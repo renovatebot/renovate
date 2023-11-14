@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
+import pMap from 'p-map';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -28,7 +29,7 @@ import {
 async function helmCommands(
   execOptions: ExecOptions,
   manifestPath: string,
-  repositories: Repository[]
+  repositories: Repository[],
 ): Promise<void> {
   const cmd: string[] = [];
   // get OCI registries and detect host rules
@@ -46,8 +47,8 @@ async function helmCommands(
     });
 
   // if credentials for the registry have been found, log into it
-  registries.forEach((value) => {
-    const loginCmd = generateLoginCmd(value, 'helm registry login');
+  await pMap(registries, async (value) => {
+    const loginCmd = await generateLoginCmd(value, 'helm registry login');
     if (loginCmd) {
       cmd.push(loginCmd);
     }
@@ -94,7 +95,7 @@ export async function updateArtifacts({
 
   const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
   const isUpdateOptionAddChartArchives = config.postUpdateOptions?.includes(
-    'helmUpdateSubChartArchives'
+    'helmUpdateSubChartArchives',
   );
 
   if (

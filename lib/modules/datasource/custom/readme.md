@@ -3,7 +3,7 @@ This `custom` datasource allows requesting version data from generic HTTP(S) end
 ## Usage
 
 The `customDatasources` option takes a record of `customDatasource` configs.
-This example shows how to update the `k3s.version` file with a custom datasource and a [regexManagers](../../manager/regex/index.md):
+This example shows how to update the `k3s.version` file with a custom datasource and a [regex](../../manager/regex/index.md) custom manager:
 
 Options:
 
@@ -19,8 +19,9 @@ Available template variables:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["k3s.version"],
       "matchStrings": ["(?<currentValue>\\S+)"],
       "depNameTemplate": "k3s",
@@ -117,6 +118,39 @@ When Renovate receives this response with the `plain` format, it will convert it
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
 
+### Yaml
+
+If `yaml` is used, response is parsed and converted into JSON for further processing.
+
+Suppose the body of the HTTP response is as follows:
+
+```yaml
+releases:
+  - version: 1.0.0
+  - version: 2.0.0
+  - version: 3.0.0
+```
+
+When Renovate receives this response with the `yaml` format, it will convert it into the following:
+
+```json
+{
+  "releases": [
+    {
+      "version": "1.0.0"
+    },
+    {
+      "version": "2.0.0"
+    },
+    {
+      "version": "3.0.0"
+    }
+  ]
+}
+```
+
+After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
+
 ## Examples
 
 ### K3s
@@ -142,8 +176,9 @@ You can use this configuration to request the newest versions of the Hashicorp p
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yml$"],
       "datasourceTemplate": "custom.hashicorp",
       "matchStrings": [
@@ -176,8 +211,9 @@ You can use the following configuration to upgrade the Grafana Dashboards versio
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yml$"],
       "matchStrings": [
         "#\\s+renovate:\\s+depName=\"(?<depName>.*)\"\\n\\s+gnetId:\\s+(?<packageName>.*?)\\n\\s+revision:\\s+(?<currentValue>.*)"
@@ -249,7 +285,7 @@ This example uses Nexus as the webserver.
 }
 ```
 
-This could be used to update Ansible YAML files with the latest version through a regex manager.
+This could be used to update Ansible YAML files with the latest version through a custom manager.
 For example, with the following Ansible content:
 
 ```yaml
@@ -257,12 +293,13 @@ For example, with the following Ansible content:
 something_version: '77'
 ```
 
-And the following regex manager:
+And the following custom manager:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yml$"],
       "datasourceTemplate": "custom.nexus_generic",
       "matchStrings": [

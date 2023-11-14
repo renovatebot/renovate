@@ -2,6 +2,7 @@ import { gte, lt, lte, satisfies } from '@renovatebot/pep440';
 import { parse as parseRange } from '@renovatebot/pep440/lib/specifier.js';
 import { parse as parseVersion } from '@renovatebot/pep440/lib/version.js';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
 import type { NewValueConfig } from '../types';
 
@@ -28,8 +29,9 @@ type UserPolicy =
  * @returns A {@link UserPolicy}
  */
 function getRangePrecision(ranges: Range[]): UserPolicy {
-  const bound: number[] =
-    parseVersion((ranges[1] || ranges[0]).version)?.release ?? [];
+  const bound = coerceArray(
+    parseVersion((ranges[1] || ranges[0]).version)?.release,
+  );
   let rangePrecision = -1;
   // range is defined by a single bound.
   // ie. <1.2.2.3,
@@ -39,7 +41,7 @@ function getRangePrecision(ranges: Range[]): UserPolicy {
   }
   // Range is defined by both upper and lower bounds.
   if (ranges.length === 2) {
-    const lowerBound: number[] = parseVersion(ranges[0].version)?.release ?? [];
+    const lowerBound = coerceArray(parseVersion(ranges[0].version)?.release);
     rangePrecision = bound.findIndex((el, index) => el > lowerBound[index]);
   }
   // Tune down Major precision if followed by a zero
@@ -72,13 +74,14 @@ function getRangePrecision(ranges: Range[]): UserPolicy {
 function getFutureVersion(
   policy: UserPolicy,
   newVersion: string,
-  baseVersion?: string
+  baseVersion?: string,
 ): number[] {
-  const toRelease: number[] = parseVersion(newVersion)?.release ?? [];
-  const baseRelease: number[] =
-    parseVersion(baseVersion ?? newVersion)?.release ?? [];
+  const toRelease = coerceArray(parseVersion(newVersion)?.release);
+  const baseRelease = coerceArray(
+    parseVersion(baseVersion ?? newVersion)?.release,
+  );
   return baseRelease.map((_, index) => {
-    const toPart: number = toRelease[index] ?? 0;
+    const toPart = toRelease[index] ?? 0;
     if (index < policy) {
       return toPart;
     }
@@ -136,7 +139,7 @@ export function getNewValue({
           currentVersion,
           newVersion,
         },
-        ranges
+        ranges,
       );
       break;
     case 'widen':
@@ -147,7 +150,7 @@ export function getNewValue({
           currentVersion,
           newVersion,
         },
-        ranges
+        ranges,
       );
       break;
     case 'bump':
@@ -158,7 +161,7 @@ export function getNewValue({
           currentVersion,
           newVersion,
         },
-        ranges
+        ranges,
       );
       break;
     default:
@@ -168,7 +171,7 @@ export function getNewValue({
       logger.debug(
         'Unsupported rangeStrategy: ' +
           rangeStrategy +
-          '. Using "replace" instead.'
+          '. Using "replace" instead.',
       );
       return getNewValue({
         currentValue,
@@ -185,14 +188,14 @@ export function getNewValue({
   }
   const checkedResult = checkRangeAndRemoveUnnecessaryRangeLimit(
     result,
-    newVersion
+    newVersion,
   );
 
   if (!satisfies(newVersion, checkedResult)) {
     // we failed at creating the range
     logger.warn(
       { result, newVersion, currentValue },
-      'pep440: failed to calculate newValue'
+      'pep440: failed to calculate newValue',
     );
     return null;
   }
@@ -209,7 +212,7 @@ export function isLessThanRange(input: string, range: string): boolean {
         x
           .replace(regEx(/\s*/g), '')
           .split(regEx(/(~=|==|!=|<=|>=|<|>|===)/))
-          .slice(1)
+          .slice(1),
       )
       .map(([op, version]) => {
         if (['!=', '<=', '<'].includes(op)) {
@@ -272,7 +275,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
       const futureVersion = getFutureVersion(
         precision,
         newVersion,
-        range.version
+        range.version,
       );
       return range.operator + futureVersion.join('.');
     }
@@ -285,7 +288,7 @@ function handleUpperBound(range: Range, newVersion: string): string | null {
 
 function updateRangeValue(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
-  range: Range
+  range: Range,
 ): string | null {
   // used to exclude versions,
   // we assume that's for a good reason
@@ -298,13 +301,13 @@ function updateRangeValue(
     const futureVersion = getFutureVersion(
       UserPolicyPrecisionMap.None,
       newVersion,
-      range.version
+      range.version,
     ).join('.');
     return range.operator + futureVersion + '.*';
   }
   if (range.operator === '~=') {
-    const baseVersion = parseVersion(range.version)?.release ?? [];
-    const futureVersion = parseVersion(newVersion)?.release ?? [];
+    const baseVersion = coerceArray(parseVersion(range.version)?.release);
+    const futureVersion = coerceArray(parseVersion(newVersion)?.release);
     const baseLen = baseVersion.length;
     const newVerLen = futureVersion.length;
     // trim redundant trailing version specifiers
@@ -344,7 +347,7 @@ function updateRangeValue(
   // istanbul ignore next
   logger.error(
     { newVersion, currentValue, range },
-    'pep440: failed to process range'
+    'pep440: failed to process range',
   );
   // istanbul ignore next
   return null;
@@ -391,7 +394,7 @@ function divideCompatibleReleaseRange(currentRange: Range): Range[] {
 
 function handleWidenStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
-  ranges: Range[]
+  ranges: Range[],
 ): (string | null)[] {
   // newVersion is within range
   if (satisfies(newVersion, currentValue)) {
@@ -410,7 +413,7 @@ function handleWidenStrategy(
   return newRanges.map((range) => {
     // newVersion is over the upper bound
     if (range.operator === '<' && gte(newVersion, range.version)) {
-      const upperBound = parseVersion(range.version)?.release ?? [];
+      const upperBound = coerceArray(parseVersion(range.version)?.release);
       const len = upperBound.length;
       // Match the precision of the smallest specifier if other than 0
       if (upperBound[len - 1] !== 0) {
@@ -424,7 +427,7 @@ function handleWidenStrategy(
       let futureVersion = getFutureVersion(
         rangePrecision,
         newVersion,
-        range.version
+        range.version,
       );
       if (trimZeros) {
         futureVersion = trimTrailingZeros(futureVersion);
@@ -439,14 +442,14 @@ function handleWidenStrategy(
         currentVersion,
         newVersion,
       },
-      range
+      range,
     );
   });
 }
 
 function handleReplaceStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
-  ranges: Range[]
+  ranges: Range[],
 ): (string | null)[] {
   // newVersion is within range
   if (satisfies(newVersion, currentValue)) {
@@ -460,7 +463,7 @@ function handleReplaceStrategy(
       let futureVersion = getFutureVersion(
         rangePrecision,
         newVersion,
-        range.version
+        range.version,
       );
       if (trimZeros) {
         futureVersion = trimTrailingZeros(futureVersion);
@@ -474,7 +477,7 @@ function handleReplaceStrategy(
         return '>=' + newVersion;
       }
       // update the lower bound to reflect the accepted new version
-      const lowerBound = parseVersion(range.version)?.release ?? [];
+      const lowerBound = coerceArray(parseVersion(range.version)?.release);
       const rangePrecision = lowerBound.length - 1;
       let newBase = getFutureVersion(rangePrecision, newVersion);
       if (trimZeros) {
@@ -498,14 +501,14 @@ function handleReplaceStrategy(
         currentVersion,
         newVersion,
       },
-      range
+      range,
     );
   });
 }
 
 function handleBumpStrategy(
   { currentValue, rangeStrategy, currentVersion, newVersion }: NewValueConfig,
-  ranges: Range[]
+  ranges: Range[],
 ): (string | null)[] {
   return ranges.map((range) => {
     // bump lower bound to current new version
@@ -519,14 +522,14 @@ function handleBumpStrategy(
         currentVersion,
         newVersion,
       },
-      range
+      range,
     );
   });
 }
 
 export function checkRangeAndRemoveUnnecessaryRangeLimit(
   rangeInput: string,
-  newVersion: string
+  newVersion: string,
 ): string {
   let newRange: string = rangeInput;
   if (rangeInput.includes(',')) {

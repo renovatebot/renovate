@@ -153,7 +153,7 @@ function normalizePattern(pattern: string, suffix: '.ts' | '.spec.ts'): string {
  * Otherwise, `fallback` value is used to determine some defaults.
  */
 function configureShardingOrFallbackTo(
-  fallback: JestShardedSubconfig
+  fallback: JestShardedSubconfig,
 ): JestShardedSubconfig {
   const shardKey = process.env.TEST_SHARD;
   if (!shardKey) {
@@ -163,7 +163,7 @@ function configureShardingOrFallbackTo(
   if (!testShards[shardKey]) {
     const keys = Object.keys(testShards).join(', ');
     throw new Error(
-      `Unknown value for TEST_SHARD: ${shardKey} (possible values: ${keys})`
+      `Unknown value for TEST_SHARD: ${shardKey} (possible values: ${keys})`,
     );
   }
 
@@ -211,9 +211,10 @@ const config: JestConfig = {
     '<rootDir>/tools/',
   ],
   cacheDirectory: '.cache/jest',
-  clearMocks: true,
   collectCoverage: true,
-  coverageReporters: ci ? ['lcovonly', 'json'] : ['html', 'text-summary'],
+  coverageReporters: ci
+    ? ['lcovonly', 'json']
+    : ['html', 'text-summary', 'json'],
   transform: {
     '\\.ts$': [
       'ts-jest',
@@ -230,6 +231,7 @@ const config: JestConfig = {
     '/__mocks__/',
   ],
   reporters: ci ? ['default', 'github-actions'] : ['default'],
+  resetMocks: true,
   setupFilesAfterEnv: [
     'jest-extended/all',
     'expect-more-jest',
@@ -299,7 +301,7 @@ function getMatchingShards(files: string[]): string[] {
       const patterns = matchPaths.map((path) =>
         path.endsWith('.spec.ts')
           ? path.replace(/\.spec\.ts$/, '{.ts,.spec.ts}')
-          : `${path}/**/*`
+          : `${path}/**/*`,
       );
 
       if (patterns.some((pattern) => minimatch(file, pattern))) {
@@ -324,7 +326,7 @@ function scheduleItems<T>(items: T[], availableInstances: number): T[][] {
       : items.length % numInstances;
 
   const partitionSizes = Array.from({ length: numInstances }, (_, idx) =>
-    idx < lighterInstancesIdx ? maxPerInstance : maxPerInstance - 1
+    idx < lighterInstancesIdx ? maxPerInstance : maxPerInstance - 1,
   );
 
   const result: T[][] = Array.from({ length: numInstances }, () => []);

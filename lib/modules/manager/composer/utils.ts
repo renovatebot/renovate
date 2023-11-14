@@ -4,6 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { HostRuleSearchResult } from '../../../types';
 import type { ToolConstraint } from '../../../util/exec/types';
+import { coerceNumber } from '../../../util/number';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { Lockfile, PackageFile } from './schema';
@@ -14,7 +15,7 @@ const depRequireInstall = new Set(['symfony/flex']);
 
 export function getComposerArguments(
   config: UpdateArtifactsConfig,
-  toolConstraint: ToolConstraint
+  toolConstraint: ToolConstraint,
 ): string {
   let args = '';
 
@@ -46,7 +47,7 @@ export function getComposerArguments(
 }
 
 export function getPhpConstraint(
-  constraints: Record<string, string>
+  constraints: Record<string, string>,
 ): string | null {
   const { php } = constraints;
 
@@ -70,7 +71,7 @@ export function requireComposerDependencyInstallation({
 
 export function extractConstraints(
   { config, require, requireDev }: PackageFile,
-  { pluginApiVersion }: Lockfile
+  { pluginApiVersion }: Lockfile,
 ): Record<string, string> {
   const res: Record<string, string> = { composer: '1.*' };
 
@@ -78,8 +79,8 @@ export function extractConstraints(
   const phpVersion = config?.platform.php;
   if (phpVersion) {
     const major = api.getMajor(phpVersion);
-    const minor = api.getMinor(phpVersion) ?? 0;
-    const patch = api.getPatch(phpVersion) ?? 0;
+    const minor = coerceNumber(api.getMinor(phpVersion));
+    const patch = coerceNumber(api.getPatch(phpVersion));
     res.php = `<=${major}.${minor}.${patch}`;
   } else if (require.php) {
     res.php = require.php;

@@ -16,8 +16,8 @@ import { regEx } from '../lib/util/regex';
  * Simple wrapper for getting mocked version of a module
  * @param module module which is mocked by `jest.mock`
  */
-export function mocked<T extends object>(module: T): jest.MockedObject<T> {
-  return module as jest.MockedObject<T>;
+export function mocked<T extends object>(module: T): jest.Mocked<T> {
+  return jest.mocked(module);
 }
 
 /**
@@ -25,7 +25,7 @@ export function mocked<T extends object>(module: T): jest.MockedObject<T> {
  * @param func function which is mocked by `jest.mock`
  */
 export function mockedFunction<T extends (...args: any[]) => any>(
-  func: T
+  func: T,
 ): jest.MockedFunction<T> {
   return func as jest.MockedFunction<T>;
 }
@@ -41,15 +41,15 @@ export function partial(obj: unknown = {}): unknown {
   return obj;
 }
 
-export const fs = mocked(_fs);
-export const git = mocked(_git);
+export const fs = jest.mocked(_fs);
+export const git = jest.mocked(_git);
 
 // TODO: fix types, jest / typescript is using wrong overload (#22198)
-export const platform = mocked(partial<Required<Platform>>(_platform));
-export const scm = mocked(_scm);
-export const env = mocked(_env);
-export const hostRules = mocked(_hostRules);
-export const logger = mocked(_logger);
+export const platform = jest.mocked(partial<Required<Platform>>(_platform));
+export const scm = jest.mocked(_scm);
+export const env = jest.mocked(_env);
+export const hostRules = jest.mocked(_hostRules);
+export const logger = jest.mocked(_logger);
 
 export type { RenovateConfig };
 
@@ -101,7 +101,7 @@ export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
  */
 export const replacingSerializer = (
   search: string,
-  replacement: string
+  replacement: string,
 ): Plugin => ({
   test: (value) => typeof value === 'string' && value.includes(search),
   serialize: (val, config, indent, depth, refs, printer) => {

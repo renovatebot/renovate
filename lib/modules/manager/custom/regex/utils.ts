@@ -1,11 +1,14 @@
 import { URL } from 'node:url';
 import is from '@sindresorhus/is';
 import { migrateDatasource } from '../../../../config/migrations/custom/datasource-migration';
-import type { RegexManagerTemplates } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import * as template from '../../../../util/template';
-import type { CustomExtractConfig, PackageDependency } from '../../types';
-import type { ExtractionTemplate } from './types';
+import type { PackageDependency } from '../../types';
+import type {
+  ExtractionTemplate,
+  RegexManagerConfig,
+  RegexManagerTemplates,
+} from './types';
 
 export const validMatchFields = [
   'depName',
@@ -25,7 +28,7 @@ type ValidMatchFields = (typeof validMatchFields)[number];
 function updateDependency(
   dependency: PackageDependency,
   field: ValidMatchFields,
-  value: string
+  value: string,
 ): void {
   switch (field) {
     case 'registryUrl':
@@ -51,8 +54,8 @@ function updateDependency(
 
 export function createDependency(
   extractionTemplate: ExtractionTemplate,
-  config: CustomExtractConfig,
-  dep?: PackageDependency
+  config: RegexManagerConfig,
+  dep?: PackageDependency,
 ): PackageDependency | null {
   const dependency = dep ?? {};
   const { groups, replaceString } = extractionTemplate;
@@ -67,7 +70,7 @@ export function createDependency(
       } catch (err) {
         logger.warn(
           { template: tmpl },
-          'Error compiling template for custom manager'
+          'Error compiling template for custom manager',
         );
         return null;
       }
@@ -81,7 +84,7 @@ export function createDependency(
 
 export function regexMatchAll(
   regex: RegExp,
-  content: string
+  content: string,
 ): RegExpMatchArray[] {
   const matches: RegExpMatchArray[] = [];
   let matchResult: RegExpMatchArray | null;
@@ -102,14 +105,14 @@ export function regexMatchAll(
 
 export function mergeGroups(
   mergedGroup: Record<string, string>,
-  secondGroup: Record<string, string>
+  secondGroup: Record<string, string>,
 ): Record<string, string> {
   return { ...mergedGroup, ...secondGroup };
 }
 
 export function mergeExtractionTemplate(
   base: ExtractionTemplate,
-  addition: ExtractionTemplate
+  addition: ExtractionTemplate,
 ): ExtractionTemplate {
   return {
     groups: mergeGroups(base.groups, addition.groups),

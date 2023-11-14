@@ -6,7 +6,7 @@ import { GithubReleasesDatasource } from '../../../datasource/github-releases';
 import type { PackageDependency } from '../../types';
 
 const githubUrlRegex = regEx(
-  /^https:\/\/github\.com\/(?<packageName>[^/]+\/[^/]+)/
+  /^https:\/\/github\.com\/(?<packageName>[^/]+\/[^/]+)/,
 );
 
 function githubPackageName(input: string): string | undefined {
@@ -17,7 +17,7 @@ function githubPackageName(input: string): string | undefined {
   return parseGithubUrl(input)?.match(githubUrlRegex)?.groups?.packageName;
 }
 
-export const gitRules = ['git_repository'] as const;
+export const gitRules = ['git_repository', '_git_repository'] as const;
 
 export const GitTarget = z
   .object({

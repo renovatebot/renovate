@@ -12,7 +12,6 @@ describe('modules/manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       GlobalConfig.set({ localDir });
-      jest.resetAllMocks();
     });
 
     it('returns null if no releases', async () => {
@@ -197,7 +196,7 @@ describe('modules/manager/helmfile/extract', () => {
           registryAliases: {
             stable: 'https://charts.helm.sh/stable',
           },
-        }
+        },
       );
       expect(result).toMatchSnapshot({
         datasource: 'helm',
@@ -340,7 +339,7 @@ describe('modules/manager/helmfile/extract', () => {
           registryAliases: {
             stable: 'https://charts.helm.sh/stable',
           },
-        }
+        },
       );
       expect(result).toMatchObject({
         datasource: 'helm',
@@ -406,7 +405,7 @@ describe('modules/manager/helmfile/extract', () => {
           registryAliases: {
             stable: 'https://charts.helm.sh/stable',
           },
-        }
+        },
       );
       expect(result).toMatchObject({
         datasource: 'helm',

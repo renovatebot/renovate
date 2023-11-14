@@ -1,9 +1,10 @@
 import * as semver from 'semver';
 import { regEx } from '../../../util/regex';
+import { coerceString } from '../../../util/string';
 
 export function makeVersion(
   version: string,
-  options: semver.RangeOptions
+  options: semver.RangeOptions,
 ): string | boolean | null {
   const splitVersion = version.split('.');
   const prerelease = semver.prerelease(version, options);
@@ -57,7 +58,7 @@ export function containsOperators(input: string): boolean {
 export function matchesWithOptions(
   version: string,
   cleanRange: string,
-  options: semver.RangeOptions
+  options: semver.RangeOptions,
 ): boolean {
   let cleanedVersion = version;
   if (
@@ -66,7 +67,7 @@ export function matchesWithOptions(
     options.includePrerelease
   ) {
     const coercedVersion = semver.coerce(cleanedVersion)?.raw;
-    cleanedVersion = coercedVersion ? coercedVersion : '';
+    cleanedVersion = coerceString(coercedVersion);
   }
   return semver.satisfies(cleanedVersion, cleanRange, options);
 }
@@ -74,7 +75,7 @@ export function matchesWithOptions(
 export function findSatisfyingVersion(
   versions: string[],
   range: string,
-  compareRt: number
+  compareRt: number,
 ): string | null {
   const options = getOptions(range);
   let cur: any = null;

@@ -43,7 +43,6 @@ describe('workers/repository/process/lookup/filter-checks', () => {
   beforeEach(() => {
     config = { currentVersion: '1.0.0' };
     sortedReleases = clone(releases);
-    jest.resetAllMocks();
     dateUtil.getElapsedMs.mockReturnValueOnce(toMs('3 days') ?? 0);
     dateUtil.getElapsedMs.mockReturnValueOnce(toMs('5 days') ?? 0);
     dateUtil.getElapsedMs.mockReturnValueOnce(toMs('7 days') ?? 0);
@@ -57,7 +56,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -72,7 +71,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -87,7 +86,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeTrue();
@@ -102,7 +101,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -117,7 +116,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -135,7 +134,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -150,7 +149,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -170,7 +169,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();

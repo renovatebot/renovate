@@ -12,7 +12,7 @@ interface Resolver {
     filePreset: string,
     presetPath?: string,
     endpoint?: string,
-    tag?: string
+    tag?: string,
   ): Promise<Preset | undefined>;
 }
 
@@ -41,7 +41,7 @@ export function getPreset({
   const resolver = resolvers[platform];
   if (!resolver) {
     throw new Error(
-      `The platform you're using ($platform) does not support local presets.`
+      `The platform you're using (${platform}) does not support local presets.`,
     );
   }
   const endpoint = GlobalConfig.get('endpoint');
@@ -51,6 +51,6 @@ export function getPreset({
     presetPath,
     // TODO: fix type #22198
     endpoint!,
-    tag
+    tag,
   );
 }

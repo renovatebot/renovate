@@ -16,7 +16,7 @@ import type {
 } from './types';
 
 const dependencyRegex = regEx(
-  /^(?<groupId>[a-zA-Z][-_a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-_a-zA-Z0-9]*)*)(?:\/(?<artifactId>[a-zA-Z][-_a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-_a-zA-Z0-9]*)*))?$/
+  /^(?<groupId>[a-zA-Z][-_a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-_a-zA-Z0-9]*)*)(?:\/(?<artifactId>[a-zA-Z][-_a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-_a-zA-Z0-9]*)*))?$/,
 );
 
 function getPackageName(depName: string): string | null {
@@ -33,18 +33,18 @@ function getPackageName(depName: string): string | null {
 }
 
 const githubDependencyRegex = regEx(
-  /^(?:com|io)\.github\.(?<packageName>[^/]+\/[^/]+)$/
+  /^(?:com|io)\.github\.(?<packageName>[^/]+\/[^/]+)$/,
 );
 const gitlabDependencyRegex = regEx(
-  /^(?:com|io)\.gitlab\.(?<packageName>[^/]+\/[^/]+)$/
+  /^(?:com|io)\.gitlab\.(?<packageName>[^/]+\/[^/]+)$/,
 );
 const bitbucketDependencyRegex = regEx(
-  /^(?:org|io)\.bitbucket\.(?<packageName>[^/]+\/[^/]+)$/
+  /^(?:org|io)\.bitbucket\.(?<packageName>[^/]+\/[^/]+)$/,
 );
 
 function resolveGitPackageFromEdnKey(
   dep: PackageDependency,
-  key: string
+  key: string,
 ): void {
   if (dep.datasource) {
     return;
@@ -73,18 +73,18 @@ function resolveGitPackageFromEdnKey(
 }
 
 const githubUrlRegex = regEx(
-  /^(?:https:\/\/|git@)github\.com[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/
+  /^(?:https:\/\/|git@)github\.com[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/,
 );
 const gitlabUrlRegex = regEx(
-  /^(?:https:\/\/|git@)gitlab\.com[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/
+  /^(?:https:\/\/|git@)gitlab\.com[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/,
 );
 const bitbucketUrlRegex = regEx(
-  /^(?:https:\/\/|git@)bitbucket\.org[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/
+  /^(?:https:\/\/|git@)bitbucket\.org[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/,
 );
 
 function resolveGitPackageFromEdnVal(
   dep: PackageDependency,
-  val: ParsedEdnRecord
+  val: ParsedEdnRecord,
 ): void {
   const gitUrl = val['git/url'];
   if (!is.string(gitUrl)) {
@@ -128,7 +128,7 @@ function extractDependency(
   val: ParsedEdnData,
   metadata: ParsedEdnMetadata,
   mavenRegistries: string[],
-  depType?: string
+  depType?: string,
 ): PackageDependency | null {
   if (!is.plainObject(val)) {
     return null;
@@ -185,7 +185,7 @@ function extractSection(
   section: ParsedEdnData,
   metadata: ParsedEdnMetadata,
   mavenRegistries: string[],
-  depType?: string
+  depType?: string,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   if (is.plainObject(section)) {
@@ -195,7 +195,7 @@ function extractSection(
         val,
         metadata,
         mavenRegistries,
-        depType
+        depType,
       );
       if (dep) {
         deps.push(dep);
@@ -244,16 +244,16 @@ export function extractPackageFile(content: string): PackageFileContent | null {
             aliasSection['extra-deps'],
             metadata,
             mavenRegistries,
-            depType
-          )
+            depType,
+          ),
         );
         deps.push(
           ...extractSection(
             aliasSection['override-deps'],
             metadata,
             mavenRegistries,
-            depType
-          )
+            depType,
+          ),
         );
       }
     }

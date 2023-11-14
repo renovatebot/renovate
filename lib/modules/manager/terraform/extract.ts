@@ -16,7 +16,7 @@ import {
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace({ content }, `terraform.extractPackageFile(${packageFile})`);
 
@@ -30,7 +30,7 @@ export async function extractPackageFile(
   if (!passedExtractors.length) {
     logger.debug(
       { packageFile },
-      'preflight content check has not found any relevant content'
+      'preflight content check has not found any relevant content',
     );
     return null;
   }
@@ -38,7 +38,7 @@ export async function extractPackageFile(
     { packageFile },
     `preflight content check passed for extractors: [${passedExtractors
       .map((value) => value.constructor.name)
-      .toString()}]`
+      .toString()}]`,
   );
 
   const dependencies: PackageDependency[] = [];

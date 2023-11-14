@@ -42,7 +42,6 @@ limits.getBranchesRemaining = jest.fn().mockResolvedValue(99);
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = getConfig();
   repoCache.getCache.mockReturnValue({});
 });
@@ -196,7 +195,7 @@ describe('workers/repository/process/write', () => {
         ...new Set(
           branch.upgrades
             .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-            .filter(is.string)
+            .filter(is.string),
         ),
       ].sort();
       const commitFingerprint = fingerprint({
@@ -225,7 +224,7 @@ describe('workers/repository/process/write', () => {
         ...new Set(
           branch.upgrades
             .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-            .filter(is.string)
+            .filter(is.string),
         ),
       ].sort();
 
@@ -270,7 +269,7 @@ describe('workers/repository/process/write', () => {
         ...new Set(
           branch.upgrades
             .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-            .filter(is.string)
+            .filter(is.string),
         ),
       ].sort();
       const commitFingerprint = fingerprint({
@@ -319,7 +318,7 @@ describe('workers/repository/process/write', () => {
       scm.branchExists.mockResolvedValueOnce(true);
       await writeUpdates(config, branches);
       expect(logger.logger.debug).not.toHaveBeenCalledWith(
-        'No branch cache found for new/some-branch'
+        'No branch cache found for new/some-branch',
       );
       expect(repoCacheObj).toEqual({
         branches: [
@@ -382,7 +381,7 @@ describe('workers/repository/process/write', () => {
       scm.getBranchCommit.mockResolvedValueOnce('sha');
       scm.getBranchCommit.mockResolvedValueOnce('base_sha');
       return expect(
-        syncBranchState('branch_name', 'base_branch')
+        syncBranchState('branch_name', 'base_branch'),
       ).resolves.toEqual({
         branchName: 'branch_name',
         sha: 'sha',
@@ -411,7 +410,7 @@ describe('workers/repository/process/write', () => {
       scm.getBranchCommit.mockResolvedValueOnce('sha');
       scm.getBranchCommit.mockResolvedValueOnce('base_sha');
       return expect(
-        syncBranchState('branch_name', 'new_base_branch')
+        syncBranchState('branch_name', 'new_base_branch'),
       ).resolves.toEqual({
         branchName: 'branch_name',
         sha: 'sha',
@@ -444,7 +443,7 @@ describe('workers/repository/process/write', () => {
       scm.getBranchCommit.mockResolvedValueOnce('sha');
       scm.getBranchCommit.mockResolvedValueOnce('new_base_sha');
       return expect(
-        syncBranchState('branch_name', 'base_branch')
+        syncBranchState('branch_name', 'base_branch'),
       ).resolves.toEqual({
         branchName: 'branch_name',
         sha: 'sha',
@@ -480,7 +479,7 @@ describe('workers/repository/process/write', () => {
       scm.getBranchCommit.mockResolvedValueOnce('new_sha');
       scm.getBranchCommit.mockResolvedValueOnce('base_sha');
       return expect(
-        syncBranchState('branch_name', 'base_branch')
+        syncBranchState('branch_name', 'base_branch'),
       ).resolves.toEqual({
         branchName: 'branch_name',
         sha: 'new_sha',
@@ -516,7 +515,7 @@ describe('workers/repository/process/write', () => {
       scm.getBranchCommit.mockResolvedValueOnce('sha');
       scm.getBranchCommit.mockResolvedValueOnce('base_sha');
       return expect(
-        syncBranchState('branch_name', 'base_branch')
+        syncBranchState('branch_name', 'base_branch'),
       ).resolves.toEqual({
         branchName: 'branch_name',
         sha: 'sha',

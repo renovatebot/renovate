@@ -15,7 +15,16 @@ export function sortNumeric(a: number, b: number): number {
 // undefined. This predicate acts as a type guard so that the resulting type for
 // `values.filter(isNotNullOrUndefined)` is `T[]`.
 export function isNotNullOrUndefined<T>(
-  value: T | undefined | null
+  value: T | undefined | null,
 ): value is T {
   return !is.nullOrUndefined(value);
+}
+
+/**
+ * Converts a single value or an array of values to an array of values.
+ * @param value a single value or an array of values
+ * @returns array of values
+ */
+export function toArray<T>(value: T | T[]): T[] {
+  return is.array(value) ? value : [value];
 }

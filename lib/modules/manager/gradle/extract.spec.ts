@@ -23,13 +23,13 @@ function mockFs(files: Record<string, string>): void {
       return existingFileNameWithPath
         .slice(0, existingFileNameWithPath.lastIndexOf('/') + 1)
         .concat(otherFileName);
-    }
+    },
   );
 }
 
 describe('modules/manager/gradle/extract', () => {
-  afterAll(() => {
-    jest.resetAllMocks();
+  beforeEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('returns null', async () => {
@@ -42,8 +42,8 @@ describe('modules/manager/gradle/extract', () => {
     expect(
       await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
-      )
+        Object.keys(fsMock),
+      ),
     ).toBeNull();
   });
 
@@ -62,7 +62,7 @@ describe('modules/manager/gradle/extract', () => {
 
     expect(logger.logger.debug).toHaveBeenCalledWith(
       { err, config: {}, packageFile: filename },
-      `Failed to process Gradle file`
+      `Failed to process Gradle file`,
     );
   });
 
@@ -75,7 +75,7 @@ describe('modules/manager/gradle/extract', () => {
 
     const res = await extractAllPackageFiles(
       partial<ExtractConfig>(),
-      Object.keys(fsMock)
+      Object.keys(fsMock),
     );
 
     expect(res).toMatchObject([
@@ -102,7 +102,7 @@ describe('modules/manager/gradle/extract', () => {
 
     const res = await extractAllPackageFiles(
       partial<ExtractConfig>(),
-      Object.keys(fsMock)
+      Object.keys(fsMock),
     );
 
     expect(res).toMatchObject([
@@ -178,7 +178,7 @@ describe('modules/manager/gradle/extract', () => {
 
     const res = await extractAllPackageFiles(
       partial<ExtractConfig>(),
-      Object.keys(fsMock)
+      Object.keys(fsMock),
     );
 
     expect(res).toMatchObject([
@@ -252,7 +252,7 @@ describe('modules/manager/gradle/extract', () => {
 
     const res = await extractAllPackageFiles(
       partial<ExtractConfig>(),
-      Object.keys(fsMock)
+      Object.keys(fsMock),
     );
 
     expect(res).toMatchObject([
@@ -299,7 +299,7 @@ describe('modules/manager/gradle/extract', () => {
 
     const res = await extractAllPackageFiles(
       partial<ExtractConfig>(),
-      Object.keys(fsMock)
+      Object.keys(fsMock),
     );
 
     expect(res).toMatchObject([
@@ -324,7 +324,7 @@ describe('modules/manager/gradle/extract', () => {
 
     const res = await extractAllPackageFiles(
       partial<ExtractConfig>(),
-      Object.keys(fsMock)
+      Object.keys(fsMock),
     );
 
     expect(res).toMatchObject([
@@ -358,7 +358,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -406,7 +406,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -467,7 +467,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -505,7 +505,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
       expect(res).toMatchObject([
         {
@@ -540,7 +540,6 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'org.mockito:mockito-core',
-              groupName: 'org.mockito',
               currentValue: '3.10.0',
               managerData: {
                 fileReplacePosition: 474,
@@ -549,7 +548,6 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'com.github.siom79.japicmp:japicmp',
-              groupName: 'com.github.siom79.japicmp',
               currentValue: '0.15.+',
               managerData: {
                 fileReplacePosition: 561,
@@ -624,7 +622,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -633,7 +631,6 @@ describe('modules/manager/gradle/extract', () => {
           deps: [
             {
               depName: 'com.squareup.okhttp3:okhttp',
-              groupName: 'com.squareup.okhttp3',
               currentValue: '4.9.0',
               managerData: {
                 fileReplacePosition: 100,
@@ -642,7 +639,6 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'com.squareup.okio:okio',
-              groupName: 'com.squareup.okio',
               currentValue: '2.8.0',
               managerData: {
                 fileReplacePosition: 162,
@@ -651,7 +647,6 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'com.squareup.picasso:picasso',
-              groupName: 'com.squareup.picasso',
               currentValue: '2.5.1',
               managerData: {
                 fileReplacePosition: 244,
@@ -740,8 +735,8 @@ describe('modules/manager/gradle/extract', () => {
       expect(
         await extractAllPackageFiles(
           partial<ExtractConfig>(),
-          Object.keys(fsMock)
-        )
+          Object.keys(fsMock),
+        ),
       ).toBeNull();
     });
 
@@ -762,7 +757,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
       expect(res).toMatchObject([
         {
@@ -805,7 +800,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
       expect(res).toMatchObject([
         {
@@ -875,7 +870,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -955,7 +950,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -977,8 +972,8 @@ describe('modules/manager/gradle/extract', () => {
       expect(
         await extractAllPackageFiles(
           partial<ExtractConfig>(),
-          Object.keys(fsMock)
-        )
+          Object.keys(fsMock),
+        ),
       ).toBeNull();
     });
 
@@ -991,8 +986,8 @@ describe('modules/manager/gradle/extract', () => {
       expect(
         await extractAllPackageFiles(
           partial<ExtractConfig>(),
-          Object.keys(fsMock)
-        )
+          Object.keys(fsMock),
+        ),
       ).toBeNull();
     });
   });
@@ -1011,7 +1006,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -1059,7 +1054,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
       expect(res).toBeNull();
     });
@@ -1073,7 +1068,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
       expect(res).toBeNull();
     });
@@ -1102,7 +1097,7 @@ describe('modules/manager/gradle/extract', () => {
 
       const res = await extractAllPackageFiles(
         partial<ExtractConfig>(),
-        Object.keys(fsMock)
+        Object.keys(fsMock),
       );
 
       // Each lock dep is only present once, with highest prio for exact prop match, then globs from longest to shortest

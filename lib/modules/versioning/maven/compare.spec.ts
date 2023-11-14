@@ -1,8 +1,10 @@
 import {
   autoExtendMavenRange,
   compare,
+  isSubversion,
   parseRange,
   rangeToStr,
+  tokenize,
 } from './compare';
 
 describe('modules/versioning/maven/compare', () => {
@@ -220,6 +222,196 @@ describe('modules/versioning/maven/compare', () => {
     });
   });
 
+  describe('isSubversion', () => {
+    it.each`
+      majorVersion         | minorVersion    | expected
+      ${'1.2.3'}           | ${'1.2.3'}      | ${true}
+      ${'1.2.3'}           | ${'1.0.0'}      | ${false}
+      ${'2.0.0'}           | ${'2.0.1'}      | ${true}
+      ${'3.1.0'}           | ${'3.01.00'}    | ${true}
+      ${'4.0.0'}           | ${''}           | ${false}
+      ${'5.0.0'}           | ${'4.5.2'}      | ${false}
+      ${'6.0.0'}           | ${'6.0.0-beta'} | ${true}
+      ${'invalid.version'} | ${''}           | ${false}
+      ${''}                | ${'1.2.3'}      | ${false}
+      ${'v1.2.3'}          | ${'1.2.3'}      | ${true}
+      ${'v1.2.3'}          | ${'v1.2.3'}     | ${true}
+    `(
+      'isSubversion("$majorVersion", "$minorVersion") === $expected',
+      ({ majorVersion, minorVersion, expected }) => {
+        expect(isSubversion(majorVersion, minorVersion)).toBe(expected);
+      },
+    );
+  });
+
+  describe('tokenize', () => {
+    const zeroToken = {
+      prefix: 'PREFIX_HYPHEN',
+      type: 'TYPE_NUMBER',
+      val: 0,
+      isTransition: false,
+    };
+    const testObj = [
+      {
+        input: '1.2.3',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_NUMBER',
+            val: 1,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 2,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 3,
+          },
+        ],
+      },
+      {
+        input: 'alpha.beta.rc',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_QUALIFIER',
+            val: 'alpha',
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_QUALIFIER',
+            val: 'beta',
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_QUALIFIER',
+            val: 'rc',
+          },
+        ],
+      },
+      {
+        input: '1.2.3-alpha.beta',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_NUMBER',
+            val: 1,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 2,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 3,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_QUALIFIER',
+            val: 'alpha',
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_QUALIFIER',
+            val: 'beta',
+          },
+        ],
+      },
+      {
+        input: '1.2.x-3',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_NUMBER',
+            val: 1,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 2,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_QUALIFIER',
+            val: 'x',
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_NUMBER',
+            val: 3,
+          },
+        ],
+      },
+      {
+        input: '00.02.003',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_NUMBER',
+            val: 0,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 2,
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_NUMBER',
+            val: 3,
+          },
+        ],
+      },
+      {
+        input: 'invalid.version',
+        expected: [
+          {
+            isTransition: false,
+            prefix: 'PREFIX_HYPHEN',
+            type: 'TYPE_QUALIFIER',
+            val: 'invalid',
+          },
+          {
+            isTransition: false,
+            prefix: 'PREFIX_DOT',
+            type: 'TYPE_QUALIFIER',
+            val: 'version',
+          },
+        ],
+      },
+      { input: '', expected: [zeroToken] },
+    ];
+
+    it('should tokenize', () => {
+      for (const { input, expected } of testObj) {
+        expect(tokenize(input)).toEqual(expected);
+      }
+    });
+  });
+
   describe('Non-standard behavior', () => {
     describe('equality', () => {
       it.each`
@@ -314,9 +506,9 @@ describe('modules/versioning/maven/compare', () => {
         ];
         expect(parseRange(input)).toEqual(parseResult);
         expect(rangeToStr(parseResult as never)).toEqual(
-          input.replace(/\s*/g, '')
+          input.replace(/\s*/g, ''),
         );
-      }
+      },
     );
 
     it.each`
@@ -365,7 +557,7 @@ describe('modules/versioning/maven/compare', () => {
       'autoExtendMavenRange("$range", "$version") === $expected',
       ({ range, version, expected }) => {
         expect(autoExtendMavenRange(range, version)).toEqual(expected);
-      }
+      },
     );
   });
 });

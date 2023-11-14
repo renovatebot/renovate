@@ -16,7 +16,7 @@ export interface VersionComparator {
 }
 
 export abstract class GenericVersioningApi<
-  T extends GenericVersion = GenericVersion
+  T extends GenericVersion = GenericVersion,
 > implements VersioningApi
 {
   private _getSection(version: string, index: number): number | null {
@@ -129,9 +129,8 @@ export abstract class GenericVersioningApi<
     return result ?? null;
   }
 
-  getNewValue(newValueConfig: NewValueConfig): string {
-    const { newVersion } = newValueConfig || {};
-    return newVersion;
+  getNewValue({ newVersion }: NewValueConfig): string | null {
+    return newVersion ?? null;
   }
 
   sortVersions(version: string, other: string): number {

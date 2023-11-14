@@ -66,21 +66,21 @@ export const ComposerPackagesResponse = z
   })
   .transform(
     ({ packageName, packagesResponse }) =>
-      packagesResponse.packages[packageName]
+      packagesResponse.packages[packageName],
   )
   .transform((xs) => ComposerReleases.parse(xs));
 export type ComposerPackagesResponse = z.infer<typeof ComposerPackagesResponse>;
 
 export function parsePackagesResponse(
   packageName: string,
-  packagesResponse: unknown
+  packagesResponse: unknown,
 ): ComposerReleases {
   try {
     return ComposerPackagesResponse.parse({ packageName, packagesResponse });
   } catch (err) {
     logger.debug(
       { packageName, err },
-      `Error parsing packagist response for ${packageName}`
+      `Error parsing packagist response for ${packageName}`,
     );
     return [];
   }
@@ -138,7 +138,7 @@ export function extractReleaseResult(
 }
 
 export function extractDepReleases(
-  composerReleases: unknown
+  composerReleases: unknown,
 ): ReleaseResult | null {
   const parsedReleases = ComposerReleases.parse(composerReleases);
   return extractReleaseResult(parsedReleases);
@@ -146,10 +146,10 @@ export function extractDepReleases(
 
 export function parsePackagesResponses(
   packageName: string,
-  packagesResponses: unknown[]
+  packagesResponses: unknown[],
 ): ReleaseResult | null {
   const releaseArrays = packagesResponses.map((pkgResp) =>
-    parsePackagesResponse(packageName, pkgResp)
+    parsePackagesResponse(packageName, pkgResp),
   );
   return extractReleaseResult(...releaseArrays);
 }
@@ -166,7 +166,7 @@ export type HashSpec = z.infer<typeof HashSpec>;
 
 export const RegistryFile = z.intersection(
   HashSpec,
-  z.object({ key: z.string() })
+  z.object({ key: z.string() }),
 );
 export type RegistryFile = z.infer<typeof RegistryFile>;
 
@@ -180,11 +180,11 @@ export const PackagistFile = PackagesResponse.merge(
     providers: LooseRecord(HashSpec)
       .transform((x) =>
         Object.fromEntries(
-          Object.entries(x).map(([key, { hash }]) => [key, hash])
-        )
+          Object.entries(x).map(([key, { hash }]) => [key, hash]),
+        ),
       )
       .catch({}),
-  })
+  }),
 );
 export type PackagistFile = z.infer<typeof PackagistFile>;
 
@@ -196,20 +196,20 @@ export const RegistryMeta = z
       z.object({
         ['includes']: LooseRecord(HashSpec)
           .transform((x) =>
-            Object.entries(x).map(([name, { hash }]) => ({ key: name, hash }))
+            Object.entries(x).map(([name, { hash }]) => ({ key: name, hash })),
           )
           .catch([]),
         ['provider-includes']: LooseRecord(HashSpec)
           .transform((x) =>
-            Object.entries(x).map(([key, { hash }]) => ({ key, hash }))
+            Object.entries(x).map(([key, { hash }]) => ({ key, hash })),
           )
           .catch([]),
         ['providers-lazy-url']: z.string().nullable().catch(null),
         ['providers-url']: z.string().nullable().catch(null),
         ['metadata-url']: z.string().nullable().catch(null),
         ['available-packages']: z.array(z.string()).nullable().catch(null),
-      })
-    )
+      }),
+    ),
   )
   .transform(
     ({
@@ -231,6 +231,6 @@ export const RegistryMeta = z
       metadataUrl,
       includesPackages: {} as Record<string, ReleaseResult | null>,
       availablePackages,
-    })
+    }),
   );
 export type RegistryMeta = z.infer<typeof RegistryMeta>;

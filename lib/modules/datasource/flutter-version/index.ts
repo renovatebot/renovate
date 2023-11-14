@@ -37,7 +37,7 @@ export class FlutterVersionDatasource extends Datasource {
     try {
       const resp = (
         await this.http.getJson<FlutterResponse>(
-          `${registryUrl}/flutter_infra_release/releases/releases_linux.json`
+          `${registryUrl}/flutter_infra_release/releases/releases_linux.json`,
         )
       ).body;
       result.releases = resp.releases
@@ -54,10 +54,9 @@ export class FlutterVersionDatasource extends Datasource {
           releaseTimestamp: release_date,
           isStable: channel === 'stable',
         }));
+      return result.releases.length ? result : null;
     } catch (err) {
       this.handleGenericErrors(err);
     }
-
-    return result.releases.length ? result : null;
   }
 }

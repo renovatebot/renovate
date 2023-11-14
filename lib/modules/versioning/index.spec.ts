@@ -8,7 +8,7 @@ import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
 
 const supportedSchemes = getOptions().find(
-  (option) => option.name === 'versioning'
+  (option) => option.name === 'versioning',
 )?.allowedValues;
 
 describe('modules/versioning/index', () => {
@@ -36,7 +36,7 @@ describe('modules/versioning/index', () => {
   it('validates', () => {
     function validate(
       module: VersioningApi | VersioningApiConstructor,
-      name: string
+      name: string,
     ): boolean {
       const mod = isVersioningApiConstructor(module) ? new module() : module;
 
@@ -60,10 +60,10 @@ describe('modules/versioning/index', () => {
 
   it('should fallback to semver-coerced', () => {
     expect(allVersioning.get(undefined)).toBe(
-      allVersioning.get(semverCoercedVersioning.id)
+      allVersioning.get(semverCoercedVersioning.id),
     );
     expect(allVersioning.get('unknown')).toBe(
-      allVersioning.get(semverCoercedVersioning.id)
+      allVersioning.get(semverCoercedVersioning.id),
     );
   });
 
@@ -106,24 +106,24 @@ describe('modules/versioning/index', () => {
     }
 
     for (const supportedScheme of supportedSchemes ?? []) {
-      it(supportedScheme, () => {
+      it(supportedScheme, async () => {
         const schemeKeys = getAllPropertyNames(
-          allVersioning.get(supportedScheme)
+          allVersioning.get(supportedScheme),
         )
           .filter(
-            (val) => !optionalFunctions.includes(val) && !val.startsWith('_')
+            (val) => !optionalFunctions.includes(val) && !val.startsWith('_'),
           )
           .sort();
 
         expect(schemeKeys).toEqual(npmApi);
 
-        const apiOrCtor = require('./' + supportedScheme).api;
+        const apiOrCtor = (await import(`./${supportedScheme}`)).api;
         if (isVersioningApiConstructor(apiOrCtor)) {
           return;
         }
 
         expect(Object.keys(apiOrCtor).sort()).toEqual(
-          Object.keys(allVersioning.get(supportedScheme)).sort()
+          Object.keys(allVersioning.get(supportedScheme)).sort(),
         );
       });
     }
@@ -142,7 +142,7 @@ describe('modules/versioning/index', () => {
       const api = new DummyScheme();
       const schemeKeys = getAllPropertyNames(api)
         .filter(
-          (val) => !optionalFunctions.includes(val) && !val.startsWith('_')
+          (val) => !optionalFunctions.includes(val) && !val.startsWith('_'),
         )
         .sort();
 

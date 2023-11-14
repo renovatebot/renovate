@@ -34,7 +34,6 @@ let config: RenovateConfig;
 
 beforeEach(() => {
   memCache.init();
-  jest.resetAllMocks();
   config = getConfig();
   config.errors = [];
   config.warnings = [];
@@ -47,6 +46,7 @@ describe('workers/repository/init/merge', () => {
   describe('detectRepoFileConfig()', () => {
     beforeEach(async () => {
       await initRepoCache({ repoFingerprint: '0123456789abcdef' });
+      jest.restoreAllMocks();
     });
 
     it('returns config if not found', async () => {
@@ -59,14 +59,14 @@ describe('workers/repository/init/merge', () => {
       jest
         .spyOn(repoCache, 'getCache')
         .mockReturnValueOnce(
-          partial<RepoCacheData>({ configFileName: 'renovate.json' })
+          partial<RepoCacheData>({ configFileName: 'renovate.json' }),
         );
       platform.getRawFile.mockRejectedValueOnce(new Error());
       scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       expect(await detectRepoFileConfig()).toEqual({});
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Existing config file no longer exists'
+        'Existing config file no longer exists',
       );
     });
 
@@ -76,7 +76,7 @@ describe('workers/repository/init/merge', () => {
       });
       OnboardingState.onboardingCacheValid = true;
       onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
-        'package.json'
+        'package.json',
       );
       onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(pJson);
       expect(await detectRepoFileConfig()).toEqual({
@@ -88,10 +88,10 @@ describe('workers/repository/init/merge', () => {
     it('clones, if onboarding cache is valid but parsed config is undefined', async () => {
       OnboardingState.onboardingCacheValid = true;
       onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
-        'package.json'
+        'package.json',
       );
       onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(
-        undefined as never
+        undefined as never,
       );
       scm.getFileList.mockResolvedValueOnce(['package.json']);
       const pJson = JSON.stringify({
@@ -114,10 +114,10 @@ describe('workers/repository/init/merge', () => {
       });
       OnboardingState.onboardingCacheValid = true;
       onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
-        'renovate.json'
+        'renovate.json',
       );
       onboardingCache.getOnboardingConfigFromCache.mockReturnValueOnce(
-        configParsed
+        configParsed,
       );
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: 'renovate.json',
@@ -178,7 +178,7 @@ describe('workers/repository/init/merge', () => {
     it('throws error if duplicate keys', async () => {
       scm.getFileList.mockResolvedValue(['package.json', '.renovaterc']);
       fs.readLocalFile.mockResolvedValue(
-        '{ "enabled": true, "enabled": false }'
+        '{ "enabled": true, "enabled": false }',
       );
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.renovaterc',
@@ -275,7 +275,7 @@ describe('workers/repository/init/merge', () => {
       expect(() =>
         checkForRepoConfigError({
           configFileParseError: { validationError: '', validationMessage: '' },
-        })
+        }),
       ).toThrow();
     });
   });
@@ -362,6 +362,24 @@ describe('workers/repository/init/merge', () => {
       });
       config.extends = [':automergeDisabled'];
       expect(await mergeRenovateConfig(config)).toBeDefined();
+    });
+
+    it('continues if no errors-2', async () => {
+      scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        warnings: [],
+        errors: [],
+      });
+      expect(
+        await mergeRenovateConfig({
+          ...config,
+          requireConfig: 'ignored',
+          configFileParsed: undefined,
+          warnings: undefined,
+          secrets: undefined,
+        }),
+      ).toBeDefined();
     });
   });
 });

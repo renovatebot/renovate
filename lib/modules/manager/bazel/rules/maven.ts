@@ -4,7 +4,7 @@ import { MavenDatasource } from '../../../datasource/maven';
 import { id as versioning } from '../../../versioning/gradle';
 import type { PackageDependency } from '../../types';
 
-export const mavenRules = ['maven_install'] as const;
+export const mavenRules = ['maven_install', '_maven_install'] as const;
 
 const ArtifactSpec = z.union([
   z.object({
@@ -58,5 +58,5 @@ export const MavenTarget = z
         currentValue,
         depType,
         registryUrls,
-      }))
+      })),
   );

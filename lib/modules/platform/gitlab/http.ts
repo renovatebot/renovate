@@ -10,12 +10,21 @@ export async function getUserID(username: string): Promise<number> {
   ).body[0].id;
 }
 
-export async function getMemberUserIDs(group: string): Promise<number[]> {
+async function getMembers(group: string): Promise<GitLabUser[]> {
   const groupEncoded = encodeURIComponent(group);
-  const members = (
+  return (
     await gitlabApi.getJson<GitLabUser[]>(`groups/${groupEncoded}/members`)
   ).body;
+}
+
+export async function getMemberUserIDs(group: string): Promise<number[]> {
+  const members = await getMembers(group);
   return members.map((u) => u.id);
+}
+
+export async function getMemberUsernames(group: string): Promise<string[]> {
+  const members = await getMembers(group);
+  return members.map((u) => u.username);
 }
 
 export async function isUserBusy(user: string): Promise<boolean> {

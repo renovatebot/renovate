@@ -15,7 +15,6 @@ describe('workers/repository/process/fetch', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       config = getConfig();
     });
 
@@ -119,7 +118,7 @@ describe('workers/repository/process/fetch', () => {
       };
       await fetchUpdates(config, packageFiles);
       expect(packageFiles.docker[0].deps[0].skipReason).toBe(
-        'internal-package'
+        'internal-package',
       );
       expect(packageFiles.docker[0].deps[0].updates).toHaveLength(0);
     });
@@ -159,7 +158,7 @@ describe('workers/repository/process/fetch', () => {
       lookupUpdates.mockRejectedValueOnce(new Error('some error'));
 
       await expect(
-        fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles)
+        fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),
       ).rejects.toThrow();
     });
 
@@ -176,7 +175,7 @@ describe('workers/repository/process/fetch', () => {
       lookupUpdates.mockRejectedValueOnce(new Error('some error'));
 
       await expect(
-        fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles)
+        fetchUpdates({ ...config, repoIsOnboarded: true }, packageFiles),
       ).rejects.toThrow();
     });
 

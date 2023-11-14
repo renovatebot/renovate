@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
+import { detectPlatform } from '../../../util/common';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -12,10 +13,6 @@ import {
   matchesPrecommitDependencyHeuristic,
 } from './parsing';
 import type { PreCommitConfig } from './types';
-
-function isEmptyObject(obj: any): boolean {
-  return Object.keys(obj).length === 0 && obj.constructor === Object;
-}
 
 /**
  * Determines the datasource(id) to be used for this dependency
@@ -29,9 +26,9 @@ function isEmptyObject(obj: any): boolean {
  */
 function determineDatasource(
   repository: string,
-  hostname: string
+  hostname: string,
 ): { datasource?: string; registryUrls?: string[]; skipReason?: SkipReason } {
-  if (hostname === 'github.com') {
+  if (hostname === 'github.com' || detectPlatform(repository) === 'github') {
     logger.debug({ repository, hostname }, 'Found github dependency');
     return { datasource: GithubTagsDatasource.id };
   }
@@ -39,13 +36,23 @@ function determineDatasource(
     logger.debug({ repository, hostname }, 'Found gitlab dependency');
     return { datasource: GitlabTagsDatasource.id };
   }
+  if (detectPlatform(repository) === 'gitlab') {
+    logger.debug(
+      { repository, hostname },
+      'Found gitlab dependency with custom registryUrl',
+    );
+    return {
+      datasource: GitlabTagsDatasource.id,
+      registryUrls: ['https://' + hostname],
+    };
+  }
   const hostUrl = 'https://' + hostname;
   const res = find({ url: hostUrl });
-  if (isEmptyObject(res)) {
+  if (is.emptyObject(res)) {
     // 1 check, to possibly prevent 3 failures in combined query of hostType & url.
     logger.debug(
       { repository, hostUrl },
-      'Provided hostname does not match any hostRules. Ignoring'
+      'Provided hostname does not match any hostRules. Ignoring',
     );
     return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
@@ -53,24 +60,24 @@ function determineDatasource(
     ['github', GithubTagsDatasource.id],
     ['gitlab', GitlabTagsDatasource.id],
   ]) {
-    if (!isEmptyObject(find({ hostType, url: hostUrl }))) {
+    if (is.nonEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
         { repository, hostUrl, hostType },
-        `Provided hostname matches a ${hostType} hostrule.`
+        `Provided hostname matches a ${hostType} hostrule.`,
       );
       return { datasource: sourceId, registryUrls: [hostname] };
     }
   }
   logger.debug(
     { repository, registry: hostUrl },
-    'Provided hostname did not match any of the hostRules of hostType github nor gitlab'
+    'Provided hostname did not match any of the hostRules of hostType github nor gitlab',
   );
   return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }
 
 function extractDependency(
   tag: string,
-  repository: string
+  repository: string,
 ): {
   depName?: string;
   depType?: string;
@@ -106,7 +113,7 @@ function extractDependency(
   }
   logger.info(
     { repository },
-    'Could not separate hostname from full dependency url.'
+    'Could not separate hostname from full dependency url.',
   );
   return {
     depName: undefined,
@@ -146,7 +153,7 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   type ParsedContent = Record<string, unknown> | PreCommitConfig;
   let parsedContent: ParsedContent;
@@ -155,21 +162,21 @@ export function extractPackageFile(
   } catch (err) {
     logger.debug(
       { filename: packageFile, err },
-      'Failed to parse pre-commit config YAML'
+      'Failed to parse pre-commit config YAML',
     );
     return null;
   }
   if (!is.plainObject<Record<string, unknown>>(parsedContent)) {
     logger.debug(
       { packageFile },
-      `Parsing of pre-commit config YAML returned invalid result`
+      `Parsing of pre-commit config YAML returned invalid result`,
     );
     return null;
   }
   if (!matchesPrecommitConfigHeuristic(parsedContent)) {
     logger.debug(
       { packageFile },
-      `File does not look like a pre-commit config file`
+      `File does not look like a pre-commit config file`,
     );
     return null;
   }
@@ -182,7 +189,7 @@ export function extractPackageFile(
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       { packageFile, err },
-      'Error scanning parsed pre-commit config'
+      'Error scanning parsed pre-commit config',
     );
   }
   return null;

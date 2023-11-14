@@ -1,20 +1,21 @@
-import os from 'node:os';
 import { GlobalConfig } from '../../../config/global';
 import * as memCache from '../memory';
 import { cache } from './decorator';
+import * as file from './file';
 import * as packageCache from '.';
 
 jest.mock('./file');
 
 describe('util/cache/package/decorator', () => {
-  const setCache = jest.spyOn(packageCache, 'set');
-
-  let count = 1;
+  const setCache = file.set;
   const getValue = jest.fn();
+  let count = 1;
 
   beforeEach(async () => {
+    jest.useRealTimers();
+    GlobalConfig.reset();
     memCache.init();
-    await packageCache.init({ cacheDir: os.tmpdir() });
+    await packageCache.init({ cacheDir: 'some-dir' });
     count = 1;
     getValue.mockImplementation(() => {
       const res = String(100 * count + 10 * count + count);
@@ -41,7 +42,7 @@ describe('util/cache/package/decorator', () => {
       'some-namespace',
       'cache-decorator:some-key',
       { cachedAt: expect.any(String), value: '111' },
-      30
+      30,
     );
   });
 
@@ -81,7 +82,7 @@ describe('util/cache/package/decorator', () => {
       'namespace',
       'cache-decorator:key',
       { cachedAt: expect.any(String), value: null },
-      30
+      30,
     );
   });
 
@@ -129,7 +130,7 @@ describe('util/cache/package/decorator', () => {
       'some-namespace',
       'cache-decorator:some-key',
       { cachedAt: expect.any(String), value: '111' },
-      30
+      30,
     );
   });
 
@@ -151,7 +152,7 @@ describe('util/cache/package/decorator', () => {
       'namespace',
       'cache-decorator:key',
       { cachedAt: expect.any(String), value: '111' },
-      30
+      30,
     );
   });
 
@@ -170,13 +171,8 @@ describe('util/cache/package/decorator', () => {
     }
 
     beforeEach(() => {
-      jest.useFakeTimers({ advanceTimers: false });
+      jest.useFakeTimers();
       GlobalConfig.set({ cacheHardTtlMinutes: 2 });
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-      GlobalConfig.reset();
     });
 
     it('updates cached result', async () => {
@@ -192,7 +188,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
-        2
+        2,
       );
 
       jest.advanceTimersByTime(1);
@@ -202,7 +198,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '222' },
-        2
+        2,
       );
     });
 
@@ -219,7 +215,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
-        3
+        3,
       );
 
       jest.advanceTimersByTime(120 * 1000 - 1); // namespace default ttl is 1min
@@ -234,7 +230,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '222' },
-        3
+        3,
       );
     });
 
@@ -247,7 +243,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
-        2
+        2,
       );
 
       jest.advanceTimersByTime(60 * 1000);
@@ -266,7 +262,7 @@ describe('util/cache/package/decorator', () => {
         'namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
-        2
+        2,
       );
 
       jest.advanceTimersByTime(2 * 60 * 1000 - 1);

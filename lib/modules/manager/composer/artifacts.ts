@@ -24,6 +24,7 @@ import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { Json } from '../../../util/schema-utils';
+import { coerceString } from '../../../util/string';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -56,7 +57,7 @@ function getAuthJson(): string | null {
       : undefined,
     isArtifactAuthEnabled(gitTagsHostRule)
       ? findGithubToken(gitTagsHostRule)
-      : undefined
+      : undefined,
   );
 
   if (selectedGithubToken) {
@@ -71,7 +72,7 @@ function getAuthJson(): string | null {
     }
 
     if (gitlabHostRule?.token) {
-      const host = gitlabHostRule.resolvedHost ?? 'gitlab.com';
+      const host = coerceString(gitlabHostRule.resolvedHost, 'gitlab.com');
       authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
       authJson['gitlab-token'][host] = gitlabHostRule.token;
       // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
@@ -180,7 +181,7 @@ export async function updateArtifacts({
           'update ' +
           updatedDeps
             .map((dep) =>
-              dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName
+              dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName,
             )
             .filter(is.string)
             .map((dep) => quote(dep))
@@ -240,7 +241,7 @@ export async function updateArtifacts({
     }
     if (
       err.message?.includes(
-        'Your requirements could not be resolved to an installable set of packages.'
+        'Your requirements could not be resolved to an installable set of packages.',
       )
     ) {
       logger.info('Composer requirements cannot be resolved');

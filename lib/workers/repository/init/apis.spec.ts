@@ -19,10 +19,6 @@ describe('workers/repository/init/apis', () => {
       delete config.forkProcessing;
     });
 
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('runs', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
@@ -44,7 +40,7 @@ describe('workers/repository/init/apis', () => {
         initApis({
           ...config,
           optimizeForDisabled: true,
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_DISABLED);
     });
 
@@ -61,7 +57,7 @@ describe('workers/repository/init/apis', () => {
         initApis({
           ...config,
           forkProcessing: 'disabled',
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_FORKED);
     });
 
@@ -91,7 +87,7 @@ describe('workers/repository/init/apis', () => {
           optimizeForDisabled: true,
           forkProcessing: 'disabled',
           isFork: true,
-        })
+        }),
       ).resolves.not.toThrow();
     });
 
@@ -111,10 +107,10 @@ describe('workers/repository/init/apis', () => {
       });
       expect(workerPlatformConfig).toBeTruthy();
       expect(workerPlatformConfig.onboardingConfigFileName).toBe(
-        '.github/renovate.json'
+        '.github/renovate.json',
       );
       expect(platform.getJsonFile).toHaveBeenCalledWith(
-        '.github/renovate.json'
+        '.github/renovate.json',
       );
       expect(platform.getJsonFile).not.toHaveBeenCalledWith('renovate.json');
     });
@@ -153,6 +149,40 @@ describe('workers/repository/init/apis', () => {
       expect(workerPlatformConfig).toBeTruthy();
       expect(workerPlatformConfig.onboardingConfigFileName).toBe('foo.bar');
       expect(platform.getJsonFile).toHaveBeenCalledWith('renovate.json');
+    });
+
+    it('checks for re-enablement and continues', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockResolvedValueOnce({
+        enabled: true,
+      });
+      const workerPlatformConfig = await initApis({
+        ...config,
+        optimizeForDisabled: true,
+        extends: [':disableRenovate'],
+      });
+      expect(workerPlatformConfig).toBeTruthy();
+      expect(platform.getJsonFile).toHaveBeenCalledWith('renovate.json');
+    });
+
+    it('checks for re-enablement and skips', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockResolvedValueOnce(null);
+      await expect(
+        initApis({
+          ...config,
+          optimizeForDisabled: true,
+          extends: [':disableRenovate'],
+        }),
+      ).rejects.toThrow(REPOSITORY_DISABLED);
     });
   });
 });

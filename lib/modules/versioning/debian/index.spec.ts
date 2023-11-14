@@ -11,10 +11,6 @@ describe('modules/versioning/debian/index', () => {
     Settings.now = () => dt.valueOf();
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   it.each`
     version           | expected
     ${undefined}      | ${false}
@@ -87,7 +83,7 @@ describe('modules/versioning/debian/index', () => {
     'isCompatible("$version") === $expected',
     ({ version, range, expected }) => {
       expect(debian.isCompatible(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -168,7 +164,7 @@ describe('modules/versioning/debian/index', () => {
     ({ version, expected }) => {
       debian.isStable(version);
       expect(logger.debug).toHaveBeenCalledTimes(0);
-    }
+    },
   );
 
   it('checks runtime date handling & refresh rolling release data', () => {
@@ -180,7 +176,7 @@ describe('modules/versioning/debian/index', () => {
     expect(debian.isStable('buster')).toBeFalse();
     expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(logger.debug).toHaveBeenCalledWith(
-      'RollingReleasesData - data written'
+      'RollingReleasesData - data written',
     );
   });
 
@@ -266,7 +262,7 @@ describe('modules/versioning/debian/index', () => {
       expect(debian.getMajor(version)).toBe(major);
       expect(debian.getMinor(version)).toBe(minor);
       expect(debian.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -333,7 +329,7 @@ describe('modules/versioning/debian/index', () => {
     'getSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(debian.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -355,7 +351,7 @@ describe('modules/versioning/debian/index', () => {
     'minSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(debian.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -389,9 +385,9 @@ describe('modules/versioning/debian/index', () => {
           rangeStrategy,
           currentVersion,
           newVersion,
-        })
+        }),
       ).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -423,6 +419,6 @@ describe('modules/versioning/debian/index', () => {
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(debian.matches(version, range)).toBe(expected);
-    }
+    },
   );
 });

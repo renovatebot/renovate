@@ -30,7 +30,7 @@ export class HelmDatasource extends Datasource {
     key: (helmRepository: string) => helmRepository,
   })
   async getRepositoryData(
-    helmRepository: string
+    helmRepository: string,
   ): Promise<HelmRepositoryData | null> {
     let res: HttpResponse<string>;
     try {
@@ -40,7 +40,7 @@ export class HelmDatasource extends Datasource {
       if (!res?.body) {
         logger.warn(
           { helmRepository },
-          `Received invalid response from helm repository`
+          `Received invalid response from helm repository`,
         );
         return null;
       }
@@ -54,7 +54,7 @@ export class HelmDatasource extends Datasource {
       if (!is.plainObject<HelmRepository>(doc)) {
         logger.warn(
           { helmRepository },
-          `Failed to parse index.yaml from helm repository`
+          `Failed to parse index.yaml from helm repository`,
         );
         return null;
       }
@@ -71,7 +71,8 @@ export class HelmDatasource extends Datasource {
           releases: releases.map((release) => ({
             version: release.version,
             releaseTimestamp: release.created ?? null,
-            newDigest: release.digest,
+            // The Helm repository at Gitlab does not include a digest (#24280)
+            newDigest: release.digest ?? undefined,
           })),
         };
       }
@@ -80,7 +81,7 @@ export class HelmDatasource extends Datasource {
     } catch (err) {
       logger.debug(
         { helmRepository, err },
-        `Failed to parse index.yaml from helm repository`
+        `Failed to parse index.yaml from helm repository`,
       );
       return null;
     }
@@ -104,7 +105,7 @@ export class HelmDatasource extends Datasource {
     if (!releases) {
       logger.debug(
         { dependency: packageName },
-        `Entry ${packageName} doesn't exist in index.yaml from ${helmRepository}`
+        `Entry ${packageName} doesn't exist in index.yaml from ${helmRepository}`,
       );
       return null;
     }

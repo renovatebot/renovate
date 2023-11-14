@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import type { PackageRule } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
@@ -30,11 +31,11 @@ export class PackageRulesMigration extends AbstractMigration {
   override readonly propertyName = 'packageRules';
 
   override run(value: unknown): void {
-    let packageRules = (this.get('packageRules') as PackageRule[]) ?? [];
-    packageRules = Array.isArray(packageRules) ? [...packageRules] : [];
+    let packageRules = this.get('packageRules') as PackageRule[];
+    if (is.nonEmptyArray(packageRules)) {
+      packageRules = packageRules.map(renameKeys);
 
-    packageRules = packageRules.map(renameKeys);
-
-    this.rewrite(packageRules);
+      this.rewrite(packageRules);
+    }
   }
 }

@@ -12,7 +12,7 @@ import { isDateExpired } from '../util';
  * and reconciling them with newly obtained ones from paginated queries.
  */
 export abstract class AbstractGithubGraphqlCacheStrategy<
-  GithubItem extends GithubDatasourceItem
+  GithubItem extends GithubDatasourceItem,
 > implements GithubGraphqlCacheStrategy<GithubItem>
 {
   /**
@@ -38,22 +38,21 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   protected createdAt = this.now;
 
   /**
-   * This flag helps to indicate whether the cache record
-   * should be persisted after the current cache access cycle.
+   * This flag indicates whether there is any new or updated items
    */
-  protected hasUpdatedItems = false;
+  protected hasNovelty = false;
 
   /**
    * Loading and persisting data is delegated to the concrete strategy.
    */
   abstract load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined>;
   abstract persist(
-    cacheRecord: GithubGraphqlCacheRecord<GithubItem>
+    cacheRecord: GithubGraphqlCacheRecord<GithubItem>,
   ): Promise<void>;
 
   constructor(
     protected readonly cacheNs: string,
-    protected readonly cacheKey: string
+    protected readonly cacheKey: string,
   ) {}
 
   /**
@@ -107,18 +106,22 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     let isPaginationDone = false;
     for (const item of items) {
       const { version } = item;
+      const oldItem = cachedItems[version];
 
       // If we reached previously stored item that is stabilized,
       // we assume the further pagination will not yield any new items.
-      const oldItem = cachedItems[version];
-      if (oldItem) {
-        if (this.isStabilized(oldItem)) {
-          isPaginationDone = true;
-        }
+      //
+      // However, we don't break the loop here, allowing to reconcile
+      // the entire page of items. This protects us from unusual cases
+      // when release authors intentionally break the timeline. Therefore,
+      // while it feels appealing to break early, please don't do that.
+      if (oldItem && this.isStabilized(oldItem)) {
+        isPaginationDone = true;
+      }
 
-        if (!dequal(oldItem, item)) {
-          this.hasUpdatedItems = true;
-        }
+      // Check if item is new or updated
+      if (!oldItem || !dequal(oldItem, item)) {
+        this.hasNovelty = true;
       }
 
       cachedItems[version] = item;
@@ -137,13 +140,19 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     const cachedItems = await this.getItems();
     const resultItems: Record<string, GithubItem> = {};
 
+    let hasDeletedItems = false;
     for (const [version, item] of Object.entries(cachedItems)) {
       if (this.isStabilized(item) || this.reconciledVersions.has(version)) {
         resultItems[version] = item;
+      } else {
+        hasDeletedItems = true;
       }
     }
 
-    await this.store(resultItems);
+    if (this.hasNovelty || hasDeletedItems) {
+      await this.store(resultItems);
+    }
+
     return Object.values(resultItems);
   }
 

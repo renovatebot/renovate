@@ -27,7 +27,7 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
         .reply(200, expressJson);
 
       expect(
-        await findFirstParentVersion('express', '4.0.0', 'send', '0.11.1')
+        await findFirstParentVersion('express', '4.0.0', 'send', '0.11.1'),
       ).toBe('4.11.1');
     });
 
@@ -49,8 +49,8 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
           'express',
           '4.0.0',
           'buffer-crc32',
-          '10.0.0'
-        )
+          '10.0.0',
+        ),
       ).toBe('4.9.1');
     });
 
@@ -70,7 +70,7 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
         });
 
       expect(
-        await findFirstParentVersion('express', '4.0.0', 'qs', '6.0.4')
+        await findFirstParentVersion('express', '4.0.0', 'qs', '6.0.4'),
       ).toBe('4.14.0');
     });
 
@@ -89,7 +89,7 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
         });
 
       expect(
-        await findFirstParentVersion('express', '4.16.1', 'type-is', '1.2.1')
+        await findFirstParentVersion('express', '4.16.1', 'type-is', '1.2.1'),
       ).toBe('4.16.1');
     });
 
@@ -107,7 +107,7 @@ describe('modules/manager/npm/update/locked-dependency/common/parent-version', (
         });
 
       expect(
-        await findFirstParentVersion('express', '4.16.1', 'debug', '9.0.0')
+        await findFirstParentVersion('express', '4.16.1', 'debug', '9.0.0'),
       ).toBeNull();
     });
   });

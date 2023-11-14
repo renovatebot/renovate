@@ -61,11 +61,12 @@ describe('modules/versioning/swift/index', () => {
     versions                          | range           | expected
     ${['1.2.3', '1.2.4', '1.2.5']}    | ${'..<"1.2.4"'} | ${'1.2.3'}
     ${['v1.2.3', 'v1.2.4', 'v1.2.5']} | ${'..<"1.2.4"'} | ${'1.2.3'}
+    ${['v1.2.3', 'v1.2.4', 'v1.2.5']} | ${''}           | ${null}
   `(
     'minSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -73,11 +74,12 @@ describe('modules/versioning/swift/index', () => {
     ${['1.2.3', '1.2.4', '1.2.5']}    | ${'..<"1.2.4"'} | ${'1.2.3'}
     ${['v1.2.3', 'v1.2.4', 'v1.2.5']} | ${'..<"1.2.4"'} | ${'1.2.3'}
     ${['1.2.3', '1.2.4', '1.2.5']}    | ${'..."1.2.4"'} | ${'1.2.4'}
+    ${['1.2.3', '1.2.4', '1.2.5']}    | ${''}           | ${null}
   `(
     'getSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -86,11 +88,12 @@ describe('modules/versioning/swift/index', () => {
     ${'v1.2.3'} | ${'..."1.2.4"'} | ${false}
     ${'1.2.3'}  | ${'"1.2.4"...'} | ${true}
     ${'v1.2.3'} | ${'"1.2.4"...'} | ${true}
+    ${'v1.2.3'} | ${''}           | ${false}
   `(
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -99,11 +102,12 @@ describe('modules/versioning/swift/index', () => {
     ${'v1.2.4'} | ${'..."1.2.4"'} | ${true}
     ${'1.2.4'}  | ${'..."1.2.3"'} | ${false}
     ${'v1.2.4'} | ${'..."1.2.3"'} | ${false}
+    ${'v1.2.4'} | ${''}           | ${false}
   `(
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -133,8 +137,8 @@ describe('modules/versioning/swift/index', () => {
           rangeStrategy,
           currentVersion,
           newVersion,
-        })
+        }),
       ).toBe(expected);
-    }
+    },
   );
 });

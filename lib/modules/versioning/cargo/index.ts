@@ -70,14 +70,14 @@ const matches = (version: string, range: string): boolean =>
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return npm.getSatisfyingVersion(versions, cargo2npm(range));
 }
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return npm.minSatisfyingVersion(versions, cargo2npm(range));
 }
@@ -109,12 +109,14 @@ function getNewValue({
     currentVersion,
     newVersion,
   });
-  let newCargo = newSemver ? npm2cargo(newSemver) : null;
+  let newCargo = newSemver
+    ? npm2cargo(newSemver)
+    : /* istanbul ignore next: should never happen */ null;
   // istanbul ignore if
   if (!newCargo) {
     logger.info(
       { currentValue, newSemver },
-      'Could not get cargo version from semver'
+      'Could not get cargo version from semver',
     );
     return currentValue;
   }

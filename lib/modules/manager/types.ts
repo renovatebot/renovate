@@ -1,7 +1,6 @@
 import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
-  RegexManagerTemplates,
   UpdateType,
   ValidationMessage,
 } from '../../config/types';
@@ -9,6 +8,7 @@ import type { Category } from '../../constants';
 import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
 import type { FileChange } from '../../util/git/types';
 import type { MergeConfidence } from '../../util/merge-confidence/types';
+import type { CustomExtractConfig } from './custom/types';
 
 export type Result<T> = T | Promise<T>;
 
@@ -21,12 +21,6 @@ export interface ExtractConfig extends CustomExtractConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean | null;
-}
-
-export interface CustomExtractConfig extends RegexManagerTemplates {
-  autoReplaceStringTemplate?: string;
-  matchStrings?: string[];
-  matchStringsStrategy?: MatchStringsStrategy;
 }
 
 export interface UpdateArtifactsConfig {
@@ -43,6 +37,7 @@ export interface UpdateArtifactsConfig {
   newVersion?: string;
   newMajor?: number;
   registryAliases?: Record<string, string>;
+  lockFiles?: string[];
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
@@ -89,7 +84,7 @@ export interface LookupUpdate {
   newMajor?: number;
   newMinor?: number;
   newName?: string;
-  newValue: string;
+  newValue?: string;
   semanticCommitType?: string;
   pendingChecks?: boolean;
   pendingVersions?: string[];
@@ -159,6 +154,7 @@ export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   currentRawValue?: any;
   depGroup?: string;
   lockFiles?: string[];
+  manager?: string;
   name?: string;
   newDigest?: string;
   newFrom?: string;
@@ -232,40 +228,40 @@ export interface ManagerApi extends ModuleApi {
 
   categories?: Category[];
   supportsLockFileMaintenance?: boolean;
-
+  supersedesManagers?: string[];
   supportedDatasources: string[];
 
   bumpPackageVersion?(
     content: string,
     currentValue: string,
-    bumpVersion: ReleaseType
+    bumpVersion: ReleaseType,
   ): Result<BumpPackageVersionResult>;
 
   detectGlobalConfig?(): Result<GlobalManagerConfig>;
 
   extractAllPackageFiles?(
     config: ExtractConfig,
-    files: string[]
+    files: string[],
   ): Result<PackageFile[] | null>;
 
   extractPackageFile?(
     content: string,
     packageFile?: string,
-    config?: ExtractConfig
+    config?: ExtractConfig,
   ): Result<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
   updateArtifacts?(
-    updateArtifact: UpdateArtifact
+    updateArtifact: UpdateArtifact,
   ): Result<UpdateArtifactsResult[] | null>;
 
   updateDependency?(
-    updateDependencyConfig: UpdateDependencyConfig
+    updateDependencyConfig: UpdateDependencyConfig,
   ): Result<string | null>;
 
   updateLockedDependency?(
-    config: UpdateLockedConfig
+    config: UpdateLockedConfig,
   ): Result<UpdateLockedResult>;
 }
 

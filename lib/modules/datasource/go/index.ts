@@ -34,7 +34,7 @@ export class GoDatasource extends Datasource {
 
   // Pseudo versions https://go.dev/ref/mod#pseudo-versions
   static readonly pversionRegexp = regEx(
-    /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/
+    /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/,
   );
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
@@ -61,7 +61,7 @@ export class GoDatasource extends Datasource {
   })
   override async getDigest(
     { packageName }: DigestConfig,
-    value?: string | null
+    value?: string | null,
   ): Promise<string | null> {
     const source = await BaseGoDatasource.getDatasource(packageName);
     if (!source) {
@@ -77,16 +77,16 @@ export class GoDatasource extends Datasource {
 
     switch (source.datasource) {
       case GitTagsDatasource.id: {
-        return this.direct.git.getDigest?.(source, tag) ?? null;
+        return this.direct.git.getDigest(source, tag);
       }
       case GithubTagsDatasource.id: {
         return this.direct.github.getDigest(source, tag);
       }
       case BitbucketTagsDatasource.id: {
-        return this.direct.bitbucket.getDigest?.(source, tag) ?? null;
+        return this.direct.bitbucket.getDigest(source, tag);
       }
       case GitlabTagsDatasource.id: {
-        return this.direct.gitlab.getDigest?.(source, tag) ?? null;
+        return this.direct.gitlab.getDigest(source, tag);
       }
       /* istanbul ignore next: can never happen, makes lint happy */
       default: {

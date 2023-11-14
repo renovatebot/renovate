@@ -19,7 +19,6 @@ describe('modules/datasource/rubygems/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       memCache.clear();
-      jest.resetAllMocks();
     });
 
     it('returns null for missing pkg', async () => {
@@ -37,7 +36,7 @@ describe('modules/datasource/rubygems/index', () => {
           datasource: RubyGemsDatasource.id,
           packageName: 'foobar',
           registryUrls: ['https://example.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -169,7 +168,7 @@ describe('modules/datasource/rubygems/index', () => {
             { number: '1.0.0' },
             { number: '2.0.0' },
             { number: '3.0.0' },
-          ])
+          ]),
         );
 
       const res = await getPkgReleases({
@@ -201,7 +200,7 @@ describe('modules/datasource/rubygems/index', () => {
             1.0.0 |checksum:aaa
             2.0.0 |checksum:bbb
             3.0.0 |checksum:ccc
-          `
+          `,
         );
 
       const res = await getPkgReleases({
@@ -232,7 +231,7 @@ describe('modules/datasource/rubygems/index', () => {
           datasource: RubyGemsDatasource.id,
           packageName: 'foobar',
           registryUrls: ['https://example.com'],
-        })
+        }),
       ).rejects.toThrow(ExternalHostError);
     });
 
@@ -252,7 +251,7 @@ describe('modules/datasource/rubygems/index', () => {
           datasource: RubyGemsDatasource.id,
           packageName: 'foobar',
           registryUrls: ['https://example.com'],
-        })
+        }),
       ).rejects.toThrow(ExternalHostError);
     });
 
@@ -282,7 +281,7 @@ describe('modules/datasource/rubygems/index', () => {
             { number: '1.0.0' },
             { number: '2.0.0' },
             { number: '3.0.0' },
-          ])
+          ]),
         );
 
       const res = await getPkgReleases({

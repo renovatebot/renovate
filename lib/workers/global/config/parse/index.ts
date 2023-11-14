@@ -3,6 +3,7 @@ import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
 import { addStream, logger, setContext } from '../../../../logger';
 import { detectAllGlobalConfig } from '../../../../modules/manager';
+import { coerceArray } from '../../../../util/array';
 import { ensureDir, getParentDir, readSystemFile } from '../../../../util/fs';
 import { addSecretForSanitizing } from '../../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../../util/url';
@@ -14,7 +15,7 @@ import { hostRulesFromEnv } from './host-rules-from-env';
 
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
-  argv: string[]
+  argv: string[],
 ): Promise<AllConfig> {
   logger.debug('Parsing configs');
 
@@ -52,7 +53,7 @@ export async function parseConfigs(
   if (!config.privateKeyOld && config.privateKeyPathOld) {
     config.privateKeyOld = await readSystemFile(
       config.privateKeyPathOld,
-      'utf8'
+      'utf8',
     );
     delete config.privateKeyPathOld;
   }
@@ -70,7 +71,7 @@ export async function parseConfigs(
   if (config.logFile) {
     logger.debug(
       // TODO: types (#22198)
-      `Enabling ${config.logFileLevel!} logging to ${config.logFile}`
+      `Enabling ${config.logFileLevel!} logging to ${config.logFile}`,
     );
     await ensureDir(getParentDir(config.logFile));
     addStream({
@@ -95,7 +96,7 @@ export async function parseConfigs(
 
   if (config.detectHostRulesFromEnv) {
     const hostRules = hostRulesFromEnv(env);
-    config.hostRules = [...(config.hostRules ?? []), ...hostRules];
+    config.hostRules = [...coerceArray(config.hostRules), ...hostRules];
   }
   // Get global config
   logger.trace({ config }, 'Full config');

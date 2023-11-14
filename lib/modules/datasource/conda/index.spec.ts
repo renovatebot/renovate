@@ -16,7 +16,7 @@ describe('modules/datasource/conda/index', () => {
         getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -26,17 +26,20 @@ describe('modules/datasource/conda/index', () => {
         await getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).toBeNull();
     });
 
     it('returns null for empty result', async () => {
-      httpMock.scope(defaultRegistryUrl).get(depUrl).reply(200, {});
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(depUrl)
+        .reply(200, { versions: [] });
       expect(
         await getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -46,7 +49,7 @@ describe('modules/datasource/conda/index', () => {
         getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 

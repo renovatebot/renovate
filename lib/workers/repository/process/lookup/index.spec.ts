@@ -11,6 +11,7 @@ import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags
 import { NpmDatasource } from '../../../../modules/datasource/npm';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist';
 import { PypiDatasource } from '../../../../modules/datasource/pypi';
+import { id as debianVersioningId } from '../../../../modules/versioning/debian';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { id as gitVersioningId } from '../../../../modules/versioning/git';
 import { id as nodeVersioningId } from '../../../../modules/versioning/node';
@@ -19,7 +20,6 @@ import { id as pep440VersioningId } from '../../../../modules/versioning/pep440'
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry';
 import type { HostRule } from '../../../../types';
 import * as memCache from '../../../../util/cache/memory';
-import * as githubGraphql from '../../../../util/github/graphql';
 import { initConfig, resetConfig } from '../../../../util/merge-confidence';
 import * as McApi from '../../../../util/merge-confidence';
 import type { LookupUpdateConfig } from './types';
@@ -43,24 +43,22 @@ let config: LookupUpdateConfig;
 describe('workers/repository/process/lookup/index', () => {
   const getGithubReleases = jest.spyOn(
     GithubReleasesDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   const getGithubTags = jest.spyOn(
     GithubTagsDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   const getDockerReleases = jest.spyOn(
     DockerDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
 
   beforeEach(() => {
-    // TODO: fix wrong tests
-    jest.resetAllMocks();
     // TODO: fix types #22198
     config = partial<LookupUpdateConfig>(getConfig() as never);
     config.manager = 'npm';
@@ -83,6 +81,14 @@ describe('workers/repository/process/lookup/index', () => {
   });
 
   describe('.lookupUpdates()', () => {
+    it('returns null if invalid currentValue', async () => {
+      // @ts-expect-error: testing invalid currentValue
+      config.currentValue = 3;
+      expect((await lookup.lookupUpdates(config)).skipReason).toBe(
+        'invalid-value',
+      );
+    });
+
     it('returns null if unknown datasource', async () => {
       config.packageName = 'some-dep';
       config.datasource = 'does not exist';
@@ -255,7 +261,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       await expect(lookup.lookupUpdates(config)).rejects.toThrow(
-        Error(CONFIG_VALIDATION)
+        Error(CONFIG_VALIDATION),
       );
     });
 
@@ -379,7 +385,7 @@ describe('workers/repository/process/lookup/index', () => {
           .get('/q')
           .reply(200, qJson);
         expect(await lookup.lookupUpdates(config)).toMatchObject({ updates });
-      }
+      },
     );
 
     it.each`
@@ -400,7 +406,7 @@ describe('workers/repository/process/lookup/index', () => {
           .get('/q')
           .reply(200, qJson);
         expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
-      }
+      },
     );
 
     it('supports pinning for x-range-all (no lockfile)', async () => {
@@ -441,7 +447,7 @@ describe('workers/repository/process/lookup/index', () => {
           .get('/q')
           .reply(200, qJson);
         expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
-      }
+      },
     );
 
     it('ignores pinning for ranges when other upgrade exists', async () => {
@@ -1222,7 +1228,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(0);
       expect(res.warnings).toHaveLength(1);
       expect(res.warnings[0].message).toBe(
-        "Can't find version with tag foo for npm package typescript"
+        "Can't find version with tag foo for npm package typescript",
       );
     });
 
@@ -1235,22 +1241,23 @@ describe('workers/repository/process/lookup/index', () => {
 
       // Only mock calls once so that the second invocation results in
       // no digest being computable.
-      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
-        {
-          version: 'v2.0.0',
-          gitRef: 'v2.0.0',
-          releaseTimestamp: '2022-01-01',
-          hash: 'abc',
-        },
-      ]);
+      getGithubReleases.mockResolvedValueOnce({ releases: [] });
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'v2.0.0',
+            gitRef: 'v2.0.0',
+            releaseTimestamp: '2022-01-01',
+          },
+        ],
+      });
 
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
       expect(res.warnings).toHaveLength(1);
       expect(res.warnings[0]).toEqual({
         message:
-          'Could not determine new digest for update (datasource: github-tags)',
+          'Could not determine new digest for update (github-tags package angular/angular)',
         topic: 'angular/angular',
       });
     });
@@ -1265,20 +1272,60 @@ describe('workers/repository/process/lookup/index', () => {
 
         // Only mock calls once so that the second invocation results in
         // no digest being computable.
-        jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
-        jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
-          {
-            version: 'v2.0.0',
-            gitRef: 'v2.0.0',
-            releaseTimestamp: '2022-01-01',
-            hash: 'abc',
-          },
-        ]);
+        getGithubReleases.mockResolvedValueOnce({ releases: [] });
+        getGithubTags.mockResolvedValueOnce({
+          releases: [
+            {
+              version: 'v2.0.0',
+              gitRef: 'v2.0.0',
+              releaseTimestamp: '2022-01-01',
+            },
+          ],
+        });
 
         const res = await lookup.lookupUpdates(config);
         expect(res.updates).toHaveLength(0);
         expect(res.warnings).toHaveLength(0);
       });
+    });
+
+    it('should use registry of update to determine digest', async () => {
+      config.currentValue = 'v1.0.0';
+      config.registryUrls = [
+        'https://github.enterprise.com',
+        'https://github.com',
+      ];
+      config.digestOneAndOnly = true;
+      config.packageName = 'angular/angular';
+      config.pinDigests = true;
+      config.datasource = GithubTagsDatasource.id;
+
+      getGithubTags.mockRejectedValueOnce(
+        new Error('Not contained in registry'),
+      );
+      getGithubTags.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'v1.0.0',
+            gitRef: 'v1.0.0',
+            releaseTimestamp: '2022-01-01',
+          },
+        ],
+      });
+      const getGithubTagsDigest = jest
+        .spyOn(GithubTagsDatasource.prototype, 'getDigest')
+        .mockResolvedValueOnce('digest1234');
+
+      const res = await lookup.lookupUpdates(config);
+      expect(getGithubTagsDigest).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          registryUrl: 'https://github.com',
+        }),
+        'v1.0.0',
+      );
+
+      expect(res.updates).toHaveLength(1);
+      expect(res.updates[0].newDigest).toBe('digest1234');
     });
 
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
@@ -1628,7 +1675,7 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '8.1.5' },
           { version: '8.1' },
           { version: '8.2.0' },
-          { version: '8.2.5' },
+          { version: '8.2.5', newDigest: 'abc123' },
           { version: '8.2' },
           { version: '8' },
           { version: '9.0' },
@@ -1695,6 +1742,80 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         updates: [{ newValue: '9', updateType: 'major' }],
+      });
+    });
+
+    it('applies versionCompatibility for 18.10.0', async () => {
+      config.currentValue = '18.10.0-alpine';
+      config.currentDigest = 'aaa111';
+      config.packageName = 'node';
+      config.versioning = nodeVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)(?<compatibility>-.*)?$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '18.10.0' },
+          { version: '18.18.0' },
+          { version: '18.19.0-alpine' },
+          { version: '18.20.0' },
+        ],
+      });
+      getDockerDigest.mockResolvedValueOnce('bbb222');
+      getDockerDigest.mockResolvedValueOnce('ccc333');
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(2);
+      expect(res).toMatchObject({
+        updates: [
+          {
+            newValue: '18.19.0-alpine',
+            newDigest: 'bbb222',
+            updateType: 'minor',
+          },
+          {
+            newValue: '18.10.0-alpine',
+            newDigest: 'ccc333',
+            updateType: 'digest',
+          },
+        ],
+      });
+    });
+
+    it('handles versionCompatibility mismatch', async () => {
+      config.currentValue = '18.10.0-alpine';
+      config.packageName = 'node';
+      config.versioning = nodeVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)-slim$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '18.18.0' },
+          { version: '18.19.0-alpine' },
+          { version: '18.20.0' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        updates: [],
+      });
+    });
+
+    it('applies versionCompatibility for debian codenames with suffix', async () => {
+      config.currentValue = 'bullseye-slim';
+      config.packageName = 'debian';
+      config.versioning = debianVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)(?<compatibility>-.*)?$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: 'bullseye' },
+          { version: 'bullseye-slim' },
+          { version: 'bookworm' },
+          { version: 'bookworm-slim' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        updates: [{ newValue: 'bookworm-slim', updateType: 'major' }],
       });
     });
 
@@ -1792,6 +1913,7 @@ describe('workers/repository/process/lookup/index', () => {
         releases: [
           {
             version: '8.0.0',
+            newDigest: 'sha256:0123456789abcdef',
           },
           {
             version: '8.1.0',
@@ -1799,7 +1921,6 @@ describe('workers/repository/process/lookup/index', () => {
         ],
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
-      getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         updates: [
@@ -2149,7 +2270,7 @@ describe('workers/repository/process/lookup/index', () => {
       const defaultApiBaseUrl = 'https://developer.mend.io/';
       const getMergeConfidenceSpy = jest.spyOn(
         McApi,
-        'getMergeConfidenceLevel'
+        'getMergeConfidenceLevel',
       );
       const hostRule: HostRule = {
         hostType: 'merge-confidence',
@@ -2167,6 +2288,7 @@ describe('workers/repository/process/lookup/index', () => {
       });
 
       it('gets a merge confidence level for a given update when corresponding packageRule is in use', async () => {
+        getMergeConfidenceSpy.mockRestore();
         const datasource = NpmDatasource.id;
         const packageName = 'webpack';
         const newVersion = '3.8.1';
@@ -2182,7 +2304,7 @@ describe('workers/repository/process/lookup/index', () => {
         httpMock
           .scope(defaultApiBaseUrl)
           .get(
-            `/api/mc/json/${datasource}/${packageName}/${currentValue}/${newVersion}`
+            `/api/mc/json/${datasource}/${packageName}/${currentValue}/${newVersion}`,
           )
           .reply(200, { confidence: 'high' });
 

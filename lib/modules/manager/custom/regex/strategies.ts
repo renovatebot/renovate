@@ -12,17 +12,22 @@ import {
 
 export function handleAny(
   content: string,
-  packageFile: string,
-  config: RegexManagerConfig
+  _packageFile: string,
+  config: RegexManagerConfig,
 ): PackageDependency[] {
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
     .flatMap((regex) => regexMatchAll(regex, content)) // match all regex to content, get all matches, reduce to single array
     .map((matchResult) =>
       createDependency(
-        { groups: matchResult.groups ?? {}, replaceString: matchResult[0] },
-        config
-      )
+        {
+          groups:
+            matchResult.groups ??
+            /* istanbul ignore next: can this happen? */ {},
+          replaceString: matchResult[0],
+        },
+        config,
+      ),
     )
     .filter(is.truthy)
     .filter(isValidDependency);
@@ -30,8 +35,8 @@ export function handleAny(
 
 export function handleCombination(
   content: string,
-  packageFile: string,
-  config: RegexManagerConfig
+  _packageFile: string,
+  config: RegexManagerConfig,
 ): PackageDependency[] {
   const matches = config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
@@ -43,7 +48,7 @@ export function handleCombination(
 
   const extraction = matches
     .map((match) => ({
-      groups: match.groups ?? {},
+      groups: match.groups ?? /* istanbul ignore next: can this happen? */ {},
       replaceString:
         match?.groups?.currentValue ?? match?.groups?.currentDigest
           ? match[0]
@@ -58,10 +63,10 @@ export function handleCombination(
 export function handleRecursive(
   content: string,
   packageFile: string,
-  config: RegexManagerConfig
+  config: RegexManagerConfig,
 ): PackageDependency[] {
   const regexes = config.matchStrings.map((matchString) =>
-    regEx(matchString, 'g')
+    regEx(matchString, 'g'),
   );
 
   return processRecursive({
@@ -91,9 +96,9 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
         groups: combinedGroups,
         replaceString: content,
       },
-      config
+      config,
     );
-    return result ? [result] : [];
+    return result ? [result] : /* istanbul ignore next: can this happen? */ [];
   }
   return regexMatchAll(regexes[index], content).flatMap((match) => {
     return processRecursive({

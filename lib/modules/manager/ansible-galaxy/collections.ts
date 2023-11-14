@@ -13,7 +13,7 @@ import {
 
 function interpretLine(
   lineMatch: RegExpMatchArray,
-  dependency: AnsibleGalaxyPackageDependency
+  dependency: AnsibleGalaxyPackageDependency,
 ): void {
   const localDependency = dependency;
   const key = lineMatch[2];
@@ -30,10 +30,12 @@ function interpretLine(
     }
     case 'source': {
       localDependency.managerData.source = value;
-      if (value?.startsWith('git@')) {
+      if (value?.startsWith('git@') || value?.endsWith('.git')) {
         localDependency.packageName = value;
       } else {
-        localDependency.registryUrls = value ? [value] : [];
+        localDependency.registryUrls = value
+          ? [value]
+          : /* istanbul ignore next: should have test */ [];
       }
       break;
     }
@@ -50,7 +52,7 @@ function interpretLine(
 
 function handleGitDep(
   dep: AnsibleGalaxyPackageDependency,
-  nameMatch: RegExpExecArray | null
+  nameMatch: RegExpExecArray | null,
 ): void {
   dep.datasource = GitTagsDatasource.id;
 
@@ -65,7 +67,7 @@ function handleGitDep(
     const source = nameMatch.groups.source;
     const massagedDepName = nameMatch.groups.depName.replace(
       regEx(/.git$/),
-      ''
+      '',
     );
     dep.depName = `${nameMatch.groups.hostname}/${massagedDepName}`;
     // remove leading `git+` from URLs like `git+https://...`
@@ -83,7 +85,9 @@ function handleGitDep(
 function handleGalaxyDep(dep: AnsibleGalaxyPackageDependency): void {
   dep.datasource = GalaxyCollectionDatasource.id;
   dep.depName = dep.managerData.name;
-  dep.registryUrls = dep.managerData.source ? [dep.managerData.source] : [];
+  dep.registryUrls = dep.managerData.source
+    ? /* istanbul ignore next: should have test */ [dep.managerData.source]
+    : [];
   dep.currentValue = dep.managerData.version;
 }
 

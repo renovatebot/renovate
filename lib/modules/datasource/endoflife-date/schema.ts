@@ -30,6 +30,6 @@ export const EndoflifeDateVersions = z
       const version = latest ?? cycle;
       const isDeprecated = eol === true || discontinued === true;
       return { version, releaseTimestamp, isDeprecated };
-    }
+    },
   )
   .array();

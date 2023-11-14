@@ -1,16 +1,17 @@
 import { Readable } from 'node:stream';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 
+jest.mock('./azure-got-wrapper');
+
 describe('modules/platform/azure/azure-helper', () => {
   let azureHelper: typeof import('./azure-helper');
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.mock('./azure-got-wrapper');
-    azureHelper = require('./azure-helper');
-    azureApi = require('./azure-got-wrapper');
+    azureHelper = await import('./azure-helper');
+    azureApi = jest.requireMock('./azure-got-wrapper');
   });
 
   describe('getRef', () => {
@@ -19,7 +20,7 @@ describe('modules/platform/azure/azure-helper', () => {
         () =>
           ({
             getRefs: jest.fn(() => [{ objectId: 132 }]),
-          } as any)
+          }) as any,
       );
       const res = await azureHelper.getRefs('123', 'branch');
       expect(res).toMatchSnapshot();
@@ -30,7 +31,7 @@ describe('modules/platform/azure/azure-helper', () => {
         () =>
           ({
             getRefs: jest.fn(() => []),
-          } as any)
+          }) as any,
       );
       const res = await azureHelper.getRefs('123');
       expect(res).toHaveLength(0);
@@ -41,7 +42,7 @@ describe('modules/platform/azure/azure-helper', () => {
         () =>
           ({
             getRefs: jest.fn(() => [{ objectId: '132' }]),
-          } as any)
+          }) as any,
       );
       const res = await azureHelper.getRefs('123', 'refs/head/branch1');
       expect(res).toMatchSnapshot();
@@ -54,12 +55,12 @@ describe('modules/platform/azure/azure-helper', () => {
         () =>
           ({
             getRefs: jest.fn(() => [{ objectId: '132' }]),
-          } as any)
+          }) as any,
       );
       const res = await azureHelper.getAzureBranchObj(
         '123',
         'branchName',
-        'base'
+        'base',
       );
       expect(res).toMatchSnapshot();
     });
@@ -69,7 +70,7 @@ describe('modules/platform/azure/azure-helper', () => {
         () =>
           ({
             getRefs: jest.fn(() => []),
-          } as any)
+          }) as any,
       );
       const res = await azureHelper.getAzureBranchObj('123', 'branchName');
       expect(res).toMatchSnapshot();
@@ -95,13 +96,13 @@ describe('modules/platform/azure/azure-helper', () => {
         () =>
           ({
             getItemText: jest.fn(() => mockEventStream),
-          } as any)
+          }) as any,
       );
 
       const res = await azureHelper.getFile(
         '123',
         'repository',
-        './myFilePath/test'
+        './myFilePath/test',
       );
       expect(res).toBeNull();
     });
@@ -124,13 +125,13 @@ describe('modules/platform/azure/azure-helper', () => {
         () =>
           ({
             getItemText: jest.fn(() => mockEventStream),
-          } as any)
+          }) as any,
       );
 
       const res = await azureHelper.getFile(
         '123',
         'repository',
-        './myFilePath/test'
+        './myFilePath/test',
       );
       expect(res).toBeNull();
     });
@@ -153,13 +154,13 @@ describe('modules/platform/azure/azure-helper', () => {
         () =>
           ({
             getItemText: jest.fn(() => mockEventStream),
-          } as any)
+          }) as any,
       );
 
       const res = await azureHelper.getFile(
         '123',
         'repository',
-        './myFilePath/test'
+        './myFilePath/test',
       );
       expect(res).toMatchSnapshot();
     });
@@ -171,13 +172,13 @@ describe('modules/platform/azure/azure-helper', () => {
             getItemText: jest.fn(() => ({
               readable: false,
             })),
-          } as any)
+          }) as any,
       );
 
       const res = await azureHelper.getFile(
         '123',
         'repository',
-        './myFilePath/test'
+        './myFilePath/test',
       );
       expect(res).toBeNull();
     });
@@ -191,7 +192,7 @@ describe('modules/platform/azure/azure-helper', () => {
             getCommit: jest.fn(() => ({
               parents: ['123456'],
             })),
-          } as any)
+          }) as any,
       );
       const res = await azureHelper.getCommitDetails('123', '123456');
       expect(res).toMatchSnapshot();
@@ -204,10 +205,10 @@ describe('modules/platform/azure/azure-helper', () => {
         () =>
           ({
             getPolicyConfigurations: jest.fn(() => []),
-          } as any)
+          }) as any,
       );
       expect(await azureHelper.getMergeMethod('', '')).toEqual(
-        GitPullRequestMergeStrategy.NoFastForward
+        GitPullRequestMergeStrategy.NoFastForward,
       );
     });
 
@@ -230,10 +231,10 @@ describe('modules/platform/azure/azure-helper', () => {
                 },
               },
             ]),
-          } as any)
+          }) as any,
       );
       expect(await azureHelper.getMergeMethod('', '')).toEqual(
-        GitPullRequestMergeStrategy.Squash
+        GitPullRequestMergeStrategy.Squash,
       );
     });
 
@@ -269,10 +270,10 @@ describe('modules/platform/azure/azure-helper', () => {
                 },
               },
             ]),
-          } as any)
+          }) as any,
       );
       expect(await azureHelper.getMergeMethod('', '')).toEqual(
-        GitPullRequestMergeStrategy.Rebase
+        GitPullRequestMergeStrategy.Rebase,
       );
     });
 
@@ -338,10 +339,10 @@ describe('modules/platform/azure/azure-helper', () => {
                 },
               },
             ]),
-          } as any)
+          }) as any,
       );
       expect(
-        await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock)
+        await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock),
       ).toEqual(GitPullRequestMergeStrategy.Rebase);
     });
 
@@ -394,10 +395,10 @@ describe('modules/platform/azure/azure-helper', () => {
                 },
               },
             ]),
-          } as any)
+          }) as any,
       );
       expect(
-        await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock)
+        await azureHelper.getMergeMethod('', '', refMock, defaultBranchMock),
       ).toEqual(GitPullRequestMergeStrategy.Rebase);
     });
   });

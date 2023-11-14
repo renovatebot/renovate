@@ -1,5 +1,11 @@
 import is from '@sindresorhus/is';
 import { allManagersList, getManagerList } from '../modules/manager';
+import { isCustomManager } from '../modules/manager/custom';
+import type {
+  RegexManagerConfig,
+  RegexManagerTemplates,
+} from '../modules/manager/custom/regex/types';
+import type { CustomManager } from '../modules/manager/custom/types';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
@@ -45,7 +51,7 @@ const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 
 function isManagerPath(parentPath: string): boolean {
   return (
-    regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
+    regEx(/^customManagers\[[0-9]+]$/).test(parentPath) ||
     managerList.includes(parentPath)
   );
 }
@@ -65,7 +71,7 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
 
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
-    (manager) => !allManagersList.includes(manager)
+    (manager) => !allManagersList.includes(manager.replace('custom.', '')),
   );
 }
 
@@ -91,7 +97,7 @@ export function getParentName(parentPath: string | undefined): string {
 export async function validateConfig(
   config: RenovateConfig,
   isPreset?: boolean,
-  parentPath?: string
+  parentPath?: string,
 ): Promise<ValidationResult> {
   if (!optionTypes) {
     optionTypes = {};
@@ -128,13 +134,13 @@ export async function validateConfig(
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
-        val as string[]
+        val as string[],
       );
       if (is.nonEmptyArray(unsupportedManagers)) {
         errors.push({
           topic: 'Configuration Error',
           message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
-            ', '
+            ', ',
           )}"`,
         });
       }
@@ -242,7 +248,7 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
-                val
+                val,
               )} (${typeof val})`,
             });
           }
@@ -251,7 +257,7 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-                val
+                val,
               )} (${typeof val})`,
             });
           }
@@ -262,7 +268,7 @@ export async function validateConfig(
                 const subValidation = await validateConfig(
                   subval as RenovateConfig,
                   isPreset,
-                  `${currentPath}[${subIndex}]`
+                  `${currentPath}[${subIndex}]`,
                 );
                 warnings = warnings.concat(subValidation.warnings);
                 errors = errors.concat(subValidation.errors);
@@ -334,19 +340,19 @@ export async function validateConfig(
                     packageRules: [
                       await resolveConfigPresets(
                         packageRule as RenovateConfig,
-                        config
+                        config,
                       ),
                     ],
                   }).migratedConfig.packageRules![0];
                   errors.push(
-                    ...managerValidator.check({ resolvedRule, currentPath })
+                    ...managerValidator.check({ resolvedRule, currentPath }),
                   );
                   const selectorLength = Object.keys(resolvedRule).filter(
-                    (ruleKey) => selectors.includes(ruleKey)
+                    (ruleKey) => selectors.includes(ruleKey),
                   ).length;
                   if (!selectorLength) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
-                      packageRule
+                      packageRule,
                     )}`;
                     errors.push({
                       topic: 'Configuration Error',
@@ -355,7 +361,7 @@ export async function validateConfig(
                   }
                   if (selectorLength === Object.keys(resolvedRule).length) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
-                      packageRule
+                      packageRule,
                     )}`;
                     warnings.push({
                       topic: 'Configuration Error',
@@ -382,7 +388,7 @@ export async function validateConfig(
                     for (const option of preLookupOptions) {
                       if (resolvedRule[option] !== undefined) {
                         const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${JSON.stringify(
-                          packageRule
+                          packageRule,
                         )}`;
                         errors.push({
                           topic: 'Configuration Error',
@@ -399,7 +405,7 @@ export async function validateConfig(
                 }
               }
             }
-            if (key === 'regexManagers') {
+            if (key === 'customManagers') {
               const allowedKeys = [
                 'customType',
                 'description',
@@ -416,77 +422,56 @@ export async function validateConfig(
                 'autoReplaceStringTemplate',
                 'depTypeTemplate',
               ];
-              // TODO: fix types #22198
-              for (const regexManager of val as any[]) {
+              for (const customManager of val as CustomManager[]) {
                 if (
-                  Object.keys(regexManager).some(
-                    (k) => !allowedKeys.includes(k)
+                  Object.keys(customManager).some(
+                    (k) => !allowedKeys.includes(k),
                   )
                 ) {
-                  const disallowedKeys = Object.keys(regexManager).filter(
-                    (k) => !allowedKeys.includes(k)
+                  const disallowedKeys = Object.keys(customManager).filter(
+                    (k) => !allowedKeys.includes(k),
                   );
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Regex Manager contains disallowed fields: ${disallowedKeys.join(
-                      ', '
+                    message: `Custom Manager contains disallowed fields: ${disallowedKeys.join(
+                      ', ',
                     )}`,
                   });
-                } else if (is.nonEmptyString(regexManager.customType)) {
-                  if (is.nonEmptyArray(regexManager.fileMatch)) {
-                    if (is.nonEmptyArray(regexManager.matchStrings)) {
-                      let validRegex = false;
-                      for (const matchString of regexManager.matchStrings) {
-                        try {
-                          regEx(matchString);
-                          validRegex = true;
-                        } catch (e) {
-                          errors.push({
-                            topic: 'Configuration Error',
-                            message: `Invalid regExp for ${currentPath}: \`${String(
-                              matchString
-                            )}\``,
-                          });
-                        }
-                      }
-                      if (validRegex) {
-                        const mandatoryFields = [
-                          'depName',
-                          'currentValue',
-                          'datasource',
-                        ];
-                        for (const field of mandatoryFields) {
-                          if (
-                            !regexManager[`${field}Template`] &&
-                            !regexManager.matchStrings.some(
-                              (matchString: string) =>
-                                matchString.includes(`(?<${field}>`)
-                            )
-                          ) {
-                            errors.push({
-                              topic: 'Configuration Error',
-                              message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
-                            });
-                          }
-                        }
-                      }
-                    } else {
-                      errors.push({
-                        topic: 'Configuration Error',
-                        message: `Each Regex Manager must contain a non-empty matchStrings array`,
-                      });
+                } else if (
+                  is.nonEmptyString(customManager.customType) &&
+                  isCustomManager(customManager.customType)
+                ) {
+                  if (is.nonEmptyArray(customManager.fileMatch)) {
+                    switch (customManager.customType) {
+                      case 'regex':
+                        validateRegexManagerFields(
+                          customManager,
+                          currentPath,
+                          errors,
+                        );
+                        break;
                     }
                   } else {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Each Regex Manager must contain a non-empty fileMatch array`,
+                      message: `Each Custom Manager must contain a non-empty fileMatch array`,
                     });
                   }
                 } else {
-                  errors.push({
-                    topic: 'Configuration Error',
-                    message: `Each Regex Manager must contain a non-empty customType string`,
-                  });
+                  if (
+                    is.emptyString(customManager.customType) ||
+                    is.undefined(customManager.customType)
+                  ) {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Each Custom Manager must contain a non-empty customType string`,
+                    });
+                  } else {
+                    errors.push({
+                      topic: 'Configuration Error',
+                      message: `Invalid customType: ${customManager.customType}. Key is not a custom manager`,
+                    });
+                  }
                 }
               }
             }
@@ -596,7 +581,7 @@ export async function validateConfig(
                   continue;
                 }
                 for (const [subKey, subValue] of Object.entries(
-                  customDatasourceValue
+                  customDatasourceValue,
                 )) {
                   if (!allowedKeys.includes(subKey)) {
                     errors.push({
@@ -642,7 +627,7 @@ export async function validateConfig(
                 const subValidation = await validateConfig(
                   val,
                   isPreset,
-                  currentPath
+                  currentPath,
                 );
                 warnings = warnings.concat(subValidation.warnings);
                 errors = errors.concat(subValidation.errors);
@@ -671,4 +656,44 @@ export async function validateConfig(
   errors.sort(sortAll);
   warnings.sort(sortAll);
   return { errors, warnings };
+}
+
+function validateRegexManagerFields(
+  customManager: Partial<RegexManagerConfig>,
+  currentPath: string,
+  errors: ValidationMessage[],
+): void {
+  if (is.nonEmptyArray(customManager.matchStrings)) {
+    for (const matchString of customManager.matchStrings) {
+      try {
+        regEx(matchString);
+      } catch (e) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
+        });
+      }
+    }
+  } else {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `Each Custom Manager must contain a non-empty matchStrings array`,
+    });
+  }
+
+  const mandatoryFields = ['depName', 'currentValue', 'datasource'];
+  for (const field of mandatoryFields) {
+    const templateField = `${field}Template` as keyof RegexManagerTemplates;
+    if (
+      !customManager[templateField] &&
+      !customManager.matchStrings?.some((matchString) =>
+        matchString.includes(`(?<${field}>`),
+      )
+    ) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
+      });
+    }
+  }
 }

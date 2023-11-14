@@ -19,7 +19,7 @@ describe('modules/datasource/dart-version/index', () => {
         getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -29,17 +29,24 @@ describe('modules/datasource/dart-version/index', () => {
         await getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
-      httpMock.scope(baseUrl).get(urlPath).reply(200, []);
+      const scope = httpMock.scope(baseUrl);
+      for (const channel of channels) {
+        scope
+          .get(
+            `/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F${channel}%2Frelease%2F&alt=json`,
+          )
+          .reply(200, { prefixes: [] });
+      }
       expect(
         await getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -48,7 +55,7 @@ describe('modules/datasource/dart-version/index', () => {
         httpMock
           .scope(baseUrl)
           .get(
-            `/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F${channel}%2Frelease%2F&alt=json`
+            `/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F${channel}%2Frelease%2F&alt=json`,
           )
           .reply(200, Fixtures.get(`${channel}.json`));
       }

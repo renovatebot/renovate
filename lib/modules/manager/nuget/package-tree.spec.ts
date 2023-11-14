@@ -7,7 +7,13 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { getDependentPackageFiles } from './package-tree';
 
 jest.mock('fs', () => memfs);
-jest.mock('fs-extra', () => Fixtures.fsExtra());
+jest.mock('fs-extra', () =>
+  jest
+    .requireActual<typeof import('../../../../test/fixtures')>(
+      '../../../../test/fixtures',
+    )
+    .fsExtra(),
+);
 jest.mock('../../../util/git');
 
 const adminConfig: RepoGlobalConfig = {
@@ -30,7 +36,7 @@ describe('modules/manager/nuget/package-tree', () => {
       scm.getFileList.mockResolvedValue(['single.csproj']);
       Fixtures.mock({
         '/tmp/repo/single.csproj': Fixtures.get(
-          'single-project-file/single.csproj'
+          'single-project-file/single.csproj',
         ),
       });
 
@@ -58,10 +64,10 @@ describe('modules/manager/nuget/package-tree', () => {
       scm.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
-          'two-one-reference/one/one.csproj'
+          'two-one-reference/one/one.csproj',
         ),
         '/tmp/repo/two/two.csproj': Fixtures.get(
-          'two-one-reference/two/two.csproj'
+          'two-one-reference/two/two.csproj',
         ),
       });
 
@@ -75,18 +81,18 @@ describe('modules/manager/nuget/package-tree', () => {
       scm.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
-          'two-one-reference-with-central-versions/one/one.csproj'
+          'two-one-reference-with-central-versions/one/one.csproj',
         ),
         '/tmp/repo/two/two.csproj': Fixtures.get(
-          'two-one-reference-with-central-versions/two/two.csproj'
+          'two-one-reference-with-central-versions/two/two.csproj',
         ),
         '/tmp/repo/Directory.Packages.props': Fixtures.get(
-          'two-one-reference-with-central-versions/Directory.Packages.props'
+          'two-one-reference-with-central-versions/Directory.Packages.props',
         ),
       });
 
       expect(
-        await getDependentPackageFiles('Directory.Packages.props', true)
+        await getDependentPackageFiles('Directory.Packages.props', true),
       ).toEqual([
         { isLeaf: false, name: 'one/one.csproj' },
         { isLeaf: true, name: 'two/two.csproj' },
@@ -101,13 +107,13 @@ describe('modules/manager/nuget/package-tree', () => {
       ]);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
-          'three-two-linear-references/one/one.csproj'
+          'three-two-linear-references/one/one.csproj',
         ),
         '/tmp/repo/two/two.csproj': Fixtures.get(
-          'three-two-linear-references/two/two.csproj'
+          'three-two-linear-references/two/two.csproj',
         ),
         '/tmp/repo/three/three.csproj': Fixtures.get(
-          'three-two-linear-references/three/three.csproj'
+          'three-two-linear-references/three/three.csproj',
         ),
       });
 
@@ -135,13 +141,13 @@ describe('modules/manager/nuget/package-tree', () => {
       ]);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
-          'three-two-treelike-references/one/one.csproj'
+          'three-two-treelike-references/one/one.csproj',
         ),
         '/tmp/repo/two/two.csproj': Fixtures.get(
-          'three-two-treelike-references/two/two.csproj'
+          'three-two-treelike-references/two/two.csproj',
         ),
         '/tmp/repo/three/three.csproj': Fixtures.get(
-          'three-two-treelike-references/three/three.csproj'
+          'three-two-treelike-references/three/three.csproj',
         ),
       });
 
@@ -163,15 +169,15 @@ describe('modules/manager/nuget/package-tree', () => {
       scm.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
-          'circular-reference/one/one.csproj'
+          'circular-reference/one/one.csproj',
         ),
         '/tmp/repo/two/two.csproj': Fixtures.get(
-          'circular-reference/two/two.csproj'
+          'circular-reference/two/two.csproj',
         ),
       });
 
       await expect(getDependentPackageFiles('one/one.csproj')).rejects.toThrow(
-        'Circular reference detected in NuGet package files'
+        'Circular reference detected in NuGet package files',
       );
     });
 

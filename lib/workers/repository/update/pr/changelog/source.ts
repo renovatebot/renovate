@@ -4,6 +4,7 @@ import { getPkgReleases } from '../../../../../modules/datasource';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
 import * as packageCache from '../../../../../util/cache/package';
+import { memoize } from '../../../../../util/memoize';
 import { regEx } from '../../../../../util/regex';
 import { parseUrl, trimSlashes } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -12,21 +13,22 @@ import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
 import type {
   ChangeLogError,
+  ChangeLogPlatform,
   ChangeLogRelease,
   ChangeLogResult,
 } from './types';
 
 export abstract class ChangeLogSource {
-  private platform;
-  private datasource;
-  private cacheNamespace: string;
+  private readonly cacheNamespace: string;
 
   constructor(
-    platform: 'bitbucket' | 'github' | 'gitlab',
-    datasource: 'bitbucket-tags' | 'github-tags' | 'gitlab-tags'
+    private readonly platform: ChangeLogPlatform,
+    private readonly datasource:
+      | 'bitbucket-tags'
+      | 'gitea-tags'
+      | 'github-tags'
+      | 'gitlab-tags',
   ) {
-    this.platform = platform;
-    this.datasource = datasource;
     this.cacheNamespace = `changelog-${platform}-release`;
   }
 
@@ -34,7 +36,7 @@ export abstract class ChangeLogSource {
     baseUrl: string,
     repository: string,
     prevHead: string,
-    nextHead: string
+    nextHead: string,
   ): string;
 
   abstract getAPIBaseUrl(config: BranchUpgradeConfig): string;
@@ -52,7 +54,7 @@ export abstract class ChangeLogSource {
 
     if (is.nullOrUndefined(tags) || is.emptyArray(tags)) {
       logger.debug(
-        `No ${this.datasource} tags found for repository: ${repository}`
+        `No ${this.datasource} tags found for repository: ${repository}`,
       );
 
       return [];
@@ -62,7 +64,7 @@ export abstract class ChangeLogSource {
   }
 
   public async getChangeLogJSON(
-    config: BranchUpgradeConfig
+    config: BranchUpgradeConfig,
   ): Promise<ChangeLogResult | null> {
     logger.trace(`getChangeLogJSON for ${this.platform}`);
 
@@ -113,20 +115,22 @@ export abstract class ChangeLogSource {
     }
 
     const changelogReleases: ChangeLogRelease[] = [];
-    // compare versions
-    const include = (v: string): boolean =>
+
+    // Check if `v` belongs to the range (currentVersion, newVersion]
+    const inRange = (v: string): boolean =>
       version.isGreaterThan(v, currentVersion) &&
       !version.isGreaterThan(v, newVersion);
 
+    const getTags = memoize(() => this.getAllTags(apiBaseUrl, repository));
     for (let i = 1; i < validReleases.length; i += 1) {
       const prev = validReleases[i - 1];
       const next = validReleases[i];
-      if (!include(next.version)) {
+      if (!inRange(next.version)) {
         continue;
       }
       let release = await packageCache.get(
         this.cacheNamespace,
-        this.getCacheKey(sourceUrl, packageName, prev.version, next.version)
+        this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
       );
       if (!release) {
         release = {
@@ -137,26 +141,15 @@ export abstract class ChangeLogSource {
           changes: [],
           compare: {},
         };
-        const prevHead = await this.getRef(
-          version,
-          packageName,
-          prev,
-          apiBaseUrl,
-          repository
-        );
-        const nextHead = await this.getRef(
-          version,
-          packageName,
-          next,
-          apiBaseUrl,
-          repository
-        );
+        const tags = await getTags();
+        const prevHead = this.getRef(version, packageName, prev, tags);
+        const nextHead = this.getRef(version, packageName, next, tags);
         if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
           release.compare.url = this.getCompareURL(
             baseUrl,
             repository,
             prevHead,
-            nextHead
+            nextHead,
           );
         }
         const cacheMinutes = 55;
@@ -164,7 +157,7 @@ export abstract class ChangeLogSource {
           this.cacheNamespace,
           this.getCacheKey(sourceUrl, packageName, prev.version, next.version),
           release,
-          cacheMinutes
+          cacheMinutes,
         );
       }
       changelogReleases.unshift(release);
@@ -192,7 +185,7 @@ export abstract class ChangeLogSource {
     version: allVersioning.VersioningApi,
     packageName: string,
     depNewVersion: string,
-    tags: string[]
+    tags: string[],
   ): string | undefined {
     const regex = regEx(`(?:${packageName}|release)[@-]`, undefined, false);
     const exactReleaseRegex = regEx(`${packageName}[@\\-_]v?${depNewVersion}`);
@@ -205,20 +198,17 @@ export abstract class ChangeLogSource {
       .find((tag) => version.equals(tag.replace(regex, ''), depNewVersion));
   }
 
-  private async getRef(
+  private getRef(
     version: allVersioning.VersioningApi,
     packageName: string,
     release: Release,
-    apiBaseUrl: string,
-    repository: string
-  ): Promise<string | null> {
-    const tags = await this.getAllTags(apiBaseUrl, repository);
-
+    tags: string[],
+  ): string | null {
     const tagName = this.findTagOfRelease(
       version,
       packageName,
       release.version,
-      tags
+      tags,
     );
     if (is.nonEmptyString(tagName)) {
       return tagName;
@@ -233,7 +223,7 @@ export abstract class ChangeLogSource {
     sourceUrl: string,
     packageName: string,
     prev: string,
-    next: string
+    next: string,
   ): string {
     return `${slugifyUrl(sourceUrl)}:${packageName}:${prev}:${next}`;
   }
@@ -243,7 +233,7 @@ export abstract class ChangeLogSource {
     if (is.nullOrUndefined(parsedUrl)) {
       return '';
     }
-    const protocol = parsedUrl.protocol;
+    const protocol = parsedUrl.protocol.replace(regEx(/^git\+/), '');
     const host = parsedUrl.host;
     return `${protocol}//${host}/`;
   }

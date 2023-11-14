@@ -39,7 +39,7 @@ describe('config/defaults', () => {
         const val = getDefault(option);
 
         expect(val).toBeNull();
-      }
+      },
     );
   });
 });

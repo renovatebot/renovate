@@ -15,6 +15,7 @@ describe('workers/repository/update/branch/automerge', () => {
     beforeEach(() => {
       config = partial<RenovateConfig>();
       GlobalConfig.reset();
+      isScheduledSpy.mockReturnValue(true);
     });
 
     it('returns false if not configured for automerge', async () => {
@@ -55,7 +56,7 @@ describe('workers/repository/update/branch/automerge', () => {
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce('green');
       expect(await tryBranchAutomerge(config)).toBe(
-        'automerge aborted - PR exists'
+        'automerge aborted - PR exists',
       );
     });
 

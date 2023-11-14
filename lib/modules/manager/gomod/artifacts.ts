@@ -5,6 +5,7 @@ import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
@@ -28,25 +29,25 @@ const { major, valid } = semver;
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
-  { constraints }: UpdateArtifactsConfig
+  { constraints }: UpdateArtifactsConfig,
 ): string[] {
   // Check if we fail to parse any major versions and log that they're skipped
   const invalidMajorDeps = updatedDeps.filter(
-    ({ newVersion }) => !valid(newVersion)
+    ({ newVersion }) => !valid(newVersion),
   );
   if (invalidMajorDeps.length > 0) {
     invalidMajorDeps.forEach(({ depName }) =>
       logger.warn(
         { depName },
-        'Ignoring dependency: Could not get major version'
-      )
+        'Ignoring dependency: Could not get major version',
+      ),
     );
   }
 
   const updateImportCommands = updatedDeps
     .filter(
       ({ newVersion }) =>
-        valid(newVersion) && !newVersion!.endsWith('+incompatible')
+        valid(newVersion) && !newVersion!.endsWith('+incompatible'),
     )
     .map(({ depName, newVersion }) => ({
       depName: depName!,
@@ -54,12 +55,13 @@ function getUpdateImportPathCmds(
     }))
     // Skip path updates going from v0 to v1
     .filter(
-      ({ depName, newMajor }) => depName.startsWith('gopkg.in/') || newMajor > 1
+      ({ depName, newMajor }) =>
+        depName.startsWith('gopkg.in/') || newMajor > 1,
     )
 
     .map(
       ({ depName, newMajor }) =>
-        `mod upgrade --mod-name=${depName} -t=${newMajor}`
+        `mod upgrade --mod-name=${depName} -t=${newMajor}`,
     );
 
   if (updateImportCommands.length > 0) {
@@ -73,17 +75,17 @@ function getUpdateImportPathCmds(
       ) {
         installMarwanModArgs = installMarwanModArgs.replace(
           regEx(/@latest$/),
-          `@${gomodModCompatibility}`
+          `@${gomodModCompatibility}`,
         );
       } else {
         logger.debug(
           { gomodModCompatibility },
-          'marwan-at-work/mod compatibility range is not valid - skipping'
+          'marwan-at-work/mod compatibility range is not valid - skipping',
         );
       }
     } else {
       logger.debug(
-        'No marwan-at-work/mod compatibility range found - installing marwan-at-work/mod latest'
+        'No marwan-at-work/mod compatibility range found - installing marwan-at-work/mod latest',
       );
     }
     updateImportCommands.unshift(`go ${installMarwanModArgs}`);
@@ -97,7 +99,9 @@ function useModcacherw(goVersion: string | undefined): boolean {
     return true;
   }
 
-  const [, majorPart, minorPart] = regEx(/(\d+)\.(\d+)/).exec(goVersion) ?? [];
+  const [, majorPart, minorPart] = coerceArray(
+    regEx(/(\d+)\.(\d+)/).exec(goVersion),
+  );
   const [major, minor] = [majorPart, minorPart].map((x) => parseInt(x, 10));
 
   return (
@@ -146,7 +150,7 @@ export async function updateArtifacts({
       .join('\n');
 
     const inlineReplaceRegEx = regEx(
-      /(\r?\n)(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g
+      /(\r?\n)(replace\s+[^\s]+\s+=>\s+\.\.\/.*)/g,
     );
 
     // $1 will be matched with the (\r?n) group
@@ -175,7 +179,7 @@ export async function updateArtifacts({
 
     if (massagedGoMod !== newGoModContent) {
       logger.debug(
-        'Removed some relative replace statements and comments from go.mod'
+        'Removed some relative replace statements and comments from go.mod',
       );
     }
   }
@@ -196,7 +200,9 @@ export async function updateArtifacts({
         GONOSUMDB: process.env.GONOSUMDB,
         GOSUMDB: process.env.GOSUMDB,
         GOINSECURE: process.env.GOINSECURE,
-        GOFLAGS: useModcacherw(goConstraints) ? '-modcacherw' : null,
+        GOFLAGS: useModcacherw(goConstraints)
+          ? '-modcacherw'
+          : /* istanbul ignore next: hard to test */ null,
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(['go']),
       },
@@ -342,7 +348,7 @@ export async function updateArtifacts({
           });
         }
       }
-      for (const f of status.deleted || []) {
+      for (const f of coerceArray(status.deleted)) {
         res.push({
           file: {
             type: 'deletion',
@@ -385,7 +391,7 @@ export async function updateArtifacts({
 }
 
 async function getGoConstraints(
-  goModFileName: string
+  goModFileName: string,
 ): Promise<string | undefined> {
   const content = (await readLocalFile(goModFileName, 'utf8')) ?? null;
   if (!content) {

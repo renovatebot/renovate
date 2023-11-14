@@ -46,6 +46,7 @@ export interface GraphqlOptions {
   limit?: number;
   cursor?: string | null;
   acceptHeader?: string;
+  token?: string;
 }
 
 export interface HttpOptions {
@@ -92,3 +93,5 @@ export interface HttpResponse<T = string> {
   headers: HttpHeaders;
   authorization?: boolean;
 }
+
+export type GotTask<T> = () => Promise<HttpResponse<T>>;

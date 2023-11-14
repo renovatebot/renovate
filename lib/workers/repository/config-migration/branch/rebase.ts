@@ -12,7 +12,7 @@ import type { MigratedData } from './migrated-data';
 
 export async function rebaseMigrationBranch(
   config: RenovateConfig,
-  migratedConfigData: MigratedData
+  migratedConfigData: MigratedData,
 ): Promise<string | null> {
   logger.debug('Checking if migration branch needs rebasing');
   const branchName = getMigrationBranchName(config);
@@ -38,14 +38,13 @@ export async function rebaseMigrationBranch(
 
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
-    configFileName
+    configFileName,
   );
   const commitMessage = commitMessageFactory.getCommitMessage();
 
   await scm.checkoutBranch(config.defaultBranch!);
-  contents = await MigratedDataFactory.applyPrettierFormatting(
-    migratedConfigData
-  );
+  contents =
+    await MigratedDataFactory.applyPrettierFormatting(migratedConfigData);
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName,
@@ -76,5 +75,8 @@ export function jsonStripWhitespaces(json: string | null): string | null {
    *
    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
    */
-  return quickStringify(JSON5.parse(json)) ?? null;
+  return (
+    quickStringify(JSON5.parse(json)) ??
+    /* istanbul ignore next: should never happen */ null
+  );
 }

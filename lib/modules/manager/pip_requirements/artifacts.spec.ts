@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../test/exec-util';
 import { fs, mocked } from '../../../../test/util';
@@ -11,7 +12,7 @@ const datasource = mocked(_datasource);
 
 jest.mock('../../../util/exec/common');
 jest.mock('../../../util/fs');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -41,8 +42,6 @@ botocore==1.27.46 \
 
 describe('modules/manager/pip_requirements/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     GlobalConfig.set(adminConfig);
   });
 
@@ -53,7 +52,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -65,7 +64,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'eventlet' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -78,7 +77,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }, { depName: 'boto3-stubs' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -102,7 +101,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }, { depName: 'boto3-stubs' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -138,7 +137,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         ],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -168,7 +167,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         artifactError: {
@@ -206,7 +205,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -255,7 +254,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {

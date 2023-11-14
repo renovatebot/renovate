@@ -13,7 +13,7 @@ describe('config/validation', () => {
 
     it('handles encrypted within array types', () => {
       expect(configValidation.getParentName('hostRules[0].encrypted')).toBe(
-        'hostRules'
+        'hostRules',
       );
     });
   });
@@ -189,9 +189,8 @@ describe('config/validation', () => {
         },
         major: null,
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(3);
       expect(errors).toMatchSnapshot();
@@ -206,9 +205,8 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
       expect(errors[0].message).toContain('ansible');
@@ -224,7 +222,7 @@ describe('config/validation', () => {
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        config as any
+        config as any,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
@@ -238,13 +236,12 @@ describe('config/validation', () => {
       [
         'multiple enabled managers',
         {
-          enabledManagers: ['npm', 'gradle', 'maven', 'regex'],
+          enabledManagers: ['npm', 'gradle', 'maven', 'custom.regex'],
         },
       ],
     ])('validates enabled managers for %s', async (_case, config) => {
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
     });
@@ -259,13 +256,12 @@ describe('config/validation', () => {
     ])(
       'errors if included not supported enabled managers for %s',
       async (_case, config) => {
-        const { warnings, errors } = await configValidation.validateConfig(
-          config
-        );
+        const { warnings, errors } =
+          await configValidation.validateConfig(config);
         expect(warnings).toHaveLength(0);
         expect(errors).toHaveLength(1);
         expect(errors).toMatchSnapshot();
-      }
+      },
     );
 
     it('errors for all types', async () => {
@@ -299,9 +295,8 @@ describe('config/validation', () => {
         ],
         major: null,
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(15);
@@ -327,9 +322,8 @@ describe('config/validation', () => {
           },
         },
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(4);
       expect(errors).toMatchSnapshot();
       expect(errors).toHaveLength(4);
@@ -347,7 +341,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
@@ -363,9 +357,8 @@ describe('config/validation', () => {
           fileMatch: ['x?+'],
         },
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
@@ -373,7 +366,7 @@ describe('config/validation', () => {
 
     it('validates regEx for each fileMatch', async () => {
       const config: RenovateConfig = {
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['js', '***$}{]]['],
@@ -385,16 +378,16 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
       expect(errors).toMatchSnapshot();
     });
 
-    it('errors if regexManager has empty fileMatch', async () => {
+    it('errors if customManager has empty fileMatch', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: [],
@@ -403,23 +396,23 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config as any,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Regex Manager must contain a non-empty fileMatch array",
+            "message": "Each Custom Manager must contain a non-empty fileMatch array",
             "topic": "Configuration Error",
           },
         ]
       `);
     });
 
-    it('errors if no regexManager customType', async () => {
+    it('errors if no customManager customType', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             fileMatch: ['some-file'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
@@ -430,53 +423,91 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config as any,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Regex Manager must contain a non-empty customType string",
+            "message": "Each Custom Manager must contain a non-empty customType string",
             "topic": "Configuration Error",
           },
         ]
       `);
     });
 
-    it('errors if empty regexManager matchStrings', async () => {
+    it('errors if invalid customManager customType', async () => {
       const config = {
-        regexManagers: [
-          { customType: 'regex', fileMatch: ['foo'], matchStrings: [] },
+        customManagers: [
+          {
+            customType: 'unknown',
+            fileMatch: ['some-file'],
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchInlineSnapshot(`
+        [
+          {
+            "message": "Invalid customType: unknown. Key is not a custom manager",
+            "topic": "Configuration Error",
+          },
+        ]
+      `);
+    });
+
+    it('errors if empty customManager matchStrings', async () => {
+      const config = {
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['foo'],
+            matchStrings: [],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
+          },
+          {
+            customType: 'regex',
+            fileMatch: ['foo'],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
           },
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config as RenovateConfig,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
       expect(errors).toMatchInlineSnapshot(`
         [
           {
-            "message": "Each Regex Manager must contain a non-empty matchStrings array",
+            "message": "Each Custom Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
           {
-            "message": "Each Regex Manager must contain a non-empty matchStrings array",
+            "message": "Each Custom Manager must contain a non-empty matchStrings array",
             "topic": "Configuration Error",
           },
         ]
       `);
     });
 
-    it('errors if no regexManager fileMatch', async () => {
+    it('errors if no customManager fileMatch', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
@@ -486,7 +517,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config as any,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -494,25 +525,48 @@ describe('config/validation', () => {
 
     it('validates regEx for each matchStrings', async () => {
       const config: RenovateConfig = {
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['Dockerfile'],
             matchStrings: ['***$}{]]['],
+            depNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            currentValueTemplate: 'baz',
           },
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
 
-    it('passes if regexManager fields are present', async () => {
+    // testing if we get all errors at once or not (possible), this does not include customType or fileMatch
+    // since they are common to all custom managers
+    it('validates all possible regex manager options', async () => {
       const config: RenovateConfig = {
-        regexManagers: [
+        customManagers: [
+          {
+            customType: 'regex',
+            fileMatch: ['Dockerfile'],
+            matchStrings: ['***$}{]]['], // invalid matchStrings regex, no depName, datasource and currentValue
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(4);
+    });
+
+    it('passes if customManager fields are present', async () => {
+      const config: RenovateConfig = {
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['Dockerfile'],
@@ -527,15 +581,15 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
     });
 
-    it('errors if extra regexManager fields are present', async () => {
+    it('errors if extra customManager fields are present', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['Dockerfile'],
@@ -549,15 +603,15 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config as any,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
 
-    it('errors if regexManager fields are missing', async () => {
+    it('errors if customManager fields are missing', async () => {
       const config: RenovateConfig = {
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['Dockerfile'],
@@ -569,7 +623,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
@@ -582,7 +636,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
@@ -594,7 +648,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
@@ -606,7 +660,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config as never, // TODO: #15963
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
@@ -618,7 +672,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
@@ -631,9 +685,8 @@ describe('config/validation', () => {
           example2: 'https://www.example2.com/example',
         },
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
     });
@@ -646,9 +699,8 @@ describe('config/validation', () => {
           } as unknown as string, // intentional incorrect config to check error message
         },
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchObject([
         {
@@ -666,9 +718,8 @@ describe('config/validation', () => {
           example2: 'http://www.example.com',
         },
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchObject([
         {
@@ -688,7 +739,7 @@ describe('config/validation', () => {
             fileMatch: ['bar'],
           },
         },
-        regexManagers: [
+        customManagers: [
           {
             customType: 'regex',
             fileMatch: ['build.gradle'],
@@ -698,9 +749,8 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(errors).toHaveLength(1);
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
@@ -718,9 +768,8 @@ describe('config/validation', () => {
           },
         },
       } as never;
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(errors).toHaveLength(1);
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
@@ -730,9 +779,8 @@ describe('config/validation', () => {
       const config = {
         hostType: 'npm',
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(errors).toHaveLength(0);
       expect(warnings).toHaveLength(1);
       expect(warnings).toMatchSnapshot();
@@ -744,7 +792,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -758,7 +806,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(warnings).toHaveLength(1);
       expect(warnings).toMatchSnapshot();
@@ -776,7 +824,7 @@ describe('config/validation', () => {
       } as any;
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -795,7 +843,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,
-        true
+        true,
       );
       expect(errors).toHaveLength(0);
       expect(warnings).toHaveLength(1);
@@ -808,9 +856,8 @@ describe('config/validation', () => {
           example2: 'https://www.example2.com/example',
         },
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
     });
@@ -822,9 +869,8 @@ describe('config/validation', () => {
           example2: 123,
         },
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchObject([
         {
@@ -839,9 +885,8 @@ describe('config/validation', () => {
       const config = {
         schedule: ['30 5 * * *'],
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config
-      );
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchObject([
         {

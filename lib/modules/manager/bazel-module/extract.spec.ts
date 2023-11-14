@@ -16,22 +16,19 @@ describe('modules/manager/bazel-module/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       GlobalConfig.set(adminConfig);
-    });
-
-    afterEach(() => {
-      GlobalConfig.reset();
+      jest.restoreAllMocks();
     });
 
     it('returns null if fails to parse', async () => {
       const result = await extractPackageFile(
         'blahhhhh:foo:@what\n',
-        'MODULE.bazel'
+        'MODULE.bazel',
       );
       expect(result).toBeNull();
     });
 
     it('returns null if something throws an error', async () => {
-      jest.spyOn(parser, 'parse').mockImplementationOnce((input) => {
+      jest.spyOn(parser, 'parse').mockImplementationOnce(() => {
         throw new Error('Test error');
       });
       const result = await extractPackageFile('content', 'MODULE.bazel');
@@ -54,9 +51,9 @@ describe('modules/manager/bazel-module/extract', () => {
     it('returns bazel_dep and git_override dependencies', async () => {
       const input = codeBlock`
         bazel_dep(name = "rules_foo", version = "1.2.3")
-        
+
         bazel_dep(name = "rules_bar", version = "1.0.0", dev_dependency = True)
-        
+
         git_override(
             module_name = "rules_foo",
             commit = "850cb49c8649e463b80ef7984e7c744279746170",
@@ -90,7 +87,7 @@ describe('modules/manager/bazel-module/extract', () => {
             currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
             packageName: 'example/rules_foo',
           },
-        ])
+        ]),
       );
     });
 
@@ -146,7 +143,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'rules_foo',
             skipReason: 'unsupported-datasource',
           },
-        ])
+        ]),
       );
     });
 
@@ -177,7 +174,7 @@ describe('modules/manager/bazel-module/extract', () => {
             depName: 'rules_foo',
             skipReason: 'unsupported-datasource',
           },
-        ])
+        ]),
       );
     });
 
@@ -212,7 +209,7 @@ describe('modules/manager/bazel-module/extract', () => {
             skipReason: 'ignored',
             registryUrls: ['https://example.com/custom_registry'],
           },
-        ])
+        ]),
       );
     });
 

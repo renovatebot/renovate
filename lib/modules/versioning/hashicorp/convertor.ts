@@ -18,20 +18,20 @@ export function hashicorp2npm(input: string): string {
     .map((single) => {
       const r = single.match(
         regEx(
-          /^\s*(|=|!=|>|<|>=|<=|~>)\s*v?((\d+)(\.\d+){0,2}[\w-+]*(\.\d+)*)\s*$/
-        )
+          /^\s*(|=|!=|>|<|>=|<=|~>)\s*v?((\d+)(\.\d+){0,2}[\w-+]*(\.\d+)*)\s*$/,
+        ),
       );
       if (!r) {
         logger.warn(
           { constraint: input, element: single },
-          'Invalid hashicorp constraint'
+          'Invalid hashicorp constraint',
         );
         throw new Error('Invalid hashicorp constraint');
       }
       if (r[1] === '!=') {
         logger.warn(
           { constraint: input, element: single },
-          'Unsupported hashicorp constraint'
+          'Unsupported hashicorp constraint',
         );
         throw new Error('Unsupported hashicorp constraint');
       }
@@ -72,7 +72,7 @@ export function npm2hashicorp(input: string): string {
     .split(' ')
     .map((single) => {
       const r = single.match(
-        regEx(/^(|>|<|>=|<=|~|\^)v?((\d+)(\.\d+){0,2}[\w-]*(\.\d+)*)$/)
+        regEx(/^(|>|<|>=|<=|~|\^)v?((\d+)(\.\d+){0,2}[\w-]*(\.\d+)*)$/),
       );
       if (!r) {
         throw new Error('invalid npm constraint');

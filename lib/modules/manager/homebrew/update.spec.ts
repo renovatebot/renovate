@@ -9,11 +9,6 @@ const ibazel = Fixtures.get('ibazel.rb');
 const baseUrl = 'https://github.com';
 
 describe('modules/manager/homebrew/update', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-  });
-
   it('updates "releases" github dependency', async () => {
     const upgrade = {
       currentValue: 'v0.16.1',
@@ -56,7 +51,7 @@ describe('modules/manager/homebrew/update', () => {
     httpMock
       .scope(baseUrl)
       .get(
-        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
@@ -84,7 +79,7 @@ describe('modules/manager/homebrew/update', () => {
     httpMock
       .scope(baseUrl)
       .get(
-        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .replyWithError('')
       .get('/bazelbuild/bazel-watcher/archive/v0.9.3.tar.gz')
@@ -136,7 +131,7 @@ describe('modules/manager/homebrew/update', () => {
     httpMock
       .scope(baseUrl)
       .get(
-        '/bazelbuild/invalid/repo/name/releases/download/v0.9.3/invalid/repo/name-0.9.3.tar.gz'
+        '/bazelbuild/invalid/repo/name/releases/download/v0.9.3/invalid/repo/name-0.9.3.tar.gz',
       )
       .replyWithError('')
       .get('/bazelbuild/invalid/repo/name/archive/v0.9.3.tar.gz')
@@ -166,11 +161,11 @@ describe('modules/manager/homebrew/update', () => {
     httpMock
       .scope(baseUrl)
       .get(
-        '/bazelbuild/wrong-version/archive/v10.2.3.tar.gz/releases/download/v0.9.3/wrong-version/archive/v10.2.3.tar.gz-0.9.3.tar.gz'
+        '/bazelbuild/wrong-version/archive/v10.2.3.tar.gz/releases/download/v0.9.3/wrong-version/archive/v10.2.3.tar.gz-0.9.3.tar.gz',
       )
       .replyWithError('')
       .get(
-        '/bazelbuild/wrong-version/archive/v10.2.3.tar.gz/archive/v0.9.3.tar.gz'
+        '/bazelbuild/wrong-version/archive/v10.2.3.tar.gz/archive/v0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
@@ -205,7 +200,7 @@ describe('modules/manager/homebrew/update', () => {
     httpMock
       .scope(baseUrl)
       .get(
-        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
@@ -239,7 +234,7 @@ describe('modules/manager/homebrew/update', () => {
     httpMock
       .scope(baseUrl)
       .get(
-        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
@@ -274,7 +269,7 @@ describe('modules/manager/homebrew/update', () => {
     httpMock
       .scope(baseUrl)
       .get(
-        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
@@ -308,7 +303,7 @@ describe('modules/manager/homebrew/update', () => {
     httpMock
       .scope(baseUrl)
       .get(
-        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
       )
       .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({

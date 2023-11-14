@@ -28,9 +28,9 @@ export class DebianVersioningApi extends GenericVersioningApi {
   override isValid(version: string): boolean {
     const isValid = super.isValid(version);
     const schedule = this._distroInfo.getSchedule(
-      this._rollingReleases.getVersionByLts(version)
+      this._rollingReleases.getVersionByLts(version),
     );
-    return (isValid && schedule && RELEASE_PROP in schedule) ?? false;
+    return isValid && schedule !== null && RELEASE_PROP in schedule;
   }
 
   override isStable(version: string): boolean {
@@ -43,7 +43,6 @@ export class DebianVersioningApi extends GenericVersioningApi {
   override getNewValue({
     currentValue,
     rangeStrategy,
-    currentVersion,
     newVersion,
   }: NewValueConfig): string {
     if (rangeStrategy === 'pin') {
@@ -83,7 +82,10 @@ export class DebianVersioningApi extends GenericVersioningApi {
     // newVersion is [oldold|old|]stable
     // current value is numeric
     if (this._rollingReleases.has(newVersion)) {
-      return this._rollingReleases.schedule(newVersion)?.version ?? newVersion;
+      return (
+        this._rollingReleases.schedule(newVersion)?.version ??
+        /* istanbul ignore next: should never happen */ newVersion
+      );
     }
 
     return this._distroInfo.getVersionByCodename(newVersion);

@@ -8,7 +8,7 @@ import {
 
 export function parsePubspec(
   fileName: string,
-  fileContent: string
+  fileContent: string,
 ): PubspecSchema | null {
   const res = PubspecYaml.safeParse(fileContent);
   if (res.success) {
@@ -21,7 +21,7 @@ export function parsePubspec(
 
 export function parsePubspecLock(
   fileName: string,
-  fileContent: string
+  fileContent: string,
 ): PubspecLockSchema | null {
   const res = PubspecLockYaml.safeParse(fileContent);
   if (res.success) {
@@ -29,7 +29,7 @@ export function parsePubspecLock(
   } else {
     logger.debug(
       { err: res.error, fileName },
-      'Error parsing pubspec lockfile.'
+      'Error parsing pubspec lockfile.',
     );
   }
   return null;

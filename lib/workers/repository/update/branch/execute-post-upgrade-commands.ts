@@ -4,6 +4,7 @@ import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
+import { coerceArray } from '../../../../util/array';
 import { exec } from '../../../../util/exec';
 import {
   localPathIsFile,
@@ -25,15 +26,15 @@ export interface PostUpgradeCommandsExecutionResult {
 
 export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
-  config: BranchConfig
+  config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   const artifactErrors = [...(config.artifactErrors ?? [])];
   const allowedPostUpgradeCommands = GlobalConfig.get(
-    'allowedPostUpgradeCommands'
+    'allowedPostUpgradeCommands',
   );
   const allowPostUpgradeCommandTemplating = GlobalConfig.get(
-    'allowPostUpgradeCommandTemplating'
+    'allowPostUpgradeCommandTemplating',
   );
 
   for (const upgrade of filteredUpgradeCommands) {
@@ -43,15 +44,15 @@ export async function postUpgradeCommandsExecutor(
         tasks: upgrade.postUpgradeTasks,
         allowedCommands: allowedPostUpgradeCommands,
       },
-      `Checking for post-upgrade tasks`
+      `Checking for post-upgrade tasks`,
     );
-    const commands = upgrade.postUpgradeTasks?.commands ?? [];
+    const commands = upgrade.postUpgradeTasks?.commands;
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? ['**/*'];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
       for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
         const canWriteFile = await localPathIsFile(file.path);
-        if (file.type === 'addition' && canWriteFile) {
+        if (file.type === 'addition' && !file.isSymlink && canWriteFile) {
           let contents: Buffer | null;
           if (typeof file.contents === 'string') {
             contents = Buffer.from(file.contents);
@@ -66,7 +67,7 @@ export async function postUpgradeCommandsExecutor(
       for (const cmd of commands) {
         if (
           allowedPostUpgradeCommands!.some((pattern) =>
-            regEx(pattern).test(cmd)
+            regEx(pattern).test(cmd),
           )
         ) {
           try {
@@ -81,7 +82,7 @@ export async function postUpgradeCommandsExecutor(
 
             logger.debug(
               { cmd: compiledCmd, ...execResult },
-              'Executed post-upgrade task'
+              'Executed post-upgrade task',
             );
           } catch (error) {
             artifactErrors.push({
@@ -95,12 +96,12 @@ export async function postUpgradeCommandsExecutor(
               cmd,
               allowedPostUpgradeCommands,
             },
-            'Post-upgrade task did not match any on allowedPostUpgradeCommands list'
+            'Post-upgrade task did not match any on allowedPostUpgradeCommands list',
           );
           artifactErrors.push({
             lockFile: upgrade.packageFile,
             stderr: sanitize(
-              `Post-upgrade command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`
+              `Post-upgrade command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`,
             ),
           });
         }
@@ -113,11 +114,11 @@ export async function postUpgradeCommandsExecutor(
           if (minimatch(pattern, { dot: true }).match(relativePath)) {
             logger.debug(
               { file: relativePath, pattern },
-              'Post-upgrade file saved'
+              'Post-upgrade file saved',
             );
             const existingContent = await readLocalFile(relativePath);
             const existingUpdatedArtifacts = updatedArtifacts.find(
-              (ua) => ua.path === relativePath
+              (ua) => ua.path === relativePath,
             );
             if (existingUpdatedArtifacts?.type === 'addition') {
               existingUpdatedArtifacts.contents = existingContent;
@@ -130,18 +131,18 @@ export async function postUpgradeCommandsExecutor(
             }
             // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
             updatedArtifacts = updatedArtifacts.filter(
-              (ua) => !(ua.type === 'deletion' && ua.path === relativePath)
+              (ua) => !(ua.type === 'deletion' && ua.path === relativePath),
             );
           }
         }
       }
 
-      for (const relativePath of status.deleted || []) {
+      for (const relativePath of coerceArray(status.deleted)) {
         for (const pattern of fileFilters) {
           if (minimatch(pattern, { dot: true }).match(relativePath)) {
             logger.debug(
               { file: relativePath, pattern },
-              'Post-upgrade file removed'
+              'Post-upgrade file removed',
             );
             updatedArtifacts.push({
               type: 'deletion',
@@ -149,7 +150,7 @@ export async function postUpgradeCommandsExecutor(
             });
             // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
             updatedArtifacts = updatedArtifacts.filter(
-              (ua) => !(ua.type === 'addition' && ua.path === relativePath)
+              (ua) => !(ua.type === 'addition' && ua.path === relativePath),
             );
           }
         }
@@ -160,7 +161,7 @@ export async function postUpgradeCommandsExecutor(
 }
 
 export default async function executePostUpgradeCommands(
-  config: BranchConfig
+  config: BranchConfig,
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
   const hasChangedFiles =
     (is.array(config.updatedPackageFiles) &&
@@ -191,7 +192,7 @@ export default async function executePostUpgradeCommands(
   const updateUpgradeCommands: BranchUpgradeConfig[] = config.upgrades.filter(
     ({ postUpgradeTasks }) =>
       !postUpgradeTasks?.executionMode ||
-      postUpgradeTasks.executionMode === 'update'
+      postUpgradeTasks.executionMode === 'update',
   );
 
   const { updatedArtifacts, artifactErrors } =

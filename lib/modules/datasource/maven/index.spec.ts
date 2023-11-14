@@ -1,15 +1,24 @@
+import { GoogleAuth as _googleAuth } from 'google-auth-library';
 import { ReleaseResult, getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
 import { MavenDatasource } from '.';
 
+const googleAuth = mocked(_googleAuth);
+jest.mock('google-auth-library');
+
 const datasource = MavenDatasource.id;
 
 const baseUrl = 'https://repo.maven.apache.org/maven2';
 const baseUrlCustom = 'https://custom.registry.renovatebot.com';
+
+const arRegistry = 'maven.pkg.dev/some-project/some-repository';
+const baseUrlAR = `artifactregistry://${arRegistry}`;
+const baseUrlARHttps = `https://${arRegistry}`;
 
 interface SnapshotOpts {
   version: string;
@@ -93,8 +102,8 @@ function mockGenericPackage(opts: MockOpts = {}) {
         .get(
           `/${packagePath}/${latest}/${artifact}-${latest.replace(
             '-SNAPSHOT',
-            ''
-          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
+            '',
+          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`,
         )
         .reply(200, pom);
     } else {
@@ -146,14 +155,14 @@ function mockGenericPackage(opts: MockOpts = {}) {
               snapshot.version
             }/${artifact}-${snapshot.version.replace(
               '-SNAPSHOT',
-              ''
-            )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
+              '',
+            )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`,
           )
           .reply(snapshot.jarStatus, '', { 'Last-Modified': timestamp });
       } else {
         scope
           .head(
-            `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`
+            `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`,
           )
           .reply(404, '');
       }
@@ -176,7 +185,6 @@ describe('modules/datasource/maven/index', () => {
       matchHost: 'custom.registry.renovatebot.com',
       token: '123test',
     });
-    jest.resetAllMocks();
   });
 
   afterEach(() => {
@@ -278,27 +286,6 @@ describe('modules/datasource/maven/index', () => {
     expect(res).toMatchSnapshot();
   });
 
-  it('collects releases from all registry urls', async () => {
-    mockGenericPackage({ html: null });
-    mockGenericPackage({
-      base: baseUrlCustom,
-      meta: Fixtures.get('metadata-extra.xml'),
-      latest: '3.0.0',
-      jars: { '3.0.0': 200 },
-      snapshots: [],
-    });
-
-    const res = await get('org.example:package', baseUrl, baseUrlCustom);
-
-    expect(res?.releases).toMatchObject([
-      { version: '0.0.1' },
-      { version: '1.0.0' },
-      { version: '1.0.3-SNAPSHOT' },
-      { version: '2.0.0' },
-      { version: '3.0.0' },
-    ]);
-  });
-
   it('falls back to next registry url', async () => {
     mockGenericPackage({ html: null });
     httpMock
@@ -324,7 +311,7 @@ describe('modules/datasource/maven/index', () => {
       'https://unauthorized_repo/',
       'https://empty_repo',
       'https://unknown_error',
-      baseUrl
+      baseUrl,
     );
 
     expect(res).toMatchSnapshot();
@@ -346,7 +333,7 @@ describe('modules/datasource/maven/index', () => {
     const res = await get(
       'org.example:package',
       'ftp://protocol_error_repo',
-      base
+      base,
     );
 
     expect(res?.releases).toMatchSnapshot();
@@ -362,7 +349,7 @@ describe('modules/datasource/maven/index', () => {
     const res = await get(
       'org.example:package',
       'https://invalid_metadata_repo',
-      baseUrl
+      baseUrl,
     );
 
     expect(res).toMatchSnapshot();
@@ -378,7 +365,7 @@ describe('modules/datasource/maven/index', () => {
     const res = await get(
       'org.example:package',
       'https://invalid_metadata_repo',
-      baseUrl
+      baseUrl,
     );
 
     expect(res).toMatchSnapshot();
@@ -398,7 +385,7 @@ describe('modules/datasource/maven/index', () => {
     const res = await get(
       'org.example:package',
 
-      '${project.baseUri}../../repository/'
+      '${project.baseUri}../../repository/',
     );
     expect(res).toBeNull();
   });
@@ -452,6 +439,116 @@ describe('modules/datasource/maven/index', () => {
     const res = await get('org.example:package', frontendUrl);
 
     expect(res).toMatchSnapshot();
+  });
+
+  it('supports artifactregistry urls with auth', async () => {
+    const metadataPaths = [
+      '/org/example/package/maven-metadata.xml',
+      '/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml',
+      '/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml',
+      '/org/example/package/1.0.5-SNAPSHOT/maven-metadata.xml',
+    ];
+    const pomfilePath = '/org/example/package/2.0.0/package-2.0.0.pom';
+    hostRules.clear();
+
+    for (const path of metadataPaths) {
+      httpMock
+        .scope(baseUrlARHttps)
+        .get(path)
+        .matchHeader(
+          'authorization',
+          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==',
+        )
+        .reply(200, Fixtures.get('metadata.xml'));
+    }
+
+    httpMock
+      .scope(baseUrlARHttps)
+      .get(pomfilePath)
+      .matchHeader(
+        'authorization',
+        'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==',
+      )
+      .reply(200, Fixtures.get('pom.xml'));
+
+    googleAuth.mockImplementation(
+      jest.fn().mockImplementation(() => ({
+        getAccessToken: jest.fn().mockResolvedValue('some-token'),
+      })),
+    );
+
+    const res = await get('org.example:package', baseUrlAR);
+
+    expect(res).toEqual({
+      display: 'org.example:package',
+      group: 'org.example',
+      homepage: 'https://package.example.org/about',
+      name: 'package',
+      registryUrl:
+        'artifactregistry://maven.pkg.dev/some-project/some-repository',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
+    expect(googleAuth).toHaveBeenCalledTimes(5);
+  });
+
+  it('supports artifactregistry urls without auth', async () => {
+    const metadataPaths = [
+      '/org/example/package/maven-metadata.xml',
+      '/org/example/package/1.0.3-SNAPSHOT/maven-metadata.xml',
+      '/org/example/package/1.0.4-SNAPSHOT/maven-metadata.xml',
+      '/org/example/package/1.0.5-SNAPSHOT/maven-metadata.xml',
+    ];
+    const pomfilePath = '/org/example/package/2.0.0/package-2.0.0.pom';
+    hostRules.clear();
+
+    for (const path of metadataPaths) {
+      httpMock
+        .scope(baseUrlARHttps)
+        .get(path)
+        .reply(200, Fixtures.get('metadata.xml'));
+    }
+
+    httpMock
+      .scope(baseUrlARHttps)
+      .get(pomfilePath)
+      .reply(200, Fixtures.get('pom.xml'));
+
+    googleAuth.mockImplementation(
+      jest.fn().mockImplementation(() => ({
+        getAccessToken: jest.fn().mockResolvedValue(undefined),
+      })),
+    );
+
+    const res = await get('org.example:package', baseUrlAR);
+
+    expect(res).toEqual({
+      display: 'org.example:package',
+      group: 'org.example',
+      homepage: 'https://package.example.org/about',
+      name: 'package',
+      registryUrl:
+        'artifactregistry://maven.pkg.dev/some-project/some-repository',
+      releases: [
+        { version: '0.0.1' },
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.0.2' },
+        { version: '1.0.3-SNAPSHOT' },
+        { version: '1.0.4-SNAPSHOT' },
+        { version: '1.0.5-SNAPSHOT' },
+        { version: '2.0.0' },
+      ],
+    });
+    expect(googleAuth).toHaveBeenCalledTimes(5);
   });
 
   describe('fetching parent info', () => {

@@ -6,6 +6,7 @@ import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
+import { coerceString } from '../../../../util/string';
 import * as template from '../../../../util/template';
 import { joinUrlParts } from '../../../../util/url';
 import { getPlatformPrOptions } from '../../update/pr';
@@ -17,17 +18,17 @@ import { getMigrationBranchName } from '../common';
 
 export async function ensureConfigMigrationPr(
   config: RenovateConfig,
-  migratedConfigData: MigratedData
+  migratedConfigData: MigratedData,
 ): Promise<void> {
   logger.debug('ensureConfigMigrationPr()');
   const docsLink = joinUrlParts(
-    config.productLinks?.documentation ?? '',
-    'configuration-options/#configmigration'
+    coerceString(config.productLinks?.documentation),
+    'configuration-options/#configmigration',
   );
   const branchName = getMigrationBranchName(config);
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
-    migratedConfigData.filename
+    migratedConfigData.filename,
   );
 
   const prTitle = commitMessageFactory.getPrTitle();
@@ -49,9 +50,8 @@ ${
 
 :no_bell: **Ignore**: Close this PR and you won't be reminded about config migration again, but one day your current config may no longer be valid.
 
-:question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${
-      config.productLinks?.help
-    }).\n\n`
+:question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${config
+      .productLinks?.help}).\n\n`,
   );
 
   if (is.string(config.prHeader)) {
@@ -115,12 +115,12 @@ ${
     if (
       err.response?.statusCode === 422 &&
       err.response?.body?.errors?.[0]?.message?.startsWith(
-        'A pull request already exists'
+        'A pull request already exists',
       )
     ) {
       logger.warn(
         { err },
-        'Migration PR already exists but cannot find it. It was probably created by a different user.'
+        'Migration PR already exists but cannot find it. It was probably created by a different user.',
       );
       await scm.deleteBranch(branchName);
       return;

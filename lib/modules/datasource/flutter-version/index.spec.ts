@@ -17,7 +17,7 @@ describe('modules/datasource/flutter-version/index', () => {
         getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -27,17 +27,17 @@ describe('modules/datasource/flutter-version/index', () => {
         await getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
-      httpMock.scope(baseUrl).get(urlPath).reply(200, []);
+      httpMock.scope(baseUrl).get(urlPath).reply(200, { releases: [] });
       expect(
         await getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).toBeNull();
     });
 

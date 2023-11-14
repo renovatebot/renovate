@@ -3,7 +3,6 @@ import { logger } from '../../../../../../logger';
 import type { GitlabRelease } from '../../../../../../modules/datasource/gitlab-releases/types';
 import type { GitlabTreeNode } from '../../../../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../../../../util/http/gitlab';
-import { ensureTrailingSlash } from '../../../../../../util/url';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
@@ -17,13 +16,11 @@ const http = new GitlabHttp(id);
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  sourceDirectory?: string
+  sourceDirectory?: string,
 ): Promise<ChangeLogFile | null> {
   logger.trace('gitlab.getReleaseNotesMd()');
   const urlEncodedRepo = encodeURIComponent(repository);
-  const apiPrefix = `${ensureTrailingSlash(
-    apiBaseUrl
-  )}projects/${urlEncodedRepo}/repository/`;
+  const apiPrefix = `${apiBaseUrl}projects/${urlEncodedRepo}/repository/`;
 
   // https://docs.gitlab.com/13.2/ee/api/repositories.html#list-repository-tree
   const tree = (
@@ -33,7 +30,7 @@ export async function getReleaseNotesMd(
       }`,
       {
         paginate: true,
-      }
+      },
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'blob');
@@ -49,7 +46,7 @@ export async function getReleaseNotesMd(
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(
-      `Multiple candidates for changelog file, using ${changelogFile}`
+      `Multiple candidates for changelog file, using ${changelogFile}`,
     );
   }
 
@@ -61,23 +58,19 @@ export async function getReleaseNotesMd(
 
 export async function getReleaseList(
   project: ChangeLogProject,
-  _release: ChangeLogRelease
+  _release: ChangeLogRelease,
 ): Promise<ChangeLogNotes[]> {
   logger.trace('gitlab.getReleaseNotesMd()');
-  // TODO #22198
-  const apiBaseUrl = project.apiBaseUrl!;
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  const repository = project.repository!;
+  const apiBaseUrl = project.apiBaseUrl;
+  const repository = project.repository;
   const urlEncodedRepo = encodeURIComponent(repository);
-  const apiUrl = `${ensureTrailingSlash(
-    apiBaseUrl
-  )}projects/${urlEncodedRepo}/releases`;
+  const apiUrl = `${apiBaseUrl}projects/${urlEncodedRepo}/releases`;
 
   const res = await http.getJson<GitlabRelease[]>(`${apiUrl}?per_page=100`, {
     paginate: true,
   });
   return res.body.map((release) => ({
-    url: `${apiUrl}/${release.tag_name}`,
+    url: `${project.baseUrl}${repository}/-/releases/${release.tag_name}`,
     notesSourceUrl: apiUrl,
     name: release.name,
     body: release.description,

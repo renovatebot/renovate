@@ -1,10 +1,11 @@
+import { mockDeep } from 'jest-mock-extended';
 import { getDigest, getPkgReleases } from '..';
 import { mocked } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
 import * as _hostRules from '../../../util/host-rules';
 import { GithubReleasesDatasource } from '.';
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 const hostRules = mocked(_hostRules);
 
 describe('modules/datasource/github-releases/index', () => {
@@ -113,7 +114,7 @@ describe('modules/datasource/github-releases/index', () => {
           packageName,
           currentValue,
         },
-        newValue
+        newValue,
       );
       expect(digest).toBe(newDigest);
     });
@@ -121,7 +122,7 @@ describe('modules/datasource/github-releases/index', () => {
     it('should be independent of the current value', async () => {
       const digest = await getDigest(
         { datasource: GithubReleasesDatasource.id, packageName },
-        newValue
+        newValue,
       );
       expect(digest).toBe(newDigest);
     });
@@ -134,7 +135,7 @@ describe('modules/datasource/github-releases/index', () => {
           currentValue,
           currentDigest,
         },
-        newValue
+        newValue,
       );
       expect(digest).toEqual(newDigest);
     });
@@ -147,7 +148,7 @@ describe('modules/datasource/github-releases/index', () => {
           currentValue,
           currentDigest,
         },
-        'unknown-tag'
+        'unknown-tag',
       );
       expect(digest).toBeNull();
     });
