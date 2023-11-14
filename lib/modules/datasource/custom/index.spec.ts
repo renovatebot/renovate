@@ -1,11 +1,11 @@
-import { promises as _fs } from 'fs';
 import { codeBlock } from 'common-tags';
+import _fs from 'fs-extra';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import { CustomDatasource } from './index';
 
-jest.mock('fs');
+jest.mock('fs-extra');
 const fs = mocked(_fs);
 
 describe('modules/datasource/custom/index', () => {
