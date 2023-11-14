@@ -6,7 +6,7 @@ Renovate supports all Gerrit 3.x versions.
 
 The current implementation uses Gerrit's "hashtags" feature.
 Therefore you must use a Gerrit version that uses the [NoteDB](https://gerrit-review.googlesource.com/Documentation/note-db.html) backend.
-Gerrit `2.x` with NoteDB (only in `2.15` and `2.16`) is not tested, but could work.
+We did not test Gerrit `2.x` with NoteDB (only in `2.15` and `2.16`), but could work.
 
 ## Authentication
 
