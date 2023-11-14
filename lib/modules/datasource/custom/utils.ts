@@ -42,7 +42,6 @@ export function massageCustomDatasourceConfig(
     format: customDatasource.format ?? 'json',
     defaultRegistryUrlTemplate: registryUrl,
     transformTemplates: transform,
-    isLocalRegistry: !!customDatasource.isLocalRegistry,
   };
 }
 

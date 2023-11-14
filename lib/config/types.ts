@@ -264,7 +264,6 @@ export interface RenovateConfig
 
 export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
-  isLocalRegistry?: boolean;
   format?: 'json' | 'plain' | 'yaml';
   transformTemplates?: string[];
 }

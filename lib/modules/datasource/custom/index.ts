@@ -26,12 +26,9 @@ export class CustomDatasource extends Datasource {
       return null;
     }
 
-    const {
-      isLocalRegistry,
-      defaultRegistryUrlTemplate,
-      transformTemplates,
-      format,
-    } = config;
+    const { defaultRegistryUrlTemplate, transformTemplates, format } = config;
+
+    const isLocalRegistry = defaultRegistryUrlTemplate.startsWith('file://');
 
     let data: unknown;
     if (isLocalRegistry) {

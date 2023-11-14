@@ -274,8 +274,7 @@ describe('modules/datasource/custom/index', () => {
         packageName: 'myPackage',
         customDatasources: {
           foo: {
-            isLocalRegistry: true,
-            defaultRegistryUrlTemplate: 'test.yaml',
+            defaultRegistryUrlTemplate: 'file://test.yaml',
             format: 'yaml',
           },
         },
@@ -315,8 +314,7 @@ describe('modules/datasource/custom/index', () => {
         packageName: 'myPackage',
         customDatasources: {
           foo: {
-            isLocalRegistry: true,
-            defaultRegistryUrlTemplate: 'test.json',
+            defaultRegistryUrlTemplate: 'file://test.json',
             format: 'json',
           },
         },
