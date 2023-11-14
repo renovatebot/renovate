@@ -77,6 +77,10 @@ For example:
 When you enable `autodiscover`, by default, Renovate runs on _every_ repository that the bot account can access.
 You can limit which repositories Renovate can access by using the `autodiscoverFilter` config option.
 
+## autodiscoverExclusions
+
+If using `autodiscoverFilter`, you can further specify repositories to be removed from result with `autodiscoverExclusions`. It works the same way as `autodiscoverFilter`, but is applied after and removes any matching results.
+
 ## autodiscoverFilter
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.

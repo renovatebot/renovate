@@ -194,4 +194,19 @@ describe('workers/global/autodiscover', () => {
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(['project/repo', 'PROJECT/repo2']);
   });
+
+  it('removes repos matching autodiscoverExclusions', async () => {
+    config.autodiscover = true;
+    config.autodiscoverFilter = ['project/*'];
+    config.autodiscoverExclusions = ['project/not-this-one'];
+    config.platform = 'github';
+    hostRules.find = jest.fn(() => ({
+      token: 'abc',
+    }));
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['project/repo', 'project/not-this-one']),
+    );
+    const res = await autodiscoverRepositories(config);
+    expect(res.repositories).toEqual(['project/repo']);
+  });
 });

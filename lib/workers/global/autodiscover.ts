@@ -13,7 +13,7 @@ function repoName(value: string | { repository: string }): string {
 export async function autodiscoverRepositories(
   config: AllConfig,
 ): Promise<AllConfig> {
-  const { autodiscoverFilter } = config;
+  const { autodiscoverFilter, autodiscoverExclusions } = config;
   if (config.platform === 'local') {
     if (config.repositories?.length) {
       logger.debug(
@@ -51,10 +51,15 @@ export async function autodiscoverRepositories(
 
   if (autodiscoverFilter) {
     logger.debug({ autodiscoverFilter }, 'Applying autodiscoverFilter');
-    discovered = applyFilters(
-      discovered,
-      is.string(autodiscoverFilter) ? [autodiscoverFilter] : autodiscoverFilter,
-    );
+    const addFilters = is.string(autodiscoverFilter)
+      ? [autodiscoverFilter]
+      : autodiscoverFilter;
+    const removeFilters = autodiscoverExclusions
+      ? is.string(autodiscoverExclusions)
+        ? [autodiscoverExclusions]
+        : autodiscoverExclusions
+      : [];
+    discovered = applyFilters(discovered, addFilters, removeFilters);
 
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
@@ -95,10 +100,13 @@ export async function autodiscoverRepositories(
   return { ...config, repositories: discovered };
 }
 
-export function applyFilters(repos: string[], filters: string[]): string[] {
-  const matched = new Set<string>();
-
-  for (const filter of filters) {
+export function applyFilters(
+  repos: string[],
+  addFilters: string[],
+  removeFilters: string[],
+): string[] {
+  const applyFilter = (repos: string[], filter: string): string[] => {
+    const matched = new Set<string>();
     let res: string[];
     if (isConfigRegex(filter)) {
       const autodiscoveryPred = configRegexPredicate(filter);
@@ -112,6 +120,13 @@ export function applyFilters(repos: string[], filters: string[]): string[] {
     for (const repository of res) {
       matched.add(repository);
     }
-  }
-  return [...matched];
+    return [...matched];
+  };
+
+  const matched = addFilters.flatMap((filter) => applyFilter(repos, filter));
+  const removeMatched = removeFilters.flatMap((filter) =>
+    applyFilter(matched, filter),
+  );
+
+  return [...matched.filter((matched) => !removeMatched.includes(matched))];
 }

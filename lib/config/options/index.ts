@@ -800,6 +800,17 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'autodiscoverExclusions',
+    description:
+      'Exclusion filters from the autodiscover filtered repositories',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    default: null,
+    globalOnly: true,
+  },
+  {
     name: 'autodiscoverNamespaces',
     description:
       'Filter the list of autodiscovered repositories by namespaces.',
