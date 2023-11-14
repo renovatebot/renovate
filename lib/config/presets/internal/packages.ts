@@ -127,6 +127,10 @@ export const presets: Record<string, Preset> = {
     matchPackageNames: ['@types/react'],
     matchPackagePrefixes: ['react'],
   },
+  releaseIt: {
+    description: 'All packages published by release-it.',
+    matchSourceUrlPrefixes: ['https://github.com/release-it/'],
+  },
   stylelint: {
     description: 'All Stylelint packages.',
     matchPackagePrefixes: ['stylelint'],
