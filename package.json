@@ -167,7 +167,7 @@
     "@renovatebot/pep440": "3.0.11",
     "@renovatebot/ruby-semver": "3.0.18",
     "@sindresorhus/is": "4.6.0",
-    "@types/ms": "0.7.33",
+    "@types/ms": "0.7.34",
     "@types/tmp": "0.2.5",
     "@yarnpkg/core": "4.0.1",
     "@yarnpkg/parsers": "3.0.0",
