@@ -386,8 +386,8 @@ importers:
         specifier: 2.0.1
         version: 2.0.1
       '@types/clean-git-ref':
-        specifier: 2.0.1
-        version: 2.0.1
+        specifier: 2.0.2
+        version: 2.0.2
       '@types/common-tags':
         specifier: 1.8.3
         version: 1.8.3
@@ -3732,8 +3732,8 @@ packages:
     resolution: {integrity: sha512-G+K3b82RzH99HbRvlKf5++1P2E8ToBRObimboMTKdL2etEEAL7xL8zJqm3XSUZmlVEwMTxESnaYDTaZF/GEXNQ==}
     dev: true
 
-  /@types/clean-git-ref@2.0.1:
-    resolution: {integrity: sha512-m/Zw6/mBnPOl3nB+kAa+hj0Po7rMbhYuj0KLSuXzs18OhVO7ngiutpVwgNs0Ng3Iz6mbyMWmJVRKet1kreYssA==}
+  /@types/clean-git-ref@2.0.2:
+    resolution: {integrity: sha512-2z9rK9ayJHatZt9oDLCGE0FsArvjG1xWGuSufh6FTbbPdbpGj7cpzhfcKbVnyrwatTQ5KyxhurmGBM2xDa8Jgw==}
     dev: true
 
   /@types/common-tags@1.8.3:
