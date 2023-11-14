@@ -404,8 +404,8 @@ importers:
         specifier: 11.0.3
         version: 11.0.3
       '@types/git-url-parse':
-        specifier: 9.0.2
-        version: 9.0.2
+        specifier: 9.0.3
+        version: 9.0.3
       '@types/github-url-from-git':
         specifier: 1.5.2
         version: 1.5.2
@@ -3770,8 +3770,8 @@ packages:
       '@types/node': 18.18.9
     dev: true
 
-  /@types/git-url-parse@9.0.2:
-    resolution: {integrity: sha512-WLeklQNHJVFaChgqO0GdlSxvTPIofIPz/rK2UJdDXkkCYZjy8nonkl4RwssvD/BbKYoFHcvJ7qlAE1RvYNaHOQ==}
+  /@types/git-url-parse@9.0.3:
+    resolution: {integrity: sha512-Wrb8zeghhpKbYuqAOg203g+9YSNlrZWNZYvwxJuDF4dTmerijqpnGbI79yCuPtHSXHPEwv1pAFUB4zsSqn82Og==}
     dev: true
 
   /@types/github-url-from-git@1.5.2:
