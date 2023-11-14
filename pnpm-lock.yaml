@@ -365,35 +365,35 @@ importers:
         specifier: 1.3.96
         version: 1.3.96
       '@types/auth-header':
-        specifier: 1.0.4
-        version: 1.0.4
+        specifier: 1.0.5
+        version: 1.0.5
       '@types/aws4':
-        specifier: 1.11.5
-        version: 1.11.5
+        specifier: 1.11.6
+        version: 1.11.6
       '@types/breejs__later':
-        specifier: 4.1.4
-        version: 4.1.4
+        specifier: 4.1.5
+        version: 4.1.5
       '@types/bunyan':
-        specifier: 1.8.10
-        version: 1.8.10
+        specifier: 1.8.11
+        version: 1.8.11
       '@types/cacache':
-        specifier: 17.0.1
-        version: 17.0.1
+        specifier: 17.0.2
+        version: 17.0.2
       '@types/callsite':
-        specifier: 1.0.33
-        version: 1.0.33
+        specifier: 1.0.34
+        version: 1.0.34
       '@types/changelog-filename-regex':
         specifier: 2.0.1
         version: 2.0.1
       '@types/clean-git-ref':
-        specifier: 2.0.1
-        version: 2.0.1
+        specifier: 2.0.2
+        version: 2.0.2
       '@types/common-tags':
-        specifier: 1.8.3
-        version: 1.8.3
+        specifier: 1.8.4
+        version: 1.8.4
       '@types/conventional-commits-detector':
-        specifier: 1.0.1
-        version: 1.0.1
+        specifier: 1.0.2
+        version: 1.0.2
       '@types/diff':
         specifier: 5.0.7
         version: 5.0.7
@@ -404,8 +404,8 @@ importers:
         specifier: 11.0.3
         version: 11.0.3
       '@types/git-url-parse':
-        specifier: 9.0.2
-        version: 9.0.2
+        specifier: 9.0.3
+        version: 9.0.3
       '@types/github-url-from-git':
         specifier: 1.5.2
         version: 1.5.2
@@ -3654,12 +3654,12 @@ packages:
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
     dev: true
 
-  /@types/auth-header@1.0.4:
-    resolution: {integrity: sha512-rG9GxxkIwG1dcfDFjE49XAYM8yr83khd0y4bOlnf89q7+AJUpkes0D27S6H+l4+5c3AIdYAvFoI42JSHJed4Vw==}
+  /@types/auth-header@1.0.5:
+    resolution: {integrity: sha512-pr9BoXauVJWTB8ecMNv3XVRQIz9VjW9VqW0HIRfNuNwbtaCxAhOs46yqyCuLw1/jcKYTw2zfzwGNL/SwzKDGcw==}
     dev: true
 
-  /@types/aws4@1.11.5:
-    resolution: {integrity: sha512-UBercs8+U9+KAGq3eDIB7+qKVbjxayzwit5Xw+UfRBWgNolGh8PZwCjLn5ILqgVSSTnIJDktGHTsFfOA2kGjkA==}
+  /@types/aws4@1.11.6:
+    resolution: {integrity: sha512-5CnVUkHNyLGpD9AnOcK66YyP0qvIh6nhJJoeK8zSl5YKikUcUbdB7SlHevUYVqicgeh6j5AJa1qa/h08dSZHoA==}
     dependencies:
       '@types/node': 18.18.9
     dev: true
@@ -3693,12 +3693,12 @@ packages:
       '@babel/types': 7.23.3
     dev: true
 
-  /@types/breejs__later@4.1.4:
-    resolution: {integrity: sha512-AAJ8GjEpC76hyJj0UfPUADVGVnpFjyv3IepCEjOCij0wyJzyYdrRg0sCpO234WKbsHVW3iy3LC7GOvZr7LvBGw==}
+  /@types/breejs__later@4.1.5:
+    resolution: {integrity: sha512-O7VIO7sktsIwmLUyEeUnLMJ+QD2pv0yBGI2EMbVmwC1GOOTWJAaneL82ZyIwRgpEjJ9ciUHP8LuuuU55uj5ZjA==}
     dev: true
 
-  /@types/bunyan@1.8.10:
-    resolution: {integrity: sha512-A82U/3EAdWX89f+dfysGiRvbeoLuRLV3i6SLg3HuNK4Yf+dHOqdbxT70vQUwvD3DOr2Dvpcv9dRX4ipTf0LpEg==}
+  /@types/bunyan@1.8.11:
+    resolution: {integrity: sha512-758fRH7umIMk5qt5ELmRMff4mLDlN+xyYzC+dkPTdKwbSkJFvz6xwyScrytPU0QIBbRRwbiE8/BIg8bpajerNQ==}
     dependencies:
       '@types/node': 18.18.9
     dev: true
@@ -3709,8 +3709,8 @@ packages:
       '@types/node': 18.18.9
     dev: false
 
-  /@types/cacache@17.0.1:
-    resolution: {integrity: sha512-UE0nmwT8EGT8aZNYXh4xNemW2n45zPMdAxc4fKee5fqTML+XcZCq/CwFvVu3wpQm9QHxL6XQsxE5hgVqJ7S9ZA==}
+  /@types/cacache@17.0.2:
+    resolution: {integrity: sha512-IrqHzVX2VRMDQQKa7CtKRnuoCLdRJiLW6hWU+w7i7+AaQ0Ii5bKwJxd5uRK4zBCyrHd3tG6G8zOm2LplxbSfQg==}
     dependencies:
       '@types/node': 18.18.9
     dev: true
@@ -3724,24 +3724,24 @@ packages:
       '@types/responselike': 1.0.3
     dev: false
 
-  /@types/callsite@1.0.33:
-    resolution: {integrity: sha512-Iwj90JhhEUYhfJ4buLdgB+HU3iQU8LXeVEG6Yo25Nisq8+RWCPql2f3wdnIFwMtvM2Qh40YJx6WbPDGhm5hYoQ==}
+  /@types/callsite@1.0.34:
+    resolution: {integrity: sha512-eglitkkbqiQiijtKsUvOcQm+E6qLMPcggjDJXeqNBnLxdzffRGop2+2QDN/8pHh396/jN5cmIwweNKUqKJ50mQ==}
     dev: true
 
   /@types/changelog-filename-regex@2.0.1:
     resolution: {integrity: sha512-G+K3b82RzH99HbRvlKf5++1P2E8ToBRObimboMTKdL2etEEAL7xL8zJqm3XSUZmlVEwMTxESnaYDTaZF/GEXNQ==}
     dev: true
 
-  /@types/clean-git-ref@2.0.1:
-    resolution: {integrity: sha512-m/Zw6/mBnPOl3nB+kAa+hj0Po7rMbhYuj0KLSuXzs18OhVO7ngiutpVwgNs0Ng3Iz6mbyMWmJVRKet1kreYssA==}
+  /@types/clean-git-ref@2.0.2:
+    resolution: {integrity: sha512-2z9rK9ayJHatZt9oDLCGE0FsArvjG1xWGuSufh6FTbbPdbpGj7cpzhfcKbVnyrwatTQ5KyxhurmGBM2xDa8Jgw==}
     dev: true
 
-  /@types/common-tags@1.8.3:
-    resolution: {integrity: sha512-v3smfzf7umSwpkJrmlUe+apSv6bVnrIFCeBeprnP4f8lIh6pECZxyD50e8yFwfouIt85TdxN5yXiFwS5fnsS3w==}
+  /@types/common-tags@1.8.4:
+    resolution: {integrity: sha512-S+1hLDJPjWNDhcGxsxEbepzaxWqURP/o+3cP4aa2w7yBXgdcmKGQtZzP8JbyfOd0m+33nh+8+kvxYE2UJtBDkg==}
     dev: true
 
-  /@types/conventional-commits-detector@1.0.1:
-    resolution: {integrity: sha512-Adz5W9P8sREhvuTNqtVIdbJIgasX5uEg+Z7IQGaZ8/nBRAZmqyuFmfhhvTW42kaJTN1+1u2okQa8yT+YZn9/lw==}
+  /@types/conventional-commits-detector@1.0.2:
+    resolution: {integrity: sha512-Yzo8dW+b2vziyDD9WNY+IPq4rcZyguHNuyNZC3wv0igpVFRd7VWHufl+vRQaCzDR2ftPTB1VPwbvXxWVpzBo+g==}
     dev: true
 
   /@types/diff@5.0.7:
@@ -3770,8 +3770,8 @@ packages:
       '@types/node': 18.18.9
     dev: true
 
-  /@types/git-url-parse@9.0.2:
-    resolution: {integrity: sha512-WLeklQNHJVFaChgqO0GdlSxvTPIofIPz/rK2UJdDXkkCYZjy8nonkl4RwssvD/BbKYoFHcvJ7qlAE1RvYNaHOQ==}
+  /@types/git-url-parse@9.0.3:
+    resolution: {integrity: sha512-Wrb8zeghhpKbYuqAOg203g+9YSNlrZWNZYvwxJuDF4dTmerijqpnGbI79yCuPtHSXHPEwv1pAFUB4zsSqn82Og==}
     dev: true
 
   /@types/github-url-from-git@1.5.2:
