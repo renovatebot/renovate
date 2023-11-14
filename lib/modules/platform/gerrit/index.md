@@ -70,4 +70,4 @@ For example:
 Commit-Message=`Update keycloak.version to v21` \
 Pull-Request-Title=`Update keycloak.version to v21 (major)`
 
-In this case the Gerrit-Platform implementation tries to detect this and change the commit-message on a second patch-set.
+In this case the Gerrit-Platform implementation tries to detect this and change the commit-message in a second patch-set.
