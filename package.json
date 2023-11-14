@@ -295,7 +295,7 @@
     "@types/moo": "0.5.9",
     "@types/nock": "10.0.3",
     "@types/node": "18.18.9",
-    "@types/parse-link-header": "2.0.2",
+    "@types/parse-link-header": "2.0.3",
     "@types/prettier": "2.7.3",
     "@types/semver": "7.5.4",
     "@types/semver-stable": "3.0.1",

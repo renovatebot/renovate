@@ -452,8 +452,8 @@ importers:
         specifier: 18.18.9
         version: 18.18.9
       '@types/parse-link-header':
-        specifier: 2.0.2
-        version: 2.0.2
+        specifier: 2.0.3
+        version: 2.0.3
       '@types/prettier':
         specifier: 2.7.3
         version: 2.7.3
@@ -3912,8 +3912,8 @@ packages:
   /@types/normalize-package-data@2.4.4:
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
 
-  /@types/parse-link-header@2.0.2:
-    resolution: {integrity: sha512-RKU5SIF0oyM2ZI0ubw66FkM/0RJUv/r84I7vJcXkcICcfeOpd1WXfpcqkFJPaWli5z3YdxMsfWojyU5uofT6sA==}
+  /@types/parse-link-header@2.0.3:
+    resolution: {integrity: sha512-ffLAxD6Xqcf2gSbtEJehj8yJ5R/2OZqD4liodQvQQ+hhO4kg1mk9ToEZQPMtNTm/zIQj2GNleQbsjPp9+UQm4Q==}
     dev: true
 
   /@types/prettier@2.7.3:
