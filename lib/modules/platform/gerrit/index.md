@@ -21,7 +21,7 @@ Let Renovate use your HTTP access token by doing _one_ of the following:
 - Set your HTTP access token as an environment variable `RENOVATE_PASSWORD`, or
 - Set your HTTP access token when you run Renovate in the CLI with `--password=`
 
-This user must be allowed to assign the Code-Review label with "+2" to their own changes for "automerge" to work.
+The Gerrit user account must be allowed to assign the Code-Review label with "+2" to their own changes for "automerge" to work.
 
 You must set `platform=gerrit` in your Renovate config file.
 
@@ -34,7 +34,8 @@ Renovate will now add the _Code-Review_ label with the value "+2" to each of its
 !!! note
     The login must be allowed to give +2 for the Code-Review label.
 
-The Renovate option `automergeType: "branch"` makes no sense for Gerrit, because there are no branches used.
+The Renovate option `automergeType: "branch"` makes no sense for Gerrit,
+because there are no branches used to create pull requests.
 It works similar to the default option `"pr"`.
 
 ## Optional features
