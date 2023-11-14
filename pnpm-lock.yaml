@@ -470,8 +470,8 @@ importers:
         specifier: 6.1.8
         version: 6.1.8
       '@types/traverse':
-        specifier: 0.6.34
-        version: 0.6.34
+        specifier: 0.6.35
+        version: 0.6.35
       '@types/url-join':
         specifier: 4.0.2
         version: 4.0.2
@@ -3966,8 +3966,8 @@ packages:
     resolution: {integrity: sha512-chhaNf2oKHlRkDGt+tiKE2Z5aJ6qalm7Z9rlLdBwmOiAAf09YQvvoLXjWK4HWPF1xU/fqvMgfNfpVoBscA/tKA==}
     dev: false
 
-  /@types/traverse@0.6.34:
-    resolution: {integrity: sha512-bTvEo1/mx4ERGCcZfcvI8hBIUulNhqMcgyX/JzZ+p0WGdiU+oVjIJJJUs5zrkeWpfrTj98UvUm0qVHUk5lnkUg==}
+  /@types/traverse@0.6.35:
+    resolution: {integrity: sha512-ZZBG4X4CTVqKLpPvDtqxyCO7VsVAfOsvbJAdbM90uYrXRv27fAjbV8eVUtdBLivC6x6Gcx6n6Kvjbai3IX1rWw==}
     dev: true
 
   /@types/treeify@1.0.3:
