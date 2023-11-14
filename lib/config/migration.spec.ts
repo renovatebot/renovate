@@ -246,6 +246,18 @@ describe('config/migration', () => {
       expect(isMigrated).toBeFalse();
     });
 
+    it('does not migrate RegExp objects in arrays', () => {
+      const config = {
+        allowedPostUpgradeCommands: [/my regex/],
+      };
+      const { isMigrated, migratedConfig } =
+        configMigration.migrateConfig(config);
+      expect(migratedConfig.allowedPostUpgradeCommands).toEqual(
+        config.allowedPostUpgradeCommands,
+      );
+      expect(isMigrated).toBeFalse();
+    });
+
     it('migrates packages', () => {
       const config = {
         packages: [

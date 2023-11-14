@@ -71,7 +71,7 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         if (is.array(migratedConfig?.[key])) {
           const newArray = [];
           for (const item of migratedConfig[key] as unknown[]) {
-            if (is.object(item) && !is.array(item)) {
+            if (is.object(item) && !is.array(item) && !is.regExp(item)) {
               const arrMigrate = migrateConfig(item as RenovateConfig);
               newArray.push(arrMigrate.migratedConfig);
             } else {
