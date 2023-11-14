@@ -29,5 +29,6 @@ exports[`modules/datasource/galaxy-collection/index getReleases processes real d
       "version": "1.2.1",
     },
   ],
+  "sourceUrl": "https://github.com/ansible-collections/community.kubernetes",
 }
 `;
