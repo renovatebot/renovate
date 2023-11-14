@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+import { readLocalFile } from '../../../../util/fs';
 import type { Http } from '../../../../util/http';
 import { newlineRegex } from '../../../../util/regex';
 import type { ReleaseResult } from '../../types';
@@ -29,8 +29,8 @@ export async function fetch(
   return convertLinesToVersions(response.body);
 }
 
-export async function read(path: string): Promise<ReleaseResult> {
-  const fileContent = await fs.readFile(path, 'utf8');
+export async function read(path: string): Promise<ReleaseResult | null> {
+  const fileContent = await readLocalFile(path, 'utf8');
 
-  return convertLinesToVersions(fileContent);
+  return fileContent ? convertLinesToVersions(fileContent) : null;
 }

@@ -1,6 +1,5 @@
-import { promises as fs } from 'fs';
 import yaml from 'js-yaml';
-
+import { readLocalFile } from '../../../../util/fs';
 import type { Http } from '../../../../util/http';
 
 export async function fetch(http: Http, url: string): Promise<unknown> {
@@ -10,7 +9,7 @@ export async function fetch(http: Http, url: string): Promise<unknown> {
 }
 
 export async function read(path: string): Promise<unknown> {
-  const fileContent = await fs.readFile(path, 'utf8');
+  const fileContent = await readLocalFile(path, 'utf8');
 
-  return yaml.load(fileContent);
+  return fileContent ? yaml.load(fileContent) : null;
 }
