@@ -62,7 +62,7 @@ This is because Renovate will query the label and prevent `automerge` accordingl
 
 ## Known problems
 
-### PR-title doesn't match first commit-msg line
+### PR title is different from first commit message
 
 Sometimes the pull-request title parameter to `platform.createPr(...)/updatePr(...)` is different from the first line of the commit message.
 For example:
