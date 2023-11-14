@@ -267,7 +267,7 @@
     "@semantic-release/exec": "6.0.3",
     "@swc/core": "1.3.96",
     "@types/auth-header": "1.0.4",
-    "@types/aws4": "1.11.5",
+    "@types/aws4": "1.11.6",
     "@types/breejs__later": "4.1.4",
     "@types/bunyan": "1.8.10",
     "@types/cacache": "17.0.1",
