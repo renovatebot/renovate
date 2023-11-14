@@ -17,8 +17,8 @@ We did not test Gerrit `2.x` with NoteDB (only in `2.15` and `2.16`), but could 
 
 Let Renovate use your HTTP access token by doing _one_ of the following:
 
-- Set your HTTP access token as a `password` in your `config.js` file
-- Set your HTTP access token as an environment variable `RENOVATE_PASSWORD`
+- Set your HTTP access token as a `password` in your `config.js` file, or
+- Set your HTTP access token as an environment variable `RENOVATE_PASSWORD`, or
 - Set your HTTP access token when you run Renovate in the CLI with `--password=`
 
 This user must be allowed to assign the Code-Review label with "+2" to their own changes for "automerge" to work.
