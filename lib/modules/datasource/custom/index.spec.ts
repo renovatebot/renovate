@@ -5,7 +5,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import { CustomDatasource } from './index';
 
-jest.mock('fs-extra');
+jest.mock('fs');
 const fs = mocked(_fs);
 
 describe('modules/datasource/custom/index', () => {
