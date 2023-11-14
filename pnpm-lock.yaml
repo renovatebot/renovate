@@ -416,8 +416,8 @@ importers:
         specifier: 1.3.33
         version: 1.3.33
       '@types/js-yaml':
-        specifier: 4.0.8
-        version: 4.0.8
+        specifier: 4.0.9
+        version: 4.0.9
       '@types/json-dup-key-validator':
         specifier: 1.0.2
         version: 1.0.2
@@ -3812,8 +3812,8 @@ packages:
       '@types/istanbul-lib-report': 3.0.3
     dev: true
 
-  /@types/js-yaml@4.0.8:
-    resolution: {integrity: sha512-m6jnPk1VhlYRiLFm3f8X9Uep761f+CK8mHyS65LutH2OhmBF0BeMEjHgg05usH8PLZMWWc/BUR9RPmkvpWnyRA==}
+  /@types/js-yaml@4.0.9:
+    resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
     dev: true
 
   /@types/json-dup-key-validator@1.0.2:
