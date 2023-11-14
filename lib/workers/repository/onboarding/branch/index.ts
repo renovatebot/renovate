@@ -59,12 +59,12 @@ export async function checkOnboardingBranch(
     if (!isModified) {
       const commit = await rebaseOnboardingBranch(
         config,
-        onboardingPr.bodyStruct?.rawConfigHash
+        onboardingPr.bodyStruct?.rawConfigHash,
       );
       if (commit) {
         logger.info(
           { branch: config.onboardingBranch, commit, onboarding: true },
-          'Branch updated'
+          'Branch updated',
         );
       }
       // istanbul ignore if

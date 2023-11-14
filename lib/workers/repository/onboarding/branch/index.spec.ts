@@ -276,7 +276,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(scm.mergeToLocal).toHaveBeenCalledOnce();
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       expect(logger.debug).not.toHaveBeenCalledWith(
-        'Skip processing since the onboarding branch is up to date and default branch has not changed'
+        'Skip processing since the onboarding branch is up to date and default branch has not changed',
       ); // onboarding cache no longer valid
       expect(logger.info).toHaveBeenCalledWith(
         {
@@ -284,7 +284,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           commit: 'new-onboarding-sha',
           onboarding: true,
         },
-        'Branch updated'
+        'Branch updated',
       );
     });
 

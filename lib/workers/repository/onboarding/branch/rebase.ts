@@ -9,7 +9,7 @@ import { getOnboardingConfigContents } from './config';
 
 export async function rebaseOnboardingBranch(
   config: RenovateConfig,
-  previousConfigHash: string | undefined
+  previousConfigHash: string | undefined,
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
 
@@ -30,7 +30,7 @@ export async function rebaseOnboardingBranch(
   }
   logger.debug(
     { previousConfigHash, currentConfigHash },
-    'Rebasing onboarding branch'
+    'Rebasing onboarding branch',
   );
 
   if (GlobalConfig.get('dryRun')) {
@@ -40,7 +40,7 @@ export async function rebaseOnboardingBranch(
 
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
-    configFile
+    configFile,
   );
   const commitMessage = commitMessageFactory.create();
 

@@ -57,14 +57,14 @@ describe('workers/repository/onboarding/branch/rebase', () => {
           ...config,
           onboardingConfigFileName: '.github/renovate.json',
         },
-        hash
+        hash,
       );
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
-        '.github/renovate.json'
+        '.github/renovate.json',
       );
       expect(scm.commitAndPush.mock.calls[0][0].files[0].path).toBe(
-        '.github/renovate.json'
+        '.github/renovate.json',
       );
     });
 
@@ -74,14 +74,14 @@ describe('workers/repository/onboarding/branch/rebase', () => {
           ...config,
           onboardingConfigFileName: undefined,
         },
-        hash
+        hash,
       );
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush.mock.calls[0][0].message).toContain(
-        'renovate.json'
+        'renovate.json',
       );
       expect(scm.commitAndPush.mock.calls[0][0].files[0].path).toBe(
-        'renovate.json'
+        'renovate.json',
       );
     });
 
@@ -101,7 +101,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       GlobalConfig.set({ localDir: '', dryRun: 'full', platform: 'github' });
       await rebaseOnboardingBranch(config, hash);
       expect(logger.info).toHaveBeenCalledWith(
-        'DRY-RUN: Would rebase files in onboarding branch'
+        'DRY-RUN: Would rebase files in onboarding branch',
       );
       expect(scm.commitAndPush).not.toHaveBeenCalled();
     });
@@ -119,7 +119,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(res).toBeNull();
       expect(scm.commitAndPush).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledWith(
-        `Skipping rebase as ${platform} does not support html comments`
+        `Skipping rebase as ${platform} does not support html comments`,
       );
     });
   });
