@@ -82,7 +82,7 @@ export function getPipenvConstraint(
   return '';
 }
 
-function getMatchingHostRule(url: string | undefined): HostRule {
+function getMatchingHostRule(url: string): HostRule {
   return find({ hostType: PypiDatasource.id, url });
 }
 
@@ -161,16 +161,16 @@ export async function updateArtifacts({
       pipfileName,
     );
     if (sourceUrl) {
-      logger.trace('Pipfile contains credentials');
+      logger.debug({ sourceUrl }, 'Pipfile contains credentials');
       const hostRule = getMatchingHostRule(sourceUrl);
       if (hostRule) {
-        logger.trace('Found matching hostRule for Pipfile credentials');
+        logger.debug('Found matching hostRule for Pipfile credentials');
         if (hostRule.username) {
-          logger.trace('Adding USERNAME environment variable for pipenv');
+          logger.debug('Adding USERNAME environment variable for pipenv');
           extraEnv.USERNAME = hostRule.username;
         }
         if (hostRule.password) {
-          logger.trace('Adding PASSWORD environment variable for pipenv');
+          logger.debug('Adding PASSWORD environment variable for pipenv');
           extraEnv.PASSWORD = hostRule.password;
         }
       }
