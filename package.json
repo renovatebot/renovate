@@ -272,7 +272,7 @@
     "@types/bunyan": "1.8.11",
     "@types/cacache": "17.0.2",
     "@types/callsite": "1.0.34",
-    "@types/changelog-filename-regex": "2.0.1",
+    "@types/changelog-filename-regex": "2.0.2",
     "@types/clean-git-ref": "2.0.2",
     "@types/common-tags": "1.8.4",
     "@types/conventional-commits-detector": "1.0.2",
