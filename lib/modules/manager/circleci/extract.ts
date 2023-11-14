@@ -7,7 +7,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
@@ -59,7 +59,7 @@ export function extractPackageFile(
             currentValue: dep.currentValue,
             currentDigest: dep.currentDigest,
           },
-          'CircleCI docker image'
+          'CircleCI docker image',
         );
         dep.depType = 'docker';
         dep.versioning = 'docker';

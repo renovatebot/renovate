@@ -22,7 +22,7 @@ describe('modules/datasource/common', () => {
 
     it('supports custom datasource', () => {
       expect(getDatasourceFor('custom.foobar')).toEqual(
-        getDatasourceFor(CustomDatasource.id)
+        getDatasourceFor(CustomDatasource.id),
       );
     });
 
@@ -42,7 +42,7 @@ describe('modules/datasource/common', () => {
       expect(getDefaultVersioning('foobar')).toBe(defaultVersioning.id);
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { datasourceName: 'foobar' },
-        'Missing datasource!'
+        'Missing datasource!',
       );
     });
 
@@ -185,7 +185,7 @@ describe('modules/datasource/common', () => {
       });
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { datasourceName: 'foobar' },
-        'Missing datasource!'
+        'Missing datasource!',
       );
     });
   });
@@ -249,7 +249,7 @@ describe('modules/datasource/common', () => {
     it('filters out non-matching', () => {
       const versionCompatibility = '^(?<version>[^-]+)$';
       expect(
-        applyVersionCompatibility(input, versionCompatibility, undefined)
+        applyVersionCompatibility(input, versionCompatibility, undefined),
       ).toMatchObject({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
       });
@@ -258,7 +258,7 @@ describe('modules/datasource/common', () => {
     it('filters out incompatible', () => {
       const versionCompatibility = '^(?<version>[^-]+)(?<compatibility>.*)?$';
       expect(
-        applyVersionCompatibility(input, versionCompatibility, '-alpine')
+        applyVersionCompatibility(input, versionCompatibility, '-alpine'),
       ).toMatchObject({
         releases: [{ version: '2.0.0' }],
       });

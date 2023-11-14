@@ -12,7 +12,7 @@ import type { RepositoryRule } from './types';
 
 export async function generateLoginCmd(
   repositoryRule: RepositoryRule,
-  loginCMD: string
+  loginCMD: string,
 ): Promise<string | null> {
   const { hostRule, repository } = repositoryRule;
   const { username, password } = hostRule;
@@ -30,13 +30,13 @@ export async function generateLoginCmd(
     addSecretForSanitizing(username);
     addSecretForSanitizing(password);
     return `${loginCMD} --username ${quote(username)} --password ${quote(
-      password
+      password,
     )} ${repository}`;
   }
   if (username && password) {
     logger.trace({ repository }, `Using basic auth for Helm registry`);
     return `${loginCMD} --username ${quote(username)} --password ${quote(
-      password
+      password,
     )} ${repository}`;
   }
   return null;
@@ -49,7 +49,7 @@ export function generateHelmEnvs(): ExtraEnv {
     HELM_REGISTRY_CONFIG: `${upath.join(privateCacheDir(), 'registry.json')}`,
     HELM_REPOSITORY_CONFIG: `${upath.join(
       privateCacheDir(),
-      'repositories.yaml'
+      'repositories.yaml',
     )}`,
     HELM_REPOSITORY_CACHE: `${upath.join(privateCacheDir(), 'repositories')}`,
   };

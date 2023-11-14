@@ -12,7 +12,7 @@ import type { BranchConfig } from '../../../types';
 
 export async function handleClosedPr(
   config: BranchConfig,
-  pr: Pr
+  pr: Pr,
 ): Promise<void> {
   if (pr.state === 'closed') {
     let content;
@@ -30,7 +30,7 @@ export async function handleClosedPr(
     if (!config.suppressNotifications!.includes('prIgnoreNotification')) {
       if (GlobalConfig.get('dryRun')) {
         logger.info(
-          `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`
+          `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`,
         );
       } else {
         await ensureComment({
@@ -52,7 +52,7 @@ export async function handleClosedPr(
 
 export async function handleModifiedPr(
   config: BranchConfig,
-  pr: Pr
+  pr: Pr,
 ): Promise<void> {
   if (config.suppressNotifications!.includes('prEditedNotification')) {
     return;
@@ -71,7 +71,7 @@ export async function handleModifiedPr(
     logger.debug('Manual rebase has been requested for PR');
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`
+        `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`,
       );
       return;
     }
@@ -84,7 +84,7 @@ export async function handleModifiedPr(
   } else {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`
+        `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`,
       );
       return;
     }

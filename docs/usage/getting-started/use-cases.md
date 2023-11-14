@@ -25,7 +25,7 @@ Renovate:
 1. Checks if any newer versions exist
 1. Raises Pull Requests for available updates
 
-The Pull Requests patch the package files directly, and include Release Notes for the newer versions (if they are available).
+The Pull Requests patch the package files directly, and include changelogs for the newer versions (if they are available).
 
 By default:
 

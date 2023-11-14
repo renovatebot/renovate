@@ -99,7 +99,7 @@ function matches(a: string, b: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {

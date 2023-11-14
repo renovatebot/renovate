@@ -1,12 +1,24 @@
 import is from '@sindresorhus/is';
-import { AbstractMigration } from '../base/abstract-migration';
+import type { RenovateConfig } from '../../types';
+import { RenamePropertyMigration } from '../base/rename-property-migration';
 
-export class FetchReleaseNotesMigration extends AbstractMigration {
-  override readonly propertyName = 'fetchReleaseNotes';
+export class FetchReleaseNotesMigration extends RenamePropertyMigration {
+  constructor(originalConfig: RenovateConfig, migratedConfig: RenovateConfig) {
+    super(
+      'fetchReleaseNotes',
+      'fetchChangeLogs',
+      originalConfig,
+      migratedConfig,
+    );
+  }
 
   override run(value: unknown): void {
+    let newValue: unknown = value;
+
     if (is.boolean(value)) {
-      this.rewrite(value ? 'pr' : 'off');
+      newValue = value ? 'pr' : 'off';
     }
+
+    super.run(newValue);
   }
 }

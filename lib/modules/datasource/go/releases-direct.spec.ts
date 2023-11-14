@@ -18,7 +18,7 @@ describe('modules/datasource/go/releases-direct', () => {
   const gitGetTags = jest.spyOn(GitTagsDatasource.prototype, 'getReleases');
   const githubGetTags = jest.spyOn(
     GithubTagsDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   beforeEach(() => {
@@ -40,7 +40,7 @@ describe('modules/datasource/go/releases-direct', () => {
       await expect(
         datasource.getReleases({
           packageName: 'golang.org/foo/something',
-        })
+        }),
       ).rejects.toThrow();
     });
 
@@ -215,7 +215,7 @@ describe('modules/datasource/go/releases-direct', () => {
       httpMock
         .scope('https://gitlab.com/')
         .get(
-          '/api/v4/projects/group%2Fsubgroup%2Frepo/repository/tags?per_page=100'
+          '/api/v4/projects/group%2Fsubgroup%2Frepo/repository/tags?per_page=100',
         )
         .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
       const res = await datasource.getReleases({

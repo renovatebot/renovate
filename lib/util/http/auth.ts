@@ -19,7 +19,7 @@ export type AuthGotOptions = Pick<
 >;
 
 export function applyAuthorization<GotOptions extends AuthGotOptions>(
-  inOptions: GotOptions
+  inOptions: GotOptions,
 ): GotOptions {
   const options: GotOptions = { ...inOptions };
 
@@ -45,7 +45,7 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
         if (is.string(options.headers.accept)) {
           options.headers.accept = options.headers.accept.replace(
             'application/vnd.github.v3+json',
-            'application/vnd.github.machine-man-preview+json'
+            'application/vnd.github.machine-man-preview+json',
           );
         }
       }
@@ -74,7 +74,7 @@ export function applyAuthorization<GotOptions extends AuthGotOptions>(
   } else if (options.password !== undefined) {
     // Otherwise got will add username and password to url and header
     const auth = Buffer.from(
-      `${options.username ?? ''}:${options.password}`
+      `${options.username ?? ''}:${options.password}`,
     ).toString('base64');
     options.headers.authorization = `Basic ${auth}`;
     delete options.username;

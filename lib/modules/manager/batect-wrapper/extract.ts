@@ -7,7 +7,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 const VERSION_REGEX = regEx(/^\s+VERSION="(.*)"$/m);
 
 export function extractPackageFile(
-  fileContent: string
+  fileContent: string,
 ): PackageFileContent | null {
   logger.trace('batect.extractPackageFile()');
   const match = VERSION_REGEX.exec(fileContent);

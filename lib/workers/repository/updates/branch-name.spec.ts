@@ -89,7 +89,7 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe(
-        'update-branch-patch-some-group-slug-update-topic'
+        'update-branch-patch-some-group-slug-update-topic',
       );
     });
 
@@ -334,7 +334,7 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe(
-        'some-group-name-dollarpercentand-or-lessgreater-version-grouptopic'
+        'some-group-name-dollarpercentand-or-lessgreater-version-grouptopic',
       );
     });
 
@@ -349,7 +349,7 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe(
-        'some-group-name.dollarpercentversion-grouptopic'
+        'some-group-name.dollarpercentversion-grouptopic',
       );
     });
   });

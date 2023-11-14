@@ -8,7 +8,7 @@ describe('config/migrations/custom/automerge-migration', () => {
       } as any,
       {
         automerge: false,
-      }
+      },
     );
   });
 
@@ -27,7 +27,7 @@ describe('config/migrations/custom/automerge-migration', () => {
         major: {
           automerge: false,
         },
-      }
+      },
     );
   });
 
@@ -43,7 +43,7 @@ describe('config/migrations/custom/automerge-migration', () => {
         major: {
           automerge: false,
         },
-      }
+      },
     );
   });
 
@@ -54,7 +54,7 @@ describe('config/migrations/custom/automerge-migration', () => {
       } as any,
       {
         automerge: true,
-      }
+      },
     );
   });
 });

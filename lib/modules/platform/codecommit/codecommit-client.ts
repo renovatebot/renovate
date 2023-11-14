@@ -64,7 +64,7 @@ export function buildCodeCommitClient(): void {
 }
 
 export async function deleteComment(
-  commentId: string
+  commentId: string,
 ): Promise<DeleteCommentContentOutput> {
   const input: DeleteCommentContentInput = {
     commentId,
@@ -74,7 +74,7 @@ export async function deleteComment(
 }
 
 export async function getPrComments(
-  pullRequestId: string
+  pullRequestId: string,
 ): Promise<GetCommentsForPullRequestOutput> {
   const input: GetCommentsForPullRequestInput = {
     pullRequestId,
@@ -85,7 +85,7 @@ export async function getPrComments(
 
 export async function updateComment(
   commentId: string,
-  content: string
+  content: string,
 ): Promise<UpdateCommentOutput> {
   const input: UpdateCommentInput = {
     commentId,
@@ -100,7 +100,7 @@ export async function createPrComment(
   repositoryName: string | undefined,
   content: string,
   beforeCommitId: string,
-  afterCommitId: string
+  afterCommitId: string,
 ): Promise<PostCommentForPullRequestOutput> {
   const input: PostCommentForPullRequestInput = {
     pullRequestId,
@@ -147,7 +147,7 @@ export async function createPrComment(
 
 export async function updatePrStatus(
   pullRequestId: string,
-  pullRequestStatus: PullRequestStatusEnum
+  pullRequestStatus: PullRequestStatusEnum,
 ): Promise<UpdatePullRequestStatusOutput> {
   const input: UpdatePullRequestStatusInput = {
     pullRequestId,
@@ -159,7 +159,7 @@ export async function updatePrStatus(
 
 export async function updatePrTitle(
   prNo: string,
-  title: string
+  title: string,
 ): Promise<UpdatePullRequestTitleOutput> {
   const input: UpdatePullRequestTitleInput = {
     pullRequestId: `${prNo}`,
@@ -171,7 +171,7 @@ export async function updatePrTitle(
 
 export async function updatePrDescription(
   pullRequestId: string,
-  description: string
+  description: string,
 ): Promise<UpdatePullRequestDescriptionOutput> {
   const input: UpdatePullRequestDescriptionInput = {
     pullRequestId,
@@ -186,7 +186,7 @@ export async function createPr(
   description: string,
   sourceReference: string,
   destinationReference: string,
-  repositoryName: string | undefined
+  repositoryName: string | undefined,
 ): Promise<CreatePullRequestOutput> {
   const input: CreatePullRequestInput = {
     title,
@@ -206,7 +206,7 @@ export async function createPr(
 export async function getFile(
   repositoryName: string | undefined,
   filePath: string,
-  commitSpecifier: string | undefined
+  commitSpecifier: string | undefined,
 ): Promise<GetFileOutput> {
   const input: GetFileInput = {
     repositoryName,
@@ -218,7 +218,7 @@ export async function getFile(
 }
 
 export async function listPullRequests(
-  repositoryName: string
+  repositoryName: string,
 ): Promise<ListPullRequestsOutput> {
   const input: ListPullRequestsInput = {
     repositoryName,
@@ -230,7 +230,7 @@ export async function listPullRequests(
 }
 
 export async function getRepositoryInfo(
-  repository: string
+  repository: string,
 ): Promise<GetRepositoryOutput> {
   const input: GetRepositoryInput = {
     repositoryName: `${repository}`,
@@ -240,7 +240,7 @@ export async function getRepositoryInfo(
 }
 
 export async function getPr(
-  pullRequestId: string
+  pullRequestId: string,
 ): Promise<GetPullRequestOutput | undefined> {
   const input: GetPullRequestInput = {
     pullRequestId,
@@ -263,7 +263,7 @@ export async function listRepositories(): Promise<ListRepositoriesOutput> {
 
 export async function createPrApprovalRule(
   pullRequestId: string,
-  approvalRuleContent: string
+  approvalRuleContent: string,
 ): Promise<CreatePullRequestApprovalRuleOutput> {
   const input: CreatePullRequestApprovalRuleInput = {
     approvalRuleContent,
@@ -276,7 +276,7 @@ export async function createPrApprovalRule(
 
 export function getCodeCommitUrl(
   repoMetadata: RepositoryMetadata,
-  repoName: string
+  repoName: string,
 ): string {
   logger.debug('get code commit url');
   if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {

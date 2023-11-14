@@ -27,7 +27,7 @@ describe('modules/versioning/ivy/index', () => {
     'parseDynamicRevision("$input") === { type: "$type", value: "$value" }',
     ({ input, type, value }) => {
       expect(parseDynamicRevision(input)).toEqual({ type, value });
-    }
+    },
   );
 
   it.each`
@@ -137,7 +137,7 @@ describe('modules/versioning/ivy/index', () => {
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
       expect(ivy.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -167,7 +167,7 @@ describe('modules/versioning/ivy/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 
   it.each`
@@ -177,7 +177,7 @@ describe('modules/versioning/ivy/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(ivy.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`

@@ -14,7 +14,7 @@ describe('config/migrations/custom/package-files-migration', () => {
       {
         includePaths: ['package.json'],
         packageRules: [{ paths: ['package.json'], packageRules: [] }],
-      }
+      },
     );
   });
 
@@ -25,7 +25,7 @@ describe('config/migrations/custom/package-files-migration', () => {
       },
       {
         includePaths: ['package.json', 'Chart.yaml'],
-      }
+      },
     );
   });
 
@@ -49,7 +49,7 @@ describe('config/migrations/custom/package-files-migration', () => {
             packageRules: [{ labels: ['breaking'] }],
           },
         ],
-      }
+      },
     );
   });
 
@@ -60,7 +60,7 @@ describe('config/migrations/custom/package-files-migration', () => {
       },
       {
         includePaths: ['package.json'],
-      }
+      },
     );
   });
 
@@ -92,7 +92,7 @@ describe('config/migrations/custom/package-files-migration', () => {
             ],
           },
         ],
-      }
+      },
     );
   });
 
@@ -106,7 +106,7 @@ describe('config/migrations/custom/package-files-migration', () => {
       {
         includePaths: ['package.json'],
         packageRules: [{ labels: ['linter'] }],
-      }
+      },
     );
   });
 });

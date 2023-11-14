@@ -23,7 +23,7 @@ export class GithubRunnersDatasource extends Datasource {
 
   public static isValidRunner(
     runnerName: string,
-    runnerVersion: string
+    runnerVersion: string,
   ): boolean {
     const runnerReleases = GithubRunnersDatasource.releases[runnerName];
     if (!runnerReleases) {
@@ -31,7 +31,7 @@ export class GithubRunnersDatasource extends Datasource {
     }
 
     const versionExists = runnerReleases.some(
-      ({ version }) => version === runnerVersion
+      ({ version }) => version === runnerVersion,
     );
 
     return runnerVersion === 'latest' || versionExists;

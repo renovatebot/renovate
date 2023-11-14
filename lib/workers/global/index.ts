@@ -29,11 +29,11 @@ import { isLimitReached } from './limits';
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
-  repository: RenovateRepository
+  repository: RenovateRepository,
 ): Promise<RenovateConfig> {
   const repoConfig = configParser.mergeChildConfig(
     globalConfig,
-    is.string(repository) ? { repository } : repository
+    is.string(repository) ? { repository } : repository,
   );
   // TODO: types (#22198)
   const platform = GlobalConfig.get('platform')!;
@@ -42,7 +42,7 @@ export async function getRepositoryConfig(
       ? process.cwd()
       : upath.join(
           repoConfig.baseDir,
-          `./repos/${platform}/${repoConfig.repository}`
+          `./repos/${platform}/${repoConfig.repository}`,
         );
   await fs.ensureDir(repoConfig.localDir);
   delete repoConfig.baseDir;
@@ -68,12 +68,12 @@ function checkEnv(): void {
   if (process.release?.name !== 'node' || !process.versions?.node) {
     logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
       { release: process.release, versions: process.versions },
-      'Unknown node environment detected.'
+      'Unknown node environment detected.',
     );
   } else if (!semver.satisfies(process.versions?.node, range)) {
     logger.error(
       { versions: process.versions, range },
-      'Unsupported node environment detected. Please update your node version.'
+      'Unsupported node environment detected. Please update your node version.',
     );
   } else if (
     rangeNext &&
@@ -81,7 +81,7 @@ function checkEnv(): void {
   ) {
     logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
       { versions: process.versions },
-      `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`
+      `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`,
     );
   }
 }
@@ -97,7 +97,7 @@ export async function validatePresets(config: AllConfig): Promise<void> {
 }
 
 export async function resolveGlobalExtends(
-  globalExtends: string[]
+  globalExtends: string[],
 ): Promise<AllConfig> {
   try {
     // Make a "fake" config to pass to resolveConfigPresets and resolve globalPresets
@@ -127,7 +127,7 @@ export async function start(): Promise<number> {
         // resolve global presets immediately
         config = mergeChildConfig(
           config,
-          await resolveGlobalExtends(config.globalExtends)
+          await resolveGlobalExtends(config.globalExtends),
         );
       }
       // initialize all submodules
@@ -149,14 +149,14 @@ export async function start(): Promise<number> {
 
     // autodiscover repositories (needs to come after platform initialization)
     config = await instrument('discover', () =>
-      autodiscoverRepositories(config)
+      autodiscoverRepositories(config),
     );
 
     if (is.nonEmptyString(config.writeDiscoveredRepos)) {
       const content = JSON.stringify(config.repositories);
       await fs.writeFile(config.writeDiscoveredRepos, content);
       logger.info(
-        `Written discovered repositories to ${config.writeDiscoveredRepos}`
+        `Written discovered repositories to ${config.writeDiscoveredRepos}`,
       );
       return 0;
     }
@@ -191,7 +191,7 @@ export async function start(): Promise<number> {
                 ? repository
                 : repository.repository,
           },
-        }
+        },
       );
     }
   } catch (err) /* istanbul ignore next */ {
@@ -213,7 +213,7 @@ export async function start(): Promise<number> {
   if (loggerErrors.length) {
     logger.info(
       { loggerErrors },
-      'Renovate is exiting with a non-zero code due to the following logged errors'
+      'Renovate is exiting with a non-zero code due to the following logged errors',
     );
     return 1;
   }

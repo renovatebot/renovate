@@ -7,7 +7,7 @@ import type { ChartDefinition, Repository } from './types';
 
 export function parseRepository(
   depName: string,
-  repositoryURL: string
+  repositoryURL: string,
 ): PackageDependency {
   const res: PackageDependency = {};
 
@@ -41,7 +41,7 @@ export function parseRepository(
  */
 export function resolveAlias(
   repository: string,
-  registryAliases: Record<string, string>
+  registryAliases: Record<string, string>,
 ): string | null {
   if (!isAlias(repository)) {
     return repository;
@@ -84,7 +84,7 @@ export function isAlias(repository: string): boolean {
 }
 
 export function isOCIRegistry(
-  repository: Repository | string | null | undefined
+  repository: Repository | string | null | undefined,
 ): boolean {
   if (is.nullOrUndefined(repository)) {
     return false;
@@ -94,7 +94,7 @@ export function isOCIRegistry(
 }
 
 export function aliasRecordToRepositories(
-  registryAliases: Record<string, string>
+  registryAliases: Record<string, string>,
 ): Repository[] {
   return Object.entries(registryAliases).map(([alias, url]) => {
     return {

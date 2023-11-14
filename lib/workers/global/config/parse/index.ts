@@ -15,7 +15,7 @@ import { hostRulesFromEnv } from './host-rules-from-env';
 
 export async function parseConfigs(
   env: NodeJS.ProcessEnv,
-  argv: string[]
+  argv: string[],
 ): Promise<AllConfig> {
   logger.debug('Parsing configs');
 
@@ -53,7 +53,7 @@ export async function parseConfigs(
   if (!config.privateKeyOld && config.privateKeyPathOld) {
     config.privateKeyOld = await readSystemFile(
       config.privateKeyPathOld,
-      'utf8'
+      'utf8',
     );
     delete config.privateKeyPathOld;
   }
@@ -71,7 +71,7 @@ export async function parseConfigs(
   if (config.logFile) {
     logger.debug(
       // TODO: types (#22198)
-      `Enabling ${config.logFileLevel!} logging to ${config.logFile}`
+      `Enabling ${config.logFileLevel!} logging to ${config.logFile}`,
     );
     await ensureDir(getParentDir(config.logFile));
     addStream({

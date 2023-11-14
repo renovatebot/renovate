@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { CustomDatasource } from './index';
@@ -196,6 +197,46 @@ describe('modules/datasource/custom/index', () => {
         },
       });
       expect(result).toBeNull();
+    });
+
+    it('return releases for yaml API directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+
+      const yaml = codeBlock`
+        releases:
+          - version: 1.0.0
+          - version: 2.0.0
+          - version: 3.0.0
+      `;
+
+      httpMock.scope('https://example.com').get('/v1').reply(200, yaml, {
+        'Content-Type': 'text/yaml',
+      });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            format: 'yaml',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
     });
 
     it('return release when templating registryUrl', async () => {

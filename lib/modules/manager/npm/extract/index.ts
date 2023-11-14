@@ -30,7 +30,7 @@ function hasMultipleLockFiles(lockFiles: NpmLockFiles): boolean {
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`npm.extractPackageFile(${packageFile})`);
   logger.trace({ content });
@@ -63,7 +63,7 @@ export async function extractPackageFile(
 
   for (const [key, val] of Object.entries(lockFiles) as [
     'yarnLock' | 'packageLock' | 'shrinkwrapJson' | 'pnpmShrinkwrap',
-    string
+    string,
   ][]) {
     const filePath = getSiblingFileName(packageFile, val);
     if (await readLocalFile(filePath, 'utf8')) {
@@ -78,7 +78,7 @@ export async function extractPackageFile(
 
   if (hasMultipleLockFiles(lockFiles)) {
     logger.warn(
-      'Updating multiple npm lock files is deprecated and support will be removed in future versions.'
+      'Updating multiple npm lock files is deprecated and support will be removed in future versions.',
     );
   }
 
@@ -89,7 +89,7 @@ export async function extractPackageFile(
     if (is.string(config.npmrc) && !config.npmrcMerge) {
       logger.debug(
         { npmrcFileName },
-        'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false'
+        'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false',
       );
       npmrc = config.npmrc;
     } else {
@@ -103,13 +103,13 @@ export async function extractPackageFile(
         logger.debug('Stripping package-lock setting from .npmrc');
         repoNpmrc = repoNpmrc.replace(
           regEx(/(^|\n)package-lock.*?(\n|$)/g),
-          '\n'
+          '\n',
         );
       }
       if (repoNpmrc.includes('=${') && !GlobalConfig.get('exposeAllEnv')) {
         logger.debug(
           { npmrcFileName },
-          'Stripping .npmrc file of lines with variables'
+          'Stripping .npmrc file of lines with variables',
         );
         repoNpmrc = repoNpmrc
           .split(newlineRegex)
@@ -127,13 +127,13 @@ export async function extractPackageFile(
 
   let yarnConfig: YarnConfig | null = null;
   const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
-  if (is.string(repoYarnrcYml)) {
+  if (is.string(repoYarnrcYml) && repoYarnrcYml.trim().length > 0) {
     yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
   }
 
   const legacyYarnrcFileName = getSiblingFileName(packageFile, '.yarnrc');
   const repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
-  if (is.string(repoLegacyYarnrc)) {
+  if (is.string(repoLegacyYarnrc) && repoLegacyYarnrc.trim().length > 0) {
     yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
 
@@ -156,7 +156,7 @@ export async function extractPackageFile(
     const hasFancyRefs = !!res.deps.some(
       (dep) =>
         !!dep.currentValue?.startsWith('file:') ||
-        !!dep.currentValue?.startsWith('npm:')
+        !!dep.currentValue?.startsWith('npm:'),
     );
     if ((hasFancyRefs && !!lockFiles.npmLock) || yarnZeroInstall) {
       // https://github.com/npm/cli/issues/1432
@@ -178,7 +178,7 @@ export async function extractPackageFile(
       if (dep.depName) {
         const registryUrlFromYarnConfig = resolveRegistryUrl(
           dep.depName,
-          yarnConfig
+          yarnConfig,
         );
         if (registryUrlFromYarnConfig && dep.datasource === NpmDatasource.id) {
           dep.registryUrls = [registryUrlFromYarnConfig];
@@ -195,7 +195,7 @@ export async function extractPackageFile(
       ...lockFiles,
       yarnZeroInstall,
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(
-        packageJson.packageManager
+        packageJson.packageManager,
       ),
       workspacesPackages,
     },
@@ -206,7 +206,7 @@ export async function extractPackageFile(
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  packageFiles: string[]
+  packageFiles: string[],
 ): Promise<PackageFile<NpmManagerData>[]> {
   const npmFiles: PackageFile<NpmManagerData>[] = [];
   for (const packageFile of packageFiles) {

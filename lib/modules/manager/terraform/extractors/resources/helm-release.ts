@@ -18,7 +18,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
   override extract(
     hclMap: TerraformDefinitionFile,
     _locks: ProviderLock[],
-    config: ExtractConfig
+    config: ExtractConfig,
   ): PackageDependency[] {
     const dependencies = [];
 
@@ -31,7 +31,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
     if (!is.plainObject(helmReleases)) {
       logger.debug(
         { helmReleases },
-        'Terraform: unexpected `helmReleases` value'
+        'Terraform: unexpected `helmReleases` value',
       );
       return [];
     }
@@ -60,10 +60,10 @@ export class HelmReleaseExtractor extends DependencyExtractor {
           this.processOCI(
             joinUrlParts(
               helmRelease.repository.replace('oci://', ''),
-              helmRelease.chart
+              helmRelease.chart,
             ),
             config,
-            dep
+            dep,
           );
         } else {
           dep.registryUrls = [helmRelease.repository];
@@ -77,12 +77,12 @@ export class HelmReleaseExtractor extends DependencyExtractor {
   private processOCI(
     depName: string,
     config: ExtractConfig,
-    dep: PackageDependency
+    dep: PackageDependency,
   ): void {
     const { depName: packageName, datasource } = getDep(
       depName,
       false,
-      config.registryAliases
+      config.registryAliases,
     );
     dep.packageName = packageName;
     dep.datasource = datasource;
