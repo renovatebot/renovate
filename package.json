@@ -290,7 +290,7 @@
     "@types/luxon": "3.3.4",
     "@types/markdown-it": "13.0.5",
     "@types/markdown-table": "2.0.0",
-    "@types/marshal": "0.5.2",
+    "@types/marshal": "0.5.3",
     "@types/mdast": "3.0.14",
     "@types/moo": "0.5.8",
     "@types/nock": "10.0.3",
