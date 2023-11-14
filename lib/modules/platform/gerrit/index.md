@@ -39,8 +39,8 @@ It works similar to the default option `"pr"`.
 
 ## Optional features
 
-The [Merge Confidence](https://docs.renovatebot.com/merge-confidence/) feature can be used.
-It needs only a corresponding Gerrit-Label and the permission to set the min/max value.
+You can use the [Merge Confidence](https://docs.renovatebot.com/merge-confidence/) feature on the Gerrit platform.
+For this to work, Renovate needs a Gerrit-Label and permission to set the min/max value.
 
 You must set a label, for Renovate to pass the information to the Gerrit changes.
 
