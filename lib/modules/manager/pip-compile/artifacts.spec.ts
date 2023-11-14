@@ -58,7 +58,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toEqual([]);
   });
@@ -73,7 +73,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       { cmd: 'pip-compile requirements.in' },
@@ -86,7 +86,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['requirements.txt'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
@@ -95,7 +95,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config: { ...config, constraints: { python: '3.7' } },
-      })
+      }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchObject([
       { cmd: 'pip-compile requirements.in' },
@@ -112,7 +112,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['requirements.txt'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
@@ -122,7 +122,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config: { ...config, constraints: { python: '3.10.2' } },
-      })
+      }),
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -158,7 +158,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['requirements.txt'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
@@ -167,7 +167,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config: { ...config, constraints: { python: '3.10.2' } },
-      })
+      }),
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -192,7 +192,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         artifactError: { lockFile: 'requirements.txt', stderr: 'not found' },
@@ -207,7 +207,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['requirements.txt'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
@@ -216,7 +216,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: lockMaintenanceConfig,
-      })
+      }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchObject([
       { cmd: 'pip-compile requirements.in' },
@@ -233,7 +233,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['requirements.txt'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
@@ -246,7 +246,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           ...config,
           constraints: { python: '3.10.2', pipTools: '6.13.0' },
         },
-      })
+      }),
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -278,8 +278,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
         constructPipCompileCmd(
           Fixtures.get('requirementsNoHeaders.txt'),
           'subdir/requirements.in',
-          'subdir/requirements.txt'
-        )
+          'subdir/requirements.txt',
+        ),
       ).toBe('pip-compile requirements.in');
     });
 
@@ -288,10 +288,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
         constructPipCompileCmd(
           Fixtures.get('requirementsWithHashes.txt'),
           'subdir/requirements.in',
-          'subdir/requirements.txt'
-        )
+          'subdir/requirements.txt',
+        ),
       ).toBe(
-        'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in'
+        'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
       );
     });
 
@@ -300,16 +300,16 @@ describe('modules/manager/pip-compile/artifacts', () => {
         constructPipCompileCmd(
           Fixtures.get('requirementsWithUnknownArguments.txt'),
           'subdir/requirements.in',
-          'subdir/requirements.txt'
-        )
+          'subdir/requirements.txt',
+        ),
       ).toBe('pip-compile --generate-hashes requirements.in');
       expect(logger.trace).toHaveBeenCalledWith(
         { argument: '--version' },
-        'pip-compile argument is not (yet) supported'
+        'pip-compile argument is not (yet) supported',
       );
       expect(logger.warn).toHaveBeenCalledWith(
         { argument: '--resolver=foobar' },
-        'pip-compile was previously executed with an unexpected `--resolver` value'
+        'pip-compile was previously executed with an unexpected `--resolver` value',
       );
     });
 
@@ -318,14 +318,14 @@ describe('modules/manager/pip-compile/artifacts', () => {
         constructPipCompileCmd(
           Fixtures.get('requirementsWithExploitingArguments.txt'),
           'subdir/requirements.in',
-          'subdir/requirements.txt'
-        )
+          'subdir/requirements.txt',
+        ),
       ).toBe(
-        'pip-compile --generate-hashes --output-file=requirements.txt requirements.in'
+        'pip-compile --generate-hashes --output-file=requirements.txt requirements.in',
       );
       expect(logger.warn).toHaveBeenCalledWith(
         { argument: '--output-file=/etc/shadow' },
-        'pip-compile was previously executed with an unexpected `--output-file` filename'
+        'pip-compile was previously executed with an unexpected `--output-file` filename',
       );
     });
   });
@@ -338,7 +338,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       'returns expected value for supported %s resolver',
       (argument: string, expected: string) => {
         expect(extractResolver(argument)).toBe(expected);
-      }
+      },
     );
 
     it.each(['--resolver=foo', '--resolver='])(
@@ -347,9 +347,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
         expect(extractResolver(argument)).toBeNull();
         expect(logger.warn).toHaveBeenCalledWith(
           { argument },
-          'pip-compile was previously executed with an unexpected `--resolver` value'
+          'pip-compile was previously executed with an unexpected `--resolver` value',
         );
-      }
+      },
     );
   });
 });

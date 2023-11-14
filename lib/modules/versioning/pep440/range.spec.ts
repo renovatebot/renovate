@@ -10,8 +10,8 @@ it.each`
   ({ rangeInput, newVersion, expected }) => {
     const res = checkRangeAndRemoveUnnecessaryRangeLimit(
       rangeInput,
-      newVersion
+      newVersion,
     );
     expect(res).toEqual(expected);
-  }
+  },
 );

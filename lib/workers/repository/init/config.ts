@@ -4,7 +4,7 @@ import { mergeRenovateConfig } from './merge';
 
 // istanbul ignore next
 export async function getRepoConfig(
-  config_: RenovateConfig
+  config_: RenovateConfig,
 ): Promise<RenovateConfig> {
   let config = { ...config_ };
   config.baseBranch = config.defaultBranch;

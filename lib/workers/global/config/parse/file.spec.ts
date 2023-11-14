@@ -41,7 +41,7 @@ describe('workers/global/config/parse/file', () => {
     ])('parses %s', async (_fileType, filePath) => {
       const configFile = upath.resolve(__dirname, './__fixtures__/', filePath);
       expect(
-        await file.getConfig({ RENOVATE_CONFIG_FILE: configFile })
+        await file.getConfig({ RENOVATE_CONFIG_FILE: configFile }),
       ).toEqual(customConfig);
     });
 
@@ -82,7 +82,7 @@ describe('workers/global/config/parse/file', () => {
         await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
         expect(processExitSpy).toHaveBeenCalledWith(1);
         fs.unlinkSync(configFile);
-      }
+      },
     );
 
     it('fatal error and exit if custom config file does not exist', async () => {
@@ -101,7 +101,7 @@ describe('workers/global/config/parse/file', () => {
 
       const configFile = upath.resolve(
         __dirname,
-        './__fixtures__/config-ref-error.js-invalid'
+        './__fixtures__/config-ref-error.js-invalid',
       );
       const tmpDir = tmp.path;
       await fsExtra.ensureDir(tmpDir);
@@ -112,7 +112,7 @@ describe('workers/global/config/parse/file', () => {
       await file.getConfig({ RENOVATE_CONFIG_FILE: tmpConfigFile });
 
       expect(logger.fatal).toHaveBeenCalledWith(
-        `Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined`
+        `Error parsing config file due to unresolved variable(s): CI_API_V4_URL is not defined`,
       );
       expect(processExitSpy).toHaveBeenCalledWith(1);
     });
@@ -159,7 +159,7 @@ describe('workers/global/config/parse/file', () => {
         await file.deleteNonDefaultConfig({ RENOVATE_CONFIG_FILE: configFile });
 
         expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
-      }
+      },
     );
 
     it('skip when config file does not exist', async () => {
@@ -184,7 +184,7 @@ describe('workers/global/config/parse/file', () => {
         });
 
         expect(fsRemoveSpy).toHaveBeenCalledTimes(0);
-      }
+      },
     );
 
     it('removes the specified config file', async () => {
@@ -203,7 +203,7 @@ describe('workers/global/config/parse/file', () => {
       expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
       expect(logger.trace).toHaveBeenCalledWith(
         expect.anything(),
-        'config file successfully deleted'
+        'config file successfully deleted',
       );
     });
 
@@ -223,7 +223,7 @@ describe('workers/global/config/parse/file', () => {
       expect(fsRemoveSpy).toHaveBeenCalledWith(configFile);
       expect(logger.warn).toHaveBeenCalledWith(
         expect.anything(),
-        'error deleting config file'
+        'error deleting config file',
       );
     });
   });

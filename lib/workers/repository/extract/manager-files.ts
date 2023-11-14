@@ -10,7 +10,7 @@ import { readLocalFile } from '../../../util/fs';
 import type { WorkerExtractConfig } from '../../types';
 
 export async function getManagerPackageFiles(
-  config: WorkerExtractConfig
+  config: WorkerExtractConfig,
 ): Promise<PackageFile[] | null> {
   const { enabled, manager, fileList } = config;
   logger.trace(`getPackageFiles(${manager})`);
@@ -23,7 +23,7 @@ export async function getManagerPackageFiles(
     logger.debug(
       `Matched ${
         fileList.length
-      } file(s) for manager ${manager}: ${fileList.join(', ')}`
+      } file(s) for manager ${manager}: ${fileList.join(', ')}`,
     );
   } else {
     return [];
@@ -33,7 +33,7 @@ export async function getManagerPackageFiles(
     const allPackageFiles = await extractAllPackageFiles(
       manager,
       config,
-      fileList
+      fileList,
     );
     return allPackageFiles;
   }
@@ -46,7 +46,7 @@ export async function getManagerPackageFiles(
         manager,
         content,
         packageFile,
-        config
+        config,
       );
       if (res) {
         packageFiles.push({

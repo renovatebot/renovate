@@ -98,7 +98,7 @@ describe('modules/versioning/azure-rest-api/index', () => {
     'equals("$version", "$other") === $expected',
     ({ version, other, expected }) => {
       expect(azureRestApi.equals(version, other)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -115,7 +115,7 @@ describe('modules/versioning/azure-rest-api/index', () => {
     'isGreaterThan("$version", "$other") === $expected',
     ({ version, other, expected }) => {
       expect(azureRestApi.isGreaterThan(version, other)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -132,6 +132,6 @@ describe('modules/versioning/azure-rest-api/index', () => {
     'sortVersions("$version", "$other") === $expected',
     ({ version, other, expected }) => {
       expect(azureRestApi.sortVersions(version, other)).toBe(expected);
-    }
+    },
   );
 });

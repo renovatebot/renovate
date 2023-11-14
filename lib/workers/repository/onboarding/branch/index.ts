@@ -27,7 +27,7 @@ import {
 import { rebaseOnboardingBranch } from './rebase';
 
 export async function checkOnboardingBranch(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<RenovateConfig> {
   logger.debug('checkOnboarding()');
   logger.trace({ config });
@@ -82,7 +82,7 @@ export async function checkOnboardingBranch(
       !(config.onboardingRebaseCheckbox && OnboardingState.prUpdateRequested)
     ) {
       logger.debug(
-        'Skip processing since the onboarding branch is up to date and default branch has not changed'
+        'Skip processing since the onboarding branch is up to date and default branch has not changed',
       );
       OnboardingState.onboardingCacheValid = true;
       return { ...config, repoIsOnboarded, onboardingBranch, branchList };
@@ -94,7 +94,7 @@ export async function checkOnboardingBranch(
       }
       isConflicted = await isOnboardingBranchConflicted(
         config.baseBranch!,
-        config.onboardingBranch!
+        config.onboardingBranch!,
       );
     }
   } else {
@@ -121,7 +121,7 @@ export async function checkOnboardingBranch(
     if (commit) {
       logger.info(
         { branch: onboardingBranch, commit, onboarding: true },
-        'Branch created'
+        'Branch created',
       );
     }
   }
@@ -136,7 +136,7 @@ export async function checkOnboardingBranch(
     getBranchCommit(config.defaultBranch!)!,
     getBranchCommit(onboardingBranch!)!,
     isConflicted,
-    isModified
+    isModified,
   );
 
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
@@ -168,7 +168,7 @@ function invalidateExtractCache(baseBranch: string): void {
 
 function isOnboardingCacheValid(
   defaultBranch: string,
-  onboardingBranch: string
+  onboardingBranch: string,
 ): boolean {
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;

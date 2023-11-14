@@ -8,7 +8,7 @@ export interface GithubDatasourceItem {
  */
 export interface GithubGraphqlDatasourceAdapter<
   Input,
-  Output extends GithubDatasourceItem
+  Output extends GithubDatasourceItem,
 > {
   /**
    * Used for creating datasource-unique cache key
@@ -88,14 +88,14 @@ export interface GithubGraphqlRepoParams {
 }
 
 export interface GithubGraphqlCacheRecord<
-  GithubItem extends GithubDatasourceItem
+  GithubItem extends GithubDatasourceItem,
 > {
   items: Record<string, GithubItem>;
   createdAt: string;
 }
 
 export interface GithubGraphqlCacheStrategy<
-  GithubItem extends GithubDatasourceItem
+  GithubItem extends GithubDatasourceItem,
 > {
   reconcile(items: GithubItem[]): Promise<boolean>;
   finalize(): Promise<GithubItem[]>;

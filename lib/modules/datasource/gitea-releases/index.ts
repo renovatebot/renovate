@@ -30,7 +30,7 @@ export class GiteaReleasesDatasource extends Datasource {
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `${GiteaTagsDatasource.getApiUrl(
-      registryUrl
+      registryUrl,
     )}repos/${repo}/releases?draft=false`;
     const tags = (
       await this.http.getJson(
@@ -38,7 +38,7 @@ export class GiteaReleasesDatasource extends Datasource {
         {
           paginate: true,
         },
-        ReleasesSchema
+        ReleasesSchema,
       )
     ).body;
 
@@ -65,10 +65,10 @@ export class GiteaReleasesDatasource extends Datasource {
   async getTagCommit(
     registryUrl: string | undefined,
     repo: string,
-    tag: string
+    tag: string,
   ): Promise<string | null> {
     const url = `${GiteaTagsDatasource.getApiUrl(
-      registryUrl
+      registryUrl,
     )}repos/${repo}/tags/${tag}`;
 
     const { body } = await this.http.getJson(url, TagSchema);
@@ -85,14 +85,14 @@ export class GiteaReleasesDatasource extends Datasource {
   })
   override async getDigest(
     { packageName: repo, registryUrl }: DigestConfig,
-    newValue?: string
+    newValue?: string,
   ): Promise<string | null> {
     if (newValue?.length) {
       return this.getTagCommit(registryUrl, repo, newValue);
     }
 
     const url = `${GiteaTagsDatasource.getApiUrl(
-      registryUrl
+      registryUrl,
     )}repos/${repo}/commits?stat=false&verification=false&files=false&page=1&limit=1`;
     const { body } = await this.http.getJson(url, CommitsSchema);
 

@@ -34,7 +34,7 @@ export class GoDatasource extends Datasource {
 
   // Pseudo versions https://go.dev/ref/mod#pseudo-versions
   static readonly pversionRegexp = regEx(
-    /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/
+    /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/,
   );
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
@@ -61,7 +61,7 @@ export class GoDatasource extends Datasource {
   })
   override async getDigest(
     { packageName }: DigestConfig,
-    value?: string | null
+    value?: string | null,
   ): Promise<string | null> {
     const source = await BaseGoDatasource.getDatasource(packageName);
     if (!source) {

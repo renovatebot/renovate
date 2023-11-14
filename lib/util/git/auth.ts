@@ -32,12 +32,12 @@ const standardGitAllowedHostTypes = [
 export function getGitAuthenticatedEnvironmentVariables(
   originalGitUrl: string,
   { token, username, password, hostType, matchHost }: HostRule,
-  environmentVariables?: NodeJS.ProcessEnv
+  environmentVariables?: NodeJS.ProcessEnv,
 ): NodeJS.ProcessEnv {
   if (!token && !(username && password)) {
     logger.warn(
       // TODO: types (#22198)
-      `Could not create environment variable for ${matchHost!} as neither token or username and password was set`
+      `Could not create environment variable for ${matchHost!} as neither token or username and password was set`,
     );
     return { ...environmentVariables };
   }
@@ -52,8 +52,8 @@ export function getGitAuthenticatedEnvironmentVariables(
     if (Number.isNaN(gitConfigCount)) {
       logger.warn(
         `Found GIT_CONFIG_COUNT env variable, but couldn't parse the value to an integer: ${String(
-          process.env.GIT_CONFIG_COUNT
-        )}. Ignoring it.`
+          process.env.GIT_CONFIG_COUNT,
+        )}. Ignoring it.`,
       );
       gitConfigCount = 0;
     }
@@ -63,7 +63,7 @@ export function getGitAuthenticatedEnvironmentVariables(
     authenticationRules = getAuthenticationRulesWithToken(
       originalGitUrl,
       hostType,
-      token
+      token,
     );
   } else {
     const encodedUsername = encodeURIComponent(username!);
@@ -71,7 +71,7 @@ export function getGitAuthenticatedEnvironmentVariables(
 
     authenticationRules = getAuthenticationRules(
       originalGitUrl,
-      `${encodedUsername}:${encodedPassword}`
+      `${encodedUsername}:${encodedPassword}`,
     );
   }
 
@@ -97,7 +97,7 @@ export function getGitAuthenticatedEnvironmentVariables(
 function getAuthenticationRulesWithToken(
   url: string,
   hostType: string | undefined | null,
-  authToken: string
+  authToken: string,
 ): AuthenticationRule[] {
   let token = authToken;
   let type = hostType;
@@ -116,7 +116,7 @@ function getAuthenticationRulesWithToken(
  */
 export function getAuthenticationRules(
   gitUrl: string,
-  token: string
+  token: string,
 ): AuthenticationRule[] {
   const authenticationRules = [];
   const hasUser = token.split(':').length > 1;
@@ -156,7 +156,7 @@ export function getAuthenticationRules(
 }
 
 export function getGitEnvironmentVariables(
-  additionalHostTypes: string[] = []
+  additionalHostTypes: string[] = [],
 ): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
 
@@ -169,7 +169,7 @@ export function getGitEnvironmentVariables(
   if (gitHubHostRule?.token) {
     environmentVariables = getGitAuthenticatedEnvironmentVariables(
       'https://github.com/',
-      gitHubHostRule
+      gitHubHostRule,
     );
   }
 
@@ -191,7 +191,7 @@ export function getGitEnvironmentVariables(
     if (!hostRule.hostType || gitAllowedHostTypes.has(hostRule.hostType)) {
       environmentVariables = addAuthFromHostRule(
         hostRule,
-        environmentVariables
+        environmentVariables,
       );
     }
   }
@@ -200,7 +200,7 @@ export function getGitEnvironmentVariables(
 
 function addAuthFromHostRule(
   hostRule: HostRule,
-  env: NodeJS.ProcessEnv
+  env: NodeJS.ProcessEnv,
 ): NodeJS.ProcessEnv {
   let environmentVariables = env;
   const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
@@ -209,11 +209,11 @@ function addAuthFromHostRule(
     environmentVariables = getGitAuthenticatedEnvironmentVariables(
       httpUrl!,
       hostRule,
-      environmentVariables
+      environmentVariables,
     );
   } else {
     logger.debug(
-      `Could not parse registryUrl ${hostRule.matchHost!} or not using http(s). Ignoring`
+      `Could not parse registryUrl ${hostRule.matchHost!} or not using http(s). Ignoring`,
     );
   }
   return environmentVariables;

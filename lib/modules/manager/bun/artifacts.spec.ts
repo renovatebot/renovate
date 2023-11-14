@@ -111,7 +111,7 @@ describe('modules/manager/bun/artifacts', () => {
       fs.readFile.mockResolvedValueOnce(oldLock as never);
       exec.mockRejectedValueOnce(execError);
       await expect(updateArtifacts(updateArtifact)).rejects.toThrow(
-        TEMPORARY_ERROR
+        TEMPORARY_ERROR,
       );
     });
 

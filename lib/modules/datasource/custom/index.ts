@@ -1,11 +1,12 @@
 import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { logger } from '../../../logger';
-import { newlineRegex } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { fetch as plainFetch } from './formats/plain';
+import { fetch as yamlFetch } from './formats/yaml';
 import { ReleaseResultZodSchema } from './schema';
-import { massageCustomDatasourceConfig } from './utils';
+import { getCustomConfig } from './utils';
 
 export class CustomDatasource extends Datasource {
   static readonly id = 'custom';
@@ -17,36 +18,25 @@ export class CustomDatasource extends Datasource {
   }
 
   async getReleases(
-    getReleasesConfig: GetReleasesConfig
+    getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    const customDatasourceName = getReleasesConfig.datasource?.replace(
-      'custom.',
-      ''
-    );
-
-    if (!is.nonEmptyString(customDatasourceName)) {
-      logger.debug(
-        `No datasource has been supplied while looking up ${getReleasesConfig.packageName}`
-      );
-      return null;
-    }
-
-    const config = massageCustomDatasourceConfig(
-      customDatasourceName,
-      getReleasesConfig
-    );
+    const config = getCustomConfig(getReleasesConfig);
     if (is.nullOrUndefined(config)) {
       return null;
     }
 
     const { defaultRegistryUrlTemplate, transformTemplates, format } = config;
-    // TODO add here other format options than JSON and "plain"
     let response: unknown;
     try {
-      if (format === 'plain') {
-        response = await this.fetchPlainFormat(defaultRegistryUrlTemplate);
-      } else {
-        response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
+      switch (format) {
+        case 'plain':
+          response = await plainFetch(this.http, defaultRegistryUrlTemplate);
+          break;
+        case 'yaml':
+          response = await yamlFetch(this.http, defaultRegistryUrlTemplate);
+          break;
+        case 'json':
+          response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
       }
     } catch (e) {
       this.handleHttpErrors(e);
@@ -68,25 +58,5 @@ export class CustomDatasource extends Datasource {
       logger.trace({ data }, 'Response that has failed validation');
       return null;
     }
-  }
-
-  private async fetchPlainFormat(url: string): Promise<unknown> {
-    const response = await this.http.get(url, {
-      headers: {
-        Accept: 'text/plain',
-      },
-    });
-    const contentType = response.headers['content-type'];
-    if (!contentType?.startsWith('text/')) {
-      return null;
-    }
-    const versions = response.body.split(newlineRegex).map((version) => {
-      return {
-        version: version.trim(),
-      };
-    });
-    return {
-      releases: versions,
-    };
   }
 }

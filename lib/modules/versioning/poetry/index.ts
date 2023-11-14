@@ -83,7 +83,7 @@ function matches(version: string, range: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const semverVersions: string[] = [];
   versions.forEach((version) => {
@@ -99,7 +99,7 @@ function getSatisfyingVersion(
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const semverVersions: string[] = [];
   versions.forEach((version) => {
@@ -124,7 +124,7 @@ function isSingleVersion(constraint: string): boolean {
 function handleShort(
   operator: string,
   currentValue: string,
-  newVersion: string
+  newVersion: string,
 ): string | null {
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
@@ -167,7 +167,7 @@ function getNewValue({
     } catch (err) /* istanbul ignore next */ {
       logger.info(
         { err },
-        'Poetry versioning: Error caught checking if newVersion satisfies currentValue'
+        'Poetry versioning: Error caught checking if newVersion satisfies currentValue',
       );
     }
     const parsedRange = parseRange(npmCurrentValue);
@@ -194,7 +194,7 @@ function getNewValue({
       .length !== 3
   ) {
     logger.debug(
-      'Cannot massage python version to npm - returning currentValue'
+      'Cannot massage python version to npm - returning currentValue',
     );
     return currentValue;
   }
@@ -219,7 +219,7 @@ function getNewValue({
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       { currentValue, rangeStrategy, currentVersion, newVersion, err },
-      'Could not generate new value using npm.getNewValue()'
+      'Could not generate new value using npm.getNewValue()',
     );
   }
 
