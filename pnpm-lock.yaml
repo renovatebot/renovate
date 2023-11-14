@@ -368,8 +368,8 @@ importers:
         specifier: 1.0.4
         version: 1.0.4
       '@types/aws4':
-        specifier: 1.11.5
-        version: 1.11.5
+        specifier: 1.11.6
+        version: 1.11.6
       '@types/breejs__later':
         specifier: 4.1.4
         version: 4.1.4
@@ -3658,8 +3658,8 @@ packages:
     resolution: {integrity: sha512-rG9GxxkIwG1dcfDFjE49XAYM8yr83khd0y4bOlnf89q7+AJUpkes0D27S6H+l4+5c3AIdYAvFoI42JSHJed4Vw==}
     dev: true
 
-  /@types/aws4@1.11.5:
-    resolution: {integrity: sha512-UBercs8+U9+KAGq3eDIB7+qKVbjxayzwit5Xw+UfRBWgNolGh8PZwCjLn5ILqgVSSTnIJDktGHTsFfOA2kGjkA==}
+  /@types/aws4@1.11.6:
+    resolution: {integrity: sha512-5CnVUkHNyLGpD9AnOcK66YyP0qvIh6nhJJoeK8zSl5YKikUcUbdB7SlHevUYVqicgeh6j5AJa1qa/h08dSZHoA==}
     dependencies:
       '@types/node': 18.18.9
     dev: true
