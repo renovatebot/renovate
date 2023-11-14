@@ -383,8 +383,8 @@ importers:
         specifier: 1.0.34
         version: 1.0.34
       '@types/changelog-filename-regex':
-        specifier: 2.0.1
-        version: 2.0.1
+        specifier: 2.0.2
+        version: 2.0.2
       '@types/clean-git-ref':
         specifier: 2.0.2
         version: 2.0.2
@@ -3728,8 +3728,8 @@ packages:
     resolution: {integrity: sha512-eglitkkbqiQiijtKsUvOcQm+E6qLMPcggjDJXeqNBnLxdzffRGop2+2QDN/8pHh396/jN5cmIwweNKUqKJ50mQ==}
     dev: true
 
-  /@types/changelog-filename-regex@2.0.1:
-    resolution: {integrity: sha512-G+K3b82RzH99HbRvlKf5++1P2E8ToBRObimboMTKdL2etEEAL7xL8zJqm3XSUZmlVEwMTxESnaYDTaZF/GEXNQ==}
+  /@types/changelog-filename-regex@2.0.2:
+    resolution: {integrity: sha512-H9iuCn3Ata8075f1Nyg/WScyicJ3eXr7AklsOrPeME3sa8izDlpBhbWurtdZJfuo4Vc5+J7wNoD9Yo1d66sj+A==}
     dev: true
 
   /@types/clean-git-ref@2.0.2:
