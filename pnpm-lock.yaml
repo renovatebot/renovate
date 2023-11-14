@@ -419,8 +419,8 @@ importers:
         specifier: 4.0.8
         version: 4.0.8
       '@types/json-dup-key-validator':
-        specifier: 1.0.1
-        version: 1.0.1
+        specifier: 1.0.2
+        version: 1.0.2
       '@types/linkify-markdown':
         specifier: 1.0.2
         version: 1.0.2
@@ -3816,8 +3816,8 @@ packages:
     resolution: {integrity: sha512-m6jnPk1VhlYRiLFm3f8X9Uep761f+CK8mHyS65LutH2OhmBF0BeMEjHgg05usH8PLZMWWc/BUR9RPmkvpWnyRA==}
     dev: true
 
-  /@types/json-dup-key-validator@1.0.1:
-    resolution: {integrity: sha512-p38LQuXp4vJ2dApz4ePhbDoLS1JYpmM0N0GIpDtQnDV+0AWThEb2xUR0a8KZHG9Ql2YOxYhk4/VLW50mCyDRrQ==}
+  /@types/json-dup-key-validator@1.0.2:
+    resolution: {integrity: sha512-zJSAGITlz2nFT7xcKsvns8UifwSJpKuhgsdZj7+WoxiixiGnIefNiLK2uNhEICRkI9S2ccU6RYdqPS7iJRtU7Q==}
     dev: true
 
   /@types/json-schema@7.0.15:
