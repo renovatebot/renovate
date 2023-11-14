@@ -271,7 +271,7 @@
     "@types/breejs__later": "4.1.5",
     "@types/bunyan": "1.8.10",
     "@types/cacache": "17.0.1",
-    "@types/callsite": "1.0.33",
+    "@types/callsite": "1.0.34",
     "@types/changelog-filename-regex": "2.0.1",
     "@types/clean-git-ref": "2.0.1",
     "@types/common-tags": "1.8.3",
