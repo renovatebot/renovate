@@ -23,7 +23,7 @@ Let Renovate use your HTTP access token by doing _one_ of the following:
 
 This user must be allowed to assign the Code-Review label with "+2" to their own changes for "automerge" to work.
 
-Remember to set `platform=gerrit` somewhere in your Renovate config file.
+You must set `platform=gerrit` in your Renovate config file.
 
 ## Renovate PR/Branch-Model with Gerrit and needed permissions
 
