@@ -15,12 +15,8 @@ export type CommitStatusType =
 export type PRMergeMethod = 'merge' | 'rebase' | 'rebase-merge' | 'squash';
 
 export interface GiteaLabel {
-  color: string;
-  description: string;
-  exclusive: boolean;
   id: number;
   name: string;
-  url: string;
 }
 export interface PR {
   number: number;

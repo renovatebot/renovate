@@ -22,7 +22,7 @@ export function prepareLabels(config: RenovateConfig): string[] {
 export function getChangedLabels(
   oldLabels: string[],
   newLabels: string[],
-): Array<string[] | null> {
+): [string[] | undefined, string[] | undefined] {
   const labelsToAdd = newLabels?.filter((l) => !oldLabels?.includes(l));
   const labelsToRemove = oldLabels?.filter((l) => !newLabels?.includes(l));
 

@@ -114,12 +114,8 @@ describe('modules/platform/gitea/index', () => {
       },
       labels: [
         {
-          color: '00aabb',
-          description: 'Used to mark PRs that resolve a bug',
-          exclusive: false,
           id: 1,
           name: 'bug',
-          url: 'https://some-url',
         },
       ],
     }),
