@@ -269,7 +269,7 @@
     "@types/auth-header": "1.0.4",
     "@types/aws4": "1.11.6",
     "@types/breejs__later": "4.1.5",
-    "@types/bunyan": "1.8.10",
+    "@types/bunyan": "1.8.11",
     "@types/cacache": "17.0.1",
     "@types/callsite": "1.0.33",
     "@types/changelog-filename-regex": "2.0.1",
