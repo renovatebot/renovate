@@ -41,13 +41,13 @@ describe('modules/platform/gerrit/utils', () => {
     it('create a git url without username/password', () => {
       hostRules.find.mockReturnValue({});
       expect(() => utils.getGerritRepoUrl('web/apps', baseUrl)).toThrow(
-        'Init: You must configure a Gerrit Server username/password'
+        'Init: You must configure a Gerrit Server username/password',
       );
     });
 
     it('throws on invalid endpoint', () => {
       expect(() => utils.getGerritRepoUrl('web/apps', '...')).toThrow(
-        Error(CONFIG_GIT_URL_UNAVAILABLE)
+        Error(CONFIG_GIT_URL_UNAVAILABLE),
       );
     });
   });
@@ -64,7 +64,7 @@ describe('modules/platform/gerrit/utils', () => {
       'maps pr state %p to gerrit filter %p',
       (prState: any, filter: string) => {
         expect(utils.mapPrStateToGerritFilter(prState)).toEqual(filter);
-      }
+      },
     );
   });
 
@@ -78,7 +78,7 @@ describe('modules/platform/gerrit/utils', () => {
       'maps gerrit change state %p to PrState %p',
       (state: GerritChangeStatus, prState: any) => {
         expect(utils.mapGerritChangeStateToPrState(state)).toEqual(prState);
-      }
+      },
     );
   });
 
@@ -223,9 +223,9 @@ describe('modules/platform/gerrit/utils', () => {
       'Label with +1/-1 map branchState=%p to %p',
       (branchState, expectedValue) => {
         expect(mapBranchStatusToLabel(branchState, labelWithOne)).toEqual(
-          expectedValue
+          expectedValue,
         );
-      }
+      },
     );
 
     const labelWithTwo: GerritLabelTypeInfo = {
@@ -247,9 +247,9 @@ describe('modules/platform/gerrit/utils', () => {
       'Label with +2/-2, map branchState=%p to %p',
       (branchState, expectedValue) => {
         expect(mapBranchStatusToLabel(branchState, labelWithTwo)).toEqual(
-          expectedValue
+          expectedValue,
         );
-      }
+      },
     );
   });
 
@@ -285,12 +285,12 @@ describe('modules/platform/gerrit/utils', () => {
         context: string | undefined | null,
         labelConfig: RepoGlobalConfig['gerritLabelMapping'],
         gerritLabels: Record<string, GerritLabelTypeInfo>,
-        expectedRes: any
+        expectedRes: any,
       ) => {
         expect(
-          mapBranchStateContextToLabel(context, labelConfig, gerritLabels)
+          mapBranchStateContextToLabel(context, labelConfig, gerritLabels),
         ).toEqual(expectedRes);
-      }
+      },
     );
   });
 });

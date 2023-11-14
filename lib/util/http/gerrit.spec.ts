@@ -50,7 +50,7 @@ describe('util/http/gerrit', () => {
     return expect(
       api
         .postJson('some-url', { body: { key: 'value' } })
-        .then((res) => res.body)
+        .then((res) => res.body),
     ).resolves.toEqual({ res: 'success' });
   });
 
@@ -64,7 +64,7 @@ describe('util/http/gerrit', () => {
       });
 
     return expect(
-      api.putJson('some-url', { body: { key: 'value' } }).then((r) => r.body)
+      api.putJson('some-url', { body: { key: 'value' } }).then((r) => r.body),
     ).resolves.toEqual({ res: 'success' });
   });
 });

@@ -27,7 +27,7 @@ export function getGerritRepoUrl(repository: string, endpoint: string): string {
   }
   if (!(opts.username && opts.password)) {
     throw new Error(
-      'Init: You must configure a Gerrit Server username/password'
+      'Init: You must configure a Gerrit Server username/password',
     );
   }
   url.username = opts.username;
@@ -35,11 +35,11 @@ export function getGerritRepoUrl(repository: string, endpoint: string): string {
   url.pathname = joinUrlParts(
     url.pathname,
     'a',
-    encodeURIComponent(repository)
+    encodeURIComponent(repository),
   );
   logger.trace(
     { url: url.toString() },
-    'using URL based on configured endpoint'
+    'using URL based on configured endpoint',
   );
   return url.toString();
 }
@@ -69,7 +69,7 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
     title: change.subject,
     reviewers:
       change.reviewers?.REVIEWER?.filter(
-        (reviewer) => typeof reviewer.username === 'string'
+        (reviewer) => typeof reviewer.username === 'string',
       ).map((reviewer) => reviewer.username!) ?? [],
     bodyStruct: {
       hash: hashBody(findPullRequestBody(change)),
@@ -78,7 +78,7 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
 }
 
 export function mapGerritChangeStateToPrState(
-  state: GerritChangeStatus
+  state: GerritChangeStatus,
 ): PrState {
   switch (state) {
     case 'NEW':
@@ -97,9 +97,9 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
 }
 
 export function findPullRequestBody(change: GerritChange): string | undefined {
-  const msg = change.messages?.findLast(
-    (msg) => msg.tag === TAG_PULL_REQUEST_BODY
-  );
+  const msg = Array.from(change.messages ?? [])
+    .reverse()
+    .find((msg) => msg.tag === TAG_PULL_REQUEST_BODY);
   if (msg) {
     return msg.message.replace(/^Patch Set \d+:\n\n/, ''); //TODO: check how to get rid of the auto-added prefix?
   }
@@ -108,7 +108,7 @@ export function findPullRequestBody(change: GerritChange): string | undefined {
 
 export function mapBranchStatusToLabel(
   state: BranchStatus,
-  label: GerritLabelTypeInfo
+  label: GerritLabelTypeInfo,
 ): number {
   const numbers = Object.keys(label.values).map((x) => parseInt(x, 10));
   switch (state) {
@@ -125,7 +125,7 @@ export function mapBranchStatusToLabel(
 export function mapBranchStateContextToLabel(
   context: string | null | undefined,
   labelMapping: RepoGlobalConfig['gerritLabelMapping'],
-  gerritLabels: Record<string, GerritLabelTypeInfo>
+  gerritLabels: Record<string, GerritLabelTypeInfo>,
 ): {
   labelName?: string;
   label?: GerritLabelTypeInfo;

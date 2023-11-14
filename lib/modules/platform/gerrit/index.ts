@@ -75,7 +75,7 @@ export function initPlatform({
   }
   if (!(username && password)) {
     throw new Error(
-      'Init: You must configure a Gerrit Server username/password'
+      'Init: You must configure a Gerrit Server username/password',
     );
   }
   config.labelMappings = gerritLabelMapping;
@@ -139,7 +139,7 @@ export async function initRepo({
 
 export async function findPr(
   findPRConfig: FindPRConfig,
-  refreshCache?: boolean
+  refreshCache?: boolean,
 ): Promise<Pr | null> {
   const change = (
     await client.findChanges(config.repository!, findPRConfig, refreshCache)
@@ -166,14 +166,14 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
     await client.updateCommitMessage(
       prConfig.number,
       change.change_id,
-      prConfig.prTitle
+      prConfig.prTitle,
     );
   }
   if (prConfig.prBody) {
     await client.addMessageIfNotAlreadyExists(
       prConfig.number,
       prConfig.prBody,
-      TAG_PULL_REQUEST_BODY
+      TAG_PULL_REQUEST_BODY,
     );
   }
   if (prConfig.platformOptions?.autoApprove) {
@@ -188,7 +188,7 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
   logger.debug(
     `createPr(${prConfig.sourceBranch}, ${prConfig.prTitle}, ${
       prConfig.labels?.toString() ?? ''
-    })`
+    })`,
   );
   const pr = (
     await client.findChanges(
@@ -198,12 +198,12 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
         targetBranch: prConfig.targetBranch,
         state: 'open',
       },
-      true
+      true,
     )
   ).pop();
   if (pr === undefined) {
     throw new Error(
-      `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`
+      `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`,
     );
   }
   //Workaround for "Known Problems.1"
@@ -211,13 +211,13 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     await client.updateCommitMessage(
       pr._number,
       pr.change_id,
-      prConfig.prTitle
+      prConfig.prTitle,
     );
   }
   await client.addMessageIfNotAlreadyExists(
     pr._number,
     prConfig.prBody,
-    TAG_PULL_REQUEST_BODY
+    TAG_PULL_REQUEST_BODY,
   );
   if (prConfig.platformOptions?.autoApprove) {
     await client.approveChange(pr._number);
@@ -240,7 +240,7 @@ export function getPrList(): Promise<Pr[]> {
 
 export async function mergePr(config: MergePRConfig): Promise<boolean> {
   logger.debug(
-    `mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`
+    `mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`,
   );
   try {
     const change = await client.submitChange(config.id);
@@ -249,7 +249,7 @@ export async function mergePr(config: MergePRConfig): Promise<boolean> {
     if (err.statusCode === 409) {
       logger.warn(
         { err },
-        "Can't submit the change, because the submit rule doesn't allow it."
+        "Can't submit the change, because the submit rule doesn't allow it.",
       );
       return false;
     }
@@ -262,13 +262,13 @@ export async function mergePr(config: MergePRConfig): Promise<boolean> {
  * @param branchName
  */
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   const changes = await client.findChanges(
     config.repository!,
     { state: 'open', branchName },
-    true
+    true,
   );
   if (changes.length > 0) {
     const allSubmittable =
@@ -294,19 +294,19 @@ export async function getBranchStatus(
  */
 export async function getBranchStatusCheck(
   branchName: string,
-  context: string | null | undefined
+  context: string | null | undefined,
 ): Promise<BranchStatus | null> {
   const { labelName } = mapBranchStateContextToLabel(
     context,
     config.labelMappings,
-    config.labels
+    config.labels,
   );
   if (labelName) {
     const change = (
       await client.findChanges(
         config.repository!,
         { branchName, state: 'open' },
-        true
+        true,
       )
     ).pop();
     if (change) {
@@ -330,12 +330,12 @@ export async function getBranchStatusCheck(
  * @param branchStatusConfig
  */
 export async function setBranchStatus(
-  branchStatusConfig: BranchStatusConfig
+  branchStatusConfig: BranchStatusConfig,
 ): Promise<void> {
   const { labelName, label } = mapBranchStateContextToLabel(
     branchStatusConfig.context,
     config.labelMappings,
-    config.labels
+    config.labels,
   );
   const labelValue =
     label && mapBranchStatusToLabel(branchStatusConfig.state, label);
@@ -351,7 +351,7 @@ export async function setBranchStatus(
 export function getRawFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
+  branchOrTag?: string,
 ): Promise<string | null> {
   const repo = repoName ?? config.repository ?? 'All-Projects';
   const branch =
@@ -362,7 +362,7 @@ export function getRawFile(
 export async function getJsonFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
+  branchOrTag?: string,
 ): Promise<any> {
   const raw = (await getRawFile(fileName, repoName, branchOrTag))!;
   return JSON5.parse(raw);
@@ -374,7 +374,7 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 export async function addReviewers(
   number: number,
-  reviewers: string[]
+  reviewers: string[],
 ): Promise<void> {
   for (const reviewer of reviewers) {
     await client.addReviewer(number, reviewer);
@@ -386,12 +386,12 @@ export async function addReviewers(
  */
 export async function addAssignees(
   number: number,
-  assignees: string[]
+  assignees: string[],
 ): Promise<void> {
   if (assignees.length) {
     if (assignees.length > 1) {
       logger.debug(
-        `addAssignees(${number}, ${assignees.toString()}) called with more then one assignee! Gerrit only supports one assignee! Using the first from list.`
+        `addAssignees(${number}, ${assignees.toString()}) called with more then one assignee! Gerrit only supports one assignee! Using the first from list.`,
       );
     }
     await client.addAssignee(number, assignees[0]);
@@ -399,17 +399,17 @@ export async function addAssignees(
 }
 
 export async function ensureComment(
-  ensureComment: EnsureCommentConfig
+  ensureComment: EnsureCommentConfig,
 ): Promise<boolean> {
   logger.debug(
     `ensureComment(${ensureComment.number}, ${ensureComment.topic!}, ${
       ensureComment.content
-    })`
+    })`,
   );
   await client.addMessageIfNotAlreadyExists(
     ensureComment.number,
     ensureComment.content,
-    ensureComment.topic ?? undefined
+    ensureComment.topic ?? undefined,
   );
   return true;
 }
@@ -424,16 +424,16 @@ export function massageMarkdown(prBody: string): string {
     .replace(regEx(/&#8203;/g), '') //remove zero-width-space not supported in gerrit-markdown
     .replace(
       'close this Change-Request unmerged.',
-      'abandon or down vote this Change-Request with -2.'
+      'abandon or down vote this Change-Request with -2.',
     )
     .replace('Branch creation', 'Change creation')
     .replace(
       'Close this Change-Request',
-      'Down-vote this Change-Request with -2'
+      'Down-vote this Change-Request with -2',
     )
     .replace(
       'you tick the rebase/retry checkbox',
-      'add "rebase!" at the beginning of the commit message.'
+      'add "rebase!" at the beginning of the commit message.',
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
@@ -446,7 +446,7 @@ export function deleteLabel(number: number, label: string): Promise<void> {
 export function ensureCommentRemoval(
   ensureCommentRemoval:
     | EnsureCommentRemovalConfigByTopic
-    | EnsureCommentRemovalConfigByContent
+    | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
   return Promise.resolve();
 }
@@ -456,7 +456,7 @@ export function ensureIssueClosing(title: string): Promise<void> {
 }
 
 export function ensureIssue(
-  issueConfig: EnsureIssueConfig
+  issueConfig: EnsureIssueConfig,
 ): Promise<EnsureIssueResult | null> {
   return Promise.resolve(null);
 }

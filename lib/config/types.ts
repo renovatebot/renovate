@@ -137,7 +137,6 @@ export interface RepoGlobalConfig {
   dryRun?: DryRunConfig;
   executionTimeout?: number;
   gerritLabelMapping?: {
-    minimumReleaseAgeLabel?: string;
     mergeConfidenceLabel?: string;
   };
   gitTimeout?: number;

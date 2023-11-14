@@ -1,6 +1,6 @@
 # Gerrit
 
-## Supported Gerrit Versions
+## Supported Gerrit versions
 
 Renovate supports all Gerrit 3.x versions.
 

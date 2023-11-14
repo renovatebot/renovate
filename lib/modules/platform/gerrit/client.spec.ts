@@ -30,7 +30,7 @@ describe('modules/platform/gerrit/client', () => {
             repo1: { id: 'repo1', state: 'ACTIVE' },
             repo2: { id: 'repo2', state: 'ACTIVE' },
           }),
-          jsonResultHeader
+          jsonResultHeader,
         );
       expect(await client.getRepos()).toEqual(['repo1', 'repo2']);
     });
@@ -48,10 +48,10 @@ describe('modules/platform/gerrit/client', () => {
             name: 'test-repo',
             state: 'READ_ONLY',
           }),
-          jsonResultHeader
+          jsonResultHeader,
         );
       await expect(client.getProjectInfo('test/repo')).rejects.toThrow(
-        REPOSITORY_ARCHIVED
+        REPOSITORY_ARCHIVED,
       );
     });
 
@@ -66,7 +66,7 @@ describe('modules/platform/gerrit/client', () => {
             name: 'test-repo',
             state: 'ACTIVE',
           }),
-          jsonResultHeader
+          jsonResultHeader,
         );
       await expect(client.getProjectInfo('test/repo')).resolves.toEqual({
         id: 'repo1',
@@ -84,7 +84,7 @@ describe('modules/platform/gerrit/client', () => {
         .reply(
           200,
           gerritRestResponse({ ref: 'sha-hash....', revision: 'main' }),
-          jsonResultHeader
+          jsonResultHeader,
         );
       await expect(client.getBranchInfo('test/repo')).resolves.toEqual({
         ref: 'sha-hash....',
@@ -121,13 +121,13 @@ describe('modules/platform/gerrit/client', () => {
           .reply(
             200,
             gerritRestResponse([{ _number: 1 }, { _number: 2 }]),
-            jsonResultHeader
+            jsonResultHeader,
           );
         await expect(client.findChanges('repo', config)).resolves.toEqual([
           { _number: 1 },
           { _number: 2 },
         ]);
-      }
+      },
     );
   });
 
@@ -137,7 +137,7 @@ describe('modules/platform/gerrit/client', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get(
-          '/a/changes/123456?o=SUBMITTABLE&o=CHECK&o=MESSAGES&o=DETAILED_ACCOUNTS&o=LABELS&o=CURRENT_ACTIONS&o=CURRENT_REVISION'
+          '/a/changes/123456?o=SUBMITTABLE&o=CHECK&o=MESSAGES&o=DETAILED_ACCOUNTS&o=LABELS&o=CURRENT_ACTIONS&o=CURRENT_REVISION',
         )
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(client.getChange(123456)).resolves.toEqual(change);
@@ -155,7 +155,7 @@ describe('modules/platform/gerrit/client', () => {
         .get('/a/changes/123456/revisions/current/mergeable')
         .reply(200, gerritRestResponse(mergeInfo), jsonResultHeader);
       await expect(
-        client.getMergeableInfo(partial<GerritChange>({ _number: 123456 }))
+        client.getMergeableInfo(partial<GerritChange>({ _number: 123456 })),
       ).resolves.toEqual(mergeInfo);
     });
   });
@@ -202,7 +202,7 @@ describe('modules/platform/gerrit/client', () => {
         })
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(
-        client.updateCommitMessage(123456, 'changeID', 'new message')
+        client.updateCommitMessage(123456, 'changeID', 'new message'),
       ).toResolve();
     });
   });
@@ -226,7 +226,7 @@ describe('modules/platform/gerrit/client', () => {
             partial<GerritChangeMessageInfo>({ message: 'msg1' }),
             partial<GerritChangeMessageInfo>({ message: 'msg2' }),
           ]),
-          jsonResultHeader
+          jsonResultHeader,
         );
       await expect(client.getMessages(123456)).resolves.toEqual([
         { message: 'msg1' },
@@ -265,7 +265,7 @@ describe('modules/platform/gerrit/client', () => {
         .get('/a/changes/123456/messages')
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(
-        client.checkForExistingMessage(123456, ' the message ')
+        client.checkForExistingMessage(123456, ' the message '),
       ).resolves.toBeFalse();
     });
 
@@ -279,10 +279,10 @@ describe('modules/platform/gerrit/client', () => {
             partial<GerritChangeMessageInfo>({ message: 'msg1' }),
             partial<GerritChangeMessageInfo>({ message: 'the message' }),
           ]),
-          jsonResultHeader
+          jsonResultHeader,
         );
       await expect(
-        client.checkForExistingMessage(123456, 'the message')
+        client.checkForExistingMessage(123456, 'the message'),
       ).resolves.toBeTrue();
     });
   });
@@ -305,8 +305,8 @@ describe('modules/platform/gerrit/client', () => {
         client.addMessageIfNotAlreadyExists(
           123456,
           ' new trimmed message\n',
-          'TAG'
-        )
+          'TAG',
+        ),
       ).toResolve();
     });
 
@@ -319,11 +319,11 @@ describe('modules/platform/gerrit/client', () => {
           gerritRestResponse([
             partial<GerritChangeMessageInfo>({ message: 'msg1', tag: 'TAG' }),
           ]),
-          jsonResultHeader
+          jsonResultHeader,
         );
 
       await expect(
-        client.addMessageIfNotAlreadyExists(123456, 'msg1\n', 'TAG')
+        client.addMessageIfNotAlreadyExists(123456, 'msg1\n', 'TAG'),
       ).toResolve();
     });
   });
@@ -369,11 +369,11 @@ describe('modules/platform/gerrit/client', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get(
-          '/a/projects/test%2Frepo/branches/main/files/renovate.json/content'
+          '/a/projects/test%2Frepo/branches/main/files/renovate.json/content',
         )
         .reply(200, gerritFileResponse('{}'));
       await expect(
-        client.getFile('test/repo', 'main', 'renovate.json')
+        client.getFile('test/repo', 'main', 'renovate.json'),
       ).resolves.toBe('{}');
     });
   });
@@ -418,7 +418,7 @@ describe('modules/platform/gerrit/client', () => {
   describe('wasApprovedBy()', () => {
     it('label not exists', () => {
       expect(
-        client.wasApprovedBy(partial<GerritChange>({}), 'user')
+        client.wasApprovedBy(partial<GerritChange>({}), 'user'),
       ).toBeUndefined();
     });
 
@@ -430,8 +430,8 @@ describe('modules/platform/gerrit/client', () => {
               'Code-Review': {},
             },
           }),
-          'user'
-        )
+          'user',
+        ),
       ).toBeUndefined();
     });
 
@@ -448,8 +448,8 @@ describe('modules/platform/gerrit/client', () => {
               },
             },
           }),
-          'user'
-        )
+          'user',
+        ),
       ).toBeTrue();
     });
 
@@ -466,8 +466,8 @@ describe('modules/platform/gerrit/client', () => {
               },
             },
           }),
-          'user'
-        )
+          'user',
+        ),
       ).toBeFalse();
     });
   });

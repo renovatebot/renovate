@@ -1427,16 +1427,15 @@ You can't use other filenames because Renovate only checks the default filename 
 
 ## gerritLabelMapping
 
-The name of the Gerrit labels to use for the `MinimumReleaseAge` and `Merge-Confidence` status.
+The name of the Gerrit label to use for the `Merge-Confidence` status.
 
 ```json
 {
-  "minimumReleaseAgeLabel": "Renovate-Release-Age",
   "mergeConfidenceLabel": "Renovate-Confidence"
 }
 ```
 
-If one or both are unset, then these information will not be passed to the Gerrit changes.
+You must set the label above for Renovate to pass the information to the Gerrit changes.
 
 ## gitAuthor
 

@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import { logger } from '../../../logger';
 import * as git from '../../../util/git';
-import type { CommitFilesConfig, CommitSha } from '../../../util/git/types';
+import type { CommitFilesConfig, LongCommitSha } from '../../../util/git/types';
 import { hash } from '../../../util/hash';
 import { DefaultGitScm } from '../default-scm';
 import { client } from './client';
@@ -27,8 +27,8 @@ export class GerritScm extends DefaultGitScm {
   }
 
   override async getBranchCommit(
-    branchName: string
-  ): Promise<CommitSha | null> {
+    branchName: string,
+  ): Promise<LongCommitSha | null> {
     const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
     const change = await client
       .findChanges(repository, searchConfig, true)
@@ -41,7 +41,7 @@ export class GerritScm extends DefaultGitScm {
 
   override async isBranchBehindBase(
     branchName: string,
-    baseBranch: string
+    baseBranch: string,
   ): Promise<boolean> {
     const searchConfig: GerritFindPRConfig = {
       state: 'open',
@@ -60,7 +60,7 @@ export class GerritScm extends DefaultGitScm {
 
   override async isBranchConflicted(
     baseBranch: string,
-    branch: string
+    branch: string,
   ): Promise<boolean> {
     const searchConfig: GerritFindPRConfig = {
       state: 'open',
@@ -73,7 +73,7 @@ export class GerritScm extends DefaultGitScm {
       return !mergeInfo.mergeable;
     } else {
       logger.warn(
-        `There is no open change with branch=${branch} and baseBranch=${baseBranch}`
+        `There is no open change with branch=${branch} and baseBranch=${baseBranch}`,
       );
       return true;
     }
@@ -92,8 +92,8 @@ export class GerritScm extends DefaultGitScm {
   }
 
   override async commitAndPush(
-    commit: CommitFilesConfig
-  ): Promise<CommitSha | null> {
+    commit: CommitFilesConfig,
+  ): Promise<LongCommitSha | null> {
     logger.debug(`commitAndPush(${commit.branchName})`);
     const searchConfig: GerritFindPRConfig = {
       state: 'open',
@@ -154,7 +154,7 @@ export class GerritScm extends DefaultGitScm {
       .then((res) => res.pop());
     if (change) {
       return super.mergeToLocal(
-        change.revisions![change.current_revision!].ref
+        change.revisions![change.current_revision!].ref,
       );
     }
     return super.mergeToLocal(branchName);

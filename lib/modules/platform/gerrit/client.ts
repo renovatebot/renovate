@@ -28,14 +28,14 @@ class GerritClient {
   async getRepos(): Promise<string[]> {
     const res = await this.gerritHttp.getJson<string[]>(
       'a/projects/?type=CODE&state=ACTIVE',
-      {}
+      {},
     );
     return Object.keys(res.body);
   }
 
   async getProjectInfo(repository: string): Promise<GerritProjectInfo> {
     const projectInfo = await this.gerritHttp.getJson<GerritProjectInfo>(
-      `a/projects/${encodeURIComponent(repository)}`
+      `a/projects/${encodeURIComponent(repository)}`,
     );
     if (projectInfo.body.state !== 'ACTIVE') {
       throw new Error(REPOSITORY_ARCHIVED);
@@ -45,7 +45,7 @@ class GerritClient {
 
   async getBranchInfo(repository: string): Promise<GerritBranchInfo> {
     const branchInfo = await this.gerritHttp.getJson<GerritBranchInfo>(
-      `a/projects/${encodeURIComponent(repository)}/branches/HEAD`
+      `a/projects/${encodeURIComponent(repository)}/branches/HEAD`,
     );
     return branchInfo.body;
   }
@@ -53,17 +53,17 @@ class GerritClient {
   async findChanges(
     repository: string,
     findPRConfig: GerritFindPRConfig,
-    refreshCache?: boolean
+    refreshCache?: boolean,
   ): Promise<GerritChange[]> {
     const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
     const changes = await this.gerritHttp.getJson<GerritChange[]>(
       `a/changes/?q=` +
         filters.join('+') +
         this.requestDetails.map((det) => `&o=${det}`).join(''),
-      { memCache: !refreshCache }
+      { memCache: !refreshCache },
     );
     logger.trace(
-      `findChanges(${filters.join(', ')}) => ${changes.body.length}`
+      `findChanges(${filters.join(', ')}) => ${changes.body.length}`,
     );
     return changes.body;
   }
@@ -71,14 +71,14 @@ class GerritClient {
   async getChange(changeNumber: number): Promise<GerritChange> {
     const changes = await this.gerritHttp.getJson<GerritChange>(
       `a/changes/${changeNumber}?` +
-        this.requestDetails.map((det) => `o=${det}`).join('&')
+        this.requestDetails.map((det) => `o=${det}`).join('&'),
     );
     return changes.body;
   }
 
   async getMergeableInfo(change: GerritChange): Promise<GerritMergeableInfo> {
     const mergeable = await this.gerritHttp.getJson<GerritMergeableInfo>(
-      `a/changes/${change._number}/revisions/current/mergeable`
+      `a/changes/${change._number}/revisions/current/mergeable`,
     );
     return mergeable.body;
   }
@@ -89,7 +89,7 @@ class GerritClient {
 
   async submitChange(changeNumber: number): Promise<GerritChange> {
     const change = await this.gerritHttp.postJson<GerritChange>(
-      `a/changes/${changeNumber}/submit`
+      `a/changes/${changeNumber}/submit`,
     );
     return change.body;
   }
@@ -103,18 +103,18 @@ class GerritClient {
   async updateCommitMessage(
     number: number,
     gerritChangeID: string,
-    prTitle: string
+    prTitle: string,
   ): Promise<void> {
     await this.setCommitMessage(
       number,
-      `${prTitle}\n\nChange-Id: ${gerritChangeID}\n`
+      `${prTitle}\n\nChange-Id: ${gerritChangeID}\n`,
     );
   }
 
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
     const messages = await this.gerritHttp.getJson<GerritChangeMessageInfo[]>(
       `a/changes/${changeNumber}/messages`,
-      { memCache: false }
+      { memCache: false },
     );
     return messages.body;
   }
@@ -122,31 +122,31 @@ class GerritClient {
   async addMessage(
     changeNumber: number,
     message: string,
-    tag?: string
+    tag?: string,
   ): Promise<void> {
     await this.gerritHttp.postJson(
       `a/changes/${changeNumber}/revisions/current/review`,
-      { body: { message, tag } }
+      { body: { message, tag } },
     );
   }
 
   async checkForExistingMessage(
     changeNumber: number,
     newMessage: string,
-    msgType?: string
+    msgType?: string,
   ): Promise<boolean> {
     const messages = await this.getMessages(changeNumber);
     return messages.some(
       (existingMsg) =>
         (msgType === undefined || msgType === existingMsg.tag) &&
-        existingMsg.message.includes(newMessage)
+        existingMsg.message.includes(newMessage),
     );
   }
 
   async addMessageIfNotAlreadyExists(
     changeNumber: number,
     message: string,
-    tag?: string
+    tag?: string,
   ): Promise<void> {
     const newMsg = message.trim(); //the last \n was removed from gerrit after the comment was added...
     if (!(await this.checkForExistingMessage(changeNumber, newMsg, tag))) {
@@ -157,11 +157,11 @@ class GerritClient {
   async setLabel(
     changeNumber: number,
     label: string,
-    value: number
+    value: number,
   ): Promise<void> {
     await this.gerritHttp.postJson(
       `a/changes/${changeNumber}/revisions/current/review`,
-      { body: { labels: { [label]: value } } }
+      { body: { labels: { [label]: value } } },
     );
   }
 
@@ -176,19 +176,19 @@ class GerritClient {
       `a/changes/${changeNumber}/assignee`,
       {
         body: { assignee },
-      }
+      },
     );
   }
 
   async getFile(
     repo: string,
     branch: string,
-    fileName: string
+    fileName: string,
   ): Promise<string> {
     const base64Content = await this.gerritHttp.get(
       `a/projects/${encodeURIComponent(
-        repo
-      )}/branches/${branch}/files/${encodeURIComponent(fileName)}/content`
+        repo,
+      )}/branches/${branch}/files/${encodeURIComponent(fileName)}/content`,
     );
     return Buffer.from(base64Content.body, 'base64').toString();
   }
@@ -215,7 +215,7 @@ class GerritClient {
 
   private static buildSearchFilters(
     repository: string,
-    searchConfig: GerritFindPRConfig
+    searchConfig: GerritFindPRConfig,
   ): string[] {
     const filterState = mapPrStateToGerritFilter(searchConfig.state);
     const filters = ['owner:self', 'project:' + repository, filterState];

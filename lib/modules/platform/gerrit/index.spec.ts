@@ -69,7 +69,7 @@ describe('modules/platform/gerrit/index', () => {
           endpoint: gerritEndpointUrl,
           username: 'abc',
           password: '123',
-        })
+        }),
       ).toEqual({ endpoint: 'https://dev.gerrit.com/renovate/' });
     });
   });
@@ -83,10 +83,10 @@ describe('modules/platform/gerrit/index', () => {
 
   it('initRepo() - inactive', async () => {
     clientMock.getProjectInfo.mockRejectedValueOnce(
-      new Error(REPOSITORY_ARCHIVED)
+      new Error(REPOSITORY_ARCHIVED),
     );
     await expect(gerrit.initRepo({ repository: 'test/repo' })).rejects.toThrow(
-      REPOSITORY_ARCHIVED
+      REPOSITORY_ARCHIVED,
     );
   });
 
@@ -140,12 +140,12 @@ describe('modules/platform/gerrit/index', () => {
     it('findPr() - no results', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(
-        gerrit.findPr({ branchName: 'branch', state: 'open' })
+        gerrit.findPr({ branchName: 'branch', state: 'open' }),
       ).resolves.toBeNull();
       expect(clientMock.findChanges).toHaveBeenCalledWith(
         'test/repo',
         { branchName: 'branch', state: 'open' },
-        undefined
+        undefined,
       );
     });
 
@@ -155,7 +155,7 @@ describe('modules/platform/gerrit/index', () => {
         partial<GerritChange>({ _number: 2 }),
       ]);
       await expect(
-        gerrit.findPr({ branchName: 'branch', state: 'open' })
+        gerrit.findPr({ branchName: 'branch', state: 'open' }),
       ).resolves.toHaveProperty('number', 2);
     });
   });
@@ -165,7 +165,7 @@ describe('modules/platform/gerrit/index', () => {
       const change = partial<GerritChange>({});
       clientMock.getChange.mockResolvedValueOnce(change);
       await expect(gerrit.getPr(123456)).resolves.toEqual(
-        mapGerritChangeToPr(change)
+        mapGerritChangeToPr(change),
       );
       expect(clientMock.getChange).toHaveBeenCalledWith(123456);
     });
@@ -196,7 +196,7 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.updateCommitMessage).toHaveBeenCalledWith(
         123456,
         '...',
-        'new title'
+        'new title',
       );
     });
 
@@ -253,7 +253,7 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
         123456,
         'NEW PR-Body',
-        TAG_PULL_REQUEST_BODY
+        TAG_PULL_REQUEST_BODY,
       );
     });
   });
@@ -267,9 +267,9 @@ describe('modules/platform/gerrit/index', () => {
           targetBranch: 'target',
           prTitle: 'title',
           prBody: 'body',
-        })
+        }),
       ).rejects.toThrow(
-        `the change should be created automatically from previous push to refs/for/source`
+        `the change should be created automatically from previous push to refs/for/source`,
       );
     });
   });
@@ -309,13 +309,13 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
         123456,
         'body',
-        TAG_PULL_REQUEST_BODY
+        TAG_PULL_REQUEST_BODY,
       );
       expect(clientMock.approveChange).not.toHaveBeenCalled();
       expect(clientMock.updateCommitMessage).toHaveBeenCalledWith(
         123456,
         '...',
-        'title'
+        'title',
       );
     });
 
@@ -333,7 +333,7 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
         123456,
         'body',
-        TAG_PULL_REQUEST_BODY
+        TAG_PULL_REQUEST_BODY,
       );
       expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
       expect(clientMock.setCommitMessage).not.toHaveBeenCalled();
@@ -344,7 +344,7 @@ describe('modules/platform/gerrit/index', () => {
     it('getBranchPr() - no result', async () => {
       clientMock.findChanges.mockResolvedValue([]);
       await expect(
-        gerrit.getBranchPr('renovate/dependency-1.x')
+        gerrit.getBranchPr('renovate/dependency-1.x'),
       ).resolves.toBeNull();
       expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
         branchName: 'renovate/dependency-1.x',
@@ -358,7 +358,7 @@ describe('modules/platform/gerrit/index', () => {
       });
       clientMock.findChanges.mockResolvedValue([change]);
       await expect(
-        gerrit.getBranchPr('renovate/dependency-1.x')
+        gerrit.getBranchPr('renovate/dependency-1.x'),
       ).resolves.toHaveProperty('number', 123456);
       expect(clientMock.findChanges.mock.lastCall).toEqual([
         'test/repo',
@@ -395,14 +395,14 @@ describe('modules/platform/gerrit/index', () => {
 
     it('mergePr() - success', async () => {
       clientMock.submitChange.mockResolvedValueOnce(
-        partial<GerritChange>({ status: 'MERGED' })
+        partial<GerritChange>({ status: 'MERGED' }),
       );
       await expect(gerrit.mergePr({ id: 123456 })).resolves.toBeTrue();
     });
 
     it('mergePr() - other errors', async () => {
       clientMock.submitChange.mockRejectedValueOnce(
-        new Error('any other error')
+        new Error('any other error'),
       );
       await expect(gerrit.mergePr({ id: 123456 })).rejects.toThrow();
     });
@@ -412,7 +412,7 @@ describe('modules/platform/gerrit/index', () => {
     it('getBranchStatus() - branchname/change not found => yellow', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(
-        gerrit.getBranchStatus('renovate/dependency-1.x')
+        gerrit.getBranchStatus('renovate/dependency-1.x'),
       ).resolves.toBe('yellow');
     });
 
@@ -422,7 +422,7 @@ describe('modules/platform/gerrit/index', () => {
       });
       clientMock.findChanges.mockResolvedValueOnce([change]);
       await expect(
-        gerrit.getBranchStatus('renovate/dependency-1.x')
+        gerrit.getBranchStatus('renovate/dependency-1.x'),
       ).resolves.toBe('green');
     });
 
@@ -442,7 +442,7 @@ describe('modules/platform/gerrit/index', () => {
         submittableChange,
       ]);
       await expect(
-        gerrit.getBranchStatus('renovate/dependency-1.x')
+        gerrit.getBranchStatus('renovate/dependency-1.x'),
       ).resolves.toBe('red');
     });
   });
@@ -459,7 +459,7 @@ describe('modules/platform/gerrit/index', () => {
         'renovate/merge-confidence',
       ])('getBranchStatusCheck() - %s ', async (ctx) => {
         await expect(
-          gerrit.getBranchStatusCheck('renovate/dependency-1.x', ctx)
+          gerrit.getBranchStatusCheck('renovate/dependency-1.x', ctx),
         ).resolves.toBe('yellow');
         expect(clientMock.findChanges).not.toHaveBeenCalled();
       });
@@ -501,7 +501,7 @@ describe('modules/platform/gerrit/index', () => {
         });
         clientMock.findChanges.mockResolvedValueOnce([change]);
         await expect(
-          gerrit.getBranchStatusCheck('renovate/dependency-1.x', ctx)
+          gerrit.getBranchStatusCheck('renovate/dependency-1.x', ctx),
         ).resolves.toBe(expectedState);
       });
     });
@@ -520,7 +520,7 @@ describe('modules/platform/gerrit/index', () => {
             context: 'renovate/stability-days',
             state: 'red',
             description: 'desc',
-          })
+          }),
         ).resolves.toBeUndefined();
         expect(clientMock.setLabel).not.toHaveBeenCalled();
       });
@@ -532,7 +532,7 @@ describe('modules/platform/gerrit/index', () => {
             context: 'renovate/merge-confidence',
             state: 'red',
             description: 'desc',
-          })
+          }),
         ).resolves.toBeUndefined();
       });
     });
@@ -585,9 +585,9 @@ describe('modules/platform/gerrit/index', () => {
           expect(clientMock.setLabel).toHaveBeenCalledWith(
             123456,
             expectedLabel,
-            expectedVote
+            expectedVote,
           );
-        }
+        },
       );
 
       it('no change found', async () => {
@@ -598,7 +598,7 @@ describe('modules/platform/gerrit/index', () => {
             context: 'renovate/merge-confidence',
             state: 'red',
             description: 'desc',
-          })
+          }),
         ).resolves.toBeUndefined();
         expect(clientMock.setLabel).not.toHaveBeenCalled();
       });
@@ -608,18 +608,18 @@ describe('modules/platform/gerrit/index', () => {
   describe('addReviewers()', () => {
     it('addReviewers() - add reviewers', async () => {
       await expect(
-        gerrit.addReviewers(123456, ['user1', 'user2'])
+        gerrit.addReviewers(123456, ['user1', 'user2']),
       ).resolves.toBeUndefined();
       expect(clientMock.addReviewer).toHaveBeenCalledTimes(2);
       expect(clientMock.addReviewer).toHaveBeenNthCalledWith(
         1,
         123456,
-        'user1'
+        'user1',
       );
       expect(clientMock.addReviewer).toHaveBeenNthCalledWith(
         2,
         123456,
-        'user2'
+        'user2',
       );
     });
   });
@@ -627,7 +627,7 @@ describe('modules/platform/gerrit/index', () => {
   describe('addAssignees()', () => {
     it('addAssignees() - set assignee', async () => {
       await expect(
-        gerrit.addAssignees(123456, ['user1', 'user2'])
+        gerrit.addAssignees(123456, ['user1', 'user2']),
       ).resolves.toBeUndefined();
       expect(clientMock.addAssignee).toHaveBeenCalledTimes(1);
       expect(clientMock.addAssignee).toHaveBeenCalledWith(123456, 'user1');
@@ -641,12 +641,12 @@ describe('modules/platform/gerrit/index', () => {
           number: 123456,
           topic: null,
           content: 'My-Comment-Msg',
-        })
+        }),
       ).resolves.toBeTrue();
       expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
         123456,
         'My-Comment-Msg',
-        undefined
+        undefined,
       );
     });
 
@@ -656,12 +656,12 @@ describe('modules/platform/gerrit/index', () => {
           number: 123456,
           topic: 'myTopic',
           content: 'My-Comment-Msg',
-        })
+        }),
       ).resolves.toBeTrue();
       expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
         123456,
         'My-Comment-Msg',
-        'myTopic'
+        'myTopic',
       );
     });
   });
@@ -673,12 +673,12 @@ describe('modules/platform/gerrit/index', () => {
 
     it('getRawFile() - repo and branch', async () => {
       await expect(
-        gerrit.getRawFile('renovate.json', 'test/repo', 'main')
+        gerrit.getRawFile('renovate.json', 'test/repo', 'main'),
       ).resolves.toBe('{}');
       expect(clientMock.getFile).toHaveBeenCalledWith(
         'test/repo',
         'main',
-        'renovate.json'
+        'renovate.json',
       );
     });
 
@@ -692,7 +692,7 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.getFile).toHaveBeenCalledWith(
         'repo',
         'master',
-        'renovate.json'
+        'renovate.json',
       );
     });
 
@@ -706,7 +706,7 @@ describe('modules/platform/gerrit/index', () => {
       expect(clientMock.getFile).toHaveBeenCalledWith(
         'All-Projects',
         'HEAD',
-        'renovate.json'
+        'renovate.json',
       );
     });
   });
@@ -716,7 +716,7 @@ describe('modules/platform/gerrit/index', () => {
     it('getJsonFile()', async () => {
       clientMock.getFile.mockResolvedValueOnce('{}');
       await expect(
-        gerrit.getJsonFile('renovate.json', 'test/repo', 'main')
+        gerrit.getJsonFile('renovate.json', 'test/repo', 'main'),
       ).resolves.toEqual({});
     });
   });
@@ -737,7 +737,7 @@ describe('modules/platform/gerrit/index', () => {
   describe('currently unused/not-implemented functions', () => {
     it('deleteLabel()', async () => {
       await expect(
-        gerrit.deleteLabel(123456, 'label')
+        gerrit.deleteLabel(123456, 'label'),
       ).resolves.toBeUndefined();
     });
 
@@ -747,7 +747,7 @@ describe('modules/platform/gerrit/index', () => {
           type: 'by-topic',
           number: 123456,
           topic: 'topic',
-        })
+        }),
       ).resolves.toBeUndefined();
     });
 
@@ -757,7 +757,7 @@ describe('modules/platform/gerrit/index', () => {
 
     it('ensureIssue()', async () => {
       await expect(
-        gerrit.ensureIssue({ body: 'body', title: 'title' })
+        gerrit.ensureIssue({ body: 'body', title: 'title' }),
       ).resolves.toBeNull();
     });
 

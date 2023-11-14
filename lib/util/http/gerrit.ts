@@ -21,7 +21,7 @@ export class GerritHttp extends Http {
 
   protected override async request<T>(
     path: string,
-    options?: InternalHttpOptions
+    options?: InternalHttpOptions,
   ): Promise<HttpResponse<T>> {
     const url = validateUrl(path) ? path : baseUrl + path;
     const opts: InternalHttpOptions = {
