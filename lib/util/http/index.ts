@@ -19,6 +19,7 @@ import { Throttle, getThrottle } from './throttle';
 import type {
   GotJSONOptions,
   GotOptions,
+  GotTask,
   HttpOptions,
   HttpRequestOptions,
   HttpResponse,
@@ -42,8 +43,6 @@ type JsonArgs<
   httpOptions?: Opts;
   schema?: Schema;
 };
-
-type Task<T> = () => Promise<HttpResponse<T>>;
 
 // Copying will help to avoid circular structure
 // and mutation of the cached response.
@@ -132,6 +131,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options: HttpOptions = {},
   ) {
     this.options = merge<GotOptions>(options, { context: { hostType } });
+
+    if (process.env.NODE_ENV === 'test') {
+      this.options.retry = 0;
+    }
   }
 
   protected getThrottle(url: string): Throttle | null {
@@ -167,9 +170,6 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       };
     }
 
-    if (process.env.NODE_ENV === 'test') {
-      options.retry = 0;
-    }
     options.hooks = {
       beforeRedirect: [removeAuthorization],
     };
@@ -206,7 +206,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // istanbul ignore else: no cache tests
     if (!resPromise) {
       const startTime = Date.now();
-      const httpTask: Task<T> = () => {
+      const httpTask: GotTask<T> = () => {
         const queueDuration = Date.now() - startTime;
         return gotTask(url, options, {
           method: options.method,
@@ -216,12 +216,12 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       };
 
       const throttle = this.getThrottle(url);
-      const throttledTask: Task<T> = throttle
+      const throttledTask: GotTask<T> = throttle
         ? () => throttle.add<HttpResponse<T>>(httpTask)
         : httpTask;
 
       const queue = getQueue(url);
-      const queuedTask: Task<T> = queue
+      const queuedTask: GotTask<T> = queue
         ? () => queue.add<HttpResponse<T>>(throttledTask)
         : throttledTask;
 

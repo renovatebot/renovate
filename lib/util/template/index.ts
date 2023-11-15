@@ -73,7 +73,7 @@ export const exposedConfigOptions = [
 export const allowedFields = {
   baseBranch: 'The baseBranch for this branch/PR',
   body: 'The body of the release notes',
-  category: 'The category of the manager of the dependency being updated',
+  categories: 'The categories of the manager of the dependency being updated',
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
