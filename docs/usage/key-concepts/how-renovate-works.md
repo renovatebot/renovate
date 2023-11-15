@@ -85,7 +85,7 @@ flowchart LR
 
   end
 
-  COLLECT --> UPDATE
+  EXTRACT --> UPDATE
 ```
 
 ## Advanced
