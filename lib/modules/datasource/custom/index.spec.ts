@@ -315,6 +315,41 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
+    it('return releases for plain text file directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{
+        1.0.0
+        2.0.0
+        3.0.0
+      }`);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.version',
+            format: 'plain',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
     it('return release when templating registryUrl', async () => {
       const expected = {
         releases: [
