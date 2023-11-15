@@ -28,6 +28,40 @@ import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
+async function getNpmConstraintFromPackageLock(
+  lockFileDir: string,
+): Promise<string | undefined> {
+  const lockFileName = upath.join(lockFileDir, 'package-lock.json');
+  const lockFile = await readLocalFile(lockFileName, 'utf8');
+  // istanbul ignore if: should not happen
+  if (!lockFile) {
+    return undefined;
+  }
+  try {
+    const lockFileJson = JSON.parse(lockFile);
+    const { lockfileVersion } = lockFileJson;
+    if (!lockfileVersion) {
+      logger.debug(`Could not determine lockfileVersion`);
+    }
+    if (lockfileVersion === 1) {
+      logger.debug(`Using npm constraint <7 for lockfileVersion=1`);
+      return `<7`;
+    }
+    if (lockfileVersion === 2) {
+      logger.debug(`Using npm constraint <9 for lockfileVersion=2`);
+      return `<9`;
+    }
+    logger.debug(
+      `Using npm constraint >=9 for lockfileVersion=${lockfileVersion}`,
+    );
+    return `>=9`;
+  } catch (err) {
+    logger.debug(`Error parsing ${lockFileName}`);
+  }
+  logger.debug('No npm constraint found for package-lock.json');
+  return undefined;
+}
+
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
@@ -48,7 +82,9 @@ export async function generateLockFile(
       toolName: 'npm',
       constraint:
         config.constraints?.npm ??
-        getPackageManagerVersion('npm', await lazyPgkJson.getValue()),
+        getPackageManagerVersion('npm', await lazyPgkJson.getValue()) ??
+        (await getNpmConstraintFromPackageLock(lockFileDir)) ??
+        null,
     };
     const supportsPreferDedupeFlag =
       !npmToolConstraint.constraint ||
