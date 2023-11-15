@@ -18,6 +18,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:supportRedHatImageVersion',
       'workarounds:javaLTSVersions',
       'workarounds:disableEclipseLifecycleMapping',
+      'workarounds:disableMavenParentPackages',
       'workarounds:disableMavenParentRoot',
       'workarounds:containerbase',
     ],
@@ -44,6 +45,16 @@ export const presets: Record<string, Preset> = {
         enabled: false,
         matchDatasources: ['maven'],
         matchPackageNames: ['org.eclipse.m2e:lifecycle-mapping'],
+      },
+    ],
+  },
+  disableMavenParentPackages: {
+    description: 'Avoid version fetching for parent Maven packages.',
+    packageRules: [
+      {
+        enabled: false,
+        matchDepTypes: ['parent'],
+        matchManagers: ['maven'],
       },
     ],
   },
