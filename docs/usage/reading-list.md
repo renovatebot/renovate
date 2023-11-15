@@ -60,6 +60,7 @@ First, complete the "Beginners" and the "Intermediate" reading list.
 Then read:
 
 - Define your own custom manager with [`customManagers`](./configuration-options.md#custommanagers) (previously `regexManagers`)
+- Define your own custom datasources with [`customDatasources`](./configuration-options.md#customdatasources)
 - [Shareable config presets](./config-presets.md)
 
 ## Self-hosting Renovate
