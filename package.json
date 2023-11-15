@@ -302,7 +302,7 @@
     "@types/semver-utils": "1.1.3",
     "@types/tar": "6.1.8",
     "@types/traverse": "0.6.35",
-    "@types/url-join": "4.0.2",
+    "@types/url-join": "4.0.3",
     "@types/validate-npm-package-name": "4.0.2",
     "@types/xmldoc": "1.1.8",
     "@typescript-eslint/eslint-plugin": "6.10.0",
