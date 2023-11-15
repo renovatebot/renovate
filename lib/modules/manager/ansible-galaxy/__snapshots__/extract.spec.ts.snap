@@ -182,6 +182,24 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check galax
     "depName": "community.windows",
     "depType": "galaxy-collection",
   },
+  {
+    "currentValue": "7.3.0",
+    "datasource": "galaxy-collection",
+    "depName": "community.general_quoted",
+    "depType": "galaxy-collection",
+  },
+  {
+    "currentValue": "7.3.0",
+    "datasource": "galaxy-collection",
+    "depName": "community.general_with_comment_quoted",
+    "depType": "galaxy-collection",
+  },
+  {
+    "currentValue": ">=1.0.0,<2.0.0",
+    "datasource": "galaxy-collection",
+    "depName": "community.windows_quoted",
+    "depType": "galaxy-collection",
+  },
 ]
 `;
 

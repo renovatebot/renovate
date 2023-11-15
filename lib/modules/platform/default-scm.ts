@@ -1,5 +1,5 @@
 import * as git from '../../util/git';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
+import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
 import type { PlatformScm } from './types';
 
 export class DefaultGitScm implements PlatformScm {
@@ -7,7 +7,9 @@ export class DefaultGitScm implements PlatformScm {
     return Promise.resolve(git.branchExists(branchName));
   }
 
-  commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null> {
+  commitAndPush(
+    commitConfig: CommitFilesConfig,
+  ): Promise<LongCommitSha | null> {
     return git.commitFiles(commitConfig);
   }
 
@@ -15,7 +17,7 @@ export class DefaultGitScm implements PlatformScm {
     return git.deleteBranch(branchName);
   }
 
-  getBranchCommit(branchName: string): Promise<CommitSha | null> {
+  getBranchCommit(branchName: string): Promise<LongCommitSha | null> {
     return Promise.resolve(git.getBranchCommit(branchName));
   }
 
@@ -35,7 +37,7 @@ export class DefaultGitScm implements PlatformScm {
     return git.getFileList();
   }
 
-  checkoutBranch(branchName: string): Promise<CommitSha> {
+  checkoutBranch(branchName: string): Promise<LongCommitSha> {
     return git.checkoutBranch(branchName);
   }
 

@@ -95,7 +95,6 @@ describe('util/git/index', () => {
   const OLD_ENV = process.env;
 
   beforeEach(async () => {
-    jest.resetModules();
     process.env = { ...OLD_ENV };
     origin = await tmp.dir({ unsafeCleanup: true });
     const repo = Git(origin.path);

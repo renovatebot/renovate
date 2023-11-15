@@ -9,6 +9,13 @@ Let Renovate use your PAT by doing _one_ of the following:
 - Set your PAT as an environment variable `RENOVATE_TOKEN`
 - Set your PAT when you run Renovate in the CLI with `--token=`
 
+Permissions for your PAT should be at minimum:
+
+| Scope        | Permission   | Description                       |
+| ------------ | ------------ | --------------------------------- |
+| `Code`       | Read & Write | Required                          |
+| `Work Items` | Read & write | Only needed for link to work item |
+
 Remember to set `platform=azure` somewhere in your Renovate config file.
 
 ## Features awaiting implementation
@@ -20,19 +27,19 @@ Remember to set `platform=azure` somewhere in your Renovate config file.
 ### Setting up a new pipeline
 
 Create a brand new pipeline within Azure DevOps, and select your source:
-![Azure DevOps create new pipeline](/assets/images/azure-devops-setup-1.png){ loading=lazy }
+![Azure DevOps create new pipeline](../../../assets/images/azure-devops-setup-1.png){ loading=lazy }
 
 Then select your repository.
 
 Within _Configure your pipeline_ select: **Starter pipeline**
-![Azure DevOps starter pipeline template](/assets/images/azure-devops-setup-2.png){ loading=lazy }
+![Azure DevOps starter pipeline template](../../../assets/images/azure-devops-setup-2.png){ loading=lazy }
 
 Replace _all_ content in the starter pipeline with:
 
 ```yaml
 schedules:
   - cron: '0 3 * * *'
-    displayName: 'Every day at 3am'
+    displayName: 'Every day at 3am (UTC)'
     branches:
       include: [main]
     always: true
@@ -52,7 +59,9 @@ steps:
       git config --global user.name 'Renovate Bot'
       npx --userconfig .npmrc renovate
     env:
-      TOKEN: $(System.AccessToken)
+      RENOVATE_PLATFORM: azure
+      RENOVATE_ENDPOINT: $(System.CollectionUri)
+      RENOVATE_TOKEN: $(System.AccessToken)
 ```
 
 ### Create a .npmrc file
@@ -72,9 +81,6 @@ Create a `config.js` file in your repository:
 
 ```javascript
 module.exports = {
-  platform: 'azure',
-  endpoint: 'https://dev.azure.com/YOUR-ORG/',
-  token: process.env.TOKEN,
   hostRules: [
     {
       hostType: 'npm',
@@ -87,7 +93,6 @@ module.exports = {
 };
 ```
 
-For the `endpoint` key, replace `YOUR-ORG` with your Azure DevOps organization.
 For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure DevOps project and repository.
 
 ### Yarn users
@@ -98,8 +103,6 @@ Use the `matchHost` config option to specify the full path to the registry.
 ```javascript
 module.exports = {
   platform: 'azure',
-  endpoint: 'https://myorg.visualstudio.com/',
-  token: process.env.TOKEN,
   hostRules: [
     {
       matchHost:
@@ -126,7 +129,7 @@ always-auth=true
 ### Add renovate.json file
 
 Additionally, you can create a `renovate.json` file (which holds the Renovate configuration) in the root of the repository you want to update.
-[Read more about the Renovate configuration options](https://docs.renovatebot.com/configuration-options/)
+[Read more about the Renovate configuration options](../../../configuration-options.md)
 
 ### Using a single pipeline to update multiple repositories
 

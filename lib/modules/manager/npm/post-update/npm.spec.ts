@@ -459,6 +459,17 @@ describe('modules/manager/npm/post-update/npm', () => {
           workspacesPackages: ['docs/*', 'web/*'],
         },
       },
+      {
+        packageFile: 'some-missing-dir/docs/a/package.json',
+        packageName: 'hello',
+        depType: 'dependencies',
+        newVersion: '1.1.1',
+        newValue: '^1.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['docs/*', 'web/*'],
+        },
+      },
     ];
 
     it('workspace in sub-folder', async () => {

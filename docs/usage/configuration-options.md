@@ -648,7 +648,7 @@ When using with `npm`, we recommend you:
 Use `customDatasources` to fetch releases from APIs or statically hosted sites and Renovate has no own datasource.
 These datasources can be referred by `customManagers` or can be used to overwrite default datasources.
 
-For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
+For more details see the [`custom` datasource documentation](modules/datasource/custom/index.md).
 
 ## customManagers
 
@@ -674,7 +674,7 @@ We recommend you use only _one_ of these methods, or you'll get confused.
 We recommend that you also tell Renovate what `versioning` to use.
 If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
 
-For more details and examples about it, see our [documentation for the `regex` manager](/modules/manager/regex/).
+For more details and examples about it, see our [documentation for the `regex` manager](modules/manager/regex/index.md).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 <!-- prettier-ignore -->
@@ -965,7 +965,7 @@ It is not needed if either:
 ### format
 
 Defines which format the API is returning.
-Currently `json` or `plain` are supported, see the `custom` [datasource documentation](/modules/datasource/custom/) for more information.
+Currently `json` or `plain` are supported, see the `custom` [datasource documentation](modules/datasource/custom/index.md) for more information.
 
 ### transformTemplates
 
@@ -1170,7 +1170,17 @@ Example:
 }
 ```
 
-For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
+To enable custom managers you will need to add `custom.` prefix before their names
+
+Example:
+
+```json
+{
+  "enabledManagers": ["custom.regex"]
+}
+```
+
+For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
 
 ## encrypted
 
@@ -1334,7 +1344,7 @@ Because `fileMatch` is mergeable, you don't need to duplicate the defaults and c
 ```
 
 If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example).
-The full list of supported managers can be found [here](https://docs.renovatebot.com/modules/manager/).
+The full list of supported managers can be found [here](modules/manager/index.md#supported-managers).
 
 ## filterUnavailableUsers
 
@@ -2402,7 +2412,7 @@ This field supports Regular Expressions if they begin and end with `/`, otherwis
 
 Use `matchCategories` to restrict rules to a particular language or group.
 Matching is done using "any" logic, i.e. "match any of the following categories".
-The categories can be found in the [manager documentation](./modules/manager/index.md).
+The categories can be found in the [manager documentation](modules/manager/index.md).
 
 <!-- prettier-ignore -->
 !!! note
@@ -2483,7 +2493,7 @@ Use this field to restrict rules to a particular package manager. e.g.
 }
 ```
 
-For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
+For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
 
 ### matchDatasources
 
@@ -2555,8 +2565,8 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
 }
 ```
 
-The syntax of the version range must follow the [versioning scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning) used by the matched package(s).
-This is usually defined by the [manager](https://docs.renovatebot.com/modules/manager/#supported-managers) which discovered them or by the default versioning for the package's [datasource](https://docs.renovatebot.com/modules/datasource/).
+The syntax of the version range must follow the [versioning scheme](modules/versioning.md#supported-versioning) used by the matched package(s).
+This is usually defined by the [manager](modules/manager/index.md#supported-managers) which discovered them or by the default versioning for the package's [datasource](modules/datasource/index.md).
 For example, a Gradle package would typically need Gradle constraint syntax (e.g. `[,7.0)`) and not SemVer syntax (e.g. `<7.0`).
 
 This field also supports Regular Expressions which must begin and end with `/`.
@@ -2816,6 +2826,7 @@ Managers which do not support replacement:
 - `homebrew`
 - `maven`
 - `regex`
+- `sbt`
 
 Use the `replacementName` config option to set the name of a replacement package.
 
@@ -3324,18 +3335,18 @@ You can use the `registryAliases` object to set registry aliases.
 
 This feature works with the following managers:
 
-- [`ansible`](/modules/manager/ansible)
-- [`bitbucket-pipelines`](/modules/manager/bitbucket-pipelines)
-- [`docker-compose`](/modules/manager/docker-compose)
-- [`dockerfile`](/modules/manager/dockerfile)
-- [`droneci`](/modules/manager/droneci)
-- [`gitlabci`](/modules/manager/gitlabci/)
-- [`helm-requirements`](/modules/manager/helm-requirements/)
-- [`helmfile`](/modules/manager/helmfile/)
-- [`helmv3`](/modules/manager/helmv3/)
-- [`kubernetes`](/modules/manager/kubernetes)
-- [`terraform`](/modules/manager/terraform)
-- [`woodpecker`](/modules/manager/woodpecker)
+- [`ansible`](modules/manager/ansible/index.md)
+- [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
+- [`docker-compose`](modules/manager/docker-compose/index.md)
+- [`dockerfile`](modules/manager/dockerfile/index.md)
+- [`droneci`](modules/manager/droneci/index.md)
+- [`gitlabci`](modules/manager/gitlabci/index.md)
+- [`helm-requirements`](modules/manager/helm-requirements/index.md)
+- [`helmfile`](modules/manager/helmfile/index.md)
+- [`helmv3`](modules/manager/helmv3/index.md)
+- [`kubernetes`](modules/manager/kubernetes/index.md)
+- [`terraform`](modules/manager/terraform/index.md)
+- [`woodpecker`](modules/manager/woodpecker/index.md)
 
 ```json
 {
