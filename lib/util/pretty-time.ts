@@ -46,7 +46,7 @@ const rangeRegex = regEx(/^(?<operator>(>=|<=|<|>))\s*(?<age>.*)/);
 
 export function satisfiesDateRange(
   date: string,
-  range: string
+  range: string,
 ): boolean | null {
   const grps = range.trim().match(rangeRegex)?.groups;
   if (!grps) {

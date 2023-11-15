@@ -1,5 +1,6 @@
 import { BaseBranchesMatcher } from './base-branches';
 import { CategoriesMatcher } from './categories';
+import { CurrentAgeMatcher } from './current-age';
 import { CurrentValueMatcher } from './current-value';
 import { CurrentVersionMatcher } from './current-version';
 import { DatasourcesMatcher } from './datasources';
@@ -45,3 +46,4 @@ matchers.push([new CurrentValueMatcher()]);
 matchers.push([new CurrentVersionMatcher()]);
 matchers.push([new RepositoriesMatcher()]);
 matchers.push([new CategoriesMatcher()]);
+matchers.push([new CurrentAgeMatcher()]);
