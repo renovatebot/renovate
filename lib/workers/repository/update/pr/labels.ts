@@ -20,8 +20,8 @@ export function prepareLabels(config: RenovateConfig): string[] {
  * that need to be added and removed to transition from 'oldLabels' to 'newLabels'.
  */
 export function getChangedLabels(
-  oldLabels: string[],
-  newLabels: string[],
+  oldLabels: string[] | undefined,
+  newLabels: string[] | undefined,
 ): [string[] | undefined, string[] | undefined] {
   const labelsToAdd = newLabels?.filter((l) => !oldLabels?.includes(l));
   const labelsToRemove = oldLabels?.filter((l) => !newLabels?.includes(l));
