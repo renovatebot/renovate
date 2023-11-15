@@ -140,7 +140,7 @@ type PackageJson = {
           await validate(
             file,
             fileConfig,
-            strict && !!process.env.RENOVATE_CONFIG_FILE
+            strict && !!process.env.RENOVATE_CONFIG_FILE,
           );
         } catch (err) {
           logger.error({ file, err }, 'File is not valid Renovate config');
