@@ -300,8 +300,8 @@ importers:
         specifier: 0.5.21
         version: 0.5.21
       toml-eslint-parser:
-        specifier: 0.7.0
-        version: 0.7.0
+        specifier: 0.9.3
+        version: 0.9.3
       traverse:
         specifier: 0.6.7
         version: 0.6.7
@@ -10348,8 +10348,8 @@ packages:
     dependencies:
       is-number: 7.0.0
 
-  /toml-eslint-parser@0.7.0:
-    resolution: {integrity: sha512-HYjp7nkJOk8IOjNHHMH+bbwiwO1CF5KffrRYo5+Qt6CdWoWfEuVk9RRrLnGQlMiG2fUT/26g8DR0kqteGkHVDA==}
+  /toml-eslint-parser@0.9.3:
+    resolution: {integrity: sha512-moYoCvkNUAPCxSW9jmHmRElhm4tVJpHL8ItC/+uYD0EpPSFXbck7yREz9tNdJVTSpHVod8+HoipcpbQ0oE6gsw==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dependencies:
       eslint-visitor-keys: 3.4.3
