@@ -167,7 +167,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const packageLockContents = JSON.stringify({lockfileVersion:2});
+    const packageLockContents = JSON.stringify({ lockfileVersion: 2 });
     fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
     fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
     const postUpdateOptions = ['npmDedupe'];
@@ -196,7 +196,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const packageLockContents = JSON.stringify({lockfileVersion:1});
+    const packageLockContents = JSON.stringify({ lockfileVersion: 1 });
     fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
     fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
     const postUpdateOptions = ['npmDedupe'];
