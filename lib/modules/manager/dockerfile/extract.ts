@@ -251,6 +251,7 @@ export function extractPackageFile(
 
   let escapeChar = '\\\\';
   let lookForEscapeChar = true;
+  let lookForSyntaxDirective = true;
 
   const lineFeed = content.indexOf('\r\n') >= 0 ? '\r\n' : '\n';
   const lines = content.split(newlineRegex);
@@ -270,6 +271,33 @@ export function extractPackageFile(
         }
         lookForEscapeChar = false;
       }
+    }
+
+    if (lookForSyntaxDirective) {
+      const syntaxRegex = regEx(
+        '^#[ \\t]*syntax[ \\t]*=[ \\t]*(?<image>\\S+)',
+        'im',
+      );
+      const syntaxMatch = instruction.match(syntaxRegex);
+      if (syntaxMatch?.groups?.image) {
+        const syntaxImage = syntaxMatch.groups.image;
+        const lineNumberRanges: number[][] = [
+          [lineNumberInstrStart, lineNumber],
+        ];
+        const dep = getDep(syntaxImage, true, config.registryAliases);
+        dep.depType = 'syntax';
+        processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);
+        logger.trace(
+          {
+            depName: dep.depName,
+            currentValue: dep.currentValue,
+            currentDigest: dep.currentDigest,
+          },
+          'Dockerfile # syntax',
+        );
+        deps.push(dep);
+      }
+      lookForSyntaxDirective = false;
     }
 
     const lineContinuationRegex = regEx(escapeChar + '[ \\t]*$|^[ \\t]*#', 'm');
@@ -400,7 +428,9 @@ export function extractPackageFile(
     return null;
   }
   for (const d of deps) {
-    d.depType = 'stage';
+    if (!d.depType) {
+      d.depType = 'stage';
+    }
   }
   deps[deps.length - 1].depType = 'final';
   return { deps };

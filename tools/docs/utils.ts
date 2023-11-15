@@ -68,6 +68,6 @@ export async function formatDescription(
   return `**Description**:\n\n${content}\n`;
 }
 
-export function getModuleLink(module: string, title: string): string {
-  return `[${title ?? module}](${module}/)`;
+export function getModuleLink(module: string, title?: string): string {
+  return `[${title ?? module}](${module}/index.md)`;
 }

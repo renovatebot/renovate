@@ -1,6 +1,6 @@
 import type { MergeStrategy } from '../../config/types';
 import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
+import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
@@ -252,7 +252,7 @@ export interface Platform {
   getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
-  commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
+  commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
   expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
 }
 
@@ -261,11 +261,11 @@ export interface PlatformScm {
   isBranchModified(branchName: string): Promise<boolean>;
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
-  getBranchCommit(branchName: string): Promise<CommitSha | null>;
+  getBranchCommit(branchName: string): Promise<LongCommitSha | null>;
   deleteBranch(branchName: string): Promise<void>;
-  commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
+  commitAndPush(commitConfig: CommitFilesConfig): Promise<LongCommitSha | null>;
   getFileList(): Promise<string[]>;
-  checkoutBranch(branchName: string): Promise<CommitSha>;
+  checkoutBranch(branchName: string): Promise<LongCommitSha>;
   mergeToLocal(branchName: string): Promise<void>;
   mergeAndPush(branchName: string): Promise<void>;
 }

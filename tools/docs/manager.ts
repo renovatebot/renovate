@@ -10,6 +10,7 @@ import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
 import {
   formatUrls,
   getDisplayName,
+  getModuleLink,
   getNameWithUrl,
   replaceContent,
 } from './utils';
@@ -25,7 +26,7 @@ function getTitle(manager: string, displayName: string): string {
 }
 
 function getManagerLink(manager: string): string {
-  return `[\`${manager}\`](${manager}/)`;
+  return getModuleLink(manager, `\`${manager}\``);
 }
 
 export const CategoryNames: Record<Category, string> = {
@@ -118,12 +119,12 @@ sidebar_label: ${displayName}
           md += '\n```\n\n';
         }
       }
-      md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](/modules/manager/#file-matching).\n\n`;
+      md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](../index.md#file-matching).\n\n`;
       md += '## Supported datasources\n\n';
       const escapedDatasources = (supportedDatasources || [])
         .map(
           (datasource) =>
-            `[\`${datasource}\`](../../datasource/#${datasource}-datasource)`,
+            `[\`${datasource}\`](../../datasource/${datasource}/index.md)`,
         )
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;

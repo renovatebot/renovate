@@ -20,5 +20,8 @@ dependencies:
   community.general: 7.3.0
   community.general_with_comment: 7.3.0   # This is a comment
   community.windows: '>=1.0.0,<2.0.0'
+  "community.general_quoted": 7.3.0
+  "community.general_with_comment_quoted": 7.3.0   # This is a comment
+  "community.windows_quoted": '>=1.0.0,<2.0.0'
 repository: "https://github.com/foo/bar"
 issues: "https://github.com/foo/bar/issues"

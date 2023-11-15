@@ -265,18 +265,28 @@ export function divideWorkspaceAndRootDeps(
         // stop when the first match is found and
         // add workspaceDir to workspaces set and upgrade object
         for (const workspacePattern of workspacePatterns) {
-          if (minimatch(workspacePattern).match(workspaceDir)) {
+          const massagedPattern = (workspacePattern as string).replace(
+            /^\.\//,
+            '',
+          );
+          if (minimatch(massagedPattern).match(workspaceDir)) {
             workspaceName = workspaceDir;
             break;
           }
         }
-        if (
-          workspaceName &&
-          !rootDeps.has(upgrade.managerData.packageKey) // prevent same dep from existing in root and workspace
-        ) {
-          workspaces.add(workspaceName);
-          upgrade.workspace = workspaceName;
-          lockWorkspacesUpdates.push(upgrade);
+        if (workspaceName) {
+          if (
+            !rootDeps.has(upgrade.managerData.packageKey) // prevent same dep from existing in root and workspace
+          ) {
+            workspaces.add(workspaceName);
+            upgrade.workspace = workspaceName;
+            lockWorkspacesUpdates.push(upgrade);
+          }
+        } else {
+          logger.warn(
+            { workspacePatterns, workspaceDir },
+            'workspaceDir not found',
+          );
         }
         continue;
       }
