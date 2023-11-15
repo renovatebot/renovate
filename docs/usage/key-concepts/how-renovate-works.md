@@ -96,7 +96,7 @@ Here's a detailed overview of the workflow:
 flowchart TB
     subgraph INITIALIZATION
         direction TB
-        MC[Merge configuration sources \n most important to least: \n cli > env > file > default]
+        MC[Merge configurations \n most important to least: \n cli > env > file > default]
         MC --> IP[Initialize platform]
         IP --> AD[Query the platform for repositories]
         AD --> NFIL[Narrow the list with filters]
