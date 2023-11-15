@@ -32,8 +32,6 @@ Renovate uses these modules in order:
 1. The datasource module looks up versions of the dependency
 1. The versioning module validates and sorts the returned versions
 
-The platform handles the interaction with the remote repositories, for example creating the PRs.
-
 For example:
 
 1. The `gitlabci` manager finds a dependency named `python:3.10-alpine` of datasource `docker`
