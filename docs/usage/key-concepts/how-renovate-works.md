@@ -7,11 +7,11 @@ description: Learn how Renovate works
 
 Renovate usually performs these steps:
 
-- Clones the repo
-- Scans package files to extract dependencies
-- Looks up registries to check for available updates
-- Applies any grouping rules defined
-- Pushes branches and raises Pull Requests
+- Cloning the repository
+- Scanning package files to extract dependencies
+- Looking up registries to check for available updates
+- Applying any grouping rules defined
+- Pushing branches and raising Pull Requests
 
 Because Renovate needs to support a lot of dependency naming and versioning conventions, it has modules for each known convention.
 You can contribute your own modules, if you want.
@@ -27,17 +27,18 @@ Renovate's modules are:
 
 Renovate uses these modules in order:
 
+1. The platform module is used to interact with the source control platform and clone the repository
 1. The manager module looks for files based on their name and extracts the dependencies (each dependency has a datasource)
-2. The datasource module looks up versions of the dependency
-3. The versioning module validates and sorts the returned versions
+1. The datasource module looks up versions of the dependency
+1. The versioning module validates and sorts the returned versions
 
 The platform handles the interaction with the remote repositories, for example creating the PRs.
 
 For example:
 
-1. the `gitlabci` manager finds a dependency named `python:3.10-alpine` of datasource `docker`
-2. the `docker` datasource looks for versions and finds `[python:3.9,python:3.9-alpine,python:3.10,python:3.10-alpine,python:3.11,python:3.11-alpine]`
-3. the `docker` versioning takes `python:3.11-alpine` as it is compatible with `python:3.10-alpine`
+1. The `gitlabci` manager finds a dependency named `python:3.10-alpine` of datasource `docker`
+2. The `docker` datasource looks for versions and finds `[python:3.9,python:3.9-alpine,python:3.10,python:3.10-alpine,python:3.11,python:3.11-alpine]`
+3. The `docker` versioning takes `python:3.11-alpine` as it is compatible with `python:3.10-alpine`
 
 # Workflow
 
