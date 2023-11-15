@@ -11,7 +11,7 @@ describe('util/package-rules/files', () => {
         },
         {
           matchFileNames: ['frontend/package.json'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });

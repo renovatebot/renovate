@@ -100,7 +100,7 @@ describe('modules/versioning/ubuntu/index', () => {
     'isCompatible("$version") === $expected',
     ({ version, range, expected }) => {
       expect(ubuntu.isCompatible(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -268,7 +268,7 @@ describe('modules/versioning/ubuntu/index', () => {
       expect(ubuntu.getMajor(version)).toBe(major);
       expect(ubuntu.getMinor(version)).toBe(minor);
       expect(ubuntu.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -337,7 +337,7 @@ describe('modules/versioning/ubuntu/index', () => {
     'getSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(ubuntu.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -356,7 +356,7 @@ describe('modules/versioning/ubuntu/index', () => {
     'minSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(ubuntu.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -375,9 +375,9 @@ describe('modules/versioning/ubuntu/index', () => {
           rangeStrategy,
           currentVersion,
           newVersion,
-        })
+        }),
       ).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -397,6 +397,6 @@ describe('modules/versioning/ubuntu/index', () => {
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(ubuntu.matches(version, range)).toBe(expected);
-    }
+    },
   );
 });

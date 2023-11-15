@@ -56,7 +56,7 @@ describe('workers/repository/update/branch/automerge', () => {
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce('green');
       expect(await tryBranchAutomerge(config)).toBe(
-        'automerge aborted - PR exists'
+        'automerge aborted - PR exists',
       );
     });
 

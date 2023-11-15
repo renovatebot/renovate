@@ -176,7 +176,7 @@ export interface PostUpgradeTasks {
 }
 
 export type UpdateConfig<
-  T extends RenovateSharedConfig = RenovateSharedConfig
+  T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
 export type RenovateRepository =
@@ -250,7 +250,7 @@ export interface RenovateConfig
   customManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
 
-  fetchReleaseNotes?: FetchReleaseNotesOptions;
+  fetchChangeLogs?: FetchChangeLogsOptions;
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
@@ -264,7 +264,7 @@ export interface RenovateConfig
 
 export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
-  format?: 'json' | 'plain';
+  format?: 'json' | 'plain' | 'yaml';
   transformTemplates?: string[];
 }
 
@@ -275,6 +275,7 @@ export interface AllConfig
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
+  expandCodeOwnersGroups?: boolean;
   assignees?: string[];
   assigneesSampleSize?: number;
   ignoreReviewers?: string[];
@@ -298,7 +299,7 @@ export type UpdateType =
   | 'bump'
   | 'replacement';
 
-export type FetchReleaseNotesOptions = 'off' | 'branch' | 'pr';
+export type FetchChangeLogsOptions = 'off' | 'branch' | 'pr';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
@@ -396,7 +397,7 @@ export interface RenovateOptionBase {
 }
 
 export interface RenovateArrayOption<
-  T extends string | number | Record<string, unknown> = Record<string, unknown>
+  T extends string | number | Record<string, unknown> = Record<string, unknown>,
 > extends RenovateOptionBase {
   default?: T[] | null;
   mergeable?: boolean;

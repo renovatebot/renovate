@@ -31,7 +31,7 @@
       "request": "launch",
       "name": "Jest Current File",
       "runtimeExecutable": "pnpm",
-      "program": "jest",
+      "program": "jest:vscode",
       "args": [
         "--runInBand",
         "--collectCoverage=false",
@@ -52,7 +52,7 @@
       "request": "launch",
       "name": "Jest All",
       "runtimeExecutable": "pnpm",
-      "program": "jest",
+      "program": "jest:vscode",
       "args": [
         "--runInBand",
         "--collectCoverage=false",
@@ -71,7 +71,7 @@
       "request": "launch",
       "name": "Jest Current Folder",
       "runtimeExecutable": "pnpm",
-      "program": "jest",
+      "program": "jest:vscode",
       "args": [
         "--runInBand",
         "--collectCoverage=false",
@@ -90,7 +90,7 @@
       "internalConsoleOptions": "neverOpen",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "pnpm",
-      "program": "jest",
+      "program": "jest:vscode",
       "args": ["--runInBand", "--watchAll=false", "--testTimeout=100000000"]
     }
   ]

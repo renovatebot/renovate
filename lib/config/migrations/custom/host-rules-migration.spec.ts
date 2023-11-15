@@ -59,7 +59,7 @@ describe('config/migrations/custom/host-rules-migration', () => {
           { matchHost: 'https://domain.com/', token: '123test' },
           { matchHost: 'some.domain.com', token: '123test' },
         ],
-      }
+      },
     );
   });
 
@@ -75,14 +75,14 @@ describe('config/migrations/custom/host-rules-migration', () => {
             },
           ],
         } as any,
-        {}
+        {},
       ).run([
         {
           matchHost: 'https://some-diff.domain.com',
           baseUrl: 'https://some.domain.com',
           token: '123test',
         },
-      ])
+      ]),
     ).toThrow(CONFIG_VALIDATION);
   });
 });

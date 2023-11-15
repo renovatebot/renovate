@@ -54,7 +54,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -62,7 +62,7 @@ describe('modules/manager/nuget/artifacts', () => {
   it('aborts if lock file is unchanged', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce(
-      'path/with space/packages.lock.json'
+      'path/with space/packages.lock.json',
     );
     git.getFiles.mockResolvedValueOnce({
       'path/with space/packages.lock.json': 'Current packages.lock.json',
@@ -76,7 +76,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
@@ -108,7 +108,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -148,7 +148,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -168,7 +168,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -191,7 +191,7 @@ describe('modules/manager/nuget/artifacts', () => {
           ...config,
           isLockFileMaintenance: true,
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -236,7 +236,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config: { ...config, constraints: { dotnet: '7.0.100' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -296,7 +296,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config: { ...config, constraints: { dotnet: '7.0.100' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -350,7 +350,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -390,7 +390,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         artifactError: {

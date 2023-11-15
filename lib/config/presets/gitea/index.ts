@@ -12,7 +12,7 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  tag?: string | null
+  tag?: string | null,
 ): Promise<Preset> {
   let res: RepoContents;
   try {
@@ -29,7 +29,7 @@ export async function fetchJSONFile(
   }
 
   // TODO: null check #22198
-  return parsePreset(fromBase64(res.content!));
+  return parsePreset(fromBase64(res.content!), fileName);
 }
 
 export function getPresetFromEndpoint(
@@ -37,7 +37,7 @@ export function getPresetFromEndpoint(
   filePreset: string,
   presetPath?: string,
   endpoint = Endpoint,
-  tag?: string | undefined
+  tag?: string | undefined,
 ): Promise<Preset | undefined> {
   return fetchPreset({
     repo,

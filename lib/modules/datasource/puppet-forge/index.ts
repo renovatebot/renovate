@@ -46,7 +46,7 @@ export class PuppetForgeDatasource extends Datasource {
 
   static createReleaseResult(
     releases: Release[],
-    module: PuppetModule
+    module: PuppetModule,
   ): ReleaseResult {
     const result: ReleaseResult = {
       releases,

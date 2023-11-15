@@ -13,7 +13,7 @@ import type { Bundle, FeatureModel } from './types';
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig
+  _config?: ExtractConfig,
 ): PackageFileContent | null {
   // References:
   // - OSGi compendium release 8 ( https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.feature.html )
@@ -102,14 +102,14 @@ export function extractPackageFile(
 
 function isSupportedFeatureResourceVersion(
   featureModel: FeatureModel,
-  fileName: string
+  fileName: string,
 ): boolean {
   const resourceVersion = featureModel['feature-resource-version'];
   if (resourceVersion) {
     const resourceSemVer = coerce(resourceVersion);
     if (!resourceSemVer) {
       logger.debug(
-        `Skipping file ${fileName} due to invalid feature-resource-version '${resourceVersion}'`
+        `Skipping file ${fileName} due to invalid feature-resource-version '${resourceVersion}'`,
       );
       return false;
     }
@@ -117,7 +117,7 @@ function isSupportedFeatureResourceVersion(
     // we only support 1.x, although no over version has been defined
     if (!satisfies(resourceSemVer, '^1')) {
       logger.debug(
-        `Skipping file ${fileName} due to unsupported feature-resource-version '${resourceVersion}'`
+        `Skipping file ${fileName} due to unsupported feature-resource-version '${resourceVersion}'`,
       );
       return false;
     }
@@ -128,7 +128,7 @@ function isSupportedFeatureResourceVersion(
 
 function extractArtifactList(
   sectionName: string,
-  sectionValue: unknown
+  sectionValue: unknown,
 ): Bundle[] {
   // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model implementation
   if (sectionName.includes(':ARTIFACTS|') && is.array(sectionValue)) {

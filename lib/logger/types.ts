@@ -37,6 +37,6 @@ export type BunyanStream = (NodeJS.WritableStream | Stream) & {
   write: (
     chunk: BunyanRecord,
     enc: BufferEncoding,
-    cb: (err?: Error | null) => void
+    cb: (err?: Error | null) => void,
   ) => void;
 };

@@ -37,6 +37,16 @@ describe('modules/manager/index', () => {
     });
   });
 
+  describe('getEnabledManagersList()', () => {
+    it('works', () => {
+      expect(manager.getEnabledManagersList()).toEqual(manager.allManagersList);
+      expect(manager.getEnabledManagersList(['custom.regex', 'npm'])).toEqual([
+        'npm',
+        'regex',
+      ]);
+    });
+  });
+
   it('validates', () => {
     function validate(module: ManagerApi, moduleName: string): boolean {
       // no need to validate custom as it is a wrapper and not an actual manager
@@ -64,7 +74,7 @@ describe('modules/manager/index', () => {
     delete loadedMgr['custom'];
 
     expect(Array.from([...mgrs.keys(), ...customMgrs.keys()]).sort()).toEqual(
-      Object.keys(loadedMgr).sort()
+      Object.keys(loadedMgr).sort(),
     );
 
     for (const name of mgrs.keys()) {
@@ -86,10 +96,10 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        await manager.extractAllPackageFiles('unknown', {} as any, [])
+        await manager.extractAllPackageFiles('unknown', {} as any, []),
       ).toBeNull();
       expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, [])
+        await manager.extractAllPackageFiles('dummy', {} as any, []),
       ).toBeNull();
     });
 
@@ -100,7 +110,7 @@ describe('modules/manager/index', () => {
         extractAllPackageFiles: () => Promise.resolve([]),
       });
       expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, [])
+        await manager.extractAllPackageFiles('dummy', {} as any, []),
       ).not.toBeNull();
     });
 
@@ -116,10 +126,10 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        manager.extractPackageFile('unknown', '', 'filename', {})
+        manager.extractPackageFile('unknown', '', 'filename', {}),
       ).toBeNull();
       expect(
-        manager.extractPackageFile('dummy', '', 'filename', {})
+        manager.extractPackageFile('dummy', '', 'filename', {}),
       ).toBeNull();
     });
 
@@ -130,7 +140,7 @@ describe('modules/manager/index', () => {
         extractPackageFile: () => Promise.resolve({ deps: [] }),
       });
       expect(
-        manager.extractPackageFile('dummy', '', 'filename', {})
+        manager.extractPackageFile('dummy', '', 'filename', {}),
       ).not.toBeNull();
     });
 
@@ -142,7 +152,7 @@ describe('modules/manager/index', () => {
       });
 
       expect(
-        manager.extractPackageFile('dummy', '', 'filename', {})
+        manager.extractPackageFile('dummy', '', 'filename', {}),
       ).not.toBeNull();
     });
 
@@ -158,7 +168,7 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' })
+        manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' }),
       ).toBeNull();
     });
 
@@ -169,7 +179,7 @@ describe('modules/manager/index', () => {
         getRangeStrategy: () => 'replace',
       });
       expect(
-        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' })
+        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
       ).not.toBeNull();
 
       manager.getManagers().set('dummy', {
@@ -177,11 +187,11 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' })
+        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
       ).not.toBeNull();
 
       expect(
-        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'bump' })
+        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'bump' }),
       ).not.toBeNull();
     });
 
@@ -194,7 +204,7 @@ describe('modules/manager/index', () => {
         manager.getRangeStrategy({
           manager: 'dummy',
           rangeStrategy: 'in-range-only',
-        })
+        }),
       ).toBe('update-lockfile');
     });
 
@@ -208,7 +218,7 @@ describe('modules/manager/index', () => {
         manager.getRangeStrategy({
           manager: 'dummy',
           rangeStrategy: 'in-range-only',
-        })
+        }),
       ).toBe('update-lockfile');
     });
 

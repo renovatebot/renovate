@@ -15,7 +15,7 @@ export const MSBUILD_CENTRAL_FILE = 'Packages.props';
  */
 export async function getDependentPackageFiles(
   packageFileName: string,
-  isCentralManament = false
+  isCentralManament = false,
 ): Promise<ProjectFile[]> {
   const packageFiles = await getAllPackageFiles();
   const graph: ReturnType<typeof Graph> = Graph();
@@ -52,10 +52,10 @@ export async function getDependentPackageFiles(
       .filter(is.nonEmptyString);
 
     const projectReferences = projectReferenceAttributes.map((a) =>
-      upath.normalize(a)
+      upath.normalize(a),
     );
     const normalizedRelativeProjectReferences = projectReferences.map((r) =>
-      reframeRelativePathToRootOfRepo(f, r)
+      reframeRelativePathToRootOfRepo(f, r),
     );
 
     for (const ref of normalizedRelativeProjectReferences) {
@@ -85,7 +85,7 @@ export async function getDependentPackageFiles(
 function recursivelyGetDependentPackageFiles(
   packageFileName: string,
   graph: ReturnType<typeof Graph>,
-  deps: Map<string, boolean>
+  deps: Map<string, boolean>,
 ): void {
   const dependents = graph.adjacent(packageFileName);
 
@@ -106,20 +106,20 @@ function recursivelyGetDependentPackageFiles(
  */
 function reframeRelativePathToRootOfRepo(
   dependentProjectRelativePath: string,
-  projectReference: string
+  projectReference: string,
 ): string {
   const virtualRepoRoot = '/';
   const absoluteDependentProjectPath = upath.resolve(
     virtualRepoRoot,
-    dependentProjectRelativePath
+    dependentProjectRelativePath,
   );
   const absoluteProjectReferencePath = upath.resolve(
     upath.dirname(absoluteDependentProjectPath),
-    projectReference
+    projectReference,
   );
   const relativeProjectReferencePath = upath.relative(
     virtualRepoRoot,
-    absoluteProjectReferencePath
+    absoluteProjectReferencePath,
   );
 
   return relativeProjectReferencePath;
@@ -131,7 +131,7 @@ function reframeRelativePathToRootOfRepo(
 async function getAllPackageFiles(): Promise<string[]> {
   const allFiles = await scm.getFileList();
   const filteredPackageFiles = allFiles.filter(
-    minimatch.filter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true })
+    minimatch.filter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true }),
   );
 
   logger.trace({ filteredPackageFiles }, 'Found package files');

@@ -20,7 +20,7 @@ There are four times in Renovate's behavior when it may need credentials:
 
 - Resolving private config presets
 - Looking up dependency versions
-- Looking up release notes
+- Looking up changelogs
 - Passing to package managers when updating lock files or checksums
 
 <!-- prettier-ignore -->
@@ -67,9 +67,7 @@ In addition to the above options to match against a host, you need to add the cr
 Typically they are either `token`, or `username` + `password`.
 Other credential terms are not supported yet.
 
-Here is an example of some host rules:
-
-```json
+```json title="Example host rules"
 {
   "hostRules": [
     {
@@ -144,14 +142,14 @@ Assume this config is used on the `github.com/some-other-org` repo:
 }
 ```
 
-## Looking up Release Notes
+## Looking up changelogs
 
 When Renovate creates Pull Requests, its default behavior is to locate and embed release notes/changelogs of packages.
 These release notes are fetched from the source repository of packages and not from the registries themselves, so if they are private then they will require different credentials.
 
 When it comes to open source, most packages host their source on `github.com` in public repositories.
 GitHub greatly rate limits unauthenticated API requests, so you need to configure credentials for `github.com` or the bot will get rate limited quickly.
-It can be confusing for people who host their own source code privately to be asked to configure a `github.com` token but without it Release Notes for most open source packages will be blocked.
+It can be confusing for people who host their own source code privately to be asked to configure a `github.com` token but without it changelogs for most open source packages will be blocked.
 
 Currently the preferred way to configure `github.com` credentials for self-hosted Renovate is:
 
@@ -210,7 +208,7 @@ The environment variables used are: `GIT_CONFIG_KEY_0=url.https://${token}@githu
 Maybe you're running your own ChartMuseum server to host your private Helm Charts.
 This is how you connect to a private Helm repository:
 
-```js
+```js title="Connecting to a private Helm repository"
 module.exports = {
   hostRules: [
     {
@@ -442,6 +440,19 @@ For example:
     }
   ]
 }
+```
+
+### pipenv
+
+If a `Pipfile` contains a `source` with `USERNAME` or `PASSWORD` environment variables and there is a `hostRules` entry with a matching host plus `username` and `password` fields, then these variables would be passed to `pipenv lock`.
+
+For example:
+
+```ini
+[[source]]
+url = "https://$USERNAME:${PASSWORD}@mypypi.example.com/simple"
+verify_ssl = true
+name = "pypi"
 ```
 
 ### poetry

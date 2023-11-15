@@ -39,7 +39,7 @@ describe('workers/repository/onboarding/branch/config', () => {
           '  "extends": [\n' +
           '    "local>some/renovate-config"\n' +
           '  ]\n' +
-          '}\n'
+          '}\n',
       );
     });
   });
@@ -57,7 +57,7 @@ describe('workers/repository/onboarding/branch/config', () => {
 
     it('handles finding an organization dot platform preset', async () => {
       mockedPresets.getPreset.mockRejectedValueOnce(
-        new Error(PRESET_DEP_NOT_FOUND)
+        new Error(PRESET_DEP_NOT_FOUND),
       );
       mockedPresets.getPreset.mockResolvedValueOnce({ enabled: true });
       const onboardingConfig = await getOnboardingConfig(config);
@@ -70,7 +70,7 @@ describe('workers/repository/onboarding/branch/config', () => {
 
     it('handles not finding an organization preset', async () => {
       mockedPresets.getPreset.mockRejectedValue(
-        new Error(PRESET_DEP_NOT_FOUND)
+        new Error(PRESET_DEP_NOT_FOUND),
       );
       const onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
@@ -79,7 +79,7 @@ describe('workers/repository/onboarding/branch/config', () => {
 
     it('ignores an unknown error', async () => {
       mockedPresets.getPreset.mockRejectedValue(
-        new Error('unknown error for test')
+        new Error('unknown error for test'),
       );
       const onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
@@ -88,7 +88,7 @@ describe('workers/repository/onboarding/branch/config', () => {
 
     it('ignores unsupported platform', async () => {
       mockedPresets.getPreset.mockRejectedValue(
-        new Error(`Unsupported platform 'dummy' for local preset.`)
+        new Error(`Unsupported platform 'dummy' for local preset.`),
       );
       const onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);

@@ -43,7 +43,7 @@ describe('modules/platform/gitlab/index', () => {
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
-      '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+      '0d9c7726c3d628b7e28af234595cfd20febdbf8e',
     );
     hostRules.find.mockReturnValue({
       token: '123test',
@@ -98,7 +98,7 @@ describe('modules/platform/gitlab/index', () => {
         await gitlab.initPlatform({
           token: 'some-token',
           endpoint: undefined,
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -119,7 +119,7 @@ describe('modules/platform/gitlab/index', () => {
         await gitlab.initPlatform({
           endpoint,
           token: 'some-token',
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -132,7 +132,7 @@ describe('modules/platform/gitlab/index', () => {
           token: 'some-token',
           endpoint: undefined,
           gitAuthor: 'somebody',
-        })
+        }),
       ).toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
     });
   });
@@ -142,7 +142,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false',
         )
         .replyWithError('getRepos error');
       await expect(gitlab.getRepos()).rejects.toThrow('getRepos error');
@@ -152,7 +152,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false',
         )
         .reply(200, [
           {
@@ -174,7 +174,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false',
         )
         .reply(200, [
           {
@@ -196,7 +196,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&topic=one%2Ctwo'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&topic=one%2Ctwo',
         )
         .reply(200, [
           {
@@ -214,7 +214,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/groups/a/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false'
+          '/api/v4/groups/a/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false',
         )
         .reply(200, [
           {
@@ -222,7 +222,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .get(
-          '/api/v4/groups/c%2Fd/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false'
+          '/api/v4/groups/c%2Fd/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false',
         )
         .reply(200, [
           {
@@ -240,7 +240,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/groups/a/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false&topic=one%2Ctwo'
+          '/api/v4/groups/a/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&archived=false&include_subgroups=true&with_shared=false&topic=one%2Ctwo',
         )
         .reply(200, [
           {
@@ -263,7 +263,7 @@ describe('modules/platform/gitlab/index', () => {
       repository: 'some/repo',
     },
     repoResp: httpMock.Body | null = null,
-    scope = httpMock.scope(gitlabApiHost)
+    scope = httpMock.scope(gitlabApiHost),
   ): Promise<httpMock.Scope> {
     const repo = repoParams.repository;
     const justRepo = repo.split('/').slice(0, 2).join('/');
@@ -272,7 +272,7 @@ describe('modules/platform/gitlab/index', () => {
       repoResp ?? {
         default_branch: 'master',
         http_url_to_repo: `https://gitlab.com/${justRepo}.git`,
-      }
+      },
     );
     await gitlab.initRepo(repoParams);
     return scope;
@@ -289,7 +289,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(
         await gitlab.initRepo({
           repository: 'some/repo/project',
-        })
+        }),
       ).toEqual({
         defaultBranch: 'master',
         isFork: false,
@@ -305,7 +305,7 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-        })
+        }),
       ).rejects.toThrow('always error');
     });
 
@@ -317,7 +317,7 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
     });
 
@@ -329,7 +329,7 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_MIRRORED);
     });
 
@@ -345,7 +345,7 @@ describe('modules/platform/gitlab/index', () => {
         await gitlab.initRepo({
           repository: 'some/repo',
           includeMirrors: true,
-        })
+        }),
       ).toEqual({
         defaultBranch: 'master',
         isFork: false,
@@ -361,7 +361,7 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_DISABLED);
     });
 
@@ -373,7 +373,7 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_DISABLED);
     });
 
@@ -385,7 +385,7 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_EMPTY);
     });
 
@@ -397,7 +397,7 @@ describe('modules/platform/gitlab/index', () => {
       await expect(
         gitlab.initRepo({
           repository: 'some/repo',
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_EMPTY);
     });
 
@@ -412,7 +412,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(
         await gitlab.initRepo({
           repository: 'some/repo/project',
-        })
+        }),
       ).toEqual({
         defaultBranch: 'master',
         isFork: false,
@@ -449,7 +449,7 @@ describe('modules/platform/gitlab/index', () => {
         gitlab.initRepo({
           repository: 'some/repo/project',
           gitUrl: 'ssh',
-        })
+        }),
       ).rejects.toThrow(CONFIG_GIT_URL_UNAVAILABLE);
     });
 
@@ -495,7 +495,7 @@ describe('modules/platform/gitlab/index', () => {
           default_branch: 'master',
           http_url_to_repo: null,
           merge_method: 'merge',
-        }
+        },
       );
       expect(await gitlab.getRepoForceRebase()).toBeFalse();
     });
@@ -509,7 +509,7 @@ describe('modules/platform/gitlab/index', () => {
           default_branch: 'master',
           http_url_to_repo: null,
           merge_method: 'ff',
-        }
+        },
       );
       expect(await gitlab.getRepoForceRebase()).toBeTrue();
     });
@@ -520,7 +520,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
       const pr = await gitlab.getBranchPr('some-branch');
@@ -531,7 +531,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -543,7 +543,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1'
+          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1',
         )
         .reply(200, {
           iid: 91,
@@ -566,7 +566,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -578,7 +578,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1'
+          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1',
         )
         .reply(200, {
           iid: 91,
@@ -601,7 +601,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -613,7 +613,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1'
+          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1',
         )
         .reply(200, {
           iid: 91,
@@ -638,11 +638,11 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch', true);
@@ -653,11 +653,11 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -669,7 +669,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1'
+          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1',
         )
         .reply(200, {
           iid: 91,
@@ -695,14 +695,14 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [
           { context: 'renovate/stability-days', status: 'success' },
           { context: 'renovate/other', status: 'success' },
         ])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch', true);
@@ -713,14 +713,14 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [
           { name: 'renovate/stability-days', status: 'success' },
           { name: 'renovate/other', status: 'success' },
         ])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch', false);
@@ -731,14 +731,14 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [
           { status: 'success' },
           { status: 'failed', allow_failure: true },
         ])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch', true);
@@ -749,11 +749,11 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [{ status: 'failed', allow_failure: true }])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch', true);
@@ -764,11 +764,11 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [{ status: 'success' }, { status: 'skipped' }])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch', true);
@@ -779,11 +779,11 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [{ status: 'skipped' }])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch', true);
@@ -794,11 +794,11 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [{ status: 'skipped' }, { status: 'failed' }])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch', true);
@@ -809,7 +809,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [
           { status: 'success' },
@@ -817,7 +817,7 @@ describe('modules/platform/gitlab/index', () => {
           { status: 'failed' },
         ])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch', true);
@@ -828,11 +828,11 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [{ status: 'success' }, { status: 'foo' }])
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch', true);
@@ -844,7 +844,7 @@ describe('modules/platform/gitlab/index', () => {
       git.branchExists.mockReturnValue(false);
       await initRepo();
       await expect(gitlab.getBranchStatus('somebranch', true)).rejects.toThrow(
-        REPOSITORY_CHANGED
+        REPOSITORY_CHANGED,
       );
     });
   });
@@ -854,12 +854,12 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatusCheck(
         'somebranch',
-        'some-context'
+        'some-context',
       );
       expect(res).toBeNull();
     });
@@ -868,12 +868,12 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [{ name: 'context-1', status: 'pending' }]);
       const res = await gitlab.getBranchStatusCheck(
         'somebranch',
-        'some-context'
+        'some-context',
       );
       expect(res).toBeNull();
     });
@@ -882,7 +882,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [
           { name: 'context-1', status: 'pending' },
@@ -891,7 +891,7 @@ describe('modules/platform/gitlab/index', () => {
         ]);
       const res = await gitlab.getBranchStatusCheck(
         'somebranch',
-        'some-context'
+        'some-context',
       );
       expect(res).toBe('green');
     });
@@ -900,7 +900,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [
           { name: 'context-1', status: 'pending' },
@@ -909,7 +909,7 @@ describe('modules/platform/gitlab/index', () => {
         ]);
       const res = await gitlab.getBranchStatusCheck(
         'somebranch',
-        'some-context'
+        'some-context',
       );
       expect(res).toBe('yellow');
     });
@@ -922,15 +922,15 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [])
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
         .reply(200, []);
 
@@ -941,7 +941,7 @@ describe('modules/platform/gitlab/index', () => {
           description: 'some-description',
           state,
           url: 'some-url',
-        })
+        }),
       ).toResolve();
     });
 
@@ -949,15 +949,15 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [])
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
         .reply(200, []);
 
@@ -981,15 +981,15 @@ describe('modules/platform/gitlab/index', () => {
           (body: any): boolean => {
             expect(body.pipeline_id).toBe(123);
             return true;
-          }
+          },
         )
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [])
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
         .reply(200, { last_pipeline: { id: 123 } });
 
@@ -1000,7 +1000,7 @@ describe('modules/platform/gitlab/index', () => {
           description: 'some-description',
           state: 'green',
           url: 'some-url',
-        })
+        }),
       ).toResolve();
     });
 
@@ -1011,15 +1011,15 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .post(
-          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
         .reply(200, {})
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses',
         )
         .reply(200, [])
         .get(
-          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e',
         )
         .reply(200, []);
 
@@ -1041,7 +1041,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened',
         )
         .reply(200, [
           {
@@ -1061,7 +1061,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened',
         )
         .reply(200, [
           {
@@ -1085,7 +1085,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened',
         )
         .reply(200, [
           {
@@ -1110,7 +1110,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened',
         )
         .reply(200, [])
         .post('/api/v4/projects/undefined/issues')
@@ -1127,7 +1127,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened',
         )
         .reply(200, [
           {
@@ -1154,7 +1154,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened',
         )
         .reply(200, [
           {
@@ -1182,7 +1182,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened',
         )
         .reply(200, [
           {
@@ -1207,7 +1207,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened',
         )
         .reply(200, [
           {
@@ -1233,7 +1233,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened',
         )
         .reply(200, [
           {
@@ -1264,7 +1264,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&scope=created_by_me&state=opened',
         )
         .reply(200, [
           {
@@ -1301,11 +1301,11 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/users?username=someotheruser')
         .reply(200, [{ id: 124 }])
         .put(
-          '/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124'
+          '/api/v4/projects/undefined/merge_requests/42?assignee_ids[]=123&assignee_ids[]=124',
         )
         .reply(200);
       await expect(
-        gitlab.addAssignees(42, ['someuser', 'someotheruser'])
+        gitlab.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
     });
 
@@ -1315,7 +1315,7 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/users?username=someuser')
         .replyWithError('some error');
       await expect(
-        gitlab.addAssignees(42, ['someuser', 'someotheruser'])
+        gitlab.addAssignees(42, ['someuser', 'someotheruser']),
       ).toResolve();
     });
   });
@@ -1327,7 +1327,7 @@ describe('modules/platform/gitlab/index', () => {
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
         expect(logger.warn).toHaveBeenCalledWith(
           { version: '13.8.0' },
-          'Adding reviewers is only available in GitLab 13.9 and onwards'
+          'Adding reviewers is only available in GitLab 13.9 and onwards',
         );
       });
     });
@@ -1346,7 +1346,7 @@ describe('modules/platform/gitlab/index', () => {
         const scope = httpMock
           .scope(gitlabApiHost)
           .get(
-            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1',
           )
           .reply(404);
 
@@ -1358,7 +1358,7 @@ describe('modules/platform/gitlab/index', () => {
         const scope = httpMock
           .scope(gitlabApiHost)
           .get(
-            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1',
           )
           .reply(200, { reviewers: existingReviewers })
           .get('/api/v4/users?username=someuser')
@@ -1376,7 +1376,7 @@ describe('modules/platform/gitlab/index', () => {
         const scope = httpMock
           .scope(gitlabApiHost)
           .get(
-            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1',
           )
           .reply(200, { reviewers: existingReviewers })
           .get('/api/v4/users?username=someuser')
@@ -1398,7 +1398,7 @@ describe('modules/platform/gitlab/index', () => {
         const scope = httpMock
           .scope(gitlabApiHost)
           .get(
-            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1',
           )
           .reply(200, { reviewers: existingReviewers })
           .get('/api/v4/users?username=someuser')
@@ -1418,7 +1418,7 @@ describe('modules/platform/gitlab/index', () => {
         const scope = httpMock
           .scope(gitlabApiHost)
           .get(
-            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1',
           )
           .reply(200, { reviewers: existingReviewers })
           .get('/api/v4/users?username=someuser')
@@ -1438,7 +1438,7 @@ describe('modules/platform/gitlab/index', () => {
         const scope = httpMock
           .scope(gitlabApiHost)
           .get(
-            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1',
           )
           .reply(200, { reviewers: existingReviewers })
           .get('/api/v4/users?username=someuser')
@@ -1467,7 +1467,7 @@ describe('modules/platform/gitlab/index', () => {
           number: 42,
           topic: 'some-subject',
           content: 'some\ncontent',
-        })
+        }),
       ).toResolve();
     });
 
@@ -1483,7 +1483,7 @@ describe('modules/platform/gitlab/index', () => {
           number: 42,
           topic: 'some-subject',
           content: 'some\ncontent',
-        })
+        }),
       ).toResolve();
     });
 
@@ -1497,7 +1497,7 @@ describe('modules/platform/gitlab/index', () => {
           number: 42,
           topic: 'some-subject',
           content: 'some\ncontent',
-        })
+        }),
       ).toResolve();
     });
 
@@ -1511,7 +1511,7 @@ describe('modules/platform/gitlab/index', () => {
           number: 42,
           topic: null,
           content: '!merge',
-        })
+        }),
       ).toResolve();
     });
   });
@@ -1529,7 +1529,7 @@ describe('modules/platform/gitlab/index', () => {
           type: 'by-topic',
           number: 42,
           topic: 'some-subject',
-        })
+        }),
       ).toResolve();
     });
 
@@ -1545,7 +1545,7 @@ describe('modules/platform/gitlab/index', () => {
           type: 'by-content',
           number: 42,
           content: 'some-body',
-        })
+        }),
       ).toResolve();
     });
   });
@@ -1555,7 +1555,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -1575,7 +1575,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -1596,7 +1596,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -1618,7 +1618,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -1639,7 +1639,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -1660,7 +1660,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -1811,7 +1811,7 @@ describe('modules/platform/gitlab/index', () => {
           platformOptions: {
             usePlatformAutomerge: true,
           },
-        })
+        }),
       ).toMatchInlineSnapshot(`
         {
           "id": 1,
@@ -1926,7 +1926,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
-        })
+        }),
       ).toMatchInlineSnapshot(`
         {
           "id": 1,
@@ -1971,7 +1971,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .put(
-          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50005'
+          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50005',
         )
         .reply(200);
       expect(
@@ -1985,7 +1985,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
-        })
+        }),
       ).toStrictEqual({
         id: 1,
         iid: 12345,
@@ -2033,11 +2033,11 @@ describe('modules/platform/gitlab/index', () => {
           },
         ])
         .delete(
-          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50006'
+          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50006',
         )
         .reply(200)
         .delete(
-          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50007'
+          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50007',
         )
         .reply(200)
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
@@ -2053,7 +2053,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
-        })
+        }),
       ).toStrictEqual({
         id: 1,
         iid: 12345,
@@ -2102,7 +2102,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
-        })
+        }),
       ).toMatchInlineSnapshot(`
         {
           "id": 1,
@@ -2153,7 +2153,7 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
             gitLabIgnoreApprovals: true,
           },
-        })
+        }),
       ).toMatchInlineSnapshot(`
         {
           "id": 1,
@@ -2187,7 +2187,7 @@ describe('modules/platform/gitlab/index', () => {
           platformOptions: {
             autoApprove: true,
           },
-        })
+        }),
       ).toStrictEqual({
         id: 1,
         iid: 12345,
@@ -2219,7 +2219,7 @@ describe('modules/platform/gitlab/index', () => {
           platformOptions: {
             autoApprove: true,
           },
-        })
+        }),
       ).toResolve();
     });
   });
@@ -2229,7 +2229,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1',
         )
         .reply(200, {
           id: 1,
@@ -2252,7 +2252,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1',
         )
         .reply(200, {
           id: 1,
@@ -2275,7 +2275,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1',
         )
         .reply(200, {
           id: 1,
@@ -2298,7 +2298,7 @@ describe('modules/platform/gitlab/index', () => {
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/merge_requests/12345?include_diverged_commits_count=1'
+          '/api/v4/projects/some%2Frepo/merge_requests/12345?include_diverged_commits_count=1',
         )
         .reply(200, {
           id: 1,
@@ -2322,7 +2322,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1',
         )
         .reply(200, {
           id: 1,
@@ -2349,7 +2349,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1',
         )
         .reply(200, {
           id: 1,
@@ -2392,7 +2392,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -2405,7 +2405,7 @@ describe('modules/platform/gitlab/index', () => {
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
       await expect(
-        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
+        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
     });
 
@@ -2414,7 +2414,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -2427,7 +2427,7 @@ describe('modules/platform/gitlab/index', () => {
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
       await expect(
-        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
+        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
     });
 
@@ -2436,7 +2436,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -2449,7 +2449,7 @@ describe('modules/platform/gitlab/index', () => {
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
       await expect(
-        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
+        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
     });
 
@@ -2458,7 +2458,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -2478,7 +2478,7 @@ describe('modules/platform/gitlab/index', () => {
           prBody: 'body',
           state: 'closed',
           targetBranch: 'branch-b',
-        })
+        }),
       ).toResolve();
     });
 
@@ -2487,7 +2487,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -2509,7 +2509,7 @@ describe('modules/platform/gitlab/index', () => {
           platformOptions: {
             autoApprove: true,
           },
-        })
+        }),
       ).toResolve();
     });
 
@@ -2518,7 +2518,7 @@ describe('modules/platform/gitlab/index', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me'
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
         )
         .reply(200, [
           {
@@ -2536,7 +2536,7 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'title',
           prBody: 'body',
           state: 'closed',
-        })
+        }),
       ).toResolve();
     });
   });
@@ -2550,7 +2550,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(
         await gitlab.mergePr({
           id: 1,
-        })
+        }),
       ).toBeTrue();
     });
   });
@@ -2569,15 +2569,17 @@ These updates have all been created already. Click a checkbox below to force a r
   describe('massageMarkdown(input)', () => {
     it('strips invalid unicode null characters', () => {
       expect(
-        gitlab.massageMarkdown("The source contains 'Ruby\u0000' at: 2.7.6.219")
+        gitlab.massageMarkdown(
+          "The source contains 'Ruby\u0000' at: 2.7.6.219",
+        ),
       ).toBe("The source contains 'Ruby' at: 2.7.6.219");
     });
 
     it('replaces PR with MR including pluralization', () => {
       expect(
         gitlab.massageMarkdown(
-          'A Pull Request is a PR, multiple Pull Requests are PRs.'
-        )
+          'A Pull Request is a PR, multiple Pull Requests are PRs.',
+        ),
       ).toBe('A Merge Request is a MR, multiple Merge Requests are MRs.');
     });
 
@@ -2621,7 +2623,7 @@ These updates have all been created already. Click a checkbox below to force a r
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+          '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1',
         )
         .reply(200, {
           id: 1,
@@ -2641,12 +2643,25 @@ These updates have all been created already. Click a checkbox below to force a r
   });
 
   describe('getJsonFile()', () => {
+    it('returns null', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
+        )
+        .reply(200, {
+          content: '',
+        });
+      const res = await gitlab.getJsonFile('dir/file.json');
+      expect(res).toBeNull();
+    });
+
     it('returns file content', async () => {
       const data = { foo: 'bar' };
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
         )
         .reply(200, {
           content: toBase64(JSON.stringify(data)),
@@ -2665,7 +2680,7 @@ These updates have all been created already. Click a checkbox below to force a r
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json5?ref=HEAD'
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json5?ref=HEAD',
         )
         .reply(200, {
           content: toBase64(json5Data),
@@ -2679,7 +2694,7 @@ These updates have all been created already. Click a checkbox below to force a r
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/different%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
+          '/api/v4/projects/different%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
         )
         .reply(200, {
           content: toBase64(JSON.stringify(data)),
@@ -2693,7 +2708,7 @@ These updates have all been created already. Click a checkbox below to force a r
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=dev'
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=dev',
         )
         .reply(200, {
           content: toBase64(JSON.stringify(data)),
@@ -2701,7 +2716,7 @@ These updates have all been created already. Click a checkbox below to force a r
       const res = await gitlab.getJsonFile(
         'dir/file.json',
         'some%2Frepo',
-        'dev'
+        'dev',
       );
       expect(res).toEqual(data);
     });
@@ -2710,7 +2725,7 @@ These updates have all been created already. Click a checkbox below to force a r
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
         )
         .reply(200, {
           content: toBase64('!@#'),
@@ -2722,7 +2737,7 @@ These updates have all been created already. Click a checkbox below to force a r
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD'
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=HEAD',
         )
         .replyWithError('some error');
       await expect(gitlab.getJsonFile('dir/file.json')).rejects.toThrow();
@@ -2764,6 +2779,70 @@ These updates have all been created already. Click a checkbox below to force a r
         .reply(404);
       const filteredUsers = await gitlab.filterUnavailableUsers?.(['maria']);
       expect(filteredUsers).toEqual(['maria']);
+    });
+  });
+
+  describe('expandGroupMembers(reviewersOrAssignees)', () => {
+    it('expands group members for groups with members', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/groups/group-a/members')
+        .reply(200, [{ username: 'maria' }, { username: 'jimmy' }])
+        .get('/api/v4/groups/group-b/members')
+        .reply(200, [{ username: 'john' }]);
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        'u@email.com',
+        '@group-a',
+        '@group-b',
+      ]);
+      expect(expandedGroupMembers).toEqual([
+        'u@email.com',
+        'maria',
+        'jimmy',
+        'john',
+      ]);
+    });
+
+    it('users are not expanded when 404', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/groups/john/members')
+        .reply(404, { message: '404 Group Not Found' });
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.(['john']);
+      expect(expandedGroupMembers).toEqual(['john']);
+    });
+
+    it('users are not expanded when non 404', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/groups/group/members')
+        .reply(403, { message: '403 Authorization' });
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        '@group',
+      ]);
+      expect(expandedGroupMembers).toEqual(['group']);
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Unable to fetch group',
+      );
+    });
+
+    it('groups with no members expand into empty list', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/groups/group-c/members')
+        .reply(200, []);
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        '@group-c',
+      ]);
+      expect(expandedGroupMembers).toEqual([]);
+    });
+
+    it('includes email in final result', async () => {
+      const expandedGroupMembers = await gitlab.expandGroupMembers?.([
+        'u@email.com',
+      ]);
+      expect(expandedGroupMembers).toEqual(['u@email.com']);
     });
   });
 });

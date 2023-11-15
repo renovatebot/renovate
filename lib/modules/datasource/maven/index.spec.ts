@@ -102,8 +102,8 @@ function mockGenericPackage(opts: MockOpts = {}) {
         .get(
           `/${packagePath}/${latest}/${artifact}-${latest.replace(
             '-SNAPSHOT',
-            ''
-          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
+            '',
+          )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`,
         )
         .reply(200, pom);
     } else {
@@ -155,14 +155,14 @@ function mockGenericPackage(opts: MockOpts = {}) {
               snapshot.version
             }/${artifact}-${snapshot.version.replace(
               '-SNAPSHOT',
-              ''
-            )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
+              '',
+            )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`,
           )
           .reply(snapshot.jarStatus, '', { 'Last-Modified': timestamp });
       } else {
         scope
           .head(
-            `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`
+            `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`,
           )
           .reply(404, '');
       }
@@ -311,7 +311,7 @@ describe('modules/datasource/maven/index', () => {
       'https://unauthorized_repo/',
       'https://empty_repo',
       'https://unknown_error',
-      baseUrl
+      baseUrl,
     );
 
     expect(res).toMatchSnapshot();
@@ -333,7 +333,7 @@ describe('modules/datasource/maven/index', () => {
     const res = await get(
       'org.example:package',
       'ftp://protocol_error_repo',
-      base
+      base,
     );
 
     expect(res?.releases).toMatchSnapshot();
@@ -349,7 +349,7 @@ describe('modules/datasource/maven/index', () => {
     const res = await get(
       'org.example:package',
       'https://invalid_metadata_repo',
-      baseUrl
+      baseUrl,
     );
 
     expect(res).toMatchSnapshot();
@@ -365,7 +365,7 @@ describe('modules/datasource/maven/index', () => {
     const res = await get(
       'org.example:package',
       'https://invalid_metadata_repo',
-      baseUrl
+      baseUrl,
     );
 
     expect(res).toMatchSnapshot();
@@ -385,7 +385,7 @@ describe('modules/datasource/maven/index', () => {
     const res = await get(
       'org.example:package',
 
-      '${project.baseUri}../../repository/'
+      '${project.baseUri}../../repository/',
     );
     expect(res).toBeNull();
   });
@@ -457,7 +457,7 @@ describe('modules/datasource/maven/index', () => {
         .get(path)
         .matchHeader(
           'authorization',
-          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg=='
+          'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==',
         )
         .reply(200, Fixtures.get('metadata.xml'));
     }
@@ -467,14 +467,14 @@ describe('modules/datasource/maven/index', () => {
       .get(pomfilePath)
       .matchHeader(
         'authorization',
-        'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg=='
+        'Basic b2F1dGgyYWNjZXNzdG9rZW46c29tZS10b2tlbg==',
       )
       .reply(200, Fixtures.get('pom.xml'));
 
     googleAuth.mockImplementation(
       jest.fn().mockImplementation(() => ({
         getAccessToken: jest.fn().mockResolvedValue('some-token'),
-      }))
+      })),
     );
 
     const res = await get('org.example:package', baseUrlAR);
@@ -525,7 +525,7 @@ describe('modules/datasource/maven/index', () => {
     googleAuth.mockImplementation(
       jest.fn().mockImplementation(() => ({
         getAccessToken: jest.fn().mockResolvedValue(undefined),
-      }))
+      })),
     );
 
     const res = await get('org.example:package', baseUrlAR);

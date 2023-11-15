@@ -125,7 +125,7 @@ describe('modules/versioning/composer/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(semver.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -141,7 +141,7 @@ describe('modules/versioning/composer/index', () => {
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(semver.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -230,7 +230,7 @@ describe('modules/versioning/composer/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 
   it.each`

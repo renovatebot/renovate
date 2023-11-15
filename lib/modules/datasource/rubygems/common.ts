@@ -7,7 +7,7 @@ import { GemMetadata, GemVersions } from './schema';
 
 export function assignMetadata(
   releases: ReleaseResult,
-  metadata: GemMetadata
+  metadata: GemMetadata,
 ): ReleaseResult {
   return assignKeys(releases, metadata, [
     'changelogUrl',
@@ -19,7 +19,7 @@ export function assignMetadata(
 export function getV1Metadata(
   http: Http,
   registryUrl: string,
-  packageName: string
+  packageName: string,
 ): AsyncResult<GemMetadata, SafeJsonError> {
   const metadataUrl = join(registryUrl, '/api/v1/gems', `${packageName}.json`);
   return http.getJsonSafe(metadataUrl, GemMetadata);
@@ -28,17 +28,17 @@ export function getV1Metadata(
 export function getV1Releases(
   http: Http,
   registryUrl: string,
-  packageName: string
+  packageName: string,
 ): AsyncResult<ReleaseResult, SafeJsonError | 'unsupported-api'> {
   const versionsUrl = join(
     registryUrl,
     '/api/v1/versions',
-    `${packageName}.json`
+    `${packageName}.json`,
   );
 
   return http.getJsonSafe(versionsUrl, GemVersions).transform((releaseResult) =>
     getV1Metadata(http, registryUrl, packageName)
       .transform((metadata) => assignMetadata(releaseResult, metadata))
-      .unwrapOrElse(releaseResult)
+      .unwrapOrElse(releaseResult),
   );
 }

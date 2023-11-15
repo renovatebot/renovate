@@ -21,7 +21,7 @@ export class GitHubChangeLogSource extends ChangeLogSource {
     baseUrl: string,
     repository: string,
     prevHead: string,
-    nextHead: string
+    nextHead: string,
   ): string {
     return `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
   }
@@ -60,19 +60,19 @@ export class GitHubChangeLogSource extends ChangeLogSource {
         if (!GlobalConfig.get('githubTokenWarn')) {
           logger.debug(
             { manager, packageName, sourceUrl },
-            'GitHub token warning has been suppressed. Skipping release notes retrieval'
+            'GitHub token warning has been suppressed. Skipping release notes retrieval',
           );
           return { isValid: false };
         }
         logger.warn(
           { manager, packageName, sourceUrl },
-          'No github.com token has been configured. Skipping release notes retrieval'
+          'No github.com token has been configured. Skipping release notes retrieval',
         );
         return { isValid: false, error: 'MissingGithubToken' };
       }
       logger.debug(
         { manager, packageName, sourceUrl },
-        'Repository URL does not match any known github hosts - skipping changelog retrieval'
+        'Repository URL does not match any known github hosts - skipping changelog retrieval',
       );
       return { isValid: false };
     }

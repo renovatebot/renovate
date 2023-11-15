@@ -1,7 +1,8 @@
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import type { HostRule } from '../../../types';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { ExecOptions, ExtraEnv, Opt } from '../../../util/exec/types';
 import {
   deleteLocalFile,
   ensureCacheDir,
@@ -9,16 +10,19 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
+import { find } from '../../../util/host-rules';
+import { PypiDatasource } from '../../datasource/pypi';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import { extractPackageFile } from './extract';
 import { PipfileLockSchema } from './schema';
 
 export function getPythonConstraint(
   existingLockFileContent: string,
-  config: UpdateArtifactsConfig
+  config: UpdateArtifactsConfig,
 ): string | undefined {
   const { constraints = {} } = config;
   const { python } = constraints;
@@ -50,7 +54,7 @@ export function getPythonConstraint(
 
 export function getPipenvConstraint(
   existingLockFileContent: string,
-  config: UpdateArtifactsConfig
+  config: UpdateArtifactsConfig,
 ): string {
   const { constraints = {} } = config;
   const { pipenv } = constraints;
@@ -78,6 +82,37 @@ export function getPipenvConstraint(
   return '';
 }
 
+function getMatchingHostRule(url: string): HostRule {
+  return find({ hostType: PypiDatasource.id, url });
+}
+
+async function findPipfileSourceUrlWithCredentials(
+  pipfileContent: string,
+  pipfileName: string,
+): Promise<string | null> {
+  const pipfile = await extractPackageFile(pipfileContent, pipfileName);
+  if (!pipfile) {
+    logger.debug('Error parsing Pipfile');
+    return null;
+  }
+
+  const credentialTokens = [
+    '$USERNAME:',
+    // eslint-disable-next-line no-template-curly-in-string
+    '${USERNAME}',
+    '$PASSWORD@',
+    // eslint-disable-next-line no-template-curly-in-string
+    '${PASSWORD}',
+  ];
+
+  const sourceWithCredentials = pipfile.registryUrls?.find((url) =>
+    credentialTokens.some((token) => url.includes(token)),
+  );
+
+  // Only one source is currently supported
+  return sourceWithCredentials ?? null;
+}
+
 export async function updateArtifacts({
   packageFileName: pipfileName,
   newPackageFileContent: newPipfileContent,
@@ -100,14 +135,14 @@ export async function updateArtifacts({
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const pipenvConstraint = getPipenvConstraint(
       existingLockFileContent,
-      config
+      config,
     );
+    const extraEnv: Opt<ExtraEnv> = {
+      PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
+      PIP_CACHE_DIR: await ensureCacheDir('pip'),
+    };
     const execOptions: ExecOptions = {
       cwdFile: pipfileName,
-      extraEnv: {
-        PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
-        PIP_CACHE_DIR: await ensureCacheDir('pip'),
-      },
       docker: {},
       toolConstraints: [
         {
@@ -120,6 +155,28 @@ export async function updateArtifacts({
         },
       ],
     };
+
+    const sourceUrl = await findPipfileSourceUrlWithCredentials(
+      newPipfileContent,
+      pipfileName,
+    );
+    if (sourceUrl) {
+      logger.debug({ sourceUrl }, 'Pipfile contains credentials');
+      const hostRule = getMatchingHostRule(sourceUrl);
+      if (hostRule) {
+        logger.debug('Found matching hostRule for Pipfile credentials');
+        if (hostRule.username) {
+          logger.debug('Adding USERNAME environment variable for pipenv');
+          extraEnv.USERNAME = hostRule.username;
+        }
+        if (hostRule.password) {
+          logger.debug('Adding PASSWORD environment variable for pipenv');
+          extraEnv.PASSWORD = hostRule.password;
+        }
+      }
+    }
+    execOptions.extraEnv = extraEnv;
+
     logger.trace({ cmd }, 'pipenv lock command');
     await exec(cmd, execOptions);
     const status = await getRepoStatus();

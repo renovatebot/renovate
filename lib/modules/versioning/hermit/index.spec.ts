@@ -59,7 +59,7 @@ describe('modules/versioning/hermit/index', () => {
       expect(versioning.getMajor(version)).toBe(major);
       expect(versioning.getMinor(version)).toBe(minor);
       expect(versioning.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -77,7 +77,7 @@ describe('modules/versioning/hermit/index', () => {
     'equals("$version", "$other") === $expected',
     ({ version, other, expected }) => {
       expect(versioning.equals(version, other)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -104,7 +104,7 @@ describe('modules/versioning/hermit/index', () => {
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
       expect(versioning.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -133,7 +133,7 @@ describe('modules/versioning/hermit/index', () => {
     'isGreaterThan("$version", "$other") === $expected',
     ({ version, other, expected }) => {
       expect(versioning.isGreaterThan(version, other)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -160,42 +160,42 @@ describe('modules/versioning/hermit/index', () => {
     'isLessThanRange("$version", "$other") === $expected',
     ({ version, other, expected }) => {
       expect(versioning.isLessThanRange(version, other)).toBe(expected);
-    }
+    },
   );
 
   it('getSatisfyingVersion', () => {
     expect(versioning.getSatisfyingVersion(['@1.1.1', '1.2.3'], '1.2.3')).toBe(
-      '1.2.3'
+      '1.2.3',
     );
     expect(
       versioning.getSatisfyingVersion(
         ['1.1.1', '@2.2.1', '2.2.2', '3.3.3'],
-        '2.2.2'
-      )
+        '2.2.2',
+      ),
     ).toBe('2.2.2');
     expect(
       versioning.getSatisfyingVersion(
         ['1.1.1', '@1.3.3', '2.2.2', '3.3.3'],
-        '1.2.3'
-      )
+        '1.2.3',
+      ),
     ).toBeNull();
   });
 
   it('minSatisfyingVersion', () => {
     expect(versioning.minSatisfyingVersion(['@1.1.1', '1.2.3'], '1.2.3')).toBe(
-      '1.2.3'
+      '1.2.3',
     );
     expect(
       versioning.minSatisfyingVersion(
         ['1.1.1', '@1.2.3', '2.2.2', '3.3.3'],
-        '2.2.2'
-      )
+        '2.2.2',
+      ),
     ).toBe('2.2.2');
     expect(
       versioning.minSatisfyingVersion(
         ['1.1.1', '@1.2.2', '2.2.2', '3.3.3'],
-        '1.2.3'
-      )
+        '1.2.3',
+      ),
     ).toBeNull();
   });
 
@@ -214,7 +214,7 @@ describe('modules/versioning/hermit/index', () => {
           '2.1',
           '@stable',
           '@latest',
-        ].sort((a, b) => versioning.sortVersions(a, b))
+        ].sort((a, b) => versioning.sortVersions(a, b)),
       ).toEqual([
         '@latest',
         '@stable',

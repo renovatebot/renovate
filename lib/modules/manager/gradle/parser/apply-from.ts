@@ -13,7 +13,7 @@ const qApplyFromFile = q
         q
           .opt(q.sym<Ctx>(regEx(/^(?:rootProject|project)$/)).op('.'))
           .sym('file'),
-        q.opt<Ctx>(q.sym('new')).sym('File')
+        q.opt<Ctx>(q.sym('new')).sym('File'),
       )
       .tree({
         maxDepth: 1,
@@ -24,12 +24,12 @@ const qApplyFromFile = q
           .opt(
             q
               .join(qValueMatcher, q.op(','))
-              .handler((ctx) => storeInTokenMap(ctx, 'parentPath'))
+              .handler((ctx) => storeInTokenMap(ctx, 'parentPath')),
           )
           .join(qValueMatcher)
           .end(),
       }),
-    qValueMatcher
+    qValueMatcher,
   )
   .handler((ctx) => storeInTokenMap(ctx, 'scriptFile'));
 
@@ -47,7 +47,7 @@ export const qApplyFrom = q
         startsWith: '(',
         endsWith: ')',
         search: q.begin<Ctx>().sym('from').op('=').join(qApplyFromFile).end(),
-      })
+      }),
   )
   .handler(handleApplyFrom)
   .handler(cleanupTempVars);

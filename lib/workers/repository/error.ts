@@ -41,7 +41,7 @@ import {
 
 export default async function handleError(
   config: RenovateConfig,
-  err: Error
+  err: Error,
 ): Promise<string> {
   if (err.message === REPOSITORY_UNINITIATED) {
     logger.info('Repository is uninitiated - skipping');
@@ -95,7 +95,7 @@ export default async function handleError(
   }
   if (err.message === REPOSITORY_FORKED) {
     logger.info(
-      'Repository is a fork and not manually configured - skipping - did you want to run with flag --include-forks?'
+      'Repository is a fork and not manually configured - skipping - did you want to run with flag --include-forks?',
     );
     return err.message;
   }
@@ -132,14 +132,14 @@ export default async function handleError(
     delete config.branchList;
     logger.warn(
       { error: err },
-      'Repository aborted due to potential secrets exposure'
+      'Repository aborted due to potential secrets exposure',
     );
     return err.message;
   }
   if (err instanceof ExternalHostError) {
     logger.warn(
       { hostType: err.hostType, packageName: err.packageName, err: err.err },
-      'Host error'
+      'Host error',
     );
     logger.info('External host error causing abort - skipping');
     delete config.branchList;
