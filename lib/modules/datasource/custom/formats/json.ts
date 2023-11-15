@@ -9,5 +9,5 @@ export async function fetch(http: Http, url: string): Promise<unknown> {
 export async function read(path: string): Promise<unknown> {
   const fileContent = await readLocalFile(path, 'utf8');
 
-  return fileContent ? JSON.parse(fileContent) : null;
+  return JSON.parse(fileContent!);
 }
