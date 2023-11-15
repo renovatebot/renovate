@@ -1,12 +1,10 @@
 import { codeBlock } from 'common-tags';
-import _fs from 'fs-extra';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { mocked } from '../../../../test/util';
+import { fs } from '../../../../test/util';
 import { CustomDatasource } from './index';
 
-jest.mock('fs-extra');
-const fs = mocked(_fs);
+jest.mock('../../../util/fs');
 
 describe('modules/datasource/custom/index', () => {
   describe('getReleases', () => {
@@ -259,15 +257,12 @@ describe('modules/datasource/custom/index', () => {
         ],
       };
 
-      const yaml = codeBlock`
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
         releases:
           - version: 1.0.0
           - version: 2.0.0
           - version: 3.0.0
-      `;
-
-      const file = Buffer.from(yaml);
-      fs.readFile.mockResolvedValueOnce(file as never);
+      `);
 
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
@@ -298,16 +293,13 @@ describe('modules/datasource/custom/index', () => {
         ],
       };
 
-      const json = codeBlock`{
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{
         "releases": [
           { "version": "1.0.0" },
           { "version": "2.0.0" },
           { "version": "3.0.0" }
         ]
-      }`;
-
-      const file = Buffer.from(json);
-      fs.readFile.mockResolvedValueOnce(file as never);
+      }`);
 
       const result = await getPkgReleases({
         datasource: `${CustomDatasource.id}.foo`,
