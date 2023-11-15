@@ -205,13 +205,13 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
     Renovate tries to delay until Azure is in the expected state, but it will continue if it takes too long.
     In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
-### Automerge and GitHub branch protection rules
+**Automerge and GitHub branch protection rules**
 
-You must select at least one status check in the **Require status checks to pass before merging** section of your branch protection rules on GitHub, if you match all three conditions:
+You must select at least one status check in the _Require status checks to pass before merging_ section of your branch protection rules on GitHub, if you match all three conditions:
 
 - `automerge=true`
 - `platformAutomerge=true`, Renovate defaults to `true`
-- you use use GitHub's **Require status checks to pass before merging** branch protection rule
+- You use use GitHub's _Require status checks to pass before merging_ branch protection rule
 
 If you don't select any status check, and you use platform automerge, then GitHub might automerge PRs with failing tests!
 
