@@ -315,6 +315,23 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
+    it('return null for plain text file if the body is not what is expected', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.version',
+            format: 'plain',
+          },
+        },
+      });
+
+      expect(result).toBeNull();
+    });
+
     it('return releases for plain text file directly exposing in Renovate format', async () => {
       const expected = {
         releases: [
