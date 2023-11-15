@@ -43,7 +43,7 @@ describe('modules/manager/bazel/artifacts', () => {
     httpMock
       .scope('https://github.com')
       .get(
-        '/GoogleContainerTools/distroless/archive/033387ac8853e6cc1cd47df6c346bc53cbc490d8.tar.gz'
+        '/GoogleContainerTools/distroless/archive/033387ac8853e6cc1cd47df6c346bc53cbc490d8.tar.gz',
       )
       .reply(200, tarContent);
 
@@ -52,7 +52,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
 
     expect(res).toEqual([
@@ -110,7 +110,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
 
     expect(res).toEqual([
@@ -169,7 +169,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
 
     expect(res).toEqual([
@@ -216,7 +216,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
     expect(res).toBeNull();
   });
@@ -243,7 +243,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
     expect(res).toBeNull();
   });
@@ -271,7 +271,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
     expect(res).toBeNull();
   });
@@ -298,7 +298,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
     expect(res).toBeNull();
   });
@@ -326,7 +326,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
     expect(res).toBeNull();
   });
@@ -384,7 +384,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
 
     expect(res).toEqual([
@@ -451,7 +451,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
 
     expect(res).toEqual([
@@ -518,7 +518,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
 
     expect(res).toEqual([
@@ -585,7 +585,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
 
     expect(res).toEqual([
@@ -640,7 +640,7 @@ describe('modules/manager/bazel/artifacts', () => {
     httpMock
       .scope('https://github.com')
       .get(
-        '/bazelbuild/rules_nodejs/releases/download/5.5.4/rules_nodejs-core-5.5.4.tar.gz'
+        '/bazelbuild/rules_nodejs/releases/download/5.5.4/rules_nodejs-core-5.5.4.tar.gz',
       )
       .reply(200, tarContent);
 
@@ -655,7 +655,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
 
     expect(res).toEqual([
@@ -711,14 +711,14 @@ describe('modules/manager/bazel/artifacts', () => {
     httpMock
       .scope('https://github.com')
       .get(
-        '/bazelbuild/rules_nodejs/releases/download/1.2.3/rules_nodejs-core-1.2.3.tar.gz'
+        '/bazelbuild/rules_nodejs/releases/download/1.2.3/rules_nodejs-core-1.2.3.tar.gz',
       )
       .reply(200, tarContent);
 
     const output = input
       .replace(
         `${currentValue}/rules_nodejs-core-${currentValue}`,
-        `${newValue}/rules_nodejs-core-${newValue}`
+        `${newValue}/rules_nodejs-core-${newValue}`,
       )
       .replace(inputHash, outputHash);
 
@@ -727,7 +727,7 @@ describe('modules/manager/bazel/artifacts', () => {
         packageFileName: 'WORKSPACE',
         updatedDeps: [upgrade],
         newPackageFileContent: input,
-      })
+      }),
     );
 
     expect(res).toEqual([

@@ -12,7 +12,7 @@ function getGlobalKey(namespace: string, key: string): string {
 
 export async function get<T = any>(
   namespace: string,
-  key: string
+  key: string,
 ): Promise<T | undefined> {
   if (!cacheProxy) {
     return undefined;
@@ -38,7 +38,7 @@ export async function set(
   namespace: string,
   key: string,
   value: unknown,
-  minutes: number
+  minutes: number,
 ): Promise<void> {
   if (!cacheProxy) {
     return;

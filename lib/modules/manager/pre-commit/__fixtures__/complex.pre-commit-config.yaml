@@ -23,6 +23,16 @@ repos:
     rev: 19.3b0
     hooks:
       - id: black
+  - repo: https://gitlab.mycompany.com/my/dep
+    # should also detect custom gitlab registry
+    rev: v42.0
+    hooks:
+      - id: custom-hook
+  - repo: https://gitlab.mycompany.com/my/dep
+    # should also detect http for custom gitlab registry
+    rev: v42.0
+    hooks:
+      - id: custom-hook
   - repo: https://github.com/prettier/pre-commit
     # should accept different order of keys
     hooks:

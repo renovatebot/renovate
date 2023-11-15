@@ -26,7 +26,7 @@ describe('modules/versioning/git/index', () => {
     ({ version, range, expected }) => {
       const res = git.isCompatible(version, range);
       expect(!!res).toBe(expected);
-    }
+    },
   );
 
   it.each`

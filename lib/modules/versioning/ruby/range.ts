@@ -21,7 +21,7 @@ export interface Range {
 
 const parse = (range: string): Range => {
   const regExp = regEx(
-    /^(?<operator>[^\d\s]+)?(?<delimiter>\s*)(?<version>[0-9a-zA-Z-.]+)$/
+    /^(?<operator>[^\d\s]+)?(?<delimiter>\s*)(?<version>[0-9a-zA-Z-.]+)$/,
   );
 
   const value = (range || '').trim();

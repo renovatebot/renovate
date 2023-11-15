@@ -18,7 +18,7 @@ import type { KubernetesConfiguration } from './types';
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace('kubernetes.extractPackageFile()');
 
@@ -39,7 +39,7 @@ export function extractPackageFile(
 
 function extractImages(
   content: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
@@ -54,7 +54,7 @@ function extractImages(
           currentValue: dep.currentValue,
           currentDigest: dep.currentDigest,
         },
-        'Kubernetes image'
+        'Kubernetes image',
       );
       deps.push(dep);
     }
@@ -65,7 +65,7 @@ function extractImages(
 
 function extractApis(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageDependency[] {
   let doc: KubernetesConfiguration[];
 
@@ -81,7 +81,7 @@ function extractApis(
     .filter(
       (m) =>
         is.nonEmptyStringAndNotWhitespace(m.kind) &&
-        is.nonEmptyStringAndNotWhitespace(m.apiVersion)
+        is.nonEmptyStringAndNotWhitespace(m.apiVersion),
     )
     .filter((m) => supportedApis.has(m.kind))
     .map((configuration) => ({

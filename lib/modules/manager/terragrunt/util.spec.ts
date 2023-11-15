@@ -16,7 +16,7 @@ describe('modules/manager/terragrunt/util', () => {
 
     it('returns unknown on string with random chars', () => {
       expect(getTerragruntDependencyType('sdfsgdsfadfhfghfhgdfsdf')).toBe(
-        'unknown'
+        'unknown',
       );
     });
   });

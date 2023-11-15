@@ -2,62 +2,33 @@
 
 exports[`modules/datasource/galaxy-collection/index getReleases processes real data 1`] = `
 {
-  "registryUrl": "https://old-galaxy.ansible.com/",
+  "registryUrl": "https://galaxy.ansible.com",
   "releases": [
     {
       "dependencies": {},
-      "downloadUrl": "https://galaxy.ansible.com/download/community-kubernetes-0.11.1.tar.gz",
+      "downloadUrl": "https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/community-kubernetes-0.11.1.tar.gz",
       "isDeprecated": false,
       "newDigest": "cd197084b32f8976394f269eb005bf475eff2122fddbb48380c76154ab4d4530",
+      "sourceUrl": "https://github.com/ansible-collections/community.kubernetes",
       "version": "0.11.1",
     },
     {
       "dependencies": {},
-      "downloadUrl": "https://galaxy.ansible.com/download/community-kubernetes-1.2.0.tar.gz",
+      "downloadUrl": "https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/community-kubernetes-1.2.0.tar.gz",
       "isDeprecated": false,
       "newDigest": "a53eaf6a51987d30cc48ebcd20f0102dae0f17a7a02071928381e5a62951a0ed",
+      "sourceUrl": "https://github.com/ansible-collections/community.kubernetes",
       "version": "1.2.0",
     },
     {
       "dependencies": {},
-      "downloadUrl": "https://galaxy.ansible.com/download/community-kubernetes-1.2.1.tar.gz",
+      "downloadUrl": "https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts/community-kubernetes-1.2.1.tar.gz",
       "isDeprecated": false,
       "newDigest": "38e064bb32ee86781f0c6e56bd29fcfbaf48180f993e129185eb8420caabf223",
+      "sourceUrl": "https://github.com/ansible-collections/community.kubernetes",
       "version": "1.2.1",
     },
   ],
   "sourceUrl": "https://github.com/ansible-collections/community.kubernetes",
-  "tags": [
-    "kubernetes",
-    "k8s",
-    "cloud",
-    "infrastructure",
-    "openshift",
-    "okd",
-    "cluster",
-  ],
-}
-`;
-
-exports[`modules/datasource/galaxy-collection/index getReleases returns only valid versions if a version detail fails 1`] = `
-{
-  "registryUrl": "https://old-galaxy.ansible.com/",
-  "releases": [
-    {
-      "dependencies": {},
-      "downloadUrl": "https://galaxy.ansible.com/download/community-kubernetes-0.11.1.tar.gz",
-      "isDeprecated": false,
-      "newDigest": "cd197084b32f8976394f269eb005bf475eff2122fddbb48380c76154ab4d4530",
-      "version": "0.11.1",
-    },
-    {
-      "dependencies": {},
-      "downloadUrl": "https://galaxy.ansible.com/download/community-kubernetes-1.2.0.tar.gz",
-      "isDeprecated": false,
-      "newDigest": "a53eaf6a51987d30cc48ebcd20f0102dae0f17a7a02071928381e5a62951a0ed",
-      "version": "1.2.0",
-    },
-  ],
-  "tags": undefined,
 }
 `;

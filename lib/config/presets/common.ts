@@ -23,6 +23,7 @@ export const removedPresets: Record<string, string | null> = {
   'default:app': 'config:js-app',
   'default:js-app': 'config:js-app',
   'default:library': 'config:js-lib',
+  'default:onlyNpm': null,
   'default:unpublishSafe': 'npm:unpublishSafe',
   'helpers:oddIsUnstable': null,
   'helpers:oddIsUnstablePackages': null,

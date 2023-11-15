@@ -33,7 +33,7 @@ function getHelmDep({
  */
 function findDependencies(
   parsedContent: Record<string, unknown> | HelmDockerImageDependency,
-  packageDependencies: Array<PackageDependency>
+  packageDependencies: Array<PackageDependency>,
 ): Array<PackageDependency> {
   if (!parsedContent || typeof parsedContent !== 'object') {
     return packageDependencies;
@@ -59,7 +59,7 @@ function findDependencies(
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   let parsedContent: Record<string, unknown>[] | HelmDockerImageDependency[];
   try {
@@ -84,7 +84,7 @@ export function extractPackageFile(
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       { err, packageFile },
-      'Error parsing helm-values parsed content'
+      'Error parsing helm-values parsed content',
     );
   }
   return null;

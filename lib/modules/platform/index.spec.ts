@@ -11,6 +11,7 @@ jest.unmock('./scm');
 describe('modules/platform/index', () => {
   beforeEach(() => {
     jest.resetModules();
+    process.env.RENOVATE_X_GITHUB_HOST_RULES = 'true';
   });
 
   it('validates', () => {
@@ -26,7 +27,7 @@ describe('modules/platform/index', () => {
     const loadedMgr = loadModules(
       __dirname,
       undefined,
-      (m) => !['utils', 'git'].includes(m)
+      (m) => !['utils', 'git'].includes(m),
     );
     expect(Array.from(platforms.keys())).toEqual(Object.keys(loadedMgr));
 
@@ -38,7 +39,7 @@ describe('modules/platform/index', () => {
 
   it('throws if no platform', () => {
     expect(() => platform.platform.initPlatform({})).toThrow(
-      PLATFORM_NOT_FOUND
+      PLATFORM_NOT_FOUND,
     );
   });
 

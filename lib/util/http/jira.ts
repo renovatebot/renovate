@@ -19,7 +19,7 @@ export class JiraHttp extends Http {
 
   protected override request<T>(
     url: string | URL,
-    options?: InternalHttpOptions & HttpRequestOptions<T>
+    options?: InternalHttpOptions & HttpRequestOptions<T>,
   ): Promise<HttpResponse<T>> {
     const opts = { baseUrl, ...options };
     return super.request<T>(url, opts);

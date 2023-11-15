@@ -48,6 +48,10 @@ const repoGroups = {
   ],
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
+  'aws-sdk-rust': [
+    'https://github.com/awslabs/smithy-rs',
+    'https://github.com/awslabs/aws-sdk-rust',
+  ],
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
   'azure azure-libraries-for-net':
     'https://github.com/Azure/azure-libraries-for-net',
@@ -275,6 +279,8 @@ const repoGroups = {
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
+  'google-api-dotnet-client':
+    'https://github.com/googleapis/google-api-dotnet-client',
   grafana: 'https://github.com/grafana/grafana',
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
@@ -287,6 +293,7 @@ const repoGroups = {
   groovy: 'https://github.com/apache/groovy',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
+  'hickory-dns': 'https://github.com/hickory-dns/hickory-dns',
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
@@ -358,6 +365,10 @@ const repoGroups = {
   okhttp: 'https://github.com/square/okhttp',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-erlang':
+    'https://github.com/open-telemetry/opentelemetry-erlang',
+  'opentelemetry-erlang-contrib':
+    'https://github.com/open-telemetry/opentelemetry-erlang-contrib',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   orleans: 'https://github.com/dotnet/orleans',
@@ -421,6 +432,7 @@ const repoGroups = {
     'https://github.com/domaindrivendev/Swashbuckle.AspNetCore',
   'system.io.abstractions':
     'https://github.com/System-IO-Abstractions/System.IO.Abstractions/',
+  tamagui: 'https://github.com/tamagui/tamagui',
   'tanstack-query': 'https://github.com/TanStack/query',
   tauri: 'https://github.com/tauri-apps/tauri',
   'telus-tds': 'https://github.com/telusdigital/tds',
@@ -435,6 +447,7 @@ const repoGroups = {
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
+  'trust-dns': 'https://github.com/bluejekyll/trust-dns',
   tsoa: 'https://github.com/lukeautry/tsoa',
   turbo: 'https://github.com/vercel/turbo',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
@@ -443,6 +456,7 @@ const repoGroups = {
   unocss: 'https://github.com/unocss/unocss',
   uppy: 'https://github.com/transloadit/uppy',
   vaadinWebComponents: 'https://github.com/vaadin/web-components',
+  visx: 'https://github.com/airbnb/visx',
   vitest: 'https://github.com/vitest-dev/vitest',
   vstest: 'https://github.com/microsoft/vstest',
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],

@@ -86,7 +86,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -97,7 +97,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -107,7 +107,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(lockFile as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     expect(
@@ -116,7 +116,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         updatedDeps: [{ depName: 'dep1' }],
         newPackageFileContent: helmfileYaml,
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       { cmd: 'helmfile deps -f helmfile.yaml' },
@@ -129,7 +129,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(lockFileTwo as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
@@ -139,7 +139,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         updatedDeps,
         newPackageFileContent: helmfileYaml,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -186,10 +186,10 @@ describe('modules/manager/helmfile/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(
-      lockFileTwoWithoutRepositories as never
+      lockFileTwoWithoutRepositories as never,
     );
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
@@ -199,7 +199,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         updatedDeps,
         newPackageFileContent: helmfileYamlWithoutRepositories,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -255,7 +255,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(lockFileOCIPrivateRepoTwo as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
@@ -265,7 +265,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         updatedDeps,
         newPackageFileContent: helmfileYamlOCIPrivateRepo,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -353,7 +353,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce(lockFileTwo);
       fs.privateCacheDir.mockReturnValue(
-        '/tmp/renovate/cache/__renovate-private-cache'
+        '/tmp/renovate/cache/__renovate-private-cache',
       );
       fs.getParentDir.mockReturnValue('');
       // helm
@@ -372,7 +372,7 @@ describe('modules/manager/helmfile/artifacts', () => {
           updatedDeps,
           newPackageFileContent: helmfileYaml,
           config,
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -383,7 +383,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject(expectedCommands);
-    }
+    },
   );
 
   it.each([
@@ -393,7 +393,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     git.getFile.mockResolvedValueOnce(lockFile);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error(errorMessage);
@@ -405,7 +405,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         updatedDeps,
         newPackageFileContent: helmfileYaml,
         config,
-      })
+      }),
     ).toEqual([
       {
         artifactError: {

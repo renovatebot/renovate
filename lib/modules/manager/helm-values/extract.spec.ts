@@ -2,11 +2,11 @@ import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
 const helmDefaultChartInitValues = Fixtures.get(
-  'default_chart_init_values.yaml'
+  'default_chart_init_values.yaml',
 );
 
 const helmMultiAndNestedImageValues = Fixtures.get(
-  'multi_and_nested_image_values.yaml'
+  'multi_and_nested_image_values.yaml',
 );
 
 describe('modules/manager/helm-values/extract', () => {
@@ -41,7 +41,7 @@ describe('modules/manager/helm-values/extract', () => {
 
     it('extract data from file with multiple documents', () => {
       const multiDocumentFile = Fixtures.get(
-        'single_file_with_multiple_documents.yaml'
+        'single_file_with_multiple_documents.yaml',
       );
       const result = extractPackageFile(multiDocumentFile);
       expect(result).toMatchObject({
