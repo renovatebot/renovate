@@ -201,7 +201,7 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
 
 <!-- prettier-ignore -->
 !!! warning "Renovate automerge and GitHub branch protection rule: Require status checks to pass before merging branch protection rule"
-    If you set `automerge: true` _and_ use GitHub's **Require status checks to pass before merging** branch protection rule, then you must select at least one status check in that section.
+    If you set `automerge: true` _and_ use `platformAutomerge=true` (Renovate defaults to true) _and_ use GitHub's **Require status checks to pass before merging** branch protection rule, then you must select at least one status check in that section.
     If you don't, and platform automerge is in use, then GitHub might automerge PRs with failing tests!
 
 <!-- prettier-ignore -->
