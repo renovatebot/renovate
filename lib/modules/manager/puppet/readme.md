@@ -50,15 +50,15 @@ mod 'example/infra', '3.3.0'
 ```ruby title="GitHub-based forge"
 # Tag based
 mod 'example/standalone_jar',
-  :git => 'git@gitlab.example.de:puppet/example-standalone_jar',
-  :tag => '0.9.0'
+    :git => 'git@gitlab.example.de:puppet/example-standalone_jar',
+    :tag => '0.9.0'
 ```
 
 ```ruby title="Git-based forge"
 # Tag based
 mod 'stdlib',
-:git => 'git@gitlab.com:example/project_stdlib.git',
-:tag => '5.0.0'
+    :git => 'git@gitlab.com:example/project_stdlib.git',
+    :tag => '5.0.0'
 ```
 
 ### Possible improvements
