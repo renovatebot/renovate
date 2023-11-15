@@ -77,12 +77,12 @@ export async function generateLockFile(
 
   let lockFile: string | null = null;
   try {
-    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+    const lazyPkgJson = lazyLoadPackageJson(lockFileDir);
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
       constraint:
         config.constraints?.npm ??
-        getPackageManagerVersion('npm', await lazyPgkJson.getValue()) ??
+        getPackageManagerVersion('npm', await lazyPkgJson.getValue()) ??
         (await getNpmConstraintFromPackageLock(lockFileDir)) ??
         null,
     };
@@ -120,7 +120,7 @@ export async function generateLockFile(
       cwdFile: lockFileName,
       extraEnv,
       toolConstraints: [
-        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
+        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
         npmToolConstraint,
       ],
       docker: {},
