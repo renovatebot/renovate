@@ -21,12 +21,42 @@ import {
   renameLocalFile,
 } from '../../../../util/fs';
 import { minimatch } from '../../../../util/minimatch';
+import { Result } from '../../../../util/result';
 import { trimSlashes } from '../../../../util/url';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { PackageLock } from '../schema';
 import { composeLockFile, parseLockFile } from '../utils';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
+
+async function getNpmConstraintFromPackageLock(
+  lockFileDir: string,
+): Promise<string | null> {
+  const packageLockFileName = upath.join(lockFileDir, 'package-lock.json');
+  const packageLockContents = await readLocalFile(packageLockFileName, 'utf8');
+  const packageLockJson = Result.parse(
+    packageLockContents,
+    PackageLock,
+  ).unwrapOrNull();
+  if (!packageLockJson) {
+    logger.debug(`Could not parse ${packageLockFileName}`);
+    return null;
+  }
+  const { lockfileVersion } = packageLockJson;
+  if (lockfileVersion === 1) {
+    logger.debug(`Using npm constraint <7 for lockfileVersion=1`);
+    return `<7`;
+  }
+  if (lockfileVersion === 2) {
+    logger.debug(`Using npm constraint <9 for lockfileVersion=2`);
+    return `<9`;
+  }
+  logger.debug(
+    `Using npm constraint >=9 for lockfileVersion=${lockfileVersion}`,
+  );
+  return `>=9`;
+}
 
 export async function generateLockFile(
   lockFileDir: string,
@@ -43,12 +73,14 @@ export async function generateLockFile(
 
   let lockFile: string | null = null;
   try {
-    const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+    const lazyPkgJson = lazyLoadPackageJson(lockFileDir);
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
       constraint:
         config.constraints?.npm ??
-        getPackageManagerVersion('npm', await lazyPgkJson.getValue()),
+        getPackageManagerVersion('npm', await lazyPkgJson.getValue()) ??
+        (await getNpmConstraintFromPackageLock(lockFileDir)) ??
+        null,
     };
     const supportsPreferDedupeFlag =
       !npmToolConstraint.constraint ||
@@ -84,7 +116,7 @@ export async function generateLockFile(
       cwdFile: lockFileName,
       extraEnv,
       toolConstraints: [
-        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
+        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
         npmToolConstraint,
       ],
       docker: {},
