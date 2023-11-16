@@ -39,7 +39,7 @@ Replace _all_ content in the starter pipeline with:
 ```yaml
 schedules:
   - cron: '0 3 * * *'
-    displayName: 'Every day at 3am'
+    displayName: 'Every day at 3am (UTC)'
     branches:
       include: [main]
     always: true
@@ -59,7 +59,9 @@ steps:
       git config --global user.name 'Renovate Bot'
       npx --userconfig .npmrc renovate
     env:
-      TOKEN: $(System.AccessToken)
+      RENOVATE_PLATFORM: azure
+      RENOVATE_ENDPOINT: $(System.CollectionUri)
+      RENOVATE_TOKEN: $(System.AccessToken)
 ```
 
 ### Create a .npmrc file
@@ -79,9 +81,6 @@ Create a `config.js` file in your repository:
 
 ```javascript
 module.exports = {
-  platform: 'azure',
-  endpoint: 'https://dev.azure.com/YOUR-ORG/',
-  token: process.env.TOKEN,
   hostRules: [
     {
       hostType: 'npm',
@@ -94,7 +93,6 @@ module.exports = {
 };
 ```
 
-For the `endpoint` key, replace `YOUR-ORG` with your Azure DevOps organization.
 For the `repositories` key, replace `YOUR-PROJECT/YOUR-REPO` with your Azure DevOps project and repository.
 
 ### Yarn users
@@ -105,8 +103,6 @@ Use the `matchHost` config option to specify the full path to the registry.
 ```javascript
 module.exports = {
   platform: 'azure',
-  endpoint: 'https://myorg.visualstudio.com/',
-  token: process.env.TOKEN,
   hostRules: [
     {
       matchHost:

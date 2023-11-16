@@ -193,30 +193,6 @@ describe('util/http/index', () => {
     );
   });
 
-  it('retries', async () => {
-    const NODE_ENV = process.env.NODE_ENV;
-    try {
-      delete process.env.NODE_ENV;
-      httpMock
-        .scope(baseUrl)
-        .head('/')
-        .reply(500)
-        .head('/')
-        .reply(200, undefined, { 'x-some-header': 'abc' });
-      expect(await http.head('http://renovate.com')).toEqual({
-        authorization: false,
-        body: '',
-        headers: {
-          'x-some-header': 'abc',
-        },
-        statusCode: 200,
-      });
-      expect(httpMock.allUsed()).toBeTrue();
-    } finally {
-      process.env.NODE_ENV = NODE_ENV;
-    }
-  });
-
   it('limits concurrency by host', async () => {
     hostRules.add({ matchHost: 'renovate.com', concurrentRequestLimit: 1 });
 
@@ -312,6 +288,38 @@ describe('util/http/index', () => {
     const res = await http.getBuffer('http://renovate.com');
     expect(res?.body).toBeInstanceOf(Buffer);
     expect(res?.body.toString('utf-8')).toBe('test');
+  });
+
+  describe('retry', () => {
+    let NODE_ENV: string | undefined;
+
+    beforeAll(() => {
+      NODE_ENV = process.env.NODE_ENV;
+      delete process.env.NODE_ENV;
+      http = new Http('dummy');
+    });
+
+    afterAll(() => {
+      process.env.NODE_ENV = NODE_ENV;
+    });
+
+    it('works', async () => {
+      httpMock
+        .scope(baseUrl)
+        .head('/')
+        .reply(500)
+        .head('/')
+        .reply(200, undefined, { 'x-some-header': 'abc' });
+      expect(await http.head('http://renovate.com')).toEqual({
+        authorization: false,
+        body: '',
+        headers: {
+          'x-some-header': 'abc',
+        },
+        statusCode: 200,
+      });
+      expect(httpMock.allUsed()).toBeTrue();
+    });
   });
 
   describe('Schema support', () => {
