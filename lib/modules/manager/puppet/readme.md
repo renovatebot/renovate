@@ -47,35 +47,25 @@ forge "https://forgeapi.example.com"
 mod 'example/infra', '3.3.0'
 ```
 
-```ruby title="GitHub-based forge"
-# Tag based
+```ruby title="GitHub-based forge, tag based"
 mod 'example/standalone_jar',
     :git => 'git@gitlab.example.de:puppet/example-standalone_jar',
     :tag => '0.9.0'
 ```
 
-```ruby title="Git-based forge"
-# Tag based
+```ruby title="Git-based forge, tag based"
 mod 'stdlib',
     :git => 'git@gitlab.com:example/project_stdlib.git',
     :tag => '5.0.0'
 ```
 
-### Possible improvements
-
-#### Further Git-support
-
-Usually, you can add the versions to a forge and use the already provided way of updating:
-
-```ruby
-# Branch based
+```ruby title="Git-based forge, branch based"
 mod 'example/samba',
     :git    => 'https://github.com/example/puppet-samba',
     :branch => 'stable_version'
 ```
 
-```ruby
-# Ref based
+```ruby title="Git-based forge, ref based"
 mod 'example/samba',
     :git => 'https://github.com/example/puppet-samba',
     :ref => 'stable_version'
