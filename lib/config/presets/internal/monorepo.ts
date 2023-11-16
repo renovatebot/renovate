@@ -42,11 +42,13 @@ const repoGroups = {
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
   ],
   'aws-cdk': 'https://github.com/aws/aws-cdk',
+  'aws-sdk-go': 'https://github.com/aws/aws-sdk-go',
+  'aws-sdk-go-v2': 'https://github.com/aws/aws-sdk-go-v2',
+  'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-lambda-powertools-typescript': [
     'https://github.com/awslabs/aws-lambda-powertools-typescript',
     'https://github.com/aws-powertools/powertools-lambda-typescript',
   ],
-  'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   'aws-sdk-rust': [
     'https://github.com/awslabs/smithy-rs',
