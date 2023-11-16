@@ -3,6 +3,7 @@
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest pin 1`] = `
 {
   "currentVersion": "8.0.0",
+  "currentVersionReleaseTimeStamp": undefined,
   "fixedVersion": "8.0.0",
   "isSingleVersion": true,
   "registryUrl": "https://index.docker.io",
@@ -47,6 +48,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest pin for up to date version 1`] = `
 {
   "currentVersion": "8.1.0",
+  "currentVersionReleaseTimeStamp": undefined,
   "fixedVersion": "8.1.0",
   "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
@@ -66,6 +68,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest update 1`] = `
 {
   "currentVersion": "8.0.0",
+  "currentVersionReleaseTimeStamp": undefined,
   "fixedVersion": "8.0.0",
   "isSingleVersion": true,
   "registryUrl": "https://index.docker.io",
@@ -122,6 +125,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles git su
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles sourceUrl packageRules with version restrictions 1`] = `
 {
   "currentVersion": "0.9.99",
+  "currentVersionReleaseTimeStamp": undefined,
   "fixedVersion": "0.9.99",
   "isSingleVersion": true,
   "registryUrl": "https://registry.npmjs.org",
@@ -177,6 +181,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles update
 exports[`workers/repository/process/lookup/index .lookupUpdates() ignores deprecated 1`] = `
 {
   "currentVersion": "1.3.0",
+  "currentVersionReleaseTimeStamp": "2015-04-26T16:42:11.311Z",
   "deprecationMessage": "On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`q2\` has the following deprecation notice:
 
 \`true\`
@@ -205,6 +210,7 @@ Marking the latest version of an npm package as deprecated results in the entire
 exports[`workers/repository/process/lookup/index .lookupUpdates() is deprecated 1`] = `
 {
   "currentVersion": "1.3.0",
+  "currentVersionReleaseTimeStamp": "2015-04-26T16:42:11.311Z",
   "fixedVersion": "1.3.0",
   "isSingleVersion": true,
   "registryUrl": "https://registry.npmjs.org",
@@ -261,6 +267,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() returns additi
 exports[`workers/repository/process/lookup/index .lookupUpdates() returns complex object 1`] = `
 {
   "currentVersion": "1.3.0",
+  "currentVersionReleaseTimeStamp": "2015-04-26T16:42:11.311Z",
   "fixedVersion": "1.3.0",
   "isSingleVersion": true,
   "registryUrl": "https://registry.npmjs.org",
@@ -509,6 +516,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should warn if
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8 1`] = `
 {
   "currentVersion": "8",
+  "currentVersionReleaseTimeStamp": undefined,
   "fixedVersion": "8",
   "isSingleVersion": true,
   "registryUrl": "https://index.docker.io",
@@ -531,6 +539,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompat
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8.1 1`] = `
 {
   "currentVersion": "8.1",
+  "currentVersionReleaseTimeStamp": undefined,
   "fixedVersion": "8.1",
   "isSingleVersion": true,
   "registryUrl": "https://index.docker.io",
@@ -562,6 +571,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompat
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8.1.0 1`] = `
 {
   "currentVersion": "8.1.0",
+  "currentVersionReleaseTimeStamp": undefined,
   "fixedVersion": "8.1.0",
   "isSingleVersion": true,
   "registryUrl": "https://index.docker.io",
