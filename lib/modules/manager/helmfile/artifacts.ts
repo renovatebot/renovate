@@ -60,7 +60,7 @@ export async function updateArtifacts({
       },
     ];
     const needKustomize = updatedDeps.some(
-      (dep) => dep.managerData?.needKustomize
+      (dep) => dep.managerData?.needKustomize,
     );
     if (needKustomize) {
       toolConstraints.push({
@@ -72,7 +72,7 @@ export async function updateArtifacts({
     const cmd: string[] = [];
     const doc = Result.parse(
       newPackageFileContent,
-      Yaml.pipe(Doc)
+      Yaml.pipe(Doc),
     ).unwrapOrThrow();
 
     for (const value of coerceArray(doc.repositories).filter(isOCIRegistry)) {
@@ -80,7 +80,7 @@ export async function updateArtifacts({
         value.name,
         `https://${value.url}`,
         // this extracts the hostname from url like format ghcr.ip/helm-charts
-        value.url.replace(regEx(/\/.*/), '')
+        value.url.replace(regEx(/\/.*/), ''),
       );
 
       if (loginCmd) {

@@ -54,6 +54,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  'asdf-plugin-manager': {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-plugin-manager',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'asdf-community/asdf-plugin-manager',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   awscli: {
     asdfPluginUrl: 'https://github.com/MetricMike/asdf-awscli',
     config: {
@@ -250,7 +258,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     asdfPluginUrl: 'https://github.com/halcyon/asdf-java',
     config: (version) => {
       const adoptOpenJdkMatches = version.match(
-        /^adoptopenjdk-(?<version>\d\S+)/
+        /^adoptopenjdk-(?<version>\d\S+)/,
       )?.groups;
       if (adoptOpenJdkMatches) {
         return {
@@ -260,7 +268,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
         };
       }
       const adoptOpenJreMatches = version.match(
-        /^adoptopenjdk-jre-(?<version>\d\S+)/
+        /^adoptopenjdk-jre-(?<version>\d\S+)/,
       )?.groups;
       if (adoptOpenJreMatches) {
         return {
@@ -270,7 +278,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
         };
       }
       const semeruJdkMatches = version.match(
-        /^semeru-openj9-(?<version>\d\S+)_openj9-(?<openj9>\d\S+)/
+        /^semeru-openj9-(?<version>\d\S+)_openj9-(?<openj9>\d\S+)/,
       )?.groups;
       if (semeruJdkMatches) {
         return {
@@ -280,7 +288,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
         };
       }
       const semeruJreMatches = version.match(
-        /^semeru-jre-openj9-(?<version>\d\S+)_openj9-\d\S+/
+        /^semeru-jre-openj9-(?<version>\d\S+)_openj9-\d\S+/,
       )?.groups;
       if (semeruJreMatches) {
         return {
@@ -289,9 +297,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: semeruJreMatches.version,
         };
       }
-      const temurinJdkMatches = version.match(
-        /^temurin-(?<version>\d\S+)/
-      )?.groups;
+      const temurinJdkMatches = version.match(/^temurin-(?<version>\d\S+)/)
+        ?.groups;
       if (temurinJdkMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -299,9 +306,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: temurinJdkMatches.version,
         };
       }
-      const temurinJreMatches = version.match(
-        /^temurin-jre-(?<version>\d\S+)/
-      )?.groups;
+      const temurinJreMatches = version.match(/^temurin-jre-(?<version>\d\S+)/)
+        ?.groups;
       if (temurinJreMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -452,6 +458,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'rust-lang/rust',
     },
   },
+  sbt: {
+    asdfPluginUrl: 'https://github.com/bram2000/asdf-sbt.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'sbt/sbt',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   scala: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-scala',
     config: (version) => {
@@ -549,6 +563,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'aquasecurity/trivy',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  vault: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-hashicorp',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'hashicorp/vault',
       extractVersion: '^v(?<version>\\S+)',
     },
   },

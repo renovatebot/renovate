@@ -55,7 +55,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           currentVersion: undefined,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -65,7 +65,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           ...upgrade,
           currentVersion: '1.0.0',
           newVersion: '1.0.0',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -74,7 +74,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://gitea.com/help',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -82,7 +82,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-        })
+        }),
       ).toMatchObject({
         hasReleaseNotes: false,
         project: {
@@ -187,7 +187,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-        })
+        }),
       ).toMatchObject({
         hasReleaseNotes: true,
         project: {
@@ -232,7 +232,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-        })
+        }),
       ).toMatchObject({
         hasReleaseNotes: false,
         project: {
@@ -267,7 +267,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-        })
+        }),
       ).toMatchObject({
         hasReleaseNotes: false,
         project: {
@@ -293,7 +293,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: undefined,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -302,7 +302,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'http://example.com',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -311,7 +311,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           releases: [],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -320,7 +320,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           releases: [{ version: '0.9.0' }],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -335,7 +335,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           ...upgrade,
           sourceUrl: 'https://gitea-enterprise.example.com/meno/dropzone/',
           endpoint: 'https://gitea-enterprise.example.com/',
-        })
+        }),
       ).toMatchObject({
         hasReleaseNotes: false,
         project: {
@@ -372,7 +372,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           platform: 'gitea',
           sourceUrl: 'https://git.test.com/meno/dropzone/',
           endpoint: 'https://git.test.com/api/v1/',
-        })
+        }),
       ).toMatchObject({
         hasReleaseNotes: false,
         project: {
@@ -454,7 +454,7 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
           { name: 'v5.5.0' },
         ]);
       expect(
-        await changelogSource.getAllTags('https://git.test.com/', 'some/repo')
+        await changelogSource.getAllTags('https://git.test.com/', 'some/repo'),
       ).toEqual([]);
     });
   });
@@ -483,8 +483,8 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
         await getReleaseNotesMd(
           'some/repo',
           'https://git.test.com/api/v1/',
-          'charts/some'
-        )
+          'charts/some',
+        ),
       ).toEqual({
         changelogFile: 'charts/some/CHANGELOG.md',
         changelogMd: 'some content\n#\n##',

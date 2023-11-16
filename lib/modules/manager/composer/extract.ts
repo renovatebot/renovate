@@ -4,7 +4,7 @@ import { ComposerExtract } from './schema';
 
 export async function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): Promise<PackageFileContent | null> {
   const res = await ComposerExtract.safeParseAsync({
     content,

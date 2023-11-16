@@ -22,7 +22,7 @@ export async function findHermitCwd(cwd: string): Promise<string> {
 }
 
 export async function getHermitEnvs(
-  rawOptions: RawExecOptions
+  rawOptions: RawExecOptions,
 ): Promise<Record<string, string>> {
   const cwd = rawOptions.cwd ?? /* istanbul ignore next */ '';
   const hermitCwd = await findHermitCwd(cwd);

@@ -32,8 +32,8 @@ export function setPlatformApi(name: PlatformId): void {
   if (!platforms.has(name)) {
     throw new Error(
       `Init: Platform "${name}" not found. Must be one of: ${getPlatformList().join(
-        ', '
-      )}`
+        ', ',
+      )}`,
     );
   }
   _platform = platforms.get(name);

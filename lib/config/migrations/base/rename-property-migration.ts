@@ -11,7 +11,7 @@ export class RenamePropertyMigration extends AbstractMigration {
     deprecatedPropertyName: string,
     newPropertyName: string,
     originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig
+    migratedConfig: RenovateConfig,
   ) {
     super(originalConfig, migratedConfig);
     this.propertyName = deprecatedPropertyName;

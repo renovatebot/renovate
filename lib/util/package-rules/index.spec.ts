@@ -734,7 +734,7 @@ describe('util/package-rules/index', () => {
       expect(error).toStrictEqual(new Error(MISSING_API_CREDENTIALS));
       expect(error.validationError).toBe('Missing credentials');
       expect(error.validationMessage).toBe(
-        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#matchconfidence) and add the required host rule.'
+        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#matchconfidence) and add the required host rule.',
       );
     });
   });
@@ -1013,7 +1013,7 @@ describe('util/package-rules/index', () => {
 
   it('empty rules', () => {
     expect(
-      applyPackageRules({ ...config1, packageRules: null as never })
+      applyPackageRules({ ...config1, packageRules: null as never }),
     ).toEqual({
       foo: 'bar',
       packageRules: null,

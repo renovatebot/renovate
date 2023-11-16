@@ -45,7 +45,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     it('returns if onboarded', async () => {
       config.repoIsOnboarded = true;
       await expect(
-        ensureOnboardingPr(config, packageFiles, branches)
+        ensureOnboardingPr(config, packageFiles, branches),
       ).resolves.not.toThrow();
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
@@ -65,16 +65,33 @@ describe('workers/repository/onboarding/pr/index', () => {
         config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
         OnboardingState.prUpdateRequested = prUpdateRequested;
         await expect(
-          ensureOnboardingPr(config, packageFiles, branches)
+          ensureOnboardingPr(config, packageFiles, branches),
         ).resolves.not.toThrow();
         expect(platform.updatePr).toHaveBeenCalledTimes(0);
         expect(platform.createPr).toHaveBeenCalledTimes(expected);
-      }
+      },
     );
 
     it('creates PR', async () => {
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
+    });
+
+    it('creates semantic PR', async () => {
+      await ensureOnboardingPr(
+        {
+          ...config,
+          semanticCommitType: undefined, // should default to "chore"
+          semanticCommits: 'enabled',
+        },
+        packageFiles,
+        branches,
+      );
+      expect(platform.createPr).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prTitle: 'chore: Configure Renovate',
+        }),
+      );
     });
 
     it('creates PR with labels', async () => {
@@ -85,7 +102,7 @@ describe('workers/repository/onboarding/pr/index', () => {
           addLabels: ['label', 'additional-label'],
         },
         packageFiles,
-        branches
+        branches,
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].labels).toEqual([
@@ -111,11 +128,11 @@ describe('workers/repository/onboarding/pr/index', () => {
             prFooter: '',
           },
           packageFiles,
-          branches
+          branches,
         );
         expect(platform.createPr).toHaveBeenCalledTimes(1);
         expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
-      }
+      },
     );
 
     it.each`
@@ -136,11 +153,11 @@ describe('workers/repository/onboarding/pr/index', () => {
               'There should be several empty lines at the end of the PR\r\n\n\n',
           },
           packageFiles,
-          branches
+          branches,
         );
         expect(platform.createPr).toHaveBeenCalledTimes(1);
         expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
-      }
+      },
     );
 
     it.each`
@@ -164,17 +181,17 @@ describe('workers/repository/onboarding/pr/index', () => {
               'And this is a footer for repository:{{repository}} baseBranch:{{baseBranch}}',
           },
           packageFiles,
-          branches
+          branches,
         );
         expect(platform.createPr).toHaveBeenCalledTimes(1);
         expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-          /platform:github/
+          /platform:github/,
         );
         expect(platform.createPr.mock.calls[0][0].prBody).toMatch(
-          /repository:test/
+          /repository:test/,
         );
         expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
-      }
+      },
     );
 
     it.each`
@@ -193,12 +210,12 @@ describe('workers/repository/onboarding/pr/index', () => {
           partial<Pr>({
             title: 'Configure Renovate',
             bodyStruct: onboardingRebaseCheckbox ? bodyStruct : { hash },
-          })
+          }),
         );
         await ensureOnboardingPr(config, packageFiles, branches);
         expect(platform.createPr).toHaveBeenCalledTimes(0);
         expect(platform.updatePr).toHaveBeenCalledTimes(0);
-      }
+      },
     );
 
     it('ensures comment, when PR is conflicted', async () => {
@@ -207,7 +224,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         partial<Pr>({
           title: 'Configure Renovate',
           bodyStruct,
-        })
+        }),
       );
       scm.isBranchConflicted.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
@@ -222,7 +239,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         partial<Pr>({
           title: 'Configure Renovate',
           bodyStruct,
-        })
+        }),
       );
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
@@ -245,10 +262,10 @@ describe('workers/repository/onboarding/pr/index', () => {
       GlobalConfig.set({ dryRun: 'full' });
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(logger.info).toHaveBeenCalledWith(
-        'DRY-RUN: Would check branch renovate/configure'
+        'DRY-RUN: Would check branch renovate/configure',
       );
       expect(logger.info).toHaveBeenLastCalledWith(
-        'DRY-RUN: Would create onboarding PR'
+        'DRY-RUN: Would create onboarding PR',
       );
     });
 
@@ -258,14 +275,14 @@ describe('workers/repository/onboarding/pr/index', () => {
         partial<Pr>({
           title: 'Configure Renovate',
           bodyStruct,
-        })
+        }),
       );
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(logger.info).toHaveBeenCalledWith(
-        'DRY-RUN: Would check branch renovate/configure'
+        'DRY-RUN: Would check branch renovate/configure',
       );
       expect(logger.info).toHaveBeenLastCalledWith(
-        'DRY-RUN: Would update onboarding PR'
+        'DRY-RUN: Would update onboarding PR',
       );
     });
 
@@ -282,7 +299,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       it('throws when trying to create a new PR', async () => {
         platform.createPr.mockRejectedValueOnce(err);
         await expect(
-          ensureOnboardingPr(config, packageFiles, branches)
+          ensureOnboardingPr(config, packageFiles, branches),
         ).toReject();
         expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
       });
@@ -293,10 +310,10 @@ describe('workers/repository/onboarding/pr/index', () => {
         };
         platform.createPr.mockRejectedValueOnce(err);
         await expect(
-          ensureOnboardingPr(config, packageFiles, branches)
+          ensureOnboardingPr(config, packageFiles, branches),
         ).toResolve();
         expect(logger.warn).toHaveBeenCalledWith(
-          'Onboarding PR already exists but cannot find it. It was probably created by a different user.'
+          'Onboarding PR already exists but cannot find it. It was probably created by a different user.',
         );
         expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
       });

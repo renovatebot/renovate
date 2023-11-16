@@ -7,8 +7,8 @@ describe('modules/manager/custom/regex/utils', () => {
     expect(
       utils.regexMatchAll(
         lazyMatch,
-        '1f699d2bfc99bbbe4c1ed5bb8fc21e6911d69c6e\n'
-      )
+        '1f699d2bfc99bbbe4c1ed5bb8fc21e6911d69c6e\n',
+      ),
     ).toBeArray();
   });
 });

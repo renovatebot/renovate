@@ -31,7 +31,7 @@ function getDescriptionArray(config: RenovateConfig): string[] {
 
 export function getConfigDesc(
   config: RenovateConfig,
-  packageFiles?: Record<string, PackageFile[]>
+  packageFiles?: Record<string, PackageFile[]>,
 ): string {
   // TODO: type (#22198)
   const configFile = configFileNames.includes(config.onboardingConfigFileName!)
@@ -52,7 +52,7 @@ export function getConfigDesc(
   });
   desc += '\n';
   desc += emojify(
-    `:abcd: Would you like to change the way Renovate is upgrading your dependencies?`
+    `:abcd: Would you like to change the way Renovate is upgrading your dependencies?`,
   );
   desc += ` Simply edit the \`${configFile}\` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time Renovate runs.`;
   desc += '\n\n---\n';

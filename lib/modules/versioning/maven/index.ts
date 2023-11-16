@@ -131,7 +131,7 @@ const isStable = (version: string): boolean => {
 // istanbul ignore next
 const getSatisfyingVersion = (
   versions: string[],
-  range: string
+  range: string,
 ): string | null =>
   versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
@@ -155,7 +155,7 @@ function getNewValue({
   }
   return coerceString(
     autoExtendMavenRange(currentValue, newVersion),
-    currentValue
+    currentValue,
   );
 }
 

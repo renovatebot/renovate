@@ -8,7 +8,7 @@ export function createSDBackendURL(
   registryURL: string,
   sdType: ServiceDiscoveryEndpointType,
   sdResult: ServiceDiscoveryResult,
-  subPath: string
+  subPath: string,
 ): string {
   const sdEndpoint = sdResult[sdType] ?? '';
   const fullPath = joinUrlParts(sdEndpoint, subPath);

@@ -6,7 +6,7 @@ describe('config/migrations/custom/ignore-node-modules-migration', () => {
       {
         ignoreNodeModules: true,
       },
-      { ignorePaths: ['node_modules/'] }
+      { ignorePaths: ['node_modules/'] },
     );
   });
 });

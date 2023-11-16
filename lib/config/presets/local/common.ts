@@ -8,7 +8,7 @@ export async function fetchJSONFile(
   repo: string,
   fileName: string,
   _endpoint?: string,
-  tag?: string | undefined
+  tag?: string | undefined,
 ): Promise<Preset> {
   let raw: string | null;
   try {
@@ -19,7 +19,7 @@ export async function fetchJSONFile(
     }
 
     logger.debug(
-      `Preset file ${fileName} not found in ${repo}: ${err.message}}`
+      `Preset file ${fileName} not found in ${repo}: ${err.message}}`,
     );
 
     throw new Error(PRESET_DEP_NOT_FOUND);
@@ -29,7 +29,7 @@ export async function fetchJSONFile(
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  return parsePreset(raw);
+  return parsePreset(raw, fileName);
 }
 
 export function getPresetFromEndpoint(
@@ -37,7 +37,7 @@ export function getPresetFromEndpoint(
   filePreset: string,
   presetPath: string | undefined,
   endpoint: string,
-  tag?: string | undefined
+  tag?: string | undefined,
 ): Promise<Preset | undefined> {
   return fetchPreset({
     repo,

@@ -38,7 +38,7 @@ These permissions are always needed to run the respective app.
 | Checks            |  `read` and `write`   |   not applicable   | Read and write status checks                                  |
 | Code              |  `read` and `write`   |       `read`       | Read for repository content and write for creating branches   |
 | Commit statuses   |  `read` and `write`   | `read` and `write` | Read and write commit statuses for Renovate PRs               |
-| Issues            |  `read` and `write`   | `read` and `write` | Create dependency dashboard or Config Warning issues          |
+| Issues            |  `read` and `write`   | `read` and `write` | Create Dependency Dashboard or Config Warning issues          |
 | Pull Requests     |  `read` and `write`   | `read` and `write` | Create update PRs                                             |
 | Workflows         |  `read` and `write`   |   not applicable   | Explicit permission needed to update workflows                |
 

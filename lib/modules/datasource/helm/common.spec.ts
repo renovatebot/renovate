@@ -22,7 +22,7 @@ describe('modules/datasource/helm/common', () => {
       '$input -> $output',
       ({ input, output }: { input: string; output: string }) => {
         expect(findSourceUrl(repo.entries[input][0])).toEqual(output);
-      }
+      },
     );
   });
 });

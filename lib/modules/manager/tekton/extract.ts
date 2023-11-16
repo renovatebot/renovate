@@ -13,7 +13,7 @@ import type {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`tekton.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
@@ -23,7 +23,7 @@ export function extractPackageFile(
   } catch (err) {
     logger.debug(
       { err, packageFile },
-      'Failed to parse YAML resource as a Tekton resource'
+      'Failed to parse YAML resource as a Tekton resource',
     );
     return null;
   }
@@ -108,14 +108,14 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
       currentValue: dep.currentValue,
       currentDigest: dep.currentDigest,
     },
-    'Tekton bundle dependency found'
+    'Tekton bundle dependency found',
   );
   deps.push(dep);
 }
 
 function addStepImageSpec(
   spec: TektonResourceSpec | undefined,
-  deps: PackageDependency[]
+  deps: PackageDependency[],
 ): void {
   if (is.nullOrUndefined(spec)) {
     return;
@@ -138,14 +138,14 @@ function addStepImageSpec(
         currentValue: dep.currentValue,
         currentDigest: dep.currentDigest,
       },
-      'Tekton step image dependency found'
+      'Tekton step image dependency found',
     );
     deps.push(dep);
   }
 }
 
 function getBundleValue(
-  fields: TektonResolverParamsField[] | undefined
+  fields: TektonResolverParamsField[] | undefined,
 ): string | undefined {
   for (const field of coerceArray(fields)) {
     if (field.name === 'bundle') {
