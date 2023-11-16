@@ -77,7 +77,7 @@ flowchart LR
     FED2 -...-> CU
 
     UD -....-> CU
-    J --> CU[Collect updates]
+    J --> CU[Look up updates]
 
     CU --> FEU[[For each update]]
 
