@@ -75,7 +75,7 @@ mod 'example/samba',
 ```
 
 ```ruby
-# ref based
+# Ref based
 mod 'example/samba',
     :git => 'https://github.com/example/puppet-samba',
     :ref => 'stable_version'
