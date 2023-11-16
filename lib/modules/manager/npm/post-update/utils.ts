@@ -28,12 +28,12 @@ export async function loadPackageJson(
 export function getPackageManagerVersion(
   name: string,
   pkg: PackageJsonSchema,
-): string | undefined {
+): string | null {
   if (pkg.packageManager?.name === name) {
     return pkg.packageManager.version;
   }
   if (pkg.engines?.[name]) {
     return pkg.engines[name];
   }
-  return undefined;
+  return null;
 }
