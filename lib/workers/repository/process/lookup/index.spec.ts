@@ -2024,7 +2024,7 @@ describe('workers/repository/process/lookup/index', () => {
             version: '17.0.0',
             // a day old release
             releaseTimestamp: new Date(
-              Date.now() - 25 * 60 * 60 * 1000
+              Date.now() - 25 * 60 * 60 * 1000,
             ).toISOString(),
           },
           {

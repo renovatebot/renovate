@@ -74,7 +74,7 @@ describe('util/pretty-time', () => {
       `satisfiesRange('$date', '$range') === $expected`,
       ({ date, range, expected }) => {
         expect(satisfiesDateRange(date, range)).toBe(expected);
-      }
+      },
     );
   });
 });
