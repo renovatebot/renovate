@@ -42,7 +42,7 @@ For example:
 
 ## Basic
 
-Here's a high-level overview of Renovate's workflow, where it collects dependencies and then updates them:
+Here's a high-level overview of Renovate's workflow, where it extracts dependencies and then updates them:
 
 ```mermaid
 flowchart LR
@@ -108,7 +108,7 @@ flowchart TB
 
       subgraph EXTRACTD[EXTRACT DEPENDENCIES]
           direction TB
-          CLBRANCH[Collect existing branches]
+          CLBRANCH[Extract base branches]
           CLBRANCH --> VULN[Check for vulnerabilities]
           VULN --> CC[[For each manager]]
           CC -->|managerA| CD["..."]
@@ -118,7 +118,7 @@ flowchart TB
           CFEF -->|file2| CCD2[...]
       end
 
-      subgraph COLLECTU[COLLECT UPDATES]
+      subgraph LOOKUP[LOOK UP UPDATES]
           direction TB
           UC[[For each manager]]
           UC -->|managerA| UD["..."]
@@ -131,7 +131,7 @@ flowchart TB
           D2 --> J[use versioning to find \n next valid update]
           FED2 -...-> CU
           UD -....-> CU
-          J --> CU[Collect updates]
+          J --> CU[Look up updates]
       end
 
       subgraph WRITEU[WRITE UPDATES]
@@ -151,9 +151,9 @@ flowchart TB
       FER --> IRPO[Initialize repository]
 
       IRPO --> EXTRACTD
-      EXTRACTD --> COLLECTU
+      EXTRACTD --> LOOKUP
 
-      COLLECTU --> WRITEU
+      LOOKUP --> WRITEU
 
       WRITEU --> FINALIZE
 
