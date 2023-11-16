@@ -131,7 +131,7 @@ export function cache<T>({
   });
 }
 
-function getTtlOverride(namespace: string): number | undefined {
+export function getTtlOverride(namespace: string): number | undefined {
   const ttl: unknown = GlobalConfig.get('cacheTtlOverride', {})[namespace];
   if (is.number(ttl)) {
     return ttl;

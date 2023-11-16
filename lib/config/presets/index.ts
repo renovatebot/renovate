@@ -5,7 +5,8 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as memCache from '../../util/cache/memory';
+import * as packageCache from '../../util/cache/package';
+import { getTtlOverride } from '../../util/cache/package/decorator';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as massage from '../massage';
@@ -37,6 +38,8 @@ const presetSources: Record<string, PresetApi> = {
   local,
   internal,
 };
+
+const presetCacheNamespace = 'preset';
 
 const nonScopedPresetWithSubdirRegex = regEx(
   /^(?<repo>~?[\w\-. /]+?)\/\/(?:(?<presetPath>[\w\-./]+)\/)?(?<presetName>[\w\-.]+)(?:#(?<tag>[\w\-./]+?))?$/,
@@ -222,7 +225,10 @@ export async function getPreset(
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
   const cacheKey = `preset:${preset}`;
-  let presetConfig = memCache.get<Preset | null | undefined>(cacheKey);
+  let presetConfig = await packageCache.get<Preset | null | undefined>(
+    presetCacheNamespace,
+    cacheKey,
+  );
   if (is.nullOrUndefined(presetConfig)) {
     presetConfig = await presetSources[presetSource].getPreset({
       repo,
@@ -230,7 +236,12 @@ export async function getPreset(
       presetName,
       tag,
     });
-    memCache.set(cacheKey, presetConfig);
+    await packageCache.set(
+      presetCacheNamespace,
+      cacheKey,
+      presetConfig,
+      getTtlOverride(presetCacheNamespace) ?? 15,
+    );
   }
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
