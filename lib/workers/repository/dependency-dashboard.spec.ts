@@ -215,7 +215,7 @@ describe('workers/repository/dependency-dashboard', () => {
       });
     });
 
-    it('does not read dashboard body but apply checkedBranches', async () => {
+    it('does not read dashboard body but applies checkedBranches regardless', async () => {
       const conf: RenovateConfig = {};
       conf.dependencyDashboard = false;
       conf.checkedBranches = ['branch1', 'branch2'];
