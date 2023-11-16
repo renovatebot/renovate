@@ -26,8 +26,12 @@ describe('modules/manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
-    fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
+    const packageLockContents = JSON.stringify({
+      packages: {},
+      lockfileVersion: 3,
+    });
+    fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
+    fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
     const skipInstalls = true;
     const postUpdateOptions = ['npmDedupe'];
     const updates = [
@@ -42,7 +46,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.error).toBeFalse();
-    expect(res.lockFile).toBe('package-lock-contents');
+    expect(res.lockFile).toBe(packageLockContents);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -167,7 +171,10 @@ describe('modules/manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const packageLockContents = JSON.stringify({ lockfileVersion: 2 });
+    const packageLockContents = JSON.stringify({
+      dependencies: {},
+      lockfileVersion: 2,
+    });
     fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
     fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
     const postUpdateOptions = ['npmDedupe'];
@@ -196,7 +203,10 @@ describe('modules/manager/npm/post-update/npm', () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    const packageLockContents = JSON.stringify({ lockfileVersion: 1 });
+    const packageLockContents = JSON.stringify({
+      dependencies: {},
+      lockfileVersion: 1,
+    });
     fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
     fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
     const postUpdateOptions = ['npmDedupe'];
