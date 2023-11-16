@@ -104,7 +104,12 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
 export async function readDashboardBody(
   config: SelectAllConfig,
 ): Promise<void> {
-  config.dependencyDashboardChecks = {};
+  let dashboardChecks: DependencyDashboard = {
+    dependencyDashboardChecks: {},
+    dependencyDashboardAllPending: false,
+    dependencyDashboardRebaseAllOpen: false,
+    dependencyDashboardAllRateLimited: false,
+  };
   const stringifiedConfig = JSON.stringify(config);
   if (
     config.dependencyDashboard === true ||
@@ -116,24 +121,21 @@ export async function readDashboardBody(
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
-      const dashboardChecks = parseDashboardIssue(issue.body ?? '');
-
-      if (config.checkedBranches) {
-        const checkedBranchesRec: Record<string, string> = Object.fromEntries(
-          config.checkedBranches.map((branchName) => [
-            branchName,
-            'global-config',
-          ]),
-        );
-        dashboardChecks.dependencyDashboardChecks = {
-          ...dashboardChecks.dependencyDashboardChecks,
-          ...checkedBranchesRec,
-        };
-      }
-
-      Object.assign(config, dashboardChecks);
+      dashboardChecks = parseDashboardIssue(issue.body ?? '');
     }
   }
+
+  if (config.checkedBranches) {
+    const checkedBranchesRec: Record<string, string> = Object.fromEntries(
+      config.checkedBranches.map((branchName) => [branchName, 'global-config']),
+    );
+    dashboardChecks.dependencyDashboardChecks = {
+      ...dashboardChecks.dependencyDashboardChecks,
+      ...checkedBranchesRec,
+    };
+  }
+
+  Object.assign(config, dashboardChecks);
 }
 
 function getListItem(branch: BranchConfig, type: string): string {
