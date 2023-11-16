@@ -260,7 +260,7 @@ const repoGroups = {
   'elastic-apm-agent-rum-js': 'https://github.com/elastic/apm-agent-rum-js',
   'electron-forge': [
     'https://github.com/electron-userland/electron-forge',
-    'https://github.com/electron/forge'
+    'https://github.com/electron/forge',
   ],
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
