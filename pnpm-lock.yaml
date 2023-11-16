@@ -596,8 +596,8 @@ importers:
         specifier: 10.9.1
         version: 10.9.1(@swc/core@1.3.96)(@types/node@18.18.9)(typescript@5.1.6)
       type-fest:
-        specifier: 4.6.0
-        version: 4.6.0
+        specifier: 4.7.1
+        version: 4.7.1
       typescript:
         specifier: 5.1.6
         version: 5.1.6
@@ -9391,7 +9391,7 @@ packages:
     dependencies:
       find-up-simple: 1.0.0
       read-pkg: 9.0.0
-      type-fest: 4.6.0
+      type-fest: 4.7.1
     dev: true
 
   /read-pkg-up@7.0.1:
@@ -9429,7 +9429,7 @@ packages:
       '@types/normalize-package-data': 2.4.4
       normalize-package-data: 6.0.0
       parse-json: 8.0.1
-      type-fest: 4.6.0
+      type-fest: 4.7.1
     dev: true
 
   /read-yaml-file@2.1.0:
@@ -10546,11 +10546,6 @@ packages:
   /type-fest@3.13.1:
     resolution: {integrity: sha512-tLq3bSNx+xSpwvAJnzrK0Ep5CLNWjvFTOp71URMaAEWBfRb9nnJiBoUe0tF8bI4ZFO3omgBR6NvnbzVUT3Ly4g==}
     engines: {node: '>=14.16'}
-    dev: true
-
-  /type-fest@4.6.0:
-    resolution: {integrity: sha512-rLjWJzQFOq4xw7MgJrCZ6T1jIOvvYElXT12r+y0CC6u67hegDHaxcPqb2fZHOGlqxugGQPNB1EnTezjBetkwkw==}
-    engines: {node: '>=16'}
     dev: true
 
   /type-fest@4.7.1:
