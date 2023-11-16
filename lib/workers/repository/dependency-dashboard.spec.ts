@@ -214,6 +214,24 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardAllRateLimited: true,
       });
     });
+
+    it('does not read dashboard body but apply checkedBranches', async () => {
+      const conf: RenovateConfig = {};
+      conf.dependencyDashboard = false;
+      conf.checkedBranches = ['branch1', 'branch2'];
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        checkedBranches: ['branch1', 'branch2'],
+        dependencyDashboard: false,
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {
+          branch1: 'global-config',
+          branch2: 'global-config',
+        },
+        dependencyDashboardRebaseAllOpen: false,
+      });
+    });
   });
 
   describe('ensureDependencyDashboard()', () => {

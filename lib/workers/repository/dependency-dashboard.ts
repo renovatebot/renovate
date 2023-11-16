@@ -127,10 +127,7 @@ export async function readDashboardBody(
 
   if (config.checkedBranches) {
     const checkedBranchesRec: Record<string, string> = Object.fromEntries(
-      config.checkedBranches.map((branchName) => [
-        branchName,
-        'global-config',
-      ]),
+      config.checkedBranches.map((branchName) => [branchName, 'global-config']),
     );
     dashboardChecks.dependencyDashboardChecks = {
       ...dashboardChecks.dependencyDashboardChecks,
@@ -139,7 +136,6 @@ export async function readDashboardBody(
   }
 
   Object.assign(config, dashboardChecks);
-
 }
 
 function getListItem(branch: BranchConfig, type: string): string {
