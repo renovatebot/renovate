@@ -33,6 +33,39 @@ exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts 
 }
 `;
 
+exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts dependencies with --index-url short code 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "==0.3.1",
+      "currentVersion": "0.3.1",
+      "datasource": "pypi",
+      "depName": "some-package",
+    },
+    {
+      "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
+      "datasource": "pypi",
+      "depName": "some-other-package",
+    },
+    {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "sphinx",
+    },
+    {
+      "currentValue": "==1.9",
+      "currentVersion": "1.9",
+      "datasource": "pypi",
+      "depName": "not_semver",
+    },
+  ],
+  "registryUrls": [
+    "http://example.com/private-pypi/",
+  ],
+}
+`;
+
 exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts multiple dependencies 1`] = `
 [
   {
