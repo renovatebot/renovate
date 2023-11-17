@@ -105,6 +105,7 @@ The configuration:
 {
   "autodiscoverFilter": ["my-org/*"]
 }
+```
 
 The search for repositories is case-insensitive.
 
