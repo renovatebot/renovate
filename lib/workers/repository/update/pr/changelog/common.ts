@@ -7,6 +7,11 @@ export function slugifyUrl(url: string): string {
 }
 
 /**
+ * A comparator function to sort changelog files by preference,
+ * prioritizing markdown files and plain text files over other file types.
+ *
+ * Avoid selecting files like `CHANGELOG.json` when `CHANGELOG.md` is available.
+ * @see https://github.com/renovatebot/renovate/issues/25830
  *
  * @example
  * ```
