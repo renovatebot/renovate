@@ -28,7 +28,7 @@ export function slugifyUrl(url: string): string {
  * @param b path to changelog file
  */
 export function compareChangelogFilePath(a: string, b: string): number {
-  const preferedChangelogRegexList = [/\.(md|markdown|mkd)$/i, /\.(txt|text)/i];
+  const preferedChangelogRegexList = [/\.(?:md|markdown|mkd)$/i, /\.(?:txt|text)$/i];
 
   const aPreferedIndex = preferedChangelogRegexList.findIndex((f) => f.test(a));
   const bPreferedIndex = preferedChangelogRegexList.findIndex((f) => f.test(b));
