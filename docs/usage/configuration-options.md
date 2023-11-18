@@ -3388,8 +3388,8 @@ The field supports multiple URLs but it is datasource-dependent on whether only 
 ## renovateCompatibility
 
 This capability exists so that Renovate maintainers can change default behavior without forcing all existing users to adopt the new behavior immediately.
-Although Renovate consistently adheres to SemVer and limits "breaking" changes to major releases, the majority of _users_ of Renovate are end users in repositories and they do not have control over which major release of Renovate is running.
-This is especially true in the Renovate GitHub App for github.com, which is operated by the Renovate team at Mend.io.
+Although Renovate adheres to SemVer and limits "breaking" behavior changes to major releases, the majority of _users_ of Renovate are end users in repositories and they do not have control over which major release of Renovate is running or when that major upgrade is performed.
+This is true particularly in the Renovate GitHub App for github.com, which is operated by the Renovate team at Mend.io.
 
 By introducing the `renovateCompatibility` feature it allows Renovate to maintain previous behavior whenever possible for repositories which were onboarded prior to the change in behavior.
 Users can then migrate their config to the new major release and decide that that point whether to adopt the new behavior, or keep a backwards compatibility setting to maintain the earlier behavior indefinitely.
