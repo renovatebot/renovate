@@ -2,15 +2,18 @@ Renovate can update Puppetfiles.
 
 ### How it works
 
-1. Renovate searches in each repository for any `Puppetfile` files
-1. Existing dependencies are extracted from the relevant sections of the file
-1. Renovate resolves the dependency on the provided forges (or uses `https://forgeapi.puppetlabs.com` as default)
-1. A PR is created with `Puppetfile` updated in the same commit
-1. If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
+Renovate:
+
+1. Searches each repository for any `Puppetfile` files
+1. Extracts dependencies from the relevant sections of the `Puppetfile`
+1. Resolves the dependency on the default forge: `https://forgeapi.puppetlabs.com`, or on a user-defined forge
+1. Creates a PR that updates the `Puppetfile`
+
+Finally, if the source repository has a "changelog" file _or_ uses GitHub releases, then Renovate puts the changelogs for each version in its PR.
 
 ### Supported Puppetfile formats
 
-The `puppetfile` manager extracts the dependencies from one Puppetfile.
+The `puppet` manager extracts the dependencies from one Puppetfile.
 You can define a forge in your `puppetfile` in these ways:
 
 - No forge
