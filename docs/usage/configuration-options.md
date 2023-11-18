@@ -3385,6 +3385,22 @@ In case there is a need to configure them manually, it can be done using this `r
 
 The field supports multiple URLs but it is datasource-dependent on whether only the first is used or multiple.
 
+## renovateCompatibility
+
+This capability exists so that Renovate maintainers can change default behavior without forcing all existing users to adopt the new behavior immediately.
+Although Renovate consistently adheres to SemVer and limits "breaking" changes to major releases, the majority of _users_ of Renovate are end users in repositories and they do not have control over which major release of Renovate is running.
+This is especially true in the Renovate GitHub App for github.com, which is operated by the Renovate team at Mend.io.
+
+By introducing the `renovateCompatibility` feature it allows Renovate to maintain previous behavior whenever possible for repositories which were onboarded prior to the change in behavior.
+Users can then migrate their config to the new major release and decide that that point whether to adopt the new behavior, or keep a backwards compatibility setting to maintain the earlier behavior indefinitely.
+
+This setting was introduced in Renovate v38, so it has a default value of 37, meaning that if no compatibility value is defined then it assumes compatibility with v37.
+
+This field can be set to either:
+
+- 0, indicating "Do not care about compatibility, always give me the latest default behavior" (essentially the way most software works, including Renovate < v38), or
+- Any positive integer corresponding to a major release of Renovate (e.g. 37 or greater)
+
 ## replacement
 
 Add to this object if you wish to define rules that apply only to PRs that replace dependencies.

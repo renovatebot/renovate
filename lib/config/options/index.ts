@@ -6,6 +6,13 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'renovateCompatibility',
+    description:
+      'The Renovate major release compatibility to maintain in functionality.',
+    type: 'integer',
+    default: 37,
+  },
+  {
     name: 'detectGlobalManagerConfig',
     description:
       'If `true`, Renovate tries to detect global manager configuration from the file system.',
