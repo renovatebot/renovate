@@ -1,9 +1,11 @@
 import type { Preset, PresetConfig } from '../types';
+import * as compatibilityPreset from './compatibility';
 import * as configPreset from './config';
 import * as defaultPreset from './default';
 import * as dockerPreset from './docker';
 import * as groupPreset from './group';
 import * as helpersPreset from './helpers';
+import * as legacyPreset from './legacy';
 import * as mergeConfidence from './merge-confidence';
 import * as monorepoPreset from './monorepo';
 import * as npm from './npm';
@@ -18,11 +20,13 @@ import * as workaroundsPreset from './workarounds';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const groups: Record<string, Record<string, Preset>> = {
+  comptibility: compatibilityPreset.presets,
   config: configPreset.presets,
   default: defaultPreset.presets,
   docker: dockerPreset.presets,
   group: groupPreset.presets,
   helpers: helpersPreset.presets,
+  legacy: legacyPreset.presets,
   mergeConfidence: mergeConfidence.presets,
   monorepo: monorepoPreset.presets,
   npm: npm.presets,
