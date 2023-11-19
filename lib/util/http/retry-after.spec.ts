@@ -1,5 +1,23 @@
 import { RequestError } from 'got';
-import { extractRetryAfterHeaderSeconds, wrapWithRetry } from './retry-after';
+import * as hostRules from '../host-rules';
+import {
+  extractRetryAfterHeaderSeconds,
+  getMaxRetryAfter,
+  wrapWithRetry,
+} from './retry-after';
+
+function requestError(
+  response: {
+    statusCode?: number;
+    headers?: Record<string, string | string[]>;
+  } | null = null,
+) {
+  const err = new RequestError('request error', {}, null as never);
+  if (response) {
+    (err as any).response = response;
+  }
+  return err;
+}
 
 describe('util/http/retry-after', () => {
   describe('wrapWithRetry', () => {
@@ -67,45 +85,66 @@ describe('util/http/retry-after', () => {
     });
 
     it('returns null for RequestError without response', () => {
-      expect(
-        extractRetryAfterHeaderSeconds(
-          new RequestError('foo', {}, null as never),
-        ),
-      ).toBeNull();
+      expect(extractRetryAfterHeaderSeconds(requestError())).toBeNull();
     });
 
     it('returns null for status other than 429', () => {
       const err = new RequestError('foo', {}, null as never);
       (err as any).response = { statusCode: 302 };
-      expect(extractRetryAfterHeaderSeconds(err)).toBeNull();
+      expect(
+        extractRetryAfterHeaderSeconds(requestError({ statusCode: 302 })),
+      ).toBeNull();
     });
 
     it('returns null missing "retry-after" header', () => {
-      const err = new RequestError('foo', {}, null as never);
-      (err as any).response = { statusCode: 429, headers: {} };
-      expect(extractRetryAfterHeaderSeconds(err)).toBeNull();
+      expect(
+        extractRetryAfterHeaderSeconds(
+          requestError({ statusCode: 429, headers: {} }),
+        ),
+      ).toBeNull();
     });
 
     it('returns null for non-integer "retry-after" header', () => {
-      const err = new RequestError('foo', {}, null as never);
-      (err as any).response = {
-        statusCode: 429,
-        headers: {
-          'retry-after': 'Wed, 21 Oct 2015 07:28:00 GMT',
-        },
-      };
-      expect(extractRetryAfterHeaderSeconds(err)).toBeNull();
+      expect(
+        extractRetryAfterHeaderSeconds(
+          requestError({
+            statusCode: 429,
+            headers: {
+              'retry-after': 'Wed, 21 Oct 2015 07:28:00 GMT',
+            },
+          }),
+        ),
+      ).toBeNull();
     });
 
     it('returns delay in seconds', () => {
-      const err = new RequestError('foo', {}, null as never);
-      (err as any).response = {
-        statusCode: 429,
-        headers: {
-          'retry-after': '42',
-        },
-      };
-      expect(extractRetryAfterHeaderSeconds(err)).toBe(42);
+      expect(
+        extractRetryAfterHeaderSeconds(
+          requestError({
+            statusCode: 429,
+            headers: {
+              'retry-after': '42',
+            },
+          }),
+        ),
+      ).toBe(42);
+    });
+  });
+
+  describe('getMaxRetryAfter', () => {
+    afterEach(() => {
+      hostRules.clear();
+    });
+
+    it('returns default value of 60 when host rule is not set', () => {
+      expect(getMaxRetryAfter('http://example.com')).toBe(60);
+    });
+
+    it('returns maxRetryAfter', () => {
+      hostRules.add({ matchHost: 'foo.com', maxRetryAfter: 111 });
+      hostRules.add({ matchHost: 'bar.com', maxRetryAfter: 222 });
+      expect(getMaxRetryAfter('http://foo.com')).toBe(111);
+      expect(getMaxRetryAfter('http://bar.com')).toBe(222);
     });
   });
 });

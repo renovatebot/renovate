@@ -10,12 +10,16 @@ import * as memCache from '../cache/memory';
 import { clone } from '../clone';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
-import { parseUrl, resolveBaseUrl } from '../url';
+import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
-import { extractRetryAfterHeaderSeconds, wrapWithRetry } from './retry-after';
+import {
+  extractRetryAfterHeaderSeconds,
+  getMaxRetryAfter,
+  wrapWithRetry,
+} from './retry-after';
 import { Throttle, getThrottle } from './throttle';
 import type {
   GotJSONOptions,
@@ -226,11 +230,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         ? () => queue.add<HttpResponse<T>>(throttledTask)
         : throttledTask;
 
-      const host = parseUrl(url)?.host ?? /* istanbul ignore next */ url;
       resPromise = wrapWithRetry(
-        host,
+        url,
         queuedTask,
         extractRetryAfterHeaderSeconds,
+        getMaxRetryAfter(url),
       );
 
       if (memCacheKey) {

@@ -2734,6 +2734,16 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     default: [],
   },
+  {
+    name: 'maxRetryAfter',
+    description:
+      'Maximum number of seconds to wait before retrying a failed request.',
+    type: 'integer',
+    stage: 'package',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
