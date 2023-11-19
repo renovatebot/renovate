@@ -1763,6 +1763,23 @@ Example config:
 }
 ```
 
+### maxRetryAfter
+
+By default, Renovate will retry after any `Retry-After` header value, up to a maximum of 60 seconds.
+
+You can configure a different maximum value using `maxRetryAfter`:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "maxRetryAfter": 25
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
