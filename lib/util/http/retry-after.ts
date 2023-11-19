@@ -1,13 +1,10 @@
+import { setTimeout } from 'timers/promises';
 import { RequestError } from 'got';
 import type { Task } from './types';
 
 const hostBlocks = new Map<string, Promise<void>>();
 
 const maxRetries = 2;
-
-function sleep(seconds: number): Promise<void> {
-  return new Promise((resolve) => global.setTimeout(resolve, seconds * 1000));
-}
 
 export function extractRetryAfterHeaderSeconds(err: unknown): number | null {
   if (!(err instanceof RequestError)) {
@@ -60,7 +57,7 @@ export async function wrapWithRetry<T>(
         throw err;
       }
 
-      hostBlocks.set(key, sleep(delaySeconds));
+      hostBlocks.set(key, setTimeout(delaySeconds * 1000));
       retries += 1;
     }
   }
