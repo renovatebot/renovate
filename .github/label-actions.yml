@@ -302,3 +302,17 @@
 
 
     Thanks, the Renovate team
+
+'auto:misclassified-problem':
+  comment: >
+    Hi there,
+
+    A maintainer has flagged that this discussion is _misclassified_ as a bug when it is not.
+
+    Incorrectly classified discussions waste maintainer time, worsen search result accuracy for future users, plus make it harder to train AI on this dataset.
+
+    The next time you create a discussion, please keep in mind:
+    - If you are new to Renovate, try to stick to questions instead of problem reports
+    - Just because Renovate does something you don't expect, doesn't automatically mean it's a bug
+    - Unsupported features should be raised as ideas, not problems
+    - Those who appear to be _twisting_ questions into sounding like a bug for attention will be given the least support
