@@ -5,7 +5,6 @@ import { XmlDocument } from 'xmldoc';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
 import type {
   HttpOptions,
