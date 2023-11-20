@@ -32,6 +32,7 @@ import {
   getAuthHeaders,
   getRegistryRepository,
   gitRefLabel,
+  imageUrlLabel,
   isDockerHost,
   sourceLabel,
   sourceLabels,
@@ -1027,6 +1028,9 @@ export class DockerDatasource extends Datasource {
           ret.sourceUrl = labels[label];
           break;
         }
+      }
+      if (is.nonEmptyString(labels[imageUrlLabel])) {
+        ret.homepage = labels[imageUrlLabel];
       }
     }
     return ret;

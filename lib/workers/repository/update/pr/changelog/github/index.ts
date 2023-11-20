@@ -9,6 +9,7 @@ import { queryReleases } from '../../../../../../util/github/graphql';
 import { GithubHttp } from '../../../../../../util/http/github';
 import { fromBase64 } from '../../../../../../util/string';
 import { ensureTrailingSlash, joinUrlParts } from '../../../../../../util/url';
+import { compareChangelogFilePath } from '../common';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
@@ -44,6 +45,7 @@ export async function getReleaseNotesMd(
 
   const allFiles = res.body.tree.filter((f) => f.type === 'blob');
   let files: GithubGitTreeNode[] = [];
+
   if (sourceDirectory?.length) {
     files = allFiles
       .filter((f) => f.path.startsWith(sourceDirectory))
@@ -60,7 +62,9 @@ export async function getReleaseNotesMd(
     logger.trace('no changelog file found');
     return null;
   }
-  const { path: changelogFile, sha } = files.shift()!;
+  const { path: changelogFile, sha } = files
+    .sort((a, b) => compareChangelogFilePath(a.path, b.path))
+    .shift()!;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(
