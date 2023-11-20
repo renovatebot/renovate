@@ -265,6 +265,7 @@ const repoGroups = {
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
+  eslint: 'https://github.com/eslint/eslint',
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
   expo: 'https://github.com/expo/expo',
