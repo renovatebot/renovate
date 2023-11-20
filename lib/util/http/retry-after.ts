@@ -1,5 +1,6 @@
 import { setTimeout } from 'timers/promises';
 import { RequestError } from 'got';
+import { logger } from '../../logger';
 import * as hostRules from '../host-rules';
 import { parseUrl } from '../url';
 import type { Task } from './types';
@@ -27,14 +28,20 @@ export async function wrapWithRetry<T>(
 
       return await task();
     } catch (err) {
-      if (retries === maxRetries) {
-        throw err;
-      }
-
       const delaySeconds = getDelaySeconds(err);
       if (delaySeconds === null) {
         throw err;
       }
+
+      if (retries === maxRetries) {
+        logger.debug({ url }, 'Retry-After: giving up');
+        throw err;
+      }
+
+      logger.debug(
+        { url, delaySeconds },
+        `Retry-After: will retry after ${delaySeconds} seconds`,
+      );
 
       const delay = 1000 * Math.max(0, Math.min(delaySeconds, maxRetryAfter));
       hostBlocks.set(key, setTimeout(delay));
@@ -52,7 +59,7 @@ export function extractRetryAfterHeaderSeconds(err: unknown): number | null {
     return null;
   }
 
-  if (err.response.statusCode !== 429) {
+  if (err.response.statusCode !== 429 && err.response.statusCode !== 403) {
     return null;
   }
 
@@ -63,6 +70,10 @@ export function extractRetryAfterHeaderSeconds(err: unknown): number | null {
 
   const seconds = parseInt(retryAfter, 10);
   if (Number.isNaN(seconds)) {
+    logger.debug(
+      { url: err.response.url, retryAfter },
+      'Retry-After: unsupported format',
+    );
     return null;
   }
 
