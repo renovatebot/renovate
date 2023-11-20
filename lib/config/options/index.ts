@@ -2368,7 +2368,7 @@ const options: RenovateOptions[] = [
     default: false,
     cli: false,
     env: false,
-    experimental: true,
+    advancedUse: true,
   },
   {
     name: 'artifactAuth',

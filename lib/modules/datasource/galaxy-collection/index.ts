@@ -86,8 +86,14 @@ export class GalaxyCollectionDatasource extends Datasource {
     const filteredReleases = enrichedReleases.filter(is.truthy);
     // extract base information which are only provided on the release from the newest release
 
+    // Find the source URL of the highest version release
+    const sourceUrlOfHighestRelease = enrichedReleases.find(
+      (release) => baseProject.highest_version.version === release.version,
+    )?.sourceUrl;
+
     return {
       releases: filteredReleases,
+      sourceUrl: sourceUrlOfHighestRelease,
     };
   }
 

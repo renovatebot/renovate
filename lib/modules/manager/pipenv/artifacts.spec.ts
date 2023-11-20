@@ -1,6 +1,7 @@
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
+import { Fixtures } from '../../../../test/fixtures';
 import {
   env,
   fs,
@@ -13,12 +14,14 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
+import { find as _find } from '../../../util/host-rules';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as pipenv from '.';
 
 const datasource = mocked(_datasource);
+const find = mockedFunction(_find);
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
@@ -327,5 +330,122 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('passes private credential environment vars', async () => {
+    fs.ensureCacheDir.mockResolvedValueOnce(
+      '/tmp/renovate/cache/others/pipenv',
+    );
+    fs.readLocalFile.mockResolvedValueOnce('current pipfile.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
+
+    find.mockReturnValueOnce({
+      username: 'usernameOne',
+      password: 'passwordTwo',
+    });
+
+    const pipfile = Fixtures.get('Pipfile6');
+
+    expect(
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: pipfile,
+        config: { ...config, constraints: { python: '== 3.8.*' } },
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New Pipfile.lock',
+          path: 'Pipfile.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PASSWORD: 'passwordTwo',
+            PATH: '/tmp/path',
+            PIPENV_CACHE_DIR: '/tmp/renovate/cache/others/pipenv',
+            USERNAME: 'usernameOne',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
+  });
+
+  it('does not pass private credential environment vars if variable names differ from allowed', async () => {
+    fs.ensureCacheDir.mockResolvedValueOnce(
+      '/tmp/renovate/cache/others/pipenv',
+    );
+    fs.readLocalFile.mockResolvedValueOnce('current pipfile.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
+
+    const pipfile = Fixtures.get('Pipfile7');
+
+    expect(
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: pipfile,
+        config: { ...config, constraints: { python: '== 3.8.*' } },
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New Pipfile.lock',
+          path: 'Pipfile.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+            PIPENV_CACHE_DIR: '/tmp/renovate/cache/others/pipenv',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 });
