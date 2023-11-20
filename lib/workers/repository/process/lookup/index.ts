@@ -266,9 +266,8 @@ export async function lookupUpdates(
         return res;
       }
       res.currentVersion = currentVersion!;
-
-      const currentVersionRelease = allVersions.find(
-        (v) => v.version === currentVersion,
+      const currentVersionRelease = allVersions.find((v) =>
+        versioning.equals(v.version, currentVersion),
       );
       res.currentVersionReleaseTimeStamp =
         currentVersionRelease?.releaseTimestamp ?? undefined;
