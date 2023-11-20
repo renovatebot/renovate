@@ -246,11 +246,12 @@ export class MavenDatasource extends Datasource {
         // Release was validated and cached with HEAD request during previous run
         const isValidatedHere = !is.undefined(cachedReleaseMap[version]);
 
-        // Select only valid releases not yet verified with HEAD request
+        // istanbul ignore if: not easily testable
         if (isValidatedAtPreviousSteps || isValidatedHere) {
           return null;
         }
 
+        // Select only valid releases not yet verified with HEAD request
         return version;
       },
     );
