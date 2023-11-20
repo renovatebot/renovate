@@ -34,6 +34,8 @@ import type { RegistryRepository } from './types';
 
 export const dockerDatasourceId = 'docker' as const;
 
+export const imageUrlLabel = 'org.opencontainers.image.url' as const;
+
 export const sourceLabel = 'org.opencontainers.image.source' as const;
 export const sourceLabels = [sourceLabel, 'org.label-schema.vcs-url'] as const;
 

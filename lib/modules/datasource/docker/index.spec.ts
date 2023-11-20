@@ -1976,6 +1976,8 @@ describe('modules/datasource/docker/index', () => {
                 'https://github.com/renovatebot/renovate',
               'org.opencontainers.image.revision':
                 'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
+              'org.opencontainers.image.url':
+                'https://www.mend.io/renovate/'
             },
           },
         });
@@ -2006,6 +2008,7 @@ describe('modules/datasource/docker/index', () => {
           },
         ],
         sourceUrl: 'https://github.com/renovatebot/renovate',
+        homepage: 'https://www.mend.io/renovate/',
         gitRef: 'ab7ddb5e3c5c3b402acd7c3679d4e415f8092dde',
       });
     });
