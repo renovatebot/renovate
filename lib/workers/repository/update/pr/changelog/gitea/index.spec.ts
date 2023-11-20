@@ -466,6 +466,18 @@ describe('workers/repository/update/pr/changelog/gitea/index', () => {
         .get('/api/v1/repos/some/repo/contents/charts/some')
         .reply(200, [
           {
+            name: 'CHANGELOG',
+            path: 'charts/some/CHANGELOG',
+            type: 'file',
+            content: null,
+          },
+          {
+            name: 'CHANGELOG.json',
+            path: 'charts/some/CHANGELOG.json',
+            type: 'file',
+            content: null,
+          },
+          {
             name: 'CHANGELOG.md',
             path: 'charts/some/CHANGELOG.md',
             type: 'file',
