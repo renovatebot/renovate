@@ -2739,6 +2739,7 @@ const options: RenovateOptions[] = [
     description:
       'Maximum number of seconds to wait before retrying a failed request.',
     type: 'integer',
+    default: 60,
     stage: 'package',
     parent: 'hostRules',
     cli: false,
