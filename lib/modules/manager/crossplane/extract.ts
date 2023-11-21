@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { getDep } from '../dockerfile/extract';
@@ -8,7 +7,6 @@ import type {
   PackageFileContent,
 } from '../types';
 import { XPKGSchema } from './schema';
-import type { XPKG } from './schema';
 
 export function extractPackageFile(
   content: string,
@@ -26,38 +24,26 @@ export function extractPackageFile(
     return null;
   }
 
-  const xpkgs: XPKG[] = [];
+  const deps: PackageDependency[] = [];
   for (const item of list) {
     const parsed = XPKGSchema.safeParse(item);
     if (!parsed.success) {
+      logger.trace(
+        { item, errors: parsed.error },
+        'Invalid Crossplane package',
+      );
       continue;
     }
-    xpkgs.push(parsed.data);
-  }
+    const xpkg = parsed.data;
+    const source = xpkg.spec.package;
+    if (!source) {
+      continue;
+    }
 
-  const deps = xpkgs
-    .filter(is.plainObject)
-    .flatMap((xpkg) =>
-      processPackageSpec(xpkg, extractConfig?.registryAliases),
-    );
+    const dep = getDep(source, true, extractConfig?.registryAliases);
+    dep.depType = xpkg.kind.toLowerCase();
+    deps.push(dep);
+  }
 
   return deps.length ? { deps } : null;
-}
-
-function processPackageSpec(
-  xpkg: XPKG,
-  registryAliases?: Record<string, string>,
-): PackageDependency[] {
-  const source = xpkg.spec?.package;
-  if (!source) {
-    return [];
-  }
-
-  const deps: (PackageDependency | null)[] = [];
-
-  const dep = getDep(source, true, registryAliases);
-  dep.depType = 'docker';
-  deps.push(dep);
-
-  return deps.filter(is.truthy);
 }
