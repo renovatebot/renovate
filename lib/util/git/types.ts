@@ -9,7 +9,9 @@ export interface GitAuthor {
 
 export type GitNoVerifyOption = 'commit' | 'push';
 
-// We want to make sure it's a long sha of 40 characters and not just a string
+/**
+ * We want to make sure this is a long sha of 40 characters and not just any string
+ */
 export type LongCommitSha = string & { __longCommitSha: never };
 
 export interface StorageConfig {
