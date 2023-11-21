@@ -265,17 +265,27 @@ export async function lookupUpdates(
       if (!currentVersion! && config.lockedVersion) {
         return res;
       }
+
       res.currentVersion = currentVersion!;
       const currentVersionRelease = allVersions.find((v) =>
         versioning.equals(v.version, currentVersion),
       );
-      res.currentVersionReleaseTimeStamp =
-        currentVersionRelease?.releaseTimestamp ?? undefined;
-      // Reapply package rules to check matches for matchCurrentAge
-      config = applyPackageRules({
-        ...config,
-        currentVersionReleaseTimeStamp: res.currentVersionReleaseTimeStamp,
-      });
+
+      if (
+        is.nonEmptyString(currentVersionRelease?.releaseTimestamp) &&
+        config.packageRules?.some((rules) =>
+          is.nonEmptyString(rules.matchCurrentAge),
+        )
+      ) {
+        res.currentVersionReleaseTimeStamp =
+          currentVersionRelease?.releaseTimestamp;
+        // Reapply package rules to check matches for matchCurrentAge
+        config = applyPackageRules({
+          ...config,
+          currentVersionReleaseTimeStamp: res.currentVersionReleaseTimeStamp,
+        });
+      }
+
       if (
         compareValue &&
         currentVersion &&
