@@ -333,11 +333,6 @@ describe('config/presets/index', () => {
     });
 
     it('gets preset value from cache when it has been seen', async () => {
-      GlobalConfig.set({
-        cacheTtlOverride: {
-          preset: 60,
-        },
-      });
       config.extends = ['github>username/preset-repo'];
       config.packageRules = [
         {
@@ -370,6 +365,49 @@ describe('config/presets/index', () => {
           },
         ],
       });
+    });
+
+    it('use packageCache when presetCache is set', async () => {
+      GlobalConfig.set({
+        presetCache: true,
+        cacheTtlOverride: {
+          preset: 60,
+        },
+      });
+
+      config.extends = ['github>username/preset-repo'];
+      config.packageRules = [
+        {
+          matchManagers: ['github-actions'],
+          groupName: 'github-actions dependencies',
+        },
+      ];
+      gitHub.getPreset.mockResolvedValueOnce({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+        ],
+      });
+
+      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+          {
+            matchManagers: ['github-actions'],
+            groupName: 'github-actions dependencies',
+          },
+        ],
+      });
+
       expect(packageCache.set.mock.calls[0][3]).toBe(60);
     });
   });

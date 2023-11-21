@@ -24,6 +24,7 @@ export class GlobalConfig {
     'githubTokenWarn',
     'localDir',
     'migratePresets',
+    'presetCache',
     'privateKey',
     'privateKeyOld',
     'gitTimeout',

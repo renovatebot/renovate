@@ -201,6 +201,13 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'presetCache',
+    description: 'Define whether to turn on cache for preset',
+    type: 'boolean',
+    globalOnly: true,
+    default: false,
+  },
+  {
     name: 'globalExtends',
     description:
       'Configuration presets to use or extend for a self-hosted config.',

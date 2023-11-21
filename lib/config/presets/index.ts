@@ -5,10 +5,12 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { getTtlOverride } from '../../util/cache/package/decorator';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
+import { GlobalConfig } from '../global';
 import * as massage from '../massage';
 import * as migration from '../migration';
 import type { AllConfig, RenovateConfig } from '../types';
@@ -225,10 +227,16 @@ export async function getPreset(
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
   const cacheKey = `preset:${preset}`;
-  let presetConfig = await packageCache.get<Preset | null | undefined>(
-    presetCacheNamespace,
-    cacheKey,
-  );
+  const presetCache = GlobalConfig.get('presetCache', false);
+
+  let presetConfig: Preset | null | undefined;
+
+  if (presetCache) {
+    presetConfig = await packageCache.get(presetCacheNamespace, cacheKey);
+  } else {
+    presetConfig = memCache.get(cacheKey);
+  }
+
   if (is.nullOrUndefined(presetConfig)) {
     presetConfig = await presetSources[presetSource].getPreset({
       repo,
@@ -236,12 +244,16 @@ export async function getPreset(
       presetName,
       tag,
     });
-    await packageCache.set(
-      presetCacheNamespace,
-      cacheKey,
-      presetConfig,
-      getTtlOverride(presetCacheNamespace) ?? 15,
-    );
+    if (presetCache) {
+      await packageCache.set(
+        presetCacheNamespace,
+        cacheKey,
+        presetConfig,
+        getTtlOverride(presetCacheNamespace) ?? 15,
+      );
+    } else {
+      memCache.set(cacheKey, presetConfig);
+    }
   }
   if (!presetConfig) {
     throw new Error(PRESET_DEP_NOT_FOUND);
