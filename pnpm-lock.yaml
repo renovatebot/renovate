@@ -45,8 +45,8 @@ importers:
         specifier: 0.43.0
         version: 0.43.0(@opentelemetry/api@1.6.0)
       '@opentelemetry/instrumentation-bunyan':
-        specifier: 0.32.2
-        version: 0.32.2(@opentelemetry/api@1.6.0)
+        specifier: 0.33.0
+        version: 0.33.0(@opentelemetry/api@1.6.0)
       '@opentelemetry/instrumentation-http':
         specifier: 0.43.0
         version: 0.43.0(@opentelemetry/api@1.6.0)
@@ -2528,14 +2528,14 @@ packages:
       '@opentelemetry/sdk-trace-base': 1.17.0(@opentelemetry/api@1.6.0)
     dev: false
 
-  /@opentelemetry/instrumentation-bunyan@0.32.2(@opentelemetry/api@1.6.0):
-    resolution: {integrity: sha512-/sLChixYxFas7c5SbLLGUq2yKmU8c58IPlYNNqRSiT0epouqeBjxNUwQeizXl6Ba5+T/Yq7cwCVjh72CRb3tlA==}
+  /@opentelemetry/instrumentation-bunyan@0.33.0(@opentelemetry/api@1.6.0):
+    resolution: {integrity: sha512-i3xfmhajtOEuFO+9yMU/wJiH0tY4VtIlbJKGIKVHFOsoNqPQpG7iUQP01p0FRoje+UB+ZUvs4hU7fCZzwtnC1g==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
     dependencies:
       '@opentelemetry/api': 1.6.0
-      '@opentelemetry/instrumentation': 0.44.0(@opentelemetry/api@1.6.0)
+      '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.6.0)
       '@types/bunyan': 1.8.9
     transitivePeerDependencies:
       - supports-color
@@ -2572,8 +2572,8 @@ packages:
       - supports-color
     dev: false
 
-  /@opentelemetry/instrumentation@0.44.0(@opentelemetry/api@1.6.0):
-    resolution: {integrity: sha512-B6OxJTRRCceAhhnPDBshyQO7K07/ltX3quOLu0icEvPK9QZ7r9P1y0RQX8O5DxB4vTv4URRkxkg+aFU/plNtQw==}
+  /@opentelemetry/instrumentation@0.45.1(@opentelemetry/api@1.6.0):
+    resolution: {integrity: sha512-V1Cr0g8hSg35lpW3G/GYVZurrhHrQZJdmP68WyJ83f1FDn3iru+/Vnlto9kiOSm7PHhW+pZGdb9Fbv+mkQ31CA==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
