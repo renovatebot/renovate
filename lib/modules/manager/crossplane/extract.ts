@@ -7,28 +7,16 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type {
-  PackageDefinition,
-  PackageSpec,
-} from './types';
-import { fileTestRegex } from './util';
+import type { XPKG } from './schema';
 
 export function extractPackageFile(
   content: string,
   packageFile: string,
   extractConfig?: ExtractConfig,
 ): PackageFileContent | null {
-  // check for crossplane reference. API version for the kind attribute is used
-  if (fileTestRegex.test(content) === false) {
-    logger.debug(
-      `Skip file ${packageFile} as no pkg.crossplane.io apiVersion could be found in matched file`,
-    );
-    return null;
-  }
-
-  let definitions: PackageDefinition[];
+  let definitions: XPKG[];
   try {
-    definitions = loadAll(content) as PackageDefinition[];
+    definitions = loadAll(content) as XPKG[];
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Crossplane definition.');
     return null;
@@ -40,18 +28,18 @@ export function extractPackageFile(
 }
 
 function processPackageSpec(
-  definition: PackageDefinition,
+  xpkg: XPKG,
   registryAliases?: Record<string, string>,
 ): PackageDependency[] {
-  const spec: PackageSpec | null | undefined = definition?.spec
 
-  if (is.nullOrUndefined(spec)) {
+  const source = xpkg.spec?.package;
+  if (!source) {
     return [];
   }
 
   const deps: (PackageDependency | null)[] = [];
 
-  const dep = getDep(spec.package, true, registryAliases);
+  const dep = getDep(source, true, registryAliases);
   dep.depType = 'docker';
   deps.push(dep);
 

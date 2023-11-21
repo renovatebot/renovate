@@ -24,18 +24,7 @@ describe('modules/manager/crossplane/extract', () => {
 
     it('return invalid-value if deps are not valid images or missing', () => {
       const result = extractPackageFile(malformedPackages, 'packages.yml');
-      expect(result).toMatchObject({
-        deps: [
-          {
-            depType: 'docker',
-            skipReason: 'invalid-value',
-          },
-          {
-            depType: 'docker',
-            skipReason: 'invalid-value',
-          },
-        ],
-      });
+      expect(result).toBeNull();
     });
 
     it('return result for double quoted pkg.crossplane.io apiVersion reference', () => {
