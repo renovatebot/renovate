@@ -34,13 +34,12 @@ export async function wrapWithRetry<T>(
       }
 
       if (retries === maxRetries) {
-        logger.debug({ url }, 'Retry-After: giving up');
+        logger.debug(`Retry-After: reached maximum retries (${maxRetries}) for ${url}`);
         throw err;
       }
 
       logger.debug(
-        { url, delaySeconds },
-        `Retry-After: will retry after ${delaySeconds} seconds`,
+        `Retry-After: will retry ${url} after ${delaySeconds} seconds`,
       );
 
       const delay = 1000 * Math.max(0, Math.min(delaySeconds, maxRetryAfter));

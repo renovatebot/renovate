@@ -2737,7 +2737,7 @@ const options: RenovateOptions[] = [
   {
     name: 'maxRetryAfter',
     description:
-      'Maximum number of seconds to wait before retrying a failed request.',
+      'Maximum retry-after header value to wait for before retrying a failed request.',
     type: 'integer',
     default: 60,
     stage: 'package',
