@@ -656,6 +656,10 @@ CI jobs are usually triggered by these events: pull-request creation, pull-reque
 Set as an integer.
 Default is no limit.
 
+## presetCache
+
+This option is to turn on caching for loading presets. By turning it on, loaded presets will be cached in `preset` namespace in package cache. TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachettloverride).
+
 ## privateKey
 
 This private key is used to decrypt config files.
