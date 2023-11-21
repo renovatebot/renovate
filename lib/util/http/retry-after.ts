@@ -34,7 +34,16 @@ export async function wrapWithRetry<T>(
       }
 
       if (retries === maxRetries) {
-        logger.debug(`Retry-After: reached maximum retries (${maxRetries}) for ${url}`);
+        logger.debug(
+          `Retry-After: reached maximum retries (${maxRetries}) for ${url}`,
+        );
+        throw err;
+      }
+
+      if (delaySeconds > maxRetryAfter) {
+        logger.debug(
+          `Retry-After: delay ${delaySeconds} seconds exceeds maxRetryAfter ${maxRetryAfter} seconds for ${url}`,
+        );
         throw err;
       }
 
@@ -42,8 +51,7 @@ export async function wrapWithRetry<T>(
         `Retry-After: will retry ${url} after ${delaySeconds} seconds`,
       );
 
-      const delay = 1000 * Math.max(0, Math.min(delaySeconds, maxRetryAfter));
-      hostBlocks.set(key, setTimeout(delay));
+      hostBlocks.set(key, setTimeout(delaySeconds));
       retries += 1;
     }
   }

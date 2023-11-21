@@ -37,11 +37,11 @@ describe('util/http/retry-after', () => {
     });
 
     it('throws', async () => {
-      const task = jest.fn(() => Promise.reject(new Error('foo')));
+      const task = jest.fn(() => Promise.reject(new Error('error')));
 
       await expect(
         wrapWithRetry('http://example.com', task, () => null),
-      ).rejects.toThrow('foo');
+      ).rejects.toThrow('error');
 
       expect(task).toHaveBeenCalledTimes(1);
     });
@@ -49,8 +49,8 @@ describe('util/http/retry-after', () => {
     it('retries', async () => {
       const task = jest
         .fn()
-        .mockRejectedValueOnce(new Error('foo'))
-        .mockRejectedValueOnce(new Error('bar'))
+        .mockRejectedValueOnce(new Error('error-1'))
+        .mockRejectedValueOnce(new Error('error-2'))
         .mockResolvedValueOnce(42);
 
       const p = wrapWithRetry('http://example.com', task, () => 1);
@@ -64,18 +64,29 @@ describe('util/http/retry-after', () => {
     it('gives up after max retries', async () => {
       const task = jest
         .fn()
-        .mockRejectedValueOnce('foo')
-        .mockRejectedValueOnce('bar')
-        .mockRejectedValueOnce('baz')
-        .mockRejectedValue('qux');
+        .mockRejectedValueOnce('error-1')
+        .mockRejectedValueOnce('error-2')
+        .mockRejectedValueOnce('error-3')
+        .mockRejectedValue('error-4');
 
       const p = wrapWithRetry('http://example.com', task, () => 1).catch(
         (err) => err,
       );
       await jest.advanceTimersByTimeAsync(2000);
 
-      await expect(p).resolves.toBe('baz');
+      await expect(p).resolves.toBe('error-3');
       expect(task).toHaveBeenCalledTimes(3);
+    });
+
+    it('gives up when delay exceeds maxRetryAfter', async () => {
+      const task = jest.fn().mockRejectedValue('error');
+
+      const p = wrapWithRetry('http://example.com', task, () => 61).catch(
+        (err) => err,
+      );
+
+      await expect(p).resolves.toBe('error');
+      expect(task).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -89,7 +100,7 @@ describe('util/http/retry-after', () => {
     });
 
     it('returns null for status other than 429', () => {
-      const err = new RequestError('foo', {}, null as never);
+      const err = new RequestError('request-error', {}, null as never);
       (err as any).response = { statusCode: 302 };
       expect(
         extractRetryAfterHeaderSeconds(requestError({ statusCode: 302 })),
