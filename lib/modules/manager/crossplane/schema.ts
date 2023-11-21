@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const XPKG = z.object({
+export const XPKGSchema = z.object({
   apiVersion: z.string().regex(/^pkg.crossplane.io\//),
   kind: z.enum(['Provider', 'Configuration', 'Function']),
   spec: z.object({
@@ -8,4 +8,4 @@ const XPKG = z.object({
   }),
 });
 
-export type XPKG = z.infer<typeof XPKG>;
+export type XPKG = z.infer<typeof XPKGSchema>;

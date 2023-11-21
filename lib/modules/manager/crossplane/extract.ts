@@ -7,6 +7,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
+import { XPKGSchema } from './schema';
 import type { XPKG } from './schema';
 
 export function extractPackageFile(
@@ -14,21 +15,30 @@ export function extractPackageFile(
   packageFile: string,
   extractConfig?: ExtractConfig,
 ): PackageFileContent | null {
-  let definitions: XPKG[];
+  let list = [];
   try {
-    definitions = loadAll(content) as XPKG[];
+    list = loadAll(content);
   } catch (err) {
     logger.debug(
       { err, packageFile },
-      'Failed to parse Crossplane definition.',
+      'Failed to parse Crossplane package file.',
     );
     return null;
   }
 
-  const deps = definitions
+  const xpkgs: XPKG[] = [];
+  for (const item of list) {
+    const parsed = XPKGSchema.safeParse(item);
+    if (!parsed.success) {
+      continue;
+    }
+    xpkgs.push(parsed.data);
+  }
+
+  const deps = xpkgs
     .filter(is.plainObject)
-    .flatMap((definition) =>
-      processPackageSpec(definition, extractConfig?.registryAliases),
+    .flatMap((xpkg) =>
+      processPackageSpec(xpkg, extractConfig?.registryAliases),
     );
 
   return deps.length ? { deps } : null;

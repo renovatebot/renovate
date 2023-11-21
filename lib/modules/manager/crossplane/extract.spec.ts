@@ -1,9 +1,11 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
 const validPackages = Fixtures.get('validPackages.yml');
 const malformedPackages = Fixtures.get('malformedPackages.yml');
 const randomManifest = Fixtures.get('randomManifest.yml');
+const mixedManifest = Fixtures.get('mixedManifest.yml');
 
 describe('modules/manager/crossplane/extract', () => {
   describe('extractPackageFile()', () => {
@@ -29,11 +31,11 @@ describe('modules/manager/crossplane/extract', () => {
 
     it('return result for double quoted pkg.crossplane.io apiVersion reference', () => {
       const result = extractPackageFile(
-        `
-apiVersion: "pkg.crossplane.io/v1"
-kind: Configuration
-spec:
-  package: "xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0"
+        codeBlock`
+        apiVersion: "pkg.crossplane.io/v1"
+        kind: Configuration
+        spec:
+          package: "xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0"
         `,
         'packages.yml',
       );
@@ -50,11 +52,11 @@ spec:
 
     it('return result for single quoted pkg.crossplane.io apiVersion reference', () => {
       const result = extractPackageFile(
-        `
-apiVersion: 'pkg.crossplane.io/v1'
-kind: Configuration
-spec:
-  package: 'xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0'
+        codeBlock`
+        apiVersion: 'pkg.crossplane.io/v1'
+        kind: Configuration
+        spec:
+          package: 'xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0'
         `,
         'packages.yml',
       );
@@ -104,6 +106,25 @@ spec:
             depName: 'xpkg.upbound.io/upbound/platform-ref-aws',
             depType: 'docker',
             replaceString: 'xpkg.upbound.io/upbound/platform-ref-aws:v0.6.0',
+          },
+        ],
+      });
+    });
+
+    it('should work even if there are other resources in the file', () => {
+      const result = extractPackageFile(mixedManifest, 'packages.yml');
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v0.2.0',
+            datasource: 'docker',
+            depName: 'xpkg.upbound.io/crossplane-contrib/provider-nop',
+            depType: 'docker',
+            replaceString:
+              'xpkg.upbound.io/crossplane-contrib/provider-nop:v0.2.0',
           },
         ],
       });
