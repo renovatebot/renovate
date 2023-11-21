@@ -4,6 +4,7 @@ import { logger } from '../../../../../../logger';
 import { PagedSourceResultsSchema } from '../../../../../../modules/platform/bitbucket/schema';
 import { BitbucketHttp } from '../../../../../../util/http/bitbucket';
 import { joinUrlParts } from '../../../../../../util/url';
+import { compareChangelogFilePath } from '../common';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
@@ -42,7 +43,9 @@ export async function getReleaseNotesMd(
 
   const files = allFiles.filter((f) => changelogFilenameRegex.test(f.path));
 
-  const changelogFile = files.shift();
+  const changelogFile = files
+    .sort((a, b) => compareChangelogFilePath(a.path, b.path))
+    .shift();
   if (is.nullOrUndefined(changelogFile)) {
     logger.trace('no changelog file found');
     return null;

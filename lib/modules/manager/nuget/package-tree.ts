@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import { Graph } from 'graph-data-structure';
-import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
+import { minimatchFilter } from '../../../util/minimatch';
 import { scm } from '../../platform/scm';
 import type { ProjectFile } from './types';
 import { readFileAsXmlDocument } from './util';
@@ -131,7 +131,7 @@ function reframeRelativePathToRootOfRepo(
 async function getAllPackageFiles(): Promise<string[]> {
   const allFiles = await scm.getFileList();
   const filteredPackageFiles = allFiles.filter(
-    minimatch.filter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true }),
+    minimatchFilter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true }),
   );
 
   logger.trace({ filteredPackageFiles }, 'Found package files');
