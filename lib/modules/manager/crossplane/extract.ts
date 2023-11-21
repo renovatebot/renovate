@@ -18,11 +18,18 @@ export function extractPackageFile(
   try {
     definitions = loadAll(content) as XPKG[];
   } catch (err) {
-    logger.debug({ err, packageFile }, 'Failed to parse Crossplane definition.');
+    logger.debug(
+      { err, packageFile },
+      'Failed to parse Crossplane definition.',
+    );
     return null;
   }
 
-  const deps = definitions.filter(is.plainObject).flatMap((definition) => processPackageSpec(definition, extractConfig?.registryAliases));
+  const deps = definitions
+    .filter(is.plainObject)
+    .flatMap((definition) =>
+      processPackageSpec(definition, extractConfig?.registryAliases),
+    );
 
   return deps.length ? { deps } : null;
 }
@@ -31,7 +38,6 @@ function processPackageSpec(
   xpkg: XPKG,
   registryAliases?: Record<string, string>,
 ): PackageDependency[] {
-
   const source = xpkg.spec?.package;
   if (!source) {
     return [];

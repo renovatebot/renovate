@@ -12,6 +12,4 @@ export const defaultConfig = {
 
 export const categories: Category[] = ['kubernetes', 'iac'];
 
-export const supportedDatasources = [
-  DockerDatasource.id,
-];
+export const supportedDatasources = [DockerDatasource.id];
