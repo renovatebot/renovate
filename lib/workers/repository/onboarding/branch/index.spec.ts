@@ -23,6 +23,7 @@ import type { FileAddition } from '../../../../util/git/types';
 import { OnboardingState } from '../common';
 import * as _config from './config';
 import * as _onboardingCache from './onboarding-branch-cache';
+import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
 
 const configModule: any = _config;
@@ -31,9 +32,11 @@ jest.mock('../../../../util/cache/repository');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 jest.mock('./config');
+jest.mock('./rebase');
 jest.mock('./onboarding-branch-cache');
 
 const cache = mocked(_cache);
+const rebase = mocked(_rebase);
 const onboardingCache = mocked(_onboardingCache);
 
 describe('workers/repository/onboarding/branch/index', () => {
@@ -251,15 +254,38 @@ describe('workers/repository/onboarding/branch/index', () => {
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
 
-    it('processes onboarding branch', async () => {
+    it('rebases onboarding branch', async () => {
+      const dummyCache = {
+        scan: {
+          master: {
+            sha: 'base_sha',
+            configHash: 'hash',
+            packageFiles: {},
+            extractionFingerprints: {},
+          },
+        },
+      } satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
       scm.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('new-onboarding-sha');
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(scm.mergeToLocal).toHaveBeenCalledOnce();
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(logger.debug).not.toHaveBeenCalledWith(
+        'Skip processing since the onboarding branch is up to date and default branch has not changed',
+      ); // onboarding cache no longer valid
+      expect(logger.info).toHaveBeenCalledWith(
+        {
+          branch: config.onboardingBranch,
+          commit: 'new-onboarding-sha',
+          onboarding: true,
+        },
+        'Branch updated',
+      );
     });
 
     it('skips processing onboarding branch when main/onboarding SHAs have not changed', async () => {
@@ -286,6 +312,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         .mockReturnValueOnce('onboarding-sha');
       config.onboardingRebaseCheckbox = true;
       await checkOnboardingBranch(config);
+      expect(scm.commitAndPush).not.toHaveBeenCalled();
       expect(scm.mergeToLocal).not.toHaveBeenCalled();
     });
 
@@ -293,7 +320,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       const dummyCache = {
         scan: {
           master: {
-            sha: 'base_sha',
+            sha: 'default-sha',
             configHash: 'hash',
             packageFiles: {},
             extractionFingerprints: {},
@@ -306,10 +333,10 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getBranchCommit
         .mockReturnValueOnce('default-sha')
         .mockReturnValueOnce('new-onboarding-sha');
+      config.baseBranch = 'master';
       onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
       onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
-      config.baseBranch = 'master';
       await checkOnboardingBranch(config);
       expect(scm.mergeToLocal).toHaveBeenCalledOnce();
       expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
@@ -368,6 +395,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         config.onboardingRebaseCheckbox = true;
         OnboardingState.prUpdateRequested = false;
         scm.getFileList.mockResolvedValueOnce(['package.json']);
+        onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
         platform.findPr.mockResolvedValueOnce(null);
       });
 
