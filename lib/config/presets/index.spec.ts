@@ -367,6 +367,47 @@ describe('config/presets/index', () => {
       });
     });
 
+    it('default packageCache TTL should be 15 minutes', async () => {
+      GlobalConfig.set({
+        presetCache: true,
+      });
+
+      config.extends = ['github>username/preset-repo'];
+      config.packageRules = [
+        {
+          matchManagers: ['github-actions'],
+          groupName: 'github-actions dependencies',
+        },
+      ];
+      gitHub.getPreset.mockResolvedValueOnce({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+        ],
+      });
+
+      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+          {
+            matchManagers: ['github-actions'],
+            groupName: 'github-actions dependencies',
+          },
+        ],
+      });
+
+      expect(packageCache.set.mock.calls[0][3]).toBe(15);
+    });
+
     it('use packageCache when presetCache is set', async () => {
       GlobalConfig.set({
         presetCache: true,
