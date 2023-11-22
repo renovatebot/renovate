@@ -2077,7 +2077,7 @@ describe('workers/repository/process/lookup/index', () => {
       });
 
       expect(
-        (await lookup.lookupUpdates(config)).currentVersionReleaseTimeStamp,
+        (await lookup.lookupUpdates(config)).currentVersionTimestamp,
       ).toBeUndefined();
     });
 
@@ -2108,7 +2108,7 @@ describe('workers/repository/process/lookup/index', () => {
       });
 
       expect(
-        (await lookup.lookupUpdates(config)).currentVersionReleaseTimeStamp,
+        (await lookup.lookupUpdates(config)).currentVersionTimestamp,
       ).toBeUndefined();
     });
 

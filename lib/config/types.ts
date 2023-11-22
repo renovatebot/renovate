@@ -486,7 +486,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
   releaseTimestamp?: string | null;
   repository?: string;
-  currentVersionReleaseTimeStamp?: string;
+  currentVersionTimestamp?: string;
 }
 
 export interface ConfigMigration {

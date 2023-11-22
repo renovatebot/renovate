@@ -65,5 +65,5 @@ export interface UpdateResult {
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
   versioning?: string;
-  currentVersionReleaseTimeStamp?: string;
+  currentVersionTimestamp?: string;
 }

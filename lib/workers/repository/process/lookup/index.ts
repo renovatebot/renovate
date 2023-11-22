@@ -273,12 +273,11 @@ export async function lookupUpdates(
           is.nonEmptyString(rules.matchCurrentAge),
         )
       ) {
-        res.currentVersionReleaseTimeStamp =
-          currentVersionRelease?.releaseTimestamp;
+        res.currentVersionTimestamp = currentVersionRelease?.releaseTimestamp;
         // Reapply package rules to check matches for matchCurrentAge
         config = applyPackageRules({
           ...config,
-          currentVersionReleaseTimeStamp: res.currentVersionReleaseTimeStamp,
+          currentVersionTimestamp: res.currentVersionTimestamp,
         });
       }
 

@@ -5,17 +5,17 @@ import { Matcher } from './base';
 
 export class CurrentAgeMatcher extends Matcher {
   override matches(
-    { currentVersionReleaseTimeStamp }: PackageRuleInputConfig,
+    { currentVersionTimestamp }: PackageRuleInputConfig,
     { matchCurrentAge }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchCurrentAge)) {
       return null;
     }
 
-    if (is.undefined(currentVersionReleaseTimeStamp)) {
+    if (is.undefined(currentVersionTimestamp)) {
       return false;
     }
 
-    return satisfiesDateRange(currentVersionReleaseTimeStamp, matchCurrentAge);
+    return satisfiesDateRange(currentVersionTimestamp, matchCurrentAge);
   }
 }
