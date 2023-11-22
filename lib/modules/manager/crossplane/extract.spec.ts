@@ -78,6 +78,22 @@ describe('modules/manager/crossplane/extract', () => {
       });
     });
 
+    it('return no results for invalid resource', () => {
+        const result = extractPackageFile(
+          codeBlock`
+        ---
+        apiVersion: pkg.crossplane.io/v1
+        kind: Configuration
+        metadata:
+          name: platform-ref-aws
+        spec:
+        `,
+          'packages.yml',
+        );
+        expect(result).toBeNull();
+      },
+    );
+
     it('full test', () => {
       const result = extractPackageFile(validPackages, 'packages.yml');
       expect(result).toEqual({
