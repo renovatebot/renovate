@@ -31,9 +31,9 @@ describe('modules/manager/crossplane/extract', () => {
           {
             depType: 'function',
             skipReason: 'invalid-value',
-          }
-        ]}
-      )
+          },
+        ],
+      });
     });
 
     it('return result for double quoted pkg.crossplane.io apiVersion reference', () => {
