@@ -658,7 +658,11 @@ Default is no limit.
 
 ## presetCache
 
-This option is to turn on caching for loading presets. By turning it on, loaded presets will be cached in `preset` namespace in package cache. TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachettloverride).
+When this feature is enabled, resolved presets will be cached in Renovate's package cache, enabling reuse across multiple repositories.
+Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
+You should only enable this when all repositories are trusted, such as a corporate environment.
+
+TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachettloverride).
 
 ## privateKey
 

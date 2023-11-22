@@ -202,7 +202,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'presetCache',
-    description: 'Define whether to turn on cache for preset',
+    description: 'Cache resolved presets in package cache.',
     type: 'boolean',
     globalOnly: true,
     default: false,
