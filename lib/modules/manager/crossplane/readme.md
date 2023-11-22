@@ -14,7 +14,7 @@ If you need to change the versioning format, read the [versioning](../../../modu
 
 Some configuration examples:
 
-```json title="fileMatch if most .yaml files are for Crossplane"
+```json title="If most .yaml files are for Crossplane"
 {
   "crossplane": {
     "fileMatch": ["\\.yaml$"]
@@ -22,7 +22,7 @@ Some configuration examples:
 }
 ```
 
-```json title="fileMatch for Crossplane files in a packages/ directory"
+```json title="For Crossplane files in a packages/ directory"
 {
   "crossplane": {
     "fileMatch": ["packages/.+\\.yaml$"]
@@ -30,7 +30,7 @@ Some configuration examples:
 }
 ```
 
-```json title="fileMatch for a single Crossplane file"
+```json title="For a single Crossplane file"
 {
   "crossplane": {
     "fileMatch": ["^config/provider\\.yaml$"]
