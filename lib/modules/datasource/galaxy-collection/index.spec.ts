@@ -179,5 +179,31 @@ describe('modules/datasource/galaxy-collection/index', () => {
         }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
+
+    it('processes real data with automation hub url', async () => {
+      httpMock
+        .scope('https://my.automationhub.local/api/galaxy/content/published/')
+        .get(`/${collectionAPIPath}/community/kubernetes/`)
+        .reply(200, communityKubernetesBase)
+        .get(`/${collectionAPIPath}/community/kubernetes/versions/`)
+        .reply(200, communityKubernetesVersions)
+        .get(`/${collectionAPIPath}/community/kubernetes/versions/1.2.1/`)
+        .reply(200, communityKubernetesDetails121)
+        .get(`/${collectionAPIPath}/community/kubernetes/versions/1.2.0/`)
+        .reply(200, communityKubernetesDetails120)
+        .get(`/${collectionAPIPath}/community/kubernetes/versions/0.11.1/`)
+        .reply(200, communityKubernetesDetails0111);
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'community.kubernetes',
+        registryUrls: [
+          'https://my.automationhub.local/api/galaxy/content/published/',
+        ],
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(res?.releases).toHaveLength(3);
+    });
   });
 });
