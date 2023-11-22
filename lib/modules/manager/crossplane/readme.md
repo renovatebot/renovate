@@ -32,3 +32,11 @@ Or if it's only a single file then something like this:
 ```
 
 If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.
+
+## Dependency Types
+
+The `crossplane` manager has three `depType`s to allow a fine-grained control of which dependencies are upgraded:
+
+- `configuration`
+- `function`
+- `provider`
