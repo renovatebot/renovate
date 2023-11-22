@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { minimatch } from 'minimatch';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
+import { minimatchFilter } from '../../util/minimatch';
 import { configRegexPredicate, isConfigRegex } from '../../util/regex';
 
 // istanbul ignore next
@@ -107,7 +107,7 @@ export function applyFilters(repos: string[], filters: string[]): string[] {
       }
       res = repos.filter(autodiscoveryPred);
     } else {
-      res = repos.filter(minimatch.filter(filter, { dot: true, nocase: true }));
+      res = repos.filter(minimatchFilter(filter, { dot: true, nocase: true }));
     }
     for (const repository of res) {
       matched.add(repository);

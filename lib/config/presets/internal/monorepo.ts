@@ -46,6 +46,8 @@ const repoGroups = {
     'https://github.com/awslabs/aws-lambda-powertools-typescript',
     'https://github.com/aws-powertools/powertools-lambda-typescript',
   ],
+  'aws-sdk-go': 'https://github.com/aws/aws-sdk-go',
+  'aws-sdk-go-v2': 'https://github.com/aws/aws-sdk-go-v2',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   'aws-sdk-rust': [
@@ -313,6 +315,7 @@ const repoGroups = {
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
   lerna: 'https://github.com/lerna/lerna',
+  lexical: 'https://github.com/facebook/lexical',
   linguijs: 'https://github.com/lingui/js-lingui',
   loopback: [
     'https://github.com/strongloop/loopback-next', // old repo (see: https://github.com/loopbackio/loopback-next/issues/7595)
