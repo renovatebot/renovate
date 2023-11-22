@@ -263,22 +263,19 @@ export async function lookupUpdates(
       }
 
       res.currentVersion = currentVersion!;
-      const currentVersionRelease = allVersions.find((v) =>
+      const currentVersionTimestamp = allVersions.find((v) =>
         versioning.equals(v.version, currentVersion),
-      );
+      )?.releaseTimestamp;
 
       if (
-        is.nonEmptyString(currentVersionRelease?.releaseTimestamp) &&
+        is.nonEmptyString(currentVersionTimestamp) &&
         config.packageRules?.some((rules) =>
           is.nonEmptyString(rules.matchCurrentAge),
         )
       ) {
-        res.currentVersionTimestamp = currentVersionRelease?.releaseTimestamp;
+        res.currentVersionTimestamp = currentVersionTimestamp;
         // Reapply package rules to check matches for matchCurrentAge
-        config = applyPackageRules({
-          ...config,
-          currentVersionTimestamp: res.currentVersionTimestamp,
-        });
+        config = applyPackageRules({ ...config, currentVersionTimestamp });
       }
 
       if (
