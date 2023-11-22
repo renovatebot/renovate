@@ -118,6 +118,39 @@ When Renovate receives this response with the `plain` format, it will convert it
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
 
+### Yaml
+
+If `yaml` is used, response is parsed and converted into JSON for further processing.
+
+Suppose the body of the HTTP response is as follows:
+
+```yaml
+releases:
+  - version: 1.0.0
+  - version: 2.0.0
+  - version: 3.0.0
+```
+
+When Renovate receives this response with the `yaml` format, it will convert it into the following:
+
+```json
+{
+  "releases": [
+    {
+      "version": "1.0.0"
+    },
+    {
+      "version": "2.0.0"
+    },
+    {
+      "version": "3.0.0"
+    }
+  ]
+}
+```
+
+After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
+
 ## Examples
 
 ### K3s

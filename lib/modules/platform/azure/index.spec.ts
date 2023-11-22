@@ -73,6 +73,14 @@ describe('modules/platform/azure/index', () => {
               project: {
                 name: 'prj1',
               },
+              isDisabled: false,
+            },
+            {
+              name: 'repoDisabled',
+              project: {
+                name: 'prj1',
+              },
+              isDisabled: true,
             },
           ]),
         }) as any,

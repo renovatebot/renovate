@@ -26,7 +26,7 @@ function getTitle(manager: string, displayName: string): string {
 }
 
 function getManagerLink(manager: string): string {
-  return getModuleLink(manager, `[\`${manager}\``);
+  return getModuleLink(manager, `\`${manager}\``);
 }
 
 export const CategoryNames: Record<Category, string> = {

@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { fetch as plainFetch } from './formats/plain';
+import { fetch as yamlFetch } from './formats/yaml';
 import { ReleaseResultZodSchema } from './schema';
 import { getCustomConfig } from './utils';
 
@@ -30,6 +31,9 @@ export class CustomDatasource extends Datasource {
       switch (format) {
         case 'plain':
           response = await plainFetch(this.http, defaultRegistryUrlTemplate);
+          break;
+        case 'yaml':
+          response = await yamlFetch(this.http, defaultRegistryUrlTemplate);
           break;
         case 'json':
           response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;

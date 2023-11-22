@@ -30,7 +30,7 @@ import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
 import type {
   CommitFilesConfig,
   CommitResult,
-  CommitSha,
+  LongCommitSha,
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
@@ -828,7 +828,10 @@ export async function findPr({
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
-async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
+async function ensureBranchSha(
+  branchName: string,
+  sha: LongCommitSha,
+): Promise<void> {
   const repository = config.repository!;
   try {
     const commitUrl = `/repos/${repository}/git/commits/${sha}`;
@@ -1896,7 +1899,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
 async function pushFiles(
   { branchName, message }: CommitFilesConfig,
   { parentCommitSha, commitSha }: CommitResult,
-): Promise<CommitSha | null> {
+): Promise<LongCommitSha | null> {
   try {
     // Push the commit to GitHub using a custom ref
     // The associated blobs will be pushed automatically
@@ -1918,7 +1921,7 @@ async function pushFiles(
       `/repos/${config.repository}/git/commits`,
       { body: { message, tree: treeSha, parents: [parentCommitSha] } },
     );
-    const remoteCommitSha = commitRes.body.sha;
+    const remoteCommitSha = commitRes.body.sha as LongCommitSha;
     await ensureBranchSha(branchName, remoteCommitSha);
     return remoteCommitSha;
   } catch (err) {
@@ -1929,7 +1932,7 @@ async function pushFiles(
 
 export async function commitFiles(
   config: CommitFilesConfig,
-): Promise<CommitSha | null> {
+): Promise<LongCommitSha | null> {
   const commitResult = await git.prepareCommit(config); // Commit locally and don't push
   const { branchName, files } = config;
   if (!commitResult) {
