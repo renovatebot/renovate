@@ -24,9 +24,16 @@ describe('modules/manager/crossplane/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('return invalid-value if deps are not valid images or missing', () => {
+    it('return invalid-value if deps are not valid images and ignore if missing', () => {
       const result = extractPackageFile(malformedPackages, 'packages.yml');
-      expect(result).toBeNull();
+      expect(result).toMatchObject({
+        deps: [
+          {
+            depType: 'function',
+            skipReason: 'invalid-value',
+          }
+        ]}
+      )
     });
 
     it('return result for double quoted pkg.crossplane.io apiVersion reference', () => {

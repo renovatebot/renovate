@@ -13,6 +13,12 @@ export function extractPackageFile(
   packageFile: string,
   extractConfig?: ExtractConfig,
 ): PackageFileContent | null {
+  // avoid parsing the whole file if it doesn't contain any resource having any pkg.crossplane.io/v*
+  if (!/apiVersion:\s+["']?pkg\.crossplane\.io\/v.+["']?/.test(content)) {
+    logger.trace({ packageFile }, 'No Crossplane package found in file.');
+    return null;
+  }
+
   let list = [];
   try {
     list = loadAll(content);
@@ -35,12 +41,7 @@ export function extractPackageFile(
       continue;
     }
     const xpkg = parsed.data;
-    const source = xpkg.spec.package;
-    if (!source) {
-      continue;
-    }
-
-    const dep = getDep(source, true, extractConfig?.registryAliases);
+    const dep = getDep(xpkg.spec.package, true, extractConfig?.registryAliases);
     dep.depType = xpkg.kind.toLowerCase();
     deps.push(dep);
   }
