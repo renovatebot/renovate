@@ -6,7 +6,7 @@ If you need to change the versioning format, read the [versioning](../../../modu
 
 Some configuration examples:
 
-```json title="Most .yaml files in your repository are for Argo CD"
+```json title="If most .yaml files in your repository are for Argo CD"
 {
   "argocd": {
     "fileMatch": ["\\.yaml$"]
