@@ -8,11 +8,11 @@ export class CurrentAgeMatcher extends Matcher {
     { currentVersionTimestamp }: PackageRuleInputConfig,
     { matchCurrentAge }: PackageRule,
   ): boolean | null {
-    if (is.undefined(matchCurrentAge)) {
+    if (!is.string(matchCurrentAge)) {
       return null;
     }
 
-    if (is.undefined(currentVersionTimestamp)) {
+    if (!is.string(currentVersionTimestamp)) {
       return false;
     }
 
