@@ -1765,7 +1765,10 @@ Example config:
 
 ### maxRetryAfter
 
-By default, Renovate will retry after any `Retry-After` header value, up to a maximum of 60 seconds.
+A remote host may return a `4xx` response with a `Retry-After` header value, which indicates that Renovate has been rate-limited.
+Renovate may try to contact the host again after waiting a certain time, that's set by the host.
+By default, Renovate tries again after the `Retry-After` header value has passed, up to a maximum of 60 seconds.
+If the `Retry-After` value is more than 60 seconds, Renovate will abort the job instead of waiting.
 
 You can configure a different maximum value using `maxRetryAfter`:
 
