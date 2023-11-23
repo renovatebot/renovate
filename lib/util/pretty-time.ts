@@ -42,7 +42,7 @@ export function toMs(time: string): number | null {
   }
 }
 
-const rangeRegex = regEx(/^(?<operator>(>=|<=|<|>))\s*(?<age>.*)/);
+const rangeRegex = regEx(/^(?<operator>(>=|<=|<|>))\s*(?<age>.*)$/);
 
 export function satisfiesDateRange(
   date: string,
