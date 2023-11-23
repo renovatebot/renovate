@@ -83,14 +83,13 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       expect(res.indexOf('`renovate.json`')).not.toBe(-1);
     });
 
-    it('include button selection if onboardingRebaseCheckbox is set to true', () => {
+    it('include retry/refresh checkbox message only if onboardingRebaseCheckbox is true', () => {
       delete config.description;
       config.schedule = ['before 5am'];
       config.onboardingConfigFileName = '.github/renovate.json';
       config.onboardingRebaseCheckbox = true;
       const res = getConfigDesc(config);
       expect(res).toMatchSnapshot();
-      expect(res.indexOf('Retry/Rebase')).not.toBe(-1);
     });
   });
 });

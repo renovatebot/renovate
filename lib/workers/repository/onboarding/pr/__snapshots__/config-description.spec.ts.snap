@@ -63,7 +63,7 @@ Based on the default config's presets, Renovate will:
 "
 `;
 
-exports[`workers/repository/onboarding/pr/config-description getConfigDesc() include button selection if onboardingRebaseCheckbox is set to true 1`] = `
+exports[`workers/repository/onboarding/pr/config-description getConfigDesc() include retry/refresh checkbox only if onboardingRebaseCheckbox is true 1`] = `
 "
 ### Configuration Summary
 
