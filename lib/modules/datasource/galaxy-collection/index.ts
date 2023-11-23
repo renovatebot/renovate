@@ -46,7 +46,7 @@ export class GalaxyCollectionDatasource extends Datasource {
         registryUrl!,
         'v3/plugin/ansible/content/',
         repository,
-        'collections/index/',
+        'collections/index',
         namespace,
         projectName,
       ),
