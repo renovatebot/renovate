@@ -211,7 +211,7 @@ You must select at least one status check in the _Require status checks to pass 
 
 - `automerge=true`
 - `platformAutomerge=true`, Renovate defaults to `true`
-- You use use GitHub's _Require status checks to pass before merging_ branch protection rule
+- You use GitHub's _Require status checks to pass before merging_ branch protection rule
 
 If you don't select any status check, and you use platform automerge, then GitHub might automerge PRs with failing tests!
 

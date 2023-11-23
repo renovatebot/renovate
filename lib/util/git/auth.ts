@@ -82,9 +82,8 @@ export function getGitAuthenticatedEnvironmentVariables(
     ...environmentVariables,
   };
   for (const rule of authenticationRules) {
-    newEnvironmentVariables[
-      `GIT_CONFIG_KEY_${gitConfigCount}`
-    ] = `url.${rule.url}.insteadOf`;
+    newEnvironmentVariables[`GIT_CONFIG_KEY_${gitConfigCount}`] =
+      `url.${rule.url}.insteadOf`;
     newEnvironmentVariables[`GIT_CONFIG_VALUE_${gitConfigCount}`] =
       rule.insteadOf;
     gitConfigCount++;
