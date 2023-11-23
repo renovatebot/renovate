@@ -13,6 +13,7 @@ describe('modules/versioning/loose/index', () => {
   it.each`
     version                                        | expected
     ${'v1.4'}                                      | ${true}
+    ${'V0.5'}                                      | ${true}
     ${'3.5.0'}                                     | ${true}
     ${'4.2.21.Final'}                              | ${true}
     ${'0.6.5.1'}                                   | ${true}
