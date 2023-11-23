@@ -55,10 +55,10 @@ export function getConfigDesc(
     `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
   );
   desc += ` Add your custom config to \`${configFile}\` in this branch${
-	    config.onboardingRebaseCheckbox
-	      ? ' and select the Retry/Rebase checkbox below'
-	      : ''
-	  }. Renovate will update the Pull Request description the next time it runs.`;
+    config.onboardingRebaseCheckbox
+      ? ' and select the Retry/Rebase checkbox below'
+      : ''
+  }. Renovate will update the Pull Request description the next time it runs.`;
   desc += '\n\n---\n';
   return desc;
 }
