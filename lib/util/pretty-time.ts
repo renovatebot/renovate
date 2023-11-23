@@ -62,7 +62,7 @@ export function satisfiesDateRange(
 
   const dateMs = luxonDate.toMillis();
   const ageMs = toMs(age);
-  if (!is.number(ageMs) {
+  if (!is.number(ageMs)) {
     return null;
   }
 
