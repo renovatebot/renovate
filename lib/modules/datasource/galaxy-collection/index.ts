@@ -10,7 +10,7 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { GalaxyV3, GalaxyV3DetailedVersion, GalaxyV3Versions } from './schema';
 
 const repositoryRegex = regEx(
-  /^[\S]+\/api\/galaxy\/content\/(?<repository>[^/]+)/,
+  /^\S+\/api\/galaxy\/content\/(?<repository>[^/]+)/,
 );
 
 export class GalaxyCollectionDatasource extends Datasource {
