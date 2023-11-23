@@ -44,7 +44,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     const baseUrl = ensureTrailingSlash(
       joinUrlParts(
         registryUrl!,
-        'v3/plugin/ansible/content/',
+        'v3/plugin/ansible/content',
         repository,
         'collections/index',
         namespace,
