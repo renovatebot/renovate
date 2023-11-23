@@ -1,4 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
+import type { LongCommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { toBase64 } from '../../../util/string';
 import {
@@ -49,7 +50,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   const giteaApiHost = 'https://gitea.renovatebot.com/';
   const baseUrl = `${giteaApiHost}api/v1`;
 
-  const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
+  const mockCommitHash =
+    '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
 
   const mockUser: User = {
     id: 1,
