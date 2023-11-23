@@ -284,6 +284,8 @@ const repoGroups = {
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
+  'github-workflows-kt':
+    'https://github.com/typesafegithub/github-workflows-kt',
   'google-api-dotnet-client':
     'https://github.com/googleapis/google-api-dotnet-client',
   grafana: 'https://github.com/grafana/grafana',
