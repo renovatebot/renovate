@@ -38,8 +38,8 @@ export class GalaxyCollectionDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const [namespace, projectName] = packageName.split('.');
 
-    const matchGroups = repositoryRegex.exec(registryUrl!)?.groups;
-    const repository = matchGroups ? matchGroups.repository : 'published';
+    const repository =
+      repositoryRegex.exec(registryUrl!)?.groups?.repository ?? 'published';
 
     const baseUrl = ensureTrailingSlash(
       joinUrlParts(
