@@ -14,7 +14,7 @@ import { getSourceUrl } from './common';
  * This function tries to select tags with longest prefix could be constructed from `packageName`.
  *
  * For package named `example.com/foo/bar/baz/qux`, it will try to detect tags with following prefixes:
- * 
+ *
  *   - `foo/bar/baz/qux/vX.Y.Z`
  *   - `bar/baz/qux/vX.Y.Z`
  *   - `baz/qux/vX.Y.Z`
