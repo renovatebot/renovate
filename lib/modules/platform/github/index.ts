@@ -826,6 +826,27 @@ export async function findPr({
   return pr ?? null;
 }
 
+export async function findReconfigurePr(
+  branchName: string,
+): Promise<GhPr | null> {
+  logger.debug(`findReconfigurePr(${branchName}`);
+  const repo = config.parentRepo ?? config.repository;
+  const response = await githubApi.getJson<GhRestPr[]>(
+    `repos/${repo}/pulls?head=${repo}:${branchName}`,
+  );
+  let { body: prList } = response;
+  prList = prList.filter((pr) => pr.state === 'open');
+  if (prList.length > 1) {
+    logger.debug({ prList }, 'More than one reconfigure pR');
+    return null;
+  }
+  const pr = coerceRestPr(prList[0]);
+  if (pr) {
+    logger.debug(`Found PR #${pr.number}`);
+  }
+  return pr ?? null;
+}
+
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 async function ensureBranchSha(branchName: string, sha: string): Promise<void> {

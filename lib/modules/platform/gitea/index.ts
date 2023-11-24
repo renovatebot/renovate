@@ -80,6 +80,11 @@ let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
 let botUserName: string;
 
+function isReconfigurePr(branchName: string): boolean {
+  logger.debug({ branchName }, 'isReconfigurePr');
+  return branchName === 'renovate/reconfigure';
+}
+
 function toRenovateIssue(data: Issue): Issue {
   return {
     number: data.number,
@@ -108,7 +113,12 @@ function toRenovatePR(data: PR): Pr | null {
   }
 
   const createdBy = data.user?.username;
-  if (createdBy && botUserName && createdBy !== botUserName) {
+  if (
+    createdBy &&
+    botUserName &&
+    !isReconfigurePr(data.head.label) &&
+    createdBy !== botUserName
+  ) {
     return null;
   }
 
@@ -506,6 +516,10 @@ const platform: Platform = {
       logger.debug(`Found PR #${pr.number}`);
     }
     return pr ?? null;
+  },
+
+  async findReconfigurePr(branchName): Promise<Pr | null> {
+    return await findPr({ branchName });
   },
 
   async createPr({
@@ -968,6 +982,7 @@ export const {
   ensureIssueClosing,
   findIssue,
   findPr,
+  findReconfigurePr,
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,

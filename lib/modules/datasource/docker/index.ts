@@ -627,8 +627,9 @@ export class DockerDatasource extends Datasource {
       ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)
         ? 1000
         : 10000;
-    let url: string | null =
-      `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
+    let url:
+      | string
+      | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
     const headers = await getAuthHeaders(
       this.http,
@@ -915,8 +916,9 @@ export class DockerDatasource extends Datasource {
 
   async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
     const result: Release[] = [];
-    let url: null | string =
-      `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000`;
+    let url:
+      | null
+      | string = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000`;
     while (url) {
       const { val, err } = await this.http
         .getJsonSafe(url, DockerHubTagsPage)

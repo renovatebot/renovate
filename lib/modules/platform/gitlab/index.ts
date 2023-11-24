@@ -869,6 +869,31 @@ export async function findPr({
   );
 }
 
+export async function findReconfigurePr(
+  branchName: string,
+): Promise<Pr | null> {
+  logger.debug(`findReconfigurePr(${branchName}`);
+  const response = await gitlabApi.getJson<GitLabMergeRequest[]>(
+    `projects/${config.repository}/merge_requests?source_branch=${branchName}`,
+  );
+  let { body: prList } = response;
+  prList = prList.filter((pr) => pr.state === 'opened');
+  if (prList.length > 1) {
+    logger.debug('More than one reconfigure pR');
+    return null;
+  }
+  const mr = prList[0];
+  // only pass nexessary info
+  const pr: GitlabPr = {
+    sourceBranch: mr.source_branch,
+    number: mr.iid,
+    state: mr.state === 'opened' ? 'open' : mr.state,
+    title: mr.title,
+  };
+
+  return massagePr(pr);
+}
+
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(
   branchName: string,
