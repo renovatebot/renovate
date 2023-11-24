@@ -651,7 +651,9 @@ async function tryPrAutomerge(
         const { body } = await gitlabApi.getJson<{
           merge_status: string;
           pipeline: string;
-        }>(`projects/${config.repository}/merge_requests/${pr}`);
+        }>(`projects/${config.repository}/merge_requests/${pr}`, {
+          memCache: false,
+        });
         // Only continue if the merge request can be merged and has a pipeline.
         if (body.merge_status === desiredStatus && body.pipeline !== null) {
           break;
