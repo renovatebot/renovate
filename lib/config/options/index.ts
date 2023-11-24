@@ -2507,6 +2507,12 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'gitlabPlatformAutomergeStatusRetries',
+    description: `Maximum number of retries when retrieving merge request pipeline status.`,
+    type: 'integer',
+    default: 5,
+  },
+  {
     name: 'customManagers',
     description: 'Custom managers using regex matching.',
     type: 'array',

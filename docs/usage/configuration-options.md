@@ -1473,6 +1473,11 @@ Under the hood, it creates a MR-level approval rule where `approvals_required` i
 This option works only when `automerge=true`, `automergeType=pr` or `automergeType=branch`, and `platformAutomerge=true`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
+## gitlabPlatformAutomergeStatusRetries
+
+When using `platformAutomerge=true` in Gitlab, Renovate tries to merge a merge request immediately after creating it which will activate the `auto-merge` option of the merge request in Gitlab. The `auto-merge` option in Gitlab is only available when the merge request has a pipeline associated to it. By default Renovate checks 5 times if a pipeline exists while increasing the timeout between attempts. After running into the timeout Renovate tries to set `auto-merge` anyways. In some Gitlab installations the default timeout is too short to get a merge request pipeline up and running. In this case the merge from Renovat will result in a 405 'Method not allowed' error.
+By setting `gitlabPlatformAutomergeStatusRetries` to a number greater than 5 you can increase the timeout.
+
 ## goGetDirs
 
 By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.
