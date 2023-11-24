@@ -60,7 +60,8 @@ export function getPlatformPrOptions(
     gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
     forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
-    gitlabPlatformAutomergeStatusRetries: config.gitlabPlatformAutomergeStatusRetries,
+    gitlabPlatformAutomergeStatusRetries:
+      config.gitlabPlatformAutomergeStatusRetries,
   };
 }
 
