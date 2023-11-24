@@ -10,7 +10,7 @@ const options: RenovateOptions[] = [
     description:
       'The Renovate major release compatibility to maintain in functionality.',
     type: 'integer',
-    default: 37,
+    default: null,
   },
   {
     name: 'detectGlobalManagerConfig',

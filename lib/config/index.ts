@@ -13,6 +13,7 @@ export { mergeChildConfig };
 
 // This needs to be kept in sync with Renovate major releases
 // It cannot read it from package.json because in dev we use 0.0.0-semantic-release
+export const defaultRenovateCompatibility = 37;
 export const currentRenovateCompatibility = 38;
 
 export function getManagerConfig(
