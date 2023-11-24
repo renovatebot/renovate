@@ -10,6 +10,18 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
 import { getSourceUrl } from './common';
 
+/**
+ * This function tries to select tags with longest prefix could be constructed from `packageName`.
+ *
+ * For package named `example.com/foo/bar/baz/qux`, it will try to detect tags with following prefixes:
+ * 
+ *   - `foo/bar/baz/qux/vX.Y.Z`
+ *   - `bar/baz/qux/vX.Y.Z`
+ *   - `baz/qux/vX.Y.Z`
+ *   - `qux/vX.Y.Z`
+ *
+ * If none of the following is found, it falls back to simply returning all tags like `vX.Y.Z`.
+ */
 function filterByPrefix(packageName: string, releases: Release[]): Release[] {
   const nameParts = packageName
     .replace(regEx(/\/v\d+$/), '')
