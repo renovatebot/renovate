@@ -7,7 +7,7 @@ export const displayName = 'Loose';
 export const urls = [];
 export const supportsRanges = false;
 
-const versionPattern = regEx(/^v?(\d+(?:\.\d+)*)(.*)$/);
+const versionPattern = regEx(/^[vV]?(\d+(?:\.\d+)*)(.*)$/);
 const commitHashPattern = regEx(/^[a-f0-9]{7,40}$/);
 const numericPattern = regEx(/^[0-9]+$/);
 

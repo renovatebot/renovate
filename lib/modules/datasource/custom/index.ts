@@ -3,8 +3,9 @@ import jsonata from 'jsonata';
 import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { fetch as plainFetch } from './formats/plain';
-import { fetch as yamlFetch } from './formats/yaml';
+import { fetch as jsonFetch, read as jsonRead } from './formats/json';
+import { fetch as plainFetch, read as plainRead } from './formats/plain';
+import { fetch as yamlFetch, read as yamlRead } from './formats/yaml';
 import { ReleaseResultZodSchema } from './schema';
 import { getCustomConfig } from './utils';
 
@@ -26,24 +27,40 @@ export class CustomDatasource extends Datasource {
     }
 
     const { defaultRegistryUrlTemplate, transformTemplates, format } = config;
-    let response: unknown;
-    try {
+
+    const isLocalRegistry = defaultRegistryUrlTemplate.startsWith('file://');
+
+    let data: unknown;
+    if (isLocalRegistry) {
       switch (format) {
         case 'plain':
-          response = await plainFetch(this.http, defaultRegistryUrlTemplate);
+          data = await plainRead(defaultRegistryUrlTemplate);
           break;
         case 'yaml':
-          response = await yamlFetch(this.http, defaultRegistryUrlTemplate);
+          data = await yamlRead(defaultRegistryUrlTemplate);
           break;
         case 'json':
-          response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
+          data = await jsonRead(defaultRegistryUrlTemplate);
+          break;
       }
-    } catch (e) {
-      this.handleHttpErrors(e);
-      return null;
+    } else {
+      try {
+        switch (format) {
+          case 'plain':
+            data = await plainFetch(this.http, defaultRegistryUrlTemplate);
+            break;
+          case 'yaml':
+            data = await yamlFetch(this.http, defaultRegistryUrlTemplate);
+            break;
+          case 'json':
+            data = await jsonFetch(this.http, defaultRegistryUrlTemplate);
+            break;
+        }
+      } catch (e) {
+        this.handleHttpErrors(e);
+        return null;
+      }
     }
-
-    let data = response;
 
     for (const transformTemplate of transformTemplates) {
       const expression = jsonata(transformTemplate);

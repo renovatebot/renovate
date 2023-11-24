@@ -849,7 +849,10 @@ export async function findReconfigurePr(
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
-async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
+async function ensureBranchSha(
+  branchName: string,
+  sha: LongCommitSha,
+): Promise<void> {
   const repository = config.repository!;
   try {
     const commitUrl = `/repos/${repository}/git/commits/${sha}`;
@@ -1939,7 +1942,7 @@ async function pushFiles(
       `/repos/${config.repository}/git/commits`,
       { body: { message, tree: treeSha, parents: [parentCommitSha] } },
     );
-    const remoteCommitSha = commitRes.body.sha;
+    const remoteCommitSha = commitRes.body.sha as LongCommitSha;
     await ensureBranchSha(branchName, remoteCommitSha);
     return remoteCommitSha;
   } catch (err) {
