@@ -207,7 +207,7 @@ export interface RenovateConfig
   description?: string | string[];
   force?: RenovateConfig;
   errors?: ValidationMessage[];
-
+  renovateCompatibility?: number;
   gitAuthor?: string;
 
   hostRules?: HostRule[];
