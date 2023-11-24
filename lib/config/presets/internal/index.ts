@@ -20,7 +20,7 @@ import * as workaroundsPreset from './workarounds';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const groups: Record<string, Record<string, Preset>> = {
-  comptibility: compatibilityPreset.presets,
+  compatibility: compatibilityPreset.presets,
   config: configPreset.presets,
   default: defaultPreset.presets,
   docker: dockerPreset.presets,
