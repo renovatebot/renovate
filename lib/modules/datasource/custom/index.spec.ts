@@ -1,7 +1,10 @@
 import { codeBlock } from 'common-tags';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
+import { fs } from '../../../../test/util';
 import { CustomDatasource } from './index';
+
+jest.mock('../../../util/fs');
 
 describe('modules/datasource/custom/index', () => {
   describe('getReleases', () => {
@@ -232,6 +235,131 @@ describe('modules/datasource/custom/index', () => {
           foo: {
             defaultRegistryUrlTemplate: 'https://example.com/v1',
             format: 'yaml',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('return releases for yaml file directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        releases:
+          - version: 1.0.0
+          - version: 2.0.0
+          - version: 3.0.0
+      `);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.yaml',
+            format: 'yaml',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('return releases for json file directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{
+        "releases": [
+          { "version": "1.0.0" },
+          { "version": "2.0.0" },
+          { "version": "3.0.0" }
+        ]
+      }`);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.json',
+            format: 'json',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('return null for plain text file if the body is not what is expected', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.version',
+            format: 'plain',
+          },
+        },
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('return releases for plain text file directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`{
+        1.0.0
+        2.0.0
+        3.0.0
+      }`);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.version',
+            format: 'plain',
           },
         },
       });
