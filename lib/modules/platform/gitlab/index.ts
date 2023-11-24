@@ -644,7 +644,7 @@ async function tryPrAutomerge(
       }
 
       const desiredStatus = 'can_be_merged';
-      const retryTimes = 5;
+      const retryTimes = 35; // results in max. 5 min. timeout if no pipeline created
 
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
