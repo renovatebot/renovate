@@ -336,6 +336,32 @@ export async function findPr({
   return pr ?? null;
 }
 
+export async function findReconfigurePr(
+  branchName: string,
+): Promise<Pr | null> {
+  logger.debug(`findReconfigurePr(${branchName}`);
+  const searchParams: Record<string, string> = {
+    state: 'OPEN', // TODO: Check this string
+  };
+  searchParams['role.1'] = 'SOURCE_BRANCH'; // TODO: Check this string
+  searchParams['username.1'] = branchName;
+
+  const query = getQueryString(searchParams);
+  const prList = await utils.accumulateValues(
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
+  );
+
+  if (prList.length > 1) {
+    logger.debug({ prList }, 'More than one reconfigure pR');
+    return null;
+  }
+  const pr = utils.prInfo(prList[0]);
+  if (pr) {
+    logger.debug(`Found PR #${pr.number}`);
+  }
+  return pr ?? null;
+}
+
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
   logger.debug(`getBranchPr(${branchName})`);

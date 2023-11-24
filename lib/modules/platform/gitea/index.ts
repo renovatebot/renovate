@@ -518,10 +518,6 @@ const platform: Platform = {
     return pr ?? null;
   },
 
-  async findReconfigurePr(branchName): Promise<Pr | null> {
-    return await findPr({ branchName });
-  },
-
   async createPr({
     sourceBranch,
     targetBranch,
@@ -982,7 +978,6 @@ export const {
   ensureIssueClosing,
   findIssue,
   findPr,
-  findReconfigurePr,
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,

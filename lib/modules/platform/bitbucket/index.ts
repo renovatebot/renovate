@@ -339,6 +339,26 @@ export async function findPr({
   return pr ?? null;
 }
 
+export async function findReconfigurePr(
+  branchName: string,
+): Promise<Pr | null> {
+  logger.debug(`findReconfigurePr(${branchName}`);
+  const response = await bitbucketHttp.getJson<PrResponse[]>(
+    `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name=${branchName}`,
+  );
+  let { body: prList } = response;
+  prList = prList.filter((pr) => pr.state === 'open'); // TODO: find the equiv of open pr string for bitbucket
+  if (prList.length > 1) {
+    logger.debug({ prList }, 'More than one reconfigure pR');
+    return null;
+  }
+  const pr = utils.prInfo(prList[0]);
+  if (pr) {
+    logger.debug(`Found PR #${pr.number}`);
+  }
+  return pr ?? null;
+}
+
 // Gets details for a PR
 export async function getPr(prNo: number): Promise<Pr | null> {
   const pr = (
