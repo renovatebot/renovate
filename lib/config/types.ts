@@ -76,6 +76,7 @@ export interface RenovateSharedConfig {
   rebaseWhen?: string;
   recreateWhen?: RecreateWhen;
   recreateClosed?: boolean;
+  renovateCompatibility?: number;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   repositoryCacheType?: RepositoryCacheType;

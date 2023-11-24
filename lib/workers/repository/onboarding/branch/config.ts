@@ -1,3 +1,5 @@
+import is from '@sindresorhus/is';
+import { currentRenovateCompatibility } from '../../../../config/compatibility';
 import { GlobalConfig } from '../../../../config/global';
 import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
@@ -76,6 +78,13 @@ async function getOnboardingConfig(
     logger.debug(
       'No default org/owner preset found, so the default onboarding config will be used instead. Note: do not be concerned with any 404 messages that preceded this.',
     );
+  }
+
+  if (onboardingConfig && !is.number(config.renovateCompatibility)) {
+    logger.debug(
+      `No renovateCompatibility found in admin config, adding renovateCompatibility ${currentRenovateCompatibility} to onboarding config`,
+    );
+    onboardingConfig.renovateCompatibility = currentRenovateCompatibility;
   }
 
   logger.debug({ config: onboardingConfig }, 'onboarding config');
