@@ -3,6 +3,6 @@ body:
     id: discussion-field
     attributes:
       label: Tell us more.
-      description: Explain your feature request in this field.
+      description: Explain your idea for Renovate in this field.
     validations:
       required: true

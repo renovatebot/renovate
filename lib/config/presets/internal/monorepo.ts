@@ -46,6 +46,8 @@ const repoGroups = {
     'https://github.com/awslabs/aws-lambda-powertools-typescript',
     'https://github.com/aws-powertools/powertools-lambda-typescript',
   ],
+  'aws-sdk-go': 'https://github.com/aws/aws-sdk-go',
+  'aws-sdk-go-v2': 'https://github.com/aws/aws-sdk-go-v2',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   'aws-sdk-rust': [
@@ -282,6 +284,8 @@ const repoGroups = {
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
+  'github-workflows-kt':
+    'https://github.com/typesafegithub/github-workflows-kt',
   'google-api-dotnet-client':
     'https://github.com/googleapis/google-api-dotnet-client',
   grafana: 'https://github.com/grafana/grafana',
