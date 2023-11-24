@@ -35,7 +35,7 @@ describe('workers/repository/reconfigure/index', () => {
     cache.getCache.mockReturnValue({});
     git.getBranchCommit.mockReturnValue('sha' as LongCommitSha);
     fs.readLocalFile.mockResolvedValue(null);
-    platform.getBranchPr.mockResolvedValue(null);
+    platform.findReconfigurePr.mockResolvedValue(null);
     platform.getBranchStatusCheck.mockResolvedValue(null);
   });
 
@@ -122,7 +122,7 @@ describe('workers/repository/reconfigure/index', () => {
             "enabledManagers": ["docker"]
         }
         `);
-    platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
+    platform.findReconfigurePr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
     await validateReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
       { errors: expect.any(String) },
@@ -185,7 +185,7 @@ describe('workers/repository/reconfigure/index', () => {
             "enabledManagers": ["npm",]
         }
         `);
-    platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
+    platform.findReconfigurePr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
     await validateReconfigureBranch(config);
     expect(platform.setBranchStatus).toHaveBeenCalledWith({
       branchName: 'prefix/reconfigure',
