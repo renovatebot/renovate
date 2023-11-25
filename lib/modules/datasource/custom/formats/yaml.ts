@@ -1,15 +1,18 @@
 import yaml from 'js-yaml';
 import { readLocalFile } from '../../../../util/fs';
 import type { Http } from '../../../../util/http';
+import type { CustomDatasourceFetcher } from './types';
 
-export async function fetch(http: Http, url: string): Promise<unknown> {
-  const response = await http.get(url);
+export class YamlFetcher implements CustomDatasourceFetcher {
+  async fetch(http: Http, registryURL: string): Promise<unknown> {
+    const response = await http.get(registryURL);
 
-  return yaml.load(response.body);
-}
+    return yaml.load(response.body);
+  }
 
-export async function read(path: string): Promise<unknown> {
-  const fileContent = await readLocalFile(path, 'utf8');
+  async readFile(registryURL: string): Promise<unknown> {
+    const fileContent = await readLocalFile(registryURL, 'utf8');
 
-  return yaml.load(fileContent!);
+    return yaml.load(fileContent!);
+  }
 }

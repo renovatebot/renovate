@@ -2,6 +2,7 @@ import { readLocalFile } from '../../../../util/fs';
 import type { Http } from '../../../../util/http';
 import { newlineRegex } from '../../../../util/regex';
 import type { ReleaseResult } from '../../types';
+import type { CustomDatasourceFetcher } from './types';
 
 function convertLinesToVersions(content: string): ReleaseResult {
   const lines = content.split(newlineRegex).map((line) => line.trim());
@@ -15,22 +16,21 @@ function convertLinesToVersions(content: string): ReleaseResult {
   };
 }
 
-export async function fetch(
-  http: Http,
-  url: string,
-): Promise<ReleaseResult | null> {
-  const response = await http.getPlain(url);
+export class PlainFetcher implements CustomDatasourceFetcher {
+  async fetch(http: Http, registryURL: string): Promise<unknown> {
+    const response = await http.getPlain(registryURL);
 
-  const contentType = response.headers['content-type'];
-  if (!contentType?.startsWith('text/')) {
-    return null;
+    const contentType = response.headers['content-type'];
+    if (!contentType?.startsWith('text/')) {
+      return null;
+    }
+
+    return convertLinesToVersions(response.body);
   }
 
-  return convertLinesToVersions(response.body);
-}
+  async readFile(registryURL: string): Promise<unknown> {
+    const fileContent = await readLocalFile(registryURL, 'utf8');
 
-export async function read(path: string): Promise<ReleaseResult | null> {
-  const fileContent = await readLocalFile(path, 'utf8');
-
-  return fileContent ? convertLinesToVersions(fileContent) : null;
+    return fileContent ? convertLinesToVersions(fileContent) : null;
+  }
 }

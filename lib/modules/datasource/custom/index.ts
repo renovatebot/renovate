@@ -3,9 +3,7 @@ import jsonata from 'jsonata';
 import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { fetch as jsonFetch, read as jsonRead } from './formats/json';
-import { fetch as plainFetch, read as plainRead } from './formats/plain';
-import { fetch as yamlFetch, read as yamlRead } from './formats/yaml';
+import { fetchers } from './formats';
 import { ReleaseResultZodSchema } from './schema';
 import { getCustomConfig } from './utils';
 
@@ -28,38 +26,19 @@ export class CustomDatasource extends Datasource {
 
     const { defaultRegistryUrlTemplate, transformTemplates, format } = config;
 
+    const fetcher = fetchers[format];
     const isLocalRegistry = defaultRegistryUrlTemplate.startsWith('file://');
 
     let data: unknown;
-    if (isLocalRegistry) {
-      switch (format) {
-        case 'plain':
-          data = await plainRead(defaultRegistryUrlTemplate);
-          break;
-        case 'yaml':
-          data = await yamlRead(defaultRegistryUrlTemplate);
-          break;
-        case 'json':
-          data = await jsonRead(defaultRegistryUrlTemplate);
-          break;
+    try {
+      if (isLocalRegistry) {
+        data = await fetcher.readFile(defaultRegistryUrlTemplate);
+      } else {
+        data = await fetcher.fetch(this.http, defaultRegistryUrlTemplate);
       }
-    } else {
-      try {
-        switch (format) {
-          case 'plain':
-            data = await plainFetch(this.http, defaultRegistryUrlTemplate);
-            break;
-          case 'yaml':
-            data = await yamlFetch(this.http, defaultRegistryUrlTemplate);
-            break;
-          case 'json':
-            data = await jsonFetch(this.http, defaultRegistryUrlTemplate);
-            break;
-        }
-      } catch (e) {
-        this.handleHttpErrors(e);
-        return null;
-      }
+    } catch (e) {
+      this.handleHttpErrors(e);
+      return null;
     }
 
     for (const transformTemplate of transformTemplates) {
