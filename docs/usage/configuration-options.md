@@ -3387,7 +3387,6 @@ The field supports multiple URLs but it is datasource-dependent on whether only 
 
 ## renovateCompatibility
 
-This capability exists so that Renovate maintainers can change default behavior without forcing all existing users to adopt the new behavior immediately.
 Renovate follows SemVer and limits "breaking" behavior changes to major releases.
 This works well for users who self-host Renovate, because they control when Renovate is updated.
 But most _users_ of Renovate are end users in repositories, they can't control which major release of Renovate is running or when Renovate updates.
