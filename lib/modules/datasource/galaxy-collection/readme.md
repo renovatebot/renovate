@@ -1,6 +1,7 @@
 By default, the `galaxy-collection` datasource checks for dependencies on `https://galaxy.ansible.com`.
 
-However, you can override that behavior by either specifying a `source` in your `requirements.yaml` file or write a `packageRule` to provide other registryURLs.
+But you can set your own registries.
+You can set a `source` in your `requirements.yaml` file, _or_ write a `packageRule` to set a new `registryURLs`.
 This allows you to use renovate with a private automation hub.
 
 **Usage example - requirements.yaml**
