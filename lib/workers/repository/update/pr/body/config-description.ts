@@ -1,8 +1,16 @@
+import is from '@sindresorhus/is';
+import { currentRenovateCompatibility } from '../../../../../config/compatibility';
 import { emojify } from '../../../../../util/emoji';
 import type { BranchConfig } from '../../../../types';
 
 export function getPrConfigDescription(config: BranchConfig): string {
   let prBody = `\n\n---\n\n### Configuration\n\n`;
+  if (is.number(config.renovateCompatibility)) {
+    prBody += emojify(`:wrench: **Compatibility**: `);
+    prBody += emojify(
+      `PR created using Renovate v${config.renovateCompatibility} backwards compatibility. Latest is v${currentRenovateCompatibility}.\n\n`,
+    );
+  }
   prBody += emojify(`:date: **Schedule**: `);
   prBody +=
     'Branch creation - ' + scheduleToString(config.schedule, config.timezone);
