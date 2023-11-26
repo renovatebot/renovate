@@ -59,10 +59,11 @@ export interface StabilityConfig extends RenovateConfig {
 }
 
 export async function setStability(config: StabilityConfig): Promise<void> {
-  if (!config.stabilityStatus) {
+  if (!config.stabilityStatus || !config.statusCheckNames?.minimumReleaseAge) {
     return;
   }
-  const context = `renovate/stability-days`;
+
+  const context = config.statusCheckNames.minimumReleaseAge;
   const description =
     config.stabilityStatus === 'green'
       ? 'Updates have met minimum release age requirement'
@@ -85,12 +86,13 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   if (
     !config.branchName ||
     !config.confidenceStatus ||
+    !config.statusCheckNames?.minimumConfidence ||
     (config.minimumConfidence &&
       !isActiveConfidenceLevel(config.minimumConfidence))
   ) {
     return;
   }
-  const context = `renovate/merge-confidence`;
+  const context = config.statusCheckNames.minimumConfidence;
   const description =
     config.confidenceStatus === 'green'
       ? 'Updates have met Merge Confidence requirement'

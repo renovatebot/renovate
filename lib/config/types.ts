@@ -260,6 +260,8 @@ export interface RenovateConfig
 
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
+
+  statusCheckNames?: Record<string, string>;
 }
 
 export interface CustomDatasourceConfig {
