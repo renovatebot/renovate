@@ -120,6 +120,7 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
   const options: GotOptions = { ...inOptions };
   const foundRules = findMatchingRules(options, url);
   const { username, password, token, enabled, authType } = foundRules;
+  const { host } = new URL(url);
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
   } else if (
@@ -127,17 +128,22 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
     is.nonEmptyString(options.password) ||
     is.nonEmptyString(options.token)
   ) {
+    logger.once.debug(`hostRules: authentication already set for ${host}`);
     logger.trace({ url }, `Authorization already set`);
   } else if (password !== undefined) {
+    logger.once.debug(`hostRules: applying Basic authentication for ${host}`);
     logger.trace({ url }, `Applying Basic authentication`);
     options.username = username;
     options.password = password;
   } else if (token) {
+    logger.once.debug(`hostRules: applying Bearer authentication for ${host}`);
     logger.trace({ url }, `Applying Bearer authentication`);
     options.token = token;
     options.context = { ...options.context, authType };
   } else if (enabled === false) {
     options.enabled = false;
+  } else {
+    logger.once.debug(`hostRules: no authentication for ${host}`);
   }
   // Apply optional params
   if (foundRules.abortOnError) {
