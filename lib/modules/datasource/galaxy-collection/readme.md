@@ -4,9 +4,7 @@ But you can set your own registries.
 You can set a `source` in your `requirements.yaml` file, _or_ write a `packageRule` to set a new `registryURLs`.
 This allows you to use renovate with a private automation hub.
 
-**Usage example - requirements.yaml**
-
-```yaml
+```yaml title="Example config for requirements.yaml"
 ---
 collections:
   - name: community.general
