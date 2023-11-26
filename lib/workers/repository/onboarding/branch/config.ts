@@ -14,7 +14,7 @@ import { EditorConfig, JSONWriter } from '../../../../util/json-writer';
 async function getOnboardingConfig(
   config: RenovateConfig,
 ): Promise<RenovateSharedConfig | undefined> {
-  let onboardingConfig = clone(config.onboardingConfig);
+  let onboardingConfig = clone(config.onboardingConfig) ?? {};
 
   let orgPreset: string | undefined;
 
@@ -80,7 +80,11 @@ async function getOnboardingConfig(
     );
   }
 
-  if (onboardingConfig && !is.number(config.renovateCompatibility)) {
+  if (is.number(config.renovateCompatibility)) {
+    logger.debug(
+      `renovateCompatibility was found in admin config, so skipping from onboardingConfig`,
+    );
+  } else {
     logger.debug(
       `No renovateCompatibility found in admin config, adding renovateCompatibility ${currentRenovateCompatibility} to onboarding config`,
     );
