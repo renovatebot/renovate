@@ -21,9 +21,11 @@ export async function getRepoConfig(
   );
   if (renovateCompatibility === currentRenovateCompatibility) {
     logger.debug('No compatibility preset needed');
+    delete repoConfig.renovateCompatibility;
     return repoConfig;
   }
   // Repo needs compatibility presets
   config = await mergeCompatibilityConfig(config, renovateCompatibility);
+  config.renovateCompatibility = renovateCompatibility;
   return mergeRenovateConfig(config);
 }
