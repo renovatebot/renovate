@@ -120,7 +120,12 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
   const options: GotOptions = { ...inOptions };
   const foundRules = findMatchingRules(options, url);
   const { username, password, token, enabled, authType } = foundRules;
-  const { host } = new URL(url);
+  let host: string | undefined;
+  try {
+    host = new URL(url).host;
+  } catch (err) {
+    logger.debug(`Invalid URL: ${url}`);
+  }
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
   } else if (
