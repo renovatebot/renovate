@@ -12,9 +12,7 @@ collections:
     source: https://hub.mydomain.com/api/galaxy/content/community/
 ```
 
-**Usage example - renovate.json**
-
-```json
+```json title="Example config for renovate.json"
 {
   "packageRules": [
     {
