@@ -349,6 +349,9 @@ export async function findReconfigurePr(
   const query = getQueryString(searchParams);
   const prList = await utils.accumulateValues(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
+    'get',
+    {},
+    1,
   );
 
   if (prList.length > 1) {

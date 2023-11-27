@@ -131,13 +131,6 @@ export async function validateReconfigureBranch(
       'Validation Errors',
     );
 
-    await platform.setBranchStatus({
-      branchName,
-      context,
-      description: 'Validation Failed',
-      state: 'red',
-    });
-
     // add comment to reconfigure PR if it exists
     const branchPr = platform.findReconfigurePr
       ? await platform.findReconfigurePr(branchName)
@@ -157,6 +150,12 @@ export async function validateReconfigureBranch(
       });
     }
 
+    await platform.setBranchStatus({
+      branchName,
+      context,
+      description: 'Validation Failed',
+      state: 'red',
+    });
     setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.baseBranch!);
     return;

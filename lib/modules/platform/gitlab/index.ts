@@ -885,7 +885,7 @@ export async function findReconfigurePr(
     return null;
   }
   const mr = prList[0];
-  // only pass nexessary info
+  // only pass necessary info
   const pr: GitlabPr = {
     sourceBranch: mr.source_branch,
     number: mr.iid,

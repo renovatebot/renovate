@@ -13,6 +13,7 @@ import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
+import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
 import { getPrBodyStruct, hashBody } from '../pr-body';
@@ -82,7 +83,7 @@ let botUserName: string;
 
 function isReconfigurePr(branchName: string): boolean {
   logger.debug({ branchName }, 'isReconfigurePr');
-  return branchName === 'renovate/reconfigure';
+  return regEx(/reconfigure$/g).test(branchName);
 }
 
 function toRenovateIssue(data: Issue): Issue {
