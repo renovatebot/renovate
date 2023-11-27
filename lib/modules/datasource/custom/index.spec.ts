@@ -507,13 +507,13 @@ describe('modules/datasource/custom/index', () => {
       const expected = {
         releases: [
           {
-            version: "nginx-0.1.0.tar.gz",
+            version: 'nginx-0.1.0.tar.gz',
           },
           {
-            version: "nginx-0.1.1.tar.gz",
+            version: 'nginx-0.1.1.tar.gz',
           },
           {
-            version: "nginx-0.1.11.tar.gz",
+            version: 'nginx-0.1.11.tar.gz',
           },
         ],
       };
@@ -526,7 +526,7 @@ describe('modules/datasource/custom/index', () => {
         })
         .get('/download')
         .reply(301, undefined, {
-            'Location': 'http://nginx.org/download/'
+          Location: 'http://nginx.org/download/',
         });
 
       const result = await getPkgReleases({

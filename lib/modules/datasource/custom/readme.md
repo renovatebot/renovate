@@ -10,7 +10,7 @@ Options:
 | option                     | default | description                                                                                                                                                              |
 | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | defaultRegistryUrlTemplate | ""      | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
-| format                     | "json"  | format used by the API. Available values are: `json`, `plain`, `html`                                                                                                            |
+| format                     | "json"  | format used by the API. Available values are: `json`, `plain`, `html`                                                                                                    |
 | transformTemplates         | []      | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 Available template variables:
@@ -173,10 +173,10 @@ The following JSON will be generated:
 {
   "releases": [
     {
-      "version": "package-1.0.tar.gz",
+      "version": "package-1.0.tar.gz"
     },
     {
-      "version": "package-1.0.tar.gz",
+      "version": "package-1.0.tar.gz"
     }
   ]
 }

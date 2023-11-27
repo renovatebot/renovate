@@ -6,24 +6,26 @@ import type { ReleaseResult } from '../../types';
 import type { CustomDatasourceFetcher } from './types';
 
 function extractLinks(content: string): ReleaseResult {
-    const body = parse(content);
+  const body = parse(content);
 
-    // node-html-parser doesn't parse anything inside <pre>
-    // but, for example, nginx wraps directory listings in <pre>
-    const pres = body.getElementsByTagName('pre').map((pre) => parse(pre.textContent));
+  // node-html-parser doesn't parse anything inside <pre>
+  // but, for example, nginx wraps directory listings in <pre>
+  const pres = body
+    .getElementsByTagName('pre')
+    .map((pre) => parse(pre.textContent));
 
-    const links = [body, ...pres].flatMap((e) => e.getElementsByTagName('a'));
-    const hrefs = links
-      .map((node) => node.getAttribute('href'))
-      .filter(is.truthy);
+  const links = [body, ...pres].flatMap((e) => e.getElementsByTagName('a'));
+  const hrefs = links
+    .map((node) => node.getAttribute('href'))
+    .filter(is.truthy);
 
-    const releases = hrefs.map((href) => {
-      return {
-        version: href,
-      };
-    });
+  const releases = hrefs.map((href) => {
+    return {
+      version: href,
+    };
+  });
 
-    return { releases };
+  return { releases };
 }
 
 export class HtmlFetcher implements CustomDatasourceFetcher {
