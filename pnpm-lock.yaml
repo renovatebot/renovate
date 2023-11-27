@@ -560,8 +560,8 @@ importers:
         specifier: 29.7.0
         version: 29.7.0
       markdownlint-cli2:
-        specifier: 0.10.0
-        version: 0.10.0
+        specifier: 0.11.0
+        version: 0.11.0
       memfs:
         specifier: 4.6.0
         version: 4.6.0(quill-delta@5.1.0)(rxjs@7.8.1)(tslib@2.6.2)
@@ -6392,17 +6392,6 @@ packages:
       slash: 3.0.0
     dev: true
 
-  /globby@13.2.2:
-    resolution: {integrity: sha512-Y1zNGV+pzQdh7H39l9zgB4PJqjRNqydvdYCDG4HFXM4XuvSaQQlEc91IU1yALL8gUTDomgBAfz3XJdmUS+oo0w==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-    dependencies:
-      dir-glob: 3.0.1
-      fast-glob: 3.3.2
-      ignore: 5.3.0
-      merge2: 1.4.1
-      slash: 4.0.0
-    dev: true
-
   /globby@14.0.0:
     resolution: {integrity: sha512-/1WM/LNHRAOH9lZta77uGbq0dAEQM+XjNesWwhlERDVenqothRbnzTrL3/LrIoEPPjeUHC3vrS6TwoyxeHs7MQ==}
     engines: {node: '>=18'}
@@ -7905,17 +7894,6 @@ packages:
     engines: {node: '>=8'}
     dev: false
 
-  /markdown-it@13.0.1:
-    resolution: {integrity: sha512-lTlxriVoy2criHP0JKRhO2VDG9c2ypWCsT237eDiLqi09rmbKoUetyGHq2uOIRoRS//kfoJckS0eUzzkDR+k2Q==}
-    hasBin: true
-    dependencies:
-      argparse: 2.0.1
-      entities: 3.0.1
-      linkify-it: 4.0.1
-      mdurl: 1.0.1
-      uc.micro: 1.0.6
-    dev: true
-
   /markdown-it@13.0.2:
     resolution: {integrity: sha512-FtwnEuuK+2yVU7goGn/MJ0WBZMM9ZPgU9spqlFs7/A/pDIUNSOQZhUgOqYCficIuR2QaFnrt8LHqBWsbTAoI5w==}
     hasBin: true
@@ -7925,7 +7903,6 @@ packages:
       linkify-it: 4.0.1
       mdurl: 1.0.1
       uc.micro: 1.0.6
-    dev: false
 
   /markdown-table@2.0.0:
     resolution: {integrity: sha512-Ezda85ToJUBhM6WGaG6veasyym+Tbs3cMAw/ZhOPqXiYsr0jgocBV3j3nx+4lk47plLlIqjwuTm/ywVI+zjJ/A==}
@@ -7933,25 +7910,25 @@ packages:
       repeat-string: 1.6.1
     dev: false
 
-  /markdownlint-cli2-formatter-default@0.0.4(markdownlint-cli2@0.10.0):
+  /markdownlint-cli2-formatter-default@0.0.4(markdownlint-cli2@0.11.0):
     resolution: {integrity: sha512-xm2rM0E+sWgjpPn1EesPXx5hIyrN2ddUnUwnbCsD/ONxYtw3PX6LydvdH6dciWAoFDpwzbHM1TO7uHfcMd6IYg==}
     peerDependencies:
       markdownlint-cli2: '>=0.0.4'
     dependencies:
-      markdownlint-cli2: 0.10.0
+      markdownlint-cli2: 0.11.0
     dev: true
 
-  /markdownlint-cli2@0.10.0:
-    resolution: {integrity: sha512-kVxjPyKFC+eW7iqcxiNI50RDzwugpXkEX5eQlDso/0IUs9M73jXYguLFHDzgi5KatcxU/57Fu8KoGtkFft9lfA==}
-    engines: {node: '>=16'}
+  /markdownlint-cli2@0.11.0:
+    resolution: {integrity: sha512-RmFpr+My5in8KT+H/A6ozKIVYVzZtL5t9c8DYdv0YJdljl385z44CcCVBrclpHxCGMY2tr0hZ/ca+meGGvgdnQ==}
+    engines: {node: '>=18'}
     hasBin: true
     dependencies:
-      globby: 13.2.2
-      markdownlint: 0.31.1
-      markdownlint-cli2-formatter-default: 0.0.4(markdownlint-cli2@0.10.0)
+      globby: 14.0.0
+      markdownlint: 0.32.1
+      markdownlint-cli2-formatter-default: 0.0.4(markdownlint-cli2@0.11.0)
       micromatch: 4.0.5
       strip-json-comments: 5.0.1
-      yaml: 2.3.2
+      yaml: 2.3.4
     dev: true
 
   /markdownlint-micromark@0.1.7:
@@ -7959,11 +7936,11 @@ packages:
     engines: {node: '>=16'}
     dev: true
 
-  /markdownlint@0.31.1:
-    resolution: {integrity: sha512-CKMR2hgcIBrYlIUccDCOvi966PZ0kJExDrUi1R+oF9PvqQmCrTqjOsgIvf2403OmJ+CWomuzDoylr6KbuMyvHA==}
-    engines: {node: '>=16'}
+  /markdownlint@0.32.1:
+    resolution: {integrity: sha512-3sx9xpi4xlHlokGyHO9k0g3gJbNY4DI6oNEeEYq5gQ4W7UkiJ90VDAnuDl2U+yyXOUa6BX+0gf69ZlTUGIBp6A==}
+    engines: {node: '>=18'}
     dependencies:
-      markdown-it: 13.0.1
+      markdown-it: 13.0.2
       markdownlint-micromark: 0.1.7
     dev: true
 
@@ -9700,11 +9677,6 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /slash@4.0.0:
-    resolution: {integrity: sha512-3dOsAHXXUkQTpOYcoAxLIorMTp4gIQr5IW3iVb7A7lFIp0VHhnynm9izx6TssdrIcVIESAlVjtnO2K8bg+Coew==}
-    engines: {node: '>=12'}
-    dev: true
-
   /slash@5.1.0:
     resolution: {integrity: sha512-ZA6oR3T/pEyuqwMgAKT0/hAv8oAXckzbkmR0UkUosQ+Mc4RxGoJkRmwHgHufaenlyAgE1Mxgpdcrf75y6XcnDg==}
     engines: {node: '>=14.16'}
@@ -10736,8 +10708,8 @@ packages:
   /yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
 
-  /yaml@2.3.2:
-    resolution: {integrity: sha512-N/lyzTPaJasoDmfV7YTrYCI0G/3ivm/9wdG0aHuheKowWQwGTsK0Eoiw6utmzAnI6pkJa0DUVygvp3spqqEKXg==}
+  /yaml@2.3.4:
+    resolution: {integrity: sha512-8aAvwVUSHpfEqTQ4w/KMlf3HcRdt50E5ODIQJBw1fQ5RL34xabzxtUlzTXVqc4rkZsPbvrXKWnABCD7kWSmocA==}
     engines: {node: '>= 14'}
     dev: true
 
