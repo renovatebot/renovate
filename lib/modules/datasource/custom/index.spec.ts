@@ -503,6 +503,39 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
+    it('return releases from HTML links - local file', async () => {
+      const expected = {
+        releases: [
+          {
+            version: 'package-1.0.tar.gz',
+          },
+        ],
+      };
+
+      const content = `
+        <html>
+          <body>
+            <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+          </body>
+        </html>
+      `;
+
+      fs.readLocalFile.mockResolvedValueOnce(content);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.html',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
     it('return releases from nginx directory listing', async () => {
       const expected = {
         releases: [
