@@ -89,6 +89,36 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
+    it('return releases with digests for api directly exposing in renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: 'v1.0.0',
+            newDigest: '0123456789abcdef'
+          },
+        ],
+      };
+      const content = {
+        releases: [
+          {
+            version: 'v1.0.0',
+            digest: '0123456789abcdef'
+          },
+        ],
+      };
+      httpMock.scope('https://example.com').get('/v1').reply(200, content);
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+          },
+        },
+      });
+      expect(result).toEqual(expected);
+    });
+
     it('return releases for plain text API directly exposing in Renovate format', async () => {
       const expected = {
         releases: [

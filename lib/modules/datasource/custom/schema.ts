@@ -9,6 +9,13 @@ export const ReleaseResultZodSchema = z.object({
       sourceUrl: z.string().optional(),
       sourceDirectory: z.string().optional(),
       changelogUrl: z.string().optional(),
+      digest: z.string().optional(),
+    }).transform((input) => {
+      return {
+        ...input,
+        newDigest: input.digest,
+        digest: undefined
+      }
     }),
   ),
   sourceUrl: z.string().optional(),
