@@ -272,7 +272,7 @@ describe('util/http/host-rules', () => {
     ).toMatchObject({
       retry: {
         limit: 7,
-        maxRetryAfter: 42,
+        maxRetryAfter: 42000,
       },
     });
 
@@ -285,7 +285,7 @@ describe('util/http/host-rules', () => {
     ).toMatchObject({
       retry: {
         limit: 7,
-        maxRetryAfter: 42,
+        maxRetryAfter: 42000,
       },
     });
   });
