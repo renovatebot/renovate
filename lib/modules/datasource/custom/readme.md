@@ -182,9 +182,9 @@ The following JSON will be generated:
 }
 ```
 
-`href` attribute value becomes the `version`.
+After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
 
-To extract the version number, you could use `extractVersion` or JSONata rules.
+To extract the version number, you may use [`extractVersion`](../../../docs/usage/configuration-options.md#extractVersion) or JSONata rules.
 
 ## Examples
 
@@ -373,7 +373,7 @@ Let's use nginx itself as an example:
 {
   "customDatasources": {
     "nginx": {
-      "defaultRegistryUrlTemplate": "http://nginx.org/download",
+      "defaultRegistryUrlTemplate": "https://nginx.org/download",
       "format": "html"
     }
   },
@@ -388,7 +388,7 @@ Let's use nginx itself as an example:
 
 ### HTML page
 
-`html` format can also be used to extract versions from a typical "Downloads" page:
+You can use the `html` format to extract versions from a typical "Downloads" page:
 
 ```json
 {
