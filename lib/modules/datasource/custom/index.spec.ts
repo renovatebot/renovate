@@ -534,5 +534,65 @@ describe('modules/datasource/custom/index', () => {
 
       expect(result).toEqual(expected);
     });
+
+    it('return releases for malformed HTML', async () => {
+      const expected = {
+        releases: [
+          {
+            version: 'package-1.0.tar.gz',
+          },
+        ],
+      };
+
+      httpMock
+        .scope('https://example.com')
+        .get('/malformed.html')
+        .reply(200, Fixtures.get('malformed.html'), {
+          'Content-Type': 'text/html',
+        });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/malformed.html',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('return releases for incomplete HTML', async () => {
+      const expected = {
+        releases: [
+          {
+            version: 'package-1.0.tar.gz',
+          },
+        ],
+      };
+
+      httpMock
+        .scope('https://example.com')
+        .get('/incomplete.html')
+        .reply(200, Fixtures.get('incomplete.html'), {
+          'Content-Type': 'text/html',
+        });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/incomplete.html',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
   });
 });
