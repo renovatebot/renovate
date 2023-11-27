@@ -131,6 +131,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options: HttpOptions = {},
   ) {
     this.options = merge<GotOptions>(options, { context: { hostType } });
+
     if (process.env.NODE_ENV === 'test') {
       this.options.retry = 0;
     }
