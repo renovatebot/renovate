@@ -9,6 +9,7 @@ import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
+import { parseUrl } from '../url';
 import { dnsLookup } from './dns';
 import { keepaliveAgents } from './keepalive';
 import type { GotOptions } from './types';
@@ -120,12 +121,7 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
   const options: GotOptions = { ...inOptions };
   const foundRules = findMatchingRules(options, url);
   const { username, password, token, enabled, authType } = foundRules;
-  let host: string | undefined;
-  try {
-    host = new URL(url).host;
-  } catch (err) {
-    logger.debug(`Invalid URL: ${url}`);
-  }
+  const host = parseUrl(url)?.host;
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
   } else if (
