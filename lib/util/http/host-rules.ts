@@ -201,3 +201,8 @@ export function getThrottleIntervalMs(url: string): number | null {
     ? Math.ceil(1000 / maxRequestsPerSecond)
     : null;
 }
+
+export function getMaxRetryAfter(url: string): number {
+  const { maxRetryAfter = 60 } = hostRules.find({ url });
+  return maxRetryAfter;
+}

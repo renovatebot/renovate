@@ -1763,6 +1763,27 @@ Example config:
 }
 ```
 
+### maxRetryAfter
+
+A remote host may return a `4xx` response with a `Retry-After` header value, which indicates that Renovate has been rate-limited.
+Renovate may try to contact the host again after waiting a certain time, that's set by the host.
+Renovate tries again after the `Retry-After` header value has passed, up to a maximum of `maxRetryAfter` seconds.
+If the `Retry-After` value is more than `maxRetryAfter`, Renovate will abort the request instead of waiting.
+
+The default value for `maxRetryAfter` is 60 seconds.
+You can configure a different maximum value for particular hosts, like this:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "maxRetryAfter": 25
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
