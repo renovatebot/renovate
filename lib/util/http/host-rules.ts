@@ -193,7 +193,7 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
     } else if (is.object(options.retry)) {
       Object.assign(retry, options.retry);
     }
-    retry.maxRetryAfter = foundRules.maxRetryAfter;
+    retry.maxRetryAfter = foundRules.maxRetryAfter * 1000;
     options.retry = retry;
   }
 
