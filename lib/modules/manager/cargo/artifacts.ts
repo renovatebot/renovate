@@ -67,6 +67,12 @@ async function cargoUpdatePrecise(
 }
 
 export async function updateArtifacts(
+  updateArtifact: UpdateArtifact,
+): Promise<UpdateArtifactsResult[] | null> {
+  return await updateArtifactsImpl(updateArtifact);
+}
+
+async function updateArtifactsImpl(
   {
     packageFileName,
     updatedDeps,
@@ -174,7 +180,7 @@ export async function updateArtifacts(
         logger.debug(
           'Dependency already up to date - reattempting recursively'
         );
-        return updateArtifacts(
+        return updateArtifactsImpl(
           {
             packageFileName,
             updatedDeps: newUpdatedDeps,
