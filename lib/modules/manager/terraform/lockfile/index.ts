@@ -65,7 +65,7 @@ async function updateAllLocks(
   return updates.filter(is.truthy);
 }
 
-function getNewConstraint(
+export function getNewConstraint(
   dep: Upgrade<Record<string, unknown>>,
   oldConstraint: string | undefined,
 ): string | undefined {
@@ -88,7 +88,12 @@ function getNewConstraint(
     logger.debug(
       `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`,
     );
-    return oldConstraint.replace(currentValue, newValue);
+    let newConstraint = oldConstraint.replace(currentValue, newValue);
+    //remove surplus .0 version
+    while (newConstraint.split('.').length - 1 > 2) {
+      newConstraint = newConstraint.replace(RegExp('\\.0$'), '');
+    }
+    return newConstraint;
   }
 
   if (
