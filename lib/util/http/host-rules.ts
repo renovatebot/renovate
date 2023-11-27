@@ -31,6 +31,7 @@ export type HostRulesGotOptions = Pick<
   | 'agent'
   | 'http2'
   | 'https'
+  | 'retry'
 >;
 
 export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
@@ -185,6 +186,17 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
     };
   }
 
+  if (is.number(foundRules.maxRetryAfter)) {
+    const retry: GotOptions['retry'] = {};
+    if (is.number(options.retry)) {
+      retry.limit = options.retry;
+    } else if (is.object(options.retry)) {
+      Object.assign(retry, options.retry);
+    }
+    retry.maxRetryAfter = foundRules.maxRetryAfter;
+    options.retry = retry;
+  }
+
   return options;
 }
 
@@ -200,9 +212,4 @@ export function getThrottleIntervalMs(url: string): number | null {
   return is.number(maxRequestsPerSecond) && maxRequestsPerSecond > 0
     ? Math.ceil(1000 / maxRequestsPerSecond)
     : null;
-}
-
-export function getMaxRetryAfter(url: string): number {
-  const { maxRetryAfter = 60 } = hostRules.find({ url });
-  return maxRetryAfter;
 }

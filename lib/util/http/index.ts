@@ -13,7 +13,7 @@ import { type AsyncResult, Result } from '../result';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
-import { applyHostRules, getMaxRetryAfter } from './host-rules';
+import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
 import { Throttle, getThrottle } from './throttle';
 import type {
@@ -131,6 +131,9 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options: HttpOptions = {},
   ) {
     this.options = merge<GotOptions>(options, { context: { hostType } });
+    if (process.env.NODE_ENV === 'test') {
+      this.options.retry = 0;
+    }
   }
 
   protected getThrottle(url: string): Throttle | null {
@@ -151,10 +154,6 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         method: 'get',
         ...this.options,
         hostType: this.hostType,
-        retry: {
-          limit: process.env.NODE_ENV === 'test' ? 0 : 2,
-          maxRetryAfter: getMaxRetryAfter(url),
-        },
       },
       httpOptions,
     );
