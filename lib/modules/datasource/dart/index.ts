@@ -10,7 +10,7 @@ export class DartDatasource extends Datasource {
     super(DartDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = ['https://pub.dartlang.org/'];
 
