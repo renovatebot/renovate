@@ -4,3 +4,4 @@ nav:
   - 'Pull Requests': 'pull-requests.md'
   - 'Renovate Scheduling': 'scheduling.md'
   - 'Automerge': 'automerge.md'
+  - 'Renovate and changelogs': 'changelogs.md'
