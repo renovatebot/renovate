@@ -6,7 +6,7 @@ describe('modules/manager/tekton/extract', () => {
     it('extracts deps from a file', () => {
       const result = extractPackageFile(
         Fixtures.get('multi-doc.yaml'),
-        'test-file.yaml'
+        'test-file.yaml',
       );
       expect(result).toMatchSnapshot();
       expect(result?.deps).toHaveLength(39);
@@ -23,8 +23,8 @@ describe('modules/manager/tekton/extract', () => {
         ---
         bundle: registry.com/repo
       `,
-          'test-file.yaml'
-        )
+          'test-file.yaml',
+        ),
       ).toBeNull();
     });
 

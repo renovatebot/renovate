@@ -9,7 +9,7 @@ import { parsePubspec } from './utils';
 
 function extractFromSection(
   pubspec: PubspecSchema,
-  sectionKey: keyof Pick<PubspecSchema, 'dependencies' | 'dev_dependencies'>
+  sectionKey: keyof Pick<PubspecSchema, 'dependencies' | 'dev_dependencies'>,
 ): PackageDependency[] {
   const sectionContent = pubspec[sectionKey];
   if (!sectionContent) {
@@ -84,7 +84,7 @@ function extractFlutter(pubspec: PubspecSchema): PackageDependency[] {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   const pubspec = parsePubspec(packageFile, content);
   if (!pubspec) {

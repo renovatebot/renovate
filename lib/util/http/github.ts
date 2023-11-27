@@ -58,7 +58,7 @@ export type GithubGraphqlResponse<T = unknown> =
 function handleGotError(
   err: GotLegacyError,
   url: string | URL,
-  opts: GithubHttpOptions
+  opts: GithubHttpOptions,
 ): Error {
   const path = url.toString();
   let message = err.message || '';
@@ -112,7 +112,7 @@ function handleGotError(
   ) {
     logger.debug(
       { err },
-      'GitHub failure: Resource not accessible by integration'
+      'GitHub failure: Resource not accessible by integration',
     );
     return new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
@@ -123,7 +123,7 @@ function handleGotError(
         token: maskToken(opts.token),
         err,
       },
-      'GitHub failure: Bad credentials'
+      'GitHub failure: Bad credentials',
     );
     if (rateLimit === '60') {
       return new ExternalHostError(err, 'github');
@@ -139,8 +139,8 @@ function handleGotError(
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     } else if (
-      err.body?.errors?.find((e: any) =>
-        e.message?.startsWith('A pull request already exists')
+      err.body?.errors?.find(
+        (e: any) => e.message?.startsWith('A pull request already exists'),
       )
     ) {
       return err;
@@ -190,7 +190,7 @@ export type GraphqlPageCache = Record<string, GraphqlPageCacheItem>;
 
 function getGraphqlPageSize(
   fieldName: string,
-  defaultPageSize = MAX_GRAPHQL_PAGE_SIZE
+  defaultPageSize = MAX_GRAPHQL_PAGE_SIZE,
 ): number {
   const cache = getCache();
   const graphqlPageCache = cache?.platform?.github
@@ -200,7 +200,7 @@ function getGraphqlPageSize(
   if (graphqlPageCache && cachedRecord) {
     logger.debug(
       { fieldName, ...cachedRecord },
-      'GraphQL page size: found cached value'
+      'GraphQL page size: found cached value',
     );
 
     const oldPageSize = cachedRecord.pageSize;
@@ -215,7 +215,7 @@ function getGraphqlPageSize(
 
         logger.debug(
           { fieldName, oldPageSize, newPageSize, timestamp },
-          'GraphQL page size: expanding'
+          'GraphQL page size: expanding',
         );
 
         cachedRecord.pageLastResizedAt = timestamp;
@@ -223,7 +223,7 @@ function getGraphqlPageSize(
       } else {
         logger.debug(
           { fieldName, oldPageSize, newPageSize },
-          'GraphQL page size: expanded to default page size'
+          'GraphQL page size: expanded to default page size',
         );
 
         delete graphqlPageCache[fieldName];
@@ -245,7 +245,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
     const pageLastResizedAt = now.toISO()!;
     logger.debug(
       { fieldName, oldPageSize, newPageSize, timestamp: pageLastResizedAt },
-      'GraphQL page size: shrinking'
+      'GraphQL page size: shrinking',
     );
     const cache = getCache();
     cache.platform ??= {};
@@ -273,7 +273,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
   protected override async request<T>(
     url: string | URL,
     options?: InternalHttpOptions & GithubHttpOptions & HttpRequestOptions<T>,
-    okToRetry = true
+    okToRetry = true,
   ): Promise<HttpResponse<T>> {
     const opts: GithubHttpOptions = {
       baseUrl,
@@ -291,13 +291,13 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         authUrl.pathname = joinUrlParts(
           authUrl.pathname.startsWith('/api/v3') ? '/api/v3' : '',
           'repos',
-          `${opts.repository}`
+          `${opts.repository}`,
         );
       }
 
       const { token } = findMatchingRules(
         { hostType: this.hostType },
-        authUrl.toString()
+        authUrl.toString(),
       );
       opts.token = token;
     }
@@ -340,9 +340,9 @@ export class GithubHttp extends Http<GithubHttpOptions> {
               return this.request<T>(
                 nextUrl,
                 { ...opts, paginate: false },
-                okToRetry
+                okToRetry,
               );
-            }
+            },
           );
           const pages = await p.all(queue);
           if (opts.paginationField && is.plainObject(result.body)) {
@@ -374,7 +374,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
   public async requestGraphql<T = unknown>(
     query: string,
-    options: GraphqlOptions = {}
+    options: GraphqlOptions = {},
   ): Promise<GithubGraphqlResponse<T> | null> {
     const path = 'graphql';
 
@@ -415,7 +415,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
   async queryRepoField<T = Record<string, unknown>>(
     query: string,
     fieldName: string,
-    options: GraphqlOptions = {}
+    options: GraphqlOptions = {},
   ): Promise<T[]> {
     const result: T[] = [];
 
@@ -424,7 +424,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
     let optimalCount: null | number = null;
     let count = getGraphqlPageSize(
       fieldName,
-      options.count ?? MAX_GRAPHQL_PAGE_SIZE
+      options.count ?? MAX_GRAPHQL_PAGE_SIZE,
     );
     let limit = options.limit ?? 1000;
     let cursor: string | null = null;

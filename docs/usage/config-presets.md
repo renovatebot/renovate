@@ -215,6 +215,7 @@ Please consider contributing it to the [Renovate repository](https://github.com/
 
 Create a [discussion](https://github.com/renovatebot/renovate/discussions) to propose your preset to the Renovate maintainers.
 The maintainers can also help improve the preset, and let you know where to put it in the code.
+If you are proposing a "monorepo" preset addition then it's OK to raise a PR directly as that can be more efficient than a GitHub Discussion.
 
 ## Organization level presets
 

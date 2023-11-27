@@ -23,7 +23,7 @@ const Assets = z.array(
     version: z.string(),
     files: z.string().array(),
     sri: z.record(z.string()).optional(),
-  })
+  }),
 );
 
 export class CdnJsDatasource extends Datasource {
@@ -62,7 +62,7 @@ export class CdnJsDatasource extends Datasource {
                 }
 
                 return res;
-              })
+              }),
           ),
         });
 

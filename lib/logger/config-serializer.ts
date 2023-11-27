@@ -2,7 +2,7 @@ import traverse from 'traverse';
 import type { RenovateConfig } from '../config/types';
 
 export default function configSerializer(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): RenovateConfig {
   const templateFields = ['prBody'];
   const contentFields = [

@@ -45,12 +45,12 @@ export class ConanDatasource extends Datasource {
 
   async getConanCenterReleases(
     conanName: string,
-    userAndChannel: string
+    userAndChannel: string,
   ): Promise<ReleaseResult | null> {
     if (userAndChannel && userAndChannel !== '@_/_') {
       logger.debug(
         { conanName, userAndChannel },
-        'User/channel not supported for Conan Center lookups'
+        'User/channel not supported for Conan Center lookups',
       );
       return null;
     }
@@ -76,7 +76,7 @@ export class ConanDatasource extends Datasource {
   })
   override async getDigest(
     { registryUrl, packageName }: DigestConfig,
-    newValue?: string
+    newValue?: string,
   ): Promise<string | null> {
     if (is.undefined(newValue) || is.undefined(registryUrl)) {
       return null;
@@ -89,11 +89,10 @@ export class ConanDatasource extends Datasource {
       conanPackage.conanName,
       newValue,
       conanPackage.userAndChannel,
-      '/revisions'
+      '/revisions',
     );
-    const revisionRep = await this.http.getJson<ConanRevisionsJSON>(
-      revisionLookUp
-    );
+    const revisionRep =
+      await this.http.getJson<ConanRevisionsJSON>(revisionLookUp);
     const revisions = revisionRep?.body.revisions;
     return revisions?.[0].revision ?? null;
   }
@@ -116,20 +115,20 @@ export class ConanDatasource extends Datasource {
     ) {
       return this.getConanCenterReleases(
         conanPackage.conanName,
-        userAndChannel
+        userAndChannel,
       );
     }
 
     logger.trace(
       { packageName, registryUrl },
-      'Looking up conan api dependency'
+      'Looking up conan api dependency',
     );
 
     if (registryUrl) {
       const url = ensureTrailingSlash(registryUrl);
       const lookupUrl = joinUrlParts(
         url,
-        `v2/conans/search?q=${conanPackage.conanName}`
+        `v2/conans/search?q=${conanPackage.conanName}`,
       );
 
       try {
@@ -173,26 +172,24 @@ export class ConanDatasource extends Datasource {
                 return dep;
               }
               logger.debug(
-                `Conan package ${packageName} has latest version ${latestVersion}`
+                `Conan package ${packageName} has latest version ${latestVersion}`,
               );
 
               const latestRevisionUrl = joinUrlParts(
                 url,
-                `v2/conans/${conanPackage.conanName}/${latestVersion}/${conanPackage.userAndChannel}/latest`
+                `v2/conans/${conanPackage.conanName}/${latestVersion}/${conanPackage.userAndChannel}/latest`,
               );
-              const revResp = await this.http.getJson<ConanRevisionJSON>(
-                latestRevisionUrl
-              );
+              const revResp =
+                await this.http.getJson<ConanRevisionJSON>(latestRevisionUrl);
               const packageRev = revResp.body.revision;
 
               const [user, channel] = conanPackage.userAndChannel.split('/');
               const packageUrl = joinUrlParts(
                 `${groups.host}/artifactory/api/storage/${groups.repo}`,
-                `${user}/${conanPackage.conanName}/${latestVersion}/${channel}/${packageRev}/export/conanfile.py?properties=conan.package.url`
+                `${user}/${conanPackage.conanName}/${latestVersion}/${channel}/${packageRev}/export/conanfile.py?properties=conan.package.url`,
               );
-              const packageUrlResp = await this.http.getJson<ConanProperties>(
-                packageUrl
-              );
+              const packageUrlResp =
+                await this.http.getJson<ConanProperties>(packageUrl);
 
               if (
                 packageUrlResp.body.properties &&

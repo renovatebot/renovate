@@ -98,7 +98,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -110,7 +110,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: [],
-      })
+      }),
     );
 
     expect(
@@ -119,7 +119,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
@@ -147,7 +147,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -157,7 +157,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -199,7 +199,7 @@ describe('modules/manager/gomod/artifacts', () => {
         modified: ['go.sum', foo],
         not_added: [bar],
         deleted: [baz],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce('Foo go.sum');
@@ -283,7 +283,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -296,7 +296,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -345,7 +345,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -358,7 +358,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -388,7 +388,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -398,7 +398,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -435,7 +435,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -448,7 +448,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -544,7 +544,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -557,7 +557,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -612,7 +612,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -625,7 +625,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -653,7 +653,7 @@ describe('modules/manager/gomod/artifacts', () => {
             }),
           }),
         }),
-      ])
+      ]),
     );
   });
 
@@ -677,7 +677,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -690,7 +690,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -727,7 +727,7 @@ describe('modules/manager/gomod/artifacts', () => {
             }),
           }),
         }),
-      ])
+      ]),
     );
   });
 
@@ -751,7 +751,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -764,7 +764,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -792,7 +792,7 @@ describe('modules/manager/gomod/artifacts', () => {
             }),
           }),
         }),
-      ])
+      ]),
     );
   });
 
@@ -824,7 +824,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -837,7 +837,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -882,7 +882,7 @@ describe('modules/manager/gomod/artifacts', () => {
             }),
           }),
         }),
-      ])
+      ]),
     );
   });
 
@@ -905,7 +905,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -918,7 +918,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -945,7 +945,7 @@ describe('modules/manager/gomod/artifacts', () => {
             }),
           }),
         }),
-      ])
+      ]),
     );
   });
 
@@ -958,7 +958,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
@@ -976,7 +976,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           postUpdateOptions: ['gomodTidy'],
         },
-      })
+      }),
     ).toEqual([
       { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
@@ -1022,7 +1022,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
@@ -1040,7 +1040,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           postUpdateOptions: ['gomodTidy1.17'],
         },
-      })
+      }),
     ).toEqual([
       { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
@@ -1086,7 +1086,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
@@ -1104,7 +1104,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           postUpdateOptions: ['gomodTidyE', 'gomodTidy1.17'],
         },
-      })
+      }),
     ).toEqual([
       { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
@@ -1150,7 +1150,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
@@ -1168,7 +1168,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           postUpdateOptions: ['gomodTidyE'],
         },
-      })
+      }),
     ).toEqual([
       { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
@@ -1219,7 +1219,7 @@ describe('modules/manager/gomod/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: gomod1,
         config,
-      })
+      }),
     ).toEqual([
       {
         artifactError: {
@@ -1238,7 +1238,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum', 'main.go'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1256,7 +1256,7 @@ describe('modules/manager/gomod/artifacts', () => {
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
-      })
+      }),
     ).toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
@@ -1293,7 +1293,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum', 'main.go'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1312,7 +1312,7 @@ describe('modules/manager/gomod/artifacts', () => {
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
-      })
+      }),
     ).toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
@@ -1353,7 +1353,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1370,7 +1370,7 @@ describe('modules/manager/gomod/artifacts', () => {
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
-      })
+      }),
     ).toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
@@ -1398,7 +1398,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1415,7 +1415,7 @@ describe('modules/manager/gomod/artifacts', () => {
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
-      })
+      }),
     ).toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
@@ -1444,7 +1444,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1464,7 +1464,7 @@ describe('modules/manager/gomod/artifacts', () => {
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
-      })
+      }),
     ).toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
@@ -1492,7 +1492,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum', 'main.go'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1509,7 +1509,7 @@ describe('modules/manager/gomod/artifacts', () => {
           newMajor: 28,
           postUpdateOptions: ['gomodTidy'],
         },
-      })
+      }),
     ).toEqual([
       { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New main.go', path: 'go.mod', type: 'addition' } },
@@ -1529,7 +1529,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum', 'main.go'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1545,7 +1545,7 @@ describe('modules/manager/gomod/artifacts', () => {
           updateType: 'major',
           newMajor: 28,
         },
-      })
+      }),
     ).toEqual([
       { file: { contents: 'New go.sum', path: 'go.sum', type: 'addition' } },
       { file: { contents: 'New main.go', path: 'go.mod', type: 'addition' } },
@@ -1566,7 +1566,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum', 'main.go'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1587,7 +1587,7 @@ describe('modules/manager/gomod/artifacts', () => {
             gomodMod: 'v1.2.3',
           },
         },
-      })
+      }),
     ).toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
@@ -1625,7 +1625,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum', 'main.go'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1646,7 +1646,7 @@ describe('modules/manager/gomod/artifacts', () => {
             gomodMod: 'a.b.c',
           },
         },
-      })
+      }),
     ).toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
@@ -1683,7 +1683,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1701,7 +1701,7 @@ describe('modules/manager/gomod/artifacts', () => {
           updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
-      })
+      }),
     ).toEqual([
       { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
@@ -1743,7 +1743,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum', 'main.go'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1802,7 +1802,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum', 'main.go'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1874,7 +1874,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum', 'main.go'],
-      })
+      }),
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
@@ -1947,7 +1947,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: [],
-      })
+      }),
     );
 
     expect(
@@ -1959,7 +1959,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           goGetDirs: ['.', 'foo', '.bar/...', '&&', 'cat', '/etc/passwd'],
         },
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
@@ -1978,7 +1978,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -1991,7 +1991,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           goGetDirs: ['.'],
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -2018,7 +2018,7 @@ describe('modules/manager/gomod/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['go.sum'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
@@ -2031,7 +2031,7 @@ describe('modules/manager/gomod/artifacts', () => {
           ...config,
           goGetDirs: ['/etc', '../../../'],
         },
-      })
+      }),
     ).toEqual([
       { artifactError: { lockFile: 'go.sum', stderr: 'Invalid goGetDirs' } },
     ]);

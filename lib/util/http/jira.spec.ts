@@ -6,7 +6,7 @@ describe('util/http/jira', () => {
 
   it('throws error if setBaseUrl not called', async () => {
     await expect(api.postJson('some-path')).rejects.toThrow(
-      new TypeError('Invalid URL')
+      new TypeError('Invalid URL'),
     );
   });
 
@@ -22,7 +22,6 @@ describe('util/http/jira', () => {
         'content-type': 'application/json',
       },
       statusCode: 200,
-      url: 'https://some-site.atlassian.com/some-path',
     });
   });
 });

@@ -33,7 +33,7 @@ But Renovate may not find all your files.
 
 You can tell Renovate where to find your file(s) by setting your own `fileMatch` regex:
 
-```json
+```json title="Setting a custom fileMatch regex"
 {
   "pip_requirements": {
     "fileMatch": ["my/specifically-named.file", "\\.requirements$"]
@@ -55,9 +55,7 @@ There are three ways to do this:
 
 ### index-url in `requirements.txt`
 
-You can set the index URL in the first line of the `requirements.txt`, for example:
-
-```
+```title="Setting index URL in first line of requirements.txt"
 --index-url http://example.com/private-pypi/
 some-package==0.3.1
 some-other-package==1.0.0
@@ -92,9 +90,7 @@ Fill the array with alternate index URL(s).
 
 ## Disabling Python support
 
-To disable all managers with `language` set to `python` in Renovate, do this:
-
-```json
+```json title="Disabling all managers where language is set to Python"
 {
   "python": {
     "enabled": false
@@ -103,9 +99,8 @@ To disable all managers with `language` set to `python` in Renovate, do this:
 ```
 
 Alternatively, you can use `enabledManagers` to tell Renovate what package managers it can use.
-For example, if you only want to use Renovate's `npm` package manager:
 
-```json
+```json title="Only use Renovate's npm package manager"
 {
   "enabledManagers": ["npm"]
 }

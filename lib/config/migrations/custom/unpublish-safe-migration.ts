@@ -32,7 +32,7 @@ export class UnpublishSafeMigration extends AbstractMigration {
           }
 
           return item;
-        })
+        }),
       );
     }
   }

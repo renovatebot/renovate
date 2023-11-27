@@ -182,35 +182,35 @@ describe('modules/datasource/npm/index', () => {
       .get('/foobar')
       .reply(200, 'oops');
     await expect(
-      getPkgReleases({ datasource, packageName: 'foobar' })
+      getPkgReleases({ datasource, packageName: 'foobar' }),
     ).rejects.toThrow();
   });
 
   it('should throw error for 429', async () => {
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(429);
     await expect(
-      getPkgReleases({ datasource, packageName: 'foobar' })
+      getPkgReleases({ datasource, packageName: 'foobar' }),
     ).rejects.toThrow();
   });
 
   it('should throw error for 5xx', async () => {
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(503);
     await expect(
-      getPkgReleases({ datasource, packageName: 'foobar' })
+      getPkgReleases({ datasource, packageName: 'foobar' }),
     ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
 
   it('should throw error for 408', async () => {
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(408);
     await expect(
-      getPkgReleases({ datasource, packageName: 'foobar' })
+      getPkgReleases({ datasource, packageName: 'foobar' }),
     ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
 
   it('should throw error for others', async () => {
     httpMock.scope('https://registry.npmjs.org').get('/foobar').reply(451);
     await expect(
-      getPkgReleases({ datasource, packageName: 'foobar' })
+      getPkgReleases({ datasource, packageName: 'foobar' }),
     ).rejects.toThrow();
   });
 
@@ -273,7 +273,7 @@ describe('modules/datasource/npm/index', () => {
         'https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry',
         {
           reqheaders: { authorization: 'Bearer abc' },
-        }
+        },
       )
       .get('/foobar')
       .reply(200, npmResponse);
@@ -345,7 +345,7 @@ describe('modules/datasource/npm/index', () => {
     GlobalConfig.set({ exposeAllEnv: true });
 
     expect(() => setNpmrc('registry=${REGISTRY_MISSING}')).toThrow(
-      Error('env-replace')
+      Error('env-replace'),
     );
   });
 });

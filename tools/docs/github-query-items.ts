@@ -46,7 +46,7 @@ export interface Items {
 }
 
 export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
-  const q = `repo:renovatebot/renovate type:issue is:open -label:priority-5-triage`;
+  const q = `repo:renovatebot/renovate type:issue is:open`;
   const per_page = 100;
   try {
     const query = getQueryString({ q, per_page });
@@ -55,7 +55,7 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
       {
         paginationField: 'items',
         paginate: true,
-      }
+      },
     );
     const rawItems = res.body?.items ?? [];
 
@@ -119,7 +119,7 @@ function stringifyIssues(items: ItemsEntity[] | undefined): string {
 
 export function generateFeatureAndBugMarkdown(
   issuesMap: OpenItems,
-  key: string
+  key: string,
 ): string {
   let md = '\n\n';
 

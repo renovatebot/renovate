@@ -25,7 +25,7 @@ export const PackageLockV3Schema = z.object({
       .string()
       .transform((x) => x.replace(/^node_modules\//, ''))
       .refine((x) => x.trim() !== ''),
-    z.object({ version: z.string() })
+    z.object({ version: z.string() }),
   ),
 });
 
@@ -40,7 +40,7 @@ export const PackageLockPreV3Schema = z
   }));
 
 export const PackageLock = Json.pipe(
-  z.union([PackageLockV3Schema, PackageLockPreV3Schema])
+  z.union([PackageLockV3Schema, PackageLockPreV3Schema]),
 ).transform(({ packages, lockfileVersion }) => {
   const lockedVersions: Record<string, string> = {};
   for (const [entry, val] of Object.entries(packages)) {

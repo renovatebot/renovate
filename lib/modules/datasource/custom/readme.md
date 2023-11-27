@@ -10,7 +10,7 @@ Options:
 | option                     | default | description                                                                                                                                                              |
 | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | defaultRegistryUrlTemplate | ""      | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
-| format                     | "json"  | format used by the API. Available values are: `json`, `plain`, `html`                                                                                                    |
+| format                     | "json"  | format used by the API. Available values are: `json`, `plain`, `html`                                                                                                            |
 | transformTemplates         | []      | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 Available template variables:
@@ -118,6 +118,39 @@ When Renovate receives this response with the `plain` format, it will convert it
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
 
+### Yaml
+
+If `yaml` is used, response is parsed and converted into JSON for further processing.
+
+Suppose the body of the HTTP response is as follows:
+
+```yaml
+releases:
+  - version: 1.0.0
+  - version: 2.0.0
+  - version: 3.0.0
+```
+
+When Renovate receives this response with the `yaml` format, it will convert it into the following:
+
+```json
+{
+  "releases": [
+    {
+      "version": "1.0.0"
+    },
+    {
+      "version": "2.0.0"
+    },
+    {
+      "version": "3.0.0"
+    }
+  ]
+}
+```
+
+After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
+
 #### HTML
 
 If the format is set to `html`, Renovate will call the HTTP endpoint with the `Accept` header value `text/html`.
@@ -141,19 +174,17 @@ The following JSON will be generated:
   "releases": [
     {
       "version": "package-1.0.tar.gz",
-      "sourceUrl": "https://example.com/package-1.0.tar.gz"
     },
     {
       "version": "package-1.0.tar.gz",
-      "sourceUrl": "https://example.com/package-2.0.tar.gz"
     }
   ]
 }
 ```
 
-`href` attribute value becomes the `version`, and `sourceUrl` is set to the full resolved URL.
+`href` attribute value becomes the `version`.
 
-To extract the actual version number, you could use `extractVersion` or JSONata rules.
+To extract the version number, you could use `extractVersion` or JSONata rules.
 
 ## Examples
 
@@ -314,6 +345,23 @@ And the following custom manager:
   ]
 }
 ```
+
+Or if you have the datasource locally, you can also define your local registry by prefixing it with `file://`:
+
+```json
+{
+  "customDatasources": {
+    "local_generic": {
+      "defaultRegistryUrlTemplate": "file://dependencies/{{packageName}}/versiontracker.json",
+      "transformTemplates": [
+        "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"sourceUrl\": $v.filelink } }) }"
+      ]
+    }
+  }
+}
+```
+
+Renovate will then parse your file from your current folder to access it.
 
 ### nginx directory listing
 

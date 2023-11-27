@@ -13,7 +13,7 @@ export { mergeChildConfig };
 
 export function getManagerConfig(
   config: RenovateConfig,
-  manager: string
+  manager: string,
 ): ManagerConfig {
   let managerConfig: ManagerConfig = {
     ...config,
@@ -33,7 +33,7 @@ export function getManagerConfig(
 
 export function filterConfig(
   inputConfig: AllConfig,
-  targetStage: RenovateConfigStage
+  targetStage: RenovateConfigStage,
 ): AllConfig {
   logger.trace({ config: inputConfig }, `filterConfig('${targetStage}')`);
   const outputConfig: RenovateConfig = { ...inputConfig };

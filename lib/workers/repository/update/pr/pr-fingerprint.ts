@@ -45,7 +45,7 @@ export interface PrBodyFingerprintConfig {
 }
 
 export function generatePrBodyFingerprintConfig(
-  config: BranchConfig
+  config: BranchConfig,
 ): PrBodyFingerprintConfig {
   const filteredUpgrades = config.upgrades.map((upgrade) => {
     return {
@@ -85,7 +85,7 @@ export function generatePrBodyFingerprintConfig(
 
 export function validatePrCache(
   prCache: PrCache,
-  bodyFingerprint: string
+  bodyFingerprint: string,
 ): boolean {
   if (prCache.bodyFingerprint !== bodyFingerprint) {
     logger.debug('PR fingerprints mismatch, processing PR');
@@ -94,13 +94,13 @@ export function validatePrCache(
 
   if (getElapsedHours(prCache.lastEdited) < 24) {
     logger.debug(
-      'PR cache matches but it has been edited in the past 24hrs, so processing PR'
+      'PR cache matches but it has been edited in the past 24hrs, so processing PR',
     );
     return false;
   }
 
   logger.debug(
-    'PR cache matches and no PR changes in last 24hrs, so skipping PR body check'
+    'PR cache matches and no PR changes in last 24hrs, so skipping PR body check',
   );
   return true;
 }

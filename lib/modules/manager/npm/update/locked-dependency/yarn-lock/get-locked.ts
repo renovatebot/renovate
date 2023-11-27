@@ -23,7 +23,7 @@ export function parseEntry(depNameConstraint: string): {
 export function getYarn1LockedDependencies(
   yarnLock: YarnLock,
   depName: string,
-  currentVersion: string
+  currentVersion: string,
 ): YarnLockEntrySummary[] {
   const res: YarnLockEntrySummary[] = [];
   try {
@@ -47,7 +47,7 @@ export function getYarn1LockedDependencies(
 export function getYarn2LockedDependencies(
   yarnLock: YarnLock,
   depName: string,
-  currentVersion: string
+  currentVersion: string,
 ): YarnLockEntrySummary[] {
   const res: YarnLockEntrySummary[] = [];
   try {
@@ -79,7 +79,7 @@ export function getYarn2LockedDependencies(
 export function getLockedDependencies(
   yarnLock: YarnLock,
   depName: string,
-  currentVersion: string
+  currentVersion: string,
 ): YarnLockEntrySummary[] {
   if ('__metadata' in yarnLock) {
     return getYarn2LockedDependencies(yarnLock, depName, currentVersion);

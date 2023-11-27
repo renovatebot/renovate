@@ -81,9 +81,6 @@ export interface NpmLockFiles {
 
 export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
   hasPackageManager?: boolean;
-  lernaClient?: string;
-  lernaJsonFile?: string;
-  lernaPackages?: string[];
   packageJsonName?: string;
   parents?: string[];
   yarnZeroInstall?: boolean;

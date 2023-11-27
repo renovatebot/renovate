@@ -52,7 +52,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -64,7 +64,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'eventlet' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -77,7 +77,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }, { depName: 'boto3-stubs' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -101,7 +101,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }, { depName: 'boto3-stubs' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -137,7 +137,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         ],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -167,7 +167,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         artifactError: {
@@ -205,7 +205,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -254,7 +254,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {

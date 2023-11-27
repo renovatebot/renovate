@@ -18,6 +18,7 @@ import {
 import type { logger as _logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
+import type { LongCommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gitea';
 import type { PlatformResult } from '../types';
 import type {
@@ -50,7 +51,8 @@ describe('modules/platform/gitea/index', () => {
   let gitvcs: jest.Mocked<typeof _git>;
   let hostRules: typeof import('../../../util/host-rules');
 
-  const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
+  const mockCommitHash =
+    '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
 
   const mockUser: User = {
     id: 1,
@@ -93,7 +95,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'some-base-branch' },
       head: {
         label: 'some-head-branch',
-        sha: 'some-head-sha',
+        sha: 'some-head-sha' as LongCommitSha,
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -109,7 +111,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'other-base-branch' },
       head: {
         label: 'other-head-branch',
-        sha: 'other-head-sha',
+        sha: 'other-head-sha' as LongCommitSha,
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -125,7 +127,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'draft-base-branch' },
       head: {
         label: 'draft-head-branch',
-        sha: 'draft-head-sha',
+        sha: 'draft-head-sha' as LongCommitSha,
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -226,7 +228,7 @@ describe('modules/platform/gitea/index', () => {
 
   function initFakeRepo(
     repo?: Partial<Repo>,
-    config?: Partial<RepoParams>
+    config?: Partial<RepoParams>,
   ): Promise<RepoResult> {
     helper.getRepo.mockResolvedValueOnce({ ...mockRepo, ...repo });
 
@@ -245,7 +247,7 @@ describe('modules/platform/gitea/index', () => {
       helper.getCurrentUser.mockRejectedValueOnce(new Error());
 
       await expect(
-        gitea.initPlatform({ token: 'some-token' })
+        gitea.initPlatform({ token: 'some-token' }),
       ).rejects.toThrow();
     });
 
@@ -253,7 +255,7 @@ describe('modules/platform/gitea/index', () => {
       helper.getCurrentUser.mockResolvedValueOnce(mockUser);
 
       expect(
-        await gitea.initPlatform({ token: 'some-token' })
+        await gitea.initPlatform({ token: 'some-token' }),
       ).toMatchSnapshot();
     });
 
@@ -264,7 +266,7 @@ describe('modules/platform/gitea/index', () => {
         await gitea.initPlatform({
           token: 'some-token',
           endpoint: 'https://gitea.renovatebot.com',
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -275,7 +277,7 @@ describe('modules/platform/gitea/index', () => {
         await gitea.initPlatform({
           token: 'some-token',
           endpoint: 'https://gitea.renovatebot.com/api/v1',
-        })
+        }),
       ).toMatchObject({
         endpoint: 'https://gitea.renovatebot.com/',
       });
@@ -288,7 +290,7 @@ describe('modules/platform/gitea/index', () => {
       });
 
       expect(
-        await gitea.initPlatform({ token: 'some-token' })
+        await gitea.initPlatform({ token: 'some-token' }),
       ).toMatchSnapshot();
     });
   });
@@ -341,19 +343,19 @@ describe('modules/platform/gitea/index', () => {
 
     it('should abort when repo is archived', async () => {
       await expect(initFakeRepo({ archived: true })).rejects.toThrow(
-        REPOSITORY_ARCHIVED
+        REPOSITORY_ARCHIVED,
       );
     });
 
     it('should abort when repo is mirrored', async () => {
       await expect(initFakeRepo({ mirror: true })).rejects.toThrow(
-        REPOSITORY_MIRRORED
+        REPOSITORY_MIRRORED,
       );
     });
 
     it('should abort when repo is empty', async () => {
       await expect(initFakeRepo({ empty: true })).rejects.toThrow(
-        REPOSITORY_EMPTY
+        REPOSITORY_EMPTY,
       );
     });
 
@@ -365,25 +367,28 @@ describe('modules/platform/gitea/index', () => {
             push: false,
             admin: false,
           },
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_ACCESS_FORBIDDEN);
     });
 
     it('should abort when repo has no available merge methods', async () => {
       await expect(initFakeRepo({ allow_rebase: false })).rejects.toThrow(
-        REPOSITORY_BLOCKED
+        REPOSITORY_BLOCKED,
       );
     });
 
     it('should fall back to merge method "rebase-merge"', async () => {
       expect(
-        await initFakeRepo({ allow_rebase: false, allow_rebase_explicit: true })
+        await initFakeRepo({
+          allow_rebase: false,
+          allow_rebase_explicit: true,
+        }),
       ).toMatchSnapshot();
     });
 
     it('should fall back to merge method "squash"', async () => {
       expect(
-        await initFakeRepo({ allow_rebase: false, allow_squash_merge: true })
+        await initFakeRepo({ allow_rebase: false, allow_squash_merge: true }),
       ).toMatchSnapshot();
     });
 
@@ -392,7 +397,7 @@ describe('modules/platform/gitea/index', () => {
         await initFakeRepo({
           allow_rebase: false,
           allow_merge_commits: true,
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -406,7 +411,7 @@ describe('modules/platform/gitea/index', () => {
       await gitea.initRepo(repoCfg);
 
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
-        expect.objectContaining({ url: mockRepo.clone_url })
+        expect.objectContaining({ url: mockRepo.clone_url }),
       );
     });
 
@@ -421,7 +426,7 @@ describe('modules/platform/gitea/index', () => {
       await gitea.initRepo(repoCfg);
 
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
-        expect.objectContaining({ url: mockRepo.clone_url })
+        expect.objectContaining({ url: mockRepo.clone_url }),
       );
     });
 
@@ -436,7 +441,7 @@ describe('modules/platform/gitea/index', () => {
       await gitea.initRepo(repoCfg);
 
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
-        expect.objectContaining({ url: mockRepo.ssh_url })
+        expect.objectContaining({ url: mockRepo.ssh_url }),
       );
     });
 
@@ -450,7 +455,7 @@ describe('modules/platform/gitea/index', () => {
       };
 
       await expect(gitea.initRepo(repoCfg)).rejects.toThrow(
-        CONFIG_GIT_URL_UNAVAILABLE
+        CONFIG_GIT_URL_UNAVAILABLE,
       );
     });
 
@@ -467,7 +472,7 @@ describe('modules/platform/gitea/index', () => {
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
         expect.objectContaining({
           url: `https://gitea.com/${mockRepo.full_name}.git`,
-        })
+        }),
       );
     });
 
@@ -483,7 +488,7 @@ describe('modules/platform/gitea/index', () => {
       };
 
       await expect(gitea.initRepo(repoCfg)).rejects.toThrow(
-        CONFIG_GIT_URL_UNAVAILABLE
+        CONFIG_GIT_URL_UNAVAILABLE,
       );
     });
 
@@ -509,7 +514,7 @@ describe('modules/platform/gitea/index', () => {
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
         expect.objectContaining({
           url: `https://${token}@gitea.com/${mockRepo.full_name}.git`,
-        })
+        }),
       );
     });
 
@@ -532,7 +537,7 @@ describe('modules/platform/gitea/index', () => {
       const url = new URL(`${mockRepo.clone_url}`);
       url.username = token;
       expect(gitvcs.initRepo).toHaveBeenCalledWith(
-        expect.objectContaining({ url: url.toString() })
+        expect.objectContaining({ url: url.toString() }),
       );
     });
 
@@ -548,7 +553,7 @@ describe('modules/platform/gitea/index', () => {
       };
 
       await expect(gitea.initRepo(repoCfg)).rejects.toThrow(
-        CONFIG_GIT_URL_UNAVAILABLE
+        CONFIG_GIT_URL_UNAVAILABLE,
       );
     });
   });
@@ -576,7 +581,7 @@ describe('modules/platform/gitea/index', () => {
           state: 'success',
           context: 'some-context',
           description: 'some-description',
-        }
+        },
       );
     });
 
@@ -591,7 +596,7 @@ describe('modules/platform/gitea/index', () => {
           state: 'pending',
           context: 'some-context',
           description: 'some-description',
-        }
+        },
       );
     });
 
@@ -607,7 +612,7 @@ describe('modules/platform/gitea/index', () => {
           context: 'some-context',
           description: 'some-description',
           target_url: 'some-url',
-        }
+        },
       );
     });
 
@@ -625,7 +630,7 @@ describe('modules/platform/gitea/index', () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
         partial<CombinedCommitStatus>({
           worstStatus: state as CommitStatusType,
-        })
+        }),
       );
 
       return gitea.getBranchStatus('some-branch', true);
@@ -651,17 +656,17 @@ describe('modules/platform/gitea/index', () => {
       helper.getCombinedCommitStatus.mockRejectedValueOnce({ statusCode: 404 });
 
       await expect(gitea.getBranchStatus('some-branch', true)).rejects.toThrow(
-        REPOSITORY_CHANGED
+        REPOSITORY_CHANGED,
       );
     });
 
     it('should propagate any other errors', async () => {
       helper.getCombinedCommitStatus.mockRejectedValueOnce(
-        new Error('getCombinedCommitStatus()')
+        new Error('getCombinedCommitStatus()'),
       );
 
       await expect(gitea.getBranchStatus('some-branch', true)).rejects.toThrow(
-        'getCombinedCommitStatus()'
+        'getCombinedCommitStatus()',
       );
     });
 
@@ -697,7 +702,7 @@ describe('modules/platform/gitea/index', () => {
               created_at: '',
             },
           ],
-        })
+        }),
       );
       expect(await gitea.getBranchStatus('some-branch', false)).toBe('yellow');
     });
@@ -708,11 +713,11 @@ describe('modules/platform/gitea/index', () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
         partial<CombinedCommitStatus>({
           statuses: [],
-        })
+        }),
       );
 
       expect(
-        await gitea.getBranchStatusCheck('some-branch', 'some-context')
+        await gitea.getBranchStatusCheck('some-branch', 'some-context'),
       ).toBeNull();
     });
 
@@ -720,11 +725,11 @@ describe('modules/platform/gitea/index', () => {
       helper.getCombinedCommitStatus.mockResolvedValueOnce(
         partial<CombinedCommitStatus>({
           statuses: [partial<CommitStatus>({ context: 'other-context' })],
-        })
+        }),
       );
 
       expect(
-        await gitea.getBranchStatusCheck('some-branch', 'some-context')
+        await gitea.getBranchStatusCheck('some-branch', 'some-context'),
       ).toBeNull();
     });
 
@@ -736,11 +741,11 @@ describe('modules/platform/gitea/index', () => {
               context: 'some-context',
             }),
           ],
-        })
+        }),
       );
 
       expect(
-        await gitea.getBranchStatusCheck('some-branch', 'some-context')
+        await gitea.getBranchStatusCheck('some-branch', 'some-context'),
       ).toBe('yellow');
     });
 
@@ -753,11 +758,11 @@ describe('modules/platform/gitea/index', () => {
               context: 'some-context',
             }),
           ],
-        })
+        }),
       );
 
       expect(
-        await gitea.getBranchStatusCheck('some-branch', 'some-context')
+        await gitea.getBranchStatusCheck('some-branch', 'some-context'),
       ).toBe('green');
     });
   });
@@ -776,7 +781,7 @@ describe('modules/platform/gitea/index', () => {
       helper.getCurrentUser.mockResolvedValueOnce(mockUser);
 
       expect(
-        await gitea.initPlatform({ token: 'some-token' })
+        await gitea.initPlatform({ token: 'some-token' }),
       ).toMatchSnapshot();
 
       await initFakeRepo();
@@ -794,7 +799,7 @@ describe('modules/platform/gitea/index', () => {
           base: { ref: 'third-party-base-branch' },
           head: {
             label: 'other-head-branch',
-            sha: 'other-head-sha',
+            sha: 'other-head-sha' as LongCommitSha,
             repo: partial<Repo>({ full_name: mockRepo.full_name }),
           },
           user: { username: 'not-renovate' },
@@ -830,7 +835,7 @@ describe('modules/platform/gitea/index', () => {
               email: 'renovate@whitesourcesoftware.com',
             }),
           },
-        })
+        }),
       );
       await initFakeRepo();
 
@@ -913,7 +918,7 @@ describe('modules/platform/gitea/index', () => {
         await gitea.findPr({
           branchName: mockPR.head.label,
           state: `!${mockPR.state as PrState}` as never, // wrong argument being passed intentionally
-        })
+        }),
       ).toBeNull();
     });
 
@@ -1103,7 +1108,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.updatePR).toHaveBeenCalledWith(
         mockRepo.full_name,
         mockNewPR.number,
-        { title: 'new-title', body: 'new-body' }
+        { title: 'new-title', body: 'new-body' },
       );
     });
 
@@ -1117,7 +1122,7 @@ describe('modules/platform/gitea/index', () => {
           targetBranch: 'master',
           prTitle: mockNewPR.title,
           prBody: mockNewPR.body,
-        })
+        }),
       ).rejects.toThrow();
     });
 
@@ -1150,7 +1155,7 @@ describe('modules/platform/gitea/index', () => {
         {
           Do: 'rebase',
           merge_when_checks_succeed: true,
-        }
+        },
       );
     });
 
@@ -1184,7 +1189,7 @@ describe('modules/platform/gitea/index', () => {
         {
           Do: 'rebase',
           merge_when_checks_succeed: true,
-        }
+        },
       );
     });
 
@@ -1300,7 +1305,7 @@ describe('modules/platform/gitea/index', () => {
         await gitea.mergePr({
           branchName: 'some-branch',
           id: 1,
-        })
+        }),
       ).toBe(true);
       expect(helper.mergePR).toHaveBeenCalledTimes(1);
       expect(helper.mergePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
@@ -1317,7 +1322,7 @@ describe('modules/platform/gitea/index', () => {
           branchName: 'some-branch',
           id: 1,
           strategy: 'squash',
-        })
+        }),
       ).toBe(false);
     });
   });
@@ -1330,7 +1335,7 @@ describe('modules/platform/gitea/index', () => {
 
       expect(await gitea.getIssue?.(mockIssue.number)).toHaveProperty(
         'number',
-        mockIssue.number
+        mockIssue.number,
       );
     });
   });
@@ -1344,7 +1349,7 @@ describe('modules/platform/gitea/index', () => {
 
       expect(await gitea.findIssue(mockIssue.title)).toHaveProperty(
         'number',
-        mockIssue.number
+        mockIssue.number,
       );
     });
 
@@ -1440,7 +1445,7 @@ describe('modules/platform/gitea/index', () => {
           body: closedIssue.body,
           state: closedIssue.state,
           title: 'closed-issue',
-        }
+        },
       );
     });
 
@@ -1509,7 +1514,7 @@ describe('modules/platform/gitea/index', () => {
         mockIssue.number,
         {
           labels: [1, 3],
-        }
+        },
       );
     });
 
@@ -1548,7 +1553,7 @@ describe('modules/platform/gitea/index', () => {
         mockIssue.number,
         {
           labels: [1, 3],
-        }
+        },
       );
     });
 
@@ -1574,7 +1579,7 @@ describe('modules/platform/gitea/index', () => {
           body: closedIssue.body,
           state: 'open',
           title: 'closed-issue',
-        }
+        },
       );
     });
 
@@ -1596,7 +1601,7 @@ describe('modules/platform/gitea/index', () => {
 
     it('should close all open duplicate issues except first one when updating', async () => {
       const duplicates = mockIssues.filter(
-        (i) => i.title === 'duplicate-issue'
+        (i) => i.title === 'duplicate-issue',
       );
       const firstDuplicate = duplicates[0];
       helper.searchIssues.mockResolvedValueOnce(duplicates);
@@ -1616,7 +1621,7 @@ describe('modules/platform/gitea/index', () => {
           // eslint-disable-next-line jest/no-conditional-expect
           expect(helper.closeIssue).toHaveBeenCalledWith(
             mockRepo.full_name,
-            issue.number
+            issue.number,
           );
         }
       }
@@ -1664,7 +1669,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.closeIssue).toHaveBeenCalledTimes(1);
       expect(helper.closeIssue).toHaveBeenCalledWith(
         mockRepo.full_name,
-        mockIssue.number
+        mockIssue.number,
       );
     });
   });
@@ -1681,7 +1686,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.unassignLabel).toHaveBeenCalledWith(
         mockRepo.full_name,
         42,
-        mockLabel.id
+        mockLabel.id,
       );
     });
 
@@ -1721,7 +1726,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.createComment).toHaveBeenCalledWith(
         mockRepo.full_name,
         1,
-        body
+        body,
       );
     });
 
@@ -1742,7 +1747,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.createComment).toHaveBeenCalledWith(
         mockRepo.full_name,
         1,
-        'other-content'
+        'other-content',
       );
     });
 
@@ -1764,7 +1769,7 @@ describe('modules/platform/gitea/index', () => {
       expect(helper.updateComment).toHaveBeenCalledWith(
         mockRepo.full_name,
         13,
-        body
+        body,
       );
     });
 
@@ -1857,7 +1862,7 @@ describe('modules/platform/gitea/index', () => {
 
       expect(await gitea.getBranchPr(mockPR.head.label)).toHaveProperty(
         'number',
-        mockPR.number
+        mockPR.number,
       );
     });
 
@@ -1887,7 +1892,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakePlatform();
       const mockPR = mockPRs[0];
       await expect(
-        gitea.addReviewers(mockPR.number, ['me', 'you'])
+        gitea.addReviewers(mockPR.number, ['me', 'you']),
       ).resolves.not.toThrow();
 
       expect(helper.requestPrReviewers).toHaveBeenCalledTimes(1);
@@ -1898,7 +1903,7 @@ describe('modules/platform/gitea/index', () => {
       expect.assertions(3);
       const mockPR = mockPRs[0];
       await expect(
-        gitea.addReviewers(mockPR.number, ['me', 'you'])
+        gitea.addReviewers(mockPR.number, ['me', 'you']),
       ).resolves.not.toThrow();
 
       expect(helper.requestPrReviewers).not.toHaveBeenCalled();
@@ -1911,7 +1916,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakePlatform();
       helper.requestPrReviewers.mockRejectedValueOnce(null);
       await expect(
-        gitea.addReviewers(mockPR.number, ['me', 'you'])
+        gitea.addReviewers(mockPR.number, ['me', 'you']),
       ).resolves.not.toThrow();
       expect(logger.warn).toHaveBeenCalled();
     });
@@ -1923,7 +1928,7 @@ describe('modules/platform/gitea/index', () => {
         '[#123](../pull/123) [#124](../pull/124) [#125](../pull/125)';
 
       expect(gitea.massageMarkdown(body)).toBe(
-        '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)'
+        '[#123](pulls/123) [#124](pulls/124) [#125](pulls/125)',
       );
     });
   });

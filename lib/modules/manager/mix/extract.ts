@@ -8,7 +8,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
-  /{:(?<app>\w+)(\s*,\s*"(?<requirement>[^"]+)")?(\s*,\s*(?<opts>[^}]+))?}/gm
+  /{:(?<app>\w+)(\s*,\s*"(?<requirement>[^"]+)")?(\s*,\s*(?<opts>[^}]+))?}/gm,
 );
 const gitRegexp = regEx(/git:\s*"(?<value>[^"]+)"/);
 const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
@@ -19,7 +19,7 @@ const commentMatchRegExp = regEx(/#.*$/);
 
 export async function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): Promise<PackageFileContent | null> {
   logger.trace(`mix.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];

@@ -7,7 +7,7 @@ import type { TravisMatrixItem, TravisYaml } from './types';
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   let doc: TravisYaml;
   try {

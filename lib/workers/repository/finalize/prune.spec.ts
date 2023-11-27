@@ -37,11 +37,17 @@ describe('workers/repository/finalize/prune', () => {
       expect(git.getBranchList).toHaveBeenCalledTimes(0);
     });
 
+    it('ignores reconfigure branch', async () => {
+      delete config.branchList;
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(0);
+    });
+
     it('returns if no renovate branches', async () => {
       config.branchList = [];
       git.getBranchList.mockReturnValueOnce([]);
       await expect(
-        cleanup.pruneStaleBranches(config, config.branchList)
+        cleanup.pruneStaleBranches(config, config.branchList),
       ).resolves.not.toThrow();
     });
 
@@ -56,7 +62,7 @@ describe('workers/repository/finalize/prune', () => {
     it('renames deletes remaining branch', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       git.getBranchList.mockReturnValueOnce(
-        config.branchList.concat(['renovate/c'])
+        config.branchList.concat(['renovate/c']),
       );
       platform.findPr.mockResolvedValueOnce(partial<Pr>({ title: 'foo' }));
       await cleanup.pruneStaleBranches(config, config.branchList);
@@ -68,12 +74,12 @@ describe('workers/repository/finalize/prune', () => {
     it('skips rename but still deletes branch', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       git.getBranchList.mockReturnValueOnce(
-        config.branchList.concat(['renovate/c'])
+        config.branchList.concat(['renovate/c']),
       );
       platform.findPr.mockResolvedValueOnce(
         partial<Pr>({
           title: 'foo - autoclosed',
-        })
+        }),
       );
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
@@ -85,7 +91,7 @@ describe('workers/repository/finalize/prune', () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       GlobalConfig.set({ dryRun: 'full' });
       git.getBranchList.mockReturnValueOnce(
-        config.branchList.concat(['renovate/c'])
+        config.branchList.concat(['renovate/c']),
       );
       platform.findPr.mockResolvedValueOnce(partial<Pr>({ title: 'foo' }));
       await cleanup.pruneStaleBranches(config, config.branchList);
@@ -98,7 +104,7 @@ describe('workers/repository/finalize/prune', () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       config.pruneStaleBranches = false;
       git.getBranchList.mockReturnValueOnce(
-        config.branchList.concat(['renovate/c'])
+        config.branchList.concat(['renovate/c']),
       );
       platform.findPr.mockResolvedValueOnce(partial<Pr>({ title: 'foo' }));
       await cleanup.pruneStaleBranches(config, config.branchList);
@@ -110,7 +116,7 @@ describe('workers/repository/finalize/prune', () => {
     it('notifies via PR changes if someone pushed to PR', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       git.getBranchList.mockReturnValueOnce(
-        config.branchList.concat(['renovate/c'])
+        config.branchList.concat(['renovate/c']),
       );
       platform.getBranchPr.mockResolvedValueOnce(partial<Pr>());
       scm.isBranchModified.mockResolvedValueOnce(true);
@@ -125,12 +131,12 @@ describe('workers/repository/finalize/prune', () => {
     it('skips appending - abandoned to PR title if already present', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       git.getBranchList.mockReturnValueOnce(
-        config.branchList.concat(['renovate/c'])
+        config.branchList.concat(['renovate/c']),
       );
       platform.getBranchPr.mockResolvedValueOnce(partial<Pr>());
       scm.isBranchModified.mockResolvedValueOnce(true);
       platform.findPr.mockResolvedValueOnce(
-        partial<Pr>({ title: 'foo - abandoned' })
+        partial<Pr>({ title: 'foo - abandoned' }),
       );
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
@@ -140,7 +146,7 @@ describe('workers/repository/finalize/prune', () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       GlobalConfig.set({ dryRun: 'full' });
       git.getBranchList.mockReturnValueOnce(
-        config.branchList.concat(['renovate/c'])
+        config.branchList.concat(['renovate/c']),
       );
       platform.getBranchPr.mockResolvedValueOnce(partial<Pr>());
       scm.isBranchModified.mockResolvedValueOnce(true);
@@ -156,7 +162,7 @@ describe('workers/repository/finalize/prune', () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       GlobalConfig.set({ dryRun: 'full' });
       git.getBranchList.mockReturnValueOnce(
-        config.branchList.concat(['renovate/c'])
+        config.branchList.concat(['renovate/c']),
       );
       platform.findPr.mockResolvedValueOnce(null as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
@@ -168,7 +174,7 @@ describe('workers/repository/finalize/prune', () => {
     it('delete branch no PR', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       git.getBranchList.mockReturnValueOnce(
-        config.branchList.concat(['renovate/c'])
+        config.branchList.concat(['renovate/c']),
       );
       platform.findPr.mockResolvedValueOnce(null as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
@@ -180,7 +186,7 @@ describe('workers/repository/finalize/prune', () => {
     it('does not delete modified orphan branch', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       git.getBranchList.mockReturnValueOnce(
-        config.branchList.concat(['renovate/c'])
+        config.branchList.concat(['renovate/c']),
       );
       scm.isBranchModified.mockResolvedValueOnce(true);
       platform.findPr.mockResolvedValueOnce(null as never);

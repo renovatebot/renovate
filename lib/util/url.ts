@@ -85,8 +85,11 @@ export function getQueryString(params: Record<string, any>): string {
   return usp.toString();
 }
 
-export function validateUrl(url?: string, httpOnly = true): boolean {
-  if (!url) {
+export function validateUrl(
+  url: string | null | undefined,
+  httpOnly = true,
+): boolean {
+  if (!is.nonEmptyString(url)) {
     return false;
   }
   try {
@@ -121,7 +124,7 @@ export function createURLFromHostOrURL(url: string): URL | null {
 export type LinkHeaderLinks = _parseLinkHeader.Links;
 
 export function parseLinkHeader(
-  linkHeader: string | null | undefined
+  linkHeader: string | null | undefined,
 ): LinkHeaderLinks | null {
   if (!is.nonEmptyString(linkHeader)) {
     return null;

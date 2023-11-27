@@ -279,7 +279,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(
         azureDevOpsModules,
         'modules.tf',
-        {}
+        {},
       );
       expect(res?.deps).toHaveLength(3);
       expect(res?.deps).toIncludeAllPartialMembers([
@@ -683,7 +683,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(
         lockedVersion,
         'lockedVersion.tf',
-        {}
+        {},
       );
       expect(res?.deps).toHaveLength(3);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
@@ -719,7 +719,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(
         terraformBlock,
         'terraformBlock.tf',
-        {}
+        {},
       );
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
@@ -739,7 +739,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(
         tfeWorkspaceBlock,
         'tfeWorkspace.tf',
-        {}
+        {},
       );
       expect(res?.deps).toHaveLength(3);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(1);
@@ -770,7 +770,7 @@ describe('modules/manager/terraform/extract', () => {
           resource my provider
         `,
         'tfeWorkspace.tf',
-        {}
+        {},
       );
       expect(res).toBeNull();
     });

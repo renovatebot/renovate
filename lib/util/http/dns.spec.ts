@@ -8,7 +8,7 @@ describe('util/http/dns', () => {
       const ip = await new Promise((resolve) =>
         dnsLookup('api.github.com', 4, (_e, r, _f) => {
           resolve(r);
-        })
+        }),
       );
       expect(ip).toBeString();
       // uses cache
@@ -16,15 +16,15 @@ describe('util/http/dns', () => {
         await new Promise((resolve) =>
           dnsLookup('api.github.com', (_e, r, _f) => {
             resolve(r);
-          })
-        )
+          }),
+        ),
       ).toBe(ip);
       expect(
         await new Promise((resolve) =>
           dnsLookup('api.github.com', {}, (_e, r, _f) => {
             resolve(r);
-          })
-        )
+          }),
+        ),
       ).toBe(ip);
     });
 
@@ -37,7 +37,7 @@ describe('util/http/dns', () => {
           } else {
             resolve(r);
           }
-        })
+        }),
       );
       await expect(ip).rejects.toThrow();
     });

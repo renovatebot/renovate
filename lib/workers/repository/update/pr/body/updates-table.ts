@@ -10,7 +10,7 @@ type TableDefinition = {
 
 function getRowDefinition(
   prBodyColumns: string[],
-  upgrade: BranchUpgradeConfig
+  upgrade: BranchUpgradeConfig,
 ): TableDefinition[] {
   const res: TableDefinition[] = [];
   if (upgrade.prBodyDefinitions) {
@@ -24,7 +24,7 @@ function getRowDefinition(
 
 function getNonEmptyColumns(
   prBodyColumns: string[],
-  rows: Record<string, string>[]
+  rows: Record<string, string>[],
 ): string[] {
   const res: string[] = [];
   for (const header of prBodyColumns) {

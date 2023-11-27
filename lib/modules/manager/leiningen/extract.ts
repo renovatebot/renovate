@@ -25,7 +25,7 @@ export function expandDepName(name: string): string {
 export function extractFromVectors(
   str: string,
   ctx: ExtractContext = {},
-  vars: ExtractedVariables = {}
+  vars: ExtractedVariables = {},
 ): PackageDependency[] {
   if (!str.startsWith('[')) {
     return [];
@@ -121,7 +121,7 @@ function extractLeinRepos(content: string): string[] {
 
   const repoContent = trimAtKey(
     content.replace(/;;.*(?=[\r\n])/g, ''), // get rid of comments // TODO #12872 lookahead
-    'repositories'
+    'repositories',
   );
 
   if (repoContent) {
@@ -141,10 +141,10 @@ function extractLeinRepos(content: string): string[] {
     }
     const repoSectionContent = repoContent.slice(0, endIdx);
     const matches = coerceArray(
-      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g))
+      repoSectionContent.match(regEx(/"https?:\/\/[^"]*"/g)),
     );
     const urls = matches.map((x) =>
-      x.replace(regEx(/^"/), '').replace(regEx(/"$/), '')
+      x.replace(regEx(/^"/), '').replace(regEx(/"$/), ''),
     );
     urls.forEach((url) => result.push(url));
   }
@@ -153,7 +153,7 @@ function extractLeinRepos(content: string): string[] {
 }
 
 const defRegex = regEx(
-  /^[\s,]*\([\s,]*def[\s,]+(?<varName>[-+*=<>.!?#$%&_|a-zA-Z][-+*=<>.!?#$%&_|a-zA-Z0-9']+)[\s,]*"(?<stringValue>[^"]*)"[\s,]*\)[\s,]*$/
+  /^[\s,]*\([\s,]*def[\s,]+(?<varName>[-+*=<>.!?#$%&_|a-zA-Z][-+*=<>.!?#$%&_|a-zA-Z0-9']+)[\s,]*"(?<stringValue>[^"]*)"[\s,]*\)[\s,]*$/,
 );
 
 export function extractVariables(content: string): ExtractedVariables {
@@ -174,7 +174,7 @@ function collectDeps(
   content: string,
   key: string,
   registryUrls: string[],
-  vars: ExtractedVariables
+  vars: ExtractedVariables,
 ): PackageDependency[] {
   const ctx = {
     depType: key,

@@ -21,10 +21,10 @@ describe('util/github/url', () => {
 
     it('supports local github installations', () => {
       expect(getApiBaseUrl('https://gh.my-company.com/')).toBe(
-        'https://gh.my-company.com/api/v3/'
+        'https://gh.my-company.com/api/v3/',
       );
       expect(getApiBaseUrl('https://gh.my-company.com/api/v3/')).toBe(
-        'https://gh.my-company.com/api/v3/'
+        'https://gh.my-company.com/api/v3/',
       );
     });
   });

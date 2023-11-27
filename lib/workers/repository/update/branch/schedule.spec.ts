@@ -31,7 +31,7 @@ describe('workers/repository/update/branch/schedule', () => {
 
     it('returns false if using minutes', () => {
       expect(
-        schedule.hasValidSchedule(['every 15 mins every weekday'])[0]
+        schedule.hasValidSchedule(['every 15 mins every weekday'])[0],
       ).toBeFalse();
     });
 
@@ -49,7 +49,7 @@ describe('workers/repository/update/branch/schedule', () => {
 
     it('returns false if any schedule has no days or time range', () => {
       expect(schedule.hasValidSchedule(['at 5:00pm', 'on saturday'])[0]).toBe(
-        false
+        false,
       );
     });
 
@@ -59,13 +59,15 @@ describe('workers/repository/update/branch/schedule', () => {
 
     it('returns true if schedule has days of week', () => {
       expect(schedule.hasValidSchedule(['on friday and saturday'])[0]).toBe(
-        true
+        true,
       );
     });
 
     it('returns true for multi day schedules', () => {
       expect(
-        schedule.hasValidSchedule(['after 5:00pm on wednesday and thursday'])[0]
+        schedule.hasValidSchedule([
+          'after 5:00pm on wednesday and thursday',
+        ])[0],
       ).toBeTrue();
     });
 
@@ -75,7 +77,7 @@ describe('workers/repository/update/branch/schedule', () => {
 
     it('returns true for first day of the month', () => {
       expect(
-        schedule.hasValidSchedule(['on the first day of the month'])[0]
+        schedule.hasValidSchedule(['on the first day of the month'])[0],
       ).toBeTrue();
     });
 
@@ -91,7 +93,7 @@ describe('workers/repository/update/branch/schedule', () => {
 
     it('returns true if schedule has a start and end time', () => {
       expect(
-        schedule.hasValidSchedule(['after 11:00pm and before 6:00am'])[0]
+        schedule.hasValidSchedule(['after 11:00pm and before 6:00am'])[0],
       ).toBeTrue();
     });
 
@@ -99,7 +101,7 @@ describe('workers/repository/update/branch/schedule', () => {
       expect(
         schedule.hasValidSchedule([
           'after 11:00pm and before 6:00am every weekday',
-        ])[0]
+        ])[0],
       ).toBeTrue();
     });
 
@@ -113,7 +115,7 @@ describe('workers/repository/update/branch/schedule', () => {
       expect(
         schedule.hasValidSchedule([
           'before 5am on the first day of the month',
-        ])[0]
+        ])[0],
       ).toBeTrue();
       expect(schedule.hasValidSchedule(['every month'])[0]).toBeTrue();
     });

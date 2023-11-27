@@ -178,7 +178,7 @@ export class GoProxyDatasource extends Datasource {
   static parsedNoproxy: Record<string, RegExp | null> = {};
 
   static parseNoproxy(
-    input: unknown = process.env.GONOPROXY ?? process.env.GOPRIVATE
+    input: unknown = process.env.GONOPROXY ?? process.env.GOPRIVATE,
   ): RegExp | null {
     if (!is.string(input)) {
       return null;
@@ -221,7 +221,7 @@ export class GoProxyDatasource extends Datasource {
   async versionInfo(
     baseUrl: string,
     packageName: string,
-    version: string
+    version: string,
   ): Promise<Release> {
     const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/${version}.info`;
     const res = await this.http.getJson<VersionInfo>(url);
@@ -239,7 +239,7 @@ export class GoProxyDatasource extends Datasource {
 
   async getLatestVersion(
     baseUrl: string,
-    packageName: string
+    packageName: string,
   ): Promise<string | null> {
     try {
       const url = `${baseUrl}/${this.encodeCase(packageName)}/@latest`;
@@ -253,7 +253,7 @@ export class GoProxyDatasource extends Datasource {
 
   async getVersionsWithInfo(
     baseUrl: string,
-    packageName: string
+    packageName: string,
   ): Promise<ReleaseResult> {
     const isGopkgin = packageName.startsWith('gopkg.in/');
     const majorSuffixSeparator = isGopkgin ? '.' : '/';

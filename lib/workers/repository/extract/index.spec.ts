@@ -42,10 +42,13 @@ describe('workers/repository/extract/index', () => {
     });
 
     it('warns if no packages found for a enabled manager', async () => {
-      config.enabledManagers = ['npm'];
+      config.enabledManagers = ['npm', 'custom.regex'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([]);
       expect((await extractAllDependencies(config)).packageFiles).toEqual({});
-      expect(logger.debug).toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { manager: 'custom.regex' },
+        `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`,
+      );
     });
 
     it('warns if packageFiles is null', async () => {

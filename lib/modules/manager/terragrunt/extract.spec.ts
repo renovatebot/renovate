@@ -507,7 +507,7 @@ describe('modules/manager/terragrunt/extract', () => {
         extractPackageFile(`terragrunt {
         source = "../fe"
       }
-      `)
+      `),
       ).toBeNull();
     });
   });

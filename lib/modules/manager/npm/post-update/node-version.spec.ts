@@ -20,7 +20,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
         config,
         [],
         '',
-        new Lazy(() => Promise.resolve({}))
+        new Lazy(() => Promise.resolve({})),
       );
       expect(res).toBe('^12.16.0');
       expect(fs.readLocalFile).not.toHaveBeenCalled();
@@ -33,7 +33,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
         {},
         [],
         '',
-        new Lazy(() => Promise.resolve({}))
+        new Lazy(() => Promise.resolve({})),
       );
       expect(res).toBe('12.16.1');
     });
@@ -44,7 +44,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
         {},
         [],
         '',
-        new Lazy(() => Promise.resolve({}))
+        new Lazy(() => Promise.resolve({})),
       );
       expect(res).toBe('12.16.2');
     });
@@ -56,7 +56,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
         {},
         [],
         '',
-        new Lazy(() => Promise.resolve({}))
+        new Lazy(() => Promise.resolve({})),
       );
       expect(res).toBeNull();
     });
@@ -66,7 +66,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
         {},
         [],
         '',
-        new Lazy(() => Promise.resolve({ engines: { node: '^12.16.3' } }))
+        new Lazy(() => Promise.resolve({ engines: { node: '^12.16.3' } })),
       );
       expect(res).toBe('^12.16.3');
     });
@@ -75,7 +75,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
   describe('getNodeUpdate()', () => {
     it('returns version', () => {
       expect(getNodeUpdate([{ depName: 'node', newValue: '16.15.0' }])).toBe(
-        '16.15.0'
+        '16.15.0',
       );
     });
 
@@ -91,8 +91,8 @@ describe('modules/manager/npm/post-update/node-version', () => {
           config,
           [{ depName: 'node', newValue: '16.15.0' }],
           '',
-          new Lazy(() => Promise.resolve({}))
-        )
+          new Lazy(() => Promise.resolve({})),
+        ),
       ).toEqual({
         toolName: 'node',
         constraint: '16.15.0',
@@ -105,8 +105,8 @@ describe('modules/manager/npm/post-update/node-version', () => {
           config,
           [],
           '',
-          new Lazy(() => Promise.resolve({}))
-        )
+          new Lazy(() => Promise.resolve({})),
+        ),
       ).toEqual({
         toolName: 'node',
         constraint: '^12.16.0',

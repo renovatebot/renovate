@@ -14,7 +14,7 @@ import type {
 
 export function runRenovateRepoStats(
   config: RenovateConfig,
-  prList: Pr[]
+  prList: Pr[],
 ): void {
   const prStats = { total: 0, open: 0, closed: 0, merged: 0 };
 
@@ -64,7 +64,7 @@ function branchCacheToMetadata({
 }
 
 function filterDependencyDashboardData(
-  branches: BranchCache[]
+  branches: BranchCache[],
 ): Partial<BranchCache>[] {
   const branchesFiltered: Partial<BranchCache>[] = [];
   for (const branch of branches) {

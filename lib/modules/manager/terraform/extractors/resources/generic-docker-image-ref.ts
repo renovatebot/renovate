@@ -14,7 +14,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
   extract(
     hclMap: TerraformDefinitionFile,
     _locks: ProviderLock[],
-    config: ExtractConfig
+    config: ExtractConfig,
   ): PackageDependency[] {
     const resourceTypMap = hclMap.resource;
     if (is.nullOrUndefined(resourceTypMap)) {
@@ -34,7 +34,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
       // loop over instances of a resource type
       for (const instance of Object.values(resourceInstancesMap).flat()) {
         dependencies.push(
-          ...this.walkPath({ depType: type }, instance, path, config)
+          ...this.walkPath({ depType: type }, instance, path, config),
         );
       }
     }
@@ -53,7 +53,7 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     abstractDep: PackageDependency,
     parentElement: unknown,
     leftPath: string[],
-    config: ExtractConfig
+    config: ExtractConfig,
   ): PackageDependency[] {
     const dependencies: PackageDependency[] = [];
     // if there are no path elements left, we have reached the end of the path
@@ -95,7 +95,12 @@ export class GenericDockerImageRefExtractor extends DependencyExtractor {
     if (is.array(element)) {
       for (const arrayElement of element) {
         dependencies.push(
-          ...this.walkPath(abstractDep, arrayElement, leftPath.slice(1), config)
+          ...this.walkPath(
+            abstractDep,
+            arrayElement,
+            leftPath.slice(1),
+            config,
+          ),
         );
       }
       return dependencies;

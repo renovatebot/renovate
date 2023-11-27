@@ -39,7 +39,7 @@ interface Ctx {
 const scala = lang.createLang('scala');
 
 const sbtVersionRegex = regEx(
-  'sbt\\.version *= *(?<version>\\d+\\.\\d+\\.\\d+)'
+  'sbt\\.version *= *(?<version>\\d+\\.\\d+\\.\\d+)',
 );
 
 const scalaVersionMatch = q
@@ -53,7 +53,7 @@ const scalaVersionMatch = q
         ctx.scalaVersion = scalaVersion;
       }
       return ctx;
-    })
+    }),
   )
   .handler((ctx) => {
     if (ctx.scalaVersion) {
@@ -91,7 +91,7 @@ const packageFileVersionMatch = q
         ctx.packageFileVersion = packageFileVersion;
       }
       return ctx;
-    })
+    }),
   );
 
 const variableNameMatch = q
@@ -113,7 +113,7 @@ const variableDefinitionMatch = q
   .alt(
     q.sym<Ctx>('lazy').join(assignmentMatch),
     assignmentMatch,
-    variableNameMatch.op(':=')
+    variableNameMatch.op(':='),
   )
   .join(variableValueMatch);
 
@@ -125,7 +125,7 @@ const groupIdMatch = q.alt<Ctx>(
     }
     return ctx;
   }),
-  q.str<Ctx>((ctx, { value: groupId }) => ({ ...ctx, groupId }))
+  q.str<Ctx>((ctx, { value: groupId }) => ({ ...ctx, groupId })),
 );
 
 const artifactIdMatch = q.alt<Ctx>(
@@ -136,7 +136,7 @@ const artifactIdMatch = q.alt<Ctx>(
     }
     return ctx;
   }),
-  q.str<Ctx>((ctx, { value: artifactId }) => ({ ...ctx, artifactId }))
+  q.str<Ctx>((ctx, { value: artifactId }) => ({ ...ctx, artifactId })),
 );
 
 const versionMatch = q.alt<Ctx>(
@@ -148,7 +148,7 @@ const versionMatch = q.alt<Ctx>(
     }
     return ctx;
   }),
-  q.str<Ctx>((ctx, { value: currentValue }) => ({ ...ctx, currentValue }))
+  q.str<Ctx>((ctx, { value: currentValue }) => ({ ...ctx, currentValue })),
 );
 
 const simpleDependencyMatch = groupIdMatch
@@ -228,8 +228,8 @@ const sbtPackageMatch = q
     q.alt<Ctx>(
       q.sym<Ctx>('classifier').str(depTypeHandler),
       q.op<Ctx>('%').sym(depTypeHandler),
-      q.op<Ctx>('%').str(depTypeHandler)
-    )
+      q.op<Ctx>('%').str(depTypeHandler),
+    ),
   )
   .handler(depHandler);
 
@@ -262,7 +262,7 @@ const addResolverMatch = q.sym<Ctx>('resolvers').alt(
     type: 'wrapped-tree',
     maxDepth: 1,
     search: resolverMatch,
-  })
+  }),
 );
 
 function registryUrlHandler(ctx: Ctx): Ctx {
@@ -284,14 +284,14 @@ const query = q.tree<Ctx>({
     sbtPackageMatch,
     sbtPluginMatch,
     addResolverMatch,
-    variableDefinitionMatch
+    variableDefinitionMatch,
   ),
   postHandler: registryUrlHandler,
 });
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   if (
     packageFile === 'project/build.properties' ||

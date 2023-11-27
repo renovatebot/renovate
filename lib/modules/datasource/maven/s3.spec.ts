@@ -116,7 +116,7 @@ describe('modules/datasource/maven/s3', () => {
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
           },
-          'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars'
+          'Dependency lookup authorization failed. Please correct AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY env vars',
         );
       });
 
@@ -135,7 +135,7 @@ describe('modules/datasource/maven/s3', () => {
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
           },
-          'Dependency lookup failed. Please a correct AWS_REGION env var'
+          'Dependency lookup failed. Please a correct AWS_REGION env var',
         );
       });
 
@@ -154,7 +154,7 @@ describe('modules/datasource/maven/s3', () => {
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
           },
-          'S3 url not found'
+          'S3 url not found',
         );
       });
 
@@ -173,7 +173,7 @@ describe('modules/datasource/maven/s3', () => {
           {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
           },
-          'S3 url not found'
+          'S3 url not found',
         );
       });
 
@@ -193,7 +193,7 @@ describe('modules/datasource/maven/s3', () => {
             failedUrl: 's3://repobucket/org/example/package/maven-metadata.xml',
             message: 'Unknown error',
           },
-          'Unknown S3 download error'
+          'Unknown S3 download error',
         );
       });
 
@@ -206,7 +206,7 @@ describe('modules/datasource/maven/s3', () => {
           .resolvesOnce({});
         expect(await get('org.example:package', baseUrlS3)).toBeNull();
         expect(logger.debug).toHaveBeenCalledWith(
-          "Expecting Readable response type got 'undefined' type instead"
+          "Expecting Readable response type got 'undefined' type instead",
         );
       });
     });

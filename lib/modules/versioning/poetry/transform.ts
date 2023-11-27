@@ -41,7 +41,7 @@ function notEmpty(s: string): boolean {
  */
 export function poetry2semver(
   poetry_version: string,
-  padRelease = true
+  padRelease = true,
 ): string | null {
   const matchGroups = VERSION_PATTERN.exec(poetry_version)?.groups;
   if (!matchGroups) {

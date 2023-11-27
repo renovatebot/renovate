@@ -11,7 +11,7 @@ describe('modules/platform/github/massage-markdown-links', () => {
       [
         'Link [foo/bar#1](https://togithub.com/foo/bar/pull/1) points to [https://github.com/foo/bar/pull/1](https://togithub.com/foo/bar/pull/1).',
         'URL [https://github.com/foo/bar/pull/1](https://togithub.com/foo/bar/pull/1) becomes [foo/bar#1](https://togithub.com/foo/bar/pull/1).',
-      ].join('\n')
+      ].join('\n'),
     );
   });
 
@@ -87,6 +87,6 @@ describe('modules/platform/github/massage-markdown-links', () => {
     '$input -> $output',
     ({ input, output }: { input: string; output: string }) => {
       expect(massageMarkdownLinks(input)).toEqual(output);
-    }
+    },
   );
 });

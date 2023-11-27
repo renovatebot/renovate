@@ -2,8 +2,8 @@
 
 As end user, you can choose from these ways to run Renovate:
 
-- You use the Mend Renovate App, or
-- You self-host Renovate, for example by running the pre-built Docker image, or
+- You use the Mend Renovate App
+- You self-administer/host your own Renovate instance
 - Someone else is hosting Renovate, and you install/configure it for the repositories you choose
 
 If you're using the Mend Renovate App, or if someone else is hosting Renovate for you, skip ahead to the [installing & onboarding](./installing-onboarding.md) page.
@@ -18,6 +18,8 @@ When self-hosting Renovate you're the "administrator" of the bot, this means you
 - make sure Renovate bot itself is updated
 
 If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./installing-onboarding.md#self-hosting-on-windows) to prevent line endings from confusing Renovate bot.
+
+If you're running Renovate Community Edition or Renovate Enterprise Edition, refer to the documentation on the [`mend/renovate-ce-ee` GitHub repository](https://github.com/mend/renovate-ce-ee).
 
 ### Available distributions
 
@@ -81,9 +83,10 @@ The Renovate team provide a ["Renovate Runner"](https://gitlab.com/renovate-bot/
 This supports both `gitlab.com` and self-hosted GitLab.
 Details for how it works can be found in the project.
 
-#### Mend Renovate On-Premises
+#### Mend Renovate Community Edition / Enterprise Edition
 
-Mend Renovate On-Premises (WSOP) started out as a commercial product "Renovate Pro", but was renamed and made free to use when Renovate became a part of Mend (formerly WhiteSource) in 2019.
+Mend Renovate Community Edition (Renovate CE) and Enterprise Edition (Renovate EE) are closed-source offerings of Renovate for self-hosted users.
+Renovate CE and Renovate EE have support for GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
 It is built similarly to the default "full" Renovate image described above, but with these differences:
 
 - It is a stateful app and does not exit after processing all repositories
@@ -92,8 +95,15 @@ It is built similarly to the default "full" Renovate image described above, but 
 - It is released every 1-2 months in a slower, more stable cadence than Renovate OSS, which releases on every commit
 - It's licensed using an end-user license agreement (EULA) and not the Affero General Public License (AGPL)
 
-WSOP supports GitHub (both `github.com` and GitHub Enterprise Server) as well as GitLab self-hosted.
-Documentation can be found in its public GitHub repository [`whitesource/renovate-on-prem`](https://github.com/whitesource/renovate-on-prem).
+Plus, the Enterprise Edition has:
+
+- Horizontal scaling to run multiple 'worker' containers
+- Dedicated support from Mend.io
+- Premium features, including Smart Merge Control
+
+Go to the Mend.io website to learn more about [Renovate Enterprise Edition](https://www.mend.io/renovate-enterprise/).
+
+To learn how to configure Renovate CE or Renovate EE, read the documentation on the public GitHub repository [`mend/renovate-ce-ee`](https://github.com/mend/renovate-ce-ee).
 
 #### Mend Remediate
 
@@ -199,11 +209,11 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [github.com and GitHub Enterprise Server](https://docs.renovatebot.com/modules/platform/github/)
 - [GitLab](https://docs.renovatebot.com/modules/platform/gitlab/)
 
-### GitHub.com token for release notes
+### GitHub.com token for changelogs
 
 If you are running on any platform except github.com, you should also set the environment variable `GITHUB_COM_TOKEN` and put the Personal Access Token for github.com in it.
 This account can be _any_ account on GitHub, and needs only `read-only` access.
-It's used when fetching release notes for repositories in order to increase the hourly API limit.
+It's used when fetching changelogs for repositories in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
 <!-- prettier-ignore -->

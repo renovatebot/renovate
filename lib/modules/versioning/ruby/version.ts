@@ -70,7 +70,7 @@ const incrementMajor = (
   maj: number,
   min: number,
   ptch: number,
-  pre: string[]
+  pre: string[],
 ): number => (min === 0 || ptch === 0 || pre.length === 0 ? maj + 1 : maj);
 
 // istanbul ignore next
@@ -120,7 +120,7 @@ const decrement = (version: string): string => {
       (
         accumulator: number[],
         segment: SegmentElement,
-        index: number
+        index: number,
       ): number[] => {
         if (index === 0) {
           return [(segment as number) - 1];
@@ -136,7 +136,7 @@ const decrement = (version: string): string => {
 
         return [...accumulator, segment as number];
       },
-      []
+      [],
     );
 
   return nextSegments.reverse().join('.');

@@ -16,7 +16,7 @@ import {
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig
+  _config?: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace(`pep621.extractPackageFile(${packageFile})`);
 
@@ -33,13 +33,13 @@ export function extractPackageFile(
 
   // pyProject standard definitions
   deps.push(
-    ...parseDependencyList(depTypes.dependencies, def.project?.dependencies)
+    ...parseDependencyList(depTypes.dependencies, def.project?.dependencies),
   );
   deps.push(
     ...parseDependencyGroupRecord(
       depTypes.optionalDependencies,
-      def.project?.['optional-dependencies']
-    )
+      def.project?.['optional-dependencies'],
+    ),
   );
 
   // process specific tool sets

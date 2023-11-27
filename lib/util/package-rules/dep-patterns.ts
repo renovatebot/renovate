@@ -8,7 +8,7 @@ import { massagePattern } from './utils';
 export class DepPatternsMatcher extends Matcher {
   override matches(
     { depName, updateType }: PackageRuleInputConfig,
-    { matchDepPatterns }: PackageRule
+    { matchDepPatterns }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchDepPatterns)) {
       return null;
@@ -31,7 +31,7 @@ export class DepPatternsMatcher extends Matcher {
 
   override excludes(
     { depName, updateType }: PackageRuleInputConfig,
-    { excludeDepPatterns }: PackageRule
+    { excludeDepPatterns }: PackageRule,
   ): boolean | null {
     // ignore lockFileMaintenance for backwards compatibility
     if (is.undefined(excludeDepPatterns)) {

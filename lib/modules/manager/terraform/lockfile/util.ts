@@ -10,13 +10,13 @@ import type {
 } from './types';
 
 const providerStartLineRegex = regEx(
-  `^provider "(?<registryUrl>[^/]*)/(?<namespace>[^/]*)/(?<depName>[^/]*)"`
+  `^provider "(?<registryUrl>[^/]*)/(?<namespace>[^/]*)/(?<depName>[^/]*)"`,
 );
 const versionLineRegex = regEx(
-  `^(?<prefix>[\\s]*version[\\s]*=[\\s]*")(?<version>[^"']+)(?<suffix>".*)$`
+  `^(?<prefix>[\\s]*version[\\s]*=[\\s]*")(?<version>[^"']+)(?<suffix>".*)$`,
 );
 const constraintLineRegex = regEx(
-  `^(?<prefix>[\\s]*constraints[\\s]*=[\\s]*")(?<constraint>[^"']+)(?<suffix>".*)$`
+  `^(?<prefix>[\\s]*constraints[\\s]*=[\\s]*")(?<constraint>[^"']+)(?<suffix>".*)$`,
 );
 const hashLineRegex = regEx(`^(?<prefix>\\s*")(?<hash>[^"]+)(?<suffix>",.*)$`);
 
@@ -132,7 +132,7 @@ export function isPinnedVersion(value: string | undefined): boolean {
 export function writeLockUpdates(
   updates: ProviderLockUpdate[],
   lockFilePath: string,
-  oldLockFileContent: string
+  oldLockFileContent: string,
 ): UpdateArtifactsResult {
   const lines = oldLockFileContent.split(newlineRegex);
 
@@ -141,7 +141,7 @@ export function writeLockUpdates(
   // sort updates in order of appearance in the lockfile
   // TODO #22198
   updates.sort(
-    (a, b) => a.lineNumbers.block!.start - b.lineNumbers.block!.start
+    (a, b) => a.lineNumbers.block!.start - b.lineNumbers.block!.start,
   );
   updates.forEach((update, index, array) => {
     // re add leading whitespace
@@ -154,14 +154,14 @@ export function writeLockUpdates(
     const leadingNonRelevantLines = lines.slice(
       startWhitespace,
       // TODO #22198
-      update.lineNumbers.block!.start
+      update.lineNumbers.block!.start,
     );
     sections.push(leadingNonRelevantLines);
 
     const providerBlockLines = lines.slice(
       // TODO #22198
       update.lineNumbers.block!.start,
-      update.lineNumbers.block!.end
+      update.lineNumbers.block!.end,
     );
     const newProviderBlockLines: string[] = [];
     let hashLinePrefix = '';
@@ -169,7 +169,7 @@ export function writeLockUpdates(
     providerBlockLines.forEach((providerBlockLine, providerBlockIndex) => {
       const versionLine = providerBlockLine.replace(
         versionLineRegex,
-        `$<prefix>${update.newVersion}$<suffix>`
+        `$<prefix>${update.newVersion}$<suffix>`,
       );
       if (versionLine !== providerBlockLine) {
         newProviderBlockLines.push(versionLine);
@@ -178,7 +178,7 @@ export function writeLockUpdates(
 
       const constraintLine = providerBlockLine.replace(
         constraintLineRegex,
-        `$<prefix>${update.newConstraint}$<suffix>`
+        `$<prefix>${update.newConstraint}$<suffix>`,
       );
       if (constraintLine !== providerBlockLine) {
         newProviderBlockLines.push(constraintLine);
@@ -196,24 +196,24 @@ export function writeLockUpdates(
     });
 
     const hashesWithWhitespace = update.newHashes.map(
-      (value) => `${hashLinePrefix}${value}${hashLineSuffix}`
+      (value) => `${hashLinePrefix}${value}${hashLineSuffix}`,
     );
     newProviderBlockLines.splice(
       // TODO #22198
       update.lineNumbers.hashes.start!,
       0,
-      ...hashesWithWhitespace
+      ...hashesWithWhitespace,
     );
     sections.push(newProviderBlockLines);
   });
 
   const trailingNotUpdatedLines = lines.slice(
-    updates[updates.length - 1].lineNumbers.block?.end
+    updates[updates.length - 1].lineNumbers.block?.end,
   );
   sections.push(trailingNotUpdatedLines);
 
   const newLines = sections.reduce((previousValue, currentValue) =>
-    previousValue.concat(currentValue)
+    previousValue.concat(currentValue),
   );
   const newContent = newLines.join('\n');
 

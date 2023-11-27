@@ -22,7 +22,7 @@ describe('util/template/index', () => {
   it('has valid exposed config options', () => {
     const allOptions = getOptions().map((option) => option.name);
     const missingOptions = template.exposedConfigOptions.filter(
-      (option) => !allOptions.includes(option)
+      (option) => !allOptions.includes(option),
     );
     expect(missingOptions).toEqual([]);
   });
@@ -170,20 +170,20 @@ describe('util/template/index', () => {
       expect(
         template.containsTemplates(
           '{{#if logJSON}}{{logJSON}}{{/if}}',
-          'logJSON'
-        )
+          'logJSON',
+        ),
       ).toBeTrue();
       expect(
         template.containsTemplates(
           '{{#with logJSON.hasReleaseNotes as | hasNotes |}}{{hasNotes}}{{/if}}',
-          'logJSON'
-        )
+          'logJSON',
+        ),
       ).toBeTrue();
       expect(
         template.containsTemplates(
           '{{#if logJSON.hasReleaseNotes}}has notes{{/if}}',
-          'logJSON'
-        )
+          'logJSON',
+        ),
       ).toBeTrue();
     });
 
@@ -196,7 +196,7 @@ describe('util/template/index', () => {
     it('encodes values', () => {
       const output = template.compile(
         '{{{encodeURIComponent "@fsouza/prettierd"}}}',
-        undefined as never
+        undefined as never,
       );
       expect(output).toBe('%40fsouza%2Fprettierd');
     });
@@ -204,7 +204,7 @@ describe('util/template/index', () => {
     it('decodes values', () => {
       const output = template.compile(
         '{{{decodeURIComponent "%40fsouza/prettierd"}}}',
-        undefined as never
+        undefined as never,
       );
       expect(output).toBe('@fsouza/prettierd');
     });
@@ -217,7 +217,7 @@ describe('util/template/index', () => {
         {
           datasource: 'git-refs',
           packageName: 'renovatebot/renovate',
-        }
+        },
       );
       expect(output).toBe('https://github.com/renovatebot/renovate');
     });
@@ -228,7 +228,7 @@ describe('util/template/index', () => {
         {
           datasource: 'github-releases',
           packageName: 'renovatebot/renovate',
-        }
+        },
       );
       expect(output).toBe('renovatebot/renovate');
     });
@@ -238,7 +238,7 @@ describe('util/template/index', () => {
         '{{#if (equals newMajor "3")}}equals{{else}}not equals{{/if}}',
         {
           newMajor: 3,
-        }
+        },
       );
       expect(output).toBe('not equals');
     });

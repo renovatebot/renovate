@@ -6,7 +6,7 @@ function headRef(repo: string, branchName: string): Promise<boolean> {
   return Result.wrap(
     githubApi.headJson(`/repos/${repo}/git/refs/heads/${branchName}`, {
       memCache: false,
-    })
+    }),
   )
     .transform(() => true)
     .catch((err) => {
@@ -21,7 +21,7 @@ function headRef(repo: string, branchName: string): Promise<boolean> {
 
 export async function remoteBranchExists(
   repo: string,
-  branchName: string
+  branchName: string,
 ): Promise<boolean> {
   const refNested = `${branchName}/`;
   const isNested = await headRef(repo, refNested);

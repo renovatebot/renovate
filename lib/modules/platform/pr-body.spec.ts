@@ -15,8 +15,8 @@ describe('modules/platform/pr-body', () => {
       });
       expect(
         getPrBodyStruct(
-          'something \n<!--renovate-debug:eyJjcmVhdGVkSW5WZXIiOiAiMS4yLjEiLCJ1cGRhdGVkSW5WZXIiOiAiMS4yLjMifQ==-->'
-        )
+          'something \n<!--renovate-debug:eyJjcmVhdGVkSW5WZXIiOiAiMS4yLjEiLCJ1cGRhdGVkSW5WZXIiOiAiMS4yLjMifQ==-->',
+        ),
       ).toEqual({
         hash: '3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb',
         debugData: {
@@ -29,8 +29,8 @@ describe('modules/platform/pr-body', () => {
     it('checks if we reach warning', () => {
       expect(
         getPrBodyStruct(
-          'something \n<!--renovate-debug:some-wrong-data-ABCDEFGHIJKLMNOP-->'
-        )
+          'something \n<!--renovate-debug:some-wrong-data-ABCDEFGHIJKLMNOP-->',
+        ),
       ).toEqual({
         hash: '3fc9b689459d738f8c88a3a48aa9e33542016b7a4052e001aaa536fca74813cb',
       });
@@ -38,13 +38,13 @@ describe('modules/platform/pr-body', () => {
 
     it('hashes ignoring debug info', () => {
       expect(hashBody('foo\n<!--renovate-debug:123-->\n')).toEqual(
-        hashBody('foo')
+        hashBody('foo'),
       );
     });
 
     it('hashes ignoring reviewable section', () => {
       expect(hashBody('foo<!-- Reviewable:start -->bar')).toEqual(
-        hashBody('foo')
+        hashBody('foo'),
       );
     });
 

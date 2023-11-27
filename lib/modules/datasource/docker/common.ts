@@ -26,12 +26,15 @@ import {
   trimTrailingSlash,
 } from '../../../util/url';
 import { api as dockerVersioning } from '../../versioning/docker';
+import { getGoogleAuthToken } from '../util';
 import { ecrRegex, getECRAuthToken } from './ecr';
-import { getGoogleAccessToken, googleRegex } from './google';
+import { googleRegex } from './google';
 import type { OciHelmConfig } from './schema';
 import type { RegistryRepository } from './types';
 
 export const dockerDatasourceId = 'docker' as const;
+
+export const imageUrlLabel = 'org.opencontainers.image.url' as const;
 
 export const sourceLabel = 'org.opencontainers.image.source' as const;
 export const sourceLabels = [sourceLabel, 'org.label-schema.vcs-url'] as const;
@@ -49,7 +52,7 @@ export async function getAuthHeaders(
   http: Http,
   registryHost: string,
   dockerRepository: string,
-  apiCheckUrl = `${registryHost}/v2/`
+  apiCheckUrl = `${registryHost}/v2/`,
 ): Promise<OutgoingHttpHeaders | null> {
   try {
     const options = {
@@ -77,13 +80,13 @@ export async function getAuthHeaders(
     ) {
       logger.warn(
         { apiCheckUrl, res: apiCheckResponse },
-        'Invalid registry response'
+        'Invalid registry response',
       );
       return null;
     }
 
     const authenticateHeader = parse(
-      apiCheckResponse.headers['www-authenticate']
+      apiCheckResponse.headers['www-authenticate'],
     );
 
     const opts: HostRule & HttpOptions = hostRules.find({
@@ -93,7 +96,7 @@ export async function getAuthHeaders(
     if (ecrRegex.test(registryHost)) {
       logger.trace(
         { registryHost, dockerRepository },
-        `Using ecr auth for Docker registry`
+        `Using ecr auth for Docker registry`,
       );
       const [, region] = coerceArray(ecrRegex.exec(registryHost));
       const auth = await getECRAuthToken(region, opts);
@@ -108,40 +111,31 @@ export async function getAuthHeaders(
     ) {
       logger.trace(
         { registryHost, dockerRepository },
-        `Using google auth for Docker registry`
+        `Using google auth for Docker registry`,
       );
-      try {
-        const accessToken = await getGoogleAccessToken();
-        if (accessToken) {
-          const auth = Buffer.from(
-            `${'oauth2accesstoken'}:${accessToken}`
-          ).toString('base64');
-          opts.headers = { authorization: `Basic ${auth}` };
-        }
-      } catch (err) /* istanbul ignore next */ {
-        if (err.message?.includes('Could not load the default credentials')) {
-          logger.once.debug(
-            { registryHost, dockerRepository },
-            'Could not get Google access token, using no auth'
-          );
-        } else {
-          throw err;
-        }
+      const auth = await getGoogleAuthToken();
+      if (auth) {
+        opts.headers = { authorization: `Basic ${auth}` };
+      } else {
+        logger.once.debug(
+          { registryHost, dockerRepository },
+          'Could not get Google access token, using no auth',
+        );
       }
     } else if (opts.username && opts.password) {
       logger.trace(
         { registryHost, dockerRepository },
-        `Using basic auth for Docker registry`
+        `Using basic auth for Docker registry`,
       );
       const auth = Buffer.from(`${opts.username}:${opts.password}`).toString(
-        'base64'
+        'base64',
       );
       opts.headers = { authorization: `Basic ${auth}` };
     } else if (opts.token) {
       const authType = opts.authType ?? 'Bearer';
       logger.trace(
         { registryHost, dockerRepository },
-        `Using ${authType} token for Docker registry`
+        `Using ${authType} token for Docker registry`,
       );
       opts.headers = { authorization: `${authType} ${opts.token}` };
     }
@@ -162,7 +156,7 @@ export async function getAuthHeaders(
     ) {
       logger.trace(
         { registryHost, dockerRepository, authenticateHeader },
-        `Invalid realm, testing direct auth`
+        `Invalid realm, testing direct auth`,
       );
       return opts.headers ?? null;
     }
@@ -178,7 +172,7 @@ export async function getAuthHeaders(
     } else {
       authUrl.searchParams.append(
         'scope',
-        `repository:${dockerRepository}:pull`
+        `repository:${dockerRepository}:pull`,
       );
     }
 
@@ -188,13 +182,13 @@ export async function getAuthHeaders(
 
     logger.trace(
       { registryHost, dockerRepository, authUrl: authUrl.href },
-      `Obtaining docker registry token`
+      `Obtaining docker registry token`,
     );
     opts.noAuth = true;
     const authResponse = (
       await http.getJson<{ token?: string; access_token?: string }>(
         authUrl.href,
-        opts
+        opts,
       )
     ).body;
 
@@ -217,7 +211,7 @@ export async function getAuthHeaders(
     if (err.statusCode === 401) {
       logger.debug(
         { registryHost, dockerRepository },
-        'Unauthorized docker lookup'
+        'Unauthorized docker lookup',
       );
       logger.debug({ err });
       return null;
@@ -225,7 +219,7 @@ export async function getAuthHeaders(
     if (err.statusCode === 403) {
       logger.debug(
         { registryHost, dockerRepository },
-        'Not allowed to access docker registry'
+        'Not allowed to access docker registry',
       );
       logger.debug({ err });
       return null;
@@ -248,7 +242,7 @@ export async function getAuthHeaders(
     }
     logger.warn(
       { registryHost, dockerRepository, err },
-      'Error obtaining docker token'
+      'Error obtaining docker token',
     );
     return null;
   }
@@ -256,11 +250,11 @@ export async function getAuthHeaders(
 
 export function getRegistryRepository(
   packageName: string,
-  registryUrl: string
+  registryUrl: string,
 ): RegistryRepository {
   if (registryUrl !== DOCKER_HUB) {
     const registryEndingWithSlash = ensureTrailingSlash(
-      registryUrl.replace(regEx(/^https?:\/\//), '')
+      registryUrl.replace(regEx(/^https?:\/\//), ''),
     );
     if (packageName.startsWith(registryEndingWithSlash)) {
       let registryHost = trimTrailingSlash(registryUrl);
@@ -300,7 +294,7 @@ export function getRegistryRepository(
 
   registryHost = registryHost.replace(
     'https://docker.io',
-    'https://index.docker.io'
+    'https://index.docker.io',
   );
 
   const opts = hostRules.find({
@@ -320,7 +314,7 @@ export function getRegistryRepository(
 }
 
 export function extractDigestFromResponseBody(
-  manifestResponse: HttpResponse
+  manifestResponse: HttpResponse,
 ): string {
   return 'sha256:' + toSha256(manifestResponse.body);
 }

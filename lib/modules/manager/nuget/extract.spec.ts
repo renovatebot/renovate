@@ -24,7 +24,7 @@ describe('modules/manager/nuget/extract', () => {
 
     it('returns null for invalid csproj', async () => {
       expect(
-        await extractPackageFile('nothing here', 'bogus', config)
+        await extractPackageFile('nothing here', 'bogus', config),
       ).toBeNull();
     });
 
@@ -221,7 +221,7 @@ describe('modules/manager/nuget/extract', () => {
         packageFileVersion: '0.1.0',
       });
       expect(
-        await extractPackageFile(otherContents, otherPackageFile, config)
+        await extractPackageFile(otherContents, otherPackageFile, config),
       ).toEqual({
         deps: [
           {
@@ -243,7 +243,7 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'msbuild-sdk-files/global.json';
       const contents = Fixtures.get(packageFile);
       expect(
-        await extractPackageFile(contents, packageFile, config)
+        await extractPackageFile(contents, packageFile, config),
       ).toMatchObject({
         deps: [
           {
@@ -266,7 +266,7 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'msbuild-sdk-files/global.1.json';
       const contents = Fixtures.get(packageFile);
       expect(
-        await extractPackageFile(contents, 'global.json', config)
+        await extractPackageFile(contents, 'global.json', config),
       ).toMatchObject({
         deps: [
           {
@@ -283,7 +283,7 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'msbuild-sdk-files/invalid-json/global.json';
       const contents = Fixtures.get(packageFile);
       expect(
-        await extractPackageFile(contents, packageFile, config)
+        await extractPackageFile(contents, packageFile, config),
       ).toBeNull();
     });
 
@@ -291,7 +291,7 @@ describe('modules/manager/nuget/extract', () => {
       const packageFile = 'msbuild-sdk-files/not-nuget/global.json';
       const contents = Fixtures.get(packageFile);
       expect(
-        await extractPackageFile(contents, packageFile, config)
+        await extractPackageFile(contents, packageFile, config),
       ).toBeNull();
     });
 
@@ -310,7 +310,7 @@ describe('modules/manager/nuget/extract', () => {
                 depType: 'nuget',
               },
             ],
-          }
+          },
         );
       });
 
@@ -319,8 +319,8 @@ describe('modules/manager/nuget/extract', () => {
           await extractPackageFile(
             contents,
             `with-config-file/${packageFile}`,
-            config
-          )
+            config,
+          ),
         ).toEqual({
           deps: [
             {
@@ -342,14 +342,14 @@ describe('modules/manager/nuget/extract', () => {
           await extractPackageFile(
             contents.replace('"version": 1,', '"version": 2,'),
             packageFile,
-            config
-          )
+            config,
+          ),
         ).toBeNull();
       });
 
       it('returns null for no deps', async () => {
         expect(
-          await extractPackageFile('{"version": 1}', packageFile, config)
+          await extractPackageFile('{"version": 1}', packageFile, config),
         ).toBeNull();
       });
 

@@ -11,7 +11,7 @@ export function findDepConstraints(
   depName: string,
   currentVersion: string,
   newVersion: string,
-  parentDepName?: string
+  parentDepName?: string,
 ): ParentDependency[] {
   let parents: ParentDependency[] = [];
   let packageJsonConstraint = packageJson.dependencies?.[depName];
@@ -55,7 +55,7 @@ export function findDepConstraints(
       } else {
         logger.warn(
           { parentDepName, depName, currentVersion, constraint },
-          'Parent constraint is invalid'
+          'Parent constraint is invalid',
         );
       }
     }
@@ -69,8 +69,8 @@ export function findDepConstraints(
           depName,
           currentVersion,
           newVersion,
-          packageName
-        )
+          packageName,
+        ),
       );
     }
   }

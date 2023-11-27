@@ -41,7 +41,6 @@ describe('util/http/bitbucket', () => {
         'content-type': 'application/json',
       },
       statusCode: 200,
-      url: 'https://api.bitbucket.org/some-url',
     });
 
     setBaseUrl(customBaseUrl);
@@ -52,7 +51,6 @@ describe('util/http/bitbucket', () => {
         'content-type': 'application/json',
       },
       statusCode: 200,
-      url: 'https://api-test.bitbucket.org/some-url',
     });
   });
 

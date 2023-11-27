@@ -38,7 +38,7 @@ describe('modules/datasource/packagist/schema', () => {
             version_normalized: '1.0.0.0',
             homepage: '__unset',
           },
-        ])
+        ]),
       ).toEqual([
         {
           name: 'foo/bar',
@@ -110,11 +110,11 @@ describe('modules/datasource/packagist/schema', () => {
           source: null,
           time: null,
           require: null,
-        }
+        },
       );
 
       expect(
-        ComposerRelease.parse({ version: '1.2.3', homepage: 'example.com' })
+        ComposerRelease.parse({ version: '1.2.3', homepage: 'example.com' }),
       ).toEqual({
         version: '1.2.3',
         homepage: 'example.com',
@@ -124,7 +124,7 @@ describe('modules/datasource/packagist/schema', () => {
       });
 
       expect(
-        ComposerRelease.parse({ version: '1.2.3', source: 'nonsense' })
+        ComposerRelease.parse({ version: '1.2.3', source: 'nonsense' }),
       ).toEqual({
         version: '1.2.3',
         homepage: null,
@@ -134,7 +134,7 @@ describe('modules/datasource/packagist/schema', () => {
       });
 
       expect(
-        ComposerRelease.parse({ version: '1.2.3', source: { url: 'foobar' } })
+        ComposerRelease.parse({ version: '1.2.3', source: { url: 'foobar' } }),
       ).toEqual({
         version: '1.2.3',
         source: { url: 'foobar' },
@@ -144,7 +144,7 @@ describe('modules/datasource/packagist/schema', () => {
       });
 
       expect(
-        ComposerRelease.parse({ version: '1.2.3', time: '12345' })
+        ComposerRelease.parse({ version: '1.2.3', time: '12345' }),
       ).toEqual({
         version: '1.2.3',
         time: '12345',
@@ -166,7 +166,7 @@ describe('modules/datasource/packagist/schema', () => {
       expect(ComposerReleases.parse([1, 2, 3])).toBeEmptyArray();
       expect(ComposerReleases.parse(['foobar'])).toBeEmptyArray();
       expect(
-        ComposerReleases.parse([{ version: '1.2.3' }, { version: 'dev-main' }])
+        ComposerReleases.parse([{ version: '1.2.3' }, { version: 'dev-main' }]),
       ).toEqual([
         {
           version: '1.2.3',
@@ -199,7 +199,7 @@ describe('modules/datasource/packagist/schema', () => {
             'foo/bar': [{ version: '1.2.3' }],
             'baz/qux': [{ version: '4.5.6' }],
           },
-        })
+        }),
       ).toEqual([
         {
           version: '1.2.3',
@@ -216,7 +216,7 @@ describe('modules/datasource/packagist/schema', () => {
             'foo/bar': { '1.2.3': { version: '1.2.3' } },
             'baz/qux': { '4.5.6': { version: '4.5.6' } },
           },
-        })
+        }),
       ).toEqual([
         {
           version: '1.2.3',
@@ -242,7 +242,7 @@ describe('modules/datasource/packagist/schema', () => {
               { version: '0.0.1' },
             ],
           },
-        })
+        }),
       ).toEqual([
         {
           version: '3.3.3',
@@ -302,7 +302,7 @@ describe('modules/datasource/packagist/schema', () => {
       expect(parsePackagesResponses('foo/bar', [null])).toBeNull();
       expect(parsePackagesResponses('foo/bar', [{}])).toBeNull();
       expect(
-        parsePackagesResponses('foo/bar', [{ packages: '123' }])
+        parsePackagesResponses('foo/bar', [{ packages: '123' }]),
       ).toBeNull();
       expect(parsePackagesResponses('foo/bar', [{ packages: {} }])).toBeNull();
       expect(
@@ -351,7 +351,7 @@ describe('modules/datasource/packagist/schema', () => {
               ],
             },
           },
-        ] satisfies { packages: Record<string, ComposerRelease[]> }[])
+        ] satisfies { packages: Record<string, ComposerRelease[]> }[]),
       ).toEqual({
         homepage: 'https://example.com/1',
         sourceUrl: 'git@example.com:foo/bar-1',

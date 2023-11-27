@@ -5,12 +5,12 @@ import { getModuleLink, replaceContent } from './utils';
 
 export async function generatePlatforms(
   dist: string,
-  platformIssuesMap: OpenItems
+  platformIssuesMap: OpenItems,
 ): Promise<void> {
   let platformContent = 'Supported values for `platform` are: ';
   const platforms = getPlatformList();
   for (const platform of platforms) {
-    let md = await readFile(`lib/modules/platform/${platform}/index.md`);
+    let md = await readFile(`lib/modules/platform/${platform}/readme.md`);
 
     md += generateFeatureAndBugMarkdown(platformIssuesMap, platform);
 

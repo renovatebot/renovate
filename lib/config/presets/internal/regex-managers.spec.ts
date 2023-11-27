@@ -23,13 +23,16 @@ describe('config/presets/internal/regex-managers', () => {
         # renovate: datasource=custom.hashicorp depName=consul
         ENV CONSUL_VERSION 1.3.1
 
+        # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$
+        ENV KUSTOMIZE_VERSION v5.2.1
+
         RUN echo "FOO"
       `;
 
       const res = await extractPackageFile(
         fileContent,
         'Dockerfile',
-        customManager!
+        customManager!,
       );
 
       expect(res?.deps).toMatchObject([
@@ -61,6 +64,16 @@ describe('config/presets/internal/regex-managers', () => {
           depName: 'consul',
           replaceString:
             '# renovate: datasource=custom.hashicorp depName=consul\nENV CONSUL_VERSION 1.3.1\n',
+        },
+        {
+          currentValue: 'v5.2.1',
+          datasource: 'github-releases',
+          depName: 'kubernetes-sigs/kustomize',
+          replaceString:
+            '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$\nENV KUSTOMIZE_VERSION v5.2.1\n',
+          extractVersion: '^kustomize/(?<version>.+)$',
+          versioning:
+            'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
         },
       ]);
     });
@@ -100,6 +113,8 @@ describe('config/presets/internal/regex-managers', () => {
           YARN_VERSION: '3.3.1'
           # renovate: datasource=custom.hashicorp depName=consul
           CONSUL_VERSION: 1.3.1
+          # renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$
+          TERRAFORM_VERSION: 1.5.7
 
         jobs:
           lint:
@@ -116,7 +131,97 @@ describe('config/presets/internal/regex-managers', () => {
       const res = await extractPackageFile(
         fileContent,
         'github-workflow.yaml',
-        customManager!
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '18.13.0',
+          datasource: 'node-version',
+          depName: 'node',
+          replaceString:
+            '# renovate: datasource=node depName=node versioning=node\n  NODE_VERSION: 18.13.0\n',
+          versioning: 'node',
+        },
+        {
+          currentValue: '7.25.1',
+          datasource: 'npm',
+          depName: 'pnpm',
+          replaceString:
+            '# renovate: datasource=npm depName=pnpm\n  PNPM_VERSION: "7.25.1"\n',
+        },
+        {
+          currentValue: '3.3.1',
+          datasource: 'npm',
+          depName: 'yarn',
+          replaceString:
+            "# renovate: datasource=npm depName=yarn\n  YARN_VERSION: '3.3.1'\n",
+        },
+        {
+          currentValue: '1.3.1',
+          datasource: 'custom.hashicorp',
+          depName: 'consul',
+          replaceString:
+            '# renovate: datasource=custom.hashicorp depName=consul\n  CONSUL_VERSION: 1.3.1\n',
+        },
+        {
+          currentValue: '1.5.7',
+          datasource: 'github-releases',
+          depName: 'hashicorp/terraform',
+          replaceString:
+            '# renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$\n  TERRAFORM_VERSION: 1.5.7\n',
+          versioning: 'hashicorp',
+          extractVersion: '^v(?<version>.+)$',
+        },
+      ]);
+    });
+
+    describe('matches regexes patterns', () => {
+      it.each`
+        path                                | expected
+        ${'.github/workflows/foo.yaml'}     | ${true}
+        ${'.github/workflows/bar.yml'}      | ${true}
+        ${'.github/workflows/foo/bar.yaml'} | ${true}
+        ${'.github/actions/foo.yaml'}       | ${true}
+        ${'.github/actions/foo.yml'}        | ${true}
+        ${'.github/actions/foo/bar.yaml'}   | ${true}
+        ${'foo.yaml'}                       | ${false}
+        ${'foo.yml'}                        | ${false}
+        ${'.github/foo.yml'}                | ${false}
+        ${'.github/workflowsa/foo.yml'}     | ${false}
+        ${'.github/workflows/foo.json'}     | ${false}
+        ${'.github/workflows/foo.yamlo'}    | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
+      });
+    });
+  });
+
+  describe('Update `_VERSION` environment variables in GitLab pipeline file', () => {
+    const customManager = presets['gitlabPipelineVersions'].customManagers?.[0];
+
+    it(`find dependencies in file`, async () => {
+      const fileContent = codeBlock`
+        variables:
+          # renovate: datasource=node depName=node versioning=node
+          NODE_VERSION: 18.13.0
+          # renovate: datasource=npm depName=pnpm
+          PNPM_VERSION: "7.25.1"
+          # renovate: datasource=npm depName=yarn
+          YARN_VERSION: '3.3.1'
+          # renovate: datasource=custom.hashicorp depName=consul
+          CONSUL_VERSION: 1.3.1
+
+        lint:
+          image: node:\${NODE_VERSION}
+          script:
+            - npm install -g pnpm@\${PNPM_VERSION}
+      `;
+
+      const res = await extractPackageFile(
+        fileContent,
+        'gitlab-ci.yml',
+        customManager!,
       );
 
       expect(res?.deps).toMatchObject([
@@ -154,19 +259,13 @@ describe('config/presets/internal/regex-managers', () => {
 
     describe('matches regexes patterns', () => {
       it.each`
-        path                                | expected
-        ${'.github/workflows/foo.yaml'}     | ${true}
-        ${'.github/workflows/bar.yml'}      | ${true}
-        ${'.github/workflows/foo/bar.yaml'} | ${true}
-        ${'.github/actions/foo.yaml'}       | ${true}
-        ${'.github/actions/foo.yml'}        | ${true}
-        ${'.github/actions/foo/bar.yaml'}   | ${true}
-        ${'foo.yaml'}                       | ${false}
-        ${'foo.yml'}                        | ${false}
-        ${'.github/foo.yml'}                | ${false}
-        ${'.github/workflowsa/foo.yml'}     | ${false}
-        ${'.github/workflows/foo.json'}     | ${false}
-        ${'.github/workflows/foo.yamlo'}    | ${false}
+        path                        | expected
+        ${'.gitlab-ci.yaml'}        | ${true}
+        ${'.gitlab-ci.yml'}         | ${true}
+        ${'foo.yaml'}               | ${false}
+        ${'foo.yml'}                | ${false}
+        ${'.gitlab/ci.yml'}         | ${false}
+        ${'includes/gitlab-ci.yml'} | ${false}
       `('$path', ({ path, expected }) => {
         expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
       });
@@ -193,7 +292,7 @@ describe('config/presets/internal/regex-managers', () => {
       const res = await extractPackageFile(
         fileContent,
         'Chart.yaml',
-        customManager!
+        customManager!,
       );
 
       expect(res?.deps).toMatchObject([
@@ -246,13 +345,13 @@ describe('config/presets/internal/regex-managers', () => {
         <groovy.version>4.0.10</groovy.version>
 
         <!-- renovate: datasource=docker depName=mongo -->
-        <mongo.container.version>4.4.6</mongo.container.version>        
+        <mongo.container.version>4.4.6</mongo.container.version>
       `;
 
       const res = await extractPackageFile(
         fileContent,
         'pom.xml',
-        customManager!
+        customManager!,
       );
 
       expect(res?.deps).toMatchObject([

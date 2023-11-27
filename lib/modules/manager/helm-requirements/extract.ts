@@ -11,7 +11,7 @@ import type {
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): PackageFileContent | null {
   let deps = [];
   // TODO: fix type
@@ -59,7 +59,7 @@ export function extractPackageFile(
     res.registryUrls = [dep.repository];
     if (dep.repository.startsWith('@') || dep.repository.startsWith('alias:')) {
       const repoWithPrefixRemoved = dep.repository.slice(
-        dep.repository[0] === '@' ? 1 : 6
+        dep.repository[0] === '@' ? 1 : 6,
       );
       const alias = config.registryAliases?.[repoWithPrefixRemoved];
       if (alias) {
@@ -77,7 +77,7 @@ export function extractPackageFile(
       } catch (err) {
         logger.debug(
           { err, packageFile, url: dep.repository },
-          'Error parsing url'
+          'Error parsing url',
         );
         res.skipReason = 'invalid-url';
       }

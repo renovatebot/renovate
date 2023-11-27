@@ -115,7 +115,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
 
   override getSatisfyingVersion(
     versions: string[],
-    range: string
+    range: string,
   ): string | null {
     const parsedRange = this._parse(range);
     return parsedRange
@@ -124,14 +124,14 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
             .map((v) => this._parse(v))
             .filter(is.truthy)
             .map(asSemver),
-          asSemver(parsedRange)
+          asSemver(parsedRange),
         )
       : null;
   }
 
   override minSatisfyingVersion(
     versions: string[],
-    range: string
+    range: string,
   ): string | null {
     const parsedRange = this._parse(range);
     return parsedRange
@@ -140,7 +140,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
             .map((v) => this._parse(v))
             .filter(is.truthy)
             .map(asSemver),
-          asSemver(parsedRange)
+          asSemver(parsedRange),
         )
       : null;
   }

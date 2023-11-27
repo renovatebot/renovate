@@ -10,12 +10,12 @@ export function massageCustomDatasourceConfig(
     customDatasources,
     packageName,
     registryUrl: defaultRegistryUrl,
-  }: GetReleasesConfig
+  }: GetReleasesConfig,
 ): Required<CustomDatasourceConfig> | null {
   const customDatasource = customDatasources?.[customDatasourceName];
   if (is.nullOrUndefined(customDatasource)) {
     logger.debug(
-      `No custom datasource config provided while ${packageName} has been requested`
+      `No custom datasource config provided while ${packageName} has been requested`,
     );
     return null;
   }
@@ -25,7 +25,7 @@ export function massageCustomDatasourceConfig(
     defaultRegistryUrl ?? customDatasource.defaultRegistryUrlTemplate;
   if (is.nullOrUndefined(registryUrlTemplate)) {
     logger.debug(
-      'No registry url provided by extraction nor datasource configuration'
+      'No registry url provided by extraction nor datasource configuration',
     );
     return null;
   }
@@ -43,4 +43,22 @@ export function massageCustomDatasourceConfig(
     defaultRegistryUrlTemplate: registryUrl,
     transformTemplates: transform,
   };
+}
+
+export function getCustomConfig(
+  getReleasesConfig: GetReleasesConfig,
+): Required<CustomDatasourceConfig> | null {
+  const customDatasourceName = getReleasesConfig.datasource?.replace(
+    'custom.',
+    '',
+  );
+
+  if (!is.nonEmptyString(customDatasourceName)) {
+    logger.debug(
+      `No datasource has been supplied while looking up ${getReleasesConfig.packageName}`,
+    );
+    return null;
+  }
+
+  return massageCustomDatasourceConfig(customDatasourceName, getReleasesConfig);
 }

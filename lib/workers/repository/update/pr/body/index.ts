@@ -69,7 +69,7 @@ const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 export function getPrBody(
   branchConfig: BranchConfig,
   prBodyConfig: PrBodyConfig,
-  config: RenovateConfig
+  config: RenovateConfig,
 ): string {
   massageUpdateMetadata(branchConfig);
   let warnings = '';
@@ -78,7 +78,7 @@ export function getPrBody(
     warnings += getDepWarningsPR(
       branchConfig.packageFiles,
       config,
-      branchConfig.dependencyDashboard
+      branchConfig.dependencyDashboard,
     );
   }
   const content = {
@@ -105,7 +105,7 @@ export function getPrBody(
     if (prBodyConfig?.rebasingNotice) {
       prBody = prBody.replace(
         rebasingRegex,
-        `**Rebasing**: ${prBodyConfig.rebasingNotice}`
+        `**Rebasing**: ${prBodyConfig.rebasingNotice}`,
       );
     }
   }

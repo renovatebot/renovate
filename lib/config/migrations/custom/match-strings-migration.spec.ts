@@ -14,7 +14,7 @@ describe('config/migrations/custom/match-strings-migration', () => {
       },
       {
         matchStrings: ['(?<packageName>', '(?<packageName>(?<packageName>'],
-      }
+      },
     );
   });
 });

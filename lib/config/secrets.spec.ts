@@ -17,19 +17,19 @@ describe('config/secrets', () => {
 
     it('throws if secrets is not an object', () => {
       expect(() => validateConfigSecrets({ secrets: 'hello' } as any)).toThrow(
-        CONFIG_SECRETS_INVALID
+        CONFIG_SECRETS_INVALID,
       );
     });
 
     it('throws for invalid secret names', () => {
       expect(() =>
-        validateConfigSecrets({ secrets: { '123': 'abc' } })
+        validateConfigSecrets({ secrets: { '123': 'abc' } }),
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
 
     it('throws for non-string secret', () => {
       expect(() =>
-        validateConfigSecrets({ secrets: { abc: 123 } } as any)
+        validateConfigSecrets({ secrets: { abc: 123 } } as any),
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
 
@@ -39,7 +39,7 @@ describe('config/secrets', () => {
           repositories: [
             { repository: 'abc/def', secrets: { abc: 123 } },
           ] as any,
-        })
+        }),
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
   });
@@ -152,7 +152,7 @@ describe('config/secrets', () => {
         allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
       };
       expect(() => applySecretsToConfig(config, {}, false)).toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
     });
 
@@ -176,7 +176,7 @@ describe('config/secrets', () => {
       };
       // TODO fix me? #22198
       expect(() => applySecretsToConfig(config, null as never, false)).toThrow(
-        CONFIG_VALIDATION
+        CONFIG_VALIDATION,
       );
     });
   });

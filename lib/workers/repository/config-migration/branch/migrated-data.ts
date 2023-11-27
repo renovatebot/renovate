@@ -39,13 +39,13 @@ export type PrettierParser = BuiltInParserName;
 export async function applyPrettierFormatting(
   content: string,
   parser: PrettierParser,
-  indent?: Indent
+  indent?: Indent,
 ): Promise<string> {
   try {
     logger.trace('applyPrettierFormatting - START');
     const fileList = await scm.getFileList();
     let prettierExists = fileList.some((file) =>
-      prettierConfigFilenames.has(file)
+      prettierConfigFilenames.has(file),
     );
 
     if (!prettierExists) {
@@ -55,7 +55,7 @@ export async function applyPrettierFormatting(
           packageJsonContent && JSON.parse(packageJsonContent).prettier;
       } catch {
         logger.warn(
-          'applyPrettierFormatting - Error processing package.json file'
+          'applyPrettierFormatting - Error processing package.json file',
         );
       }
     }
@@ -145,7 +145,7 @@ export class MigratedDataFactory {
     } catch (err) {
       logger.debug(
         { err },
-        'MigratedDataFactory.getAsync() Error initializing renovate MigratedData'
+        'MigratedDataFactory.getAsync() Error initializing renovate MigratedData',
       );
     }
     return res;

@@ -15,7 +15,7 @@ import {
 } from 'graphql/language';
 
 function isOperationDefinitionNode(
-  def: DefinitionNode
+  def: DefinitionNode,
 ): def is OperationDefinitionNode {
   return def.kind === Kind.OPERATION_DEFINITION;
 }
@@ -84,7 +84,7 @@ function getArguments(key: string, val: ValueNode): Arguments {
 }
 
 function simplifyArguments(
-  argNodes?: ReadonlyArray<ArgumentNode>
+  argNodes?: ReadonlyArray<ArgumentNode>,
 ): Arguments | null {
   if (argNodes) {
     let result: Arguments = {};
@@ -105,7 +105,7 @@ function simplifyArguments(
 function simplifySelectionSet(
   selectionSet: SelectionSetNode,
   parentArgs: Arguments | null,
-  parentVars: Variables | null
+  parentVars: Variables | null,
 ): SelectionSet {
   const result: SelectionSet = {};
 
@@ -151,7 +151,7 @@ function getTypeName(typeNode: TypeNode): string {
 }
 
 function simplifyVariableDefinitions(
-  varNodes: ReadonlyArray<VariableDefinitionNode> | null
+  varNodes: ReadonlyArray<VariableDefinitionNode> | null,
 ): Variables {
   const result: Variables = {};
   if (varNodes) {
@@ -186,7 +186,7 @@ export interface GraphqlSnapshotInput {
 }
 
 export function makeGraphqlSnapshot(
-  requestBody: GraphqlSnapshotInput
+  requestBody: GraphqlSnapshotInput,
 ): GraphqlSnapshot | null {
   try {
     const { query: queryStr, variables } = requestBody;

@@ -316,7 +316,7 @@ describe('config/migration', () => {
       // TODO: fix types #22198
       expect(
         (migratedConfig.lockFileMaintenance as RenovateConfig)
-          ?.packageRules?.[0].respectLatest
+          ?.packageRules?.[0].respectLatest,
       ).toBeFalse();
     });
 

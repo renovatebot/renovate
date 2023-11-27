@@ -42,28 +42,28 @@ describe('modules/manager/cargo/extract', () => {
 
     it('returns null for invalid toml', async () => {
       expect(
-        await extractPackageFile('invalid toml', 'Cargo.toml', config)
+        await extractPackageFile('invalid toml', 'Cargo.toml', config),
       ).toBeNull();
     });
 
     it('returns null for empty dependencies', async () => {
       const cargotoml = '[dependencies]\n';
       expect(
-        await extractPackageFile(cargotoml, 'Cargo.toml', config)
+        await extractPackageFile(cargotoml, 'Cargo.toml', config),
       ).toBeNull();
     });
 
     it('returns null for empty dev-dependencies', async () => {
       const cargotoml = '[dev-dependencies]\n';
       expect(
-        await extractPackageFile(cargotoml, 'Cargo.toml', config)
+        await extractPackageFile(cargotoml, 'Cargo.toml', config),
       ).toBeNull();
     });
 
     it('returns null for empty custom target', async () => {
       const cargotoml = '[target."foo".dependencies]\n';
       expect(
-        await extractPackageFile(cargotoml, 'Cargo.toml', config)
+        await extractPackageFile(cargotoml, 'Cargo.toml', config),
       ).toBeNull();
     });
 
@@ -128,7 +128,7 @@ index = "https://github.com/mcorbin/testregistry"
 replace-with = "mcorbin"
 
 [source.mcorbin]
-replace-with = "private-crates"`
+replace-with = "private-crates"`,
       );
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
@@ -180,7 +180,7 @@ replace-with = "private-crates"`
 replace-with = "crates-io"
 
 [source.private-crates]
-replace-with = "mcorbin"`
+replace-with = "mcorbin"`,
       );
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
@@ -407,7 +407,7 @@ tokio = { version = "1.21.1" }`;
 foo = "bar"
 
 [source.crates-io]
-replace-with = "mine"`
+replace-with = "mine"`,
       );
 
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
@@ -464,7 +464,7 @@ replace-with = "private-crates"
 
 [source.private-crates]
 replace-with = "mcorbin"
-`
+`,
       );
 
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {

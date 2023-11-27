@@ -89,7 +89,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     logger.debug('Checking cached config file name');
     try {
       const configFileContent = await platform.getJsonFile(
-        cache.configFileName
+        cache.configFileName,
       );
       if (configFileContent) {
         if (
@@ -99,7 +99,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
           logger.debug('Existing config file confirmed');
           logger.debug(
             { fileName: cache.configFileName, config: configFileContent },
-            'Repository config'
+            'Repository config',
           );
           return true;
         }
@@ -149,10 +149,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
 }
 
 export async function getOnboardingPr(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<Pr | null> {
   return await platform.getBranchPr(
     config.onboardingBranch!,
-    config.baseBranch
+    config.baseBranch,
   );
 }

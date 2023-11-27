@@ -59,7 +59,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
           datasource,
           registryUrls: ['https://gitlab.com'],
           packageName: 'user/project1:mypkg',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -77,7 +77,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
           datasource,
           registryUrls: ['https://gitlab.com'],
           packageName: 'user/project1:mypkg',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -95,7 +95,7 @@ describe('modules/datasource/gitlab-packages/index', () => {
           datasource,
           registryUrls: ['https://gitlab.com'],
           packageName: 'user/project1:mypkg',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
   });

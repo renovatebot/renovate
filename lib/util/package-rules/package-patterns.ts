@@ -7,7 +7,7 @@ import { massagePattern } from './utils';
 
 function matchPatternsAgainstName(
   matchPackagePatterns: string[],
-  name: string
+  name: string,
 ): boolean {
   let isMatch = false;
   for (const packagePattern of matchPackagePatterns) {
@@ -21,7 +21,7 @@ function matchPatternsAgainstName(
 export class PackagePatternsMatcher extends Matcher {
   override matches(
     { depName, packageName }: PackageRuleInputConfig,
-    packageRule: PackageRule
+    packageRule: PackageRule,
   ): boolean | null {
     const { matchPackagePatterns } = packageRule;
     if (is.undefined(matchPackagePatterns)) {
@@ -41,7 +41,7 @@ export class PackagePatternsMatcher extends Matcher {
     if (matchPatternsAgainstName(matchPackagePatterns, depName)) {
       logger.once.info(
         { packageRule, packageName, depName },
-        'Use matchDepPatterns instead of matchPackagePatterns'
+        'Use matchDepPatterns instead of matchPackagePatterns',
       );
       return true;
     }
@@ -51,7 +51,7 @@ export class PackagePatternsMatcher extends Matcher {
 
   override excludes(
     { depName }: PackageRuleInputConfig,
-    { excludePackagePatterns }: PackageRule
+    { excludePackagePatterns }: PackageRule,
   ): boolean | null {
     // ignore lockFileMaintenance for backwards compatibility
     if (is.undefined(excludePackagePatterns)) {

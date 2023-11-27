@@ -10,16 +10,16 @@ import { DependencyExtractor } from '../../base';
 import type { TerraformDefinitionFile } from '../../hcl/types';
 
 export const githubRefMatchRegex = regEx(
-  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i
+  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
 );
 export const bitbucketRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*).git\/?(?<subfolder>.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/
+  /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*).git\/?(?<subfolder>.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
 export const gitTagsRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:(?:http|https|ssh):\/\/)?(?:.*@)?(?<path>.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/
+  /(?:git::)?(?<url>(?:(?:http|https|ssh):\/\/)?(?:.*@)?(?<path>.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
 export const azureDevOpsSshRefMatchRegex = regEx(
-  /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/
+  /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
 const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
 
@@ -69,7 +69,7 @@ export class ModuleExtractor extends DependencyExtractor {
     if (githubRefMatch?.groups) {
       dep.packageName = githubRefMatch.groups.project.replace(
         regEx(/\.git$/),
-        ''
+        '',
       );
       dep.depName = 'github.com/' + dep.packageName;
       dep.currentValue = githubRefMatch.groups.tag;

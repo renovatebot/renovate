@@ -21,7 +21,7 @@ function loadConfig(content: string): BatectConfig {
 
   if (typeof config !== 'object') {
     throw new Error(
-      `Configuration file does not contain a YAML object (it is ${typeof config}).`
+      `Configuration file does not contain a YAML object (it is ${typeof config}).`,
     );
   }
 
@@ -55,7 +55,7 @@ function extractImageDependencies(config: BatectConfig): PackageDependency[] {
 }
 
 function includeIsGitInclude(
-  include: BatectInclude
+  include: BatectInclude,
 ): include is BatectGitInclude {
   return typeof include === 'object' && include.type === 'git';
 }
@@ -92,14 +92,14 @@ function includeIsStringFileInclude(include: BatectInclude): include is string {
 }
 
 function includeIsObjectFileInclude(
-  include: BatectInclude
+  include: BatectInclude,
 ): include is BatectFileInclude {
   return typeof include === 'object' && include.type === 'file';
 }
 
 function extractReferencedConfigFiles(
   config: BatectConfig,
-  fileName: string
+  fileName: string,
 ): string[] {
   if (config.include === undefined) {
     return [];
@@ -119,7 +119,7 @@ function extractReferencedConfigFiles(
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): ExtractionResult | null {
   logger.trace(`batect.extractPackageFile(${packageFile})`);
 
@@ -132,14 +132,14 @@ export function extractPackageFile(
 
     const referencedConfigFiles = extractReferencedConfigFiles(
       config,
-      packageFile
+      packageFile,
     );
 
     return { deps, referencedConfigFiles };
   } catch (err) {
     logger.debug(
       { err, packageFile },
-      'Extracting dependencies from Batect configuration file failed'
+      'Extracting dependencies from Batect configuration file failed',
     );
 
     return null;
@@ -148,7 +148,7 @@ export function extractPackageFile(
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  packageFiles: string[]
+  packageFiles: string[],
 ): Promise<PackageFile[] | null> {
   const filesToExamine = new Set<string>(packageFiles);
   const filesAlreadyExamined = new Set<string>();

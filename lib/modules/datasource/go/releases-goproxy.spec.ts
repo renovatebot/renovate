@@ -10,12 +10,12 @@ const datasource = new GoProxyDatasource();
 describe('modules/datasource/go/releases-goproxy', () => {
   const githubGetReleases = jest.spyOn(
     GithubReleasesDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   const githubGetTags = jest.spyOn(
     GithubTagsDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   it('encodeCase', () => {
@@ -49,7 +49,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
       const release = await datasource.versionInfo(
         baseUrl,
         packageName,
-        'v0.5.0'
+        'v0.5.0',
       );
 
       expect(release).toEqual({
@@ -101,177 +101,177 @@ describe('modules/datasource/go/releases-goproxy', () => {
       expect(GoProxyDatasource.parseNoproxy('')).toBeNull();
       expect(GoProxyDatasource.parseNoproxy('/')).toBeNull();
       expect(GoProxyDatasource.parseNoproxy('*')?.source).toBe(
-        '^(?:[^\\/]*)(?:\\/.*)?$'
+        '^(?:[^\\/]*)(?:\\/.*)?$',
       );
       expect(GoProxyDatasource.parseNoproxy('?')?.source).toBe(
-        '^(?:[^\\/])(?:\\/.*)?$'
+        '^(?:[^\\/])(?:\\/.*)?$',
       );
       expect(GoProxyDatasource.parseNoproxy('foo')?.source).toBe(
-        '^(?:foo)(?:\\/.*)?$'
+        '^(?:foo)(?:\\/.*)?$',
       );
       expect(GoProxyDatasource.parseNoproxy('\\f\\o\\o')?.source).toBe(
-        '^(?:foo)(?:\\/.*)?$'
+        '^(?:foo)(?:\\/.*)?$',
       );
       expect(GoProxyDatasource.parseNoproxy('foo,bar')?.source).toBe(
-        '^(?:foo|bar)(?:\\/.*)?$'
+        '^(?:foo|bar)(?:\\/.*)?$',
       );
       expect(GoProxyDatasource.parseNoproxy('[abc]')?.source).toBe(
-        '^(?:[abc])(?:\\/.*)?$'
+        '^(?:[abc])(?:\\/.*)?$',
       );
       expect(GoProxyDatasource.parseNoproxy('[a-c]')?.source).toBe(
-        '^(?:[a-c])(?:\\/.*)?$'
+        '^(?:[a-c])(?:\\/.*)?$',
       );
       expect(GoProxyDatasource.parseNoproxy('[\\a-\\c]')?.source).toBe(
-        '^(?:[a-c])(?:\\/.*)?$'
+        '^(?:[a-c])(?:\\/.*)?$',
       );
       expect(GoProxyDatasource.parseNoproxy('a.b.c')?.source).toBe(
-        '^(?:a\\.b\\.c)(?:\\/.*)?$'
+        '^(?:a\\.b\\.c)(?:\\/.*)?$',
       );
       expect(GoProxyDatasource.parseNoproxy('trailing/')?.source).toBe(
-        '^(?:trailing)(?:\\/.*)?$'
+        '^(?:trailing)(?:\\/.*)?$',
       );
     });
 
     it('matches on real package prefixes', () => {
       expect(
-        GoProxyDatasource.parseNoproxy('ex.co')?.test('ex.co/foo')
+        GoProxyDatasource.parseNoproxy('ex.co')?.test('ex.co/foo'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('ex.co/')?.test('ex.co/foo')
+        GoProxyDatasource.parseNoproxy('ex.co/')?.test('ex.co/foo'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('ex.co/foo/bar')?.test('ex.co/foo/bar')
+        GoProxyDatasource.parseNoproxy('ex.co/foo/bar')?.test('ex.co/foo/bar'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('ex.co/foo/bar')?.test('ex.co/foo/bar')
+        GoProxyDatasource.parseNoproxy('ex.co/foo/bar')?.test('ex.co/foo/bar'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('*/foo/*')?.test('example.com/foo/bar')
+        GoProxyDatasource.parseNoproxy('*/foo/*')?.test('example.com/foo/bar'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('ex.co/foo/*')?.test('ex.co/foo/bar')
+        GoProxyDatasource.parseNoproxy('ex.co/foo/*')?.test('ex.co/foo/bar'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('ex.co/foo/*')?.test('ex.co/foo/baz')
+        GoProxyDatasource.parseNoproxy('ex.co/foo/*')?.test('ex.co/foo/baz'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('ex.co')?.test('ex.co/foo/v2')
+        GoProxyDatasource.parseNoproxy('ex.co')?.test('ex.co/foo/v2'),
       ).toBeTrue();
 
       expect(
-        GoProxyDatasource.parseNoproxy('ex.co/foo/bar')?.test('ex.co/foo/bar')
+        GoProxyDatasource.parseNoproxy('ex.co/foo/bar')?.test('ex.co/foo/bar'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('*/foo/*')?.test('example.com/foo/bar')
+        GoProxyDatasource.parseNoproxy('*/foo/*')?.test('example.com/foo/bar'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('ex.co/foo/*')?.test('ex.co/foo/bar')
+        GoProxyDatasource.parseNoproxy('ex.co/foo/*')?.test('ex.co/foo/bar'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('ex.co/foo/*')?.test('ex.co/foo/baz')
-      ).toBeTrue();
-      expect(
-        GoProxyDatasource.parseNoproxy('ex.co/foo/bar,ex.co/foo/baz')?.test(
-          'ex.co/foo/bar'
-        )
+        GoProxyDatasource.parseNoproxy('ex.co/foo/*')?.test('ex.co/foo/baz'),
       ).toBeTrue();
       expect(
         GoProxyDatasource.parseNoproxy('ex.co/foo/bar,ex.co/foo/baz')?.test(
-          'ex.co/foo/baz'
-        )
+          'ex.co/foo/bar',
+        ),
       ).toBeTrue();
       expect(
         GoProxyDatasource.parseNoproxy('ex.co/foo/bar,ex.co/foo/baz')?.test(
-          'ex.co/foo/qux'
-        )
+          'ex.co/foo/baz',
+        ),
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('ex.co/foo/bar,ex.co/foo/baz')?.test(
+          'ex.co/foo/qux',
+        ),
       ).toBeFalse();
 
       expect(
-        GoProxyDatasource.parseNoproxy('ex')?.test('ex.co/foo')
+        GoProxyDatasource.parseNoproxy('ex')?.test('ex.co/foo'),
       ).toBeFalse();
 
       expect(GoProxyDatasource.parseNoproxy('aba')?.test('x/aba')).toBeFalse();
       expect(GoProxyDatasource.parseNoproxy('x/b')?.test('x/aba')).toBeFalse();
       expect(GoProxyDatasource.parseNoproxy('x/ab')?.test('x/aba')).toBeFalse();
       expect(
-        GoProxyDatasource.parseNoproxy('x/ab[a-b]')?.test('x/aba')
+        GoProxyDatasource.parseNoproxy('x/ab[a-b]')?.test('x/aba'),
       ).toBeTrue();
     });
 
     it('matches on wildcards', () => {
       expect(
-        GoProxyDatasource.parseNoproxy('/*/')?.test('ex.co/foo')
+        GoProxyDatasource.parseNoproxy('/*/')?.test('ex.co/foo'),
       ).toBeFalse();
       expect(
-        GoProxyDatasource.parseNoproxy('*/foo')?.test('ex.co/foo')
+        GoProxyDatasource.parseNoproxy('*/foo')?.test('ex.co/foo'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('*/fo')?.test('ex.co/foo')
+        GoProxyDatasource.parseNoproxy('*/fo')?.test('ex.co/foo'),
       ).toBeFalse();
       expect(
-        GoProxyDatasource.parseNoproxy('*/fo?')?.test('ex.co/foo')
+        GoProxyDatasource.parseNoproxy('*/fo?')?.test('ex.co/foo'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('*/fo*')?.test('ex.co/foo')
+        GoProxyDatasource.parseNoproxy('*/fo*')?.test('ex.co/foo'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('*fo*')?.test('ex.co/foo')
-      ).toBeFalse();
-
-      expect(
-        GoProxyDatasource.parseNoproxy('*.co')?.test('ex.co/foo')
-      ).toBeTrue();
-      expect(
-        GoProxyDatasource.parseNoproxy('ex*')?.test('ex.co/foo')
-      ).toBeTrue();
-      expect(
-        GoProxyDatasource.parseNoproxy('*/foo')?.test('ex.co/foo/v2')
-      ).toBeTrue();
-      expect(
-        GoProxyDatasource.parseNoproxy('*/foo/')?.test('ex.co/foo/v2')
-      ).toBeTrue();
-      expect(
-        GoProxyDatasource.parseNoproxy('*/foo/*')?.test('ex.co/foo/v2')
-      ).toBeTrue();
-      expect(
-        GoProxyDatasource.parseNoproxy('*/foo/*/')?.test('ex.co/foo/v2')
-      ).toBeTrue();
-      expect(
-        GoProxyDatasource.parseNoproxy('*/v2')?.test('ex.co/foo/v2')
-      ).toBeFalse();
-      expect(
-        GoProxyDatasource.parseNoproxy('*/*/v2')?.test('ex.co/foo/v2')
-      ).toBeTrue();
-      expect(
-        GoProxyDatasource.parseNoproxy('*/*/*')?.test('ex.co/foo/v2')
-      ).toBeTrue();
-      expect(
-        GoProxyDatasource.parseNoproxy('*/*/*/')?.test('ex.co/foo/v2')
-      ).toBeTrue();
-      expect(
-        GoProxyDatasource.parseNoproxy('*/*/*')?.test('ex.co/foo')
-      ).toBeFalse();
-      expect(
-        GoProxyDatasource.parseNoproxy('*/*/*/')?.test('ex.co/foo')
+        GoProxyDatasource.parseNoproxy('*fo*')?.test('ex.co/foo'),
       ).toBeFalse();
 
       expect(
-        GoProxyDatasource.parseNoproxy('*/*/*,,')?.test('ex.co/repo')
-      ).toBeFalse();
-      expect(
-        GoProxyDatasource.parseNoproxy('*/*/*,,*/repo')?.test('ex.co/repo')
+        GoProxyDatasource.parseNoproxy('*.co')?.test('ex.co/foo'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy(',,*/repo')?.test('ex.co/repo')
+        GoProxyDatasource.parseNoproxy('ex*')?.test('ex.co/foo'),
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/foo')?.test('ex.co/foo/v2'),
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/foo/')?.test('ex.co/foo/v2'),
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/foo/*')?.test('ex.co/foo/v2'),
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/foo/*/')?.test('ex.co/foo/v2'),
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/v2')?.test('ex.co/foo/v2'),
+      ).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/v2')?.test('ex.co/foo/v2'),
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*')?.test('ex.co/foo/v2'),
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*/')?.test('ex.co/foo/v2'),
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*')?.test('ex.co/foo'),
+      ).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*/')?.test('ex.co/foo'),
+      ).toBeFalse();
+
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*,,')?.test('ex.co/repo'),
+      ).toBeFalse();
+      expect(
+        GoProxyDatasource.parseNoproxy('*/*/*,,*/repo')?.test('ex.co/repo'),
+      ).toBeTrue();
+      expect(
+        GoProxyDatasource.parseNoproxy(',,*/repo')?.test('ex.co/repo'),
       ).toBeTrue();
     });
 
     it('matches on character ranges', () => {
       expect(
-        GoProxyDatasource.parseNoproxy('x/ab[a-b]')?.test('x/aba')
+        GoProxyDatasource.parseNoproxy('x/ab[a-b]')?.test('x/aba'),
       ).toBeTrue();
       expect(
-        GoProxyDatasource.parseNoproxy('x/ab[a-b]')?.test('x/abc')
+        GoProxyDatasource.parseNoproxy('x/ab[a-b]')?.test('x/abc'),
       ).toBeFalse();
     });
   });
@@ -344,7 +344,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           codeBlock`
             v1.0.0 2018-08-13T15:31:12Z
             v1.0.1
-          `
+          `,
         )
         .get('/@v/v1.0.1.info')
         .reply(200, { Version: 'v1.0.1', Time: '2019-10-16T16:15:28Z' })
@@ -378,7 +378,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           codeBlock`
             v1.0.0
             v1.0.1
-          `
+          `,
         )
         .get('/@v/v1.0.0.info')
         .replyWithError('unknown')
@@ -416,7 +416,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           codeBlock`
             v1.0.0
             v1.0.1
-          `
+          `,
         )
         .get('/@v/v1.0.0.info')
         .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
@@ -466,7 +466,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           codeBlock`
             v1.0.0
             v1.0.1
-          `
+          `,
         )
         .get('/@v/v1.0.0.info')
         .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
@@ -560,7 +560,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
     it('supports "off" keyword', async () => {
       process.env.GOPROXY = ['https://foo.com', 'https://bar.com', 'off'].join(
-        ','
+        ',',
       );
 
       httpMock
@@ -622,7 +622,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           codeBlock`
             v1.0.0
             v1.0.1
-          `
+          `,
         )
         .get('/@v/v1.0.0.info')
         .reply(200, { Version: 'v1.0.0', Time: '2018-08-13T15:31:12Z' })
@@ -635,7 +635,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           200,
           codeBlock`
             v2.0.0
-          `
+          `,
         )
         .get('/v2/@v/v2.0.0.info')
         .reply(200, { Version: 'v2.0.0', Time: '2020-10-16T16:15:28Z' })

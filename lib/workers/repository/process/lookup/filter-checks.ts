@@ -25,7 +25,7 @@ export async function filterInternalChecks(
   config: Partial<LookupUpdateConfig & UpdateResult>,
   versioning: VersioningApi,
   bucket: string,
-  sortedReleases: Release[]
+  sortedReleases: Release[],
 ): Promise<InternalChecksResult> {
   const { currentVersion, datasource, depName, internalChecksFilter } = config;
   let release: Release | undefined = undefined;
@@ -45,11 +45,11 @@ export async function filterInternalChecks(
         versioning,
         // TODO #22198
         currentVersion!,
-        candidateRelease.version
+        candidateRelease.version,
       );
       releaseConfig = mergeChildConfig(
         releaseConfig,
-        releaseConfig[releaseConfig.updateType]!
+        releaseConfig[releaseConfig.updateType]!,
       );
       // Apply packageRules in case any apply to updateType
       releaseConfig = applyPackageRules(releaseConfig);
@@ -69,7 +69,7 @@ export async function filterInternalChecks(
           // Skip it if it doesn't pass checks
           logger.trace(
             { depName, check: 'minimumReleaseAge' },
-            `Release ${candidateRelease.version} is pending status checks`
+            `Release ${candidateRelease.version} is pending status checks`,
           );
           pendingReleases.unshift(candidateRelease);
           continue;
@@ -84,13 +84,13 @@ export async function filterInternalChecks(
             depName!,
             currentVersion!,
             newVersion,
-            updateType!
+            updateType!,
           )) ?? 'neutral';
         // TODO #22198
         if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
           logger.trace(
             { depName, check: 'minimumConfidence' },
-            `Release ${candidateRelease.version} is pending status checks`
+            `Release ${candidateRelease.version} is pending status checks`,
           );
           pendingReleases.unshift(candidateRelease);
           continue;
@@ -105,7 +105,7 @@ export async function filterInternalChecks(
         // If all releases were pending then just take the highest
         logger.trace(
           { depName, bucket },
-          'All releases are pending - using latest'
+          'All releases are pending - using latest',
         );
         release = pendingReleases.pop();
         // None are pending anymore because we took the latest, so empty the array

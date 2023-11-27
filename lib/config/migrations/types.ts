@@ -2,7 +2,7 @@ import type { RenovateConfig } from './../types';
 export interface MigrationConstructor {
   new (
     originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig
+    migratedConfig: RenovateConfig,
   ): Migration;
 }
 
