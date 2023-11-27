@@ -15,7 +15,6 @@ import {
 } from './workers/global/config/parse/file';
 
 let returnVal = 0;
-let isFoundConfigFile = false;
 
 async function validate(
   desc: string,
@@ -23,8 +22,6 @@ async function validate(
   strict: boolean,
   isPreset = false,
 ): Promise<void> {
-  isFoundConfigFile = true;
-
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
     logger.warn(
@@ -137,11 +134,7 @@ type PackageJson = {
         const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
         logger.info(`Validating ${file}`);
         try {
-          await validate(
-            file,
-            fileConfig,
-            strict && !!process.env.RENOVATE_CONFIG_FILE,
-          );
+          await validate(file, fileConfig, strict);
         } catch (err) {
           logger.error({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -151,12 +144,6 @@ type PackageJson = {
       // ignore
     }
   }
-
-  if (!isFoundConfigFile) {
-    logger.error('No configuration files found.');
-    process.exit(1);
-  }
-
   if (returnVal !== 0) {
     process.exit(returnVal);
   }

@@ -10,6 +10,7 @@ import {
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform/types';
 import * as _cache from '../../../util/cache/repository';
+import type { LongCommitSha } from '../../../util/git/types';
 import * as _merge from '../init/merge';
 import { validateReconfigureBranch } from '.';
 
@@ -32,7 +33,7 @@ describe('workers/repository/reconfigure/index', () => {
     merge.detectConfigFile.mockResolvedValue('renovate.json');
     scm.branchExists.mockResolvedValue(true);
     cache.getCache.mockReturnValue({});
-    git.getBranchCommit.mockReturnValue('sha');
+    git.getBranchCommit.mockReturnValue('sha' as LongCommitSha);
     fs.readLocalFile.mockResolvedValue(null);
     platform.getBranchPr.mockResolvedValue(null);
     platform.getBranchStatusCheck.mockResolvedValue(null);

@@ -310,3 +310,20 @@ And the following custom manager:
   ]
 }
 ```
+
+Or if you have the datasource locally, you can also define your local registry by prefixing it with `file://`:
+
+```json
+{
+  "customDatasources": {
+    "local_generic": {
+      "defaultRegistryUrlTemplate": "file://dependencies/{{packageName}}/versiontracker.json",
+      "transformTemplates": [
+        "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"sourceUrl\": $v.filelink } }) }"
+      ]
+    }
+  }
+}
+```
+
+Renovate will then parse your file from your current folder to access it.

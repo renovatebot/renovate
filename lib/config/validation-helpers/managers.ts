@@ -1,4 +1,4 @@
-import { allManagersList } from '../../modules/manager';
+import { allManagersList, isKnownManager } from '../../modules/manager';
 import type { ValidationMessage } from '../types';
 import type { CheckManagerArgs } from './types';
 
@@ -13,7 +13,7 @@ export function check({
   if (Array.isArray(resolvedRule.matchManagers)) {
     if (
       resolvedRule.matchManagers.find(
-        (confManager) => !allManagersList.includes(confManager),
+        (confManager) => !isKnownManager(confManager),
       )
     ) {
       managersErrMessage = `${currentPath}:
