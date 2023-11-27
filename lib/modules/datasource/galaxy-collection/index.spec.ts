@@ -164,7 +164,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(res?.releases).toHaveLength(3);
     });
 
-    it('returns null but matches automation hub url', async () => {
+    it('returns null but matches automation hub URL', async () => {
       httpMock
         .scope('https://my.automationhub.local/api/galaxy/content/community/')
         .get(`/v3/plugin/ansible/content/community/collections/index/foo/bar/`)
@@ -180,7 +180,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
-    it('processes real data with automation hub url', async () => {
+    it('processes real data with automation hub URL', async () => {
       httpMock
         .scope('https://my.automationhub.local/api/galaxy/content/published/')
         .get(`/${collectionAPIPath}/community/kubernetes/`)
