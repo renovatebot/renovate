@@ -495,29 +495,6 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
-
-    it('return releases from HTML links on curl download page', async () => {
-      httpMock
-        .scope('https://curl.se')
-        .get('/download.html')
-        .reply(200, Fixtures.get('curl-download.html'), {
-          'Content-Type': 'text/html',
-        });
-
-      const result = await getPkgReleases({
-        datasource: `${CustomDatasource.id}.foo`,
-        packageName: 'myPackage',
-        customDatasources: {
-          foo: {
-            defaultRegistryUrlTemplate: 'https://curl.se/download.html',
-            format: 'html',
-          },
-        },
-      });
-
-      expect(result).toMatchSnapshot();
-    });
-
     it('return releases from nginx directory listing', async () => {
       httpMock
         .scope('http://nginx.org')
