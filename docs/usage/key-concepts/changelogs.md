@@ -48,11 +48,15 @@ This section is for package maintainers that want to make sure Renovate can see 
 ### npm package maintainers
 
 I remember that Renovate needs a repository source url in the `package.json`, or at least some field in the `package.json` must be filled out.
-We helped Docusaurus a while back to get the changelogs visible, but they had a complicated monorepo setup.
+We helped Docusaurus a while back to get the changelogs visible, but they had a complicated monorepo setup, see: [`facebook/docusaurus` issue: package.json repository/directory metadata incomplete](https://github.com/facebook/docusaurus/issues/3612).
+
+As maintainer, make sure the `package.json` has a filled in `repository` field, read the [npm Docs, configuring npm `repository` field](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#repository) to learn more.
+If your repository uses the monorepo pattern make sure _each_ `package.json` file has a `repository` field.
 
 ### yarn package maintainers
 
-I suspect Yarn needs a similar field in the `package.json` as the npm package manager.
+I suspect Yarn needs a similar field like `repository` in the `package.json` as for the npm package manager.
+Maybe Yarn even uses the same field...
 
 ### maven package maintainers
 
