@@ -474,10 +474,18 @@ describe('modules/datasource/custom/index', () => {
         ],
       };
 
+      const content = `
+        <html>
+          <body>
+            <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+          </body>
+        </html>
+      `;
+
       httpMock
         .scope('https://example.com')
         .get('/index.html')
-        .reply(200, Fixtures.get('simple.html'), {
+        .reply(200, content, {
           'Content-Type': 'text/html',
         });
 
@@ -544,10 +552,17 @@ describe('modules/datasource/custom/index', () => {
         ],
       };
 
+      const content = `
+        <html>
+        <body>
+        <h1></pre><hr></body><a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+        </html>
+      `;
+
       httpMock
         .scope('https://example.com')
         .get('/malformed.html')
-        .reply(200, Fixtures.get('malformed.html'), {
+        .reply(200, content, {
           'Content-Type': 'text/html',
         });
 
@@ -574,10 +589,17 @@ describe('modules/datasource/custom/index', () => {
         ],
       };
 
+      const content = `
+        <html>
+        <body>
+        <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+        <a href="package-2.0.tar.gz
+      `;
+
       httpMock
         .scope('https://example.com')
         .get('/incomplete.html')
-        .reply(200, Fixtures.get('incomplete.html'), {
+        .reply(200, content, {
           'Content-Type': 'text/html',
         });
 
