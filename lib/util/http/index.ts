@@ -135,11 +135,14 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     protected hostType: string,
     options: HttpOptions = {},
   ) {
-    this.options = merge<GotOptions>(options, { context: { hostType } });
-
-    if (process.env.NODE_ENV === 'test') {
-      this.options.retry = 0;
-    }
+    const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
+    this.options = merge<GotOptions>(options, {
+      context: { hostType },
+      retry: {
+        limit: retryLimit,
+        maxRetryAfter: 0,
+      },
+    });
   }
 
   protected getThrottle(url: string): Throttle | null {
