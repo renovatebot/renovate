@@ -413,6 +413,7 @@ const staticGroups = {
       'group:phpstan',
       'group:polymer',
       'group:react',
+      'group:remark',
       'group:resilience4j',
       'group:rubyOnRails',
       'group:rubyOmniauth',
