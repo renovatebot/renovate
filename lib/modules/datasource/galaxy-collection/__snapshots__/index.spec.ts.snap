@@ -33,7 +33,7 @@ exports[`modules/datasource/galaxy-collection/index getReleases processes real d
 }
 `;
 
-exports[`modules/datasource/galaxy-collection/index getReleases processes real data with automation hub url 1`] = `
+exports[`modules/datasource/galaxy-collection/index getReleases processes real data with automation hub URL 1`] = `
 {
   "registryUrl": "https://my.automationhub.local/api/galaxy/content/published",
   "releases": [
