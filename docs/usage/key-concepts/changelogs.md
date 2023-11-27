@@ -66,19 +66,19 @@ Read [`maven` datasource, making your changelogs fetchable](https://docs.renovat
 
 Read the [Docker datasource](https://docs.renovatebot.com/modules/datasource/docker/) docs.
 
-### Rust packages
+### Rust package maintainers
 
 Explain how to get Rust changelogs here.
 
-### Nuget packages
+### Nuget package maintainers
 
 Explain how to get Nuget changelogs here.
 
-### Go packages
+### Go package maintainers
 
 Explain how to get Go changelogs here.
 
-### Ruby packages
+### Ruby package maintainers
 
 Explain how to get Ruby (gem) changelogs here.
 
