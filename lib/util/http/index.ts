@@ -132,6 +132,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   ) {
     this.options = merge<GotOptions>(options, { context: { hostType } });
 
+    this.options.retry = {
+      limit: 2,
+      maxRetryAfter: 60,
+    };
+
     if (process.env.NODE_ENV === 'test') {
       this.options.retry = 0;
     }

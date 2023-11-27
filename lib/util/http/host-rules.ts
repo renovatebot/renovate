@@ -188,7 +188,6 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
 
   if (is.number(foundRules.maxRetryAfter)) {
     const retry: GotOptions['retry'] = {};
-    // istanbul ignore else: not easily testable
     if (is.number(options.retry)) {
       retry.limit = options.retry;
     } else if (is.object(options.retry)) {

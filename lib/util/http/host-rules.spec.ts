@@ -261,6 +261,35 @@ describe('util/http/host-rules', () => {
     });
   });
 
+  it('supports maxRetryAfter', () => {
+    hostRules.add({
+      hostType: 'github',
+      maxRetryAfter: 42,
+    });
+
+    expect(
+      applyHostRules(url, { ...options, retry: 7, hostType: 'github-tags' }),
+    ).toMatchObject({
+      retry: {
+        limit: 7,
+        maxRetryAfter: 42,
+      },
+    });
+
+    expect(
+      applyHostRules(url, {
+        ...options,
+        retry: { limit: 7 },
+        hostType: 'github-tags',
+      }),
+    ).toMatchObject({
+      retry: {
+        limit: 7,
+        maxRetryAfter: 42,
+      },
+    });
+  });
+
   it('fallback to github', () => {
     expect(
       applyHostRules(url, { ...options, hostType: 'github-tags' }),
