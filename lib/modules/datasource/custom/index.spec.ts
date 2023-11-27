@@ -496,6 +496,20 @@ describe('modules/datasource/custom/index', () => {
     });
 
     it('return releases from nginx directory listing', async () => {
+      const expected = {
+        releases: [
+          {
+            version: "nginx-0.1.0.tar.gz",
+          },
+          {
+            version: "nginx-0.1.1.tar.gz",
+          },
+          {
+            version: "nginx-0.1.11.tar.gz",
+          },
+        ],
+      };
+
       httpMock
         .scope('http://nginx.org')
         .get('/download/')
@@ -518,7 +532,7 @@ describe('modules/datasource/custom/index', () => {
         },
       });
 
-      expect(result).toMatchSnapshot();
+      expect(result).toEqual(expected);
     });
   });
 });
