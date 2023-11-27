@@ -87,7 +87,7 @@ export function getQueryString(params: Record<string, any>): string {
 
 export function validateUrl(
   url: string | null | undefined,
-  httpOnly = true
+  httpOnly = true,
 ): boolean {
   if (!is.nonEmptyString(url)) {
     return false;
@@ -124,7 +124,7 @@ export function createURLFromHostOrURL(url: string): URL | null {
 export type LinkHeaderLinks = _parseLinkHeader.Links;
 
 export function parseLinkHeader(
-  linkHeader: string | null | undefined
+  linkHeader: string | null | undefined,
 ): LinkHeaderLinks | null {
   if (!is.nonEmptyString(linkHeader)) {
     return null;

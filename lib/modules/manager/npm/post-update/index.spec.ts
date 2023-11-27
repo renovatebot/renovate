@@ -156,8 +156,8 @@ describe('modules/manager/npm/post-update/index', () => {
         determineLockFileDirs(
           updateConfig,
 
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).toStrictEqual({
         npmLockDirs: ['package-lock.json', 'randomFolder/package-lock.json'],
         pnpmShrinkwrapDirs: ['packages/pnpm/pnpm-lock.yaml'],
@@ -179,8 +179,8 @@ describe('modules/manager/npm/post-update/index', () => {
               },
             ],
           },
-          {}
-        )
+          {},
+        ),
       ).toStrictEqual({
         npmLockDirs: [],
         pnpmShrinkwrapDirs: [],
@@ -192,10 +192,10 @@ describe('modules/manager/npm/post-update/index', () => {
   describe('writeExistingFiles()', () => {
     it('works', async () => {
       git.getFile.mockResolvedValueOnce(
-        Fixtures.get('update-lockfile-massage-1/package-lock.json')
+        Fixtures.get('update-lockfile-massage-1/package-lock.json'),
       );
       await expect(
-        writeExistingFiles(updateConfig, additionalFiles)
+        writeExistingFiles(updateConfig, additionalFiles),
       ).resolves.toBeUndefined();
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
@@ -207,8 +207,8 @@ describe('modules/manager/npm/post-update/index', () => {
       await expect(
         writeExistingFiles(
           { ...updateConfig, reuseLockFiles: false },
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).resolves.toBeUndefined();
 
       expect(fs.writeLocalFile).toHaveBeenCalledOnce();
@@ -237,7 +237,7 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(fs.writeLocalFile).toHaveBeenCalledOnce();
       expect(fs.writeLocalFile).toHaveBeenCalledWith(
         'packages/core/.npmrc',
-        '#dummy\n'
+        '#dummy\n',
       );
     });
 
@@ -255,22 +255,22 @@ describe('modules/manager/npm/post-update/index', () => {
             // No npmrc content should be written for this package.
             { packageFile: 'packages/core/package.json', managerData: {} },
           ],
-        }
+        },
       );
 
       expect(fs.writeLocalFile).toHaveBeenCalledOnce();
       expect(fs.writeLocalFile).toHaveBeenCalledWith(
         'packages/core/.npmrc',
-        '#dummy\n'
+        '#dummy\n',
       );
     });
 
     it('works only on relevant folders', async () => {
       git.getFile.mockResolvedValueOnce(
-        Fixtures.get('update-lockfile-massage-1/package-lock.json')
+        Fixtures.get('update-lockfile-massage-1/package-lock.json'),
       );
       await expect(
-        writeExistingFiles(updateConfig, additionalFiles)
+        writeExistingFiles(updateConfig, additionalFiles),
       ).resolves.toBeUndefined();
 
       expect(fs.writeLocalFile).toHaveBeenCalledTimes(2);
@@ -294,7 +294,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('missing updated packages files', async () => {
       await expect(
-        writeUpdatedPackageFiles(baseConfig)
+        writeUpdatedPackageFiles(baseConfig),
       ).resolves.toBeUndefined();
       expect(fs.writeLocalFile).not.toHaveBeenCalled();
     });
@@ -314,7 +314,7 @@ describe('modules/manager/npm/post-update/index', () => {
       const yarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
         updatedArtifacts,
-        undefined
+        undefined,
       );
       expect(yarnrcYmlContent).toBeUndefined();
       expect(updatedArtifacts).toMatchSnapshot();
@@ -327,7 +327,7 @@ describe('modules/manager/npm/post-update/index', () => {
       const existingYarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
         updatedArtifacts,
-        oldYarnrcYml
+        oldYarnrcYml,
       );
       expect(git.getFile).not.toHaveBeenCalled();
       expect(existingYarnrcYmlContent).toMatchSnapshot();
@@ -341,7 +341,7 @@ describe('modules/manager/npm/post-update/index', () => {
       const yarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
         updatedArtifacts,
-        undefined
+        undefined,
       );
       expect(yarnrcYmlContent).toBeUndefined();
       expect(updatedArtifacts).toBeEmpty();
@@ -354,7 +354,7 @@ describe('modules/manager/npm/post-update/index', () => {
       const yarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
         updatedArtifacts,
-        undefined
+        undefined,
       );
       expect(yarnrcYmlContent).toBeUndefined();
       expect(updatedArtifacts).toBeEmpty();
@@ -366,7 +366,7 @@ describe('modules/manager/npm/post-update/index', () => {
       const existingYarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
         updatedArtifacts,
-        oldYarnrcYml
+        oldYarnrcYml,
       );
       expect(existingYarnrcYmlContent).toMatch(oldYarnrcYml);
       expect(updatedArtifacts).toBeEmpty();
@@ -380,7 +380,7 @@ describe('modules/manager/npm/post-update/index', () => {
       const yarnrcYmlContent = await updateYarnBinary(
         lockFileDir,
         updatedArtifacts,
-        ''
+        '',
       );
       expect(yarnrcYmlContent).toBe('');
       expect(updatedArtifacts).toEqual([]);
@@ -404,8 +404,8 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(
         await getAdditionalFiles(
           { ...updateConfig, updateLockFiles: true },
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [],
@@ -424,8 +424,8 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(
         await getAdditionalFiles(
           { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [
@@ -467,9 +467,9 @@ describe('modules/manager/npm/post-update/index', () => {
               updateLockFiles: true,
               reuseExistingBranch: true,
             },
-            additionalFiles
+            additionalFiles,
           )
-        ).updatedArtifacts.find((a) => a.path === 'package-lock.json')
+        ).updatedArtifacts.find((a) => a.path === 'package-lock.json'),
       ).toBeUndefined();
     });
 
@@ -497,9 +497,9 @@ describe('modules/manager/npm/post-update/index', () => {
               reuseExistingBranch: false,
               baseBranch: 'base',
             },
-            additionalFiles
+            additionalFiles,
           )
-        ).updatedArtifacts.find((a) => a.path === 'package-lock.json')
+        ).updatedArtifacts.find((a) => a.path === 'package-lock.json'),
       ).toBeUndefined();
     });
 
@@ -508,8 +508,8 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(
         await getAdditionalFiles(
           { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [
@@ -541,8 +541,8 @@ describe('modules/manager/npm/post-update/index', () => {
               },
             ],
           },
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [
@@ -565,7 +565,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('no lockfiles updates', async () => {
       expect(
-        await getAdditionalFiles(baseConfig, additionalFiles)
+        await getAdditionalFiles(baseConfig, additionalFiles),
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [],
@@ -581,8 +581,8 @@ describe('modules/manager/npm/post-update/index', () => {
             upgrades: [{ isLockfileUpdate: true }],
             updateLockFiles: true,
           },
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [],
@@ -601,8 +601,8 @@ describe('modules/manager/npm/post-update/index', () => {
             updateType: 'lockFileMaintenance',
             updateLockFiles: true,
           },
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [],
@@ -618,8 +618,8 @@ describe('modules/manager/npm/post-update/index', () => {
             transitiveRemediation: true,
             updateLockFiles: true,
           },
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).toStrictEqual({
         artifactErrors: [],
         updatedArtifacts: [],
@@ -631,8 +631,8 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(
         await getAdditionalFiles(
           { ...updateConfig, updateLockFiles: true },
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).toStrictEqual({
         artifactErrors: [
           { lockFile: 'package-lock.json', stderr: 'some-error' },
@@ -646,8 +646,8 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(
         await getAdditionalFiles(
           { ...updateConfig, updateLockFiles: true, reuseExistingBranch: true },
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).toStrictEqual({
         artifactErrors: [{ lockFile: 'yarn.lock', stderr: 'some-error' }],
         updatedArtifacts: [],
@@ -668,8 +668,8 @@ describe('modules/manager/npm/post-update/index', () => {
               },
             ],
           },
-          additionalFiles
-        )
+          additionalFiles,
+        ),
       ).toStrictEqual({
         artifactErrors: [
           { lockFile: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },

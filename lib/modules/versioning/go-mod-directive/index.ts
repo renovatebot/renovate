@@ -41,7 +41,7 @@ function getNewValue({
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return npm.getSatisfyingVersion(versions, toNpmRange(range));
 }
@@ -56,7 +56,7 @@ const matches = (version: string, range: string): boolean =>
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return npm.minSatisfyingVersion(versions, toNpmRange(range));
 }

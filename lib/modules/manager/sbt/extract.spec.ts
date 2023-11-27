@@ -9,7 +9,7 @@ const sbtScalaVersionVariable = Fixtures.get(`scala-version-variable.sbt`);
 const sbtMissingScalaVersion = Fixtures.get(`missing-scala-version.sbt`);
 const sbtDependencyFile = Fixtures.get(`dependency-file.scala`);
 const sbtPrivateVariableDependencyFile = Fixtures.get(
-  `private-variable-dependency-file.scala`
+  `private-variable-dependency-file.scala`,
 );
 
 describe('modules/manager/sbt/extract', () => {
@@ -19,22 +19,22 @@ describe('modules/manager/sbt/extract', () => {
       expect(extractPackageFile('non-sense')).toBeNull();
       expect(extractPackageFile('version := "1.2.3"')).toBeNull();
       expect(
-        extractPackageFile('libraryDependencies += "foo" % "bar" % ???')
+        extractPackageFile('libraryDependencies += "foo" % "bar" % ???'),
       ).toBeNull();
       expect(
-        extractPackageFile('libraryDependencies += "foo" % "bar" %% "baz"')
+        extractPackageFile('libraryDependencies += "foo" % "bar" %% "baz"'),
       ).toBeNull();
       expect(
-        extractPackageFile('libraryDependencies += ??? % "bar" % "baz"')
+        extractPackageFile('libraryDependencies += ??? % "bar" % "baz"'),
       ).toBeNull();
       expect(
-        extractPackageFile('libraryDependencies += "foo" % ??? % "baz"')
+        extractPackageFile('libraryDependencies += "foo" % ??? % "baz"'),
       ).toBeNull();
 
       expect(extractPackageFile('libraryDependencies += ')).toBeNull();
       expect(extractPackageFile('libraryDependencies += "foo"')).toBeNull();
       expect(
-        extractPackageFile('libraryDependencies += "foo" % "bar" %')
+        extractPackageFile('libraryDependencies += "foo" % "bar" %'),
       ).toBeNull();
     });
 
@@ -262,7 +262,7 @@ describe('modules/manager/sbt/extract', () => {
 
     it('extract deps from native scala file with private variables', () => {
       expect(
-        extractPackageFile(sbtPrivateVariableDependencyFile)
+        extractPackageFile(sbtPrivateVariableDependencyFile),
       ).toMatchSnapshot({
         deps: [
           {
@@ -367,7 +367,7 @@ describe('modules/manager/sbt/extract', () => {
       expect(
         extractPackageFile(`
         addCompilerPlugin("org.scala-tools.sxr" %% "sxr" % "0.3.0")
-        `)
+        `),
       ).toMatchObject({
         deps: [
           {
@@ -386,8 +386,8 @@ describe('modules/manager/sbt/extract', () => {
           codeBlock`
             sbt.version=1.6.0
           `,
-          'project/build.properties'
-        )
+          'project/build.properties',
+        ),
       ).toMatchObject({
         deps: [
           {
@@ -410,8 +410,8 @@ describe('modules/manager/sbt/extract', () => {
             sbt.version=1.6.0
             another.conf=1.4.0
           `,
-          'project/build.properties'
-        )
+          'project/build.properties',
+        ),
       ).toMatchObject({
         deps: [
           {
@@ -433,8 +433,8 @@ describe('modules/manager/sbt/extract', () => {
           codeBlock`
             another.conf=1.4.0
           `,
-          'project/build.properties'
-        )
+          'project/build.properties',
+        ),
       ).toBeNull();
     });
   });

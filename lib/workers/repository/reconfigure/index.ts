@@ -20,7 +20,7 @@ export function getReconfigureBranchName(prefix: string): string {
   return `${prefix}reconfigure`;
 }
 export async function validateReconfigureBranch(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<void> {
   logger.debug('validateReconfigureBranch()');
   const context = `renovate/config-validation`;
@@ -50,7 +50,7 @@ export async function validateReconfigureBranch(
 
   const validationStatus = await platform.getBranchStatusCheck(
     branchName,
-    'renovate/config-validation'
+    'renovate/config-validation',
   );
   // if old status check is present skip validation
   if (is.nonEmptyString(validationStatus)) {
@@ -64,7 +64,7 @@ export async function validateReconfigureBranch(
   } catch (err) {
     logger.error(
       { err },
-      'Error while searching for config file in reconfigure branch'
+      'Error while searching for config file in reconfigure branch',
     );
   }
 
@@ -128,13 +128,13 @@ export async function validateReconfigureBranch(
   if (validationResult.errors.length > 0) {
     logger.debug(
       { errors: validationResult.errors.map((err) => err.message).join(', ') },
-      'Validation Errors'
+      'Validation Errors',
     );
 
     // add comment to reconfigure PR if it exists
     const branchPr = await platform.getBranchPr(
       branchName,
-      config.defaultBranch
+      config.defaultBranch,
     );
     if (branchPr) {
       let body = `There is an error with this repository's Renovate configuration that needs to be fixed.\n\n`;

@@ -18,7 +18,7 @@ export function trimTrailingApiPath(url: string): string {
 export function getRepoUrl(
   repo: Repo,
   gitUrl: GitUrlOption | undefined,
-  endpoint: string
+  endpoint: string,
 ): string {
   if (gitUrl === 'ssh') {
     if (!repo.ssh_url) {
@@ -43,7 +43,7 @@ export function getRepoUrl(
     url.pathname = `${url.pathname}${repo.full_name}.git`;
     logger.debug(
       { url: url.toString() },
-      'using URL based on configured endpoint'
+      'using URL based on configured endpoint',
     );
     return url.toString();
   }
@@ -62,7 +62,7 @@ export function getRepoUrl(
 }
 
 export function getMergeMethod(
-  strategy: MergeStrategy | undefined
+  strategy: MergeStrategy | undefined,
 ): PRMergeMethod | null {
   switch (strategy) {
     case 'fast-forward':

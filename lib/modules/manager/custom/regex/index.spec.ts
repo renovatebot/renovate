@@ -32,15 +32,15 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(8);
     expect(res?.deps.find((dep) => dep.depName === 'yarn')?.versioning).toBe(
-      'semver'
+      'semver',
     );
     expect(res?.deps.find((dep) => dep.depName === 'gradle')?.versioning).toBe(
-      'maven'
+      'maven',
     );
     expect(res?.deps.filter((dep) => dep.depType === 'final')).toHaveLength(8);
   });
@@ -67,7 +67,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
-      config
+      config,
     );
     expect(res).toBeNull();
   });
@@ -81,14 +81,14 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
     expect(
       res?.deps.find(
-        (dep) => dep.depName === 'openresty/headers-more-nginx-module'
-      )?.extractVersion
+        (dep) => dep.depName === 'openresty/headers-more-nginx-module',
+      )?.extractVersion,
     ).toBe('^v(?<version>.*)$');
   });
 
@@ -114,7 +114,7 @@ describe('modules/manager/custom/regex/index', () => {
           version: 8.12.13
       `,
       'Dockerfile',
-      config
+      config,
     );
     expect(res).toMatchSnapshot({
       deps: [
@@ -138,12 +138,12 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
     expect(
-      res?.deps.find((dep) => dep.depName === 'gradle')?.registryUrls
+      res?.deps.find((dep) => dep.depName === 'gradle')?.registryUrls,
     ).toEqual(['http://registry.gradle.com/']);
   });
 
@@ -157,7 +157,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
-      config
+      config,
     );
     expect(res).toMatchSnapshot({
       deps: [
@@ -173,7 +173,7 @@ describe('modules/manager/custom/regex/index', () => {
     });
     expect(logger.warn).toHaveBeenCalledWith(
       { value: 'this-is-not-a-valid-url-gradle' },
-      'Invalid regex manager registryUrl'
+      'Invalid regex manager registryUrl',
     );
   });
 
@@ -189,15 +189,15 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       dockerfileContent,
       'Dockerfile',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(2);
     expect(
-      res?.deps.find((dep) => dep.depName === 'nodejs/node')?.versioning
+      res?.deps.find((dep) => dep.depName === 'nodejs/node')?.versioning,
     ).toBe('node');
     expect(res?.deps.find((dep) => dep.depName === 'gradle')?.versioning).toBe(
-      'maven'
+      'maven',
     );
   });
 
@@ -213,7 +213,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       'image: my.old.registry/aRepository/andImage:1.18-alpine',
       'values.yaml',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
@@ -231,7 +231,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       '     image: eclipse-temurin:17.0.0-alpine',
       'bitbucket-pipelines.yml',
-      config
+      config,
     );
     expect(res).toMatchObject({
       deps: [
@@ -258,7 +258,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       'name: image: eclipse-temurin:17.0.0-alpine',
       'bitbucket-pipelines.yml',
-      config
+      config,
     );
     expect(res).toMatchObject({
       deps: [
@@ -285,7 +285,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       ansibleYamlContent,
       'ansible.yml',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
@@ -306,7 +306,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       ansibleYamlContent,
       'ansible.yml',
-      config
+      config,
     );
     expect(res?.deps).toHaveLength(1);
     expect(res?.deps[0].depName).toBe('docker.io/prom/prometheus');
@@ -325,7 +325,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       ansibleYamlContent,
       'ansible.yml',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
@@ -344,7 +344,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       exampleGitlabCiYml,
       '.gitlab-ci.yml',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
@@ -362,7 +362,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       'image: eclipse-temurin:17.0.0-alpine',
       'bitbucket-pipelines.yml',
-      config
+      config,
     );
     expect(res).toMatchObject({
       deps: [
@@ -388,7 +388,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       'image: eclipse-temurin@sha256:1234567890abcdef',
       'bitbucket-pipelines.yml',
-      config
+      config,
     );
     expect(res).toMatchObject({
       deps: [
@@ -415,7 +415,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       exampleGitlabCiYml,
       '.gitlab-ci.yml',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
@@ -446,7 +446,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
@@ -463,7 +463,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(2);
@@ -481,7 +481,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
@@ -495,7 +495,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
-      config
+      config,
     );
     expect(res).toBeNull();
   });
@@ -508,7 +508,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
-      config
+      config,
     );
     expect(res).toBeNull();
   });
@@ -526,7 +526,7 @@ describe('modules/manager/custom/regex/index', () => {
     const res = await extractPackageFile(
       exampleJsonContent,
       'example.json',
-      config
+      config,
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(4);
@@ -549,7 +549,7 @@ describe('modules/manager/custom/regex/index', () => {
     }
     `,
       'build.gradle.kts',
-      config
+      config,
     );
     expect(res).toMatchObject({
       deps: [
@@ -604,7 +604,7 @@ describe('modules/manager/custom/regex/index', () => {
       packageFile,
       newDatasource,
       packageName,
-      depName
+      depName,
     ) => {
       const config: CustomExtractConfig = {
         matchStrings: [
@@ -624,6 +624,6 @@ describe('modules/manager/custom/regex/index', () => {
           },
         ],
       });
-    }
+    },
   );
 });

@@ -5,8 +5,8 @@ import type { BunyanRecord } from './types';
 jest.mock('chalk', () =>
   ['bgRed', 'blue', 'gray', 'green', 'magenta', 'red'].reduce(
     (r, c) => Object.defineProperty(r, c, { value: (s: string) => s }),
-    {}
-  )
+    {},
+  ),
 );
 
 describe('logger/pretty-stdout', () => {
@@ -32,7 +32,7 @@ describe('logger/pretty-stdout', () => {
         repository: 'a/b',
       };
       expect(prettyStdout.getMeta(rec as any)).toEqual(
-        chalk.gray(' (repository=a/b)')
+        chalk.gray(' (repository=a/b)'),
       );
     });
 
@@ -44,7 +44,7 @@ describe('logger/pretty-stdout', () => {
         module: 'test',
       };
       expect(prettyStdout.getMeta(rec as any)).toEqual(
-        chalk.gray(' (repository=a/b, branch=c) [test]')
+        chalk.gray(' (repository=a/b, branch=c) [test]'),
       );
     });
   });
@@ -75,7 +75,7 @@ describe('logger/pretty-stdout', () => {
         },
       };
       expect(prettyStdout.getDetails(rec as any)).toBe(
-        `       "config": {"a": "b", "d": ["e", "f"]}\n`
+        `       "config": {"a": "b", "d": ["e", "f"]}\n`,
       );
     });
   });
@@ -104,7 +104,7 @@ describe('logger/pretty-stdout', () => {
           `TRACE: test message`,
           `       "config": {"a": "b", "d": ["e", "f"]}`,
           ``,
-        ].join('\n')
+        ].join('\n'),
       );
     });
   });

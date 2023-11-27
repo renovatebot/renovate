@@ -54,7 +54,7 @@ function replaceAll(input: string, from: string, to: string): string {
 function replaceValues(
   content: string,
   from: string | null | undefined,
-  to: string | null | undefined
+  to: string | null | undefined,
 ): string {
   // istanbul ignore if
   if (!from || !to || from === to) {
@@ -69,7 +69,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
   const cacheNamespace = 'url-sha256';
   const cachedResult = await packageCache.get<string | null>(
     cacheNamespace,
-    url
+    url,
   );
   /* istanbul ignore next line */
   if (cachedResult) {
@@ -104,7 +104,7 @@ async function getHashFromUrls(urls: string[]): Promise<string | null> {
 }
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact
+  updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName: path, updatedDeps: upgrades } = updateArtifact;
   let { newPackageFileContent: contents } = updateArtifact;

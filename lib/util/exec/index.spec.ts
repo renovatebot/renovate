@@ -47,7 +47,6 @@ describe('util/exec/index', () => {
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
     jest.restoreAllMocks();
-    jest.resetModules();
     processEnvOrig = process.env;
     GlobalConfig.reset();
   });
@@ -881,7 +880,7 @@ describe('util/exec/index', () => {
 
     const removeDockerContainerSpy = jest.spyOn(
       dockerModule,
-      'removeDockerContainer'
+      'removeDockerContainer',
     );
 
     const promise = exec('foobar', {});
@@ -903,7 +902,7 @@ describe('util/exec/index', () => {
     let calledOnce = false;
     const removeDockerContainerSpy = jest.spyOn(
       dockerModule,
-      'removeDockerContainer'
+      'removeDockerContainer',
     );
     removeDockerContainerSpy.mockImplementation((): Promise<void> => {
       if (!calledOnce) {
@@ -917,8 +916,8 @@ describe('util/exec/index', () => {
     const promise = exec('foobar', { docker });
     await expect(promise).rejects.toThrow(
       new Error(
-        'Error: "removeDockerContainer failed" - Original Error: "some error occurred"'
-      )
+        'Error: "removeDockerContainer failed" - Original Error: "some error occurred"',
+      ),
     );
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
   });
@@ -934,7 +933,7 @@ describe('util/exec/index', () => {
     });
     const removeDockerContainerSpy = jest.spyOn(
       dockerModule,
-      'removeDockerContainer'
+      'removeDockerContainer',
     );
     const promise = exec('foobar', {});
     await expect(promise).rejects.toThrow(TEMPORARY_ERROR);

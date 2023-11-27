@@ -24,7 +24,7 @@ describe('modules/manager/pep621/utils', () => {
           ? clear({ packageName, currentValue, extras, marker })
           : null;
         expect(result).toEqual(expected);
-      }
+      },
     );
   });
 });

@@ -25,7 +25,7 @@ export function mocked<T extends object>(module: T): jest.Mocked<T> {
  * @param func function which is mocked by `jest.mock`
  */
 export function mockedFunction<T extends (...args: any[]) => any>(
-  func: T
+  func: T,
 ): jest.MockedFunction<T> {
   return func as jest.MockedFunction<T>;
 }
@@ -101,7 +101,7 @@ export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
  */
 export const replacingSerializer = (
   search: string,
-  replacement: string
+  replacement: string,
 ): Plugin => ({
   test: (value) => typeof value === 'string' && value.includes(search),
   serialize: (val, config, indent, depth, refs, printer) => {

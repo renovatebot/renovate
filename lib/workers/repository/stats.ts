@@ -47,7 +47,7 @@ export function printRequestStats(): void {
   };
   if (packageCacheGets.length) {
     packageCacheStats.get.avgMs = Math.round(
-      packageCacheGets.reduce((a, b) => a + b, 0) / packageCacheGets.length
+      packageCacheGets.reduce((a, b) => a + b, 0) / packageCacheGets.length,
     );
     if (packageCacheGets.length > 1) {
       packageCacheStats.get.medianMs =
@@ -58,7 +58,7 @@ export function printRequestStats(): void {
   }
   if (packageCacheSets.length) {
     packageCacheStats.set.avgMs = Math.round(
-      packageCacheSets.reduce((a, b) => a + b, 0) / packageCacheSets.length
+      packageCacheSets.reduce((a, b) => a + b, 0) / packageCacheSets.length,
     );
     if (packageCacheSets.length > 1) {
       packageCacheStats.set.medianMs =
@@ -96,7 +96,7 @@ export function printRequestStats(): void {
       rawUrls[urlKey] = 1;
     }
     allRequests.push(
-      `${method.toUpperCase()} ${url} ${statusCode} ${duration} ${queueDuration}`
+      `${method.toUpperCase()} ${url} ${statusCode} ${duration} ${queueDuration}`,
     );
     const { hostname } = URL.parse(url);
 

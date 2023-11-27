@@ -25,7 +25,7 @@ describe('modules/manager/leiningen/extract', () => {
       },
     ]);
     expect(
-      extractFromVectors('[[foo/bar ~baz]]', {}, { baz: '1.2.3' })
+      extractFromVectors('[[foo/bar ~baz]]', {}, { baz: '1.2.3' }),
     ).toEqual([
       {
         datasource: ClojureDatasource.id,
@@ -35,7 +35,7 @@ describe('modules/manager/leiningen/extract', () => {
       },
     ]);
     expect(
-      extractFromVectors('[\t[foo/bar "1.2.3"]\n["foo/baz"  "4.5.6"] ]')
+      extractFromVectors('[\t[foo/bar "1.2.3"]\n["foo/baz"  "4.5.6"] ]'),
     ).toEqual([
       {
         datasource: ClojureDatasource.id,

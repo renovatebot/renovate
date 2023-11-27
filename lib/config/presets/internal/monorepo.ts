@@ -46,6 +46,8 @@ const repoGroups = {
     'https://github.com/awslabs/aws-lambda-powertools-typescript',
     'https://github.com/aws-powertools/powertools-lambda-typescript',
   ],
+  'aws-sdk-go': 'https://github.com/aws/aws-sdk-go',
+  'aws-sdk-go-v2': 'https://github.com/aws/aws-sdk-go-v2',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   'aws-sdk-rust': [
@@ -258,7 +260,10 @@ const repoGroups = {
   'dotnet-wcf': 'https://github.com/dotnet/wcf',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   'elastic-apm-agent-rum-js': 'https://github.com/elastic/apm-agent-rum-js',
-  'electron-forge': 'https://github.com/electron-userland/electron-forge',
+  'electron-forge': [
+    'https://github.com/electron-userland/electron-forge',
+    'https://github.com/electron/forge',
+  ],
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
@@ -279,6 +284,10 @@ const repoGroups = {
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
+  'github-workflows-kt':
+    'https://github.com/typesafegithub/github-workflows-kt',
+  'google-api-dotnet-client':
+    'https://github.com/googleapis/google-api-dotnet-client',
   grafana: 'https://github.com/grafana/grafana',
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
@@ -291,6 +300,7 @@ const repoGroups = {
   groovy: 'https://github.com/apache/groovy',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
+  'hickory-dns': 'https://github.com/hickory-dns/hickory-dns',
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
@@ -307,6 +317,7 @@ const repoGroups = {
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
   lerna: 'https://github.com/lerna/lerna',
+  lexical: 'https://github.com/facebook/lexical',
   linguijs: 'https://github.com/lingui/js-lingui',
   loopback: [
     'https://github.com/strongloop/loopback-next', // old repo (see: https://github.com/loopbackio/loopback-next/issues/7595)
@@ -362,6 +373,10 @@ const repoGroups = {
   okhttp: 'https://github.com/square/okhttp',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-erlang':
+    'https://github.com/open-telemetry/opentelemetry-erlang',
+  'opentelemetry-erlang-contrib':
+    'https://github.com/open-telemetry/opentelemetry-erlang-contrib',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   orleans: 'https://github.com/dotnet/orleans',
@@ -440,6 +455,7 @@ const repoGroups = {
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
+  'trust-dns': 'https://github.com/bluejekyll/trust-dns',
   tsoa: 'https://github.com/lukeautry/tsoa',
   turbo: 'https://github.com/vercel/turbo',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
@@ -448,6 +464,7 @@ const repoGroups = {
   unocss: 'https://github.com/unocss/unocss',
   uppy: 'https://github.com/transloadit/uppy',
   vaadinWebComponents: 'https://github.com/vaadin/web-components',
+  visx: 'https://github.com/airbnb/visx',
   vitest: 'https://github.com/vitest-dev/vitest',
   vstest: 'https://github.com/microsoft/vstest',
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],

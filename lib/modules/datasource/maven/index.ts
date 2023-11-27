@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
+import { filterMap } from '../../../util/filter-map';
 import * as p from '../../../util/promises';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -39,7 +40,7 @@ function getLatestSuitableVersion(releases: Release[]): string | null {
   return versions.reduce((latestVersion, version) =>
     compare(version, latestVersion) === 1
       ? version
-      : /* istanbul ignore next: hard to test */ latestVersion
+      : /* istanbul ignore next: hard to test */ latestVersion,
   );
 }
 
@@ -54,7 +55,7 @@ function extractVersions(metadata: XmlDocument): string[] {
 
 const mavenCentralHtmlVersionRegex = regEx(
   '^<a href="(?<version>[^"]+)/" title="(?:[^"]+)/">(?:[^"]+)/</a>\\s+(?<releaseTimestamp>\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d)\\s+-$',
-  'i'
+  'i',
 );
 
 export const defaultRegistryUrls = [MAVEN_REPO];
@@ -74,7 +75,7 @@ export class MavenDatasource extends Datasource {
 
   async fetchReleasesFromMetadata(
     dependency: MavenDependency,
-    repoUrl: string
+    repoUrl: string,
   ): Promise<ReleaseMap> {
     const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
 
@@ -82,7 +83,7 @@ export class MavenDatasource extends Datasource {
     const cacheKey = metadataUrl.toString();
     const cachedVersions = await packageCache.get<ReleaseMap>(
       cacheNamespace,
-      cacheKey
+      cacheKey,
     );
     /* istanbul ignore if */
     if (cachedVersions) {
@@ -91,7 +92,7 @@ export class MavenDatasource extends Datasource {
 
     const { isCacheable, xml: mavenMetadata } = await downloadMavenXml(
       this.http,
-      metadataUrl
+      metadataUrl,
     );
     if (!mavenMetadata) {
       return {};
@@ -100,7 +101,7 @@ export class MavenDatasource extends Datasource {
     const versions = extractVersions(mavenMetadata);
     const releaseMap = versions.reduce(
       (acc, version) => ({ ...acc, [version]: null }),
-      {}
+      {},
     );
     if (isCacheable) {
       await packageCache.set(cacheNamespace, cacheKey, releaseMap, 30);
@@ -111,13 +112,13 @@ export class MavenDatasource extends Datasource {
   async addReleasesFromIndexPage(
     inputReleaseMap: ReleaseMap,
     dependency: MavenDependency,
-    repoUrl: string
+    repoUrl: string,
   ): Promise<ReleaseMap> {
     const cacheNs = 'datasource-maven:index-html-releases';
     const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
     let workingReleaseMap = await packageCache.get<ReleaseMap>(
       cacheNs,
-      cacheKey
+      cacheKey,
     );
     if (!workingReleaseMap) {
       workingReleaseMap = {};
@@ -138,7 +139,7 @@ export class MavenDatasource extends Datasource {
                   'yyyy-MM-dd HH:mm',
                   {
                     zone: 'UTC',
-                  }
+                  },
                 );
                 if (date.isValid) {
                   const releaseTimestamp = date.toISO();
@@ -152,7 +153,7 @@ export class MavenDatasource extends Datasource {
         retryEarlier = true;
         logger.debug(
           { dependency, err },
-          'Failed to get releases from index.html'
+          'Failed to get releases from index.html',
         );
       }
       const cacheTTL = retryEarlier
@@ -203,7 +204,7 @@ export class MavenDatasource extends Datasource {
   async addReleasesUsingHeadRequests(
     inputReleaseMap: ReleaseMap,
     dependency: MavenDependency,
-    repoUrl: string
+    repoUrl: string,
   ): Promise<ReleaseMap> {
     const releaseMap = { ...inputReleaseMap };
 
@@ -220,11 +221,14 @@ export class MavenDatasource extends Datasource {
     //
     // Even if new version is being released each 10 minutes,
     // we still want to reset the whole cache after 24 hours.
-    const isCacheValid = await packageCache.get<true>(cacheTimeoutNs, cacheKey);
+    const cacheValid = await packageCache.get<'valid'>(
+      cacheTimeoutNs,
+      cacheKey,
+    );
 
     let cachedReleaseMap: ReleaseMap = {};
     // istanbul ignore if
-    if (isCacheValid) {
+    if (cacheValid) {
       const cache = await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
       if (cache) {
         cachedReleaseMap = cache;
@@ -232,8 +236,9 @@ export class MavenDatasource extends Datasource {
     }
 
     // List versions to check with HEAD request
-    const freshVersions = Object.entries(releaseMap)
-      .filter(([version, release]) => {
+    const freshVersions = filterMap(
+      Object.entries(releaseMap),
+      ([version, release]) => {
         // Release is present in maven-metadata.xml,
         // but haven't been validated yet
         const isValidatedAtPreviousSteps = release !== null;
@@ -241,10 +246,15 @@ export class MavenDatasource extends Datasource {
         // Release was validated and cached with HEAD request during previous run
         const isValidatedHere = !is.undefined(cachedReleaseMap[version]);
 
+        // istanbul ignore if: not easily testable
+        if (isValidatedAtPreviousSteps || isValidatedHere) {
+          return null;
+        }
+
         // Select only valid releases not yet verified with HEAD request
-        return !isValidatedAtPreviousSteps && !isValidatedHere;
-      })
-      .map(([k]) => k);
+        return version;
+      },
+    );
 
     // Update cached data with freshly discovered versions
     if (freshVersions.length) {
@@ -253,7 +263,7 @@ export class MavenDatasource extends Datasource {
           this.http,
           version,
           dependency,
-          repoUrl
+          repoUrl,
         );
         const artifactUrl = getMavenUrl(dependency, repoUrl, pomUrl);
         const release: Release = { version };
@@ -270,9 +280,9 @@ export class MavenDatasource extends Datasource {
 
       await p.all(queue);
 
-      if (!isCacheValid) {
+      if (!cacheValid) {
         // Store new TTL flag for 24 hours if the previous one is invalidated
-        await packageCache.set(cacheTimeoutNs, cacheKey, 'long', 24 * 60);
+        await packageCache.set(cacheTimeoutNs, cacheKey, 'valid', 24 * 60);
       }
 
       // Store updated cache object
@@ -312,12 +322,12 @@ export class MavenDatasource extends Datasource {
     releaseMap = await this.addReleasesFromIndexPage(
       releaseMap,
       dependency,
-      repoUrl
+      repoUrl,
     );
     releaseMap = await this.addReleasesUsingHeadRequests(
       releaseMap,
       dependency,
-      repoUrl
+      repoUrl,
     );
     const releases = this.getReleasesFromMap(releaseMap);
     if (!releases?.length) {
@@ -325,7 +335,7 @@ export class MavenDatasource extends Datasource {
     }
 
     logger.debug(
-      `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`
+      `Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`,
     );
 
     const latestSuitableVersion = getLatestSuitableVersion(releases);
@@ -335,7 +345,7 @@ export class MavenDatasource extends Datasource {
         this.http,
         dependency,
         repoUrl,
-        latestSuitableVersion
+        latestSuitableVersion,
       ));
 
     return { ...dependency, ...dependencyInfo, releases };

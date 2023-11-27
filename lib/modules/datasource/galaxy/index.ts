@@ -47,14 +47,14 @@ export class GalaxyDatasource extends Datasource {
     if (body.results.length > 1) {
       logger.warn(
         { dependency: packageName },
-        `Received multiple results from ${galaxyAPIUrl}`
+        `Received multiple results from ${galaxyAPIUrl}`,
       );
       return null;
     }
     if (body.results.length === 0) {
       logger.info(
         { dependency: packageName },
-        `Received no results from ${galaxyAPIUrl}`
+        `Received no results from ${galaxyAPIUrl}`,
       );
       return null;
     }
@@ -73,14 +73,16 @@ export class GalaxyDatasource extends Datasource {
     }
 
     result.releases = versions.map(
-      (version: { name: string; created: string }) => {
+      (version: { name: string; created?: string }) => {
         const release: Release = {
           version: version.name,
-          releaseTimestamp: version.created,
         };
 
+        if (is.nonEmptyString(version.created)) {
+          release.releaseTimestamp = version.created;
+        }
         return release;
-      }
+      },
     );
 
     return result;

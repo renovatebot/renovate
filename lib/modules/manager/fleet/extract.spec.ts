@@ -3,7 +3,7 @@ import { extractPackageFile } from '.';
 
 const validFleetYaml = Fixtures.get('valid_fleet.yaml');
 const validFleetYamlWithCustom = Fixtures.get(
-  'valid_fleet_helm_target_customization.yaml'
+  'valid_fleet_helm_target_customization.yaml',
 );
 const inValidFleetYaml = Fixtures.get('invalid_fleet.yaml');
 
@@ -36,7 +36,7 @@ describe('modules/manager/fleet/extract', () => {
           `apiVersion: v1
 kind: Fleet
 < `,
-          'fleet.yaml'
+          'fleet.yaml',
         );
 
         expect(result).toBeNull();
@@ -67,7 +67,7 @@ kind: Fleet
       it('should parse valid configuration with target customization', () => {
         const result = extractPackageFile(
           validFleetYamlWithCustom,
-          'fleet.yaml'
+          'fleet.yaml',
         );
 
         expect(result).not.toBeNull();
@@ -162,7 +162,7 @@ kind: Fleet
           `apiVersion: v1
  kind: GitRepo
  < `,
-          'test.yaml'
+          'test.yaml',
         );
 
         expect(result).toBeNull();

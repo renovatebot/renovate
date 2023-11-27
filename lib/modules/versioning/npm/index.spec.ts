@@ -40,7 +40,7 @@ describe('modules/versioning/npm/index', () => {
     'getSatisfyingVersion("$versions","$range") === $maxSatisfying',
     ({ versions, range, maxSatisfying }) => {
       expect(semver.getSatisfyingVersion(versions, range)).toBe(maxSatisfying);
-    }
+    },
   );
 
   it.each`
@@ -163,6 +163,6 @@ describe('modules/versioning/npm/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 });

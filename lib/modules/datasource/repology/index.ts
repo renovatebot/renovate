@@ -14,7 +14,7 @@ function findPackageInResponse(
   response: RepologyPackage[],
   repoName: string,
   pkgName: string,
-  types: RepologyPackageType[]
+  types: RepologyPackageType[],
 ): RepologyPackage[] | null {
   const repoPackages = response.filter((pkg) => pkg.repo === repoName);
 
@@ -76,7 +76,7 @@ export class RepologyDatasource extends Datasource {
     registryUrl: string,
     repoName: string,
     packageName: string,
-    packageType: RepologyPackageType
+    packageType: RepologyPackageType,
   ): Promise<RepologyPackage[]> {
     const query = getQueryString({
       repo: repoName,
@@ -88,7 +88,7 @@ export class RepologyDatasource extends Datasource {
 
     // Retrieve list of packages by looking up Repology project
     const packages = await this.queryPackages(
-      joinUrlParts(registryUrl, `tools/project-by?${query}`)
+      joinUrlParts(registryUrl, `tools/project-by?${query}`),
     );
 
     return packages;
@@ -96,12 +96,12 @@ export class RepologyDatasource extends Datasource {
 
   private async queryPackagesViaAPI(
     registryUrl: string,
-    packageName: string
+    packageName: string,
   ): Promise<RepologyPackage[]> {
     // Directly query the package via the API. This will only work if `packageName` has the
     // same name as the repology project
     const packages = await this.queryPackages(
-      joinUrlParts(registryUrl, `api/v1/project`, packageName)
+      joinUrlParts(registryUrl, `api/v1/project`, packageName),
     );
 
     return packages;
@@ -116,7 +116,7 @@ export class RepologyDatasource extends Datasource {
   async queryPackage(
     registryUrl: string,
     repoName: string,
-    pkgName: string
+    pkgName: string,
   ): Promise<RepologyPackage[] | undefined> {
     let response: RepologyPackage[];
     // Try getting the packages from tools/project-by first for type binname and
@@ -131,7 +131,7 @@ export class RepologyDatasource extends Datasource {
           registryUrl,
           repoName,
           pkgName,
-          pkgType
+          pkgType,
         );
 
         if (response) {
@@ -148,7 +148,7 @@ export class RepologyDatasource extends Datasource {
       if (err.statusCode === 403) {
         logger.debug(
           { repoName, pkgName },
-          'Repology does not support tools/project-by lookups for repository. Will try direct API access now'
+          'Repology does not support tools/project-by lookups for repository. Will try direct API access now',
         );
 
         // If the repository is not supported in tools/project-by we try directly accessing the
@@ -160,7 +160,7 @@ export class RepologyDatasource extends Datasource {
           response,
           repoName,
           pkgName,
-          packageTypes
+          packageTypes,
         );
         if (is.nonEmptyArray(pkg)) {
           // exit immediately if package found
@@ -169,7 +169,7 @@ export class RepologyDatasource extends Datasource {
       } else if (err.statusCode === 300) {
         logger.warn(
           { repoName, pkgName },
-          'Ambiguous redirection from package name to project name in Repology. Skipping this package'
+          'Ambiguous redirection from package name to project name in Repology. Skipping this package',
         );
         return undefined;
       }
@@ -179,7 +179,7 @@ export class RepologyDatasource extends Datasource {
 
     logger.debug(
       { repoName, pkgName },
-      'Repository or package not found on Repology'
+      'Repository or package not found on Repology',
     );
 
     return undefined;
@@ -198,8 +198,8 @@ export class RepologyDatasource extends Datasource {
     if (!repoName || !pkgName) {
       throw new ExternalHostError(
         new Error(
-          'Repology lookup name must contain repository and package separated by slash (<repo>/<pkg>)'
-        )
+          'Repology lookup name must contain repository and package separated by slash (<repo>/<pkg>)',
+        ),
       );
     }
 
@@ -223,7 +223,7 @@ export class RepologyDatasource extends Datasource {
       } else {
         logger.warn(
           { packageName, err },
-          'Repology lookup failed with unexpected error'
+          'Repology lookup failed with unexpected error',
         );
       }
 

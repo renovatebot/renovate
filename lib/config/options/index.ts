@@ -373,7 +373,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.23.11',
+    default: 'ghcr.io/containerbase/sidecar:9.24.0',
     globalOnly: true,
   },
   {
@@ -2095,6 +2095,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'expandCodeOwnersGroups',
+    description:
+      'Expand the configured code owner groups into a full list of group members.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'assigneesSampleSize',
     description: 'Take a random sample of given size from `assignees`.',
     type: 'integer',
@@ -2349,7 +2357,7 @@ const options: RenovateOptions[] = [
     default: false,
     cli: false,
     env: false,
-    experimental: true,
+    advancedUse: true,
   },
   {
     name: 'artifactAuth',

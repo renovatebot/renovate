@@ -14,7 +14,7 @@ describe('modules/manager/argocd/extract', () => {
 
     it('returns null for invalid', () => {
       expect(
-        extractPackageFile(`${malformedApplication}\n123`, 'applications.yml')
+        extractPackageFile(`${malformedApplication}\n123`, 'applications.yml'),
       ).toBeNull();
     });
 
@@ -26,7 +26,7 @@ describe('modules/manager/argocd/extract', () => {
     it('return null if deps array would be empty', () => {
       const result = extractPackageFile(
         malformedApplication,
-        'applications.yml'
+        'applications.yml',
       );
       expect(result).toBeNull();
     });
@@ -42,7 +42,7 @@ spec:
     repoURL: https://prometheus-community.github.io/helm-charts
     targetRevision: 2.4.1
         `,
-        'applications.yml'
+        'applications.yml',
       );
       expect(result).toMatchObject({
         deps: [
@@ -69,7 +69,7 @@ spec:
     repoURL: https://prometheus-community.github.io/helm-charts
     targetRevision: 2.4.1
         `,
-        'applications.yml'
+        'applications.yml',
       );
       expect(result).toMatchObject({
         deps: [
@@ -172,7 +172,7 @@ spec:
     it('supports applicationsets', () => {
       const result = extractPackageFile(
         validApplicationSet,
-        'applicationsets.yml'
+        'applicationsets.yml',
       );
       expect(result).toEqual({
         deps: [

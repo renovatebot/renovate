@@ -13,7 +13,7 @@ describe('modules/versioning/hex/index', () => {
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
       expect(hexScheme.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -24,7 +24,7 @@ describe('modules/versioning/hex/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(hexScheme.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -48,7 +48,7 @@ describe('modules/versioning/hex/index', () => {
     'isLessThanRange($version, $range) === $expected',
     ({ version, range, expected }) => {
       expect(hexScheme.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -59,7 +59,7 @@ describe('modules/versioning/hex/index', () => {
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(hexScheme.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -91,6 +91,6 @@ describe('modules/versioning/hex/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 });

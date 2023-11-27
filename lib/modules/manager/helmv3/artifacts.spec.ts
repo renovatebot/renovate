@@ -48,7 +48,7 @@ const chartFileECR = Fixtures.get('ChartECR.yaml');
 const ecrMock = mockClient(ECRClient);
 
 function mockEcrAuthResolve(
-  res: Partial<GetAuthorizationTokenCommandOutput> = {}
+  res: Partial<GetAuthorizationTokenCommandOutput> = {},
 ) {
   ecrMock.on(GetAuthorizationTokenCommand).resolvesOnce(res);
 }
@@ -78,7 +78,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -89,7 +89,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -99,7 +99,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
@@ -109,7 +109,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         updatedDeps,
         newPackageFileContent: chartFile,
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -120,7 +120,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
@@ -130,7 +130,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         updatedDeps,
         newPackageFileContent: chartFile,
         config,
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -150,7 +150,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     expect(
@@ -159,7 +159,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: chartFile,
         config: { ...config, updateType: 'lockFileMaintenance' },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -184,7 +184,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -197,7 +197,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         updatedDeps,
         newPackageFileContent: chartFile,
         config,
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -215,7 +215,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
@@ -227,7 +227,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         updatedDeps,
         newPackageFileContent: chartFile,
         config,
-      })
+      }),
     ).toMatchObject([
       {
         artifactError: {
@@ -244,7 +244,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -254,7 +254,7 @@ describe('modules/manager/helmv3/artifacts', () => {
       partial<StatusResult>({
         not_added: ['charts/example-1.9.2.tgz'],
         deleted: ['charts/example-1.6.2.tgz'],
-      })
+      }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
     const test = await helmv3.updateArtifacts({
@@ -303,7 +303,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     const execSnapshots = mockExecAll();
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -313,7 +313,7 @@ describe('modules/manager/helmv3/artifacts', () => {
       partial<StatusResult>({
         not_added: ['charts/example-1.9.2.tgz'],
         deleted: ['charts/example-1.6.2.tgz'],
-      })
+      }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -325,7 +325,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           postUpdateOptions: ['helmUpdateSubChartArchives'],
           ...config,
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -378,7 +378,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     const execSnapshots = mockExecAll();
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -387,7 +387,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         not_added: ['charts/example-1.9.2.tgz'],
-      })
+      }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -399,7 +399,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           postUpdateOptions: ['helmUpdateSubChartArchives'],
           ...config,
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -446,7 +446,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     const execSnapshots = mockExecAll();
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -456,7 +456,7 @@ describe('modules/manager/helmv3/artifacts', () => {
       partial<StatusResult>({
         not_added: ['charts/example-1.9.2.tgz', 'exampleFile'],
         deleted: ['charts/example-1.6.2.tgz', 'aFolder/otherFile'],
-      })
+      }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -468,7 +468,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           postUpdateOptions: ['helmUpdateSubChartArchives'],
           ...config,
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -521,7 +521,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     const execSnapshots = mockExecAll();
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -530,7 +530,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['example/example.tgz'],
-      })
+      }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -542,7 +542,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           postUpdateOptions: ['helmUpdateSubChartArchives'],
           ...config,
         },
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
@@ -578,7 +578,7 @@ describe('modules/manager/helmv3/artifacts', () => {
 
   it('sets repositories from registryAliases', async () => {
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
@@ -595,7 +595,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           updateType: 'lockFileMaintenance',
           registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -620,7 +620,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -636,7 +636,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           updateType: 'lockFileMaintenance',
           registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -669,7 +669,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     expect(
@@ -686,7 +686,7 @@ describe('modules/manager/helmv3/artifacts', () => {
             repo1: 'https://the_repo1_url',
           },
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -719,7 +719,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     expect(
@@ -732,7 +732,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           updateType: 'lockFileMaintenance',
           registryAliases: {},
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -766,7 +766,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2ECR as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -780,7 +780,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           updateType: 'lockFileMaintenance',
           registryAliases: {},
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -829,7 +829,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2ECR as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -843,7 +843,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           updateType: 'lockFileMaintenance',
           registryAliases: {},
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -884,7 +884,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2ECR as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -898,7 +898,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           updateType: 'lockFileMaintenance',
           registryAliases: {},
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -940,7 +940,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2ECR as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -954,7 +954,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           updateType: 'lockFileMaintenance',
           registryAliases: {},
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -993,7 +993,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     expect(
@@ -1009,7 +1009,7 @@ describe('modules/manager/helmv3/artifacts', () => {
               'https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
           },
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -1022,15 +1022,15 @@ describe('modules/manager/helmv3/artifacts', () => {
     expect(execSnapshots).toBeArrayOfSize(2);
     expect(
       execSnapshots.filter((value) =>
-        value.cmd.startsWith('helm repo add repo1')
-      )
+        value.cmd.startsWith('helm repo add repo1'),
+      ),
     ).toBeArrayOfSize(1);
     expect(
       execSnapshots.filter((value) =>
         value.cmd.includes(
-          'https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable'
-        )
-      )
+          'https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        ),
+      ),
     ).toBeArrayOfSize(1);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -1041,7 +1041,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile2Alias as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     expect(
@@ -1056,7 +1056,7 @@ describe('modules/manager/helmv3/artifacts', () => {
             jetstack: 'https://charts.jetstack.io',
           },
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -1071,15 +1071,15 @@ describe('modules/manager/helmv3/artifacts', () => {
       execSnapshots.filter(
         (value) =>
           value.cmd.startsWith('helm repo add jetstack') && // alias
-          value.cmd.includes('https://charts.jetstack.io')
-      )
+          value.cmd.includes('https://charts.jetstack.io'),
+      ),
     ).toBeArrayOfSize(1);
     expect(
       execSnapshots.filter(
         (value) =>
           value.cmd.startsWith('helm repo add nginx') && // falling back to name
-          value.cmd.includes('https://kubernetes.github.io/ingress-nginx')
-      )
+          value.cmd.includes('https://kubernetes.github.io/ingress-nginx'),
+      ),
     ).toBeArrayOfSize(1);
     expect(execSnapshots).toMatchSnapshot();
   });

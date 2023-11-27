@@ -16,7 +16,7 @@ export interface VersionComparator {
 }
 
 export abstract class GenericVersioningApi<
-  T extends GenericVersion = GenericVersion
+  T extends GenericVersion = GenericVersion,
 > implements VersioningApi
 {
   private _getSection(version: string, index: number): number | null {

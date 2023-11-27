@@ -7,6 +7,7 @@ import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { updateArtifacts } from '../index';
 import { TerraformProviderHash } from './hash';
+import { getNewConstraint } from './index';
 
 // auto-mock fs
 jest.mock('../../../../util/fs');
@@ -41,7 +42,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -55,7 +56,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -69,7 +70,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
         updatedDeps: [{ depName: 'aws' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -335,7 +336,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       }
     `);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce(
-      'test/.terraform.lock.hcl'
+      'test/.terraform.lock.hcl',
     );
 
     mockHash.mockResolvedValueOnce([
@@ -421,7 +422,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       }
     `);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce(
-      'test/.terraform.lock.hcl'
+      'test/.terraform.lock.hcl',
     );
 
     mockHash.mockResolvedValue([
@@ -658,7 +659,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       }
     `);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce(
-      'subfolder/.terraform.lock.hcl'
+      'subfolder/.terraform.lock.hcl',
     );
 
     mockGetPkgReleases
@@ -680,7 +681,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       })
       .mockResolvedValueOnce(
         // random
-        null
+        null,
       );
     mockHash.mockResolvedValue([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -743,7 +744,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
           "2.56.0",
         ],
       ]
-    `
+    `,
     );
   });
 
@@ -893,7 +894,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
           "2.2.2",
         ],
       ]
-    `
+    `,
     );
   });
 
@@ -1088,5 +1089,20 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(mockHash.mock.calls).toEqual([
       ['https://registry.example.com', 'hashicorp/aws', '3.37.0'],
     ]);
+  });
+
+  describe('getNewConstraint', () => {
+    it('correctly calculate new constraint on pinning', () => {
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '>= 4.3',
+            newValue: '5.26.0',
+            newVersion: '5.26.0',
+          },
+          '>= 4.3.0',
+        ),
+      ).toBe('5.26.0');
+    });
   });
 });

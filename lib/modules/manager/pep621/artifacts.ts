@@ -5,7 +5,7 @@ import { processors } from './processors';
 import { parsePyProject } from './utils';
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact
+  updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, newPackageFileContent } = updateArtifact;
 
@@ -27,7 +27,7 @@ export async function updateArtifacts(
   for (const processor of processors) {
     const artifactUpdates = await processor.updateArtifacts(
       updateArtifact,
-      project
+      project,
     );
     if (is.array(artifactUpdates)) {
       result.push(...artifactUpdates);

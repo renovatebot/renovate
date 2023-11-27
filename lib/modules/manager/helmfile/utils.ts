@@ -21,11 +21,11 @@ export function kustomizationsKeysUsed(release: HelmRelease): boolean {
 // eslint-disable-next-line require-await
 export async function localChartHasKustomizationsYaml(
   release: HelmRelease,
-  helmFileYamlFileName: string
+  helmFileYamlFileName: string,
 ): Promise<boolean> {
   const helmfileYamlParentDir = getParentDir(helmFileYamlFileName) || '';
   return localPathExists(
-    upath.join(helmfileYamlParentDir, release.chart, 'kustomization.yaml')
+    upath.join(helmfileYamlParentDir, release.chart, 'kustomization.yaml'),
   );
 }
 
@@ -36,7 +36,7 @@ export function isOCIRegistry(repository: HelmRepository): boolean {
 export async function generateRegistryLoginCmd(
   repositoryName: string,
   repositoryBaseURL: string,
-  repositoryHost: string
+  repositoryHost: string,
 ): Promise<string | null> {
   const repositoryRule: RepositoryRule = {
     name: repositoryName,

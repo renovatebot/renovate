@@ -10,7 +10,7 @@ import type { PuppetfileModule } from './types';
 
 function parseForgeDependency(
   module: PuppetfileModule,
-  forgeUrl: string | null
+  forgeUrl: string | null,
 ): PackageDependency {
   const dep: PackageDependency = {
     depName: module.name,
@@ -45,7 +45,7 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
 
   if (githubUrl && parsedUrl && parsedUrl.protocol !== 'https:') {
     logger.debug(
-      `Access to github is only allowed for https, your url was: ${git}`
+      `Access to github is only allowed for https, your url was: ${git}`,
     );
     return {
       depName: moduleName,

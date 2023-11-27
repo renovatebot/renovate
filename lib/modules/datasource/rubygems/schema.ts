@@ -8,11 +8,11 @@ import type { Release } from '../types';
 export const MarshalledVersionInfo = LooseArray(
   z
     .object({ number: z.string() })
-    .transform(({ number: version }): Release => ({ version }))
+    .transform(({ number: version }): Release => ({ version })),
 )
   .refine(
     (value) => !is.emptyArray(value),
-    'Empty response from `/v1/dependencies` endpoint'
+    'Empty response from `/v1/dependencies` endpoint',
   )
   .transform((releases) => ({ releases }));
 type MarshalledVersionInfo = z.infer<typeof MarshalledVersionInfo>;
@@ -28,7 +28,7 @@ export const GemMetadata = z
       changelog_uri: changelogUrl,
       homepage_uri: homepage,
       source_code_uri: sourceUrl,
-    }) => ({ changelogUrl, homepage, sourceUrl })
+    }) => ({ changelogUrl, homepage, sourceUrl }),
   );
 export type GemMetadata = z.infer<typeof GemMetadata>;
 
@@ -84,12 +84,12 @@ export const GemVersions = LooseArray(
         }
 
         return result;
-      }
-    )
+      },
+    ),
 )
   .refine(
     (value) => !is.emptyArray(value),
-    'Empty response from `/v1/gems` endpoint'
+    'Empty response from `/v1/gems` endpoint',
   )
   .transform((releases) => ({ releases }));
 export type GemVersions = z.infer<typeof GemVersions>;
@@ -100,11 +100,11 @@ export const GemInfo = z
     filterMap(body.split(newlineRegex), (line) => {
       const spaceIdx = line.indexOf(' ');
       return spaceIdx > 0 ? line.slice(0, spaceIdx) : null;
-    }).map((version): Release => ({ version }))
+    }).map((version): Release => ({ version })),
   )
   .refine(
     (value) => !is.emptyArray(value),
-    'Empty response from `/info` endpoint'
+    'Empty response from `/info` endpoint',
   )
   .transform((releases) => ({ releases }));
 export type GemInfo = z.infer<typeof GemInfo>;

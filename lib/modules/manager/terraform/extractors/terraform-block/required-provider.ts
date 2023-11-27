@@ -14,7 +14,7 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
 
   extract(
     hclRoot: TerraformDefinitionFile,
-    locks: ProviderLock[]
+    locks: ProviderLock[],
   ): PackageDependency[] {
     const terraformBlocks = hclRoot?.terraform;
     if (is.nullOrUndefined(terraformBlocks)) {
@@ -51,7 +51,7 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
           };
         }
         dependencies.push(
-          this.analyzeTerraformProvider(dep, locks, 'required_provider')
+          this.analyzeTerraformProvider(dep, locks, 'required_provider'),
         );
       }
     }

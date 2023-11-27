@@ -15,7 +15,7 @@ import {
 // istanbul ignore next
 export async function finalizeRepo(
   config: RenovateConfig,
-  branchList: string[]
+  branchList: string[],
 ): Promise<void> {
   await validateReconfigureBranch(config);
   await configMigration(config, branchList);
@@ -30,7 +30,7 @@ export async function finalizeRepo(
       (pr) =>
         pr.state === 'merged' &&
         pr.title !== 'Configure Renovate' &&
-        pr.title !== config.onboardingPrTitle
+        pr.title !== config.onboardingPrTitle,
     )
   ) {
     logger.debug('Repo is activated');

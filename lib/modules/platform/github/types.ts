@@ -1,3 +1,4 @@
+import type { LongCommitSha } from '../../../util/git/types';
 import type { Pr, PrBodyStruct } from '../types';
 
 // https://developer.github.com/v3/repos/statuses
@@ -33,7 +34,7 @@ export interface GhRestRepo {
 export interface GhRestPr {
   head: {
     ref: string;
-    sha: string;
+    sha: LongCommitSha;
     repo: {
       full_name: string;
       pushed_at?: string;

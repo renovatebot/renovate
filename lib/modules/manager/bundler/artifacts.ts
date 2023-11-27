@@ -39,7 +39,7 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
     hostRule.resolvedHost
       .split('.')
       .map((term) => term.toUpperCase())
-      .join('__')
+      .join('__'),
   );
   return {
     [varName]: `${getAuthenticationHeaderValue(hostRule)}`,
@@ -47,7 +47,7 @@ function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
 }
 
 const resolvedPkgRegex = regEx(
-  /(?<pkg>\S+)(?:\s*\([^)]+\)\s*)? was resolved to/
+  /(?<pkg>\S+)(?:\s*\([^)]+\)\s*)? was resolved to/,
 );
 
 function getResolvedPackages(input: string): string[] {
@@ -66,7 +66,7 @@ function getResolvedPackages(input: string): string[] {
 
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
-  recursionLimit = 10
+  recursionLimit = 10,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, updatedDeps, newPackageFileContent, config } =
     updateArtifact;
@@ -132,7 +132,7 @@ export async function updateArtifacts(
         ...variables,
         ...buildBundleHostVariable(hostRule),
       }),
-      {} as Record<string, string>
+      {} as Record<string, string>,
     );
 
     // Detect hosts with a hyphen '-' in the url.
@@ -147,12 +147,12 @@ export async function updateArtifacts(
         }
         return authCommands;
       },
-      []
+      [],
     );
 
     const bundler = getBundlerConstraint(
       updateArtifact,
-      existingLockFileContent
+      existingLockFileContent,
     );
     const preCommands = ['ruby --version'];
 
@@ -165,14 +165,14 @@ export async function updateArtifacts(
     ) {
       preCommands.push(
         ...bundlerHostRulesAuthCommands.map(
-          (authCommand) => `bundler config --local ${authCommand}`
-        )
+          (authCommand) => `bundler config --local ${authCommand}`,
+        ),
       );
     } else if (bundlerHostRulesAuthCommands) {
       preCommands.push(
         ...bundlerHostRulesAuthCommands.map(
-          (authCommand) => `bundler config set --local ${authCommand}`
-        )
+          (authCommand) => `bundler config set --local ${authCommand}`,
+        ),
       );
     }
 
@@ -234,19 +234,19 @@ export async function updateArtifacts(
       err.stdout?.includes('Please supply credentials for this source') ||
       err.stderr?.includes('Authentication is required') ||
       err.stderr?.includes(
-        'Please make sure you have the correct access rights'
+        'Please make sure you have the correct access rights',
       )
     ) {
       logger.debug(
         { err },
-        'Gemfile.lock update failed due to missing credentials - skipping branch'
+        'Gemfile.lock update failed due to missing credentials - skipping branch',
       );
       // Do not generate these PRs because we don't yet support Bundler authentication
       memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
     const resolveMatches: string[] = getResolvedPackages(output).filter(
-      (depName) => !updatedDepNames.includes(depName)
+      (depName) => !updatedDepNames.includes(depName),
     );
     if (
       recursionLimit > 0 &&
@@ -255,7 +255,7 @@ export async function updateArtifacts(
     ) {
       logger.debug(
         { resolveMatches, updatedDeps },
-        'Found new resolve matches - reattempting recursively'
+        'Found new resolve matches - reattempting recursively',
       );
       const newUpdatedDeps = [
         ...new Set([
@@ -270,7 +270,7 @@ export async function updateArtifacts(
           newPackageFileContent,
           config,
         },
-        recursionLimit - 1
+        recursionLimit - 1,
       );
     }
 

@@ -15,7 +15,7 @@ import type { Release, ReleaseResult } from '../types';
 import type { CachedReleaseResult, NpmResponse } from './types';
 
 const SHORT_REPO_REGEX = regEx(
-  /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/
+  /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/,
 );
 
 const platformMapping: Record<string, string> = {
@@ -70,7 +70,7 @@ const PackageSource = z
 export async function getDependency(
   http: Http,
   registryUrl: string,
-  packageName: string
+  packageName: string,
 ): Promise<ReleaseResult | null> {
   logger.trace(`npm.getDependency(${packageName})`);
 
@@ -80,12 +80,12 @@ export async function getDependency(
   const cacheNamespace = 'datasource-npm:data';
   const cachedResult = await packageCache.get<CachedReleaseResult>(
     cacheNamespace,
-    packageUrl
+    packageUrl,
   );
   if (cachedResult) {
     if (cachedResult.cacheData) {
       const softExpireAt = DateTime.fromISO(
-        cachedResult.cacheData.softExpireAt
+        cachedResult.cacheData.softExpireAt,
       );
       if (softExpireAt.isValid && softExpireAt > DateTime.local()) {
         logger.trace('Cached result is not expired - reusing');
@@ -130,7 +130,7 @@ export async function getDependency(
         cacheNamespace,
         packageUrl,
         cachedResult,
-        cacheHardTtlMinutes
+        cacheHardTtlMinutes,
       );
       delete cachedResult.cacheData;
       return cachedResult;
@@ -211,7 +211,7 @@ export async function getDependency(
         { ...dep, cacheData },
         etag
           ? /* istanbul ignore next: needs test */ cacheHardTtlMinutes
-          : cacheMinutes
+          : cacheMinutes,
       );
     } else {
       dep.isPrivate = true;
@@ -231,7 +231,7 @@ export async function getDependency(
       if (cachedResult) {
         logger.warn(
           { err },
-          'npmjs error, reusing expired cached result instead'
+          'npmjs error, reusing expired cached result instead',
         );
         delete cachedResult.cacheData;
         return cachedResult;

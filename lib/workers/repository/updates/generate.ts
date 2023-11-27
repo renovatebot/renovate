@@ -25,7 +25,7 @@ function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
     new Set(
-      branchUpgrades.map(({ depName }) => depName?.replace(/^@types\//, ''))
+      branchUpgrades.map(({ depName }) => depName?.replace(/^@types\//, '')),
     ).size === 1
   );
 }
@@ -34,7 +34,7 @@ function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
   const isTypesUpgrade = ({ depName }: BranchUpgradeConfig): boolean =>
     !!depName?.startsWith('@types/');
   const regularUpgrades = upgrades.filter(
-    (upgrade) => !isTypesUpgrade(upgrade)
+    (upgrade) => !isTypesUpgrade(upgrade),
   );
   const typesUpgrades = upgrades.filter(isTypesUpgrade);
   upgrades.splice(0, upgrades.length);
@@ -59,13 +59,13 @@ function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
       currentVersion,
       newVersion,
     },
-    'Cannot determine table values'
+    'Cannot determine table values',
   );
   return null;
 }
 
 export function generateBranchConfig(
-  upgrades: BranchUpgradeConfig[]
+  upgrades: BranchUpgradeConfig[],
 ): BranchConfig {
   let branchUpgrades = upgrades;
   if (!branchUpgrades.every((upgrade) => upgrade.pendingChecks)) {
@@ -203,7 +203,7 @@ export function generateBranchConfig(
       if (upgrade.semanticCommitScope) {
         semanticPrefix += `(${template.compile(
           upgrade.semanticCommitScope,
-          upgrade
+          upgrade,
         )})`;
       }
       upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix!);
@@ -215,7 +215,7 @@ export function generateBranchConfig(
     // Compile a few times in case there are nested templates
     upgrade.commitMessage = template.compile(
       upgrade.commitMessage ?? '',
-      upgrade
+      upgrade,
     );
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
@@ -223,7 +223,7 @@ export function generateBranchConfig(
     if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
       logger.debug(
         { branchName: config.branchName },
-        'Secrets exposed in commit message'
+        'Secrets exposed in commit message',
       );
       throw new Error(CONFIG_SECRETS_EXPOSED);
     }
@@ -231,7 +231,7 @@ export function generateBranchConfig(
     upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string
     upgrade.commitMessage = upgrade.commitMessage.replace(
       regEx(/to vv(\d)/),
-      'to v$1'
+      'to v$1',
     );
     if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
       // We only need to lowercase the first line
@@ -252,7 +252,7 @@ export function generateBranchConfig(
       if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
         logger.debug(
           { branchName: config.branchName },
-          'Secrets were exposed in PR title'
+          'Secrets were exposed in PR title',
         );
         throw new Error(CONFIG_SECRETS_EXPOSED);
       }
@@ -335,26 +335,26 @@ export function generateBranchConfig(
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
   config.reuseLockFiles = config.upgrades.every(
-    (upgrade) => upgrade.updateType !== 'lockFileMaintenance'
+    (upgrade) => upgrade.updateType !== 'lockFileMaintenance',
   );
   config.dependencyDashboardApproval = config.upgrades.some(
-    (upgrade) => upgrade.dependencyDashboardApproval
+    (upgrade) => upgrade.dependencyDashboardApproval,
   );
   config.dependencyDashboardPrApproval = config.upgrades.some(
-    (upgrade) => upgrade.prCreation === 'approval'
+    (upgrade) => upgrade.prCreation === 'approval',
   );
   config.prBodyColumns = [
     ...new Set(
       config.upgrades.reduce(
         (existing: string[], upgrade) =>
           existing.concat(upgrade.prBodyColumns!),
-        []
-      )
+        [],
+      ),
     ),
   ].filter(is.nonEmptyString);
   // combine excludeCommitPaths for multiple manager experience
   const hasExcludeCommitPaths = config.upgrades.some(
-    (u) => u.excludeCommitPaths && u.excludeCommitPaths.length > 0
+    (u) => u.excludeCommitPaths && u.excludeCommitPaths.length > 0,
   );
   if (hasExcludeCommitPaths) {
     config.excludeCommitPaths = Object.keys(
@@ -366,7 +366,7 @@ export function generateBranchConfig(
         }
 
         return acc;
-      }, {})
+      }, {}),
     );
   }
 
@@ -376,14 +376,14 @@ export function generateBranchConfig(
     ...new Set(
       config.upgrades
         .map((upgrade) => upgrade.labels ?? [])
-        .reduce((a, b) => a.concat(b), [])
+        .reduce((a, b) => a.concat(b), []),
     ),
   ];
   config.addLabels = [
     ...new Set(
       config.upgrades
         .map((upgrade) => upgrade.addLabels ?? [])
-        .reduce((a, b) => a.concat(b), [])
+        .reduce((a, b) => a.concat(b), []),
     ),
   ];
   if (config.upgrades.some((upgrade) => upgrade.updateType === 'major')) {
@@ -420,7 +420,7 @@ export function generateBranchConfig(
     config.upgrades
       .map((upgrade) => upgrade.additionalReviewers)
       .flat()
-      .filter(is.nonEmptyString)
+      .filter(is.nonEmptyString),
   );
   if (additionalReviewers.length > 0) {
     config.additionalReviewers = additionalReviewers;

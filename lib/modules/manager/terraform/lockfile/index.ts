@@ -21,7 +21,7 @@ import {
 } from './util';
 
 async function updateAllLocks(
-  locks: ProviderLock[]
+  locks: ProviderLock[],
 ): Promise<ProviderLockUpdate[]> {
   const updates = await p.map(
     locks,
@@ -39,7 +39,7 @@ async function updateAllLocks(
       const versionsList = releases.map((release) => release.version);
       const newVersion = versioning.getSatisfyingVersion(
         versionsList,
-        lock.constraints
+        lock.constraints,
       );
 
       // if the new version is the same as the last, signal that no update is needed
@@ -53,28 +53,28 @@ async function updateAllLocks(
           (await TerraformProviderHash.createHashes(
             lock.registryUrl,
             lock.packageName,
-            newVersion
+            newVersion,
           )) ?? [],
         ...lock,
       };
       return update;
     },
-    { concurrency: 4 }
+    { concurrency: 4 },
   );
 
   return updates.filter(is.truthy);
 }
 
-function getNewConstraint(
+export function getNewConstraint(
   dep: Upgrade<Record<string, unknown>>,
-  oldConstraint: string | undefined
+  oldConstraint: string | undefined,
 ): string | undefined {
   const { currentValue, currentVersion, newValue, newVersion, packageName } =
     dep;
 
   if (oldConstraint && currentValue && newValue && currentValue === newValue) {
     logger.debug(
-      `Leaving constraints "${oldConstraint}" unchanged for "${packageName}" as current and new values are the same`
+      `Leaving constraints "${oldConstraint}" unchanged for "${packageName}" as current and new values are the same`,
     );
     return oldConstraint;
   }
@@ -86,9 +86,14 @@ function getNewConstraint(
     oldConstraint.includes(currentValue)
   ) {
     logger.debug(
-      `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`
+      `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`,
     );
-    return oldConstraint.replace(currentValue, newValue);
+    let newConstraint = oldConstraint.replace(currentValue, newValue);
+    //remove surplus .0 version
+    while (newConstraint.split('.').length - 1 > 2) {
+      newConstraint = newConstraint.replace(RegExp('\\.0$'), '');
+    }
+    return newConstraint;
   }
 
   if (
@@ -98,7 +103,7 @@ function getNewConstraint(
     oldConstraint.includes(currentVersion)
   ) {
     logger.debug(
-      `Updating constraint "${oldConstraint}" to replace "${currentVersion}" with "${newVersion}" for "${packageName}"`
+      `Updating constraint "${oldConstraint}" to replace "${currentVersion}" with "${newVersion}" for "${packageName}"`,
     );
     return oldConstraint.replace(currentVersion, newVersion);
   }
@@ -109,7 +114,7 @@ function getNewConstraint(
   }
 
   logger.debug(
-    `Could not detect constraint to update for "${packageName}" so setting to newValue "${newValue}"`
+    `Could not detect constraint to update for "${packageName}" so setting to newValue "${newValue}"`,
   );
   return newValue;
 }
@@ -148,7 +153,7 @@ export async function updateArtifacts({
     } else {
       const providerDeps = updatedDeps.filter((dep) =>
         // TODO #22198
-        ['provider', 'required_provider'].includes(dep.depType!)
+        ['provider', 'required_provider'].includes(dep.depType!),
       );
       for (const dep of providerDeps) {
         massageProviderLookupName(dep);
@@ -158,7 +163,7 @@ export async function updateArtifacts({
           ? registryUrls[0]
           : TerraformProviderDatasource.defaultRegistryUrls[0];
         const updateLock = locks.find(
-          (value) => value.packageName === packageName
+          (value) => value.packageName === packageName,
         );
         // istanbul ignore if: needs test
         if (!updateLock) {
@@ -173,7 +178,7 @@ export async function updateArtifacts({
             (await TerraformProviderHash.createHashes(
               registryUrl,
               updateLock.packageName,
-              newVersion!
+              newVersion!,
             )) ?? /* istanbul ignore next: needs test */ [],
           ...updateLock,
         };

@@ -7,7 +7,7 @@ function assertBaseDir(path: string, baseDir: string): void {
   if (!path.startsWith(baseDir)) {
     logger.debug(
       { path, baseDir },
-      'Preventing access to file outside the base directory'
+      'Preventing access to file outside the base directory',
     );
     throw new Error(FILE_ACCESS_VIOLATION_ERROR);
   }
@@ -16,7 +16,7 @@ function assertBaseDir(path: string, baseDir: string): void {
 function ensurePath(path: string, key: 'localDir' | 'cacheDir'): string {
   const baseDir = upath.resolve(GlobalConfig.get(key)!);
   const fullPath = upath.resolve(
-    upath.isAbsolute(path) ? path : upath.join(baseDir, path)
+    upath.isAbsolute(path) ? path : upath.join(baseDir, path),
   );
   assertBaseDir(fullPath, baseDir);
   return fullPath;
@@ -32,11 +32,11 @@ export function ensureCachePath(path: string): string {
 
 export function isValidPath(
   path: string,
-  key: 'localDir' | 'cacheDir'
+  key: 'localDir' | 'cacheDir',
 ): boolean {
   const baseDir = upath.resolve(GlobalConfig.get(key)!);
   const fullPath = upath.resolve(
-    upath.isAbsolute(path) ? path : upath.join(baseDir, path)
+    upath.isAbsolute(path) ? path : upath.join(baseDir, path),
   );
 
   return fullPath.startsWith(baseDir);

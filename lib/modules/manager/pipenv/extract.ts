@@ -1,10 +1,10 @@
-import toml from '@iarna/toml';
 import { RANGE_PATTERN } from '@renovatebot/pep440';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { localPathExists } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { PipFile } from './types';
@@ -15,13 +15,13 @@ const rangePattern: string = RANGE_PATTERN;
 
 const specifierPartPattern = `\\s*${rangePattern.replace(
   regEx(/\?<\w+>/g),
-  '?:'
+  '?:',
 )}\\s*`;
 const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
 const specifierRegex = regEx(`^${specifierPattern}$`);
 function extractFromSection(
   pipfile: PipFile,
-  section: 'packages' | 'dev-packages'
+  section: 'packages' | 'dev-packages',
 ): PackageDependency[] {
   const pipfileSection = pipfile[section];
   if (!pipfileSection) {
@@ -55,7 +55,7 @@ function extractFromSection(
         const packageMatches = packageRegex.exec(depName);
         if (!packageMatches) {
           logger.debug(
-            `Skipping dependency with malformed package name "${depName}".`
+            `Skipping dependency with malformed package name "${depName}".`,
           );
           skipReason = 'invalid-name';
         }
@@ -63,7 +63,7 @@ function extractFromSection(
         const specifierMatches = specifierRegex.exec(currentValue!);
         if (!specifierMatches) {
           logger.debug(
-            `Skipping dependency with malformed version specifier "${currentValue!}".`
+            `Skipping dependency with malformed version specifier "${currentValue!}".`,
           );
           skipReason = 'invalid-version';
         }
@@ -88,7 +88,7 @@ function extractFromSection(
       if (requirements.index) {
         if (is.array(pipfile.source)) {
           const source = pipfile.source.find(
-            (item) => item.name === requirements.index
+            (item) => item.name === requirements.index,
           );
           if (source) {
             dep.registryUrls = [source.url];
@@ -103,14 +103,14 @@ function extractFromSection(
 
 export async function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): Promise<PackageFileContent | null> {
   logger.trace(`pipenv.extractPackageFile(${packageFile})`);
 
   let pipfile: PipFile;
   try {
     // TODO: fix type (#9610)
-    pipfile = toml.parse(content) as any;
+    pipfile = parseToml(content) as any;
   } catch (err) {
     logger.debug({ err, packageFile }, 'Error parsing Pipfile');
     return null;

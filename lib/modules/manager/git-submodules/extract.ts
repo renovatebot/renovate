@@ -14,7 +14,7 @@ import type { GitModule } from './types';
 async function getUrl(
   git: SimpleGit,
   gitModulesPath: string,
-  submoduleName: string
+  submoduleName: string,
 ): Promise<string> {
   const path = (
     await Git(simpleGitConfig()).raw([
@@ -57,7 +57,7 @@ async function getBranch(
   git: SimpleGit,
   gitModulesPath: string,
   submoduleName: string,
-  subModuleUrl: string
+  subModuleUrl: string,
 ): Promise<string> {
   const branchFromConfig = (
     await Git(simpleGitConfig()).raw([
@@ -76,7 +76,7 @@ async function getBranch(
 
 async function getModules(
   git: SimpleGit,
-  gitModulesPath: string
+  gitModulesPath: string,
 ): Promise<GitModule[]> {
   const res: GitModule[] = [];
   try {
@@ -106,7 +106,7 @@ async function getModules(
 export default async function extractPackageFile(
   _content: string,
   packageFile: string,
-  _config: ExtractConfig
+  _config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const localDir = GlobalConfig.get('localDir');
   const git = Git(localDir, simpleGitConfig());
@@ -131,7 +131,7 @@ export default async function extractPackageFile(
         git,
         gitModulesPath,
         name,
-        httpSubModuleUrl
+        httpSubModuleUrl,
       );
       deps.push({
         depName: path,
@@ -142,7 +142,7 @@ export default async function extractPackageFile(
     } catch (err) /* istanbul ignore next */ {
       logger.warn(
         { err, packageFile },
-        'Error mapping git submodules during extraction'
+        'Error mapping git submodules during extraction',
       );
     }
   }

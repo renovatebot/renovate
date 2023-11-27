@@ -11,7 +11,7 @@ import {
 import { handlePlugin } from './handlers';
 
 const qVersion = qValueMatcher.handler((ctx) =>
-  storeInTokenMap(ctx, 'version')
+  storeInTokenMap(ctx, 'version'),
 );
 
 export const qPlugins = q
@@ -46,8 +46,8 @@ export const qPlugins = q
             startsWith: '(',
             endsWith: ')',
             search: q.begin<Ctx>().join(qVersion).end(),
-          })
-      )
+          }),
+      ),
   )
   .handler(handlePlugin)
   .handler(cleanupTempVars);

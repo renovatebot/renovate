@@ -20,7 +20,7 @@ async function validate(
   desc: string,
   config: RenovateConfig,
   strict: boolean,
-  isPreset = false
+  isPreset = false,
 ): Promise<void> {
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
@@ -29,7 +29,7 @@ async function validate(
         oldConfig: config,
         newConfig: migratedConfig,
       },
-      'Config migration necessary'
+      'Config migration necessary',
     );
     if (strict) {
       returnVal = 1;
@@ -40,14 +40,14 @@ async function validate(
   if (res.errors.length) {
     logger.error(
       { file: desc, errors: res.errors },
-      'Found errors in configuration'
+      'Found errors in configuration',
     );
     returnVal = 1;
   }
   if (res.warnings.length) {
     logger.warn(
       { file: desc, warnings: res.warnings },
-      'Found errors in configuration'
+      'Found errors in configuration',
     );
     returnVal = 1;
   }
@@ -87,7 +87,7 @@ type PackageJson = {
     }
   } else {
     for (const file of configFileNames.filter(
-      (name) => name !== 'package.json'
+      (name) => name !== 'package.json',
     )) {
       try {
         if (!(await pathExists(file))) {
@@ -108,7 +108,7 @@ type PackageJson = {
     }
     try {
       const pkgJson = JSON.parse(
-        await readFile('package.json', 'utf8')
+        await readFile('package.json', 'utf8'),
       ) as PackageJson;
       if (pkgJson.renovate) {
         logger.info(`Validating package.json > renovate`);
@@ -121,7 +121,7 @@ type PackageJson = {
             'package.json > renovate-config',
             presetConfig,
             strict,
-            true
+            true,
           );
         }
       }

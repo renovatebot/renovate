@@ -34,7 +34,7 @@ describe('modules/manager/nuget/util', () => {
   describe('getConfiguredRegistries', () => {
     it('reads nuget config file', async () => {
       fs.findUpLocal.mockReturnValue(
-        Promise.resolve<string | null>('NuGet.config')
+        Promise.resolve<string | null>('NuGet.config'),
       );
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
@@ -53,7 +53,7 @@ describe('modules/manager/nuget/util', () => {
                 <package pattern="NuGet.Common"/>
               </packageSource>
             </packageSourceMapping>
-          </configuration>`
+          </configuration>`,
       );
 
       const registries = await getConfiguredRegistries('NuGet.config');
@@ -72,7 +72,7 @@ describe('modules/manager/nuget/util', () => {
 
     it('reads nuget config file with default registry', async () => {
       fs.findUpLocal.mockReturnValue(
-        Promise.resolve<string | null>('NuGet.config')
+        Promise.resolve<string | null>('NuGet.config'),
       );
       fs.readLocalFile.mockResolvedValueOnce(
         codeBlock`
@@ -89,7 +89,7 @@ describe('modules/manager/nuget/util', () => {
               <package pattern="NuGet.Common"/>
             </packageSource>
           </packageSourceMapping>
-        </configuration>`
+        </configuration>`,
       );
 
       const registries = await getConfiguredRegistries('NuGet.config');

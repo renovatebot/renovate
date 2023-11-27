@@ -29,7 +29,7 @@ import {
 async function helmCommands(
   execOptions: ExecOptions,
   manifestPath: string,
-  repositories: Repository[]
+  repositories: Repository[],
 ): Promise<void> {
   const cmd: string[] = [];
   // get OCI registries and detect host rules
@@ -95,7 +95,7 @@ export async function updateArtifacts({
 
   const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
   const isUpdateOptionAddChartArchives = config.postUpdateOptions?.includes(
-    'helmUpdateSubChartArchives'
+    'helmUpdateSubChartArchives',
   );
 
   if (

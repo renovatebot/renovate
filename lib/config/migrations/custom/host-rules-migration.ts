@@ -85,7 +85,7 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
     } else {
       logger.warn(
         { hosts },
-        'Duplicate host values found, please only use `matchHost` to specify the host'
+        'Duplicate host values found, please only use `matchHost` to specify the host',
       );
     }
   }
@@ -100,7 +100,7 @@ function massageUrl(url: string): string {
 }
 
 function removeUndefinedFields(
-  obj: Record<string, any>
+  obj: Record<string, any>,
 ): Record<string, string> {
   const result: Record<string, string> = {};
   for (const key of Object.keys(obj)) {

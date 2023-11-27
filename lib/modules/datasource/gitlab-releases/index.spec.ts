@@ -51,7 +51,7 @@ describe('modules/datasource/gitlab-releases/index', () => {
         await getPkgReleases({
           datasource: GitlabReleasesDatasource.id,
           packageName: 'some/dep2',
-        })
+        }),
       ).toBeNull();
     });
   });

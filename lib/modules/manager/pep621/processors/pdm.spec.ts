@@ -34,7 +34,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config,
           updatedDeps,
         },
-        {}
+        {},
       );
       expect(result).toBeNull();
     });
@@ -66,7 +66,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {}
+        {},
       );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
@@ -111,7 +111,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {}
+        {},
       );
       expect(result).toEqual([
         { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
@@ -163,7 +163,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           config: {},
           updatedDeps,
         },
-        {}
+        {},
       );
       expect(result).toEqual([
         {
@@ -214,7 +214,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           },
           updatedDeps: [],
         },
-        {}
+        {},
       );
       expect(result).toEqual([
         {

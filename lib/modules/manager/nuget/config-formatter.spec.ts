@@ -31,27 +31,27 @@ describe('modules/manager/nuget/config-formatter', () => {
 
       const myRegistry = packageSources?.childWithAttribute(
         'key',
-        'myRegistry'
+        'myRegistry',
       );
       expect(myRegistry?.name).toBe('add');
       expect(myRegistry?.attr['value']).toBe(
-        'https://my-registry.example.org/'
+        'https://my-registry.example.org/',
       );
       expect(myRegistry?.attr['protocolVersion']).toBe('2');
 
       const myRegistry2 = packageSources?.childWithAttribute(
         'key',
-        'myRegistry2'
+        'myRegistry2',
       );
       expect(myRegistry2?.name).toBe('add');
       expect(myRegistry2?.attr['value']).toBe(
-        'https://my-registry2.example.org/index.json'
+        'https://my-registry2.example.org/index.json',
       );
       expect(myRegistry2?.attr['protocolVersion']).toBe('3');
 
       const myUnnamedRegistry = packageSources?.childWithAttribute(
         'value',
-        'https://my-unnamed-registry.example.org/index.json'
+        'https://my-unnamed-registry.example.org/index.json',
       );
       expect(myUnnamedRegistry?.name).toBe('add');
       expect(myUnnamedRegistry?.attr['key']).toBe('Package source 1');
@@ -88,53 +88,53 @@ describe('modules/manager/nuget/config-formatter', () => {
 
       const myRegistry = packageSources?.childWithAttribute(
         'key',
-        'myRegistry'
+        'myRegistry',
       );
       expect(myRegistry?.name).toBe('add');
 
       const myRegistry2 = packageSources?.childWithAttribute(
         'key',
-        'myRegistry2'
+        'myRegistry2',
       );
       expect(myRegistry2?.name).toBe('add');
 
       const myRegistryCredentials = xmlDocument.descendantWithPath(
-        'packageSourceCredentials.myRegistry'
+        'packageSourceCredentials.myRegistry',
       );
       expect(
         myRegistryCredentials?.childWithAttribute('key', 'Username')?.attr[
           'value'
-        ]
+        ],
       ).toBe('some-username');
 
       expect(
         myRegistryCredentials?.childWithAttribute('key', 'ClearTextPassword')
-          ?.attr['value']
+          ?.attr['value'],
       ).toBe('some-password');
 
       expect(
         myRegistryCredentials?.childWithAttribute(
           'key',
-          'ValidAuthenticationTypes'
-        )?.attr['value']
+          'ValidAuthenticationTypes',
+        )?.attr['value'],
       ).toBe('basic');
 
       const myRegistry2Credentials = xmlDocument.descendantWithPath(
-        'packageSourceCredentials.myRegistry2'
+        'packageSourceCredentials.myRegistry2',
       );
       expect(
-        myRegistry2Credentials?.childWithAttribute('key', 'Username')
+        myRegistry2Credentials?.childWithAttribute('key', 'Username'),
       ).toBeUndefined();
       expect(
         myRegistry2Credentials?.childWithAttribute('key', 'ClearTextPassword')
-          ?.attr['value']
+          ?.attr['value'],
       ).toBe('some-password');
 
       expect(
         myRegistry2Credentials?.childWithAttribute(
           'key',
-          'ValidAuthenticationTypes'
-        )?.attr['value']
+          'ValidAuthenticationTypes',
+        )?.attr['value'],
       ).toBe('basic');
     });
 
@@ -157,27 +157,27 @@ describe('modules/manager/nuget/config-formatter', () => {
       const xmlDocument = new XmlDocument(xml);
 
       const packageSourceCredentials = xmlDocument.childNamed(
-        'packageSourceCredentials'
+        'packageSourceCredentials',
       );
       expect(packageSourceCredentials).toBeDefined();
 
       const registryCredentialsWithSpecialName =
         packageSourceCredentials?.childNamed(
-          'my__x0020__very__x003f____x0020__weird__x0021__-regi__x0024__try_name'
+          'my__x0020__very__x003f____x0020__weird__x0021__-regi__x0024__try_name',
         );
 
       expect(
         registryCredentialsWithSpecialName?.childWithAttribute(
           'key',
-          'Username'
-        )?.attr['value']
+          'Username',
+        )?.attr['value'],
       ).toBe('some-username');
 
       expect(
         registryCredentialsWithSpecialName?.childWithAttribute(
           'key',
-          'ClearTextPassword'
-        )?.attr['value']
+          'ClearTextPassword',
+        )?.attr['value'],
       ).toBe('some-password');
     });
 
@@ -196,10 +196,10 @@ describe('modules/manager/nuget/config-formatter', () => {
 
       const myRegistry = packageSources?.childWithAttribute(
         'key',
-        'myRegistry'
+        'myRegistry',
       );
       expect(myRegistry?.attr['value']).toBe(
-        'https://my-registry.example.org/'
+        'https://my-registry.example.org/',
       );
       expect(myRegistry?.attr['protocolVersion']).toBe('3');
     });
@@ -224,26 +224,26 @@ describe('modules/manager/nuget/config-formatter', () => {
       const xml = createNuGetConfigXml(registries);
       const xmlDocument = new XmlDocument(xml);
       const packageSourceMapping = xmlDocument.childNamed(
-        'packageSourceMapping'
+        'packageSourceMapping',
       );
       expect(packageSourceMapping).toBeDefined();
 
       const myRegistryMaps = packageSourceMapping?.childWithAttribute(
         'key',
-        'myRegistry'
+        'myRegistry',
       );
       expect(myRegistryMaps?.name).toBe('packageSource');
       expect(myRegistryMaps?.childNamed('package')?.attr['pattern']).toBe('*');
 
       const myRegistry2Maps = packageSourceMapping?.childWithAttribute(
         'key',
-        'myRegistry2'
+        'myRegistry2',
       );
       expect(myRegistry2Maps?.name).toBe('packageSource');
       expect(
         myRegistry2Maps
           ?.childrenNamed('package')
-          .map((child) => child.attr['pattern'])
+          .map((child) => child.attr['pattern']),
       ).toEqual(['LimitedPackages.*', 'MySpecialPackage']);
     });
 
@@ -262,7 +262,7 @@ describe('modules/manager/nuget/config-formatter', () => {
       const xml = createNuGetConfigXml(registries);
       const xmlDocument = new XmlDocument(xml);
       const packageSourceMapping = xmlDocument.childNamed(
-        'packageSourceMapping'
+        'packageSourceMapping',
       );
       expect(packageSourceMapping).toBeUndefined();
     });

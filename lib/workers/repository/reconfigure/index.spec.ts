@@ -10,6 +10,7 @@ import {
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform/types';
 import * as _cache from '../../../util/cache/repository';
+import type { LongCommitSha } from '../../../util/git/types';
 import * as _merge from '../init/merge';
 import { validateReconfigureBranch } from '.';
 
@@ -32,7 +33,7 @@ describe('workers/repository/reconfigure/index', () => {
     merge.detectConfigFile.mockResolvedValue('renovate.json');
     scm.branchExists.mockResolvedValue(true);
     cache.getCache.mockReturnValue({});
-    git.getBranchCommit.mockReturnValue('sha');
+    git.getBranchCommit.mockReturnValue('sha' as LongCommitSha);
     fs.readLocalFile.mockResolvedValue(null);
     platform.getBranchPr.mockResolvedValue(null);
     platform.getBranchStatusCheck.mockResolvedValue(null);
@@ -50,7 +51,7 @@ describe('workers/repository/reconfigure/index', () => {
     await validateReconfigureBranch(config);
     expect(logger.error).toHaveBeenCalledWith(
       { err },
-      'Error while searching for config file in reconfigure branch'
+      'Error while searching for config file in reconfigure branch',
     );
   });
 
@@ -58,7 +59,7 @@ describe('workers/repository/reconfigure/index', () => {
     merge.detectConfigFile.mockResolvedValue(null);
     await validateReconfigureBranch(config);
     expect(logger.warn).toHaveBeenCalledWith(
-      'No config file found in reconfigure branch'
+      'No config file found in reconfigure branch',
     );
   });
 
@@ -68,7 +69,7 @@ describe('workers/repository/reconfigure/index', () => {
     await validateReconfigureBranch(config);
     expect(logger.error).toHaveBeenCalledWith(
       { err },
-      'Error while reading config file'
+      'Error while reading config file',
     );
   });
 
@@ -86,7 +87,7 @@ describe('workers/repository/reconfigure/index', () => {
     await validateReconfigureBranch(config);
     expect(logger.error).toHaveBeenCalledWith(
       { err: expect.any(Object) },
-      'Error while parsing config file'
+      'Error while parsing config file',
     );
     expect(platform.setBranchStatus).toHaveBeenCalledWith({
       branchName: 'prefix/reconfigure',
@@ -105,7 +106,7 @@ describe('workers/repository/reconfigure/index', () => {
     await validateReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
       { errors: expect.any(String) },
-      'Validation Errors'
+      'Validation Errors',
     );
     expect(platform.setBranchStatus).toHaveBeenCalledWith({
       branchName: 'prefix/reconfigure',
@@ -125,7 +126,7 @@ describe('workers/repository/reconfigure/index', () => {
     await validateReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
       { errors: expect.any(String) },
-      'Validation Errors'
+      'Validation Errors',
     );
     expect(platform.setBranchStatus).toHaveBeenCalled();
     expect(platform.ensureComment).toHaveBeenCalled();
@@ -159,7 +160,7 @@ describe('workers/repository/reconfigure/index', () => {
     });
     await validateReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
-      'Skipping validation check as branch sha is unchanged'
+      'Skipping validation check as branch sha is unchanged',
     );
   });
 
@@ -173,7 +174,7 @@ describe('workers/repository/reconfigure/index', () => {
     platform.getBranchStatusCheck.mockResolvedValueOnce('green');
     await validateReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
-      'Skipping validation check as status check already exists'
+      'Skipping validation check as status check already exists',
     );
   });
 

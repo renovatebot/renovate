@@ -28,6 +28,7 @@ import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migrati
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
 import { IncludeForksMigration } from './custom/include-forks-migration';
 import { MatchDatasourcesMigration } from './custom/match-datasources-migration';
+import { MatchManagersMigration } from './custom/match-managers-migration';
 import { MatchStringsMigration } from './custom/match-strings-migration';
 import { NodeMigration } from './custom/node-migration';
 import { PackageFilesMigration } from './custom/package-files-migration';
@@ -152,6 +153,7 @@ export class MigrationsService {
     RecreateClosedMigration,
     StabilityDaysMigration,
     FetchReleaseNotesMigration,
+    MatchManagersMigration,
     CustomManagersMigration,
   ];
 
@@ -177,14 +179,14 @@ export class MigrationsService {
 
   static isMigrated(
     originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig
+    migratedConfig: RenovateConfig,
   ): boolean {
     return !dequal(originalConfig, migratedConfig);
   }
 
   public static getMigrations(
     originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig
+    migratedConfig: RenovateConfig,
   ): ReadonlyArray<Migration> {
     const migrations: Migration[] = [];
 
@@ -193,8 +195,8 @@ export class MigrationsService {
         new RemovePropertyMigration(
           propertyName,
           originalConfig,
-          migratedConfig
-        )
+          migratedConfig,
+        ),
       );
     }
 
@@ -207,8 +209,8 @@ export class MigrationsService {
           oldPropertyName,
           newPropertyName,
           originalConfig,
-          migratedConfig
-        )
+          migratedConfig,
+        ),
       );
     }
 
@@ -221,7 +223,7 @@ export class MigrationsService {
 
   private static getMigration(
     migrations: ReadonlyArray<Migration>,
-    key: string
+    key: string,
   ): Migration | undefined {
     return migrations.find((migration) => {
       if (is.regExp(migration.propertyName)) {

@@ -49,9 +49,9 @@ describe('util/github/graphql/util', () => {
         isDateExpired(
           DateTime.fromISO(isoTs(currentTime)),
           isoTs(initialTimestamp),
-          duration
-        )
+          duration,
+        ),
       ).toBe(expected);
-    }
+    },
   );
 });

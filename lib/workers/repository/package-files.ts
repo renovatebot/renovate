@@ -8,11 +8,11 @@ export class PackageFiles {
 
   static add(
     baseBranch: string,
-    packageFiles: Record<string, PackageFile[]> | null
+    packageFiles: Record<string, PackageFile[]> | null,
   ): void {
     logger.debug(
       { baseBranch },
-      `PackageFiles.add() - Package file saved for base branch`
+      `PackageFiles.add() - Package file saved for base branch`,
     );
     this.data.set(baseBranch, packageFiles);
   }
@@ -79,7 +79,7 @@ export class PackageFiles {
    * @param data
    */
   private static getDashboardMarkdownInternal(
-    data: Map<string, Record<string, PackageFile[]> | null>
+    data: Map<string, Record<string, PackageFile[]> | null>,
   ): string {
     const none = 'None detected\n\n';
     const pad = data.size > 1; // padding condition for a multi base branch repo
@@ -132,7 +132,7 @@ export class PackageFiles {
    *          otherwise false is returned
    */
   private static pop(
-    data: Map<string, Record<string, PackageFile[]> | null>
+    data: Map<string, Record<string, PackageFile[]> | null>,
   ): boolean {
     // get detected managers list of the last listed base branch
     const [branch, managers] = Array.from(data).pop() ?? [];

@@ -11,7 +11,7 @@ describe('util/package-rules/current-value', () => {
         },
         {
           matchCurrentValue: '^v',
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -23,7 +23,7 @@ describe('util/package-rules/current-value', () => {
         },
         {
           matchCurrentValue: '/^v/',
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -35,7 +35,7 @@ describe('util/package-rules/current-value', () => {
         },
         {
           matchCurrentValue: '/^"/',
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -45,7 +45,7 @@ describe('util/package-rules/current-value', () => {
         {},
         {
           matchCurrentValue: '/^v?[~ -]?0/',
-        }
+        },
       );
       expect(result).toBeFalse();
     });

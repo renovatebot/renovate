@@ -22,7 +22,7 @@ const scheduleMappings: Record<string, string> = {
 
 function parseCron(
   scheduleText: string,
-  timezone?: string
+  timezone?: string,
 ): CronExpression | undefined {
   try {
     return parseExpression(scheduleText, { tz: timezone });
@@ -39,7 +39,7 @@ export function hasValidTimezone(timezone: string): [true] | [false, string] {
 }
 
 export function hasValidSchedule(
-  schedule: string[] | null | 'at any time'
+  schedule: string[] | null | 'at any time',
 ): [true] | [false, string] {
   let message = '';
   if (
@@ -66,7 +66,7 @@ export function hasValidSchedule(
     }
 
     const massagedText = fixShortHours(
-      scheduleMappings[scheduleText] || scheduleText
+      scheduleMappings[scheduleText] || scheduleText,
     );
 
     const parsedSchedule = later.parse.text(massagedText);
@@ -82,7 +82,7 @@ export function hasValidSchedule(
     if (
       !parsedSchedule.schedules.some(
         (s) =>
-          !!s.M || s.d !== undefined || !!s.D || s.t_a !== undefined || !!s.t_b
+          !!s.M || s.d !== undefined || !!s.D || s.t_a !== undefined || !!s.t_b,
       )
     ) {
       message = `Invalid schedule: "${scheduleText}" has no months, days of week or time of day`;
@@ -121,7 +121,7 @@ function cronMatches(cron: string, now: DateTime, timezone?: string): boolean {
 
   if (
     !parsedCron.fields.dayOfWeek.includes(
-      (now.weekday % 7) as DayOfTheWeekRange
+      (now.weekday % 7) as DayOfTheWeekRange,
     )
   ) {
     // Weekdays mismatch
@@ -139,12 +139,12 @@ function cronMatches(cron: string, now: DateTime, timezone?: string): boolean {
 
 export function isScheduledNow(
   config: RenovateConfig,
-  scheduleKey: 'schedule' | 'automergeSchedule' = 'schedule'
+  scheduleKey: 'schedule' | 'automergeSchedule' = 'schedule',
 ): boolean {
   let configSchedule = config[scheduleKey];
   logger.debug(
     // TODO: types (#22198)
-    `Checking schedule(${String(configSchedule)}, ${config.timezone!})`
+    `Checking schedule(${String(configSchedule)}, ${config.timezone!})`,
   );
   if (
     !configSchedule ||
@@ -157,7 +157,7 @@ export function isScheduledNow(
   }
   if (!is.array(configSchedule)) {
     logger.warn(
-      `config schedule is not an array: ${JSON.stringify(configSchedule)}`
+      `config schedule is not an array: ${JSON.stringify(configSchedule)}`,
     );
     configSchedule = [configSchedule];
   }

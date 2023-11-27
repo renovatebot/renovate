@@ -48,7 +48,7 @@ describe('modules/versioning/kubernetes-api/index', () => {
       expect(versioning.getMajor(version)).toBe(major);
       expect(versioning.getMinor(version)).toBe(minor);
       expect(versioning.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -75,7 +75,7 @@ describe('modules/versioning/kubernetes-api/index', () => {
     'equals("$version", "$other") === $expected',
     ({ version, other, expected }) => {
       expect(versioning.equals(version, other)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -94,7 +94,7 @@ describe('modules/versioning/kubernetes-api/index', () => {
     'matches("$version", "$other") === $expected',
     ({ version, other, expected }) => {
       expect(versioning.matches(version, other)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -110,7 +110,7 @@ describe('modules/versioning/kubernetes-api/index', () => {
     'isGreaterThan("$version", "$other") === $expected',
     ({ version, other, expected }) => {
       expect(versioning.isGreaterThan(version, other)).toBe(expected);
-    }
+    },
   );
 
   it('sorts versions in an ascending order', () => {
@@ -127,7 +127,7 @@ describe('modules/versioning/kubernetes-api/index', () => {
         'v1beta1',
         'v1alpha2',
         'v1alpha1',
-      ].sort((a, b) => versioning.sortVersions(a, b))
+      ].sort((a, b) => versioning.sortVersions(a, b)),
     ).toEqual([
       'v1alpha1',
       'v1alpha2',

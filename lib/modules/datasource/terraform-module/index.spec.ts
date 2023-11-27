@@ -6,11 +6,11 @@ import { TerraformModuleDatasource } from '.';
 const consulData = Fixtures.get('registry-consul.json');
 const consulVersionsData = Fixtures.get('registry-consul-versions.json');
 const versionsDataWithSourceUrl = Fixtures.get(
-  'registry-versions-with-source.json'
+  'registry-versions-with-source.json',
 );
 const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
 const serviceDiscoveryCustomResult = Fixtures.get(
-  'service-custom-discovery.json'
+  'service-custom-discovery.json',
 );
 
 const datasource = TerraformModuleDatasource.id;
@@ -30,7 +30,7 @@ describe('modules/datasource/terraform-module/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'hashicorp/consul/aws',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -45,7 +45,7 @@ describe('modules/datasource/terraform-module/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'hashicorp/consul/aws',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -60,7 +60,7 @@ describe('modules/datasource/terraform-module/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'hashicorp/consul/aws',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -109,7 +109,7 @@ describe('modules/datasource/terraform-module/index', () => {
           datasource,
           packageName: 'hashicorp/consul/aws',
           registryUrls: ['https://terraform.company.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -125,7 +125,7 @@ describe('modules/datasource/terraform-module/index', () => {
           datasource,
           packageName: 'hashicorp/consul/aws',
           registryUrls: ['https://terraform.company.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -141,7 +141,7 @@ describe('modules/datasource/terraform-module/index', () => {
           datasource,
           packageName: 'hashicorp/consul/aws',
           registryUrls: ['https://terraform.company.com'],
-        })
+        }),
       ).toBeNull();
     });
 

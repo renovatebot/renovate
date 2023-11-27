@@ -57,7 +57,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -68,7 +68,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -91,7 +91,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -114,7 +114,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -367,17 +367,17 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
 
   it('returns updated workspace Cargo.lock', async () => {
     fs.statLocalFile.mockRejectedValueOnce(
-      new Error('crates/one/Cargo.lock not found')
+      new Error('crates/one/Cargo.lock not found'),
     );
     fs.statLocalFile.mockRejectedValueOnce(
-      new Error('crates/Cargo.lock not found')
+      new Error('crates/Cargo.lock not found'),
     );
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
 
@@ -396,7 +396,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -413,7 +413,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: { ...config, updateType: 'lockFileMaintenance' },
-      })
+      }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -436,7 +436,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -501,7 +501,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -606,7 +606,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -650,7 +650,7 @@ describe('modules/manager/cargo/artifacts', () => {
             }),
           }),
         }),
-      ])
+      ]),
     );
   });
 
@@ -682,7 +682,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -709,7 +709,7 @@ describe('modules/manager/cargo/artifacts', () => {
             }),
           }),
         }),
-      ])
+      ]),
     );
   });
 
@@ -741,7 +741,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -777,7 +777,7 @@ describe('modules/manager/cargo/artifacts', () => {
             }),
           }),
         }),
-      ])
+      ]),
     );
   });
 
@@ -799,7 +799,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config: { ...config, constraints: { rust: '1.65.0' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -850,7 +850,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       { artifactError: { lockFile: 'Cargo.lock', stderr: 'not found' } },
     ]);

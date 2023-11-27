@@ -9,7 +9,7 @@ export const ReleasesIndex = z
         .object({
           'releases.json': z.string(),
         })
-        .transform(({ 'releases.json': releasesUrl }) => releasesUrl)
+        .transform(({ 'releases.json': releasesUrl }) => releasesUrl),
     ).catch([]),
   })
   .transform(({ 'releases-index': releasesIndex }) => releasesIndex);
@@ -27,7 +27,7 @@ export const DotnetSdkReleases = z
     releases: LooseArray(
       ReleaseBase.extend({
         sdk: ReleaseDetails,
-      })
+      }),
     ).catch([]),
   })
   .transform(({ releases }): Release[] =>
@@ -36,8 +36,8 @@ export const DotnetSdkReleases = z
         sdk: { version },
         'release-date': releaseTimestamp,
         'release-notes': changelogUrl,
-      }) => ({ version, releaseTimestamp, changelogUrl })
-    )
+      }) => ({ version, releaseTimestamp, changelogUrl }),
+    ),
   );
 
 export const DotnetRuntimeReleases = z
@@ -45,7 +45,7 @@ export const DotnetRuntimeReleases = z
     releases: LooseArray(
       ReleaseBase.extend({
         runtime: ReleaseDetails,
-      })
+      }),
     ).catch([]),
   })
   .transform(({ releases }): Release[] =>
@@ -54,6 +54,6 @@ export const DotnetRuntimeReleases = z
         runtime: { version },
         'release-date': releaseTimestamp,
         'release-notes': changelogUrl,
-      }) => ({ version, releaseTimestamp, changelogUrl })
-    )
+      }) => ({ version, releaseTimestamp, changelogUrl }),
+    ),
   );

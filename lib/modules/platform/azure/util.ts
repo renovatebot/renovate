@@ -13,7 +13,7 @@ import { getPrBodyStruct } from '../pr-body';
 import type { AzurePr } from './types';
 
 export function getGitStatusContextCombinedName(
-  context: GitStatusContext | null | undefined
+  context: GitStatusContext | null | undefined,
 ): string | undefined {
   if (!context) {
     return undefined;
@@ -27,7 +27,7 @@ export function getGitStatusContextCombinedName(
 }
 
 export function getGitStatusContextFromCombinedName(
-  context: string | undefined | null
+  context: string | undefined | null,
 ): GitStatusContext | undefined {
   if (!context) {
     return undefined;
@@ -46,7 +46,7 @@ export function getGitStatusContextFromCombinedName(
 }
 
 export function getBranchNameWithoutRefsheadsPrefix(
-  branchPath: string | undefined
+  branchPath: string | undefined,
 ): string | undefined {
   if (!branchPath) {
     logger.error(`getBranchNameWithoutRefsheadsPrefix(undefined)`);
@@ -54,7 +54,7 @@ export function getBranchNameWithoutRefsheadsPrefix(
   }
   if (!branchPath.startsWith('refs/heads/')) {
     logger.trace(
-      `The refs/heads/ name should have started with 'refs/heads/' but it didn't. (${branchPath})`
+      `The refs/heads/ name should have started with 'refs/heads/' but it didn't. (${branchPath})`,
     );
     return branchPath;
   }
@@ -62,7 +62,7 @@ export function getBranchNameWithoutRefsheadsPrefix(
 }
 
 export function getBranchNameWithoutRefsPrefix(
-  branchPath?: string
+  branchPath?: string,
 ): string | undefined {
   if (!branchPath) {
     logger.error(`getBranchNameWithoutRefsPrefix(undefined)`);
@@ -70,7 +70,7 @@ export function getBranchNameWithoutRefsPrefix(
   }
   if (!branchPath.startsWith('refs/')) {
     logger.trace(
-      `The ref name should have started with 'refs/' but it didn't. (${branchPath})`
+      `The ref name should have started with 'refs/' but it didn't. (${branchPath})`,
     );
     return branchPath;
   }
@@ -86,10 +86,10 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const number = azurePr.pullRequestId;
 
   const sourceBranch = getBranchNameWithoutRefsheadsPrefix(
-    azurePr.sourceRefName
+    azurePr.sourceRefName,
   );
   const targetBranch = getBranchNameWithoutRefsheadsPrefix(
-    azurePr.targetRefName
+    azurePr.targetRefName,
   );
   const bodyStruct = getPrBodyStruct(azurePr.description);
 
@@ -163,7 +163,7 @@ export function getProjectAndRepo(str: string): {
 
 export function getRepoByName(
   name: string,
-  repos: (GitRepository | null | undefined)[] | undefined | null
+  repos: (GitRepository | null | undefined)[] | undefined | null,
 ): GitRepository | null {
   logger.trace(`getRepoByName(${name})`);
 
@@ -174,7 +174,7 @@ export function getRepoByName(
   const foundRepo = repos?.find(
     (r) =>
       project === r?.project?.name?.toLowerCase() &&
-      repo === r?.name?.toLowerCase()
+      repo === r?.name?.toLowerCase(),
   );
   if (!foundRepo) {
     logger.debug(`Repo not found: ${name}`);

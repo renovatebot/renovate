@@ -79,7 +79,7 @@ describe('logger/index', () => {
       addStream({
         name: 'logfile',
         level: 'error',
-      })
+      }),
     ).toThrow("Missing 'stream' or 'path' for bunyan stream");
   });
 
@@ -90,7 +90,7 @@ describe('logger/index', () => {
         path: 'file.log',
         level: 'error',
         type: 'rotating-file',
-      })
+      }),
     ).toThrow("Rotating files aren't supported");
   });
 
@@ -103,7 +103,7 @@ describe('logger/index', () => {
           chunk = x;
           return true;
         },
-      })
+      }),
     );
 
     addStream({
@@ -126,7 +126,7 @@ describe('logger/index', () => {
           logged = JSON.parse(x);
           return true;
         },
-      })
+      }),
     );
 
     addStream({
@@ -154,7 +154,7 @@ describe('logger/index', () => {
           logged = JSON.parse(x);
           return true;
         },
-      })
+      }),
     );
 
     addStream({

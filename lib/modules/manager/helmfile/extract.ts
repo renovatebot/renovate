@@ -27,14 +27,14 @@ function extractYaml(content: string): string {
 
 function isLocalPath(possiblePath: string): boolean {
   return ['./', '../', '/'].some((localPrefix) =>
-    possiblePath.startsWith(localPrefix)
+    possiblePath.startsWith(localPrefix),
   );
 }
 
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const deps: PackageDependency[] = [];
   let docs: Doc[];
@@ -46,7 +46,7 @@ export async function extractPackageFile(
   } catch (err) {
     logger.debug(
       { err, packageFile },
-      'Failed to parse helmfile helmfile.yaml'
+      'Failed to parse helmfile helmfile.yaml',
     );
     return null;
   }
@@ -121,7 +121,7 @@ export async function extractPackageFile(
       }
       // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
       const repository = doc.repositories?.find(
-        (repo) => repo.name === repoName
+        (repo) => repo.name === repoName,
       );
       if (repository?.oci) {
         res.datasource = DockerDatasource.id;

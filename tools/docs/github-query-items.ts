@@ -55,7 +55,7 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
       {
         paginationField: 'items',
         paginate: true,
-      }
+      },
     );
     const rawItems = res.body?.items ?? [];
 
@@ -119,7 +119,7 @@ function stringifyIssues(items: ItemsEntity[] | undefined): string {
 
 export function generateFeatureAndBugMarkdown(
   issuesMap: OpenItems,
-  key: string
+  key: string,
 ): string {
   let md = '\n\n';
 

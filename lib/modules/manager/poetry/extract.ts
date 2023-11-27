@@ -13,12 +13,12 @@ import { Lockfile, PoetrySchemaToml } from './schema';
 
 export async function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${packageFile})`);
   const { val: res, err } = Result.parse(
     content,
-    PoetrySchemaToml.transform(({ packageFileContent }) => packageFileContent)
+    PoetrySchemaToml.transform(({ packageFileContent }) => packageFileContent),
   ).unwrap();
   if (err) {
     logger.debug({ packageFile, err }, `Poetry: error parsing pyproject.toml`);
@@ -29,7 +29,7 @@ export async function extractPackageFile(
   const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
   const lockfileMapping = Result.parse(
     lockContents,
-    Lockfile.transform(({ lock }) => lock)
+    Lockfile.transform(({ lock }) => lock),
   ).unwrapOrElse({});
 
   let pythonVersion: string | undefined;

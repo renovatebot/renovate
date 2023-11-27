@@ -4,7 +4,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 import { isComment } from './common';
 
 const regex = regEx(
-  `(?<name>[-_a-z0-9]+)/(?<version>[^@\n{*"']+)(?<userChannel>@[-_a-zA-Z0-9]+/[^#\n.{*"' ]+)?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`
+  `(?<name>[-_a-z0-9]+)/(?<version>[^@\n{*"']+)(?<userChannel>@[-_a-zA-Z0-9]+/[^#\n.{*"' ]+)?#?(?<revision>[-_a-f0-9]+[^\n{*"'])?`,
 );
 
 function setDepType(content: string, originalType: string): string {
@@ -25,7 +25,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     (part) =>
       part.includes('python_requires') || // only matches python_requires
       part.includes('build_require') || // matches [build_requires], build_requirements(), and build_requires
-      part.includes('require') // matches [requires], requirements(), and requires
+      part.includes('require'), // matches [requires], requirements(), and requires
   );
 
   const deps: PackageDependency[] = [];

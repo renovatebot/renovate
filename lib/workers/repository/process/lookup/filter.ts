@@ -14,7 +14,7 @@ export function filterVersions(
   currentVersion: string,
   latestVersion: string,
   releases: Release[],
-  versioning: VersioningApi
+  versioning: VersioningApi,
 ): Release[] {
   const { ignoreUnstable, ignoreDeprecated, respectLatest, allowedVersions } =
     config;
@@ -38,22 +38,22 @@ export function filterVersions(
   let filteredVersions = releases.filter(
     (v) =>
       versioning.isVersion(v.version) &&
-      versioning.isGreaterThan(v.version, currentVersion)
+      versioning.isGreaterThan(v.version, currentVersion),
   );
 
   // Don't upgrade from non-deprecated to deprecated
   const fromRelease = releases.find(
-    (release) => release.version === currentVersion
+    (release) => release.version === currentVersion,
   );
   if (ignoreDeprecated && fromRelease && !fromRelease.isDeprecated) {
     filteredVersions = filteredVersions.filter((v) => {
       const versionRelease = releases.find(
-        (release) => release.version === v.version
+        (release) => release.version === v.version,
       );
       // TODO: types (#22198)
       if (versionRelease!.isDeprecated) {
         logger.trace(
-          `Skipping ${config.depName!}@${v.version} because it is deprecated`
+          `Skipping ${config.depName!}@${v.version} because it is deprecated`,
         );
         return false;
       }
@@ -65,11 +65,11 @@ export function filterVersions(
     const isAllowedPred = configRegexPredicate(allowedVersions);
     if (isAllowedPred) {
       filteredVersions = filteredVersions.filter(({ version }) =>
-        isAllowedPred(version)
+        isAllowedPred(version),
       );
     } else if (versioning.isValid(allowedVersions)) {
       filteredVersions = filteredVersions.filter((v) =>
-        versioning.matches(v.version, allowedVersions)
+        versioning.matches(v.version, allowedVersions),
       );
     } else if (
       config.versioning !== npmVersioning.id &&
@@ -77,13 +77,13 @@ export function filterVersions(
     ) {
       logger.debug(
         { depName: config.depName },
-        'Falling back to npm semver syntax for allowedVersions'
+        'Falling back to npm semver syntax for allowedVersions',
       );
       filteredVersions = filteredVersions.filter((v) =>
         semver.satisfies(
           semver.valid(v.version) ? v.version : semver.coerce(v.version)!,
-          allowedVersions
-        )
+          allowedVersions,
+        ),
       );
     } else if (
       config.versioning === poetryVersioning.id &&
@@ -91,10 +91,10 @@ export function filterVersions(
     ) {
       logger.debug(
         { depName: config.depName },
-        'Falling back to pypi syntax for allowedVersions'
+        'Falling back to pypi syntax for allowedVersions',
       );
       filteredVersions = filteredVersions.filter((v) =>
-        pep440.matches(v.version, allowedVersions)
+        pep440.matches(v.version, allowedVersions),
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);
@@ -117,7 +117,7 @@ export function filterVersions(
     !versioning.isGreaterThan(currentVersion, latestVersion)
   ) {
     filteredVersions = filteredVersions.filter(
-      (v) => !versioning.isGreaterThan(v.version, latestVersion)
+      (v) => !versioning.isGreaterThan(v.version, latestVersion),
     );
   }
 

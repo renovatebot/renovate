@@ -6,7 +6,7 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
       {
         semanticPrefix: 'fix(deps): ',
       } as any,
-      { semanticCommitType: 'fix', semanticCommitScope: 'deps' }
+      { semanticCommitType: 'fix', semanticCommitScope: 'deps' },
     );
   });
 
@@ -15,7 +15,7 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
       {
         semanticPrefix: true,
       } as any,
-      {}
+      {},
     );
   });
 
@@ -24,7 +24,7 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
       {
         semanticPrefix: 'fix: ',
       } as any,
-      { semanticCommitType: 'fix', semanticCommitScope: null }
+      { semanticCommitType: 'fix', semanticCommitScope: null },
     );
   });
 
@@ -33,7 +33,7 @@ describe('config/migrations/custom/semantic-prefix-migration', () => {
       {
         semanticPrefix: 'test',
       } as any,
-      { semanticCommitType: 'test', semanticCommitScope: null }
+      { semanticCommitType: 'test', semanticCommitScope: null },
     );
   });
 });

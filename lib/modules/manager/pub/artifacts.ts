@@ -94,7 +94,7 @@ export async function updateArtifacts({
 function getExecCommand(
   toolName: string,
   updatedDeps: Upgrade<Record<string, unknown>>[],
-  isLockFileMaintenance: boolean
+  isLockFileMaintenance: boolean,
 ): string {
   if (isLockFileMaintenance) {
     return `${toolName} pub upgrade`;

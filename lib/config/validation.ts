@@ -71,7 +71,7 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
 
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
-    (manager) => !allManagersList.includes(manager)
+    (manager) => !allManagersList.includes(manager.replace('custom.', '')),
   );
 }
 
@@ -97,7 +97,7 @@ export function getParentName(parentPath: string | undefined): string {
 export async function validateConfig(
   config: RenovateConfig,
   isPreset?: boolean,
-  parentPath?: string
+  parentPath?: string,
 ): Promise<ValidationResult> {
   if (!optionTypes) {
     optionTypes = {};
@@ -134,13 +134,13 @@ export async function validateConfig(
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
-        val as string[]
+        val as string[],
       );
       if (is.nonEmptyArray(unsupportedManagers)) {
         errors.push({
           topic: 'Configuration Error',
           message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
-            ', '
+            ', ',
           )}"`,
         });
       }
@@ -248,7 +248,7 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
-                val
+                val,
               )} (${typeof val})`,
             });
           }
@@ -257,7 +257,7 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-                val
+                val,
               )} (${typeof val})`,
             });
           }
@@ -268,7 +268,7 @@ export async function validateConfig(
                 const subValidation = await validateConfig(
                   subval as RenovateConfig,
                   isPreset,
-                  `${currentPath}[${subIndex}]`
+                  `${currentPath}[${subIndex}]`,
                 );
                 warnings = warnings.concat(subValidation.warnings);
                 errors = errors.concat(subValidation.errors);
@@ -340,19 +340,19 @@ export async function validateConfig(
                     packageRules: [
                       await resolveConfigPresets(
                         packageRule as RenovateConfig,
-                        config
+                        config,
                       ),
                     ],
                   }).migratedConfig.packageRules![0];
                   errors.push(
-                    ...managerValidator.check({ resolvedRule, currentPath })
+                    ...managerValidator.check({ resolvedRule, currentPath }),
                   );
                   const selectorLength = Object.keys(resolvedRule).filter(
-                    (ruleKey) => selectors.includes(ruleKey)
+                    (ruleKey) => selectors.includes(ruleKey),
                   ).length;
                   if (!selectorLength) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
-                      packageRule
+                      packageRule,
                     )}`;
                     errors.push({
                       topic: 'Configuration Error',
@@ -361,7 +361,7 @@ export async function validateConfig(
                   }
                   if (selectorLength === Object.keys(resolvedRule).length) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
-                      packageRule
+                      packageRule,
                     )}`;
                     warnings.push({
                       topic: 'Configuration Error',
@@ -388,7 +388,7 @@ export async function validateConfig(
                     for (const option of preLookupOptions) {
                       if (resolvedRule[option] !== undefined) {
                         const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${JSON.stringify(
-                          packageRule
+                          packageRule,
                         )}`;
                         errors.push({
                           topic: 'Configuration Error',
@@ -425,16 +425,16 @@ export async function validateConfig(
               for (const customManager of val as CustomManager[]) {
                 if (
                   Object.keys(customManager).some(
-                    (k) => !allowedKeys.includes(k)
+                    (k) => !allowedKeys.includes(k),
                   )
                 ) {
                   const disallowedKeys = Object.keys(customManager).filter(
-                    (k) => !allowedKeys.includes(k)
+                    (k) => !allowedKeys.includes(k),
                   );
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Custom Manager contains disallowed fields: ${disallowedKeys.join(
-                      ', '
+                      ', ',
                     )}`,
                   });
                 } else if (
@@ -447,7 +447,7 @@ export async function validateConfig(
                         validateRegexManagerFields(
                           customManager,
                           currentPath,
-                          errors
+                          errors,
                         );
                         break;
                     }
@@ -581,7 +581,7 @@ export async function validateConfig(
                   continue;
                 }
                 for (const [subKey, subValue] of Object.entries(
-                  customDatasourceValue
+                  customDatasourceValue,
                 )) {
                   if (!allowedKeys.includes(subKey)) {
                     errors.push({
@@ -627,7 +627,7 @@ export async function validateConfig(
                 const subValidation = await validateConfig(
                   val,
                   isPreset,
-                  currentPath
+                  currentPath,
                 );
                 warnings = warnings.concat(subValidation.warnings);
                 errors = errors.concat(subValidation.errors);
@@ -661,7 +661,7 @@ export async function validateConfig(
 function validateRegexManagerFields(
   customManager: Partial<RegexManagerConfig>,
   currentPath: string,
-  errors: ValidationMessage[]
+  errors: ValidationMessage[],
 ): void {
   if (is.nonEmptyArray(customManager.matchStrings)) {
     for (const matchString of customManager.matchStrings) {
@@ -687,7 +687,7 @@ function validateRegexManagerFields(
     if (
       !customManager[templateField] &&
       !customManager.matchStrings?.some((matchString) =>
-        matchString.includes(`(?<${field}>`)
+        matchString.includes(`(?<${field}>`),
       )
     ) {
       errors.push({

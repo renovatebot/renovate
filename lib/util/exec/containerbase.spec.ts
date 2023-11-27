@@ -49,7 +49,7 @@ describe('util/exec/containerbase', () => {
   describe('resolveConstraint()', () => {
     it('returns from config', async () => {
       expect(
-        await resolveConstraint({ toolName: 'composer', constraint: '1.1.0' })
+        await resolveConstraint({ toolName: 'composer', constraint: '1.1.0' }),
       ).toBe('1.1.0');
     });
 
@@ -72,7 +72,7 @@ describe('util/exec/containerbase', () => {
         releases: [{ version: '2.0.14-b.1' }, { version: '2.1.0-a.1' }],
       });
       expect(await resolveConstraint({ toolName: 'composer' })).toBe(
-        '2.1.0-a.1'
+        '2.1.0-a.1',
       );
     });
 
@@ -109,7 +109,7 @@ describe('util/exec/containerbase', () => {
 
     it('throws for unknown tools', async () => {
       await expect(resolveConstraint({ toolName: 'whoops' })).rejects.toThrow(
-        'Invalid tool to install: whoops'
+        'Invalid tool to install: whoops',
       );
     });
 
@@ -118,7 +118,7 @@ describe('util/exec/containerbase', () => {
         releases: [],
       });
       await expect(resolveConstraint({ toolName: 'composer' })).rejects.toThrow(
-        'No tool releases found.'
+        'No tool releases found.',
       );
     });
 
@@ -127,7 +127,7 @@ describe('util/exec/containerbase', () => {
         releases: [{ version: '1.2.3' }],
       });
       expect(
-        await resolveConstraint({ toolName: 'composer', constraint: '^3.1.0' })
+        await resolveConstraint({ toolName: 'composer', constraint: '^3.1.0' }),
       ).toBe('1.2.3');
     });
 
@@ -136,7 +136,7 @@ describe('util/exec/containerbase', () => {
         releases: [{ version: '1.2.3' }],
       });
       expect(
-        await resolveConstraint({ toolName: 'composer', constraint: 'whoops' })
+        await resolveConstraint({ toolName: 'composer', constraint: 'whoops' }),
       ).toBe('1.2.3');
     });
 
@@ -159,9 +159,9 @@ describe('util/exec/containerbase', () => {
           ],
         });
         expect(
-          await resolveConstraint({ toolName: 'python', constraint })
+          await resolveConstraint({ toolName: 'python', constraint }),
         ).toBe(expected);
-      }
+      },
     );
   });
 

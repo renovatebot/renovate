@@ -176,7 +176,7 @@ export interface PostUpgradeTasks {
 }
 
 export type UpdateConfig<
-  T extends RenovateSharedConfig = RenovateSharedConfig
+  T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
 export type RenovateRepository =
@@ -262,9 +262,12 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 }
 
+const CustomDatasourceFormats = ['json', 'plain', 'yaml'] as const;
+export type CustomDatasourceFormats = (typeof CustomDatasourceFormats)[number];
+
 export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
-  format?: 'json' | 'plain';
+  format?: CustomDatasourceFormats;
   transformTemplates?: string[];
 }
 
@@ -275,6 +278,7 @@ export interface AllConfig
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
+  expandCodeOwnersGroups?: boolean;
   assignees?: string[];
   assigneesSampleSize?: number;
   ignoreReviewers?: string[];
@@ -396,7 +400,7 @@ export interface RenovateOptionBase {
 }
 
 export interface RenovateArrayOption<
-  T extends string | number | Record<string, unknown> = Record<string, unknown>
+  T extends string | number | Record<string, unknown> = Record<string, unknown>,
 > extends RenovateOptionBase {
   default?: T[] | null;
   mergeable?: boolean;

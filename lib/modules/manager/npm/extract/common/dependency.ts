@@ -9,7 +9,7 @@ import { api, isValid, isVersion } from '../../../../versioning/npm';
 import type { PackageDependency } from '../../../types';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
-  /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/
+  /(?:git@)github.com:([^/]+)\/([^/.]+)(?:\.git)?/,
 );
 
 export function parseDepName(depType: string, key: string): string {
@@ -24,7 +24,7 @@ export function parseDepName(depType: string, key: string): string {
 export function extractDependency(
   depType: string,
   depName: string,
-  input: string
+  input: string,
 ): PackageDependency {
   const dep: PackageDependency = {};
   if (!validateNpmPackageName(depName).validForOldPackages) {
@@ -109,7 +109,7 @@ export function extractDependency(
       dep.currentValue = valSplit[2];
     } else {
       logger.debug(
-        `Invalid npm package alias for dependency: "${depName}":"${dep.currentValue}"`
+        `Invalid npm package alias for dependency: "${depName}":"${dep.currentValue}"`,
       );
     }
   }
@@ -186,7 +186,7 @@ export function extractDependency(
 }
 
 export function getExtractedConstraints(
-  deps: PackageDependency[]
+  deps: PackageDependency[],
 ): Record<string, string> {
   const extractedConstraints: Record<string, string> = {};
   const constraints = ['node', 'yarn', 'npm', 'pnpm', 'vscode'];

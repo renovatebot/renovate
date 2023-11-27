@@ -10,7 +10,7 @@ export function getBucket(
   config: BucketConfig,
   currentVersion: string,
   newVersion: string,
-  versioning: VersioningApi
+  versioning: VersioningApi,
 ): string | null {
   const { separateMajorMinor, separateMultipleMajor, separateMinorPatch } =
     config;

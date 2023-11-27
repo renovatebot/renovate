@@ -11,11 +11,11 @@ await (async () => {
     if (!installed || semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
       if (process.env.CI) {
         console.log(
-          `::error ::Minimum Git version ${GIT_MINIMUM_VERSION} is required, found version '${gitVersion}'.`
+          `::error ::Minimum Git version ${GIT_MINIMUM_VERSION} is required, found version '${gitVersion}'.`,
         );
       } else {
         throw new Error(
-          `Minimum Git version ${GIT_MINIMUM_VERSION} is required, found version '${gitVersion}'.`
+          `Minimum Git version ${GIT_MINIMUM_VERSION} is required, found version '${gitVersion}'.`,
         );
       }
     }

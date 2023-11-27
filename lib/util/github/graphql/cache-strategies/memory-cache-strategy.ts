@@ -7,7 +7,7 @@ import { AbstractGithubGraphqlCacheStrategy } from './abstract-cache-strategy';
  * and for testing purposes.
  */
 export class GithubGraphqlMemoryCacheStrategy<
-  GithubItem extends GithubDatasourceItem
+  GithubItem extends GithubDatasourceItem,
 > extends AbstractGithubGraphqlCacheStrategy<GithubItem> {
   private fullKey(): string {
     return `github-graphql-cache:${this.cacheNs}:${this.cacheKey}`;

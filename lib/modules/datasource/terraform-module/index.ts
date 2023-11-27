@@ -53,24 +53,24 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       TerraformModuleDatasource.getRegistryRepository(packageName, registryUrl);
     logger.trace(
       { registryUrlNormalized, terraformRepository: repository },
-      'terraform-module.getReleases()'
+      'terraform-module.getReleases()',
     );
 
     const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-      registryUrlNormalized
+      registryUrlNormalized,
     );
     if (this.extendedApiRegistryUrls.includes(registryUrlNormalized)) {
       return await this.queryRegistryExtendedApi(
         serviceDiscovery,
         registryUrlNormalized,
-        repository
+        repository,
       );
     }
 
     return await this.queryRegistryVersions(
       serviceDiscovery,
       registryUrlNormalized,
-      repository
+      repository,
     );
   }
 
@@ -82,7 +82,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   private async queryRegistryExtendedApi(
     serviceDiscovery: ServiceDiscoveryResult,
     registryUrl: string,
-    repository: string
+    repository: string,
   ): Promise<ReleaseResult | null> {
     let res: TerraformRelease;
     let pkgUrl: string;
@@ -94,7 +94,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         registryUrl,
         'modules.v1',
         serviceDiscovery,
-        repository
+        repository,
       );
       res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
@@ -118,7 +118,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     dep.homepage = `${registryUrl}/modules/${repository}`;
     // set published date for latest release
     const latestVersion = dep.releases.find(
-      (release) => res.version === release.version
+      (release) => res.version === release.version,
     );
     if (latestVersion) {
       latestVersion.releaseTimestamp = res.published_at;
@@ -133,7 +133,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   private async queryRegistryVersions(
     serviceDiscovery: ServiceDiscoveryResult,
     registryUrl: string,
-    repository: string
+    repository: string,
   ): Promise<ReleaseResult | null> {
     let res: TerraformModuleVersions;
     let pkgUrl: string;
@@ -143,7 +143,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         registryUrl,
         'modules.v1',
         serviceDiscovery,
-        `${repository}/versions`
+        `${repository}/versions`,
       );
       res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
       if (res.modules.length < 1) {
@@ -171,7 +171,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
   private static getRegistryRepository(
     packageName: string,
-    registryUrl: string | undefined
+    registryUrl: string | undefined,
   ): RegistryRepository {
     let registry: string;
     const split = packageName.split('/');

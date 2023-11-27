@@ -7,7 +7,7 @@ import { platform } from '../../../modules/platform';
 
 export async function raiseDeprecationWarnings(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFile[]>,
 ): Promise<void> {
   if (!config.repoIsOnboarded) {
     return;
@@ -31,7 +31,7 @@ export async function raiseDeprecationWarnings(
             depPackageFiles: [],
           };
           deprecatedPackages[dep.depName!].depPackageFiles.push(
-            packageFile.packageFile
+            packageFile.packageFile,
           );
         }
       }
@@ -48,7 +48,7 @@ export async function raiseDeprecationWarnings(
           deprecationMessage,
           packageFiles: depPackageFiles,
         },
-        'dependency is deprecated'
+        'dependency is deprecated',
       );
       const issueTitle = `${issueTitlePrefix} ${depName} (${manager})`;
       issueTitleList.push(issueTitle);
@@ -71,12 +71,12 @@ export async function raiseDeprecationWarnings(
       }
     }
     logger.debug(
-      'Checking for existing deprecated package issues missing in current deprecatedPackages'
+      'Checking for existing deprecated package issues missing in current deprecatedPackages',
     );
     const issueList = await platform.getIssueList();
     if (issueList?.length) {
       const deprecatedIssues = issueList.filter(
-        (i) => i.title!.startsWith(issueTitlePrefix) && i.state === 'open'
+        (i) => i.title!.startsWith(issueTitlePrefix) && i.state === 'open',
       );
       for (const i of deprecatedIssues) {
         if (!issueTitleList.includes(i.title!)) {

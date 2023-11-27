@@ -37,7 +37,7 @@ function restoreHttpsAuthField(x: HttpsAuthField | AuthField): string {
 function setHostRuleValue(
   rule: HostRule,
   key: string,
-  value: string | undefined
+  value: string | undefined,
 ): void {
   if (value !== undefined) {
     switch (key) {
@@ -88,7 +88,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
           matchHost = splitEnv.join('.');
         }
         const existingRule = hostRules.find(
-          (hr) => hr.hostType === hostType && hr.matchHost === matchHost
+          (hr) => hr.hostType === hostType && hr.matchHost === matchHost,
         );
         logger.debug(`Converting ${envName} into a global host rule`);
         if (existingRule) {

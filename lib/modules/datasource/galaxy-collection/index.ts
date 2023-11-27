@@ -1,16 +1,12 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
-import type { HttpResponse } from '../../../util/http/types';
 import * as p from '../../../util/promises';
+import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as pep440Versioning from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type {
-  BaseProjectResult,
-  VersionsDetailResult,
-  VersionsProjectResult,
-} from './types';
+import { GalaxyV3, GalaxyV3DetailedVersion, GalaxyV3Versions } from './schema';
 
 export class GalaxyCollectionDatasource extends Datasource {
   static readonly id = 'galaxy-collection';
@@ -21,7 +17,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   override readonly customRegistrySupport = false;
 
-  override readonly defaultRegistryUrls = ['https://old-galaxy.ansible.com/'];
+  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com'];
 
   override readonly defaultVersioning = pep440Versioning.id;
 
@@ -35,92 +31,101 @@ export class GalaxyCollectionDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const [namespace, projectName] = packageName.split('.');
 
-    // TODO: types (#22198)
-    const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
+    const baseUrl = ensureTrailingSlash(
+      joinUrlParts(
+        registryUrl!,
+        'api/v3/plugin/ansible/content/published/collections/index',
+        namespace,
+        projectName,
+      ),
+    );
 
-    let baseUrlResponse: HttpResponse<BaseProjectResult>;
-    try {
-      baseUrlResponse = await this.http.getJson<BaseProjectResult>(baseUrl);
-    } catch (err) {
-      this.handleGenericErrors(err);
+    const { val: baseProject, err: baseErr } = await this.http
+      .getJsonSafe(baseUrl, GalaxyV3)
+      .onError((err) => {
+        logger.warn(
+          { datasource: this.id, packageName, err },
+          `Error fetching ${baseUrl}`,
+        );
+      })
+      .unwrap();
+    if (baseErr) {
+      this.handleGenericErrors(baseErr);
     }
 
-    if (!baseUrlResponse?.body) {
-      logger.warn(
-        { dependency: packageName },
-        `Received invalid data from ${baseUrl}`
-      );
-      return null;
+    const versionsUrl = ensureTrailingSlash(joinUrlParts(baseUrl, 'versions'));
+
+    const { val: rawReleases, err: versionsErr } = await this.http
+      .getJsonSafe(versionsUrl, GalaxyV3Versions)
+      .onError((err) => {
+        logger.warn(
+          { datasource: this.id, packageName, err },
+          `Error fetching ${versionsUrl}`,
+        );
+      })
+      .unwrap();
+    if (versionsErr) {
+      this.handleGenericErrors(versionsErr);
     }
 
-    const baseProject = baseUrlResponse.body;
-
-    const versionsUrl = `${baseUrl}versions/`;
-
-    let versionsUrlResponse: HttpResponse<VersionsProjectResult>;
-    try {
-      versionsUrlResponse = await this.http.getJson<VersionsProjectResult>(
-        versionsUrl
-      );
-    } catch (err) {
-      this.handleGenericErrors(err);
-    }
-
-    const versionsProject = versionsUrlResponse.body;
-
-    const releases: Release[] = versionsProject.results.map((value) => {
-      const release: Release = {
-        version: value.version,
+    const releases = rawReleases.map((value) => {
+      return {
+        ...value,
         isDeprecated: baseProject.deprecated,
       };
-      return release;
     });
 
-    let newestVersionDetails: VersionsDetailResult | undefined;
     // asynchronously get release details
-    const enrichedReleases: (Release | null)[] = await p.map(
+    const enrichedReleases = await p.map(
       releases,
-      (basicRelease) =>
-        this.http
-          .getJson<VersionsDetailResult>(
-            `${versionsUrl}${basicRelease.version}/`
-          )
-          .then(
-            (versionDetailResultResponse) => versionDetailResultResponse.body
-          )
-          .then((versionDetails) => {
-            try {
-              const release: Release = {
-                version: basicRelease.version,
-                isDeprecated: !!basicRelease.isDeprecated,
-                downloadUrl: versionDetails.download_url,
-                newDigest: versionDetails.artifact.sha256,
-                dependencies: versionDetails.metadata.dependencies,
-              };
-
-              // save details of the newest release for use on the ReleaseResult object
-              if (basicRelease.version === baseProject.latest_version.version) {
-                newestVersionDetails = versionDetails;
-              }
-              return release;
-            } catch (err) {
-              logger.warn(
-                { dependency: packageName, err },
-                `Received invalid data from ${versionsUrl}${basicRelease.version}/`
-              );
-              return null;
-            }
-          })
+      (release) => this.getVersionDetails(packageName, versionsUrl, release),
+      { concurrency: 4 },
     );
+
     // filter failed versions
     const filteredReleases = enrichedReleases.filter(is.truthy);
     // extract base information which are only provided on the release from the newest release
-    const result: ReleaseResult = {
+
+    // Find the source URL of the highest version release
+    const sourceUrlOfHighestRelease = enrichedReleases.find(
+      (release) => baseProject.highest_version.version === release.version,
+    )?.sourceUrl;
+
+    return {
       releases: filteredReleases,
-      sourceUrl: newestVersionDetails?.metadata.repository ?? null,
-      homepage: newestVersionDetails?.metadata.homepage,
-      tags: newestVersionDetails?.metadata.tags,
+      sourceUrl: sourceUrlOfHighestRelease,
     };
-    return result;
+  }
+
+  @cache({
+    namespace: `datasource-${GalaxyCollectionDatasource.id}-detailed-version`,
+    key: (versionsUrl, basicRelease: Release) => basicRelease.version,
+    ttlMinutes: 10080, // 1 week
+  })
+  async getVersionDetails(
+    packageName: string,
+    versionsUrl: string,
+    basicRelease: Release,
+  ): Promise<Release> {
+    const detailedVersionUrl = ensureTrailingSlash(
+      joinUrlParts(versionsUrl, basicRelease.version),
+    );
+    const { val: rawDetailedVersion, err: versionsErr } = await this.http
+      .getJsonSafe(detailedVersionUrl, GalaxyV3DetailedVersion)
+      .onError((err) => {
+        logger.warn(
+          { datasource: this.id, packageName, err },
+          `Error fetching ${versionsUrl}`,
+        );
+      })
+      .unwrap();
+    if (versionsErr) {
+      this.handleGenericErrors(versionsErr);
+    }
+
+    return {
+      ...rawDetailedVersion,
+      isDeprecated: basicRelease.isDeprecated,
+    };
   }
 }

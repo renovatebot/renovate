@@ -65,7 +65,7 @@ describe('util/schema-utils', () => {
           .string()
           .refine((x) => x === 'bar')
           .transform((x) => x.toUpperCase()),
-        z.string().transform((x) => x.toUpperCase())
+        z.string().transform((x) => x.toUpperCase()),
       );
       expect(s.parse({ foo: 'foo', bar: 'bar' })).toEqual({ BAR: 'BAR' });
     });
@@ -79,7 +79,7 @@ describe('util/schema-utils', () => {
           onError: (x) => {
             errorData = x;
           },
-        }
+        },
       );
 
       s.parse({ foo: 'foo', bar: 'bar' });
@@ -106,7 +106,7 @@ describe('util/schema-utils', () => {
           onError: ({ error }) => {
             err = error;
           },
-        }
+        },
       );
 
       const res = Schema.parse({
@@ -272,7 +272,7 @@ describe('util/schema-utils', () => {
   describe('UtcDate', () => {
     it('parses date', () => {
       expect(UtcDate.parse('2020-04-04').toString()).toBe(
-        '2020-04-04T00:00:00.000Z'
+        '2020-04-04T00:00:00.000Z',
       );
     });
 
@@ -283,7 +283,7 @@ describe('util/schema-utils', () => {
 
   describe('Yaml', () => {
     const Schema = Yaml.pipe(
-      z.object({ foo: z.array(z.object({ bar: z.literal('baz') })) })
+      z.object({ foo: z.array(z.object({ bar: z.literal('baz') })) }),
     );
 
     it('parses valid yaml', () => {
@@ -330,8 +330,8 @@ describe('util/schema-utils', () => {
       z.array(
         z.object({
           foo: z.number(),
-        })
-      )
+        }),
+      ),
     );
 
     it('parses valid yaml', () => {
@@ -340,7 +340,7 @@ describe('util/schema-utils', () => {
           foo: 111
           ---
           foo: 222
-        `)
+        `),
       ).toEqual([{ foo: 111 }, { foo: 222 }]);
     });
 
@@ -379,7 +379,7 @@ describe('util/schema-utils', () => {
 
   describe('Toml', () => {
     const Schema = Toml.pipe(
-      z.object({ foo: z.object({ bar: z.literal('baz') }) })
+      z.object({ foo: z.object({ bar: z.literal('baz') }) }),
     );
 
     it('parses valid toml', () => {

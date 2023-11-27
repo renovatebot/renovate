@@ -72,7 +72,7 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBe(
-        "Cannot find preset's package (notfound)"
+        "Cannot find preset's package (notfound)",
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -89,7 +89,7 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBe(
-        'Preset name not found within published preset config (wrongpreset:invalid-preset)'
+        'Preset name not found within published preset config (wrongpreset:invalid-preset)',
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -121,7 +121,7 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBe(
-        'Sub-presets cannot be combined with a custom path (github>user/repo//path:subpreset)'
+        'Sub-presets cannot be combined with a custom path (github>user/repo//path:subpreset)',
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -154,7 +154,7 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBe(
-        'Preset package is missing a renovate-config entry (noconfig:recommended)'
+        'Preset package is missing a renovate-config entry (noconfig:recommended)',
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -171,7 +171,7 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBe(
-        'Preset caused unexpected error (throw:base)'
+        'Preset caused unexpected error (throw:base)',
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -201,7 +201,7 @@ describe('config/presets/index', () => {
       expect(e).toBeDefined();
       expect(e!.validationSource).toBeUndefined();
       expect(e!.validationError).toBe(
-        'Preset name not found within published preset config (wrongpreset:invalid-preset)'
+        'Preset name not found within published preset config (wrongpreset:invalid-preset)',
       );
       expect(e!.validationMessage).toBeUndefined();
     });
@@ -437,7 +437,7 @@ describe('config/presets/index', () => {
 
     it('parses github subfiles with preset name', () => {
       expect(
-        presets.parsePreset('github>some/repo:somefile/somepreset')
+        presets.parsePreset('github>some/repo:somefile/somepreset'),
       ).toEqual({
         repo: 'some/repo',
         params: undefined,
@@ -471,7 +471,7 @@ describe('config/presets/index', () => {
 
     it('parses github subfiles with preset name with .json extension', () => {
       expect(
-        presets.parsePreset('github>some/repo:somefile.json/somepreset')
+        presets.parsePreset('github>some/repo:somefile.json/somepreset'),
       ).toEqual({
         repo: 'some/repo',
         params: undefined,
@@ -484,7 +484,7 @@ describe('config/presets/index', () => {
 
     it('parses github subfiles with preset name with .json5 extension', () => {
       expect(
-        presets.parsePreset('github>some/repo:somefile.json5/somepreset')
+        presets.parsePreset('github>some/repo:somefile.json5/somepreset'),
       ).toEqual({
         repo: 'some/repo',
         params: undefined,
@@ -498,8 +498,8 @@ describe('config/presets/index', () => {
     it('parses github subfiles with preset and sub-preset name', () => {
       expect(
         presets.parsePreset(
-          'github>some/repo:somefile/somepreset/somesubpreset'
-        )
+          'github>some/repo:somefile/somepreset/somesubpreset',
+        ),
       ).toEqual({
         repo: 'some/repo',
         params: undefined,
@@ -511,7 +511,7 @@ describe('config/presets/index', () => {
 
     it('parses github subdirectories', () => {
       expect(
-        presets.parsePreset('github>some/repo//somepath/somesubpath/somefile')
+        presets.parsePreset('github>some/repo//somepath/somesubpath/somefile'),
       ).toEqual({
         repo: 'some/repo',
         params: undefined,
@@ -573,7 +573,7 @@ describe('config/presets/index', () => {
 
     it('parses local with subdirectory', () => {
       expect(
-        presets.parsePreset('local>some-group/some-repo//some-dir/some-file')
+        presets.parsePreset('local>some-group/some-repo//some-dir/some-file'),
       ).toEqual({
         repo: 'some-group/some-repo',
         params: undefined,
@@ -585,7 +585,7 @@ describe('config/presets/index', () => {
 
     it('parses local with spaces and subdirectory', () => {
       expect(
-        presets.parsePreset('local>A2B CD/A2B_Renovate//some-dir/some-file')
+        presets.parsePreset('local>A2B CD/A2B_Renovate//some-dir/some-file'),
       ).toEqual({
         repo: 'A2B CD/A2B_Renovate',
         params: undefined,
@@ -598,8 +598,8 @@ describe('config/presets/index', () => {
     it('parses local with sub preset and tag', () => {
       expect(
         presets.parsePreset(
-          'local>some-group/some-repo:some-file/subpreset#1.2.3'
-        )
+          'local>some-group/some-repo:some-file/subpreset#1.2.3',
+        ),
       ).toEqual({
         repo: 'some-group/some-repo',
         params: undefined,
@@ -613,8 +613,8 @@ describe('config/presets/index', () => {
     it('parses local with subdirectory and tag', () => {
       expect(
         presets.parsePreset(
-          'local>some-group/some-repo//some-dir/some-file#1.2.3'
-        )
+          'local>some-group/some-repo//some-dir/some-file#1.2.3',
+        ),
       ).toEqual({
         repo: 'some-group/some-repo',
         params: undefined,
@@ -628,8 +628,8 @@ describe('config/presets/index', () => {
     it('parses local with subdirectory and branch/tag with a slash', () => {
       expect(
         presets.parsePreset(
-          'local>PROJECT/repository//path/to/preset#feature/branch'
-        )
+          'local>PROJECT/repository//path/to/preset#feature/branch',
+        ),
       ).toEqual({
         repo: 'PROJECT/repository',
         params: undefined,
@@ -643,8 +643,8 @@ describe('config/presets/index', () => {
     it('parses local with sub preset and branch/tag with a slash', () => {
       expect(
         presets.parsePreset(
-          'local>PROJECT/repository:preset/subpreset#feature/branch'
-        )
+          'local>PROJECT/repository:preset/subpreset#feature/branch',
+        ),
       ).toEqual({
         repo: 'PROJECT/repository',
         params: undefined,
@@ -729,8 +729,8 @@ describe('config/presets/index', () => {
     it('returns scope with repo and params and default', () => {
       expect(
         presets.parsePreset(
-          '@somescope/somepackagename(param1, param2, param3)'
-        )
+          '@somescope/somepackagename(param1, param2, param3)',
+        ),
       ).toEqual({
         repo: '@somescope/somepackagename',
         params: ['param1', 'param2', 'param3'],
@@ -762,7 +762,7 @@ describe('config/presets/index', () => {
 
     it('returns scope with repo and presetName', () => {
       expect(
-        presets.parsePreset('@somescope/somepackagename:somePresetName')
+        presets.parsePreset('@somescope/somepackagename:somePresetName'),
       ).toEqual({
         repo: '@somescope/somepackagename',
         params: undefined,
@@ -775,8 +775,8 @@ describe('config/presets/index', () => {
     it('returns scope with repo and presetName and params', () => {
       expect(
         presets.parsePreset(
-          '@somescope/somepackagename:somePresetName(param1, param2)'
-        )
+          '@somescope/somepackagename:somePresetName(param1, param2)',
+        ),
       ).toEqual({
         repo: '@somescope/somepackagename',
         params: ['param1', 'param2'],
@@ -815,7 +815,7 @@ describe('config/presets/index', () => {
           presetName: 'webapp',
           presetPath: undefined,
           presetSource: 'npm',
-        }
+        },
       );
     });
 
@@ -900,7 +900,7 @@ describe('config/presets/index', () => {
     it('gets parameterised configs', async () => {
       const res = await presets.getPreset(
         ':group(packages:eslint, eslint)',
-        {}
+        {},
       );
       expect(res).toEqual({
         description: ['Group `eslint` packages into same branch/PR.'],

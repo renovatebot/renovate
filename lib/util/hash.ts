@@ -9,7 +9,7 @@ export type AlgorithmName = LiteralUnion<
 
 export function hash(
   data: string | Buffer,
-  algorithm: AlgorithmName = 'sha512'
+  algorithm: AlgorithmName = 'sha512',
 ): string {
   const hash = crypto.createHash(algorithm);
   hash.update(data);
@@ -22,7 +22,7 @@ export function toSha256(input: string): string {
 
 export async function hashStream(
   inputStream: NodeJS.ReadableStream,
-  algorithm: AlgorithmName = 'sha512'
+  algorithm: AlgorithmName = 'sha512',
 ): Promise<string> {
   const hash = crypto.createHash(algorithm);
   await pipeline(inputStream, hash);

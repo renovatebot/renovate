@@ -5,7 +5,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   let deps: PackageDependency[] = [];
   const npmDepends = regEx(/\nNpm\.depends\({([\s\S]*?)}\);/).exec(content);

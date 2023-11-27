@@ -31,7 +31,7 @@ describe('modules/versioning/node/index', () => {
         newVersion,
       });
       expect(res).toBe(expected);
-    }
+    },
   );
 
   const t1 = DateTime.fromISO('2020-09-01');
@@ -78,9 +78,9 @@ describe('modules/versioning/node/index', () => {
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
       expect(nodever.matches(version as string, range as string)).toBe(
-        expected
+        expected,
       );
-    }
+    },
   );
 
   it.each`
@@ -92,9 +92,9 @@ describe('modules/versioning/node/index', () => {
     'getSatisfyingVersion("$versions", "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(
-        nodever.getSatisfyingVersion(versions as string[], range as string)
+        nodever.getSatisfyingVersion(versions as string[], range as string),
       ).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -106,8 +106,8 @@ describe('modules/versioning/node/index', () => {
     'minSatisfyingVersion("$versions", "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(
-        nodever.minSatisfyingVersion(versions as string[], range as string)
+        nodever.minSatisfyingVersion(versions as string[], range as string),
       ).toBe(expected);
-    }
+    },
   );
 });

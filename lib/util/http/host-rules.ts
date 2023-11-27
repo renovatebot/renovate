@@ -35,7 +35,7 @@ export type HostRulesGotOptions = Pick<
 
 export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
   options: GotOptions,
-  url: string
+  url: string,
 ): HostRule {
   const { hostType } = options;
   let res = hostRules.find({ hostType, url });
@@ -115,7 +115,7 @@ export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
 // Apply host rules to requests
 export function applyHostRules<GotOptions extends HostRulesGotOptions>(
   url: string,
-  inOptions: GotOptions
+  inOptions: GotOptions,
 ): GotOptions {
   const options: GotOptions = { ...inOptions };
   const foundRules = findMatchingRules(options, url);

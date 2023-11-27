@@ -13,7 +13,7 @@ import { parseRepository, resolveAlias } from './utils';
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   let chart: {
     apiVersion: string;
@@ -27,14 +27,14 @@ export async function extractPackageFile(
     if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { packageFile },
-        'Failed to find required fields in Chart.yaml'
+        'Failed to find required fields in Chart.yaml',
       );
       return null;
     }
     if (chart.apiVersion !== 'v2') {
       logger.debug(
         { packageFile },
-        'Unsupported Chart apiVersion. Only v2 is supported.'
+        'Unsupported Chart apiVersion. Only v2 is supported.',
       );
       return null;
     }
@@ -49,7 +49,7 @@ export async function extractPackageFile(
     return null;
   }
   const validDependencies = chart.dependencies.filter(
-    (dep) => is.nonEmptyString(dep.name) && is.nonEmptyString(dep.version)
+    (dep) => is.nonEmptyString(dep.name) && is.nonEmptyString(dep.version),
   );
   if (!is.nonEmptyArray(validDependencies)) {
     logger.debug('Name and/or version missing for all dependencies');
