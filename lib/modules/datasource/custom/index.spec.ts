@@ -1,4 +1,4 @@
-import { codeBlock } from 'common-tags';
+import { codeBlock, html } from 'common-tags';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -474,7 +474,7 @@ describe('modules/datasource/custom/index', () => {
         ],
       };
 
-      const content = `
+      const content = html`
         <html>
           <body>
             <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
@@ -512,7 +512,7 @@ describe('modules/datasource/custom/index', () => {
         ],
       };
 
-      const content = `
+      const content = html`
         <html>
           <body>
             <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
@@ -585,7 +585,7 @@ describe('modules/datasource/custom/index', () => {
         ],
       };
 
-      const content = `
+      const content = html`
         <html>
         <body>
         <h1></pre><hr></body><a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
@@ -622,7 +622,7 @@ describe('modules/datasource/custom/index', () => {
         ],
       };
 
-      const content = `
+      const content = html`
         <html>
         <body>
         <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
