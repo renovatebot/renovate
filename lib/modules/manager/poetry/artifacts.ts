@@ -133,6 +133,10 @@ function getSourceCredentialVars(
       envVars[`POETRY_HTTP_BASIC_${formattedSourceName}_PASSWORD`] =
         matchingHostRule.password;
     }
+    if (matchingHostRule.token) {
+      envVars[`POETRY_PYPI_TOKEN_${formattedSourceName}`] =
+        matchingHostRule.token;
+    }
   }
   return envVars;
 }

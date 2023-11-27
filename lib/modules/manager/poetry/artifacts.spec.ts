@@ -181,6 +181,7 @@ describe('modules/manager/poetry/artifacts', () => {
       hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
       hostRules.find.mockReturnValueOnce({});
       hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
+      hostRules.find.mockReturnValueOnce({ token: 'tokenOne' });
       const updatedDeps = [{ depName: 'dep1' }];
       expect(
         await updateArtifacts({
