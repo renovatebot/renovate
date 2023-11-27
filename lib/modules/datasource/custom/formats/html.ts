@@ -42,6 +42,6 @@ export class HtmlFetcher implements CustomDatasourceFetcher {
   async readFile(registryURL: string): Promise<unknown> {
     const fileContent = await readLocalFile(registryURL, 'utf8');
 
-    return extractLinks(fileContent!);
+    return fileContent ? extractLinks(fileContent) : null;
   }
 }
