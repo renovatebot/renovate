@@ -32,7 +32,7 @@ const versionRegex = regEx(
 
 class OciHelmVersioningApi extends GenericVersioningApi {
   _oci2semver(value: string): string {
-    return value.replaceAll('_', '+');
+    return value && value.replaceAll('_', '+');
   }
 
   protected override _parse(version: string): GenericVersion | null {
