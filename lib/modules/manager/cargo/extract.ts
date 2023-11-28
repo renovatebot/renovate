@@ -314,6 +314,10 @@ export async function extractPackageFile(
         );
         if (lockedVersion) {
           dep.lockedVersion = lockedVersion;
+        } else {
+          logger.debug(
+            `No locked version found for package ${dep.depName} in the range of ${dep.currentValue}.`,
+          );
         }
       } catch (err) {
         // istanbul ignore next: this should not happen
