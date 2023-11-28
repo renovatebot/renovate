@@ -1,5 +1,4 @@
 import semver from 'semver';
-import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
 import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -12,14 +11,7 @@ export const urls = [
   'https://github.com/Masterminds/semver#basic-comparisons',
   'https://helm.sh/docs/topics/registries/#oci-feature-deprecation-and-behavior-changes-with-v380',
 ];
-export const supportsRanges = true;
-export const supportedRangeStrategies: RangeStrategy[] = [
-  'bump',
-  'widen',
-  'pin',
-  'replace',
-  'widen',
-];
+export const supportsRanges = false;
 
 // Combining...
 // - https://github.com/Masterminds/semver/blob/2f39fdc11c33c38e8b8b15b1f04334ba84e751f2/version.go#L42
