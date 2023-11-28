@@ -131,13 +131,13 @@ export async function extractPackageFile(
   const extractedConstraints: Record<string, any> = {};
 
   if (is.nonEmptyString(pipfile.requires?.python_version)) {
-    extractedConstraints.python = `== ${pipfile.requires!.python_version}.*`;
+    extractedConstraints.python = `== ${pipfile.requires.python_version}.*`;
   } else if (is.nonEmptyString(pipfile.requires?.python_full_version)) {
-    extractedConstraints.python = `== ${pipfile.requires!.python_full_version}`;
+    extractedConstraints.python = `== ${pipfile.requires.python_full_version}`;
   }
 
   if (is.nonEmptyString(pipfile.packages?.pipenv)) {
-    extractedConstraints.pipenv = pipfile.packages!.pipenv;
+    extractedConstraints.pipenv = pipfile.packages.pipenv;
   } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
     extractedConstraints.pipenv = pipfile['dev-packages']!.pipenv;
   }

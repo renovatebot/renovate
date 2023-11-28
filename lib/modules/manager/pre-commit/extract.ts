@@ -32,9 +32,19 @@ function determineDatasource(
     logger.debug({ repository, hostname }, 'Found github dependency');
     return { datasource: GithubTagsDatasource.id };
   }
-  if (hostname === 'gitlab.com' || detectPlatform(repository) === 'gitlab') {
+  if (hostname === 'gitlab.com') {
     logger.debug({ repository, hostname }, 'Found gitlab dependency');
     return { datasource: GitlabTagsDatasource.id };
+  }
+  if (detectPlatform(repository) === 'gitlab') {
+    logger.debug(
+      { repository, hostname },
+      'Found gitlab dependency with custom registryUrl',
+    );
+    return {
+      datasource: GitlabTagsDatasource.id,
+      registryUrls: ['https://' + hostname],
+    };
   }
   const hostUrl = 'https://' + hostname;
   const res = find({ url: hostUrl });
