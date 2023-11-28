@@ -13,7 +13,7 @@ export interface HostRuleSearchResult {
   maxRequestsPerSecond?: number;
 
   dnsCache?: boolean;
-  keepalive?: boolean;
+  keepAlive?: boolean;
   artifactAuth?: string[] | null;
   httpsCertificateAuthority?: string;
   httpsPrivateKey?: string;

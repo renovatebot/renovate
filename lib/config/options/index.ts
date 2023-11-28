@@ -2349,8 +2349,8 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
-    name: 'keepalive',
-    description: 'Enable HTTP keepalives for hosts.',
+    name: 'keepAlive',
+    description: 'Enable HTTP keep-alive for hosts.',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
