@@ -94,7 +94,7 @@ describe('modules/datasource/custom/index', () => {
         releases: [
           {
             version: 'v1.0.0',
-            newDigest: '0123456789abcdef'
+            newDigest: '0123456789abcdef',
           },
         ],
       };
@@ -102,7 +102,7 @@ describe('modules/datasource/custom/index', () => {
         releases: [
           {
             version: 'v1.0.0',
-            digest: '0123456789abcdef'
+            digest: '0123456789abcdef',
           },
         ],
       };
