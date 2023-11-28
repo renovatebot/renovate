@@ -15,6 +15,7 @@ const azurePipelines = Fixtures.get('azure-pipelines.yaml');
 const azurePipelinesNoDependency = Fixtures.get(
   'azure-pipelines-no-dependency.yaml',
 );
+const azurePipelinesRunOnce = Fixtures.get('azure-pipelines-runonce.yaml');
 const azurePipelinesStages = Fixtures.get('azure-pipelines-stages.yaml');
 const azurePipelinesJobs = Fixtures.get('azure-pipelines-jobs.yaml');
 const azurePipelinesSteps = Fixtures.get('azure-pipelines-steps.yaml');
@@ -189,6 +190,20 @@ describe('modules/manager/azure-pipelines/extract', () => {
       expect(
         extractPackageFile(azurePipelinesNoDependency, azurePipelinesFilename),
       ).toBeNull();
+    });
+
+    it('should extract deployment jobs runonce', () => {
+      const res = extractPackageFile(
+        azurePipelinesRunOnce,
+        azurePipelinesFilename,
+      );
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
     });
 
     it('should extract stages', () => {
