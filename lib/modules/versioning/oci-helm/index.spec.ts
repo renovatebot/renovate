@@ -68,7 +68,7 @@ describe('modules/versioning/oci-helm/index', () => {
       expect(ociHelm.getMajor(version)).toBe(major);
       expect(ociHelm.getMinor(version)).toBe(minor);
       expect(ociHelm.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   // Inspired by https://github.com/Masterminds/semver/blob/2f39fdc11c33c38e8b8b15b1f04334ba84e751f2/version_test.go#L306
@@ -99,11 +99,13 @@ describe('modules/versioning/oci-helm/index', () => {
     ${'3.01.2-1686130589_7aebcdf'}       | ${'3.2.0'}  | ${true}
     ${'3.1.2-1686130589+build1-7aebcdf'} | ${'3.0.0'}  | ${false}
     ${'2.1.2-1686130589+build1-7aebcdf'} | ${'3.0.0'}  | ${true}
+    ${'0.3.1'}                           | ${'~0.4'}   | ${true}
+    ${'0.5.1'}                           | ${'~0.4'}   | ${false}
   `(
     'isLessThanRange($version, $range) === $expected',
     ({ version, range, expected }) => {
       expect(ociHelm.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -145,7 +147,7 @@ describe('modules/versioning/oci-helm/index', () => {
     ({ versions, range, maxSatisfying, minSatisfying }) => {
       expect(ociHelm.getSatisfyingVersion(versions, range)).toBe(maxSatisfying);
       expect(ociHelm.minSatisfyingVersion(versions, range)).toBe(minSatisfying);
-    }
+    },
   );
 
   it.each`
@@ -179,7 +181,7 @@ describe('modules/versioning/oci-helm/index', () => {
         newVersion,
       });
       expect(res).toBe(expected);
-    }
+    },
   );
 
   it.each`
