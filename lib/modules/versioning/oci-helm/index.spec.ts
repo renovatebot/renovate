@@ -2,22 +2,33 @@ import ociHelm from '.';
 
 describe('modules/versioning/oci-helm/index', () => {
   it.each`
-    version                                  | expected
-    ${null}                                  | ${false}
-    ${''}                                    | ${false}
-    ${'1.2.3'}                               | ${true}
-    ${'v1.2.3'}                              | ${true}
-    ${'1.02.3'}                              | ${true}
-    ${'>1.02.3'}                             | ${true}
-    ${'~>2.3'}                               | ${true}
-    ${'0.0.0 - 0.1.1-0, <=0.1.1-1686130600'} | ${true}
-    ${'3.0.1 || 5.0.0'}                      | ${true}
-    ${'5.0.0 || 0-0'}                        | ${true}
-    ${'3'}                                   | ${true}
-    ${'0.1.1-1686130589_build1-7aebcdf'}     | ${true}
-    ${'0.1.1-1686130589+main'}               | ${true}
-    ${'foo'}                                 | ${false}
-    ${'12.23.4.1234'}                        | ${false}
+    version                              | expected
+    ${null}                              | ${false}
+    ${''}                                | ${false}
+    ${'1.2.3'}                           | ${true}
+    ${'v1.2.3'}                          | ${true}
+    ${'1.02.3'}                          | ${true}
+    ${'>1.02.3'}                         | ${true}
+    ${'~2.3'}                            | ${true}
+    ${'<=0.1.1-1686130600'}              | ${true}
+    ${'3.0.1 || 5.0.0'}                  | ${true}
+    ${'5.0.0 || 0-0'}                    | ${true}
+    ${'5.0.0 || >0-0'}                   | ${true}
+    ${'v2.5'}                            | ${true}
+    ${'^1.0|^2.0'}                       | ${true}
+    ${'^1.0 | ^2.0'}                     | ${true}
+    ${'^1.0||^2.0'}                      | ${true}
+    ${'^1.0 || ^2.0'}                    | ${true}
+    ${'~1.0|~2.0'}                       | ${true}
+    ${'~1.0 | ~2.0'}                     | ${true}
+    ${'~1.0||~2.0'}                      | ${true}
+    ${'~1.0 || ~2.0'}                    | ${true}
+    ${'3'}                               | ${true}
+    ${'0.1.1-1686130589_build1-7aebcdf'} | ${true}
+    ${'0.1.1-1686130589+main'}           | ${true}
+    ${'foo'}                             | ${false}
+    ${'12.23.4.1234'}                    | ${false}
+    ${'1.2.3foo'}                        | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     const res = ociHelm.isValid(version);
     expect(!!res).toBe(expected);

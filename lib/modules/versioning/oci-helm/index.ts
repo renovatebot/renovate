@@ -25,8 +25,9 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 // - https://github.com/Masterminds/semver/blob/2f39fdc11c33c38e8b8b15b1f04334ba84e751f2/version.go#L42
 // - https://regex101.com/r/vkijKf/1/ (official one from https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string)
 // ...into https://regex101.com/r/Visopn/1 with group names
+// ...prepended by range group to properly parse range values
 const versionRegex = regEx(
-  /^^v?(?<major>[0-9]\d*)(\.(?<minor>[0-9]\d*))?(\.(?<patch>[0-9]\d*))?(?:-(?<prerelease>(?:[0-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<metadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+  /^^(?<range>~|<|<=|>|>=|\^)?v?(?<major>[0-9]\d*)(\.(?<minor>[0-9]\d*))?(\.(?<patch>[0-9]\d*))?(?:-(?<prerelease>(?:[0-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<metadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/,
 );
 
 class OciHelmVersioningApi extends GenericVersioningApi {
@@ -53,6 +54,16 @@ class OciHelmVersioningApi extends GenericVersioningApi {
       prerelease,
       suffix,
     };
+  }
+
+  override isValid(version: string): boolean {
+    return (
+      !!version &&
+      version
+        .split(regEx(/\s*\|\|?\s*/g))
+        .map((part): boolean => !!this._parse(part))
+        .every((v) => v)
+    );
   }
 
   override getNewValue({ newVersion }: NewValueConfig): string | null {
