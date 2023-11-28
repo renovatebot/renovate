@@ -1796,7 +1796,7 @@ Example:
 }
 ```
 
-### keepalive
+### keepAlive
 
 If enabled, this allows a single TCP connection to remain open for multiple HTTP(S) requests/responses.
 
