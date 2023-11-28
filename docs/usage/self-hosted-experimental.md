@@ -40,6 +40,21 @@ If set to any string, Renovate will use this as the `user-agent` it sends with H
 If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
 This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
 
+## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
+
+If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergable before trying to automerge.
+The formula for the delay between attempts is `250 * attempt * attempt` milliseconds.
+
+Default value: `5` (attempts results in max. 13.75 seconds timeout).
+
+## `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY`
+
+Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
+
+Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
+
+Default value: `1000` (milliseconds).
+
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
@@ -128,14 +143,6 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 <!-- prettier-ignore -->
 !!! note
     For the GitHub Enterprise Server platform only.
-
-## `RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY`
-
-Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
-
-Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
-
-Default value: `1000` (milliseconds).
 
 ## `OTEL_EXPORTER_OTLP_ENDPOINT`
 
