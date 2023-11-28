@@ -4,11 +4,11 @@ import * as cargoVersioning from '../../versioning/cargo';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 export { getRangeStrategy } from './range';
-import { updateLockedDependency } from './update-locked';
+export { updateLockedDependency } from './update-locked';
 
 export const supportsLockFileMaintenance = true;
 
-export { extractPackageFile, updateArtifacts, updateLockedDependency };
+export { extractPackageFile, updateArtifacts };
 
 export const defaultConfig = {
   commitMessageTopic: 'Rust crate {{depName}}',
