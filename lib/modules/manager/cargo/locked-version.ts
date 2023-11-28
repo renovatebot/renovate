@@ -4,7 +4,7 @@ import { readLocalFile } from '../../../util/fs';
 import { CargoLockSchema, CargoLockSchemaToml } from './schema';
 
 export async function extractLockFileVersions(
-  lockFilePath: string
+  lockFilePath: string,
 ): Promise<Map<string, string[]> | null> {
   const content = await readLocalFile(lockFilePath, 'utf8');
   if (content) {
@@ -14,7 +14,7 @@ export async function extractLockFileVersions(
 }
 
 export function extractLockFileContentVersions(
-  content: string
+  content: string,
 ): Map<string, string[]> | null {
   const versionsByPackage = new Map<string, string[]>();
   const lock = parseLockFile(content);

@@ -291,13 +291,13 @@ export async function extractPackageFile(
   const res: PackageFileContent = { deps };
   if (lockFileName) {
     logger.debug(
-      `Found lock file ${lockFileName} for packageFile: ${packageFile}`
+      `Found lock file ${lockFileName} for packageFile: ${packageFile}`,
     );
 
     const versionsByPackage = await extractLockFileVersions(lockFileName);
     if (!versionsByPackage) {
       logger.debug(
-        `Could not extract lock file versions from ${lockFileName}.`
+        `Could not extract lock file versions from ${lockFileName}.`,
       );
       return res;
     }
@@ -310,7 +310,7 @@ export async function extractPackageFile(
       try {
         const lockedVersion = versioning.getSatisfyingVersion(
           versions,
-          dep.currentValue!
+          dep.currentValue!,
         );
         if (lockedVersion) {
           dep.lockedVersion = lockedVersion;
@@ -319,7 +319,7 @@ export async function extractPackageFile(
         // istanbul ignore next: this should not happen
         logger.warn(
           { packageName, err },
-          `Error finding satisfying version for package ${dep.depName}.`
+          `Error finding satisfying version for package ${dep.depName}.`,
         );
       }
     }

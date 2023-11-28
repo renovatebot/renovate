@@ -39,7 +39,7 @@ async function cargoUpdate(
 async function cargoUpdatePrecise(
   manifestPath: string,
   updatedDeps: Upgrade[],
-  constraint: string | undefined
+  constraint: string | undefined,
 ): Promise<void> {
   // First update all dependencies that have been bumped in `Cargo.toml`.
   const cmds = [
@@ -54,7 +54,7 @@ async function cargoUpdatePrecise(
       `cargo update --config net.git-fetch-with-cli=true` +
         ` --manifest-path ${quote(manifestPath)}` +
         ` --package ${dep.packageName!}@${dep.lockedVersion}` +
-        ` --precise ${dep.newVersion}`
+        ` --precise ${dep.newVersion}`,
     );
   }
 
@@ -79,7 +79,7 @@ async function updateArtifactsImpl(
     newPackageFileContent,
     config,
   }: UpdateArtifact,
-  recursionLimit = 10
+  recursionLimit = 10,
 ): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`cargo.updateArtifacts(${packageFileName})`);
 
@@ -124,7 +124,7 @@ async function updateArtifactsImpl(
         // If there is a dependency without a locked version then log a warning
         // and perform a regular workspace lockfile update.
         logger.warn(
-          `Missing locked version for dependency \`${missingDep.depName}\``
+          `Missing locked version for dependency \`${missingDep.depName}\``,
         );
         await cargoUpdate(packageFileName, false, config.constraints?.rust);
       } else {
@@ -132,7 +132,7 @@ async function updateArtifactsImpl(
         await cargoUpdatePrecise(
           packageFileName,
           updatedDeps,
-          config.constraints?.rust
+          config.constraints?.rust,
         );
       }
     }
@@ -172,13 +172,13 @@ async function updateArtifactsImpl(
       const newUpdatedDeps = updatedDeps.filter(
         (dep) =>
           !coerceArray(versions?.get(dep.packageName!)).includes(
-            dep.newVersion!
-          )
+            dep.newVersion!,
+          ),
       );
 
       if (newUpdatedDeps.length < updatedDeps.length) {
         logger.debug(
-          'Dependency already up to date - reattempting recursively'
+          'Dependency already up to date - reattempting recursively',
         );
         return updateArtifactsImpl(
           {
@@ -187,7 +187,7 @@ async function updateArtifactsImpl(
             newPackageFileContent,
             config,
           },
-          recursionLimit - 1
+          recursionLimit - 1,
         );
       }
     }

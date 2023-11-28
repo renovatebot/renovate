@@ -49,7 +49,7 @@ describe('modules/manager/cargo/locked-version', () => {
           ['test', ['0.1.0']],
           ['unicode-ident', ['1.0.11']],
           ['unicode-xid', ['0.2.4']],
-        ])
+        ]),
       );
     });
   });

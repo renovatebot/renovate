@@ -140,7 +140,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
@@ -189,7 +189,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       { artifactError: { lockFile: 'Cargo.lock', stderr: 'Exec error' } },
     ]);
@@ -311,7 +311,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
     ]);
@@ -337,7 +337,7 @@ describe('modules/manager/cargo/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
