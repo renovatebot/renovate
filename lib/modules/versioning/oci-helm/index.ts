@@ -88,6 +88,10 @@ class OciHelmVersioningApi extends GenericVersioningApi {
     return semver.minSatisfying(semverVersions, range, true);
   }
 
+  override isSingleVersion(version: string): boolean {
+    return !!semver.valid(this._oci2semver(version));
+  }
+
   valueToVersion(version: string): string {
     return this._oci2semver(version);
   }

@@ -198,5 +198,18 @@ describe('modules/versioning/oci-helm/index', () => {
     expect(res).toBe(expected);
   });
 
+  it.each`
+    version                              | isSingle
+    ${'1.2.3'}                           | ${true}
+    ${'1.2.3-alpha.1'}                   | ${true}
+    ${'0.1.1-1686130589_build1-7aebcdf'} | ${true}
+    ${'<1.2.3'}                          | ${false}
+    ${'~1.2.3'}                          | ${false}
+    ${'1.x'}                             | ${false}
+  `('isSingleVersion("$version") === $isSingle', ({ version, isSingle }) => {
+    const res = !!ociHelm.isSingleVersion(version);
+    expect(res).toBe(isSingle);
+  });
+
   // TODO add tests for isCompatible?
 });
