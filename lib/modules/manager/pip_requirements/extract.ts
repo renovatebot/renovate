@@ -52,11 +52,8 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   let registryUrls: string[] = [];
   const additionalRegistryUrls: string[] = [];
   content.split(newlineRegex).forEach((line) => {
-    if (line.startsWith('-i ')) {
+    if (line.startsWith('-i ') || line.startsWith('--index-url ')) {
       registryUrls = [line.split(' ')[1]];
-    }
-    if (line.startsWith('--index-url ')) {
-      registryUrls = [line.substring('--index-url '.length).split(' ')[0]];
     }
     if (line.startsWith('--extra-index-url ')) {
       const extraUrl = line
