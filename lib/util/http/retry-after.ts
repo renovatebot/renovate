@@ -51,7 +51,7 @@ export async function wrapWithRetry<T>(
         `Retry-After: will retry ${url} after ${delaySeconds} seconds`,
       );
 
-      hostBlocks.set(key, setTimeout(delaySeconds));
+      hostBlocks.set(key, setTimeout(1000 * delaySeconds));
       retries += 1;
     }
   }
