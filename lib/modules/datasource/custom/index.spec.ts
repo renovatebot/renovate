@@ -536,6 +536,23 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toEqual(expected);
     });
 
+    it('return null for local file read error - HTML format', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.html',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toBeNull();
+    });
+
     it('return releases from nginx directory listing', async () => {
       const expected = {
         releases: [
