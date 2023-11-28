@@ -31,7 +31,7 @@ const versionRegex = regEx(
 
 class OciHelmVersioningApi extends GenericVersioningApi {
   _oci2semver(value: string): string {
-    return value?.replaceAll('_', '+');
+    return value.replaceAll('_', '+');
   }
 
   protected override _parse(version: string): GenericVersion | null {
@@ -64,7 +64,7 @@ class OciHelmVersioningApi extends GenericVersioningApi {
     versions: string[],
     range: string
   ): string | null {
-    const semverVersions = versions.map((v) => (v ? this._oci2semver(v) : v));
+    const semverVersions = versions.map((v) => this._oci2semver(v));
     return semver.maxSatisfying(semverVersions, range, true);
   }
 
@@ -73,7 +73,7 @@ class OciHelmVersioningApi extends GenericVersioningApi {
     versions: string[],
     range: string
   ): string | null {
-    const semverVersions = versions.map((v) => (v ? this._oci2semver(v) : v));
+    const semverVersions = versions.map((v) => this._oci2semver(v));
     return semver.minSatisfying(semverVersions, range, true);
   }
 
