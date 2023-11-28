@@ -31,8 +31,27 @@ const versionRegex = regEx(
 );
 
 class OciHelmVersioningApi extends GenericVersioningApi {
-  _oci2semver(value: string): string {
+  private _oci2semver(value: string): string {
     return value && value.replaceAll('_', '+');
+  }
+
+  private _semver2oci(value: string): string {
+    return value && value.replaceAll('+', '_');
+  }
+
+  private _calculateSatisfyingVersionIntenal(
+    versions: string[],
+    range: string,
+    minMode: boolean,
+  ): string | null {
+    // versions values contain "_" instead of "+" as meta separator, so we need to convert those values
+    const semverVersions = versions.map((v) => this._oci2semver(v));
+    let semverRange = this._oci2semver(range);
+    const satisfyingVersion = minMode
+      ? semver.minSatisfying(semverVersions, semverRange)
+      : semver.maxSatisfying(semverVersions, semverRange);
+
+    return satisfyingVersion && this._semver2oci(satisfyingVersion);
   }
 
   protected override _parse(version: string): GenericVersion | null {
@@ -70,22 +89,18 @@ class OciHelmVersioningApi extends GenericVersioningApi {
     return newVersion ? this._oci2semver(newVersion) : null;
   }
 
-  // TODO is "versions" the fetched list? In that case, "_" has to be replaced with "+" for correct results
   override getSatisfyingVersion(
     versions: string[],
-    range: string
+    range: string,
   ): string | null {
-    const semverVersions = versions.map((v) => this._oci2semver(v));
-    return semver.maxSatisfying(semverVersions, range, true);
+    return this._calculateSatisfyingVersionIntenal(versions, range, false);
   }
 
-  // TODO is "versions" the fetched list? In that case, "_" has to be replaced with "+" for correct results
   override minSatisfyingVersion(
     versions: string[],
-    range: string
+    range: string,
   ): string | null {
-    const semverVersions = versions.map((v) => this._oci2semver(v));
-    return semver.minSatisfying(semverVersions, range, true);
+    return this._calculateSatisfyingVersionIntenal(versions, range, true);
   }
 
   override isSingleVersion(version: string): boolean {
