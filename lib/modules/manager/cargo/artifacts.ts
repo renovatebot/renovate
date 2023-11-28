@@ -33,7 +33,13 @@ async function cargoUpdate(
   await exec(cmd, execOptions);
 }
 
-export async function updateArtifacts({
+export async function updateArtifacts(
+  updateArtifact: UpdateArtifact,
+): Promise<UpdateArtifactsResult[] | null> {
+  return await updateArtifactsImpl(updateArtifact);
+}
+
+async function updateArtifactsImpl({
   packageFileName,
   updatedDeps,
   newPackageFileContent,
