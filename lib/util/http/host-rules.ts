@@ -11,7 +11,7 @@ import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
 import { parseUrl } from '../url';
 import { dnsLookup } from './dns';
-import { keepaliveAgents } from './keepalive';
+import { keepAliveAgents } from './keep-alive';
 import type { GotOptions } from './types';
 
 export type HostRulesGotOptions = Pick<
@@ -163,8 +163,8 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
     options.lookup = dnsLookup;
   }
 
-  if (foundRules.keepalive) {
-    options.agent = keepaliveAgents;
+  if (foundRules.keepAlive) {
+    options.agent = keepAliveAgents;
   }
 
   if (!hasProxy() && foundRules.enableHttp2 === true) {
