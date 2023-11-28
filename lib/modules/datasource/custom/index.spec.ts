@@ -1,5 +1,6 @@
-import { codeBlock } from 'common-tags';
+import { codeBlock, html } from 'common-tags';
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { fs } from '../../../../test/util';
 import { CustomDatasource } from './index';
@@ -461,6 +462,208 @@ describe('modules/datasource/custom/index', () => {
           },
         },
       });
+      expect(result).toEqual(expected);
+    });
+
+    it('return releases from HTML links', async () => {
+      const expected = {
+        releases: [
+          {
+            version: 'package-1.0.tar.gz',
+          },
+        ],
+      };
+
+      const content = html`
+        <html>
+          <body>
+            <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+          </body>
+        </html>
+      `;
+
+      httpMock
+        .scope('https://example.com')
+        .get('/index.html')
+        .reply(200, content, {
+          'Content-Type': 'text/html',
+        });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/index.html',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('return releases from HTML links - local file', async () => {
+      const expected = {
+        releases: [
+          {
+            version: 'package-1.0.tar.gz',
+          },
+        ],
+      };
+
+      const content = html`
+        <html>
+          <body>
+            <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+          </body>
+        </html>
+      `;
+
+      fs.readLocalFile.mockResolvedValueOnce(content);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.html',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('return null for local file read error - HTML format', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.html',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('return releases from nginx directory listing', async () => {
+      const expected = {
+        releases: [
+          {
+            version: 'nginx-0.1.0.tar.gz',
+          },
+          {
+            version: 'nginx-0.1.1.tar.gz',
+          },
+          {
+            version: 'nginx-0.1.11.tar.gz',
+          },
+        ],
+      };
+
+      httpMock
+        .scope('http://nginx.org')
+        .get('/download/')
+        .reply(200, Fixtures.get('nginx-downloads.html'), {
+          'Content-Type': 'text/html',
+        })
+        .get('/download')
+        .reply(301, undefined, {
+          Location: 'http://nginx.org/download/',
+        });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'http://nginx.org/download',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('return releases for malformed HTML', async () => {
+      const expected = {
+        releases: [
+          {
+            version: 'package-1.0.tar.gz',
+          },
+        ],
+      };
+
+      const content = html`
+        <html>
+        <body>
+        <h1></pre><hr></body><a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+        </html>
+      `;
+
+      httpMock
+        .scope('https://example.com')
+        .get('/malformed.html')
+        .reply(200, content, {
+          'Content-Type': 'text/html',
+        });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/malformed.html',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('return releases for incomplete HTML', async () => {
+      const expected = {
+        releases: [
+          {
+            version: 'package-1.0.tar.gz',
+          },
+        ],
+      };
+
+      const content = html`
+        <html>
+        <body>
+        <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+        <a href="package-2.0.tar.gz
+      `;
+
+      httpMock
+        .scope('https://example.com')
+        .get('/incomplete.html')
+        .reply(200, content, {
+          'Content-Type': 'text/html',
+        });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/incomplete.html',
+            format: 'html',
+          },
+        },
+      });
+
       expect(result).toEqual(expected);
     });
   });
