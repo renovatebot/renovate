@@ -1629,7 +1629,7 @@ const options: RenovateOptions[] = [
       commitMessageExtra:
         'with {{newName}} {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{#if isSingleVersion}}{{{prettyNewVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
       prBodyNotes: [
-        'This is a special PR that replaces `{{{depNameSanitized}}}` with the community suggested minimal stable replacement version.',
+        'This is a special PR that replaces `{{{depName}}}` with the community suggested minimal stable replacement version.',
       ],
     },
     cli: false,
