@@ -26,3 +26,4 @@ jobs:
           github-token: ${{ github.token }}
           issue-inactive-days: 30
           pr-inactive-days: 30
+          process-only: 'issues, prs'
