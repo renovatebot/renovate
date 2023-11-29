@@ -14,4 +14,4 @@ If your Helm charts make use of repository aliases then you will need to configu
 
 If you need to change the versioning format, read the [versioning](../../versioning.md) documentation to learn more.
 
-To learn how to use Helm with private packages, read [private package support, Package Manager Credentials for Artifact Updating, helm](https://docs.renovatebot.com/getting-started/private-packages/#helm).
+To learn how to use Helm with private packages, read [private package support, Package Manager Credentials for Artifact Updating, helm](../../../getting-started/private-packages.md#helm).
