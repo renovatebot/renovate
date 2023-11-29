@@ -1,0 +1,10 @@
+jobs:
+  - deployment: deployment_one
+    strategy:
+      runOnce:
+        on:
+          success:
+            steps:
+              - task: Bash@3
+                inputs:
+                  script: 'echo Hello World'

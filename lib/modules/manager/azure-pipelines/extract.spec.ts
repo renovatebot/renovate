@@ -15,6 +15,13 @@ const azurePipelines = Fixtures.get('azure-pipelines.yaml');
 const azurePipelinesNoDependency = Fixtures.get(
   'azure-pipelines-no-dependency.yaml',
 );
+const azurePipelinesOnFailure = Fixtures.get('azure-pipelines-on-failure.yaml');
+const azurePipelinesOnSuccess = Fixtures.get('azure-pipelines-on-success.yaml');
+const azurePipelinesPostroute = Fixtures.get('azure-pipelines-postroute.yaml');
+const azurePipelinesPredeploy = Fixtures.get('azure-pipelines-predeploy.yaml');
+const azurePipelinesRoute = Fixtures.get('azure-pipelines-route.yaml');
+const azurePipelinesRolling = Fixtures.get('azure-pipelines-rolling.yaml');
+const azurePipelinesCanary = Fixtures.get('azure-pipelines-canary.yaml');
 const azurePipelinesRunOnce = Fixtures.get('azure-pipelines-runonce.yaml');
 const azurePipelinesStages = Fixtures.get('azure-pipelines-stages.yaml');
 const azurePipelinesJobs = Fixtures.get('azure-pipelines-jobs.yaml');
@@ -195,6 +202,104 @@ describe('modules/manager/azure-pipelines/extract', () => {
     it('should extract deployment jobs runonce', () => {
       const res = extractPackageFile(
         azurePipelinesRunOnce,
+        azurePipelinesFilename,
+      );
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs on failure', () => {
+      const res = extractPackageFile(
+        azurePipelinesOnFailure,
+        azurePipelinesFilename,
+      );
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs on success', () => {
+      const res = extractPackageFile(
+        azurePipelinesOnSuccess,
+        azurePipelinesFilename,
+      );
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs postroute', () => {
+      const res = extractPackageFile(
+        azurePipelinesPostroute,
+        azurePipelinesFilename,
+      );
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs predeploy', () => {
+      const res = extractPackageFile(
+        azurePipelinesPredeploy,
+        azurePipelinesFilename,
+      );
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs route', () => {
+      const res = extractPackageFile(
+        azurePipelinesRoute,
+        azurePipelinesFilename,
+      );
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs rolling', () => {
+      const res = extractPackageFile(
+        azurePipelinesRolling,
+        azurePipelinesFilename,
+      );
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs canary', () => {
+      const res = extractPackageFile(
+        azurePipelinesCanary,
         azurePipelinesFilename,
       );
       expect(res?.deps).toEqual([
