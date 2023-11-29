@@ -126,7 +126,7 @@ describe('modules/datasource/dotnet-version/index', () => {
 
       expect(res).toBeDefined();
       expect(res?.sourceUrl).toBe('https://github.com/dotnet/sdk');
-      expect(res?.releases).toHaveLength(17);
+      expect(res?.releases).toHaveLength(19);
       expect(res?.releases).toIncludeAllPartialMembers([
         { version: '3.1.100-preview1-014459' },
         { version: '3.1.423' },
@@ -134,6 +134,8 @@ describe('modules/datasource/dotnet-version/index', () => {
         { version: '5.0.408' },
         { version: '6.0.100-preview.1.21103.13' },
         { version: '6.0.401' },
+        { version: '6.0.304' },
+        { version: '6.0.109' },
         { version: '7.0.100-preview.1.22110.4' },
         { version: '7.0.100-rc.1.22431.12' },
       ]);

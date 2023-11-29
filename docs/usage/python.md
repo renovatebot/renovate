@@ -6,7 +6,7 @@ description: Python/pip dependencies support in Renovate
 # Python package manager support
 
 Renovate supports several Python package managers, including `pip`, `pipenv`, `poetry`, etc.
-See [all supported managers](https://docs.renovatebot.com/modules/manager/).
+See [all supported managers](./modules/manager/index.md).
 
 ## Versioning support
 
