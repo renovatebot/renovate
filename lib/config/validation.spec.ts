@@ -144,6 +144,28 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('validates invalid statusCheckNames', async () => {
+      const config = {
+        statusCheckNames: {
+          randomKey: '',
+          mergeConfidence: 10,
+          configValidation: '',
+          artifactError: null,
+        },
+      } as any;
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid `statusCheckNames.mergeConfidence` configuration: status check is not a string',
+        },
+        {
+          message:
+            'Invalid `statusCheckNames.statusCheckNames.randomKey` configuration: key is not allowed',
+        },
+      ]);
+    });
+
     it('catches invalid customDatasources record type', async () => {
       const config = {
         customDatasources: {

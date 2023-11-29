@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
@@ -86,13 +87,13 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   if (
     !config.branchName ||
     !config.confidenceStatus ||
-    !config.statusCheckNames?.minimumConfidence ||
+    !is.nonEmptyString(config.statusCheckNames?.mergeConfidence) ||
     (config.minimumConfidence &&
       !isActiveConfidenceLevel(config.minimumConfidence))
   ) {
     return;
   }
-  const context = config.statusCheckNames.minimumConfidence;
+  const context = config.statusCheckNames!.mergeConfidence;
   const description =
     config.confidenceStatus === 'green'
       ? 'Updates have met Merge Confidence requirement'

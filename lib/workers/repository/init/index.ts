@@ -1,3 +1,4 @@
+import fs from 'fs/promises';
 import { GlobalConfig } from '../../../config/global';
 import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
@@ -57,6 +58,7 @@ export async function initRepo(
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
   if (config.printConfig) {
+    await fs.writeFile('config.json', JSON.stringify(config));
     logger.info(
       { config, hostRules: getAll() },
       'Full resolved config and hostRules including presets',

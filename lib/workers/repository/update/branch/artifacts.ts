@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
@@ -6,12 +7,15 @@ import type { BranchConfig } from '../../../types';
 export async function setArtifactErrorStatus(
   config: BranchConfig,
 ): Promise<void> {
-  if (!config.artifactErrors?.length) {
+  if (
+    !config.artifactErrors?.length ||
+    !is.nonEmptyString(config.statusCheckNames?.artifactError)
+  ) {
     // no errors
     return;
   }
 
-  const context = `renovate/artifacts`;
+  const context = config.statusCheckNames!.artifactError;
   const description = 'Artifact file update failure';
   const state = 'red';
   const existingState = await platform.getBranchStatusCheck(
