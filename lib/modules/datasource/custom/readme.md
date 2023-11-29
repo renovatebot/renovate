@@ -185,7 +185,7 @@ The following JSON will be generated:
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied to process the JSON data.
 
-To extract the version number, you may use [`extractVersion`](../../../../docs/usage/configuration-options.md#extractversion) or JSONata rules.
+To extract the version number, you may use [`extractVersion`](../../../configuration-options.md#extractversion) or JSONata rules.
 
 ## Examples
 
