@@ -7,7 +7,7 @@ The `regex` manager is unique in Renovate because:
 - By using the `customManagers` config, you can create multiple "regex managers" for the same repository
 
 We have [additional Handlebars helpers](https://docs.renovatebot.com/templates/#additional-handlebars-helpers) to help you perform common transformations on the regex manager's template fields.
-Also read the documentation for the [`customManagers` config option](https://docs.renovatebot.com/configuration-options/#custommanagers).
+Also read the documentation for the [`customManagers` config option](../../../configuration-options.md#custommanagers).
 
 ### Required Fields
 
@@ -19,8 +19,8 @@ The first two required fields are `fileMatch` and `matchStrings`:
 Before Renovate can look up a dependency and decide about updates, it needs this information about each dependency:
 
 - The dependency's name
-- Which `datasource` to use: npm, Docker, GitHub tags, and so on. For how to format this references see [datasource overview](https://docs.renovatebot.com/modules/datasource/#supported-datasources)
-- Which version scheme to use: defaults to `semver-coerced`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](https://docs.renovatebot.com/modules/versioning/#supported-versioning)
+- Which `datasource` to use: npm, Docker, GitHub tags, and so on. For how to format this references see [datasource overview](../../datasource/index.md#supported-datasources)
+- Which version scheme to use: defaults to `semver-coerced`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](../../versioning.md#supported-versioning)
 
 Configuration-wise, it works like this:
 

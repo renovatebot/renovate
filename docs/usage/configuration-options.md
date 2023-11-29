@@ -443,7 +443,7 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 Another example would be if you want to configure a DCO signoff to each commit.
 
-If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](https://docs.renovatebot.com/presets-default/#gitsignoff) to your `extends` array:
+If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
 
 ```json
 {
@@ -689,7 +689,7 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 
 <!-- prettier-ignore -->
 !!! tip
-    Look at our [Regex Manager Presets](https://docs.renovatebot.com/presets-regexManagers/), they may have what you need.
+    Look at our [Regex Manager Presets](./presets-regexManagers.md), they may have what you need.
 
 ### customType
 
@@ -1883,7 +1883,7 @@ Specifies the private key in [PEM format](https://en.wikipedia.org/wiki/Privacy-
 <!-- prettier-ignore -->
 !!! warning
     Do _not_ put your private key into this field, to avoid losing confidentiality completely.
-    You must use [secrets](https://docs.renovatebot.com/self-hosted-configuration/#secrets) to pass it down securely instead.
+    You must use [secrets](./self-hosted-configuration.md#secrets) to pass it down securely instead.
 
 ### httpsCertificate
 
@@ -2188,15 +2188,15 @@ Set `osvVulnerabilityAlerts` to `true` to get pull requests with vulnerability f
 You will only get OSV-based vulnerability alerts for _direct_ dependencies.
 Renovate only queries the OSV database for dependencies that use one of these datasources:
 
-- [`crate`](https://docs.renovatebot.com/modules/datasource/crate/)
-- [`go`](https://docs.renovatebot.com/modules/datasource/go/)
-- [`hex`](https://docs.renovatebot.com/modules/datasource/hex/)
-- [`maven`](https://docs.renovatebot.com/modules/datasource/maven/)
-- [`npm`](https://docs.renovatebot.com/modules/datasource/npm/)
-- [`nuget`](https://docs.renovatebot.com/modules/datasource/nuget/)
-- [`packagist`](https://docs.renovatebot.com/modules/datasource/packagist/)
-- [`pypi`](https://docs.renovatebot.com/modules/datasource/pypi/)
-- [`rubygems`](https://docs.renovatebot.com/modules/datasource/rubygems/)
+- [`crate`](./modules/datasource/crate/index.md)
+- [`go`](./modules/datasource/go/index.md)
+- [`hex`](./modules/datasource/hex/index.md)
+- [`maven`](./modules/datasource/maven/index.md)
+- [`npm`](./modules/datasource/npm/index.md)
+- [`nuget`](./modules/datasource/nuget/index.md)
+- [`packagist`](./modules/datasource/packagist/index.md)
+- [`pypi`](./modules/datasource/pypi/index.md)
+- [`rubygems`](./modules/datasource/rubygems/index.md)
 
 ## packageRules
 
@@ -3453,7 +3453,7 @@ The default value for `schedule` is "at any time", which is functionally the sam
 i.e. Renovate will run on the repository around the clock.
 
 The easiest way to define a schedule is to use a preset if one of them fits your requirements.
-See [Schedule presets](https://docs.renovatebot.com/presets-schedule/) for details and feel free to request a new one in the source repository if you think it would help others.
+See [Schedule presets](./presets-schedule.md) for details and feel free to request a new one in the source repository if you think it would help others.
 
 ```title="Some text schedules that are known to work"
 every weekend
