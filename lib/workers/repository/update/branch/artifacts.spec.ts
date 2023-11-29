@@ -14,6 +14,9 @@ describe('workers/repository/update/branch/artifacts', () => {
       branchName: 'renovate/pin',
       upgrades: [],
       artifactErrors: [{ lockFile: 'some' }],
+      statusCheckNames: {
+        artifactError: 'renovate/artifact',
+      },
     } satisfies BranchConfig;
   });
 
