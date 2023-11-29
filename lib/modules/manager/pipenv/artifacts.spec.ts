@@ -77,6 +77,15 @@ describe('modules/manager/pipenv/artifacts', () => {
         { version: '3.10.2' },
       ],
     });
+
+    // pipenv
+    getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '2013.5.19' },
+        { version: '2013.6.11' },
+        { version: '2013.6.12' },
+      ],
+    });
   });
 
   it('returns if no Pipfile.lock found', async () => {
@@ -209,7 +218,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.7.6' },
-      { cmd: 'install-tool pipenv 2023.1.2' },
+      { cmd: 'install-tool pipenv 2013.6.12' },
       { cmd: 'pipenv lock', options: { cwd: '/tmp/github/some/repo' } },
     ]);
   });
