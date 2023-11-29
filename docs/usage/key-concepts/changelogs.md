@@ -24,31 +24,36 @@ Renovate "sees" changelogs by:
 
 ## Platforms that Renovate can fetch changelogs from
 
-Renovate can fetch changelogs from these platforms:
-
-- List item 1
-- List item 2
+See the list of platforms in the [`fetchChangelogs` config option docs](../configuration-options.md#fetchchangelogs).
 
 ### Running Renovate on a non-GitHub platform
 
-Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs).
+When you run Renovate on a non-GitHub platform, you must give Renovate a special token.
+Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs) to learn more.
 
 ## Troubleshooting missing changelogs
 
-Follow these steps to see why Renovate can't find a changelog:
+Follow these steps to find out why Renovate does not find a changelog:
 
 1. Step one
 1. Step two
 1. Step three
 
+If none of this helps, search the Renovate issues and discussions to see if this is a known problem.
+
 ## Advice for package maintainers
 
 This section is for package maintainers that want to make sure Renovate can see their changelogs.
 
-### npm package maintainers
+### Let Renovate understand your versioning and changelogs
 
-I remember that Renovate needs a repository source url in the `package.json`, or at least some field in the `package.json` must be filled out.
-We helped Docusaurus a while back to get the changelogs visible, but they had a complicated monorepo setup, see: [`facebook/docusaurus` issue: package.json repository/directory metadata incomplete](https://github.com/facebook/docusaurus/issues/3612).
+In general, Renovate can understand your versions and changelogs best when you:
+
+- Use SemVer versioning, so `major.minor.patch`
+- Use the [`semantic-release` bot](https://github.com/semantic-release/semantic-release) to automate the release process
+- Anything else I'm forgetting to list here
+
+### npm package maintainers
 
 As maintainer, make sure the `package.json` has a filled in `repository` field, read the [npm Docs, configuring npm `repository` field](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#repository) to learn more.
 If your repository uses the monorepo pattern make sure _each_ `package.json` file has a `repository` field.
@@ -73,6 +78,8 @@ Explain how to get Rust changelogs here.
 ### Nuget package maintainers
 
 Explain how to get Nuget changelogs here.
+
+See [Renovate issue #14128 about using NuGet's changelogs](https://github.com/renovatebot/renovate/issues/14128).
 
 ### Go package maintainers
 
