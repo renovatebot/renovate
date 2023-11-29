@@ -3579,6 +3579,23 @@ You can set your own label name with the `"stopUpdatingLabel"` field:
 }
 ```
 
+## statusCheckNames
+
+This feature allows users to customize the context of the staus checks added by Renovate to the update branches.
+
+1. You can modify existing status checks, but adding entirely new ones is not supported
+2. Setting the value to `null` or an empty string, will effectively disable/skip that particular status check
+3. This option is mergeable, meaning you only have to specify the status checks you want to modify
+
+```json
+{
+  "statusCheckNames": {
+    "minimumReleaseAge": "custom/stability-days", // default value
+    "mergeConfidence": "custom/merge-confidence-level" // custom string
+  }
+}
+```
+
 ## suppressNotifications
 
 Use this field to suppress various types of warnings and other notifications from Renovate.
