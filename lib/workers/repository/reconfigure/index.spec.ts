@@ -26,6 +26,9 @@ describe('workers/repository/reconfigure/index', () => {
   const config: RenovateConfig = {
     branchPrefix: 'prefix/',
     baseBranch: 'base',
+    statusCheckNames: {
+      configValidation: 'renovate/config-validation',
+    },
   };
 
   beforeEach(() => {
