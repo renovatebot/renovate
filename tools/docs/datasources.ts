@@ -33,6 +33,7 @@ export async function generateDatasources(
     let md = codeBlock`
       ---
       title: ${displayName}
+      edit_url: https://github.com/renovatebot/renovate/edit/main/lib/modules/datasource/${datasource}/readme.md
       ---
 
       # ${displayName} Datasource
