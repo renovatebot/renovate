@@ -3564,21 +3564,6 @@ Configure this to `true` if you wish to get one PR for every separate major vers
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
-## stopUpdatingLabel
-
-This feature only works on supported platforms, check the table above.
-
-If you want Renovate to stop updating a PR, you can apply a label to the PR.
-By default, Renovate listens to the label: `"stop-updating"`.
-
-You can set your own label name with the `"stopUpdatingLabel"` field:
-
-```json
-{
-  "stopUpdatingLabel": "take-a-break-renovate"
-}
-```
-
 ## statusCheckNames
 
 This feature allows users to customize the context of the staus checks added by Renovate to the update branches.
@@ -3593,6 +3578,21 @@ This feature allows users to customize the context of the staus checks added by 
     "minimumReleaseAge": "custom/stability-days",
     "mergeConfidence": "custom/merge-confidence-level"
   }
+}
+```
+
+## stopUpdatingLabel
+
+This feature only works on supported platforms, check the table above.
+
+If you want Renovate to stop updating a PR, you can apply a label to the PR.
+By default, Renovate listens to the label: `"stop-updating"`.
+
+You can set your own label name with the `"stopUpdatingLabel"` field:
+
+```json
+{
+  "stopUpdatingLabel": "take-a-break-renovate"
 }
 ```
 
