@@ -15,10 +15,12 @@
         "version": "3.1.29",
         "version-display": "3.1.29"
       },
-      "sdk": {
-        "version": "3.1.423",
-        "version-display": "3.1.423"
-      }
+      "sdks": [
+        {
+          "version": "3.1.423",
+          "version-display": "3.1.423"
+        }
+      ]
     },
     {
       "release-date": "2020-01-14",
@@ -29,10 +31,12 @@
         "version": "3.1.1",
         "version-display": "3.1.1"
       },
-      "sdk": {
-        "version": "3.1.101",
-        "version-display": "3.1.101"
-      }
+      "sdks": [
+        {
+          "version": "3.1.101",
+          "version-display": "3.1.101"
+        }
+      ]
     },
     {
       "release-date": "2019-12-03",
@@ -43,10 +47,12 @@
         "version": "3.1.0",
         "version-display": "3.1.0"
       },
-      "sdk": {
-        "version": "3.1.100",
-        "version-display": "3.1.100"
-      }
+      "sdks": [
+        {
+          "version": "3.1.100",
+          "version-display": "3.1.100"
+        }
+      ]
     },
     {
       "release-date": "2019-10-15",
@@ -57,10 +63,12 @@
         "version": "3.1.0-preview1.19506.1",
         "version-display": "3.1.0-preview1"
       },
-      "sdk": {
-        "version": "3.1.100-preview1-014459",
-        "version-display": "3.1.100-preview1"
-      }
+      "sdks": [
+        {
+          "version": "3.1.100-preview1-014459",
+          "version-display": "3.1.100-preview1"
+        }
+      ]
     }
   ]
 }
