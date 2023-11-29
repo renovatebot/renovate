@@ -21,6 +21,29 @@ export interface Stage {
   jobs?: Job[];
 }
 
+export interface On {
+  failure?: Job;
+  success?: Job;
+}
+
+export interface Deploy {
+  deploy?: Job;
+  preDeploy?: Job;
+  routeTraffic?: Job;
+  postRouteTraffic?: Job;
+  on?: On;
+}
+
+export interface Strategy {
+  runOnce?: Deploy;
+  rolling?: Deploy;
+  canary?: Deploy;
+}
+
+export interface Deployment {
+  strategy?: Strategy;
+}
+
 export interface Job {
   steps?: Step[];
 }
