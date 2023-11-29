@@ -60,11 +60,14 @@ export interface StabilityConfig extends RenovateConfig {
 }
 
 export async function setStability(config: StabilityConfig): Promise<void> {
-  if (!config.stabilityStatus || !config.statusCheckNames?.minimumReleaseAge) {
+  if (
+    !config.stabilityStatus ||
+    !is.nonEmptyString(config.statusCheckNames?.minimumReleaseAge)
+  ) {
     return;
   }
 
-  const context = config.statusCheckNames.minimumReleaseAge;
+  const context = config.statusCheckNames!.minimumReleaseAge;
   const description =
     config.stabilityStatus === 'green'
       ? 'Updates have met minimum release age requirement'

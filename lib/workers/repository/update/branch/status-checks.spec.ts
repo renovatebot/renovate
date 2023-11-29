@@ -14,6 +14,9 @@ describe('workers/repository/update/branch/status-checks', () => {
     beforeEach(() => {
       config = partial<StabilityConfig>({
         branchName: 'renovate/some-branch',
+        statusCheckNames: {
+          minimumReleaseAge: 'renovate/stability-days',
+        },
       });
     });
 
@@ -53,6 +56,9 @@ describe('workers/repository/update/branch/status-checks', () => {
     beforeEach(() => {
       config = {
         branchName: 'renovate/some-branch',
+        statusCheckNames: {
+          mergeConfidence: 'renovate/merge-confidence',
+        },
       };
     });
 
