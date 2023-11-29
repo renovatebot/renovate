@@ -3590,8 +3590,8 @@ This feature allows users to customize the context of the staus checks added by 
 ```json
 {
   "statusCheckNames": {
-    "minimumReleaseAge": "custom/stability-days", // default value
-    "mergeConfidence": "custom/merge-confidence-level" // custom string
+    "minimumReleaseAge": "custom/stability-days",
+    "mergeConfidence": "custom/merge-confidence-level"
   }
 }
 ```
