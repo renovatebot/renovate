@@ -88,12 +88,8 @@ export function getNewConstraint(
     logger.debug(
       `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`,
     );
-    let newConstraint = oldConstraint.replace(currentValue, newValue);
     //remove surplus .0 version
-    while (newConstraint.split('.').length - 1 > 2) {
-      newConstraint = newConstraint.replace(RegExp('\\.0$'), '');
-    }
-    return newConstraint;
+    return oldConstraint.replace(RegExp(`${currentValue}(\\.0)*`), newValue);
   }
 
   if (
