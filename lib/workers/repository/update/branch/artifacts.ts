@@ -7,15 +7,21 @@ import type { BranchConfig } from '../../../types';
 export async function setArtifactErrorStatus(
   config: BranchConfig,
 ): Promise<void> {
-  if (
-    !config.artifactErrors?.length ||
-    !is.nonEmptyString(config.statusCheckNames?.artifactError)
-  ) {
+  if (!config.artifactErrors?.length) {
     // no errors
     return;
   }
+  if (
+    !config.statusCheckNames ||
+    !is.nonEmptyString(config.statusCheckNames?.artifactError)
+  ) {
+    logger.debug(
+      'Status check is null or an empty string, skipping status check addition',
+    );
+    return;
+  }
 
-  const context = config.statusCheckNames!.artifactError;
+  const context = config.statusCheckNames.artifactError;
   const description = 'Artifact file update failure';
   const state = 'red';
   const existingState = await platform.getBranchStatusCheck(

@@ -66,8 +66,17 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   ) {
     return;
   }
+  if (
+    !config.statusCheckNames ||
+    !is.nonEmptyString(config.statusCheckNames?.minimumReleaseAge)
+  ) {
+    logger.debug(
+      'Status check is null or empty an string, skipping status check addition',
+    );
+    return;
+  }
 
-  const context = config.statusCheckNames!.minimumReleaseAge;
+  const context = config.statusCheckNames.minimumReleaseAge;
   const description =
     config.stabilityStatus === 'green'
       ? 'Updates have met minimum release age requirement'
@@ -90,13 +99,22 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   if (
     !config.branchName ||
     !config.confidenceStatus ||
-    !is.nonEmptyString(config.statusCheckNames?.mergeConfidence) ||
     (config.minimumConfidence &&
       !isActiveConfidenceLevel(config.minimumConfidence))
   ) {
     return;
   }
-  const context = config.statusCheckNames!.mergeConfidence;
+  if (
+    !config.statusCheckNames ||
+    !is.nonEmptyString(config.statusCheckNames?.mergeConfidence)
+  ) {
+    logger.debug(
+      'Status check is null or an empty string, skipping status check addition',
+    );
+    return;
+  }
+
+  const context = config.statusCheckNames.mergeConfidence;
   const description =
     config.confidenceStatus === 'green'
       ? 'Updates have met Merge Confidence requirement'

@@ -23,6 +23,9 @@ async function setBranchStatus(
   context: string | undefined,
 ): Promise<void> {
   if (!is.nonEmptyString(context)) {
+    logger.debug(
+      'Status check is null or an empty string, skipping status check addition',
+    );
     return;
   }
 
