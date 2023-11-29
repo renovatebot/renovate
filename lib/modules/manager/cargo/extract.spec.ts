@@ -6,6 +6,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { writeLocalFile } from '../../../util/fs';
 import type { ExtractConfig } from '../types';
+
 import { extractPackageFile } from '.';
 
 const cargo1toml = Fixtures.get('Cargo.1.toml');
@@ -15,12 +16,8 @@ const cargo4toml = Fixtures.get('Cargo.4.toml');
 const cargo5toml = Fixtures.get('Cargo.5.toml');
 const cargo6configtoml = Fixtures.get('cargo.6.config.toml');
 const cargo6toml = Fixtures.get('Cargo.6.toml');
-const cargo7toml = Fixtures.get('Cargo.7.toml');
-const cargo7lock = Fixtures.get('Cargo.7.lock');
-const cargo8toml = Fixtures.get('Cargo.8.toml');
-const cargo8lock = Fixtures.get('Cargo.8.lock');
-const cargo9toml = Fixtures.get('Cargo.9.toml');
-const cargo9lock = Fixtures.get('Cargo.9.lock');
+
+const lockfileUpdateCargotoml = Fixtures.get('lockfile-update/Cargo.toml');
 
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
@@ -521,26 +518,44 @@ replace-with = "mcorbin"
     });
 
     it('extracts locked versions', async () => {
-      await writeLocalFile('Cargo.lock', cargo9lock);
+      const cargolock = Fixtures.get('lockfile-update/Cargo.3.lock');
+      await writeLocalFile('Cargo.lock', cargolock);
 
-      const res = await extractPackageFile(cargo9toml, 'Cargo.toml', config);
+      const cargotoml = codeBlock`[package]
+name = "test"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+syn = "2.0"`;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
       expect(res?.deps).toMatchObject([{ lockedVersion: '2.0.1' }]);
     });
 
     it('extracts locked versions for renamed packages', async () => {
-      await writeLocalFile('Cargo.lock', cargo7lock);
+      const cargolock = Fixtures.get('lockfile-update/Cargo.1.lock');
+      await writeLocalFile('Cargo.lock', cargolock);
 
-      const res = await extractPackageFile(cargo7toml, 'Cargo.toml', config);
+      const res = await extractPackageFile(
+        lockfileUpdateCargotoml,
+        'Cargo.toml',
+        config,
+      );
       expect(res?.deps).toMatchObject([
-        { lockedVersion: '1.0.1' },
         { lockedVersion: '2.0.1' },
+        { lockedVersion: '1.0.1' },
       ]);
     });
 
     it('handles missing locked versions', async () => {
-      await writeLocalFile('Cargo.lock', cargo8lock);
+      const cargolock = Fixtures.get('lockfile-update/Cargo.2.lock');
+      await writeLocalFile('Cargo.lock', cargolock);
 
-      const res = await extractPackageFile(cargo8toml, 'Cargo.toml', config);
+      const res = await extractPackageFile(
+        lockfileUpdateCargotoml,
+        'Cargo.toml',
+        config,
+      );
       expect(res?.deps).toMatchObject([
         { lockedVersion: '2.0.1' },
         expect.not.objectContaining({ lockedVersion: expect.anything() }),
@@ -550,7 +565,11 @@ replace-with = "mcorbin"
     it('handles invalid lock file', async () => {
       await writeLocalFile('Cargo.lock', 'foo');
 
-      const res = await extractPackageFile(cargo8toml, 'Cargo.toml', config);
+      const res = await extractPackageFile(
+        lockfileUpdateCargotoml,
+        'Cargo.toml',
+        config,
+      );
       expect(res?.deps).toMatchObject([
         expect.not.objectContaining({ lockedVersion: expect.anything() }),
         expect.not.objectContaining({ lockedVersion: expect.anything() }),
