@@ -84,5 +84,20 @@ describe('documentation', () => {
         expect(headers).toEqual(expectedOptions);
       });
     });
+
+    describe('self-hosted-experimental', () => {
+      const doc = fs.readFileSync(
+        'docs/usage/self-hosted-experimental.md',
+        'utf8',
+      );
+
+      const headers = doc
+        .match(/\n## (.*?)\n/g)
+        ?.map((match) => match.substring(4, match.length - 1));
+
+      it('has headers sorted alphabetically', () => {
+        expect(headers).toEqual([...headers!].sort());
+      });
+    });
   });
 });

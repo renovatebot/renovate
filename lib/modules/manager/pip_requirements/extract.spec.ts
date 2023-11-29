@@ -47,6 +47,24 @@ describe('modules/manager/pip_requirements/extract', () => {
       expect(res?.deps).toHaveLength(4);
     });
 
+    it('extracts dependencies with --index-url short code', () => {
+      const requirements = `-i http://example.com/private-pypi/
+some-package==0.3.1`;
+
+      const res = extractPackageFile(requirements);
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '==0.3.1',
+            currentVersion: '0.3.1',
+            datasource: 'pypi',
+            depName: 'some-package',
+          },
+        ],
+      });
+    });
+
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(requirements2)?.deps;
       expect(res).toMatchSnapshot();

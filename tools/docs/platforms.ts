@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { getPlatformList } from '../../lib/modules/platform';
 import { readFile, updateFile } from '../utils';
 import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
@@ -10,8 +11,14 @@ export async function generatePlatforms(
   let platformContent = 'Supported values for `platform` are: ';
   const platforms = getPlatformList();
   for (const platform of platforms) {
-    let md = await readFile(`lib/modules/platform/${platform}/readme.md`);
+    let md = codeBlock`
+      ---
+      edit_url: https://github.com/renovatebot/renovate/edit/main/lib/modules/platform/${platform}/readme.md
+      ---
+      `;
 
+    md += '\n\n';
+    md += await readFile(`lib/modules/platform/${platform}/readme.md`);
     md += generateFeatureAndBugMarkdown(platformIssuesMap, platform);
 
     await updateFile(`${dist}/modules/platform/${platform}/index.md`, md);

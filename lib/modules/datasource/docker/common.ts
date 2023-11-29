@@ -94,6 +94,7 @@ export async function getAuthHeaders(
       url: apiCheckUrl,
     });
     if (ecrRegex.test(registryHost)) {
+      logger.once.debug(`hostRules: ecr auth for ${registryHost}`);
       logger.trace(
         { registryHost, dockerRepository },
         `Using ecr auth for Docker registry`,
@@ -109,6 +110,7 @@ export async function getAuthHeaders(
       typeof opts.password === 'undefined' &&
       typeof opts.token === 'undefined'
     ) {
+      logger.once.debug(`hostRules: google auth for ${registryHost}`);
       logger.trace(
         { registryHost, dockerRepository },
         `Using google auth for Docker registry`,
@@ -123,6 +125,7 @@ export async function getAuthHeaders(
         );
       }
     } else if (opts.username && opts.password) {
+      logger.once.debug(`hostRules: basic auth for ${registryHost}`);
       logger.trace(
         { registryHost, dockerRepository },
         `Using basic auth for Docker registry`,
@@ -133,6 +136,9 @@ export async function getAuthHeaders(
       opts.headers = { authorization: `Basic ${auth}` };
     } else if (opts.token) {
       const authType = opts.authType ?? 'Bearer';
+      logger.once.debug(
+        `hostRules: ${authType} token auth for ${registryHost}`,
+      );
       logger.trace(
         { registryHost, dockerRepository },
         `Using ${authType} token for Docker registry`,
@@ -154,6 +160,7 @@ export async function getAuthHeaders(
       !is.string(authenticateHeader.params.realm) ||
       parseUrl(authenticateHeader.params.realm) === null
     ) {
+      logger.once.debug(`hostRules: testing direct auth for ${registryHost}`);
       logger.trace(
         { registryHost, dockerRepository, authenticateHeader },
         `Invalid realm, testing direct auth`,

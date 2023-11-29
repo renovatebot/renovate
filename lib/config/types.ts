@@ -262,7 +262,7 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 }
 
-const CustomDatasourceFormats = ['json', 'plain', 'yaml'] as const;
+const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
 export type CustomDatasourceFormats = (typeof CustomDatasourceFormats)[number];
 
 export interface CustomDatasourceConfig {
