@@ -8,7 +8,15 @@ import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
-import type { AzurePipelines, Container, Repository } from './types';
+import type {
+  AzurePipelines,
+  Container,
+  Deploy,
+  Deployment,
+  Job,
+  Repository,
+  Step,
+} from './types';
 
 const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
 
@@ -115,6 +123,52 @@ export function parseAzurePipelines(
   return pkg;
 }
 
+function extractSteps(
+  steps?: Step[],
+): PackageDependency<Record<string, any>>[] {
+  const deps = [];
+  for (const step of coerceArray(steps)) {
+    const task = extractAzurePipelinesTasks(step.task);
+    if (task) {
+      deps.push(task);
+    }
+  }
+  return deps;
+}
+
+function extractJob(job?: Job): PackageDependency<Record<string, any>>[] {
+  return extractSteps(coerceArray(job?.steps));
+}
+
+function extractTasksFromDeploy(
+  deploy?: Deploy,
+): PackageDependency<Record<string, any>>[] {
+  const deps = extractJob(deploy?.deploy);
+  deps.push(...extractJob(deploy?.postRouteTraffic));
+  deps.push(...extractJob(deploy?.preDeploy));
+  deps.push(...extractJob(deploy?.routeTraffic));
+  deps.push(...extractJob(deploy?.on?.failure));
+  deps.push(...extractJob(deploy?.on?.success));
+  return deps;
+}
+
+function extractJobs(
+  jobs?: Job[] | Deployment[],
+): PackageDependency<Record<string, any>>[] {
+  const deps: PackageDependency<Record<string, any>>[] = [];
+
+  for (const { strategy } of coerceArray<Deployment>(jobs)) {
+    deps.push(...extractTasksFromDeploy(strategy?.canary));
+    deps.push(...extractTasksFromDeploy(strategy?.rolling));
+    deps.push(...extractTasksFromDeploy(strategy?.runOnce));
+  }
+
+  for (const job of coerceArray(jobs)) {
+    deps.push(...extractJob(job));
+  }
+  return deps;
+}
+
 export function extractPackageFile(
   content: string,
   packageFile: string,
@@ -142,31 +196,11 @@ export function extractPackageFile(
   }
 
   for (const { jobs } of coerceArray(pkg.stages)) {
-    for (const { steps } of coerceArray(jobs)) {
-      for (const step of coerceArray(steps)) {
-        const task = extractAzurePipelinesTasks(step.task);
-        if (task) {
-          deps.push(task);
-        }
-      }
-    }
+    deps.push(...extractJobs(jobs));
   }
 
-  for (const { steps } of coerceArray(pkg.jobs)) {
-    for (const step of coerceArray(steps)) {
-      const task = extractAzurePipelinesTasks(step.task);
-      if (task) {
-        deps.push(task);
-      }
-    }
-  }
-
-  for (const step of coerceArray(pkg.steps)) {
-    const task = extractAzurePipelinesTasks(step.task);
-    if (task) {
-      deps.push(task);
-    }
-  }
+  deps.push(...extractJobs(pkg.jobs));
+  deps.push(...extractSteps(pkg.steps));
 
   if (!deps.length) {
     return null;

@@ -13,7 +13,7 @@ export interface Resources {
 export interface AzurePipelines {
   resources?: Resources;
   stages?: Stage[];
-  jobs?: Job[];
+  jobs?: Job[] | Deployment[];
   steps?: Step[];
 }
 
@@ -42,10 +42,12 @@ export interface Strategy {
 
 export interface Deployment {
   strategy?: Strategy;
+  prototype?: any;
 }
 
 export interface Job {
   steps?: Step[];
+  prototype?: any;
 }
 
 export interface Step {
