@@ -18,6 +18,7 @@ import { resolveConfigPresets } from './presets';
 import type {
   RenovateConfig,
   RenovateOptions,
+  StatusCheckKey,
   ValidationMessage,
   ValidationResult,
 } from './types';
@@ -563,16 +564,20 @@ export async function validateConfig(
                 });
               }
             } else if (key === 'statusCheckNames') {
-              const allowedStatusStrings = [
+              const allowedStatusStrings: StatusCheckKey[] = [
                 'minimumReleaseAge',
-                'artifactError',
                 'mergeConfidence',
                 'configValidation',
+                'artifactError',
               ];
               for (const [statusCheckKey, statusCheckValue] of Object.entries(
                 val,
               )) {
-                if (!allowedStatusStrings.includes(statusCheckKey)) {
+                if (
+                  !allowedStatusStrings.includes(
+                    statusCheckKey as StatusCheckKey,
+                  )
+                ) {
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed`,

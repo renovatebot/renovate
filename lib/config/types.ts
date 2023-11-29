@@ -189,6 +189,12 @@ export type RenovateRepository =
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 
+export type StatusCheckKey =
+  | 'minimumReleaseAge'
+  | 'mergeConfidence'
+  | 'configValidation'
+  | 'artifactError';
+
 // TODO: Proper typings
 export interface RenovateConfig
   extends LegacyAdminConfig,
@@ -261,7 +267,7 @@ export interface RenovateConfig
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
 
-  statusCheckNames?: Record<string, string>;
+  statusCheckNames?: Partial<Record<StatusCheckKey, string>>;
 }
 
 export interface CustomDatasourceConfig {
