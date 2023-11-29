@@ -562,6 +562,21 @@ syn = "2.0"`;
       ]);
     });
 
+    it('handles invalid versions in the toml file', async () => {
+      const cargolock = Fixtures.get('lockfile-update/Cargo.3.lock');
+      await writeLocalFile('Cargo.lock', cargolock);
+
+      const cargotoml = codeBlock`[package]
+name = "test"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+syn = "2.foo.1"`;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.deps).not.toHaveProperty('lockedVersion');
+    });
+
     it('handles invalid lock file', async () => {
       await writeLocalFile('Cargo.lock', 'foo');
 
