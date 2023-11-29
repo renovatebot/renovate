@@ -1,6 +1,9 @@
 export interface TektonResource {
   spec: TektonResourceSpec;
   items?: TektonResource[];
+  metadata?: {
+    annotations: { [key: string]: string };
+  };
 }
 
 export interface TektonResourceSpec {

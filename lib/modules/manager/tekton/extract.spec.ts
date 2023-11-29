@@ -12,6 +12,15 @@ describe('modules/manager/tekton/extract', () => {
       expect(result?.deps).toHaveLength(39);
     });
 
+    it('extracts deps from a file in annotations', () => {
+      const result = extractPackageFile(
+        Fixtures.get('multi-doc-annotations.yaml'),
+        'test-file.yaml',
+      );
+      expect(result).toMatchSnapshot();
+      expect(result?.deps).toHaveLength(6);
+    });
+
     it('ignores file without any deps', () => {
       expect(extractPackageFile('foo: bar', 'test-file.yaml')).toBeNull();
     });

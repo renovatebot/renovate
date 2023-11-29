@@ -10,6 +10,9 @@ import type {
   TektonResource,
   TektonResourceSpec,
 } from './types';
+import { regEx } from '../../../util/regex';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 
 export function extractPackageFile(
   content: string,
@@ -52,6 +55,8 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   // Handle PipelineRun resource
   addDep(doc.spec?.pipelineRef, deps);
 
+  addPipelineAsCodeAnnotations(doc.metadata?.annotations, deps);
+
   // Handle PipelineRun resource with inline Pipeline definition
   const pipelineSpec = doc.spec?.pipelineSpec;
   if (is.truthy(pipelineSpec)) {
@@ -78,6 +83,80 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   }
 
   return deps;
+}
+
+function addPipelineAsCodeAnnotations(
+  annotations:
+    | {
+        [key: string]: string;
+      }
+    | undefined,
+  deps: PackageDependency[],
+): void {
+  if (is.nullOrUndefined(annotations)) {
+    return;
+  }
+
+  for (const annotationsKey in annotations) {
+    if (
+      !annotationsKey.toLowerCase().includes('pipelinesascode.tekton.dev/task')
+    ) {
+      continue;
+    }
+
+    const tasks = annotations[annotationsKey]
+      .replace('[', '')
+      .replace(']', '')
+      .split(',');
+    for (const task of tasks) {
+      const dep = getAnnotationDep(task.trim());
+      if (!dep) {
+        continue;
+      }
+      deps.push(dep);
+    }
+  }
+}
+
+const githubRelease = regEx(
+  /^(?<url>(?:(?:http|https):\/\/)?(?<path>(?:[^:/\s]+[:/])?(?<project>[^/\s]+\/[^/\s]+)))\/releases\/download\/(?<currentValue>.+)\/(?<subdir>[^?\s]*)$/,
+);
+
+const gitUrl = regEx(
+  /^(?<url>(?:(?:http|https):\/\/)?(?<path>(?:[^:/\s]+[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?:\/raw)?\/(?<currentValue>.+?)\/(?<subdir>[^?\s]*)$/,
+);
+
+function getAnnotationDep(url: string): PackageDependency | null {
+  const dep: PackageDependency = {};
+  dep.depType = 'tekton-annotation';
+
+  if (githubRelease.test(url)) {
+    const match = githubRelease.exec(url);
+    dep.datasource = GithubReleasesDatasource.id;
+
+    dep.depName = match?.groups?.path;
+    dep.packageName = match?.groups?.project;
+    dep.currentValue = match?.groups?.currentValue;
+    return dep;
+  }
+
+  if (gitUrl.test(url)) {
+    const match = gitUrl.exec(url);
+    dep.datasource = GitTagsDatasource.id;
+
+    dep.depName = match?.groups?.path.replace(
+      'raw.githubusercontent.com',
+      'github.com',
+    );
+    dep.packageName = match?.groups?.url.replace(
+      'raw.githubusercontent.com',
+      'github.com',
+    );
+    dep.currentValue = match?.groups?.currentValue;
+    return dep;
+  }
+
+  return null;
 }
 
 function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
