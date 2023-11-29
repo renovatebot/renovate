@@ -169,7 +169,7 @@ describe('util/exec/containerbase', () => {
         await resolveConstraint({
           toolName: 'pipenv',
           constraint: '==2020.8.13',
-        })
+        }),
       ).toBe('2020.8.13');
     });
   });
