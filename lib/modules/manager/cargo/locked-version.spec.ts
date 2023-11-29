@@ -40,7 +40,10 @@ describe('modules/manager/cargo/locked-version', () => {
     });
 
     it('returns a map of package versions', async () => {
-      await writeLocalFile('Cargo.lock', Fixtures.get('Cargo.7.lock'));
+      await writeLocalFile(
+        'Cargo.lock',
+        Fixtures.get('lockfile-update/Cargo.1.lock'),
+      );
       expect(await extractLockFileVersions('Cargo.lock')).toEqual(
         new Map([
           ['proc-macro2', ['1.0.66']],
