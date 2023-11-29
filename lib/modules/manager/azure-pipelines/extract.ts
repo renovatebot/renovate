@@ -140,7 +140,7 @@ function extractJob(job?: Job): PackageDependency<Record<string, any>>[] {
   return extractSteps(coerceArray(job?.steps));
 }
 
-function extractTasksFromDeploy(
+function extractDeploy(
   deploy?: Deploy,
 ): PackageDependency<Record<string, any>>[] {
   const deps = extractJob(deploy?.deploy);
@@ -158,9 +158,9 @@ function extractJobs(
   const deps: PackageDependency<Record<string, any>>[] = [];
 
   for (const { strategy } of coerceArray<Deployment>(jobs)) {
-    deps.push(...extractTasksFromDeploy(strategy?.canary));
-    deps.push(...extractTasksFromDeploy(strategy?.rolling));
-    deps.push(...extractTasksFromDeploy(strategy?.runOnce));
+    deps.push(...extractDeploy(strategy?.canary));
+    deps.push(...extractDeploy(strategy?.rolling));
+    deps.push(...extractDeploy(strategy?.runOnce));
   }
 
   for (const job of coerceArray(jobs)) {
