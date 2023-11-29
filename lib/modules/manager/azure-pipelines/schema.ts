@@ -40,7 +40,9 @@ export type Deployment = z.infer<typeof Deployment>;
 export const Jobs = z.array(z.union([Job, Deployment]));
 export type Jobs = z.infer<typeof Jobs>;
 
-export const Stage = z.array(Job);
+export const Stage = z.object({
+  jobs: Jobs,
+});
 export type Stage = z.infer<typeof Stage>;
 
 export const Container = z.object({
@@ -49,7 +51,7 @@ export const Container = z.object({
 export type Container = z.infer<typeof Container>;
 
 export const Repository = z.object({
-  type: z.enum(['git', 'github', 'bitbucket', 'githubenterprise']),
+  type: z.enum(['git', 'github', 'bitbucket']),
   name: z.string(),
   ref: z.string().optional(),
 });
@@ -57,16 +59,18 @@ export type Repository = z.infer<typeof Repository>;
 
 export const Resources = z
   .object({
-    repositories: Repository,
-    containers: Container,
+    repositories: z.array(Repository),
+    containers: z.array(Container),
   })
   .partial();
 export type Resources = z.infer<typeof Resources>;
 
-export const AzurePipelines = z.object({
-  resources: Resources,
-  stages: z.array(Stage),
-  jobs: z.array(Jobs),
-  steps: z.array(Step),
-});
+export const AzurePipelines = z
+  .object({
+    resources: Resources,
+    stages: z.array(Stage),
+    jobs: z.array(Jobs),
+    steps: z.array(Step),
+  })
+  .partial();
 export type AzurePipelines = z.infer<typeof AzurePipelines>;
