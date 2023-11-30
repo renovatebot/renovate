@@ -77,10 +77,6 @@ export function extractRepository(
 export function extractContainer(
   container: Container,
 ): PackageDependency | null {
-  if (!container.image) {
-    return null;
-  }
-
   const dep = getDep(container.image);
   logger.debug(
     {
