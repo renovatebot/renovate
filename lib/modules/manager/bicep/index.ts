@@ -1,3 +1,4 @@
+import type { Category } from '../../../constants';
 import { AzureBicepResourceDatasource } from '../../datasource/azure-bicep-resource';
 
 export { extractPackageFile } from './extract';
