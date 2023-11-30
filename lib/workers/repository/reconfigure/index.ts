@@ -134,7 +134,7 @@ export async function validateReconfigureBranch(
     // add comment to reconfigure PR if it exists
     const branchPr = platform.findReconfigurePr
       ? await platform.findReconfigurePr(branchName)
-      : await platform.findPr({ branchName });
+      : await platform.findPr({ branchName, state: 'open' });
     if (branchPr) {
       let body = `There is an error with this repository's Renovate configuration that needs to be fixed.\n\n`;
       body += `Location: \`${configFileName}\`\n`;
