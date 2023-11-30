@@ -114,6 +114,15 @@ describe('util/template/index', () => {
     expect(output).toBe('CUSTOM_FOO is foo');
   });
 
+  it('replace', () => {
+    const userTemplate =
+      "{{ replace '[a-z]+\\.github\\.com' 'ghc' depName }}{{ replace 'some' 'other' depType }}";
+    const output = template.compile(userTemplate, {
+      depName: 'some.github.com/dep',
+    });
+    expect(output).toBe('ghc/dep');
+  });
+
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
     const allowedArrayField = 'prBodyNotes';
