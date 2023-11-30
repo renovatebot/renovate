@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
@@ -5,6 +6,7 @@ import { env, fs, git, mocked, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
+import { regEx } from '../../../util/regex';
 import type { UpdateArtifactsConfig } from '../types';
 import * as util from './util';
 import * as nuget from '.';
@@ -27,6 +29,12 @@ const adminConfig: RepoGlobalConfig = {
 };
 
 const config: UpdateArtifactsConfig = {};
+
+const windowsEnv = Object.fromEntries(
+  ['PROGRAMFILES', 'PROGRAMFILES(X86)', 'APPDATA', 'LOCALAPPDATA']
+    .map((key) => [key, process.env[key]?.replace(regEx(/\\(\w)/g), '/$1')])
+    .filter(([, value]) => is.string(value)),
+);
 
 describe('modules/manager/nuget/artifacts', () => {
   beforeEach(() => {
@@ -87,6 +95,7 @@ describe('modules/manager/nuget/artifacts', () => {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
             MSBUILDDISABLENODEREUSE: '1',
+            ...windowsEnv,
           },
         },
       },
@@ -127,6 +136,7 @@ describe('modules/manager/nuget/artifacts', () => {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
             MSBUILDDISABLENODEREUSE: '1',
+            ...windowsEnv,
           },
         },
       },
@@ -210,6 +220,7 @@ describe('modules/manager/nuget/artifacts', () => {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
             MSBUILDDISABLENODEREUSE: '1',
+            ...windowsEnv,
           },
         },
       },
@@ -260,6 +271,9 @@ describe('modules/manager/nuget/artifacts', () => {
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e NUGET_PACKAGES ' +
           '-e MSBUILDDISABLENODEREUSE ' +
+          Object.keys(windowsEnv)
+            .map((key) => `-e ${key} `)
+            .join('') +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar ' +
@@ -274,6 +288,7 @@ describe('modules/manager/nuget/artifacts', () => {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
             MSBUILDDISABLENODEREUSE: '1',
+            ...windowsEnv,
           },
         },
       },
@@ -328,6 +343,7 @@ describe('modules/manager/nuget/artifacts', () => {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
             MSBUILDDISABLENODEREUSE: '1',
+            ...windowsEnv,
           },
         },
       },
@@ -369,6 +385,7 @@ describe('modules/manager/nuget/artifacts', () => {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
             MSBUILDDISABLENODEREUSE: '1',
+            ...windowsEnv,
           },
         },
       },
