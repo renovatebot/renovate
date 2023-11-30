@@ -1,12 +1,20 @@
 import { codeBlock } from 'common-tags';
-import { DirectoryResult, dir } from 'tmp-promise';
-import { join } from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { writeLocalFile } from '../../../util/fs';
+import { fs } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
+
+jest.mock('../../../util/fs');
+
+function mockReadLocalFile(files: Record<string, string | null>) {
+  fs.readLocalFile.mockImplementation((file): Promise<any> => {
+    let content: string | null = '';
+    if (file in files) {
+      content = files[file];
+    }
+    return Promise.resolve(content);
+  });
+}
 
 const cargo1toml = Fixtures.get('Cargo.1.toml');
 const cargo2toml = Fixtures.get('Cargo.2.toml');
@@ -20,26 +28,11 @@ const lockfileUpdateCargotoml = Fixtures.get('lockfile-update/Cargo.toml');
 
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
-    let config: ExtractConfig;
-    let adminConfig: RepoGlobalConfig;
-    let tmpDir: DirectoryResult;
+    const config: ExtractConfig = {};
 
-    beforeEach(async () => {
-      config = {};
-      tmpDir = await dir({ unsafeCleanup: true });
-      adminConfig = {
-        localDir: join(tmpDir.path, 'local'),
-        cacheDir: join(tmpDir.path, 'cache'),
-      };
-
-      GlobalConfig.set(adminConfig);
+    beforeEach(() => {
       delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
       delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
-    });
-
-    afterEach(async () => {
-      await tmpDir.cleanup();
-      GlobalConfig.reset();
     });
 
     it('returns null for invalid toml', async () => {
@@ -100,7 +93,7 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('extracts registry urls from .cargo/config.toml', async () => {
-      await writeLocalFile('.cargo/config.toml', cargo6configtoml);
+      mockReadLocalFile({ '.cargo/config.toml': cargo6configtoml });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -109,7 +102,7 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('extracts registry urls from .cargo/config (legacy path)', async () => {
-      await writeLocalFile('.cargo/config', cargo6configtoml);
+      mockReadLocalFile({ '.cargo/config.toml': cargo6configtoml });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -118,9 +111,8 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('extracts overridden registry indexes from .cargo/config.toml', async () => {
-      await writeLocalFile(
-        '.cargo/config.toml',
-        codeBlock`[registries]
+      mockReadLocalFile({
+        '.cargo/config.toml': codeBlock`[registries]
 private-crates = { index = "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git" }
 
 [registries.mcorbin]
@@ -131,7 +123,7 @@ replace-with = "mcorbin"
 
 [source.mcorbin]
 replace-with = "private-crates"`,
-      );
+      });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -176,14 +168,13 @@ replace-with = "private-crates"`,
     });
 
     it('extracts registries overridden to the default', async () => {
-      await writeLocalFile(
-        '.cargo/config.toml',
-        codeBlock`[source.mcorbin]
+      mockReadLocalFile({
+        '.cargo/config.toml': codeBlock`[source.mcorbin]
 replace-with = "crates-io"
 
 [source.private-crates]
 replace-with = "mcorbin"`,
-      );
+      });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -219,7 +210,7 @@ replace-with = "mcorbin"`,
     });
 
     it('extracts registries with an empty config.toml', async () => {
-      await writeLocalFile('.cargo/config.toml', ``);
+      mockReadLocalFile({ '.cargo/config.toml': '' });
       const res = await extractPackageFile(cargo5toml, 'Cargo.toml', {
         ...config,
       });
@@ -383,8 +374,7 @@ tokio = { version = "1.21.1" }`;
     });
 
     it('fails to parse cargo config with invalid TOML', async () => {
-      await writeLocalFile('.cargo/config', '[registries');
-
+      mockReadLocalFile({ '.cargo/config': '[registries' });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -393,8 +383,7 @@ tokio = { version = "1.21.1" }`;
     });
 
     it('ignore cargo config registries with missing index', async () => {
-      await writeLocalFile('.cargo/config', '[registries.mine]\nfoo = "bar"');
-
+      mockReadLocalFile({ '.cargo/config': '[registries.mine]\nfoo = "bar"' });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -403,14 +392,13 @@ tokio = { version = "1.21.1" }`;
     });
 
     it('ignore cargo config source replaced registries with missing index', async () => {
-      await writeLocalFile(
-        '.cargo/config',
-        codeBlock`[registries.mine]
+      mockReadLocalFile({
+        '.cargo/config': codeBlock`[registries.mine]
 foo = "bar"
 
 [source.crates-io]
 replace-with = "mine"`,
-      );
+      });
 
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
@@ -450,9 +438,8 @@ replace-with = "mine"`,
     });
 
     it('ignore cargo config with circular registry source replacements', async () => {
-      await writeLocalFile(
-        '.cargo/config',
-        codeBlock`[registries]
+      mockReadLocalFile({
+        '.cargo/config': codeBlock`[registries]
 private-crates = { index = "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git" }
 
 [registries.mcorbin]
@@ -467,7 +454,7 @@ replace-with = "private-crates"
 [source.private-crates]
 replace-with = "mcorbin"
 `,
-      );
+      });
 
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
@@ -518,7 +505,8 @@ replace-with = "mcorbin"
 
     it('extracts locked versions', async () => {
       const cargolock = Fixtures.get('lockfile-update/Cargo.3.lock');
-      await writeLocalFile('Cargo.lock', cargolock);
+      mockReadLocalFile({ 'Cargo.lock': cargolock });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
 
       const cargotoml = codeBlock`[package]
 name = "test"
@@ -533,7 +521,8 @@ syn = "2.0"`;
 
     it('extracts locked versions for renamed packages', async () => {
       const cargolock = Fixtures.get('lockfile-update/Cargo.1.lock');
-      await writeLocalFile('Cargo.lock', cargolock);
+      mockReadLocalFile({ 'Cargo.lock': cargolock });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
 
       const res = await extractPackageFile(
         lockfileUpdateCargotoml,
@@ -548,7 +537,8 @@ syn = "2.0"`;
 
     it('handles missing locked versions', async () => {
       const cargolock = Fixtures.get('lockfile-update/Cargo.2.lock');
-      await writeLocalFile('Cargo.lock', cargolock);
+      mockReadLocalFile({ 'Cargo.lock': cargolock });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
 
       const res = await extractPackageFile(
         lockfileUpdateCargotoml,
@@ -563,7 +553,8 @@ syn = "2.0"`;
 
     it('handles invalid versions in the toml file', async () => {
       const cargolock = Fixtures.get('lockfile-update/Cargo.3.lock');
-      await writeLocalFile('Cargo.lock', cargolock);
+      mockReadLocalFile({ 'Cargo.lock': cargolock });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
 
       const cargotoml = codeBlock`[package]
 name = "test"
@@ -577,7 +568,8 @@ syn = "2.foo.1"`;
     });
 
     it('handles invalid lock file', async () => {
-      await writeLocalFile('Cargo.lock', 'foo');
+      mockReadLocalFile({ 'Cargo.lock': 'foo' });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
 
       const res = await extractPackageFile(
         lockfileUpdateCargotoml,
