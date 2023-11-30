@@ -96,8 +96,11 @@ export function extractContainer(
 }
 
 export function extractAzurePipelinesTasks(
-  task: string,
+  task?: string,
 ): PackageDependency | null {
+  if (!task) {
+    return null;
+  }
   const match = AzurePipelinesTaskRegex.exec(task);
   if (match?.groups) {
     return {
