@@ -221,6 +221,18 @@ Results which are soft expired are reused in the following manner:
 - The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
 - If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
+## cachePreset
+
+When this feature is enabled, resolved presets will be cached in Renovate's package cache, enabling reuse across multiple repositories.
+
+TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachettloverride).
+
+<!-- prettier-ignore -->
+!!! warning
+     Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository,
+     however it also means that private presets can be "leaked" between repositories.
+     You should only enable this when all repositories are trusted, such as a corporate environment.
+
 ## cacheTtlOverride
 
 Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
@@ -655,18 +667,6 @@ Parameter to reduce CI load.
 CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events.
 Set as an integer.
 Default is no limit.
-
-## presetCache
-
-When this feature is enabled, resolved presets will be cached in Renovate's package cache, enabling reuse across multiple repositories.
-
-TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachettloverride).
-
-<!-- prettier-ignore -->
-!!! warning
-     Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository,
-     however it also means that private presets can be "leaked" between repositories.
-     You should only enable this when all repositories are trusted, such as a corporate environment.
 
 ## privateKey
 

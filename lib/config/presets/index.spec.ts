@@ -370,7 +370,7 @@ describe('config/presets/index', () => {
 
     it('default packageCache TTL should be 15 minutes', async () => {
       GlobalConfig.set({
-        presetCache: true,
+        cachePreset: true,
       });
 
       config.extends = ['github>username/preset-repo'];
@@ -409,9 +409,9 @@ describe('config/presets/index', () => {
       expect(packageCache.set.mock.calls[0][3]).toBe(15);
     });
 
-    it('use packageCache when presetCache is set', async () => {
+    it('use packageCache when cachePreset is set', async () => {
       GlobalConfig.set({
-        presetCache: true,
+        cachePreset: true,
         cacheTtlOverride: {
           preset: 60,
         },

@@ -227,11 +227,11 @@ export async function getPreset(
   const { presetSource, repo, presetPath, presetName, tag, params } =
     parsePreset(preset);
   const cacheKey = `preset:${preset}`;
-  const presetCache = GlobalConfig.get('presetCache', false);
+  const cachePreset = GlobalConfig.get('cachePreset', false);
 
   let presetConfig: Preset | null | undefined;
 
-  if (presetCache) {
+  if (cachePreset) {
     presetConfig = await packageCache.get(presetCacheNamespace, cacheKey);
   } else {
     presetConfig = memCache.get(cacheKey);
@@ -244,7 +244,7 @@ export async function getPreset(
       presetName,
       tag,
     });
-    if (presetCache) {
+    if (cachePreset) {
       await packageCache.set(
         presetCacheNamespace,
         cacheKey,
