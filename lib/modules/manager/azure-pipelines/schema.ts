@@ -29,11 +29,13 @@ export type Deploy = z.infer<typeof Deploy>;
 
 export const Deployment = z
   .object({
-    strategy: z.object({
-      runOnce: Deploy,
-      rolling: Deploy,
-      canary: Deploy,
-    }),
+    strategy: z
+      .object({
+        runOnce: Deploy,
+        rolling: Deploy,
+        canary: Deploy,
+      })
+      .partial(),
   })
   .partial();
 export type Deployment = z.infer<typeof Deployment>;
