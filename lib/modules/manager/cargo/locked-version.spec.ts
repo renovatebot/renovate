@@ -1,10 +1,22 @@
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
+import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { writeLocalFile } from '../../../util/fs';
 import { extractLockFileVersions, parseLockFile } from './locked-version';
+
+jest.mock('../../../util/fs');
+
+function mockReadLocalFile(files: Record<string, string | null>) {
+  fs.readLocalFile.mockImplementation((file): Promise<any> => {
+    let content: string | null = '';
+    if (file in files) {
+      content = files[file];
+    }
+    return Promise.resolve(content);
+  });
+}
 
 describe('modules/manager/cargo/locked-version', () => {
   describe('extractLockFileVersions()', () => {
@@ -30,20 +42,19 @@ describe('modules/manager/cargo/locked-version', () => {
     });
 
     it('returns null for invalid lock file', async () => {
-      await writeLocalFile('Cargo.lock', 'foo');
+      mockReadLocalFile({ 'Cargo.lock': 'foo' });
       expect(await extractLockFileVersions('Cargo.lock')).toBeNull();
     });
 
     it('returns empty map for lock file without packages', async () => {
-      await writeLocalFile('Cargo.lock', '[metadata]');
+      mockReadLocalFile({ 'Cargo.lock': '[metadata]' });
       expect(await extractLockFileVersions('Cargo.lock')).toEqual(new Map());
     });
 
     it('returns a map of package versions', async () => {
-      await writeLocalFile(
-        'Cargo.lock',
-        Fixtures.get('lockfile-update/Cargo.1.lock'),
-      );
+      mockReadLocalFile({
+        'Cargo.lock': Fixtures.get('lockfile-update/Cargo.1.lock'),
+      });
       expect(await extractLockFileVersions('Cargo.lock')).toEqual(
         new Map([
           ['proc-macro2', ['1.0.66']],
