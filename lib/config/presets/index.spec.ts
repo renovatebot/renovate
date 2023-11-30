@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import { mocked } from '../../../test/util';
 import * as memCache from '../../util/cache/memory';
@@ -18,7 +19,7 @@ import * as presets from '.';
 jest.mock('./npm');
 jest.mock('./github');
 jest.mock('./local');
-jest.mock('../../util/cache/package');
+jest.mock('../../util/cache/package', () => mockDeep());
 
 const npm = mocked(_npm);
 const local = mocked(_local);
