@@ -3,6 +3,7 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
+  "init": true,
   "hostRequirements": {
     "cpus": 4,
     "memory": "7gb",
