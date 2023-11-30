@@ -1,5 +1,5 @@
 import { RequestError } from 'got';
-import { extractRetryAfterHeaderSeconds, wrapWithRetry } from './retry-after';
+import { getRetryAfter, wrapWithRetry } from './retry-after';
 
 function requestError(
   response: {
@@ -26,7 +26,12 @@ describe('util/http/retry-after', () => {
 
     it('works', async () => {
       const task = jest.fn(() => Promise.resolve(42));
-      const res = await wrapWithRetry('http://example.com', task, () => null);
+      const res = await wrapWithRetry(
+        task,
+        'http://example.com',
+        () => null,
+        60,
+      );
       expect(res).toBe(42);
       expect(task).toHaveBeenCalledTimes(1);
     });
@@ -35,7 +40,7 @@ describe('util/http/retry-after', () => {
       const task = jest.fn(() => Promise.reject(new Error('error')));
 
       await expect(
-        wrapWithRetry('http://example.com', task, () => null),
+        wrapWithRetry(task, 'http://example.com', () => null, 60),
       ).rejects.toThrow('error');
 
       expect(task).toHaveBeenCalledTimes(1);
@@ -48,7 +53,7 @@ describe('util/http/retry-after', () => {
         .mockRejectedValueOnce(new Error('error-2'))
         .mockResolvedValueOnce(42);
 
-      const p = wrapWithRetry('http://example.com', task, () => 1);
+      const p = wrapWithRetry(task, 'http://example.com', () => 1, 60);
       await jest.advanceTimersByTimeAsync(2000);
 
       const res = await p;
@@ -64,7 +69,7 @@ describe('util/http/retry-after', () => {
         .mockRejectedValueOnce('error-3')
         .mockRejectedValue('error-4');
 
-      const p = wrapWithRetry('http://example.com', task, () => 1).catch(
+      const p = wrapWithRetry(task, 'http://example.com', () => 1, 60).catch(
         (err) => err,
       );
       await jest.advanceTimersByTimeAsync(2000);
@@ -76,7 +81,7 @@ describe('util/http/retry-after', () => {
     it('gives up when delay exceeds maxRetryAfter', async () => {
       const task = jest.fn().mockRejectedValue('error');
 
-      const p = wrapWithRetry('http://example.com', task, () => 61).catch(
+      const p = wrapWithRetry(task, 'http://example.com', () => 61, 60).catch(
         (err) => err,
       );
 
@@ -85,34 +90,30 @@ describe('util/http/retry-after', () => {
     });
   });
 
-  describe('extractRetryAfterHeaderSeconds', () => {
+  describe('getRetryAfter', () => {
     it('returns null for non-RequestError', () => {
-      expect(extractRetryAfterHeaderSeconds(new Error())).toBeNull();
+      expect(getRetryAfter(new Error())).toBeNull();
     });
 
     it('returns null for RequestError without response', () => {
-      expect(extractRetryAfterHeaderSeconds(requestError())).toBeNull();
+      expect(getRetryAfter(requestError())).toBeNull();
     });
 
     it('returns null for status other than 429', () => {
       const err = new RequestError('request-error', {}, null as never);
       (err as any).response = { statusCode: 302 };
-      expect(
-        extractRetryAfterHeaderSeconds(requestError({ statusCode: 302 })),
-      ).toBeNull();
+      expect(getRetryAfter(requestError({ statusCode: 302 }))).toBeNull();
     });
 
     it('returns null missing "retry-after" header', () => {
       expect(
-        extractRetryAfterHeaderSeconds(
-          requestError({ statusCode: 429, headers: {} }),
-        ),
+        getRetryAfter(requestError({ statusCode: 429, headers: {} })),
       ).toBeNull();
     });
 
     it('returns null for non-integer "retry-after" header', () => {
       expect(
-        extractRetryAfterHeaderSeconds(
+        getRetryAfter(
           requestError({
             statusCode: 429,
             headers: {
@@ -125,7 +126,7 @@ describe('util/http/retry-after', () => {
 
     it('returns delay in seconds', () => {
       expect(
-        extractRetryAfterHeaderSeconds(
+        getRetryAfter(
           requestError({
             statusCode: 429,
             headers: {

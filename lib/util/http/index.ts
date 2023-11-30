@@ -15,7 +15,7 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRule, findMatchingRule } from './host-rules';
 import { getQueue } from './queue';
-import { extractRetryAfterHeaderSeconds, wrapWithRetry } from './retry-after';
+import { getRetryAfter, wrapWithRetry } from './retry-after';
 import { Throttle, getThrottle } from './throttle';
 import type {
   GotJSONOptions,
@@ -231,12 +231,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         : throttledTask;
 
       const { maxRetryAfter = 60 } = hostRule;
-      resPromise = wrapWithRetry(
-        url,
-        queuedTask,
-        extractRetryAfterHeaderSeconds,
-        maxRetryAfter,
-      );
+      resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
 
       if (memCacheKey) {
         memCache.set(memCacheKey, resPromise);

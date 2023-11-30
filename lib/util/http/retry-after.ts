@@ -9,10 +9,10 @@ const hostBlocks = new Map<string, Promise<void>>();
 const maxRetries = 2;
 
 export async function wrapWithRetry<T>(
-  url: string,
   task: Task<T>,
-  getDelaySeconds: (err: unknown) => number | null,
-  maxRetryAfter = 60,
+  url: string,
+  getRetryAfter: (err: unknown) => number | null,
+  maxRetryAfter: number,
 ): Promise<T> {
   const key = parseUrl(url)?.host ?? /* istanbul ignore next */ url;
 
@@ -27,7 +27,7 @@ export async function wrapWithRetry<T>(
 
       return await task();
     } catch (err) {
-      const delaySeconds = getDelaySeconds(err);
+      const delaySeconds = getRetryAfter(err);
       if (delaySeconds === null) {
         throw err;
       }
@@ -56,7 +56,7 @@ export async function wrapWithRetry<T>(
   }
 }
 
-export function extractRetryAfterHeaderSeconds(err: unknown): number | null {
+export function getRetryAfter(err: unknown): number | null {
   if (!(err instanceof RequestError)) {
     return null;
   }
