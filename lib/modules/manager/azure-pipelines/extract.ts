@@ -9,6 +9,7 @@ import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 import {
   AzurePipelines,
+  AzurePipelinesYaml,
   Container,
   Deploy,
   Deployment,
@@ -112,19 +113,16 @@ export function parseAzurePipelines(
   content: string,
   packageFile: string,
 ): AzurePipelines | null {
-  const content_json = load(content, { json: true }) as string;
-  const res = AzurePipelines.safeParse({
-    content_json,
-    fileName: packageFile,
-  });
-  if (!res.success) {
+  const res = AzurePipelinesYaml.safeParse(content);
+  if (res.success) {
+    return res.data;
+  } else {
     logger.debug(
-      { packageFile, err: res.error },
-      'azure-pipelines: extract failed',
+      { err: res.error, packageFile },
+      'Error parsing pubspec lockfile.',
     );
-    return null;
   }
-  return res.data;
+  return null;
 }
 
 function extractSteps(

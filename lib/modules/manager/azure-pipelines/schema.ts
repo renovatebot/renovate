@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Yaml } from '../../../util/schema-utils';
 
 export const Step = z.object({
   task: z.string(),
@@ -69,8 +70,10 @@ export const AzurePipelines = z
   .object({
     resources: Resources,
     stages: z.array(Stage),
-    jobs: z.array(Jobs),
+    jobs: Jobs,
     steps: z.array(Step),
   })
   .partial();
 export type AzurePipelines = z.infer<typeof AzurePipelines>;
+
+export const AzurePipelinesYaml = Yaml.pipe(AzurePipelines);
