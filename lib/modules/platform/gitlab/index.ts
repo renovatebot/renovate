@@ -894,7 +894,7 @@ export async function findReconfigurePr(
   const pr: GitlabPr = {
     sourceBranch: mr.source_branch,
     number: mr.iid,
-    state: mr.state === 'opened' ? 'open' : mr.state,
+    state: 'open',
     title: mr.title,
   };
 
