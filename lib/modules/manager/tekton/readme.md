@@ -12,8 +12,17 @@ They can be created directly as a Kubernetes resource with standard tools like `
 Tasks and Pipeline definitions can also live outside the Kubernetes cluster and get fetched by Tekton when needed, this approach relies on Tekton resource references rather than the resource definition.
 The `tekton` manager focuses on providing updates to Tekton resource references.
 
-Right now, Renovate's Tekton manager only supports references that are [Bundles](https://tekton.dev/docs/pipelines/tekton-bundle-contracts/).
+Right now, Renovate's Tekton manager supports references that are [Bundles](https://tekton.dev/docs/pipelines/tekton-bundle-contracts/) and [PipelinesAsCode](https://pipelinesascode.com) with [remote http url resolver](https://pipelinesascode.com/docs/guide/resolver/#remote-http-url).
 Read the [Tekton Pipeline remote resolution docs](https://tekton.dev/docs/pipelines/resolution/) for the different kinds of Tekton references and their corresponding resolvers.
+
+### Using a PipelinesAsCode remote url reference
+
+By specifying the annotation with a remote task based on the recommended way using [git based versioning](https://github.com/tektoncd/community/blob/main/teps/0115-tekton-catalog-git-based-versioning.md).
+
+```yaml
+  annotations:
+    pipelinesascode.tekton.dev/task: "https://github.com/foo/bar/raw/v0.0.1/tasks/task/task.yaml"
+```
 
 ### Using a Tekton Bundle reference
 
