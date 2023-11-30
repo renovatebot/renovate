@@ -96,11 +96,8 @@ export function extractContainer(
 }
 
 export function extractAzurePipelinesTasks(
-  task?: string,
+  task: string,
 ): PackageDependency | null {
-  if (!task) {
-    return null;
-  }
   const match = AzurePipelinesTaskRegex.exec(task);
   if (match?.groups) {
     return {
@@ -142,7 +139,7 @@ function extractSteps(
 }
 
 function extractJob(job?: Job): PackageDependency<Record<string, any>>[] {
-  return extractSteps(coerceArray(job?.steps));
+  return extractSteps(job?.steps);
 }
 
 function extractDeploy(
@@ -159,16 +156,13 @@ function extractDeploy(
 
 function extractJobs(jobs?: Jobs): PackageDependency<Record<string, any>>[] {
   const deps: PackageDependency<Record<string, any>>[] = [];
-  if (!jobs) {
-    return deps;
-  }
-
-  for (const jobOrDeployment of jobs) {
+  for (const jobOrDeployment of coerceArray(jobs)) {
     const deployment = jobOrDeployment as Deployment;
     if (deployment.strategy) {
       deps.push(...extractDeploy(deployment.strategy.canary));
       deps.push(...extractDeploy(deployment.strategy.rolling));
       deps.push(...extractDeploy(deployment.strategy.runOnce));
+      continue;
     }
 
     const job = jobOrDeployment as Job;

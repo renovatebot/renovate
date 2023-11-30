@@ -1,13 +1,13 @@
 import { z } from 'zod';
-import { Yaml } from '../../../util/schema-utils';
+import { LooseArray, Yaml } from '../../../util/schema-utils';
 
 export const Step = z.object({
-  task: z.string().optional(),
+  task: z.string(),
 });
 export type Step = z.infer<typeof Step>;
 
 export const Job = z.object({
-  steps: z.array(Step),
+  steps: LooseArray(Step),
 });
 export type Job = z.infer<typeof Job>;
 
@@ -40,7 +40,7 @@ export const Deployment = z
   .partial();
 export type Deployment = z.infer<typeof Deployment>;
 
-export const Jobs = z.array(z.union([Job, Deployment]));
+export const Jobs = LooseArray(z.union([Job, Deployment]));
 export type Jobs = z.infer<typeof Jobs>;
 
 export const Stage = z.object({
@@ -62,8 +62,8 @@ export type Repository = z.infer<typeof Repository>;
 
 export const Resources = z
   .object({
-    repositories: z.array(Repository),
-    containers: z.array(Container),
+    repositories: LooseArray(Repository),
+    containers: LooseArray(Container),
   })
   .partial();
 export type Resources = z.infer<typeof Resources>;
@@ -71,9 +71,9 @@ export type Resources = z.infer<typeof Resources>;
 export const AzurePipelines = z
   .object({
     resources: Resources,
-    stages: z.array(Stage),
+    stages: LooseArray(Stage),
     jobs: Jobs,
-    steps: z.array(Step),
+    steps: LooseArray(Step),
   })
   .partial();
 export type AzurePipelines = z.infer<typeof AzurePipelines>;
