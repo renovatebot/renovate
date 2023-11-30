@@ -414,6 +414,7 @@ const staticGroups = {
       'group:polymer',
       'group:react',
       'group:resilience4j',
+      'group:releaseIt',
       'group:rubyOnRails',
       'group:rubyOmniauth',
       'group:socketio',
@@ -443,6 +444,15 @@ const staticGroups = {
       'group:symfony',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  releaseIt: {
+    description: 'Group all packages published by release-it together.',
+    packageRules: [
+      {
+        extends: 'packages:releaseIt',
+        groupName: 'release-it packages',
+      },
+    ],
   },
   resilience4j: {
     description: 'Group Java Resilience4j packages.',
