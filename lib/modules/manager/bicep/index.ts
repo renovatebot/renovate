@@ -6,4 +6,6 @@ export const defaultConfig = {
   fileMatch: ['\\.bicep$'],
 };
 
+export const categories: Category[] = ['iac'];
+
 export const supportedDatasources = [AzureBicepResourceDatasource.id];
