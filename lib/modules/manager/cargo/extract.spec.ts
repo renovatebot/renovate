@@ -6,7 +6,6 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { writeLocalFile } from '../../../util/fs';
 import type { ExtractConfig } from '../types';
-
 import { extractPackageFile } from '.';
 
 const cargo1toml = Fixtures.get('Cargo.1.toml');

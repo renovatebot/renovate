@@ -307,23 +307,15 @@ export async function extractPackageFile(
     for (const dep of deps) {
       const packageName = dep.packageName ?? dep.depName!;
       const versions = coerceArray(versionsByPackage.get(packageName));
-      try {
-        const lockedVersion = versioning.getSatisfyingVersion(
-          versions,
-          dep.currentValue!,
-        );
-        if (lockedVersion) {
-          dep.lockedVersion = lockedVersion;
-        } else {
-          logger.debug(
-            `No locked version found for package ${dep.depName} in the range of ${dep.currentValue}.`,
-          );
-        }
-      } catch (err) {
-        // istanbul ignore next: this should not happen
-        logger.warn(
-          { packageName, err },
-          `Error finding satisfying version for package ${dep.depName}.`,
+      const lockedVersion = versioning.getSatisfyingVersion(
+        versions,
+        dep.currentValue!,
+      );
+      if (lockedVersion) {
+        dep.lockedVersion = lockedVersion;
+      } else {
+        logger.debug(
+          `No locked version found for package ${dep.depName} in the range of ${dep.currentValue}.`,
         );
       }
     }
