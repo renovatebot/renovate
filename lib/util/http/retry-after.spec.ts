@@ -1,10 +1,6 @@
 import { RequestError } from 'got';
 import * as hostRules from '../host-rules';
-import {
-  extractRetryAfterHeaderSeconds,
-  getMaxRetryAfter,
-  wrapWithRetry,
-} from './retry-after';
+import { extractRetryAfterHeaderSeconds, wrapWithRetry } from './retry-after';
 
 function requestError(
   response: {
@@ -139,23 +135,6 @@ describe('util/http/retry-after', () => {
           }),
         ),
       ).toBe(42);
-    });
-  });
-
-  describe('getMaxRetryAfter', () => {
-    afterEach(() => {
-      hostRules.clear();
-    });
-
-    it('returns default value of 60 when host rule is not set', () => {
-      expect(getMaxRetryAfter('http://example.com')).toBe(60);
-    });
-
-    it('returns maxRetryAfter', () => {
-      hostRules.add({ matchHost: 'foo.com', maxRetryAfter: 111 });
-      hostRules.add({ matchHost: 'bar.com', maxRetryAfter: 222 });
-      expect(getMaxRetryAfter('http://foo.com')).toBe(111);
-      expect(getMaxRetryAfter('http://bar.com')).toBe(222);
     });
   });
 });
