@@ -447,7 +447,13 @@ const staticGroups = {
   },
   remark: {
     description: 'Group remark packages together.',
-    matchSourceUrlPrefixes: ['https://github.com/remarkjs/'],
+    packageRules: [
+      {
+        groupName: 'remark',
+        matchSourceUrlPrefixes: ['https://github.com/remarkjs/'],
+        matchDatasources: ['npm'],
+      },
+    ],
   },
   resilience4j: {
     description: 'Group Java Resilience4j packages.',
