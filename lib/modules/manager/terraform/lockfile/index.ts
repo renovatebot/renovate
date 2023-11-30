@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import * as p from '../../../../util/promises';
+import { escapeRegExp, regEx } from '../../../../util/regex';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { get as getVersioning } from '../../../versioning';
@@ -89,7 +90,10 @@ export function getNewConstraint(
       `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`,
     );
     //remove surplus .0 version
-    return oldConstraint.replace(RegExp(`${currentValue}(\\.0)*`), newValue);
+    return oldConstraint.replace(
+      regEx(`${escapeRegExp(currentValue)}(\\.0)*`),
+      newValue,
+    );
   }
 
   if (
