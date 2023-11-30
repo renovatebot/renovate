@@ -14,7 +14,7 @@ export interface HostRuleSearchResult {
   maxRetryAfter?: number;
 
   dnsCache?: boolean;
-  keepalive?: boolean;
+  keepAlive?: boolean;
   artifactAuth?: string[] | null;
   httpsCertificateAuthority?: string;
   httpsPrivateKey?: string;
