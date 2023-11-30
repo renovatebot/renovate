@@ -41,7 +41,7 @@ If you're using `config:recommended` now, replace it with `config:best-practices
 
 ### What's in the `config:best-practices` preset?
 
-The [`config:best-practices` preset](https://docs.renovatebot.com/presets-config/#configbest-practices) has this configuration:
+The [`config:best-practices` preset](./presets-config.md#configbest-practices) has this configuration:
 
 ```json
 {
@@ -125,7 +125,7 @@ When you're behind on updates, you'll have a bad time, because you must read _mo
 
 Finally, when you're updating often, you'll start looking for ways to automate the updates.
 You may start to [`automerge`](./configuration-options.md#automerge) development dependencies like Prettier, or ESLint when the linter passes.
-Or you may decide to automerge any `patch` type upgrades, by using the [`default:automergePatch`](https://docs.renovatebot.com/presets-default/#automergepatch) preset.
+Or you may decide to automerge any `patch` type upgrades, by using the [`default:automergePatch`](./presets-default.md#automergepatch) preset.
 
 You may also start using [GitHub's pull request merge queues](./key-concepts/automerge.md#github-merge-queue) to speed up the merge process.
 Renovate does not support GitLab's Merge Trains, see [issue #5573](https://github.com/renovatebot/renovate/issues/5573).
@@ -195,7 +195,7 @@ Say you're on version `1` of a dependency, and the latest `major` version is at 
 You should update to `2`, then `3` and finally `4`.
 Avoid updating from `1` directly to `4`.
 
-Use the [`:separateMultipleMajorReleases`](https://docs.renovatebot.com/presets-default/#separatemultiplemajorreleases) preset to get separate `major` updates.
+Use the [`:separateMultipleMajorReleases`](./presets-default.md#separatemultiplemajorreleases) preset to get separate `major` updates.
 
 ### Update development tools
 

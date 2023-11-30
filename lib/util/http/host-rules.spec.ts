@@ -115,8 +115,8 @@ describe('util/http/host-rules', () => {
     });
   });
 
-  it('uses http keepalives', () => {
-    hostRules.add({ keepalive: true });
+  it('uses http keep-alive', () => {
+    hostRules.add({ keepAlive: true });
     expect(
       applyHostRules(url, { ...options, token: 'xxx' }).agent,
     ).toBeDefined();

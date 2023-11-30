@@ -9,7 +9,10 @@ export interface GitAuthor {
 
 export type GitNoVerifyOption = 'commit' | 'push';
 
-export type LongCommitSha = string;
+/**
+ * We want to make sure this is a long sha of 40 characters and not just any string
+ */
+export type LongCommitSha = string & { __longCommitSha: never };
 
 export interface StorageConfig {
   currentBranch?: string;
@@ -22,7 +25,7 @@ export interface StorageConfig {
 export interface LocalConfig extends StorageConfig {
   additionalBranches: string[];
   currentBranch: string;
-  currentBranchSha: string;
+  currentBranchSha: LongCommitSha;
   branchCommits: Record<string, LongCommitSha>;
   branchIsModified: Record<string, boolean>;
   commitBranches: Record<string, string[]>;
@@ -89,8 +92,8 @@ export interface PushFilesConfig {
 export type BranchName = string;
 
 export interface CommitResult {
-  parentCommitSha: string;
-  commitSha: string;
+  parentCommitSha: LongCommitSha;
+  commitSha: LongCommitSha;
   files: FileChange[];
 }
 
@@ -98,7 +101,7 @@ export interface TreeItem {
   path: string;
   mode: string;
   type: string;
-  sha: string;
+  sha: LongCommitSha;
 }
 
 /**

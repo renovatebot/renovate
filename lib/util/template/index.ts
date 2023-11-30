@@ -3,6 +3,7 @@ import handlebars from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { getChildEnv } from '../exec/utils';
+import { regEx } from '../regex';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
@@ -11,11 +12,8 @@ handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2),
 );
 
-// istanbul ignore next
-handlebars.registerHelper(
-  'replace',
-  (find, replace, context) =>
-    (context || '').replace(new RegExp(find, 'g'), replace), // TODO #12873
+handlebars.registerHelper('replace', (find, replace, context) =>
+  (context ?? '').replace(regEx(find, 'g'), replace),
 );
 
 handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());

@@ -442,6 +442,19 @@ For example:
 }
 ```
 
+### pipenv
+
+If a `Pipfile` contains a `source` with `USERNAME` or `PASSWORD` environment variables and there is a `hostRules` entry with a matching host plus `username` and `password` fields, then these variables would be passed to `pipenv lock`.
+
+For example:
+
+```ini
+[[source]]
+url = "https://$USERNAME:${PASSWORD}@mypypi.example.com/simple"
+verify_ssl = true
+name = "pypi"
+```
+
 ### poetry
 
 For every Poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`, where `X` represents the normalized name of the source in `pyproject.toml`.

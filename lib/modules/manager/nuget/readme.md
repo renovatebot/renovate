@@ -1,4 +1,4 @@
-Use [`packageRules`](https://docs.renovatebot.com/configuration-options/#packagerules) to control the behavior of the NuGet package manager.
+Use [`packageRules`](../../../configuration-options.md#packagerules) to control the behavior of the NuGet package manager.
 
 The NuGet package manager supports these SDK-style files and formats:
 

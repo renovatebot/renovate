@@ -265,9 +265,12 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 }
 
+const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
+export type CustomDatasourceFormats = (typeof CustomDatasourceFormats)[number];
+
 export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
-  format?: 'json' | 'plain' | 'yaml';
+  format?: CustomDatasourceFormats;
   transformTemplates?: string[];
 }
 

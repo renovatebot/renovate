@@ -61,12 +61,12 @@ Read the [MDN Web Docs, decodeURIComponent()](https://developer.mozilla.org/en-U
 
 ### replace
 
-The `replace` helper replaces _all_ found strings with the replacement string.
+The `replace` helper replaces _all_ found strings matching the given regex with the replacement string.
 If you want to replace some characters in a string, use the built-in function `replace` like this:
 
-`{{{replace 'github.com' 'ghc' depName}}}`
+`{{{replace '[a-z]+\.github\.com' 'ghc' depName}}}`
 
-In the example above all matches of `github.com` will be replaced by `ghc` in `depName`.
+In the example above all matches of the regex `[a-z]+\.github\.com` will be replaced by `ghc` in `depName`.
 
 Read the [MDN Web Docs, String.prototype.replace()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace) to learn more.
 

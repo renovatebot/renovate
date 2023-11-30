@@ -39,6 +39,14 @@ const hugoDefinition: ToolingDefinition = {
 };
 
 export const upgradeableTooling: Record<string, ToolingDefinition> = {
+  act: {
+    asdfPluginUrl: 'https://github.com/grimoh/asdf-act.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'nektos/act',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   'adr-tools': {
     asdfPluginUrl: 'https://gitlab.com/td7x/asdf/adr-tools.git',
     config: {
