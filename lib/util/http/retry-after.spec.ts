@@ -1,5 +1,4 @@
 import { RequestError } from 'got';
-import * as hostRules from '../host-rules';
 import { extractRetryAfterHeaderSeconds, wrapWithRetry } from './retry-after';
 
 function requestError(
