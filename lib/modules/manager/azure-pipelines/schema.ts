@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { Yaml } from '../../../util/schema-utils';
 
 export const Step = z.object({
-  task: z.string(),
+  task: z.string().optional(),
 });
 export type Step = z.infer<typeof Step>;
 
