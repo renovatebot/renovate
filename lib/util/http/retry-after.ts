@@ -1,7 +1,6 @@
 import { setTimeout } from 'timers/promises';
 import { RequestError } from 'got';
 import { logger } from '../../logger';
-import * as hostRules from '../host-rules';
 import { parseUrl } from '../url';
 import type { Task } from './types';
 
@@ -85,9 +84,4 @@ export function extractRetryAfterHeaderSeconds(err: unknown): number | null {
   }
 
   return seconds;
-}
-
-export function getMaxRetryAfter(url: string): number {
-  const { maxRetryAfter = 60 } = hostRules.find({ url });
-  return maxRetryAfter;
 }
