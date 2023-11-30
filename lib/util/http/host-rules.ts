@@ -34,9 +34,9 @@ export type HostRulesGotOptions = Pick<
   | 'https'
 >;
 
-export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
-  options: GotOptions,
+export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   url: string,
+  options: GotOptions,
 ): HostRule {
   const { hostType } = options;
   let res = hostRules.find({ hostType, url });
@@ -114,13 +114,12 @@ export function findMatchingRules<GotOptions extends HostRulesGotOptions>(
 }
 
 // Apply host rules to requests
-export function applyHostRules<GotOptions extends HostRulesGotOptions>(
+export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   url: string,
-  inOptions: GotOptions,
+  options: GotOptions,
+  hostRule: HostRule,
 ): GotOptions {
-  const options: GotOptions = { ...inOptions };
-  const foundRules = findMatchingRules(options, url);
-  const { username, password, token, enabled, authType } = foundRules;
+  const { username, password, token, enabled, authType } = hostRule;
   const host = parseUrl(url)?.host;
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
@@ -147,48 +146,48 @@ export function applyHostRules<GotOptions extends HostRulesGotOptions>(
     logger.once.debug(`hostRules: no authentication for ${host}`);
   }
   // Apply optional params
-  if (foundRules.abortOnError) {
-    options.abortOnError = foundRules.abortOnError;
+  if (hostRule.abortOnError) {
+    options.abortOnError = hostRule.abortOnError;
   }
 
-  if (foundRules.abortIgnoreStatusCodes) {
-    options.abortIgnoreStatusCodes = foundRules.abortIgnoreStatusCodes;
+  if (hostRule.abortIgnoreStatusCodes) {
+    options.abortIgnoreStatusCodes = hostRule.abortIgnoreStatusCodes;
   }
 
-  if (foundRules.timeout) {
-    options.timeout = foundRules.timeout;
+  if (hostRule.timeout) {
+    options.timeout = hostRule.timeout;
   }
 
-  if (foundRules.dnsCache) {
+  if (hostRule.dnsCache) {
     options.lookup = dnsLookup;
   }
 
-  if (foundRules.keepAlive) {
+  if (hostRule.keepAlive) {
     options.agent = keepAliveAgents;
   }
 
-  if (!hasProxy() && foundRules.enableHttp2 === true) {
+  if (!hasProxy() && hostRule.enableHttp2 === true) {
     options.http2 = true;
   }
 
-  if (is.nonEmptyString(foundRules.httpsCertificateAuthority)) {
+  if (is.nonEmptyString(hostRule.httpsCertificateAuthority)) {
     options.https = {
       ...(options.https ?? {}),
-      certificateAuthority: foundRules.httpsCertificateAuthority,
+      certificateAuthority: hostRule.httpsCertificateAuthority,
     };
   }
 
-  if (is.nonEmptyString(foundRules.httpsPrivateKey)) {
+  if (is.nonEmptyString(hostRule.httpsPrivateKey)) {
     options.https = {
       ...(options.https ?? {}),
-      key: foundRules.httpsPrivateKey,
+      key: hostRule.httpsPrivateKey,
     };
   }
 
-  if (is.nonEmptyString(foundRules.httpsCertificate)) {
+  if (is.nonEmptyString(hostRule.httpsCertificate)) {
     options.https = {
       ...(options.https ?? {}),
-      certificate: foundRules.httpsCertificate,
+      certificate: hostRule.httpsCertificate,
     };
   }
 
