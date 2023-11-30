@@ -138,9 +138,7 @@ function extractJob(job: Job | undefined): PackageDependency[] {
   return extractSteps(job?.steps);
 }
 
-function extractDeploy(
-  deploy: Deploy | undefined,
-): PackageDependency[] {
+function extractDeploy(deploy: Deploy | undefined): PackageDependency[] {
   const deps = extractJob(deploy?.deploy);
   deps.push(...extractJob(deploy?.postRouteTraffic));
   deps.push(...extractJob(deploy?.preDeploy));
