@@ -1,4 +1,5 @@
 import { git, mocked, partial } from '../../../../test/util';
+import type { LongCommitSha } from '../../../util/git/types';
 import { client as _client } from './client';
 import { GerritScm, configureScm } from './scm';
 import type {
@@ -182,7 +183,7 @@ describe('modules/platform/gerrit/scm', () => {
 
   describe('getBranchCommit()', () => {
     it('no change found for branch name -> return result from git.getBranchCommit', async () => {
-      git.getBranchCommit.mockReturnValueOnce('shaHashValue');
+      git.getBranchCommit.mockReturnValueOnce('shaHashValue' as LongCommitSha);
       clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(gerritScm.getBranchCommit('myBranchName')).resolves.toBe(
         'shaHashValue',
@@ -281,8 +282,8 @@ describe('modules/platform/gerrit/scm', () => {
     it('commitFiles() - create first Patch', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha',
-        parentCommitSha: 'parentSha',
+        commitSha: 'commitSha' as LongCommitSha,
+        parentCommitSha: 'parentSha' as LongCommitSha,
         files: [],
       });
       git.pushCommit.mockResolvedValueOnce(true);
@@ -319,8 +320,8 @@ describe('modules/platform/gerrit/scm', () => {
       });
       clientMock.findChanges.mockResolvedValueOnce([existingChange]);
       git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha',
-        parentCommitSha: 'parentSha',
+        commitSha: 'commitSha' as LongCommitSha,
+        parentCommitSha: 'parentSha' as LongCommitSha,
         files: [],
       });
       git.pushCommit.mockResolvedValueOnce(true);
@@ -357,8 +358,8 @@ describe('modules/platform/gerrit/scm', () => {
       clientMock.findChanges.mockResolvedValueOnce([existingChange]);
       clientMock.wasApprovedBy.mockReturnValueOnce(true);
       git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha',
-        parentCommitSha: 'parentSha',
+        commitSha: 'commitSha' as LongCommitSha,
+        parentCommitSha: 'parentSha' as LongCommitSha,
         files: [],
       });
       git.pushCommit.mockResolvedValueOnce(true);

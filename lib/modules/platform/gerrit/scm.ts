@@ -34,7 +34,7 @@ export class GerritScm extends DefaultGitScm {
       .findChanges(repository, searchConfig, true)
       .then((res) => res.pop());
     if (change) {
-      return change.current_revision!;
+      return change.current_revision! as LongCommitSha;
     }
     return git.getBranchCommit(branchName);
   }
