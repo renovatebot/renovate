@@ -1,5 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/platform/github/index findReconfigurePr() finds reconfigure pr 1`] = `
+{
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "node_id": undefined,
+  "number": 1,
+  "sourceBranch": "branch-a",
+  "sourceRepo": "some/repo",
+  "state": "open",
+  "title": "branch a pr",
+  "updated_at": undefined,
+}
+`;
+
 exports[`modules/platform/github/index getRepoForceRebase should throw 401 1`] = `"Response code 401 (Unauthorized)"`;
 
 exports[`modules/platform/github/index getRepos should return an array of repos 1`] = `

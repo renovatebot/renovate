@@ -354,6 +354,10 @@ export async function findReconfigurePr(
     1,
   );
 
+  if (!prList.length) {
+    logger.debug({ prList }, 'No reconfigure Pr found');
+    return null;
+  }
   if (prList.length > 1) {
     logger.debug({ prList }, 'More than one Reconfigure PR');
     return null;
@@ -362,7 +366,8 @@ export async function findReconfigurePr(
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
-  return pr ?? null;
+
+  return pr;
 }
 
 // Returns the Pull Request for a branch. Null if not exists.

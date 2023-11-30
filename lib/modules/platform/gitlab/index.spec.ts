@@ -1679,6 +1679,74 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
+  describe('findReconfigurePr()', () => {
+    it('exists', () => {
+      expect(gitlab.findReconfigurePr).toBeDefined();
+    });
+
+    it('finds reconfigure pr', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests?source_branch=branch')
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch',
+            title: 'branch a pr',
+            state: 'opened',
+          },
+        ]);
+      expect(await gitlab.findReconfigurePr?.('branch')).toMatchSnapshot();
+    });
+
+    it('returns null if reconfigure pr is closed', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests?source_branch=branch')
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch',
+            title: 'branch a pr',
+            state: 'closed',
+          },
+        ]);
+      const pr = await gitlab.findReconfigurePr?.('branch');
+      expect(pr).toBeNull();
+    });
+
+    it('returns null if reconfigure pr not found', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests?source_branch=branch')
+        .reply(200, []);
+      const pr = await gitlab.findReconfigurePr?.('branch');
+      expect(pr).toBeNull();
+    });
+
+    it('returns null if more than one PR is open from reconfigure branch', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests?source_branch=branch')
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch',
+            title: 'branch a pr',
+            state: 'opened',
+          },
+          {
+            iid: 2,
+            source_branch: 'branch',
+            title: 'branch a pr 2',
+            state: 'opened',
+          },
+        ]);
+      const pr = await gitlab.findReconfigurePr?.('branch');
+      expect(pr).toBeNull();
+    });
+  });
+
   async function initPlatform(gitlabVersion: string) {
     httpMock
       .scope(gitlabApiHost)

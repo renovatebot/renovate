@@ -350,8 +350,12 @@ export async function findReconfigurePr(
   ).body.values;
 
   prList = prList.filter((pr) => pr.state === 'OPEN');
-  if (prList.length === 0 || prList.length > 1) {
-    logger.debug({ prList }, 'More than one reconfigure pR');
+  if (prList.length === 0) {
+    logger.debug({ prList }, 'No reconfigure pr found');
+    return null;
+  }
+  if (prList.length > 1) {
+    logger.debug({ prList }, 'Found more than one reconfigure pr');
     return null;
   }
   const pr = utils.prInfo(prList[0]);

@@ -836,6 +836,11 @@ export async function findReconfigurePr(
   );
   let { body: prList } = response;
   prList = prList.filter((pr) => pr.state === 'open');
+
+  if (!prList.length) {
+    logger.debug({ prList }, 'No reconfigure Pr found');
+    return null;
+  }
   if (prList.length > 1) {
     logger.debug({ prList }, 'More than one reconfigure pR');
     return null;
@@ -844,7 +849,7 @@ export async function findReconfigurePr(
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
   }
-  return pr ?? null;
+  return pr;
 }
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;

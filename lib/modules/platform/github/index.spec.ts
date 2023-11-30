@@ -2430,6 +2430,74 @@ describe('modules/platform/github/index', () => {
     });
   });
 
+  describe('findReconfigurePr()', () => {
+    it('exists', () => {
+      expect(github.findReconfigurePr).toBeDefined();
+    });
+
+    it('finds reconfigure pr', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls?head=some/repo:branch').reply(200, [
+        {
+          number: 1,
+          head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+          title: 'branch a pr',
+          state: 'open',
+        },
+      ]);
+      await github.initRepo({ repository: 'some/repo' });
+      expect(await github.findReconfigurePr?.('branch')).toMatchSnapshot();
+    });
+
+    it('returns null if reconfigure pr is closed', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls?head=some/repo:branch').reply(200, [
+        {
+          number: 1,
+          head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+          title: 'branch a pr',
+          state: 'closed',
+        },
+      ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = await github.findReconfigurePr?.('branch');
+      expect(pr).toBeNull();
+    });
+
+    it('returns null if reconfigure pr not found', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls?head=some/repo:branch').reply(200, []);
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = await github.findReconfigurePr?.('branch');
+      expect(pr).toBeNull();
+    });
+
+    it('returns null if more than one PR is open from reconfigure branch', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/pulls?head=some/repo:branch').reply(200, [
+        {
+          number: 1,
+          head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+          title: 'branch a pr',
+          state: 'open',
+        },
+        {
+          number: 2,
+          head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+          title: 'branch a pr2',
+          state: 'open',
+        },
+      ]);
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = await github.findReconfigurePr?.('branch');
+      expect(pr).toBeNull();
+    });
+  });
+
   describe('createPr()', () => {
     it('should create and return a PR object', async () => {
       const scope = httpMock.scope(githubApiHost);

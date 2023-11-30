@@ -1308,6 +1308,70 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
       });
 
+      describe('findReconfigurePr()', () => {
+        it('exists', () => {
+          expect(bitbucket.findReconfigurePr).toBeDefined();
+        });
+
+        it('finds reconfigure pr', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [prMock(url, 'SOME', 'repo')],
+            });
+          expect(
+            await bitbucket.findReconfigurePr?.('branch'),
+          ).toMatchSnapshot();
+        });
+
+        it('returns null if more than one PR is open from reconfigure branch', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [
+                prMock(url, 'SOME', 'repo'),
+                {
+                  ...prMock(url, 'SOME', 'repo'),
+                  version: 1,
+                  id: 1,
+                  description: '',
+                  fromRef: { displayId: 'branch' },
+                  toRef: { displayId: 'master' },
+                  title: 'reconfigure',
+                  state: 'OPEN',
+                  createdDate: new Date(),
+                },
+              ],
+            });
+
+          const pr = await bitbucket.findReconfigurePr?.('branch');
+          expect(pr).toBeNull();
+        });
+
+        it('returns null if no PR found', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
+
+          const pr = await bitbucket.findReconfigurePr?.('branch');
+          expect(pr).toBeNull();
+        });
+      });
+
       describe('createPr()', () => {
         it('posts PR', async () => {
           const scope = await initRepo();

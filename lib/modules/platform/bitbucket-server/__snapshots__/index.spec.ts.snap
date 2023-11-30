@@ -25,6 +25,21 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path findPr() 
 }
 `;
 
+exports[`modules/platform/bitbucket-server/index endpoint with no path findReconfigurePr() finds reconfigure pr 1`] = `
+{
+  "bodyStruct": {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
+  "createdAt": 1547853840016,
+  "number": 5,
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
 exports[`modules/platform/bitbucket-server/index endpoint with no path getBranchPr() has pr 1`] = `
 {
   "bodyStruct": {
@@ -215,6 +230,21 @@ exports[`modules/platform/bitbucket-server/index endpoint with path addReviewers
 exports[`modules/platform/bitbucket-server/index endpoint with path deleteLAbel() does not throw 1`] = `undefined`;
 
 exports[`modules/platform/bitbucket-server/index endpoint with path findPr() has pr 1`] = `
+{
+  "bodyStruct": {
+    "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
+  },
+  "createdAt": 1547853840016,
+  "number": 5,
+  "sourceBranch": "userName1/pullRequest5",
+  "state": "open",
+  "targetBranch": "master",
+  "title": "title",
+  "version": 1,
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path findReconfigurePr() finds reconfigure pr 1`] = `
 {
   "bodyStruct": {
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
