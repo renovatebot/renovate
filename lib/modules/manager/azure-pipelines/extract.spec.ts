@@ -55,12 +55,11 @@ describe('modules/manager/azure-pipelines/extract', () => {
       ).toBeNull();
     });
 
-    it('should return null when reference is not defined', () => {
+    it('should return null when reference is not defined specified', () => {
       expect(
         extractRepository({
           type: 'github',
           name: 'user/repo',
-          ref: null,
         }),
       ).toBeNull();
     });
@@ -134,10 +133,6 @@ describe('modules/manager/azure-pipelines/extract', () => {
         currentValue: '16.04',
         datasource: 'docker',
       });
-    });
-
-    it('should return null if image field is missing', () => {
-      expect(extractContainer({ image: null })).toBeNull();
     });
   });
 

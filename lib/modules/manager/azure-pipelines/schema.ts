@@ -49,7 +49,7 @@ export const Stage = z.object({
 export type Stage = z.infer<typeof Stage>;
 
 export const Container = z.object({
-  image: z.string().optional(),
+  image: z.string(),
 });
 export type Container = z.infer<typeof Container>;
 

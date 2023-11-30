@@ -204,8 +204,8 @@ export function extractPackageFile(
     deps.push(...extractJobs(jobs));
   }
 
-  deps.push(...extractJobs(pkg.jobs as Jobs));
-  deps.push(...extractSteps(pkg.steps as Step[])); // Type assertion
+  deps.push(...extractJobs(pkg.jobs));
+  deps.push(...extractSteps(pkg.steps));
 
   if (!deps.length) {
     return null;
