@@ -154,6 +154,46 @@ describe('workers/repository/reconfigure/index', () => {
     });
   });
 
+  it('skips adding status check if statusCheckNames.configValidation is null', async () => {
+    cache.getCache.mockReturnValueOnce({
+      reconfigureBranchCache: {
+        reconfigureBranchSha: 'new-sha',
+        isConfigValid: false,
+      },
+    });
+
+    await validateReconfigureBranch({
+      ...config,
+      statusCheckNames: {
+        configValidation: null,
+      },
+    });
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Status check is null or an empty string, skipping status check addition',
+    );
+    expect(platform.setBranchStatus).not.toHaveBeenCalled();
+  });
+
+  it('skips adding status check if statusCheckNames.configValidation is empty string', async () => {
+    cache.getCache.mockReturnValueOnce({
+      reconfigureBranchCache: {
+        reconfigureBranchSha: 'new-sha',
+        isConfigValid: false,
+      },
+    });
+
+    await validateReconfigureBranch({
+      ...config,
+      statusCheckNames: {
+        configValidation: '',
+      },
+    });
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Status check is null or an empty string, skipping status check addition',
+    );
+    expect(platform.setBranchStatus).not.toHaveBeenCalled();
+  });
+
   it('skips validation if cache is valid', async () => {
     cache.getCache.mockReturnValueOnce({
       reconfigureBranchCache: {

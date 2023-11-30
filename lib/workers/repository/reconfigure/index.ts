@@ -20,7 +20,7 @@ async function setBranchStatus(
   branchName: string,
   description: string,
   state: string,
-  context: string | undefined,
+  context?: string | null,
 ): Promise<void> {
   if (!is.nonEmptyString(context)) {
     logger.debug(

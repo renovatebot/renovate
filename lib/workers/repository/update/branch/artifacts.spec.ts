@@ -1,5 +1,6 @@
 import { platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
+import { logger } from '../../../../logger';
 import type { BranchConfig } from '../../../types';
 import { setArtifactErrorStatus } from './artifacts';
 
@@ -33,15 +34,50 @@ describe('workers/repository/update/branch/artifacts', () => {
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
 
+    it('skips status if statusCheckNames.artifactError is null', async () => {
+      await setArtifactErrorStatus({
+        ...config,
+        statusCheckNames: {
+          artifactError: null,
+        },
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('skips status if statusCheckNames.artifactError is empty string', async () => {
+      await setArtifactErrorStatus({
+        ...config,
+        statusCheckNames: {
+          artifactError: '',
+        },
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('skips status if statusCheckNames is undefined', async () => {
+      await setArtifactErrorStatus({
+        ...config,
+        statusCheckNames: undefined as never,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
     it('skips status (dry-run)', async () => {
       GlobalConfig.set({ dryRun: 'full' });
-      platform.getBranchStatusCheck.mockResolvedValueOnce(null);
       await setArtifactErrorStatus(config);
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
 
     it('skips status (no errors)', async () => {
-      platform.getBranchStatusCheck.mockResolvedValueOnce(null);
       config.artifactErrors = [];
       await setArtifactErrorStatus(config);
       expect(platform.setBranchStatus).not.toHaveBeenCalled();

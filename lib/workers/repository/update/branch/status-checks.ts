@@ -60,10 +60,7 @@ export interface StabilityConfig extends RenovateConfig {
 }
 
 export async function setStability(config: StabilityConfig): Promise<void> {
-  if (
-    !config.stabilityStatus ||
-    !is.nonEmptyString(config.statusCheckNames?.minimumReleaseAge)
-  ) {
+  if (!config.stabilityStatus) {
     return;
   }
   if (
@@ -71,7 +68,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
     !is.nonEmptyString(config.statusCheckNames?.minimumReleaseAge)
   ) {
     logger.debug(
-      'Status check is null or empty an string, skipping status check addition',
+      'Status check is null or an empty string, skipping status check addition',
     );
     return;
   }

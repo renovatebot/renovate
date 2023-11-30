@@ -267,7 +267,7 @@ export interface RenovateConfig
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
 
-  statusCheckNames?: Partial<Record<StatusCheckKey, string>>;
+  statusCheckNames?: Partial<Record<StatusCheckKey, string | null>>;
 }
 
 export interface CustomDatasourceConfig {
