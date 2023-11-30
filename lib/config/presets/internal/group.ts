@@ -450,8 +450,8 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'remark',
-        matchSourceUrlPrefixes: ['https://github.com/remarkjs/'],
         matchDatasources: ['npm'],
+        matchSourceUrlPrefixes: ['https://github.com/remarkjs/'],
       },
     ],
   },
