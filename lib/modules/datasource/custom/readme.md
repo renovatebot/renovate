@@ -10,7 +10,7 @@ Options:
 | option                     | default | description                                                                                                                                                              |
 | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | defaultRegistryUrlTemplate | ""      | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
-| format                     | "json"  | format used by the API. Available values are: `json`, `plain`, `html`                                                                                                    |
+| format                     | "json"  | format used by the API. Available values are: `json`, `plain`, `yaml`, `html`                                                                                            |
 | transformTemplates         | []      | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 Available template variables:
@@ -119,7 +119,7 @@ When Renovate receives this response with the `plain` format, it will convert it
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
 
-### Yaml
+#### Yaml
 
 If `yaml` is used, response is parsed and converted into JSON for further processing.
 
@@ -185,7 +185,7 @@ The following JSON will be generated:
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied to process the JSON data.
 
-To extract the version number, you may use [`extractVersion`](../../../../docs/usage/configuration-options.md#extractversion) or JSONata rules.
+To extract the version number, you may use [`extractVersion`](../../../configuration-options.md#extractversion) or JSONata rules.
 
 ## Examples
 

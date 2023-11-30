@@ -67,4 +67,4 @@ As an example, the following config matches all the YAML files in a repository:
 }
 ```
 
-See our [versioning](https://docs.renovatebot.com/modules/versioning/) documentation for details on the existing versioning rules and possible alterations.
+See our [versioning](../../versioning.md) documentation for details on the existing versioning rules and possible alterations.

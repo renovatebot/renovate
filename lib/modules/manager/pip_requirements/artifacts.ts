@@ -71,7 +71,7 @@ export async function updateArtifacts({
       docker: {},
       toolConstraints: [
         { toolName: 'python', constraint: config.constraints?.python },
-        { toolName: 'hashin' },
+        { toolName: 'hashin', constraint: config.constraints?.hashin },
       ],
       extraEnv: {
         PIP_CACHE_DIR: await ensureCacheDir('pip'),
