@@ -122,7 +122,7 @@ export function parseAzurePipelines(
 }
 
 function extractSteps(
-  steps?: Step[],
+  steps: Step[] | undefined,
 ): PackageDependency<Record<string, any>>[] {
   const deps = [];
   for (const step of coerceArray(steps)) {
@@ -134,13 +134,13 @@ function extractSteps(
   return deps;
 }
 
-function extractJob(job?: Job): PackageDependency<Record<string, any>>[] {
+function extractJob(job: Job | undefined): PackageDependency[] {
   return extractSteps(job?.steps);
 }
 
 function extractDeploy(
-  deploy?: Deploy,
-): PackageDependency<Record<string, any>>[] {
+  deploy: Deploy | undefined,
+): PackageDependency[] {
   const deps = extractJob(deploy?.deploy);
   deps.push(...extractJob(deploy?.postRouteTraffic));
   deps.push(...extractJob(deploy?.preDeploy));
@@ -150,8 +150,8 @@ function extractDeploy(
   return deps;
 }
 
-function extractJobs(jobs?: Jobs): PackageDependency<Record<string, any>>[] {
-  const deps: PackageDependency<Record<string, any>>[] = [];
+function extractJobs(jobs: Jobs | undefined): PackageDependency[] {
+  const deps: PackageDependency[] = [];
   for (const jobOrDeployment of coerceArray(jobs)) {
     const deployment = jobOrDeployment as Deployment;
     if (deployment.strategy) {
