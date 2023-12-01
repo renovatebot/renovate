@@ -350,6 +350,7 @@ export async function cloneSubmodules(shouldClone: boolean): Promise<void> {
   }
   submodulesInitizialized = true;
   await syncGit();
+  await git.addConfig('submodule.recurse', 'true');
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
     try {
