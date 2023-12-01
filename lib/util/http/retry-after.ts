@@ -1,10 +1,9 @@
 import { setTimeout } from 'timers/promises';
 import { RequestError } from 'got';
+import { DateTime } from 'luxon';
 import { logger } from '../../logger';
 import { parseUrl } from '../url';
 import type { Task } from './types';
-import { DateTime } from 'luxon';
-import { regEx } from '../regex';
 
 const hostBlocks = new Map<string, Promise<void>>();
 
