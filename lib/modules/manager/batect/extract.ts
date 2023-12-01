@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { load } from '../../../util/yaml';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';

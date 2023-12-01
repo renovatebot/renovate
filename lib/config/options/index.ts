@@ -201,6 +201,13 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'presetCachePersistence',
+    description: 'Cache resolved presets in package cache.',
+    type: 'boolean',
+    globalOnly: true,
+    default: false,
+  },
+  {
     name: 'globalExtends',
     description:
       'Configuration presets to use or extend for a self-hosted config.',
@@ -373,7 +380,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.25.0',
+    default: 'ghcr.io/containerbase/sidecar:9.26.0',
     globalOnly: true,
   },
   {

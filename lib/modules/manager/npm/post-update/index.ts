@@ -1,7 +1,6 @@
 // TODO: types (#22198)
 import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
-import { dump, load } from 'js-yaml';
 import upath from 'upath';
 import { logger } from '../../../../logger';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
@@ -18,6 +17,7 @@ import type { FileChange } from '../../../../util/git/types';
 import * as hostRules from '../../../../util/host-rules';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { ensureTrailingSlash } from '../../../../util/url';
+import { dump, load } from '../../../../util/yaml';
 import { NpmDatasource } from '../../../datasource/npm';
 import { scm } from '../../../platform/scm';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';

@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { trimTrailingSlash } from '../../../util/url';
+import { loadAll } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';

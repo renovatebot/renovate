@@ -140,6 +140,7 @@ export interface RepoGlobalConfig {
   exposeAllEnv?: boolean;
   githubTokenWarn?: boolean;
   migratePresets?: Record<string, string>;
+  presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
   localDir?: string;

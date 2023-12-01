@@ -1,5 +1,5 @@
-import { load } from 'js-yaml';
 import { Fixtures } from '../../../../test/fixtures';
+import { load } from '../../../util/yaml';
 import { findSourceUrl } from './common';
 import type { HelmRepository } from './types';
 

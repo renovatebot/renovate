@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { loadAll } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type {

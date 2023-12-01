@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { trimLeadingSlash } from '../../../util/url';
+import { load } from '../../../util/yaml';
 import type {
   ExtractConfig,
   PackageDependency,

@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
-import { load } from 'js-yaml';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -10,6 +9,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
+import { load } from '../../../../util/yaml';
 import type { PackageFile } from '../../types';
 import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
 import type { NpmManagerData } from '../types';
