@@ -8,7 +8,7 @@ jest.mock('../../../util/fs');
 
 function mockReadLocalFile(files: Record<string, string | null>) {
   fs.readLocalFile.mockImplementation((file): Promise<any> => {
-    let content: string | null = '';
+    let content: string | null = null;
     if (file in files) {
       content = files[file];
     }
