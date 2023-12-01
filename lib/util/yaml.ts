@@ -30,7 +30,7 @@ export function dump(obj: any, opts?: DumpOptions | undefined): string {
   return upstreamDump(obj, opts);
 }
 
-export function massageContent(content: string, options?: YamlOptions): string {
+function massageContent(content: string, options?: YamlOptions): string {
   if (options?.removeTemplates) {
     return content
       .replace(regEx(/{{`.+?`}}/gs), '')
