@@ -1,5 +1,5 @@
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
+import { loadAll } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,

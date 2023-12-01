@@ -201,6 +201,13 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'presetCachePersistence',
+    description: 'Cache resolved presets in package cache.',
+    type: 'boolean',
+    globalOnly: true,
+    default: false,
+  },
+  {
     name: 'globalExtends',
     description:
       'Configuration presets to use or extend for a self-hosted config.',

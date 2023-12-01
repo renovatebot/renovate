@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
-import { load } from 'js-yaml';
 import JSON5 from 'json5';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
@@ -8,6 +7,7 @@ import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
 import { readSystemFile } from '../../../../util/fs';
+import { load } from '../../../../util/yaml';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   if (upath.basename(file) === '.renovaterc') {

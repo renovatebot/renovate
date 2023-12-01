@@ -1,9 +1,9 @@
-import { load, loadAll } from 'js-yaml';
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
 import { z } from 'zod';
 import { parse as parseToml } from './toml';
+import { load, loadAll } from './yaml';
 
 interface ErrorContext<T> {
   error: z.ZodError;

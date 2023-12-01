@@ -1,6 +1,9 @@
+import { mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import { mocked } from '../../../test/util';
 import * as memCache from '../../util/cache/memory';
+import * as _packageCache from '../../util/cache/package';
+import { GlobalConfig } from '../global';
 import type { RenovateConfig } from '../types';
 import * as _github from './github';
 import * as _local from './local';
@@ -16,10 +19,12 @@ import * as presets from '.';
 jest.mock('./npm');
 jest.mock('./github');
 jest.mock('./local');
+jest.mock('../../util/cache/package', () => mockDeep());
 
 const npm = mocked(_npm);
 const local = mocked(_local);
 const gitHub = mocked(_github);
+const packageCache = mocked(_packageCache);
 
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
@@ -29,7 +34,25 @@ describe('config/presets/index', () => {
 
     beforeEach(() => {
       config = {};
+      GlobalConfig.reset();
       memCache.init();
+      packageCache.get.mockImplementation(
+        <T>(namespace: string, key: string): Promise<T> =>
+          Promise.resolve(memCache.get(`${namespace}-${key}`)),
+      );
+
+      packageCache.set.mockImplementation(
+        (
+          namespace: string,
+          key: string,
+          value: unknown,
+          minutes: number,
+        ): Promise<void> => {
+          memCache.set(`${namespace}-${key}`, value);
+          return Promise.resolve();
+        },
+      );
+
       npm.getPreset.mockImplementation(({ repo, presetName }) => {
         if (repo === 'renovate-config-ikatyang') {
           return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
@@ -343,6 +366,91 @@ describe('config/presets/index', () => {
           },
         ],
       });
+    });
+
+    it('default packageCache TTL should be 15 minutes', async () => {
+      GlobalConfig.set({
+        presetCachePersistence: true,
+      });
+
+      config.extends = ['github>username/preset-repo'];
+      config.packageRules = [
+        {
+          matchManagers: ['github-actions'],
+          groupName: 'github-actions dependencies',
+        },
+      ];
+      gitHub.getPreset.mockResolvedValueOnce({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+        ],
+      });
+
+      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+          {
+            matchManagers: ['github-actions'],
+            groupName: 'github-actions dependencies',
+          },
+        ],
+      });
+
+      expect(packageCache.set.mock.calls[0][3]).toBe(15);
+    });
+
+    it('use packageCache when presetCachePersistence is set', async () => {
+      GlobalConfig.set({
+        presetCachePersistence: true,
+        cacheTtlOverride: {
+          preset: 60,
+        },
+      });
+
+      config.extends = ['github>username/preset-repo'];
+      config.packageRules = [
+        {
+          matchManagers: ['github-actions'],
+          groupName: 'github-actions dependencies',
+        },
+      ];
+      gitHub.getPreset.mockResolvedValueOnce({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+        ],
+      });
+
+      expect(await presets.resolveConfigPresets(config)).toBeDefined();
+      const res = await presets.resolveConfigPresets(config);
+      expect(res).toEqual({
+        packageRules: [
+          {
+            matchDatasources: ['docker'],
+            matchPackageNames: ['ubi'],
+            versioning: 'regex',
+          },
+          {
+            matchManagers: ['github-actions'],
+            groupName: 'github-actions dependencies',
+          },
+        ],
+      });
+
+      expect(packageCache.set.mock.calls[0][3]).toBe(60);
     });
   });
 

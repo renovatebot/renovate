@@ -1,8 +1,8 @@
-import yaml from 'js-yaml';
 import { Fixtures } from '../../../../../test/fixtures';
 import { getFixturePath, logger, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as fs from '../../../../util/fs';
+import * as yaml from '../../../../util/yaml';
 import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 import {
