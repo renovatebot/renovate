@@ -1,7 +1,10 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { regEx } from '../../../util/regex';
 import { loadAll } from '../../../util/yaml';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type {
@@ -10,9 +13,6 @@ import type {
   TektonResource,
   TektonResourceSpec,
 } from './types';
-import { regEx } from '../../../util/regex';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import { GitTagsDatasource } from '../../datasource/git-tags';
 
 export function extractPackageFile(
   content: string,
