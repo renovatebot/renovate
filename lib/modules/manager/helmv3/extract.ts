@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
+import { load } from '../../../util/yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import type {
   ExtractConfig,

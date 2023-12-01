@@ -1,5 +1,5 @@
-import { load } from 'js-yaml';
 import { Fixtures } from '../../../../test/fixtures';
+import { load } from '../../../util/yaml';
 import type { GitlabPipeline } from '../gitlabci/types';
 import { replaceReferenceTags } from '../gitlabci/utils';
 import {

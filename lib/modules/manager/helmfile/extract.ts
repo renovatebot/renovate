@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { loadAll } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type {
@@ -17,13 +17,6 @@ import {
 
 const isValidChartName = (name: string | undefined): boolean =>
   !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
-
-function extractYaml(content: string): string {
-  // regex remove go templated ({{ . }}) values
-  return content
-    .replace(regEx(/{{`.+?`}}/gs), '')
-    .replace(regEx(/{{.+?}}/g), '');
-}
 
 function isLocalPath(possiblePath: string): boolean {
   return ['./', '../', '/'].some((localPrefix) =>
@@ -42,7 +35,10 @@ export async function extractPackageFile(
   // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
   let needKustomize = false;
   try {
-    docs = loadAll(extractYaml(content), null, { json: true }) as Doc[];
+    docs = loadAll(content, null, {
+      removeTemplates: true,
+      json: true,
+    }) as Doc[];
   } catch (err) {
     logger.debug(
       { err, packageFile },

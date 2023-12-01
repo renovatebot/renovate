@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { loadAll } from '../../../util/yaml';
 import {
   KubernetesApiDatasource,
   supportedApis,
