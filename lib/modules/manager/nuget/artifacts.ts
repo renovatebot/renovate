@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -56,19 +55,11 @@ async function runDotnetRestore(
     packageFileName,
   );
 
-  // Pass through environment variables that are used by NuGet on Windows.
-  const windowsNuGetEnv = Object.fromEntries(
-    ['PROGRAMFILES', 'PROGRAMFILES(X86)', 'APPDATA', 'LOCALAPPDATA']
-      .map((key) => [key, process.env[key]])
-      .filter(([, value]) => is.nonEmptyString(value)),
-  );
-
   const execOptions: ExecOptions = {
     docker: {},
     extraEnv: {
       NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
       MSBUILDDISABLENODEREUSE: '1',
-      ...windowsNuGetEnv,
     },
     toolConstraints: [
       { toolName: 'dotnet', constraint: config.constraints?.dotnet },
