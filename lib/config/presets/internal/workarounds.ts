@@ -13,6 +13,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreWeb3jCoreWithOldReleaseTimestamp',
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
+      'workarounds:nodeDockerVersioning',
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
@@ -136,6 +137,13 @@ export const presets: Record<string, Preset> = {
         matchPackagePrefixes: ['commons-'],
       },
     ],
+  },
+  nodeDockerVersioning: {
+    description: 'Use node versioning for `node` docker images.',
+    matchDatasources: ['docker'],
+    matchPackageNames: ['node'],
+    versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
+    versioning: 'node',
   },
   reduceRepologyServerLoad: {
     description:
