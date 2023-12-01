@@ -63,7 +63,6 @@ describe('modules/manager/tekton/extract', () => {
           },
         ],
       });
-      expect(result?.deps).toHaveLength(6);
     });
 
     it('ignores file without any deps', () => {

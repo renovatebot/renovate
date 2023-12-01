@@ -100,7 +100,10 @@ function addPipelineAsCodeAnnotations(
       continue;
     }
 
-    const tasks = value.replace('/]$/', '').replace('/^[/', '').split(',');
+    const tasks = value
+      .replace(regEx(/]$/), '')
+      .replace(regEx(/^\[/), '')
+      .split(',');
     for (const task of tasks) {
       const dep = getAnnotationDep(task.trim());
       if (!dep) {
