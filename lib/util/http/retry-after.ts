@@ -3,6 +3,8 @@ import { RequestError } from 'got';
 import { logger } from '../../logger';
 import { parseUrl } from '../url';
 import type { Task } from './types';
+import { DateTime } from 'luxon';
+import { regEx } from '../regex';
 
 const hostBlocks = new Map<string, Promise<void>>();
 
@@ -69,19 +71,33 @@ export function getRetryAfter(err: unknown): number | null {
     return null;
   }
 
-  const retryAfter = err.response.headers['retry-after'];
+  const retryAfter = err.response.headers['retry-after']?.trim();
   if (!retryAfter) {
     return null;
   }
 
-  const seconds = parseInt(retryAfter, 10);
-  if (Number.isNaN(seconds)) {
-    logger.debug(
-      { url: err.response.url, retryAfter },
-      'Retry-After: unsupported format',
-    );
-    return null;
+  const date = DateTime.fromHTTP(retryAfter);
+  if (date.isValid) {
+    const seconds = Math.floor(date.diffNow('seconds').seconds);
+    if (seconds < 0) {
+      logger.debug(
+        { url: err.response.url, retryAfter },
+        'Retry-After: date in the past',
+      );
+      return null;
+    }
+
+    return seconds;
   }
 
-  return seconds;
+  const seconds = parseInt(retryAfter, 10);
+  if (!Number.isNaN(seconds)) {
+    return seconds;
+  }
+
+  logger.debug(
+    { url: err.response.url, retryAfter },
+    'Retry-After: unsupported format',
+  );
+  return null;
 }

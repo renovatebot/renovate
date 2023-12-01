@@ -15,15 +15,15 @@ function requestError(
 }
 
 describe('util/http/retry-after', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   describe('wrapWithRetry', () => {
-    beforeEach(() => {
-      jest.useFakeTimers({ advanceTimers: true });
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
     it('works', async () => {
       const task = jest.fn(() => Promise.resolve(42));
       const res = await wrapWithRetry(
@@ -124,7 +124,21 @@ describe('util/http/retry-after', () => {
       ).toBeNull();
     });
 
-    it('returns delay in seconds', () => {
+    it('returns delay in seconds from date', () => {
+      jest.setSystemTime(new Date('2020-01-01T00:00:00Z'));
+      expect(
+        getRetryAfter(
+          requestError({
+            statusCode: 429,
+            headers: {
+              'retry-after': 'Wed, 01 Jan 2020 00:00:42 GMT',
+            },
+          }),
+        ),
+      ).toBe(42);
+    });
+
+    it('returns delay in seconds from number', () => {
       expect(
         getRetryAfter(
           requestError({
@@ -135,6 +149,19 @@ describe('util/http/retry-after', () => {
           }),
         ),
       ).toBe(42);
+    });
+
+    it('returns null for invalid header value', () => {
+      expect(
+        getRetryAfter(
+          requestError({
+            statusCode: 429,
+            headers: {
+              'retry-after': 'invalid',
+            },
+          }),
+        ),
+      ).toBeNull();
     });
   });
 });
