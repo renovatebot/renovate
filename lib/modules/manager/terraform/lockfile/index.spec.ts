@@ -1104,5 +1104,18 @@ describe('modules/manager/terraform/lockfile/index', () => {
         ),
       ).toBe('5.26.0');
     });
+
+    it('update constraint with multiple elements', () => {
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '2.41.0',
+            newValue: '2.46.0',
+            newVersion: '2.46.0',
+          },
+          '>= 2.36.0, 2.41.0',
+        ),
+      ).toBe('>= 2.36.0, 2.46.0');
+    });
   });
 });
