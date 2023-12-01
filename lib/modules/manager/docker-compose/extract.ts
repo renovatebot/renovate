@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { load } from '../../../util/yaml';
+import { parseSingleYaml } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageFileContent } from '../types';
 import type { DockerComposeConfig } from './types';
@@ -37,7 +37,7 @@ export function extractPackageFile(
   let config: DockerComposeConfig;
   try {
     // TODO: fix me (#9610)
-    config = load(content, { json: true }) as DockerComposeConfig;
+    config = parseSingleYaml(content, { json: true }) as DockerComposeConfig;
     if (!config) {
       logger.debug(
         { packageFile },

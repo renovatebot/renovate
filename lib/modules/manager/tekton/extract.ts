@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
-import { loadAll } from '../../../util/yaml';
+import { parseYaml } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type {
@@ -19,7 +19,7 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   let docs: TektonResource[];
   try {
-    docs = loadAll(content) as TektonResource[];
+    docs = parseYaml(content) as TektonResource[];
   } catch (err) {
     logger.debug(
       { err, packageFile },

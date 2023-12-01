@@ -1,15 +1,15 @@
 import { codeBlock } from 'common-tags';
-import { load, loadAll } from './yaml';
+import { parseSingleYaml, parseYaml } from './yaml';
 
 describe('util/yaml', () => {
   describe('loadAll', () => {
     it('should return empty array for empty string', () => {
-      expect(loadAll(``)).toEqual([]);
+      expect(parseYaml(``)).toEqual([]);
     });
 
     it('should parse content with single document', () => {
       expect(
-        loadAll(codeBlock`
+        parseYaml(codeBlock`
       myObject:
         aString: value
       `),
@@ -24,7 +24,7 @@ describe('util/yaml', () => {
 
     it('should parse content with multiple documents', () => {
       expect(
-        loadAll(codeBlock`
+        parseYaml(codeBlock`
       myObject:
         aString: value
       ---
@@ -44,7 +44,7 @@ describe('util/yaml', () => {
 
     it('should parse content with templates', () => {
       expect(
-        loadAll(
+        parseYaml(
           codeBlock`
       myObject:
         aString: {{ value }}
@@ -69,12 +69,12 @@ describe('util/yaml', () => {
 
   describe('load', () => {
     it('should return undefined', () => {
-      expect(load(``)).toBeUndefined();
+      expect(parseSingleYaml(``)).toBeUndefined();
     });
 
     it('should parse content with single document', () => {
       expect(
-        load(codeBlock`
+        parseSingleYaml(codeBlock`
       myObject:
         aString: value
       `),
@@ -87,7 +87,7 @@ describe('util/yaml', () => {
 
     it('should parse content with multiple documents', () => {
       expect(() =>
-        load(codeBlock`
+        parseSingleYaml(codeBlock`
       myObject:
         aString: value
       ---
@@ -98,7 +98,7 @@ describe('util/yaml', () => {
 
     it('should parse content with template', () => {
       expect(
-        load(
+        parseSingleYaml(
           codeBlock`
       myObject:
         aString: {{value}}

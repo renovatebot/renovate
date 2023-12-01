@@ -114,9 +114,11 @@ export async function updateArtifacts({
   }
   try {
     // get repositories and registries defined in the package file
-    const packages = yaml.load(newPackageFileContent) as ChartDefinition; //TODO #9610
+    const packages = yaml.parseSingleYaml(
+      newPackageFileContent,
+    ) as ChartDefinition; //TODO #9610
     const locks = existingLockFileContent
-      ? (yaml.load(existingLockFileContent) as ChartDefinition)
+      ? (yaml.parseSingleYaml(existingLockFileContent) as ChartDefinition)
       : { dependencies: [] }; //TODO #9610
 
     const chartDefinitions: ChartDefinition[] = [];

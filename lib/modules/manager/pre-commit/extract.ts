@@ -4,7 +4,7 @@ import type { SkipReason } from '../../../types';
 import { detectPlatform } from '../../../util/common';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
-import { load } from '../../../util/yaml';
+import { parseSingleYaml } from '../../../util/yaml';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -158,7 +158,7 @@ export function extractPackageFile(
   type ParsedContent = Record<string, unknown> | PreCommitConfig;
   let parsedContent: ParsedContent;
   try {
-    parsedContent = load(content, { json: true }) as ParsedContent;
+    parsedContent = parseSingleYaml(content, { json: true }) as ParsedContent;
   } catch (err) {
     logger.debug(
       { filename: packageFile, err },
