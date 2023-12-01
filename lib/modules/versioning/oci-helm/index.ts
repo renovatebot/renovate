@@ -19,7 +19,7 @@ export const supportsRanges = false;
 // ...into https://regex101.com/r/Visopn/1 with group names
 // ...prepended by range group to properly parse range values
 const versionRegex = regEx(
-  /^^(?<range>~|<|<=|>|>=|\^)?v?(?<major>[0-9]\d*)(\.(?<minor>[0-9]\d*))?(\.(?<patch>[0-9]\d*))?(?:-(?<prerelease>(?:[0-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<metadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/,
+  /^(?<range>~|<|<=|>|>=|\^)?v?(?<major>[0-9]\d*)(\.(?<minor>[0-9]\d*))?(\.(?<patch>[0-9]\d*))?(?:-(?<prerelease>(?:[0-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<metadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/,
 );
 
 class OciHelmVersioningApi extends GenericVersioningApi {
