@@ -3,7 +3,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
 import { ensureTrailingSlash } from '../../../util/url';
-import { load } from '../../../util/yaml';
+import { parseSingleYaml } from '../../../util/yaml';
 import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -48,7 +48,7 @@ export class HelmDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
     try {
-      const doc = load(res.body, {
+      const doc = parseSingleYaml(res.body, {
         json: true,
       }) as HelmRepository;
       if (!is.plainObject<HelmRepository>(doc)) {

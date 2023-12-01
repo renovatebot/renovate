@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
-import { loadAll } from '../../../util/yaml';
+import { parseYaml } from '../../../util/yaml';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
@@ -52,7 +52,7 @@ function readManifest(
   };
   let resources: FluxResource[];
   try {
-    resources = loadAll(content, null, { json: true }) as FluxResource[];
+    resources = parseYaml(content, null, { json: true }) as FluxResource[];
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Flux manifest');
     return null;

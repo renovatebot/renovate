@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { load } from '../../../util/yaml';
+import { parseSingleYaml } from '../../../util/yaml';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { TravisMatrixItem, TravisYaml } from './types';
@@ -11,7 +11,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   let doc: TravisYaml;
   try {
-    doc = load(content, {
+    doc = parseSingleYaml(content, {
       json: true,
     }) as TravisYaml;
   } catch (err) {

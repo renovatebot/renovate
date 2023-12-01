@@ -3,7 +3,7 @@ import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
 import { z } from 'zod';
 import { parse as parseToml } from './toml';
-import { load, loadAll } from './yaml';
+import { parseSingleYaml, parseYaml } from './yaml';
 
 interface ErrorContext<T> {
   error: z.ZodError;
@@ -228,7 +228,7 @@ export const UtcDate = z
 
 export const Yaml = z.string().transform((str, ctx): JsonValue => {
   try {
-    return load(str, { json: true }) as JsonValue;
+    return parseSingleYaml(str, { json: true }) as JsonValue;
   } catch (e) {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;
@@ -237,7 +237,7 @@ export const Yaml = z.string().transform((str, ctx): JsonValue => {
 
 export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
   try {
-    return loadAll(str, null, { json: true }) as JsonArray;
+    return parseYaml(str, null, { json: true }) as JsonArray;
   } catch (e) {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;
