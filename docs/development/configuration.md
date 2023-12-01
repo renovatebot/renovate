@@ -17,7 +17,7 @@ Options which have `"globalOnly": true` are reserved only for bot global configu
 
 ### Configuration File
 
-You can override default configuration using a configuration file, with default name `config.js` in the working directory.
+You can override default configuration using a configuration file, with default name `config.js` or `config.cjs` (in ESM repositories) in the working directory.
 If you need an alternate location or name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
 
 **Note:** `RENOVATE_CONFIG_FILE` must be provided with an explicit file extension.
