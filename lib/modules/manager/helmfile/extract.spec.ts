@@ -14,6 +14,19 @@ describe('modules/manager/helmfile/extract', () => {
       GlobalConfig.set({ localDir });
     });
 
+    it('skip null YAML document', async () => {
+      const content = `
+      ~
+      `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toBeNull();
+    });
+
     it('returns null if no releases', async () => {
       const content = `
       repositories:
