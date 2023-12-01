@@ -1,9 +1,5 @@
-import { DirectoryResult, dir } from 'tmp-promise';
-import { join } from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
 import { extractLockFileVersions, parseLockFile } from './locked-version';
 
 jest.mock('../../../util/fs');
@@ -20,23 +16,6 @@ function mockReadLocalFile(files: Record<string, string | null>) {
 
 describe('modules/manager/cargo/locked-version', () => {
   describe('extractLockFileVersions()', () => {
-    let adminConfig: RepoGlobalConfig;
-    let tmpDir: DirectoryResult;
-
-    beforeEach(async () => {
-      tmpDir = await dir({ unsafeCleanup: true });
-      adminConfig = {
-        localDir: join(tmpDir.path, 'local'),
-      };
-
-      GlobalConfig.set(adminConfig);
-    });
-
-    afterEach(async () => {
-      await tmpDir.cleanup();
-      GlobalConfig.reset();
-    });
-
     it('returns null for missing lock file', async () => {
       expect(await extractLockFileVersions('Cargo.lock')).toBeNull();
     });
