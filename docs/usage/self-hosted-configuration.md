@@ -221,7 +221,7 @@ Results which are soft expired are reused in the following manner:
 - The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
 - If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
-## cachePreset
+## presetCachePersistence
 
 When this feature is enabled, resolved presets will be cached in Renovate's package cache, enabling reuse across multiple repositories.
 

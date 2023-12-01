@@ -128,7 +128,6 @@ export interface RepoGlobalConfig {
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;
-  cachePreset?: boolean;
   cacheTtlOverride?: Record<string, number>;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
@@ -141,6 +140,7 @@ export interface RepoGlobalConfig {
   exposeAllEnv?: boolean;
   githubTokenWarn?: boolean;
   migratePresets?: Record<string, string>;
+  presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
   localDir?: string;

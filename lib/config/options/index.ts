@@ -201,7 +201,7 @@ const options: RenovateOptions[] = [
     },
   },
   {
-    name: 'cachePreset',
+    name: 'presetCachePersistence',
     description: 'Cache resolved presets in package cache.',
     type: 'boolean',
     globalOnly: true,
