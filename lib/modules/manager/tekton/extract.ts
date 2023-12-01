@@ -85,29 +85,22 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   return deps;
 }
 
+const taskAnnotation = regEx(/^pipelinesascode\.tekton\.dev\/task(-[0-9]+)?$/);
+
 function addPipelineAsCodeAnnotations(
-  annotations:
-    | {
-        [key: string]: string;
-      }
-    | undefined,
+  annotations: Record<string, string> | undefined | null,
   deps: PackageDependency[],
 ): void {
   if (is.nullOrUndefined(annotations)) {
     return;
   }
 
-  for (const annotationsKey in annotations) {
-    if (
-      !annotationsKey.toLowerCase().includes('pipelinesascode.tekton.dev/task')
-    ) {
+  for (const [key, value] of Object.entries(annotations)) {
+    if (!taskAnnotation.test(key)) {
       continue;
     }
 
-    const tasks = annotations[annotationsKey]
-      .replace('[', '')
-      .replace(']', '')
-      .split(',');
+    const tasks = value.replace('/]$/', '').replace('/^[/', '').split(',');
     for (const task of tasks) {
       const dep = getAnnotationDep(task.trim());
       if (!dep) {
@@ -130,8 +123,9 @@ function getAnnotationDep(url: string): PackageDependency | null {
   const dep: PackageDependency = {};
   dep.depType = 'tekton-annotation';
 
-  if (githubRelease.test(url)) {
-    const match = githubRelease.exec(url);
+  let match = githubRelease.exec(url);
+
+  if (match?.groups) {
     dep.datasource = GithubReleasesDatasource.id;
 
     dep.depName = match?.groups?.path;
@@ -140,8 +134,8 @@ function getAnnotationDep(url: string): PackageDependency | null {
     return dep;
   }
 
-  if (gitUrl.test(url)) {
-    const match = gitUrl.exec(url);
+  match = gitUrl.exec(url);
+  if (match?.groups) {
     dep.datasource = GitTagsDatasource.id;
 
     dep.depName = match?.groups?.path.replace(

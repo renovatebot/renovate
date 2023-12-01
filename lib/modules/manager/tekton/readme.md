@@ -20,8 +20,8 @@ Read the [Tekton Pipeline remote resolution docs](https://tekton.dev/docs/pipeli
 By specifying the annotation with a remote task based on the recommended way using [git based versioning](https://github.com/tektoncd/community/blob/main/teps/0115-tekton-catalog-git-based-versioning.md).
 
 ```yaml
-  annotations:
-    pipelinesascode.tekton.dev/task: "https://github.com/foo/bar/raw/v0.0.1/tasks/task/task.yaml"
+annotations:
+  pipelinesascode.tekton.dev/task: 'https://github.com/foo/bar/raw/v0.0.1/tasks/task/task.yaml'
 ```
 
 ### Using a Tekton Bundle reference
