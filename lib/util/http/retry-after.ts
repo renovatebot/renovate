@@ -53,10 +53,10 @@ export async function wrapWithRetry<T>(
 
       const existingDelay = hostBlocks.get(key);
       const newDelay = setTimeout(1000 * delaySeconds);
-      const delayPromise = existingDelay
+      const accumulatedDelay = existingDelay
         ? Promise.all([existingDelay, newDelay])
         : newDelay;
-      hostBlocks.set(key, delayPromise);
+      hostBlocks.set(key, accumulatedDelay);
       retries += 1;
     }
   }
