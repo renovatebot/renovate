@@ -5,7 +5,7 @@ import { logger } from '../../logger';
 import { parseUrl } from '../url';
 import type { Task } from './types';
 
-const hostBlocks = new Map<string, Promise<unknown>>();
+const hostDelays = new Map<string, Promise<unknown>>();
 
 const maxRetries = 2;
 
@@ -20,11 +20,8 @@ export async function wrapWithRetry<T>(
   let retries = 0;
   for (;;) {
     try {
-      const delayPromise = hostBlocks.get(key);
-      if (delayPromise) {
-        await delayPromise;
-        hostBlocks.delete(key);
-      }
+      await hostDelays.get(key);
+      hostDelays.delete(key);
 
       return await task();
     } catch (err) {
@@ -52,10 +49,10 @@ export async function wrapWithRetry<T>(
       );
 
       const delay = Promise.all([
-        hostBlocks.get(key),
+        hostDelays.get(key),
         setTimeout(1000 * delaySeconds),
       ]);
-      hostBlocks.set(key, delay);
+      hostDelays.set(key, delay);
       retries += 1;
     }
   }
