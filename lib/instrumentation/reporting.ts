@@ -3,23 +3,15 @@ import { PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../config/types';
 import { logger } from '../logger';
-import type { PackageFile } from '../modules/manager/types';
 import type { BranchCache } from '../util/cache/repository/types';
 import { getS3Client, parseS3Url } from '../util/s3';
 import type { ExtractResult } from '../workers/repository/process/extract-update';
+import type { Report } from './types';
 
 const result: Report = {
   repositories: {},
 };
 
-interface Report {
-  repositories: Record<string, RepoReport>;
-}
-
-interface RepoReport {
-  branches: Partial<BranchCache>[];
-  packageFiles: Record<string, PackageFile[]>;
-}
 export function addBranchStats(
   config: RenovateConfig,
   branchesInformation: Partial<BranchCache>[],
