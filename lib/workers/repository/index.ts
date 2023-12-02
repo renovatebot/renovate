@@ -9,6 +9,7 @@ import {
 } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
+import { addExtractionStats } from '../../instrumentation/reporting';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
@@ -58,9 +59,13 @@ export async function renovateRepository(
       config.repoIsOnboarded! ||
       !OnboardingState.onboardingCacheValid ||
       OnboardingState.prUpdateRequested;
-    const { branches, branchList, packageFiles } = performExtract
+    const extractResult = performExtract
       ? await instrument('extract', () => extractDependencies(config))
       : emptyExtract(config);
+    addExtractionStats(config, extractResult);
+
+    const { branches, branchList, packageFiles } = extractResult;
+
     if (config.semanticCommits === 'auto') {
       config.semanticCommits = await detectSemanticCommits();
     }

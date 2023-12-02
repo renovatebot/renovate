@@ -262,6 +262,24 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'reportType',
+    description: 'Set how or if reports should be generated',
+    globalOnly: true,
+    type: 'string',
+    default: null,
+    experimental: true,
+    allowedValues: ['logger', 'file', 's3'],
+  },
+  {
+    name: 'reportPath',
+    description:
+      'Path to where the file should be written. In case of `s3` this has to be full s3 URI',
+    globalOnly: true,
+    type: 'string',
+    default: null,
+    experimental: true,
+  },
+  {
     name: 'force',
     description:
       'Any configuration set in this object will force override existing settings.',

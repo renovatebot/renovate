@@ -784,6 +784,23 @@ For TLS/SSL-enabled connections, use rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
+## reportPath
+
+This value describes the location where the report is written to.
+
+In case [`reportType`](#reporttype) is set to `file` set this to a filepath ( e.g. `/foo/bar.json`).
+
+If the value `s3` is used in [`reportType`](#reporttype) use a S3 URI ( e.g. `s3://bucket-name/key-name`)
+
+## reportType
+
+Defines how the report is exposed.
+
+- `<unset>` If unset, no report will be provided, tough debug logs will still contain partial information of the report.
+- `logging` The report will be printed as part of the log messages on `INFO` level.
+- `file` The report will be written to a path provided by [`reportPath`](#reportpath)
+- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`RENOVATE_X_S3_ENDPOINT`](./self-hosted-experimental.md#renovatexs3endpoint) and [`RENOVATE_X_S3_PATH_STYLE`](./self-hosted-experimental.md#renovatexs3pathstyle)
+
 ## repositories
 
 Elements in the `repositories` array can be an object if you wish to define more settings:

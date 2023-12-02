@@ -198,6 +198,8 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     Record<string, unknown> {
+  reportPath?: string;
+  reportType?: 'logging' | 'file' | 's3';
   depName?: string;
   baseBranches?: string[];
   useBaseBranchConfig?: UseBaseBranchConfigType;
