@@ -51,12 +51,11 @@ export async function wrapWithRetry<T>(
         `Retry-After: will retry ${url} after ${delaySeconds} seconds`,
       );
 
-      const existingDelay = hostBlocks.get(key);
-      const newDelay = setTimeout(1000 * delaySeconds);
-      const accumulatedDelay = existingDelay
-        ? Promise.all([existingDelay, newDelay])
-        : newDelay;
-      hostBlocks.set(key, accumulatedDelay);
+      const delay = Promise.all([
+        hostBlocks.get(key),
+        setTimeout(1000 * delaySeconds),
+      ]);
+      hostBlocks.set(key, delay);
       retries += 1;
     }
   }
