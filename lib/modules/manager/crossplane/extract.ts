@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { loadAll } from '../../../util/yaml';
+import { parseYaml } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
@@ -21,7 +21,7 @@ export function extractPackageFile(
 
   let list = [];
   try {
-    list = loadAll(content);
+    list = parseYaml(content);
   } catch (err) {
     logger.debug(
       { err, packageFile },

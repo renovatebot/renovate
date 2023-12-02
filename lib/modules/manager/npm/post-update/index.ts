@@ -17,7 +17,7 @@ import type { FileChange } from '../../../../util/git/types';
 import * as hostRules from '../../../../util/host-rules';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { ensureTrailingSlash } from '../../../../util/url';
-import { dump, load } from '../../../../util/yaml';
+import { dump, parseSingleYaml } from '../../../../util/yaml';
 import { NpmDatasource } from '../../../datasource/npm';
 import { scm } from '../../../platform/scm';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
@@ -390,8 +390,9 @@ export async function updateYarnBinary(
       return existingYarnrcYmlContent;
     }
 
-    const oldYarnPath = (load(yarnrcYml) as YarnRcYmlFile)?.yarnPath;
-    const newYarnPath = (load(newYarnrcYml) as YarnRcYmlFile)?.yarnPath;
+    const oldYarnPath = (parseSingleYaml(yarnrcYml) as YarnRcYmlFile)?.yarnPath;
+    const newYarnPath = (parseSingleYaml(newYarnrcYml) as YarnRcYmlFile)
+      ?.yarnPath;
     if (
       !is.nonEmptyStringAndNotWhitespace(oldYarnPath) ||
       !is.nonEmptyStringAndNotWhitespace(newYarnPath)
@@ -568,10 +569,9 @@ export async function getAdditionalFiles(
       existingYarnrcYmlContent = await readLocalFile(yarnRcYmlFilename, 'utf8');
       if (existingYarnrcYmlContent) {
         try {
-          const existingYarnrRcYml = load(existingYarnrcYmlContent) as Record<
-            string,
-            unknown
-          >;
+          const existingYarnrRcYml = parseSingleYaml(
+            existingYarnrcYmlContent,
+          ) as Record<string, unknown>;
           const updatedYarnYrcYml = deepmerge(
             existingYarnrRcYml,
             additionalYarnRcYml,
