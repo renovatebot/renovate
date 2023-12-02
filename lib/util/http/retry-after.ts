@@ -5,7 +5,7 @@ import { logger } from '../../logger';
 import { parseUrl } from '../url';
 import type { Task } from './types';
 
-const hostBlocks = new Map<string, Promise<void>>();
+const hostBlocks = new Map<string, Promise<unknown>>();
 
 const maxRetries = 2;
 
@@ -51,7 +51,12 @@ export async function wrapWithRetry<T>(
         `Retry-After: will retry ${url} after ${delaySeconds} seconds`,
       );
 
-      hostBlocks.set(key, setTimeout(1000 * delaySeconds));
+      const existingDelay = hostBlocks.get(key);
+      const newDelay = setTimeout(1000 * delaySeconds);
+      const delayPromise = existingDelay
+        ? Promise.all([existingDelay, newDelay])
+        : newDelay;
+      hostBlocks.set(key, delayPromise);
       retries += 1;
     }
   }
