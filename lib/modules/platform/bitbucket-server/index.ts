@@ -355,13 +355,11 @@ export async function findReconfigurePr(
   );
 
   if (!prList.length) {
-    logger.debug({ prList }, 'No reconfigure Pr found');
+    logger.debug(`No reconfigure Pr found for branch ${branchName}`);
     return null;
   }
-  if (prList.length > 1) {
-    logger.debug({ prList }, 'More than one Reconfigure PR');
-    return null;
-  }
+
+  // return the latest pr
   const pr = utils.prInfo(prList[0]);
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);

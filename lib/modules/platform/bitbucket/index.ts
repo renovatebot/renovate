@@ -351,13 +351,11 @@ export async function findReconfigurePr(
 
   prList = prList.filter((pr) => pr.state === 'OPEN');
   if (prList.length === 0) {
-    logger.debug({ prList }, 'No reconfigure pr found');
+    logger.debug(`No reconfigure pr found for branch ${branchName}`);
     return null;
   }
-  if (prList.length > 1) {
-    logger.debug({ prList }, 'Found more than one reconfigure pr');
-    return null;
-  }
+
+  // return the latest pr
   const pr = utils.prInfo(prList[0]);
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);

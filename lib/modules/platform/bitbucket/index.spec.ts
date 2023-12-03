@@ -1005,35 +1005,6 @@ describe('modules/platform/bitbucket/index', () => {
       const pr = await bitbucket.findReconfigurePr?.('branch');
       expect(pr).toBeNull();
     });
-
-    it('returns null if more than one PR is open from reconfigure branch', async () => {
-      const scope = await initRepoMock();
-      scope
-        .get(
-          '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"',
-        )
-        .reply(200, {
-          values: [
-            {
-              id: 5,
-              source: { branch: { name: 'branch' } },
-              destination: { branch: { name: 'master' } },
-              title: 'title',
-              state: 'OPEN',
-            },
-            {
-              id: 6,
-              source: { branch: { name: 'branch' } },
-              destination: { branch: { name: 'master' } },
-              title: 'title',
-              state: 'OPEN',
-            },
-          ],
-        });
-
-      const pr = await bitbucket.findReconfigurePr?.('branch');
-      expect(pr).toBeNull();
-    });
   });
 
   describe('createPr()', () => {

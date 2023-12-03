@@ -832,13 +832,13 @@ export async function findReconfigurePr(
   logger.debug(`findReconfigurePr(${branchName}`);
   const repo = config.parentRepo ?? config.repository;
   const response = await githubApi.getJson<GhRestPr[]>(
-    `repos/${repo}/pulls?head=${repo}:${branchName}`,
+    `repos/${repo}/pulls?head=${repo}:${branchName}state=open`,
   );
   let { body: prList } = response;
   prList = prList.filter((pr) => pr.state === 'open');
 
   if (!prList.length) {
-    logger.debug({ prList }, 'No reconfigure Pr found');
+    logger.debug(`No reconfigure Pr found for branch ${branchName}`);
     return null;
   }
 

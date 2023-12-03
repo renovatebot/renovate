@@ -876,13 +876,13 @@ export async function findReconfigurePr(
 ): Promise<Pr | null> {
   logger.debug(`findReconfigurePr(${branchName}`);
   const response = await gitlabApi.getJson<GitLabMergeRequest[]>(
-    `projects/${config.repository}/merge_requests?source_branch=${branchName}`,
+    `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
   );
   let { body: mrList } = response;
   mrList = mrList.filter((pr) => pr.state === 'opened');
 
   if (!mrList.length) {
-    logger.debug({ mrList }, 'No reconfigure MR found');
+    logger.debug(`No reconfigure MR found for branch ${branchName}`);
     return null;
   }
 
