@@ -2438,14 +2438,16 @@ describe('modules/platform/github/index', () => {
     it('finds reconfigure pr', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/pulls?head=some/repo:branch').reply(200, [
-        {
-          number: 1,
-          head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
-          title: 'branch a pr',
-          state: 'open',
-        },
-      ]);
+      scope
+        .get('/repos/some/repo/pulls?head=some/repo:branch&state=open')
+        .reply(200, [
+          {
+            number: 1,
+            head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+            title: 'branch a pr',
+            state: 'open',
+          },
+        ]);
       await github.initRepo({ repository: 'some/repo' });
       expect(await github.findReconfigurePr?.('branch')).toMatchSnapshot();
     });
@@ -2453,14 +2455,16 @@ describe('modules/platform/github/index', () => {
     it('returns null if reconfigure pr is closed', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/pulls?head=some/repo:branch').reply(200, [
-        {
-          number: 1,
-          head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
-          title: 'branch a pr',
-          state: 'closed',
-        },
-      ]);
+      scope
+        .get('/repos/some/repo/pulls?head=some/repo:branch&state=open')
+        .reply(200, [
+          {
+            number: 1,
+            head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+            title: 'branch a pr',
+            state: 'closed',
+          },
+        ]);
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.findReconfigurePr?.('branch');
       expect(pr).toBeNull();
@@ -2469,7 +2473,9 @@ describe('modules/platform/github/index', () => {
     it('returns null if reconfigure pr not found', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/pulls?head=some/repo:branch').reply(200, []);
+      scope
+        .get('/repos/some/repo/pulls?head=some/repo:branch&state=open')
+        .reply(200, []);
       await github.initRepo({ repository: 'some/repo' });
       const pr = await github.findReconfigurePr?.('branch');
       expect(pr).toBeNull();

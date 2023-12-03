@@ -1687,7 +1687,9 @@ describe('modules/platform/gitlab/index', () => {
     it('finds reconfigure pr', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?source_branch=branch')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?source_branch=branch&state=opened',
+        )
         .reply(200, [
           {
             iid: 1,
@@ -1702,7 +1704,9 @@ describe('modules/platform/gitlab/index', () => {
     it('returns null if reconfigure pr is closed', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?source_branch=branch')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?source_branch=branch&state=opened',
+        )
         .reply(200, [
           {
             iid: 1,
@@ -1718,7 +1722,9 @@ describe('modules/platform/gitlab/index', () => {
     it('returns null if reconfigure pr not found', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?source_branch=branch')
+        .get(
+          '/api/v4/projects/undefined/merge_requests?source_branch=branch&state=opened',
+        )
         .reply(200, []);
       const pr = await gitlab.findReconfigurePr?.('branch');
       expect(pr).toBeNull();
