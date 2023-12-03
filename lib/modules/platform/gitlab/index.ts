@@ -878,18 +878,17 @@ export async function findReconfigurePr(
   const response = await gitlabApi.getJson<GitLabMergeRequest[]>(
     `projects/${config.repository}/merge_requests?source_branch=${branchName}`,
   );
-  let { body: prList } = response;
-  prList = prList.filter((pr) => pr.state === 'opened');
+  let { body: mrList } = response;
+  mrList = mrList.filter((pr) => pr.state === 'opened');
 
-  if (!prList.length) {
-    logger.debug({ prList }, 'No reconfigure Pr found');
+  if (!mrList.length) {
+    logger.debug({ mrList }, 'No reconfigure MR found');
     return null;
   }
-  if (prList.length > 1) {
-    logger.debug('More than one reconfigure pR');
-    return null;
-  }
-  const mr = prList[0];
+
+  // return the latest merge request
+  const mr = mrList[0];
+
   // only pass necessary info
   const pr: GitlabPr = {
     sourceBranch: mr.source_branch,

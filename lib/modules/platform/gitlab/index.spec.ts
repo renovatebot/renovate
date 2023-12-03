@@ -1723,28 +1723,6 @@ describe('modules/platform/gitlab/index', () => {
       const pr = await gitlab.findReconfigurePr?.('branch');
       expect(pr).toBeNull();
     });
-
-    it('returns null if more than one PR is open from reconfigure branch', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests?source_branch=branch')
-        .reply(200, [
-          {
-            iid: 1,
-            source_branch: 'branch',
-            title: 'branch a pr',
-            state: 'opened',
-          },
-          {
-            iid: 2,
-            source_branch: 'branch',
-            title: 'branch a pr 2',
-            state: 'opened',
-          },
-        ]);
-      const pr = await gitlab.findReconfigurePr?.('branch');
-      expect(pr).toBeNull();
-    });
   });
 
   async function initPlatform(gitlabVersion: string) {

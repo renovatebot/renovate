@@ -841,10 +841,8 @@ export async function findReconfigurePr(
     logger.debug({ prList }, 'No reconfigure Pr found');
     return null;
   }
-  if (prList.length > 1) {
-    logger.debug({ prList }, 'More than one reconfigure pR');
-    return null;
-  }
+
+  // return the latest pull request
   const pr = coerceRestPr(prList[0]);
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
