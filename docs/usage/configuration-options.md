@@ -3566,11 +3566,11 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 ## statusCheckNames
 
-This feature allows users to customize the context of the staus checks added by Renovate to the update branches.
+You can customize the context of the status check that Renovate adds to its update branches.
 
-1. You can modify existing status checks, but adding entirely new ones is not supported
-2. Setting the value to `null` or an empty string, will effectively disable/skip that particular status check
-3. This option is mergeable, meaning you only have to specify the status checks you want to modify
+- You can modify existing status checks, but adding new status checks is _not_ supported
+- Setting the value to `null` or an empty string, effectively disables or skips that status check
+- This option is mergeable, which means you only have to specify the status checks that you want to modify
 
 ```json
 {

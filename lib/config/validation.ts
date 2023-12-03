@@ -580,7 +580,7 @@ export async function validateConfig(
                 ) {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed`,
+                    message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed.`,
                   });
                 }
                 if (
@@ -588,7 +588,7 @@ export async function validateConfig(
                 ) {
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: status check is not a string`,
+                    message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: status check is not a string.`,
                   });
                   continue;
                 }

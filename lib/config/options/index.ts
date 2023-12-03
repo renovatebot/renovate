@@ -172,7 +172,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'statusCheckNames',
-    description: 'Custom strings to use as status check names',
+    description: 'Custom strings to use as status check names.',
     type: 'object',
     mergeable: true,
     default: {

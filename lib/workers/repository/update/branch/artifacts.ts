@@ -16,7 +16,7 @@ export async function setArtifactErrorStatus(
     !is.nonEmptyString(config.statusCheckNames?.artifactError)
   ) {
     logger.debug(
-      'Status check is null or an empty string, skipping status check addition',
+      'Status check is null or an empty string, skipping status check addition.',
     );
     return;
   }

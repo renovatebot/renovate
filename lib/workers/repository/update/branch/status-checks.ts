@@ -68,7 +68,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
     !is.nonEmptyString(config.statusCheckNames?.minimumReleaseAge)
   ) {
     logger.debug(
-      'Status check is null or an empty string, skipping status check addition',
+      'Status check is null or an empty string, skipping status check addition.',
     );
     return;
   }
@@ -106,7 +106,7 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
     !is.nonEmptyString(config.statusCheckNames?.mergeConfidence)
   ) {
     logger.debug(
-      'Status check is null or an empty string, skipping status check addition',
+      'Status check is null or an empty string, skipping status check addition.',
     );
     return;
   }

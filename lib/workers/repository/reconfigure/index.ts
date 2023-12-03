@@ -24,7 +24,7 @@ async function setBranchStatus(
 ): Promise<void> {
   if (!is.nonEmptyString(context)) {
     logger.debug(
-      'Status check is null or an empty string, skipping status check addition',
+      'Status check is null or an empty string, skipping status check addition.',
     );
     return;
   }
@@ -77,7 +77,7 @@ export async function validateReconfigureBranch(
 
     // if old status check is present skip validation
     if (is.nonEmptyString(validationStatus)) {
-      logger.debug('Skipping validation check as status check already exists');
+      logger.debug('Skipping validation check because status check already exists.');
       return;
     }
   }
