@@ -157,13 +157,14 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `statusCheckNames.mergeConfidence` configuration: status check is not a string',
+            'Invalid `statusCheckNames.mergeConfidence` configuration: status check is not a string.',
         },
         {
           message:
-            'Invalid `statusCheckNames.statusCheckNames.randomKey` configuration: key is not allowed',
+            'Invalid `statusCheckNames.statusCheckNames.randomKey` configuration: key is not allowed.',
         },
       ]);
+      expect(errors).toHaveLength(2);
     });
 
     it('catches invalid customDatasources record type', async () => {

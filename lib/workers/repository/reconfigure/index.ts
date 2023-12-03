@@ -77,7 +77,9 @@ export async function validateReconfigureBranch(
 
     // if old status check is present skip validation
     if (is.nonEmptyString(validationStatus)) {
-      logger.debug('Skipping validation check because status check already exists.');
+      logger.debug(
+        'Skipping validation check because status check already exists.',
+      );
       return;
     }
   }
