@@ -1765,7 +1765,7 @@ Example config:
 
 ### maxRetryAfter
 
-A remote host may return a `429`/`403` response with a `Retry-After` header value, which indicates that Renovate has been rate-limited.
+A remote host may return a `429` or `403` response with a `Retry-After` header value, which indicates that Renovate has been rate-limited.
 Renovate may try to contact the host again after waiting a certain time, that's set by the host.
 By default, Renovate tries again after the `Retry-After` header value has passed, up to a maximum of 60 seconds.
 If the `Retry-After` value is more than 60 seconds, Renovate will abort the request instead of waiting.
