@@ -9,6 +9,14 @@ const hostDelays = new Map<string, Promise<unknown>>();
 
 const maxRetries = 2;
 
+/**
+ * Given a task that returns a promise, retry the task if it fails with a
+ * 429 Too Many Requests or 403 Forbidden response, using the Retry-After
+ * header to determine the delay.
+ *
+ * For response codes other than 429 or 403, or if the Retry-After header
+ * is not present or invalid, the task is not retried, throwing the error.
+ */
 export async function wrapWithRetry<T>(
   task: Task<T>,
   url: string,
