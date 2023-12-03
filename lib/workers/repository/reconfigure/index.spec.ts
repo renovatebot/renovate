@@ -217,7 +217,7 @@ describe('workers/repository/reconfigure/index', () => {
     platform.getBranchStatusCheck.mockResolvedValueOnce('green');
     await validateReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
-      'Skipping validation check as status check already exists',
+      'Skipping validation check because status check already exists.',
     );
   });
 
