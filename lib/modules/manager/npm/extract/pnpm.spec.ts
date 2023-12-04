@@ -42,7 +42,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
     });
 
     it('detects errors when opening pnpm-workspace.yml file', async () => {
-      jest.spyOn(yaml, 'load').mockImplementationOnce(() => {
+      jest.spyOn(yaml, 'parseSingleYaml').mockImplementationOnce(() => {
         throw new Error();
       });
 

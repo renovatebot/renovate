@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
-import { loadAll } from '../../../util/yaml';
+import { parseYaml } from '../../../util/yaml';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { getDep } from '../dockerfile/extract';
@@ -22,7 +22,7 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   let docs: TektonResource[];
   try {
-    docs = loadAll(content) as TektonResource[];
+    docs = parseYaml(content) as TektonResource[];
   } catch (err) {
     logger.debug(
       { err, packageFile },

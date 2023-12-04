@@ -11,7 +11,7 @@ interface YamlOptions extends LoadOptions {
   removeTemplates?: boolean;
 }
 
-export function loadAll(
+export function parseYaml(
   content: string,
   iterator?: null | undefined,
   options?: YamlOptions,
@@ -21,7 +21,10 @@ export function loadAll(
   return multiple(massagedContent, iterator, options);
 }
 
-export function load(content: string, options?: YamlOptions): unknown {
+export function parseSingleYaml(
+  content: string,
+  options?: YamlOptions,
+): unknown {
   const massagedContent = massageContent(content, options);
   return single(massagedContent, options);
 }

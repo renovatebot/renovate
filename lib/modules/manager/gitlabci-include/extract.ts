@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
-import { load } from '../../../util/yaml';
+import { parseSingleYaml } from '../../../util/yaml';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type {
   GitlabInclude,
@@ -71,7 +71,7 @@ export function extractPackageFile(
   const platform = GlobalConfig.get('platform');
   const endpoint = GlobalConfig.get('endpoint');
   try {
-    const doc = load(replaceReferenceTags(content), {
+    const doc = parseSingleYaml(replaceReferenceTags(content), {
       json: true,
     }) as GitlabPipeline;
     const includes = getAllIncludeProjects(doc);
