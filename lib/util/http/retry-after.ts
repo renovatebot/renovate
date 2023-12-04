@@ -23,7 +23,7 @@ export async function wrapWithRetry<T>(
   getRetryAfter: (err: unknown) => number | null,
   maxRetryAfter: number,
 ): Promise<T> {
-  const key = parseUrl(url)?.host ?? /* istanbul ignore next */ url;
+  const key = parseUrl(url)?.host ?? url;
 
   let retries = 0;
   for (;;) {

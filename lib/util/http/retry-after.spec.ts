@@ -28,7 +28,7 @@ describe('util/http/retry-after', () => {
       const task = jest.fn(() => Promise.resolve(42));
       const res = await wrapWithRetry(
         task,
-        'http://example.com',
+        'foobar',
         () => null,
         60,
       );
