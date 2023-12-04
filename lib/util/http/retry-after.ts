@@ -75,7 +75,7 @@ export function getRetryAfter(err: unknown): number | null {
     return null;
   }
 
-  if (err.response.statusCode !== 429 && err.response.statusCode !== 403) {
+  if (err.response.statusCode < 400 || err.response.statusCode >= 500) {
     return null;
   }
 
