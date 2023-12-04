@@ -263,7 +263,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'reportType',
-    description: 'Set how or if reports should be generated',
+    description: 'Set how, or if, reports should be generated.',
     globalOnly: true,
     type: 'string',
     default: null,
@@ -273,7 +273,7 @@ const options: RenovateOptions[] = [
   {
     name: 'reportPath',
     description:
-      'Path to where the file should be written. In case of `s3` this has to be full s3 URI',
+      'Path to where the file should be written. In case of `s3` this has to be a full S3 URI.',
     globalOnly: true,
     type: 'string',
     default: null,
