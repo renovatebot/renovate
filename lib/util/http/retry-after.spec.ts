@@ -26,12 +26,7 @@ describe('util/http/retry-after', () => {
   describe('wrapWithRetry', () => {
     it('works', async () => {
       const task = jest.fn(() => Promise.resolve(42));
-      const res = await wrapWithRetry(
-        task,
-        'foobar',
-        () => null,
-        60,
-      );
+      const res = await wrapWithRetry(task, 'foobar', () => null, 60);
       expect(res).toBe(42);
       expect(task).toHaveBeenCalledTimes(1);
     });
