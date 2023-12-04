@@ -3572,7 +3572,7 @@ You can customize the context of the status check that Renovate adds to its upda
 - Setting the value to `null` or an empty string, effectively disables or skips that status check
 - This option is mergeable, which means you only have to specify the status checks that you want to modify
 
-```json
+```json title="Example of overriding status check strings"
 {
   "statusCheckNames": {
     "minimumReleaseAge": "custom/stability-days",
