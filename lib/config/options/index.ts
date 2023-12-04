@@ -175,6 +175,7 @@ const options: RenovateOptions[] = [
     description: 'Custom strings to use as status check names.',
     type: 'object',
     mergeable: true,
+    advancedUse: true,
     default: {
       minimumReleaseAge: 'renovate/stability-days',
       mergeConfidence: 'renovate/merge-confidence',
