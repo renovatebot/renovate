@@ -1,8 +1,8 @@
 name: trivy
 
 on:
-  schedule:
-    - cron: '59 11 * * *'
+  # schedule:
+  #   - cron: '59 11 * * *'
   workflow_dispatch:
 
 permissions: {}
