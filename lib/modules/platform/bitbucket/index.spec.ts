@@ -953,56 +953,38 @@ describe('modules/platform/bitbucket/index', () => {
       });
       expect(pr?.number).toBe(5);
     });
-  });
 
-  describe('findReconfigurePr()', () => {
-    it('exists', () => {
-      expect(bitbucket.findReconfigurePr).toBeDefined();
-    });
-
-    it('finds reconfigure pr', async () => {
+    it('finds pr from other authors', async () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"',
+          '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"&state=open',
         )
         .reply(200, { values: [pr] });
-      expect(await bitbucket.findReconfigurePr?.('branch')).toMatchSnapshot();
+      expect(
+        await bitbucket.findPr({
+          branchName: 'branch',
+          state: 'open',
+          includeOtherAuthors: true,
+        }),
+      ).toMatchSnapshot();
     });
 
-    it('returns null if reconfigure pr is not open', async () => {
+    it('returns null if no open pr exists - (includeOtherAuthors)', async () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"',
-        )
-        .reply(200, {
-          values: [
-            {
-              id: 5,
-              source: { branch: { name: 'branch' } },
-              destination: { branch: { name: 'master' } },
-              title: 'title',
-              state: 'closed',
-            },
-          ],
-        });
-
-      const pr = await bitbucket.findReconfigurePr?.('branch');
-      expect(pr).toBeNull();
-    });
-
-    it('returns null if reconfigure pr not found', async () => {
-      const scope = await initRepoMock();
-      scope
-        .get(
-          '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"',
+          '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"&state=open',
         )
         .reply(200, {
           values: [],
         });
 
-      const pr = await bitbucket.findReconfigurePr?.('branch');
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        state: 'open',
+        includeOtherAuthors: true,
+      });
       expect(pr).toBeNull();
     });
   });

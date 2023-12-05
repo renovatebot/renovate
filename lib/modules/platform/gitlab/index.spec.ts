@@ -1677,12 +1677,6 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(res).toBeDefined();
     });
-  });
-
-  describe('findReconfigurePr()', () => {
-    it('exists', () => {
-      expect(gitlab.findReconfigurePr).toBeDefined();
-    });
 
     it('finds reconfigure pr', async () => {
       httpMock
@@ -1698,35 +1692,27 @@ describe('modules/platform/gitlab/index', () => {
             state: 'opened',
           },
         ]);
-      expect(await gitlab.findReconfigurePr?.('branch')).toMatchSnapshot();
+      expect(
+        await gitlab.findPr({
+          branchName: 'branch',
+          state: 'open',
+          includeOtherAuthors: true,
+        }),
+      ).toMatchSnapshot();
     });
 
-    it('returns null if reconfigure pr is closed', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?source_branch=branch&state=opened',
-        )
-        .reply(200, [
-          {
-            iid: 1,
-            source_branch: 'branch',
-            title: 'branch a pr',
-            state: 'closed',
-          },
-        ]);
-      const pr = await gitlab.findReconfigurePr?.('branch');
-      expect(pr).toBeNull();
-    });
-
-    it('returns null if reconfigure pr not found', async () => {
+    it('returns null if no pr found - (includeOtherAuthors)', async () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
           '/api/v4/projects/undefined/merge_requests?source_branch=branch&state=opened',
         )
         .reply(200, []);
-      const pr = await gitlab.findReconfigurePr?.('branch');
+      const pr = await gitlab.findPr({
+        branchName: 'branch',
+        state: 'open',
+        includeOtherAuthors: true,
+      });
       expect(pr).toBeNull();
     });
   });

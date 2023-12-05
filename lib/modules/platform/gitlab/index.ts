@@ -858,8 +858,37 @@ export async function findPr({
   branchName,
   prTitle,
   state = 'all',
+  includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle!}, ${state})`);
+
+  if (includeOtherAuthors) {
+    // only fetch open mrs from other authors
+    const response = await gitlabApi.getJson<GitLabMergeRequest[]>(
+      `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
+    );
+    let { body: mrList } = response;
+    mrList = mrList.filter((pr) => pr.state === 'opened');
+
+    if (!mrList.length) {
+      logger.debug(`No reconfigure MR found for branch ${branchName}`);
+      return null;
+    }
+
+    // return the latest merge request
+    const mr = mrList[0];
+
+    // only pass necessary info
+    const pr: GitlabPr = {
+      sourceBranch: mr.source_branch,
+      number: mr.iid,
+      state: 'open',
+      title: mr.title,
+    };
+
+    return massagePr(pr);
+  }
+
   const prList = await getPrList();
   return (
     prList.find(
@@ -869,35 +898,6 @@ export async function findPr({
         matchesState(p.state, state),
     ) ?? null
   );
-}
-
-export async function findReconfigurePr(
-  branchName: string,
-): Promise<Pr | null> {
-  logger.debug(`findReconfigurePr(${branchName}`);
-  const response = await gitlabApi.getJson<GitLabMergeRequest[]>(
-    `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
-  );
-  let { body: mrList } = response;
-  mrList = mrList.filter((pr) => pr.state === 'opened');
-
-  if (!mrList.length) {
-    logger.debug(`No reconfigure MR found for branch ${branchName}`);
-    return null;
-  }
-
-  // return the latest merge request
-  const mr = mrList[0];
-
-  // only pass necessary info
-  const pr: GitlabPr = {
-    sourceBranch: mr.source_branch,
-    number: mr.iid,
-    state: 'open',
-    title: mr.title,
-  };
-
-  return massagePr(pr);
 }
 
 // Returns the Pull Request for a branch. Null if not exists.

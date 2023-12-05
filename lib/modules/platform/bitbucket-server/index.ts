@@ -324,8 +324,40 @@ export async function findPr({
   prTitle,
   state = 'all',
   refreshCache,
+  includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
+
+  if (includeOtherAuthors) {
+    // only fetch open prs from other authors
+    const searchParams: Record<string, string> = {
+      state: 'OPEN',
+    };
+    searchParams['direction'] = 'outgoing';
+    searchParams['at'] = `refs/heads/${branchName}`;
+
+    const query = getQueryString(searchParams);
+    const prs = await utils.accumulateValues(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
+      'get',
+      {},
+      1,
+    );
+
+    if (!prs.length) {
+      logger.debug(`No reconfigure Pr found for branch ${branchName}`);
+      return null;
+    }
+
+    // return the latest pr
+    const pr = utils.prInfo(prs[0]);
+    if (pr) {
+      logger.debug(`Found PR #${pr.number}`);
+    }
+
+    return pr;
+  }
+
   const prList = await getPrList(refreshCache);
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
   if (pr) {
@@ -334,38 +366,6 @@ export async function findPr({
     logger.debug(`Renovate did not find a PR for branch #${branchName}`);
   }
   return pr ?? null;
-}
-
-export async function findReconfigurePr(
-  branchName: string,
-): Promise<Pr | null> {
-  logger.debug(`findReconfigurePr(${branchName}`);
-  const searchParams: Record<string, string> = {
-    state: 'OPEN',
-  };
-  searchParams['direction'] = 'outgoing';
-  searchParams['at'] = `refs/heads/${branchName}`;
-
-  const query = getQueryString(searchParams);
-  const prList = await utils.accumulateValues(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
-    'get',
-    {},
-    1,
-  );
-
-  if (!prList.length) {
-    logger.debug(`No reconfigure Pr found for branch ${branchName}`);
-    return null;
-  }
-
-  // return the latest pr
-  const pr = utils.prInfo(prList[0]);
-  if (pr) {
-    logger.debug(`Found PR #${pr.number}`);
-  }
-
-  return pr;
 }
 
 // Returns the Pull Request for a branch. Null if not exists.

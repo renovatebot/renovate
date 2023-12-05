@@ -41,7 +41,6 @@ describe('workers/repository/reconfigure/index', () => {
   });
 
   it('no effect on repo with no reconfigure branch', async () => {
-    platform.findReconfigurePr.mockResolvedValue(null);
     scm.branchExists.mockResolvedValueOnce(false);
     await validateReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith('No reconfigure branch found');
@@ -124,7 +123,6 @@ describe('workers/repository/reconfigure/index', () => {
             "enabledManagers": ["docker"]
         }
         `);
-    platform.findReconfigurePr = undefined as never;
     platform.findPr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
     await validateReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(

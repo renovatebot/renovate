@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/platform/github/index findReconfigurePr() finds reconfigure pr 1`] = `
+exports[`modules/platform/github/index findPr(branchName, prTitle, state) finds pr from other authors 1`] = `
 {
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",

@@ -296,8 +296,31 @@ export async function findPr({
   branchName,
   prTitle,
   state = 'all',
+  includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
+
+  if (includeOtherAuthors) {
+    // only fetch open prs from other authors
+    const prs = (
+      await bitbucketHttp.getJson<PagedResult<PrResponse>>(
+        `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name="${branchName}"&state=open`,
+      )
+    ).body.values;
+
+    if (prs.length === 0) {
+      logger.debug(`No reconfigure pr found for branch ${branchName}`);
+      return null;
+    }
+
+    // return the latest pr
+    const pr = utils.prInfo(prs[0]);
+    if (pr) {
+      logger.debug(`Found PR #${pr.number}`);
+    }
+    return pr;
+  }
+
   const prList = await getPrList();
   const pr = prList.find(
     (p) =>
@@ -337,30 +360,6 @@ export async function findPr({
   }
 
   return pr ?? null;
-}
-
-export async function findReconfigurePr(
-  branchName: string,
-): Promise<Pr | null> {
-  logger.debug(`findReconfigurePr(${branchName}`);
-  let prList = (
-    await bitbucketHttp.getJson<PagedResult<PrResponse>>(
-      `/2.0/repositories/${config.repository}/pullrequests?q=source.branch.name="${branchName}"`,
-    )
-  ).body.values;
-
-  prList = prList.filter((pr) => pr.state === 'OPEN');
-  if (prList.length === 0) {
-    logger.debug(`No reconfigure pr found for branch ${branchName}`);
-    return null;
-  }
-
-  // return the latest pr
-  const pr = utils.prInfo(prList[0]);
-  if (pr) {
-    logger.debug(`Found PR #${pr.number}`);
-  }
-  return pr;
 }
 
 // Gets details for a PR

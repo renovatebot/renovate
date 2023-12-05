@@ -798,8 +798,32 @@ export async function findPr({
   branchName,
   prTitle,
   state = 'all',
+  includeOtherAuthors,
 }: FindPRConfig): Promise<GhPr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
+
+  if (includeOtherAuthors) {
+    const repo = config.parentRepo ?? config.repository;
+    // only fetch open prs from other authors
+    const response = await githubApi.getJson<GhRestPr[]>(
+      `repos/${repo}/pulls?head=${repo}:${branchName}&state=open`,
+    );
+    let { body: prList } = response;
+    prList = prList.filter((pr) => pr.state === 'open');
+
+    if (!prList.length) {
+      logger.debug(`No reconfigure Pr found for branch ${branchName}`);
+      return null;
+    }
+
+    // return the latest pull request
+    const pr = coerceRestPr(prList[0]);
+    if (pr) {
+      logger.debug(`Found PR #${pr.number}`);
+    }
+    return pr;
+  }
+
   const prList = await getPrList();
   const pr = prList.find((p) => {
     if (p.sourceBranch !== branchName) {
@@ -824,30 +848,6 @@ export async function findPr({
     logger.debug(`Found PR #${pr.number}`);
   }
   return pr ?? null;
-}
-
-export async function findReconfigurePr(
-  branchName: string,
-): Promise<GhPr | null> {
-  logger.debug(`findReconfigurePr(${branchName}`);
-  const repo = config.parentRepo ?? config.repository;
-  const response = await githubApi.getJson<GhRestPr[]>(
-    `repos/${repo}/pulls?head=${repo}:${branchName}&state=open`,
-  );
-  let { body: prList } = response;
-  prList = prList.filter((pr) => pr.state === 'open');
-
-  if (!prList.length) {
-    logger.debug(`No reconfigure Pr found for branch ${branchName}`);
-    return null;
-  }
-
-  // return the latest pull request
-  const pr = coerceRestPr(prList[0]);
-  if (pr) {
-    logger.debug(`Found PR #${pr.number}`);
-  }
-  return pr;
 }
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;

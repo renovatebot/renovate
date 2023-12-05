@@ -1306,25 +1306,23 @@ describe('modules/platform/bitbucket-server/index', () => {
             }),
           ).toBeNull();
         });
-      });
 
-      describe('findReconfigurePr()', () => {
-        it('exists', () => {
-          expect(bitbucket.findReconfigurePr).toBeDefined();
-        });
-
-        it('finds reconfigure pr', async () => {
+        it('finds pr from other authors', async () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=open&direction=outgoing&at=refs/heads/branch&limit=1`,
             )
             .reply(200, {
               isLastPage: true,
               values: [prMock(url, 'SOME', 'repo')],
             });
           expect(
-            await bitbucket.findReconfigurePr?.('branch'),
+            await bitbucket.findPr({
+              branchName: 'branch',
+              state: 'open',
+              includeOtherAuthors: true,
+            }),
           ).toMatchSnapshot();
         });
 
@@ -1332,14 +1330,18 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=open&direction=outgoing&at=refs/heads/branch&limit=1`,
             )
             .reply(200, {
               isLastPage: true,
               values: [],
             });
 
-          const pr = await bitbucket.findReconfigurePr?.('branch');
+          const pr = await bitbucket.findPr({
+            branchName: 'branch',
+            state: 'open',
+            includeOtherAuthors: true,
+          });
           expect(pr).toBeNull();
         });
       });
