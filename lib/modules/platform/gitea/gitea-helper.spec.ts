@@ -87,6 +87,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
       push: true,
       admin: false,
     },
+    has_issues: true,
   };
 
   const otherMockRepo: Repo = {

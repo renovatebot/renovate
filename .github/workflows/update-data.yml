@@ -30,7 +30,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Update static data
         run: pnpm run update-static-data

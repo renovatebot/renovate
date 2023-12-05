@@ -31,7 +31,7 @@ export async function extractPackageFile(
 ): Promise<PackageFileContent | null> {
   const deps: PackageDependency[] = [];
   let docs: Doc[];
-  const registryAliases: Record<string, string> = {};
+  let registryAliases: Record<string, string> = {};
   // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
   let needKustomize = false;
   try {
@@ -47,16 +47,26 @@ export async function extractPackageFile(
     return null;
   }
   for (const doc of docs) {
-    if (!(doc && is.array(doc.releases))) {
+    if (!doc) {
       continue;
     }
 
+    // Always check for repositories in the current document and override the existing ones if any (as YAML does)
     if (doc.repositories) {
+      registryAliases = {};
       for (let i = 0; i < doc.repositories.length; i += 1) {
         registryAliases[doc.repositories[i].name] = doc.repositories[i].url;
       }
+      logger.debug(
+        { registryAliases, packageFile },
+        `repositories discovered.`,
+      );
     }
-    logger.debug({ registryAliases }, 'repositories discovered.');
+
+    // Skip extraction if the document contains no releases
+    if (!is.array(doc.releases)) {
+      continue;
+    }
 
     for (const dep of doc.releases) {
       let depName = dep.chart;
