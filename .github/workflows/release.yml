@@ -130,5 +130,5 @@ jobs:
         run: |
           cosign sign --yes ghcr.io/${{ env.OWNER }}/${{ env.FILE }}:${{ env.RENOVATE_VERSION }}
           cosign sign --yes ghcr.io/${{ env.OWNER }}/${{ env.FILE }}:${{ env.RENOVATE_VERSION }}-full
-          cosign sign --yes renovate/${{ env.FILE }}:${{ env.RENOVATE_VERSION }}
-          cosign sign --yes renovate/${{ env.FILE }}:${{ env.RENOVATE_VERSION }}-full
+          cosign sign --yes ${{ env.FILE }}/${{ env.FILE }}:${{ env.RENOVATE_VERSION }}
+          cosign sign --yes ${{ env.FILE }}/${{ env.FILE }}:${{ env.RENOVATE_VERSION }}-full

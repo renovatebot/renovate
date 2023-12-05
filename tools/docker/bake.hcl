@@ -67,8 +67,8 @@ target "slim" {
   tags = [
     "ghcr.io/${OWNER}/${FILE}",
     "ghcr.io/${OWNER}/${FILE}:${TAG}",
-    "renovate/${FILE}",
-    "renovate/${FILE}:${TAG}",
+    "${FILE}/${FILE}",
+    "${FILE}/${FILE}:${TAG}",
   ]
 }
 
@@ -83,8 +83,8 @@ target "full" {
    tags = [
     "ghcr.io/${OWNER}/${FILE}:full",
     "ghcr.io/${OWNER}/${FILE}:${TAG}-full",
-    "renovate/${FILE}:full",
-    "renovate/${FILE}:${TAG}-full",
+    "${FILE}/${FILE}:full",
+    "${FILE}/${FILE}:${TAG}-full",
   ]
 }
 
