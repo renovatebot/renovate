@@ -508,12 +508,14 @@ replace-with = "mcorbin"
       mockReadLocalFile({ 'Cargo.lock': cargolock });
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
 
-      const cargotoml = codeBlock`[package]
-name = "test"
-version = "0.1.0"
-edition = "2021"
-[dependencies]
-syn = "2.0"`;
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        version = "0.1.0"
+        edition = "2021"
+        [dependencies]
+        syn = "2.0"
+        `;
 
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
       expect(res?.deps).toMatchObject([{ lockedVersion: '2.0.1' }]);
@@ -556,12 +558,14 @@ syn = "2.0"`;
       mockReadLocalFile({ 'Cargo.lock': cargolock });
       fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
 
-      const cargotoml = codeBlock`[package]
-name = "test"
-version = "0.1.0"
-edition = "2021"
-[dependencies]
-syn = "2.foo.1"`;
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        version = "0.1.0"
+        edition = "2021"
+        [dependencies]
+        syn = "2.foo.1"
+        `;
 
       const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
       expect(res?.deps).not.toHaveProperty('lockedVersion');
