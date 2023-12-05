@@ -46,7 +46,7 @@ export async function extractPackageFile(
     );
     return null;
   }
-  for (const [docIndex, doc] of docs.entries()) {
+  for (const doc of docs) {
     if (!doc) {
       continue;
     }
@@ -58,8 +58,8 @@ export async function extractPackageFile(
         registryAliases[doc.repositories[i].name] = doc.repositories[i].url;
       }
       logger.debug(
-        { registryAliases },
-        `repositories discovered in document ${docIndex + 1} in ${packageFile}`,
+        { registryAliases, packageFile },
+        `repositories discovered.`,
       );
     }
 
