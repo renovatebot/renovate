@@ -66,8 +66,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@renovatebot/osv-offline':
-        specifier: 1.3.9
-        version: 1.3.9
+        specifier: 1.3.10
+        version: 1.3.10
       '@renovatebot/pep440':
         specifier: 3.0.12
         version: 3.0.12
@@ -2825,13 +2825,13 @@ packages:
       '@seald-io/nedb': 4.0.2
     dev: false
 
-  /@renovatebot/osv-offline@1.3.9:
-    resolution: {integrity: sha512-Krluyx5CJscwS5/XD3Nhd2ay7mih4teRCsFok05pokvBfcjWBRSD6WcUPgGE+P9BJIo9i4ddYStHmuU1055P6g==}
+  /@renovatebot/osv-offline@1.3.10:
+    resolution: {integrity: sha512-Bj1Xb3HQlFQ6/E0tGNd0BM3LODg3LrVBJrWPdJWj4GdebO0N3OlqXZo2bE1tvVzeqjSdkXMn0mrtomyQSYwbgg==}
     dependencies:
       '@octokit/rest': 20.0.2
       '@renovatebot/osv-offline-db': 1.4.0
       adm-zip: 0.5.10
-      fs-extra: 11.1.1
+      fs-extra: 11.2.0
       got: 11.8.6
       luxon: 3.4.4
       node-fetch: 2.7.0
@@ -6122,6 +6122,15 @@ packages:
       graceful-fs: 4.2.11
       jsonfile: 6.1.0
       universalify: 2.0.1
+
+  /fs-extra@11.2.0:
+    resolution: {integrity: sha512-PmDi3uwK5nFuXh7XDTlVnS17xJS7vW36is2+w3xcv8SVxiB4NyATf4ctkVY5bkSjX0Y4nbvZCq1/EjtEyr9ktw==}
+    engines: {node: '>=14.14'}
+    dependencies:
+      graceful-fs: 4.2.11
+      jsonfile: 6.1.0
+      universalify: 2.0.1
+    dev: false
 
   /fs-minipass@2.1.0:
     resolution: {integrity: sha512-V/JgOLFCS+R6Vcq0slCuaeWEdNC3ouDlJMNIsacH2VtALiu9mV4LPrHc5cDl8k5aw6J8jwgWWpiTo5RYhmIzvg==}
