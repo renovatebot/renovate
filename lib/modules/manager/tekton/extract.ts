@@ -126,30 +126,30 @@ function getAnnotationDep(url: string): PackageDependency | null {
   const dep: PackageDependency = {};
   dep.depType = 'tekton-annotation';
 
-  let match = githubRelease.exec(url);
+  let groups = githubRelease.exec(url)?.groups;
 
-  if (match?.groups) {
+  if (groups) {
     dep.datasource = GithubReleasesDatasource.id;
 
-    dep.depName = match?.groups?.path;
-    dep.packageName = match?.groups?.project;
-    dep.currentValue = match?.groups?.currentValue;
+    dep.depName = groups.path;
+    dep.packageName = groups.project;
+    dep.currentValue = groups.currentValue;
     return dep;
   }
 
-  match = gitUrl.exec(url);
-  if (match?.groups) {
+  groups = gitUrl.exec(url)?.groups;
+  if (groups) {
     dep.datasource = GitTagsDatasource.id;
 
-    dep.depName = match?.groups?.path.replace(
+    dep.depName = groups.path.replace(
       'raw.githubusercontent.com',
       'github.com',
     );
-    dep.packageName = match?.groups?.url.replace(
+    dep.packageName = groups.url.replace(
       'raw.githubusercontent.com',
       'github.com',
     );
-    dep.currentValue = match?.groups?.currentValue;
+    dep.currentValue = groups.currentValue;
     return dep;
   }
 
