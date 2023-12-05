@@ -64,6 +64,7 @@ interface GiteaRepoConfig {
   labelList: Promise<Label[]> | null;
   defaultBranch: string;
   cloneSubmodules: boolean;
+  hasIssuesEnabled: boolean;
 }
 
 export const id = 'gitea';
@@ -334,6 +335,7 @@ const platform: Platform = {
     config.prList = null;
     config.issueList = null;
     config.labelList = null;
+    config.hasIssuesEnabled = repo.has_issues;
 
     return {
       defaultBranch: config.defaultBranch,
@@ -655,6 +657,9 @@ const platform: Platform = {
   },
 
   getIssueList(): Promise<Issue[]> {
+    if (config.hasIssuesEnabled === false) {
+      return Promise.resolve([]);
+    }
     if (config.issueList === null) {
       config.issueList = helper
         .searchIssues(config.repository, { state: 'all' }, { memCache: false })
@@ -669,6 +674,9 @@ const platform: Platform = {
   },
 
   async getIssue(number: number, memCache = true): Promise<Issue | null> {
+    if (config.hasIssuesEnabled === false) {
+      return null;
+    }
     try {
       const body = (
         await helper.getIssue(config.repository, number, { memCache })
@@ -707,6 +715,12 @@ const platform: Platform = {
     once,
   }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
     logger.debug(`ensureIssue(${title})`);
+    if (config.hasIssuesEnabled === false) {
+      logger.info(
+        'Cannot ensure issue because issues are disabled in this repository',
+      );
+      return null;
+    }
     try {
       const body = smartLinks(content);
 
@@ -819,6 +833,12 @@ const platform: Platform = {
 
   async ensureIssueClosing(title: string): Promise<void> {
     logger.debug(`ensureIssueClosing(${title})`);
+    if (config.hasIssuesEnabled === false) {
+      logger.info(
+        'Cannot ensure issue because issues are disabled in this repository',
+      );
+      return;
+    }
     const issueList = await platform.getIssueList();
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
