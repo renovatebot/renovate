@@ -147,7 +147,7 @@ export const presets: Record<string, Preset> = {
       },
       {
         description: 'Replace `renovate` `slim` docker tag with `latest`.',
-        matchCurrentValue: 'slim',
+        matchCurrentValue: '/^slim$/',
         matchDatasources: ['docker'],
         matchPackageNames: ['ghcr.io/renovatebot/renovate'],
         matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
