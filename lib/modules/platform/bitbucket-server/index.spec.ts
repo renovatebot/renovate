@@ -1311,7 +1311,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=open&direction=outgoing&at=refs/heads/branch&limit=1`,
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1326,11 +1326,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           ).toMatchSnapshot();
         });
 
-        it('returns null if no PR found', async () => {
+        it('returns null if no pr found - (includeOtherAuthors)', async () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=open&direction=outgoing&at=refs/heads/branch&limit=1`,
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
             )
             .reply(200, {
               isLastPage: true,
