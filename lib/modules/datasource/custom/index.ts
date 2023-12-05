@@ -32,7 +32,9 @@ export class CustomDatasource extends Datasource {
     let data: unknown;
     try {
       if (isLocalRegistry) {
-        data = await fetcher.readFile(defaultRegistryUrlTemplate);
+        data = await fetcher.readFile(
+          defaultRegistryUrlTemplate.replace('file://', ''),
+        );
       } else {
         data = await fetcher.fetch(this.http, defaultRegistryUrlTemplate);
       }
