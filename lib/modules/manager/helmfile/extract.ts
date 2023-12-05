@@ -42,7 +42,7 @@ export async function extractPackageFile(
   } catch (err) {
     logger.debug(
       { err, packageFile },
-      `Failed to parse helmfile ${packageFile}`,
+      'Failed to parse helmfile helmfile.yaml',
     );
     return null;
   }
