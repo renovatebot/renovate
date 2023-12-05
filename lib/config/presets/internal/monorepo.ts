@@ -512,6 +512,9 @@ const patternGroups = {
   fullcalendar: '^@fullcalendar/',
   hotchocolate: '^HotChocolate\\.',
   'prometheus-simpleclient': '^io.prometheus:simpleclient',
+  // Can't specify the russh repo (https://github.com/warp-tech/russh) in repoGroups because parts
+  // of it (e.g. russh-config) are released separately.
+  russh: ['^russh$', '^russh-keys$'],
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',
