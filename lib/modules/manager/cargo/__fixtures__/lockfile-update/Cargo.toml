@@ -1,0 +1,8 @@
+[package]
+name = "test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+a = { package = "syn", version = "2.0" }
+b = { package = "syn", version = "1.0" }
