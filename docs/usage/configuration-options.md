@@ -625,7 +625,12 @@ Renovate supports two options:
 More advanced filtering options may come in future.
 
 There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
-This feature is limited to `packagist`, `npm`, and `pypi` datasources.
+This feature is limited to the folllowing datasources:
+
+- `jenkins-plugins`
+- `npm`
+- `packagist`
+- `pypi`
 
 <!-- prettier-ignore -->
 !!! warning
