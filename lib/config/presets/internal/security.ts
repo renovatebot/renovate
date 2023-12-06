@@ -8,7 +8,7 @@ export const presets: Record<string, Preset> = {
         matchSourceUrlPrefixes: ['https://github.com/', 'https://gitlab.com'],
         prBodyDefinitions: {
           OpenSSF:
-            '[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/{{platform}}.com/{{sourceRepo}}/badge)](https://securityscorecards.dev/viewer/?uri={{platform}}.com/{{sourceRepo}})',
+            "[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/{{{ replace '(^https?://)?' '' sourceUrl }}}/badge)](https://securityscorecards.dev/viewer/?uri={{{ replace '(^https?://)?' '' sourceUrl }}})",
         },
         prBodyColumns: [
           'Package',
