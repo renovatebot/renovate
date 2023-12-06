@@ -1,9 +1,4 @@
-import { regEx } from '../../../util/regex';
 import type { NugetVersion } from './types';
-
-function num(input: string | undefined): number | undefined {
-  return input?.match(regEx(/^\d+$/)) ? Number.parseInt(input, 10) : undefined;
-}
 
 function comparePrereleases(x: string, y: string): number {
   const xParts = x.split('.');
@@ -13,19 +8,16 @@ function comparePrereleases(x: string, y: string): number {
   for (let i = 0; i < maxLen; i += 1) {
     const xPart = xParts[i] ?? '';
     const yPart = yParts[i] ?? '';
+    const xNum = Number(xPart);
+    const yNum = Number(yPart);
 
-    const xNum = num(xPart);
-    const yNum = num(yPart);
-    if (xNum !== undefined && yNum !== undefined) {
-      const numCmp = Math.sign(xNum - yNum);
-      if (numCmp !== 0) {
-        return numCmp;
-      }
-    }
+    const res =
+      !Number.isNaN(xNum) && !Number.isNaN(yNum)
+        ? Math.sign(xNum - yNum)
+        : xPart.localeCompare(yPart, undefined, { sensitivity: 'base' });
 
-    const strCmp = xPart.localeCompare(yPart);
-    if (strCmp !== 0) {
-      return strCmp;
+    if (res !== 0) {
+      return res;
     }
   }
 
@@ -46,7 +38,7 @@ export function cmp(x: NugetVersion, y: NugetVersion): number {
   } else if (!x.prerelease && y.prerelease) {
     return 1;
   } else if (x.prerelease && y.prerelease) {
-    return x.prerelease.localeCompare(y.prerelease, undefined, { numeric: true });
+    return comparePrereleases(x.prerelease, y.prerelease);
   }
 
   return 0;
