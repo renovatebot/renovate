@@ -86,7 +86,7 @@ module.exports = {
       hostType: 'npm',
       matchHost: 'pkgs.dev.azure.com',
       username: 'apikey',
-      password: process.env.TOKEN,
+      password: process.env.RENOVATE_TOKEN,
     },
   ],
   repositories: ['YOUR-PROJECT/YOUR-REPO'],
@@ -107,7 +107,7 @@ module.exports = {
     {
       matchHost:
         'https://myorg.pkgs.visualstudio.com/_packaging/myorg/npm/registry/',
-      token: process.env.TOKEN,
+      token: process.env.RENOVATE_TOKEN,
       hostType: 'npm',
     },
     {
