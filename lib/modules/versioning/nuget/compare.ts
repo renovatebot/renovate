@@ -2,7 +2,7 @@ import { regEx } from '../../../util/regex';
 import type { NugetVersion } from './types';
 
 function num(input: string | undefined): number | undefined {
-  return input?.match(regEx(/^\d+$/)) ? Number(input) : undefined;
+  return input?.match(regEx(/^\d+$/)) ? Number.parseInt(input, 10) : undefined;
 }
 
 function comparePrereleases(x: string, y: string): number {
