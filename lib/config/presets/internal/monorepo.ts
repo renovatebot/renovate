@@ -51,6 +51,7 @@ const repoGroups = {
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   'aws-sdk-rust': [
+    'https://github.com/smithy-lang/smithy-rs',
     'https://github.com/awslabs/smithy-rs',
     'https://github.com/awslabs/aws-sdk-rust',
   ],
