@@ -46,7 +46,7 @@ export function cmp(x: NugetVersion, y: NugetVersion): number {
   } else if (!x.prerelease && y.prerelease) {
     return 1;
   } else if (x.prerelease && y.prerelease) {
-    return comparePrereleases(x.prerelease, y.prerelease);
+    return x.prerelease.localeCompare(y.prerelease, undefined, { numeric: true });
   }
 
   return 0;
