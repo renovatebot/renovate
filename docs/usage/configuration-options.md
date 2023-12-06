@@ -3039,9 +3039,7 @@ If set to `branch` the postUpgradeTask is executed for the whole branch.
 
 Use this array to provide a list of column names you wish to include in the PR tables.
 
-For example, if you wish to add the package file name to the table, you would add this to your config:
-
-```json
+```json title="Adding the package file name to the table"
 {
   "prBodyColumns": [
     "Package",
@@ -3060,11 +3058,12 @@ For example, if you wish to add the package file name to the table, you would ad
 
 ## prBodyDefinitions
 
-You can configure this object to either (a) modify the template for an existing table column in PR bodies, or (b) you wish to _add_ a definition for a new/additional column.
+You can configure this object to either:
 
-Here is an example of modifying the default value for the `"Package"` column to put it inside a `<code></code>` block:
+- modify the template for an existing table column in PR bodies, or
+- _add_ a definition for a new/additional column.
 
-```json
+```json title="Modifying the default value for the Package column to put it inside a code block"
 {
   "prBodyDefinitions": {
     "Package": "`{{{depName}}}`"
@@ -3072,9 +3071,7 @@ Here is an example of modifying the default value for the `"Package"` column to 
 }
 ```
 
-Here is an example of adding a custom `"Sourcegraph"` column definition:
-
-```json
+```json title="Adding a custom Sourcegraph column definition"
 {
   "prBodyDefinitions": {
     "Sourcegraph": "[![code search for \"{{{depName}}}\"](https://sourcegraph.com/search/badge?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}}&label=matches)](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}})"
@@ -3097,9 +3094,7 @@ Here is an example of adding a custom `"Sourcegraph"` column definition:
 
 Use this field to add custom content inside PR bodies, including conditionally.
 
-e.g. if you wish to add an extra Warning to major updates:
-
-```json
+```json title="Adding an extra Warning to major updates"
 {
   "prBodyNotes": ["{{#if isMajor}}:warning: MAJOR MAJOR MAJOR :warning:{{/if}}"]
 }
