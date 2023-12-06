@@ -25,8 +25,8 @@ describe('modules/manager/mix/extract', () => {
         {
           currentValue: '>2.1.0 or <=3.0.0',
           datasource: 'hex',
-          depName: 'ecto',
-          packageName: 'ecto',
+          depName: 'foo_bar',
+          packageName: 'foo_bar',
         },
         {
           currentDigest: undefined,
@@ -76,8 +76,8 @@ describe('modules/manager/mix/extract', () => {
         {
           currentValue: '~> 1.0',
           datasource: 'hex',
-          depName: 'jason',
-          packageName: 'jason',
+          depName: 'mason',
+          packageName: 'mason',
         },
         {
           currentValue: '~> 6.1',
@@ -89,8 +89,8 @@ describe('modules/manager/mix/extract', () => {
           currentValue: '== 1.6.14',
           currentVersion: '1.6.14',
           datasource: 'hex',
-          depName: 'phoenix',
-          packageName: 'phoenix',
+          depName: 'public',
+          packageName: 'public',
         },
       ]);
     });

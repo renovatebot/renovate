@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { findLocalSiblingOrParent, localPathExists } from '../../../util/fs';
+import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -16,13 +16,16 @@ const refRegexp = regEx(/ref:\s*"(?<value>[^"]+)"/);
 const branchOrTagRegexp = regEx(/(?:branch|tag):\s*"(?<value>[^"]+)"/);
 const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/);
 const commentMatchRegExp = regEx(/#.*$/);
+const lockedVersionRegExp = regEx(
+  /^\s+"(?<app>\w+)".*?"(?<lockedVersion>\d+\.\d+\.\d+)"/,
+);
 
 export async function extractPackageFile(
   content: string,
   packageFile: string,
 ): Promise<PackageFileContent | null> {
   logger.trace(`mix.extractPackageFile(${packageFile})`);
-  const deps: PackageDependency[] = [];
+  const deps = new Map<string, PackageDependency>();
   const contentArr = content
     .split(newlineRegex)
     .map((line) => line.replace(commentMatchRegExp, ''));
@@ -64,17 +67,35 @@ export async function extractPackageFile(
           }
         }
 
-        deps.push(dep);
+        deps.set(app, dep);
+        logger.info(`setting ${app} to ${JSON.stringify(dep)}`);
         depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
       }
     }
   }
-  const res: PackageFileContent = { deps };
   const lockFileName =
     (await findLocalSiblingOrParent(packageFile, 'mix.lock')) ?? 'mix.lock';
-  // istanbul ignore if
-  if (await localPathExists(lockFileName)) {
-    res.lockFiles = [lockFileName];
+  const lockFileContent = await readLocalFile(lockFileName);
+
+  if (lockFileContent) {
+    const lockedVersions = lockFileContent
+      .toString()
+      .split(newlineRegex)
+      .slice(1, -1)
+      .reduce<Map<string, string>>((lockedVersions, line) => {
+        const groups = lockedVersionRegExp.exec(line)?.groups;
+        if (groups?.app && groups?.lockedVersion) {
+          lockedVersions.set(groups.app, groups.lockedVersion);
+        }
+        return lockedVersions;
+      }, new Map());
+    for (const [app, dep] of deps.entries()) {
+      dep.lockedVersion = lockedVersions.get(app);
+      logger.debug(`Found ${dep.lockedVersion} for ${app}`);
+    }
   }
-  return res;
+  return {
+    deps: Array.from(deps.values()),
+    lockFiles: lockFileContent ? [lockFileName] : undefined,
+  };
 }
