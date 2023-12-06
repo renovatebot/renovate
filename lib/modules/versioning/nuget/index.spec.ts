@@ -68,7 +68,6 @@ describe('modules/versioning/nuget/index', () => {
     ${'1.2.0.1'}        | ${'1.2.0'}         | ${true}
     ${'1.2.0.1'}        | ${'1.2.0.1-beta'}  | ${true}
     ${'1.2.0.1-beta'}   | ${'1.2.0.1'}       | ${false}
-    ${undefined}        | ${'1.2.0'}         | ${true}
     ${'1.2.0+1'}        | ${'1.2.0'}         | ${false}
     ${'1.2.0'}          | ${'1.2.0+1'}       | ${false}
   `('isGreaterThan($a, $b) === $expected', ({ a, b, expected }) => {
