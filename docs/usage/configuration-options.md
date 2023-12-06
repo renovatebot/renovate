@@ -1770,7 +1770,7 @@ Renovate may try to contact the host again after waiting a certain time, that's 
 By default, Renovate tries again after the `Retry-After` header value has passed, up to a maximum of 60 seconds.
 If the `Retry-After` value is more than 60 seconds, Renovate will abort the request instead of waiting.
 
-You can configure a different maximum value using `maxRetryAfter`:
+You can configure a different maximum value in seconds using `maxRetryAfter`:
 
 ```json
 {
