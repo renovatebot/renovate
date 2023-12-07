@@ -321,7 +321,7 @@ const repoGroups = {
   lerna: 'https://github.com/lerna/lerna',
   lexical: 'https://github.com/facebook/lexical',
   linguijs: 'https://github.com/lingui/js-lingui',
-  'logging-log4j2': 'https://github.com/apache/logging-log4j2',
+  log4j2: 'https://github.com/apache/logging-log4j2',
   loopback: [
     'https://github.com/strongloop/loopback-next', // old repo (see: https://github.com/loopbackio/loopback-next/issues/7595)
     'https://github.com/loopbackio/loopback-next',
