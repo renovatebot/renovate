@@ -341,7 +341,7 @@ export async function findPr({
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
       'get',
       {},
-      1,
+      1, // only fetch the latest pr
     );
 
     if (!prs.length) {

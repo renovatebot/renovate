@@ -13,7 +13,6 @@ import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
-import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
 import { getPrBodyStruct, hashBody } from '../pr-body';
@@ -81,11 +80,6 @@ let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
 let botUserName: string;
 
-function isReconfigurePr(branchName: string): boolean {
-  logger.debug({ branchName }, 'isReconfigurePr');
-  return regEx(/reconfigure$/g).test(branchName);
-}
-
 function toRenovateIssue(data: Issue): Issue {
   return {
     number: data.number,
@@ -96,7 +90,7 @@ function toRenovateIssue(data: Issue): Issue {
 }
 
 // TODO #22198
-function toRenovatePR(data: PR): Pr | null {
+function toRenovatePR(data: PR, includeOtherAuthors = false): Pr | null {
   if (!data) {
     return null;
   }
@@ -115,9 +109,9 @@ function toRenovatePR(data: PR): Pr | null {
 
   const createdBy = data.user?.username;
   if (
+    !includeOtherAuthors &&
     createdBy &&
     botUserName &&
-    !isReconfigurePr(data.head.label) &&
     createdBy !== botUserName
   ) {
     return null;
@@ -458,12 +452,14 @@ const platform: Platform = {
     return 'yellow';
   },
 
-  getPrList(): Promise<Pr[]> {
+  getPrList(includeOtherAuthors = false): Promise<Pr[]> {
     if (config.prList === null) {
       config.prList = helper
         .searchPRs(config.repository, { state: 'all' }, { memCache: false })
         .then((prs) => {
-          const prList = prs.map(toRenovatePR).filter(is.truthy);
+          const prList = prs
+            .map((pr) => toRenovatePR(pr, includeOtherAuthors))
+            .filter(is.truthy);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
           return prList;
         });
@@ -502,9 +498,10 @@ const platform: Platform = {
     branchName,
     prTitle: title,
     state = 'all',
+    includeOtherAuthors,
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
-    const prList = await platform.getPrList();
+    const prList = await platform.getPrList(includeOtherAuthors);
     const pr = prList.find(
       (p) =>
         p.sourceRepo === config.repository &&

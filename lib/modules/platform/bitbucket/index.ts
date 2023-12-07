@@ -309,7 +309,7 @@ export async function findPr({
     ).body.values;
 
     if (prs.length === 0) {
-      logger.debug(`No reconfigure pr found for branch ${branchName}`);
+      logger.debug(`No reconfigure Pr found for branch ${branchName}`);
       return null;
     }
 
