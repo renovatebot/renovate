@@ -190,6 +190,44 @@ describe('util/git/index', () => {
     it('sets non-master base branch', async () => {
       await expect(git.checkoutBranch('develop')).resolves.not.toThrow();
     });
+
+    it('sets non-master base branch with submodule update', async () => {
+      const repo = Git(base.path);
+
+      const submoduleBasePath = base.path + '/submodule';
+      await fs.mkdir(submoduleBasePath);
+      const submodule = Git(submoduleBasePath);
+      await submodule.init();
+      await submodule.addConfig('user.email', 'Jest@example.com');
+      await submodule.addConfig('user.name', 'Jest');
+
+      await fs.writeFile(submoduleBasePath + '/init_file', 'init');
+      await submodule.add('init_file');
+      await submodule.commit('init submodule');
+
+      await repo.submoduleAdd('./submodule', './submodule');
+      await repo.commit('add submodule');
+      await repo.branch(['stable']);
+
+      await fs.writeFile(submoduleBasePath + '/current_file', 'current');
+      await submodule.add('current_file');
+      await submodule.commit('update');
+      await repo.add('submodule');
+      await repo.commit('update submodule');
+
+      expect((await repo.status()).isClean()).toBeTrue();
+      // verify that problem exists without --recurse-submodule flag
+      await repo.checkout('stable');
+      expect((await repo.status()).isClean()).toBeFalse();
+
+      await git.initRepo({
+        cloneSubmodules: true,
+        url: base.path,
+      });
+      expect((await git.getRepoStatus()).isClean()).toBeTrue();
+      await git.checkoutBranch('stable');
+      expect((await git.getRepoStatus()).isClean()).toBeTrue();
+    });
   });
 
   describe('getFileList()', () => {
