@@ -227,6 +227,11 @@ describe('util/git/index', () => {
       expect((await git.getRepoStatus()).isClean()).toBeTrue();
       await git.checkoutBranch('stable');
       expect((await git.getRepoStatus()).isClean()).toBeTrue();
+
+      // cleanup
+      await repo.checkout('main');
+      await repo.reset(['--hard', 'HEAD~2']);
+      await fs.rm(submoduleBasePath, { recursive: true });
     });
   });
 
