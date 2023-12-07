@@ -808,9 +808,8 @@ export async function findPr({
     const response = await githubApi.getJson<GhRestPr[]>(
       `repos/${repo}/pulls?head=${repo}:${branchName}&state=open`,
     );
-    let { body: prList } = response;
-    prList = prList.filter((pr) => pr.state === 'open');
 
+    const { body: prList } = response;
     if (!prList.length) {
       logger.debug(`No reconfigure Pr found for branch ${branchName}`);
       return null;

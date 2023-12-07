@@ -867,9 +867,8 @@ export async function findPr({
     const response = await gitlabApi.getJson<GitLabMergeRequest[]>(
       `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
     );
-    let { body: mrList } = response;
-    mrList = mrList.filter((pr) => pr.state === 'opened');
 
+    const { body: mrList } = response;
     if (!mrList.length) {
       logger.debug(`No reconfigure MR found for branch ${branchName}`);
       return null;
