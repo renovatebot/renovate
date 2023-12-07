@@ -152,7 +152,7 @@
     "@aws-sdk/client-s3": "3.363.0",
     "@aws-sdk/credential-providers": "3.363.0",
     "@breejs/later": "4.2.0",
-    "@cdktf/hcl2json": "0.19.1",
+    "@cdktf/hcl2json": "0.19.2",
     "@opentelemetry/api": "1.7.0",
     "@opentelemetry/context-async-hooks": "1.18.1",
     "@opentelemetry/exporter-trace-otlp-http": "0.45.1",
