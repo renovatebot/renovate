@@ -3568,9 +3568,9 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 You can customize the context of the status check that Renovate adds to its update branches.
 
-- You can modify existing status checks, but adding new status checks is _not_ supported
-- Setting the value to `null` or an empty string, effectively disables or skips that status check
-- This option is mergeable, which means you only have to specify the status checks that you want to modify
+You can modify existing status checks, but adding new status checks is _not_ supported.
+Setting the value to `null` or an empty string, effectively disables or skips that status check.
+This option is mergeable, which means you only have to specify the status checks that you want to modify.
 
 ```json title="Example of overriding status check strings"
 {
