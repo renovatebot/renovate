@@ -1,8 +1,8 @@
 export interface NugetVersion {
   major: number;
-  minor: number;
-  patch: number;
-  revision: number; // Fourth version component
+  minor: number | undefined;
+  patch: number | undefined;
+  revision: number | undefined; // Fourth version component
   prerelease: string | undefined;
   metadata: string | undefined;
 }

@@ -75,8 +75,8 @@ describe('modules/versioning/nuget/index', () => {
       ${''}        | ${null} | ${null} | ${null}
       ${null}      | ${null} | ${null} | ${null}
       ${undefined} | ${null} | ${null} | ${null}
-      ${'1'}       | ${1}    | ${0}    | ${0}
-      ${'1.2'}     | ${1}    | ${2}    | ${0}
+      ${'1'}       | ${1}    | ${null} | ${null}
+      ${'1.2'}     | ${1}    | ${2}    | ${null}
       ${'1.2.3'}   | ${1}    | ${2}    | ${3}
       ${'1.2.3.4'} | ${1}    | ${2}    | ${3}
     `(
@@ -119,6 +119,8 @@ describe('modules/versioning/nuget/index', () => {
       ${'1.2.0+1'}        | ${'1.2.0'}         | ${false}
       ${'1.2.0'}          | ${'1.2.0+1'}       | ${false}
       ${'1-a'}            | ${'1-0'}           | ${true}
+      ${'1-a.b'}          | ${'1-a'}           | ${true}
+      ${'1-a'}            | ${'1-a.b'}         | ${false}
       ${'foo'}            | ${'bar'}           | ${false}
       ${'bar'}            | ${'foo'}           | ${false}
     `('isGreaterThan($a, $b) === $expected', ({ a, b, expected }) => {
@@ -196,31 +198,79 @@ describe('modules/versioning/nuget/index', () => {
   });
 
   describe('getNewValue()', () => {
-    it.each`
-      currentValue | rangeStrategy | currentVersion | newVersion | isReplacement | expected
-      ${'1.0.0'}   | ${'replace'}  | ${'1.0.0'}     | ${null}    | ${false}      | ${null}
-      ${'1.0.0'}   | ${'replace'}  | ${'1.0.0'}     | ${'2.0.0'} | ${false}      | ${'2.0.0'}
-    `(
-      '$rangeStrategy: currentValue=$currentValue currentVersion=$currentVersion newVersion=$newVersion isReplacement=$isReplacement -> $expected',
-      ({
-        currentValue,
-        rangeStrategy,
-        currentVersion,
-        newVersion,
-        isReplacement,
-        expected,
-      }) => {
+    it('returns newVersion if the range is version too', () => {
+      expect(
+        nuget.getNewValue({
+          rangeStrategy: 'auto',
+          currentValue: '1.0.0',
+          newVersion: '1.2.3',
+        }),
+      ).toBe('1.2.3');
+    });
+
+    it('returns null if the range is invalid', () => {
+      expect(
+        nuget.getNewValue({
+          rangeStrategy: 'auto',
+          currentValue: '[1.2.3]',
+          newVersion: 'foobar',
+        }),
+      ).toBeNull();
+    });
+
+    describe('pin', () => {
+      it('returns the new version', () => {
         expect(
           nuget.getNewValue({
-            currentValue,
-            rangeStrategy,
-            currentVersion,
-            newVersion,
-            isReplacement,
+            rangeStrategy: 'pin',
+            currentValue: '[1.0.0]',
+            newVersion: '2.0.0',
           }),
-        ).toBe(expected);
-      },
-    );
+        ).toBe('2.0.0');
+      });
+    });
+
+    describe('auto', () => {
+      it.each`
+        currentValue       | newVersion       | expected
+        ${'[1.0.0.0]'}     | ${'2.0.0.0'}     | ${'[2.0.0.0]'}
+        ${'[1]'}           | ${'2-beta+meta'} | ${'[2-beta+meta]'}
+        ${'(1.0.0,)'}      | ${'0.0.1'}       | ${'(1.0.0,)'}
+        ${'(1.0.0,)'}      | ${'1.2.3'}       | ${'(1.2.3,)'}
+        ${'[1.0.0,)'}      | ${'1.2.3'}       | ${'[1.2.3,)'}
+        ${'(,1.0.0)'}      | ${'0.0.1'}       | ${'(,1.0.0)'}
+        ${'(,1.0.0)'}      | ${'1.2.3'}       | ${'(,1.2.3)'}
+        ${'(,1.0.0]'}      | ${'1.2.3'}       | ${'(,1.2.3]'}
+        ${'(1.0.0,1.2.3)'} | ${'0.0.1'}       | ${'(1.0.0,1.2.3)'}
+        ${'(1.0.0,1.2.3)'} | ${'2.0.0'}       | ${'(1.0.0,2.0.0)'}
+        ${'(1.0.0,1.2.3]'} | ${'2.0.0'}       | ${'(1.0.0,2.0.0]'}
+        ${'(1.0.0,1.2.3)'} | ${'1.0.1'}       | ${'(1.0.0,1.2.3)'}
+        ${'(1.0.0,1.2.3)'} | ${'1.0.1'}       | ${'(1.0.0,1.2.3)'}
+        ${'(1.0.0,1.2.3]'} | ${'1.0.1'}       | ${'(1.0.0,1.2.3]'}
+        ${'*'}             | ${'1.2.3'}       | ${'*'}
+        ${'*-*'}           | ${'1.2.3'}       | ${'*-*'}
+        ${'1.*'}           | ${'1.2.3'}       | ${'1.*'}
+        ${'1.*'}           | ${'2'}           | ${'2.*'}
+        ${'1.*-*'}         | ${'2'}           | ${'2.*-*'}
+        ${'1.2.*'}         | ${'2'}           | ${'2.0.*'}
+        ${'1.2.*-*'}       | ${'2'}           | ${'2.0.*-*'}
+        ${'1.2.3.*'}       | ${'2'}           | ${'2.0.0.*'}
+        ${'1.2.3.*-*'}     | ${'2'}           | ${'2.0.0.*-*'}
+        ${'1.*'}           | ${'2-beta'}      | ${'1.*'}
+        ${'1.*-*'}         | ${'2-beta'}      | ${'2.*-*'}
+      `(
+        'currentValue=$currentValue newVersion=$newVersion -> $expected',
+        ({ currentValue, newVersion, expected }) => {
+          expect(
+            nuget.getNewValue({
+              rangeStrategy: 'bump',
+              currentValue,
+              newVersion,
+            }),
+          ).toBe(expected);
+        },
+      );
+    });
   });
 
   describe('sortVersions', () => {

@@ -44,8 +44,8 @@ const [
                                                                       // 1.2.3.*-*                   The highest version including the not stable versions with the major version 1, the minor version 2 and the patch version 3
 ];
 
-function num(s: string | undefined): number {
-  return s ? Number(s) : 0;
+function num(s: string | undefined): number | undefined {
+  return s ? Number(s) : undefined;
 }
 
 export function parseVersion(input: string): NugetVersion | null {
@@ -56,7 +56,7 @@ export function parseVersion(input: string): NugetVersion | null {
 
   const [, major, minor, patch, revision, prerelease, metadata] = versionMatch;
   return {
-    major: num(major),
+    major: num(major)!,
     minor: num(minor),
     patch: num(patch),
     revision: num(revision),
@@ -72,7 +72,7 @@ export function parseRange(input: string): NugetRange | null {
     return {
       type: 'range-exact',
       version: {
-        major: num(major),
+        major: num(major)!,
         minor: num(minor),
         patch: num(patch),
         revision: num(revision),
@@ -89,7 +89,7 @@ export function parseRange(input: string): NugetRange | null {
     return {
       type: 'range-min',
       min: {
-        major: num(major),
+        major: num(major)!,
         minor: num(minor),
         patch: num(patch),
         revision: num(revision),
@@ -107,7 +107,7 @@ export function parseRange(input: string): NugetRange | null {
     return {
       type: 'range-max',
       max: {
-        major: num(major),
+        major: num(major)!,
         minor: num(minor),
         patch: num(patch),
         revision: num(revision),
@@ -140,7 +140,7 @@ export function parseRange(input: string): NugetRange | null {
     return {
       type: 'range-mixed',
       min: {
-        major: num(minMajor),
+        major: num(minMajor)!,
         minor: num(minMinor),
         patch: num(minPatch),
         revision: num(minRevision),
@@ -149,7 +149,7 @@ export function parseRange(input: string): NugetRange | null {
       },
       minInclusive: minBracket === '[',
       max: {
-        major: num(maxMajor),
+        major: num(maxMajor)!,
         minor: num(maxMinor),
         patch: num(maxPatch),
         revision: num(maxRevision),
@@ -174,7 +174,7 @@ export function parseRange(input: string): NugetRange | null {
     const [, major, prerelease] = floatingMinorMatch;
     return {
       type: 'floating-minor',
-      major: num(major),
+      major: num(major)!,
       unstable: prerelease === '-*',
     };
   }
@@ -184,8 +184,8 @@ export function parseRange(input: string): NugetRange | null {
     const [, major, minor, prerelease] = floatingPatchMatch;
     return {
       type: 'floating-patch',
-      major: num(major),
-      minor: num(minor),
+      major: num(major)!,
+      minor: num(minor)!,
       unstable: prerelease === '-*',
     };
   }
@@ -195,12 +195,92 @@ export function parseRange(input: string): NugetRange | null {
     const [, major, minor, patch, prerelease] = floatingRevisionMatch;
     return {
       type: 'floating-revision',
-      major: num(major),
-      minor: num(minor),
-      patch: num(patch),
+      major: num(major)!,
+      minor: num(minor)!,
+      patch: num(patch)!,
       unstable: prerelease === '-*',
     };
   }
 
   return null;
+}
+
+export function versionToString(version: NugetVersion): string {
+  let res = `${version.major}`;
+
+  if (version.minor !== undefined) {
+    res += `.${version.minor}`;
+  }
+
+  if (version.patch !== undefined) {
+    res += `.${version.patch}`;
+  }
+
+  if (version.revision !== undefined) {
+    res += `.${version.revision}`;
+  }
+
+  if (version.prerelease) {
+    res += `-${version.prerelease}`;
+  }
+
+  if (version.metadata) {
+    res += `+${version.metadata}`;
+  }
+
+  return res;
+}
+
+function openBracket(inclusive: boolean): '[' | '(' {
+  return inclusive ? '[' : '(';
+}
+
+function closeBracket(inclusive: boolean): ']' | ')' {
+  return inclusive ? ']' : ')';
+}
+
+export function rangeToString(range: NugetRange): string {
+  if (range.type === 'range-exact') {
+    const version = versionToString(range.version);
+    return `[${version}]`;
+  }
+
+  if (range.type === 'range-min') {
+    const version = versionToString(range.min);
+    const bracket = openBracket(range.minInclusive);
+    return `${bracket}${version},)`;
+  }
+
+  if (range.type === 'range-max') {
+    const version = versionToString(range.max);
+    const bracket = closeBracket(range.maxInclusive);
+    return `(,${version}${bracket}`;
+  }
+
+  if (range.type === 'range-mixed') {
+    const minVersion = versionToString(range.min);
+    const minBracket = openBracket(range.minInclusive);
+    const maxVersion = versionToString(range.max);
+    const maxBracket = closeBracket(range.maxInclusive);
+    return `${minBracket}${minVersion},${maxVersion}${maxBracket}`;
+  }
+
+  const suffix = range.unstable ? '-*' : '';
+
+  if (range.type === 'floating-revision') {
+    const { major, minor, patch } = range;
+    return `${major}.${minor}.${patch}.*${suffix}`;
+  }
+
+  if (range.type === 'floating-patch') {
+    const { major, minor } = range;
+    return `${major}.${minor}.*${suffix}`;
+  }
+
+  if (range.type === 'floating-minor') {
+    const { major } = range;
+    return `${major}.*${suffix}`;
+  }
+
+  return `*${suffix}`;
 }

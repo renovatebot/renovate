@@ -1,6 +1,7 @@
 import type { NewValueConfig, VersioningApi } from '../types';
 import { cmp } from './compare';
 import { parseRange, parseVersion } from './parse';
+import * as nugetRange from './range';
 import type { NugetVersion } from './types';
 
 export const id = 'nuget';
@@ -8,7 +9,7 @@ export const displayName = 'NuGet';
 export const urls = [
   'https://docs.microsoft.com/en-us/nuget/concepts/package-versioning',
 ];
-export const supportsRanges = false;
+export const supportsRanges = true;
 
 class NugetVersioningApi implements VersioningApi {
   isCompatible(version: string, _current?: string | undefined): boolean {
@@ -57,7 +58,7 @@ class NugetVersioningApi implements VersioningApi {
       return null;
     }
 
-    return parsed.minor;
+    return parsed.minor ?? null;
   }
 
   getPatch(version: string): number | null {
@@ -66,7 +67,7 @@ class NugetVersioningApi implements VersioningApi {
       return null;
     }
 
-    return parsed.patch;
+    return parsed.patch ?? null;
   }
 
   equals(version: string, other: string): boolean {
@@ -194,8 +195,24 @@ class NugetVersioningApi implements VersioningApi {
     return min;
   }
 
-  getNewValue({ newVersion }: NewValueConfig): string | null {
-    return newVersion ?? null;
+  getNewValue({
+    currentValue,
+    rangeStrategy,
+    currentVersion,
+    newVersion,
+  }: NewValueConfig): string | null {
+    if (rangeStrategy === 'pin' || this.isVersion(currentValue)) {
+      return newVersion;
+    }
+
+    const r = parseRange(currentValue);
+    const v = parseVersion(newVersion);
+
+    if (!r || !v) {
+      return null;
+    }
+
+    return nugetRange.bump(r, v);
   }
 
   sortVersions(version: string, other: string): number {
@@ -221,66 +238,7 @@ class NugetVersioningApi implements VersioningApi {
 
     const r = parseRange(range);
     if (r) {
-      if (r.type === 'range-exact') {
-        return cmp(v, r.version) === 0;
-      }
-
-      if (r.type === 'range-min') {
-        if (r.minInclusive) {
-          return cmp(v, r.min) >= 0;
-        }
-
-        return cmp(v, r.min) > 0;
-      }
-
-      if (r.type === 'range-max') {
-        if (r.maxInclusive) {
-          return cmp(v, r.max) <= 0;
-        }
-
-        return cmp(v, r.max) < 0;
-      }
-
-      if (r.type === 'range-mixed') {
-        if (r.minInclusive && r.maxInclusive) {
-          return cmp(v, r.min) >= 0 && cmp(v, r.max) <= 0;
-        }
-
-        if (r.minInclusive) {
-          return cmp(v, r.min) >= 0 && cmp(v, r.max) < 0;
-        }
-
-        if (r.maxInclusive) {
-          return cmp(v, r.min) > 0 && cmp(v, r.max) <= 0;
-        }
-
-        return cmp(v, r.min) > 0 && cmp(v, r.max) < 0;
-      }
-
-      if (r.type === 'floating-major') {
-        return r.unstable || !v.prerelease;
-      }
-
-      if (r.type === 'floating-minor') {
-        return r.major === v.major && (r.unstable || !v.prerelease);
-      }
-
-      if (r.type === 'floating-patch') {
-        return (
-          r.major === v.major &&
-          r.minor === v.minor &&
-          (r.unstable || !v.prerelease)
-        );
-      }
-
-      if (r.type === 'floating-revision') {
-        return (
-          r.major === v.major &&
-          r.minor === v.minor &&
-          r.patch === v.patch &&
-          (r.unstable || !v.prerelease)
-        );
-      }
+      return nugetRange.matches(v, r);
     }
 
     return false;

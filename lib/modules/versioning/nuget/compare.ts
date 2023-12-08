@@ -25,14 +25,26 @@ function comparePrereleases(x: string, y: string): number {
 }
 
 export function cmp(x: NugetVersion, y: NugetVersion): number {
-  if (x.major !== y.major) {
-    return Math.sign(x.major - y.major);
-  } else if (x.minor !== y.minor) {
-    return Math.sign(x.minor - y.minor);
-  } else if (x.patch !== y.patch) {
-    return Math.sign(x.patch - y.patch);
-  } else if (x.revision !== y.revision) {
-    return Math.sign(x.revision - y.revision);
+  const xMajor = x.major;
+  const yMajor = y.major;
+
+  const xMinor = x.minor ?? 0;
+  const yMinor = y.minor ?? 0;
+
+  const xPatch = x.patch ?? 0;
+  const yPatch = y.patch ?? 0;
+
+  const xRevision = x.revision ?? 0;
+  const yRevision = y.revision ?? 0;
+
+  if (xMajor !== yMajor) {
+    return Math.sign(xMajor - yMajor);
+  } else if (xMinor !== yMinor) {
+    return Math.sign(xMinor - yMinor);
+  } else if (xPatch !== yPatch) {
+    return Math.sign(xPatch - yPatch);
+  } else if (xRevision !== yRevision) {
+    return Math.sign(xRevision - yRevision);
   } else if (x.prerelease && !y.prerelease) {
     return -1;
   } else if (!x.prerelease && y.prerelease) {

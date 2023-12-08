@@ -13,23 +13,38 @@ describe('modules/versioning/nuget/parse', () => {
   });
 
   describe('versions', () => {
-    describe('omit zeros', () => {
-      test.each`
-        input
-        ${'2'}
-        ${'2.0'}
-        ${'2.0.0'}
-        ${'2.0.0.0'}
-      `('parse("$input")', ({ input }) => {
-        const res = parseVersion(input);
-        expect(res).toEqual({
-          major: 2,
-          minor: 0,
-          patch: 0,
-          revision: 0,
-          prerelease: undefined,
-          metadata: undefined,
-        });
+    it('omits zeros', () => {
+      expect(parseVersion('2')).toEqual({
+        major: 2,
+        minor: undefined,
+        patch: undefined,
+        revision: undefined,
+        prerelease: undefined,
+        metadata: undefined,
+      });
+      expect(parseVersion('2.0')).toEqual({
+        major: 2,
+        minor: 0,
+        patch: undefined,
+        revision: undefined,
+        prerelease: undefined,
+        metadata: undefined,
+      });
+      expect(parseVersion('2.0.0')).toEqual({
+        major: 2,
+        minor: 0,
+        patch: 0,
+        revision: undefined,
+        prerelease: undefined,
+        metadata: undefined,
+      });
+      expect(parseVersion('2.0.0.0')).toEqual({
+        major: 2,
+        minor: 0,
+        patch: 0,
+        revision: 0,
+        prerelease: undefined,
+        metadata: undefined,
       });
     });
 
@@ -48,7 +63,7 @@ describe('modules/versioning/nuget/parse', () => {
             major: 1,
             minor: 0,
             patch: 0,
-            revision: 0,
+            revision: undefined,
             prerelease,
             metadata,
           });
@@ -66,7 +81,7 @@ describe('modules/versioning/nuget/parse', () => {
           major: 1,
           minor: 0,
           patch: 0,
-          revision: 0,
+          revision: undefined,
           prerelease: 'beta',
           metadata: 'meta',
         },
@@ -80,7 +95,7 @@ describe('modules/versioning/nuget/parse', () => {
           major: 1,
           minor: 2,
           patch: 3,
-          revision: 0,
+          revision: undefined,
           prerelease: undefined,
           metadata: undefined,
         },
@@ -93,7 +108,7 @@ describe('modules/versioning/nuget/parse', () => {
           major: 1,
           minor: 2,
           patch: 3,
-          revision: 0,
+          revision: undefined,
           prerelease: undefined,
           metadata: undefined,
         },
@@ -108,7 +123,7 @@ describe('modules/versioning/nuget/parse', () => {
           major: 1,
           minor: 2,
           patch: 3,
-          revision: 0,
+          revision: undefined,
           prerelease: undefined,
           metadata: undefined,
         },
@@ -121,7 +136,7 @@ describe('modules/versioning/nuget/parse', () => {
           major: 1,
           minor: 2,
           patch: 3,
-          revision: 0,
+          revision: undefined,
           prerelease: undefined,
           metadata: undefined,
         },
@@ -143,7 +158,7 @@ describe('modules/versioning/nuget/parse', () => {
             major: 1,
             minor: 2,
             patch: 3,
-            revision: 0,
+            revision: undefined,
             prerelease: undefined,
             metadata: undefined,
           },
@@ -152,7 +167,7 @@ describe('modules/versioning/nuget/parse', () => {
             major: 2,
             minor: 3,
             patch: 4,
-            revision: 0,
+            revision: undefined,
             prerelease: undefined,
             metadata: undefined,
           },
