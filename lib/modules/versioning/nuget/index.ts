@@ -10,6 +10,7 @@ export const urls = [
   'https://docs.microsoft.com/en-us/nuget/concepts/package-versioning',
 ];
 export const supportsRanges = true;
+export const supportedRangeStrategies = ['pin', 'auto'];
 
 class NugetVersioningApi implements VersioningApi {
   isCompatible(version: string, _current?: string | undefined): boolean {
