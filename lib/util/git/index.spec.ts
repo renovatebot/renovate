@@ -229,7 +229,7 @@ describe('util/git/index', () => {
       expect((await git.getRepoStatus()).isClean()).toBeTrue();
 
       // cleanup
-      await repo.checkout('main');
+      await repo.checkout('-');
       await repo.reset(['--hard', 'HEAD~2']);
       await fs.rm(submoduleBasePath, { recursive: true });
     });
