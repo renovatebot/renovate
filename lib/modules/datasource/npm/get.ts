@@ -251,8 +251,8 @@ export async function getDependency(
     if (err instanceof ExternalHostError) {
       if (cachedResult) {
         logger.warn(
-          { err },
-          `npm host error with ${uri.host}, reusing expired cached result instead`,
+          { err, host: uri.host },
+          `npm host error, reusing expired cached result instead`,
         );
         delete cachedResult.cacheData;
         return cachedResult;
