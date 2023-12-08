@@ -10,7 +10,7 @@ export const urls = [
   'https://docs.microsoft.com/en-us/nuget/concepts/package-versioning',
 ];
 export const supportsRanges = true;
-export const supportedRangeStrategies = ['pin', 'auto'];
+export const supportedRangeStrategies = ['pin', 'replace'];
 
 class NugetVersioningApi implements VersioningApi {
   isCompatible(version: string, _current?: string | undefined): boolean {
@@ -202,18 +202,25 @@ class NugetVersioningApi implements VersioningApi {
     currentVersion,
     newVersion,
   }: NewValueConfig): string | null {
-    if (rangeStrategy === 'pin' || this.isVersion(currentValue)) {
+    const v = parseVersion(newVersion);
+    if (!v) {
+      return null;
+    }
+
+    if (rangeStrategy === 'pin') {
+      return nugetRange.pin(v);
+    }
+
+    if (this.isVersion(currentValue)) {
       return newVersion;
     }
 
     const r = parseRange(currentValue);
-    const v = parseVersion(newVersion);
-
-    if (!r || !v) {
+    if (!r) {
       return null;
     }
 
-    return nugetRange.bump(r, v);
+    return nugetRange.replace(r, v);
   }
 
   sortVersions(version: string, other: string): number {

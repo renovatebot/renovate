@@ -65,7 +65,11 @@ export function matches(version: NugetVersion, range: NugetRange): boolean {
   );
 }
 
-export function bump(range: NugetRange, newVersion: NugetVersion): string {
+export function pin(version: NugetVersion): string {
+  return rangeToString({ type: 'range-exact', version });
+}
+
+export function replace(range: NugetRange, newVersion: NugetVersion): string {
   if (range.type === 'range-exact') {
     return rangeToString({
       ...range,

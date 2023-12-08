@@ -201,19 +201,29 @@ describe('modules/versioning/nuget/index', () => {
     it('returns newVersion if the range is version too', () => {
       expect(
         nuget.getNewValue({
-          rangeStrategy: 'auto',
+          rangeStrategy: 'replace',
           currentValue: '1.0.0',
           newVersion: '1.2.3',
         }),
       ).toBe('1.2.3');
     });
 
-    it('returns null if the range is invalid', () => {
+    it('returns null if version is invalid', () => {
       expect(
         nuget.getNewValue({
-          rangeStrategy: 'auto',
+          rangeStrategy: 'replace',
           currentValue: '[1.2.3]',
           newVersion: 'foobar',
+        }),
+      ).toBeNull();
+    });
+
+    it('returns null if range is invalid', () => {
+      expect(
+        nuget.getNewValue({
+          rangeStrategy: 'replace',
+          currentValue: 'foobar',
+          newVersion: '1.2.3',
         }),
       ).toBeNull();
     });
@@ -223,14 +233,14 @@ describe('modules/versioning/nuget/index', () => {
         expect(
           nuget.getNewValue({
             rangeStrategy: 'pin',
-            currentValue: '[1.0.0]',
+            currentValue: '1.0.0',
             newVersion: '2.0.0',
           }),
-        ).toBe('2.0.0');
+        ).toBe('[2.0.0]');
       });
     });
 
-    describe('auto', () => {
+    describe('replace', () => {
       it.each`
         currentValue       | newVersion       | expected
         ${'[1.0.0.0]'}     | ${'2.0.0.0'}     | ${'[2.0.0.0]'}
@@ -263,7 +273,7 @@ describe('modules/versioning/nuget/index', () => {
         ({ currentValue, newVersion, expected }) => {
           expect(
             nuget.getNewValue({
-              rangeStrategy: 'bump',
+              rangeStrategy: 'replace',
               currentValue,
               newVersion,
             }),
