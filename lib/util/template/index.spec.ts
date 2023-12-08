@@ -219,6 +219,16 @@ describe('util/template/index', () => {
     });
   });
 
+  describe('base64 encoding', () => {
+    it('encodes values', () => {
+      const output = template.compile(
+        '{{{encodeBase64 "@fsouza/prettierd"}}}',
+        undefined as never,
+      );
+      expect(output).toBe('QGZzb3V6YS9wcmV0dGllcmQ=');
+    });
+  });
+
   describe('equals', () => {
     it('equals', () => {
       const output = template.compile(
