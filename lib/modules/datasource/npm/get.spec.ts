@@ -245,6 +245,75 @@ describe('modules/datasource/npm/get', () => {
     expect(await getDependency(http, registryUrl, 'npm-error-402')).toBeNull();
   });
 
+  it('throw ExternalHostError when error happens on registry.npmjs.org', async () => {
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    await expect(
+      getDependency(http, registryUrl, 'npm-parse-error'),
+    ).rejects.toThrow(ExternalHostError);
+  });
+
+  it('do not throw ExternalHostError when error happens on custom host', async () => {
+    setNpmrc('registry=https://test.org');
+    httpMock
+      .scope('https://test.org')
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    expect(
+      await getDependency(http, registryUrl, 'npm-parse-error'),
+    ).toBeNull();
+  });
+
+  it('do not throw ExternalHostError when error happens on registry.npmjs.org when hostRules disables abortOnError', async () => {
+    hostRules.add({
+      matchHost: 'https://registry.npmjs.org',
+      abortOnError: false,
+    });
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    expect(
+      await getDependency(http, registryUrl, 'npm-parse-error'),
+    ).toBeNull();
+  });
+
+  it('do not throw ExternalHostError when error happens on registry.npmjs.org when hostRules without protocol disables abortOnError', async () => {
+    hostRules.add({
+      matchHost: 'registry.npmjs.org',
+      abortOnError: false,
+    });
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    expect(
+      await getDependency(http, registryUrl, 'npm-parse-error'),
+    ).toBeNull();
+  });
+
+  it('throw ExternalHostError when error happens on custom host when hostRules enables abortOnError', async () => {
+    setNpmrc('registry=https://test.org');
+    hostRules.add({
+      matchHost: 'https://test.org',
+      abortOnError: true,
+    });
+    httpMock
+      .scope('https://test.org')
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    await expect(
+      getDependency(http, registryUrl, 'npm-parse-error'),
+    ).rejects.toThrow(ExternalHostError);
+  });
+
   it('massages non-compliant repository urls', async () => {
     setNpmrc('registry=https://test.org\n_authToken=XXX');
 
