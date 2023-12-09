@@ -40,57 +40,7 @@ For example:
 
 # Workflow
 
-## Basic
-
-Here's a high-level overview of Renovate's workflow, where it extracts dependencies and then updates them:
-
-```mermaid
-flowchart LR
-  subgraph EXTRACT
-    direction TB
-    CC[[For each manager]]
-    CC -->|managerA| CD["..."]
-    CC -->|managerB| CCF["match files"]
-
-    CCF --> CFEF[[For each file]]
-
-    CFEF -->|file1| CCD1[Extract dependency]
-    CFEF -->|file2| CCD2[...]
-  end
-
-  subgraph UPDATE
-    direction TB
-
-    UC[[For each manager]]
-    UC -->|managerA| UD["..."]
-    UC -->|managerB| UFEF[[For each file]]
-
-    UFEF -->|file1| FED[[For each dependency]]
-    UFEF -->|file2| FED2[...]
-
-
-    FED -->|dep1| D1[...]
-    D1 -..-> CU
-    FED -->|dep2| D2[use datasource to\n fetch versions]
-    D2 --> J[use versioning to find \n next valid update]
-
-    FED2 -...-> CU
-
-    UD -....-> CU
-    J --> CU[Look up updates]
-
-    CU --> FEU[[For each update]]
-
-    FEU --> AU[Create branch\nApply update\nCreate PR]
-
-  end
-
-  EXTRACT --> UPDATE
-```
-
-## Advanced
-
-Here's a detailed overview of the workflow:
+Here's an overview of the workflow:
 
 ```mermaid
 flowchart TB
