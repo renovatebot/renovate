@@ -171,6 +171,17 @@ export async function processBranch(
         result: 'already-existed',
       };
     }
+    if (
+      !branchExists &&
+      branchConfig.pendingChecks &&
+      !dependencyDashboardCheck
+    ) {
+      return {
+        branchExists: false,
+        prNo: branchPr?.number,
+        result: 'pending',
+      };
+    }
     // istanbul ignore if
     if (!branchExists && config.dependencyDashboardApproval) {
       if (dependencyDashboardCheck) {
@@ -207,17 +218,6 @@ export async function processBranch(
         branchExists,
         prNo: branchPr?.number,
         result: 'commit-limit-reached',
-      };
-    }
-    if (
-      !branchExists &&
-      branchConfig.pendingChecks &&
-      !dependencyDashboardCheck
-    ) {
-      return {
-        branchExists: false,
-        prNo: branchPr?.number,
-        result: 'pending',
       };
     }
     if (branchExists) {

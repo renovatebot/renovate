@@ -1,9 +1,9 @@
-import { load } from 'js-yaml';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
+import { parseSingleYaml } from '../../../util/yaml';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { getDep } from '../dockerfile/extract';
@@ -106,7 +106,7 @@ export function parseAzurePipelines(
 ): AzurePipelines | null {
   let pkg: AzurePipelines | null = null;
   try {
-    pkg = load(content, { json: true }) as AzurePipelines;
+    pkg = parseSingleYaml(content, { json: true }) as AzurePipelines;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ packageFile, err }, 'Error parsing azure-pipelines content');
     return null;

@@ -23,6 +23,7 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
+import { parseInteger } from '../../../util/number';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -644,19 +645,25 @@ async function tryPrAutomerge(
       }
 
       const desiredStatus = 'can_be_merged';
-      const retryTimes = 5;
+      // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
+      const retryTimes = parseInteger(
+        process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
+        5,
+      );
 
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJson<{
           merge_status: string;
           pipeline: string;
-        }>(`projects/${config.repository}/merge_requests/${pr}`);
+        }>(`projects/${config.repository}/merge_requests/${pr}`, {
+          memCache: false,
+        });
         // Only continue if the merge request can be merged and has a pipeline.
         if (body.merge_status === desiredStatus && body.pipeline !== null) {
           break;
         }
-        await setTimeout(500 * attempt);
+        await setTimeout(250 * attempt ** 2); // exponential backoff
       }
 
       await gitlabApi.putJson(
@@ -936,9 +943,7 @@ export async function setBranchStatus({
   try {
     // give gitlab some time to create pipelines for the sha
     await setTimeout(
-      process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY
-        ? parseInt(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 10)
-        : 1000,
+      parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
     );
 
     await gitlabApi.postJson(url, { body: options });

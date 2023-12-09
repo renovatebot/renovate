@@ -1,8 +1,8 @@
-import yaml from 'js-yaml';
 import { Fixtures } from '../../../../../test/fixtures';
 import { getFixturePath, logger, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as fs from '../../../../util/fs';
+import * as yaml from '../../../../util/yaml';
 import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 import {
@@ -42,7 +42,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
     });
 
     it('detects errors when opening pnpm-workspace.yml file', async () => {
-      jest.spyOn(yaml, 'load').mockImplementationOnce(() => {
+      jest.spyOn(yaml, 'parseSingleYaml').mockImplementationOnce(() => {
         throw new Error();
       });
 

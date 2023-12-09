@@ -15,10 +15,20 @@
         "version": "6.0.9",
         "version-display": "6.0.9"
       },
-      "sdk": {
-        "version": "6.0.401",
-        "version-display": "6.0.401"
-      }
+      "sdks": [
+        {
+          "version": "6.0.401",
+          "version-display": "6.0.401"
+        },
+        {
+          "version": "6.0.304",
+          "version-display": "6.0.304"
+        },
+        {
+          "version": "6.0.109",
+          "version-display": "6.0.109"
+        }
+      ]
     },
     {
       "release-date": "2021-12-14",
@@ -29,10 +39,12 @@
         "version": "6.0.1",
         "version-display": "6.0.1"
       },
-      "sdk": {
-        "version": "6.0.101",
-        "version-display": "6.0.101"
-      }
+      "sdks": [
+        {
+          "version": "6.0.101",
+          "version-display": "6.0.101"
+        }
+      ]
     },
     {
       "release-date": "2021-11-08",
@@ -43,10 +55,12 @@
         "version": "6.0.0",
         "version-display": "6.0.0"
       },
-      "sdk": {
-        "version": "6.0.100",
-        "version-display": "6.0.100"
-      }
+      "sdks": [
+        {
+          "version": "6.0.100",
+          "version-display": "6.0.100"
+        }
+      ]
     },
     {
       "release-date": "2021-09-14",
@@ -57,10 +71,12 @@
         "version": "6.0.0-rc.1.21451.13",
         "version-display": "6.0.0-rc.1"
       },
-      "sdk": {
-        "version": "6.0.100-rc.1.21463.6",
-        "version-display": "6.0.100-rc.1"
-      }
+      "sdks": [
+        {
+          "version": "6.0.100-rc.1.21463.6",
+          "version-display": "6.0.100-rc.1"
+        }
+      ]
     },
     {
       "release-date": "2021-02-17",
@@ -71,10 +87,12 @@
         "version": "6.0.0-preview.1.21102.12",
         "version-display": "6.0.0-preview.1"
       },
-      "sdk": {
-        "version": "6.0.100-preview.1.21103.13",
-        "version-display": "6.0.100-preview.1"
-      }
+      "sdks": [
+        {
+          "version": "6.0.100-preview.1.21103.13",
+          "version-display": "6.0.100-preview.1"
+        }
+      ]
     }
   ]
 }

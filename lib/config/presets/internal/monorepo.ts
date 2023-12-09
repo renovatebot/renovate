@@ -46,9 +46,12 @@ const repoGroups = {
     'https://github.com/awslabs/aws-lambda-powertools-typescript',
     'https://github.com/aws-powertools/powertools-lambda-typescript',
   ],
+  'aws-sdk-go': 'https://github.com/aws/aws-sdk-go',
+  'aws-sdk-go-v2': 'https://github.com/aws/aws-sdk-go-v2',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   'aws-sdk-rust': [
+    'https://github.com/smithy-lang/smithy-rs',
     'https://github.com/awslabs/smithy-rs',
     'https://github.com/awslabs/aws-sdk-rust',
   ],
@@ -258,7 +261,10 @@ const repoGroups = {
   'dotnet-wcf': 'https://github.com/dotnet/wcf',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   'elastic-apm-agent-rum-js': 'https://github.com/elastic/apm-agent-rum-js',
-  'electron-forge': 'https://github.com/electron-userland/electron-forge',
+  'electron-forge': [
+    'https://github.com/electron-userland/electron-forge',
+    'https://github.com/electron/forge',
+  ],
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
@@ -279,6 +285,8 @@ const repoGroups = {
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
+  'github-workflows-kt':
+    'https://github.com/typesafegithub/github-workflows-kt',
   'google-api-dotnet-client':
     'https://github.com/googleapis/google-api-dotnet-client',
   grafana: 'https://github.com/grafana/grafana',
@@ -306,11 +314,14 @@ const repoGroups = {
     'https://github.com/facebook/jest', // old repo
     'https://github.com/jestjs/jest',
   ],
+  jna: 'https://github.com/java-native-access/jna',
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
   lerna: 'https://github.com/lerna/lerna',
+  lexical: 'https://github.com/facebook/lexical',
   linguijs: 'https://github.com/lingui/js-lingui',
+  log4j2: 'https://github.com/apache/logging-log4j2',
   loopback: [
     'https://github.com/strongloop/loopback-next', // old repo (see: https://github.com/loopbackio/loopback-next/issues/7595)
     'https://github.com/loopbackio/loopback-next',
@@ -504,6 +515,9 @@ const patternGroups = {
   fullcalendar: '^@fullcalendar/',
   hotchocolate: '^HotChocolate\\.',
   'prometheus-simpleclient': '^io.prometheus:simpleclient',
+  // Can't specify the russh repo (https://github.com/warp-tech/russh) in repoGroups because parts
+  // of it (e.g. russh-config) are released separately.
+  russh: ['^russh$', '^russh-keys$'],
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',

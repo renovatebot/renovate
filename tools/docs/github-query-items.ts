@@ -68,7 +68,10 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
     return renovateOpenItems;
   } catch (err) {
     logger.error({ err }, 'Error getting query results');
-    throw err;
+    if (process.env.CI) {
+      throw err;
+    }
+    return { managers: {}, platforms: {}, datasources: {} };
   }
 }
 

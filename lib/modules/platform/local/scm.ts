@@ -18,13 +18,15 @@ export class LocalFs implements PlatformScm {
   branchExists(branchName: string): Promise<boolean> {
     return Promise.resolve(true);
   }
-  getBranchCommit(branchName: string): Promise<string | null> {
+  getBranchCommit(branchName: string): Promise<LongCommitSha | null> {
     return Promise.resolve(null);
   }
   deleteBranch(branchName: string): Promise<void> {
     return Promise.resolve();
   }
-  commitAndPush(commitConfig: CommitFilesConfig): Promise<string | null> {
+  commitAndPush(
+    commitConfig: CommitFilesConfig,
+  ): Promise<LongCommitSha | null> {
     return Promise.resolve(null);
   }
 
@@ -46,7 +48,8 @@ export class LocalFs implements PlatformScm {
   }
 
   checkoutBranch(branchName: string): Promise<LongCommitSha> {
-    return Promise.resolve('');
+    // We don't care about the commit sha in local mode
+    return Promise.resolve('' as LongCommitSha);
   }
 
   mergeAndPush(branchName: string): Promise<void> {

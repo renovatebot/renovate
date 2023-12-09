@@ -26,8 +26,10 @@ async function getOnboardingConfig(
   // Check for org/renovate-config
   try {
     const repo = `${orgName}/renovate-config`;
+    const orgPresetName = `local>${repo}`;
+    logger.debug(`Checking for preset: ${orgPresetName}`);
     if (await getPreset({ repo })) {
-      orgPreset = `local>${repo}`;
+      orgPreset = orgPresetName;
     }
   } catch (err) {
     if (
@@ -45,13 +47,16 @@ async function getOnboardingConfig(
     try {
       const repo = `${orgName}/.${platform}`;
       const presetName = 'renovate-config';
+      const orgPresetName = `local>${repo}:${presetName}`;
+      logger.debug(`Checking for preset: ${orgPresetName}`);
+
       if (
         await getPreset({
           repo,
           presetName,
         })
       ) {
-        orgPreset = `local>${repo}:${presetName}`;
+        orgPreset = orgPresetName;
       }
     } catch (err) {
       if (
@@ -74,7 +79,7 @@ async function getOnboardingConfig(
   } else {
     // Organization preset did not exist
     logger.debug(
-      'No default org/owner preset found, so the default onboarding config will be used instead. Note: do not be concerned with any 404 messages that preceded this.',
+      'No default org/owner preset found, so the default onboarding config will be used instead.',
     );
   }
 

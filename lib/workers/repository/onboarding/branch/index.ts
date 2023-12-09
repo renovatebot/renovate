@@ -7,7 +7,7 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
+import { type Pr, platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
 import { getBranchCommit, setGitAuthor } from '../../../../util/git';
@@ -24,6 +24,7 @@ import {
   isOnboardingBranchModified,
   setOnboardingCache,
 } from './onboarding-branch-cache';
+import { rebaseOnboardingBranch } from './rebase';
 
 export async function checkOnboardingBranch(
   config: RenovateConfig,
@@ -51,10 +52,29 @@ export async function checkOnboardingBranch(
   // TODO #22198
   const branchList = [onboardingBranch!];
   if (onboardingPr) {
+    logger.debug('Onboarding PR already exists');
+
+    isModified = await isOnboardingBranchModified(config.onboardingBranch!);
+    // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
+    if (!isModified) {
+      const commit = await rebaseOnboardingBranch(
+        config,
+        onboardingPr.bodyStruct?.rawConfigHash,
+      );
+      if (commit) {
+        logger.info(
+          { branch: config.onboardingBranch, commit, onboarding: true },
+          'Branch updated',
+        );
+      }
+      // istanbul ignore if
+      if (platform.refreshPr) {
+        await platform.refreshPr(onboardingPr.number);
+      }
+    }
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
-    logger.debug('Onboarding PR already exists');
 
     if (
       isConfigHashPresent(onboardingPr) && // needed so that existing onboarding PRs are updated with config hash comment
@@ -68,8 +88,6 @@ export async function checkOnboardingBranch(
       return { ...config, repoIsOnboarded, onboardingBranch, branchList };
     }
     OnboardingState.onboardingCacheValid = false;
-
-    isModified = await isOnboardingBranchModified(config.onboardingBranch!);
     if (isModified) {
       if (hasOnboardingBranchChanged(config.onboardingBranch!)) {
         invalidateExtractCache(config.baseBranch!);

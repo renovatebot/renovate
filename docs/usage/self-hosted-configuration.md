@@ -80,6 +80,7 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 ## autodiscoverFilter
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
+The pattern matches against the organization/repo path.
 It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
 
 If you set multiple filters, then the matches of each filter are added to the overall result.
@@ -88,18 +89,21 @@ If you use an environment variable or the CLI to set the value for `autodiscover
 Commas will be used as delimiter for a new filter.
 
 ```
-# DO NOT use commas inside the filter if your are using env or CLI variables to configure it.
-RENOVATE_AUTODISCOVER_FILTER="/myapp/{readme.md,src/**}"
+# DO NOT use commas inside the filter if your are using env or cli variables to configure it.
+RENOVATE_AUTODISCOVER_FILTER="/MyOrg/{my-repo,foo-repo}"
+
 
 # in this example you can use regex instead
-RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
+RENOVATE_AUTODISCOVER_FILTER="/MyOrg\/(my|foo)-repo/"
 ```
 
 **Minimatch**:
 
+The configuration:
+
 ```json
 {
-  "autodiscoverFilter": ["project/*"]
+  "autodiscoverFilter": ["my-org/*"]
 }
 ```
 
@@ -655,6 +659,17 @@ Parameter to reduce CI load.
 CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events.
 Set as an integer.
 Default is no limit.
+
+## presetCachePersistence
+
+When this feature is enabled, resolved presets will be cached in Renovate's package cache, enabling reuse across multiple repositories.
+
+TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachettloverride).
+
+<!-- prettier-ignore -->
+!!! warning
+     Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
+     You should only enable this when all repositories are trusted, such as a corporate environment.
 
 ## privateKey
 
