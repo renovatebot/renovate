@@ -227,6 +227,20 @@ describe('util/template/index', () => {
       );
       expect(output).toBe('QGZzb3V6YS9wcmV0dGllcmQ=');
     });
+
+    it('handles null values gracefully', () => {
+      const output = template.compile('{{{encodeBase64 packageName}}}', {
+        packageName: null,
+      });
+      expect(output).toBe('');
+    });
+
+    it('handles undefined values gracefully', () => {
+      const output = template.compile('{{{encodeBase64 packageName}}}', {
+        packageName: undefined,
+      });
+      expect(output).toBe('');
+    });
   });
 
   describe('equals', () => {
