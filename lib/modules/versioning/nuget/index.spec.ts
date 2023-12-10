@@ -44,6 +44,7 @@ describe('modules/versioning/nuget/index', () => {
       ${'17.04'}                   | ${true}
       ${'3.0.0.beta'}              | ${false}
       ${'5.1.2-+'}                 | ${false}
+      ${'1--'}                     | ${true}
     `('isValid("$input") === $expected', ({ input, expected }) => {
       expect(nuget.isValid(input)).toBe(expected);
       expect(nuget.isCompatible(input)).toBe(expected);
