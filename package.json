@@ -230,7 +230,7 @@
     "p-queue": "6.6.2",
     "p-throttle": "4.1.1",
     "parse-link-header": "2.0.0",
-    "prettier": "3.1.0",
+    "prettier": "3.1.1",
     "redis": "4.6.11",
     "remark": "13.0.0",
     "remark-github": "10.1.0",
@@ -344,7 +344,7 @@
     "tmp-promise": "3.0.3",
     "ts-jest": "29.1.1",
     "ts-node": "10.9.1",
-    "type-fest": "4.8.2",
+    "type-fest": "4.8.3",
     "typescript": "5.3.3",
     "unified": "9.2.2"
   },
