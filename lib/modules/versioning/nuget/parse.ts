@@ -56,6 +56,7 @@ export function parseVersion(input: string): NugetVersion | null {
 
   const [, major, minor, patch, revision, prerelease, metadata] = versionMatch;
   return {
+    type: 'version',
     major: num(major)!,
     minor: num(minor),
     patch: num(patch),
@@ -72,6 +73,7 @@ export function parseRange(input: string): NugetRange | null {
     return {
       type: 'range-exact',
       version: {
+        type: 'version',
         major: num(major)!,
         minor: num(minor),
         patch: num(patch),
@@ -89,6 +91,7 @@ export function parseRange(input: string): NugetRange | null {
     return {
       type: 'range-min',
       min: {
+        type: 'version',
         major: num(major)!,
         minor: num(minor),
         patch: num(patch),
@@ -107,6 +110,7 @@ export function parseRange(input: string): NugetRange | null {
     return {
       type: 'range-max',
       max: {
+        type: 'version',
         major: num(major)!,
         minor: num(minor),
         patch: num(patch),
@@ -140,6 +144,7 @@ export function parseRange(input: string): NugetRange | null {
     return {
       type: 'range-mixed',
       min: {
+        type: 'version',
         major: num(minMajor)!,
         minor: num(minMinor),
         patch: num(minPatch),
@@ -149,6 +154,7 @@ export function parseRange(input: string): NugetRange | null {
       },
       minInclusive: minBracket === '[',
       max: {
+        type: 'version',
         major: num(maxMajor)!,
         minor: num(maxMinor),
         patch: num(maxPatch),

@@ -1,4 +1,5 @@
 export interface NugetVersion {
+  type: 'version';
   major: number;
   minor: number | undefined;
   patch: number | undefined;

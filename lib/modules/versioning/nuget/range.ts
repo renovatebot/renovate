@@ -86,6 +86,7 @@ export function replace(range: NugetRange, newVersion: NugetVersion): string {
   } else if (range.unstable || !newVersion.prerelease) {
     if (range.type === 'floating-minor') {
       const v: NugetVersion = {
+        type: 'version',
         major: range.major,
         minor: undefined,
         patch: undefined,
@@ -101,6 +102,7 @@ export function replace(range: NugetRange, newVersion: NugetVersion): string {
       }
     } else if (range.type === 'floating-patch') {
       const v: NugetVersion = {
+        type: 'version',
         major: range.major,
         minor: range.minor,
         patch: undefined,
@@ -117,6 +119,7 @@ export function replace(range: NugetRange, newVersion: NugetVersion): string {
       }
     } else if (range.type === 'floating-revision') {
       const v: NugetVersion = {
+        type: 'version',
         major: range.major,
         minor: range.minor,
         patch: range.patch,

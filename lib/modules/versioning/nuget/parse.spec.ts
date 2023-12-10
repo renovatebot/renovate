@@ -15,6 +15,7 @@ describe('modules/versioning/nuget/parse', () => {
   describe('versions', () => {
     it('omits zeros', () => {
       expect(parseVersion('2')).toEqual({
+        type: 'version',
         major: 2,
         minor: undefined,
         patch: undefined,
@@ -23,6 +24,7 @@ describe('modules/versioning/nuget/parse', () => {
         metadata: undefined,
       });
       expect(parseVersion('2.0')).toEqual({
+        type: 'version',
         major: 2,
         minor: 0,
         patch: undefined,
@@ -31,6 +33,7 @@ describe('modules/versioning/nuget/parse', () => {
         metadata: undefined,
       });
       expect(parseVersion('2.0.0')).toEqual({
+        type: 'version',
         major: 2,
         minor: 0,
         patch: 0,
@@ -39,6 +42,7 @@ describe('modules/versioning/nuget/parse', () => {
         metadata: undefined,
       });
       expect(parseVersion('2.0.0.0')).toEqual({
+        type: 'version',
         major: 2,
         minor: 0,
         patch: 0,
@@ -60,6 +64,7 @@ describe('modules/versioning/nuget/parse', () => {
         ({ input, prerelease, metadata }) => {
           const res = parseVersion(input);
           expect(res).toEqual({
+            type: 'version',
             major: 1,
             minor: 0,
             patch: 0,
@@ -78,6 +83,7 @@ describe('modules/versioning/nuget/parse', () => {
       expect(res).toEqual({
         type: 'range-exact',
         version: {
+          type: 'version',
           major: 1,
           minor: 0,
           patch: 0,
@@ -92,6 +98,7 @@ describe('modules/versioning/nuget/parse', () => {
       expect(parseRange('(1.2.3,)')).toEqual({
         type: 'range-min',
         min: {
+          type: 'version',
           major: 1,
           minor: 2,
           patch: 3,
@@ -105,6 +112,7 @@ describe('modules/versioning/nuget/parse', () => {
       expect(parseRange('[1.2.3,)')).toEqual({
         type: 'range-min',
         min: {
+          type: 'version',
           major: 1,
           minor: 2,
           patch: 3,
@@ -120,6 +128,7 @@ describe('modules/versioning/nuget/parse', () => {
       expect(parseRange('(,1.2.3]')).toEqual({
         type: 'range-max',
         max: {
+          type: 'version',
           major: 1,
           minor: 2,
           patch: 3,
@@ -133,6 +142,7 @@ describe('modules/versioning/nuget/parse', () => {
       expect(parseRange('(,1.2.3)')).toEqual({
         type: 'range-max',
         max: {
+          type: 'version',
           major: 1,
           minor: 2,
           patch: 3,
@@ -155,6 +165,7 @@ describe('modules/versioning/nuget/parse', () => {
         expect(parseRange(input)).toEqual({
           type: 'range-mixed',
           min: {
+            type: 'version',
             major: 1,
             minor: 2,
             patch: 3,
@@ -164,6 +175,7 @@ describe('modules/versioning/nuget/parse', () => {
           },
           minInclusive,
           max: {
+            type: 'version',
             major: 2,
             minor: 3,
             patch: 4,
