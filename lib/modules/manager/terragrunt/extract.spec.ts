@@ -8,6 +8,35 @@ describe('modules/manager/terragrunt/extract', () => {
     });
 
     it('extracts terragrunt sources', () => {
+      const res = extractPackageFile(Fixtures.get('1.hcl'));
+      expect(res).toEqual({
+        deps: [
+          {
+            datasource: 'terraform-module',
+            depName: 'myuser/myrepo',
+            depType: 'terragrunt',
+            registryUrls: ['registry.terraform.io'],
+          },
+          {
+            datasource: 'terraform-module',
+            depName: 'terraform-google-modules/kubernetes-engine/google',
+            depType: 'terragrunt',
+            registryUrls: ['registry.terraform.io'],
+          },
+          {
+            datasource: 'terraform-module',
+            depName: 'terraform-aws-modules/vpc/aws',
+            depType: 'terragrunt',
+            registryUrls: ['registry.terraform.io'],
+          },
+          {}
+        ],
+      });
+      expect(res?.deps).toHaveLength(4);
+      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
+    });
+
+    it('extracts terragrunt sources', () => {
       const res = extractPackageFile(Fixtures.get('2.hcl'));
       expect(res).toEqual({
         deps: [

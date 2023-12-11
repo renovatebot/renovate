@@ -65,7 +65,7 @@ export function analyseTerragruntModule(
     } else if (source.startsWith('tfr:///')) {
       dep.registryUrls = ['registry.terraform.io']
       dep.depType = 'terragrunt';
-      dep.depName = source.split('//')[1].replace('/', '');
+      dep.depName = source.split('//')[1].split('?')[0].replace('/', '');
       dep.datasource = TerraformModuleDatasource.id;
     } else if (moduleParts.length >= 3) {
       const hostnameMatch = hostnameMatchRegex.exec(source);
