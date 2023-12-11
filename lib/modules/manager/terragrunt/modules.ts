@@ -68,7 +68,7 @@ export function analyseTerragruntModule(
       dep.depName = source.split('//')[1].replace('/', '');
       dep.datasource = TerraformModuleDatasource.id;
     }
-  } else if (moduleParts.length >= 3) {
+    } else if (moduleParts.length >= 3) {
       const hostnameMatch = hostnameMatchRegex.exec(source);
       if (hostnameMatch?.groups) {
         dep.registryUrls = [`https://${hostnameMatch.groups.hostname}`];
