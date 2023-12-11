@@ -335,7 +335,7 @@ const platform: Platform = {
     config.prList = null;
     config.issueList = null;
     config.labelList = null;
-    config.hasIssuesEnabled = repo.has_issues;
+    config.hasIssuesEnabled = !repo.external_tracker && repo.has_issues;
 
     return {
       defaultBranch: config.defaultBranch,
