@@ -29,7 +29,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depType: 'terragrunt',
             registryUrls: ['registry.terraform.io'],
           },
-          {}
+          {},
         ],
       });
       expect(res?.deps).toHaveLength(4);
