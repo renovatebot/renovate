@@ -162,6 +162,13 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
     options.lookup = dnsLookup;
   }
 
+  if (hostRule.headers) {
+    options.headers = {
+      ...options.headers,
+      ...hostRule.headers,
+    };
+  }
+
   if (hostRule.keepAlive) {
     options.agent = keepAliveAgents;
   }
