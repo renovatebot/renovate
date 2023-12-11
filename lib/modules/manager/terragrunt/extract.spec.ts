@@ -7,7 +7,7 @@ describe('modules/manager/terragrunt/extract', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
 
-    it('extracts terragrunt sources', () => {
+    it('extracts terragrunt sources using tfr protocol', () => {
       const res = extractPackageFile(Fixtures.get('1.hcl'));
       expect(res).toEqual({
         deps: [
