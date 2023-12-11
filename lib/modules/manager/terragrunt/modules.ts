@@ -63,10 +63,7 @@ export function analyseTerragruntModule(
     if (moduleParts[0] === '..') {
       dep.skipReason = 'local';
     } else if (source.startsWith('tfr:///')) {
-      const hostnameMatch = hostnameMatchRegex.exec('registry.terraform.io');
-      if (hostnameMatch?.groups) {
-        dep.registryUrls = [`https://${hostnameMatch.groups.hostname}`];
-      }
+      dep.registryUrls = ['registry.terraform.io']
       dep.depType = 'terragrunt';
       dep.depName = source.split('//')[1].replace('/', '');
       dep.datasource = TerraformModuleDatasource.id;
