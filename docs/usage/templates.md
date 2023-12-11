@@ -59,6 +59,14 @@ In the example above `depName` is the string you want to decode.
 
 Read the [MDN Web Docs, decodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent) to learn more.
 
+### encodeBase64
+
+If you want to convert a string to Base64, use the built-in function `encodeBase64` like this:
+
+`{{{encodeBase64 body}}}`
+
+In the example above `body` is the string you want to transform into a Base64-encoded value.
+
 ### replace
 
 The `replace` helper replaces _all_ found strings matching the given regex with the replacement string.
