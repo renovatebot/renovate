@@ -5,7 +5,7 @@ describe('modules/versioning/nuget/index', () => {
     it.each`
       input              | expected
       ${'[1.2.3]'}       | ${true}
-      ${'1.2.3'}         | ${false}
+      ${'1.2.3'}         | ${true}
       ${'[1.2.3,1.2.3]'} | ${false}
       ${'[1.2.3,1.2.4]'} | ${false}
     `('isSingleVersion("$input") === $expected', ({ input, expected }) => {

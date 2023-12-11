@@ -18,6 +18,10 @@ class NugetVersioningApi implements VersioningApi {
   }
 
   isSingleVersion(version: string): boolean {
+    if (this.isVersion(version)) {
+      return true;
+    }
+
     const parsed = parseRange(version);
     return !!parsed && parsed.type === 'range-exact';
   }
