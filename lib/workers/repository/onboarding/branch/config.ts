@@ -21,7 +21,7 @@ async function getOnboardingConfig(
   // TODO #22198
   const repoPathParts = config.repository!.split('/');
 
-for (
+  for (
     let index = repoPathParts.length - 1;
     index >= 1 && !foundPreset;
     index--
@@ -42,6 +42,7 @@ for (
         !err.message.startsWith('Unsupported platform')
       ) {
         logger.warn({ err }, 'Unknown error fetching default owner preset');
+      }
     }
   }
 
