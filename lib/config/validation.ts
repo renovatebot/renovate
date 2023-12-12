@@ -669,7 +669,7 @@ function validateRegexManagerFields(
       try {
         regEx(matchString);
       } catch (err) {
-        logger.debug({ err }, 'regEx validation error');
+        logger.debug({ err }, 'customManager.matchStrings regEx validation error');
         errors.push({
           topic: 'Configuration Error',
           message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
