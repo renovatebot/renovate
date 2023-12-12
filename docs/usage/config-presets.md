@@ -219,7 +219,7 @@ If you are proposing a "monorepo" preset addition then it's OK to raise a PR dir
 
 ## Group/Organization level presets
 
-Whenever repository onboarding happens, Renovate checks for a a default config to extend. Renovate will check for a repository called `renovate-config` with a `default.json` file in the parent user/group/org of the repository. On platforms that support nested groups (e.g. GitLab), Renovate will check for this repository at each level of grouping.
+Whenever repository onboarding happens, Renovate checks for a a default config to extend. Renovate will check for a repository called `renovate-config` with a `default.json` file in the parent user/group/org of the repository. On platforms that support nested groups (e.g. GitLab), Renovate will check for this repository at each level of grouping, from nearest to furthest, ans use teh first one it finds.
 On all platforms, it will also look for a repository named like `.{{platform}}` (e.g. `.github`) with a `renovate-config.json`, under the same top-level user/group/org.
 
 If found, that repository's preset will be suggested as the sole extended preset, and any existing `onboardingConfig` config will be ignored/overridden.
