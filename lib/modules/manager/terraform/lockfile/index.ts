@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import * as p from '../../../../util/promises';
+import { escapeRegExp, regEx } from '../../../../util/regex';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { get as getVersioning } from '../../../versioning';
@@ -65,7 +66,7 @@ async function updateAllLocks(
   return updates.filter(is.truthy);
 }
 
-function getNewConstraint(
+export function getNewConstraint(
   dep: Upgrade<Record<string, unknown>>,
   oldConstraint: string | undefined,
 ): string | undefined {
@@ -88,7 +89,11 @@ function getNewConstraint(
     logger.debug(
       `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`,
     );
-    return oldConstraint.replace(currentValue, newValue);
+    //remove surplus .0 version
+    return oldConstraint.replace(
+      regEx(`${escapeRegExp(currentValue)}(\\.0)*`),
+      newValue,
+    );
   }
 
   if (

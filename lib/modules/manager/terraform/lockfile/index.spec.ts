@@ -7,6 +7,7 @@ import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
 import { updateArtifacts } from '../index';
 import { TerraformProviderHash } from './hash';
+import { getNewConstraint } from './index';
 
 // auto-mock fs
 jest.mock('../../../../util/fs');
@@ -1088,5 +1089,33 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(mockHash.mock.calls).toEqual([
       ['https://registry.example.com', 'hashicorp/aws', '3.37.0'],
     ]);
+  });
+
+  describe('getNewConstraint', () => {
+    it('correctly calculate new constraint on pinning', () => {
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '>= 4.3',
+            newValue: '5.26.0',
+            newVersion: '5.26.0',
+          },
+          '>= 4.3.0',
+        ),
+      ).toBe('5.26.0');
+    });
+
+    it('update constraint with multiple elements', () => {
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '2.41.0',
+            newValue: '2.46.0',
+            newVersion: '2.46.0',
+          },
+          '>= 2.36.0, 2.41.0',
+        ),
+      ).toBe('>= 2.36.0, 2.46.0');
+    });
   });
 });

@@ -145,6 +145,22 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['renovatebot/internal-tools'],
         replacementName: 'containerbase/internal-tools',
       },
+      {
+        description: 'Replace `renovate` `slim` docker tag with `latest`.',
+        matchCurrentValue: '/^slim$/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['ghcr.io/renovatebot/renovate'],
+        matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+        replacementVersion: 'latest',
+      },
+      {
+        description: 'Remove `renovate` `-slim` docker tag suffix.',
+        extractVersion: '^(?<version>.+)-slim$',
+        matchCurrentValue: '/-slim$/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['ghcr.io/renovatebot/renovate'],
+        matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+      },
     ],
   },
   'cucumber-to-scoped': {
@@ -652,6 +668,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['react-scripts-ts'],
         replacementName: 'react-scripts',
         replacementVersion: '2.1.8',
+      },
+    ],
+  },
+  'read-pkg-up-rename': {
+    description: '`read-pkg-up` was renamed to `read-package-up`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['read-pkg-up'],
+        replacementName: 'read-package-up',
+        replacementVersion: '11.0.0',
       },
     ],
   },

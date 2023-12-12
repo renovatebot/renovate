@@ -77,7 +77,7 @@ export interface Pr {
   labels?: string[];
   number: number;
   reviewers?: string[];
-  sha?: string;
+  sha?: LongCommitSha;
   sourceRepo?: string;
   state: string;
   targetBranch?: string;

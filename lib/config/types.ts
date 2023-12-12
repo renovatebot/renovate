@@ -140,6 +140,7 @@ export interface RepoGlobalConfig {
   exposeAllEnv?: boolean;
   githubTokenWarn?: boolean;
   migratePresets?: Record<string, string>;
+  presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
   localDir?: string;
@@ -262,9 +263,12 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 }
 
+const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
+export type CustomDatasourceFormats = (typeof CustomDatasourceFormats)[number];
+
 export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
-  format?: 'json' | 'plain' | 'yaml';
+  format?: CustomDatasourceFormats;
   transformTemplates?: string[];
 }
 

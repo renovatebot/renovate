@@ -13,7 +13,7 @@ import { type AsyncResult, Result } from '../result';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
-import { applyHostRules } from './host-rules';
+import { applyHostRule, findMatchingRule } from './host-rules';
 import { getQueue } from './queue';
 import { Throttle, getThrottle } from './throttle';
 import type {
@@ -176,7 +176,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     applyDefaultHeaders(options);
 
-    options = applyHostRules(url, options);
+    const hostRule = findMatchingRule(url, options);
+    options = applyHostRule(url, options, hostRule);
     if (options.enabled === false) {
       logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
       throw new Error(HOST_DISABLED);
@@ -486,7 +487,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
 
     applyDefaultHeaders(combinedOptions);
-    combinedOptions = applyHostRules(resolvedUrl, combinedOptions);
+    const hostRule = findMatchingRule(url, combinedOptions);
+    combinedOptions = applyHostRule(resolvedUrl, combinedOptions, hostRule);
     if (combinedOptions.enabled === false) {
       throw new Error(HOST_DISABLED);
     }

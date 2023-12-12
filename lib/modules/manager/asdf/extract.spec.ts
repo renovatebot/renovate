@@ -44,6 +44,7 @@ describe('modules/manager/asdf/extract', () => {
     it('can handle multiple tools in one file', () => {
       const res = extractPackageFile(
         codeBlock`
+act 0.2.54
 adr-tools 3.0.0
 argocd 2.5.4
 asdf-plugin-manager 1.1.1
@@ -116,6 +117,13 @@ dummy 1.2.3
       );
       expect(res).toEqual({
         deps: [
+          {
+            currentValue: '0.2.54',
+            datasource: 'github-releases',
+            packageName: 'nektos/act',
+            depName: 'act',
+            extractVersion: '^v(?<version>\\S+)',
+          },
           {
             currentValue: '3.0.0',
             datasource: 'github-tags',

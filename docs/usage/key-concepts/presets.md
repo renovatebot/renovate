@@ -45,7 +45,7 @@ This is similar to the way you can share ESLint configurations.
 ## Built-in presets
 
 Renovate comes with a lot of built-in presets that you can use.
-Browse [Renovate's default presets](https://docs.renovatebot.com/presets-default/) to find any that are useful to you.
+Browse [Renovate's default presets](../presets-default.md) to find any that are useful to you.
 Once you find a preset you like, put it in an `extends` array in your config file.
 
 ### Contributing a new built-in preset
@@ -58,5 +58,5 @@ Read [Contributing to presets](../config-presets.md#contributing-to-presets) to 
 
 In short:
 
-- Browse [Renovate's default presets](https://docs.renovatebot.com/presets-default/) to find any that are useful to you
+- Browse [Renovate's default presets](../presets-default.md) to find any that are useful to you
 - Publish your own if you wish to reuse them across repositories

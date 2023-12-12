@@ -21,7 +21,7 @@ async function getOnboardingConfig(
   // TODO #22198
   const repoPathParts = config.repository!.split('/');
 
-  for (
+for (
     let index = repoPathParts.length - 1;
     index >= 1 && !foundPreset;
     index--
@@ -31,16 +31,17 @@ async function getOnboardingConfig(
     // Check for group/renovate-config
     try {
       const repo = `${groupName}/renovate-config`;
+      const preset = `local>${repo}`;
+      logger.debug(`Checking for preset: ${preset}`);
       if (await getPreset({ repo })) {
-        foundPreset = `local>${repo}`;
+        foundPreset = preset;
       }
     } catch (err) {
       if (
         err.message !== PRESET_DEP_NOT_FOUND &&
         !err.message.startsWith('Unsupported platform')
       ) {
-        logger.warn({ err }, 'Unknown error fetching group preset');
-      }
+        logger.warn({ err }, 'Unknown error fetching default owner preset');
     }
   }
 
@@ -55,13 +56,16 @@ async function getOnboardingConfig(
     try {
       const repo = `${orgName}/.${platform}`;
       const presetName = 'renovate-config';
+      const orgPresetName = `local>${repo}:${presetName}`;
+      logger.debug(`Checking for preset: ${orgPresetName}`);
+
       if (
         await getPreset({
           repo,
           presetName,
         })
       ) {
-        foundPreset = `local>${repo}:${presetName}`;
+        foundPreset = orgPresetName;
       }
     } catch (err) {
       if (
@@ -82,7 +86,7 @@ async function getOnboardingConfig(
   } else {
     // Organization preset did not exist
     logger.debug(
-      'No default org/owner preset found, so the default onboarding config will be used instead. Note: do not be concerned with any 404 messages that preceded this.',
+      'No default org/owner preset found, so the default onboarding config will be used instead.',
     );
   }
 
