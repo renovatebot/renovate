@@ -14,7 +14,7 @@ terraform {
     execute      = ["echo", "Running Terraform"]
   }
 
-  source = "tfr:///myuser/myrepo//folder/modules/moduleone?ref=v0.0.9"
+  source = "tfr:///myuser/myrepo/cloud//folder/modules/moduleone?ref=v0.0.9"
 
   after_hook "after_hook" {
     commands     = ["apply", "plan"]

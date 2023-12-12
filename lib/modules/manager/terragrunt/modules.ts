@@ -13,6 +13,9 @@ export const githubRefMatchRegex = regEx(
 export const gitTagsRefMatchRegex = regEx(
   /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
+export const tfrVersionMatchRegex = regEx(
+  /tfr:\/\/(?<registry>.*?)\/(?<org>[^\/]+?)\/(?<name>[^\/]+?)\/(?<cloud>[^\/?]+).*\?(?:ref|version)=(?<currentValue>.*?)$/,
+);
 const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
 
 export function extractTerragruntModule(
@@ -35,6 +38,7 @@ export function analyseTerragruntModule(
   const source = dep.managerData!.source;
   const githubRefMatch = githubRefMatchRegex.exec(source ?? '');
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(source ?? '');
+  const tfrVersionMatch = tfrVersionMatchRegex.exec(source ?? '');
 
   if (githubRefMatch?.groups) {
     dep.depType = 'github';
@@ -58,14 +62,20 @@ export function analyseTerragruntModule(
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
     dep.datasource = GitTagsDatasource.id;
+  } else if (tfrVersionMatch?.groups) {
+    dep.depType = 'terragrunt';
+    dep.depName =
+      tfrVersionMatch.groups.org +
+      '/' +
+      tfrVersionMatch.groups.name +
+      '/' +
+      tfrVersionMatch.groups.cloud;
+    dep.currentValue = tfrVersionMatch.groups.currentValue;
+    dep.datasource = TerraformModuleDatasource.id;
   } else if (source) {
     const moduleParts = source.split('//')[0].split('/');
     if (moduleParts[0] === '..') {
       dep.skipReason = 'local';
-    } else if (source.startsWith('tfr:///')) {
-      dep.depType = 'terragrunt';
-      dep.depName = source.split('//')[1].split('?')[0].replace('/', '');
-      dep.datasource = TerraformModuleDatasource.id;
     } else if (moduleParts.length >= 3) {
       const hostnameMatch = hostnameMatchRegex.exec(source);
       if (hostnameMatch?.groups) {

@@ -12,16 +12,19 @@ describe('modules/manager/terragrunt/extract', () => {
       expect(res).toEqual({
         deps: [
           {
+            currentValue: 'v0.0.9',
             datasource: 'terraform-module',
-            depName: 'myuser/myrepo',
+            depName: 'myuser/myrepo/cloud',
             depType: 'terragrunt',
           },
           {
+            currentValue: '1.2.3',
             datasource: 'terraform-module',
             depName: 'terraform-google-modules/kubernetes-engine/google',
             depType: 'terragrunt',
           },
           {
+            currentValue: '3.3.0',
             datasource: 'terraform-module',
             depName: 'terraform-aws-modules/vpc/aws',
             depType: 'terragrunt',
