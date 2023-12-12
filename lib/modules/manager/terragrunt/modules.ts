@@ -14,7 +14,7 @@ export const gitTagsRefMatchRegex = regEx(
   /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
 export const tfrVersionMatchRegex = regEx(
-  /tfr:\/\/(?<registry>.*?)\/(?<org>[^\/]+?)\/(?<name>[^\/]+?)\/(?<cloud>[^\/?]+).*\?(?:ref|version)=(?<currentValue>.*?)$/,
+  /tfr:\/\/(?<registry>.*?)\/(?<org>[^/]+?)\/(?<name>[^/]+?)\/(?<cloud>[^/?]+).*\?(?:ref|version)=(?<currentValue>.*?)$/,
 );
 const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
 
