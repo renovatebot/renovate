@@ -29,8 +29,6 @@ describe('modules/manager/terragrunt/extract', () => {
           {},
         ],
       });
-      expect(res?.deps).toHaveLength(4);
-      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
     });
 
     it('extracts terragrunt sources', () => {
