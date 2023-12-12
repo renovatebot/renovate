@@ -49,9 +49,11 @@ export function regEx(
     }
     return instance;
   } catch (err) {
+    logger.trace({ err }, 'RegEx constructor error');
     const error = new Error(CONFIG_VALIDATION);
+    error.validationMessage = err.message;
     error.validationSource = pattern.toString();
-    error.validationError = `Invalid regular expression: ${pattern.toString()}`;
+    error.validationError = `Invalid regular expression (re2): ${pattern.toString()}`;
     throw error;
   }
 }
