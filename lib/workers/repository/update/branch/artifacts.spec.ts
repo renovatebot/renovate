@@ -1,4 +1,4 @@
-import { platform } from '../../../../../test/util';
+import { RenovateConfig, partial, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { BranchConfig } from '../../../types';
@@ -15,9 +15,9 @@ describe('workers/repository/update/branch/artifacts', () => {
       branchName: 'renovate/pin',
       upgrades: [],
       artifactErrors: [{ lockFile: 'some' }],
-      statusCheckNames: {
+      statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
         artifactError: 'renovate/artifact',
-      },
+      }),
     } satisfies BranchConfig;
   });
 
@@ -37,9 +37,9 @@ describe('workers/repository/update/branch/artifacts', () => {
     it('skips status if statusCheckNames.artifactError is null', async () => {
       await setArtifactErrorStatus({
         ...config,
-        statusCheckNames: {
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           artifactError: null,
-        },
+        }),
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
@@ -50,9 +50,9 @@ describe('workers/repository/update/branch/artifacts', () => {
     it('skips status if statusCheckNames.artifactError is empty string', async () => {
       await setArtifactErrorStatus({
         ...config,
-        statusCheckNames: {
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           artifactError: '',
-        },
+        }),
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
@@ -63,7 +63,7 @@ describe('workers/repository/update/branch/artifacts', () => {
     it('skips status if statusCheckNames is undefined', async () => {
       await setArtifactErrorStatus({
         ...config,
-        statusCheckNames: undefined as never,
+        statusCheckNames: undefined,
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',

@@ -15,12 +15,13 @@ import {
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
-import type {
-  RenovateConfig,
-  RenovateOptions,
-  StatusCheckKey,
-  ValidationMessage,
-  ValidationResult,
+import {
+  type RenovateConfig,
+  type RenovateOptions,
+  type StatusCheckKey,
+  type ValidationMessage,
+  type ValidationResult,
+  allowedStatusCheckStrings,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
 
@@ -564,17 +565,11 @@ export async function validateConfig(
                 });
               }
             } else if (key === 'statusCheckNames') {
-              const allowedStatusStrings: StatusCheckKey[] = [
-                'minimumReleaseAge',
-                'mergeConfidence',
-                'configValidation',
-                'artifactError',
-              ];
               for (const [statusCheckKey, statusCheckValue] of Object.entries(
                 val,
               )) {
                 if (
-                  !allowedStatusStrings.includes(
+                  !allowedStatusCheckStrings.includes(
                     statusCheckKey as StatusCheckKey,
                   )
                 ) {

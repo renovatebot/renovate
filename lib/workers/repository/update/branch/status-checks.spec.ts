@@ -1,4 +1,4 @@
-import { partial, platform } from '../../../../../test/util';
+import { RenovateConfig, partial, platform } from '../../../../../test/util';
 import { logger } from '../../../../logger';
 import {
   ConfidenceConfig,
@@ -15,9 +15,9 @@ describe('workers/repository/update/branch/status-checks', () => {
     beforeEach(() => {
       config = partial<StabilityConfig>({
         branchName: 'renovate/some-branch',
-        statusCheckNames: {
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           minimumReleaseAge: 'renovate/stability-days',
-        },
+        }),
       });
     });
 
@@ -54,9 +54,9 @@ describe('workers/repository/update/branch/status-checks', () => {
       config.stabilityStatus = 'green';
       await setStability({
         ...config,
-        statusCheckNames: {
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           minimumReleaseAge: null,
-        },
+        }),
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
@@ -68,9 +68,9 @@ describe('workers/repository/update/branch/status-checks', () => {
       config.stabilityStatus = 'green';
       await setStability({
         ...config,
-        statusCheckNames: {
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           minimumReleaseAge: '',
-        },
+        }),
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
@@ -97,9 +97,9 @@ describe('workers/repository/update/branch/status-checks', () => {
     beforeEach(() => {
       config = {
         branchName: 'renovate/some-branch',
-        statusCheckNames: {
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           mergeConfidence: 'renovate/merge-confidence',
-        },
+        }),
       };
     });
 
@@ -138,9 +138,9 @@ describe('workers/repository/update/branch/status-checks', () => {
       config.confidenceStatus = 'green';
       await setConfidence({
         ...config,
-        statusCheckNames: {
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           mergeConfidence: null,
-        },
+        }),
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',
@@ -153,9 +153,9 @@ describe('workers/repository/update/branch/status-checks', () => {
       config.confidenceStatus = 'green';
       await setConfidence({
         ...config,
-        statusCheckNames: {
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
           mergeConfidence: '',
-        },
+        }),
       });
       expect(logger.debug).toHaveBeenCalledWith(
         'Status check is null or an empty string, skipping status check addition.',

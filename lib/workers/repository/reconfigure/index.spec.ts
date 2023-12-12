@@ -4,6 +4,7 @@ import {
   fs,
   git,
   mocked,
+  partial,
   platform,
   scm,
 } from '../../../../test/util';
@@ -26,9 +27,9 @@ describe('workers/repository/reconfigure/index', () => {
   const config: RenovateConfig = {
     branchPrefix: 'prefix/',
     baseBranch: 'base',
-    statusCheckNames: {
+    statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
       configValidation: 'renovate/config-validation',
-    },
+    }),
   };
 
   beforeEach(() => {
@@ -164,9 +165,9 @@ describe('workers/repository/reconfigure/index', () => {
 
     await validateReconfigureBranch({
       ...config,
-      statusCheckNames: {
+      statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
         configValidation: null,
-      },
+      }),
     });
     expect(logger.debug).toHaveBeenCalledWith(
       'Status check is null or an empty string, skipping status check addition.',
@@ -184,9 +185,9 @@ describe('workers/repository/reconfigure/index', () => {
 
     await validateReconfigureBranch({
       ...config,
-      statusCheckNames: {
+      statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
         configValidation: '',
-      },
+      }),
     });
     expect(logger.debug).toHaveBeenCalledWith(
       'Status check is null or an empty string, skipping status check addition.',

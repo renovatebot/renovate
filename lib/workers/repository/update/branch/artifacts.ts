@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
@@ -11,17 +10,15 @@ export async function setArtifactErrorStatus(
     // no errors
     return;
   }
-  if (
-    !config.statusCheckNames ||
-    !is.nonEmptyString(config.statusCheckNames?.artifactError)
-  ) {
+
+  const context = config.statusCheckNames?.artifactError;
+  if (!context) {
     logger.debug(
       'Status check is null or an empty string, skipping status check addition.',
     );
     return;
   }
 
-  const context = config.statusCheckNames.artifactError;
   const description = 'Artifact file update failure';
   const state = 'red';
   const existingState = await platform.getBranchStatusCheck(

@@ -23,9 +23,7 @@ async function setBranchStatus(
   context?: string | null,
 ): Promise<void> {
   if (!is.nonEmptyString(context)) {
-    logger.debug(
-      'Status check is null or an empty string, skipping status check addition.',
-    );
+    // already logged this case when validating the status check
     return;
   }
 
@@ -82,6 +80,10 @@ export async function validateReconfigureBranch(
       );
       return;
     }
+  } else {
+    logger.debug(
+      'Status check is null or an empty string, skipping status check addition.',
+    );
   }
 
   try {

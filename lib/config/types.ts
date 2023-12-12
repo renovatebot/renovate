@@ -189,11 +189,13 @@ export type RenovateRepository =
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 
-export type StatusCheckKey =
-  | 'minimumReleaseAge'
-  | 'mergeConfidence'
-  | 'configValidation'
-  | 'artifactError';
+export const allowedStatusCheckStrings = [
+  'minimumReleaseAge',
+  'mergeConfidence',
+  'configValidation',
+  'artifactError',
+] as const;
+export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -267,7 +269,7 @@ export interface RenovateConfig
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
 
-  statusCheckNames?: Partial<Record<StatusCheckKey, string | null>>;
+  statusCheckNames?: Record<StatusCheckKey, string | null>;
 }
 
 export interface CustomDatasourceConfig {

@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
@@ -63,17 +62,15 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   if (!config.stabilityStatus) {
     return;
   }
-  if (
-    !config.statusCheckNames ||
-    !is.nonEmptyString(config.statusCheckNames?.minimumReleaseAge)
-  ) {
+
+  const context = config.statusCheckNames?.minimumReleaseAge;
+  if (!context) {
     logger.debug(
       'Status check is null or an empty string, skipping status check addition.',
     );
     return;
   }
 
-  const context = config.statusCheckNames.minimumReleaseAge;
   const description =
     config.stabilityStatus === 'green'
       ? 'Updates have met minimum release age requirement'
@@ -101,17 +98,14 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   ) {
     return;
   }
-  if (
-    !config.statusCheckNames ||
-    !is.nonEmptyString(config.statusCheckNames?.mergeConfidence)
-  ) {
+  const context = config.statusCheckNames?.mergeConfidence;
+  if (!context) {
     logger.debug(
       'Status check is null or an empty string, skipping status check addition.',
     );
     return;
   }
 
-  const context = config.statusCheckNames.mergeConfidence;
   const description =
     config.confidenceStatus === 'green'
       ? 'Updates have met Merge Confidence requirement'

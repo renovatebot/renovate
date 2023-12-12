@@ -152,7 +152,8 @@ describe('config/validation', () => {
           configValidation: '',
           artifactError: null,
         },
-      } as any;
+      };
+      // @ts-expect-error invalid options
       const { errors } = await configValidation.validateConfig(config);
       expect(errors).toMatchObject([
         {
