@@ -68,6 +68,23 @@ describe('workers/repository/onboarding/branch/config', () => {
       });
     });
 
+    it('handles finding a preset in the same group', async () => {
+      config.repository = 'org/group/repo';
+      mockedPresets.getPreset.mockImplementation(({ repo }) => {
+        if (repo === 'org/group/renovate-config') {
+          return Promise.resolve({ enabled: true });
+        }
+        return Promise.reject(new Error(PRESET_DEP_NOT_FOUND));
+      });
+      const onboardingConfig = await getOnboardingConfig(config);
+      expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
+      expect(onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: ['local>org/group/renovate-config'],
+      });
+      mockedPresets.getPreset.mockClear();
+    });
+
     it('handles finding a preset in a parent group', async () => {
       config.repository = 'org/group/repo';
       mockedPresets.getPreset.mockImplementation(({ repo }) => {
