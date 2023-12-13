@@ -520,7 +520,13 @@ export async function checkoutBranch(
   logger.debug(`Setting current branch to ${branchName}`);
   await syncGit();
   try {
-    await gitRetry(() => git.checkout(['-f', branchName, '--']));
+    await gitRetry(() =>
+      git.checkout(
+        submodulesInitizialized
+          ? ['-f', '--recurse-submodules', branchName, '--']
+          : ['-f', branchName, '--'],
+      ),
+    );
     config.currentBranch = branchName;
     config.currentBranchSha = (
       await git.raw(['rev-parse', 'HEAD'])

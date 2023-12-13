@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../logger';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
 import type {
@@ -667,7 +668,11 @@ function validateRegexManagerFields(
     for (const matchString of customManager.matchStrings) {
       try {
         regEx(matchString);
-      } catch (e) {
+      } catch (err) {
+        logger.debug(
+          { err },
+          'customManager.matchStrings regEx validation error',
+        );
         errors.push({
           topic: 'Configuration Error',
           message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
