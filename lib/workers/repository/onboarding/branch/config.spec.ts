@@ -82,7 +82,6 @@ describe('workers/repository/onboarding/branch/config', () => {
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         extends: ['local>org/group/renovate-config'],
       });
-      mockedPresets.getPreset.mockClear();
     });
 
     it('handles finding a preset in a parent group', async () => {
@@ -99,7 +98,6 @@ describe('workers/repository/onboarding/branch/config', () => {
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         extends: ['local>org/renovate-config'],
       });
-      mockedPresets.getPreset.mockClear();
     });
 
     it('handles falling back to finding a organization preset', async () => {
@@ -116,7 +114,6 @@ describe('workers/repository/onboarding/branch/config', () => {
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         extends: ['local>org/.github:renovate-config'],
       });
-      mockedPresets.getPreset.mockClear();
     });
 
     it('handles not finding any preset', async () => {

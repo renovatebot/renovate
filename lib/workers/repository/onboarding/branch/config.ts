@@ -49,8 +49,7 @@ async function getOnboardingConfig(
   if (!foundPreset) {
     // Check for org/.{{platform}}
 
-    // TODO #22198
-    const orgName = config.repository!.split('/')[0];
+    const orgName = repoPathParts[0];
 
     // TODO: types (#22198)
     const platform = GlobalConfig.get('platform')!;
