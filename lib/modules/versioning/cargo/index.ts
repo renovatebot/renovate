@@ -62,7 +62,7 @@ const isLessThanRange = (version: string, range: string): boolean =>
   !!npm.isLessThanRange?.(version, cargo2npm(range));
 
 export const isValid = (input: string): boolean =>
-  !!input && npm.isValid(cargo2npm(input));
+  npm.isValid(cargo2npm(input));
 
 const matches = (version: string, range: string): boolean =>
   npm.matches(version, cargo2npm(range));
