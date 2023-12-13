@@ -9,7 +9,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[md]": {
-    "editor.wordBasedSuggestions": false
+    "editor.wordBasedSuggestions": "off"
   },
   "files.associations": {
     "Dockerfile.*": "dockerfile",
@@ -21,6 +21,6 @@
   "npm.packageManager": "pnpm",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   }
 }
