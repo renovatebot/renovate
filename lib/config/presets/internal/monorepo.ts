@@ -47,7 +47,10 @@ const repoGroups = {
     'https://github.com/aws-powertools/powertools-lambda-typescript',
   ],
   'aws-sdk-go': 'https://github.com/aws/aws-sdk-go',
-  'aws-sdk-go-v2': 'https://github.com/aws/aws-sdk-go-v2',
+  'aws-sdk-go-v2': [
+    'https://github.com/aws/smithy-go',
+    'https://github.com/aws/aws-sdk-go-v2'
+  ],
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   'aws-sdk-rust': [
