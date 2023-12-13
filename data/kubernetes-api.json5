@@ -139,7 +139,6 @@
     'source.toolkit.fluxcd.io/v1alpha1',
     'source.toolkit.fluxcd.io/v1beta1',
     'source.toolkit.fluxcd.io/v1beta2',
-    'source.toolkit.fluxcd.io/v1',
   ],
   ImageRepository: ['image.toolkit.fluxcd.io/v1beta2'],
   OCIRepository: ['source.toolkit.fluxcd.io/v1beta2'],
