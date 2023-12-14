@@ -177,10 +177,10 @@ const options: RenovateOptions[] = [
     mergeable: true,
     advancedUse: true,
     default: {
-      minimumReleaseAge: 'renovate/stability-days',
-      mergeConfidence: 'renovate/merge-confidence',
-      configValidation: 'renovate/config-validation',
       artifactError: 'renovate/artifacts',
+      configValidation: 'renovate/config-validation',
+      mergeConfidence: 'renovate/merge-confidence',
+      minimumReleaseAge: 'renovate/stability-days',
     },
   },
   {
