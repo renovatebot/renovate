@@ -345,7 +345,7 @@ export async function findPr({
     );
 
     if (!prs.length) {
-      logger.debug(`No reconfigure Pr found for branch ${branchName}`);
+      logger.debug(`No reconfigure PR found for branch ${branchName}`);
       return null;
     }
 
