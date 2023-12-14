@@ -343,6 +343,7 @@ const repoGroups = {
   mdx: 'https://github.com/mdx-js/mdx',
   'middy-js': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
+  'ml-dotnet': 'https://github.com/dotnet/machinelearning',
   mockito: 'https://github.com/mockito/mockito',
   'mongo-csharp-driver': 'https://github.com/mongodb/mongo-csharp-driver',
   mstest: 'https://github.com/microsoft/testfx',
