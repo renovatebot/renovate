@@ -45,8 +45,8 @@ importers:
         specifier: 0.45.1
         version: 0.45.1(@opentelemetry/api@1.7.0)
       '@opentelemetry/instrumentation-bunyan':
-        specifier: 0.33.0
-        version: 0.33.0(@opentelemetry/api@1.7.0)
+        specifier: 0.34.0
+        version: 0.34.0(@opentelemetry/api@1.7.0)
       '@opentelemetry/instrumentation-http':
         specifier: 0.45.1
         version: 0.45.1(@opentelemetry/api@1.7.0)
@@ -2514,13 +2514,14 @@ packages:
       '@opentelemetry/sdk-trace-base': 1.18.1(@opentelemetry/api@1.7.0)
     dev: false
 
-  /@opentelemetry/instrumentation-bunyan@0.33.0(@opentelemetry/api@1.7.0):
-    resolution: {integrity: sha512-i3xfmhajtOEuFO+9yMU/wJiH0tY4VtIlbJKGIKVHFOsoNqPQpG7iUQP01p0FRoje+UB+ZUvs4hU7fCZzwtnC1g==}
+  /@opentelemetry/instrumentation-bunyan@0.34.0(@opentelemetry/api@1.7.0):
+    resolution: {integrity: sha512-UjuvggGrclyn6avTcMAdqLyrrTV26ufB73vPBPlEmA3a2dtYCS07zW82Kacxi5emZDpmHIk6zQE18DqCb/xfpA==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
     dependencies:
       '@opentelemetry/api': 1.7.0
+      '@opentelemetry/api-logs': 0.45.1
       '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.7.0)
       '@types/bunyan': 1.8.9
     transitivePeerDependencies:
