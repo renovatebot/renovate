@@ -815,12 +815,7 @@ export async function findPr({
       return null;
     }
 
-    // return the latest pull request
-    const pr = coerceRestPr(prList[0]);
-    if (pr) {
-      logger.debug(`Found PR #${pr.number}`);
-    }
-    return pr;
+    return coerceRestPr(prList[0]);
   }
 
   const prList = await getPrList();
