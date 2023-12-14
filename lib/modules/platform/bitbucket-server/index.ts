@@ -349,13 +349,7 @@ export async function findPr({
       return null;
     }
 
-    // return the latest pr
-    const pr = utils.prInfo(prs[0]);
-    if (pr) {
-      logger.debug(`Found PR #${pr.number}`);
-    }
-
-    return pr;
+    return utils.prInfo(prs[0]);
   }
 
   const prList = await getPrList(refreshCache);

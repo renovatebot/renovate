@@ -193,7 +193,7 @@ export interface Platform {
     branchOrTag?: string,
   ): Promise<any>;
   initRepo(config: RepoParams): Promise<RepoResult>;
-  getPrList(includeOtherAuthors?: boolean): Promise<Pr[]>;
+  getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(
     issueConfig: EnsureIssueConfig,
