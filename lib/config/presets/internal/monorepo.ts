@@ -390,7 +390,8 @@ const repoGroups = {
     'https://github.com/pixijs/pixi.js', // old repo
     'https://github.com/pixijs/pixijs',
   ],
-  playwright: 'https://github.com/Microsoft/playwright',
+  playwright: 'https://github.com/microsoft/playwright',
+  'playwright-dotnet': 'https://github.com/microsoft/playwright-dotnet',
   pnpjs: 'https://github.com/pnp/pnpjs',
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
