@@ -171,6 +171,19 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'statusCheckNames',
+    description: 'Custom strings to use as status check names.',
+    type: 'object',
+    mergeable: true,
+    advancedUse: true,
+    default: {
+      artifactError: 'renovate/artifacts',
+      configValidation: 'renovate/config-validation',
+      mergeConfidence: 'renovate/merge-confidence',
+      minimumReleaseAge: 'renovate/stability-days',
+    },
+  },
+  {
     name: 'extends',
     description: 'Configuration presets to use or extend.',
     stage: 'package',
