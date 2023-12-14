@@ -374,6 +374,7 @@ const repoGroups = {
     'https://github.com/nuxt/nuxt',
   ],
   okhttp: 'https://github.com/square/okhttp',
+  openiddict: 'https://github.com/openiddict/openiddict-core',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
   'opentelemetry-erlang':
