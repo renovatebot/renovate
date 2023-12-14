@@ -388,6 +388,7 @@ const repoGroups = {
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   orleans: 'https://github.com/dotnet/orleans',
+  'panda-css': 'https://github.com/chakra-ui/panda',
   parcel: 'https://github.com/parcel-bundler/parcel',
   'percy-cli': 'https://github.com/percy/cli',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
