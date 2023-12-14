@@ -379,6 +379,8 @@ const repoGroups = {
   openiddict: 'https://github.com/openiddict/openiddict-core',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-dotnet-contrib':
+    'https://github.com/open-telemetry/opentelemetry-dotnet-contrib',
   'opentelemetry-erlang':
     'https://github.com/open-telemetry/opentelemetry-erlang',
   'opentelemetry-erlang-contrib':
