@@ -4,6 +4,7 @@ import * as httpMock from '../../../../../test/http-mock';
 import { partial } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import { CustomDatasource } from '../../../../modules/datasource/custom';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
@@ -53,6 +54,11 @@ describe('workers/repository/process/lookup/index', () => {
 
   const getDockerReleases = jest.spyOn(
     DockerDatasource.prototype,
+    'getReleases',
+  );
+
+  const getCustomDatasourceReleases = jest.spyOn(
+    CustomDatasource.prototype,
     'getReleases',
   );
 
@@ -1932,6 +1938,31 @@ describe('workers/repository/process/lookup/index', () => {
           {
             newDigest: 'sha256:0123456789abcdef',
             newValue: '8.0.0',
+            updateType: 'digest',
+          },
+        ],
+      });
+    });
+
+    it('handles digest update for custom datasource', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'my-package';
+      config.datasource = CustomDatasource.id;
+      config.currentDigest = 'zzzzzzzzzzzzzzz';
+      getCustomDatasourceReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '1.0.0',
+            newDigest: '0123456789abcdef',
+          },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot({
+        updates: [
+          {
+            newDigest: '0123456789abcdef',
+            newValue: '1.0.0',
             updateType: 'digest',
           },
         ],
