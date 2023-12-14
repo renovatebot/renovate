@@ -1,8 +1,9 @@
 import { codeBlock } from 'common-tags';
 import { XmlDocument } from 'xmldoc';
 import { fs } from '../../../../test/util';
+import type { Registry } from './types';
 import { bumpPackageVersion } from './update';
-import { findVersion, getConfiguredRegistries } from './util';
+import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
 
 jest.mock('../../../util/fs');
 
@@ -104,6 +105,123 @@ describe('modules/manager/nuget/util', () => {
         'Contoso.*',
         'NuGet.Common',
       ]);
+    });
+  });
+
+  describe('applyRegistries', () => {
+    it('applies registry to package name via source mapping', () => {
+      const registries: Registry[] = [
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json',
+          sourceMappedPackagePatterns: ['*'],
+        },
+        {
+          name: 'contoso.com',
+          url: 'https://contoso.com/packages/',
+          sourceMappedPackagePatterns: ['Contoso.*', 'NuGet.Common'],
+        },
+        {
+          name: 'contoso.test',
+          url: 'https://contoso.test/packages/',
+          sourceMappedPackagePatterns: [
+            'Contoso.*',
+            'Contoso.Test.*',
+            'NuGet.*',
+            'NuGet.Common*',
+          ],
+        },
+      ];
+
+      expect(
+        applyRegistries({ depName: 'Newtonsoft.Json' }, registries),
+      ).toEqual({
+        depName: 'Newtonsoft.Json',
+        registryUrls: ['https://api.nuget.org/v3/index.json'],
+      });
+
+      expect(
+        applyRegistries({ depName: 'Contoso.SomePackage' }, registries),
+      ).toEqual({
+        depName: 'Contoso.SomePackage',
+        registryUrls: [
+          'https://contoso.com/packages/',
+          'https://contoso.test/packages/',
+        ],
+      });
+
+      expect(applyRegistries({ depName: 'NuGet.Some' }, registries)).toEqual({
+        depName: 'NuGet.Some',
+        registryUrls: ['https://contoso.test/packages/'],
+      });
+
+      expect(
+        applyRegistries({ depName: 'Contoso.Test.SomePackage' }, registries),
+      ).toEqual({
+        depName: 'Contoso.Test.SomePackage',
+        registryUrls: ['https://contoso.test/packages/'],
+      });
+    });
+
+    it('applies registry to package name case insensitive', () => {
+      const registries: Registry[] = [
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json',
+          sourceMappedPackagePatterns: ['*'],
+        },
+        {
+          name: 'contoso.com',
+          url: 'https://contoso.com/packages/',
+          sourceMappedPackagePatterns: ['Contoso.*', 'Nuget.common'],
+        },
+      ];
+
+      expect(applyRegistries({ depName: 'NuGet.Common' }, registries)).toEqual({
+        depName: 'NuGet.Common',
+        registryUrls: ['https://contoso.com/packages/'],
+      });
+    });
+
+    it('applies all registries to package name', () => {
+      const registries: Registry[] = [
+        {
+          name: 'nuget.org',
+          url: 'https://api.nuget.org/v3/index.json',
+        },
+        {
+          name: 'contoso.com',
+          url: 'https://contoso.com/packages/',
+        },
+      ];
+
+      expect(
+        applyRegistries(
+          {
+            depName: 'Newtonsoft.Json',
+          },
+          registries,
+        ),
+      ).toEqual({
+        depName: 'Newtonsoft.Json',
+        registryUrls: [
+          'https://api.nuget.org/v3/index.json',
+          'https://contoso.com/packages/',
+        ],
+      });
+    });
+
+    it('applies nothing', () => {
+      expect(
+        applyRegistries(
+          {
+            depName: 'Newtonsoft.Json',
+          },
+          undefined,
+        ),
+      ).toEqual({
+        depName: 'Newtonsoft.Json',
+      });
     });
   });
 });
