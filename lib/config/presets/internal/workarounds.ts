@@ -13,6 +13,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreWeb3jCoreWithOldReleaseTimestamp',
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
+      'workarounds:nodeDockerVersioning',
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
@@ -134,6 +135,17 @@ export const presets: Record<string, Preset> = {
         allowedVersions: '!/^200\\d{5}(\\.\\d+)?/',
         matchDatasources: ['maven', 'sbt-package'],
         matchPackagePrefixes: ['commons-'],
+      },
+    ],
+  },
+  nodeDockerVersioning: {
+    description: 'Use node versioning for `node` docker images.',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchDepNames: ['node'],
+        versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
+        versioning: 'node',
       },
     ],
   },

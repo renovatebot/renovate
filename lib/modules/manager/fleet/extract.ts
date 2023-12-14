@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parseYaml } from '../../../util/yaml';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { checkIfStringIsPath } from '../terraform/util';
@@ -120,7 +120,7 @@ export function extractPackageFile(
   try {
     if (regEx('fleet.ya?ml').test(packageFile)) {
       // TODO: fix me (#9610)
-      const docs = loadAll(content, null, { json: true }) as FleetFile[];
+      const docs = parseYaml(content, null, { json: true }) as FleetFile[];
       const fleetDeps = docs
         .filter((doc) => is.truthy(doc?.helm))
         .flatMap((doc) => extractFleetFile(doc));
@@ -128,7 +128,7 @@ export function extractPackageFile(
       deps.push(...fleetDeps);
     } else {
       // TODO: fix me (#9610)
-      const docs = loadAll(content, null, { json: true }) as GitRepo[];
+      const docs = parseYaml(content, null, { json: true }) as GitRepo[];
       const gitRepoDeps = docs
         .filter((doc) => doc.kind === 'GitRepo') // ensure only GitRepo manifests are processed
         .flatMap((doc) => extractGitRepo(doc));

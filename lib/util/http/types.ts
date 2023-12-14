@@ -94,4 +94,5 @@ export interface HttpResponse<T = string> {
   authorization?: boolean;
 }
 
-export type GotTask<T> = () => Promise<HttpResponse<T>>;
+export type Task<T> = () => Promise<T>;
+export type GotTask<T> = Task<HttpResponse<T>>;

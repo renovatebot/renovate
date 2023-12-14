@@ -143,6 +143,7 @@ export interface RepoGlobalConfig {
   exposeAllEnv?: boolean;
   githubTokenWarn?: boolean;
   migratePresets?: Record<string, string>;
+  presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
   localDir?: string;
@@ -191,6 +192,14 @@ export type RenovateRepository =
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
+
+export const allowedStatusCheckStrings = [
+  'minimumReleaseAge',
+  'mergeConfidence',
+  'configValidation',
+  'artifactError',
+] as const;
+export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -263,6 +272,8 @@ export interface RenovateConfig
 
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
+
+  statusCheckNames?: Record<StatusCheckKey, string | null>;
 }
 
 const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;

@@ -14,7 +14,7 @@ import * as p from '../promises';
 import { range } from '../range';
 import { regEx } from '../regex';
 import { joinUrlParts, parseLinkHeader, resolveBaseUrl } from '../url';
-import { findMatchingRules } from './host-rules';
+import { findMatchingRule } from './host-rules';
 import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
@@ -295,10 +295,9 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         );
       }
 
-      const { token } = findMatchingRules(
-        { hostType: this.hostType },
-        authUrl.toString(),
-      );
+      const { token } = findMatchingRule(authUrl.toString(), {
+        hostType: this.hostType,
+      });
       opts.token = token;
     }
 

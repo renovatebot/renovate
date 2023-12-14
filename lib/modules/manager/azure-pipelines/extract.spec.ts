@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
@@ -15,9 +16,6 @@ const azurePipelines = Fixtures.get('azure-pipelines.yaml');
 const azurePipelinesNoDependency = Fixtures.get(
   'azure-pipelines-no-dependency.yaml',
 );
-const azurePipelinesStages = Fixtures.get('azure-pipelines-stages.yaml');
-const azurePipelinesJobs = Fixtures.get('azure-pipelines-jobs.yaml');
-const azurePipelinesSteps = Fixtures.get('azure-pipelines-steps.yaml');
 
 describe('modules/manager/azure-pipelines/extract', () => {
   afterEach(() => {
@@ -58,12 +56,11 @@ describe('modules/manager/azure-pipelines/extract', () => {
       ).toBeNull();
     });
 
-    it('should return null when reference is not defined', () => {
+    it('should return null when reference is not defined specified', () => {
       expect(
         extractRepository({
           type: 'github',
           name: 'user/repo',
-          ref: null,
         }),
       ).toBeNull();
     });
@@ -138,10 +135,6 @@ describe('modules/manager/azure-pipelines/extract', () => {
         datasource: 'docker',
       });
     });
-
-    it('should return null if image field is missing', () => {
-      expect(extractContainer({ image: null })).toBeNull();
-    });
   });
 
   describe('extractAzurePipelinesTasks()', () => {
@@ -191,11 +184,196 @@ describe('modules/manager/azure-pipelines/extract', () => {
       ).toBeNull();
     });
 
+    it('should extract deployment jobs runonce', () => {
+      const packageFile = codeBlock`
+        jobs:
+        - deployment: deployment_one
+          strategy:
+            runOnce:
+              deploy:
+                steps:
+                  - task: Bash@3
+                    inputs:
+                      script: 'echo Hello World'
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs on failure', () => {
+      const packageFile = codeBlock`
+        jobs:
+        - deployment: deployment_one
+          strategy:
+            runOnce:
+              on:
+                failure:
+                  steps:
+                    - task: Bash@3
+                      inputs:
+                        script: 'echo Hello World'
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs on success', () => {
+      const packageFile = codeBlock`
+        jobs:
+        - deployment: deployment_one
+          strategy:
+            runOnce:
+              on:
+                success:
+                  steps:
+                    - task: Bash@3
+                      inputs:
+                        script: 'echo Hello World'
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs postroute', () => {
+      const packageFile = codeBlock`
+        jobs:
+        - deployment: deployment_one
+          strategy:
+            runOnce:
+              postRouteTraffic:
+                steps:
+                  - task: Bash@3
+                    inputs:
+                      script: 'echo Hello World'
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs predeploy', () => {
+      const packageFile = codeBlock`
+        jobs:
+        - deployment: deployment_one
+          strategy:
+            runOnce:
+              preDeploy:
+                steps:
+                  - task: Bash@3
+                    inputs:
+                      script: 'echo Hello World'
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs route', () => {
+      const packageFile = codeBlock`
+        jobs:
+        - deployment: deployment_one
+          strategy:
+            runOnce:
+              routeTraffic:
+                steps:
+                  - task: Bash@3
+                    inputs:
+                      script: 'echo Hello World'
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs rolling', () => {
+      const packageFile = codeBlock`
+        jobs:
+        - deployment: deployment_one
+          strategy:
+            rolling:
+              deploy:
+                steps:
+                  - task: Bash@3
+                    inputs:
+                      script: 'echo Hello World'
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
+    it('should extract deployment jobs canary', () => {
+      const packageFile = codeBlock`
+        jobs:
+        - deployment: deployment_one
+          strategy:
+            canary:
+              deploy:
+                steps:
+                  - task: Bash@3
+                    inputs:
+                      script: 'echo Hello World'
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      expect(res?.deps).toEqual([
+        {
+          depName: 'Bash',
+          currentValue: '3',
+          datasource: AzurePipelinesTasksDatasource.id,
+        },
+      ]);
+    });
+
     it('should extract stages', () => {
-      const res = extractPackageFile(
-        azurePipelinesStages,
-        azurePipelinesFilename,
-      );
+      const packageFile = codeBlock`
+        stages:
+        - stage: stage_one
+          jobs:
+            - job: job_one
+              steps:
+                - task: Bash@3
+                  inputs:
+                    script: 'echo Hello World'
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -206,10 +384,15 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should extract jobs', () => {
-      const res = extractPackageFile(
-        azurePipelinesJobs,
-        azurePipelinesFilename,
-      );
+      const packageFile = codeBlock`
+        jobs:
+        - job: job_one
+          steps:
+            - task: Bash@3
+              inputs:
+                script: 'echo Hello World'
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -220,10 +403,13 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should extract steps', () => {
-      const res = extractPackageFile(
-        azurePipelinesSteps,
-        azurePipelinesFilename,
-      );
+      const packageFile = codeBlock`
+        steps:
+        - task: Bash@3
+          inputs:
+            script: 'echo Hello World'
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -234,10 +420,11 @@ describe('modules/manager/azure-pipelines/extract', () => {
     });
 
     it('should return null when task alias used', () => {
-      const content = `
-      steps:
-      - bash: 'echo Hello World'`;
-      const res = extractPackageFile(content, azurePipelinesFilename);
+      const packageFile = codeBlock`
+        steps:
+        - bash: 'echo Hello World';
+      `;
+      const res = extractPackageFile(packageFile, azurePipelinesFilename);
       expect(res).toBeNull();
     });
   });

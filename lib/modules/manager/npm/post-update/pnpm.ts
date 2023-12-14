@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
@@ -11,6 +10,7 @@ import type {
   ToolConstraint,
 } from '../../../../util/exec/types';
 import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
+import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
@@ -126,7 +126,7 @@ export async function getConstraintFromLockFile(
     if (!lockfileContent) {
       return null;
     }
-    const pnpmLock = load(lockfileContent) as PnpmLockFile;
+    const pnpmLock = parseSingleYaml(lockfileContent) as PnpmLockFile;
     if (!is.number(pnpmLock?.lockfileVersion)) {
       return null;
     }

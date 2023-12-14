@@ -171,6 +171,19 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'statusCheckNames',
+    description: 'Custom strings to use as status check names.',
+    type: 'object',
+    mergeable: true,
+    advancedUse: true,
+    default: {
+      artifactError: 'renovate/artifacts',
+      configValidation: 'renovate/config-validation',
+      mergeConfidence: 'renovate/merge-confidence',
+      minimumReleaseAge: 'renovate/stability-days',
+    },
+  },
+  {
     name: 'extends',
     description: 'Configuration presets to use or extend.',
     stage: 'package',
@@ -199,6 +212,13 @@ const options: RenovateOptions[] = [
     additionalProperties: {
       type: 'string',
     },
+  },
+  {
+    name: 'presetCachePersistence',
+    description: 'Cache resolved presets in package cache.',
+    type: 'boolean',
+    globalOnly: true,
+    default: false,
   },
   {
     name: 'globalExtends',
@@ -373,7 +393,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.25.0',
+    default: 'ghcr.io/containerbase/sidecar:9.30.4',
     globalOnly: true,
   },
   {
@@ -2743,6 +2763,17 @@ const options: RenovateOptions[] = [
     experimental: true,
     globalOnly: true,
     default: [],
+  },
+  {
+    name: 'maxRetryAfter',
+    description:
+      'Maximum retry-after header value to wait for before retrying a failed request.',
+    type: 'integer',
+    default: 60,
+    stage: 'package',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
   },
 ];
 

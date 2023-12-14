@@ -8,6 +8,10 @@ import { regEx } from '../regex';
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
 
+handlebars.registerHelper('encodeBase64', (str: string) =>
+  Buffer.from(str ?? '').toString('base64'),
+);
+
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2),
 );
@@ -208,8 +212,9 @@ export function proxyCompileInput(input: CompileInput): CompileInput {
   return new Proxy<CompileInput>(input, compileInputProxyHandler);
 }
 
-const templateRegex =
-  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g; // TODO #12873
+const templateRegex = regEx(
+  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g,
+);
 
 export function compile(
   template: string,
