@@ -14,34 +14,43 @@ async function getOnboardingConfig(
 ): Promise<RenovateSharedConfig | undefined> {
   let onboardingConfig = clone(config.onboardingConfig);
 
-  let orgPreset: string | undefined;
+  let foundPreset: string | undefined;
 
-  logger.debug(
-    'Checking if this org/owner has a default Renovate preset which can be used.',
-  );
+  logger.debug('Checking for a default Renovate preset which can be used.');
 
   // TODO #22198
-  const orgName = config.repository!.split('/')[0];
+  const repoPathParts = config.repository!.split('/');
 
-  // Check for org/renovate-config
-  try {
-    const repo = `${orgName}/renovate-config`;
-    const orgPresetName = `local>${repo}`;
-    logger.debug(`Checking for preset: ${orgPresetName}`);
-    if (await getPreset({ repo })) {
-      orgPreset = orgPresetName;
-    }
-  } catch (err) {
-    if (
-      err.message !== PRESET_DEP_NOT_FOUND &&
-      !err.message.startsWith('Unsupported platform')
-    ) {
-      logger.warn({ err }, 'Unknown error fetching default owner preset');
+  for (
+    let index = repoPathParts.length - 1;
+    index >= 1 && !foundPreset;
+    index--
+  ) {
+    const groupName = repoPathParts.slice(0, index).join('/');
+
+    // Check for group/renovate-config
+    try {
+      const repo = `${groupName}/renovate-config`;
+      const preset = `local>${repo}`;
+      logger.debug(`Checking for preset: ${preset}`);
+      if (await getPreset({ repo })) {
+        foundPreset = preset;
+      }
+    } catch (err) {
+      if (
+        err.message !== PRESET_DEP_NOT_FOUND &&
+        !err.message.startsWith('Unsupported platform')
+      ) {
+        logger.warn({ err }, 'Unknown error fetching default owner preset');
+      }
     }
   }
 
-  if (!orgPreset) {
+  if (!foundPreset) {
     // Check for org/.{{platform}}
+
+    const orgName = repoPathParts[0];
+
     // TODO: types (#22198)
     const platform = GlobalConfig.get('platform')!;
     try {
@@ -56,7 +65,7 @@ async function getOnboardingConfig(
           presetName,
         })
       ) {
-        orgPreset = orgPresetName;
+        foundPreset = orgPresetName;
       }
     } catch (err) {
       if (
@@ -68,13 +77,11 @@ async function getOnboardingConfig(
     }
   }
 
-  if (orgPreset) {
-    logger.debug(
-      `Found org preset ${orgPreset} - using it in onboarding config`,
-    );
+  if (foundPreset) {
+    logger.debug(`Found preset ${foundPreset} - using it in onboarding config`);
     onboardingConfig = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-      extends: [orgPreset],
+      extends: [foundPreset],
     };
   } else {
     // Organization preset did not exist
