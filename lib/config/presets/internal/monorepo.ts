@@ -299,6 +299,7 @@ const repoGroups = {
     'https://github.com/dotansimha/graphql-codegen',
   ],
   groovy: 'https://github.com/apache/groovy',
+  'grpc-dotnet': 'https://github.com/grpc/grpc-dotnet',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   'hickory-dns': 'https://github.com/hickory-dns/hickory-dns',
