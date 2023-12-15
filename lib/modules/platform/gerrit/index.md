@@ -42,8 +42,7 @@ It works similar to the default option `"pr"`.
 
 You can use the `statusCheckNames` configuration to map any of the available branch checks (like `minimumReleaseAge`, `mergeConfidence`, and so on) to a Gerrit label.
 
-For example you want to use the [Merge Confidence](https://docs.renovatebot.com/merge-confidence/) feature and map result of this check
-to your Gerrit label "Renovate-Merge-Confidence" you can configure:
+For example, if you want to use the [Merge Confidence](https://docs.renovatebot.com/merge-confidence/) feature and map the result of the Merge Confidence check to your Gerrit label "Renovate-Merge-Confidence" you can configure:
 
 ```json
 {
