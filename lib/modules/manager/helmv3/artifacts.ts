@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
 import pMap from 'p-map';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -14,6 +13,7 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import * as yaml from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -114,9 +114,11 @@ export async function updateArtifacts({
   }
   try {
     // get repositories and registries defined in the package file
-    const packages = yaml.load(newPackageFileContent) as ChartDefinition; //TODO #9610
+    const packages = yaml.parseSingleYaml(
+      newPackageFileContent,
+    ) as ChartDefinition; //TODO #9610
     const locks = existingLockFileContent
-      ? (yaml.load(existingLockFileContent) as ChartDefinition)
+      ? (yaml.parseSingleYaml(existingLockFileContent) as ChartDefinition)
       : { dependencies: [] }; //TODO #9610
 
     const chartDefinitions: ChartDefinition[] = [];

@@ -167,9 +167,7 @@ Secrets should be configured using environment variables (e.g. `RENOVATE_TOKEN`,
 [Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
 To share environment variables across projects, use [CircleCI Contexts](https://circleci.com/docs/2.0/contexts/).
 
-The following example runs Renovate hourly, and looks for the self-hosted configuration file at `renovate-config.js`:
-
-```yml
+```yml title="This runs Renovate hourly, and looks for the self-hosted config file at renovate-config.js"
 version: '2.1'
 orbs:
   renovate: daniel-shuy/renovate@2.2.0
@@ -190,9 +188,7 @@ workflows:
 
 #### Renovate config file validation when using CircleCI
 
-How to validate your config as part of your workflow:
-
-```yml
+```yml title="Validate your config as part of your workflow"
 version: '2.1'
 orbs:
   renovate: daniel-shuy/renovate@2.2.0

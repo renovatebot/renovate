@@ -18,6 +18,7 @@ import {
 import type { logger as _logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
+import type { LongCommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gitea';
 import type { PlatformResult } from '../types';
 import type {
@@ -50,7 +51,8 @@ describe('modules/platform/gitea/index', () => {
   let gitvcs: jest.Mocked<typeof _git>;
   let hostRules: typeof import('../../../util/host-rules');
 
-  const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
+  const mockCommitHash =
+    '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
 
   const mockUser: User = {
     id: 1,
@@ -93,7 +95,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'some-base-branch' },
       head: {
         label: 'some-head-branch',
-        sha: 'some-head-sha',
+        sha: 'some-head-sha' as LongCommitSha,
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -109,7 +111,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'other-base-branch' },
       head: {
         label: 'other-head-branch',
-        sha: 'other-head-sha',
+        sha: 'other-head-sha' as LongCommitSha,
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -125,7 +127,7 @@ describe('modules/platform/gitea/index', () => {
       base: { ref: 'draft-base-branch' },
       head: {
         label: 'draft-head-branch',
-        sha: 'draft-head-sha',
+        sha: 'draft-head-sha' as LongCommitSha,
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
     }),
@@ -797,7 +799,7 @@ describe('modules/platform/gitea/index', () => {
           base: { ref: 'third-party-base-branch' },
           head: {
             label: 'other-head-branch',
-            sha: 'other-head-sha',
+            sha: 'other-head-sha' as LongCommitSha,
             repo: partial<Repo>({ full_name: mockRepo.full_name }),
           },
           user: { username: 'not-renovate' },
@@ -1325,6 +1327,13 @@ describe('modules/platform/gitea/index', () => {
     });
   });
 
+  describe('getIssueList', () => {
+    it('should return empty for disabled issues', async () => {
+      await initFakeRepo({ has_issues: false });
+      expect(await gitea.getIssueList()).toBeEmptyArray();
+    });
+  });
+
   describe('getIssue', () => {
     it('should return the issue', async () => {
       const mockIssue = mockIssues.find((i) => i.number === 1)!;
@@ -1335,6 +1344,11 @@ describe('modules/platform/gitea/index', () => {
         'number',
         mockIssue.number,
       );
+    });
+
+    it('should return null for disabled issues', async () => {
+      await initFakeRepo({ has_issues: false });
+      expect(await gitea.getIssue!(1)).toBeNull();
     });
   });
 
@@ -1655,6 +1669,18 @@ describe('modules/platform/gitea/index', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
+
+    it('should return null for disabled issues', async () => {
+      await initFakeRepo({ has_issues: false });
+      expect(
+        await gitea.ensureIssue({
+          title: 'new-title',
+          body: 'new-body',
+          shouldReOpen: false,
+          once: false,
+        }),
+      ).toBeNull();
+    });
   });
 
   describe('ensureIssueClosing', () => {
@@ -1669,6 +1695,11 @@ describe('modules/platform/gitea/index', () => {
         mockRepo.full_name,
         mockIssue.number,
       );
+    });
+
+    it('should return for disabled issues', async () => {
+      await initFakeRepo({ has_issues: false });
+      await expect(gitea.ensureIssueClosing('new-title')).toResolve();
     });
   });
 

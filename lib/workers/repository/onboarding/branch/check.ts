@@ -11,6 +11,7 @@ import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchCommit } from '../../../../util/git';
+import { getSemanticCommitPrTitle } from '../common';
 
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
@@ -41,13 +42,21 @@ async function packageJsonConfigExists(): Promise<boolean> {
   return false;
 }
 
-function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
-  return platform.findPr({
-    branchName: config.onboardingBranch!,
-    prTitle: config.onboardingPrTitle,
-    state: '!open',
-    targetBranch: config.baseBranch,
-  });
+async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
+  return (
+    (await platform.findPr({
+      branchName: config.onboardingBranch!,
+      prTitle: config.onboardingPrTitle,
+      state: '!open',
+      targetBranch: config.baseBranch,
+    })) ??
+    (await platform.findPr({
+      branchName: config.onboardingBranch!,
+      prTitle: getSemanticCommitPrTitle(config),
+      state: '!open',
+      targetBranch: config.baseBranch,
+    }))
+  );
 }
 
 export async function isOnboarded(config: RenovateConfig): Promise<boolean> {

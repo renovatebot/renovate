@@ -15,6 +15,7 @@ import {
 import type { logger as _logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
+import type { LongCommitSha } from '../../../util/git/types';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
 
@@ -43,13 +44,14 @@ describe('modules/platform/gitlab/index', () => {
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
-      '0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+      '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
     );
     hostRules.find.mockReturnValue({
       token: '123test',
     });
     delete process.env.GITLAB_IGNORE_REPO_URL;
     delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY;
+    delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
   });
 
   async function initFakePlatform(version: string) {
@@ -1790,17 +1792,12 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {
-          merge_status: 'can_be_merged',
-          pipeline: {
-            id: 29626725,
-            sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
-            ref: 'patch-28',
-            status: 'success',
-          },
-        })
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
+      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
       expect(
         await gitlab.createPr({
           sourceBranch: 'some-branch',
@@ -1812,15 +1809,19 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toMatchInlineSnapshot(`
-        {
-          "id": 1,
-          "iid": 12345,
-          "number": 12345,
-          "sourceBranch": "some-branch",
-          "title": "some title",
-        }
-      `);
+      ).toEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+
+      expect(timers.setTimeout.mock.calls).toMatchObject([
+        [250],
+        [1000],
+        [2250],
+      ]);
     });
 
     it('raises with squash enabled when repository squash option is default_on', async () => {

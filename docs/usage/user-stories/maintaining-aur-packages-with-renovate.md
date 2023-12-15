@@ -35,9 +35,9 @@ You might have seen it opening pull requests on GitHub and making updates for np
 
 Renovate has a couple of concepts that I need to explain first: [datasources](../modules/datasource/index.md) and [managers](../modules/manager/index.md).
 Datasources define where to look for new versions of a dependency.
-Renovate comes with over 50 different datasources, but the one that is important for AUR packages is the [`git-tags` datasource](https://docs.renovatebot.com/modules/datasource/#git-tags-datasource).
+Renovate comes with over 50 different datasources, but the one that is important for AUR packages is the [`git-tags` datasource](../modules/datasource/git-tags/index.md).
 Managers are the Renovate concept for package managers.
-There isn’t an AUR or `PKGBUILD` manager, but there is a [regex manager](https://docs.renovatebot.com/modules/manager/regex/) that I can use.
+There isn’t an AUR or `PKGBUILD` manager, but there is a [regex manager](../modules/manager/regex/index.md) that I can use.
 
 I can create a `renovate.json` configuration with the following custom manager configuration:
 
@@ -68,7 +68,7 @@ And here’s an extract from the PKGBUILD for the [bicep-bin](https://aur.archli
 pkgver=0.15.31 # renovate: datasource=github-tags depName=Azure/bicep
 ```
 
-Here I’m configuring Renovate to use the [`github-tags`](https://docs.renovatebot.com/modules/datasource/github-tags/) datasource and to look in the [`Azure/bicep` GitHub repository](https://github.com/Azure/bicep) for new versions.
+Here I’m configuring Renovate to use the [`github-tags`](../modules/datasource/github-tags/index.md) datasource and to look in the [`Azure/bicep` GitHub repository](https://github.com/Azure/bicep) for new versions.
 That means it’ll look in the [list of tags for the `Azure/bicep` repository](https://github.com/Azure/bicep/tags) for any new versions.
 If Renovate finds any new versions, it’ll automatically update the `PKGBUILD` and open a pull request with the updated version.
 
