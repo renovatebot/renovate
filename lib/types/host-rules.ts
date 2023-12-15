@@ -11,6 +11,7 @@ export interface HostRuleSearchResult {
   enableHttp2?: boolean;
   concurrentRequestLimit?: number;
   maxRequestsPerSecond?: number;
+  maxRetryAfter?: number;
 
   dnsCache?: boolean;
   keepAlive?: boolean;
