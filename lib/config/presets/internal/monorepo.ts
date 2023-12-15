@@ -316,6 +316,7 @@ const repoGroups = {
     'https://github.com/jestjs/jest',
   ],
   jna: 'https://github.com/java-native-access/jna',
+  'json-smart-v2': 'https://github.com/netplex/json-smart-v2',
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
