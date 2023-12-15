@@ -1,5 +1,4 @@
 import { mocked, partial } from '../../../../test/util';
-import type { RepoGlobalConfig } from '../../../config/types';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import * as _hostRules from '../../../util/host-rules';
@@ -13,7 +12,7 @@ import type {
   GerritLabelTypeInfo,
 } from './types';
 import * as utils from './utils';
-import { mapBranchStateContextToLabel, mapBranchStatusToLabel } from './utils';
+import { mapBranchStatusToLabel } from './utils';
 
 jest.mock('../../../util/host-rules');
 
@@ -249,47 +248,6 @@ describe('modules/platform/gerrit/utils', () => {
         expect(mapBranchStatusToLabel(branchState, labelWithTwo)).toEqual(
           expectedValue,
         );
-      },
-    );
-  });
-
-  describe('mapBranchStateContextToLabel()', () => {
-    const labelConfig: RepoGlobalConfig['gerritLabelMapping'] = {
-      mergeConfidenceLabel: 'Confidence',
-    };
-    const gerritLabels: Record<string, GerritLabelTypeInfo> = {
-      Stability: { values: {}, default_value: 0 },
-      Confidence: { values: {}, default_value: 1 },
-    };
-
-    it.each([
-      [undefined, labelConfig, {}, {}],
-      [null, labelConfig, {}, {}],
-      ['renovate/artifacts', labelConfig, {}, {}],
-      [
-        'renovate/merge-confidence',
-        labelConfig,
-        gerritLabels,
-        {
-          labelName: 'Confidence',
-          label: {
-            values: {},
-            default_value: 1,
-          },
-        },
-      ],
-      ['renovate/merge-confidence', labelConfig, {}, {}],
-    ])(
-      'map context %p',
-      (
-        context: string | undefined | null,
-        labelConfig: RepoGlobalConfig['gerritLabelMapping'],
-        gerritLabels: Record<string, GerritLabelTypeInfo>,
-        expectedRes: any,
-      ) => {
-        expect(
-          mapBranchStateContextToLabel(context, labelConfig, gerritLabels),
-        ).toEqual(expectedRes);
       },
     );
   });

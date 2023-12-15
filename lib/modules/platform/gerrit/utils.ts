@@ -1,4 +1,3 @@
-import type { RepoGlobalConfig } from '../../../config/types';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
@@ -120,31 +119,4 @@ export function mapBranchStatusToLabel(
   }
   // istanbul ignore next
   return label.default_value;
-}
-
-export function mapBranchStateContextToLabel(
-  context: string | null | undefined,
-  labelMapping: RepoGlobalConfig['gerritLabelMapping'],
-  gerritLabels: Record<string, GerritLabelTypeInfo>,
-): {
-  labelName?: string;
-  label?: GerritLabelTypeInfo;
-} {
-  let labelName;
-  switch (context) {
-    //TODO #21442
-    case 'renovate/stability-days':
-      //not usefully for Gerrit
-      break;
-    case 'renovate/merge-confidence':
-      labelName = labelMapping?.mergeConfidenceLabel;
-      break;
-  }
-  if (labelName && gerritLabels[labelName]) {
-    return {
-      labelName,
-      label: gerritLabels[labelName],
-    };
-  }
-  return {};
 }

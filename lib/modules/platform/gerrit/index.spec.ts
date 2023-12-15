@@ -468,9 +468,6 @@ describe('modules/platform/gerrit/index', () => {
     describe('GerritLabel is available', () => {
       beforeEach(() => {
         writeToConfig({
-          labelMappings: {
-            mergeConfidenceLabel: 'Renovate-Merge-Confidence',
-          },
           labels: {
             'Renovate-Merge-Confidence': {
               values: { '0': 'default', '-1': 'Unsatisfied', '1': 'Satisfied' },
@@ -482,18 +479,16 @@ describe('modules/platform/gerrit/index', () => {
 
       it.each([
         {
-          ctx: 'renovate/merge-confidence',
           label: 'Renovate-Merge-Confidence',
           labelValue: { rejected: partial<GerritAccountInfo>({}) },
           expectedState: 'red' as BranchStatus,
         },
         {
-          ctx: 'renovate/merge-confidence',
           label: 'Renovate-Merge-Confidence',
           labelValue: { approved: partial<GerritAccountInfo>({}) },
           expectedState: 'green' as BranchStatus,
         },
-      ])('$ctx/$labels', async ({ ctx, label, labelValue, expectedState }) => {
+      ])('$ctx/$labels', async ({ label, labelValue, expectedState }) => {
         const change = partial<GerritChange>({
           labels: {
             [label]: partial<GerritLabelInfo>({ ...labelValue }),
@@ -501,7 +496,7 @@ describe('modules/platform/gerrit/index', () => {
         });
         clientMock.findChanges.mockResolvedValueOnce([change]);
         await expect(
-          gerrit.getBranchStatusCheck('renovate/dependency-1.x', ctx),
+          gerrit.getBranchStatusCheck('renovate/dependency-1.x', label),
         ).resolves.toBe(expectedState);
       });
     });
@@ -540,9 +535,6 @@ describe('modules/platform/gerrit/index', () => {
     describe('GerritLabel is available', () => {
       beforeEach(() => {
         writeToConfig({
-          labelMappings: {
-            mergeConfidenceLabel: 'Renovate-Merge-Confidence',
-          },
           labels: {
             'Renovate-Merge-Confidence': {
               values: { '0': 'default', '-1': 'Unsatisfied', '1': 'Satisfied' },
@@ -554,19 +546,19 @@ describe('modules/platform/gerrit/index', () => {
 
       it.each([
         {
-          ctx: 'renovate/merge-confidence',
+          ctx: 'Renovate-Merge-Confidence',
           branchState: 'red' as BranchStatus,
           expectedVote: -1,
           expectedLabel: 'Renovate-Merge-Confidence',
         },
         {
-          ctx: 'renovate/merge-confidence',
+          ctx: 'Renovate-Merge-Confidence',
           branchState: 'yellow' as BranchStatus,
           expectedVote: -1,
           expectedLabel: 'Renovate-Merge-Confidence',
         },
         {
-          ctx: 'renovate/merge-confidence',
+          ctx: 'Renovate-Merge-Confidence',
           branchState: 'green' as BranchStatus,
           expectedVote: 1,
           expectedLabel: 'Renovate-Merge-Confidence',
@@ -595,7 +587,7 @@ describe('modules/platform/gerrit/index', () => {
         await expect(
           gerrit.setBranchStatus({
             branchName: 'renovate/dependency-1.x',
-            context: 'renovate/merge-confidence',
+            context: 'Renovate-Merge-Confidence',
             state: 'red',
             description: 'desc',
           }),

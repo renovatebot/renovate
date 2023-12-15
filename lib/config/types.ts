@@ -136,9 +136,6 @@ export interface RepoGlobalConfig {
   dockerUser?: string;
   dryRun?: DryRunConfig;
   executionTimeout?: number;
-  gerritLabelMapping?: {
-    mergeConfidenceLabel?: string;
-  };
   gitTimeout?: number;
   exposeAllEnv?: boolean;
   githubTokenWarn?: boolean;

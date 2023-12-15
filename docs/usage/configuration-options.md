@@ -1440,18 +1440,6 @@ If you allow Renovate to run on "Selected" repositories, `forkProcessing` will b
 Only the `onboardingConfigFileName` (which defaults to `renovate.json`) is supported for `forkProcessing`.
 You can't use other filenames because Renovate only checks the default filename when using the Git-hosting platform's API.
 
-## gerritLabelMapping
-
-The name of the Gerrit label to use for the `Merge-Confidence` status.
-
-```json
-{
-  "mergeConfidenceLabel": "Renovate-Confidence"
-}
-```
-
-You must set the label above for Renovate to pass the information to the Gerrit changes.
-
 ## gitAuthor
 
 You can customize the Git author that's used whenever Renovate creates a commit.

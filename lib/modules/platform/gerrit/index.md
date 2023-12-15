@@ -40,21 +40,19 @@ It works similar to the default option `"pr"`.
 
 ## Optional features
 
-You can use the [Merge Confidence](https://docs.renovatebot.com/merge-confidence/) feature on the Gerrit platform.
-For this to work, Renovate needs a Gerrit-Label and permission to set the min/max value.
+You can use the `statusCheckNames` configuration to map any of the available branch checks (i.e. minimumReleaseAge, mergeConfidence, ...)
+to a Gerrit label.
 
-You must set a label, for Renovate to pass the information to the Gerrit changes.
+For example you want to use the [Merge Confidence](https://docs.renovatebot.com/merge-confidence/) feature and map result of this check
+to your Gerrit label "Renovate-Merge-Confidence" you can configure:
 
 ```json
 {
-  "gerritLabelMapping": {
-    "mergeConfidenceLabel": "Renovate-Merge-Confidence"
+  "statusCheckNames": {
+    "mergeConfidence": "Renovate-Merge-Confidence"
   }
 }
 ```
-
-You don't need a special Submit-Rule to block submits for Renovate usage (i.e. can be _Trigger Votes_ only).
-This is because Renovate will query the label and prevent `automerge` accordingly.
 
 ## Unsupported platform features/concepts
 

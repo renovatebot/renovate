@@ -1,5 +1,4 @@
 import JSON5 from 'json5';
-import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
@@ -34,7 +33,6 @@ import type { GerritLabelTypeInfo, GerritProjectInfo } from './types';
 import {
   TAG_PULL_REQUEST_BODY,
   getGerritRepoUrl,
-  mapBranchStateContextToLabel,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
 } from './utils';
@@ -50,13 +48,9 @@ let config: {
   head?: string;
   config?: GerritProjectInfo;
   labels: Record<string, GerritLabelTypeInfo>;
-  labelMappings?: {
-    mergeConfidenceLabel?: string;
-  };
   gerritUsername?: string;
 } = {
   labels: {},
-  labelMappings: {},
 };
 
 export function writeToConfig(newConfig: typeof config): void {
@@ -67,8 +61,7 @@ export function initPlatform({
   endpoint,
   username,
   password,
-  gerritLabelMapping,
-}: PlatformParams & RepoGlobalConfig): Promise<PlatformResult> {
+}: PlatformParams): Promise<PlatformResult> {
   logger.debug(`initPlatform(${endpoint!}, ${username!})`);
   if (!endpoint) {
     throw new Error('Init: You must configure a Gerrit Server endpoint');
@@ -78,7 +71,6 @@ export function initPlatform({
       'Init: You must configure a Gerrit Server username/password',
     );
   }
-  config.labelMappings = gerritLabelMapping;
   config.gerritUsername = username;
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
@@ -294,14 +286,10 @@ export async function getBranchStatus(
  */
 export async function getBranchStatusCheck(
   branchName: string,
-  context: string | null | undefined,
+  context: string,
 ): Promise<BranchStatus | null> {
-  const { labelName } = mapBranchStateContextToLabel(
-    context,
-    config.labelMappings,
-    config.labels,
-  );
-  if (labelName) {
+  const label = config.labels[context];
+  if (label) {
     const change = (
       await client.findChanges(
         config.repository!,
@@ -310,7 +298,7 @@ export async function getBranchStatusCheck(
       )
     ).pop();
     if (change) {
-      const labelRes = change.labels?.[labelName];
+      const labelRes = change.labels?.[context];
       if (labelRes) {
         if (labelRes.approved) {
           return 'green';
@@ -332,19 +320,15 @@ export async function getBranchStatusCheck(
 export async function setBranchStatus(
   branchStatusConfig: BranchStatusConfig,
 ): Promise<void> {
-  const { labelName, label } = mapBranchStateContextToLabel(
-    branchStatusConfig.context,
-    config.labelMappings,
-    config.labels,
-  );
+  const label = config.labels[branchStatusConfig.context];
   const labelValue =
     label && mapBranchStatusToLabel(branchStatusConfig.state, label);
-  if (labelName && labelValue) {
+  if (branchStatusConfig.context && labelValue) {
     const pr = await getBranchPr(branchStatusConfig.branchName);
     if (pr === null) {
       return;
     }
-    await client.setLabel(pr.number, labelName, labelValue);
+    await client.setLabel(pr.number, branchStatusConfig.context, labelValue);
   }
 }
 
