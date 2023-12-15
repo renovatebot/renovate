@@ -493,6 +493,7 @@ const repoGroups = {
     'https://github.com/xunit/xunit.analyzers',
   ],
   yarn: 'https://github.com/yarnpkg/berry',
+  'zag-js': 'https://github.com/chakra-ui/zag',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 
