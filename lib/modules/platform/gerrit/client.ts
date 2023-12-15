@@ -19,7 +19,7 @@ class GerritClient {
     'MESSAGES',
     'DETAILED_ACCOUNTS',
     'LABELS',
-    'CURRENT_ACTIONS', //to check if current_revision can be "rebase"
+    'CURRENT_ACTIONS', //to check if current_revision can be "rebased"
     'CURRENT_REVISION', //get RevisionInfo::ref to fetch
   ] as const;
 
