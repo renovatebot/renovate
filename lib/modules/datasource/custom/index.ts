@@ -59,7 +59,7 @@ export class CustomDatasource extends Datasource {
   }
 
   override getDigest(
-    { packageName: repo, registryUrl }: Partial<DigestConfig>,
+    { packageName }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
     // Return null here to support setting a digest: value can be provided digest in getReleases
