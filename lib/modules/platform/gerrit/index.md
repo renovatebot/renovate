@@ -61,7 +61,7 @@ For example, if you want to use the [Merge Confidence](https://docs.renovatebot.
 
 ### PR title is different from first commit message
 
-Sometimes the pull-request title parameter to `platform.createPr(...)/updatePr(...)` is different from the first line of the commit message.
+Sometimes the PR title passed to the Gerrit platform code is different from the first line of the commit message.
 For example:
 
 Commit-Message=`Update keycloak.version to v21` \
