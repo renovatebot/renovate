@@ -12,9 +12,9 @@ Renovate detects and populates changelogs by:
 1. Identifying a source URL from the datasource response for a package, and saving that internally as `sourceUrl` if found
 1. Checking if Renovate's internal [_manual_ metadata](https://github.com/renovatebot/renovate/blob/main/lib/modules/datasource/metadata-manual.ts) for the package includes a source URL
 1. Looking up the source URL, if it resides on a supported platform (e.g. GitHub)
-1. Checking for both "Releases" metadata in the repository as well as any commonly known "changelog" file names
+1. Checking for both "Releases" metadata in the repository and any commonly known "changelog" file names
 1. Filtering the found releases to only include those versions being updated by the current PR
-1. Formatting and embedding the results into the PR body 
+1. Formatting and embedding the results into the PR body
 
 ## Changelogs for private packages
 
@@ -24,7 +24,7 @@ For private packages, the algorithm is mostly the same as described above, with 
 - The private registry must include the source URL in its response
 - Renovate must be able to detect and authenticate with whatever private repository corresponds to the source URL
 
-For more details, see [Private packages, looking up changelogs](../getting-started/private-packages.md#looking-up-changelogs)
+For more details, see [Private packages, looking up changelogs](../getting-started/private-packages.md#looking-up-changelogs).
 
 ## Relevant configuration options
 
@@ -32,7 +32,7 @@ For more details, see [Private packages, looking up changelogs](../getting-start
 
 Set to `off` if changelog fetching is causing a problem.
 
-Set to `branch` if you have an advanced use case where you're embedding changelogs in the git commit itself (not usually recommended due to its potential size).
+Set to `branch` if you have an advanced use case where you're embedding changelogs in the Git commit itself, we don't recommend this due to its potential size.
 
 ### [`customChangelogUrl`](../configuration-options.md#customchangelogurl)
 
@@ -44,10 +44,10 @@ See the list of platforms in the [`fetchChangelogs` config option docs](../confi
 
 ### Running Renovate on a non-GitHub platform
 
-The majority of Open Source packages are hosted on github.com, which means that the majority of changelogs are located there too.
-Fetching changelogs from GitHub.com requires a GitHub token because it is not allowed to use the GraphQL API unauthenticated.
+Most Open Source packages are hosted on github.com, which means most changelogs are hosted there too.
+Fetching changelogs from github.com requires a GitHub token because GitHub blocks unauthenticated GraphQL API use.
 
-This means that if you run Renovate on self-hosted GitHub Enterprise Server, or any non-github platform which Renovate supports, then you need to configure a github.com Personal Access Token in Renovate in order to fetch changelogs.
+This means that if you run Renovate on self-hosted GitHub Enterprise Server, or any non-GitHub platform which Renovate supports, then you need to configure a github.com Personal Access Token in Renovate in order to fetch changelogs.
 
 Read [Running Renovate, GitHub.com token for changelogs](../getting-started/running.md#githubcom-token-for-changelogs) to learn more.
 
@@ -76,7 +76,7 @@ This section is for package maintainers that want to make sure Renovate can see 
 
 There isn't much information to add other than what's already written above.
 
-Make sure that you have the required source URL in your package metadata, not just in your repo but in the final data which the registry returns.
+Make sure that you have the required source URL in your package metadata, not just in your repository but also in the final data which the registry returns.
 For example, we have seen cases where the `repository` field in npm's `package.json` is populated correctly in the repository, but stripped out as part of the publishing process.
 
 ### Let Renovate understand your versioning and changelogs
@@ -87,8 +87,9 @@ In general, Renovate can understand your versions and changelogs best when you:
 - Use the [`semantic-release` bot](https://github.com/semantic-release/semantic-release) to automate the release process
 
 Try to avoid things like:
+
 - Stripping out the trailing `.0` unnecessarily (e.g. having a package `3.1.0` on a registry but using only `3.1` in your changelogs)
-- Using "Release names" in a way which makes the actual version hard to discern (e.g. Instead of `3.0.0` you call title your release notes `Bit news! v3 is here`
+- Using "Release names" in a way which makes the actual version hard to discern (e.g. instead of `3.0.0` you title your release notes `Big news! v3 is here`
 
 ### npm package maintainers
 
