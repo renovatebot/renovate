@@ -1958,7 +1958,7 @@ describe('workers/repository/process/lookup/index', () => {
         ],
       });
       const res = await lookup.lookupUpdates(config);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         updates: [
           {
             newDigest: '0123456789abcdef',
