@@ -57,16 +57,16 @@ Follow these steps to find out why Renovate does not find a changelog:
 
 1. The datasource for this package does not support sourceUrls.
    - If the registry fundamentally does not provide this data, then the only possibility is for it to be manually populated through PRs to Renovate's source code
-   - If the registry provides source URLs but Renovate does not support it yet, then raise a feature request with examples, or better yet a Pull Request to implement it yourself
+   - If the registry provides source URLs in its response but Renovate does not understand the required fields, then raise a feature request with examples, or better yet a Pull Request to implement support for the source URL parsing/mapping yourself
    - Sometimes self-hosted versions of registries don't include the full metadata compared to what the public registries do
-1. The package does not provide this information to the registry.
+1. The package was published without source URL information being included.
    - For example, occasionally `npm` packages don't have `repository` fields included
    - For example, Docker images regularly do not have the required `LABEL` entry
 1. Renovate cannot access the source repository
    - This is typically a concern for private repositories only
    - Check if the token Renovate uses has access rights to the repository you need it to access
 1. Renovate cannot detect the file names or release name convention within the repository
-   - In this case an enhancement to Renovate might be needed to better detect the releases/formats, assuming it's got a reasonable convention to follow
+   - In this case an enhancement to Renovate might be needed to better detect the releases/formats, assuming the package/repository has a reasonable convention to follow
 
 If none of this helps, search the Renovate issues and discussions to see if this is a known problem.
 
