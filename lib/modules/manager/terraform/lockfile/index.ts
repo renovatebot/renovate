@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import * as p from '../../../../util/promises';
+import { escapeRegExp, regEx } from '../../../../util/regex';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { get as getVersioning } from '../../../versioning';
@@ -16,6 +17,7 @@ import {
   extractLocks,
   findLockFile,
   isPinnedVersion,
+  massageNewValue,
   readLockFile,
   writeLockUpdates,
 } from './util';
@@ -69,8 +71,15 @@ export function getNewConstraint(
   dep: Upgrade<Record<string, unknown>>,
   oldConstraint: string | undefined,
 ): string | undefined {
-  const { currentValue, currentVersion, newValue, newVersion, packageName } =
-    dep;
+  const {
+    currentValue,
+    currentVersion,
+    newValue: rawNewValue,
+    newVersion,
+    packageName,
+  } = dep;
+
+  const newValue = massageNewValue(rawNewValue);
 
   if (oldConstraint && currentValue && newValue && currentValue === newValue) {
     logger.debug(
@@ -88,12 +97,11 @@ export function getNewConstraint(
     logger.debug(
       `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`,
     );
-    let newConstraint = oldConstraint.replace(currentValue, newValue);
     //remove surplus .0 version
-    while (newConstraint.split('.').length - 1 > 2) {
-      newConstraint = newConstraint.replace(RegExp('\\.0$'), '');
-    }
-    return newConstraint;
+    return oldConstraint.replace(
+      regEx(`${escapeRegExp(currentValue)}(\\.0)*`),
+      newValue,
+    );
   }
 
   if (

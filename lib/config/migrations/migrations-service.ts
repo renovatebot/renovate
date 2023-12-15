@@ -84,6 +84,7 @@ export class MigrationsService {
     ['endpoints', 'hostRules'],
     ['excludedPackageNames', 'excludePackageNames'],
     ['exposeEnv', 'exposeAllEnv'],
+    ['keepalive', 'keepAlive'],
     ['managerBranchPrefix', 'additionalBranchPrefix'],
     ['multipleMajorPrs', 'separateMultipleMajor'],
     ['separatePatchReleases', 'separateMinorPatch'],

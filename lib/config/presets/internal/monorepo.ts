@@ -51,6 +51,7 @@ const repoGroups = {
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   'aws-sdk-rust': [
+    'https://github.com/smithy-lang/smithy-rs',
     'https://github.com/awslabs/smithy-rs',
     'https://github.com/awslabs/aws-sdk-rust',
   ],
@@ -298,6 +299,7 @@ const repoGroups = {
     'https://github.com/dotansimha/graphql-codegen',
   ],
   groovy: 'https://github.com/apache/groovy',
+  'grpc-dotnet': 'https://github.com/grpc/grpc-dotnet',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   'hickory-dns': 'https://github.com/hickory-dns/hickory-dns',
@@ -313,12 +315,14 @@ const repoGroups = {
     'https://github.com/facebook/jest', // old repo
     'https://github.com/jestjs/jest',
   ],
+  jna: 'https://github.com/java-native-access/jna',
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
   lerna: 'https://github.com/lerna/lerna',
   lexical: 'https://github.com/facebook/lexical',
   linguijs: 'https://github.com/lingui/js-lingui',
+  log4j2: 'https://github.com/apache/logging-log4j2',
   loopback: [
     'https://github.com/strongloop/loopback-next', // old repo (see: https://github.com/loopbackio/loopback-next/issues/7595)
     'https://github.com/loopbackio/loopback-next',
@@ -339,6 +343,7 @@ const repoGroups = {
   mdx: 'https://github.com/mdx-js/mdx',
   'middy-js': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
+  'ml-dotnet': 'https://github.com/dotnet/machinelearning',
   mockito: 'https://github.com/mockito/mockito',
   'mongo-csharp-driver': 'https://github.com/mongodb/mongo-csharp-driver',
   mstest: 'https://github.com/microsoft/testfx',
@@ -371,8 +376,11 @@ const repoGroups = {
     'https://github.com/nuxt/nuxt',
   ],
   okhttp: 'https://github.com/square/okhttp',
+  openiddict: 'https://github.com/openiddict/openiddict-core',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-dotnet-contrib':
+    'https://github.com/open-telemetry/opentelemetry-dotnet-contrib',
   'opentelemetry-erlang':
     'https://github.com/open-telemetry/opentelemetry-erlang',
   'opentelemetry-erlang-contrib':
@@ -380,6 +388,7 @@ const repoGroups = {
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   orleans: 'https://github.com/dotnet/orleans',
+  'panda-css': 'https://github.com/chakra-ui/panda',
   parcel: 'https://github.com/parcel-bundler/parcel',
   'percy-cli': 'https://github.com/percy/cli',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
@@ -387,7 +396,8 @@ const repoGroups = {
     'https://github.com/pixijs/pixi.js', // old repo
     'https://github.com/pixijs/pixijs',
   ],
-  playwright: 'https://github.com/Microsoft/playwright',
+  playwright: 'https://github.com/microsoft/playwright',
+  'playwright-dotnet': 'https://github.com/microsoft/playwright-dotnet',
   pnpjs: 'https://github.com/pnp/pnpjs',
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
@@ -483,6 +493,7 @@ const repoGroups = {
     'https://github.com/xunit/xunit.analyzers',
   ],
   yarn: 'https://github.com/yarnpkg/berry',
+  'zag-js': 'https://github.com/chakra-ui/zag',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 
@@ -512,6 +523,9 @@ const patternGroups = {
   fullcalendar: '^@fullcalendar/',
   hotchocolate: '^HotChocolate\\.',
   'prometheus-simpleclient': '^io.prometheus:simpleclient',
+  // Can't specify the russh repo (https://github.com/warp-tech/russh) in repoGroups because parts
+  // of it (e.g. russh-config) are released separately.
+  russh: ['^russh$', '^russh-keys$'],
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',

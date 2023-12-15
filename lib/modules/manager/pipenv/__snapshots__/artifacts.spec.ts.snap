@@ -111,7 +111,7 @@ exports[`modules/manager/pipenv/artifacts supports docker mode 1`] = `
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e PIPENV_CACHE_DIR -e PIP_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool python 3.7.6 && install-tool pipenv 2023.1.2 && pipenv lock"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e PIPENV_CACHE_DIR -e PIP_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool python 3.7.6 && install-tool pipenv 2013.6.12 && pipenv lock"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
+import { parseSingleYaml } from '../../../util/yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import type {
   ExtractConfig,
@@ -23,7 +23,7 @@ export async function extractPackageFile(
   };
   try {
     // TODO: fix me (#9610)
-    chart = load(content, { json: true }) as any;
+    chart = parseSingleYaml(content, { json: true }) as any;
     if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { packageFile },

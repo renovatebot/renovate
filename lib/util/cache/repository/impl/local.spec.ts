@@ -188,7 +188,7 @@ describe('util/cache/repository/impl/local', () => {
       `Repository cache type not supported using type "local" instead`,
     );
     expect(fs.outputCacheFile).toHaveBeenCalledWith(
-      '/tmp/cache/renovate/repository/github/some/repo.json',
+      'renovate/repository/github/some/repo.json',
       JSON.stringify(newCacheRecord),
     );
   });
