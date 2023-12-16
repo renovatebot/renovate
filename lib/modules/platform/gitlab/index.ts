@@ -863,14 +863,14 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, ${prTitle!}, ${state})`);
 
   if (includeOtherAuthors) {
-    // only fetch open mrs from other authors
+    // PR might have been created by anyone, so don't use the cached Renovate MR list
     const response = await gitlabApi.getJson<GitLabMergeRequest[]>(
       `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
     );
 
     const { body: mrList } = response;
     if (!mrList.length) {
-      logger.debug(`No reconfigure MR found for branch ${branchName}`);
+      logger.debug(`No MR found for branch ${branchName}`);
       return null;
     }
 

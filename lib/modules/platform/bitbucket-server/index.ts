@@ -329,7 +329,7 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
 
   if (includeOtherAuthors) {
-    // only fetch open prs from other authors
+    // PR might have been created by anyone, so don't use the cached Renovate PR list
     const searchParams: Record<string, string> = {
       state: 'OPEN',
     };
@@ -345,7 +345,7 @@ export async function findPr({
     );
 
     if (!prs.length) {
-      logger.debug(`No reconfigure PR found for branch ${branchName}`);
+      logger.debug(`No PR found for branch ${branchName}`);
       return null;
     }
 

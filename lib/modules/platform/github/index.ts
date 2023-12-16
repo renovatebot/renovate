@@ -804,14 +804,14 @@ export async function findPr({
 
   if (includeOtherAuthors) {
     const repo = config.parentRepo ?? config.repository;
-    // only fetch open prs from other authors
+    // PR might have been created by anyone, so don't use the cached Renovate PR list
     const response = await githubApi.getJson<GhRestPr[]>(
       `repos/${repo}/pulls?head=${repo}:${branchName}&state=open`,
     );
 
     const { body: prList } = response;
     if (!prList.length) {
-      logger.debug(`No reconfigure PR found for branch ${branchName}`);
+      logger.debug(`No PR found for branch ${branchName}`);
       return null;
     }
 
