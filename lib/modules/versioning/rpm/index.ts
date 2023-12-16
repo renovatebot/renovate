@@ -3,6 +3,13 @@ import { regEx } from '../../../util/regex';
 import { GenericVersion, GenericVersioningApi } from '../generic';
 import type { VersioningApi } from '../types';
 
+export const id = 'rpm';
+export const displayName = 'RPM version';
+export const urls = [
+  'https://docs.fedoraproject.org/en-US/packaging-guidelines/Versioning/',
+];
+export const supportsRanges = false;
+
 const alphaNumPattern = regEx(/(\w+)|(\d+)|(~)/g);
 const epochPattern = regEx(/^\d+$/);
 const leadingZerosPattern = regEx(/^0+/);
@@ -56,7 +63,7 @@ class RpmVersioningApi extends GenericVersioningApi {
     }
 
     const release = [...remainingVersion.matchAll(regEx(/\d+/g))].map((m) =>
-      parseInt(m[0], 10)
+      parseInt(m[0], 10),
     );
 
     return {
@@ -66,6 +73,43 @@ class RpmVersioningApi extends GenericVersioningApi {
       release,
       suffix: rpmRelease,
     };
+  }
+
+  protected __compare_character(s1: any, s2: any): number {
+    const matches = Math.min(s1?.length ?? 0, s2?.length ?? 0);
+
+    for (let i = 0; i < matches; i++) {
+      const c1 = s1[i];
+      const c2 = s2[i];
+      if (c1 === c2) {
+        continue;
+      }
+
+      // Numbers are bigger than characters
+      // Because c1 is a number, it is bigger
+      else if (is.numericString(c1) && !is.numericString(c2)) {
+        return 1;
+      }
+      // Because c2 is a number, it is bigger
+      else if (!isNaN(c1) && isNaN(c2)) {
+        return -1;
+      }
+
+      // Okay, they're the same type (aka alpha && alpha, or num && num)
+      // Let's continue with the regular compare
+      if ((c1 ?? '') > (c2 ?? '')) {
+        return 1;
+      } else if ((c1 ?? '') < (c2 ?? '')) {
+        return -1;
+      }
+    }
+
+    if (s1.length === s2.length) {
+      return 0;
+    }
+
+    // Okay, they've been the exact same up until now, so return the longer one
+    return s1.length > s2.length ? 1 : -1;
   }
 
   /**
@@ -118,10 +162,9 @@ class RpmVersioningApi extends GenericVersioningApi {
       }
 
       // string compare
-      if ((matchv1 ?? '') > (matchv2 ?? '')) {
-        return 1;
-      } else if ((matchv1 ?? '') < (matchv2 ?? '')) {
-        return -1;
+      const compared_value = this.__compare_character(matchv1, matchv2);
+      if (compared_value !== 0) {
+        return compared_value;
       }
     }
 
@@ -154,7 +197,7 @@ class RpmVersioningApi extends GenericVersioningApi {
     }
     const upstreamVersionDifference = this._compare_string(
       parsed1.upstreamVersion,
-      parsed2.upstreamVersion
+      parsed2.upstreamVersion,
     );
     if (upstreamVersionDifference !== 0) {
       return upstreamVersionDifference;
