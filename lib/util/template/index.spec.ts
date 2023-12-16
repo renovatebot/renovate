@@ -114,6 +114,15 @@ describe('util/template/index', () => {
     expect(output).toBe('CUSTOM_FOO is foo');
   });
 
+  it('replace', () => {
+    const userTemplate =
+      "{{ replace '[a-z]+\\.github\\.com' 'ghc' depName }}{{ replace 'some' 'other' depType }}";
+    const output = template.compile(userTemplate, {
+      depName: 'some.github.com/dep',
+    });
+    expect(output).toBe('ghc/dep');
+  });
+
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
     const allowedArrayField = 'prBodyNotes';
@@ -207,6 +216,30 @@ describe('util/template/index', () => {
         undefined as never,
       );
       expect(output).toBe('@fsouza/prettierd');
+    });
+  });
+
+  describe('base64 encoding', () => {
+    it('encodes values', () => {
+      const output = template.compile(
+        '{{{encodeBase64 "@fsouza/prettierd"}}}',
+        undefined as never,
+      );
+      expect(output).toBe('QGZzb3V6YS9wcmV0dGllcmQ=');
+    });
+
+    it('handles null values gracefully', () => {
+      const output = template.compile('{{{encodeBase64 packageName}}}', {
+        packageName: null,
+      });
+      expect(output).toBe('');
+    });
+
+    it('handles undefined values gracefully', () => {
+      const output = template.compile('{{{encodeBase64 packageName}}}', {
+        packageName: undefined,
+      });
+      expect(output).toBe('');
     });
   });
 

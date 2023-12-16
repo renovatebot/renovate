@@ -67,7 +67,7 @@ export class MavenDatasource extends Datasource {
 
   override readonly defaultVersioning: string = mavenVersioning.id;
 
-  override readonly registryStrategy: RegistryStrategy = 'hunt';
+  override readonly registryStrategy: RegistryStrategy = 'merge';
 
   constructor(id = MavenDatasource.id) {
     super(id);

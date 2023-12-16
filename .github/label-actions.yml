@@ -142,9 +142,9 @@
 
 
     Please only skip tests if:
-      - you cannot test the code, or
-      - the code is very difficult to test, or
-      - the edge case won't usually happen at runtime
+     - you cannot test the code, or
+     - the code is very difficult to test, or
+     - the edge case won't usually happen at runtime
 
 
     If you skip a test, always comment why:
@@ -250,6 +250,7 @@
   comment: >
     Hi there,
 
+
     A maintainer has flagged this discussion as giving off some bad vibes. **Maintainers will no longer participate in this discussion unless/until such "vibes" are resolved.**
 
 
@@ -265,9 +266,9 @@
 
 
     If you want to get the discussion back on track, we would like you to:
-    - Remove, or edit, the bad vibes parts of your comments
-    - Say that you understand the problem (we don't need a lengthy apology)
-    - Stop giving off more bad vibes
+     - Remove, or edit, the bad vibes parts of your comments
+     - Say that you understand the problem (we don't need a lengthy apology)
+     - Stop giving off more bad vibes
 
 
     If you're unhappy with this, we suggest you stop using the repository discussions or the product altogether.
@@ -279,9 +280,12 @@
   comment: >
     Hi there,
 
+
     Please stick to one topic/question per Discussion. Start a new discussion per topic.
 
+
     This prevents future users from finding this discussion and getting confused by multiple questions and answers. One question and answer per Discussion works best.
+
 
     For example:
      - Don't create a discussion with multiple questions requiring multiple answers
@@ -294,9 +298,12 @@
   comment: >
     Hi there,
 
+
     Please do not unnecessarily `@` mention maintainers like `@rarkins` or `@viceice`. Doing so causes annoying notifications and makes it harder to maintain this repository.
 
+
     For example, never `@` mention a maintainer when you are creating a discussion if your desire is to get attention. This is rude behavior, just like shouting out your coffee order in a Starbucks before it's your turn.
+
 
     It's OK to comment in an issue or discussion after multiple days or weeks. But please, still don't `@` mention people. The maintainers try to answer most discussions, but they can't answer all discussions. If you're still not getting an answer, take a look at the information you've given us and see if you can improve it.
 
@@ -307,12 +314,17 @@
   comment: >
     Hi there,
 
+
     A maintainer has flagged that this discussion is _misclassified_ as a bug when it is not.
 
-    Incorrectly classified discussions waste maintainer time, worsen search result accuracy for future users, plus make it harder to train AI on this dataset.
+
+    Incorrectly classified discussions waste maintainer time, worsen search result accuracy and make it harder to train AI on this dataset.
+
 
     The next time you create a discussion, please keep in mind:
-    - If you are new to Renovate, try to stick to questions instead of problem reports
-    - Just because Renovate does something you don't expect, doesn't automatically mean it's a bug
-    - Unsupported features should be raised as ideas, not problems
-    - Those who appear to be _twisting_ questions into sounding like a bug for attention will be given the least support
+     - If you are new to Renovate, try to stick to questions instead of problem reports
+     - Just because Renovate does something you don't expect, doesn't automatically mean it's a bug
+     - Unsupported features should be raised as ideas, not problems
+     - Those who appear to be _twisting_ questions into sounding like a bug for attention will be given the least support
+
+    Thanks, the Renovate team

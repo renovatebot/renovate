@@ -202,12 +202,12 @@ We also recommend you configure `config.gitAuthor` with the same identity as you
 
 Read the platform-specific docs to learn how to setup authentication on your platform:
 
-- [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
-- [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
-- [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
-- [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
-- [github.com and GitHub Enterprise Server](https://docs.renovatebot.com/modules/platform/github/)
-- [GitLab](https://docs.renovatebot.com/modules/platform/gitlab/)
+- [Azure DevOps](../modules/platform/azure/index.md)
+- [Bitbucket Cloud](../modules/platform/bitbucket/index.md)
+- [Bitbucket Server](../modules/platform/bitbucket-server/index.md)
+- [Gitea and Forgejo](../modules/platform/gitea/index.md)
+- [github.com and GitHub Enterprise Server](../modules/platform/github/index.md)
+- [GitLab](../modules/platform/gitlab/index.md)
 
 ### GitHub.com token for changelogs
 
