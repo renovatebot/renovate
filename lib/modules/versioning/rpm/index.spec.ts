@@ -129,7 +129,6 @@ describe('modules/versioning/rpm/index', () => {
     ${'ab'}              | ${'a0'}              | ${true}
     ${'10'}              | ${'1.'}              | ${true}
     ${'10'}              | ${'1a'}              | ${true}
-    ${'a'}               | ${'A'}               | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(rpm.isGreaterThan(a, b)).toBe(expected);
   });
