@@ -219,7 +219,7 @@ class RpmVersioningApi extends GenericVersioningApi {
     }
 
     // If there is a tilde in a segment past the minimum number of segments, find it
-    if (matchesv1.length > matches && matchesv1?.[matches][0] === '~') {
+    if (matchesv1.length > matches && matchesv1[matches][0] === '~') {
       return -1;
     }
 
