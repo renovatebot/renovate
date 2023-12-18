@@ -31,7 +31,7 @@ const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
   ]);
 
 export function mergeBodyTransformer(
-  mergeStrategy: MergeStrategy | undefined
+  mergeStrategy: MergeStrategy | undefined,
 ): MergeRequestBody {
   const body: MergeRequestBody = {
     close_source_branch: true,
@@ -72,3 +72,18 @@ export function prInfo(pr: PrResponse): Pr {
     createdAt: pr.created_on,
   };
 }
+
+export const prFieldsFilter = [
+  'values.id',
+  'values.title',
+  'values.state',
+  'values.links.commits.href',
+  'values.summary.raw',
+  'values.source.branch.name',
+  'values.destination.branch.name',
+  'values.reviewers.display_name',
+  'values.reviewers.uuid',
+  'values.reviewers.nickname',
+  'values.reviewers.account_status',
+  'values.created_on',
+].join(',');

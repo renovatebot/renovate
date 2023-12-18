@@ -147,7 +147,7 @@ describe('modules/datasource/index', () => {
       const managerList = fs
         .readdirSync(__dirname, { withFileTypes: true })
         .filter(
-          (dirent) => dirent.isDirectory() && !dirent.name.startsWith('_')
+          (dirent) => dirent.isDirectory() && !dirent.name.startsWith('_'),
         )
         .map((dirent) => dirent.name)
         .sort();
@@ -157,7 +157,7 @@ describe('modules/datasource/index', () => {
     it('validates datasource', () => {
       function validateDatasource(
         module: DatasourceApi,
-        name: string
+        name: string,
       ): boolean {
         if (!module.getReleases) {
           return false;
@@ -180,7 +180,7 @@ describe('modules/datasource/index', () => {
       const loadedDs = loadModules(
         __dirname,
         validateDatasource,
-        filterClassBasedDatasources
+        filterClassBasedDatasources,
       );
       expect(Array.from(dss.keys())).toEqual(Object.keys(loadedDs));
 
@@ -195,7 +195,7 @@ describe('modules/datasource/index', () => {
         await getPkgReleases({
           datasource: null as never, // #22198
           packageName: 'some/dep',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -205,7 +205,7 @@ describe('modules/datasource/index', () => {
         await getPkgReleases({
           datasource,
           packageName: null as never, // #22198
-        })
+        }),
       ).toBeNull();
     });
 
@@ -214,7 +214,7 @@ describe('modules/datasource/index', () => {
         await getPkgReleases({
           datasource: 'some-unknown-datasource',
           packageName: 'some/dep',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -233,7 +233,7 @@ describe('modules/datasource/index', () => {
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { datasource: 'dummy', registryUrls, defaultRegistryUrls: undefined },
-        'Custom registries are not allowed for this datasource and will be ignored'
+        'Custom registries are not allowed for this datasource and will be ignored',
       );
       expect(res).toMatchObject({ releases: [{ version: '1.2.3' }] });
     });
@@ -261,7 +261,7 @@ describe('modules/datasource/index', () => {
       class TestDatasource extends DummyDatasource {
         override getDigest(
           config: DigestConfig,
-          newValue?: string
+          newValue?: string,
         ): Promise<string> {
           return Promise.resolve(config.packageName);
         }
@@ -273,7 +273,7 @@ describe('modules/datasource/index', () => {
           datasource,
           packageName: 'pkgName',
           replacementName: 'replacement',
-        })
+        }),
       ).toBe('replacement');
     });
   });
@@ -370,7 +370,7 @@ describe('modules/datasource/index', () => {
             sourceUrl: '   https://abc.com   ',
             releases: [{ version: '1.0.0' }],
           },
-        })
+        }),
       );
       const res = await getPkgReleases({
         datasource,
@@ -387,7 +387,7 @@ describe('modules/datasource/index', () => {
             sourceUrl: 'scm:git@github.com:Jasig/cas.git',
             releases: [{ version: '1.0.0' }],
           },
-        })
+        }),
       );
       const res = await getPkgReleases({
         datasource,
@@ -457,7 +457,7 @@ describe('modules/datasource/index', () => {
               packageName: 'package',
               registryUrls,
             },
-            'Excess registryUrls found for datasource lookup - using first configured only'
+            'Excess registryUrls found for datasource lookup - using first configured only',
           );
         });
 
@@ -478,7 +478,7 @@ describe('modules/datasource/index', () => {
           expect(res).toBeNull();
           expect(logger.logger.warn).toHaveBeenCalledWith(
             { datasource, packageName, registryUrls },
-            'Excess registryUrls found for datasource lookup - using first configured only'
+            'Excess registryUrls found for datasource lookup - using first configured only',
           );
         });
       });
@@ -514,7 +514,7 @@ describe('modules/datasource/index', () => {
         beforeEach(() => {
           datasources.set(
             datasource,
-            new MergeRegistriesDatasource(registries)
+            new MergeRegistriesDatasource(registries),
           );
         });
 
@@ -583,7 +583,7 @@ describe('modules/datasource/index', () => {
                 'https://reg2.com',
                 'https://reg3.com',
               ],
-            })
+            }),
           ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         });
 
@@ -593,7 +593,7 @@ describe('modules/datasource/index', () => {
               datasource,
               packageName,
               registryUrls: ['https://reg4.com', 'https://reg5.com'],
-            })
+            }),
           ).toBeNull();
         });
       });
@@ -658,7 +658,7 @@ describe('modules/datasource/index', () => {
           datasources.set(datasource, new HuntRegistriyDatasource(registries));
 
           await expect(
-            getPkgReleases({ datasource, packageName, registryUrls })
+            getPkgReleases({ datasource, packageName, registryUrls }),
           ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         });
 

@@ -145,6 +145,22 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['renovatebot/internal-tools'],
         replacementName: 'containerbase/internal-tools',
       },
+      {
+        description: 'Replace `renovate` `slim` docker tag with `latest`.',
+        matchCurrentValue: '/^slim$/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['ghcr.io/renovatebot/renovate'],
+        matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+        replacementVersion: 'latest',
+      },
+      {
+        description: 'Remove `renovate` `-slim` docker tag suffix.',
+        extractVersion: '^(?<version>.+)-slim$',
+        matchCurrentValue: '/-slim$/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['ghcr.io/renovatebot/renovate'],
+        matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+      },
     ],
   },
   'cucumber-to-scoped': {
@@ -655,6 +671,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'read-pkg-up-rename': {
+    description: '`read-pkg-up` was renamed to `read-package-up`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['read-pkg-up'],
+        replacementName: 'read-package-up',
+        replacementVersion: '11.0.0',
+      },
+    ],
+  },
   'redux-devtools-extension-to-scope': {
     description:
       'The `redux-devtools-extension` package was renamed to `@redux-devtools/extension`.',
@@ -687,6 +714,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rollup-plugin-babel'],
         replacementName: '@rollup/plugin-babel',
         replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'rollup-json-to-scoped': {
+    description: 'The json plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-json'],
+        replacementName: '@rollup/plugin-json',
+        replacementVersion: '4.0.0',
       },
     ],
   },

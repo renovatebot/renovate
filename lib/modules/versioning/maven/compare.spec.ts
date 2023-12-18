@@ -240,7 +240,7 @@ describe('modules/versioning/maven/compare', () => {
       'isSubversion("$majorVersion", "$minorVersion") === $expected',
       ({ majorVersion, minorVersion, expected }) => {
         expect(isSubversion(majorVersion, minorVersion)).toBe(expected);
-      }
+      },
     );
   });
 
@@ -506,9 +506,9 @@ describe('modules/versioning/maven/compare', () => {
         ];
         expect(parseRange(input)).toEqual(parseResult);
         expect(rangeToStr(parseResult as never)).toEqual(
-          input.replace(/\s*/g, '')
+          input.replace(/\s*/g, ''),
         );
-      }
+      },
     );
 
     it.each`
@@ -557,7 +557,7 @@ describe('modules/versioning/maven/compare', () => {
       'autoExtendMavenRange("$range", "$version") === $expected',
       ({ range, version, expected }) => {
         expect(autoExtendMavenRange(range, version)).toEqual(expected);
-      }
+      },
     );
   });
 });

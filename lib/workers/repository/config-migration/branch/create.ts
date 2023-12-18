@@ -9,7 +9,7 @@ import type { MigratedData } from './migrated-data';
 
 export async function createConfigMigrationBranch(
   config: Partial<RenovateConfig>,
-  migratedConfigData: MigratedData
+  migratedConfigData: MigratedData,
 ): Promise<string | null> {
   logger.debug('createConfigMigrationBranch()');
   const configFileName = migratedConfigData.filename;
@@ -17,7 +17,7 @@ export async function createConfigMigrationBranch(
 
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
-    configFileName
+    configFileName,
   );
 
   const commitMessage = commitMessageFactory.getCommitMessage();
@@ -29,9 +29,8 @@ export async function createConfigMigrationBranch(
   }
 
   await scm.checkoutBranch(config.defaultBranch!);
-  const contents = await MigratedDataFactory.applyPrettierFormatting(
-    migratedConfigData
-  );
+  const contents =
+    await MigratedDataFactory.applyPrettierFormatting(migratedConfigData);
   return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName: getMigrationBranchName(config),

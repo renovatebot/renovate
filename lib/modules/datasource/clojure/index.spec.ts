@@ -56,7 +56,7 @@ function mockGenericPackage(opts: MockOpts = {}) {
             version: '1.0.3-SNAPSHOT',
             meta: Fixtures.get(
               'metadata-snapshot-version.xml',
-              upath.join('..', 'maven')
+              upath.join('..', 'maven'),
             ),
             jarStatus: 200,
           },
@@ -64,7 +64,7 @@ function mockGenericPackage(opts: MockOpts = {}) {
             version: '1.0.4-SNAPSHOT',
             meta: Fixtures.get(
               'metadata-snapshot-version-invalid.xml',
-              upath.join('..', 'maven')
+              upath.join('..', 'maven'),
             ),
           },
           {
@@ -129,14 +129,14 @@ function mockGenericPackage(opts: MockOpts = {}) {
               snapshot.version
             }/${artifact}-${snapshot.version.replace(
               '-SNAPSHOT',
-              ''
-            )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`
+              '',
+            )}-20200101.${major}${minor}${patch}-${parseInt(patch, 10)}.pom`,
           )
           .reply(snapshot.jarStatus, '', { 'Last-Modified': timestamp });
       } else {
         scope
           .head(
-            `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`
+            `/${packagePath}/${snapshot.version}/${artifact}-${snapshot.version}.pom`,
           )
           .reply(404, '');
       }
@@ -186,7 +186,7 @@ describe('modules/datasource/clojure/index', () => {
     const { releases } = (await get(
       'org.example:package',
       baseUrl,
-      baseUrlCustom
+      baseUrlCustom,
     ))!;
 
     expect(releases).toMatchObject([
@@ -223,7 +223,7 @@ describe('modules/datasource/clojure/index', () => {
       'https://unauthorized_repo/',
       'https://empty_repo',
       'https://unknown_error',
-      baseUrl
+      baseUrl,
     );
 
     expect(res).toMatchSnapshot();
@@ -236,7 +236,7 @@ describe('modules/datasource/clojure/index', () => {
     const { releases } = (await get(
       'org.example:package',
       'ftp://protocol_error_repo',
-      base
+      base,
     ))!;
 
     expect(releases).toMatchSnapshot();
@@ -249,13 +249,13 @@ describe('modules/datasource/clojure/index', () => {
       .get('/org/example/package/maven-metadata.xml')
       .reply(
         200,
-        Fixtures.get('metadata-invalid.xml', upath.join('..', 'maven'))
+        Fixtures.get('metadata-invalid.xml', upath.join('..', 'maven')),
       );
 
     const res = await get(
       'org.example:package',
       'https://invalid_metadata_repo',
-      baseUrl
+      baseUrl,
     );
 
     expect(res).toMatchSnapshot();
@@ -271,7 +271,7 @@ describe('modules/datasource/clojure/index', () => {
     const res = await get(
       'org.example:package',
       'https://invalid_metadata_repo',
-      baseUrl
+      baseUrl,
     );
 
     expect(res).toMatchSnapshot();
@@ -291,7 +291,7 @@ describe('modules/datasource/clojure/index', () => {
     const res = await get(
       'org.example:package',
 
-      '${project.baseUri}../../repository/'
+      '${project.baseUri}../../repository/',
     );
     expect(res).toBeNull();
   });

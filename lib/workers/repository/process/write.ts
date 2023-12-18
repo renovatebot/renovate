@@ -16,7 +16,7 @@ import { getBranchesRemaining, getPrsRemaining } from './limits';
 export type WriteUpdateResult = 'done' | 'automerged';
 
 export function generateCommitFingerprintConfig(
-  branch: BranchConfig
+  branch: BranchConfig,
 ): UpgradeFingerprintConfig[] {
   const res = branch.upgrades.map((upgrade) => {
     const filteredUpgrade = {} as UpgradeFingerprintConfig;
@@ -31,7 +31,7 @@ export function generateCommitFingerprintConfig(
 
 export function canSkipBranchUpdateCheck(
   branchState: BranchCache,
-  commitFingerprint: string
+  commitFingerprint: string,
 ): boolean {
   if (!branchState.commitFingerprint) {
     logger.trace('branch.isUpToDate(): no fingerprint');
@@ -49,7 +49,7 @@ export function canSkipBranchUpdateCheck(
 
 export async function syncBranchState(
   branchName: string,
-  baseBranch: string
+  baseBranch: string,
 ): Promise<BranchCache> {
   logger.debug('syncBranchState()');
   const branchSha = await scm.getBranchCommit(branchName)!;
@@ -61,7 +61,7 @@ export async function syncBranchState(
   let branchState = cachedBranches.find((br) => br.branchName === branchName);
   if (!branchState) {
     logger.debug(
-      'syncBranchState(): Branch cache not found, creating minimal branchState'
+      'syncBranchState(): Branch cache not found, creating minimal branchState',
     );
     // create a minimal branch state
     branchState = {
@@ -110,7 +110,7 @@ export async function syncBranchState(
 
 export async function writeUpdates(
   config: RenovateConfig,
-  allBranches: BranchConfig[]
+  allBranches: BranchConfig[],
 ): Promise<WriteUpdateResult> {
   const branches = allBranches;
   logger.debug(
@@ -119,7 +119,7 @@ export async function writeUpdates(
     }: ${branches
       .map((b) => b.branchName)
       .sort()
-      .join(', ')}`
+      .join(', ')}`,
   );
   const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug(`Calculated maximum PRs remaining this run: ${prsRemaining}`);
@@ -127,7 +127,7 @@ export async function writeUpdates(
 
   const branchesRemaining = await getBranchesRemaining(config, branches);
   logger.debug(
-    `Calculated maximum branches remaining this run: ${branchesRemaining}`
+    `Calculated maximum branches remaining this run: ${branchesRemaining}`,
   );
   setMaxLimit('Branches', branchesRemaining);
 
@@ -145,7 +145,7 @@ export async function writeUpdates(
       ...new Set(
         branch.upgrades
           .map((upgrade) => hashMap.get(upgrade.manager) ?? upgrade.manager)
-          .filter(is.string)
+          .filter(is.string),
       ),
     ].sort();
     const commitFingerprint = fingerprint({
@@ -154,7 +154,7 @@ export async function writeUpdates(
     });
     branch.skipBranchUpdate = canSkipBranchUpdateCheck(
       branchState,
-      commitFingerprint
+      commitFingerprint,
     );
     const res = await processBranch(branch);
     branch.prBlockedBy = res?.prBlockedBy;

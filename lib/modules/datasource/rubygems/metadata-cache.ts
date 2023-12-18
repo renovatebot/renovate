@@ -36,7 +36,7 @@ export class MetadataCache {
   async getRelease(
     registryUrl: string,
     packageName: string,
-    versions: string[]
+    versions: string[],
   ): Promise<ReleaseResult> {
     const cacheNs = `datasource-rubygems`;
     const cacheKey = `metadata-cache:${registryUrl}:${packageName}`;
@@ -45,7 +45,7 @@ export class MetadataCache {
     const loadCache = (): AsyncResult<ReleaseResult, CacheLoadError> =>
       Result.wrapNullable<CacheRecord, CacheLoadError, CacheLoadError>(
         packageCache.get<CacheRecord>(cacheNs, cacheKey),
-        { type: 'cache-not-found' }
+        { type: 'cache-not-found' },
       ).transform((cache) => {
         return versionsHash === cache.hash
           ? Result.ok(cache.data)
@@ -55,7 +55,7 @@ export class MetadataCache {
     const saveCache = async (
       cache: CacheRecord,
       ttlMinutes = 100 * 24 * 60,
-      ttlDelta = 10 * 24 * 60
+      ttlDelta = 10 * 24 * 60,
     ): Promise<void> => {
       const registryHostname = parseUrl(registryUrl)?.hostname;
       if (registryHostname === 'rubygems.org') {
@@ -69,7 +69,7 @@ export class MetadataCache {
       .catch((err) =>
         getV1Releases(this.http, registryUrl, packageName).transform(
           async (
-            data: ReleaseResult
+            data: ReleaseResult,
           ): Promise<Result<ReleaseResult, CacheError>> => {
             const dataHash = hashReleases(data);
             if (dataHash === versionsHash) {
@@ -90,20 +90,20 @@ export class MetadataCache {
                 await saveCache(
                   { ...staleCache, isFallback: true },
                   24 * 60,
-                  0
+                  0,
                 );
               }
               return Result.ok(staleCache.data);
             }
 
             return Result.err({ type: 'cache-invalid' });
-          }
-        )
+          },
+        ),
       )
       .catch((err) => {
         logger.debug(
           { err },
-          'Rubygems: error fetching rubygems data, falling back to versions-only result'
+          'Rubygems: error fetching rubygems data, falling back to versions-only result',
         );
         const releases = versions.map((version) => ({ version }));
         return Result.ok({ releases } as ReleaseResult);

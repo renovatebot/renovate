@@ -13,7 +13,7 @@ describe('modules/manager/maven/update', () => {
       const { bumpedContent } = pomUpdater.bumpPackageVersion(
         simpleContent,
         '0.0.1',
-        'patch'
+        'patch',
       );
 
       const project = new XmlDocument(bumpedContent!);
@@ -24,12 +24,12 @@ describe('modules/manager/maven/update', () => {
       const { bumpedContent } = pomUpdater.bumpPackageVersion(
         simpleContent,
         '0.0.1',
-        'patch'
+        'patch',
       );
       const { bumpedContent: bumpedContent2 } = pomUpdater.bumpPackageVersion(
         bumpedContent!,
         '0.0.1',
-        'patch'
+        'patch',
       );
 
       expect(bumpedContent).toEqual(bumpedContent2);
@@ -39,7 +39,7 @@ describe('modules/manager/maven/update', () => {
       const { bumpedContent } = pomUpdater.bumpPackageVersion(
         minimumContent,
         '1',
-        'patch'
+        'patch',
       );
 
       const project = new XmlDocument(bumpedContent!);
@@ -50,7 +50,7 @@ describe('modules/manager/maven/update', () => {
       const { bumpedContent } = pomUpdater.bumpPackageVersion(
         minimumContent,
         '',
-        'patch'
+        'patch',
       );
 
       expect(bumpedContent).toEqual(minimumContent);
@@ -60,7 +60,7 @@ describe('modules/manager/maven/update', () => {
       const { bumpedContent } = pomUpdater.bumpPackageVersion(
         simpleContent,
         '0.0.1',
-        true as any
+        true as any,
       );
       expect(bumpedContent).toEqual(simpleContent);
     });
@@ -69,7 +69,7 @@ describe('modules/manager/maven/update', () => {
       const { bumpedContent } = pomUpdater.bumpPackageVersion(
         prereleaseContent,
         '1.0.0-1',
-        'prerelease'
+        'prerelease',
       );
 
       const project = new XmlDocument(bumpedContent!);

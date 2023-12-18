@@ -18,7 +18,7 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         simpleContent,
         '0.0.1',
-        'patch'
+        'patch',
       );
 
       const project = new XmlDocument(bumpedContent!);
@@ -29,12 +29,12 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         simpleContent,
         '0.0.1',
-        'patch'
+        'patch',
       );
       const { bumpedContent: bumpedContent2 } = bumpPackageVersion(
         bumpedContent!,
         '0.0.1',
-        'patch'
+        'patch',
       );
 
       expect(bumpedContent).toEqual(bumpedContent2);
@@ -44,12 +44,12 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         issue23526InitialContent,
         '4.9.0',
-        'minor'
+        'minor',
       );
       const { bumpedContent: bumpedContent2 } = bumpPackageVersion(
         bumpedContent!,
         '4.9.0',
-        'minor'
+        'minor',
       );
 
       expect(bumpedContent2).toEqual(issue23526ExpectedContent);
@@ -59,7 +59,7 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         minimumContent,
         '1',
-        'patch'
+        'patch',
       );
 
       const project = new XmlDocument(bumpedContent!);
@@ -78,7 +78,7 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         originalContent,
         '0.0.1',
-        'patch'
+        'patch',
       );
 
       expect(bumpedContent).toEqual(originalContent);
@@ -88,7 +88,7 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         simpleContent,
         '0.0.1',
-        true as any
+        true as any,
       );
       expect(bumpedContent).toEqual(simpleContent);
     });
@@ -97,7 +97,7 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         prereleaseContent,
         '1.0.0-1',
-        'prerelease'
+        'prerelease',
       );
 
       const project = new XmlDocument(bumpedContent!);
@@ -111,7 +111,7 @@ describe('modules/manager/nuget/update', () => {
 
       const project = new XmlDocument(bumpedContent!);
       expect(project.valueWithPath('PropertyGroup.VersionPrefix')).toBe(
-        '1.0.1'
+        '1.0.1',
       );
     });
   });

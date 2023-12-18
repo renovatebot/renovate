@@ -1,6 +1,6 @@
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
-import { allManagersList } from '../../../modules/manager';
+import { getEnabledManagersList } from '../../../modules/manager';
 import { isCustomManager } from '../../../modules/manager/custom';
 import type { RegexManagerTemplates } from '../../../modules/manager/custom/regex/types';
 import { validMatchFields } from '../../../modules/manager/custom/regex/utils';
@@ -14,11 +14,11 @@ export interface FingerprintExtractConfig {
 
 // checks for regex manager fields
 function getCustomManagerFields(
-  config: WorkerExtractConfig
+  config: WorkerExtractConfig,
 ): CustomExtractConfig {
   const regexFields = {} as CustomExtractConfig;
   for (const field of validMatchFields.map(
-    (f) => `${f}Template` as keyof RegexManagerTemplates
+    (f) => `${f}Template` as keyof RegexManagerTemplates,
   )) {
     if (config[field]) {
       regexFields[field] = config[field];
@@ -34,7 +34,7 @@ function getCustomManagerFields(
 }
 
 function getFilteredManagerConfig(
-  config: WorkerExtractConfig
+  config: WorkerExtractConfig,
 ): WorkerExtractConfig {
   return {
     ...(isCustomManager(config.manager) && getCustomManagerFields(config)),
@@ -52,22 +52,16 @@ function getFilteredManagerConfig(
 }
 
 export function generateFingerprintConfig(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): FingerprintExtractConfig {
   const managerExtractConfigs: WorkerExtractConfig[] = [];
-  let managerList: Set<string>;
-  const { enabledManagers } = config;
-  if (enabledManagers?.length) {
-    managerList = new Set(enabledManagers);
-  } else {
-    managerList = new Set(allManagersList);
-  }
+  const managerList = new Set(getEnabledManagersList(config.enabledManagers));
 
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     if (isCustomManager(manager)) {
       const filteredCustomManagers = (config.customManagers ?? []).filter(
-        (mgr) => mgr.customType === manager
+        (mgr) => mgr.customType === manager,
       );
       for (const customManager of filteredCustomManagers) {
         managerExtractConfigs.push({

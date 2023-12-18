@@ -10,12 +10,12 @@ import * as rules from './rules';
 
 export async function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): Promise<PackageFileContent | null> {
   try {
     const records = parse(content);
     const pfc: PackageFileContent | null = LooseArray(
-      RuleToBazelModulePackageDep
+      RuleToBazelModulePackageDep,
     )
       .transform(rules.toPackageDependencies)
       .transform((deps) => (deps.length ? { deps } : null))

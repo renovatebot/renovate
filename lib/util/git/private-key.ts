@@ -17,7 +17,7 @@ export function setPrivateKey(key: string | undefined): void {
   }
   addSecretForSanitizing(key.trim(), 'global');
   logger.debug(
-    'gitPrivateKey: successfully set (but not yet written/configured)'
+    'gitPrivateKey: successfully set (but not yet written/configured)',
   );
   gitPrivateKey = key.trim();
 }

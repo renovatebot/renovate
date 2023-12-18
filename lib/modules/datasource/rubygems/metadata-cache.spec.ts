@@ -15,7 +15,7 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
 
     packageCache.get.mockImplementation(
       (ns, key) =>
-        Promise.resolve(packageCacheMock.get(`${ns}::${key}`)) as never
+        Promise.resolve(packageCacheMock.get(`${ns}::${key}`)) as never,
     );
 
     packageCache.set.mockImplementation((ns, key, value) => {
@@ -148,7 +148,7 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
             { version: '3.0.0' },
           ],
         },
-      }
+      },
     );
     const cache = new MetadataCache(new Http('test'));
 
@@ -198,7 +198,7 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
         hash: '123',
         isFallback: true,
       },
-      24 * 60
+      24 * 60,
     );
   });
 
@@ -221,12 +221,12 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
     const res1 = await cache.getRelease(
       'https://rubygems.org',
       'foobar',
-      versions
+      versions,
     );
     const res2 = await cache.getRelease(
       'https://rubygems.org',
       'foobar',
-      versions
+      versions,
     );
 
     expect(res1).toEqual(res2);
@@ -293,7 +293,7 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
     const res = await cache.getRelease(
       'https://rubygems.org',
       'foobar',
-      versions
+      versions,
     );
 
     expect(res).toEqual({
@@ -313,7 +313,7 @@ describe('modules/datasource/rubygems/metadata-cache', () => {
     const res = await cache.getRelease(
       'https://rubygems.org',
       'foobar',
-      versions
+      versions,
     );
 
     expect(res).toEqual({

@@ -1,18 +1,18 @@
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { parseSingleYaml } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { VelaPipelineConfiguration } from './types';
 
 export function extractPackageFile(
   file: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   let doc: VelaPipelineConfiguration | undefined;
 
   try {
-    doc = load(file, { json: true }) as VelaPipelineConfiguration;
+    doc = parseSingleYaml(file, { json: true }) as VelaPipelineConfiguration;
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Vela file.');
     return null;

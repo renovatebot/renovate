@@ -3,6 +3,7 @@ import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
+import { prFieldsFilter } from './utils';
 
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
@@ -47,7 +48,7 @@ describe('modules/platform/bitbucket/index', () => {
   async function initRepoMock(
     config?: Partial<RepoParams>,
     repoResp?: any,
-    existingScope?: httpMock.Scope
+    existingScope?: httpMock.Scope,
   ): Promise<httpMock.Scope> {
     const repository = config?.repository ?? 'some/repo';
 
@@ -80,7 +81,7 @@ describe('modules/platform/bitbucket/index', () => {
         password: '123',
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?'
+        'Init: Bitbucket Cloud endpoint should generally be https://api.bitbucket.org/ but is being configured to a different value. Did you mean to use Bitbucket Server?',
       );
     });
 
@@ -94,7 +95,7 @@ describe('modules/platform/bitbucket/index', () => {
           endpoint: baseUrl,
           username: 'abc',
           password: '123',
-        })
+        }),
       ).toEqual(expectedResult);
     });
 
@@ -107,7 +108,7 @@ describe('modules/platform/bitbucket/index', () => {
         await bitbucket.initPlatform({
           endpoint: baseUrl,
           token: 'abc',
-        })
+        }),
       ).toEqual(expectedResult);
     });
 
@@ -118,7 +119,7 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(403, { error: { detail: { required: ['account'] } } });
       await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
       expect(logger.warn).toHaveBeenCalledWith(
-        `Bitbucket: missing 'account' scope for password`
+        `Bitbucket: missing 'account' scope for password`,
       );
     });
   });
@@ -145,7 +146,7 @@ describe('modules/platform/bitbucket/index', () => {
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -161,7 +162,7 @@ describe('modules/platform/bitbucket/index', () => {
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
-        })
+        }),
       ).toEqual({
         defaultBranch: 'master',
         isFork: false,
@@ -235,7 +236,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
         )
         .reply(200, { values: [pr] })
         .get('/2.0/repositories/some/repo/pullrequests/5')
@@ -248,7 +249,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
         )
         .reply(200, { values: [pr] });
 
@@ -267,7 +268,7 @@ describe('modules/platform/bitbucket/index', () => {
           target: { hash: 'master_hash' },
         })
         .get(
-          '/2.0/repositories/some/repo/commit/master_hash/statuses?pagelen=100'
+          '/2.0/repositories/some/repo/commit/master_hash/statuses?pagelen=100',
         )
         .reply(200, {
           values: [
@@ -292,7 +293,7 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .get(
-          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100'
+          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100',
         )
         .reply(200, {
           values: [
@@ -317,7 +318,7 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .get(
-          '/2.0/repositories/some/repo/commit/pending/branch_hash/statuses?pagelen=100'
+          '/2.0/repositories/some/repo/commit/pending/branch_hash/statuses?pagelen=100',
         )
         .reply(200, {
           values: [
@@ -328,7 +329,7 @@ describe('modules/platform/bitbucket/index', () => {
           ],
         });
       expect(await bitbucket.getBranchStatus('pending/branch', true)).toBe(
-        'yellow'
+        'yellow',
       );
     });
 
@@ -336,7 +337,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/refs/branches/branch-with-empty-status'
+          '/2.0/repositories/some/repo/refs/branches/branch-with-empty-status',
         )
         .reply(200, {
           name: 'branch-with-empty-status',
@@ -346,13 +347,13 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .get(
-          '/2.0/repositories/some/repo/commit/branch-with-empty-status/statuses?pagelen=100'
+          '/2.0/repositories/some/repo/commit/branch-with-empty-status/statuses?pagelen=100',
         )
         .reply(200, {
           values: [],
         });
       expect(
-        await bitbucket.getBranchStatus('branch-with-empty-status', true)
+        await bitbucket.getBranchStatus('branch-with-empty-status', true),
       ).toBe('yellow');
     });
 
@@ -368,7 +369,7 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .get(
-          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100'
+          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100',
         )
         .reply(200, {
           values: [
@@ -392,7 +393,7 @@ describe('modules/platform/bitbucket/index', () => {
           target: { hash: 'master_hash' },
         })
         .get(
-          '/2.0/repositories/some/repo/commit/master_hash/statuses?pagelen=100'
+          '/2.0/repositories/some/repo/commit/master_hash/statuses?pagelen=100',
         )
         .reply(200, {
           values: [
@@ -433,7 +434,7 @@ describe('modules/platform/bitbucket/index', () => {
         .post('/2.0/repositories/some/repo/commit/branch_hash/statuses/build')
         .reply(200)
         .get(
-          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100'
+          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100',
         )
         .reply(200, {
           values: [
@@ -450,7 +451,7 @@ describe('modules/platform/bitbucket/index', () => {
           description: 'description',
           state: 'red',
           url: 'targetUrl',
-        })
+        }),
       ).toResolve();
     });
   });
@@ -462,7 +463,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock({}, { has_issues: true });
       scope
         .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.uuid%3D%2212345%22'
+          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.uuid%3D%2212345%22',
         )
         .reply(200, {
           values: [
@@ -486,11 +487,11 @@ describe('modules/platform/bitbucket/index', () => {
         {
           repository: 'some/empty',
         },
-        { has_issues: true }
+        { has_issues: true },
       );
       scope
         .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
+          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
         )
         .reply(200, {
           values: [],
@@ -504,7 +505,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock({}, { has_issues: true });
       scope
         .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
+          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
         )
         .reply(200, {
           values: [
@@ -525,22 +526,22 @@ describe('modules/platform/bitbucket/index', () => {
         .put('/2.0/repositories/some/repo/issues/26')
         .reply(200);
       expect(
-        await bitbucket.ensureIssue({ title: 'title', body: 'body' })
+        await bitbucket.ensureIssue({ title: 'title', body: 'body' }),
       ).toBe('updated');
     });
 
     it('creates new issue', async () => {
       const scope = await initRepoMock(
         { repository: 'some/empty' },
-        { has_issues: true }
+        { has_issues: true },
       );
       scope
         .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
+          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
         )
         .reply(200, { values: [] })
         .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22old-title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
+          '/2.0/repositories/some/empty/issues?q=title%3D%22old-title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
         )
         .reply(200, { values: [] })
         .post('/2.0/repositories/some/empty/issues')
@@ -550,7 +551,7 @@ describe('modules/platform/bitbucket/index', () => {
           title: 'title',
           reuseTitle: 'old-title',
           body: 'body',
-        })
+        }),
       ).toBe('created');
     });
 
@@ -558,7 +559,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock({}, { has_issues: true });
       scope
         .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
+          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
         )
         .reply(200, {
           values: [
@@ -580,7 +581,7 @@ describe('modules/platform/bitbucket/index', () => {
         await bitbucket.ensureIssue({
           title: 'title',
           body: '\n content \n',
-        })
+        }),
       ).toBeNull();
     });
   });
@@ -595,7 +596,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock({}, { has_issues: true });
       scope
         .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
+          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)',
         )
         .reply(200, {
           values: [
@@ -683,7 +684,7 @@ describe('modules/platform/bitbucket/index', () => {
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await expect(
-        bitbucket.addReviewers(5, ['someuser', 'someotheruser'])
+        bitbucket.addReviewers(5, ['someuser', 'someotheruser']),
       ).toResolve();
     });
 
@@ -704,7 +705,7 @@ describe('modules/platform/bitbucket/index', () => {
         bitbucket.addReviewers(5, [
           'someuser',
           '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-        ])
+        ]),
       ).toResolve();
     });
   });
@@ -720,7 +721,7 @@ describe('modules/platform/bitbucket/index', () => {
           number: 3,
           topic: 'topic',
           content: 'content',
-        })
+        }),
       ).toMatchSnapshot();
     });
   });
@@ -736,7 +737,7 @@ describe('modules/platform/bitbucket/index', () => {
           type: 'by-topic',
           number: 3,
           topic: 'topic',
-        })
+        }),
       ).toMatchSnapshot();
     });
   });
@@ -753,7 +754,7 @@ describe('modules/platform/bitbucket/index', () => {
       await initRepoMock(undefined, null, scope);
       scope
         .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&q=author.uuid="12345"&pagelen=50'
+          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&q=author.uuid="12345"&fields=${prFieldsFilter}&pagelen=50`,
         )
         .reply(200, {
           values: [
@@ -779,14 +780,14 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
         )
         .reply(200, { values: [pr] });
       expect(
         await bitbucket.findPr({
           branchName: 'branch',
           prTitle: 'title',
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -805,7 +806,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
         )
         .reply(200, {
           values: [
@@ -843,7 +844,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock({}, { is_private: true });
       scope
         .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
         )
         .reply(200, {
           values: [
@@ -883,7 +884,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock({}, { is_private: false });
       scope
         .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
         )
         .reply(200, {
           values: [
@@ -899,7 +900,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
         .reply(200, { values: [prComment] })
         .get(
-          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D',
         )
         .reply(200, { values: [workspaceMember] });
 
@@ -927,7 +928,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock({}, { is_private: false });
       scope
         .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
         )
         .reply(200, {
           values: [
@@ -943,7 +944,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
         .reply(200, { values: [prComment] })
         .get(
-          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D',
         )
         .reply(404);
 
@@ -978,7 +979,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
         )
         .reply(200, {
           values: [projectReviewer, repoReviewer],
@@ -1022,7 +1023,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
         )
         .reply(200, {
           values: [
@@ -1046,7 +1047,7 @@ describe('modules/platform/bitbucket/index', () => {
           account_status: 'active',
         })
         .get(
-          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D',
         )
         .reply(200)
         .get('/2.0/users/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D')
@@ -1054,7 +1055,7 @@ describe('modules/platform/bitbucket/index', () => {
           account_status: 'active',
         })
         .get(
-          '/2.0/workspaces/some/members/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D'
+          '/2.0/workspaces/some/members/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D',
         )
         .reply(404)
         .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
@@ -1093,7 +1094,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
         )
         .reply(200, {
           values: [memberReviewer, notMemberReviewer],
@@ -1112,11 +1113,11 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .get(
-          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D',
         )
         .reply(404)
         .get(
-          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D',
         )
         .reply(200)
         .post('/2.0/repositories/some/repo/pullrequests')
@@ -1144,7 +1145,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
         )
         .reply(200, {
           values: [reviewer],
@@ -1163,7 +1164,7 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .get(
-          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D',
         )
         .reply(401);
       await expect(() =>
@@ -1175,7 +1176,7 @@ describe('modules/platform/bitbucket/index', () => {
           platformOptions: {
             bbUseDefaultReviewers: true,
           },
-        })
+        }),
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
 
@@ -1199,7 +1200,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
         )
         .reply(200, {
           values: reviewers,
@@ -1240,7 +1241,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
         )
         .reply(200, {
           values: [reviewer],
@@ -1264,7 +1265,7 @@ describe('modules/platform/bitbucket/index', () => {
           platformOptions: {
             bbUseDefaultReviewers: true,
           },
-        })
+        }),
       ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
     });
 
@@ -1279,7 +1280,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get(
-          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100',
         )
         .reply(200, {
           values: [reviewer],
@@ -1303,7 +1304,7 @@ describe('modules/platform/bitbucket/index', () => {
           platformOptions: {
             bbUseDefaultReviewers: true,
           },
-        })
+        }),
       ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
     });
   });
@@ -1394,7 +1395,7 @@ describe('modules/platform/bitbucket/index', () => {
           prTitle: 'title',
           prBody: 'body',
           targetBranch: 'new_base',
-        })
+        }),
       ).toResolve();
     });
 
@@ -1439,7 +1440,7 @@ describe('modules/platform/bitbucket/index', () => {
           account_status: 'active',
         })
         .get(
-          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D',
         )
         .reply(200)
         .get('/2.0/users/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D')
@@ -1447,7 +1448,7 @@ describe('modules/platform/bitbucket/index', () => {
           account_status: 'active',
         })
         .get(
-          '/2.0/workspaces/some/members/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D'
+          '/2.0/workspaces/some/members/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D',
         )
         .reply(404)
         .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
@@ -1457,7 +1458,7 @@ describe('modules/platform/bitbucket/index', () => {
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
     });
 
@@ -1490,18 +1491,18 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .get(
-          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D',
         )
         .reply(404)
         .get(
-          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D',
         )
         .reply(200)
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
 
       await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
       ).toResolve();
     });
 
@@ -1529,11 +1530,11 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .get(
-          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D'
+          '/2.0/workspaces/some/members/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D',
         )
         .reply(401);
       await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
 
@@ -1558,7 +1559,7 @@ describe('modules/platform/bitbucket/index', () => {
           },
         });
       await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
       ).rejects.toThrowErrorMatchingSnapshot();
     });
 
@@ -1583,7 +1584,7 @@ describe('modules/platform/bitbucket/index', () => {
           },
         });
       await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
       ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
     });
 
@@ -1593,7 +1594,7 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(500, undefined);
       await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
       ).rejects.toThrowErrorMatchingSnapshot();
     });
 
@@ -1612,7 +1613,7 @@ describe('modules/platform/bitbucket/index', () => {
           number: pr.id,
           prTitle: pr.title,
           state: 'closed',
-        })
+        }),
       ).toBeUndefined();
     });
   });
@@ -1625,7 +1626,7 @@ describe('modules/platform/bitbucket/index', () => {
         await bitbucket.mergePr({
           branchName: 'branch',
           id: 5,
-        })
+        }),
       ).toBeTrue();
     });
 
@@ -1637,7 +1638,7 @@ describe('modules/platform/bitbucket/index', () => {
           branchName: 'branch',
           id: 5,
           strategy: 'auto',
-        })
+        }),
       ).toBeTrue();
     });
 
@@ -1649,7 +1650,7 @@ describe('modules/platform/bitbucket/index', () => {
           branchName: 'branch',
           id: 5,
           strategy: 'merge-commit',
-        })
+        }),
       ).toBeTrue();
     });
 
@@ -1661,7 +1662,7 @@ describe('modules/platform/bitbucket/index', () => {
           branchName: 'branch',
           id: 5,
           strategy: 'squash',
-        })
+        }),
       ).toBe(true);
     });
 
@@ -1682,7 +1683,7 @@ describe('modules/platform/bitbucket/index', () => {
           branchName: 'branch',
           id: 5,
           strategy: 'fast-forward',
-        })
+        }),
       ).toBeTrue();
     });
   });
@@ -1745,7 +1746,7 @@ describe('modules/platform/bitbucket/index', () => {
       const res = await bitbucket.getJsonFile(
         'file.json',
         'some/repo',
-        'feat/123-test'
+        'feat/123-test',
       );
       expect(res).toEqual(data);
     });

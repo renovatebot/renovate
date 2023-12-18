@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
-import { load } from 'js-yaml';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -10,6 +9,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
+import { parseSingleYaml } from '../../../../util/yaml';
 import type { PackageFile } from '../../types';
 import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
 import type { NpmManagerData } from '../types';
@@ -20,11 +20,11 @@ function isPnpmLockfile(obj: any): obj is PnpmLockFile {
 }
 
 export async function extractPnpmFilters(
-  fileName: string
+  fileName: string,
 ): Promise<string[] | undefined> {
   try {
     // TODO #22198
-    const contents = load((await readLocalFile(fileName, 'utf8'))!, {
+    const contents = parseSingleYaml((await readLocalFile(fileName, 'utf8'))!, {
       json: true,
     }) as PnpmWorkspaceFile;
     if (
@@ -33,7 +33,7 @@ export async function extractPnpmFilters(
     ) {
       logger.trace(
         { fileName },
-        'Failed to find required "packages" array in pnpm-workspace.yaml'
+        'Failed to find required "packages" array in pnpm-workspace.yaml',
       );
       return undefined;
     }
@@ -45,17 +45,17 @@ export async function extractPnpmFilters(
 }
 
 export async function findPnpmWorkspace(
-  packageFile: string
+  packageFile: string,
 ): Promise<{ lockFilePath: string; workspaceYamlPath: string } | null> {
   // search for pnpm-workspace.yaml
   const workspaceYamlPath = await findLocalSiblingOrParent(
     packageFile,
-    'pnpm-workspace.yaml'
+    'pnpm-workspace.yaml',
   );
   if (!workspaceYamlPath) {
     logger.trace(
       { packageFile },
-      'Failed to locate pnpm-workspace.yaml in a parent directory.'
+      'Failed to locate pnpm-workspace.yaml in a parent directory.',
     );
     return null;
   }
@@ -63,12 +63,12 @@ export async function findPnpmWorkspace(
   // search for pnpm-lock.yaml next to pnpm-workspace.yaml
   const pnpmLockfilePath = getSiblingFileName(
     workspaceYamlPath,
-    'pnpm-lock.yaml'
+    'pnpm-lock.yaml',
   );
   if (!(await localPathExists(pnpmLockfilePath))) {
     logger.trace(
       { workspaceYamlPath, packageFile },
-      'Failed to find a pnpm-lock.yaml sibling for the workspace.'
+      'Failed to find a pnpm-lock.yaml sibling for the workspace.',
     );
     return null;
   }
@@ -80,7 +80,7 @@ export async function findPnpmWorkspace(
 }
 
 export async function detectPnpmWorkspaces(
-  packageFiles: Partial<PackageFile<NpmManagerData>>[]
+  packageFiles: Partial<PackageFile<NpmManagerData>>[],
 ): Promise<void> {
   logger.debug(`Detecting pnpm Workspaces`);
   const packagePathCache = new Map<string, string[] | null>();
@@ -93,7 +93,7 @@ export async function detectPnpmWorkspaces(
     if (pnpmShrinkwrap) {
       logger.trace(
         { packageFile, pnpmShrinkwrap },
-        'Found an existing pnpm shrinkwrap file; skipping pnpm monorepo check.'
+        'Found an existing pnpm shrinkwrap file; skipping pnpm monorepo check.',
       );
       continue;
     }
@@ -116,17 +116,17 @@ export async function detectPnpmWorkspaces(
           patterns: filters,
           // Match the ignores used in @pnpm/find-workspace-packages
           ignore: ['**/node_modules/**', '**/bower_components/**'],
-        }
+        },
       );
       const packagePaths = packages.map((pkg) =>
-        upath.join(pkg.dir, 'package.json')
+        upath.join(pkg.dir, 'package.json'),
       );
       packagePathCache.set(workspaceYamlPath, packagePaths);
     }
     const packagePaths = packagePathCache.get(workspaceYamlPath);
 
     const isPackageInWorkspace = packagePaths?.some((p) =>
-      p.endsWith(packageFile!)
+      p.endsWith(packageFile!),
     );
 
     if (isPackageInWorkspace) {
@@ -135,7 +135,7 @@ export async function detectPnpmWorkspaces(
     } else {
       logger.trace(
         { packageFile, workspaceYamlPath },
-        `Didn't find the package in the pnpm workspace`
+        `Didn't find the package in the pnpm workspace`,
       );
     }
   }
@@ -148,7 +148,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       throw new Error('Unable to read pnpm-lock.yaml');
     }
 
-    const lockParsed = load(pnpmLockRaw);
+    const lockParsed = parseSingleYaml(pnpmLockRaw);
     if (!isPnpmLockfile(lockParsed)) {
       throw new Error('Invalid or empty lockfile');
     }
@@ -172,7 +172,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
 }
 
 function getLockedVersions(
-  lockParsed: PnpmLockFile
+  lockParsed: PnpmLockFile,
 ): Record<string, Record<string, Record<string, string>>> {
   const lockedVersions: Record<
     string,
@@ -194,7 +194,7 @@ function getLockedVersions(
 }
 
 function getLockedDependencyVersions(
-  obj: PnpmLockFile | Record<string, PnpmDependencySchema>
+  obj: PnpmLockFile | Record<string, PnpmDependencySchema>,
 ): Record<string, Record<string, string>> {
   const dependencyTypes = [
     'dependencies',
@@ -206,7 +206,7 @@ function getLockedDependencyVersions(
   for (const depType of dependencyTypes) {
     res[depType] = {};
     for (const [pkgName, versionCarrier] of Object.entries(
-      obj[depType] ?? {}
+      obj[depType] ?? {},
     )) {
       let version: string;
       if (is.object(versionCarrier)) {

@@ -204,12 +204,12 @@ export async function findPr({
     const prs = await getPrList();
     const refsHeadBranchName = getNewBranchName(branchName);
     prsFiltered = prs.filter(
-      (item) => item.sourceBranch === refsHeadBranchName
+      (item) => item.sourceBranch === refsHeadBranchName,
     );
 
     if (prTitle) {
       prsFiltered = prsFiltered.filter(
-        (item) => item.title.toUpperCase() === prTitle.toUpperCase()
+        (item) => item.title.toUpperCase() === prTitle.toUpperCase(),
       );
     }
 
@@ -233,7 +233,7 @@ export async function findPr({
 }
 
 export async function getBranchPr(
-  branchName: string
+  branchName: string,
 ): Promise<CodeCommitPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
@@ -244,7 +244,7 @@ export async function getBranchPr(
 }
 
 export async function getPr(
-  pullRequestId: number
+  pullRequestId: number,
 ): Promise<CodeCommitPr | null> {
   logger.debug(`getPr(${pullRequestId})`);
   const prRes = await client.getPr(`${pullRequestId}`);
@@ -306,11 +306,11 @@ export function massageMarkdown(input: string): string {
   return input
     .replace(
       'you tick the rebase/retry checkbox',
-      'rename PR to start with "rebase!"'
+      'rename PR to start with "rebase!"',
     )
     .replace(
       'checking the rebase/retry box above',
-      'renaming the PR to start with "rebase!"'
+      'renaming the PR to start with "rebase!"',
     )
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
@@ -318,14 +318,14 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(
       regEx(/(?<hiddenComment><!--renovate-(?:debug|config-hash):.*?-->)/g),
-      '[//]: # ($<hiddenComment>)'
+      '[//]: # ($<hiddenComment>)',
     );
 }
 
 export async function getJsonFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
+  branchOrTag?: string,
 ): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
   return parseJson(raw, fileName);
@@ -334,12 +334,12 @@ export async function getJsonFile(
 export async function getRawFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
+  branchOrTag?: string,
 ): Promise<string | null> {
   const fileRes = await client.getFile(
     repoName ?? config.repository,
     fileName,
-    branchOrTag
+    branchOrTag,
   );
   if (!fileRes?.fileContent) {
     return null;
@@ -368,7 +368,7 @@ export async function createPr({
     sanitize(description),
     sourceBranch,
     targetBranch,
-    config.repository
+    config.repository,
   );
 
   if (
@@ -413,7 +413,7 @@ export async function updatePr({
   if (body && cachedPr?.body !== body) {
     await client.updatePrDescription(
       `${prNo}`,
-      smartTruncate(sanitize(body), AMAZON_MAX_BODY_LENGTH)
+      smartTruncate(sanitize(body), AMAZON_MAX_BODY_LENGTH),
     );
   }
 
@@ -515,15 +515,15 @@ export async function mergePr({
 
 export async function addReviewers(
   prNo: number,
-  reviewers: string[]
+  reviewers: string[],
 ): Promise<void> {
   const numberOfApprovers = reviewers.length;
   const approvalRuleContents = `{"Version":"2018-11-08","Statements": [{"Type": "Approvers","NumberOfApprovalsNeeded":${numberOfApprovers},"ApprovalPoolMembers": ${JSON.stringify(
-    reviewers
+    reviewers,
   )}}]}`;
   const res = await client.createPrApprovalRule(
     `${prNo}`,
-    approvalRuleContents
+    approvalRuleContents,
   );
   if (res) {
     const approvalRule = res.approvalRule;
@@ -573,7 +573,7 @@ export function deleteLabel(prNumber: number, label: string): Promise<void> {
 export function getBranchStatus(branchName: string): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   logger.debug(
-    'returning branch status yellow, because getBranchStatus isnt supported on aws yet'
+    'returning branch status yellow, because getBranchStatus isnt supported on aws yet',
   );
   return Promise.resolve('yellow');
 }
@@ -581,11 +581,11 @@ export function getBranchStatus(branchName: string): Promise<BranchStatus> {
 /* istanbul ignore next */
 export function getBranchStatusCheck(
   branchName: string,
-  context: string
+  context: string,
 ): Promise<BranchStatus | null> {
   logger.debug(`getBranchStatusCheck(${branchName}, context=${context})`);
   logger.debug(
-    'returning null, because getBranchStatusCheck is not supported on aws yet'
+    'returning null, because getBranchStatusCheck is not supported on aws yet',
   );
   return Promise.resolve(null);
 }
@@ -652,23 +652,23 @@ export async function ensureComment({
       config.repository,
       body,
       thisPr[0].destinationCommit,
-      thisPr[0].sourceCommit
+      thisPr[0].sourceCommit,
     );
     logger.info(
       { repository: config.repository, prNo: number, topic },
-      'Comment added'
+      'Comment added',
     );
   } else if (commentNeedsUpdating && commentId) {
     await client.updateComment(commentId, body);
 
     logger.debug(
       { repository: config.repository, prNo: number, topic },
-      'Comment updated'
+      'Comment updated',
     );
   } else {
     logger.debug(
       { repository: config.repository, prNo: number, topic },
-      'Comment is already update-to-date'
+      'Comment is already update-to-date',
     );
   }
 
@@ -676,7 +676,7 @@ export async function ensureComment({
 }
 
 export async function ensureCommentRemoval(
-  removeConfig: EnsureCommentRemovalConfig
+  removeConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
   const { number: prNo } = removeConfig;
   const key =
@@ -702,7 +702,7 @@ export async function ensureCommentRemoval(
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
     if (!commentObj?.comments) {
       logger.debug(
-        'comments object not found under commentsForPullRequestData'
+        'comments object not found under commentsForPullRequestData',
       );
       continue;
     }

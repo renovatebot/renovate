@@ -8,7 +8,7 @@ describe('config/migrations/custom/post-update-options-migration', () => {
       },
       {
         postUpdateOptions: ['gomodTidy'],
-      }
+      },
     );
   });
 });

@@ -205,6 +205,16 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
     Renovate tries to delay until Azure is in the expected state, but it will continue if it takes too long.
     In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
+**Automerge and GitHub branch protection rules**
+
+You must select at least one status check in the _Require status checks to pass before merging_ section of your branch protection rules on GitHub, if you match all three conditions:
+
+- `automerge=true`
+- `platformAutomerge=true`, Renovate defaults to `true`
+- You use GitHub's _Require status checks to pass before merging_ branch protection rule
+
+If you don't select any status check, and you use platform automerge, then GitHub might automerge PRs with failing tests!
+
 ## automergeComment
 
 Use this only if you configure `automergeType="pr-comment"`.
@@ -433,7 +443,7 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 Another example would be if you want to configure a DCO signoff to each commit.
 
-If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](https://docs.renovatebot.com/presets-default/#gitsignoff) to your `extends` array:
+If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
 
 ```json
 {
@@ -615,7 +625,12 @@ Renovate supports two options:
 More advanced filtering options may come in future.
 
 There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
-This feature is limited to `packagist`, `npm`, and `pypi` datasources.
+This feature is limited to the folllowing datasources:
+
+- `jenkins-plugins`
+- `npm`
+- `packagist`
+- `pypi`
 
 <!-- prettier-ignore -->
 !!! warning
@@ -648,7 +663,7 @@ When using with `npm`, we recommend you:
 Use `customDatasources` to fetch releases from APIs or statically hosted sites and Renovate has no own datasource.
 These datasources can be referred by `customManagers` or can be used to overwrite default datasources.
 
-For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
+For more details see the [`custom` datasource documentation](modules/datasource/custom/index.md).
 
 ## customManagers
 
@@ -674,12 +689,12 @@ We recommend you use only _one_ of these methods, or you'll get confused.
 We recommend that you also tell Renovate what `versioning` to use.
 If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
 
-For more details and examples about it, see our [documentation for the `regex` manager](/modules/manager/regex/).
+For more details and examples about it, see our [documentation for the `regex` manager](modules/manager/regex/index.md).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 <!-- prettier-ignore -->
 !!! tip
-    Look at our [Regex Manager Presets](https://docs.renovatebot.com/presets-regexManagers/), they may have what you need.
+    Look at our [Regex Manager Presets](./presets-regexManagers.md), they may have what you need.
 
 ### customType
 
@@ -965,7 +980,7 @@ It is not needed if either:
 ### format
 
 Defines which format the API is returning.
-Currently `json` or `plain` are supported, see the `custom` [datasource documentation](/modules/datasource/custom/) for more information.
+Currently `json` or `plain` are supported, see the `custom` [datasource documentation](modules/datasource/custom/index.md) for more information.
 
 ### transformTemplates
 
@@ -1170,7 +1185,17 @@ Example:
 }
 ```
 
-For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
+To enable custom managers you will need to add `custom.` prefix before their names
+
+Example:
+
+```json
+{
+  "enabledManagers": ["custom.regex"]
+}
+```
+
+For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
 
 ## encrypted
 
@@ -1223,6 +1248,11 @@ Example:
 ```
 
 The above would mean Renovate would not include files matching the above glob pattern in the commit, even if it thinks they should be updated.
+
+## expandCodeOwnersGroups
+
+If configured, Renovate will expand any matching `CODEOWNERS` groups into a full list of group members and assign them individually instead of the group.
+This is particularly useful when combined with `assigneesSampleSize` and `assigneesFromCodeOwners`, so that only a subset of the Codeowners are assigned instead of the whole group.
 
 ## extends
 
@@ -1329,7 +1359,7 @@ Because `fileMatch` is mergeable, you don't need to duplicate the defaults and c
 ```
 
 If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example).
-The full list of supported managers can be found [here](https://docs.renovatebot.com/modules/manager/).
+The full list of supported managers can be found [here](modules/manager/index.md#supported-managers).
 
 ## filterUnavailableUsers
 
@@ -1738,6 +1768,26 @@ Example config:
 }
 ```
 
+### maxRetryAfter
+
+A remote host may return a `4xx` response with a `Retry-After` header value, which indicates that Renovate has been rate-limited.
+Renovate may try to contact the host again after waiting a certain time, that's set by the host.
+By default, Renovate tries again after the `Retry-After` header value has passed, up to a maximum of 60 seconds.
+If the `Retry-After` value is more than 60 seconds, Renovate will abort the request instead of waiting.
+
+You can configure a different maximum value in seconds using `maxRetryAfter`:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "maxRetryAfter": 25
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
@@ -1771,7 +1821,7 @@ Example:
 }
 ```
 
-### keepalive
+### keepAlive
 
 If enabled, this allows a single TCP connection to remain open for multiple HTTP(S) requests/responses.
 
@@ -1858,7 +1908,7 @@ Specifies the private key in [PEM format](https://en.wikipedia.org/wiki/Privacy-
 <!-- prettier-ignore -->
 !!! warning
     Do _not_ put your private key into this field, to avoid losing confidentiality completely.
-    You must use [secrets](https://docs.renovatebot.com/self-hosted-configuration/#secrets) to pass it down securely instead.
+    You must use [secrets](./self-hosted-configuration.md#secrets) to pass it down securely instead.
 
 ### httpsCertificate
 
@@ -2163,15 +2213,15 @@ Set `osvVulnerabilityAlerts` to `true` to get pull requests with vulnerability f
 You will only get OSV-based vulnerability alerts for _direct_ dependencies.
 Renovate only queries the OSV database for dependencies that use one of these datasources:
 
-- [`crate`](https://docs.renovatebot.com/modules/datasource/crate/)
-- [`go`](https://docs.renovatebot.com/modules/datasource/go/)
-- [`hex`](https://docs.renovatebot.com/modules/datasource/hex/)
-- [`maven`](https://docs.renovatebot.com/modules/datasource/maven/)
-- [`npm`](https://docs.renovatebot.com/modules/datasource/npm/)
-- [`nuget`](https://docs.renovatebot.com/modules/datasource/nuget/)
-- [`packagist`](https://docs.renovatebot.com/modules/datasource/packagist/)
-- [`pypi`](https://docs.renovatebot.com/modules/datasource/pypi/)
-- [`rubygems`](https://docs.renovatebot.com/modules/datasource/rubygems/)
+- [`crate`](./modules/datasource/crate/index.md)
+- [`go`](./modules/datasource/go/index.md)
+- [`hex`](./modules/datasource/hex/index.md)
+- [`maven`](./modules/datasource/maven/index.md)
+- [`npm`](./modules/datasource/npm/index.md)
+- [`nuget`](./modules/datasource/nuget/index.md)
+- [`packagist`](./modules/datasource/packagist/index.md)
+- [`pypi`](./modules/datasource/pypi/index.md)
+- [`rubygems`](./modules/datasource/rubygems/index.md)
 
 ## packageRules
 
@@ -2397,7 +2447,7 @@ This field supports Regular Expressions if they begin and end with `/`, otherwis
 
 Use `matchCategories` to restrict rules to a particular language or group.
 Matching is done using "any" logic, i.e. "match any of the following categories".
-The categories can be found in the [manager documentation](./modules/manager/index.md).
+The categories can be found in the [manager documentation](modules/manager/index.md).
 
 <!-- prettier-ignore -->
 !!! note
@@ -2478,7 +2528,7 @@ Use this field to restrict rules to a particular package manager. e.g.
 }
 ```
 
-For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
+For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
 
 ### matchDatasources
 
@@ -2550,8 +2600,8 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
 }
 ```
 
-The syntax of the version range must follow the [versioning scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning) used by the matched package(s).
-This is usually defined by the [manager](https://docs.renovatebot.com/modules/manager/#supported-managers) which discovered them or by the default versioning for the package's [datasource](https://docs.renovatebot.com/modules/datasource/).
+The syntax of the version range must follow the [versioning scheme](modules/versioning.md#supported-versioning) used by the matched package(s).
+This is usually defined by the [manager](modules/manager/index.md#supported-managers) which discovered them or by the default versioning for the package's [datasource](modules/datasource/index.md).
 For example, a Gradle package would typically need Gradle constraint syntax (e.g. `[,7.0)`) and not SemVer syntax (e.g. `<7.0`).
 
 This field also supports Regular Expressions which must begin and end with `/`.
@@ -2811,6 +2861,7 @@ Managers which do not support replacement:
 - `homebrew`
 - `maven`
 - `regex`
+- `sbt`
 
 Use the `replacementName` config option to set the name of a replacement package.
 
@@ -3013,9 +3064,7 @@ If set to `branch` the postUpgradeTask is executed for the whole branch.
 
 Use this array to provide a list of column names you wish to include in the PR tables.
 
-For example, if you wish to add the package file name to the table, you would add this to your config:
-
-```json
+```json title="Adding the package file name to the table"
 {
   "prBodyColumns": [
     "Package",
@@ -3034,11 +3083,12 @@ For example, if you wish to add the package file name to the table, you would ad
 
 ## prBodyDefinitions
 
-You can configure this object to either (a) modify the template for an existing table column in PR bodies, or (b) you wish to _add_ a definition for a new/additional column.
+You can configure this object to either:
 
-Here is an example of modifying the default value for the `"Package"` column to put it inside a `<code></code>` block:
+- modify the template for an existing table column in PR bodies, or
+- _add_ a definition for a new/additional column.
 
-```json
+```json title="Modifying the default value for the Package column to put it inside a code block"
 {
   "prBodyDefinitions": {
     "Package": "`{{{depName}}}`"
@@ -3046,9 +3096,7 @@ Here is an example of modifying the default value for the `"Package"` column to 
 }
 ```
 
-Here is an example of adding a custom `"Sourcegraph"` column definition:
-
-```json
+```json title="Adding a custom Sourcegraph column definition"
 {
   "prBodyDefinitions": {
     "Sourcegraph": "[![code search for \"{{{depName}}}\"](https://sourcegraph.com/search/badge?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}}&label=matches)](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}})"
@@ -3071,9 +3119,7 @@ Here is an example of adding a custom `"Sourcegraph"` column definition:
 
 Use this field to add custom content inside PR bodies, including conditionally.
 
-e.g. if you wish to add an extra Warning to major updates:
-
-```json
+```json title="Adding an extra Warning to major updates"
 {
   "prBodyNotes": ["{{#if isMajor}}:warning: MAJOR MAJOR MAJOR :warning:{{/if}}"]
 }
@@ -3245,7 +3291,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, and update nothing otherwise
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn`, `terraform` and `poetry` so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `npm`, `yarn`, `terraform` and `poetry` so far
 - `in-range-only` = Update the lock file when in-range updates are available, ignore package file updates
 
 Renovate's `"auto"` strategy works like this for npm:
@@ -3319,18 +3365,18 @@ You can use the `registryAliases` object to set registry aliases.
 
 This feature works with the following managers:
 
-- [`ansible`](/modules/manager/ansible)
-- [`bitbucket-pipelines`](/modules/manager/bitbucket-pipelines)
-- [`docker-compose`](/modules/manager/docker-compose)
-- [`dockerfile`](/modules/manager/dockerfile)
-- [`droneci`](/modules/manager/droneci)
-- [`gitlabci`](/modules/manager/gitlabci/)
-- [`helm-requirements`](/modules/manager/helm-requirements/)
-- [`helmfile`](/modules/manager/helmfile/)
-- [`helmv3`](/modules/manager/helmv3/)
-- [`kubernetes`](/modules/manager/kubernetes)
-- [`terraform`](/modules/manager/terraform)
-- [`woodpecker`](/modules/manager/woodpecker)
+- [`ansible`](modules/manager/ansible/index.md)
+- [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
+- [`docker-compose`](modules/manager/docker-compose/index.md)
+- [`dockerfile`](modules/manager/dockerfile/index.md)
+- [`droneci`](modules/manager/droneci/index.md)
+- [`gitlabci`](modules/manager/gitlabci/index.md)
+- [`helm-requirements`](modules/manager/helm-requirements/index.md)
+- [`helmfile`](modules/manager/helmfile/index.md)
+- [`helmv3`](modules/manager/helmv3/index.md)
+- [`kubernetes`](modules/manager/kubernetes/index.md)
+- [`terraform`](modules/manager/terraform/index.md)
+- [`woodpecker`](modules/manager/woodpecker/index.md)
 
 ```json
 {
@@ -3427,7 +3473,7 @@ The default value for `schedule` is "at any time", which is functionally the sam
 i.e. Renovate will run on the repository around the clock.
 
 The easiest way to define a schedule is to use a preset if one of them fits your requirements.
-See [Schedule presets](https://docs.renovatebot.com/presets-schedule/) for details and feel free to request a new one in the source repository if you think it would help others.
+See [Schedule presets](./presets-schedule.md) for details and feel free to request a new one in the source repository if you think it would help others.
 
 ```title="Some text schedules that are known to work"
 every weekend
@@ -3537,6 +3583,23 @@ If you wish to distinguish between patch and minor upgrades, for example if you 
 Configure this to `true` if you wish to get one PR for every separate major version upgrade of a dependency.
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
+
+## statusCheckNames
+
+You can customize the name/context of status checks that Renovate adds to commits/branches/PRs.
+
+This option enables you to modify any existing status checks name/context, but adding new status checks this way is _not_ supported.
+Setting the value to `null` or an empty string, effectively disables or skips that status check.
+This option is mergeable, which means you only have to specify the status checks that you want to modify.
+
+```json title="Example of overriding status check strings"
+{
+  "statusCheckNames": {
+    "minimumReleaseAge": "custom/stability-days",
+    "mergeConfidence": "custom/merge-confidence-level"
+  }
+}
+```
 
 ## stopUpdatingLabel
 

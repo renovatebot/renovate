@@ -3,6 +3,7 @@ import { logger } from '../../../../../../logger';
 import type { GitlabRelease } from '../../../../../../modules/datasource/gitlab-releases/types';
 import type { GitlabTreeNode } from '../../../../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../../../../util/http/gitlab';
+import { compareChangelogFilePath } from '../common';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
@@ -16,7 +17,7 @@ const http = new GitlabHttp(id);
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  sourceDirectory?: string
+  sourceDirectory?: string,
 ): Promise<ChangeLogFile | null> {
   logger.trace('gitlab.getReleaseNotesMd()');
   const urlEncodedRepo = encodeURIComponent(repository);
@@ -30,7 +31,7 @@ export async function getReleaseNotesMd(
       }`,
       {
         paginate: true,
-      }
+      },
     )
   ).body;
   const allFiles = tree.filter((f) => f.type === 'blob');
@@ -42,11 +43,13 @@ export async function getReleaseNotesMd(
     logger.trace('no changelog file found');
     return null;
   }
-  const { path: changelogFile, id } = files.shift()!;
+  const { path: changelogFile, id } = files
+    .sort((a, b) => compareChangelogFilePath(a.name, b.name))
+    .shift()!;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(
-      `Multiple candidates for changelog file, using ${changelogFile}`
+      `Multiple candidates for changelog file, using ${changelogFile}`,
     );
   }
 
@@ -58,7 +61,7 @@ export async function getReleaseNotesMd(
 
 export async function getReleaseList(
   project: ChangeLogProject,
-  _release: ChangeLogRelease
+  _release: ChangeLogRelease,
 ): Promise<ChangeLogNotes[]> {
   logger.trace('gitlab.getReleaseNotesMd()');
   const apiBaseUrl = project.apiBaseUrl;

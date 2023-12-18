@@ -29,7 +29,7 @@ describe('modules/datasource/utils', () => {
     googleAuth.mockImplementationOnce(
       jest.fn().mockImplementationOnce(() => ({
         getAccessToken: jest.fn().mockResolvedValue('some-token'),
-      }))
+      })),
     );
 
     const res = await getGoogleAuthToken();
@@ -40,7 +40,7 @@ describe('modules/datasource/utils', () => {
     googleAuth.mockImplementationOnce(
       jest.fn().mockImplementationOnce(() => ({
         getAccessToken: jest.fn().mockReturnValue(''),
-      }))
+      })),
     );
 
     const res = await getGoogleAuthToken();
@@ -52,7 +52,7 @@ describe('modules/datasource/utils', () => {
     googleAuth.mockImplementationOnce(
       jest.fn().mockImplementationOnce(() => ({
         getAccessToken: jest.fn().mockRejectedValue(new Error(err)),
-      }))
+      })),
     );
 
     await expect(getGoogleAuthToken()).rejects.toThrow('some-error');
@@ -64,7 +64,7 @@ describe('modules/datasource/utils', () => {
         getAccessToken: jest.fn().mockRejectedValue({
           message: 'Could not load the default credentials',
         }),
-      }))
+      })),
     );
 
     const res = await getGoogleAuthToken();

@@ -4,7 +4,7 @@ import { Lazy } from '../../../../util/lazy';
 import { PackageJson, PackageJsonSchema } from '../schema';
 
 export function lazyLoadPackageJson(
-  lockFileDir: string
+  lockFileDir: string,
 ): Lazy<Promise<PackageJsonSchema>> {
   return new Lazy(() => loadPackageJson(lockFileDir));
 }
@@ -12,11 +12,11 @@ export function lazyLoadPackageJson(
 export type LazyPackageJson = ReturnType<typeof lazyLoadPackageJson>;
 
 export async function loadPackageJson(
-  lockFileDir: string
+  lockFileDir: string,
 ): Promise<PackageJsonSchema> {
   const json = await readLocalFile(
     upath.join(lockFileDir, 'package.json'),
-    'utf8'
+    'utf8',
   );
   const res = PackageJson.safeParse(json);
   if (res.success) {
@@ -27,7 +27,7 @@ export async function loadPackageJson(
 
 export function getPackageManagerVersion(
   name: string,
-  pkg: PackageJsonSchema
+  pkg: PackageJsonSchema,
 ): string | null {
   if (pkg.packageManager?.name === name) {
     return pkg.packageManager.version;

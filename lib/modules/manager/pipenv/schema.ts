@@ -6,7 +6,7 @@ const PipfileLockEntrySchema = z
     z.string(),
     z.object({
       version: z.string().optional(),
-    })
+    }),
   )
   .optional();
 
@@ -24,5 +24,5 @@ export const PipfileLockSchema = Json.pipe(
       .optional(),
     default: PipfileLockEntrySchema,
     develop: PipfileLockEntrySchema,
-  })
+  }),
 );

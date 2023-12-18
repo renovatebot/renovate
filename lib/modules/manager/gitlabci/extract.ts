@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { trimLeadingSlash } from '../../../util/url';
+import { parseSingleYaml } from '../../../util/yaml';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -15,7 +15,7 @@ import { getGitlabDep, replaceReferenceTags } from './utils';
 
 export function extractFromImage(
   image: Image | undefined,
-  registryAliases?: Record<string, string>
+  registryAliases?: Record<string, string>,
 ): PackageDependency | null {
   if (is.undefined(image)) {
     return null;
@@ -33,7 +33,7 @@ export function extractFromImage(
 
 export function extractFromServices(
   services: Services | undefined,
-  registryAliases?: Record<string, string>
+  registryAliases?: Record<string, string>,
 ): PackageDependency[] {
   if (is.undefined(services)) {
     return [];
@@ -55,7 +55,7 @@ export function extractFromServices(
 
 export function extractFromJob(
   job: Job | undefined,
-  registryAliases?: Record<string, string>
+  registryAliases?: Record<string, string>,
 ): PackageDependency[] {
   if (is.undefined(job)) {
     return [];
@@ -79,11 +79,11 @@ export function extractFromJob(
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): PackageFileContent | null {
   let deps: PackageDependency[] = [];
   try {
-    const doc = load(replaceReferenceTags(content), {
+    const doc = parseSingleYaml(replaceReferenceTags(content), {
       json: true,
     }) as Record<string, Image | Services | Job>;
     if (is.object(doc)) {
@@ -93,7 +93,7 @@ export function extractPackageFile(
             {
               const dep = extractFromImage(
                 value as Image,
-                config.registryAliases
+                config.registryAliases,
               );
               if (dep) {
                 deps.push(dep);
@@ -103,7 +103,7 @@ export function extractPackageFile(
 
           case 'services':
             deps.push(
-              ...extractFromServices(value as Services, config.registryAliases)
+              ...extractFromServices(value as Services, config.registryAliases),
             );
             break;
 
@@ -117,7 +117,7 @@ export function extractPackageFile(
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       { err, packageFile },
-      'Error extracting GitLab CI dependencies'
+      'Error extracting GitLab CI dependencies',
     );
   }
 
@@ -126,7 +126,7 @@ export function extractPackageFile(
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  packageFiles: string[]
+  packageFiles: string[],
 ): Promise<PackageFile[] | null> {
   const filesToExamine = [...packageFiles];
   const seen = new Set<string>(packageFiles);
@@ -140,19 +140,19 @@ export async function extractAllPackageFiles(
     if (!content) {
       logger.debug(
         { packageFile: file },
-        `Empty or non existent gitlabci file`
+        `Empty or non existent gitlabci file`,
       );
       continue;
     }
     let doc: GitlabPipeline;
     try {
-      doc = load(replaceReferenceTags(content), {
+      doc = parseSingleYaml(replaceReferenceTags(content), {
         json: true,
       }) as GitlabPipeline;
     } catch (err) {
       logger.debug(
         { err, packageFile: file },
-        'Error extracting GitLab CI dependencies'
+        'Error extracting GitLab CI dependencies',
       );
       continue;
     }
@@ -184,7 +184,7 @@ export async function extractAllPackageFiles(
 
   logger.trace(
     { packageFiles, files: filesToExamine.entries() },
-    'extracted all GitLab CI files'
+    'extracted all GitLab CI files',
   );
 
   if (!results.length) {

@@ -11,7 +11,7 @@ import type { PyProjectProcessor } from './types';
 export class HatchProcessor implements PyProjectProcessor {
   process(
     pyproject: PyProject,
-    deps: PackageDependency[]
+    deps: PackageDependency[],
   ): PackageDependency[] {
     const hatch_envs = pyproject.tool?.hatch?.envs;
     if (is.nullOrUndefined(hatch_envs)) {
@@ -24,7 +24,7 @@ export class HatchProcessor implements PyProjectProcessor {
       deps.push(...envDeps);
       const extraDeps = parseDependencyList(
         depType,
-        env?.['extra-dependencies']
+        env?.['extra-dependencies'],
       );
       deps.push(...extraDeps);
     }
@@ -34,7 +34,7 @@ export class HatchProcessor implements PyProjectProcessor {
 
   updateArtifacts(
     updateArtifact: UpdateArtifact,
-    project: PyProject
+    project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
     // Hatch does not have lock files at the moment
     // https://github.com/pypa/hatch/issues/749

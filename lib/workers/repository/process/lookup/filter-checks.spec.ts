@@ -56,7 +56,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -71,7 +71,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -86,7 +86,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeTrue();
@@ -101,7 +101,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -116,7 +116,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -134,7 +134,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -149,7 +149,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();
@@ -169,7 +169,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
         config,
         versioning,
         'patch',
-        sortedReleases
+        sortedReleases,
       );
       expect(res).toMatchSnapshot();
       expect(res.pendingChecks).toBeFalse();

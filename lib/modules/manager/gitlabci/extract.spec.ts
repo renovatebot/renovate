@@ -33,7 +33,7 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(
         await extractAllPackageFiles(config, [
           'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.2.yaml',
-        ])
+        ]),
       ).toBeNull();
     });
 
@@ -180,7 +180,7 @@ describe('modules/manager/gitlabci/extract', () => {
             alias: imagealias1
       `,
         '',
-        {}
+        {},
       );
       expect(res?.deps).toEqual([
         {
@@ -240,7 +240,7 @@ describe('modules/manager/gitlabci/extract', () => {
         '',
         {
           registryAliases,
-        }
+        },
       );
       expect(res?.deps).toEqual([
         {
@@ -294,7 +294,7 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(
         extractFromImage({
           name: 'image:test',
-        })
+        }),
       ).toEqual(expectedRes);
 
       expect(extractFromImage(undefined)).toBeNull();
@@ -327,7 +327,7 @@ describe('modules/manager/gitlabci/extract', () => {
       expect(extractFromServices(undefined)).toBeEmptyArray();
       expect(extractFromServices(services)).toEqual(expectedRes);
       expect(
-        extractFromServices([{ name: 'image:test' }, { name: 'image2:test2' }])
+        extractFromServices([{ name: 'image:test' }, { name: 'image2:test2' }]),
       ).toEqual(expectedRes);
     });
 

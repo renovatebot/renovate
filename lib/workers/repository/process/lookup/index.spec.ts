@@ -43,17 +43,17 @@ let config: LookupUpdateConfig;
 describe('workers/repository/process/lookup/index', () => {
   const getGithubReleases = jest.spyOn(
     GithubReleasesDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   const getGithubTags = jest.spyOn(
     GithubTagsDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   const getDockerReleases = jest.spyOn(
     DockerDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
@@ -85,7 +85,7 @@ describe('workers/repository/process/lookup/index', () => {
       // @ts-expect-error: testing invalid currentValue
       config.currentValue = 3;
       expect((await lookup.lookupUpdates(config)).skipReason).toBe(
-        'invalid-value'
+        'invalid-value',
       );
     });
 
@@ -261,7 +261,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       await expect(lookup.lookupUpdates(config)).rejects.toThrow(
-        Error(CONFIG_VALIDATION)
+        Error(CONFIG_VALIDATION),
       );
     });
 
@@ -385,7 +385,7 @@ describe('workers/repository/process/lookup/index', () => {
           .get('/q')
           .reply(200, qJson);
         expect(await lookup.lookupUpdates(config)).toMatchObject({ updates });
-      }
+      },
     );
 
     it.each`
@@ -406,7 +406,7 @@ describe('workers/repository/process/lookup/index', () => {
           .get('/q')
           .reply(200, qJson);
         expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
-      }
+      },
     );
 
     it('supports pinning for x-range-all (no lockfile)', async () => {
@@ -447,7 +447,7 @@ describe('workers/repository/process/lookup/index', () => {
           .get('/q')
           .reply(200, qJson);
         expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
-      }
+      },
     );
 
     it('ignores pinning for ranges when other upgrade exists', async () => {
@@ -1228,7 +1228,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(0);
       expect(res.warnings).toHaveLength(1);
       expect(res.warnings[0].message).toBe(
-        "Can't find version with tag foo for npm package typescript"
+        "Can't find version with tag foo for npm package typescript",
       );
     });
 
@@ -1301,7 +1301,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = GithubTagsDatasource.id;
 
       getGithubTags.mockRejectedValueOnce(
-        new Error('Not contained in registry')
+        new Error('Not contained in registry'),
       );
       getGithubTags.mockResolvedValueOnce({
         releases: [
@@ -1321,7 +1321,7 @@ describe('workers/repository/process/lookup/index', () => {
         expect.objectContaining({
           registryUrl: 'https://github.com',
         }),
-        'v1.0.0'
+        'v1.0.0',
       );
 
       expect(res.updates).toHaveLength(1);
@@ -2270,7 +2270,7 @@ describe('workers/repository/process/lookup/index', () => {
       const defaultApiBaseUrl = 'https://developer.mend.io/';
       const getMergeConfidenceSpy = jest.spyOn(
         McApi,
-        'getMergeConfidenceLevel'
+        'getMergeConfidenceLevel',
       );
       const hostRule: HostRule = {
         hostType: 'merge-confidence',
@@ -2304,7 +2304,7 @@ describe('workers/repository/process/lookup/index', () => {
         httpMock
           .scope(defaultApiBaseUrl)
           .get(
-            `/api/mc/json/${datasource}/${packageName}/${currentValue}/${newVersion}`
+            `/api/mc/json/${datasource}/${packageName}/${currentValue}/${newVersion}`,
           )
           .reply(200, { confidence: 'high' });
 

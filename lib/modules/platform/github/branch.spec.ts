@@ -35,9 +35,9 @@ describe('modules/platform/github/branch', () => {
       .reply(200);
 
     await expect(
-      remoteBranchExists('my/repo', 'renovate/foobar')
+      remoteBranchExists('my/repo', 'renovate/foobar'),
     ).rejects.toThrow(
-      `Trying to create a branch 'renovate/foobar' while it's the part of nested branch`
+      `Trying to create a branch 'renovate/foobar' while it's the part of nested branch`,
     );
   });
 
@@ -48,7 +48,7 @@ describe('modules/platform/github/branch', () => {
       .reply(500, { message: 'Something went wrong' });
 
     await expect(
-      remoteBranchExists('my/repo', 'renovate/foobar')
+      remoteBranchExists('my/repo', 'renovate/foobar'),
     ).rejects.toThrow('external-host-error');
   });
 });

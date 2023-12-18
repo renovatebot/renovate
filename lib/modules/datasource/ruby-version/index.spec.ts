@@ -37,7 +37,7 @@ describe('modules/datasource/ruby-version/index', () => {
         .get('/en/downloads/releases/')
         .reply(404);
       await expect(
-        getPkgReleases({ datasource, packageName: 'ruby' })
+        getPkgReleases({ datasource, packageName: 'ruby' }),
       ).rejects.toThrow();
     });
   });

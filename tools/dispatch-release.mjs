@@ -30,7 +30,7 @@ console.log(`Dispatching version: ${version}`);
           tag,
         },
       },
-    }
+    },
   );
 })().catch((e) => {
   // Ignore for now

@@ -24,7 +24,7 @@ RegEx ??= RegExp;
 export function regEx(
   pattern: string | RegExp,
   flags?: string | undefined,
-  useCache = true
+  useCache = true,
 ): RegExp {
   let canBeCached = useCache;
   if (canBeCached && flags?.includes('g')) {
@@ -49,9 +49,11 @@ export function regEx(
     }
     return instance;
   } catch (err) {
+    logger.trace({ err }, 'RegEx constructor error');
     const error = new Error(CONFIG_VALIDATION);
+    error.validationMessage = err.message;
     error.validationSource = pattern.toString();
-    error.validationError = `Invalid regular expression: ${pattern.toString()}`;
+    error.validationError = `Invalid regular expression (re2): ${pattern.toString()}`;
     throw error;
   }
 }
@@ -86,7 +88,7 @@ function parseConfigRegex(input: string): RegExp | null {
 type ConfigRegexPredicate = (s: string) => boolean;
 
 export function configRegexPredicate(
-  input: string
+  input: string,
 ): ConfigRegexPredicate | null {
   if (isConfigRegex(input)) {
     const configRegex = parseConfigRegex(input);
@@ -102,7 +104,7 @@ export function configRegexPredicate(
 }
 
 const UUIDRegex = regEx(
-  /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i
+  /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i,
 );
 
 export function isUUID(input: string): boolean {

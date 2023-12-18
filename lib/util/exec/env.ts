@@ -19,10 +19,15 @@ const basicEnvVars = [
   'SSL_CERT_DIR',
   'SSL_CERT_FILE',
   'NODE_EXTRA_CA_CERTS',
+  // Required for NuGet to work on Windows.
+  'PROGRAMFILES',
+  'PROGRAMFILES(X86)',
+  'APPDATA',
+  'LOCALAPPDATA',
 ];
 
 export function getChildProcessEnv(
-  customEnvVars: string[] = []
+  customEnvVars: string[] = [],
 ): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = {};
   if (GlobalConfig.get('exposeAllEnv')) {

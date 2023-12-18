@@ -14,7 +14,7 @@ function matchesFileName(fileNameWithPath: string, fileName: string): boolean {
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  matchedFiles: string[]
+  matchedFiles: string[],
 ): Promise<PackageFile[]> {
   const packageFiles: PackageFile<NpmManagerData>[] = [];
   for (const matchedFile of matchedFiles) {

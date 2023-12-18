@@ -14,6 +14,6 @@ describe('modules/datasource/nuget/v3', () => {
     ({ version, other, result }) => {
       const res = sortNugetVersions(version, other);
       expect(res).toBe(result);
-    }
+    },
   );
 });

@@ -20,7 +20,7 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
       await getPkgReleases({
         datasource: AzurePipelinesTasksDatasource.id,
         packageName: 'unknown',
-      })
+      }),
     ).toBeNull();
   });
 
@@ -33,7 +33,7 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
       await getPkgReleases({
         datasource: AzurePipelinesTasksDatasource.id,
         packageName: 'AutomatedAnalysis',
-      })
+      }),
     ).toEqual({ releases: [{ version: '0.171.0' }, { version: '0.198.0' }] });
   });
 
@@ -48,7 +48,7 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
       await getPkgReleases({
         datasource: AzurePipelinesTasksDatasource.id,
         packageName: 'AutomatedAnalysis-Marketplace',
-      })
+      }),
     ).toEqual({ releases: [{ version: '0.171.0' }, { version: '0.198.0' }] });
   });
 
@@ -61,7 +61,7 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
       await getPkgReleases({
         datasource: AzurePipelinesTasksDatasource.id,
         packageName: 'automatedanalysis',
-      })
+      }),
     ).toEqual({ releases: [{ version: '0.171.0' }, { version: '0.198.0' }] });
   });
 });

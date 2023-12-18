@@ -22,7 +22,7 @@ export function gradleWrapperFileName(): string {
 }
 
 export async function prepareGradleCommand(
-  gradlewFile: string
+  gradlewFile: string,
 ): Promise<string | null> {
   const gradlewStat = await statLocalFile(gradlewFile);
   if (gradlewStat?.isFile() === true) {
@@ -44,7 +44,7 @@ export async function prepareGradleCommand(
  * @returns A Java semver range
  */
 export function getJavaConstraint(
-  gradleVersion: string | null | undefined
+  gradleVersion: string | null | undefined,
 ): string {
   const major = gradleVersion ? gradleVersioning.getMajor(gradleVersion) : null;
   const minor = gradleVersion ? gradleVersioning.getMinor(gradleVersion) : null;
@@ -63,11 +63,11 @@ export function getJavaConstraint(
 
 // https://regex101.com/r/IcOs7P/1
 const DISTRIBUTION_URL_REGEX = regEx(
-  '^(?:distributionUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip)\\s*$'
+  '^(?:distributionUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip)\\s*$',
 );
 
 export function extractGradleVersion(
-  fileContent: string
+  fileContent: string,
 ): GradleVersionExtract | null {
   const lines = fileContent?.split(newlineRegex) ?? [];
 
@@ -82,7 +82,7 @@ export function extractGradleVersion(
     }
   }
   logger.debug(
-    'Gradle wrapper version and url could not be extracted from properties - skipping update'
+    'Gradle wrapper version and url could not be extracted from properties - skipping update',
   );
 
   return null;

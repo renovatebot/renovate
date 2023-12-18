@@ -7,7 +7,7 @@ import { addSecretForSanitizing } from '../../util/sanitize';
 const JFROG_ARTIFACTORY_RES_HEADER = 'x-jfrog-version';
 
 export function isArtifactoryServer<T = unknown>(
-  res: HttpResponse<T> | undefined
+  res: HttpResponse<T> | undefined,
 ): boolean {
   return is.string(res?.headers[JFROG_ARTIFACTORY_RES_HEADER]);
 }
@@ -24,7 +24,7 @@ export async function getGoogleAuthToken(): Promise<string | null> {
       return Buffer.from(`oauth2accesstoken:${accessToken}`).toString('base64');
     } else {
       logger.warn(
-        'Could not retrieve access token using google-auth-library getAccessToken'
+        'Could not retrieve access token using google-auth-library getAccessToken',
       );
     }
   } catch (err) {

@@ -3,7 +3,7 @@ import type { PackageDependency } from '../types';
 import { dependencyRegex, galaxyRegEx } from './util';
 
 export function extractCollectionsMetaDataFile(
-  lines: string[]
+  lines: string[],
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   // in a galaxy.yml the dependency map is inside a `dependencies:` block

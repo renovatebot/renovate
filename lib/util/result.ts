@@ -25,7 +25,7 @@ interface Err<E extends Val> {
 type Res<T extends Val, E extends Val> = Ok<T> | Err<E>;
 
 function isZodResult<Input, Output extends Val>(
-  input: unknown
+  input: unknown,
 ): input is SafeParseReturnType<Input, Output> {
   if (
     typeof input !== 'object' ||
@@ -49,7 +49,7 @@ function isZodResult<Input, Output extends Val>(
 }
 
 function fromZodResult<ZodInput, ZodOutput extends Val>(
-  input: SafeParseReturnType<ZodInput, ZodOutput>
+  input: SafeParseReturnType<ZodInput, ZodOutput>,
 ): Result<ZodOutput, ZodError<ZodInput>> {
   return input.success ? Result.ok(input.data) : Result.err(input.error);
 }
@@ -66,11 +66,11 @@ type RawValue<T extends Val> = Exclude<
 function fromNullable<
   T extends Val,
   ErrForNull extends Val,
-  ErrForUndefined extends Val
+  ErrForUndefined extends Val,
 >(
   input: Nullable<T>,
   errForNull: ErrForNull,
-  errForUndefined: ErrForUndefined
+  errForUndefined: ErrForUndefined,
 ): Result<T, ErrForNull | ErrForUndefined> {
   if (input === null) {
     return Result.err(errForNull);
@@ -136,28 +136,28 @@ export class Result<T extends Val, E extends Val = Error> {
    *   ```
    */
   static wrap<T extends Val, Input = unknown>(
-    zodResult: SafeParseReturnType<Input, T>
+    zodResult: SafeParseReturnType<Input, T>,
   ): Result<T, ZodError<Input>>;
   static wrap<T extends Val, E extends Val = Error>(
-    callback: () => RawValue<T>
+    callback: () => RawValue<T>,
   ): Result<T, E>;
   static wrap<T extends Val, E extends Val = Error, EE extends Val = never>(
-    promise: Promise<Result<T, EE>>
+    promise: Promise<Result<T, EE>>,
   ): AsyncResult<T, E | EE>;
   static wrap<T extends Val, E extends Val = Error>(
-    promise: Promise<RawValue<T>>
+    promise: Promise<RawValue<T>>,
   ): AsyncResult<T, E>;
   static wrap<
     T extends Val,
     E extends Val = Error,
     EE extends Val = never,
-    Input = unknown
+    Input = unknown,
   >(
     input:
       | SafeParseReturnType<Input, T>
       | (() => RawValue<T>)
       | Promise<Result<T, EE>>
-      | Promise<RawValue<T>>
+      | Promise<RawValue<T>>,
   ): Result<T, ZodError<Input>> | Result<T, E | EE> | AsyncResult<T, E | EE> {
     if (isZodResult<Input, T>(input)) {
       return fromZodResult(input);
@@ -222,66 +222,66 @@ export class Result<T extends Val, E extends Val = Error> {
   static wrapNullable<
     T extends Val,
     E extends Val = Error,
-    ErrForNullable extends Val = Error
+    ErrForNullable extends Val = Error,
   >(
     callback: () => Nullable<T>,
-    errForNullable: ErrForNullable
+    errForNullable: ErrForNullable,
   ): Result<T, E | ErrForNullable>;
   static wrapNullable<
     T extends Val,
     E extends Val = Error,
     ErrForNull extends Val = Error,
-    ErrForUndefined extends Val = Error
+    ErrForUndefined extends Val = Error,
   >(
     callback: () => Nullable<T>,
     errForNull: ErrForNull,
-    errForUndefined: ErrForUndefined
+    errForUndefined: ErrForUndefined,
   ): Result<T, E | ErrForNull | ErrForUndefined>;
   static wrapNullable<
     T extends Val,
     E extends Val = Error,
-    ErrForNullable extends Val = Error
+    ErrForNullable extends Val = Error,
   >(
     promise: Promise<Nullable<T>>,
-    errForNullable: ErrForNullable
+    errForNullable: ErrForNullable,
   ): AsyncResult<T, E | ErrForNullable>;
   static wrapNullable<
     T extends Val,
     E extends Val = Error,
     ErrForNull extends Val = Error,
-    ErrForUndefined extends Val = Error
+    ErrForUndefined extends Val = Error,
   >(
     promise: Promise<Nullable<T>>,
     errForNull: ErrForNull,
-    errForUndefined: ErrForUndefined
+    errForUndefined: ErrForUndefined,
   ): AsyncResult<T, E | ErrForNull | ErrForUndefined>;
   static wrapNullable<
     T extends Val,
     E extends Val = Error,
-    ErrForNullable extends Val = Error
+    ErrForNullable extends Val = Error,
   >(
     value: Nullable<T>,
-    errForNullable: ErrForNullable
+    errForNullable: ErrForNullable,
   ): Result<T, E | ErrForNullable>;
   static wrapNullable<
     T extends Val,
     E extends Val = Error,
     ErrForNull extends Val = Error,
-    ErrForUndefined extends Val = Error
+    ErrForUndefined extends Val = Error,
   >(
     value: Nullable<T>,
     errForNull: ErrForNull,
-    errForUndefined: ErrForUndefined
+    errForUndefined: ErrForUndefined,
   ): Result<T, E | ErrForNull | ErrForUndefined>;
   static wrapNullable<
     T extends Val,
     E extends Val = Error,
     ErrForNull extends Val = Error,
-    ErrForUndefined extends Val = Error
+    ErrForUndefined extends Val = Error,
   >(
     input: (() => Nullable<T>) | Promise<Nullable<T>> | Nullable<T>,
     arg2: ErrForNull,
-    arg3?: ErrForUndefined
+    arg3?: ErrForUndefined,
   ):
     | Result<T, E | ErrForNull | ErrForUndefined>
     | AsyncResult<T, E | ErrForNull | ErrForUndefined> {
@@ -405,27 +405,27 @@ export class Result<T extends Val, E extends Val = Error> {
    *   ```
    */
   transform<U extends Val, EE extends Val>(
-    fn: (value: T) => Result<U, E | EE>
+    fn: (value: T) => Result<U, E | EE>,
   ): Result<U, E | EE>;
   transform<U extends Val, EE extends Val>(
-    fn: (value: T) => AsyncResult<U, E | EE>
+    fn: (value: T) => AsyncResult<U, E | EE>,
   ): AsyncResult<U, E | EE>;
   transform<U extends Val, Input = unknown>(
-    fn: (value: T) => SafeParseReturnType<Input, NonNullable<U>>
+    fn: (value: T) => SafeParseReturnType<Input, NonNullable<U>>,
   ): Result<U, E | ZodError<Input>>;
   transform<U extends Val, Input = unknown>(
-    fn: (value: T) => Promise<SafeParseReturnType<Input, NonNullable<U>>>
+    fn: (value: T) => Promise<SafeParseReturnType<Input, NonNullable<U>>>,
   ): AsyncResult<U, E | ZodError<Input>>;
   transform<U extends Val, EE extends Val>(
-    fn: (value: T) => Promise<Result<U, E | EE>>
+    fn: (value: T) => Promise<Result<U, E | EE>>,
   ): AsyncResult<U, E | EE>;
   transform<U extends Val>(
-    fn: (value: T) => Promise<RawValue<U>>
+    fn: (value: T) => Promise<RawValue<U>>,
   ): AsyncResult<U, E>;
   transform<U extends Val>(fn: (value: T) => RawValue<U>): Result<U, E>;
   transform<U extends Val, EE extends Val, Input = unknown>(
     fn: (
-      value: T
+      value: T,
     ) =>
       | Result<U, E | EE>
       | AsyncResult<U, E | EE>
@@ -433,7 +433,7 @@ export class Result<T extends Val, E extends Val = Error> {
       | Promise<SafeParseReturnType<Input, NonNullable<U>>>
       | Promise<Result<U, E | EE>>
       | Promise<RawValue<U>>
-      | RawValue<U>
+      | RawValue<U>,
   ):
     | Result<U, E | EE | ZodError<Input>>
     | AsyncResult<U, E | EE | ZodError<Input>> {
@@ -471,18 +471,21 @@ export class Result<T extends Val, E extends Val = Error> {
   }
 
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: E) => Result<U, E | EE>
+    fn: (err: E) => Result<U, E | EE>,
   ): Result<T | U, E | EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: E) => AsyncResult<U, E | EE>
+    fn: (err: E) => AsyncResult<U, E | EE>,
   ): AsyncResult<T | U, E | EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: E) => Promise<Result<U, E | EE>>
+    fn: (err: E) => Promise<Result<U, E | EE>>,
   ): AsyncResult<T | U, E | EE>;
   catch<U extends Val = T, EE extends Val = E>(
     fn: (
-      err: E
-    ) => Result<U, E | EE> | AsyncResult<U, E | EE> | Promise<Result<U, E | EE>>
+      err: E,
+    ) =>
+      | Result<U, E | EE>
+      | AsyncResult<U, E | EE>
+      | Promise<Result<U, E | EE>>,
   ): Result<T | U, E | EE> | AsyncResult<T | U, E | EE> {
     if (this.res.ok) {
       return this;
@@ -499,7 +502,7 @@ export class Result<T extends Val, E extends Val = Error> {
         return AsyncResult.wrap(result, (err) => {
           logger.warn(
             { err },
-            'Result: unexpected error in async catch handler'
+            'Result: unexpected error in async catch handler',
           );
           return Result._uncaught(err);
         });
@@ -519,10 +522,10 @@ export class Result<T extends Val, E extends Val = Error> {
   static parse<
     T,
     Schema extends ZodType<T, ZodTypeDef, Input>,
-    Input = unknown
+    Input = unknown,
   >(
     input: unknown,
-    schema: Schema
+    schema: Schema,
   ): Result<NonNullable<z.infer<Schema>>, ZodError<Input>> {
     const parseResult = schema
       .transform((result, ctx): NonNullable<T> => {
@@ -554,7 +557,7 @@ export class Result<T extends Val, E extends Val = Error> {
    * Additionally, `null` and `undefined` values are converted into Zod error.
    */
   parse<T, Schema extends ZodType<T, ZodTypeDef, Input>, Input = unknown>(
-    schema: Schema
+    schema: Schema,
   ): Result<NonNullable<z.infer<Schema>>, E | ZodError<Input>> {
     if (this.res.ok) {
       return Result.parse(this.res.val, schema);
@@ -615,7 +618,7 @@ export class AsyncResult<T extends Val, E extends Val>
     onfulfilled?:
       | ((value: Result<T, E>) => TResult1 | PromiseLike<TResult1>)
       | undefined
-      | null
+      | null,
   ): PromiseLike<TResult1> {
     return this.asyncResult.then(onfulfilled);
   }
@@ -633,13 +636,13 @@ export class AsyncResult<T extends Val, E extends Val>
     T extends Val,
     E extends Val = Error,
     EE extends Val = never,
-    Input = unknown
+    Input = unknown,
   >(
     promise:
       | Promise<SafeParseReturnType<Input, T>>
       | Promise<Result<T, EE>>
       | Promise<RawValue<T>>,
-    onErr?: (err: NonNullable<E>) => Result<T, E>
+    onErr?: (err: NonNullable<E>) => Result<T, E>,
   ): AsyncResult<T, E | EE> {
     return new AsyncResult(
       promise
@@ -659,7 +662,7 @@ export class AsyncResult<T extends Val, E extends Val>
             return onErr(err);
           }
           return Result.err(err);
-        })
+        }),
     );
   }
 
@@ -667,16 +670,16 @@ export class AsyncResult<T extends Val, E extends Val>
     T extends Val,
     E extends Val,
     ErrForNull extends Val,
-    ErrForUndefined extends Val
+    ErrForUndefined extends Val,
   >(
     promise: Promise<Nullable<T>>,
     errForNull: NonNullable<ErrForNull>,
-    errForUndefined: NonNullable<ErrForUndefined>
+    errForUndefined: NonNullable<ErrForUndefined>,
   ): AsyncResult<T, E | ErrForNull | ErrForUndefined> {
     return new AsyncResult(
       promise
         .then((value) => fromNullable(value, errForNull, errForUndefined))
-        .catch((err) => Result.err(err))
+        .catch((err) => Result.err(err)),
     );
   }
 
@@ -745,27 +748,27 @@ export class AsyncResult<T extends Val, E extends Val>
    *   ```
    */
   transform<U extends Val, EE extends Val>(
-    fn: (value: T) => Result<U, E | EE>
+    fn: (value: T) => Result<U, E | EE>,
   ): AsyncResult<U, E | EE>;
   transform<U extends Val, EE extends Val>(
-    fn: (value: T) => AsyncResult<U, E | EE>
+    fn: (value: T) => AsyncResult<U, E | EE>,
   ): AsyncResult<U, E | EE>;
   transform<U extends Val, Input = unknown>(
-    fn: (value: T) => SafeParseReturnType<Input, NonNullable<U>>
+    fn: (value: T) => SafeParseReturnType<Input, NonNullable<U>>,
   ): AsyncResult<U, E | ZodError<Input>>;
   transform<U extends Val, Input = unknown>(
-    fn: (value: T) => Promise<SafeParseReturnType<Input, NonNullable<U>>>
+    fn: (value: T) => Promise<SafeParseReturnType<Input, NonNullable<U>>>,
   ): AsyncResult<U, E | ZodError<Input>>;
   transform<U extends Val, EE extends Val>(
-    fn: (value: T) => Promise<Result<U, E | EE>>
+    fn: (value: T) => Promise<Result<U, E | EE>>,
   ): AsyncResult<U, E | EE>;
   transform<U extends Val>(
-    fn: (value: T) => Promise<RawValue<U>>
+    fn: (value: T) => Promise<RawValue<U>>,
   ): AsyncResult<U, E>;
   transform<U extends Val>(fn: (value: T) => RawValue<U>): AsyncResult<U, E>;
   transform<U extends Val, EE extends Val, Input = unknown>(
     fn: (
-      value: T
+      value: T,
     ) =>
       | Result<U, E | EE>
       | AsyncResult<U, E | EE>
@@ -773,7 +776,7 @@ export class AsyncResult<T extends Val, E extends Val>
       | Promise<SafeParseReturnType<Input, NonNullable<U>>>
       | Promise<Result<U, E | EE>>
       | Promise<RawValue<U>>
-      | RawValue<U>
+      | RawValue<U>,
   ): AsyncResult<U, E | EE | ZodError<Input>> {
     return new AsyncResult(
       this.asyncResult
@@ -802,7 +805,7 @@ export class AsyncResult<T extends Val, E extends Val>
               return AsyncResult.wrap(result, (err) => {
                 logger.warn(
                   { err },
-                  'AsyncResult: unhandled async transform error'
+                  'AsyncResult: unhandled async transform error',
                 );
                 return Result._uncaught(err);
               });
@@ -817,27 +820,30 @@ export class AsyncResult<T extends Val, E extends Val>
         .catch((err) => {
           // Happens when `.unwrap()` of `oldResult` throws
           return Result._uncaught(err);
-        })
+        }),
     );
   }
 
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: NonNullable<E>) => Result<U, E | EE>
+    fn: (err: NonNullable<E>) => Result<U, E | EE>,
   ): AsyncResult<T | U, E | EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: NonNullable<E>) => AsyncResult<U, E | EE>
+    fn: (err: NonNullable<E>) => AsyncResult<U, E | EE>,
   ): AsyncResult<T | U, E | EE>;
   catch<U extends Val = T, EE extends Val = E>(
-    fn: (err: NonNullable<E>) => Promise<Result<U, E | EE>>
+    fn: (err: NonNullable<E>) => Promise<Result<U, E | EE>>,
   ): AsyncResult<T | U, E | EE>;
   catch<U extends Val = T, EE extends Val = E>(
     fn: (
-      err: NonNullable<E>
-    ) => Result<U, E | EE> | AsyncResult<U, E | EE> | Promise<Result<U, E | EE>>
+      err: NonNullable<E>,
+    ) =>
+      | Result<U, E | EE>
+      | AsyncResult<U, E | EE>
+      | Promise<Result<U, E | EE>>,
   ): AsyncResult<T | U, E | EE> {
     const caughtAsyncResult = this.asyncResult.then((result) =>
       // eslint-disable-next-line promise/no-nesting
-      result.catch(fn as never)
+      result.catch(fn as never),
     );
     return AsyncResult.wrap(caughtAsyncResult);
   }
@@ -847,15 +853,15 @@ export class AsyncResult<T extends Val, E extends Val>
    * Additionally, `null` and `undefined` values are converted into Zod error.
    */
   parse<T, Schema extends ZodType<T, ZodTypeDef, Input>, Input = unknown>(
-    schema: Schema
+    schema: Schema,
   ): AsyncResult<NonNullable<z.infer<Schema>>, E | ZodError<Input>> {
     return new AsyncResult(
       this.asyncResult
         .then((oldResult) => oldResult.parse(schema))
         .catch(
           /* istanbul ignore next: should never happen */
-          (err) => Result._uncaught(err)
-        )
+          (err) => Result._uncaught(err),
+        ),
     );
   }
 
@@ -865,8 +871,8 @@ export class AsyncResult<T extends Val, E extends Val>
         .then((result) => result.onValue(fn))
         .catch(
           /* istanbul ignore next: should never happen */
-          (err) => Result._uncaught(err)
-        )
+          (err) => Result._uncaught(err),
+        ),
     );
   }
 
@@ -876,8 +882,8 @@ export class AsyncResult<T extends Val, E extends Val>
         .then((result) => result.onError(fn))
         .catch(
           /* istanbul ignore next: should never happen */
-          (err) => Result._uncaught(err)
-        )
+          (err) => Result._uncaught(err),
+        ),
     );
   }
 }

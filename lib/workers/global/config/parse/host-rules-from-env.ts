@@ -37,7 +37,7 @@ function restoreHttpsAuthField(x: HttpsAuthField | AuthField): string {
 function setHostRuleValue(
   rule: HostRule,
   key: string,
-  value: string | undefined
+  value: string | undefined,
 ): void {
   if (value !== undefined) {
     switch (key) {
@@ -61,6 +61,9 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
   const npmEnvPrefixes = ['npm_config_', 'npm_lifecycle_', 'npm_package_'];
 
   for (const envName of Object.keys(env).sort()) {
+    if (envName === 'GITHUB_COM_TOKEN') {
+      continue;
+    }
     if (npmEnvPrefixes.some((prefix) => envName.startsWith(prefix))) {
       logger.trace('Ignoring npm env: ' + envName);
       continue;
@@ -88,7 +91,7 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
           matchHost = splitEnv.join('.');
         }
         const existingRule = hostRules.find(
-          (hr) => hr.hostType === hostType && hr.matchHost === matchHost
+          (hr) => hr.hostType === hostType && hr.matchHost === matchHost,
         );
         logger.debug(`Converting ${envName} into a global host rule`);
         if (existingRule) {

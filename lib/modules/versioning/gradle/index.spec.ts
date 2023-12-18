@@ -205,7 +205,7 @@ describe('modules/versioning/gradle/index', () => {
       expect(api.getMajor(input)).toBe(major);
       expect(api.getMinor(input)).toBe(minor);
       expect(api.getPatch(input)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -233,7 +233,7 @@ describe('modules/versioning/gradle/index', () => {
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
       expect(api.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -250,7 +250,7 @@ describe('modules/versioning/gradle/index', () => {
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(api.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -260,7 +260,7 @@ describe('modules/versioning/gradle/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(api.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -295,6 +295,6 @@ describe('modules/versioning/gradle/index', () => {
         newVersion,
       });
       expect(res).toBe(expected);
-    }
+    },
   );
 });

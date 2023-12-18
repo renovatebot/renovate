@@ -1,15 +1,16 @@
 import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
+import type { LongCommitSha } from './types';
 
 export function getCachedBehindBaseResult(
   branchName: string,
-  branchSha: string | null,
+  branchSha: LongCommitSha | null,
   baseBranch: string,
-  baseBranchSha: string | null
+  baseBranchSha: LongCommitSha | null,
 ): boolean | null {
   const cache = getCache();
   const branch = cache.branches?.find(
-    (branch) => branch.branchName === branchName
+    (branch) => branch.branchName === branchName,
   );
 
   if (
@@ -27,11 +28,11 @@ export function getCachedBehindBaseResult(
 
 export function setCachedBehindBaseResult(
   branchName: string,
-  isBehindBase: boolean
+  isBehindBase: boolean,
 ): void {
   const cache = getCache();
   const branch = cache.branches?.find(
-    (branch) => branch.branchName === branchName
+    (branch) => branch.branchName === branchName,
   );
 
   if (!branch) {

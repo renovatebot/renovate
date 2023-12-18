@@ -19,7 +19,7 @@ describe('modules/manager/bazel-module/context', () => {
             name: fragments.string('rules_foo'),
             version: fragments.string('1.2.3'),
           },
-          true
+          true,
         ),
       ]);
     });
@@ -43,10 +43,10 @@ describe('modules/manager/bazel-module/context', () => {
             name: fragments.string('my_library'),
             srcs: fragments.array(
               [fragments.string('first'), fragments.string('second')],
-              true
+              true,
             ),
           },
-          true
+          true,
         ),
       ]);
     });
@@ -60,14 +60,14 @@ describe('modules/manager/bazel-module/context', () => {
       it('throws if there is no current', () => {
         const ctx = new Ctx();
         expect(() => ctx.currentRecord).toThrow(
-          new Error('Requested current, but no value.')
+          new Error('Requested current, but no value.'),
         );
       });
 
       it('throws if the current is not a record fragment', () => {
         const ctx = new Ctx().startArray();
         expect(() => ctx.currentRecord).toThrow(
-          new Error('Requested current record, but does not exist.')
+          new Error('Requested current record, but does not exist.'),
         );
       });
     });
@@ -81,7 +81,7 @@ describe('modules/manager/bazel-module/context', () => {
       it('throws if the current is not a record fragment', () => {
         const ctx = new Ctx().startRecord();
         expect(() => ctx.currentArray).toThrow(
-          new Error('Requested current array, but does not exist.')
+          new Error('Requested current array, but does not exist.'),
         );
       });
     });
@@ -90,8 +90,8 @@ describe('modules/manager/bazel-module/context', () => {
       const ctx = new Ctx().startAttribute('name');
       expect(() => ctx.addString('chicken')).toThrow(
         new CtxProcessingError(
-          fragments.attribute('name', fragments.string('chicken'))
-        )
+          fragments.attribute('name', fragments.string('chicken')),
+        ),
       );
     });
   });

@@ -140,6 +140,7 @@ export interface RepoGlobalConfig {
   exposeAllEnv?: boolean;
   githubTokenWarn?: boolean;
   migratePresets?: Record<string, string>;
+  presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
   localDir?: string;
@@ -176,7 +177,7 @@ export interface PostUpgradeTasks {
 }
 
 export type UpdateConfig<
-  T extends RenovateSharedConfig = RenovateSharedConfig
+  T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
 export type RenovateRepository =
@@ -188,6 +189,14 @@ export type RenovateRepository =
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
+
+export const allowedStatusCheckStrings = [
+  'minimumReleaseAge',
+  'mergeConfidence',
+  'configValidation',
+  'artifactError',
+] as const;
+export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -260,11 +269,16 @@ export interface RenovateConfig
 
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
+
+  statusCheckNames?: Record<StatusCheckKey, string | null>;
 }
+
+const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
+export type CustomDatasourceFormats = (typeof CustomDatasourceFormats)[number];
 
 export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
-  format?: 'json' | 'plain';
+  format?: CustomDatasourceFormats;
   transformTemplates?: string[];
 }
 
@@ -275,6 +289,7 @@ export interface AllConfig
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
+  expandCodeOwnersGroups?: boolean;
   assignees?: string[];
   assigneesSampleSize?: number;
   ignoreReviewers?: string[];
@@ -396,7 +411,7 @@ export interface RenovateOptionBase {
 }
 
 export interface RenovateArrayOption<
-  T extends string | number | Record<string, unknown> = Record<string, unknown>
+  T extends string | number | Record<string, unknown> = Record<string, unknown>,
 > extends RenovateOptionBase {
   default?: T[] | null;
   mergeable?: boolean;

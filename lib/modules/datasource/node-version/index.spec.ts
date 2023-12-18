@@ -12,7 +12,7 @@ describe('modules/datasource/node-version/index', () => {
         getPkgReleases({
           datasource,
           packageName: 'node',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -25,7 +25,7 @@ describe('modules/datasource/node-version/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'node',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -35,7 +35,7 @@ describe('modules/datasource/node-version/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'node',
-        })
+        }),
       ).toBeNull();
     });
 

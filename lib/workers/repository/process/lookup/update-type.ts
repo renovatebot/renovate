@@ -11,7 +11,7 @@ export function getUpdateType(
   config: UpdateTypeConfig,
   versioning: allVersioning.VersioningApi,
   currentVersion: string,
-  newVersion: string
+  newVersion: string,
 ): UpdateType {
   if (versioning.getMajor(newVersion)! > versioning.getMajor(currentVersion)!) {
     return 'major';

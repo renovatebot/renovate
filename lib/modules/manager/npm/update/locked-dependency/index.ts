@@ -5,7 +5,7 @@ import * as packageLock from './package-lock';
 import * as yarnLock from './yarn-lock';
 
 export async function updateLockedDependency(
-  config: UpdateLockedConfig
+  config: UpdateLockedConfig,
 ): Promise<UpdateLockedResult> {
   const { currentVersion, newVersion, lockFile } = config;
   if (!(semver.isVersion(currentVersion) && semver.isVersion(newVersion))) {

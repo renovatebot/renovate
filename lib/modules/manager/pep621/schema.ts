@@ -26,7 +26,7 @@ export const PyProjectSchema = z.object({
                 url: z.string(),
                 name: z.string(),
                 verify_ssl: z.boolean().optional(),
-              })
+              }),
             )
             .optional(),
         })
@@ -41,7 +41,7 @@ export const PyProjectSchema = z.object({
                   dependencies: DependencyListSchema,
                   'extra-dependencies': DependencyListSchema,
                 })
-                .optional()
+                .optional(),
             )
             .optional(),
         })

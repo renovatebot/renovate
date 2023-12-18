@@ -6,11 +6,11 @@ import { TerraformProviderDatasource } from '.';
 const azurermData = Fixtures.get('azurerm-provider.json');
 const azurermVersionsData = Fixtures.get('azurerm-provider-versions.json');
 const hashicorpGoogleBetaReleases = Fixtures.get(
-  'releaseBackendIndexGoogleBeta.json'
+  'releaseBackendIndexGoogleBeta.json',
 );
 const serviceDiscoveryResult = Fixtures.get('service-discovery.json');
 const telmateProxmoxVersions = Fixtures.get(
-  'telmate-proxmox-versions-response.json'
+  'telmate-proxmox-versions-response.json',
 );
 
 const terraformProviderDatasource = new TerraformProviderDatasource();
@@ -34,7 +34,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
           packageName: 'azurerm',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -53,7 +53,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
           packageName: 'azurerm',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -72,7 +72,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
           packageName: 'azurerm',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -116,7 +116,7 @@ describe('modules/datasource/terraform-provider/index', () => {
           datasource: TerraformProviderDatasource.id,
           packageName: 'azurerm',
           registryUrls: ['https://registry.company.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -132,7 +132,7 @@ describe('modules/datasource/terraform-provider/index', () => {
           datasource: TerraformProviderDatasource.id,
           packageName: 'azurerm',
           registryUrls: ['https://registry.company.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -148,7 +148,7 @@ describe('modules/datasource/terraform-provider/index', () => {
           datasource: TerraformProviderDatasource.id,
           packageName: 'azurerm',
           registryUrls: ['https://registry.company.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -247,7 +247,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
           packageName: 'azurerm',
-        })
+        }),
       ).toBeNull();
     });
   });
@@ -264,7 +264,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       const result = await terraformProviderDatasource.getBuilds(
         terraformProviderDatasource.defaultRegistryUrls[0],
         'hashicorp/azurerm',
-        '2.50.0'
+        '2.50.0',
       );
       expect(result).toBeNull();
     });
@@ -273,7 +273,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       const result = await terraformProviderDatasource.getBuilds(
         terraformProviderDatasource.defaultRegistryUrls[1],
         'test/azurerm',
-        '2.50.0'
+        '2.50.0',
       );
       expect(result).toBeNull();
     });
@@ -288,7 +288,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       const result = await terraformProviderDatasource.getBuilds(
         terraformProviderDatasource.defaultRegistryUrls[0],
         'Telmate/proxmox',
-        '2.8.0'
+        '2.8.0',
       );
       expect(result).toBeNull();
     });
@@ -331,7 +331,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       const res = await terraformProviderDatasource.getBuilds(
         terraformProviderDatasource.defaultRegistryUrls[0],
         'Telmate/proxmox',
-        '2.6.1'
+        '2.6.1',
       );
       expect(res).toEqual([
         {
@@ -406,7 +406,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       const res = await terraformProviderDatasource.getBuilds(
         terraformProviderDatasource.defaultRegistryUrls[0],
         'Telmate/proxmox',
-        '2.6.1'
+        '2.6.1',
       );
       expect(res).toBeNull();
     });
@@ -417,27 +417,18 @@ describe('modules/datasource/terraform-provider/index', () => {
       httpMock
         .scope(secondaryUrl)
         .get(
-          '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
+          '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
         )
         .reply(
           200,
           '500d4e787bf046bbe64c4853530aff3dfddee2fdbff0087d7b1e7a8c24388628 terraform-provider-azurerm_2.56.0_darwin_amd64.zip\n' +
             '766ff42596d643f9945b3aab2e83e306fe77c3020a5196366bbbb77eeea13b71 terraform-provider-azurerm_2.56.0_linux_amd64.zip\n' +
-            'fbdb892d9822ed0e4cb60f2fedbdbb556e4da0d88d3b942ae963ed6ff091e48f terraform-provider-azurerm_2.56.0_manifest.json'
+            'fbdb892d9822ed0e4cb60f2fedbdbb556e4da0d88d3b942ae963ed6ff091e48f terraform-provider-azurerm_2.56.0_manifest.json',
         );
 
-      const res = await terraformProviderDatasource.getZipHashes([
-        {
-          name: 'azurerm',
-          version: '2.56.0',
-          os: 'linux',
-          arch: 'amd64',
-          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-          shasums_url:
-            'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
-        },
-      ]);
+      const res = await terraformProviderDatasource.getZipHashes(
+        'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
+      );
 
       expect(res).toMatchObject([
         '500d4e787bf046bbe64c4853530aff3dfddee2fdbff0087d7b1e7a8c24388628',
@@ -446,47 +437,17 @@ describe('modules/datasource/terraform-provider/index', () => {
       ]);
     });
 
-    it('does not fetch anything when there are no builds passed in', async () => {
-      const res = await terraformProviderDatasource.getZipHashes([]);
-
-      expect(res).toBeEmptyArray();
-    });
-
-    it('does not fetch anything when there is no shasums_url defined', async () => {
-      const res = await terraformProviderDatasource.getZipHashes([
-        {
-          name: 'azurerm',
-          version: '2.56.0',
-          os: 'linux',
-          arch: 'amd64',
-          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-        },
-      ]);
-
-      expect(res).toBeEmptyArray();
-    });
-
     it('does not hard fail when the ziphashes endpoint is not available', async () => {
       httpMock
         .scope(secondaryUrl)
         .get(
-          '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS'
+          '/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
         )
         .reply(404);
 
-      const res = await terraformProviderDatasource.getZipHashes([
-        {
-          name: 'azurerm',
-          version: '2.56.0',
-          os: 'linux',
-          arch: 'amd64',
-          filename: 'terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-          url: 'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_linux_amd64.zip',
-          shasums_url:
-            'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
-        },
-      ]);
+      const res = await terraformProviderDatasource.getZipHashes(
+        'https://releases.hashicorp.com/terraform-provider-azurerm/2.56.0/terraform-provider-azurerm_2.56.0_SHA256SUMS',
+      );
 
       expect(res).toBeUndefined();
     });

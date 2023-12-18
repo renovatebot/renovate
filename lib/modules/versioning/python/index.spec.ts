@@ -50,7 +50,7 @@ describe('modules/versioning/python/index', () => {
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(versioning.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -62,7 +62,7 @@ describe('modules/versioning/python/index', () => {
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(versioning.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -79,7 +79,7 @@ describe('modules/versioning/python/index', () => {
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(versioning.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -93,7 +93,7 @@ describe('modules/versioning/python/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(versioning.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   test('getNewValue()', () => {

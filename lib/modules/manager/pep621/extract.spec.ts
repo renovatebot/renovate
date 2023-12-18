@@ -18,7 +18,7 @@ describe('modules/manager/pep621/extract', () => {
         [project]
         name =
       `,
-        'pyproject.toml'
+        'pyproject.toml',
       );
       expect(result).toBeNull();
     });
@@ -32,7 +32,7 @@ describe('modules/manager/pep621/extract', () => {
         },
       });
       const dependencies = result?.deps.filter(
-        (dep) => dep.depType === 'project.dependencies'
+        (dep) => dep.depType === 'project.dependencies',
       );
       expect(dependencies).toEqual([
         {
@@ -122,7 +122,7 @@ describe('modules/manager/pep621/extract', () => {
       ]);
 
       const optionalDependencies = result?.deps.filter(
-        (dep) => dep.depType === 'project.optional-dependencies'
+        (dep) => dep.depType === 'project.optional-dependencies',
       );
       expect(optionalDependencies).toEqual([
         {
@@ -142,7 +142,7 @@ describe('modules/manager/pep621/extract', () => {
       ]);
 
       const pdmDevDependencies = result?.deps.filter(
-        (dep) => dep.depType === 'tool.pdm.dev-dependencies'
+        (dep) => dep.depType === 'tool.pdm.dev-dependencies',
       );
       expect(pdmDevDependencies).toEqual([
         {
@@ -251,7 +251,7 @@ describe('modules/manager/pep621/extract', () => {
       verify_ssl = true
       name = "internal"
       `,
-        'pyproject.toml'
+        'pyproject.toml',
       );
 
       expect(result?.deps).toEqual([

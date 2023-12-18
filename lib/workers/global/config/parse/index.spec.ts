@@ -23,7 +23,7 @@ describe('workers/global/config/parse/index', () => {
       defaultEnv = {
         RENOVATE_CONFIG_FILE: upath.resolve(
           __dirname,
-          './__fixtures__/default.js'
+          './__fixtures__/default.js',
         ),
       };
     });
@@ -42,7 +42,7 @@ describe('workers/global/config/parse/index', () => {
       ]);
       const parsedConfig = await configParser.parseConfigs(
         defaultEnv,
-        defaultArgv
+        defaultArgv,
       );
       expect(parsedConfig).toContainEntries([
         ['token', 'abc'],
@@ -87,7 +87,7 @@ describe('workers/global/config/parse/index', () => {
       const privateKeyPath = upath.join(__dirname, '__fixtures__/private.pem');
       const privateKeyPathOld = upath.join(
         __dirname,
-        '__fixtures__/private.pem'
+        '__fixtures__/private.pem',
       );
       const env: NodeJS.ProcessEnv = {
         ...defaultEnv,
@@ -108,7 +108,7 @@ describe('workers/global/config/parse/index', () => {
       ]);
       const parsedConfig = await configParser.parseConfigs(
         defaultEnv,
-        defaultArgv
+        defaultArgv,
       );
       expect(parsedConfig).toContainEntries([
         ['platform', 'bitbucket'],

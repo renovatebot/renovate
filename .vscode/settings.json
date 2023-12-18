@@ -9,7 +9,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[md]": {
-    "editor.wordBasedSuggestions": false
+    "editor.wordBasedSuggestions": "off"
   },
   "files.associations": {
     "Dockerfile.*": "dockerfile",
@@ -19,9 +19,8 @@
   "jest.autoRun": "off",
   "jest.jestCommandLine": "pnpm jest",
   "npm.packageManager": "pnpm",
-  "prettier.prettierPath": "./node_modules/prettier",
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   }
 }

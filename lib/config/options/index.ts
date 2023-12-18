@@ -171,6 +171,19 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'statusCheckNames',
+    description: 'Custom strings to use as status check names.',
+    type: 'object',
+    mergeable: true,
+    advancedUse: true,
+    default: {
+      artifactError: 'renovate/artifacts',
+      configValidation: 'renovate/config-validation',
+      mergeConfidence: 'renovate/merge-confidence',
+      minimumReleaseAge: 'renovate/stability-days',
+    },
+  },
+  {
     name: 'extends',
     description: 'Configuration presets to use or extend.',
     stage: 'package',
@@ -199,6 +212,13 @@ const options: RenovateOptions[] = [
     additionalProperties: {
       type: 'string',
     },
+  },
+  {
+    name: 'presetCachePersistence',
+    description: 'Cache resolved presets in package cache.',
+    type: 'boolean',
+    globalOnly: true,
+    default: false,
   },
   {
     name: 'globalExtends',
@@ -373,7 +393,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.23.11',
+    default: 'ghcr.io/containerbase/sidecar:9.30.6',
     globalOnly: true,
   },
   {
@@ -1629,7 +1649,7 @@ const options: RenovateOptions[] = [
       commitMessageExtra:
         'with {{newName}} {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{#if isSingleVersion}}{{{prettyNewVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
       prBodyNotes: [
-        'This is a special PR that replaces `{{{depNameSanitized}}}` with the community suggested minimal stable replacement version.',
+        'This is a special PR that replaces `{{{depName}}}` with the community suggested minimal stable replacement version.',
       ],
     },
     cli: false,
@@ -2095,6 +2115,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'expandCodeOwnersGroups',
+    description:
+      'Expand the configured code owner groups into a full list of group members.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitlab'],
+  },
+  {
     name: 'assigneesSampleSize',
     description: 'Take a random sample of given size from `assignees`.',
     type: 'integer',
@@ -2341,15 +2369,15 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
-    name: 'keepalive',
-    description: 'Enable HTTP keepalives for hosts.',
+    name: 'keepAlive',
+    description: 'Enable HTTP keep-alive for hosts.',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
     default: false,
     cli: false,
     env: false,
-    experimental: true,
+    advancedUse: true,
   },
   {
     name: 'artifactAuth',
@@ -2725,6 +2753,17 @@ const options: RenovateOptions[] = [
     experimental: true,
     globalOnly: true,
     default: [],
+  },
+  {
+    name: 'maxRetryAfter',
+    description:
+      'Maximum retry-after header value to wait for before retrying a failed request.',
+    type: 'integer',
+    default: 60,
+    stage: 'package',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
   },
 ];
 

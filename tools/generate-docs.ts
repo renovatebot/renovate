@@ -75,7 +75,7 @@ process.on('unhandledRejection', (err) => {
 
     await tar.create(
       { file: './tmp/docs.tgz', cwd: './tmp/docs', gzip: true },
-      ['.']
+      ['.'],
     );
   } catch (err) {
     logger.error({ err }, 'Unexpected error');

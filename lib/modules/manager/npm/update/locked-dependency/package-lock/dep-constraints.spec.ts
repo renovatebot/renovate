@@ -15,8 +15,8 @@ describe('modules/manager/npm/update/locked-dependency/package-lock/dep-constrai
           packageLockJson,
           'send',
           '0.2.0',
-          '0.2.1'
-        )
+          '0.2.1',
+        ),
       ).toEqual([
         {
           constraint: '0.2.0',
@@ -33,8 +33,8 @@ describe('modules/manager/npm/update/locked-dependency/package-lock/dep-constrai
           packageLockJson,
           'express',
           '4.0.0',
-          '4.5.0'
-        )
+          '4.5.0',
+        ),
       ).toEqual([{ constraint: '4.0.0', depType: 'dependencies' }]);
     });
 
@@ -45,8 +45,8 @@ describe('modules/manager/npm/update/locked-dependency/package-lock/dep-constrai
           packageLockJson,
           'express',
           '4.4.0',
-          '4.5.0'
-        )
+          '4.5.0',
+        ),
       ).toHaveLength(0);
     });
 
@@ -60,8 +60,8 @@ describe('modules/manager/npm/update/locked-dependency/package-lock/dep-constrai
           packageLockJson,
           'express',
           '4.0.0',
-          '4.5.0'
-        )
+          '4.5.0',
+        ),
       ).toEqual([{ constraint: '4.0.0', depType: 'devDependencies' }]);
     });
   });

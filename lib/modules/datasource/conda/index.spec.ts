@@ -16,7 +16,7 @@ describe('modules/datasource/conda/index', () => {
         getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -26,7 +26,7 @@ describe('modules/datasource/conda/index', () => {
         await getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -39,7 +39,7 @@ describe('modules/datasource/conda/index', () => {
         await getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -49,7 +49,7 @@ describe('modules/datasource/conda/index', () => {
         getPkgReleases({
           datasource,
           packageName,
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 

@@ -47,7 +47,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
             merged: 1,
           },
         },
-        `Renovate repository PR statistics`
+        `Renovate repository PR statistics`,
       );
     });
   });
@@ -84,7 +84,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
           branches: [],
           inactiveBranches: [],
         },
-        `Branch summary`
+        `Branch summary`,
       );
     });
 
@@ -149,7 +149,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
           defaultBranch,
           inactiveBranches: ['b3'],
         },
-        `Branch summary`
+        `Branch summary`,
       );
     });
 

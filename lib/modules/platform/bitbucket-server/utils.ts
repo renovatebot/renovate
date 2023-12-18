@@ -50,7 +50,7 @@ const addMaxLength = (inputUrl: string, limit = 100): string => {
 function callApi<T>(
   apiUrl: string,
   method: string,
-  options?: HttpOptions
+  options?: HttpOptions,
 ): Promise<HttpResponse<T>> {
   /* istanbul ignore next */
   switch (method.toLowerCase()) {
@@ -76,7 +76,7 @@ export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
   options?: HttpOptions,
-  limit?: number
+  limit?: number,
 ): Promise<T[]> {
   let accumulator: T[] = [];
   let nextUrl = addMaxLength(reqUrl, limit);
@@ -128,7 +128,7 @@ export function isInvalidReviewersResponse(err: BitbucketError): boolean {
   return (
     errors.length > 0 &&
     errors.every(
-      (error) => error.exceptionName === BITBUCKET_INVALID_REVIEWERS_EXCEPTION
+      (error) => error.exceptionName === BITBUCKET_INVALID_REVIEWERS_EXCEPTION,
     )
   );
 }
@@ -141,7 +141,7 @@ export function getInvalidReviewers(err: BitbucketError): string[] {
       invalidReviewers = invalidReviewers.concat(
         error.reviewerErrors
           ?.map(({ context }) => context)
-          .filter(is.nonEmptyString) ?? []
+          .filter(is.nonEmptyString) ?? [],
       );
     }
   }
@@ -152,7 +152,7 @@ export function getInvalidReviewers(err: BitbucketError): string[] {
 function generateUrlFromEndpoint(
   defaultEndpoint: string,
   opts: HostRule,
-  repository: string
+  repository: string,
 ): string {
   const url = new URL(defaultEndpoint);
   const generatedUrl = git.getUrl({
@@ -185,7 +185,7 @@ export function getRepoGitUrl(
   defaultEndpoint: string,
   gitUrl: GitUrlOption | undefined,
   info: BbsRestRepo,
-  opts: HostRule
+  opts: HostRule,
 ): string {
   if (gitUrl === 'ssh') {
     const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');

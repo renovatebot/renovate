@@ -8,7 +8,7 @@ describe('config/migrations/custom/ignore-npmrc-file-migration', () => {
       },
       {
         npmrc: '',
-      }
+      },
     );
   });
 
@@ -20,7 +20,7 @@ describe('config/migrations/custom/ignore-npmrc-file-migration', () => {
       },
       {
         npmrc: '',
-      }
+      },
     );
   });
 
@@ -32,7 +32,7 @@ describe('config/migrations/custom/ignore-npmrc-file-migration', () => {
       } as any,
       {
         npmrc: '',
-      }
+      },
     );
   });
 });

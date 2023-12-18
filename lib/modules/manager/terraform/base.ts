@@ -21,19 +21,19 @@ export abstract class DependencyExtractor {
   abstract extract(
     hclRoot: TerraformDefinitionFile,
     locks: ProviderLock[],
-    config: ExtractConfig
+    config: ExtractConfig,
   ): PackageDependency[];
 }
 
 export abstract class TerraformProviderExtractor extends DependencyExtractor {
   sourceExtractionRegex = regEx(
-    /^(?:(?<hostname>(?:[a-zA-Z0-9-_]+\.+)+[a-zA-Z0-9-_]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/
+    /^(?:(?<hostname>(?:[a-zA-Z0-9-_]+\.+)+[a-zA-Z0-9-_]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/,
   );
 
   protected analyzeTerraformProvider(
     dep: PackageDependency,
     locks: ProviderLock[],
-    depType: string
+    depType: string,
   ): PackageDependency {
     dep.depType = depType;
     dep.depName = dep.managerData?.moduleName;
@@ -41,7 +41,7 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
 
     if (is.nonEmptyString(dep.managerData?.source)) {
       // TODO #22198
-      const source = this.sourceExtractionRegex.exec(dep.managerData!.source);
+      const source = this.sourceExtractionRegex.exec(dep.managerData.source);
       if (!source?.groups) {
         dep.skipReason = 'unsupported-url';
         return dep;

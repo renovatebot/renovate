@@ -21,6 +21,15 @@ If you want help with your Renovate configuration, go to the [discussions tab in
 
 For **feature requests**: first search for related requests in the issues and discussions, if you don't find anything: create a _discussion_.
 
+## Rate Limiting of Support Requests through Temporary Blocking
+
+To ensure that the Renovate maintainers don't burn out from dealing with unfriendly behavior, those who display a bad attitude when asking for or receiving support in the repo will be rate limited from further requests through the use of temporary blocking.
+The duration of the temporary block depends on how rude or inconsiderate the behavior is perceived to be, and can be from 1-30 days.
+
+If you have been blocked temporarily and believe that it is due to a misunderstanding, or you regret your comments and wish to make amends, please reach out to the lead maintainer Rhys Arkins by email with any request for early unblocking.
+If/once you are unblocked, you should edit or delete whatever comment lead to the blocking, even if you did not intend it to be rude or inconsiderate.
+Long emails or apologies are undesirable - the maintainers are busy and want to be able to help as many users as possible with the time they have available.
+
 ## Code
 
 If you would like to fix a bug or work on a feature, please fork the repository and create a Pull Request.
@@ -121,4 +130,4 @@ Important: this Slack group is restricted to development questions only in order
 Pull Request authors must sign the [Renovate CLA](https://cla-assistant.io/renovateapp/renovate).
 
 If you cannot or do not want to sign this CLA (e.g. your employment contract for your employer may not allow this), you should not submit a PR.
-Open an issue and someone else can do the work.
+Open a discussion and someone else can do the work.

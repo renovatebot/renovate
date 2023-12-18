@@ -75,7 +75,7 @@ export function checkForPlatformFailure(err: Error): Error | null {
 export function handleCommitError(
   err: Error,
   branchName: string,
-  files?: FileChange[]
+  files?: FileChange[],
 ): null {
   checkForPlatformFailure(err);
   if (err.message.includes(`'refs/heads/renovate' exists`)) {
@@ -87,11 +87,11 @@ export function handleCommitError(
   }
   if (
     err.message.includes(
-      'refusing to allow a GitHub App to create or update workflow'
+      'refusing to allow a GitHub App to create or update workflow',
     )
   ) {
     logger.warn(
-      'App has not been granted permissions to update Workflows - aborting branch.'
+      'App has not been granted permissions to update Workflows - aborting branch.',
     );
     return null;
   }
@@ -116,7 +116,7 @@ export function handleCommitError(
     error.validationError = 'Bitbucket committer error';
     error.validationMessage = `Renovate has experienced the following error when attempting to push its branch to the server: \`${err.message.replaceAll(
       '`',
-      "'"
+      "'",
     )}\``;
     throw error;
   }
