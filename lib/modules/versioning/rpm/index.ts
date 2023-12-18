@@ -207,10 +207,7 @@ class RpmVersioningApi extends GenericVersioningApi {
       }
 
       // We have two string globs, compare them
-      const compared_value = this._compare_string(
-        matchv1 as string,
-        matchv2 as string,
-      );
+      const compared_value = this._compare_string(matchv1, matchv2);
       if (compared_value !== 0) {
         return compared_value;
       }
