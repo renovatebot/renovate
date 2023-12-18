@@ -44,7 +44,7 @@ import type {
   RepoInfoBody,
 } from './types';
 import * as utils from './utils';
-import { mergeBodyTransformer } from './utils';
+import { mergeBodyTransformer, prFieldsFilter } from './utils';
 
 export const id = 'bitbucket';
 
@@ -282,6 +282,7 @@ export async function getPrList(): Promise<Pr[]> {
     if (renovateUserUuid && !config.ignorePrAuthor) {
       querySearchParams.append('q', `author.uuid="${renovateUserUuid}"`);
     }
+    querySearchParams.append('fields', prFieldsFilter);
     const query = querySearchParams.toString();
     const url = `/2.0/repositories/${config.repository}/pullrequests?${query}`;
     const prs = (

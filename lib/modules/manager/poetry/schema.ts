@@ -1,4 +1,5 @@
 import { ZodEffects, ZodType, ZodTypeDef, z } from 'zod';
+import { logger } from '../../../logger';
 import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
@@ -71,15 +72,15 @@ const PoetryGitDependency = z
 
 const PoetryPypiDependency = z.union([
   z
-    .object({ version: z.string().optional() })
-    .transform(({ version: currentValue }): PackageDependency => {
+    .object({ version: z.string().optional(), source: z.string().optional() })
+    .transform(({ version: currentValue, source }): PackageDependency => {
       if (!currentValue) {
         return { datasource: PypiDatasource.id };
       }
 
       return {
         datasource: PypiDatasource.id,
-        managerData: { nestedVersion: true },
+        managerData: { nestedVersion: true, sourceName: source?.toLowerCase() },
         currentValue,
       };
     }),
@@ -178,6 +179,70 @@ export const PoetryGroupDependencies = LooseRecord(
   return deps;
 });
 
+const PoetrySourceOrder = [
+  'default',
+  'primary',
+  'secondary',
+  'supplemental',
+  'explicit',
+] as const;
+
+export const PoetrySource = z.object({
+  name: z.string().toLowerCase(),
+  url: z.string().optional(),
+  priority: z.enum(PoetrySourceOrder).default('primary'),
+});
+export type PoetrySource = z.infer<typeof PoetrySource>;
+
+export const PoetrySources = LooseArray(PoetrySource, {
+  onError: ({ error: err }) => {
+    logger.debug({ err }, 'Poetry: error parsing sources array');
+  },
+})
+  .transform((sources) => {
+    const pypiUrl = process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/';
+    const result: PoetrySource[] = [];
+
+    let overridesPyPi = false;
+    let hasDefaultSource = false;
+    let hasPrimarySource = false;
+    for (const source of sources) {
+      if (source.name === 'pypi') {
+        source.url = pypiUrl;
+        overridesPyPi = true;
+      }
+
+      if (!source.url) {
+        continue;
+      }
+
+      if (source.priority === 'default') {
+        hasDefaultSource = true;
+      } else if (source.priority === 'primary') {
+        hasPrimarySource = true;
+      }
+
+      result.push(source);
+    }
+
+    if (sources.length && !hasDefaultSource && !overridesPyPi) {
+      result.push({
+        name: 'pypi',
+        priority: hasPrimarySource ? 'secondary' : 'default',
+        url: pypiUrl,
+      });
+    }
+
+    result.sort(
+      (a, b) =>
+        PoetrySourceOrder.indexOf(a.priority) -
+        PoetrySourceOrder.indexOf(b.priority),
+    );
+
+    return result;
+  })
+  .catch([]);
+
 export const PoetrySectionSchema = z
   .object({
     dependencies: withDepType(PoetryDependencies, 'dependencies').optional(),
@@ -187,21 +252,7 @@ export const PoetrySectionSchema = z
     ).optional(),
     extras: withDepType(PoetryDependencies, 'extras').optional(),
     group: PoetryGroupDependencies.optional(),
-    source: LooseArray(
-      z
-        .object({
-          url: z.string(),
-        })
-        .transform(({ url }) => url),
-    )
-      .refine((urls) => urls.length > 0)
-      .transform((urls) => [
-        ...urls,
-        process.env.PIP_INDEX_URL ?? 'https://pypi.org/pypi/',
-      ])
-      .transform((urls) => uniq(urls))
-      .optional()
-      .catch(undefined),
+    source: PoetrySources,
   })
   .transform(
     ({
@@ -209,7 +260,7 @@ export const PoetrySectionSchema = z
       'dev-dependencies': devDependencies = [],
       extras: extraDependencies = [],
       group: groupDependencies = [],
-      source: registryUrls,
+      source: sourceUrls,
     }) => {
       const deps: PackageDependency[] = [
         ...dependencies,
@@ -220,8 +271,22 @@ export const PoetrySectionSchema = z
 
       const res: PackageFileContent = { deps };
 
-      if (registryUrls) {
-        res.registryUrls = registryUrls;
+      if (sourceUrls.length) {
+        for (const dep of res.deps) {
+          if (dep.managerData?.sourceName) {
+            const sourceUrl = sourceUrls.find(
+              ({ name }) => name === dep.managerData?.sourceName,
+            );
+            if (sourceUrl?.url) {
+              dep.registryUrls = [sourceUrl.url];
+            }
+          }
+        }
+
+        const sourceUrlsFiltered = sourceUrls.filter(
+          ({ priority }) => priority !== 'explicit',
+        );
+        res.registryUrls = uniq(sourceUrlsFiltered.map(({ url }) => url!));
       }
 
       return res;
