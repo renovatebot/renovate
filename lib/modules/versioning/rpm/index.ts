@@ -192,8 +192,8 @@ class RpmVersioningApi extends GenericVersioningApi {
         matchv2 = matchv2?.replace(leadingZerosPattern, '');
 
         //We clearly have a number here, so return which is greater
-        const num1 = Number(matchv1);
-        const num2 = Number(matchv2);
+        const num1 = Number.parseInt(matchv1, 10);
+        const num2 = Number.parseInt(matchv2, 10);
 
         const result = num1 - num2;
 
