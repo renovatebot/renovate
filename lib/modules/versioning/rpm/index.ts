@@ -248,7 +248,6 @@ class RpmVersioningApi extends GenericVersioningApi {
     }
 
     // Greater upstream version wins
-    console.log('upstream...');
     const upstreamVersionDifference = this._compare_glob(
       parsed1.upstreamVersion,
       parsed2.upstreamVersion,
