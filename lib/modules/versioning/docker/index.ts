@@ -88,8 +88,8 @@ class DockerVersioningApi extends GenericVersioningApi {
   }
 
   valueToVersion(value: string): string {
-    // Remove any suffix after '-', e.g. '-alpine'
-    return value ? value.split('-')[0] : value;
+    // Do not remove suffix after '-', e.g. '-alpine'
+    return value
   }
 }
 

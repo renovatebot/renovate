@@ -75,6 +75,7 @@ export abstract class ChangeLogSource {
     const packageName = config.packageName!;
     const sourceDirectory = config.sourceDirectory;
     const version = allVersioning.get(versioning);
+    const manager = config.manager;
 
     if (this.shouldSkipPackage(config)) {
       return null;
@@ -98,7 +99,6 @@ export abstract class ChangeLogSource {
       logger.debug(`Invalid ${this.platform} URL found: ${sourceUrl}`);
       return null;
     }
-
     const releases = config.releases ?? (await getInRangeReleases(config));
     if (!releases?.length) {
       logger.debug('No releases');
@@ -142,8 +142,22 @@ export abstract class ChangeLogSource {
           compare: {},
         };
         const tags = await getTags();
-        const prevHead = this.getRef(version, packageName, prev, tags);
-        const nextHead = this.getRef(version, packageName, next, tags);
+        let prevHead = this.getRef(version, packageName, prev, tags);
+        let nextHead = this.getRef(version, packageName, next, tags);
+
+        if(manager === 'dockerfile' && prevHead === null){
+          prev.version = prev.version.split('-')[0];
+          prevHead = this.getRef(version, packageName, prev, tags);
+        }
+
+        if(manager === 'dockerfile' && nextHead === null){
+          next.version = next.version.split('-')[0];
+          nextHead = this.getRef(version, packageName, next, tags);
+
+          release.version = next.version;
+        }
+
+
         if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
           release.compare.url = this.getCompareURL(
             baseUrl,

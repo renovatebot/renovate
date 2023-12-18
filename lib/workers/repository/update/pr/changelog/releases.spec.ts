@@ -117,9 +117,9 @@ describe('workers/repository/update/pr/changelog/releases', () => {
       });
       const res = await releases.getInRangeReleases(config);
       expect(res).toEqual([
-        { version: '1.0.1' },
-        { version: '1.1.0' },
-        { version: '1.2.0' },
+        { version: '1.0.1-rc0' },
+        { version: '1.1.0-rc0' },
+        { version: '1.2.0-rc0' },
       ]);
     });
 

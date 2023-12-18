@@ -200,9 +200,9 @@ describe('modules/versioning/docker/index', () => {
     value               | expected
     ${'3.7.0'}          | ${'3.7.0'}
     ${'3.7.0b1'}        | ${'3.7.0b1'}
-    ${'3.7-alpine'}     | ${'3.7'}
-    ${'3.8.0-alpine'}   | ${'3.8.0'}
-    ${'3.8.0b1-alpine'} | ${'3.8.0b1'}
+    ${'3.7-alpine'}     | ${'3.7-alpine'}
+    ${'3.8.0-alpine'}   | ${'3.8.0-alpine'}
+    ${'3.8.0b1-alpine'} | ${'3.8.0b1-alpine'}
     ${'3.8.2'}          | ${'3.8.2'}
     ${undefined}        | ${undefined}
   `('valueToVersion("$value") === $expected', ({ value, expected }) => {
