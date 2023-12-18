@@ -6,6 +6,15 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'allowedHeaders',
+    description:
+      'List of headers that are allowed to be forwarded to http request',
+    type: 'array',
+    default: ['^X-'],
+    subType: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'detectGlobalManagerConfig',
     description:
       'If `true`, Renovate tries to detect global manager configuration from the file system.',

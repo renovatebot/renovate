@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../config/global';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
@@ -9,6 +10,7 @@ import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
+import keepFields from '../keep-fields';
 import { parseUrl } from '../url';
 import { dnsLookup } from './dns';
 import { keepAliveAgents } from './keep-alive';
@@ -163,9 +165,13 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   }
 
   if (hostRule.headers) {
+    const allowedHeaders = GlobalConfig.get('allowedHeaders')?.map(
+      (h) => new RegExp(h),
+    );
+
     options.headers = {
       ...options.headers,
-      ...hostRule.headers,
+      ...keepFields(hostRule.headers, allowedHeaders),
     };
   }
 

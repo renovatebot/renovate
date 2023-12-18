@@ -59,6 +59,39 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowScripts
 
+## allowedHeaders
+
+List of headers that are allowed to be forwarded to the HTTP request. This is useful when the `registryUrlTemplate` employs a specific authentication system. By default, all headers starting with "X-" are allowed, but you can include additional headers using this option. If declared, it will override the default "X-" allowed headers. `allowedHeaders` is an array of RegExp represented as strings due to JSON serialization
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://domain.com/all-versions",
+      "headers": {
+        "X-Auth-Token": "secret"
+      }
+    }
+  ]
+}
+```
+
+or with custom `allowedHeaders`
+
+```json
+{
+  "allowedHeaders": ["^custom-header$"],
+  "hostRules": [
+    {
+      "matchHost": "https://domain.com/all-versions",
+      "headers": {
+        "custom-header": "secret"
+      }
+    }
+  ]
+}
+```
+
 ## allowedPostUpgradeCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.

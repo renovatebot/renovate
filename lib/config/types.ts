@@ -125,6 +125,7 @@ export interface RepoGlobalConfig {
   allowPlugins?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
+  allowedHeaders?: (string | RegExp)[];
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;
@@ -401,12 +402,15 @@ export interface RenovateOptionBase {
 }
 
 export interface RenovateArrayOption<
-  T extends string | number | Record<string, unknown> = Record<string, unknown>,
+  T extends string | number | RegExp | Record<string, unknown> = Record<
+    string,
+    unknown
+  >,
 > extends RenovateOptionBase {
   default?: T[] | null;
   mergeable?: boolean;
   type: 'array';
-  subType?: 'string' | 'object' | 'number';
+  subType?: 'string' | 'object' | 'number' | 'regex';
   supportedManagers?: string[] | 'all';
   supportedPlatforms?: string[] | 'all';
 }
