@@ -221,7 +221,7 @@ class RpmVersioningApi extends GenericVersioningApi {
       return -1;
     }
 
-    if (matchesv2.length > matches && matchesv2?.[matches][0] === '~') {
+    if (matchesv2.length > matches && matchesv2[matches][0] === '~') {
       return 1;
     }
 
