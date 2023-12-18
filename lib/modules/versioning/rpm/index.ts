@@ -160,10 +160,8 @@ class RpmVersioningApi extends GenericVersioningApi {
       return 0;
     }
 
-    const matchesv1 =
-      (v1.match(alphaNumPattern) as Array<string>) ?? ([] as Array<string>);
-    const matchesv2 =
-      (v2.match(alphaNumPattern) as Array<string>) ?? ([] as Array<string>);
+    const matchesv1 = v1.match(alphaNumPattern) ?? [];
+    const matchesv2 = v2.match(alphaNumPattern) ?? [];
     const matches = Math.min(matchesv1.length, matchesv2.length);
 
     for (let i = 0; i < matches; i++) {
