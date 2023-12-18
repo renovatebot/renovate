@@ -167,8 +167,8 @@ class RpmVersioningApi extends GenericVersioningApi {
     const matches = Math.min(matchesv1.length, matchesv2.length);
 
     for (let i = 0; i < matches; i++) {
-      let matchv1 = matchesv1?.[i];
-      let matchv2 = matchesv2?.[i];
+      let matchv1 = matchesv1[i];
+      let matchv2 = matchesv2[i];
 
       // compare tildes
       if (matchv1?.[0] === '~' || matchv2?.[0] === '~') {
