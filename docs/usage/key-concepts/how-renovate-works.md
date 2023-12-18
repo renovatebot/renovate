@@ -9,7 +9,7 @@ Renovate usually performs these steps:
 
 - Cloning the repository
 - Scanning package files to extract dependencies
-- Looking up registries to check for available updates
+- Looking up registries to check for updates
 - Applying any grouping rules defined
 - Pushing branches and raising Pull Requests
 
