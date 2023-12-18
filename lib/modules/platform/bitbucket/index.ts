@@ -885,10 +885,7 @@ export async function createPr({
     ).body;
     BitbucketPrCache.init(config.repository, renovateUserUuid).addPr(prRes);
     const pr = utils.prInfo(prRes);
-    // istanbul ignore if: prList is initialized at this point
-    if (config.prList) {
-      config.prList.push(pr);
-    }
+    config.prList?.push(pr);
     return pr;
   } catch (err) /* istanbul ignore next */ {
     // Try sanitizing reviewers
@@ -909,11 +906,9 @@ export async function createPr({
           },
         )
       ).body;
+      BitbucketPrCache.init(config.repository, renovateUserUuid).addPr(prRes);
       const pr = utils.prInfo(prRes);
-      // istanbul ignore if
-      if (config.prList) {
-        config.prList.push(pr);
-      }
+      config.prList?.push(pr);
       return pr;
     }
   }
