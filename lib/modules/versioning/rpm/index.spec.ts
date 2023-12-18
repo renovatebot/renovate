@@ -53,6 +53,8 @@ describe('modules/versioning/rpm/index', () => {
     ${'0z1b2c3'}                                   | ${true}
     ${'0A1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d'}  | ${true}
     ${'123098140293'}                              | ${true}
+    ${'3.12.0-1~a1^20231001'}                      | ${true}
+    ${'1.2.3^20231001'}                            | ${true}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(rpm.isValid(version)).toBe(expected);
   });
@@ -85,6 +87,7 @@ describe('modules/versioning/rpm/index', () => {
     ${'1.4-1'}                | ${'1.4-2'}               | ${false}
     ${'0:1.4'}                | ${'a:1.4'}               | ${false}
     ${'a:1.4'}                | ${'0:1.4'}               | ${false}
+    ${'3.12.0-1~^2023'}       | ${'3.12.0-1^2023'}       | ${false}
   `('equals("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(rpm.equals(a, b)).toBe(expected);
   });
@@ -100,7 +103,7 @@ describe('modules/versioning/rpm/index', () => {
     ${'2.4.0'}           | ${'2.4.beta'}        | ${true}
     ${'2.4.beta'}        | ${'2.4'}             | ${true}
     ${'2.4.beta'}        | ${'2.4.0'}           | ${false}
-    ${'2.4~'}            | ${'2.4~~'}           | ${false}
+    ${'2.4~'}            | ${'2.4~~'}           | ${true}
     ${'2.4'}             | ${'2.4~'}            | ${true}
     ${'2.4a'}            | ${'2.4'}             | ${true}
     ${'2.31-13+rpm11u5'} | ${'2.31-9'}          | ${true}
@@ -116,7 +119,7 @@ describe('modules/versioning/rpm/index', () => {
     ${'1:1.0Z0-0'}       | ${'1:1.0A0-0'}       | ${true}
     ${'1:1.0a0-0'}       | ${'1:1.0Z0-0'}       | ${true}
     ${'1:1.0z0-0'}       | ${'1:1.0a0-0'}       | ${true}
-    ${'1:1.0+0-0'}       | ${'1:1.0z0-0'}       | ${false}
+    ${'1:1.0+0-0'}       | ${'1:1.0z0-0'}       | ${true}
     ${'1:1.0-0-0'}       | ${'1:1.0+0-0'}       | ${false}
     ${'1:1.0.0-0'}       | ${'1:1.0-0-0'}       | ${true}
     ${'1:1.0:0-0'}       | ${'1:1.0.0-0'}       | ${false}
@@ -130,6 +133,17 @@ describe('modules/versioning/rpm/index', () => {
     ${'10'}              | ${'1.'}              | ${true}
     ${'10'}              | ${'1a'}              | ${true}
     ${'a'}               | ${'A'}               | ${true}
+    ${'A'}               | ${'a'}               | ${false}
+    ${'A1'}              | ${'Aa'}              | ${false}
+    ${'aaaaa1'}          | ${'aaaaaaaaaaaa2'}   | ${false}
+    ${'a-1~^20231001'}   | ${'a-1^20231001'}    | ${false}
+    ${'1'}               | ${'2'}               | ${false}
+    ${'a-1~pre2^20231001'}| ${'a-1~pre2^20231002'} | ${false}
+    ${'a-1'}             | ${'a-1~pre1'}        | ${true}
+    ${'4.20-4~beta4'}    | ${'4.20-4'}          | ${false}
+    ${'1.2.3~beta2'}     | ${'1.2.3~alpha1'}    | ${true}
+    ${'1.2.3-4~alpha1'}  | ${'1.2.3-4~beta2'}   | ${false}
+    ${'}}}'}             | ${'{{{'}             | ${false}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(rpm.isGreaterThan(a, b)).toBe(expected);
   });
