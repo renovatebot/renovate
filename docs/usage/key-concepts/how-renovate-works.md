@@ -54,26 +54,26 @@ flowchart TB
 
     subgraph REPOSITORY
        direction TB
-       FER[[For each repository]]
+       FER{{For each repository}}
 
       subgraph EXTRACTD[EXTRACT DEPENDENCIES]
           direction TB
           CLBRANCH[Extract base branches]
           CLBRANCH --> VULN[Check for vulnerabilities]
-          VULN --> CC[[For each manager]]
+          VULN --> CC{{For each manager}}
           CC -->|managerA| CD["..."]
           CC -->|managerB| CCF["match files"]
-          CCF --> CFEF[[For each file]]
+          CCF --> CFEF{{For each file}}
           CFEF -->|file1| CCD1[Extract dependency]
           CFEF -->|file2| CCD2[...]
       end
 
       subgraph LOOKUP[LOOK UP UPDATES]
           direction TB
-          UC[[For each manager]]
+          UC{{For each manager}}
           UC -->|managerA| UD["..."]
-          UC -->|managerB| UFEF[[For each file]]
-          UFEF -->|file1| FED[[For each dependency]]
+          UC -->|managerB| UFEF{{For each file}}
+          UFEF -->|file1| FED{{For each dependency}}
           UFEF -->|file2| FED2[...]
           FED -->|dep1| D1[...]
           D1 -..-> CU
@@ -86,7 +86,7 @@ flowchart TB
 
       subgraph WRITEU[WRITE UPDATES]
         direction TB
-        FEU[[For each update]]
+        FEU{{For each update}}
         FEU --> AUCOND[Check if branch needed: \n existing/rebase/concurrent amount]
         AUCOND --> AU[Create branch\nApply update\nCreate PR]
       end
