@@ -44,7 +44,7 @@ import type {
   RepoInfoBody,
 } from './types';
 import * as utils from './utils';
-import { mergeBodyTransformer } from './utils';
+import { mergeBodyTransformer, prFieldsFilter } from './utils';
 
 export const id = 'bitbucket';
 
@@ -275,11 +275,16 @@ export async function getPrList(): Promise<Pr[]> {
   logger.debug('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    let url = `/2.0/repositories/${config.repository}/pullrequests?`;
-    url += utils.prStates.all.map((state) => 'state=' + state).join('&');
-    if (renovateUserUuid && !config.ignorePrAuthor) {
-      url += `&q=author.uuid="${renovateUserUuid}"`;
+    const querySearchParams = new URL.URLSearchParams();
+    for (const state of utils.prStates.all) {
+      querySearchParams.append('state', state);
     }
+    if (renovateUserUuid && !config.ignorePrAuthor) {
+      querySearchParams.append('q', `author.uuid="${renovateUserUuid}"`);
+    }
+    querySearchParams.append('fields', prFieldsFilter);
+    const query = querySearchParams.toString();
+    const url = `/2.0/repositories/${config.repository}/pullrequests?${query}`;
     const prs = (
       await bitbucketHttp.getJson<PagedResult<PrResponse>>(url, {
         paginate: true,

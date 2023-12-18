@@ -89,7 +89,7 @@ export interface PrResponse {
       name: string;
     };
   };
-  reviewers: Array<Account>;
+  reviewers: Account[];
   created_on: string;
 }
 

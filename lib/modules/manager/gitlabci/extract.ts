@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { trimLeadingSlash } from '../../../util/url';
+import { parseSingleYaml } from '../../../util/yaml';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -83,7 +83,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   let deps: PackageDependency[] = [];
   try {
-    const doc = load(replaceReferenceTags(content), {
+    const doc = parseSingleYaml(replaceReferenceTags(content), {
       json: true,
     }) as Record<string, Image | Services | Job>;
     if (is.object(doc)) {
@@ -146,7 +146,7 @@ export async function extractAllPackageFiles(
     }
     let doc: GitlabPipeline;
     try {
-      doc = load(replaceReferenceTags(content), {
+      doc = parseSingleYaml(replaceReferenceTags(content), {
         json: true,
       }) as GitlabPipeline;
     } catch (err) {

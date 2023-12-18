@@ -2,9 +2,10 @@ import upath from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import { findUpLocal, readLocalFile } from '../../../util/fs';
+import { minimatch } from '../../../util/minimatch';
 import { regEx } from '../../../util/regex';
 import { nugetOrg } from '../../datasource/nuget';
-import type { Registry } from './types';
+import type { NugetPackageDependency, Registry } from './types';
 
 export async function readFileAsXmlDocument(
   file: string,
@@ -121,4 +122,62 @@ export function findVersion(parsedXml: XmlDocument): XmlElement | null {
     }
   }
   return null;
+}
+
+export function applyRegistries(
+  dep: NugetPackageDependency,
+  registries: Registry[] | undefined,
+): NugetPackageDependency {
+  if (registries) {
+    if (!registries.some((reg) => reg.sourceMappedPackagePatterns)) {
+      dep.registryUrls = registries.map((reg) => reg.url);
+      return dep;
+    }
+
+    const regs = registries.filter((r) => r.sourceMappedPackagePatterns);
+    const map = new Map<string, Registry[]>(
+      regs.flatMap((r) => r.sourceMappedPackagePatterns!.map((p) => [p, []])),
+    );
+    const depName = dep.depName;
+
+    for (const reg of regs) {
+      for (const pattern of reg.sourceMappedPackagePatterns!) {
+        map.get(pattern)!.push(reg);
+      }
+    }
+
+    const urls: string[] = [];
+
+    for (const [pattern, regs] of [...map].sort(sortPatterns)) {
+      if (minimatch(pattern, { nocase: true }).match(depName)) {
+        urls.push(...regs.map((r) => r.url));
+        break;
+      }
+    }
+
+    if (urls.length) {
+      dep.registryUrls = urls;
+    }
+  }
+  return dep;
+}
+
+/*
+ * Sorts patterns by specificity:
+ * 1. Exact match patterns
+ * 2. Wildcard match patterns
+ */
+function sortPatterns(
+  a: [string, Registry[]],
+  b: [string, Registry[]],
+): number {
+  if (a[0].endsWith('*') && !b[0].endsWith('*')) {
+    return 1;
+  }
+
+  if (!a[0].endsWith('*') && b[0].endsWith('*')) {
+    return -1;
+  }
+
+  return a[0].localeCompare(b[0]) * -1;
 }
