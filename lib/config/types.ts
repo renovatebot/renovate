@@ -402,15 +402,12 @@ export interface RenovateOptionBase {
 }
 
 export interface RenovateArrayOption<
-  T extends string | number | RegExp | Record<string, unknown> = Record<
-    string,
-    unknown
-  >,
+  T extends string | number | Record<string, unknown> = Record<string, unknown>,
 > extends RenovateOptionBase {
   default?: T[] | null;
   mergeable?: boolean;
   type: 'array';
-  subType?: 'string' | 'object' | 'number' | 'regex';
+  subType?: 'string' | 'object' | 'number';
   supportedManagers?: string[] | 'all';
   supportedPlatforms?: string[] | 'all';
 }
