@@ -31,6 +31,7 @@ import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
+import { BitbucketPrCache } from './pr-cache';
 import type {
   Account,
   BitbucketStatus,
@@ -44,7 +45,7 @@ import type {
   RepoInfoBody,
 } from './types';
 import * as utils from './utils';
-import { mergeBodyTransformer, prFieldsFilter } from './utils';
+import { mergeBodyTransformer } from './utils';
 
 export const id = 'bitbucket';
 
@@ -275,23 +276,11 @@ export async function getPrList(): Promise<Pr[]> {
   logger.debug('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    const querySearchParams = new URL.URLSearchParams();
-    for (const state of utils.prStates.all) {
-      querySearchParams.append('state', state);
-    }
-    if (renovateUserUuid && !config.ignorePrAuthor) {
-      querySearchParams.append('q', `author.uuid="${renovateUserUuid}"`);
-    }
-    querySearchParams.append('fields', prFieldsFilter);
-    const query = querySearchParams.toString();
-    const url = `/2.0/repositories/${config.repository}/pullrequests?${query}`;
-    const prs = (
-      await bitbucketHttp.getJson<PagedResult<PrResponse>>(url, {
-        paginate: true,
-        pagelen: 50,
-      })
-    ).body.values;
-    config.prList = prs.map(utils.prInfo);
+    const bitbucketPrCache = await BitbucketPrCache.init(
+      config.repository,
+      renovateUserUuid,
+    ).sync(bitbucketHttp);
+    config.prList = bitbucketPrCache.getPrs().map(utils.prInfo);
     logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   }
   return config.prList;
@@ -894,8 +883,9 @@ export async function createPr({
         },
       )
     ).body;
+    BitbucketPrCache.init(config.repository, renovateUserUuid).addPr(prRes);
     const pr = utils.prInfo(prRes);
-    // istanbul ignore if
+    // istanbul ignore if: prList is initialized at this point
     if (config.prList) {
       config.prList.push(pr);
     }

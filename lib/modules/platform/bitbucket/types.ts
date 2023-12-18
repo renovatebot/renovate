@@ -91,6 +91,7 @@ export interface PrResponse {
   };
   reviewers: Account[];
   created_on: string;
+  updated_on: string;
 }
 
 export interface Account {
@@ -104,4 +105,10 @@ export interface EffectiveReviewer {
   type: string;
   reviewer_type: string;
   user: Account;
+}
+
+export interface BitbucketPrCacheData {
+  items: Record<number, PrResponse>;
+  updated_on: string | null;
+  author: string | null;
 }
