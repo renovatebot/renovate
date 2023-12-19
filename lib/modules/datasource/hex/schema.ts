@@ -19,6 +19,13 @@ export const HexRelease = z
         inserted_at: z.string().optional(),
       }),
     ).refine((releases) => releases.length > 0, 'No releases found'),
+    retirements: z.record(
+      z.string(),
+      z.object({
+        message: z.string(),
+        reason: z.string(),
+      }),
+    ),
   })
   .transform((hexResponse): ReleaseResult => {
     const releases: Release[] = hexResponse.releases.map(
@@ -27,6 +34,10 @@ export const HexRelease = z
 
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
+        }
+
+        if (hexResponse.retirements[version]) {
+          release.isDeprecated = true;
         }
 
         return release;
