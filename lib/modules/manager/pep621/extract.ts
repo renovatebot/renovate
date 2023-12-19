@@ -26,6 +26,8 @@ export function extractPackageFile(
   if (is.nullOrUndefined(def)) {
     return null;
   }
+
+  const packageFileVersion = def.project?.version;
   const pythonConstraint = def.project?.['requires-python'];
   const extractedConstraints = is.nonEmptyString(pythonConstraint)
     ? { extractedConstraints: { python: pythonConstraint } }
@@ -49,6 +51,6 @@ export function extractPackageFile(
   }
 
   return processedDeps.length
-    ? { ...extractedConstraints, deps: processedDeps }
+    ? { ...extractedConstraints, deps: processedDeps, packageFileVersion }
     : null;
 }

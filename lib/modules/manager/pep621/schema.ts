@@ -10,6 +10,7 @@ const DependencyRecordSchema = z
 export const PyProjectSchema = z.object({
   project: z
     .object({
+      version: z.string().optional().catch(undefined),
       'requires-python': z.string().optional(),
       dependencies: DependencyListSchema,
       'optional-dependencies': DependencyRecordSchema,
