@@ -21,9 +21,6 @@ const hostRules = mocked(_hostRules);
 
 describe('modules/platform/gerrit/utils', () => {
   beforeEach(() => {
-    jest.resetModules();
-    jest.mock('../../../util/host-rules');
-
     setBaseUrl(baseUrl);
   });
 

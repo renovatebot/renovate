@@ -1,6 +1,6 @@
-import JSON5 from 'json5';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { regEx } from '../../../util/regex';
@@ -348,8 +348,8 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<any> {
-  const raw = (await getRawFile(fileName, repoName, branchOrTag))!;
-  return JSON5.parse(raw);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  return parseJson(raw, fileName);
 }
 
 export function getRepoForceRebase(): Promise<boolean> {

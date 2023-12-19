@@ -1,12 +1,13 @@
+import { parseJson } from '../common';
 import { regEx } from '../regex';
 import { validateUrl } from '../url';
 import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from './index';
 
 let baseUrl: string;
-export const setBaseUrl = (url: string): void => {
+export function setBaseUrl(url: string): void {
   baseUrl = url;
-};
+}
 
 /**
  * Access Gerrit REST-API and strip-of the "magic prefix" from responses.
@@ -26,7 +27,7 @@ export class GerritHttp extends Http {
     const url = validateUrl(path) ? path : baseUrl + path;
     const opts: InternalHttpOptions = {
       parseJson: (text: string) =>
-        JSON.parse(text.replace(GerritHttp.magicPrefix, '')),
+        parseJson(text.replace(GerritHttp.magicPrefix, ''), path),
       ...options,
     };
     opts.headers = {
