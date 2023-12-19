@@ -38,6 +38,7 @@ export function bumpPackageVersion(
         content,
         currentValue,
         bumpVersion,
+        manager: 'pep621',
       },
       'Failed to bumpVersion',
     );
