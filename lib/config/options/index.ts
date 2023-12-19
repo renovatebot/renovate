@@ -10,7 +10,7 @@ const options: RenovateOptions[] = [
     description:
       'List of headers that are allowed to be forwarded to http request',
     type: 'array',
-    default: ['/^X-/'],
+    default: ['X-*'],
     subType: 'string',
     globalOnly: true,
   },
