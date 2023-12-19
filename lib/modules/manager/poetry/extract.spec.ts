@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { extractPackageFile } from '.';
@@ -167,6 +168,96 @@ describe('modules/manager/poetry/extract', () => {
           { depName: 'boto3', lockedVersion: '1.17.5' },
         ],
       });
+    });
+
+    it('parses git dependencies long commit hashs on http urls', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "https://github.com/tiangolo/fastapi.git", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+        werkzeug = ">=0.14"
+      `;
+      const res = (await extractPackageFile(content, filename))!.deps;
+      expect(res[0].depName).toBe('fastapi');
+      expect(res[0].packageName).toBe(
+        'https://github.com/tiangolo/fastapi.git',
+      );
+      expect(res[0].currentValue).toBeUndefined();
+      expect(res[0].currentDigest).toBe(
+        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+      );
+      expect(res[0].replaceString).toBe(
+        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+      );
+      expect(res[0].pinDigests).toBe(true);
+      expect(res[0].skipReason).toBeUndefined();
+      expect(res[0].datasource).toBe(GitRefsDatasource.id);
+      expect(res).toHaveLength(2);
+    });
+
+    it('parses git dependencies short commit hashs on http urls', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "https://github.com/tiangolo/fastapi.git", rev="6f5aa81"}
+        werkzeug = ">=0.14"
+      `;
+      const res = (await extractPackageFile(content, filename))!.deps;
+      expect(res[0].depName).toBe('fastapi');
+      expect(res[0].packageName).toBe(
+        'https://github.com/tiangolo/fastapi.git',
+      );
+      expect(res[0].currentValue).toBeUndefined();
+      expect(res[0].currentDigest).toBe('6f5aa81');
+      expect(res[0].replaceString).toBe('6f5aa81');
+      expect(res[0].pinDigests).toBe(true);
+      expect(res[0].skipReason).toBeUndefined();
+      expect(res[0].datasource).toBe(GitRefsDatasource.id);
+      expect(res).toHaveLength(2);
+    });
+
+    it('parses git dependencies long commit hashs on ssh urls', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "git@github.com:tiangolo/fastapi.git", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+        werkzeug = ">=0.14"
+      `;
+      const res = (await extractPackageFile(content, filename))!.deps;
+      expect(res[0].depName).toBe('fastapi');
+      expect(res[0].packageName).toBe('git@github.com:tiangolo/fastapi.git');
+      expect(res[0].currentValue).toBeUndefined();
+      expect(res[0].currentDigest).toBe(
+        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+      );
+      expect(res[0].replaceString).toBe(
+        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+      );
+      expect(res[0].pinDigests).toBe(true);
+      expect(res[0].skipReason).toBeUndefined();
+      expect(res[0].datasource).toBe(GitRefsDatasource.id);
+      expect(res).toHaveLength(2);
+    });
+
+    it('parses git dependencies long commit hashs on http urls with branch marker', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "https://github.com/tiangolo/fastapi.git", branch="develop", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+        werkzeug = ">=0.14"
+      `;
+      const res = (await extractPackageFile(content, filename))!.deps;
+      expect(res[0].depName).toBe('fastapi');
+      expect(res[0].packageName).toBe(
+        'https://github.com/tiangolo/fastapi.git',
+      );
+      expect(res[0].currentValue).toBe('develop');
+      expect(res[0].currentDigest).toBe(
+        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+      );
+      expect(res[0].replaceString).toBe(
+        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+      );
+      expect(res[0].pinDigests).toBe(true);
+      expect(res[0].skipReason).toBeUndefined();
+      expect(res[0].datasource).toBe(GitRefsDatasource.id);
+      expect(res).toHaveLength(2);
     });
 
     it('parses github dependencies tags on ssh urls', async () => {
