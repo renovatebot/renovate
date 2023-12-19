@@ -271,8 +271,7 @@ export const PoetrySectionSchema = z
         ...groupDependencies,
       ];
 
-      const res: PackageFileContent = { deps };
-      res.packageFileVersion = version;
+      const res: PackageFileContent = { deps, packageFileVersion: version };
 
       if (sourceUrls.length) {
         for (const dep of res.deps) {
