@@ -4,6 +4,7 @@ import JSON5 from 'json5';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
+import { validateConfig } from '../../../../config/validation';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
 import { readSystemFile } from '../../../../util/fs';
@@ -89,6 +90,14 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       'Config needs migrating',
     );
     config = migratedConfig;
+  }
+
+  const { warnings, errors } = await validateConfig(migratedConfig);
+  if (warnings.length) {
+    logger.warn({ warnings }, 'Found warnings in configuration');
+  }
+  if (errors.length) {
+    logger.warn({ errors }, 'Found errors in configuration');
   }
   return config;
 }

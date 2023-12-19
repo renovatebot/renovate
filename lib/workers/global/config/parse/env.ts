@@ -1,7 +1,9 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
+import { migrateConfig } from '../../../../config/migration';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
+import { validateConfig } from '../../../../config/validation';
 import { logger } from '../../../../logger';
 import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
@@ -82,7 +84,9 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
-export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
+export async function getConfig(
+  inputEnv: NodeJS.ProcessEnv,
+): Promise<AllConfig> {
   let env = inputEnv;
   env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
   env = renameEnvKeys(env);
@@ -97,6 +101,24 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
     try {
       config = JSON5.parse(env.RENOVATE_CONFIG);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
+
+      const { isMigrated, migratedConfig } = migrateConfig(config);
+      if (isMigrated) {
+        logger.warn(
+          { originalConfig: config, migratedConfig },
+          'Config needs migrating',
+        );
+        config = migratedConfig;
+      }
+
+      const { warnings, errors } = await validateConfig(migratedConfig);
+
+      if (warnings.length) {
+        logger.warn({ warnings }, 'Found warnings in configuration');
+      }
+      if (errors.length) {
+        logger.warn({ errors }, 'Found errors in configuration');
+      }
     } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
       process.exit(1);
