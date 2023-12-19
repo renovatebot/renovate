@@ -23,7 +23,7 @@ Renovate's modules are:
 - [datasource](../modules/datasource/index.md)
 - [manager](../modules/manager/index.md)
 - [platform](../modules/platform/index.md)
-- [versioning](../modules/versioning.md).
+- [versioning](../modules/versioning.md)
 
 Renovate uses these modules in order:
 
