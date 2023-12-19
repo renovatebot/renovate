@@ -1,6 +1,17 @@
-import { PoetrySources } from './schema';
+import { PoetrySectionSchema, PoetrySources } from './schema';
 
 describe('modules/manager/poetry/schema', () => {
+  it('parses project version', () => {
+    expect(
+      PoetrySectionSchema.parse({ version: '1.2.3' }).packageFileVersion,
+    ).toBe('1.2.3');
+
+    expect(
+      PoetrySectionSchema.parse({ version: { some: 'value' } })
+        .packageFileVersion,
+    ).toBeUndefined();
+  });
+
   describe('PoetrySources', () => {
     it('parses default values', () => {
       expect(PoetrySources.parse([])).toBeEmptyArray();
