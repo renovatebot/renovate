@@ -61,23 +61,23 @@ flowchart TB
           CLBRANCH[Extract base branches]
           CLBRANCH --> VULN[Check for vulnerabilities]
           VULN --> CC{{For each manager}}
-          CC -->|managerA| CD["..."]
-          CC -->|managerB| CCF["match files"]
+          CC -->|manager A| CD["..."]
+          CC -->|manager B| CCF["match files"]
           CCF --> CFEF{{For each file}}
-          CFEF -->|file1| CCD1[Extract dependency]
-          CFEF -->|file2| CCD2[...]
+          CFEF -->|file 1| CCD1[Extract dependency]
+          CFEF -->|file 2| CCD2[...]
       end
 
       subgraph LOOKUP[LOOK UP UPDATES]
           direction TB
           UC{{For each manager}}
-          UC -->|managerA| UD["..."]
-          UC -->|managerB| UFEF{{For each file}}
-          UFEF -->|file1| FED{{For each dependency}}
-          UFEF -->|file2| FED2[...]
-          FED -->|dep1| D1[...]
+          UC -->|manager A| UD["..."]
+          UC -->|manager B| UFEF{{For each file}}
+          UFEF -->|file 1| FED{{For each dependency}}
+          UFEF -->|file 2| FED2[...]
+          FED -->|dep 1| D1[...]
           D1 -..-> CU
-          FED -->|dep2| D2[use datasource to \n fetch versions]
+          FED -->|dep 2| D2[use datasource to \n fetch versions]
           D2 --> J[use versioning to find \n next valid update]
           FED2 -...-> CU
           UD -....-> CU
