@@ -21,6 +21,7 @@ export interface HostRuleSearchResult {
 }
 
 export interface HostRule extends HostRuleSearchResult {
+  customPackageNameRegistryUrlSplitter: any;
   encrypted?: HostRule;
   hostType?: string;
   matchHost?: string;

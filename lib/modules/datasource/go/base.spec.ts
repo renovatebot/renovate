@@ -34,6 +34,14 @@ describe('modules/datasource/go/base', () => {
     beforeEach(() => {
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
+      hostRules.customPackageNameRegistryUrlSplitter = jest.fn(
+        (x) => '(example.com/gitlab/)(.*).git',
+      );
+      hostRules.hostType = jest.fn((x) =>
+        x.url === 'https://example.com/gitlab/my-project/my-repo'
+          ? 'gitlab'
+          : '',
+      );
     });
 
     describe('meta name=go-source', () => {
@@ -393,6 +401,25 @@ describe('modules/datasource/go/base', () => {
         );
 
         expect(res).toBeNull();
+      });
+
+      it('it correctly splits a URL, when customPackageNameRegistryUrlSplitter is set', async () => {
+        const meta =
+          '<meta name="go-import" content="example.com/gitlab/my-project/my-repo.git git https://example.com/gitlab/my-project/my-repo" />';
+        httpMock
+          .scope('https://example.com')
+          .get('/gitlab/my-project/my-repo.git?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'example.com/gitlab/my-project/my-repo.git',
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'my-project/my-repo',
+          registryUrl: 'https://example.com/gitlab/',
+        });
       });
     });
   });

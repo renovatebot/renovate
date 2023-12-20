@@ -183,6 +183,22 @@ export function hostType({ url }: { url: string }): string | null {
   );
 }
 
+export function customPackageNameRegistryUrlSplitter({
+  url,
+}: {
+  url: string;
+}): string | null {
+  return (
+    hostRules
+      .filter((rule) => matchesHost(rule, { url }))
+      .sort(prioritizeLongestMatchHost)
+      .map((rule) => rule.customPackageNameRegistryUrlSplitter)
+      .filter(is.truthy)
+      .pop() ?? null
+  );
+}
+
+
 export function findAll({ hostType }: { hostType: string }): HostRule[] {
   return hostRules.filter((rule) => rule.hostType === hostType);
 }

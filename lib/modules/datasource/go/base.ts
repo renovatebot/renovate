@@ -154,9 +154,34 @@ export class BaseGoDatasource {
       const parsedUrl = URL.parse(goSourceUrl);
 
       // TODO: `parsedUrl.pathname` can be undefined
-      const packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
+      let packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
 
-      const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+      let registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+
+      try {
+        const customPackageNameRegistryUrlSplitter =
+          hostRules.customPackageNameRegistryUrlSplitter({ url: goSourceUrl });
+        if (customPackageNameRegistryUrlSplitter) {
+          logger.debug(
+            `Go module: ${goModule} lookup customPackageNameRegistryUrlSplitter ${customPackageNameRegistryUrlSplitter}`,
+          );
+          const m = new RegExp(customPackageNameRegistryUrlSplitter).exec(
+            goModule,
+          );
+          if (m !== null) {
+            logger.debug(`Found ${m[1]} ${m[2]}`);
+            registryUrl = `${parsedUrl.protocol}//${m[1]}`;
+            packageName = m[2];
+          }
+        }
+        return {
+          datasource: GitlabTagsDatasource.id,
+          registryUrl,
+          packageName,
+        };
+      } catch (e) {
+        logger.error(e);
+      }
 
       // a .git path indicates a concrete git repository, which can be different from metadata returned by gitlab
       const vcsIndicatedModule = BaseGoDatasource.gitVcsRegexp.exec(goModule);
