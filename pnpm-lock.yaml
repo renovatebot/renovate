@@ -66,8 +66,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@renovatebot/osv-offline':
-        specifier: 1.3.10
-        version: 1.3.10
+        specifier: 1.3.11
+        version: 1.3.11
       '@renovatebot/pep440':
         specifier: 3.0.17
         version: 3.0.17
@@ -2820,17 +2820,17 @@ packages:
       '@redis/client': 1.5.12
     dev: false
 
-  /@renovatebot/osv-offline-db@1.4.0:
-    resolution: {integrity: sha512-VqR66WlewMLnDOVmnEAHIFZuATG46LwvNu6ZPjH0sEaH6bCqNxfJ6kBMFEiJOWWjGOxI1u2F+nr1vtdixC9UwA==}
+  /@renovatebot/osv-offline-db@1.4.1:
+    resolution: {integrity: sha512-njYO9GQ87wU4Q+lWoQkk+jMWoLaBadc8mcPoYhHNnUwaeX7lOOZkQwNSWV+KWjx1pi5WpGUM592kAinvMH8maA==}
     dependencies:
       '@seald-io/nedb': 4.0.3
     dev: false
 
-  /@renovatebot/osv-offline@1.3.10:
-    resolution: {integrity: sha512-Bj1Xb3HQlFQ6/E0tGNd0BM3LODg3LrVBJrWPdJWj4GdebO0N3OlqXZo2bE1tvVzeqjSdkXMn0mrtomyQSYwbgg==}
+  /@renovatebot/osv-offline@1.3.11:
+    resolution: {integrity: sha512-ax3vyY3l+AltdOwo+IUHBIJbeWmgWLL1plr7eMVxUacN5/0vo5b/lWutHcGtkxK1MtAxhOsSB+qrp7H9biR2YA==}
     dependencies:
       '@octokit/rest': 20.0.2
-      '@renovatebot/osv-offline-db': 1.4.0
+      '@renovatebot/osv-offline-db': 1.4.1
       adm-zip: 0.5.10
       fs-extra: 11.2.0
       got: 11.8.6
