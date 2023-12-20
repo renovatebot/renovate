@@ -58,14 +58,13 @@ const PoetryGitDependency = z
         };
       }
     }
-    
-      if (rev) {
+
+    if (rev) {
       return {
         datasource: GitRefsDatasource.id,
         currentValue: branch,
         currentDigest: rev,
         replaceString: rev,
-        pinDigests: true,
         packageName: git,
       };
     } else {

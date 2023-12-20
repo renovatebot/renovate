@@ -184,7 +184,6 @@ describe('modules/manager/poetry/extract', () => {
         currentValue: undefined,
         currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
         replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
-        pinDigests: true,
         packageName: 'https://github.com/tiangolo/fastapi.git',
       });
     });
@@ -203,7 +202,6 @@ describe('modules/manager/poetry/extract', () => {
         currentValue: undefined,
         currentDigest: '6f5aa81',
         replaceString: '6f5aa81',
-        pinDigests: true,
         packageName: 'https://github.com/tiangolo/fastapi.git',
       });
     });
@@ -222,7 +220,6 @@ describe('modules/manager/poetry/extract', () => {
         currentValue: undefined,
         currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
         replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
-        pinDigests: true,
         packageName: 'git@github.com:tiangolo/fastapi.git',
       });
     });
@@ -241,7 +238,6 @@ describe('modules/manager/poetry/extract', () => {
         currentValue: 'develop',
         currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
         replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
-        pinDigests: true,
         packageName: 'https://github.com/tiangolo/fastapi.git',
       });
     });
