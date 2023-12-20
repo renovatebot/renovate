@@ -54,10 +54,10 @@ export class PypiDatasource extends Datasource {
     } else {
       logger.trace({ packageName, hostUrl }, 'Looking up pypi api dependency');
       try {
-        // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
+        // we need to resolve early here so we can catch any 404 or 403s and fallback to a simple lookup
         dependency = await this.getDependency(normalizedLookupName, hostUrl);
       } catch (err) {
-        if (err.statusCode !== 404) {
+        if (err.statusCode !== 404 && err.statusCode !== 403) {
           throw err;
         }
 

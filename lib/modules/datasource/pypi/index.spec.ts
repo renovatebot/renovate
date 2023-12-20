@@ -484,25 +484,28 @@ describe('modules/datasource/pypi/index', () => {
       ).toBeNull();
     });
 
-    it('fall back from json and process data from simple endpoint', async () => {
-      httpMock
-        .scope('https://custom.pypi.net/foo')
-        .get('/dj-database-url/json')
-        .reply(404);
-      httpMock
-        .scope('https://custom.pypi.net/foo')
-        .get('/dj-database-url/')
-        .reply(200, htmlResponse);
-      const config = {
-        registryUrls: ['https://custom.pypi.net/foo'],
-      };
-      const result = await getPkgReleases({
-        datasource,
-        ...config,
-        packageName: 'dj-database-url',
-      });
-      expect(result).toMatchSnapshot();
-    });
+    it.each([404, 403])(
+      'fall back from json and process data from simple endpoint',
+      async (code: number) => {
+        httpMock
+          .scope('https://custom.pypi.net/foo')
+          .get('/dj-database-url/json')
+          .reply(code);
+        httpMock
+          .scope('https://custom.pypi.net/foo')
+          .get('/dj-database-url/')
+          .reply(200, htmlResponse);
+        const config = {
+          registryUrls: ['https://custom.pypi.net/foo'],
+        };
+        const result = await getPkgReleases({
+          datasource,
+          ...config,
+          packageName: 'dj-database-url',
+        });
+        expect(result).toMatchSnapshot();
+      },
+    );
 
     it('parses data-requires-python and respects constraints from simple endpoint', async () => {
       httpMock
