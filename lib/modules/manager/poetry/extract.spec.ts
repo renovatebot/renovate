@@ -253,12 +253,13 @@ describe('modules/manager/poetry/extract', () => {
         werkzeug = ">=0.14"
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('fastapi');
-      expect(res[0].packageName).toBe('tiangolo/fastapi');
-      expect(res[0].currentValue).toBe('1.2.3');
-      expect(res[0].skipReason).toBeUndefined();
-      expect(res[0].datasource).toBe(GithubTagsDatasource.id);
       expect(res).toHaveLength(2);
+      expect(res[0]).toMatchObject({
+        depName: 'fastapi',
+        packageName: 'tiangolo/fastapi',
+        currentValue: '1.2.3',
+        datasource: GithubTagsDatasource.id,
+      });
     });
 
     it('parses github dependencies tags on http urls', async () => {
@@ -268,12 +269,13 @@ describe('modules/manager/poetry/extract', () => {
         werkzeug = ">=0.14"
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('fastapi');
-      expect(res[0].packageName).toBe('tiangolo/fastapi');
-      expect(res[0].currentValue).toBe('1.2.3');
-      expect(res[0].skipReason).toBeUndefined();
-      expect(res[0].datasource).toBe(GithubTagsDatasource.id);
       expect(res).toHaveLength(2);
+      expect(res[0]).toMatchObject({
+        depName: 'fastapi',
+        packageName: 'tiangolo/fastapi',
+        currentValue: '1.2.3',
+        datasource: GithubTagsDatasource.id,
+      });
     });
 
     it('skips git dependencies', async () => {
@@ -283,9 +285,11 @@ describe('modules/manager/poetry/extract', () => {
         werkzeug = ">=0.14"
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('flask');
-      expect(res[0].skipReason).toBe('git-dependency');
       expect(res).toHaveLength(2);
+      expect(res[0]).toMatchObject({
+        depName: 'flask',
+        skipReason: 'git-dependency',
+      });
     });
 
     it('skips git dependencies with version', async () => {
@@ -295,10 +299,12 @@ describe('modules/manager/poetry/extract', () => {
         werkzeug = ">=0.14"
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('flask');
-      expect(res[0].currentValue).toBe('1.2.3');
-      expect(res[0].skipReason).toBe('git-dependency');
       expect(res).toHaveLength(2);
+      expect(res[0]).toMatchObject({
+        depName: 'flask',
+        currentValue: '1.2.3',
+        skipReason: 'git-dependency',
+      });
     });
 
     it('skips git dependencies on tags that are not in github', async () => {
@@ -307,10 +313,12 @@ describe('modules/manager/poetry/extract', () => {
         aws-sam = {git = "https://gitlab.com/gitlab-examples/aws-sam.git", tag="1.2.3"}
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('aws-sam');
-      expect(res[0].currentValue).toBe('1.2.3');
-      expect(res[0].skipReason).toBe('git-dependency');
       expect(res).toHaveLength(1);
+      expect(res[0]).toMatchObject({
+        depName: 'aws-sam',
+        currentValue: '1.2.3',
+        skipReason: 'git-dependency',
+      });
     });
 
     it('skips path dependencies', async () => {
@@ -320,9 +328,11 @@ describe('modules/manager/poetry/extract', () => {
         werkzeug = ">=0.14"
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('flask');
-      expect(res[0].skipReason).toBe('path-dependency');
       expect(res).toHaveLength(2);
+      expect(res[0]).toMatchObject({
+        depName: 'flask',
+        skipReason: 'path-dependency',
+      });
     });
 
     it('skips path dependencies with version', async () => {
@@ -332,10 +342,12 @@ describe('modules/manager/poetry/extract', () => {
         werkzeug = ">=0.14"
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('flask');
-      expect(res[0].currentValue).toBe('1.2.3');
-      expect(res[0].skipReason).toBe('path-dependency');
       expect(res).toHaveLength(2);
+      expect(res[0]).toMatchObject({
+        depName: 'flask',
+        currentValue: '1.2.3',
+        skipReason: 'path-dependency',
+      });
     });
 
     it('does not include registry url for dependency python', async () => {
