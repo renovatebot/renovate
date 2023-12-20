@@ -8,7 +8,7 @@ const options: RenovateOptions[] = [
   {
     name: 'allowedHeaders',
     description:
-      'List of headers that are allowed to be forwarded to http request',
+      'List of allowed patterns for header names in hostRules config.',
     type: 'array',
     default: ['X-*'],
     subType: 'string',

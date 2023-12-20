@@ -61,12 +61,15 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowedHeaders
 
-List of headers that are allowed to be forwarded to the HTTP request. This is useful when the `registryUrlTemplate` employs a specific authentication system. By default, all headers starting with "X-" are allowed, but you can include additional headers using this option. If declared, it will override the default "X-" allowed headers. `allowedHeaders` is an array of minimatch-compatible globs or re2-compatible regex represented as strings.
+This is option particularly useful when a registry employs a specific authentication system not already covered by Renovate's standard credential handling in `hostRules`.
+By default, all headers starting with "X-" are allowed, but you can permit additional headers using this option.
+If declared, it will override the default "X-" allowed headers, so you should include them in your config if you wish for them to remain allowed.
+`allowedHeaders` is an array of minimatch-compatible globs or re2-compatible regex strings.
 
 Examples:
 
-- `/X/` - any header with `abc` in the name (regex)
-- `!/X/` - any header without `abcd` in the name (regex)
+- `/X/` - any header with `X` anywhere in the name (regex)
+- `!/X/` - any header without `X` anywhere in the name (regex)
 - `X-*` - any header starting with `X-` (glob pattern)
 - `X` - only the header matching exactly `X` (exact match glob)
 

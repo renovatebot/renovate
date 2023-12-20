@@ -166,11 +166,18 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
 
   if (hostRule.headers) {
     const allowedHeaders = GlobalConfig.get('allowedHeaders');
-    const filteredHeaders = Object.fromEntries(
-      Object.entries(hostRule.headers).filter(([header]) =>
-        anyMatchRegexOrMinimatch(allowedHeaders, header),
-      ),
-    );
+    const filteredHeaders: { [key: string]: string } = {};
+
+    for (const [header, value] of Object.entries(hostRule.headers)) {
+      if (anyMatchRegexOrMinimatch(allowedHeaders, header)) {
+        filteredHeaders[header] = value;
+      } else {
+        logger.once.warn(
+          { allowedHeaders, header },
+          'Disallowed hostRules header',
+        );
+      }
+    }
 
     options.headers = {
       ...options.headers,
