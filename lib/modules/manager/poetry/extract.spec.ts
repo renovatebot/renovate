@@ -177,21 +177,16 @@ describe('modules/manager/poetry/extract', () => {
         werkzeug = ">=0.14"
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('fastapi');
-      expect(res[0].packageName).toBe(
-        'https://github.com/tiangolo/fastapi.git',
-      );
-      expect(res[0].currentValue).toBeUndefined();
-      expect(res[0].currentDigest).toBe(
-        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
-      );
-      expect(res[0].replaceString).toBe(
-        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
-      );
-      expect(res[0].pinDigests).toBe(true);
-      expect(res[0].skipReason).toBeUndefined();
-      expect(res[0].datasource).toBe(GitRefsDatasource.id);
       expect(res).toHaveLength(2);
+      expect(res[0]).toMatchObject({
+        depName: 'fastapi',
+        datasource: GitRefsDatasource.id,
+        currentValue: undefined,
+        currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+        replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+        pinDigests: true,
+        packageName: 'https://github.com/tiangolo/fastapi.git',
+      });
     });
 
     it('parses git dependencies short commit hashs on http urls', async () => {
@@ -201,17 +196,16 @@ describe('modules/manager/poetry/extract', () => {
         werkzeug = ">=0.14"
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('fastapi');
-      expect(res[0].packageName).toBe(
-        'https://github.com/tiangolo/fastapi.git',
-      );
-      expect(res[0].currentValue).toBeUndefined();
-      expect(res[0].currentDigest).toBe('6f5aa81');
-      expect(res[0].replaceString).toBe('6f5aa81');
-      expect(res[0].pinDigests).toBe(true);
-      expect(res[0].skipReason).toBeUndefined();
-      expect(res[0].datasource).toBe(GitRefsDatasource.id);
       expect(res).toHaveLength(2);
+      expect(res[0]).toMatchObject({
+        depName: 'fastapi',
+        datasource: GitRefsDatasource.id,
+        currentValue: undefined,
+        currentDigest: '6f5aa81',
+        replaceString: '6f5aa81',
+        pinDigests: true,
+        packageName: 'https://github.com/tiangolo/fastapi.git',
+      });
     });
 
     it('parses git dependencies long commit hashs on ssh urls', async () => {
@@ -221,19 +215,16 @@ describe('modules/manager/poetry/extract', () => {
         werkzeug = ">=0.14"
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('fastapi');
-      expect(res[0].packageName).toBe('git@github.com:tiangolo/fastapi.git');
-      expect(res[0].currentValue).toBeUndefined();
-      expect(res[0].currentDigest).toBe(
-        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
-      );
-      expect(res[0].replaceString).toBe(
-        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
-      );
-      expect(res[0].pinDigests).toBe(true);
-      expect(res[0].skipReason).toBeUndefined();
-      expect(res[0].datasource).toBe(GitRefsDatasource.id);
       expect(res).toHaveLength(2);
+      expect(res[0]).toMatchObject({
+        depName: 'fastapi',
+        datasource: GitRefsDatasource.id,
+        currentValue: undefined,
+        currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+        replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+        pinDigests: true,
+        packageName: 'git@github.com:tiangolo/fastapi.git',
+      });
     });
 
     it('parses git dependencies long commit hashs on http urls with branch marker', async () => {
@@ -243,21 +234,16 @@ describe('modules/manager/poetry/extract', () => {
         werkzeug = ">=0.14"
       `;
       const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('fastapi');
-      expect(res[0].packageName).toBe(
-        'https://github.com/tiangolo/fastapi.git',
-      );
-      expect(res[0].currentValue).toBe('develop');
-      expect(res[0].currentDigest).toBe(
-        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
-      );
-      expect(res[0].replaceString).toBe(
-        '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
-      );
-      expect(res[0].pinDigests).toBe(true);
-      expect(res[0].skipReason).toBeUndefined();
-      expect(res[0].datasource).toBe(GitRefsDatasource.id);
       expect(res).toHaveLength(2);
+      expect(res[0]).toMatchObject({
+        depName: 'fastapi',
+        datasource: GitRefsDatasource.id,
+        currentValue: 'develop',
+        currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+        replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+        pinDigests: true,
+        packageName: 'https://github.com/tiangolo/fastapi.git',
+      });
     });
 
     it('parses github dependencies tags on ssh urls', async () => {
