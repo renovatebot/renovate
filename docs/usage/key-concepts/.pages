@@ -1,4 +1,5 @@
 nav:
+  - 'How Renovate works': 'how-renovate-works.md'
   - 'Presets': 'presets.md'
   - 'Dependency Dashboard': 'dashboard.md'
   - 'Pull Requests': 'pull-requests.md'
