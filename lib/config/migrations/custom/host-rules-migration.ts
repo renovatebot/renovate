@@ -3,6 +3,8 @@ import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import type { LegacyHostRule } from '../../../util/host-rules';
+import { anyMatchRegexOrMinimatch } from '../../../util/package-rules/match';
+import { getOptions } from '../../options';
 import { AbstractMigration } from '../base/abstract-migration';
 import { migrateDatasource } from './datasource-migration';
 
@@ -12,7 +14,14 @@ export class HostRulesMigration extends AbstractMigration {
   override run(value: (LegacyHostRule & HostRule)[]): void {
     const newHostRules: HostRule[] = [];
     for (const hostRule of value) {
-      validateHostRule(hostRule);
+      const allowedHeadersOption = getOptions().find(
+        (option) => option.name === 'allowedHeaders',
+      );
+
+      const allowedHeaders =
+        this.get('allowedHeaders') || allowedHeadersOption?.default;
+
+      validateHostRule(hostRule, allowedHeaders);
       const newRule: any = {};
 
       for (const [key, value] of Object.entries(hostRule)) {
@@ -60,8 +69,12 @@ export class HostRulesMigration extends AbstractMigration {
   }
 }
 
-function validateHostRule(rule: LegacyHostRule & HostRule): void {
-  const { matchHost, hostName, domainName, baseUrl, endpoint, host } = rule;
+function validateHostRule(
+  rule: LegacyHostRule & HostRule,
+  allowedHeaders: string[],
+): void {
+  const { matchHost, hostName, domainName, baseUrl, endpoint, host, headers } =
+    rule;
   const hosts: Record<string, string> = removeUndefinedFields({
     matchHost,
     hostName,
@@ -70,6 +83,19 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
     endpoint,
     host,
   });
+
+  if (headers) {
+    for (const [header] of Object.entries(headers)) {
+      if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
+        const error = new Error(CONFIG_VALIDATION);
+        error.validationSource = 'config';
+        error.validationMessage = `\`hostRules.headers\` cannot contain unallowed headers \`${header}\` - use \`allowedHeaders\` to permit specific headers or remove it.`;
+        error.validationError =
+          'The renovate configuration file contains some invalid settings';
+        throw error;
+      }
+    }
+  }
 
   if (Object.keys(hosts).length > 1) {
     const distinctHostValues = new Set(Object.values(hosts));
