@@ -41,9 +41,8 @@ const PoetryGitDependency = z
   })
   .transform(({ git, tag, version, branch, rev }): PackageDependency => {
     if (tag) {
-      const parsedUrl = parseGitUrl(git);
-      if (parsedUrl.source === 'github.com') {
-        const { owner, name } = parsedUrl;
+      const { source, owner, name } = parseGitUrl(git);
+      if (source === 'github.com') {
         const repo = `${owner}/${name}`;
         return {
           datasource: GithubTagsDatasource.id,
@@ -58,7 +57,9 @@ const PoetryGitDependency = z
           skipReason: 'git-dependency',
         };
       }
-    } else if (rev) {
+    }
+    
+      if (rev) {
       return {
         datasource: GitRefsDatasource.id,
         currentValue: branch,
