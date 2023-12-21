@@ -39,9 +39,8 @@ async function validate(
   const massagedConfig = massageConfig(migratedConfig);
   const res = await validateConfig(
     massagedConfig,
-    isPreset,
-    undefined,
-    isGlobalConfig
+    isGlobalConfig,
+    isPreset
   );
   if (res.errors.length) {
     logger.error(
