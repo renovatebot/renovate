@@ -50,15 +50,15 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
     if (name === 'ContainerBaseImage') {
       const dep = getDep(child.val, true);
 
-      const currentDepName = dep.depName ?? '';
-
-      results.push({
-        datasource: NugetDatasource.id,
-        depType: 'docker',
-        depName: currentDepName,
-        curentValue: dep.currentValue,
-        currentDigest: dep.currentDigest,
-      });
+      if (is.nonEmptyStringAndNotWhitespace(dep.depName)) {
+        results.push({
+          datasource: NugetDatasource.id,
+          depType: 'docker',
+          depName: dep.depName,
+          currentValue: dep.currentValue,
+          currentDigest: dep.currentDigest,
+        });
+      }
     }
 
     if (elemNames.has(name)) {
