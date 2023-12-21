@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
 import type { Release, ReleaseResult } from '../types';
@@ -36,7 +37,7 @@ export const HexRelease = z
           release.releaseTimestamp = releaseTimestamp;
         }
 
-        if (hexResponse.retirements[version]) {
+        if (is.string(hexResponse.retirements[version])) {
           release.isDeprecated = true;
         }
 
