@@ -56,7 +56,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
         datasource: NugetDatasource.id,
         depType: 'docker',
         depName: currentDepName,
-        currentVersion: dep.currentValue,
+        curentValue: dep.currentValue,
         currentDigest: dep.currentDigest,
       });
     }
