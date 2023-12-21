@@ -173,12 +173,12 @@ export class BaseGoDatasource {
             registryUrl = `${parsedUrl.protocol}//${m[1]}`;
             packageName = m[2];
           }
+          return {
+            datasource: GitlabTagsDatasource.id,
+            registryUrl,
+            packageName,
+          };
         }
-        return {
-          datasource: GitlabTagsDatasource.id,
-          registryUrl,
-          packageName,
-        };
       } catch (e) {
         logger.error(e);
       }

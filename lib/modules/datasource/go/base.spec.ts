@@ -34,14 +34,6 @@ describe('modules/datasource/go/base', () => {
     beforeEach(() => {
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
-      hostRules.customPackageNameRegistryUrlSplitter = jest.fn(
-        (x) => '(example.com/gitlab/)(.*).git',
-      );
-      hostRules.hostType = jest.fn((x) =>
-        x.url === 'https://example.com/gitlab/my-project/my-repo'
-          ? 'gitlab'
-          : '',
-      );
     });
 
     describe('meta name=go-source', () => {
@@ -404,6 +396,12 @@ describe('modules/datasource/go/base', () => {
       });
 
       it('it correctly splits a URL, when customPackageNameRegistryUrlSplitter is set', async () => {
+        hostRules.hostType.mockReturnValue('gitlab');
+
+        hostRules.customPackageNameRegistryUrlSplitter.mockReturnValue(
+          '(example.com/gitlab/)(.*).git',
+        );
+
         const meta =
           '<meta name="go-import" content="example.com/gitlab/my-project/my-repo.git git https://example.com/gitlab/my-project/my-repo" />';
         httpMock
@@ -420,6 +418,7 @@ describe('modules/datasource/go/base', () => {
           packageName: 'my-project/my-repo',
           registryUrl: 'https://example.com/gitlab/',
         });
+        hostRules.customPackageNameRegistryUrlSplitter.mockReturnValue('');
       });
     });
   });
