@@ -113,6 +113,7 @@ export interface GlobalOnlyConfig {
   privateKeyPath?: string;
   privateKeyPathOld?: string;
   redisUrl?: string;
+  redisPrefix?: string;
   repositories?: RenovateRepository[];
   platform?: PlatformId;
   endpoint?: string;

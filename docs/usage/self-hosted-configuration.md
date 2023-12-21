@@ -784,6 +784,10 @@ For TLS/SSL-enabled connections, use rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
+## redisPrefix
+
+If this value is set then Renovate will add this string to the name of all Redis cache entries used in Renovate. It's only used if `redisUrl` is configured.
+
 ## repositories
 
 Elements in the `repositories` array can be an object if you wish to define more settings:

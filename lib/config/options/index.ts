@@ -335,6 +335,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'redisPrefix',
+    description: 'If set, this will be the prefix used in all cache entries.',
+    stage: 'global',
+    type: 'string',
+    default: '',
+    globalOnly: true,
+  },
+  {
     name: 'baseDir',
     description:
       'The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.',
