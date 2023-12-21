@@ -106,7 +106,7 @@ export async function getConfig(
       if (isMigrated) {
         logger.warn(
           { originalConfig: config, migratedConfig },
-          'Config needs migrating',
+          'RENOVATE_CONFIG needs migrating',
         );
         config = migratedConfig;
       }
@@ -116,11 +116,11 @@ export async function getConfig(
       if (warnings.length) {
         logger.warn(
           { warnings },
-          'Found warnings in the config RENOVATE_CONFIG',
+          'Config validation warnings found in RENOVATE_CONFIG',
         );
       }
       if (errors.length) {
-        logger.warn({ errors }, 'Found errors in the config RENOVATE_CONFIG');
+        logger.warn({ errors }, 'Config validation errors found in RENOVATE_CONFIG');
       }
     } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');

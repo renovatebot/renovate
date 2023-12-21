@@ -53,7 +53,7 @@ describe('workers/global/config/parse/file', () => {
       expect(res.rangeStrategy).toBe('bump');
     });
 
-    it('warns if conifg is invalid', async () => {
+    it('warns if config is invalid', async () => {
       const configFile = upath.resolve(tmp.path, 'config.js');
       const fileContent = `module.exports = {
         "enabled": "invalid-value",
