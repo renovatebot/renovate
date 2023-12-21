@@ -915,7 +915,7 @@ describe('config/validation', () => {
   });
 
   describe('globalOptions()', () => {
-    it('validates options of string type', async () => {
+    it('validates string type options', async () => {
       const config = {
         binarySource: 'docker',
         gitUrl: false as never,
@@ -935,7 +935,7 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('validates options of boolean type', async () => {
+    it('validates boolean type options', async () => {
       const config = {
         unicodeEmoji: false,
         detectGlobalManagerConfig: 'invalid-type' as never,
@@ -957,7 +957,7 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('validates options of integer type', async () => {
+    it('validates integer type options', async () => {
       const config = {
         prCommitsPerRunLimit: 2,
         gitTimeout: 'invalid-type' as never,
@@ -979,7 +979,7 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('validates options of array type', async () => {
+    it('validates array type options', async () => {
       const config = {
         allowedPostUpgradeCommands: ['cmd'],
         checkedBranches: 'invalid-type' as never,
@@ -1000,7 +1000,7 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('validates options of object type', async () => {
+    it('validates object type options', async () => {
       const config = {
         productLinks: {
           documentation: 'https://docs.renovatebot.com/',
