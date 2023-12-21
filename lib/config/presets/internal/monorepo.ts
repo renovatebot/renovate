@@ -299,6 +299,7 @@ const repoGroups = {
     'https://github.com/dotansimha/graphql-codegen',
   ],
   groovy: 'https://github.com/apache/groovy',
+  'grpc-dotnet': 'https://github.com/grpc/grpc-dotnet',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   'hickory-dns': 'https://github.com/hickory-dns/hickory-dns',
@@ -315,6 +316,7 @@ const repoGroups = {
     'https://github.com/jestjs/jest',
   ],
   jna: 'https://github.com/java-native-access/jna',
+  'json-smart-v2': 'https://github.com/netplex/json-smart-v2',
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
@@ -342,6 +344,7 @@ const repoGroups = {
   mdx: 'https://github.com/mdx-js/mdx',
   'middy-js': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
+  'ml-dotnet': 'https://github.com/dotnet/machinelearning',
   mockito: 'https://github.com/mockito/mockito',
   'mongo-csharp-driver': 'https://github.com/mongodb/mongo-csharp-driver',
   mstest: 'https://github.com/microsoft/testfx',
@@ -374,8 +377,11 @@ const repoGroups = {
     'https://github.com/nuxt/nuxt',
   ],
   okhttp: 'https://github.com/square/okhttp',
+  openiddict: 'https://github.com/openiddict/openiddict-core',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-dotnet-contrib':
+    'https://github.com/open-telemetry/opentelemetry-dotnet-contrib',
   'opentelemetry-erlang':
     'https://github.com/open-telemetry/opentelemetry-erlang',
   'opentelemetry-erlang-contrib':
@@ -383,6 +389,7 @@ const repoGroups = {
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   orleans: 'https://github.com/dotnet/orleans',
+  'panda-css': 'https://github.com/chakra-ui/panda',
   parcel: 'https://github.com/parcel-bundler/parcel',
   'percy-cli': 'https://github.com/percy/cli',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
@@ -390,7 +397,8 @@ const repoGroups = {
     'https://github.com/pixijs/pixi.js', // old repo
     'https://github.com/pixijs/pixijs',
   ],
-  playwright: 'https://github.com/Microsoft/playwright',
+  playwright: 'https://github.com/microsoft/playwright',
+  'playwright-dotnet': 'https://github.com/microsoft/playwright-dotnet',
   pnpjs: 'https://github.com/pnp/pnpjs',
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
@@ -486,6 +494,7 @@ const repoGroups = {
     'https://github.com/xunit/xunit.analyzers',
   ],
   yarn: 'https://github.com/yarnpkg/berry',
+  'zag-js': 'https://github.com/chakra-ui/zag',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 

@@ -311,5 +311,17 @@ describe('modules/manager/pep621/extract', () => {
         },
       ]);
     });
+
+    it('should extract project version', () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.0.2"
+        dependencies = [ "requests==2.30.0" ]
+      `;
+
+      const res = extractPackageFile(content, 'pyproject.toml');
+      expect(res?.packageFileVersion).toBe('0.0.2');
+    });
   });
 });
