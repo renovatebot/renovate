@@ -67,7 +67,7 @@ describe('modules/manager/nuget/extract', () => {
       expect(res?.deps).toHaveLength(17);
     });
 
-    it('considers ContainerBaseImage property', async () => {
+    it('extracts ContainerBaseImage', async () => {
       const packageFile =
         'with-container-base-image/with-container-base-image.csproj';
       const contents = Fixtures.get(packageFile);
@@ -84,7 +84,7 @@ describe('modules/manager/nuget/extract', () => {
       });
     });
 
-    it('considers ContainerBaseImage property with pinned digest', async () => {
+    it('extracts ContainerBaseImage with pinned digest', async () => {
       const packageFile =
         'with-container-base-image/with-container-base-image-pinned-digest.csproj';
       const contents = Fixtures.get(packageFile);
