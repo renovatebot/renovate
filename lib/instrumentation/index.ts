@@ -52,7 +52,7 @@ export function init(): void {
   // add processors
   if (isTraceDebuggingEnabled()) {
     traceProvider.addSpanProcessor(
-      new SimpleSpanProcessor(new ConsoleSpanExporter())
+      new SimpleSpanProcessor(new ConsoleSpanExporter()),
     );
   }
 
@@ -72,7 +72,7 @@ export function init(): void {
       applyCustomAttributesOnSpan: /* istanbul ignore next */ (
         span,
         request,
-        response
+        response,
       ) => {
         // ignore 404 errors when the branch protection of Github could not be found. This is expected if no rules are configured
         if (
@@ -124,18 +124,18 @@ function getTracer(): Tracer {
 
 export function instrument<F extends (span: Span) => ReturnType<F>>(
   name: string,
-  fn: F
+  fn: F,
 ): ReturnType<F>;
 export function instrument<F extends (span: Span) => ReturnType<F>>(
   name: string,
   fn: F,
-  options: SpanOptions
+  options: SpanOptions,
 ): ReturnType<F>;
 export function instrument<F extends (span: Span) => ReturnType<F>>(
   name: string,
   fn: F,
   options: SpanOptions = {},
-  context: Context = api.context.active()
+  context: Context = api.context.active(),
 ): ReturnType<F> {
   return getTracer().startActiveSpan(name, options, context, (span: Span) => {
     try {

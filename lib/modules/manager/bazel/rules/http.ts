@@ -36,7 +36,7 @@ const archives = [
 ];
 
 const archiveSuffixRegex = regEx(
-  `(?:${archives.map(escapeRegExp).join('|')})$`
+  `(?:${archives.map(escapeRegExp).join('|')})$`,
 );
 
 function stripArchiveSuffix(value: string): string {
@@ -48,7 +48,7 @@ function isHash(value: unknown): value is string {
 }
 
 export function parseGithubPath(
-  pathname: string
+  pathname: string,
 ): Partial<PackageDependency> | null {
   const [p0, p1, p2, p3, p4, p5] = pathname.split('/').slice(1);
   const packageName = p0 + '/' + p1;
@@ -100,7 +100,7 @@ function parseGitlabPath(pathname: string): Partial<PackageDependency> | null {
 }
 
 export function parseArchiveUrl(
-  urlString: string | undefined | null
+  urlString: string | undefined | null,
 ): Partial<PackageDependency> | null {
   if (!urlString) {
     return null;

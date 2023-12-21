@@ -40,7 +40,7 @@ describe('workers/repository/init/apis', () => {
         initApis({
           ...config,
           optimizeForDisabled: true,
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_DISABLED);
     });
 
@@ -57,7 +57,7 @@ describe('workers/repository/init/apis', () => {
         initApis({
           ...config,
           forkProcessing: 'disabled',
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_FORKED);
     });
 
@@ -87,7 +87,7 @@ describe('workers/repository/init/apis', () => {
           optimizeForDisabled: true,
           forkProcessing: 'disabled',
           isFork: true,
-        })
+        }),
       ).resolves.not.toThrow();
     });
 
@@ -107,10 +107,10 @@ describe('workers/repository/init/apis', () => {
       });
       expect(workerPlatformConfig).toBeTruthy();
       expect(workerPlatformConfig.onboardingConfigFileName).toBe(
-        '.github/renovate.json'
+        '.github/renovate.json',
       );
       expect(platform.getJsonFile).toHaveBeenCalledWith(
-        '.github/renovate.json'
+        '.github/renovate.json',
       );
       expect(platform.getJsonFile).not.toHaveBeenCalledWith('renovate.json');
     });
@@ -181,7 +181,7 @@ describe('workers/repository/init/apis', () => {
           ...config,
           optimizeForDisabled: true,
           extends: [':disableRenovate'],
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_DISABLED);
     });
   });

@@ -4,6 +4,7 @@ import * as cargoVersioning from '../../versioning/cargo';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 export { getRangeStrategy } from './range';
+export { updateLockedDependency } from './update-locked';
 
 export const supportsLockFileMaintenance = true;
 

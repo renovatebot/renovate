@@ -39,13 +39,13 @@ export class DotnetVersionDatasource extends Datasource {
       const registryUrl = this.defaultRegistryUrls[0];
       const { body: urls } = await this.http.getJson(
         registryUrl,
-        ReleasesIndex
+        ReleasesIndex,
       );
 
       const channelReleases = await p.map(
         urls,
         (url) => this.getChannelReleases(url, packageName),
-        { concurrency: 1, stopOnError: true }
+        { concurrency: 1, stopOnError: true },
       );
       const releases = channelReleases.flat();
 
@@ -68,7 +68,7 @@ export class DotnetVersionDatasource extends Datasource {
   })
   async getChannelReleases(
     releaseUrl: string,
-    packageName: string
+    packageName: string,
   ): Promise<Release[]> {
     const schema =
       packageName === 'dotnet-sdk' ? DotnetSdkReleases : DotnetRuntimeReleases;

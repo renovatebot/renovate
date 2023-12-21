@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../logger';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
 import type {
@@ -15,11 +16,13 @@ import {
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
-import type {
-  RenovateConfig,
-  RenovateOptions,
-  ValidationMessage,
-  ValidationResult,
+import {
+  type RenovateConfig,
+  type RenovateOptions,
+  type StatusCheckKey,
+  type ValidationMessage,
+  type ValidationResult,
+  allowedStatusCheckStrings,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
 
@@ -52,7 +55,7 @@ const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 
 function isManagerPath(parentPath: string): boolean {
   return (
-    regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
+    regEx(/^customManagers\[[0-9]+]$/).test(parentPath) ||
     managerList.includes(parentPath)
   );
 }
@@ -72,7 +75,7 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
 
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
-    (manager) => !allManagersList.includes(manager)
+    (manager) => !allManagersList.includes(manager.replace('custom.', '')),
   );
 }
 
@@ -151,13 +154,13 @@ export async function validateConfig(
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
-        val as string[]
+        val as string[],
       );
       if (is.nonEmptyArray(unsupportedManagers)) {
         errors.push({
           topic: 'Configuration Error',
           message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
-            ', '
+            ', ',
           )}"`,
         });
       }
@@ -265,7 +268,7 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
-                val
+                val,
               )} (${typeof val})`,
             });
           }
@@ -274,7 +277,7 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-                val
+                val,
               )} (${typeof val})`,
             });
           }
@@ -286,7 +289,7 @@ export async function validateConfig(
                   subval as RenovateConfig,
                   isGlobalConfig,
                   isPreset,
-                  `${currentPath}[${subIndex}]`
+                  `${currentPath}[${subIndex}]`,
                 );
                 warnings = warnings.concat(subValidation.warnings);
                 errors = errors.concat(subValidation.errors);
@@ -358,19 +361,19 @@ export async function validateConfig(
                     packageRules: [
                       await resolveConfigPresets(
                         packageRule as RenovateConfig,
-                        config
+                        config,
                       ),
                     ],
                   }).migratedConfig.packageRules![0];
                   errors.push(
-                    ...managerValidator.check({ resolvedRule, currentPath })
+                    ...managerValidator.check({ resolvedRule, currentPath }),
                   );
                   const selectorLength = Object.keys(resolvedRule).filter(
-                    (ruleKey) => selectors.includes(ruleKey)
+                    (ruleKey) => selectors.includes(ruleKey),
                   ).length;
                   if (!selectorLength) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
-                      packageRule
+                      packageRule,
                     )}`;
                     errors.push({
                       topic: 'Configuration Error',
@@ -379,7 +382,7 @@ export async function validateConfig(
                   }
                   if (selectorLength === Object.keys(resolvedRule).length) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
-                      packageRule
+                      packageRule,
                     )}`;
                     warnings.push({
                       topic: 'Configuration Error',
@@ -406,7 +409,7 @@ export async function validateConfig(
                     for (const option of preLookupOptions) {
                       if (resolvedRule[option] !== undefined) {
                         const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${JSON.stringify(
-                          packageRule
+                          packageRule,
                         )}`;
                         errors.push({
                           topic: 'Configuration Error',
@@ -423,7 +426,7 @@ export async function validateConfig(
                 }
               }
             }
-            if (key === 'regexManagers') {
+            if (key === 'customManagers') {
               const allowedKeys = [
                 'customType',
                 'description',
@@ -440,54 +443,54 @@ export async function validateConfig(
                 'autoReplaceStringTemplate',
                 'depTypeTemplate',
               ];
-              for (const regexManager of val as CustomManager[]) {
+              for (const customManager of val as CustomManager[]) {
                 if (
-                  Object.keys(regexManager).some(
-                    (k) => !allowedKeys.includes(k)
+                  Object.keys(customManager).some(
+                    (k) => !allowedKeys.includes(k),
                   )
                 ) {
-                  const disallowedKeys = Object.keys(regexManager).filter(
-                    (k) => !allowedKeys.includes(k)
+                  const disallowedKeys = Object.keys(customManager).filter(
+                    (k) => !allowedKeys.includes(k),
                   );
                   errors.push({
                     topic: 'Configuration Error',
-                    message: `Regex Manager contains disallowed fields: ${disallowedKeys.join(
-                      ', '
+                    message: `Custom Manager contains disallowed fields: ${disallowedKeys.join(
+                      ', ',
                     )}`,
                   });
                 } else if (
-                  is.nonEmptyString(regexManager.customType) &&
-                  isCustomManager(regexManager.customType)
+                  is.nonEmptyString(customManager.customType) &&
+                  isCustomManager(customManager.customType)
                 ) {
-                  if (is.nonEmptyArray(regexManager.fileMatch)) {
-                    switch (regexManager.customType) {
+                  if (is.nonEmptyArray(customManager.fileMatch)) {
+                    switch (customManager.customType) {
                       case 'regex':
                         validateRegexManagerFields(
-                          regexManager,
+                          customManager,
                           currentPath,
-                          errors
+                          errors,
                         );
                         break;
                     }
                   } else {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Each Regex Manager must contain a non-empty fileMatch array`,
+                      message: `Each Custom Manager must contain a non-empty fileMatch array`,
                     });
                   }
                 } else {
                   if (
-                    is.emptyString(regexManager.customType) ||
-                    is.undefined(regexManager.customType)
+                    is.emptyString(customManager.customType) ||
+                    is.undefined(customManager.customType)
                   ) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Each Regex Manager must contain a non-empty customType string`,
+                      message: `Each Custom Manager must contain a non-empty customType string`,
                     });
                   } else {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid customType: ${regexManager.customType}. Key is not a custom manager`,
+                      message: `Invalid customType: ${customManager.customType}. Key is not a custom manager`,
                     });
                   }
                 }
@@ -580,6 +583,30 @@ export async function validateConfig(
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
               }
+            } else if (key === 'statusCheckNames') {
+              for (const [statusCheckKey, statusCheckValue] of Object.entries(
+                val,
+              )) {
+                if (
+                  !allowedStatusCheckStrings.includes(
+                    statusCheckKey as StatusCheckKey,
+                  )
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed.`,
+                  });
+                }
+                if (
+                  !(is.string(statusCheckValue) || is.null_(statusCheckValue))
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: status check is not a string.`,
+                  });
+                  continue;
+                }
+              }
             } else if (key === 'customDatasources') {
               const allowedKeys = [
                 'description',
@@ -599,7 +626,7 @@ export async function validateConfig(
                   continue;
                 }
                 for (const [subKey, subValue] of Object.entries(
-                  customDatasourceValue
+                  customDatasourceValue,
                 )) {
                   if (!allowedKeys.includes(subKey)) {
                     errors.push({
@@ -646,7 +673,7 @@ export async function validateConfig(
                   val,
                   isGlobalConfig,
                   isPreset,
-                  currentPath
+                  currentPath,
                 );
                 warnings = warnings.concat(subValidation.warnings);
                 errors = errors.concat(subValidation.errors);
@@ -678,15 +705,19 @@ export async function validateConfig(
 }
 
 function validateRegexManagerFields(
-  regexManager: Partial<RegexManagerConfig>,
+  customManager: Partial<RegexManagerConfig>,
   currentPath: string,
-  errors: ValidationMessage[]
+  errors: ValidationMessage[],
 ): void {
-  if (is.nonEmptyArray(regexManager.matchStrings)) {
-    for (const matchString of regexManager.matchStrings) {
+  if (is.nonEmptyArray(customManager.matchStrings)) {
+    for (const matchString of customManager.matchStrings) {
       try {
         regEx(matchString);
-      } catch (e) {
+      } catch (err) {
+        logger.debug(
+          { err },
+          'customManager.matchStrings regEx validation error',
+        );
         errors.push({
           topic: 'Configuration Error',
           message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
@@ -696,7 +727,7 @@ function validateRegexManagerFields(
   } else {
     errors.push({
       topic: 'Configuration Error',
-      message: `Each Regex Manager must contain a non-empty matchStrings array`,
+      message: `Each Custom Manager must contain a non-empty matchStrings array`,
     });
   }
 
@@ -704,9 +735,9 @@ function validateRegexManagerFields(
   for (const field of mandatoryFields) {
     const templateField = `${field}Template` as keyof RegexManagerTemplates;
     if (
-      !regexManager[templateField] &&
-      !regexManager.matchStrings?.some((matchString) =>
-        matchString.includes(`(?<${field}>`)
+      !customManager[templateField] &&
+      !customManager.matchStrings?.some((matchString) =>
+        matchString.includes(`(?<${field}>`),
       )
     ) {
       errors.push({

@@ -49,7 +49,7 @@ function isMerge(value: BazelModulePackageDep): value is MergePackageDep {
 // be surprising to someone outside the bazel-module code to see the extra
 // properties.
 export function bazelModulePackageDepToPackageDependency(
-  bmpd: BazelModulePackageDep
+  bmpd: BazelModulePackageDep,
 ): PackageDependency {
   const copy: BazelModulePackageDep = clone(bmpd);
   if (isOverride(copy)) {
@@ -77,7 +77,7 @@ const BazelDepToPackageDep = RecordFragmentSchema.extend({
     depType: rule.value,
     depName: name.value,
     currentValue: version.value,
-  })
+  }),
 );
 
 const GitOverrideToPackageDep = RecordFragmentSchema.extend({
@@ -107,7 +107,7 @@ const GitOverrideToPackageDep = RecordFragmentSchema.extend({
       override.skipReason = 'unsupported-datasource';
     }
     return override;
-  }
+  },
 );
 
 const SingleVersionOverrideToPackageDep = RecordFragmentSchema.extend({
@@ -141,7 +141,7 @@ const SingleVersionOverrideToPackageDep = RecordFragmentSchema.extend({
       merge.registryUrls = [registry.value];
     }
     return base;
-  }
+  },
 );
 
 const UnsupportedOverrideToPackageDep = RecordFragmentSchema.extend({
@@ -168,7 +168,7 @@ const UnsupportedOverrideToPackageDep = RecordFragmentSchema.extend({
       skipReason: 'unsupported-datasource',
       bazelDepSkipReason,
     };
-  }
+  },
 );
 
 export const RuleToBazelModulePackageDep = z.union([
@@ -179,14 +179,14 @@ export const RuleToBazelModulePackageDep = z.union([
 ]);
 
 const githubRemoteRegex = regEx(
-  /^https:\/\/github\.com\/(?<packageName>[^/]+\/.+)$/
+  /^https:\/\/github\.com\/(?<packageName>[^/]+\/.+)$/,
 );
 function githubPackageName(remote: string): string | undefined {
   return parseGithubUrl(remote)?.match(githubRemoteRegex)?.groups?.packageName;
 }
 
 function collectByModule(
-  packageDeps: BazelModulePackageDep[]
+  packageDeps: BazelModulePackageDep[],
 ): BazelModulePackageDep[][] {
   const rulesByModule = new Map<string, BasePackageDep[]>();
   for (const pkgDep of packageDeps) {
@@ -198,7 +198,7 @@ function collectByModule(
 }
 
 export function processModulePkgDeps(
-  packageDeps: BazelModulePackageDep[]
+  packageDeps: BazelModulePackageDep[],
 ): PackageDependency[] {
   if (!packageDeps.length) {
     return [];
@@ -227,7 +227,7 @@ export function processModulePkgDeps(
     const depTypes = overrides.map((o) => o.depType);
     logger.debug(
       { depName: moduleName, depTypes },
-      'More than one override for a module was found'
+      'More than one override for a module was found',
     );
     return deps;
   }
@@ -238,7 +238,7 @@ export function processModulePkgDeps(
 }
 
 export function toPackageDependencies(
-  packageDeps: BazelModulePackageDep[]
+  packageDeps: BazelModulePackageDep[],
 ): PackageDependency[] {
   return collectByModule(packageDeps).map(processModulePkgDeps).flat();
 }

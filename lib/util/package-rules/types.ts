@@ -5,10 +5,10 @@ export type MatchType = 'matches' | 'excludes';
 export interface MatcherApi {
   matches(
     inputConfig: PackageRuleInputConfig,
-    packageRule: PackageRule
+    packageRule: PackageRule,
   ): boolean | null;
   excludes(
     inputConfig: PackageRuleInputConfig,
-    packageRule: PackageRule
+    packageRule: PackageRule,
   ): boolean | null;
 }

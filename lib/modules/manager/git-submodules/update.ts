@@ -10,7 +10,10 @@ export default async function updateDependency({
   upgrade,
 }: UpdateDependencyConfig): Promise<string | null> {
   const localDir = GlobalConfig.get('localDir');
-  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables();
+  const gitSubmoduleAuthEnvironmentVariables = getGitEnvironmentVariables([
+    'git-tags',
+    'git-refs',
+  ]);
   const gitEnv = {
     // pass all existing env variables
     ...process.env,

@@ -41,7 +41,7 @@ export class GiteaHttp extends Http<GiteaHttpOptions> {
 
   protected override async request<T>(
     path: string,
-    options?: InternalHttpOptions & GiteaHttpOptions & HttpRequestOptions<T>
+    options?: InternalHttpOptions & GiteaHttpOptions & HttpRequestOptions<T>,
   ): Promise<HttpResponse<T>> {
     const resolvedUrl = resolveUrl(path, options?.baseUrl ?? baseUrl);
     const opts = {

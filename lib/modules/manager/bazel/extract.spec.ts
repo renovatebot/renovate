@@ -73,7 +73,7 @@ describe('modules/manager/bazel/extract', () => {
             digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
             tag="v1.0.0-alpha31.cli-migrations"
           )
-        `
+        `,
       );
       expect(res?.deps).toMatchObject([
         {
@@ -97,7 +97,7 @@ describe('modules/manager/bazel/extract', () => {
             digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
             tag="v1.0.0-alpha31.cli-migrations"
           )
-        `
+        `,
       );
       expect(res?.deps).toMatchObject([
         {
@@ -119,11 +119,11 @@ describe('modules/manager/bazel/extract', () => {
             remote = "https://github.com/test/uuid-fork",
             commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
           )
-        `
+        `,
       );
       expect(successStory?.deps[0].datasource).toBe('go');
       expect(successStory?.deps[0].packageName).toBe(
-        'github.com/test/uuid-fork'
+        'github.com/test/uuid-fork',
       );
 
       const badStory = extractPackageFile(
@@ -134,7 +134,7 @@ describe('modules/manager/bazel/extract', () => {
             remote = "https://github.com/test/uuid.git#branch",
             commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
           )
-        `
+        `,
       );
       expect(badStory?.deps[0].skipReason).toBe('unsupported-remote');
 
@@ -146,7 +146,7 @@ describe('modules/manager/bazel/extract', () => {
             remote = "https://github.mycompany.com/test/uuid",
             commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
           )
-        `
+        `,
       );
       expect(gheStory?.deps[0].skipReason).toBe('unsupported-remote');
 
@@ -158,7 +158,7 @@ describe('modules/manager/bazel/extract', () => {
             remote = "https://gitlab.com/test/uuid",
             commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
           )
-        `
+        `,
       );
       expect(gitlabRemote?.deps[0].skipReason).toBe('unsupported-remote');
     });
@@ -180,7 +180,7 @@ describe('modules/manager/bazel/extract', () => {
               sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
               urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz"],
           )
-        `
+        `,
       );
 
       expect(res?.deps).toHaveLength(2);
@@ -211,7 +211,7 @@ describe('modules/manager/bazel/extract', () => {
                 "https://gitlab.com/libeigen/eigen/-/archive/90ee821c563fa20db4d64d6991ddca256d5c52f2/eigen-90ee821c563fa20db4d64d6991ddca256d5c52f2.tar.gz",
             ],
           )
-        `
+        `,
       );
 
       expect(res?.deps).toHaveLength(2);

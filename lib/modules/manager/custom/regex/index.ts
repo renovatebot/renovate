@@ -18,7 +18,7 @@ export const displayName = 'Regex';
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): Result<PackageFileContent | null> {
   let deps: PackageDependency[];
   switch (config.matchStringsStrategy) {
@@ -30,14 +30,14 @@ export function extractPackageFile(
       deps = handleCombination(
         content,
         packageFile,
-        config as RegexManagerConfig
+        config as RegexManagerConfig,
       );
       break;
     case 'recursive':
       deps = handleRecursive(
         content,
         packageFile,
-        config as RegexManagerConfig
+        config as RegexManagerConfig,
       );
       break;
   }
@@ -54,7 +54,7 @@ export function extractPackageFile(
     }
     // copy over templates for autoreplace
     for (const field of validMatchFields.map(
-      (f) => `${f}Template` as keyof RegexManagerTemplates
+      (f) => `${f}Template` as keyof RegexManagerTemplates,
     )) {
       if (config[field]) {
         res[field] = config[field];

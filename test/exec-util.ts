@@ -40,7 +40,7 @@ function execSnapshot(cmd: string, options?: RawExecOptions): ExecSnapshot {
 const defaultExecResult = { stdout: '', stderr: '' };
 
 export function mockExecAll(
-  execResult: ExecResult = defaultExecResult
+  execResult: ExecResult = defaultExecResult,
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
   exec.mockImplementation((cmd, options) => {

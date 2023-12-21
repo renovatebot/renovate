@@ -73,7 +73,7 @@ export function boolean(value: string | boolean): BooleanFragment {
 
 export function record(
   children: ChildFragments = {},
-  isComplete = false
+  isComplete = false,
 ): RecordFragment {
   return {
     type: 'record',
@@ -85,7 +85,7 @@ export function record(
 export function attribute(
   name: string,
   value?: ValueFragments,
-  isComplete = false
+  isComplete = false,
 ): AttributeFragment {
   return {
     type: 'attribute',
@@ -97,7 +97,7 @@ export function attribute(
 
 export function array(
   items: PrimitiveFragments[] = [],
-  isComplete = false
+  isComplete = false,
 ): ArrayFragment {
   return {
     type: 'array',

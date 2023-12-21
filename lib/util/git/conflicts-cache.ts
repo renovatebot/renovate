@@ -5,7 +5,7 @@ export function getCachedConflictResult(
   branchName: string,
   branchSha: string,
   baseBranch: string,
-  baseBranchSha: string
+  baseBranchSha: string,
 ): boolean | null {
   const cache = getCache();
   const branch = cache?.branches?.find((br) => br.branchName === branchName);
@@ -24,7 +24,7 @@ export function getCachedConflictResult(
 
 export function setCachedConflictResult(
   branchName: string,
-  isConflicted: boolean
+  isConflicted: boolean,
 ): void {
   const cache = getCache();
   const branch = cache?.branches?.find((br) => br.branchName === branchName);

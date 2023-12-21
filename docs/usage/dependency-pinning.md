@@ -76,7 +76,7 @@ If you were using SemVer ranges then this new version of `foobar` will likely be
 Like before, you need to manually work out which dependency caused it - assuming you guess correctly that it was a new dependency version at fault - and pin it manually by editing `package.json` one dependency at a time.
 
 Alternatively, if you were instead pinning `foobar` then you would get a PR for `foobar@1.2.0` which awaits your approval.
-So first of all, you can choose to read the release notes and/or visually inspect the branch yourself before merging, hopefully saving you from pushing this faulty code to production.
+So first of all, you can choose to read the changelogs and/or visually inspect the branch yourself before merging, hopefully saving you from pushing this faulty code to production.
 
 If you did not catch the fault before merging, you are still better off with a pinned version.
 If you discover something wrong in production, you can easily "roll back" commits in your development environment until you find which rollback fixes the problem.

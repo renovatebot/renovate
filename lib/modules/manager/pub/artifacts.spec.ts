@@ -65,7 +65,7 @@ describe('modules/manager/pub/artifacts', () => {
 
   it('returns null if updatedDeps is empty', async () => {
     expect(
-      await pub.updateArtifacts({ ...updateArtifact, updatedDeps: [] })
+      await pub.updateArtifacts({ ...updateArtifact, updatedDeps: [] }),
     ).toBeNull();
   });
 
@@ -83,7 +83,7 @@ describe('modules/manager/pub/artifacts', () => {
             flutter: 2.0.0
         `,
         updatedDeps: [{ depName: 'dart' }, { depName: 'flutter' }],
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -112,7 +112,7 @@ describe('modules/manager/pub/artifacts', () => {
         await pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
-        })
+        }),
       ).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
@@ -130,7 +130,7 @@ describe('modules/manager/pub/artifacts', () => {
         await pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -157,7 +157,7 @@ describe('modules/manager/pub/artifacts', () => {
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
           updatedDeps: [{ depName: params.sdk }],
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -184,7 +184,7 @@ describe('modules/manager/pub/artifacts', () => {
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
           config: { ...config, updateType: 'lockFileMaintenance' },
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -215,7 +215,7 @@ describe('modules/manager/pub/artifacts', () => {
         await pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -260,7 +260,7 @@ describe('modules/manager/pub/artifacts', () => {
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
           config: { ...config, constraints: { dart: '3.3.9' } },
-        })
+        }),
       ).toEqual([
         {
           file: {
@@ -288,7 +288,7 @@ describe('modules/manager/pub/artifacts', () => {
         await pub.updateArtifacts({
           ...updateArtifact,
           newPackageFileContent: params.packageFileContent,
-        })
+        }),
       ).toEqual([{ artifactError: { lockFile, stderr } }]);
     });
   });

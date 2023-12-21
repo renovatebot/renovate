@@ -1,6 +1,6 @@
 # Renovate Developer Docs
 
-> **Note**
+> [!NOTE]
 > If you're an end-user of Renovate, please read the [Renovate documentation](https://docs.renovatebot.com).
 
 The `docs/development` directory is for developers and contributors.

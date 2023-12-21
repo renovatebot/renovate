@@ -1,17 +1,17 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
+import { parseSingleYaml } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
     // TODO: fix types
-    const doc: any = load(content);
+    const doc: any = parseSingleYaml(content);
     if (doc?.steps && is.array(doc.steps)) {
       for (const step of doc.steps) {
         if (step.name) {
@@ -22,7 +22,7 @@ export function extractPackageFile(
               currentValue: dep.currentValue,
               currentDigest: dep.currentDigest,
             },
-            'Cloud Build docker image'
+            'Cloud Build docker image',
           );
 
           deps.push(dep);
@@ -33,12 +33,12 @@ export function extractPackageFile(
     if (err.stack?.startsWith('YAMLException:')) {
       logger.debug(
         { err, packageFile },
-        'YAML exception extracting Docker images from a Cloud Build configuration file.'
+        'YAML exception extracting Docker images from a Cloud Build configuration file.',
       );
     } else {
       logger.debug(
         { err, packageFile },
-        'Error extracting Docker images from a Cloud Build configuration file.'
+        'Error extracting Docker images from a Cloud Build configuration file.',
       );
     }
   }

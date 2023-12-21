@@ -4,10 +4,10 @@ import {
   lookup as _dnsLookup,
 } from 'node:dns';
 import type { EntryObject, IPFamily, LookupOptions } from 'cacheable-lookup';
-import QuickLRU from 'quick-lru';
+import { LRUCache } from 'lru-cache';
 import { logger } from '../../logger';
 
-const cache = new QuickLRU<string, any>({ maxSize: 1000 });
+const cache = new LRUCache<string, any>({ max: 1000 });
 
 function lookup(
   ...[host, options, callback]:
@@ -17,24 +17,24 @@ function lookup(
         callback: (
           error: NodeJS.ErrnoException,
           address: string,
-          family: IPFamily
-        ) => void
+          family: IPFamily,
+        ) => void,
       ]
     | [
         hostname: string,
         callback: (
           error: NodeJS.ErrnoException,
           address: string,
-          family: IPFamily
-        ) => void
+          family: IPFamily,
+        ) => void,
       ]
     | [
         hostname: string,
         options: LookupOptions & { all: true },
         callback: (
           error: NodeJS.ErrnoException,
-          result: ReadonlyArray<EntryObject>
-        ) => void
+          result: ReadonlyArray<EntryObject>,
+        ) => void,
       ]
     | [
         hostname: string,
@@ -42,8 +42,8 @@ function lookup(
         callback: (
           error: NodeJS.ErrnoException,
           address: string,
-          family: IPFamily
-        ) => void
+          family: IPFamily,
+        ) => void,
       ]
 ): void {
   let opts: LookupOneOptions | LookupAllOptions;

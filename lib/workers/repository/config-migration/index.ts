@@ -5,13 +5,13 @@ import { ensureConfigMigrationPr } from './pr';
 
 export async function configMigration(
   config: RenovateConfig,
-  branchList: string[]
+  branchList: string[],
 ): Promise<void> {
   if (config.configMigration) {
     const migratedConfigData = await MigratedDataFactory.getAsync();
     const migrationBranch = await checkConfigMigrationBranch(
       config,
-      migratedConfigData
+      migratedConfigData,
     ); // null if migration not needed
     if (migrationBranch) {
       branchList.push(migrationBranch);

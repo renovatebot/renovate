@@ -1,6 +1,6 @@
 name: Administration only
 description: For administrators only
-labels: ['status:ready', 'priority-3-medium', 'needs-discussion']
+labels: ['priority-3-medium', 'needs-discussion']
 body:
   - type: markdown
     attributes:

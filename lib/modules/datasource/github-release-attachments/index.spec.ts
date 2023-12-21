@@ -93,13 +93,13 @@ describe('modules/datasource/github-release-attachments/index', () => {
 
     const releaseMock = new GitHubReleaseAttachmentMocker(
       githubApiHost,
-      packageName
+      packageName,
     );
 
     it('requires currentDigest', async () => {
       const digest = await getDigest(
         { datasource: GithubReleaseAttachmentsDatasource.id, packageName },
-        currentValue
+        currentValue,
       );
       expect(digest).toBeNull();
     });
@@ -111,7 +111,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
           packageName,
           currentDigest,
         },
-        currentValue
+        currentValue,
       );
       expect(digest).toEqual(currentDigest);
     });
@@ -119,7 +119,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
     it('returns updated digest in new release', async () => {
       releaseMock.withDigestFileAsset(
         currentValue,
-        `${currentDigest} asset.zip`
+        `${currentDigest} asset.zip`,
       );
       const nextValue = 'v1.0.1';
       const nextDigest = 'updated-digest';
@@ -131,7 +131,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
           currentValue,
           currentDigest,
         },
-        nextValue
+        nextValue,
       );
       expect(digest).toEqual(nextDigest);
     });
@@ -147,7 +147,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
           currentValue,
           currentDigest,
         },
-        currentValue
+        currentValue,
       );
       expect(digest).toEqual(currentDigest);
     });

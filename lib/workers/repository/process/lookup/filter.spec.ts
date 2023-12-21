@@ -49,7 +49,7 @@ describe('workers/repository/process/lookup/filter', () => {
         currentVersion,
         latestVersion,
         releases,
-        versioning
+        versioning,
       );
 
       expect(filteredVersions).toEqual([

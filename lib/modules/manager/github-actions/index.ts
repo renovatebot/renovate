@@ -5,7 +5,7 @@ export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: [
-    '^(workflow-templates|\\.(?:github|gitea|forgejo)/workflows)/[^/]+\\.ya?ml$',
+    '(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/workflows)/[^/]+\\.ya?ml$',
     '(^|/)action\\.ya?ml$',
   ],
 };

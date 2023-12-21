@@ -1,7 +1,7 @@
 import { Readable } from 'node:stream';
 
 export async function streamToString(
-  stream: NodeJS.ReadableStream
+  stream: NodeJS.ReadableStream,
 ): Promise<string> {
   const readable = Readable.from(stream);
   const chunks: Uint8Array[] = [];

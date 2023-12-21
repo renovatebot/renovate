@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
+import { hashStream } from '../../../util/hash';
 import { Http } from '../../../util/http';
 import { map as pMap } from '../../../util/promises';
 import { regEx } from '../../../util/regex';
@@ -54,7 +54,7 @@ function replaceAll(input: string, from: string, to: string): string {
 function replaceValues(
   content: string,
   from: string | null | undefined,
-  to: string | null | undefined
+  to: string | null | undefined,
 ): string {
   // istanbul ignore if
   if (!from || !to || from === to) {
@@ -69,16 +69,14 @@ async function getHashFromUrl(url: string): Promise<string | null> {
   const cacheNamespace = 'url-sha256';
   const cachedResult = await packageCache.get<string | null>(
     cacheNamespace,
-    url
+    url,
   );
   /* istanbul ignore next line */
   if (cachedResult) {
     return cachedResult;
   }
   try {
-    const hash = await hasha.fromStream(http.stream(url), {
-      algorithm: 'sha256',
-    });
+    const hash = await hashStream(http.stream(url), 'sha256');
     const cacheMinutes = 3 * 24 * 60; // 3 days
     await packageCache.set(cacheNamespace, url, hash, cacheMinutes);
     return hash;
@@ -106,7 +104,7 @@ async function getHashFromUrls(urls: string[]): Promise<string | null> {
 }
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact
+  updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName: path, updatedDeps: upgrades } = updateArtifact;
   let { newPackageFileContent: contents } = updateArtifact;

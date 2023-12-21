@@ -39,42 +39,42 @@ describe('modules/manager/github-actions/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(
-        extractPackageFile('nothing here', 'empty-workflow.yml')
+        extractPackageFile('nothing here', 'empty-workflow.yml'),
       ).toBeNull();
     });
 
     it('returns null for invalid yaml', () => {
       expect(
-        extractPackageFile('nothing here: [', 'invalid-workflow.yml')
+        extractPackageFile('nothing here: [', 'invalid-workflow.yml'),
       ).toBeNull();
     });
 
     it('extracts multiple docker image lines from yaml configuration file', () => {
       const res = extractPackageFile(
         Fixtures.get('workflow_1.yml'),
-        'workflow_1.yml'
+        'workflow_1.yml',
       );
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps.filter((d) => d.datasource === 'docker')).toHaveLength(
-        6
+        6,
       );
     });
 
     it('extracts multiple action tag lines from yaml configuration file', () => {
       const res = extractPackageFile(
         Fixtures.get('workflow_2.yml'),
-        'workflow_2.yml'
+        'workflow_2.yml',
       );
       expect(res?.deps).toMatchSnapshot();
       expect(
-        res?.deps.filter((d) => d.datasource === 'github-tags')
+        res?.deps.filter((d) => d.datasource === 'github-tags'),
       ).toHaveLength(8);
     });
 
     it('use github.com as registry when no settings provided', () => {
       const res = extractPackageFile(
         Fixtures.get('workflow_2.yml'),
-        'workflow_2.yml'
+        'workflow_2.yml',
       );
       expect(res?.deps[0].registryUrls).toBeUndefined();
     });
@@ -86,7 +86,7 @@ describe('modules/manager/github-actions/extract', () => {
       });
       const res = extractPackageFile(
         Fixtures.get('workflow_2.yml'),
-        'workflow_2.yml'
+        'workflow_2.yml',
       );
       expect(res?.deps[0].registryUrls).toEqual([
         'https://github.enterprise.com',
@@ -101,7 +101,7 @@ describe('modules/manager/github-actions/extract', () => {
       });
       const res = extractPackageFile(
         Fixtures.get('workflow_2.yml'),
-        'workflow_2.yml'
+        'workflow_2.yml',
       );
       expect(res?.deps[0].registryUrls).toEqual([
         'https://github.enterprise.com',
@@ -116,7 +116,7 @@ describe('modules/manager/github-actions/extract', () => {
       });
       const res = extractPackageFile(
         Fixtures.get('workflow_2.yml'),
-        'workflow_2.yml'
+        'workflow_2.yml',
       );
       expect(res?.deps[0].registryUrls).toBeUndefined();
     });
@@ -128,7 +128,7 @@ describe('modules/manager/github-actions/extract', () => {
       });
       const res = extractPackageFile(
         Fixtures.get('workflow_2.yml'),
-        'workflow_2.yml'
+        'workflow_2.yml',
       );
       expect(res?.deps[0].registryUrls).toBeUndefined();
     });
@@ -140,7 +140,7 @@ describe('modules/manager/github-actions/extract', () => {
       });
       const res = extractPackageFile(
         Fixtures.get('workflow_2.yml'),
-        'workflow_2.yml'
+        'workflow_2.yml',
       );
       expect(res?.deps[0].registryUrls).toBeUndefined();
     });
@@ -148,7 +148,7 @@ describe('modules/manager/github-actions/extract', () => {
     it('extracts multiple action tag lines with double quotes and comments', () => {
       const res = extractPackageFile(
         Fixtures.get('workflow_3.yml'),
-        'workflow_3.yml'
+        'workflow_3.yml',
       );
 
       expect(res?.deps).toMatchObject([
@@ -287,7 +287,7 @@ describe('modules/manager/github-actions/extract', () => {
     it('extracts tags in different formats', () => {
       const res = extractPackageFile(
         Fixtures.get('workflow_4.yml'),
-        'workflow_4.yml'
+        'workflow_4.yml',
       );
       expect(res?.deps).toMatchObject([
         {
@@ -451,7 +451,7 @@ describe('modules/manager/github-actions/extract', () => {
         },
       ]);
       expect(
-        res?.deps.filter((d) => d.datasource === 'github-runners')
+        res?.deps.filter((d) => d.datasource === 'github-runners'),
       ).toHaveLength(7);
     });
   });

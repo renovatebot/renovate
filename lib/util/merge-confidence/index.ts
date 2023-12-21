@@ -45,7 +45,7 @@ export function isActiveConfidenceLevel(confidence: string): boolean {
 
 export function satisfiesConfidenceLevel(
   confidence: MergeConfidence,
-  minimumConfidence: MergeConfidence
+  minimumConfidence: MergeConfidence,
 ): boolean {
   return confidenceLevels[confidence] >= confidenceLevels[minimumConfidence];
 }
@@ -82,7 +82,7 @@ export async function getMergeConfidenceLevel(
   packageName: string,
   currentVersion: string,
   newVersion: string,
-  updateType: UpdateType
+  updateType: UpdateType,
 ): Promise<MergeConfidence | undefined> {
   if (is.nullOrUndefined(apiBaseUrl) || is.nullOrUndefined(token)) {
     return undefined;
@@ -122,7 +122,7 @@ async function queryApi(
   datasource: string,
   packageName: string,
   currentVersion: string,
-  newVersion: string
+  newVersion: string,
 ): Promise<MergeConfidence> {
   // istanbul ignore if: defensive, already been validated before calling this function
   if (is.nullOrUndefined(apiBaseUrl) || is.nullOrUndefined(token)) {
@@ -144,7 +144,7 @@ async function queryApi(
         newVersion,
         cachedResult,
       },
-      'using merge confidence cached result'
+      'using merge confidence cached result',
     );
     return cachedResult;
   }
@@ -207,13 +207,13 @@ function getApiBaseUrl(): string {
     const parsedBaseUrl = new URL(baseFromEnv).toString();
     logger.trace(
       { baseUrl: parsedBaseUrl },
-      'using merge confidence API base found in environment variables'
+      'using merge confidence API base found in environment variables',
     );
     return parsedBaseUrl;
   } catch (err) {
     logger.warn(
       { err, baseFromEnv },
-      'invalid merge confidence API base URL found in environment variables - using default value instead'
+      'invalid merge confidence API base URL found in environment variables - using default value instead',
     );
     return defaultBaseUrl;
   }

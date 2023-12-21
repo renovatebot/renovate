@@ -21,7 +21,7 @@ describe('modules/manager/tflint-plugin/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(
-        extractPackageFile('nothing here', 'doesnt-exist.hcl', {})
+        extractPackageFile('nothing here', 'doesnt-exist.hcl', {}),
       ).toBeNull();
     });
 
@@ -31,7 +31,7 @@ describe('modules/manager/tflint-plugin/extract', () => {
       `;
 
       expect(
-        extractPackageFile(configNoVersion, 'doesnt-exist.hcl', {})
+        extractPackageFile(configNoVersion, 'doesnt-exist.hcl', {}),
       ).toBeNull();
     });
 

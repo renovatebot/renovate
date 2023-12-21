@@ -8,7 +8,7 @@ describe('config/migrations/custom/automerge-type-migration', () => {
       },
       {
         automergeType: 'branch',
-      }
+      },
     );
   });
 
@@ -20,7 +20,7 @@ describe('config/migrations/custom/automerge-type-migration', () => {
       {
         automergeType: 'test',
       },
-      false
+      false,
     );
   });
 
@@ -32,7 +32,7 @@ describe('config/migrations/custom/automerge-type-migration', () => {
       {
         automergeType: true,
       },
-      false
+      false,
     );
   });
 });

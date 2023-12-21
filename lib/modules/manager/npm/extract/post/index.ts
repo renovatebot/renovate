@@ -4,7 +4,7 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 
 export async function postExtract(
-  packageFiles: PackageFile<NpmManagerData>[]
+  packageFiles: PackageFile<NpmManagerData>[],
 ): Promise<void> {
   await detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);

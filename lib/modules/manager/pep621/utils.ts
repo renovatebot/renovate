@@ -1,14 +1,14 @@
-import toml from '@iarna/toml';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency } from '../types';
 import { PyProject, PyProjectSchema } from './schema';
 import type { Pep508ParseResult } from './types';
 
 const pep508Regex = regEx(
-  /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9,._-]+)\])?\s*(?<currentValue>[^;]+)?(;\s*(?<marker>.*))?/i
+  /^(?<packageName>[A-Z0-9._-]+)\s*(\[(?<extras>[A-Z0-9,._-]+)\])?\s*(?<currentValue>[^;]+)?(;\s*(?<marker>.*))?/i,
 );
 
 export const depTypes = {
@@ -18,7 +18,7 @@ export const depTypes = {
 };
 
 export function parsePEP508(
-  value: string | null | undefined
+  value: string | null | undefined,
 ): Pep508ParseResult | null {
   if (is.nullOrUndefined(value)) {
     return null;
@@ -51,7 +51,7 @@ export function parsePEP508(
 
 export function pep508ToPackageDependency(
   depType: string,
-  value: string
+  value: string,
 ): PackageDependency | null {
   const parsed = parsePEP508(value);
   if (is.nullOrUndefined(parsed)) {
@@ -75,7 +75,7 @@ export function pep508ToPackageDependency(
 
 export function parseDependencyGroupRecord(
   depType: string,
-  records: Record<string, string[]> | null | undefined
+  records: Record<string, string[]> | null | undefined,
 ): PackageDependency[] {
   if (is.nullOrUndefined(records)) {
     return [];
@@ -92,7 +92,7 @@ export function parseDependencyGroupRecord(
 
 export function parseDependencyList(
   depType: string,
-  list: string[] | null | undefined
+  list: string[] | null | undefined,
 ): PackageDependency[] {
   if (is.nullOrUndefined(list)) {
     return [];
@@ -110,15 +110,15 @@ export function parseDependencyList(
 
 export function parsePyProject(
   packageFile: string,
-  content: string
+  content: string,
 ): PyProject | null {
   try {
-    const jsonMap = toml.parse(content);
+    const jsonMap = parseToml(content);
     return PyProjectSchema.parse(jsonMap);
   } catch (err) {
     logger.debug(
       { packageFile, err },
-      `Failed to parse and validate pyproject file`
+      `Failed to parse and validate pyproject file`,
     );
     return null;
   }

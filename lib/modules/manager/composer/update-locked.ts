@@ -5,19 +5,19 @@ import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
 import { Lockfile } from './schema';
 
 export function updateLockedDependency(
-  config: UpdateLockedConfig
+  config: UpdateLockedConfig,
 ): UpdateLockedResult {
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
-    `composer.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
+    `composer.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
   );
   try {
     const lockfile = Json.pipe(Lockfile).parse(lockFileContent);
     if (
       lockfile?.packages.find(
         ({ name, version }) =>
-          name === depName && composer.equals(version, newVersion)
+          name === depName && composer.equals(version, newVersion),
       )
     ) {
       return { status: 'already-updated' };

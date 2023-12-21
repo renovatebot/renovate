@@ -1,13 +1,16 @@
-import { parse } from '@iarna/toml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
+import { coerceArray } from '../../../util/array';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
+import { parse as parseToml } from '../../../util/toml';
 import { CrateDatasource } from '../../datasource/crate';
+import { api as versioning } from '../../versioning/cargo';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
+import { extractLockFileVersions } from './locked-version';
 import type {
   CargoConfig,
   CargoManifest,
@@ -29,7 +32,7 @@ function extractFromSection(
   section: keyof CargoSection,
   cargoRegistries: CargoRegistries,
   target?: string,
-  depTypeOverride?: string
+  depTypeOverride?: string,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   const sectionContent = parsedContent[section];
@@ -133,7 +136,7 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
     const payload = await readLocalFile(path, 'utf8');
     if (payload) {
       try {
-        return parse(payload) as CargoConfig;
+        return parseToml(payload) as CargoConfig;
       } catch (err) {
         logger.debug({ err }, `Error parsing ${path}`);
       }
@@ -151,7 +154,7 @@ function extractCargoRegistries(config: CargoConfig): CargoRegistries {
   // check if we're overriding our default registry index
   result[DEFAULT_REGISTRY_ID] = resolveRegistryIndex(
     DEFAULT_REGISTRY_ID,
-    config
+    config,
   );
 
   const registryNames = new Set([
@@ -168,14 +171,14 @@ function extractCargoRegistries(config: CargoConfig): CargoRegistries {
 function resolveRegistryIndex(
   registryName: string,
   config: CargoConfig,
-  originalNames: Set<string> = new Set()
+  originalNames: Set<string> = new Set(),
 ): CargoRegistryUrl {
   // if we have a source replacement, follow that.
   // https://doc.rust-lang.org/cargo/reference/source-replacement.html
   const replacementName = config.source?.[registryName]?.['replace-with'];
   if (replacementName) {
     logger.debug(
-      `Replacing index of cargo registry ${registryName} with ${replacementName}`
+      `Replacing index of cargo registry ${registryName} with ${replacementName}`,
     );
     if (originalNames.has(replacementName)) {
       logger.warn(`${registryName} cargo registry resolves to itself`);
@@ -184,7 +187,7 @@ function resolveRegistryIndex(
     return resolveRegistryIndex(
       replacementName,
       config,
-      originalNames.add(replacementName)
+      originalNames.add(replacementName),
     );
   }
 
@@ -205,7 +208,7 @@ function resolveRegistryIndex(
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig
+  _config?: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   logger.trace(`cargo.extractPackageFile(${packageFile})`);
 
@@ -214,7 +217,7 @@ export async function extractPackageFile(
 
   let cargoManifest: CargoManifest;
   try {
-    cargoManifest = parse(content);
+    cargoManifest = parseToml(content) as CargoManifest;
   } catch (err) {
     logger.debug({ err, packageFile }, 'Error parsing Cargo.toml file');
     return null;
@@ -240,19 +243,19 @@ export async function extractPackageFile(
           targetContent,
           'dependencies',
           cargoRegistries,
-          target
+          target,
         ),
         ...extractFromSection(
           targetContent,
           'dev-dependencies',
           cargoRegistries,
-          target
+          target,
         ),
         ...extractFromSection(
           targetContent,
           'build-dependencies',
           cargoRegistries,
-          target
+          target,
         ),
       ];
       targetDeps = targetDeps.concat(deps);
@@ -267,7 +270,7 @@ export async function extractPackageFile(
       'dependencies',
       cargoRegistries,
       undefined,
-      'workspace.dependencies'
+      'workspace.dependencies',
     );
   }
 
@@ -283,12 +286,40 @@ export async function extractPackageFile(
   }
   const lockFileName = await findLocalSiblingOrParent(
     packageFile,
-    'Cargo.lock'
+    'Cargo.lock',
   );
   const res: PackageFileContent = { deps };
-  // istanbul ignore if
   if (lockFileName) {
+    logger.debug(
+      `Found lock file ${lockFileName} for packageFile: ${packageFile}`,
+    );
+
+    const versionsByPackage = await extractLockFileVersions(lockFileName);
+    if (!versionsByPackage) {
+      logger.debug(
+        `Could not extract lock file versions from ${lockFileName}.`,
+      );
+      return res;
+    }
+
     res.lockFiles = [lockFileName];
+
+    for (const dep of deps) {
+      const packageName = dep.packageName ?? dep.depName!;
+      const versions = coerceArray(versionsByPackage.get(packageName));
+      const lockedVersion = versioning.getSatisfyingVersion(
+        versions,
+        dep.currentValue!,
+      );
+      if (lockedVersion) {
+        dep.lockedVersion = lockedVersion;
+      } else {
+        logger.debug(
+          `No locked version found for package ${dep.depName} in the range of ${dep.currentValue}.`,
+        );
+      }
+    }
   }
+
   return res;
 }

@@ -49,7 +49,7 @@ describe('workers/repository/model/semantic-commit-message', () => {
 
   it('should create instance from string with scope', () => {
     const instance = SemanticCommitMessage.fromString(
-      'fix(dashboard): ticket 123'
+      'fix(dashboard): ticket 123',
     );
 
     expect(SemanticCommitMessage.is(instance)).toBeTrue();

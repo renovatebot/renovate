@@ -15,7 +15,7 @@ export abstract class RepoCacheBase implements RepoCache {
 
   protected constructor(
     protected readonly repository: string,
-    protected readonly fingerprint: string
+    protected readonly fingerprint: string,
   ) {}
 
   protected abstract read(): Promise<string | null>;
@@ -51,7 +51,7 @@ export abstract class RepoCacheBase implements RepoCache {
       const oldCache = await this.read();
       if (!is.string(oldCache)) {
         logger.debug(
-          `RepoCacheBase.load() - expecting data of type 'string' received '${typeof oldCache}' instead - skipping`
+          `RepoCacheBase.load() - expecting data of type 'string' received '${typeof oldCache}' instead - skipping`,
         );
         return;
       }

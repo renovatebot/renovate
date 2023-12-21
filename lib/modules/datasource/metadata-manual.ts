@@ -66,6 +66,13 @@ export const manualSourceUrls: Record<string, Record<string, string>> = {
   },
   docker: {
     'amd64/registry': 'https://github.com/distribution/distribution',
+    'amd64/traefik': 'https://github.com/containous/traefik',
+    'confluentinc/ksqldb-cli': 'https://github.com/confluentinc/ksql',
+    'confluentinc/ksqldb-server': 'https://github.com/confluentinc/ksql',
+    'crossplanecontrib/provider-helm':
+      'https://github.com/crossplane-contrib/provider-helm',
+    'crossplanecontrib/provider-kubernetes':
+      'https://github.com/crossplane-contrib/provider-kubernetes',
     'coredns/coredns': 'https://github.com/coredns/coredns',
     'docker/compose': 'https://github.com/docker/compose',
     'drone/drone': 'https://github.com/drone/drone',
@@ -90,6 +97,16 @@ export const manualSourceUrls: Record<string, Record<string, string>> = {
     'mcr.microsoft.com/dotnet/sdk': 'https://github.com/dotnet/sdk',
     node: 'https://github.com/nodejs/node',
     registry: 'https://github.com/distribution/distribution',
+    traefik: 'https://github.com/containous/traefik',
+    'kudobuilder/kuttl': 'https://github.com/kudobuilder/kuttl',
+    'prom/blackbox-exporter': 'https://github.com/prometheus/blackbox_exporter',
+    'xpkg.upbound.io/upbound/provider-gcp':
+      'https://github.com/upbound/provider-gcp',
+  },
+  helm: {
+    crossplane: 'https://github.com/crossplane/crossplane',
+    interoperator: 'https://github.com/cloudfoundry/service-fabrik-broker',
+    kyverno: 'https://github.com/kyverno/kyverno',
   },
   kubernetes: {
     node: 'https://github.com/nodejs/node',

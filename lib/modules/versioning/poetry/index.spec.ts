@@ -37,7 +37,7 @@ describe('modules/versioning/poetry/index', () => {
       expect(versioning.getMajor(version)).toBe(major);
       expect(versioning.getMinor(version)).toBe(minor);
       expect(versioning.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -135,7 +135,7 @@ describe('modules/versioning/poetry/index', () => {
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(versioning.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -146,7 +146,7 @@ describe('modules/versioning/poetry/index', () => {
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(versioning.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -162,7 +162,7 @@ describe('modules/versioning/poetry/index', () => {
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(versioning.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -175,7 +175,7 @@ describe('modules/versioning/poetry/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(versioning.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -238,7 +238,7 @@ describe('modules/versioning/poetry/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 
   it.each`

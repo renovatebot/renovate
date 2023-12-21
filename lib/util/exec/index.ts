@@ -75,7 +75,7 @@ interface RawExecArguments {
 
 async function prepareRawExec(
   cmd: string | string[],
-  opts: ExecOptions
+  opts: ExecOptions,
 ): Promise<RawExecArguments> {
   const { docker } = opts;
   const preCommands = opts.preCommands ?? [];
@@ -111,7 +111,7 @@ async function prepareRawExec(
         ...(await generateInstallCommands(opts.toolConstraints)),
         ...preCommands,
       ],
-      dockerOptions
+      dockerOptions,
     );
     rawCommands = [dockerCommand];
   } else if (isDynamicInstall(opts.toolConstraints)) {
@@ -125,7 +125,7 @@ async function prepareRawExec(
     const hermitEnvVars = await getHermitEnvs(rawOptions);
     logger.debug(
       { hermitEnvVars },
-      'merging hermit environment variables into the execution options'
+      'merging hermit environment variables into the execution options',
     );
     rawOptions.env = {
       ...rawOptions.env,
@@ -138,7 +138,7 @@ async function prepareRawExec(
 
 export async function exec(
   cmd: string | string[],
-  opts: ExecOptions = {}
+  opts: ExecOptions = {},
 ): Promise<ExecResult> {
   const { docker } = opts;
   const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix', 'renovate_');
@@ -164,15 +164,15 @@ export async function exec(
           (removeErr: Error) => {
             const message: string = err.message;
             throw new Error(
-              `Error: "${removeErr.message}" - Original Error: "${message}"`
+              `Error: "${removeErr.message}" - Original Error: "${message}"`,
             );
-          }
+          },
         );
       }
       if (err.signal === `SIGTERM`) {
         logger.debug(
           { err },
-          'exec interrupted by SIGTERM - run needs to be aborted'
+          'exec interrupted by SIGTERM - run needs to be aborted',
         );
         throw new Error(TEMPORARY_ERROR);
       }
@@ -185,7 +185,7 @@ export async function exec(
         stdout: res.stdout,
         stderr: res.stderr,
       },
-      'exec completed'
+      'exec completed',
     );
   }
 

@@ -205,6 +205,16 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
     Renovate tries to delay until Azure is in the expected state, but it will continue if it takes too long.
     In some cases this can result in a dependency not being merged, and a fresh PR being created for the dependency.
 
+**Automerge and GitHub branch protection rules**
+
+You must select at least one status check in the _Require status checks to pass before merging_ section of your branch protection rules on GitHub, if you match all three conditions:
+
+- `automerge=true`
+- `platformAutomerge=true`, Renovate defaults to `true`
+- You use GitHub's _Require status checks to pass before merging_ branch protection rule
+
+If you don't select any status check, and you use platform automerge, then GitHub might automerge PRs with failing tests!
+
 ## automergeComment
 
 Use this only if you configure `automergeType="pr-comment"`.
@@ -400,7 +410,8 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, `nuget`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm`, `nuget`, `maven`, `pep621` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm`, `nuget`, `maven`, `pep621`, `poetry` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
@@ -433,7 +444,7 @@ For example, To add `[skip ci]` to every commit you could configure:
 
 Another example would be if you want to configure a DCO signoff to each commit.
 
-If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](https://docs.renovatebot.com/presets-default/#gitsignoff) to your `extends` array:
+If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
 
 ```json
 {
@@ -615,7 +626,12 @@ Renovate supports two options:
 More advanced filtering options may come in future.
 
 There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
-This feature is limited to `packagist`, `npm`, and `pypi` datasources.
+This feature is limited to the folllowing datasources:
+
+- `jenkins-plugins`
+- `npm`
+- `packagist`
+- `pypi`
 
 <!-- prettier-ignore -->
 !!! warning
@@ -646,22 +662,311 @@ When using with `npm`, we recommend you:
 ## customDatasources
 
 Use `customDatasources` to fetch releases from APIs or statically hosted sites and Renovate has no own datasource.
-These datasources can be referred by RegexManagers or can be used to overwrite default datasources.
+These datasources can be referred by `customManagers` or can be used to overwrite default datasources.
 
-For more details see the [`custom` datasource documentation](/modules/datasource/custom/).
+For more details see the [`custom` datasource documentation](modules/datasource/custom/index.md).
+
+## customManagers
+
+Use `customManagers`(previously `regexManagers`) entries to configure the custom managers in Renovate.
+
+You can define custom managers to handle:
+
+- Proprietary file formats or conventions
+- Popular file formats not yet supported as a manager by Renovate
+
+Currently we only have one custom manager.
+The `regex` manager which is based on using Regular Expression named capture groups.
+
+You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
+
+- `datasource`
+- `depName`
+- `currentValue`
+
+Use named capture group matching _or_ set a corresponding template.
+We recommend you use only _one_ of these methods, or you'll get confused.
+
+We recommend that you also tell Renovate what `versioning` to use.
+If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
+
+For more details and examples about it, see our [documentation for the `regex` manager](modules/manager/regex/index.md).
+For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
+
+<!-- prettier-ignore -->
+!!! tip
+    Look at our [Regex Manager Presets](./presets-regexManagers.md), they may have what you need.
+
+### customType
+
+Example:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "matchStrings": [
+        "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+      ]
+    }
+  ]
+}
+```
+
+### matchStrings
+
+Each `matchStrings` must be a valid regular expression, optionally with named capture groups.
+
+Example:
+
+```json
+{
+  "matchStrings": [
+    "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
+  ]
+}
+```
+
+### matchStringsStrategy
+
+`matchStringsStrategy` controls behavior when multiple `matchStrings` values are provided.
+Three options are available:
+
+- `any` (default)
+- `recursive`
+- `combination`
+
+#### any
+
+Each provided `matchString` will be matched individually to the content of the `packageFile`.
+If a `matchString` has multiple matches in a file each will be interpreted as an independent dependency.
+
+As example the following configuration will update all three lines in the Dockerfile.
+
+```json title="renovate.json"
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^Dockerfile$"],
+      "matchStringsStrategy": "any",
+      "matchStrings": [
+        "ENV [A-Z]+_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
+        "FROM (?<depName>\\S*):(?<currentValue>\\S*)"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+```dockerfile title="Dockerfile"
+FROM amd64/ubuntu:18.04
+ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
+```
+
+#### recursive
+
+If using `recursive` the `matchStrings` will be looped through and the full match of the last will define the range of the next one.
+This can be used to narrow down the search area to prevent multiple matches.
+But the `recursive` strategy still allows the matching of multiple dependencies as described below.
+All matches of the first `matchStrings` pattern are detected, then each of these matches will be used as basis for the input for the next `matchStrings` pattern, and so on.
+If the next `matchStrings` pattern has multiple matches then it will split again.
+This process will be followed as long there is a match plus a next `matchingStrings` pattern is available.
+
+Matched groups will be available in subsequent matching layers.
+
+This is an example how this can work.
+The first custom manager will only upgrade `grafana/loki` as looks for the `backup` key then looks for the `test` key and then uses this result for extraction of necessary attributes.
+But the second custom manager will upgrade both definitions as its first `matchStrings` matches both `test` keys.
+
+```json title="renovate.json"
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^example.json$"],
+      "matchStringsStrategy": "recursive",
+      "matchStrings": [
+        "\"backup\":\\s*{[^}]*}",
+        "\"test\":\\s*\\{[^}]*}",
+        "\"name\":\\s*\"(?<depName>.*)\"[^\"]*\"type\":\\s*\"(?<datasource>.*)\"[^\"]*\"value\":\\s*\"(?<currentValue>.*)\""
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["^example.json$"],
+      "matchStringsStrategy": "recursive",
+      "matchStrings": [
+        "\"test\":\\s*\\{[^}]*}",
+        "\"name\":\\s*\"(?<depName>.*)\"[^\"]*\"type\":\\s*\"(?<datasource>.*)\"[^\"]*\"value\":\\s*\"(?<currentValue>.*)\""
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+```json title="example.json"
+{
+  "backup": {
+    "test": {
+      "name": "grafana/loki",
+      "type": "docker",
+      "value": "1.6.1"
+    }
+  },
+  "setup": {
+    "test": {
+      "name": "python",
+      "type": "docker",
+      "value": "3.9.0"
+    }
+  }
+}
+```
+
+#### combination
+
+You may use this option to combine the values of multiple lines inside a file.
+You can combine multiple lines with `matchStringStrategy` values, but the `combination` approach is less susceptible to white space or line breaks stopping a match.
+
+`combination` can only match _one_ dependency per file.
+To update multiple dependencies with `combination` you must define multiple custom managers.
+
+Matched group values will be merged to form a single dependency.
+
+```json title="renovate.json"
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["^main.yml$"],
+      "matchStringsStrategy": "combination",
+      "matchStrings": [
+        "prometheus_image:\\s*\"(?<depName>.*)\"\\s*//",
+        "prometheus_version:\\s*\"(?<currentValue>.*)\"\\s*//"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["^main.yml$"],
+      "matchStringsStrategy": "combination",
+      "matchStrings": [
+        "thanos_image:\\s*\"(?<depName>.*)\"\\s*//",
+        "thanos_version:\\s*\"(?<currentValue>.*)\"\\s*//"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+```yaml title="Ansible variable file (YAML)"
+prometheus_image: "prom/prometheus"  // a comment
+prometheus_version: "v2.21.0" // a comment
+------
+thanos_image: "prom/prometheus"  // a comment
+thanos_version: "0.15.0" // a comment
+```
+
+In the above example, each custom manager will match a single dependency each.
+
+### depNameTemplate
+
+If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### extractVersionTemplate
+
+If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### packageNameTemplate
+
+`packageName` is used for looking up dependency versions.
+It will be compiled using Handlebars and the regex `groups` result.
+It will default to the value of `depName` if left unconfigured/undefined.
+
+### currentValueTemplate
+
+If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### datasourceTemplate
+
+If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### depTypeTemplate
+
+If `depType` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### versioningTemplate
+
+If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### registryUrlTemplate
+
+If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
+It will be compiled using Handlebars and the regex `groups` result.
+
+### autoReplaceStringTemplate
+
+Allows overwriting how the matched string is replaced.
+This allows for some migration strategies.
+E.g. moving from one Docker image repository to another one.
+
+```yaml title="helm-values.yaml"
+# The image of the service <registry>/<repo>/<image>:<tag>
+image: my.old.registry/aRepository/andImage:1.18-alpine
+```
+
+```json title="The regex definition"
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["values.yaml$"],
+      "matchStrings": [
+        "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
+      ],
+      "depNameTemplate": "my.new.registry/aRepository/andImage",
+      "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+This will lead to following update where `1.21-alpine` is the newest version of `my.new.registry/aRepository/andImage`:
+
+```yaml
+# The image of the service <registry>/<repo>/<image>:<tag>
+image: my.new.registry/aRepository/andImage:1.21-alpine
+```
 
 ## customizeDashboard
 
-You can use the `customizeDashboard` object to customize dependency dashboard.
+You may use the `customizeDashboard` object to customize the Dependency Dashboard.
 
 Supported fields:
 
-- `repoProblemsHeader`: This field will replace the header of the Repository Problems in dependency dashboard issue.
+- `repoProblemsHeader`: This field will replace the header of the Repository Problems in the Dependency Dashboard issue.
 
 ### defaultRegistryUrlTemplate
 
-`registryUrl` which is used, if none is return by extraction.
-As this is a template it can be dynamically set. E.g. add the `packageName` as part of the URL:
+This field is used to build a `registryUrl` for the dependency.
+It is not needed if either:
+
+- The dependency can be found with the default `registryUrls` of the datasource (e.g. npmjs registry if the datasource is `npm`), or
+- The matching groups you specified as part of the matching already include a `registryUrl` group
+  As this is a template it can be dynamically set.
+  E.g. add the `packageName` as part of the URL:
 
 ```json5
 {
@@ -676,7 +981,7 @@ As this is a template it can be dynamically set. E.g. add the `packageName` as p
 ### format
 
 Defines which format the API is returning.
-Currently `json` or `plain` are supported, see the `custom` [datasource documentation](/modules/datasource/custom/) for more information.
+Currently `json` or `plain` are supported, see the `custom` [datasource documentation](modules/datasource/custom/index.md) for more information.
 
 ### transformTemplates
 
@@ -881,7 +1186,17 @@ Example:
 }
 ```
 
-For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
+To enable custom managers you will need to add `custom.` prefix before their names
+
+Example:
+
+```json
+{
+  "enabledManagers": ["custom.regex"]
+}
+```
+
+For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
 
 ## encrypted
 
@@ -935,6 +1250,11 @@ Example:
 
 The above would mean Renovate would not include files matching the above glob pattern in the commit, even if it thinks they should be updated.
 
+## expandCodeOwnersGroups
+
+If configured, Renovate will expand any matching `CODEOWNERS` groups into a full list of group members and assign them individually instead of the group.
+This is particularly useful when combined with `assigneesSampleSize` and `assigneesFromCodeOwners`, so that only a subset of the Codeowners are assigned instead of the whole group.
+
 ## extends
 
 See [shareable config presets](./config-presets.md) for details.
@@ -987,29 +1307,30 @@ A similar one could strip leading `v` prefixes:
 }
 ```
 
-## fetchReleaseNotes
+## fetchChangeLogs
 
-Use this config option to configure release notes fetching.
+Use this config option to configure changelogs/release notes fetching.
 The available options are:
 
-- `off` - disable release notes fetching
-- `branch` - fetch release notes while creating/updating branch
-- `pr`(default) - fetches release notes while creating/updating pull-request
+- `off` - disable changelogs fetching
+- `branch` - fetch changelogs while creating/updating branch
+- `pr`(default) - fetches changelogs while creating/updating pull-request
 
-It is not recommended to set fetchReleaseNotes=branch unless you are embedding release notes in commit information, because it results in a performance decrease.
+Avoid setting `fetchChangeLogs=branch`, because this slows down Renovate.
+But if you're embedding changelogs in commit information, you may use `fetchChangeLogs=branch`.
 
-Renovate can fetch release notes when they are hosted on one of these platforms:
+Renovate can fetch changelogs when they are hosted on one of these platforms:
 
 - Bitbucket Cloud
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from `github.com`.
+If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch changelogs notes from `github.com`.
 
 <!-- prettier-ignore -->
 !!! note
-    Renovate can only show release notes from some platforms and some package managers.
-    We're planning improvements so that Renovate can show more release notes.
+    Renovate can only show changelogs from some platforms and some package managers.
+    We're planning improvements so that Renovate can show more changelogs.
     Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get an overview of the planned work.
 
 ## fileMatch
@@ -1039,7 +1360,7 @@ Because `fileMatch` is mergeable, you don't need to duplicate the defaults and c
 ```
 
 If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example).
-The full list of supported managers can be found [here](https://docs.renovatebot.com/modules/manager/).
+The full list of supported managers can be found [here](modules/manager/index.md#supported-managers).
 
 ## filterUnavailableUsers
 
@@ -1326,7 +1647,7 @@ For example to also skip 404 responses then configure the following:
 Use this field to configure Renovate to abort runs for custom hosts.
 By default, Renovate will only abort for known public hosts, which has the downside that transient errors for other hosts can cause autoclosing of PRs.
 
-To abort Renovate runs for http failures from _any_ host:
+To abort Renovate runs for HTTP failures from _any_ host:
 
 ```json
 {
@@ -1448,6 +1769,26 @@ Example config:
 }
 ```
 
+### maxRetryAfter
+
+A remote host may return a `4xx` response with a `Retry-After` header value, which indicates that Renovate has been rate-limited.
+Renovate may try to contact the host again after waiting a certain time, that's set by the host.
+By default, Renovate tries again after the `Retry-After` header value has passed, up to a maximum of 60 seconds.
+If the `Retry-After` value is more than 60 seconds, Renovate will abort the request instead of waiting.
+
+You can configure a different maximum value in seconds using `maxRetryAfter`:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "maxRetryAfter": 25
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
@@ -1465,7 +1806,7 @@ You usually don't need to configure it in a host rule if you have already config
 
 ### insecureRegistry
 
-Enable this option to allow Renovate to connect to an [insecure Docker registry](https://docs.docker.com/registry/insecure/) that is http only.
+Enable this option to allow Renovate to connect to an [insecure Docker registry](https://docs.docker.com/registry/insecure/) that is HTTP only.
 This is insecure and is not recommended.
 
 Example:
@@ -1481,7 +1822,7 @@ Example:
 }
 ```
 
-### keepalive
+### keepAlive
 
 If enabled, this allows a single TCP connection to remain open for multiple HTTP(S) requests/responses.
 
@@ -1568,7 +1909,7 @@ Specifies the private key in [PEM format](https://en.wikipedia.org/wiki/Privacy-
 <!-- prettier-ignore -->
 !!! warning
     Do _not_ put your private key into this field, to avoid losing confidentiality completely.
-    You must use [secrets](https://docs.renovatebot.com/self-hosted-configuration/#secrets) to pass it down securely instead.
+    You must use [secrets](./self-hosted-configuration.md#secrets) to pass it down securely instead.
 
 ### httpsCertificate
 
@@ -1873,15 +2214,15 @@ Set `osvVulnerabilityAlerts` to `true` to get pull requests with vulnerability f
 You will only get OSV-based vulnerability alerts for _direct_ dependencies.
 Renovate only queries the OSV database for dependencies that use one of these datasources:
 
-- [`crate`](https://docs.renovatebot.com/modules/datasource/crate/)
-- [`go`](https://docs.renovatebot.com/modules/datasource/go/)
-- [`hex`](https://docs.renovatebot.com/modules/datasource/hex/)
-- [`maven`](https://docs.renovatebot.com/modules/datasource/maven/)
-- [`npm`](https://docs.renovatebot.com/modules/datasource/npm/)
-- [`nuget`](https://docs.renovatebot.com/modules/datasource/nuget/)
-- [`packagist`](https://docs.renovatebot.com/modules/datasource/packagist/)
-- [`pypi`](https://docs.renovatebot.com/modules/datasource/pypi/)
-- [`rubygems`](https://docs.renovatebot.com/modules/datasource/rubygems/)
+- [`crate`](./modules/datasource/crate/index.md)
+- [`go`](./modules/datasource/go/index.md)
+- [`hex`](./modules/datasource/hex/index.md)
+- [`maven`](./modules/datasource/maven/index.md)
+- [`npm`](./modules/datasource/npm/index.md)
+- [`nuget`](./modules/datasource/nuget/index.md)
+- [`packagist`](./modules/datasource/packagist/index.md)
+- [`pypi`](./modules/datasource/pypi/index.md)
+- [`rubygems`](./modules/datasource/rubygems/index.md)
 
 ## packageRules
 
@@ -2107,7 +2448,7 @@ This field supports Regular Expressions if they begin and end with `/`, otherwis
 
 Use `matchCategories` to restrict rules to a particular language or group.
 Matching is done using "any" logic, i.e. "match any of the following categories".
-The categories can be found in the [manager documentation](./modules/manager/index.md).
+The categories can be found in the [manager documentation](modules/manager/index.md).
 
 <!-- prettier-ignore -->
 !!! note
@@ -2188,7 +2529,7 @@ Use this field to restrict rules to a particular package manager. e.g.
 }
 ```
 
-For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
+For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
 
 ### matchDatasources
 
@@ -2260,8 +2601,8 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
 }
 ```
 
-The syntax of the version range must follow the [versioning scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning) used by the matched package(s).
-This is usually defined by the [manager](https://docs.renovatebot.com/modules/manager/#supported-managers) which discovered them or by the default versioning for the package's [datasource](https://docs.renovatebot.com/modules/datasource/).
+The syntax of the version range must follow the [versioning scheme](modules/versioning.md#supported-versioning) used by the matched package(s).
+This is usually defined by the [manager](modules/manager/index.md#supported-managers) which discovered them or by the default versioning for the package's [datasource](modules/datasource/index.md).
 For example, a Gradle package would typically need Gradle constraint syntax (e.g. `[,7.0)`) and not SemVer syntax (e.g. `<7.0`).
 
 This field also supports Regular Expressions which must begin and end with `/`.
@@ -2460,9 +2801,7 @@ For example to apply a special label to `major` updates:
     This configuration option needs a Mend API key, and is in private beta testing only.
     API keys are not available for free or via the `renovatebot/renovate` repository.
 
-For example to group high merge confidence updates:
-
-```json
+```json title="Grouping high merge confidence updates"
 {
   "packageRules": [
     {
@@ -2489,13 +2828,11 @@ Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostTyp
 ### customChangelogUrl
 
 Use this field to set the source URL for a package, including overriding an existing one.
-Source URLs are necessary in order to look up release notes.
+Source URLs are necessary in order to look up changelogs.
 
-Using this field we can specify the exact URL to fetch release notes from.
+Using this field we can specify the exact URL to fetch changelogs from.
 
-Example setting source URL for package "dummy":
-
-```json
+```json title="Setting the source URL for the dummy package"
 {
   "packageRules": [
     {
@@ -2525,6 +2862,7 @@ Managers which do not support replacement:
 - `homebrew`
 - `maven`
 - `regex`
+- `sbt`
 
 Use the `replacementName` config option to set the name of a replacement package.
 
@@ -2668,8 +3006,8 @@ Table with options:
 | `gomodTidyE`                 | Run `go mod tidy -e` after Go module updates.                                                                                                              |
 | `gomodUpdateImportPaths`     | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `helmUpdateSubChartArchives` | Update subchart archives in the `/charts` folder.                                                                                                          |
-| `npmDedupe`                  | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
-| `pnpmDedupe`                 | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
+| `npmDedupe`                  | Run `npm install` with `--prefer-dedupe` for npm >= 7 or `npm dedupe` after `package-lock.json` update for npm <= 6.                                       |
+| `pnpmDedupe`                 | Run `pnpm dedupe --config.ignore-scripts=true` after `pnpm-lock.yaml` updates.                                                                             |
 | `yarnDedupeFewer`            | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`          | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
@@ -2727,9 +3065,7 @@ If set to `branch` the postUpgradeTask is executed for the whole branch.
 
 Use this array to provide a list of column names you wish to include in the PR tables.
 
-For example, if you wish to add the package file name to the table, you would add this to your config:
-
-```json
+```json title="Adding the package file name to the table"
 {
   "prBodyColumns": [
     "Package",
@@ -2748,11 +3084,12 @@ For example, if you wish to add the package file name to the table, you would ad
 
 ## prBodyDefinitions
 
-You can configure this object to either (a) modify the template for an existing table column in PR bodies, or (b) you wish to _add_ a definition for a new/additional column.
+You can configure this object to either:
 
-Here is an example of modifying the default value for the `"Package"` column to put it inside a `<code></code>` block:
+- modify the template for an existing table column in PR bodies, or
+- _add_ a definition for a new/additional column.
 
-```json
+```json title="Modifying the default value for the Package column to put it inside a code block"
 {
   "prBodyDefinitions": {
     "Package": "`{{{depName}}}`"
@@ -2760,9 +3097,7 @@ Here is an example of modifying the default value for the `"Package"` column to 
 }
 ```
 
-Here is an example of adding a custom `"Sourcegraph"` column definition:
-
-```json
+```json title="Adding a custom Sourcegraph column definition"
 {
   "prBodyDefinitions": {
     "Sourcegraph": "[![code search for \"{{{depName}}}\"](https://sourcegraph.com/search/badge?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}}&label=matches)](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}})"
@@ -2785,9 +3120,7 @@ Here is an example of adding a custom `"Sourcegraph"` column definition:
 
 Use this field to add custom content inside PR bodies, including conditionally.
 
-e.g. if you wish to add an extra Warning to major updates:
-
-```json
+```json title="Adding an extra Warning to major updates"
 {
   "prBodyNotes": ["{{#if isMajor}}:warning: MAJOR MAJOR MAJOR :warning:{{/if}}"]
 }
@@ -2819,25 +3152,34 @@ This limit is enforced on a per-repository basis.
 
 ## prCreation
 
-This setting tells Renovate when you would like it to raise PRs:
+This setting tells Renovate _when_ to create PRs:
 
-- `immediate` (default): Renovate will create PRs immediately after creating the corresponding branch
-- `not-pending`: Renovate will wait until status checks have completed (passed or failed) before raising the PR
-- `status-success`: Renovate won't raise PRs unless tests pass
+- `immediate` (default): Renovate creates PRs immediately after creating the corresponding branch
+- `not-pending`: Renovate waits until status checks have completed (passed or failed) before raising the PR
+- `status-success`: Renovate only creates PRs if/when the the test pass
+- `approval`: Renovate creates branches for updates immediately, but creates the PR _after_ getting Dependency Dashboard approval
 
-Renovate defaults to `immediate` but you might want to change this to `not-pending` instead.
+When prCreation is set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
+You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR.
 
-With prCreation set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
-You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR or not.
-
-With prCreation set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
+When prCreation is set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
 When you get the PR notification, you can take action immediately, as you have the full test results.
-If there are no checks associated, Renovate will create the PR once 24 hrs have elapsed since creation of the commit.
+If there are no checks associated, Renovate will create the PR once 24 hours have elapsed since creation of the commit.
 
-With prCreation set to `status-success`, Renovate creates the PR only if/ once all tests have passed.
+When prCreation is set to `status-success`, Renovate creates the PR only if all tests have passed.
+When a branch remains without PR due to a failing test: select the corresponding PR from the Dependency Dashboard, and push your fixes to the branch.
 
-For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
-Instead, Renovate can create the PR on its next run after relevant tests have completed, so there will be some delay.
+When prCreation is set to `approval`, Renovate creates the PR only when approved via the Dependency Dashboard.
+Renovate still creates the _branch_ immediately.
+
+<!-- prettier-ignore -->
+!!! note
+    For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
+    Instead, Renovate create the PR on its _next_ run after the relevant tests have completed, so there will be some delay.
+
+<!-- prettier-ignore -->
+!!! warning
+    If you set `prCreation=approval` you must _not_ use `dependencyDashboardApproval=true`!
 
 ## prFooter
 
@@ -2950,7 +3292,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, and update nothing otherwise
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn`, `terraform` and `poetry` so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `npm`, `yarn`, `terraform` and `poetry` so far
 - `in-range-only` = Update the lock file when in-range updates are available, ignore package file updates
 
 Renovate's `"auto"` strategy works like this for npm:
@@ -3018,316 +3360,33 @@ You can select which behavior you want from Renovate:
 We recommend that you stick with the default setting for this option.
 Only change this setting if you really need to.
 
-## regexManagers
-
-Use `regexManagers` entries to configure the `regex` manager in Renovate.
-
-You can define custom managers to handle:
-
-- Proprietary file formats or conventions
-- Popular file formats not yet supported as a manager by Renovate
-
-The custom manager concept is based on using Regular Expression named capture groups.
-
-You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
-
-- `datasource`
-- `depName`
-- `currentValue`
-
-Use named capture group matching _or_ set a corresponding template.
-We recommend you use only one of these methods, or you'll get confused.
-
-We recommend that you also tell Renovate what `versioning` to use.
-If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
-
-For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
-For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
-
-<!-- prettier-ignore -->
-!!! tip
-    Look at our [Regex Manager Presets](https://docs.renovatebot.com/presets-regexManagers/), they may have what you need.
-
-### customType
-
-Example:
-
-```json
-{
-  "regexManagers": [
-    {
-      "customType": "regex",
-      "matchStrings": [
-        "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
-      ]
-    }
-  ]
-}
-```
-
-### matchStrings
-
-`matchStrings` should each be a valid regular expression, optionally with named capture groups.
-
-Example:
-
-```json
-{
-  "matchStrings": [
-    "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)\\s"
-  ]
-}
-```
-
-### matchStringsStrategy
-
-`matchStringsStrategy` controls behavior when multiple `matchStrings` values are provided.
-Three options are available:
-
-- `any` (default)
-- `recursive`
-- `combination`
-
-#### any
-
-Each provided `matchString` will be matched individually to the content of the `packageFile`.
-If a `matchString` has multiple matches in a file each will be interpreted as an independent dependency.
-
-As example the following configuration will update all 3 lines in the Dockerfile.
-renovate.json:
-
-```json
-{
-  "regexManagers": [
-    {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStringsStrategy": "any",
-      "matchStrings": [
-        "ENV [A-Z]+_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
-        "FROM (?<depName>\\S*):(?<currentValue>\\S*)"
-      ],
-      "datasourceTemplate": "docker"
-    }
-  ]
-}
-```
-
-a Dockerfile:
-
-```dockerfile
-FROM amd64/ubuntu:18.04
-ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
-ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
-```
-
-#### recursive
-
-If using `recursive` the `matchStrings` will be looped through and the full match of the last will define the range of the next one.
-This can be used to narrow down the search area to prevent multiple matches.
-But the `recursive` strategy still allows the matching of multiple dependencies as described below.
-All matches of the first `matchStrings` pattern are detected, then each of these matches will used as basis be used as the input for the next `matchStrings` pattern, and so on.
-If the next `matchStrings` pattern has multiple matches then it will split again.
-This process will be followed as long there is a match plus a next `matchingStrings` pattern is available.
-
-Matched groups will be available in subsequent matching layers.
-
-This is an example how this can work.
-The first regex manager will only upgrade `grafana/loki` as looks for the `backup` key then looks for the `test` key and then uses this result for extraction of necessary attributes.
-But the second regex manager will upgrade both definitions as its first `matchStrings` matches both `test` keys.
-
-renovate.json:
-
-```json
-{
-  "regexManagers": [
-    {
-      "fileMatch": ["^example.json$"],
-      "matchStringsStrategy": "recursive",
-      "matchStrings": [
-        "\"backup\":\\s*{[^}]*}",
-        "\"test\":\\s*\\{[^}]*}",
-        "\"name\":\\s*\"(?<depName>.*)\"[^\"]*\"type\":\\s*\"(?<datasource>.*)\"[^\"]*\"value\":\\s*\"(?<currentValue>.*)\""
-      ],
-      "datasourceTemplate": "docker"
-    },
-    {
-      "fileMatch": ["^example.json$"],
-      "matchStringsStrategy": "recursive",
-      "matchStrings": [
-        "\"test\":\\s*\\{[^}]*}",
-        "\"name\":\\s*\"(?<depName>.*)\"[^\"]*\"type\":\\s*\"(?<datasource>.*)\"[^\"]*\"value\":\\s*\"(?<currentValue>.*)\""
-      ],
-      "datasourceTemplate": "docker"
-    }
-  ]
-}
-```
-
-example.json:
-
-```json
-{
-  "backup": {
-    "test": {
-      "name": "grafana/loki",
-      "type": "docker",
-      "value": "1.6.1"
-    }
-  },
-  "setup": {
-    "test": {
-      "name": "python",
-      "type": "docker",
-      "value": "3.9.0"
-    }
-  }
-}
-```
-
-#### combination
-
-This option allows the possibility to combine the values of multiple lines inside a file.
-While using multiple lines is also possible using both other `matchStringStrategy` values, the `combination` approach is less susceptible to white space or line breaks stopping a match.
-
-`combination` will only match at most one dependency per file, so if you want to update multiple dependencies using `combination` you have to define multiple regex managers.
-
-Matched group values will be merged to form a single dependency.
-
-renovate.json:
-
-```json
-{
-  "regexManagers": [
-    {
-      "fileMatch": ["^main.yml$"],
-      "matchStringsStrategy": "combination",
-      "matchStrings": [
-        "prometheus_image:\\s*\"(?<depName>.*)\"\\s*//",
-        "prometheus_version:\\s*\"(?<currentValue>.*)\"\\s*//"
-      ],
-      "datasourceTemplate": "docker"
-    },
-    {
-      "fileMatch": ["^main.yml$"],
-      "matchStringsStrategy": "combination",
-      "matchStrings": [
-        "thanos_image:\\s*\"(?<depName>.*)\"\\s*//",
-        "thanos_version:\\s*\"(?<currentValue>.*)\"\\s*//"
-      ],
-      "datasourceTemplate": "docker"
-    }
-  ]
-}
-```
-
-Ansible variable file ( yaml ):
-
-```yaml
-prometheus_image: "prom/prometheus"  // a comment
-prometheus_version: "v2.21.0" // a comment
-------
-thanos_image: "prom/prometheus"  // a comment
-thanos_version: "0.15.0" // a comment
-```
-
-In the above example, each regex manager will match a single dependency each.
-
-### depNameTemplate
-
-If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### extractVersionTemplate
-
-If `extractVersion` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### packageNameTemplate
-
-`packageName` is used for looking up dependency versions.
-It will be compiled using Handlebars and the regex `groups` result.
-It will default to the value of `depName` if left unconfigured/undefined.
-
-### currentValueTemplate
-
-If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### datasourceTemplate
-
-If the `datasource` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### depTypeTemplate
-
-If `depType` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### versioningTemplate
-
-If the `versioning` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### registryUrlTemplate
-
-If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
-It will be compiled using Handlebars and the regex `groups` result.
-
-### autoReplaceStringTemplate
-
-Allows overwriting how the matched string is replaced.
-This allows for some migration strategies.
-E.g. moving from one Docker image repository to another one.
-
-helm-values.yaml:
-
-```yaml
-# The image of the service <registry>/<repo>/<image>:<tag>
-image: my.old.registry/aRepository/andImage:1.18-alpine
-```
-
-regex definition:
-
-```json
-{
-  "regexManagers": [
-    {
-      "fileMatch": ["values.yaml$"],
-      "matchStrings": [
-        "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
-      ],
-      "depNameTemplate": "my.new.registry/aRepository/andImage",
-      "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
-      "datasourceTemplate": "docker"
-    }
-  ]
-}
-```
-
-This will lead to following update where `1.21-alpine` is the newest version of `my.new.registry/aRepository/andImage`:
-
-```yaml
-# The image of the service <registry>/<repo>/<image>:<tag>
-image: my.new.registry/aRepository/andImage:1.21-alpine
-```
-
 ## registryAliases
 
 You can use the `registryAliases` object to set registry aliases.
 
 This feature works with the following managers:
 
-- [`ansible`](/modules/manager/ansible)
-- [`docker-compose`](/modules/manager/docker-compose)
-- [`dockerfile`](/modules/manager/dockerfile)
-- [`droneci`](/modules/manager/droneci)
-- [`gitlabci`](/modules/manager/gitlabci/)
-- [`helm-requirements`](/modules/manager/helm-requirements/)
-- [`helmfile`](/modules/manager/helmfile/)
-- [`helmv3`](/modules/manager/helmv3/)
-- [`kubernetes`](/modules/manager/kubernetes)
-- [`terraform`](/modules/manager/terraform)
-- [`woodpecker`](/modules/manager/woodpecker)
+- [`ansible`](modules/manager/ansible/index.md)
+- [`bitbucket-pipelines`](modules/manager/bitbucket-pipelines/index.md)
+- [`docker-compose`](modules/manager/docker-compose/index.md)
+- [`dockerfile`](modules/manager/dockerfile/index.md)
+- [`droneci`](modules/manager/droneci/index.md)
+- [`gitlabci`](modules/manager/gitlabci/index.md)
+- [`helm-requirements`](modules/manager/helm-requirements/index.md)
+- [`helmfile`](modules/manager/helmfile/index.md)
+- [`helmv3`](modules/manager/helmv3/index.md)
+- [`kubernetes`](modules/manager/kubernetes/index.md)
+- [`terraform`](modules/manager/terraform/index.md)
+- [`woodpecker`](modules/manager/woodpecker/index.md)
+
+```json
+{
+  "registryAliases": {
+    "jfrogecosystem": "some.jfrog.mirror",
+    "jfrog.com": "some.jfrog.mirror"
+  }
+}
+```
 
 ## registryUrls
 
@@ -3415,11 +3474,9 @@ The default value for `schedule` is "at any time", which is functionally the sam
 i.e. Renovate will run on the repository around the clock.
 
 The easiest way to define a schedule is to use a preset if one of them fits your requirements.
-See [Schedule presets](https://docs.renovatebot.com/presets-schedule/) for details and feel free to request a new one in the source repository if you think it would help others.
+See [Schedule presets](./presets-schedule.md) for details and feel free to request a new one in the source repository if you think it would help others.
 
-Otherwise, here are some text schedules that are known to work:
-
-```
+```title="Some text schedules that are known to work"
 every weekend
 before 5:00am
 after 10pm and before 5:00am
@@ -3528,6 +3585,23 @@ Configure this to `true` if you wish to get one PR for every separate major vers
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
+## statusCheckNames
+
+You can customize the name/context of status checks that Renovate adds to commits/branches/PRs.
+
+This option enables you to modify any existing status checks name/context, but adding new status checks this way is _not_ supported.
+Setting the value to `null` or an empty string, effectively disables or skips that status check.
+This option is mergeable, which means you only have to specify the status checks that you want to modify.
+
+```json title="Example of overriding status check strings"
+{
+  "statusCheckNames": {
+    "minimumReleaseAge": "custom/stability-days",
+    "mergeConfidence": "custom/merge-confidence-level"
+  }
+}
+```
+
 ## stopUpdatingLabel
 
 This feature only works on supported platforms, check the table above.
@@ -3546,7 +3620,7 @@ You can set your own label name with the `"stopUpdatingLabel"` field:
 ## suppressNotifications
 
 Use this field to suppress various types of warnings and other notifications from Renovate.
-Example:
+For example:
 
 ```json
 {
@@ -3612,7 +3686,7 @@ You can edit these user-facing strings:
 - `ignoreOther`: Text of the PR comment for other (neither digest nor major) upgrades.
 - `ignoreTopic`: Topic of the PR comment.
 
-Example:
+For example:
 
 ```json
 {
@@ -3624,6 +3698,43 @@ Example:
   }
 }
 ```
+
+## versionCompatibility
+
+This option is used for advanced use cases where the version string embeds more data than just the version.
+It's typically used with docker and tags datasources.
+
+Here are two examples:
+
+- The image tag `ghcr.io/umami-software/umami:postgresql-v1.37.0` embeds text like `postgresql-` as a prefix to the actual version to differentiate different DB types.
+- Docker image tags like `node:18.10.0-alpine` embed the base image as a suffix to the version.
+
+Here is an example of solving these types of cases:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/umami-software/umami"],
+      "versionCompatibility": "^(?<compatibility>.*)-(?<version>.*)$",
+      "versioning": "semver"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["node"],
+      "versionCompatibility": "^(?<version>[^-]+)(?<compatibility>-.*)?$",
+      "versioning": "node"
+    }
+  ]
+}
+```
+
+This feature is most useful when the `currentValue` is a version and not a range/constraint.
+
+This feature _can_ be used in combination with `extractVersion` although that's likely only a rare edge case.
+When combined, `extractVersion` is applied to datasource results first, and then `versionCompatibility`.
+`extractVersion` should be used when the raw version string returned by the `datasource` contains extra details (such as a `v` prefix) when compared to the value/version used within the repository.
 
 ## versioning
 
@@ -3656,9 +3767,8 @@ Follow these steps:
 Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.
 
 You may use the `vulnerabilityAlerts` configuration object to customize vulnerability-fix PRs.
-For example, to set a custom label and assignee:
 
-```json
+```json title="Setting a custom label and assignee"
 {
   "vulnerabilityAlerts": {
     "labels": ["security"],
@@ -3681,7 +3791,7 @@ For example, to set a custom label and assignee:
 
 To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabilityAlerts` config object, like this:
 
-```json
+```json title="Disabling vulnerability alerts"
 {
   "vulnerabilityAlerts": {
     "enabled": false

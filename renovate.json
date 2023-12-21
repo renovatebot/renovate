@@ -30,7 +30,7 @@
       "enabled": false
     }
   ],
-  "regexManagers": [
+  "customManagers": [
     {
       "customType": "regex",
       "fileMatch": ["config/options/index.ts"],

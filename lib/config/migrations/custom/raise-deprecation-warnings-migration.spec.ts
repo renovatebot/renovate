@@ -6,7 +6,7 @@ describe('config/migrations/custom/raise-deprecation-warnings-migration', () => 
       { raiseDeprecationWarnings: false },
       {
         suppressNotifications: ['deprecationWarningIssues'],
-      }
+      },
     );
   });
 
@@ -16,7 +16,7 @@ describe('config/migrations/custom/raise-deprecation-warnings-migration', () => 
         raiseDeprecationWarnings: false,
         suppressNotifications: ['test'],
       },
-      { suppressNotifications: ['test', 'deprecationWarningIssues'] }
+      { suppressNotifications: ['test', 'deprecationWarningIssues'] },
     );
   });
 
@@ -25,7 +25,7 @@ describe('config/migrations/custom/raise-deprecation-warnings-migration', () => 
       {
         raiseDeprecationWarnings: true,
       },
-      {}
+      {},
     );
   });
 });

@@ -260,7 +260,7 @@ describe('modules/datasource/gitea-releases/index', () => {
       httpMock
         .scope('https://codeberg.org')
         .get(
-          '/api/v1/repos/forgejo-contrib/forgejo-helm/commits?stat=false&verification=false&files=false&page=1&limit=1'
+          '/api/v1/repos/forgejo-contrib/forgejo-helm/commits?stat=false&verification=false&files=false&page=1&limit=1',
         )
         .reply(200, body);
 
@@ -278,7 +278,7 @@ describe('modules/datasource/gitea-releases/index', () => {
       httpMock
         .scope('https://gitea.com')
         .get(
-          '/api/v1/repos/some/dep2/commits?stat=false&verification=false&files=false&page=1&limit=1'
+          '/api/v1/repos/some/dep2/commits?stat=false&verification=false&files=false&page=1&limit=1',
         )
         .reply(200, []);
       const res = await getDigest({
@@ -312,7 +312,7 @@ describe('modules/datasource/gitea-releases/index', () => {
           datasource,
           packageName: 'gitea/helm-chart',
         },
-        'v9.0.1'
+        'v9.0.1',
       );
       expect(res).toBe('29c9bbb4bfec04ab22761cc2d999eb0fcb8acbed');
     });

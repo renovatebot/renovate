@@ -25,4 +25,5 @@ Next, all `hostRules` with both a token or username/password and `matchHost` wil
 Rules from this list are converted to environment variable directives if they match _any_ of the following characteristics:
 
 - No `hostType` is defined, or
+- `hostType` is `git-tags` or `git-refs`, or
 - `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)

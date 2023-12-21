@@ -76,7 +76,7 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should extract the version of a non http base', () => {
       const pkg = extractResource(
-        'ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3'
+        'ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3',
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
@@ -88,7 +88,7 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should extract the depName if the URL includes a port number', () => {
       const pkg = extractResource(
-        'ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3'
+        'ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3',
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
@@ -100,7 +100,7 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should extract the version of a non http base with subdir', () => {
       const pkg = extractResource(
-        'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3'
+        'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3',
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
@@ -186,8 +186,19 @@ describe('modules/manager/kustomize/extract', () => {
       expect(pkg).toBeNull();
     });
 
+    it('should return null on invalid input', () => {
+      const pkg = extractImage({
+        // @ts-expect-error: for testing
+        name: 3,
+        newTag: '',
+      });
+      expect(pkg).toBeNull();
+    });
+
     it('should correctly extract a default image', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -203,6 +214,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract an image in a repo', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -218,6 +231,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract from a different registry', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -233,6 +248,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract from a different port', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -248,6 +265,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract from a multi-depth registry', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         replaceString: 'v1.0.0',
@@ -714,7 +733,7 @@ describe('modules/manager/kustomize/extract', () => {
 
         const pkg = extractResource(`${url}?ref=${version}`);
         expect(pkg).toEqual(sample);
-      }
+      },
     );
   });
 });

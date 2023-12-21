@@ -14,14 +14,14 @@ describe('modules/datasource/cpan/index', () => {
         .post(
           '/v1/file/_search',
           (body) =>
-            body.query.filtered.filter.and[0].term['module.name'] === 'FooBar'
+            body.query.filtered.filter.and[0].term['module.name'] === 'FooBar',
         )
         .reply(200, Fixtures.get('empty.json'));
       expect(
         await getPkgReleases({
           datasource: CpanDatasource.id,
           packageName: 'FooBar',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -31,7 +31,7 @@ describe('modules/datasource/cpan/index', () => {
         await getPkgReleases({
           datasource: CpanDatasource.id,
           packageName: 'Plack',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -41,7 +41,7 @@ describe('modules/datasource/cpan/index', () => {
         getPkgReleases({
           datasource: CpanDatasource.id,
           packageName: 'Plack',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -51,7 +51,7 @@ describe('modules/datasource/cpan/index', () => {
         await getPkgReleases({
           datasource: CpanDatasource.id,
           packageName: 'Plack',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -61,7 +61,7 @@ describe('modules/datasource/cpan/index', () => {
         .post(
           '/v1/file/_search',
           (body) =>
-            body.query.filtered.filter.and[0].term['module.name'] === 'Plack'
+            body.query.filtered.filter.and[0].term['module.name'] === 'Plack',
         )
         .reply(200, Fixtures.get('Plack.json'));
       const res = await getPkgReleases({

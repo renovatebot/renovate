@@ -65,28 +65,28 @@ import { regEx } from '../../../util/regex';
 // - Replace single \ -> double \
 export const versionGroup = '([0-9a-zA-Z_]+(?:[.-][0-9a-zA-Z_]+)*)';
 export const matchVersion = regEx(
-  `^(?<version>${versionGroup})$`
+  `^(?<version>${versionGroup})$`,
 ); /* Match a version number (e.g. 1.0.0) */
 export const exactVersion = regEx(
-  `^(?<exact_version>==(?<exact_version_group>${versionGroup})?)$`
+  `^(?<exact_version>==(?<exact_version_group>${versionGroup})?)$`,
 ); /* Match an exact version number (e.g. ==1.0.0) */
 // inclusiveBound is called inclusive but behaviour in rez is this:
 // package-1..3 will match versions 1.2.3, 2.3.4, but not 3.0.0 or above
 export const inclusiveBound = regEx(
-  `^(?<inclusive_bound>(?<inclusive_lower_version>${versionGroup})?\\.\\.(?<inclusive_upper_version>${versionGroup})?)$`
+  `^(?<inclusive_bound>(?<inclusive_lower_version>${versionGroup})?\\.\\.(?<inclusive_upper_version>${versionGroup})?)$`,
 ); /* Match an inclusive bound (e.g. 1.0.0..2.0.0) */
 // Add ? after |\\+) in order to match >=1.15
 export const lowerBound = new RegExp( // TODO #12872 named backreference
-  `^(?<lower_bound>(?<lower_bound_prefix>>|>=)?(?<lower_version>${versionGroup})?(\\k<lower_bound_prefix>|\\+)?)$`
+  `^(?<lower_bound>(?<lower_bound_prefix>>|>=)?(?<lower_version>${versionGroup})?(\\k<lower_bound_prefix>|\\+)?)$`,
 ); /* Match a lower bound (e.g. 1.0.0+) */
 export const upperBound = new RegExp( // TODO #12872  lookahead
-  `^(?<upper_bound>(?<upper_bound_prefix><(?=${versionGroup})|<=)?(?<upper_version>${versionGroup})?)$`
+  `^(?<upper_bound>(?<upper_bound_prefix><(?=${versionGroup})|<=)?(?<upper_version>${versionGroup})?)$`,
 ); /* Match an upper bound (e.g. <=1.0.0) */
 // Add ,? to match >=7,<9 (otherwise it just matches >=7<9)
 export const ascendingRange = new RegExp( // TODO #12872  named backreference
-  `^(?<range_asc>(?<range_lower_asc>(?<range_lower_asc_prefix>>|>=)?(?<range_lower_asc_version>${versionGroup})?(\\k<range_lower_asc_prefix>|\\+)?),?(?<range_upper_asc>(\\k<range_lower_asc_version>,?|)(?<range_upper_asc_prefix><(?=${versionGroup})|<=)(?<range_upper_asc_version>${versionGroup})?))$`
+  `^(?<range_asc>(?<range_lower_asc>(?<range_lower_asc_prefix>>|>=)?(?<range_lower_asc_version>${versionGroup})?(\\k<range_lower_asc_prefix>|\\+)?),?(?<range_upper_asc>(\\k<range_lower_asc_version>,?|)(?<range_upper_asc_prefix><(?=${versionGroup})|<=)(?<range_upper_asc_version>${versionGroup})?))$`,
 ); /* Match a range in ascending order (e.g. 1.0.0+<2.0.0) */
 // Add , to match <9,>=7 (otherwise it just matches <9>=7)
 export const descendingRange = new RegExp( // TODO #12872  named backreference
-  `^(?<range_desc>(?<range_upper_desc>(?<range_upper_desc_prefix><|<=)?(?<range_upper_desc_version>${versionGroup})?(\\k<range_upper_desc_prefix>|\\+)?),(?<range_lower_desc>(\\k<range_upper_desc_version>,|)(?<range_lower_desc_prefix><(?=${versionGroup})|>=?)(?<range_lower_desc_version>${versionGroup})?))$`
+  `^(?<range_desc>(?<range_upper_desc>(?<range_upper_desc_prefix><|<=)?(?<range_upper_desc_version>${versionGroup})?(\\k<range_upper_desc_prefix>|\\+)?),(?<range_lower_desc>(\\k<range_upper_desc_version>,|)(?<range_lower_desc_prefix><(?=${versionGroup})|>=?)(?<range_lower_desc_version>${versionGroup})?))$`,
 ); /* Match a range in descending order (e.g. <=2.0.0,1.0.0+) */

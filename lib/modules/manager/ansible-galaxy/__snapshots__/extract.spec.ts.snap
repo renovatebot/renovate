@@ -33,6 +33,13 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check colle
     "packageName": "https://example.com/organization/repo_name.git",
   },
   {
+    "currentValue": "3.0.0",
+    "datasource": "git-tags",
+    "depName": "namespace.mycollection",
+    "depType": "galaxy-collection",
+    "packageName": "https://example.com/organization/repo_name.git",
+  },
+  {
     "currentValue": "1.2.2",
     "datasource": "git-tags",
     "depName": "example.com/organization/repo_name",
@@ -173,6 +180,24 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check galax
     "currentValue": ">=1.0.0,<2.0.0",
     "datasource": "galaxy-collection",
     "depName": "community.windows",
+    "depType": "galaxy-collection",
+  },
+  {
+    "currentValue": "7.3.0",
+    "datasource": "galaxy-collection",
+    "depName": "community.general_quoted",
+    "depType": "galaxy-collection",
+  },
+  {
+    "currentValue": "7.3.0",
+    "datasource": "galaxy-collection",
+    "depName": "community.general_with_comment_quoted",
+    "depType": "galaxy-collection",
+  },
+  {
+    "currentValue": ">=1.0.0,<2.0.0",
+    "datasource": "galaxy-collection",
+    "depName": "community.windows_quoted",
     "depType": "galaxy-collection",
   },
 ]

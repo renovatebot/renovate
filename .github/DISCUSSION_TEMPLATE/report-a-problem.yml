@@ -4,21 +4,18 @@ body:
     attributes:
       label: How are you running Renovate?
       options:
-        - 'Placeholder value, please select the correct response from the dropdown'
         - 'Mend Renovate hosted app on github.com'
         - 'Self-hosted Renovate'
-    validations:
-      required: true
 
   - type: input
-    id: renovate-version-if-selfhosting
+    id: self-hosted-veresion
     attributes:
       label: If you're self-hosting Renovate, tell us what version of Renovate you run.
     validations:
       required: false
 
   - type: dropdown
-    id: platform-select
+    id: self-hosted-platform
     attributes:
       label: If you're self-hosting Renovate, select which platform you are using.
       options:
@@ -40,11 +37,8 @@ body:
     attributes:
       label: Was this something which used to work for you, and then stopped?
       options:
-        - 'Placeholder value, please select the correct response from the dropdown'
-        - 'I am trying to get this working for the first time'
         - 'It used to work, and then stopped'
-    validations:
-      required: true
+        - 'I have not seen this working'
 
   - type: textarea
     id: describe-problem
@@ -61,7 +55,7 @@ body:
       description: |
         Try not to report a problem unless you've looked at the logs first.
         If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
-        If you are using the Renovate App, log into [Renovate's app dashboard](https://app.renovatebot.com/dashboard) and locate the correct job log for when the problem occurred (e.g. when the PR was created).
+        If you are using the Renovate App, log into [Renovate's app dashboard](https://developer.mend.io) and locate the correct job log for when the problem occurred (e.g. when the PR was created).
         Try to paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others don't have permissions to view them).
         If you're not sure about the relevant parts of the log, then feel free to post the full log to a [Github Gist](https://gist.github.com/) and link to it.
         Try to highlight the important logs into the Discussion itself.
@@ -69,7 +63,9 @@ body:
         <details><summary>Logs</summary>
 
         ```
+
         Copy/paste the relevant log(s) here, between the starting and ending backticks
+
         ```
 
         </details>

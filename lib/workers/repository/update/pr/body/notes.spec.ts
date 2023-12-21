@@ -54,13 +54,13 @@ describe('workers/repository/update/pr/body/notes', () => {
       isPin: true,
     });
     expect(res).toContain(
-      'If you wish to disable git hash updates, add `":disableDigestUpdates"` to the extends array in your config.'
+      'If you wish to disable git hash updates, add `":disableDigestUpdates"` to the extends array in your config.',
     );
     expect(res).toContain(
-      'This Pull Request updates lock files to use the latest dependency versions.'
+      'This Pull Request updates lock files to use the latest dependency versions.',
     );
     expect(res).toContain(
-      "Add the preset `:preserveSemverRanges` to your config if you don't want to pin your dependencies."
+      "Add the preset `:preserveSemverRanges` to your config if you don't want to pin your dependencies.",
     );
   });
 });

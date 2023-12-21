@@ -7,7 +7,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { BranchConfig } from '../../types';
 
 export async function getPrHourlyRemaining(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<number> {
   if (config.prHourlyLimit) {
     try {
@@ -19,11 +19,11 @@ export async function getPrHourlyRemaining(
         (pr) =>
           pr.sourceBranch !== config.onboardingBranch &&
           pr.sourceBranch.startsWith(config.branchPrefix!) &&
-          DateTime.fromISO(pr.createdAt!) > currentHourStart
+          DateTime.fromISO(pr.createdAt!) > currentHourStart,
       );
       const prsRemaining = Math.max(
         0,
-        config.prHourlyLimit - soFarThisHour.length
+        config.prHourlyLimit - soFarThisHour.length,
       );
       logger.debug(`PR hourly limit remaining: ${prsRemaining}`);
       return prsRemaining;
@@ -36,12 +36,12 @@ export async function getPrHourlyRemaining(
       return config.prHourlyLimit;
     }
   }
-  return 99;
+  return Number.MAX_SAFE_INTEGER;
 }
 
 export async function getConcurrentPrsRemaining(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  branches: BranchConfig[],
 ): Promise<number> {
   if (config.prConcurrentLimit) {
     logger.debug(`Calculating prConcurrentLimit (${config.prConcurrentLimit})`);
@@ -69,7 +69,7 @@ export async function getConcurrentPrsRemaining(
       logger.debug(`${openPrs.length} PRs are currently open`);
       const concurrentRemaining = Math.max(
         0,
-        config.prConcurrentLimit - openPrs.length
+        config.prConcurrentLimit - openPrs.length,
       );
       logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
       return concurrentRemaining;
@@ -78,12 +78,12 @@ export async function getConcurrentPrsRemaining(
       return config.prConcurrentLimit;
     }
   }
-  return 99;
+  return Number.MAX_SAFE_INTEGER;
 }
 
 export async function getPrsRemaining(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  branches: BranchConfig[],
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
   const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);
@@ -92,7 +92,7 @@ export async function getPrsRemaining(
 
 export async function getConcurrentBranchesRemaining(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  branches: BranchConfig[],
 ): Promise<number> {
   const { branchConcurrentLimit, prConcurrentLimit } = config;
   const limit =
@@ -111,7 +111,7 @@ export async function getConcurrentBranchesRemaining(
 
       const existingCount = existingBranches.length;
       logger.debug(
-        `${existingCount} already existing branches found: ${existingBranches.join()}`
+        `${existingCount} already existing branches found: ${existingBranches.join()}`,
       );
 
       const concurrentRemaining = Math.max(0, limit - existingCount);
@@ -124,17 +124,17 @@ export async function getConcurrentBranchesRemaining(
       return limit;
     }
   }
-  return 99;
+  return Number.MAX_SAFE_INTEGER;
 }
 
 export async function getBranchesRemaining(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  branches: BranchConfig[],
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
   const concurrentRemaining = await getConcurrentBranchesRemaining(
     config,
-    branches
+    branches,
   );
   return Math.min(hourlyRemaining, concurrentRemaining);
 }

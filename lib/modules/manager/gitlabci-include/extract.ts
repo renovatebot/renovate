@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type {
   GitlabInclude,
@@ -18,7 +18,7 @@ import {
 } from './common';
 
 function extractDepFromIncludeFile(
-  includeObj: GitlabIncludeProject
+  includeObj: GitlabIncludeProject,
 ): PackageDependency {
   const dep: PackageDependency = {
     datasource: GitlabTagsDatasource.id,
@@ -34,7 +34,7 @@ function extractDepFromIncludeFile(
 }
 
 function getIncludeProjectsFromInclude(
-  includeValue: GitlabInclude[] | GitlabInclude
+  includeValue: GitlabInclude[] | GitlabInclude,
 ): GitlabIncludeProject[] {
   const includes = is.array(includeValue) ? includeValue : [includeValue];
 
@@ -65,13 +65,13 @@ function getAllIncludeProjects(data: GitlabPipeline): GitlabIncludeProject[] {
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   const platform = GlobalConfig.get('platform');
   const endpoint = GlobalConfig.get('endpoint');
   try {
-    const doc = load(replaceReferenceTags(content), {
+    const doc = parseSingleYaml(replaceReferenceTags(content), {
       json: true,
     }) as GitlabPipeline;
     const includes = getAllIncludeProjects(doc);
@@ -86,7 +86,7 @@ export function extractPackageFile(
     if (err.stack?.startsWith('YAMLException:')) {
       logger.debug(
         { err, packageFile },
-        'YAML exception extracting GitLab CI includes'
+        'YAML exception extracting GitLab CI includes',
       );
     } else {
       logger.debug({ err, packageFile }, 'Error extracting GitLab CI includes');

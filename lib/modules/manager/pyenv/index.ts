@@ -9,6 +9,7 @@ export const supportedDatasources = [DockerDatasource.id];
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.python-version$'],
   versioning: dockerVersioning.id,
+  pinDigests: false,
 };
 
 export const categories: Category[] = ['python'];

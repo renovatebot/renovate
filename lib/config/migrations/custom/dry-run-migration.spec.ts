@@ -8,7 +8,7 @@ describe('config/migrations/custom/dry-run-migration', () => {
       },
       {
         dryRun: 'full',
-      }
+      },
     );
   });
 
@@ -19,7 +19,7 @@ describe('config/migrations/custom/dry-run-migration', () => {
       },
       {
         dryRun: null,
-      }
+      },
     );
   });
 });

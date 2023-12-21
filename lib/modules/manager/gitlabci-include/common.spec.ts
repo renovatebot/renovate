@@ -1,5 +1,5 @@
-import { load } from 'js-yaml';
 import { Fixtures } from '../../../../test/fixtures';
+import { parseSingleYaml } from '../../../util/yaml';
 import type { GitlabPipeline } from '../gitlabci/types';
 import { replaceReferenceTags } from '../gitlabci/utils';
 import {
@@ -10,8 +10,8 @@ import {
 } from './common';
 
 const yamlFileMultiConfig = Fixtures.get('gitlab-ci.1.yaml');
-const pipeline = load(
-  replaceReferenceTags(yamlFileMultiConfig)
+const pipeline = parseSingleYaml(
+  replaceReferenceTags(yamlFileMultiConfig),
 ) as GitlabPipeline;
 const includeLocal = { local: 'something' };
 const includeProject = { project: 'something' };

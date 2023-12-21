@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { extractPackageFile } from './extract';
 
@@ -13,4 +14,7 @@ export const defaultConfig = {
 
 export const categories: Category[] = ['ci'];
 
-export const supportedDatasources = [GithubTagsDatasource.id];
+export const supportedDatasources = [
+  GithubTagsDatasource.id,
+  BitbucketTagsDatasource.id,
+];

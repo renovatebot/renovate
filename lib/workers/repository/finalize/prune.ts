@@ -6,10 +6,11 @@ import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
 import { getBranchList, setUserRepoConfig } from '../../../util/git';
+import { getReconfigureBranchName } from '../reconfigure';
 
 async function cleanUpBranches(
   config: RenovateConfig,
-  remainingBranches: string[]
+  remainingBranches: string[],
 ): Promise<void> {
   if (!config.pruneStaleBranches) {
     logger.debug('Branch/PR pruning is disabled - skipping');
@@ -29,7 +30,7 @@ async function cleanUpBranches(
         if (branchIsModified) {
           logger.debug(
             { prNo: pr.number, prTitle: pr.title },
-            'Branch is modified - skipping PR autoclosing'
+            'Branch is modified - skipping PR autoclosing',
           );
           if (GlobalConfig.get('dryRun')) {
             logger.info(`DRY-RUN: Would update PR title and ensure comment.`);
@@ -53,12 +54,12 @@ async function cleanUpBranches(
         } else if (GlobalConfig.get('dryRun')) {
           logger.info(
             { prNo: pr.number, prTitle: pr.title },
-            `DRY-RUN: Would autoclose PR`
+            `DRY-RUN: Would autoclose PR`,
           );
         } else {
           logger.info(
             { branchName, prNo: pr.number, prTitle: pr.title },
-            'Autoclosing PR'
+            'Autoclosing PR',
           );
           let newPrTitle = pr.title;
           if (!pr.title.endsWith('- autoclosed')) {
@@ -82,12 +83,12 @@ async function cleanUpBranches(
     } catch (err) /* istanbul ignore next */ {
       if (err.message === 'config-validation') {
         logger.debug(
-          'Cannot prune branch due to collision between tags and branch names'
+          'Cannot prune branch due to collision between tags and branch names',
         );
       } else if (err.message?.includes("bad revision 'origin/")) {
         logger.debug(
           { branchName },
-          'Branch not found on origin when attempting to prune'
+          'Branch not found on origin when attempting to prune',
         );
       } else if (err.message !== REPOSITORY_CHANGED) {
         logger.warn({ err, branch: branchName }, 'Error pruning branch');
@@ -98,7 +99,7 @@ async function cleanUpBranches(
 
 export async function pruneStaleBranches(
   config: RenovateConfig,
-  branchList: string[] | null | undefined
+  branchList: string[] | null | undefined,
 ): Promise<void> {
   logger.debug('Removing any stale branches');
   logger.trace({ config }, `pruneStaleBranches`);
@@ -109,8 +110,10 @@ export async function pruneStaleBranches(
     return;
   }
   // TODO: types (#22198)
-  let renovateBranches = getBranchList().filter((branchName) =>
-    branchName.startsWith(config.branchPrefix!)
+  let renovateBranches = getBranchList().filter(
+    (branchName) =>
+      branchName.startsWith(config.branchPrefix!) &&
+      branchName !== getReconfigureBranchName(config.branchPrefix!),
   );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');
@@ -121,15 +124,15 @@ export async function pruneStaleBranches(
       branchList: branchList?.sort(),
       renovateBranches: renovateBranches?.sort(),
     },
-    'Branch lists'
+    'Branch lists',
   );
   // TODO: types (#22198)
   const lockFileBranch = `${config.branchPrefix!}lock-file-maintenance`;
   renovateBranches = renovateBranches.filter(
-    (branch) => branch !== lockFileBranch
+    (branch) => branch !== lockFileBranch,
   );
   const remainingBranches = renovateBranches.filter(
-    (branch) => !branchList.includes(branch)
+    (branch) => !branchList.includes(branch),
   );
   logger.debug(`remainingBranches=${String(remainingBranches)}`);
   if (remainingBranches.length === 0) {

@@ -12,7 +12,7 @@ import type { BranchUpgradeConfig } from '../../../types';
 
 export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
-  newContent: string
+  newContent: string,
 ): Promise<boolean> {
   const { manager, packageFile, depIndex } = upgrade;
   let newUpgrade: PackageDependency;
@@ -21,31 +21,31 @@ export async function confirmIfDepUpdated(
       manager,
       newContent,
       packageFile!,
-      upgrade
+      upgrade,
     );
     // istanbul ignore if
     if (!newExtract) {
       // TODO: fix types (#22198)
       logger.debug(
-        `Could not extract ${packageFile!} (manager=${manager}) after autoreplace. Did the autoreplace make the file unparseable?`
+        `Could not extract ${packageFile!} (manager=${manager}) after autoreplace. Did the autoreplace make the file unparseable?`,
       );
       logger.trace(
         { packageFile, content: newContent },
-        'packageFile content after autoreplace'
+        'packageFile content after autoreplace',
       );
       return false;
     }
     // istanbul ignore if
     if (!newExtract.deps?.length) {
       logger.debug(
-        `Extracted ${packageFile!} after autoreplace has no deps array. Did the autoreplace make the file unparseable?`
+        `Extracted ${packageFile!} after autoreplace has no deps array. Did the autoreplace make the file unparseable?`,
       );
       return false;
     }
     // istanbul ignore if
     if (is.number(depIndex) && depIndex >= newExtract.deps.length) {
       logger.debug(
-        `Extracted ${packageFile!} after autoreplace has fewer deps than expected.`
+        `Extracted ${packageFile!} after autoreplace has fewer deps than expected.`,
       );
       return false;
     }
@@ -70,7 +70,7 @@ export async function confirmIfDepUpdated(
         currentDepName: upgrade.depName,
         newDepName: newUpgrade.depName,
       },
-      'depName mismatch'
+      'depName mismatch',
     );
     return false;
   }
@@ -83,7 +83,7 @@ export async function confirmIfDepUpdated(
         currentDepName: upgrade.depName,
         newDepName: newUpgrade.depName,
       },
-      'depName is not updated'
+      'depName is not updated',
     );
     return false;
   }
@@ -96,7 +96,7 @@ export async function confirmIfDepUpdated(
         expectedValue: upgrade.newValue,
         foundValue: newUpgrade.currentValue,
       },
-      'Value is not updated'
+      'Value is not updated',
     );
     return false;
   }
@@ -113,7 +113,7 @@ export async function confirmIfDepUpdated(
         expectedValue: upgrade.newDigest,
         foundValue: newUpgrade.currentDigest,
       },
-      'Digest is not updated'
+      'Digest is not updated',
     );
     return false;
   }
@@ -127,14 +127,14 @@ function getDepsSignature(deps: PackageDependency[]): string {
     .map(
       (dep) =>
         `${(dep.depName ?? dep.packageName)!}${(dep.packageName ??
-          dep.depName)!}`
+          dep.depName)!}`,
     )
     .join(',');
 }
 
 export async function checkBranchDepsMatchBaseDeps(
   upgrade: BranchUpgradeConfig,
-  branchContent: string
+  branchContent: string,
 ): Promise<boolean> {
   const { baseDeps, manager, packageFile } = upgrade;
   try {
@@ -142,14 +142,14 @@ export async function checkBranchDepsMatchBaseDeps(
       manager,
       branchContent,
       packageFile!,
-      upgrade
+      upgrade,
     )!;
     const branchDeps = res!.deps;
     return getDepsSignature(baseDeps!) === getDepsSignature(branchDeps);
   } catch (err) /* istanbul ignore next */ {
     logger.info(
       { manager, packageFile },
-      'Failed to parse branchContent - rebasing'
+      'Failed to parse branchContent - rebasing',
     );
     return false;
   }
@@ -157,20 +157,20 @@ export async function checkBranchDepsMatchBaseDeps(
 
 async function checkExistingBranch(
   upgrade: BranchUpgradeConfig,
-  existingContent: string
+  existingContent: string,
 ): Promise<string | null> {
   const { packageFile, depName } = upgrade;
   if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
     logger.debug(
       { packageFile, depName },
-      'Rebasing branch after deps list has changed'
+      'Rebasing branch after deps list has changed',
     );
     return null;
   }
   if (!(await confirmIfDepUpdated(upgrade, existingContent))) {
     logger.debug(
       { packageFile, depName },
-      'Rebasing after outdated branch dep found'
+      'Rebasing after outdated branch dep found',
     );
     return null;
   }
@@ -183,7 +183,7 @@ export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
   reuseExistingBranch: boolean,
-  firstUpdate = true
+  firstUpdate = true,
 ): Promise<string | null> {
   const {
     packageFile,
@@ -223,7 +223,7 @@ export async function doAutoReplace(
   if (searchIndex === -1) {
     logger.info(
       { packageFile, depName, existingContent, replaceString },
-      'Cannot find replaceString in current file content. Was it already updated?'
+      'Cannot find replaceString in current file content. Was it already updated?',
     );
     return existingContent;
   }
@@ -238,37 +238,37 @@ export async function doAutoReplace(
       if (currentValue && newValue) {
         newString = newString.replace(
           regEx(escapeRegExp(currentValue), autoReplaceRegExpFlag),
-          newValue
+          newValue,
         );
       }
       if (depName && newName) {
         newString = newString.replace(
           regEx(escapeRegExp(depName), autoReplaceRegExpFlag),
-          newName
+          newName,
         );
       }
       if (currentDigest && newDigest) {
         newString = newString.replace(
           regEx(escapeRegExp(currentDigest), autoReplaceRegExpFlag),
-          newDigest
+          newDigest,
         );
       } else if (currentDigestShort && newDigest) {
         newString = newString.replace(
           regEx(escapeRegExp(currentDigestShort), autoReplaceRegExpFlag),
-          newDigest
+          newDigest,
         );
       }
     }
     if (!firstUpdate && (await confirmIfDepUpdated(upgrade, existingContent))) {
       logger.debug(
         { packageFile, depName },
-        'Package file is already updated - no work to do'
+        'Package file is already updated - no work to do',
       );
       return existingContent;
     }
     logger.debug(
       { packageFile, depName },
-      `Starting search at index ${searchIndex}`
+      `Starting search at index ${searchIndex}`,
     );
     let newContent = existingContent;
     let nameReplaced = !newName;
@@ -282,7 +282,7 @@ export async function doAutoReplace(
         if (newName && matchAt(newContent, searchIndex, depName!)) {
           logger.debug(
             { packageFile, depName },
-            `Found depName at index ${searchIndex}`
+            `Found depName at index ${searchIndex}`,
           );
           if (nameReplaced) {
             startIndex += 1;
@@ -303,14 +303,14 @@ export async function doAutoReplace(
         ) {
           logger.debug(
             { packageFile, currentValue },
-            `Found currentValue at index ${searchIndex}`
+            `Found currentValue at index ${searchIndex}`,
           );
           // Now test if the result matches
           newContent = replaceAt(
             newContent,
             searchIndex,
             currentValue!,
-            newValue
+            newValue,
           );
           await writeLocalFile(upgrade.packageFile!, newContent);
           valueReplaced = true;
@@ -327,14 +327,14 @@ export async function doAutoReplace(
       } else if (matchAt(newContent, searchIndex, replaceString!)) {
         logger.debug(
           { packageFile, depName },
-          `Found match at index ${searchIndex}`
+          `Found match at index ${searchIndex}`,
         );
         // Now test if the result matches
         newContent = replaceAt(
           newContent,
           searchIndex,
           replaceString!,
-          newString
+          newString,
         );
         await writeLocalFile(upgrade.packageFile!, newContent);
         if (await confirmIfDepUpdated(upgrade, newContent)) {

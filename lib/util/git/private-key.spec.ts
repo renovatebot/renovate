@@ -6,9 +6,9 @@ import { setPrivateKey } from '.';
 jest.mock('fs-extra', () =>
   jest
     .requireActual<typeof import('../../../test/fixtures')>(
-      '../../../test/fixtures'
+      '../../../test/fixtures',
     )
-    .fsExtra()
+    .fsExtra(),
 );
 jest.mock('../exec');
 

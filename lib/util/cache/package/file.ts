@@ -17,7 +17,7 @@ async function rm(namespace: string, key: string): Promise<void> {
 
 export async function get<T = never>(
   namespace: string,
-  key: string
+  key: string,
 ): Promise<T | undefined> {
   if (!cacheFileName) {
     return undefined;
@@ -47,7 +47,7 @@ export async function set(
   namespace: string,
   key: string,
   value: unknown,
-  ttlMinutes = 5
+  ttlMinutes = 5,
 ): Promise<void> {
   if (!cacheFileName) {
     return;
@@ -60,7 +60,7 @@ export async function set(
       compress: true,
       value: await compress(JSON.stringify(value)),
       expiry: DateTime.local().plus({ minutes: ttlMinutes }),
-    })
+    }),
   );
 }
 
@@ -97,7 +97,7 @@ export async function cleanup(): Promise<void> {
     }
     const durationMs = Math.round(Date.now() - startTime);
     logger.debug(
-      `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`
+      `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`,
     );
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error cleaning up expired file cache');

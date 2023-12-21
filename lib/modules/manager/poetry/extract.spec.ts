@@ -78,29 +78,6 @@ describe('modules/manager/poetry/extract', () => {
       expect(res?.deps).toHaveLength(3);
     });
 
-    it('extracts registries', async () => {
-      const res = await extractPackageFile(pyproject6toml, filename);
-      expect(res?.registryUrls).toMatchSnapshot();
-      expect(res?.registryUrls).toHaveLength(3);
-    });
-
-    it('can parse empty registries', async () => {
-      const res = await extractPackageFile(pyproject7toml, filename);
-      expect(res?.registryUrls).toBeUndefined();
-    });
-
-    it('can parse missing registries', async () => {
-      const res = await extractPackageFile(pyproject1toml, filename);
-      expect(res?.registryUrls).toBeUndefined();
-    });
-
-    it('dedupes registries', async () => {
-      const res = await extractPackageFile(pyproject8toml, filename);
-      expect(res).toMatchObject({
-        registryUrls: ['https://pypi.org/pypi/', 'https://bar.baz/+simple/'],
-      });
-    });
-
     it('extracts mixed versioning types', async () => {
       const res = await extractPackageFile(pyproject9toml, filename);
       expect(res).toMatchSnapshot({
@@ -303,6 +280,100 @@ describe('modules/manager/poetry/extract', () => {
         datasource: GithubReleasesDatasource.id,
         commitMessageTopic: 'Python',
         registryUrls: null,
+      });
+    });
+
+    describe('registry URLs', () => {
+      it('can parse empty registries', async () => {
+        const res = await extractPackageFile(pyproject7toml, filename);
+        expect(res?.registryUrls).toBeUndefined();
+      });
+
+      it('can parse missing registries', async () => {
+        const res = await extractPackageFile(pyproject1toml, filename);
+        expect(res?.registryUrls).toBeUndefined();
+      });
+
+      it('extracts registries', async () => {
+        const res = await extractPackageFile(pyproject6toml, filename);
+        expect(res?.registryUrls).toMatchObject([
+          'https://foo.bar/simple/',
+          'https://bar.baz/+simple/',
+          'https://pypi.org/pypi/',
+        ]);
+      });
+
+      it('dedupes registries', async () => {
+        const res = await extractPackageFile(pyproject8toml, filename);
+        expect(res?.registryUrls).toMatchObject([
+          'https://pypi.org/pypi/',
+          'https://bar.baz/+simple/',
+        ]);
+      });
+
+      it('source with priority="default" and implicit PyPI priority="primary"', async () => {
+        const content = codeBlock`
+          [tool.poetry.dependencies]
+          python = "^3.11"
+
+          [[tool.poetry.source]]
+          name = "foo"
+          url = "https://foo.bar/simple/"
+          priority = "default"
+
+          [[tool.poetry.source]]
+          name = "PyPI"
+        `;
+        const res = await extractPackageFile(content, filename);
+        expect(res?.registryUrls).toMatchObject([
+          'https://foo.bar/simple/',
+          'https://pypi.org/pypi/',
+        ]);
+      });
+
+      it('source with implicit priority and PyPI with priority="explicit"', async () => {
+        const content = codeBlock`
+          [tool.poetry.dependencies]
+          python = "^3.11"
+
+          [[tool.poetry.source]]
+          name = "foo"
+          url = "https://foo.bar/simple/"
+
+          [[tool.poetry.source]]
+          name = "PyPI"
+          priority = "explicit"
+        `;
+        const res = await extractPackageFile(content, filename);
+        expect(res?.registryUrls).toMatchObject(['https://foo.bar/simple/']);
+      });
+
+      it('supports dependencies with explicit source', async () => {
+        const content = codeBlock`
+        [tool.poetry.dependencies]
+        attrs = "^23.1.0"
+        typer = { version = "^0.9.0", source = "pypi" }
+        requests-cache = { version = "^1.1.0", source = "artifactory" }
+
+        [[tool.poetry.source]]
+        name = "artifactory"
+        url = "https://example.com"
+        priority = "explicit"
+      `;
+        const res = await extractPackageFile(content, filename);
+        expect(res?.deps).toMatchObject([
+          { depName: 'attrs', currentValue: '^23.1.0' },
+          {
+            depName: 'typer',
+            currentValue: '^0.9.0',
+            registryUrls: ['https://pypi.org/pypi/'],
+          },
+          {
+            depName: 'requests-cache',
+            currentValue: '^1.1.0',
+            registryUrls: ['https://example.com'],
+          },
+        ]);
       });
     });
   });

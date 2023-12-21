@@ -12,7 +12,7 @@ import type { RenovateConfig } from './types';
 
 export async function tryDecryptPgp(
   privateKey: string,
-  encryptedStr: string
+  encryptedStr: string,
 ): Promise<string | null> {
   if (encryptedStr.length < 500) {
     // optimization during transition of public key -> pgp
@@ -49,7 +49,7 @@ export async function tryDecryptPgp(
 
 export function tryDecryptPublicKeyDefault(
   privateKey: string,
-  encryptedStr: string
+  encryptedStr: string,
 ): string | null {
   let decryptedStr: string | null = null;
   try {
@@ -65,7 +65,7 @@ export function tryDecryptPublicKeyDefault(
 
 export function tryDecryptPublicKeyPKCS1(
   privateKey: string,
-  encryptedStr: string
+  encryptedStr: string,
 ): string | null {
   let decryptedStr: string | null = null;
   try {
@@ -75,7 +75,7 @@ export function tryDecryptPublicKeyPKCS1(
           key: privateKey,
           padding: crypto.constants.RSA_PKCS1_PADDING,
         },
-        Buffer.from(encryptedStr, 'base64')
+        Buffer.from(encryptedStr, 'base64'),
       )
       .toString();
   } catch (err) {
@@ -87,7 +87,7 @@ export function tryDecryptPublicKeyPKCS1(
 export async function tryDecrypt(
   privateKey: string,
   encryptedStr: string,
-  repository: string
+  repository: string,
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
   if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
@@ -112,36 +112,36 @@ export async function tryDecrypt(
               .map((o) => ensureTrailingSlash(o));
             if (is.nonEmptyString(repo)) {
               const scopedRepos = orgPrefixes.map((orgPrefix) =>
-                `${orgPrefix}${repo}`.toUpperCase()
+                `${orgPrefix}${repo}`.toUpperCase(),
               );
               if (scopedRepos.some((r) => r === repository.toUpperCase())) {
                 decryptedStr = value;
               } else {
                 logger.debug(
                   { scopedRepos },
-                  'Secret is scoped to a different repository'
+                  'Secret is scoped to a different repository',
                 );
                 const error = new Error('config-validation');
                 error.validationError = `Encrypted secret is scoped to a different repository: "${scopedRepos.join(
-                  ','
+                  ',',
                 )}".`;
                 throw error;
               }
             } else {
               if (
                 orgPrefixes.some((orgPrefix) =>
-                  repository.toUpperCase().startsWith(orgPrefix)
+                  repository.toUpperCase().startsWith(orgPrefix),
                 )
               ) {
                 decryptedStr = value;
               } else {
                 logger.debug(
                   { orgPrefixes },
-                  'Secret is scoped to a different org'
+                  'Secret is scoped to a different org',
                 );
                 const error = new Error('config-validation');
                 error.validationError = `Encrypted secret is scoped to a different org: "${orgPrefixes.join(
-                  ','
+                  ',',
                 )}".`;
                 throw error;
               }
@@ -171,7 +171,7 @@ export async function tryDecrypt(
 
 export async function decryptConfig(
   config: RenovateConfig,
-  repository: string
+  repository: string,
 ): Promise<RenovateConfig> {
   logger.trace({ config }, 'decryptConfig()');
   const decryptedConfig = { ...config };
@@ -199,7 +199,7 @@ export async function decryptConfig(
             addSecretForSanitizing(token);
             logger.debug(
               { decryptedToken: maskToken(token) },
-              'Migrating npmToken to npmrc'
+              'Migrating npmToken to npmrc',
             );
             if (is.string(decryptedConfig.npmrc)) {
               /* eslint-disable no-template-curly-in-string */
@@ -207,13 +207,13 @@ export async function decryptConfig(
                 logger.debug('Replacing ${NPM_TOKEN} with decrypted token');
                 decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
                   regEx(/\${NPM_TOKEN}/g),
-                  token
+                  token,
                 );
               } else {
                 logger.debug('Appending _authToken= to end of existing npmrc');
                 decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
                   regEx(/\n?$/),
-                  `\n_authToken=${token}\n`
+                  `\n_authToken=${token}\n`,
                 );
               }
               /* eslint-enable no-template-curly-in-string */
@@ -235,7 +235,7 @@ export async function decryptConfig(
       for (const item of val) {
         if (is.object(item) && !is.array(item)) {
           (decryptedConfig[key] as RenovateConfig[]).push(
-            await decryptConfig(item as RenovateConfig, repository)
+            await decryptConfig(item as RenovateConfig, repository),
           );
         } else {
           (decryptedConfig[key] as unknown[]).push(item);
@@ -244,7 +244,7 @@ export async function decryptConfig(
     } else if (is.object(val) && key !== 'content') {
       decryptedConfig[key] = await decryptConfig(
         val as RenovateConfig,
-        repository
+        repository,
       );
     }
   }

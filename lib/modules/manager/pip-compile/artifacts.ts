@@ -20,7 +20,7 @@ import type {
 } from '../types';
 
 function getPythonConstraint(
-  config: UpdateArtifactsConfig
+  config: UpdateArtifactsConfig,
 ): string | undefined | null {
   const { constraints = {} } = config;
   const { python } = constraints;
@@ -46,7 +46,7 @@ function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
 }
 
 const constraintLineRegex = regEx(
-  /^(#.*?\r?\n)+# {4}pip-compile(?<arguments>.*?)\r?\n/
+  /^(#.*?\r?\n)+# {4}pip-compile(?<arguments>.*?)\r?\n/,
 );
 const allowedPipArguments = [
   '--allow-unsafe',
@@ -58,7 +58,7 @@ const allowedPipArguments = [
 export function constructPipCompileCmd(
   content: string,
   inputFileName: string,
-  outputFileName: string
+  outputFileName: string,
 ): string {
   const headers = constraintLineRegex.exec(content);
   const args = ['pip-compile'];
@@ -73,7 +73,7 @@ export function constructPipCompileCmd(
           // we don't trust the user-supplied output-file argument; use our value here
           logger.warn(
             { argument },
-            'pip-compile was previously executed with an unexpected `--output-file` filename'
+            'pip-compile was previously executed with an unexpected `--output-file` filename',
           );
         }
         args.push(`--output-file=${file}`);
@@ -85,7 +85,7 @@ export function constructPipCompileCmd(
       } else if (argument.startsWith('--')) {
         logger.trace(
           { argument },
-          'pip-compile argument is not (yet) supported'
+          'pip-compile argument is not (yet) supported',
         );
       } else {
         // ignore position argument (.in file)
@@ -104,7 +104,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const outputFileName = inputFileName.replace(regEx(/(\.in)?$/), '.txt');
   logger.debug(
-    `pipCompile.updateArtifacts(${inputFileName}->${outputFileName})`
+    `pipCompile.updateArtifacts(${inputFileName}->${outputFileName})`,
   );
   const existingOutput = await readLocalFile(outputFileName, 'utf8');
   if (!existingOutput) {
@@ -119,7 +119,7 @@ export async function updateArtifacts({
     const cmd = constructPipCompileCmd(
       existingOutput,
       inputFileName,
-      outputFileName
+      outputFileName,
     );
     const constraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);
@@ -181,7 +181,7 @@ export function extractResolver(argument: string): string | null {
 
   logger.warn(
     { argument },
-    'pip-compile was previously executed with an unexpected `--resolver` value'
+    'pip-compile was previously executed with an unexpected `--resolver` value',
   );
   return null;
 }

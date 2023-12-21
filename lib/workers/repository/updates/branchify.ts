@@ -15,7 +15,7 @@ export type BranchifiedConfig = Merge<
 >;
 export async function branchifyUpgrades(
   config: RenovateConfig,
-  packageFiles: Record<string, any[]>
+  packageFiles: Record<string, any[]>,
 ): Promise<BranchifiedConfig> {
   logger.debug('branchifyUpgrades');
   const updates = await flattenUpdates(config, packageFiles);
@@ -23,7 +23,7 @@ export async function branchifyUpgrades(
     `${updates.length} flattened updates found: ${updates
       .map((u) => u.depName)
       .filter((txt) => txt?.trim().length)
-      .join(', ')}`
+      .join(', ')}`,
   );
   const errors: ValidationMessage[] = [];
   const warnings: ValidationMessage[] = [];
@@ -33,7 +33,7 @@ export async function branchifyUpgrades(
     const update: BranchUpgradeConfig = { ...u } as any;
     branchUpgrades[update.branchName] = branchUpgrades[update.branchName] || [];
     branchUpgrades[update.branchName] = [update].concat(
-      branchUpgrades[update.branchName]
+      branchUpgrades[update.branchName],
     );
   }
   logger.debug(`Returning ${Object.keys(branchUpgrades).length} branch(es)`);
@@ -62,7 +62,7 @@ export async function branchifyUpgrades(
               previousNewValue,
               thisNewValue: newValue,
             },
-            'Ignoring upgrade collision'
+            'Ignoring upgrade collision',
           );
           return false;
         }
@@ -102,7 +102,7 @@ export async function branchifyUpgrades(
         const [sourceUrl, newVersion] = key.split('|');
         logger.debug(
           { sourceUrl, newVersion, branches: value },
-          'Found sourceUrl with multiple branches that should probably be combined into a group'
+          'Found sourceUrl with multiple branches that should probably be combined into a group',
         );
       }
     }

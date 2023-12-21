@@ -13,7 +13,7 @@ describe('modules/platform/scm', () => {
 
   it('unknown platform', () => {
     expect(() => setPlatformScmApi('unknown' as PlatformId)).toThrow(
-      PLATFORM_NOT_FOUND
+      PLATFORM_NOT_FOUND,
     );
   });
 
@@ -33,6 +33,6 @@ describe('modules/platform/scm', () => {
       setPlatformScmApi(platform);
       await scm.isBranchBehindBase('abc', 'main');
       expect(git.isBranchBehindBase).toHaveBeenCalledTimes(1);
-    }
+    },
   );
 });

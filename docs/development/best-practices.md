@@ -146,6 +146,12 @@ function foo(str: string): boolean {
 }
 ```
 
+### Refactor one thing at a time
+
+Refactor the code _or_ refactor the tests.
+
+Avoid refactoring the code and tests at the same time, this can mask regression errors.
+
 ## Logging
 
 For `WARN`, `ERROR` and `FATAL log messages use logger metadata.

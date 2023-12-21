@@ -56,7 +56,7 @@ describe('util/http/gitea', () => {
       'pagination-example-2',
       {
         paginate: true,
-      }
+      },
     );
     expect(res.body.data).toHaveLength(6);
     expect(res.body.data).toEqual(['abc', 'def', 'ghi', 'jkl', 'mno', 'pqr']);
@@ -74,7 +74,7 @@ describe('util/http/gitea', () => {
       'pagination-example-3',
       {
         paginate: true,
-      }
+      },
     );
     expect(res.body.data).toHaveLength(3);
     expect(res.body.data).toEqual(['abc', 'def', 'ghi']);

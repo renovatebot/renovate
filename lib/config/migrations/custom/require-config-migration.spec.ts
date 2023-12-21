@@ -9,7 +9,7 @@ describe('config/migrations/custom/require-config-migration', () => {
       },
       {
         requireConfig: 'required',
-      }
+      },
     );
   });
 
@@ -20,7 +20,7 @@ describe('config/migrations/custom/require-config-migration', () => {
       },
       {
         requireConfig: 'optional',
-      }
+      },
     );
   });
 });

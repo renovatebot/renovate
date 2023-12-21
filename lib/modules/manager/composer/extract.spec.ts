@@ -295,7 +295,7 @@ describe('modules/manager/composer/extract', () => {
             }
           }
         `,
-        packageFile
+        packageFile,
       );
       expect(res?.deps).toEqual([
         {

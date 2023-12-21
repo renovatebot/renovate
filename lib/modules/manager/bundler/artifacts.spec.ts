@@ -53,8 +53,6 @@ const updatedGemfileLock = {
 describe('modules/manager/bundler/artifacts', () => {
   describe('updateArtifacts', () => {
     beforeEach(() => {
-      jest.resetModules();
-
       delete process.env.GEM_HOME;
 
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
@@ -76,7 +74,7 @@ describe('modules/manager/bundler/artifacts', () => {
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: '',
           config,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -87,7 +85,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: [],
-        })
+        }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
@@ -96,7 +94,7 @@ describe('modules/manager/bundler/artifacts', () => {
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
-        })
+        }),
       ).toBeNull();
       expect(execSnapshots).toMatchObject([
         { cmd: 'bundler lock --update foo bar' },
@@ -110,7 +108,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: [],
-        })
+        }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
@@ -119,7 +117,7 @@ describe('modules/manager/bundler/artifacts', () => {
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
-        })
+        }),
       ).toBeNull();
       expect(execSnapshots).toMatchObject([
         { options: { cwd: '/tmp/github/some/repo' } },
@@ -133,7 +131,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: ['Gemfile.lock'],
-        })
+        }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
@@ -142,7 +140,7 @@ describe('modules/manager/bundler/artifacts', () => {
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
-        })
+        }),
       ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         { cmd: 'bundler lock --update foo bar' },
@@ -157,7 +155,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: ['Gemfile.lock'],
-        })
+        }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
@@ -166,7 +164,7 @@ describe('modules/manager/bundler/artifacts', () => {
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
-        })
+        }),
       ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         { cmd: 'bundler lock --update foo bar' },
@@ -180,7 +178,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: ['Gemfile.lock'],
-        })
+        }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
@@ -199,7 +197,7 @@ describe('modules/manager/bundler/artifacts', () => {
               'bundlerConservative',
             ],
           },
-        })
+        }),
       ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         expect.objectContaining({
@@ -226,7 +224,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: ['Gemfile.lock'],
-        })
+        }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
@@ -235,7 +233,7 @@ describe('modules/manager/bundler/artifacts', () => {
           updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
           newPackageFileContent: 'Updated Gemfile content',
           config,
-        })
+        }),
       ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool ruby 1.2.0' },
@@ -264,7 +262,7 @@ describe('modules/manager/bundler/artifacts', () => {
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
             modified: ['Gemfile.lock'],
-          })
+          }),
         );
         fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
         expect(
@@ -273,7 +271,7 @@ describe('modules/manager/bundler/artifacts', () => {
             updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
             newPackageFileContent: 'Updated Gemfile content',
             config,
-          })
+          }),
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
           { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -317,7 +315,7 @@ describe('modules/manager/bundler/artifacts', () => {
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
             modified: ['Gemfile.lock'],
-          })
+          }),
         );
         fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
         expect(
@@ -332,7 +330,7 @@ describe('modules/manager/bundler/artifacts', () => {
                 bundler: '3.2.1',
               },
             },
-          })
+          }),
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
           { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -378,7 +376,7 @@ describe('modules/manager/bundler/artifacts', () => {
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
             modified: ['Gemfile.lock'],
-          })
+          }),
         );
         fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
         expect(
@@ -393,7 +391,7 @@ describe('modules/manager/bundler/artifacts', () => {
                 bundler: 'bar',
               },
             },
-          })
+          }),
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
           { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -438,13 +436,13 @@ describe('modules/manager/bundler/artifacts', () => {
           },
         ]);
         bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
-          'some-user:some-password'
+          'some-user:some-password',
         );
         const execSnapshots = mockExecAll();
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
             modified: ['Gemfile.lock'],
-          })
+          }),
         );
         fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
         expect(
@@ -453,7 +451,7 @@ describe('modules/manager/bundler/artifacts', () => {
             updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
             newPackageFileContent: 'Updated Gemfile content',
             config,
-          })
+          }),
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
           { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -503,13 +501,13 @@ describe('modules/manager/bundler/artifacts', () => {
           },
         ]);
         bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
-          'some-user:some-password'
+          'some-user:some-password',
         );
         const execSnapshots = mockExecAll();
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
             modified: ['Gemfile.lock'],
-          })
+          }),
         );
         fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
         expect(
@@ -523,7 +521,7 @@ describe('modules/manager/bundler/artifacts', () => {
                 bundler: '1.2',
               },
             },
-          })
+          }),
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
           { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -574,13 +572,13 @@ describe('modules/manager/bundler/artifacts', () => {
           },
         ]);
         bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
-          'some-user:some-password'
+          'some-user:some-password',
         );
         const execSnapshots = mockExecAll();
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
             modified: ['Gemfile.lock'],
-          })
+          }),
         );
         fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
         expect(
@@ -594,7 +592,7 @@ describe('modules/manager/bundler/artifacts', () => {
                 bundler: '2.1',
               },
             },
-          })
+          }),
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
           { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -649,13 +647,13 @@ describe('modules/manager/bundler/artifacts', () => {
           },
         ]);
         bundlerHostRules.getAuthenticationHeaderValue.mockReturnValue(
-          'some-user:some-password'
+          'some-user:some-password',
         );
         const execSnapshots = mockExecAll();
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
             modified: ['Gemfile.lock'],
-          })
+          }),
         );
         fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
         expect(
@@ -664,7 +662,7 @@ describe('modules/manager/bundler/artifacts', () => {
             updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
             newPackageFileContent: 'Updated Gemfile content',
             config,
-          })
+          }),
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
           { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
@@ -707,7 +705,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: ['Gemfile.lock'],
-        })
+        }),
       );
       expect(
         await updateArtifacts({
@@ -718,7 +716,7 @@ describe('modules/manager/bundler/artifacts', () => {
             ...config,
             isLockFileMaintenance: true,
           },
-        })
+        }),
       ).toMatchObject([{ artifactError: { lockFile: 'Gemfile.lock' } }]);
       expect(execSnapshots).toMatchObject([{ cmd: 'bundler lock --update' }]);
     });
@@ -730,7 +728,7 @@ describe('modules/manager/bundler/artifacts', () => {
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({
           modified: ['Gemfile.lock'],
-        })
+        }),
       );
       fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
       expect(
@@ -743,7 +741,7 @@ describe('modules/manager/bundler/artifacts', () => {
             isLockFileMaintenance: true,
             updateType: 'patch', // This will have no effect together with isLockFileMaintenance
           },
-        })
+        }),
       ).not.toBeNull();
       expect(execSnapshots).toMatchObject([{ cmd: 'bundler lock --update' }]);
     });
@@ -761,7 +759,7 @@ describe('modules/manager/bundler/artifacts', () => {
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
             modified: ['Gemfile.lock'],
-          })
+          }),
         );
         expect(
           await updateArtifacts({
@@ -772,7 +770,7 @@ describe('modules/manager/bundler/artifacts', () => {
               ...config,
               isLockFileMaintenance: true,
             },
-          })
+          }),
         ).toMatchObject([
           {
             artifactError: {
@@ -801,7 +799,7 @@ describe('modules/manager/bundler/artifacts', () => {
               ...config,
               isLockFileMaintenance: true,
             },
-          })
+          }),
         ).rejects.toThrow(TEMPORARY_ERROR);
       });
 
@@ -823,7 +821,7 @@ describe('modules/manager/bundler/artifacts', () => {
               ...config,
               isLockFileMaintenance: true,
             },
-          })
+          }),
         ).toMatchObject([{ artifactError: { lockFile: 'Gemfile.lock' } }]);
       });
 
@@ -845,7 +843,7 @@ describe('modules/manager/bundler/artifacts', () => {
               ...config,
               isLockFileMaintenance: true,
             },
-          })
+          }),
         ).rejects.toThrow(BUNDLER_INVALID_CREDENTIALS);
       });
 
@@ -864,7 +862,7 @@ describe('modules/manager/bundler/artifacts', () => {
         git.getRepoStatus.mockResolvedValueOnce(
           partial<StatusResult>({
             modified: ['Gemfile.lock'],
-          })
+          }),
         );
 
         const res = await updateArtifacts({

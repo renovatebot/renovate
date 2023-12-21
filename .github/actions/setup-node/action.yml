@@ -52,18 +52,18 @@ runs:
       run: corepack enable
 
     - name: Setup Node
-      uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
+      uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
       with:
         node-version: ${{ inputs.node-version }}
         cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
 
     - name: Install dependencies
-      uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
+      uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4 # v2.9.0
       if: env.CACHE_HIT != 'true'
       with:
         timeout_minutes: 10
         max_attempts: 3
-        command: pnpm install
+        command: pnpm install --frozen-lockfile
 
     - name: Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'

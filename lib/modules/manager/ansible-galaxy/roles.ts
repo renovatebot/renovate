@@ -13,7 +13,7 @@ import {
 function interpretLine(
   lineMatch: RegExpMatchArray,
   lineNumber: number,
-  dependency: AnsibleGalaxyPackageDependency
+  dependency: AnsibleGalaxyPackageDependency,
 ): AnsibleGalaxyPackageDependency | null {
   const localDependency = dependency;
   const key = lineMatch[2];

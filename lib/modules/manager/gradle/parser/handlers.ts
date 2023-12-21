@@ -287,7 +287,7 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
   let registryUrl = interpolateString(
     loadFromTokenMap(ctx, 'registryUrl'),
     ctx,
-    localVariables
+    localVariables,
   );
   if (registryUrl) {
     registryUrl = registryUrl.replace(regEx(/\\/g), '');
@@ -346,7 +346,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
   if (ctx.tokenMap.parentPath) {
     const parentPath = interpolateString(
       loadFromTokenMap(ctx, 'parentPath'),
-      ctx
+      ctx,
     );
     if (parentPath && scriptFile) {
       scriptFile = upath.join(parentPath, scriptFile);
@@ -375,7 +375,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
     ctx.globalVars,
     scriptFilePath,
     ctx.fileContents,
-    ctx.recursionDepth + 1
+    ctx.recursionDepth + 1,
   );
 
   ctx.deps.push(...matchResult.deps);
