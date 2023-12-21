@@ -21,7 +21,7 @@ async function validate(
   config: RenovateConfig,
   strict: boolean,
   isGlobalConfig: boolean,
-  isPreset = false
+  isPreset:boolean
 ): Promise<void> {
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
@@ -81,7 +81,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(file, parsedContent, strict, false);
+          await validate(file, parsedContent, strict, true, false); // allow global options when validating files from command line
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -102,7 +102,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(file, parsedContent, strict, false);
+          await validate(file, parsedContent, strict, false, false);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -122,6 +122,7 @@ type PackageJson = {
           'package.json > renovate',
           pkgJson.renovate,
           strict,
+          false,
           false
         );
       }
@@ -132,7 +133,8 @@ type PackageJson = {
             'package.json > renovate-config',
             presetConfig,
             strict,
-            true
+            true,
+            false
           );
         }
       }
@@ -145,7 +147,7 @@ type PackageJson = {
         const file = process.env.RENOVATE_CONFIG_FILE ?? 'config.js';
         logger.info(`Validating ${file}`);
         try {
-          await validate(file, fileConfig, strict, true);
+          await validate(file, fileConfig, strict, true, false);
         } catch (err) {
           logger.error({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
