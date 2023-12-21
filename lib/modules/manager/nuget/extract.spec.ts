@@ -67,6 +67,42 @@ describe('modules/manager/nuget/extract', () => {
       expect(res?.deps).toHaveLength(17);
     });
 
+    it('considers ContainerBaseImage property', async () => {
+      const packageFile =
+        'with-container-base-image/with-container-base-image.csproj';
+      const contents = Fixtures.get(packageFile);
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            depName: 'mcr.microsoft.com/dotnet/runtime',
+            depType: 'docker',
+            datasource: 'nuget',
+            currentVersion: '7.0.10',
+          },
+        ],
+        packageFileVersion: '0.1.0',
+      });
+    });
+
+    it('considers ContainerBaseImage property with pinned digest', async () => {
+      const packageFile =
+        'with-container-base-image/with-container-base-image-pinned-digest.csproj';
+      const contents = Fixtures.get(packageFile);
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+        deps: [
+          {
+            depName: 'mcr.microsoft.com/dotnet/runtime',
+            depType: 'docker',
+            datasource: 'nuget',
+            currentVersion: '7.0.10',
+            currentDigest:
+              'sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19',
+          },
+        ],
+        packageFileVersion: '0.1.0',
+      });
+    });
+
     it('considers NuGet.config', async () => {
       const packageFile = 'with-config-file/with-config-file.csproj';
       const contents = Fixtures.get(packageFile);
