@@ -37,7 +37,7 @@ export const HexRelease = z
           release.releaseTimestamp = releaseTimestamp;
         }
 
-        if (is.string(hexResponse.retirements[version])) {
+        if (is.plainObject(hexResponse.retirements[version])) {
           release.isDeprecated = true;
         }
 
