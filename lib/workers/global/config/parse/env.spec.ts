@@ -267,7 +267,7 @@ describe('workers/global/config/parse/env', () => {
       expect(config.token).toBe('a');
     });
 
-    describe('malformed RENOVATE_CONFIG', () => {
+    describe('RENOVATE_CONFIG tests', () => {
       let processExit: jest.SpyInstance<never, [code?: number]>;
 
       beforeAll(() => {
@@ -284,6 +284,23 @@ describe('workers/global/config/parse/env', () => {
         const envParam: NodeJS.ProcessEnv = { RENOVATE_CONFIG: '!@#' };
         await env.getConfig(envParam);
         expect(processExit).toHaveBeenCalledWith(1);
+      });
+
+      it('migrates', async () => {
+        const envParam: NodeJS.ProcessEnv = {
+          RENOVATE_CONFIG: '{"automerge":"any","token":"foo"}',
+        };
+        const config = await env.getConfig(envParam);
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(config.automerge).toBeTrue();
+      });
+
+      it('warns if config is invalid', async () => {
+        const envParam: NodeJS.ProcessEnv = {
+          RENOVATE_CONFIG: '{"enabled":"invalid-value","prTitle":"something"}',
+        };
+        await env.getConfig(envParam);
+        expect(logger.warn).toHaveBeenCalledTimes(2);
       });
     });
 
