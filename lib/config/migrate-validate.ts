@@ -32,7 +32,7 @@ export async function migrateAndValidate(
     }: {
       warnings: ValidationMessage[];
       errors: ValidationMessage[];
-    } = await configValidation.validateConfig(massagedConfig);
+    } = await configValidation.validateConfig(massagedConfig, false);
     // istanbul ignore if
     if (is.nonEmptyArray(warnings)) {
       logger.warn({ warnings }, 'Found renovate config warnings');
