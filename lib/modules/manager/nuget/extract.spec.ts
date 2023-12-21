@@ -68,8 +68,7 @@ describe('modules/manager/nuget/extract', () => {
     });
 
     it('extracts ContainerBaseImage', async () => {
-      const packageFile =
-        'with-container-base-image/with-container-base-image.csproj';
+      const packageFile = 'with-container-base-image/with-container-base-image.csproj';
       const contents = Fixtures.get(packageFile);
       expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
@@ -85,8 +84,7 @@ describe('modules/manager/nuget/extract', () => {
     });
 
     it('extracts ContainerBaseImage with pinned digest', async () => {
-      const packageFile =
-        'with-container-base-image/with-container-base-image-pinned-digest.csproj';
+      const packageFile = 'with-container-base-image/with-container-base-image-pinned-digest.csproj';
       const contents = Fixtures.get(packageFile);
       expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
