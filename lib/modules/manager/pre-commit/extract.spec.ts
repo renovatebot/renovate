@@ -11,14 +11,14 @@ const filename = '.pre-commit.yaml';
 const complexPrecommitConfig = Fixtures.get('complex.pre-commit-config.yaml');
 const examplePrecommitConfig = Fixtures.get('.pre-commit-config.yaml');
 const emptyReposPrecommitConfig = Fixtures.get(
-  'empty_repos.pre-commit-config.yaml'
+  'empty_repos.pre-commit-config.yaml',
 );
 const noReposPrecommitConfig = Fixtures.get('no_repos.pre-commit-config.yaml');
 const invalidRepoPrecommitConfig = Fixtures.get(
-  'invalid_repo.pre-commit-config.yaml'
+  'invalid_repo.pre-commit-config.yaml',
 );
 const enterpriseGitPrecommitConfig = Fixtures.get(
-  'enterprise.pre-commit-config.yaml'
+  'enterprise.pre-commit-config.yaml',
 );
 
 describe('modules/manager/pre-commit/extract', () => {
@@ -84,6 +84,16 @@ describe('modules/manager/pre-commit/extract', () => {
           { depName: 'psf/black', currentValue: '19.3b0' },
           { depName: 'psf/black', currentValue: '19.3b0' },
           { depName: 'psf/black', currentValue: '19.3b0' },
+          {
+            depName: 'my/dep',
+            currentValue: 'v42.0',
+            registryUrls: ['https://gitlab.mycompany.com'],
+          },
+          {
+            depName: 'my/dep',
+            currentValue: 'v42.0',
+            registryUrls: ['https://gitlab.mycompany.com'],
+          },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
           { depName: 'prettier/pre-commit', currentValue: 'v2.1.2' },
           { skipReason: 'invalid-url' },

@@ -32,7 +32,7 @@ describe('modules/datasource/gradle-version/index', () => {
       expect(res).not.toBeNull();
       expect(res?.releases).toHaveLength(300);
       expect(
-        res?.releases.filter(({ isDeprecated }) => isDeprecated)
+        res?.releases.filter(({ isDeprecated }) => isDeprecated),
       ).toHaveLength(1);
     });
 
@@ -80,16 +80,16 @@ describe('modules/datasource/gradle-version/index', () => {
         gradleVersionDatasource.getReleases(
           partial<GetReleasesConfig>({
             registryUrl: 'https://services.gradle.org/versions/all',
-          })
-        )
+          }),
+        ),
       ).rejects.toThrow(ExternalHostError);
 
       await expect(
         gradleVersionDatasource.getReleases(
           partial<GetReleasesConfig>({
             registryUrl: 'http://baz.qux',
-          })
-        )
+          }),
+        ),
       ).rejects.toThrow(ExternalHostError);
     });
   });

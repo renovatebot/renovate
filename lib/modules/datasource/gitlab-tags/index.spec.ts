@@ -114,7 +114,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
           registryUrls: ['https://gitlab.company.com/api/v4/'],
           packageName: 'some/dep2',
         },
-        'branch'
+        'branch',
       );
       expect(res).toBe(digest);
     });
@@ -143,7 +143,7 @@ describe('modules/datasource/gitlab-tags/index', () => {
           registryUrls: ['https://gitlab.company.com/api/v4/'],
           packageName: 'some/dep2',
         },
-        'unknown-branch'
+        'unknown-branch',
       );
       expect(res).toBeNull();
     });

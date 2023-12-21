@@ -26,7 +26,7 @@ export class ScheduleMigration extends AbstractMigration {
         ) {
           const parsedSchedule = later.parse.text(
             // We need to massage short hours first before we can parse it
-            schedules[i].replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2') // TODO #12071
+            schedules[i].replace(regEx(/( \d?\d)((a|p)m)/g), '$1:00$2'), // TODO #12071
           ).schedules[0];
           // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
           if (!parsedSchedule?.t_a || !parsedSchedule.t_b) {
@@ -38,20 +38,20 @@ export class ScheduleMigration extends AbstractMigration {
             schedules[i] = toSplit
               .replace(
                 regEx(
-                  /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
+                  /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/,
                 ), // TODO #12071
-                '$1$2 $3 $7'
+                '$1$2 $3 $7',
               )
               .trim();
             schedules.push(
               toSplit
                 .replace(
                   regEx(
-                    /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/
+                    /^(.*?)(after|before) (.*?) and (after|before) (.*?)( |$)(.*)/,
                   ), // TODO #12071
-                  '$1$4 $5 $7'
+                  '$1$4 $5 $7',
                 )
-                .trim()
+                .trim(),
             );
           }
         }
@@ -60,13 +60,13 @@ export class ScheduleMigration extends AbstractMigration {
         if (schedules[i].includes('on the last day of the month')) {
           schedules[i] = schedules[i].replace(
             'on the last day of the month',
-            'on the first day of the month'
+            'on the first day of the month',
           );
         }
         if (schedules[i].includes('on every weekday')) {
           schedules[i] = schedules[i].replace(
             'on every weekday',
-            'every weekday'
+            'every weekday',
           );
         }
         if (schedules[i].endsWith(' every day')) {
@@ -74,12 +74,12 @@ export class ScheduleMigration extends AbstractMigration {
         }
         if (
           regEx(/every (mon|tues|wednes|thurs|fri|satur|sun)day$/).test(
-            schedules[i]
+            schedules[i],
           ) // TODO #12071
         ) {
           schedules[i] = schedules[i].replace(
             regEx(/every ([a-z]*day)$/), // TODO #12071
-            'on $1'
+            'on $1',
           );
         }
         if (schedules[i].endsWith('days')) {

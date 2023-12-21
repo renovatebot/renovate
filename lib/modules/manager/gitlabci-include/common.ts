@@ -11,7 +11,7 @@ export function isNonEmptyObject(obj: any): boolean {
 }
 
 export function filterIncludeFromGitlabPipeline(
-  pipeline: GitlabPipeline
+  pipeline: GitlabPipeline,
 ): GitlabPipeline {
   const pipeline_without_include: GitlabPipeline = {};
   for (const key of Object.keys(pipeline).filter((key) => key !== 'include')) {
@@ -22,13 +22,13 @@ export function filterIncludeFromGitlabPipeline(
 }
 
 export function isGitlabIncludeProject(
-  include: GitlabInclude
+  include: GitlabInclude,
 ): include is GitlabIncludeProject {
   return !is.undefined((include as GitlabIncludeProject).project);
 }
 
 export function isGitlabIncludeLocal(
-  include: GitlabInclude
+  include: GitlabInclude,
 ): include is GitlabIncludeLocal {
   return !is.undefined((include as GitlabIncludeLocal).local);
 }

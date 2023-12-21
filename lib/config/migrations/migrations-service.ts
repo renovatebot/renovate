@@ -15,6 +15,7 @@ import { BranchNameMigration } from './custom/branch-name-migration';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
+import { CustomManagersMigration } from './custom/custom-managers-migration';
 import { DatasourceMigration } from './custom/datasource-migration';
 import { DepTypesMigration } from './custom/dep-types-migration';
 import { DryRunMigration } from './custom/dry-run-migration';
@@ -27,6 +28,7 @@ import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migrati
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
 import { IncludeForksMigration } from './custom/include-forks-migration';
 import { MatchDatasourcesMigration } from './custom/match-datasources-migration';
+import { MatchManagersMigration } from './custom/match-managers-migration';
 import { MatchStringsMigration } from './custom/match-strings-migration';
 import { NodeMigration } from './custom/node-migration';
 import { PackageFilesMigration } from './custom/package-files-migration';
@@ -41,7 +43,6 @@ import { RaiseDeprecationWarningsMigration } from './custom/raise-deprecation-wa
 import { RebaseConflictedPrs } from './custom/rebase-conflicted-prs-migration';
 import { RebaseStalePrsMigration } from './custom/rebase-stale-prs-migration';
 import { RecreateClosedMigration } from './custom/recreate-closed-migration';
-import { RegexManagersMigration } from './custom/regex-managers-migration';
 import { RenovateForkMigration } from './custom/renovate-fork-migration';
 import { RequireConfigMigration } from './custom/require-config-migration';
 import { RequiredStatusChecksMigration } from './custom/required-status-checks-migration';
@@ -83,6 +84,7 @@ export class MigrationsService {
     ['endpoints', 'hostRules'],
     ['excludedPackageNames', 'excludePackageNames'],
     ['exposeEnv', 'exposeAllEnv'],
+    ['keepalive', 'keepAlive'],
     ['managerBranchPrefix', 'additionalBranchPrefix'],
     ['multipleMajorPrs', 'separateMultipleMajor'],
     ['separatePatchReleases', 'separateMinorPatch'],
@@ -96,6 +98,7 @@ export class MigrationsService {
     ['masterIssueFooter', 'dependencyDashboardFooter'],
     ['masterIssueTitle', 'dependencyDashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
+    ['regexManagers', 'customManagers'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
@@ -151,7 +154,8 @@ export class MigrationsService {
     RecreateClosedMigration,
     StabilityDaysMigration,
     FetchReleaseNotesMigration,
-    RegexManagersMigration,
+    MatchManagersMigration,
+    CustomManagersMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
@@ -176,14 +180,14 @@ export class MigrationsService {
 
   static isMigrated(
     originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig
+    migratedConfig: RenovateConfig,
   ): boolean {
     return !dequal(originalConfig, migratedConfig);
   }
 
   public static getMigrations(
     originalConfig: RenovateConfig,
-    migratedConfig: RenovateConfig
+    migratedConfig: RenovateConfig,
   ): ReadonlyArray<Migration> {
     const migrations: Migration[] = [];
 
@@ -192,8 +196,8 @@ export class MigrationsService {
         new RemovePropertyMigration(
           propertyName,
           originalConfig,
-          migratedConfig
-        )
+          migratedConfig,
+        ),
       );
     }
 
@@ -206,8 +210,8 @@ export class MigrationsService {
           oldPropertyName,
           newPropertyName,
           originalConfig,
-          migratedConfig
-        )
+          migratedConfig,
+        ),
       );
     }
 
@@ -220,7 +224,7 @@ export class MigrationsService {
 
   private static getMigration(
     migrations: ReadonlyArray<Migration>,
-    key: string
+    key: string,
   ): Migration | undefined {
     return migrations.find((migration) => {
       if (is.regExp(migration.propertyName)) {

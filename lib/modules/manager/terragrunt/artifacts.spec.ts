@@ -66,6 +66,6 @@ describe('modules/manager/terragrunt/artifacts', () => {
         config: localConfig,
       });
       expect(terraformLockfile.updateArtifacts).not.toHaveBeenCalled();
-    }
+    },
   );
 });

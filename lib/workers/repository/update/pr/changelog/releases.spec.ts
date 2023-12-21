@@ -47,8 +47,11 @@ describe('workers/repository/update/pr/changelog/releases', () => {
         newVersion: '1.1.0',
       });
       const res = await releases.getInRangeReleases(config);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(3);
+      expect(res).toEqual([
+        { version: '1.0.0' },
+        { version: '1.0.1' },
+        { version: '1.1.0' },
+      ]);
     });
 
     it('should contain currentVersion unstable', async () => {
@@ -60,8 +63,12 @@ describe('workers/repository/update/pr/changelog/releases', () => {
         newVersion: '1.1.0',
       });
       const res = await releases.getInRangeReleases(config);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(4);
+      expect(res).toEqual([
+        { version: '1.0.1-rc0' },
+        { version: '1.0.1-rc1' },
+        { version: '1.0.1' },
+        { version: '1.1.0' },
+      ]);
     });
 
     it('should contain newVersion unstable', async () => {
@@ -73,8 +80,12 @@ describe('workers/repository/update/pr/changelog/releases', () => {
         newVersion: '1.2.0-rc1',
       });
       const res = await releases.getInRangeReleases(config);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(4);
+      expect(res).toEqual([
+        { version: '1.0.1' },
+        { version: '1.1.0' },
+        { version: '1.2.0-rc0' },
+        { version: '1.2.0-rc1' },
+      ]);
     });
 
     it('should contain both currentVersion newVersion unstable', async () => {
@@ -86,8 +97,14 @@ describe('workers/repository/update/pr/changelog/releases', () => {
         newVersion: '1.2.0-rc1',
       });
       const res = await releases.getInRangeReleases(config);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(6);
+      expect(res).toEqual([
+        { version: '1.0.1-rc0' },
+        { version: '1.0.1-rc1' },
+        { version: '1.0.1' },
+        { version: '1.1.0' },
+        { version: '1.2.0-rc0' },
+        { version: '1.2.0-rc1' },
+      ]);
     });
 
     it('should valueToVersion', async () => {
@@ -99,8 +116,23 @@ describe('workers/repository/update/pr/changelog/releases', () => {
         newVersion: '1.2.0-rc0',
       });
       const res = await releases.getInRangeReleases(config);
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(3);
+      expect(res).toEqual([
+        { version: '1.0.1' },
+        { version: '1.1.0' },
+        { version: '1.2.0' },
+      ]);
+    });
+
+    it('should return any previous version if current version is non-existent', async () => {
+      const config = partial<BranchUpgradeConfig>({
+        datasource: 'some-datasource',
+        packageName: 'some-depname',
+        versioning: npmVersioning.id,
+        currentVersion: '1.0.2',
+        newVersion: '1.1.0',
+      });
+      const res = await releases.getInRangeReleases(config);
+      expect(res).toEqual([{ version: '1.0.1' }, { version: '1.1.0' }]);
     });
   });
 });

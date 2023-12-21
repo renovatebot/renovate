@@ -33,5 +33,5 @@ export const DockerTarget = z
         currentDigest: digest,
         registryUrls: [registry],
       },
-    ]
+    ],
   );

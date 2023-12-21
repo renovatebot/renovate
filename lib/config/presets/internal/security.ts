@@ -2,7 +2,7 @@ import type { Preset } from '../types';
 
 export const presets: Record<string, Preset> = {
   'openssf-scorecard': {
-    description: 'Show OpenSSF badge on pull requests',
+    description: 'Show OpenSSF badge on pull requests.',
     packageRules: [
       {
         matchSourceUrlPrefixes: ['https://github.com/'],

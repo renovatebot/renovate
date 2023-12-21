@@ -12,6 +12,7 @@ export const presets: Record<string, Preset> = {
           'packagist',
           'pypi',
           'rubygems',
+          'go',
         ],
         matchUpdateTypes: ['patch', 'minor', 'major'],
         prBodyColumns: [
@@ -37,6 +38,7 @@ export const presets: Record<string, Preset> = {
           'packagist',
           'pypi',
           'rubygems',
+          'go',
         ],
         matchUpdateTypes: ['patch', 'minor', 'major'],
         prBodyColumns: ['Package', 'Change', 'Age', 'Confidence'],

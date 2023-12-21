@@ -36,7 +36,7 @@ describe('workers/repository/update/branch/check-existing', () => {
         partial<Pr>({
           number: 12,
           state: 'closed',
-        })
+        }),
       );
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
       expect(platform.findPr).toHaveBeenCalledTimes(1);
@@ -50,12 +50,12 @@ describe('workers/repository/update/branch/check-existing', () => {
         partial<Pr>({
           number: 12,
           state: 'closed',
-        })
+        }),
       );
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
       expect(platform.findPr).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenCalledWith(
-        `Found closed PR with current title`
+        `Found closed PR with current title`,
       );
     });
   });

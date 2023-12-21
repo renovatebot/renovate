@@ -13,7 +13,7 @@ import {
 export function handleAny(
   content: string,
   _packageFile: string,
-  config: RegexManagerConfig
+  config: RegexManagerConfig,
 ): PackageDependency[] {
   return config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
@@ -26,8 +26,8 @@ export function handleAny(
             /* istanbul ignore next: can this happen? */ {},
           replaceString: matchResult[0],
         },
-        config
-      )
+        config,
+      ),
     )
     .filter(is.truthy)
     .filter(isValidDependency);
@@ -36,7 +36,7 @@ export function handleAny(
 export function handleCombination(
   content: string,
   _packageFile: string,
-  config: RegexManagerConfig
+  config: RegexManagerConfig,
 ): PackageDependency[] {
   const matches = config.matchStrings
     .map((matchString) => regEx(matchString, 'g'))
@@ -63,10 +63,10 @@ export function handleCombination(
 export function handleRecursive(
   content: string,
   packageFile: string,
-  config: RegexManagerConfig
+  config: RegexManagerConfig,
 ): PackageDependency[] {
   const regexes = config.matchStrings.map((matchString) =>
-    regEx(matchString, 'g')
+    regEx(matchString, 'g'),
   );
 
   return processRecursive({
@@ -96,7 +96,7 @@ function processRecursive(parameters: RecursionParameter): PackageDependency[] {
         groups: combinedGroups,
         replaceString: content,
       },
-      config
+      config,
     );
     return result ? [result] : /* istanbul ignore next: can this happen? */ [];
   }

@@ -171,7 +171,7 @@ function isNested(value: unknown): value is NestedValue {
 
 export function sanitizeValue(
   value: unknown,
-  seen = new WeakMap<NestedValue, unknown>()
+  seen = new WeakMap<NestedValue, unknown>(),
 ): any {
   if (is.string(value)) {
     return sanitize(sanitizeUrls(value));
@@ -247,7 +247,7 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
     const write = (
       chunk: BunyanRecord,
       enc: BufferEncoding,
-      cb: (err?: Error | null) => void
+      cb: (err?: Error | null) => void,
     ): void => {
       const raw = sanitizeValue(chunk);
       const result =

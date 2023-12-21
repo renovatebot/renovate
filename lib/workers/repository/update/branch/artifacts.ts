@@ -4,19 +4,26 @@ import { platform } from '../../../../modules/platform';
 import type { BranchConfig } from '../../../types';
 
 export async function setArtifactErrorStatus(
-  config: BranchConfig
+  config: BranchConfig,
 ): Promise<void> {
   if (!config.artifactErrors?.length) {
     // no errors
     return;
   }
 
-  const context = `renovate/artifacts`;
+  const context = config.statusCheckNames?.artifactError;
+  if (!context) {
+    logger.debug(
+      'Status check is null or an empty string, skipping status check addition.',
+    );
+    return;
+  }
+
   const description = 'Artifact file update failure';
   const state = 'red';
   const existingState = await platform.getBranchStatusCheck(
     config.branchName,
-    context
+    context,
   );
 
   // Check if state needs setting

@@ -73,7 +73,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
         .replyWithError('Unknown error');
 
       await expect(rubygems.getVersions(registryUrl, 'foo')).rejects.toThrow(
-        'Unknown error'
+        'Unknown error',
       );
       expect(memCache.size).toBe(0);
     });
@@ -103,7 +103,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
           codeBlock`
             33333333333333333333333333333333
             foo -1.1.1,1.2.3 44444444444444444444444444444444
-          ` + '\n'
+          ` + '\n',
         );
 
       const res2 = await rubygems.getVersions(registryUrl, 'foo');
@@ -129,7 +129,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
           codeBlock`
             01010101010101010101010101010101
             foo -1.1.1,1.2.3 44444444444444444444444444444444
-          ` + '\n'
+          ` + '\n',
         )
         .get('/versions')
         .reply(
@@ -140,7 +140,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
             foo 1.2.3 11111111111111111111111111111111
             bar 2.2.2 22222222222222222222222222222222
             baz 3.3.3 01010101010101010101010101010101
-          ` + '\n'
+          ` + '\n',
         );
 
       const res2 = await rubygems.getVersions(registryUrl, 'foo');
@@ -163,7 +163,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
         .get('/versions')
         .reply(
           200,
-          fullBody + `foo -1.1.1,1.2.3 44444444444444444444444444444444\n`
+          fullBody + `foo -1.1.1,1.2.3 44444444444444444444444444444444\n`,
         );
 
       const res2 = await rubygems.getVersions(registryUrl, 'foo');
@@ -205,7 +205,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
               created_at: 2021-05-05T00:00:00.000Z
               ---
               foo 9.9.9 99999999999999999999999999999999
-            ` + '\n'
+            ` + '\n',
           );
 
         const res = await rubygems.getVersions(registryUrl, 'foo');
@@ -220,7 +220,7 @@ describe('modules/datasource/rubygems/versions-endpoint-cache', () => {
           .replyWithError('Unknown error');
 
         await expect(rubygems.getVersions(registryUrl, 'foo')).rejects.toThrow(
-          'Unknown error'
+          'Unknown error',
         );
 
         expect(memCache.get('https://rubygems.org')).toBeUndefined();

@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { trimTrailingSlash } from '../../../util/url';
+import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -21,19 +21,19 @@ import { fileTestRegex } from './util';
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig
+  _config?: ExtractConfig,
 ): PackageFileContent | null {
   // check for argo reference. API version for the kind attribute is used
   if (fileTestRegex.test(content) === false) {
     logger.debug(
-      `Skip file ${packageFile} as no argoproj.io apiVersion could be found in matched file`
+      `Skip file ${packageFile} as no argoproj.io apiVersion could be found in matched file`,
     );
     return null;
   }
 
   let definitions: ApplicationDefinition[];
   try {
-    definitions = loadAll(content) as ApplicationDefinition[];
+    definitions = parseYaml(content) as ApplicationDefinition[];
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse ArgoCD definition.');
     return null;
@@ -86,7 +86,7 @@ function processSource(source: ApplicationSource): PackageDependency | null {
 }
 
 function processAppSpec(
-  definition: ApplicationDefinition
+  definition: ApplicationDefinition,
 ): PackageDependency[] {
   const spec: ApplicationSpec | null | undefined =
     definition.kind === 'Application'

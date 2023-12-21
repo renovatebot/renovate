@@ -12,8 +12,8 @@ describe('modules/manager/bazel/rules/index', () => {
     // Archive of a commit.
     expect(
       parseArchiveUrl(
-        'https://github.com/foo/bar/archive/abcdef0123abcdef0123abcdef0123abcdef0123.tar.gz'
-      )
+        'https://github.com/foo/bar/archive/abcdef0123abcdef0123abcdef0123abcdef0123.tar.gz',
+      ),
     ).toEqual({
       datasource: 'github-tags',
       packageName: 'foo/bar',
@@ -23,8 +23,8 @@ describe('modules/manager/bazel/rules/index', () => {
     // Archive of a release
     expect(
       parseArchiveUrl(
-        'https://github.com/foo/bar/releases/download/1.2.3/foobar-1.2.3.tar.gz'
-      )
+        'https://github.com/foo/bar/releases/download/1.2.3/foobar-1.2.3.tar.gz',
+      ),
     ).toEqual({
       datasource: 'github-releases',
       packageName: 'foo/bar',
@@ -34,8 +34,8 @@ describe('modules/manager/bazel/rules/index', () => {
     // Archive of a tag.
     expect(
       parseArchiveUrl(
-        'https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz'
-      )
+        'https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz',
+      ),
     ).toEqual({
       datasource: 'github-tags',
       packageName: 'aspect-build/rules_js',
@@ -46,11 +46,14 @@ describe('modules/manager/bazel/rules/index', () => {
   describe('git', () => {
     it('extracts git dependencies', () => {
       expect(
-        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' }),
       ).toBeEmptyArray();
 
       expect(
-        extractDepsFromFragmentData({ rule: 'git_repository', name: 'foo_bar' })
+        extractDepsFromFragmentData({
+          rule: 'git_repository',
+          name: 'foo_bar',
+        }),
       ).toBeEmptyArray();
 
       expect(
@@ -58,7 +61,7 @@ describe('modules/manager/bazel/rules/index', () => {
           rule: 'git_repository',
           name: 'foo_bar',
           tag: '1.2.3',
-        })
+        }),
       ).toBeEmptyArray();
 
       expect(
@@ -67,7 +70,7 @@ describe('modules/manager/bazel/rules/index', () => {
           name: 'foo_bar',
           tag: '1.2.3',
           remote: 'https://github.com/foo/bar',
-        })
+        }),
       ).toEqual([
         {
           datasource: 'github-releases',
@@ -84,7 +87,7 @@ describe('modules/manager/bazel/rules/index', () => {
           name: 'foo_bar',
           commit: 'abcdef0123abcdef0123abcdef0123abcdef0123',
           remote: 'https://github.com/foo/bar',
-        })
+        }),
       ).toEqual([
         {
           datasource: 'github-releases',
@@ -101,7 +104,7 @@ describe('modules/manager/bazel/rules/index', () => {
           name: 'foo_bar',
           tag: '1.2.3',
           remote: 'https://gitlab.com/foo/bar',
-        })
+        }),
       ).toMatchObject([
         {
           currentValue: '1.2.3',
@@ -116,11 +119,11 @@ describe('modules/manager/bazel/rules/index', () => {
   describe('go', () => {
     it('extracts go dependencies', () => {
       expect(
-        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' }),
       ).toBeEmptyArray();
 
       expect(
-        extractDepsFromFragmentData({ rule: 'go_repository', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'go_repository', name: 'foo_bar' }),
       ).toBeEmptyArray();
 
       expect(
@@ -128,7 +131,7 @@ describe('modules/manager/bazel/rules/index', () => {
           rule: 'go_repository',
           name: 'foo_bar',
           tag: '1.2.3',
-        })
+        }),
       ).toBeEmptyArray();
 
       expect(
@@ -137,7 +140,7 @@ describe('modules/manager/bazel/rules/index', () => {
           name: 'foo_bar',
           tag: '1.2.3',
           importpath: 'foo/bar/baz',
-        })
+        }),
       ).toEqual([
         {
           datasource: 'go',
@@ -154,7 +157,7 @@ describe('modules/manager/bazel/rules/index', () => {
           name: 'foo_bar',
           commit: 'abcdef0123abcdef0123abcdef0123abcdef0123',
           importpath: 'foo/bar/baz',
-        })
+        }),
       ).toEqual([
         {
           datasource: 'go',
@@ -173,7 +176,7 @@ describe('modules/manager/bazel/rules/index', () => {
           tag: '1.2.3',
           importpath: 'foo/bar/baz',
           remote: 'https://github.com/foo/bar',
-        })
+        }),
       ).toEqual([
         {
           datasource: 'go',
@@ -191,7 +194,7 @@ describe('modules/manager/bazel/rules/index', () => {
           tag: '1.2.3',
           importpath: 'foo/bar/baz',
           remote: 'https://example.com/foo/bar',
-        })
+        }),
       ).toEqual([
         {
           datasource: 'go',
@@ -208,11 +211,11 @@ describe('modules/manager/bazel/rules/index', () => {
   describe('http', () => {
     it('extracts http dependencies', () => {
       expect(
-        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' }),
       ).toBeEmptyArray();
 
       expect(
-        extractDepsFromFragmentData({ rule: 'http_archive', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'http_archive', name: 'foo_bar' }),
       ).toBeEmptyArray();
 
       expect(
@@ -220,7 +223,7 @@ describe('modules/manager/bazel/rules/index', () => {
           rule: 'http_archive',
           name: 'foo_bar',
           sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-        })
+        }),
       ).toBeEmptyArray();
 
       expect(
@@ -229,7 +232,7 @@ describe('modules/manager/bazel/rules/index', () => {
           name: 'foo_bar',
           sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
           url: 'https://github.com/foo/bar/archive/abcdef0123abcdef0123abcdef0123abcdef0123.tar.gz',
-        })
+        }),
       ).toEqual([
         {
           currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
@@ -249,7 +252,7 @@ describe('modules/manager/bazel/rules/index', () => {
             'https://example.com/foo/bar',
             'https://github.com/foo/bar/archive/abcdef0123abcdef0123abcdef0123abcdef0123.tar.gz',
           ],
-        })
+        }),
       ).toEqual([
         {
           currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
@@ -266,7 +269,7 @@ describe('modules/manager/bazel/rules/index', () => {
           name: 'foo_bar',
           sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
           url: 'https://github.com/foo/bar/releases/download/1.2.3/foobar-1.2.3.tar.gz',
-        })
+        }),
       ).toEqual([
         {
           currentValue: '1.2.3',
@@ -286,7 +289,7 @@ describe('modules/manager/bazel/rules/index', () => {
             'https://example.com/foo/bar',
             'https://github.com/foo/bar/releases/download/1.2.3/foobar-1.2.3.tar.gz',
           ],
-        })
+        }),
       ).toEqual([
         {
           currentValue: '1.2.3',
@@ -306,7 +309,7 @@ describe('modules/manager/bazel/rules/index', () => {
           urls: [
             'https://github.com/aspect-build/rules_js/archive/refs/tags/v1.1.2.tar.gz',
           ],
-        })
+        }),
       ).toEqual([
         {
           currentValue: 'v1.1.2',
@@ -322,7 +325,7 @@ describe('modules/manager/bazel/rules/index', () => {
   describe('docker', () => {
     it('extracts docker dependencies', () => {
       expect(
-        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' }),
       ).toBeEmptyArray();
 
       expect(
@@ -333,7 +336,7 @@ describe('modules/manager/bazel/rules/index', () => {
           digest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
           repository: 'example.com/foo/bar',
           registry: 'https://example.com',
-        })
+        }),
       ).toEqual([
         {
           currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
@@ -352,7 +355,7 @@ describe('modules/manager/bazel/rules/index', () => {
   describe('oci', () => {
     it('extracts oci dependencies', () => {
       expect(
-        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' }),
       ).toBeEmptyArray();
 
       expect(
@@ -362,7 +365,7 @@ describe('modules/manager/bazel/rules/index', () => {
           tag: '1.2.3',
           digest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
           image: 'example.com/foo/bar',
-        })
+        }),
       ).toEqual([
         {
           currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
@@ -401,7 +404,7 @@ describe('modules/manager/bazel/rules/index', () => {
             'https://example1.com/maven2',
             'https://example2.com/maven2',
           ],
-        })
+        }),
       ).toEqual([
         {
           currentValue: '1.1.1',

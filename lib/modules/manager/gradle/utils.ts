@@ -8,7 +8,7 @@ import type {
 } from './types';
 
 const artifactRegex = regEx(
-  '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$'
+  '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$',
 );
 
 const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+]+)');
@@ -16,7 +16,7 @@ const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+]+)');
 // Extracts version-like and range-like strings
 // from the beginning of input
 export function versionLikeSubstring(
-  input: string | null | undefined
+  input: string | null | undefined,
 ): string | null {
   if (!input) {
     return null;
@@ -70,7 +70,7 @@ export function isDependencyString(input: string): boolean {
 }
 
 export function parseDependencyString(
-  input: string
+  input: string,
 ): PackageDependency<GradleManagerData> | null {
   if (!isDependencyString(input)) {
     return null;
@@ -176,7 +176,7 @@ export function reorderFiles(packageFiles: string[]): string[] {
 export function getVars(
   registry: VariableRegistry,
   dir: string,
-  vars: PackageVariables = registry[dir] || {}
+  vars: PackageVariables = registry[dir] || {},
 ): PackageVariables {
   const dirAbs = toAbsolutePath(dir);
   const parentDir = upath.dirname(dirAbs);
@@ -190,7 +190,7 @@ export function getVars(
 export function updateVars(
   registry: VariableRegistry,
   dir: string,
-  newVars: PackageVariables
+  newVars: PackageVariables,
 ): void {
   const oldVars = registry[dir] ?? {};
   registry[dir] = { ...oldVars, ...newVars };

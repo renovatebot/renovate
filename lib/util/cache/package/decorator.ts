@@ -73,7 +73,7 @@ export function cache<T>({
     finalKey = `cache-decorator:${finalKey}`;
     const oldRecord = await packageCache.get<DecoratorCachedRecord>(
       finalNamespace,
-      finalKey
+      finalKey,
     );
 
     const ttlOverride = getTtlOverride(finalNamespace);
@@ -81,7 +81,7 @@ export function cache<T>({
 
     const cacheHardTtlMinutes = GlobalConfig.get(
       'cacheHardTtlMinutes',
-      7 * 24 * 60
+      7 * 24 * 60,
     );
     let hardTtl = softTtl;
     if (methodName === 'getReleases' || methodName === 'getDigest') {
@@ -111,7 +111,7 @@ export function cache<T>({
       } catch (err) {
         logger.debug(
           { err },
-          'Package cache decorator: callback error, returning old data'
+          'Package cache decorator: callback error, returning old data',
         );
         return oldData;
       }
@@ -131,7 +131,7 @@ export function cache<T>({
   });
 }
 
-function getTtlOverride(namespace: string): number | undefined {
+export function getTtlOverride(namespace: string): number | undefined {
   const ttl: unknown = GlobalConfig.get('cacheTtlOverride', {})[namespace];
   if (is.number(ttl)) {
     return ttl;

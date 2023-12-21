@@ -117,6 +117,6 @@ export async function generateSchema(dist: string): Promise<void> {
   createSchemaForChildConfigs();
   await updateFile(
     `${dist}/renovate-schema.json`,
-    `${JSON.stringify(schema, null, 2)}\n`
+    `${JSON.stringify(schema, null, 2)}\n`,
   );
 }

@@ -71,10 +71,24 @@ describe('workers/global/autodiscover', () => {
       token: 'abc',
     }));
     ghApi.getRepos = jest.fn(() =>
-      Promise.resolve(['project/repo', 'project/another-repo'])
+      Promise.resolve(['project/repo', 'project/another-repo']),
     );
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(['project/repo']);
+  });
+
+  it('filters autodiscovered dot repos', async () => {
+    config.autodiscover = true;
+    config.autodiscoverFilter = ['project/*'];
+    config.platform = 'github';
+    hostRules.find = jest.fn(() => ({
+      token: 'abc',
+    }));
+    ghApi.getRepos = jest.fn(() =>
+      Promise.resolve(['project/repo', 'project/.github']),
+    );
+    const res = await autodiscoverRepositories(config);
+    expect(res.repositories).toEqual(['project/repo', 'project/.github']);
   });
 
   it('filters autodiscovered github repos but nothing matches', async () => {
@@ -85,7 +99,7 @@ describe('workers/global/autodiscover', () => {
       token: 'abc',
     }));
     ghApi.getRepos = jest.fn(() =>
-      Promise.resolve(['another-project/repo', 'another-project/another-repo'])
+      Promise.resolve(['another-project/repo', 'another-project/another-repo']),
     );
     const res = await autodiscoverRepositories(config);
     expect(res).toEqual(config);
@@ -99,7 +113,7 @@ describe('workers/global/autodiscover', () => {
       token: 'abc',
     }));
     ghApi.getRepos = jest.fn(() =>
-      Promise.resolve(['project/repo', 'project/another-repo'])
+      Promise.resolve(['project/repo', 'project/another-repo']),
     );
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(['project/repo']);
@@ -113,7 +127,7 @@ describe('workers/global/autodiscover', () => {
       token: 'abc',
     }));
     ghApi.getRepos = jest.fn(() =>
-      Promise.resolve(['project/repo', 'project/another-repo'])
+      Promise.resolve(['project/repo', 'project/another-repo']),
     );
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(['project/another-repo']);
@@ -127,7 +141,7 @@ describe('workers/global/autodiscover', () => {
       token: 'abc',
     }));
     ghApi.getRepos = jest.fn(() =>
-      Promise.resolve(['project/repo', 'project/another-repo'])
+      Promise.resolve(['project/repo', 'project/another-repo']),
     );
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(['project/another-repo']);
@@ -141,7 +155,7 @@ describe('workers/global/autodiscover', () => {
       token: 'abc',
     }));
     ghApi.getRepos = jest.fn(() =>
-      Promise.resolve(['project/repo', 'project/another-repo'])
+      Promise.resolve(['project/repo', 'project/another-repo']),
     );
     await expect(autodiscoverRepositories(config)).rejects.toThrow();
   });
@@ -158,7 +172,10 @@ describe('workers/global/autodiscover', () => {
       'department/dev/aProject',
     ];
     ghApi.getRepos = jest.fn(() =>
-      Promise.resolve(['another-project/another-repo', ...expectedRepositories])
+      Promise.resolve([
+        'another-project/another-repo',
+        ...expectedRepositories,
+      ]),
     );
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(expectedRepositories);
@@ -172,7 +189,7 @@ describe('workers/global/autodiscover', () => {
       token: 'abc',
     }));
     ghApi.getRepos = jest.fn(() =>
-      Promise.resolve(['project/repo', 'PROJECT/repo2'])
+      Promise.resolve(['project/repo', 'PROJECT/repo2']),
     );
     const res = await autodiscoverRepositories(config);
     expect(res.repositories).toEqual(['project/repo', 'PROJECT/repo2']);

@@ -68,7 +68,7 @@ describe('modules/manager/docker-compose/extract', () => {
           registryAliases: {
             'quay.io': 'my-quay-mirror.registry.com',
           },
-        }
+        },
       );
       expect(res).toEqual({
         deps: [
@@ -98,7 +98,7 @@ describe('modules/manager/docker-compose/extract', () => {
           registryAliases: {
             'index.docker.io': 'my-docker-mirror.registry.com',
           },
-        }
+        },
       );
       expect(res).toEqual({
         deps: [
@@ -129,7 +129,7 @@ describe('modules/manager/docker-compose/extract', () => {
             'quay.io': 'my-quay-mirror.registry.com',
             'my-quay-mirror.registry.com': 'quay.io',
           },
-        }
+        },
       );
       expect(res).toEqual({
         deps: [

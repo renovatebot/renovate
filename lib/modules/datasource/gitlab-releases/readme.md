@@ -1,4 +1,4 @@
-[GitLab Releases API](https://docs.gitlab.com/ee/api/releases/) supports looking up [releases supported by GitLab](https://docs.gitlab.com/ee/user/project/releases/) and can be used in combination with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to keep dependencies up-to-date which are not specifically supported by Renovate.
+[GitLab Releases API](https://docs.gitlab.com/ee/api/releases/) supports looking up [releases supported by GitLab](https://docs.gitlab.com/ee/user/project/releases/) and can be used in combination with [regex managers](../../manager/regex/index.md) to keep dependencies up-to-date which are not specifically supported by Renovate.
 
 To specify which specific repository should be queried when looking up a package, the `packageName` should be set to the project path.
 
@@ -14,12 +14,13 @@ Please note the following requirements:
 **Usage Example**
 
 A real-world example for this specific datasource would be maintaining package versions in a config file.
-This can be achieved by configuring a generic regex manager in `renovate.json` for files named `versions.ini`:
+This can be achieved by configuring a custom manager in `renovate.json` for files named `versions.ini`:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["^versions.ini$"],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VERSION=(?<currentValue>.*)\\s"

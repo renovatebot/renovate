@@ -42,7 +42,7 @@ export class NodeVersionDatasource extends Datasource {
     try {
       const resp = (
         await this.http.getJson<NodeRelease[]>(
-          joinUrlParts(registryUrl, 'index.json')
+          joinUrlParts(registryUrl, 'index.json'),
         )
       ).body;
       result.releases.push(
@@ -50,7 +50,7 @@ export class NodeVersionDatasource extends Datasource {
           version,
           releaseTimestamp: date,
           isStable: lts !== false,
-        }))
+        })),
       );
     } catch (err) {
       this.handleGenericErrors(err);

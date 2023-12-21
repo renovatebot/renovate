@@ -106,7 +106,7 @@ Renovate can be configured to access more repositories and access repositories a
 This example shows how you can use a `config.js` file to configure Renovate for use with Artifactory.
 We're using environment variables to pass the Artifactory username and password to Renovate bot.
 
-```js
+```js title="config.js"
 module.exports = {
   hostRules: [
     {
@@ -131,3 +131,66 @@ module.exports = {
   ],
 };
 ```
+
+### Google Artifact Registry
+
+There are multiple ways to configure Renovate to access Artifact Registry.
+
+#### Using Application Default Credentials / Workload Identity (Self-Hosted only)
+
+Configure [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc) or [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) as normal and _don't_ provide a username, password or token.
+Renovate will automatically retrieve the credentials using the `google-auth-library`.
+
+#### Using long-lived service account credentials
+
+To access the Google Artifact Registry, use the JSON service account with `Basic` authentication, and use the:
+
+- `_json_key_base64` as username
+- full Google Cloud Platform service account JSON as password
+
+To avoid JSON-in-JSON wrapping, which can cause problems, encode the JSON service account beforehand.
+
+1. Download your JSON service account and store it on your machine. Make sure that the service account has `read` (and only `read`) permissions to your artifacts
+2. Base64 encode the service account credentials by running `cat service-account.json | base64`
+3. Add the encoded service account to your configuration file
+
+   1. If you want to add it to your self-hosted configuration file:
+
+      ```json
+      {
+        "hostRules": [
+          {
+            "matchHost": "europe-maven.pkg.dev",
+            "username": "_json_key_base64",
+            "password": "<base64 service account>"
+          }
+        ]
+      }
+      ```
+
+   2. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
+
+      ```json
+      {
+        "hostRules": [
+          {
+            "matchHost": "europe-maven.pkg.dev",
+            "username": "_json_key_base64",
+            "encrypted": {
+              "password": "<encrypted base64 service account>"
+            }
+          }
+        ]
+      }
+      ```
+
+4. Add the following to the `packageRules` in your repository Renovate configuration file:
+
+   ```json
+   {
+     "matchManagers": ["maven", "gradle"],
+     "registryUrls": [
+       "https://europe-maven.pkg.dev/<my-gcp-project>/<my-repository>"
+     ]
+   }
+   ```

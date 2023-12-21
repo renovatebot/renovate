@@ -8,7 +8,7 @@ export class CacheFactory {
   static get(
     repository: string,
     repoFingerprint: string,
-    cacheType: RepositoryCacheType
+    cacheType: RepositoryCacheType,
   ): RepoCache {
     const type = cacheType.split('://')[0].trim().toLowerCase();
     switch (type) {
@@ -19,7 +19,7 @@ export class CacheFactory {
       default:
         logger.warn(
           { cacheType },
-          `Repository cache type not supported using type "local" instead`
+          `Repository cache type not supported using type "local" instead`,
         );
         return new RepoCacheLocal(repository, repoFingerprint);
     }

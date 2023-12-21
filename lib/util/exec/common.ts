@@ -25,7 +25,7 @@ function stringify(list: Buffer[]): string {
 
 function initStreamListeners(
   cp: ChildProcess,
-  opts: RawExecOptions & { maxBuffer: number }
+  opts: RawExecOptions & { maxBuffer: number },
 ): [Buffer[], Buffer[]] {
   const stdout: Buffer[] = [];
   const stderr: Buffer[] = [];
@@ -90,7 +90,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
           new ExecError(`Command failed: ${cmd}\nInterrupted by ${signal}`, {
             ...rejectInfo(),
             signal,
-          })
+          }),
         );
         return;
       }
@@ -99,7 +99,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
           new ExecError(`Command failed: ${cmd}\n${stringify(stderr)}`, {
             ...rejectInfo(),
             exitCode: code,
-          })
+          }),
         );
         return;
       }
@@ -147,5 +147,5 @@ function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
 
 export const rawExec: (
   cmd: string,
-  opts: RawExecOptions
+  opts: RawExecOptions,
 ) => Promise<ExecResult> = exec;

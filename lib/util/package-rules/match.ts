@@ -19,7 +19,7 @@ export function matchRegexOrMinimatch(pattern: string, input: string): boolean {
 
 export function anyMatchRegexOrMinimatch(
   patterns: string[] | undefined,
-  input: string | undefined
+  input: string | undefined,
 ): boolean | null {
   if (is.undefined(patterns)) {
     return null;

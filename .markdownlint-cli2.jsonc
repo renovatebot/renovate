@@ -1,6 +1,7 @@
 {
   // Disable some built-in rules
   "config": {
+    "no-emphasis-as-heading": false,
     "fenced-code-language": false,
     "first-line-heading": false,
     "line-length": false,

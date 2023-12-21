@@ -80,7 +80,7 @@ describe('modules/manager/gradle/utils', () => {
         'b.gradle',
         'a.gradle',
         'versions.gradle',
-      ])
+      ]),
     ).toStrictEqual([
       'versions.gradle',
       'a.gradle',
@@ -99,7 +99,7 @@ describe('modules/manager/gradle/utils', () => {
         'a/versions.gradle',
         'build.gradle',
         'a/b/c/versions.gradle',
-      ])
+      ]),
     ).toStrictEqual([
       'versions.gradle',
       'build.gradle',
@@ -118,7 +118,7 @@ describe('modules/manager/gradle/utils', () => {
     ]);
 
     expect(
-      reorderFiles(['b.gradle', 'c.gradle', 'a.gradle', 'gradle.properties'])
+      reorderFiles(['b.gradle', 'c.gradle', 'a.gradle', 'gradle.properties']),
     ).toStrictEqual(['gradle.properties', 'a.gradle', 'b.gradle', 'c.gradle']);
 
     expect(
@@ -134,7 +134,7 @@ describe('modules/manager/gradle/utils', () => {
         'b.gradle',
         'c.gradle',
         'a.gradle',
-      ])
+      ]),
     ).toStrictEqual([
       'gradle.properties',
       'a.gradle',

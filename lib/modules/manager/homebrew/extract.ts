@@ -57,7 +57,7 @@ function extractUrl(content: string): string | null {
 }
 
 export function parseUrlPath(
-  urlStr: string | null | undefined
+  urlStr: string | null | undefined,
 ): UrlPathParsedResult | null {
   if (!urlStr) {
     return null;
@@ -76,7 +76,7 @@ export function parseUrlPath(
       currentValue = s[3];
       const targz = currentValue.slice(
         currentValue.length - 7,
-        currentValue.length
+        currentValue.length,
       );
       if (targz === '.tar.gz') {
         currentValue = currentValue.substring(0, currentValue.length - 7);

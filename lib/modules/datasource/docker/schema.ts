@@ -88,7 +88,7 @@ export const OciImageIndexManifest = ManifestObject.extend({
         'application/vnd.oci.image.index.v1+json',
       ]),
       platform: OciPlatform,
-    })
+    }),
   ),
   annotations: z.record(z.string()).nullish(),
 });
@@ -113,15 +113,15 @@ export type DistributionManifest = z.infer<typeof DistributionManifest>;
  */
 export const DistributionListManifest = ManifestObject.extend({
   mediaType: z.literal(
-    'application/vnd.docker.distribution.manifest.list.v2+json'
+    'application/vnd.docker.distribution.manifest.list.v2+json',
   ),
   manifests: z.array(
     Descriptor.extend({
       mediaType: z.literal(
-        'application/vnd.docker.distribution.manifest.v2+json'
+        'application/vnd.docker.distribution.manifest.v2+json',
       ),
       platform: OciPlatform,
-    })
+    }),
   ),
 });
 
@@ -149,7 +149,7 @@ export const Manifest = ManifestObject.passthrough()
       DistributionListManifest,
       OciImageManifest,
       OciImageIndexManifest,
-    ])
+    ]),
   );
 
 export type Manifest = z.infer<typeof Manifest>;
@@ -182,7 +182,7 @@ export const DockerHubTagsPage = z
       onError: /* istanbul ignore next */ ({ error }) => {
         logger.debug(
           { error },
-          'Docker: Failed to parse some tags from Docker Hub'
+          'Docker: Failed to parse some tags from Docker Hub',
         );
       },
     }),

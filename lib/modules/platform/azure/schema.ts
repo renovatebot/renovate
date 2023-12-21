@@ -13,7 +13,7 @@ const WrappedException: z.ZodSchema<WrappedException> = z.lazy(() =>
     stackTrace: z.string().optional(),
     typeKey: z.string().optional(),
     typeName: z.string().optional(),
-  })
+  }),
 );
 
 export const WrappedExceptionSchema = Json.pipe(WrappedException);

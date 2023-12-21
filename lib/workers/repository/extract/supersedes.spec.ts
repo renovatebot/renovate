@@ -14,13 +14,21 @@ describe('workers/repository/extract/supersedes', () => {
         { manager: 'ansible' },
         {
           manager: 'bun',
-          packageFiles: [{ packageFile: 'package.json', deps: [] }],
+          packageFiles: [
+            { packageFile: 'package.json', deps: [] },
+            { packageFile: 'frontend/package.json', deps: [] },
+          ],
         },
         {
           manager: 'npm',
           packageFiles: [
             { packageFile: 'package.json', deps: [] },
             { packageFile: 'backend/package.json', deps: [] },
+            {
+              packageFile: 'frontend/package.json',
+              deps: [],
+              lockFiles: ['frontend/yarn.lock'],
+            },
           ],
         },
       ];
@@ -34,11 +42,22 @@ describe('workers/repository/extract/supersedes', () => {
               deps: [],
               packageFile: 'package.json',
             },
+            {
+              deps: [],
+              packageFile: 'frontend/package.json',
+            },
           ],
         },
         {
           manager: 'npm',
-          packageFiles: [{ deps: [], packageFile: 'backend/package.json' }],
+          packageFiles: [
+            { deps: [], packageFile: 'backend/package.json' },
+            {
+              deps: [],
+              lockFiles: ['frontend/yarn.lock'],
+              packageFile: 'frontend/package.json',
+            },
+          ],
         },
       ]);
     });

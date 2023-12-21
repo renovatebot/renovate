@@ -81,9 +81,7 @@ Use the "Dependency Dashboard approval" workflow to get updates for certain pack
 
 The basic idea is that you create a new `packageRules` entry and describe what kind of package, or type of updates you want to approve beforehand.
 
-Say you want to manually approve all major `npm` package manager updates:
-
-```json
+```json title="Manually approve all major npm package manager updates"
 {
   "packageRules": [
     {
@@ -95,9 +93,7 @@ Say you want to manually approve all major `npm` package manager updates:
 }
 ```
 
-Or say you want to manually approve all major Jest updates:
-
-```json
+```json title="Manually approve all major Jest updates"
 {
   "packageRules": [
     {

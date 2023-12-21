@@ -119,7 +119,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         '| [koa](https://github.com/koajs/koa) | dependencies | pin | [`^1.7.0` -> `1.7.0`](https://renovatebot.com/diffs/npm/koa/1.7.0/1.7.0) |\n' +
         '| [mocha](https://mochajs.org/) ([source](https://github.com/mochajs/mocha)) | devDependencies | pin | [`^6.2.3` -> `6.2.3`](https://renovatebot.com/diffs/npm/mocha/6.2.3/6.2.3) |\n' +
         '\n' +
-        '\n'
+        '\n',
     );
   });
 });

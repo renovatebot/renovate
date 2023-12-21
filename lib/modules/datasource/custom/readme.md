@@ -3,14 +3,14 @@ This `custom` datasource allows requesting version data from generic HTTP(S) end
 ## Usage
 
 The `customDatasources` option takes a record of `customDatasource` configs.
-This example shows how to update the `k3s.version` file with a custom datasource and a [regexManagers](../../manager/regex/index.md):
+This example shows how to update the `k3s.version` file with a custom datasource and a [regex](../../manager/regex/index.md) custom manager:
 
 Options:
 
 | option                     | default | description                                                                                                                                                              |
 | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | defaultRegistryUrlTemplate | ""      | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
-| format                     | "json"  | format used by the API. Available values are: `json`, `plain`                                                                                                            |
+| format                     | "json"  | format used by the API. Available values are: `json`, `plain`, `yaml`, `html`                                                                                            |
 | transformTemplates         | []      | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 Available template variables:
@@ -19,8 +19,9 @@ Available template variables:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["k3s.version"],
       "matchStrings": ["(?<currentValue>\\S+)"],
       "depNameTemplate": "k3s",
@@ -67,7 +68,8 @@ All available options:
       "releaseTimestamp": "2022-12-24T18:21Z",
       "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md#v0710",
       "sourceUrl": "https://github.com/demo-org/demo",
-      "sourceDirectory": "monorepo/folder"
+      "sourceDirectory": "monorepo/folder",
+      "digest": "c667f758f9e46e1d8111698e8d3a181c0b10f430"
     }
   ],
   "sourceUrl": "https://github.com/demo-org/demo",
@@ -117,6 +119,74 @@ When Renovate receives this response with the `plain` format, it will convert it
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
 
+#### Yaml
+
+If `yaml` is used, response is parsed and converted into JSON for further processing.
+
+Suppose the body of the HTTP response is as follows:
+
+```yaml
+releases:
+  - version: 1.0.0
+  - version: 2.0.0
+  - version: 3.0.0
+```
+
+When Renovate receives this response with the `yaml` format, it will convert it into the following:
+
+```json
+{
+  "releases": [
+    {
+      "version": "1.0.0"
+    },
+    {
+      "version": "2.0.0"
+    },
+    {
+      "version": "3.0.0"
+    }
+  ]
+}
+```
+
+After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
+
+#### HTML
+
+If the format is set to `html`, Renovate will call the HTTP endpoint with the `Accept` header value `text/html`.
+The body of the response will be treated as a HTML document, and all hyperlinks will be converted to versions.
+
+For the following HTML document:
+
+```html
+<html>
+  <body>
+    <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+    <a href="package-2.0.tar.gz">package-2.0.tar.gz</a>
+  </body>
+</html>
+```
+
+The following JSON will be generated:
+
+```json
+{
+  "releases": [
+    {
+      "version": "package-1.0.tar.gz"
+    },
+    {
+      "version": "package-1.0.tar.gz"
+    }
+  ]
+}
+```
+
+After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied to process the JSON data.
+
+To extract the version number, you may use [`extractVersion`](../../../configuration-options.md#extractversion) or JSONata rules.
+
 ## Examples
 
 ### K3s
@@ -142,8 +212,9 @@ You can use this configuration to request the newest versions of the Hashicorp p
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yml$"],
       "datasourceTemplate": "custom.hashicorp",
       "matchStrings": [
@@ -176,8 +247,9 @@ You can use the following configuration to upgrade the Grafana Dashboards versio
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yml$"],
       "matchStrings": [
         "#\\s+renovate:\\s+depName=\"(?<depName>.*)\"\\n\\s+gnetId:\\s+(?<packageName>.*?)\\n\\s+revision:\\s+(?<currentValue>.*)"
@@ -249,7 +321,7 @@ This example uses Nexus as the webserver.
 }
 ```
 
-This could be used to update Ansible YAML files with the latest version through a regex manager.
+This could be used to update Ansible YAML files with the latest version through a custom manager.
 For example, with the following Ansible content:
 
 ```yaml
@@ -257,18 +329,80 @@ For example, with the following Ansible content:
 something_version: '77'
 ```
 
-And the following regex manager:
+And the following custom manager:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yml$"],
       "datasourceTemplate": "custom.nexus_generic",
       "matchStrings": [
         "#\\s*renovate:\\s*(datasource=(?<datasource>.*?)\\s*)?depName=(?<depName>.*?)(\\s*versioning=(?<versioning>.*?))?\\s*\\w*:\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ]
+}
+```
+
+Or if you have the datasource locally, you can also define your local registry by prefixing it with `file://`:
+
+```json
+{
+  "customDatasources": {
+    "local_generic": {
+      "defaultRegistryUrlTemplate": "file://dependencies/{{packageName}}/versiontracker.json",
+      "transformTemplates": [
+        "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"sourceUrl\": $v.filelink } }) }"
+      ]
+    }
+  }
+}
+```
+
+Renovate will then parse your file from your current folder to access it.
+
+### nginx directory listing
+
+Sometimes all you have is a directory with files, and a HTTP server that can generate directory listings.
+
+Let's use nginx itself as an example:
+
+```json
+{
+  "customDatasources": {
+    "nginx": {
+      "defaultRegistryUrlTemplate": "https://nginx.org/download",
+      "format": "html"
+    }
+  },
+  "packageRules": [
+    {
+      "matchDatasources": ["custom.nginx"],
+      "extractVersion": "^nginx-(?<version>.+)\\.tar\\.gz$"
+    }
+  ]
+}
+```
+
+### HTML page
+
+You can use the `html` format to extract versions from a typical "Downloads" page:
+
+```json
+{
+  "customDatasources": {
+    "curl": {
+      "defaultRegistryUrlTemplate": "https://curl.se/download.html",
+      "format": "html"
+    }
+  },
+  "packageRules": [
+    {
+      "matchDatasources": ["custom.curl"],
+      "extractVersion": "/curl-(?<version>.+)\\.tar\\.gz$"
     }
   ]
 }

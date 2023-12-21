@@ -33,7 +33,7 @@
     "series": "edgy",
     "created": "2006-06-01",
     "release": "2006-10-26",
-    "eol": "2008-04-26"
+    "eol": "2008-04-25"
   },
   "v7.04": {
     "codename": "Feisty Fawn",
@@ -114,7 +114,7 @@
     "release": "2012-04-26",
     "eol": "2017-04-28",
     "eol_server": "2017-04-28",
-    "eol_esm": "2019-04-28"
+    "eol_esm": "2019-04-26"
   },
   "v12.10": {
     "codename": "Quantal Quetzal",
@@ -172,8 +172,8 @@
     "series": "xenial",
     "created": "2015-10-22",
     "release": "2016-04-21",
-    "eol": "2021-04-21",
-    "eol_server": "2021-04-21",
+    "eol": "2021-04-30",
+    "eol_server": "2021-04-30",
     "eol_esm": "2026-04-23"
   },
   "v16.10": {
@@ -286,5 +286,14 @@
     "created": "2023-04-20",
     "release": "2023-10-12",
     "eol": "2024-07-11"
+  },
+  "v24.04": {
+    "codename": "Noble Numbat",
+    "series": "noble",
+    "created": "2023-10-12",
+    "release": "2024-04-25",
+    "eol": "2029-05-31",
+    "eol_server": "2029-05-31",
+    "eol_esm": "2034-04-25"
   }
 }

@@ -17,7 +17,7 @@ export type AutomergeResult =
   | 'not ready';
 
 export async function tryBranchAutomerge(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<AutomergeResult> {
   logger.debug('Checking if we can automerge branch');
   if (!(config.automerge && config.automergeType === 'branch')) {
@@ -28,7 +28,7 @@ export async function tryBranchAutomerge(
   }
   const existingPr = await platform.getBranchPr(
     config.branchName!,
-    config.baseBranch
+    config.baseBranch,
   );
   if (existingPr) {
     return 'automerge aborted - PR exists';
@@ -36,7 +36,7 @@ export async function tryBranchAutomerge(
   const branchStatus = await resolveBranchStatus(
     config.branchName!,
     !!config.internalChecksAsSuccess,
-    config.ignoreTests
+    config.ignoreTests,
   );
   if (branchStatus === 'green') {
     logger.debug(`Automerging branch`);
@@ -59,7 +59,7 @@ export async function tryBranchAutomerge(
         err.message.includes('refusing to merge unrelated histories') ||
         err.message.includes('Not possible to fast-forward') ||
         err.message.includes(
-          'Updates were rejected because the tip of your current branch is behind'
+          'Updates were rejected because the tip of your current branch is behind',
         )
       ) {
         logger.debug({ err }, 'Branch automerge error');
@@ -70,20 +70,20 @@ export async function tryBranchAutomerge(
         if (err.message.includes('status check')) {
           logger.debug(
             { err },
-            'Branch is not ready for automerge: required status checks are remaining'
+            'Branch is not ready for automerge: required status checks are remaining',
           );
           return 'not ready';
         }
         if (err.stack?.includes('reviewers')) {
           logger.info(
             { err },
-            'Branch automerge is not possible due to branch protection (required reviewers)'
+            'Branch automerge is not possible due to branch protection (required reviewers)',
           );
           return 'failed';
         }
         logger.info(
           { err },
-          'Branch automerge is not possible due to branch protection'
+          'Branch automerge is not possible due to branch protection',
         );
         return 'failed';
       }

@@ -31,7 +31,7 @@ describe('config/presets/github/index', () => {
         'some/repo',
         'some-filename.json',
         githubApiHost,
-        undefined
+        undefined,
       );
       expect(res).toEqual({ from: 'api' });
     });
@@ -56,7 +56,7 @@ describe('config/presets/github/index', () => {
         .reply(200, { content: toBase64('invalid') });
 
       await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow(
-        PRESET_INVALID_JSON
+        PRESET_INVALID_JSON,
       );
     });
 
@@ -69,7 +69,7 @@ describe('config/presets/github/index', () => {
         });
 
       await expect(github.getPreset({ repo: 'some/repo' })).rejects.toThrow(
-        PRESET_INVALID_JSON
+        PRESET_INVALID_JSON,
       );
     });
 
@@ -133,7 +133,7 @@ describe('config/presets/github/index', () => {
         .get(`${basePath}/somefile.json`)
         .reply(200, {
           content: Buffer.from(
-            '{"somename":{"somesubname":{"foo":"bar"}}}'
+            '{"somename":{"somesubname":{"foo":"bar"}}}',
           ).toString('base64'),
         });
 
@@ -184,7 +184,7 @@ describe('config/presets/github/index', () => {
         github.getPreset({
           repo: 'some/repo',
           presetName: 'somefile/somename/somesubname',
-        })
+        }),
       ).rejects.toThrow(PRESET_NOT_FOUND);
     });
   });
@@ -198,7 +198,7 @@ describe('config/presets/github/index', () => {
           content: toBase64('{"from":"api"}'),
         });
       expect(
-        await github.getPresetFromEndpoint('some/repo', 'default', undefined)
+        await github.getPresetFromEndpoint('some/repo', 'default', undefined),
       ).toEqual({ from: 'api' });
     });
 
@@ -216,9 +216,9 @@ describe('config/presets/github/index', () => {
             'default',
             undefined,
             'https://api.github.example.org',
-            undefined
+            undefined,
           )
-          .catch(() => ({ from: 'api' }))
+          .catch(() => ({ from: 'api' })),
       ).toEqual({ from: 'api' });
     });
 
@@ -235,8 +235,8 @@ describe('config/presets/github/index', () => {
           'default',
           undefined,
           githubApiHost,
-          'someTag'
-        )
+          'someTag',
+        ),
       ).toEqual({ from: 'api' });
     });
 
@@ -254,9 +254,9 @@ describe('config/presets/github/index', () => {
             'default',
             undefined,
             'https://api.github.example.org',
-            'someTag'
+            'someTag',
           )
-          .catch(() => ({ from: 'api' }))
+          .catch(() => ({ from: 'api' })),
       ).toEqual({ from: 'api' });
     });
   });

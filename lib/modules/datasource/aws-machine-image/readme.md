@@ -51,15 +51,15 @@ Example:
 ```
 
 At the moment, this datasource has no "manager".
-You have to use the regex manager for this.
+You have to use the custom manager for this.
 
 **Usage Example**
 
-Here's an example of using the regex manager:
+Here's an example of using the custom manager:
 
 ```javascript
 module.exports = {
-  regexManagers: [
+  customManagers: [
     {
       customType: 'regex',
       fileMatch: ['.*'],
@@ -77,7 +77,7 @@ Or as JSON:
 
 ```yaml
 {
-  'regexManagers':
+  'customManagers':
     [
       {
         'customType': 'regex',

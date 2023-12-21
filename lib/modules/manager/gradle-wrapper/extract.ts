@@ -5,7 +5,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 import { extractGradleVersion } from './utils';
 
 export function extractPackageFile(
-  fileContent: string
+  fileContent: string,
 ): PackageFileContent | null {
   logger.trace('gradle-wrapper.extractPackageFile()');
   const extractResult = extractGradleVersion(fileContent);

@@ -47,7 +47,7 @@ describe('modules/manager/mix/artifacts', () => {
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -58,7 +58,7 @@ describe('modules/manager/mix/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -69,7 +69,7 @@ describe('modules/manager/mix/artifacts', () => {
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -83,7 +83,7 @@ describe('modules/manager/mix/artifacts', () => {
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -125,7 +125,7 @@ describe('modules/manager/mix/artifacts', () => {
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
@@ -150,7 +150,7 @@ describe('modules/manager/mix/artifacts', () => {
           ...config,
           constraints: { erlang: '26.0.0', elixir: '1.14.5' },
         },
-      })
+      }),
     ).toEqual([
       {
         file: { type: 'addition', path: 'mix.lock', contents: 'New mix.lock' },
@@ -224,7 +224,7 @@ describe('modules/manager/mix/artifacts', () => {
     const [, packageUpdateCommand] = execSnapshots;
     expect(packageUpdateCommand.cmd).toInclude(
       'mix hex.organization auth renovate_test --key valid_test_token && ' +
-        'mix deps.update private_package other_package'
+        'mix deps.update private_package other_package',
     );
   });
 
@@ -305,7 +305,7 @@ describe('modules/manager/mix/artifacts', () => {
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
     expect(fs.readLocalFile).toHaveBeenCalledWith('subdir/mix.lock', 'utf8');
   });
@@ -322,7 +322,7 @@ describe('modules/manager/mix/artifacts', () => {
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       { artifactError: { lockFile: 'mix.lock', stderr: 'not found' } },
     ]);
@@ -338,7 +338,7 @@ describe('modules/manager/mix/artifacts', () => {
         updatedDeps: [{ depName: 'plug' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       { artifactError: { lockFile: 'mix.lock', stderr: 'exec-error' } },
     ]);

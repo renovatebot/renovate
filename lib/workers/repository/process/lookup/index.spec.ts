@@ -11,6 +11,7 @@ import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags
 import { NpmDatasource } from '../../../../modules/datasource/npm';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist';
 import { PypiDatasource } from '../../../../modules/datasource/pypi';
+import { id as debianVersioningId } from '../../../../modules/versioning/debian';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { id as gitVersioningId } from '../../../../modules/versioning/git';
 import { id as nodeVersioningId } from '../../../../modules/versioning/node';
@@ -42,17 +43,17 @@ let config: LookupUpdateConfig;
 describe('workers/repository/process/lookup/index', () => {
   const getGithubReleases = jest.spyOn(
     GithubReleasesDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   const getGithubTags = jest.spyOn(
     GithubTagsDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   const getDockerReleases = jest.spyOn(
     DockerDatasource.prototype,
-    'getReleases'
+    'getReleases',
   );
 
   const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
@@ -80,6 +81,14 @@ describe('workers/repository/process/lookup/index', () => {
   });
 
   describe('.lookupUpdates()', () => {
+    it('returns null if invalid currentValue', async () => {
+      // @ts-expect-error: testing invalid currentValue
+      config.currentValue = 3;
+      expect((await lookup.lookupUpdates(config)).skipReason).toBe(
+        'invalid-value',
+      );
+    });
+
     it('returns null if unknown datasource', async () => {
       config.packageName = 'some-dep';
       config.datasource = 'does not exist';
@@ -252,7 +261,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       await expect(lookup.lookupUpdates(config)).rejects.toThrow(
-        Error(CONFIG_VALIDATION)
+        Error(CONFIG_VALIDATION),
       );
     });
 
@@ -376,7 +385,7 @@ describe('workers/repository/process/lookup/index', () => {
           .get('/q')
           .reply(200, qJson);
         expect(await lookup.lookupUpdates(config)).toMatchObject({ updates });
-      }
+      },
     );
 
     it.each`
@@ -397,7 +406,7 @@ describe('workers/repository/process/lookup/index', () => {
           .get('/q')
           .reply(200, qJson);
         expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
-      }
+      },
     );
 
     it('supports pinning for x-range-all (no lockfile)', async () => {
@@ -438,7 +447,7 @@ describe('workers/repository/process/lookup/index', () => {
           .get('/q')
           .reply(200, qJson);
         expect((await lookup.lookupUpdates(config)).updates).toEqual([]);
-      }
+      },
     );
 
     it('ignores pinning for ranges when other upgrade exists', async () => {
@@ -1219,7 +1228,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(0);
       expect(res.warnings).toHaveLength(1);
       expect(res.warnings[0].message).toBe(
-        "Can't find version with tag foo for npm package typescript"
+        "Can't find version with tag foo for npm package typescript",
       );
     });
 
@@ -1248,7 +1257,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.warnings).toHaveLength(1);
       expect(res.warnings[0]).toEqual({
         message:
-          'Could not determine new digest for update (datasource: github-tags)',
+          'Could not determine new digest for update (github-tags package angular/angular)',
         topic: 'angular/angular',
       });
     });
@@ -1292,7 +1301,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = GithubTagsDatasource.id;
 
       getGithubTags.mockRejectedValueOnce(
-        new Error('Not contained in registry')
+        new Error('Not contained in registry'),
       );
       getGithubTags.mockResolvedValueOnce({
         releases: [
@@ -1312,7 +1321,7 @@ describe('workers/repository/process/lookup/index', () => {
         expect.objectContaining({
           registryUrl: 'https://github.com',
         }),
-        'v1.0.0'
+        'v1.0.0',
       );
 
       expect(res.updates).toHaveLength(1);
@@ -1733,6 +1742,80 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         updates: [{ newValue: '9', updateType: 'major' }],
+      });
+    });
+
+    it('applies versionCompatibility for 18.10.0', async () => {
+      config.currentValue = '18.10.0-alpine';
+      config.currentDigest = 'aaa111';
+      config.packageName = 'node';
+      config.versioning = nodeVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)(?<compatibility>-.*)?$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '18.10.0' },
+          { version: '18.18.0' },
+          { version: '18.19.0-alpine' },
+          { version: '18.20.0' },
+        ],
+      });
+      getDockerDigest.mockResolvedValueOnce('bbb222');
+      getDockerDigest.mockResolvedValueOnce('ccc333');
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(2);
+      expect(res).toMatchObject({
+        updates: [
+          {
+            newValue: '18.19.0-alpine',
+            newDigest: 'bbb222',
+            updateType: 'minor',
+          },
+          {
+            newValue: '18.10.0-alpine',
+            newDigest: 'ccc333',
+            updateType: 'digest',
+          },
+        ],
+      });
+    });
+
+    it('handles versionCompatibility mismatch', async () => {
+      config.currentValue = '18.10.0-alpine';
+      config.packageName = 'node';
+      config.versioning = nodeVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)-slim$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '18.18.0' },
+          { version: '18.19.0-alpine' },
+          { version: '18.20.0' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        updates: [],
+      });
+    });
+
+    it('applies versionCompatibility for debian codenames with suffix', async () => {
+      config.currentValue = 'bullseye-slim';
+      config.packageName = 'debian';
+      config.versioning = debianVersioningId;
+      config.versionCompatibility = '^(?<version>[^-]+)(?<compatibility>-.*)?$';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          { version: 'bullseye' },
+          { version: 'bullseye-slim' },
+          { version: 'bookworm' },
+          { version: 'bookworm-slim' },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        updates: [{ newValue: 'bookworm-slim', updateType: 'major' }],
       });
     });
 
@@ -2187,7 +2270,7 @@ describe('workers/repository/process/lookup/index', () => {
       const defaultApiBaseUrl = 'https://developer.mend.io/';
       const getMergeConfidenceSpy = jest.spyOn(
         McApi,
-        'getMergeConfidenceLevel'
+        'getMergeConfidenceLevel',
       );
       const hostRule: HostRule = {
         hostType: 'merge-confidence',
@@ -2221,7 +2304,7 @@ describe('workers/repository/process/lookup/index', () => {
         httpMock
           .scope(defaultApiBaseUrl)
           .get(
-            `/api/mc/json/${datasource}/${packageName}/${currentValue}/${newVersion}`
+            `/api/mc/json/${datasource}/${packageName}/${currentValue}/${newVersion}`,
           )
           .reply(200, { confidence: 'high' });
 

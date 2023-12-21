@@ -1,9 +1,9 @@
-import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
 import deepmerge from 'deepmerge';
 import type { SkipReason } from '../../../../types';
 import { hasKey } from '../../../../util/object';
 import { escapeRegExp, regEx } from '../../../../util/regex';
+import { parse as parseToml } from '../../../../util/toml';
 import type { PackageDependency } from '../../types';
 import type {
   GradleCatalog,
@@ -18,12 +18,12 @@ import type {
 function findVersionIndex(
   content: string,
   depName: string,
-  version: string
+  version: string,
 ): number {
   const eDn = escapeRegExp(depName);
   const eVer = escapeRegExp(version);
   const re = regEx(
-    `(?:id\\s*=\\s*)?['"]?${eDn}["']?(?:(?:\\s*=\\s*)|:|,\\s*)(?:.*version(?:\\.ref)?(?:\\s*\\=\\s*))?["']?${eVer}['"]?`
+    `(?:id\\s*=\\s*)?['"]?${eDn}["']?(?:(?:\\s*=\\s*)|:|,\\s*)(?:.*version(?:\\.ref)?(?:\\s*\\=\\s*))?["']?${eVer}['"]?`,
   );
   const match = re.exec(content);
   if (match) {
@@ -37,20 +37,20 @@ function findVersionIndex(
 function findIndexAfter(
   content: string,
   sliceAfter: string,
-  find: string
+  find: string,
 ): number {
   const slicePoint = content.indexOf(sliceAfter) + sliceAfter.length;
   return slicePoint + content.slice(slicePoint).indexOf(find);
 }
 
 function isArtifactDescriptor(
-  obj: GradleCatalogArtifactDescriptor | GradleCatalogModuleDescriptor
+  obj: GradleCatalogArtifactDescriptor | GradleCatalogModuleDescriptor,
 ): obj is GradleCatalogArtifactDescriptor {
   return hasKey('group', obj);
 }
 
 function isVersionPointer(
-  obj: GradleVersionCatalogVersion | undefined
+  obj: GradleVersionCatalogVersion | undefined,
 ): obj is VersionPointer {
   return hasKey('ref', obj);
 }
@@ -61,7 +61,7 @@ function normalizeAlias(alias: string): string {
 
 function findOriginalAlias(
   versions: Record<string, GradleVersionPointerTarget>,
-  alias: string
+  alias: string,
 ): string {
   const normalizedAlias = normalizeAlias(alias);
   for (const sectionKey of Object.keys(versions)) {
@@ -244,9 +244,9 @@ function extractDependency({
 
 export function parseCatalog(
   packageFile: string,
-  content: string
+  content: string,
 ): PackageDependency<GradleManagerData>[] {
-  const tomlContent = parse(content) as GradleCatalog;
+  const tomlContent = parseToml(content) as GradleCatalog;
   const versions = tomlContent.versions ?? {};
   const libs = tomlContent.libraries ?? {};
   const libStartIndex = content.indexOf('libraries');

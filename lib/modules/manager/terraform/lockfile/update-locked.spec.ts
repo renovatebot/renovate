@@ -1,11 +1,35 @@
-import { Fixtures } from '../../../../../test/fixtures';
+import { codeBlock } from 'common-tags';
 import type { UpdateLockedConfig } from '../../types';
 import { updateLockedDependency } from './update-locked';
 import * as utilFns from './util';
 
 const lockFile = 'terraform.hcl';
 
-const lockFileContent = Fixtures.get('validLockfile.hcl');
+const lockFileContent = codeBlock`
+  provider "registry.terraform.io/hashicorp/aws" {
+    version     = "3.0.0"
+    constraints = "3.0.0"
+    hashes = [
+      "foo",
+    ]
+  }
+
+  provider "registry.terraform.io/hashicorp/azurerm" {
+    version     = "2.50.0"
+    constraints = "~> 2.50"
+    hashes = [
+      "bar",
+    ]
+  }
+
+  provider "registry.terraform.io/hashicorp/random" {
+    version     = "2.2.1"
+    constraints = "~> 2.2"
+    hashes = [
+      "baz",
+    ]
+  }
+`;
 
 describe('modules/manager/terraform/lockfile/update-locked', () => {
   it('detects already updated', () => {

@@ -88,7 +88,7 @@ const version3: DBEngineVersion = {
 };
 
 function mockDescribeVersionsCommand(
-  result: DescribeDBEngineVersionsCommandOutput
+  result: DescribeDBEngineVersionsCommandOutput,
 ): void {
   rdsMock.on(DescribeDBEngineVersionsCommand).resolves(result);
 }
