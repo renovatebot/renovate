@@ -18,7 +18,7 @@ describe('config/validation', () => {
     });
   });
 
-  describe('validateConfig(config) - repo config', () => {
+  describe('validateConfig(config)', () => {
     it('returns deprecation warnings', async () => {
       const config = {
         prTitle: 'something',
@@ -251,6 +251,7 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config as any,
+        false,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);

@@ -21,7 +21,7 @@ async function validate(
   config: RenovateConfig,
   strict: boolean,
   isGlobalConfig: boolean,
-  isPreset:boolean
+  isPreset: boolean,
 ): Promise<void> {
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
@@ -37,11 +37,7 @@ async function validate(
     }
   }
   const massagedConfig = massageConfig(migratedConfig);
-  const res = await validateConfig(
-    massagedConfig,
-    isGlobalConfig,
-    isPreset
-  );
+  const res = await validateConfig(massagedConfig, isGlobalConfig, isPreset);
   if (res.errors.length) {
     logger.error(
       { file: desc, errors: res.errors },
@@ -122,7 +118,7 @@ type PackageJson = {
           pkgJson.renovate,
           strict,
           false,
-          false
+          false,
         );
       }
       if (pkgJson['renovate-config']) {
@@ -132,8 +128,8 @@ type PackageJson = {
             'package.json > renovate-config',
             presetConfig,
             strict,
-            false, 
-            true
+            false,
+            true,
           );
         }
       }

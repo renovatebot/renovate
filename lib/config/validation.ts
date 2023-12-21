@@ -754,7 +754,7 @@ function validateGlobalConfig(
   val: unknown,
   type: string,
   errors: ValidationMessage[],
-  currentPath: string | undefined
+  currentPath: string | undefined,
 ): void {
   if (type === 'string') {
     if (!is.string(val)) {
@@ -768,7 +768,7 @@ function validateGlobalConfig(
       errors.push({
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-          val
+          val,
         )} (${typeof val})`,
       });
     }
@@ -777,7 +777,7 @@ function validateGlobalConfig(
       errors.push({
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be a boolean. Found: ${JSON.stringify(
-          val
+          val,
         )} (${typeof val})`,
       });
     }
