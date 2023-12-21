@@ -120,7 +120,10 @@ export async function getConfig(
         );
       }
       if (errors.length) {
-        logger.warn({ errors }, 'Config validation errors found in RENOVATE_CONFIG');
+        logger.warn(
+          { errors },
+          'Config validation errors found in RENOVATE_CONFIG',
+        );
       }
     } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');

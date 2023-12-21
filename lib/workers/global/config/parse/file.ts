@@ -94,10 +94,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
 
   const { warnings, errors } = await validateConfig(migratedConfig);
   if (warnings.length) {
-    logger.warn(
-      { configFile, warnings },
-      `Config validation warnings in file`,
-    );
+    logger.warn({ configFile, warnings }, `Config validation warnings in file`);
   }
   if (errors.length) {
     logger.warn({ configFile, errors }, `Config validation errors in file`);
