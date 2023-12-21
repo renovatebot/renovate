@@ -981,12 +981,8 @@ describe('config/validation', () => {
         binarySource: 'docker',
         gitUrl: false as never,
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
+      const { warnings } = await configValidation.validateConfig(config, true);
+      expect(warnings).toMatchObject([
         {
           message: 'Configuration option `gitUrl` should be a string',
           topic: 'Configuration Error',
@@ -999,12 +995,8 @@ describe('config/validation', () => {
         unicodeEmoji: false,
         detectGlobalManagerConfig: 'invalid-type' as never,
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
+      const { warnings } = await configValidation.validateConfig(config, true);
+      expect(warnings).toMatchObject([
         {
           message: `Configuration option \`detectGlobalManagerConfig\` should be a boolean. Found: ${JSON.stringify(
             'invalid-type',
@@ -1019,12 +1011,8 @@ describe('config/validation', () => {
         prCommitsPerRunLimit: 2,
         gitTimeout: 'invalid-type' as never,
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
+      const { warnings } = await configValidation.validateConfig(config, true);
+      expect(warnings).toMatchObject([
         {
           message: `Configuration option \`gitTimeout\` should be an integer. Found: ${JSON.stringify(
             'invalid-type',
@@ -1039,12 +1027,8 @@ describe('config/validation', () => {
         allowedPostUpgradeCommands: ['cmd'],
         checkedBranches: 'invalid-type' as never,
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
+      const { warnings } = await configValidation.validateConfig(config, true);
+      expect(warnings).toMatchObject([
         {
           message:
             'Configuration option `checkedBranches` should be a list (Array)',
@@ -1065,12 +1049,8 @@ describe('config/validation', () => {
           someField: false as never,
         },
       };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config,
-        true,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
+      const { warnings } = await configValidation.validateConfig(config, true);
+      expect(warnings).toMatchObject([
         {
           message: 'Configuration option `secrets` should be a JSON object',
           topic: 'Configuration Error',

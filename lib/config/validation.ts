@@ -148,7 +148,7 @@ export async function validateConfig(
     }
     if (optionGlobals.has(key)) {
       if (isGlobalConfig) {
-        validateGlobalConfig(key, val, optionTypes[key], errors, currentPath);
+        validateGlobalConfig(key, val, optionTypes[key], warnings, currentPath);
         continue;
       }
     }
@@ -753,19 +753,19 @@ function validateGlobalConfig(
   key: string,
   val: unknown,
   type: string,
-  errors: ValidationMessage[],
+  warnings: ValidationMessage[],
   currentPath: string | undefined,
 ): void {
   if (type === 'string') {
     if (!is.string(val)) {
-      errors.push({
+      warnings.push({
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be a string`,
       });
     }
   } else if (type === 'integer') {
     if (!is.number(val)) {
-      errors.push({
+      warnings.push({
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
           val,
@@ -774,7 +774,7 @@ function validateGlobalConfig(
     }
   } else if (type === 'boolean') {
     if (val !== true && val !== false) {
-      errors.push({
+      warnings.push({
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be a boolean. Found: ${JSON.stringify(
           val,
@@ -783,7 +783,7 @@ function validateGlobalConfig(
     }
   } else if (type === 'array') {
     if (!is.array(val)) {
-      errors.push({
+      warnings.push({
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be a list (Array)`,
       });
@@ -792,13 +792,13 @@ function validateGlobalConfig(
     if (is.plainObject(val)) {
       const res = validatePlainObject(val);
       if (res !== true) {
-        errors.push({
+        warnings.push({
           topic: 'Configuration Error',
           message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
         });
       }
     } else {
-      errors.push({
+      warnings.push({
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be a JSON object`,
       });
