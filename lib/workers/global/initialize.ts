@@ -64,6 +64,14 @@ function setGlobalHostRules(config: RenovateConfig): void {
   }
 }
 
+function configureThirdPartyLibraries(config: AllConfig): void {
+  if (!config.useCloudMetadataServices) {
+    logger.debug('Disabling the use of cloud metadata services');
+    process.env.AWS_EC2_METADATA_DISABLED = 'true'; // See https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html#envvars-list
+    process.env.METADATA_SERVER_DETECTION = 'none'; // See https://cloud.google.com/nodejs/docs/reference/gcp-metadata/latest#environment-variables
+  }
+}
+
 export async function globalInitialize(
   config_: AllConfig,
 ): Promise<RenovateConfig> {
@@ -76,6 +84,7 @@ export async function globalInitialize(
   limitCommitsPerRun(config);
   setEmojiConfig(config);
   setGlobalHostRules(config);
+  configureThirdPartyLibraries(config);
   await initMergeConfidence();
   return config;
 }
