@@ -1781,6 +1781,8 @@ Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#ht
 
 You can provide `headers` object that includes fields to be forwarded to the HTTP request headers. By default, all headers starting with "X-" are allowed, a bot administrator may configure an override for [allowedHeaders](self-hosted-configuration.md#allowedHeaders) to configure more permitted headers.
 
+Any `headers` value configured in bot admin `hostRules` (e.g. `config.js`) won't be validated so can contain any desired header regardless of `allowedHeaders`.
+
 Example:
 
 ```json
