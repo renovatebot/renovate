@@ -8,7 +8,7 @@ let client: ReturnType<typeof createClient> | undefined;
 let rprefix: string | undefined;
 
 function getKey(namespace: string, key: string): string {
-  return `${rprefix}:${namespace}-${key}`;
+  return `${rprefix}${namespace}-${key}`;
 }
 
 export async function end(): Promise<void> {
