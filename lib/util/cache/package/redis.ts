@@ -88,7 +88,7 @@ export async function init(
   if (!url) {
     return;
   }
-  rprefix = prefix;
+  rprefix = prefix ?? '';
   logger.debug('Redis cache init');
   client = createClient({
     url,
