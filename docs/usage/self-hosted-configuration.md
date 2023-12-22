@@ -786,7 +786,8 @@ Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
 ## redisPrefix
 
-If this value is set then Renovate will add this string to the name of all Redis cache entries used in Renovate. It's only used if `redisUrl` is configured.
+If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
+It's only used if `redisUrl` is configured.
 
 ## repositories
 
