@@ -771,6 +771,11 @@ Used as an alternative to `privateKeyOld`, if you want the key to be read from d
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
+## redisPrefix
+
+If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
+It's only used if `redisUrl` is configured.
+
 ## redisUrl
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
@@ -783,11 +788,6 @@ Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 For TLS/SSL-enabled connections, use rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
-
-## redisPrefix
-
-If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
-It's only used if `redisUrl` is configured.
 
 ## repositories
 
