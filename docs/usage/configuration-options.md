@@ -1779,7 +1779,7 @@ Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#ht
 
 ### headers
 
-You can provide `headers` object that includes fields to be forwarded to the HTTP request headers. By default, all headers starting with "X-" are allowed, see [allowedHeaders](self-hosted-configuration.md#allowedHeaders) to configure more permitted headers.
+You can provide `headers` object that includes fields to be forwarded to the HTTP request headers. By default, all headers starting with "X-" are allowed, a bot administrator may configure an override for [allowedHeaders](self-hosted-configuration.md#allowedHeaders) to configure more permitted headers.
 
 Example:
 
@@ -1789,7 +1789,7 @@ Example:
     {
       "matchHost": "https://domain.com/all-versions",
       "headers": {
-        "custom-header": "secret"
+        "X-custom-header": "secret"
       }
     }
   ]

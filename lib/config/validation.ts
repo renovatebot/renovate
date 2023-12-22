@@ -649,17 +649,17 @@ export async function validateConfig(
 
     if (key === 'hostRules' && is.array(val)) {
       const allowedHeaders = GlobalConfig.get('allowedHeaders');
-      (val as HostRule[]).forEach((rule) => {
+      for (const rule of val as HostRule[]) {
         const headers = rule.headers ?? {};
         for (const [header] of Object.entries(headers)) {
           if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
             errors.push({
               topic: 'Configuration Error',
-              message: `Configuration option \`hostRules.headers\` cannot contain unallowed headers \`${header}\` - use \`allowedHeaders\` to permit specific headers or remove it.`,
+              message: `hostRules header \`${header}\` is not permitted by this bot's \`allowedHeaders\`.`,
             });
           }
         }
-      });
+      }
     }
   }
 

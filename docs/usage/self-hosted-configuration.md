@@ -86,20 +86,12 @@ Examples:
 }
 ```
 
-or with custom `allowedHeaders`
+or with custom `allowedHeaders`:
 
-```json
-{
-  "allowedHeaders": ["custom-header"],
-  "hostRules": [
-    {
-      "matchHost": "https://domain.com/all-versions",
-      "headers": {
-        "custom-header": "secret"
-      }
-    }
-  ]
-}
+```js title="config.js"
+module.exports = {
+  allowedHeaders: ['custom-header'],
+};
 ```
 
 ## allowedPostUpgradeCommands
