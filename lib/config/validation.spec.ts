@@ -1,3 +1,4 @@
+import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
@@ -892,6 +893,33 @@ describe('config/validation', () => {
         {
           message:
             'Invalid schedule: `Invalid schedule: "30 5 * * *" has cron syntax, but doesn\'t have * as minutes`',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('errors if unallowed headers in hostRules', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'https://domain.com/all-versions',
+            headers: {
+              'X-Auth-Token': 'token',
+              unallowedHeader: 'token',
+            },
+          },
+        ],
+      };
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchObject([
+        {
+          message:
+            "hostRules header `unallowedHeader` is not permitted by this bot's `allowedHeaders`.",
           topic: 'Configuration Error',
         },
       ]);
