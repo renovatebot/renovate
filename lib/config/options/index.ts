@@ -339,7 +339,6 @@ const options: RenovateOptions[] = [
     description: 'Key prefix for redis cache entries.',
     stage: 'global',
     type: 'string',
-    default: '',
     globalOnly: true,
   },
   {
