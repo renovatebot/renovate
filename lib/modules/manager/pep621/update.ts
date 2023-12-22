@@ -16,7 +16,7 @@ export function bumpPackageVersion(
 
   let bumpedContent = content;
   try {
-    const newProjectVersion = inc(currentValue); // bumpVersion
+    const newProjectVersion = inc(currentValue, bumpVersion);
     if (!newProjectVersion) {
       throw new Error('pep440 inc failed');
     }

@@ -120,8 +120,6 @@ export async function validateConfig(
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
-  // console.log('config11', parentPath, config);
-
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
     // istanbul ignore if
