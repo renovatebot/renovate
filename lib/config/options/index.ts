@@ -2376,6 +2376,16 @@ const options: RenovateOptions[] = [
     advancedUse: true,
   },
   {
+    name: 'headers',
+    description:
+      'An object that includes fields to be forwarded to the HTTP request headers if they are permitted by allowedHeaders.',
+    type: 'object',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
     name: 'artifactAuth',
     description:
       'A list of package managers to enable artifact auth. Only managers on the list are enabled. All are enabled if `null`.',

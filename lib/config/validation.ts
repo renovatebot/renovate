@@ -6,12 +6,15 @@ import type {
   RegexManagerTemplates,
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
+import type { HostRule } from '../types/host-rules';
+import { anyMatchRegexOrMinimatch } from '../util/package-rules/match';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
   hasValidSchedule,
   hasValidTimezone,
 } from '../workers/repository/update/branch/schedule';
+import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
@@ -34,6 +37,7 @@ const topLevelObjects = managerList;
 
 const ignoredNodes = [
   '$schema',
+  'headers',
   'depType',
   'npmToken',
   'packageFile',
@@ -115,6 +119,8 @@ export async function validateConfig(
   }
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
+
+  // console.log('config11', parentPath, config);
 
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
@@ -641,6 +647,21 @@ export async function validateConfig(
           }
         }
       }
+    }
+
+    if (key === 'hostRules' && is.array(val)) {
+      const allowedHeaders = GlobalConfig.get('allowedHeaders');
+      (val as HostRule[]).forEach((rule) => {
+        const headers = rule.headers ?? {};
+        for (const [header] of Object.entries(headers)) {
+          if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `Configuration option \`hostRules.headers\` cannot contain unallowed headers \`${header}\` - use \`allowedHeaders\` to permit specific headers or remove it.`,
+            });
+          }
+        }
+      });
     }
   }
 
