@@ -336,7 +336,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'redisPrefix',
-    description: 'If set, this will be the prefix used in all cache entries.',
+    description: 'Key prefix for redis cache entries.',
     stage: 'global',
     type: 'string',
     default: '',
