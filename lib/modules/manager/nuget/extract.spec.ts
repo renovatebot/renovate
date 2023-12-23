@@ -75,7 +75,7 @@ describe('modules/manager/nuget/extract', () => {
           {
             depName: 'mcr.microsoft.com/dotnet/runtime',
             depType: 'docker',
-            datasource: 'nuget',
+            datasource: 'docker',
             currentValue: '7.0.10',
           },
         ],
@@ -91,7 +91,7 @@ describe('modules/manager/nuget/extract', () => {
           {
             depName: 'mcr.microsoft.com/dotnet/runtime',
             depType: 'docker',
-            datasource: 'nuget',
+            datasource: 'docker',
             currentValue: '7.0.10',
             currentDigest:
               'sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19',

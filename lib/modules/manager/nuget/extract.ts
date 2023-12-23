@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
+import { DockerDatasource } from '../../datasource/docker';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
@@ -52,7 +53,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
 
       if (is.nonEmptyStringAndNotWhitespace(dep.depName)) {
         results.push({
-          datasource: NugetDatasource.id,
+          datasource: DockerDatasource.id,
           depType: 'docker',
           depName: dep.depName,
           currentValue: dep.currentValue,
