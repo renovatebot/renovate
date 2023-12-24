@@ -76,7 +76,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(false, file, parsedContent, strict);
+          await validate(true, file, parsedContent, strict);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -117,7 +117,7 @@ type PackageJson = {
           false,
           'package.json > renovate',
           pkgJson.renovate,
-          strict
+          strict,
         );
       }
       if (pkgJson['renovate-config']) {
@@ -128,7 +128,7 @@ type PackageJson = {
             'package.json > renovate-config',
             presetConfig,
             strict,
-            true
+            true,
           );
         }
       }
