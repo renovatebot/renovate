@@ -28,7 +28,8 @@ Merge Confidence badges for pull requests are available on any supported platfor
 Renovate will show Merge Confidence badges for these languages:
 
 | Language   | Datasource  |
-| ---------- | ----------- |
+|------------|-------------|
+| Golang     | `go`        |
 | JavaScript | `npm`       |
 | Java       | `maven`     |
 | Python     | `pypi`      |
