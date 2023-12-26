@@ -1030,7 +1030,7 @@ describe('modules/platform/azure/index', () => {
         ${'rebase'}
         ${'squash'}
       `(
-        'should not call getMergeMethod if automergeStrategy is $automergeStrategy',
+        'should not call getMergeMethod when automergeStrategy is $automergeStrategy',
         async (automergeStrategy) => {
           await initRepo({ repository: 'some/repo' });
           const prResult = {
