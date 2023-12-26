@@ -54,7 +54,7 @@ export async function createOnboardingBranch(
         contents,
       },
     ],
-    message: commitMessage.toString(),
+    message: commitMessage,
     platformCommit: !!config.platformCommit,
     force: true,
   });

@@ -34,7 +34,7 @@ describe('workers/repository/onboarding/branch/create', () => {
       });
     });
 
-    it('applies the supplied commit message', async () => {
+    it('applies supplied commit message', async () => {
       const message =
         'We can Renovate if we want to, we can leave PRs in decline';
 
