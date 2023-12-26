@@ -42,7 +42,7 @@ export function parseSupportedDatasourceString(
     supportedDatasourceRawString;
 
   if (!is.string(supportedDatasourceString)) {
-    return;
+    return undefined;
   }
 
   let parsedDatasourceList: string[] | undefined;
@@ -60,7 +60,7 @@ export function parseSupportedDatasourceString(
       { parsedDatasourceList },
       `Expected a string array but got ${typeof parsedDatasourceList}`,
     );
-    return;
+    return undefined;
   }
 
   return parsedDatasourceList;
