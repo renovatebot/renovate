@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
+import * as template from '../../../../util/template';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -25,7 +26,16 @@ export async function createOnboardingBranch(
     config,
     configFile!,
   );
-  const commitMessage = commitMessageFactory.create();
+  let commitMessage = commitMessageFactory.create().toString();
+
+  if (config.commitBody) {
+    commitMessage = `${commitMessage}\n\n${template.compile(
+      config.commitBody,
+      config,
+    )}`;
+
+    logger.trace(`commitMessage: ` + JSON.stringify(commitMessage));
+  }
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
