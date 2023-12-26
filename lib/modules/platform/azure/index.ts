@@ -756,13 +756,17 @@ export async function setBranchStatus({
 export async function mergePr({
   branchName,
   id: pullRequestId,
+  strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${pullRequestId}, ${branchName!})`);
   const azureApiGit = await azureApi.gitApi();
 
   let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
 
-  const mergeStrategy = await getMergeStrategy(pr.targetRefName!);
+  const mergeStrategy =
+    strategy === 'auto'
+      ? await getMergeStrategy(pr.targetRefName!)
+      : mapMergeStrategy(strategy);
   const objToUpdate: GitPullRequest = {
     status: PullRequestStatus.Completed,
     lastMergeSourceCommit: pr.lastMergeSourceCommit,

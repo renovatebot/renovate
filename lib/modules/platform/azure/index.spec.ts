@@ -1083,7 +1083,7 @@ describe('modules/platform/azure/index', () => {
         ${'rebase'}       | ${GitPullRequestMergeStrategy.Rebase}
         ${'squash'}       | ${GitPullRequestMergeStrategy.Squash}
       `(
-        'should create PR with automergeStrategy $automergeStrategy',
+        'should create PR with mergeStrategy $prMergeStrategy',
         async ({ automergeStrategy, prMergeStrategy }) => {
           await initRepo({ repository: 'some/repo' });
           const prResult = {
@@ -1644,6 +1644,7 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.mergePr({
         branchName: branchNameMock,
         id: pullRequestIdMock,
+        strategy: 'auto',
       });
 
       expect(updatePullRequestMock).toHaveBeenCalledWith(
@@ -1661,6 +1662,59 @@ describe('modules/platform/azure/index', () => {
       );
       expect(res).toBeTrue();
     });
+
+    it.each`
+      automergeStrategy | prMergeStrategy
+      ${'fast-forward'} | ${GitPullRequestMergeStrategy.Rebase}
+      ${'merge-commit'} | ${GitPullRequestMergeStrategy.NoFastForward}
+      ${'rebase'}       | ${GitPullRequestMergeStrategy.Rebase}
+      ${'squash'}       | ${GitPullRequestMergeStrategy.Squash}
+    `(
+      'should complete PR with mergeStrategy $prMergeStrategy',
+      async ({ automergeStrategy, prMergeStrategy }) => {
+        await initRepo({ repository: 'some/repo' });
+        const pullRequestIdMock = 12345;
+        const branchNameMock = 'test';
+        const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+        const updatePullRequestMock = jest.fn(() => ({
+          status: 3,
+        }));
+        azureApi.gitApi.mockImplementationOnce(
+          () =>
+            ({
+              getPullRequestById: jest.fn(() => ({
+                lastMergeSourceCommit: lastMergeSourceCommitMock,
+                targetRefName: 'refs/heads/ding',
+                title: 'title',
+              })),
+              updatePullRequest: updatePullRequestMock,
+            }) as any,
+        );
+
+        azureHelper.getMergeMethod = jest.fn().mockReturnValue(prMergeStrategy);
+
+        const res = await azure.mergePr({
+          branchName: branchNameMock,
+          id: pullRequestIdMock,
+          strategy: automergeStrategy,
+        });
+
+        expect(updatePullRequestMock).toHaveBeenCalledWith(
+          {
+            status: PullRequestStatus.Completed,
+            lastMergeSourceCommit: lastMergeSourceCommitMock,
+            completionOptions: {
+              mergeStrategy: prMergeStrategy,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'title',
+            },
+          },
+          '1',
+          pullRequestIdMock,
+        );
+        expect(res).toBeTrue();
+      },
+    );
 
     it('should return false if the PR does not update successfully', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -1709,10 +1763,12 @@ describe('modules/platform/azure/index', () => {
       await azure.mergePr({
         branchName: 'test-branch-1',
         id: 1234,
+        strategy: 'auto',
       });
       await azure.mergePr({
         branchName: 'test-branch-2',
         id: 5678,
+        strategy: 'auto',
       });
 
       expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
