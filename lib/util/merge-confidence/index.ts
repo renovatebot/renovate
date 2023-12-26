@@ -25,21 +25,17 @@ export const confidenceLevels: Record<MergeConfidence, number> = {
 export function initConfig(): void {
   apiBaseUrl = getApiBaseUrl();
   token = getApiToken();
-  supportedDatasources = parseSupportedDatasourceString() ?? [
-    ...presetSupportedDatasources,
-  ];
+  supportedDatasources =
+    parseSupportedDatasourceString() ?? presetSupportedDatasources;
 
   if (!is.nullOrUndefined(token)) {
     logger.debug(`Merge confidence token found for ${apiBaseUrl}`);
   }
 }
 
-export function parseSupportedDatasourceString(
-  supportedDatasourceRawString?: string,
-): string[] | undefined {
+export function parseSupportedDatasourceString(): string[] | undefined {
   const supportedDatasourceString =
-    process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES ??
-    supportedDatasourceRawString;
+    process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES;
 
   if (!is.string(supportedDatasourceString)) {
     return undefined;
@@ -202,8 +198,6 @@ async function queryApi(
 
 /**
  * Checks the health of the Merge Confidence API by attempting to authenticate with it.
- *
- * @param supportedDatasourcesString an optional JSON string array consisting of supported datasources
  *
  * @returns Resolves when the API health check is completed successfully.
  *

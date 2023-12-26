@@ -406,11 +406,21 @@ describe('util/merge-confidence/index', () => {
       });
 
       describe('parseSupportedDatasourceList()', () => {
+        let envOrg: NodeJS.ProcessEnv;
+
         type ParseSupportedDatasourceTestCase = {
           name: string;
           datasourceListString: string | undefined;
           expected: string[] | undefined;
         };
+
+        beforeEach(() => {
+          envOrg = process.env;
+        });
+
+        afterEach(() => {
+          process.env = envOrg;
+        });
 
         it.each([
           {
@@ -444,9 +454,10 @@ describe('util/merge-confidence/index', () => {
             datasourceListString,
             expected,
           }: ParseSupportedDatasourceTestCase) => {
-            expect(
-              parseSupportedDatasourceString(datasourceListString),
-            ).toStrictEqual(expected);
+            process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES =
+              datasourceListString;
+
+            expect(parseSupportedDatasourceString()).toStrictEqual(expected);
           },
         );
       });
