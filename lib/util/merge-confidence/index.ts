@@ -37,7 +37,7 @@ export function parseSupportedDatasourceString(
     .RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES,
 ): string[] | undefined {
   if (!is.string(supportedDatasourceString)) {
-    return;
+    return undefined;
   }
 
   let parsedDatasourceList: string[] | undefined;
@@ -55,7 +55,7 @@ export function parseSupportedDatasourceString(
       { parsedDatasourceList },
       `Expected a string array but got ${typeof parsedDatasourceList}`,
     );
-    return;
+    return undefined;
   }
 
   return parsedDatasourceList;
