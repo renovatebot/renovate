@@ -1023,97 +1023,115 @@ describe('modules/platform/azure/index', () => {
         expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
       });
 
-      it('should not call getMergeMethod if automergeStrategy is not auto', async () => {
-        await initRepo({ repository: 'some/repo' });
-        const prResult = {
-          pullRequestId: 123,
-          title: 'The Title',
-          createdBy: {
-            id: '123',
-          },
-        };
-        const prUpdateResults = {
-          ...prResult,
-          autoCompleteSetBy: {
-            id: prResult.createdBy.id,
-          },
-          completionOptions: {
-            squashMerge: true,
-            deleteSourceBranch: true,
-            mergeCommitMessage: 'The Title',
-          },
-        };
-        const updateFn = jest.fn(() => Promise.resolve(prUpdateResults));
+      it.each`
+        automergeStrategy
+        ${'fast-forward'}
+        ${'merge-commit'}
+        ${'rebase'}
+        ${'squash'}
+      `(
+        'should not call getMergeMethod if automergeStrategy is $automergeStrategy',
+        async (automergeStrategy) => {
+          await initRepo({ repository: 'some/repo' });
+          const prResult = {
+            pullRequestId: 123,
+            title: 'The Title',
+            createdBy: {
+              id: '123',
+            },
+          };
+          const prUpdateResults = {
+            ...prResult,
+            autoCompleteSetBy: {
+              id: prResult.createdBy.id,
+            },
+            completionOptions: {
+              squashMerge: true,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'The Title',
+            },
+          };
+          const updateFn = jest.fn(() => Promise.resolve(prUpdateResults));
 
-        azureApi.gitApi.mockResolvedValue(
-          partial<IGitApi>({
-            createPullRequest: jest.fn(() => Promise.resolve(prResult)),
-            createPullRequestLabel: jest.fn().mockResolvedValue({}),
-            updatePullRequest: updateFn,
-          }),
-        );
-        await azure.createPr({
-          sourceBranch: 'some-branch',
-          targetBranch: 'dev',
-          prTitle: 'The Title',
-          prBody: 'Hello world',
-          labels: ['deps', 'renovate'],
-          platformOptions: {
-            automergeStrategy: 'squash',
-            usePlatformAutomerge: true,
-          },
-        });
+          azureApi.gitApi.mockResolvedValue(
+            partial<IGitApi>({
+              createPullRequest: jest.fn(() => Promise.resolve(prResult)),
+              createPullRequestLabel: jest.fn().mockResolvedValue({}),
+              updatePullRequest: updateFn,
+            }),
+          );
+          await azure.createPr({
+            sourceBranch: 'some-branch',
+            targetBranch: 'dev',
+            prTitle: 'The Title',
+            prBody: 'Hello world',
+            labels: ['deps', 'renovate'],
+            platformOptions: {
+              automergeStrategy,
+              usePlatformAutomerge: true,
+            },
+          });
 
-        expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(0);
-      });
+          expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(0);
+        },
+      );
 
-      it('should create PR with the chosen automergeStrategy', async () => {
-        await initRepo({ repository: 'some/repo' });
-        const prResult = {
-          pullRequestId: 456,
-          title: 'The Title',
-          createdBy: {
-            id: '123',
-          },
-        };
-        const prUpdateResult = {
-          ...prResult,
-          autoCompleteSetBy: {
-            id: prResult.createdBy.id,
-          },
-          completionOptions: {
-            mergeStrategy: GitPullRequestMergeStrategy.Rebase,
-            squashMerge: false,
-            deleteSourceBranch: true,
-            mergeCommitMessage: 'The Title',
-          },
-        };
-        const updateFn = jest.fn().mockResolvedValue(prUpdateResult);
-        azureApi.gitApi.mockResolvedValueOnce(
-          partial<IGitApi>({
-            createPullRequest: jest.fn().mockResolvedValue(prResult),
-            createPullRequestLabel: jest.fn().mockResolvedValue({}),
-            updatePullRequest: updateFn,
-          }),
-        );
-        const pr = await azure.createPr({
-          sourceBranch: 'some-branch',
-          targetBranch: 'dev',
-          prTitle: 'The Title',
-          prBody: 'Hello world',
-          labels: ['deps', 'renovate'],
-          platformOptions: {
-            automergeStrategy: 'rebase',
-            usePlatformAutomerge: true,
-          },
-        });
-        expect(pr).toMatchSnapshot();
-        expect(updateFn).toHaveBeenCalled();
-        expect(updateFn.mock.calls[0][0].completionOptions.mergeStrategy).toBe(
-          GitPullRequestMergeStrategy.Rebase,
-        );
-        expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(0);
-      });
+      it.each`
+        automergeStrategy | prMergeStrategy
+        ${'fast-forward'} | ${GitPullRequestMergeStrategy.Rebase}
+        ${'merge-commit'} | ${GitPullRequestMergeStrategy.NoFastForward}
+        ${'rebase'}       | ${GitPullRequestMergeStrategy.Rebase}
+        ${'squash'}       | ${GitPullRequestMergeStrategy.Squash}
+      `(
+        'should create PR with automergeStrategy $automergeStrategy',
+        async ({ automergeStrategy, prMergeStrategy }) => {
+          await initRepo({ repository: 'some/repo' });
+          const prResult = {
+            pullRequestId: 456,
+            title: 'The Title',
+            createdBy: {
+              id: '123',
+            },
+          };
+          const prUpdateResult = {
+            ...prResult,
+            autoCompleteSetBy: {
+              id: prResult.createdBy.id,
+            },
+            completionOptions: {
+              mergeStrategy: prMergeStrategy,
+              squashMerge: false,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'The Title',
+            },
+          };
+          const updateFn = jest.fn().mockResolvedValue(prUpdateResult);
+          azureApi.gitApi.mockResolvedValueOnce(
+            partial<IGitApi>({
+              createPullRequest: jest.fn().mockResolvedValue(prResult),
+              createPullRequestLabel: jest.fn().mockResolvedValue({}),
+              updatePullRequest: updateFn,
+            }),
+          );
+          const pr = await azure.createPr({
+            sourceBranch: 'some-branch',
+            targetBranch: 'dev',
+            prTitle: 'The Title',
+            prBody: 'Hello world',
+            labels: ['deps', 'renovate'],
+            platformOptions: {
+              automergeStrategy,
+              usePlatformAutomerge: true,
+            },
+          });
+          expect(pr).toMatchSnapshot();
+          expect(updateFn).toHaveBeenCalled();
+          expect(
+            updateFn.mock.calls[0][0].completionOptions.mergeStrategy,
+          ).toBe(prMergeStrategy);
+          expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(0);
+        },
+      );
     });
 
     it('should create and return an approved PR object', async () => {

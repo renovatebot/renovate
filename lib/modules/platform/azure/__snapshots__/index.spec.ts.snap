@@ -49,7 +49,7 @@ exports[`modules/platform/azure/index createPr() should create and return an app
 }
 `;
 
-exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create and return a PR object with auto-complete set 1`] = `
+exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create PR with automergeStrategy fast-forward 1`] = `
 {
   "autoCompleteSetBy": {
     "id": "123",
@@ -60,7 +60,8 @@ exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is se
   "completionOptions": {
     "deleteSourceBranch": true,
     "mergeCommitMessage": "The Title",
-    "squashMerge": true,
+    "mergeStrategy": 3,
+    "squashMerge": false,
   },
   "createdAt": undefined,
   "createdBy": {
@@ -76,7 +77,35 @@ exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is se
 }
 `;
 
-exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create PR with the chosen automergeStrategy 1`] = `
+exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create PR with automergeStrategy merge-commit 1`] = `
+{
+  "autoCompleteSetBy": {
+    "id": "123",
+  },
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "completionOptions": {
+    "deleteSourceBranch": true,
+    "mergeCommitMessage": "The Title",
+    "mergeStrategy": 1,
+    "squashMerge": false,
+  },
+  "createdAt": undefined,
+  "createdBy": {
+    "id": "123",
+  },
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+  "title": "The Title",
+}
+`;
+
+exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create PR with automergeStrategy rebase 1`] = `
 {
   "autoCompleteSetBy": {
     "id": "123",
@@ -89,6 +118,61 @@ exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is se
     "mergeCommitMessage": "The Title",
     "mergeStrategy": 3,
     "squashMerge": false,
+  },
+  "createdAt": undefined,
+  "createdBy": {
+    "id": "123",
+  },
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+  "title": "The Title",
+}
+`;
+
+exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create PR with automergeStrategy squash 1`] = `
+{
+  "autoCompleteSetBy": {
+    "id": "123",
+  },
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "completionOptions": {
+    "deleteSourceBranch": true,
+    "mergeCommitMessage": "The Title",
+    "mergeStrategy": 2,
+    "squashMerge": false,
+  },
+  "createdAt": undefined,
+  "createdBy": {
+    "id": "123",
+  },
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+  "title": "The Title",
+}
+`;
+
+exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create and return a PR object with auto-complete set 1`] = `
+{
+  "autoCompleteSetBy": {
+    "id": "123",
+  },
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "completionOptions": {
+    "deleteSourceBranch": true,
+    "mergeCommitMessage": "The Title",
+    "squashMerge": true,
   },
   "createdAt": undefined,
   "createdBy": {
