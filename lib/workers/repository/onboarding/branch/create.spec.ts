@@ -58,12 +58,11 @@ describe('workers/repository/onboarding/branch/create', () => {
     });
 
     describe('applies the commitBody value', () => {
+      const commitBody = 'Signed Off: {{gitAuthor}}';
+      const gitAuthor = 'Bot bot@botland.com';
+
       it('to the default commit message', async () => {
-        await createOnboardingBranch({
-          ...config,
-          commitBody: 'Signed Off: {{gitAuthor}}',
-          gitAuthor: 'Bot bot@botland.com',
-        });
+        await createOnboardingBranch({ ...config, commitBody, gitAuthor });
         expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
@@ -85,11 +84,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         config.onboardingCommitMessage = message;
 
-        await createOnboardingBranch({
-          ...config,
-          commitBody: 'Signed Off: {{gitAuthor}}',
-          gitAuthor: 'Bot bot@botland.com',
-        });
+        await createOnboardingBranch({ ...config, commitBody, gitAuthor });
         expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
