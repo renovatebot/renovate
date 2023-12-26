@@ -34,7 +34,7 @@ describe('workers/repository/onboarding/branch/create', () => {
       });
     });
 
-    it('applies supplied commit message', async () => {
+    it('applies the supplied commit message', async () => {
       const message =
         'We can Renovate if we want to, we can leave PRs in decline';
 
@@ -54,6 +54,55 @@ describe('workers/repository/onboarding/branch/create', () => {
         force: true,
         message,
         platformCommit: false,
+      });
+    });
+
+    describe('applies the commitBody value', () => {
+      it('to the default commit message', async () => {
+        await createOnboardingBranch({
+          ...config,
+          commitBody: 'Signed Off: {{gitAuthor}}',
+          gitAuthor: 'Bot bot@botland.com',
+        });
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message: `Add renovate.json\n\nSigned Off: Bot bot@botland.com`,
+          platformCommit: false,
+        });
+      });
+
+      it('to the supplied commit message', async () => {
+        const message =
+          'We can Renovate if we want to, we can leave PRs in decline';
+
+        config.onboardingCommitMessage = message;
+
+        await createOnboardingBranch({
+          ...config,
+          commitBody: 'Signed Off: {{gitAuthor}}',
+          gitAuthor: 'Bot bot@botland.com',
+        });
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message: `We can Renovate if we want to, we can leave PRs in decline\n\nSigned Off: Bot bot@botland.com`,
+          platformCommit: false,
+        });
       });
     });
 
