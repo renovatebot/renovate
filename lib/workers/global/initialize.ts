@@ -76,9 +76,7 @@ export async function globalInitialize(
   limitCommitsPerRun(config);
   setEmojiConfig(config);
   setGlobalHostRules(config);
-  await initMergeConfidence(
-    process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES,
-  );
+  await initMergeConfidence();
   return config;
 }
 

@@ -33,7 +33,8 @@ export function initConfig(): void {
 }
 
 export function parseSupportedDatasourceString(
-  supportedDatasourceString: string | undefined,
+  supportedDatasourceString: string | undefined = process.env
+    .RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES,
 ): string[] | undefined {
   if (!is.string(supportedDatasourceString)) {
     return;
