@@ -1003,7 +1003,7 @@ describe('modules/platform/azure/index', () => {
           labels: ['deps', 'renovate'],
           platformOptions: {
             automergeStrategy: 'auto',
-            usePlatformAutomerge: true
+            usePlatformAutomerge: true,
           },
         });
 
@@ -1015,7 +1015,7 @@ describe('modules/platform/azure/index', () => {
           labels: ['deps', 'renovate'],
           platformOptions: {
             automergeStrategy: 'auto',
-            usePlatformAutomerge: true
+            usePlatformAutomerge: true,
           },
         });
 
@@ -1030,8 +1030,8 @@ describe('modules/platform/azure/index', () => {
           title: 'The Title',
           createdBy: {
             id: '123',
-          }
-        }
+          },
+        };
         const prUpdateResults = {
           ...prResult,
           autoCompleteSetBy: {
@@ -1042,16 +1042,12 @@ describe('modules/platform/azure/index', () => {
             deleteSourceBranch: true,
             mergeCommitMessage: 'The Title',
           },
-        }
-        const updateFn = jest.fn(() =>
-          Promise.resolve(prUpdateResults),
-        );
+        };
+        const updateFn = jest.fn(() => Promise.resolve(prUpdateResults));
 
         azureApi.gitApi.mockResolvedValue(
           partial<IGitApi>({
-            createPullRequest: jest.fn(() =>
-              Promise.resolve(prResult),
-            ),
+            createPullRequest: jest.fn(() => Promise.resolve(prResult)),
             createPullRequestLabel: jest.fn().mockResolvedValue({}),
             updatePullRequest: updateFn,
           }),
@@ -1064,7 +1060,7 @@ describe('modules/platform/azure/index', () => {
           labels: ['deps', 'renovate'],
           platformOptions: {
             automergeStrategy: 'squash',
-            usePlatformAutomerge: true
+            usePlatformAutomerge: true,
           },
         });
 
@@ -1108,12 +1104,14 @@ describe('modules/platform/azure/index', () => {
           labels: ['deps', 'renovate'],
           platformOptions: {
             automergeStrategy: 'rebase',
-            usePlatformAutomerge: true
+            usePlatformAutomerge: true,
           },
         });
         expect(pr).toMatchSnapshot();
         expect(updateFn).toHaveBeenCalled();
-        expect(updateFn.mock.calls[0][0].completionOptions.mergeStrategy).toBe(GitPullRequestMergeStrategy.Rebase);
+        expect(updateFn.mock.calls[0][0].completionOptions.mergeStrategy).toBe(
+          GitPullRequestMergeStrategy.Rebase,
+        );
         expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(0);
       });
     });

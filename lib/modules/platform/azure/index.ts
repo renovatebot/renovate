@@ -9,6 +9,7 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { MergeStrategy } from '../../../config/types';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -54,7 +55,6 @@ import {
   getStorageExtraCloneOpts,
   max4000Chars,
 } from './util';
-import type { MergeStrategy } from '../../../config/types';
 
 interface Config {
   repoForceRebase: boolean;
@@ -462,7 +462,9 @@ async function getMergeStrategy(
   );
 }
 
-function mapMergeStrategy(mergeStrategy?: MergeStrategy): GitPullRequestMergeStrategy {
+function mapMergeStrategy(
+  mergeStrategy?: MergeStrategy,
+): GitPullRequestMergeStrategy {
   switch (mergeStrategy) {
     case 'rebase':
     case 'fast-forward':
@@ -506,7 +508,10 @@ export async function createPr({
     config.repoId,
   );
   if (platformOptions?.usePlatformAutomerge) {
-    const mergeStrategy = platformOptions.automergeStrategy !== 'auto' ? mapMergeStrategy(platformOptions.automergeStrategy) : await getMergeStrategy(pr.targetRefName!);
+    const mergeStrategy =
+      platformOptions.automergeStrategy === 'auto'
+        ? await getMergeStrategy(pr.targetRefName!)
+        : mapMergeStrategy(platformOptions.automergeStrategy);
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
