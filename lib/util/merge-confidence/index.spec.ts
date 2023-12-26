@@ -406,20 +406,14 @@ describe('util/merge-confidence/index', () => {
       });
 
       describe('parseSupportedDatasourceList()', () => {
-        let envOrg: NodeJS.ProcessEnv;
-
         type ParseSupportedDatasourceTestCase = {
           name: string;
           datasourceListString: string | undefined;
           expected: string[] | undefined;
         };
 
-        beforeEach(() => {
-          envOrg = process.env;
-        });
-
         afterEach(() => {
-          process.env = envOrg;
+          delete process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES;
         });
 
         it.each([

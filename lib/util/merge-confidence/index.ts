@@ -4,6 +4,7 @@ import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../cache/package';
+import { parseJson } from '../common';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
 import { MERGE_CONFIDENCE } from './common';
@@ -41,9 +42,9 @@ export function parseSupportedDatasourceString(): string[] | undefined {
     return undefined;
   }
 
-  let parsedDatasourceList: string[] | undefined;
+  let parsedDatasourceList: unknown;
   try {
-    parsedDatasourceList = JSON.parse(supportedDatasourceString);
+    parsedDatasourceList = parseJson(supportedDatasourceString, '.json5');
   } catch (err) {
     logger.error(
       { supportedDatasourceString, err },
