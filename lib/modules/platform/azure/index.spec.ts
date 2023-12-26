@@ -936,7 +936,7 @@ describe('modules/platform/azure/index', () => {
         expect(pr).toMatchSnapshot();
       });
 
-      it('should only call getMergeMethod once per run if automergeStrategy is auto', async () => {
+      it('should only call getMergeMethod once per run when automergeStrategy is auto', async () => {
         await initRepo({ repository: 'some/repo' });
         const prResult = [
           {
