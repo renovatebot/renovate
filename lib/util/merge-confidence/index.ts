@@ -25,7 +25,9 @@ export const confidenceLevels: Record<MergeConfidence, number> = {
 export function initConfig(): void {
   apiBaseUrl = getApiBaseUrl();
   token = getApiToken();
-  supportedDatasources = [...presetSupportedDatasources];
+  supportedDatasources = parseSupportedDatasourceString() ?? [
+    ...presetSupportedDatasources,
+  ];
 
   if (!is.nullOrUndefined(token)) {
     logger.debug(`Merge confidence token found for ${apiBaseUrl}`);
@@ -33,9 +35,12 @@ export function initConfig(): void {
 }
 
 export function parseSupportedDatasourceString(
-  supportedDatasourceString: string | undefined = process.env
-    .RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES,
+  supportedDatasourceRawString?: string,
 ): string[] | undefined {
+  const supportedDatasourceString =
+    process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES ??
+    supportedDatasourceRawString;
+
   if (!is.string(supportedDatasourceString)) {
     return;
   }
@@ -209,15 +214,8 @@ async function queryApi(
  * authenticate with the API. If either the base URL or token is not defined, it will immediately return
  * without making a request.
  */
-export async function initMergeConfidence(
-  supportedDatasourcesString?: string,
-): Promise<void> {
+export async function initMergeConfidence(): Promise<void> {
   initConfig();
-
-  const p = parseSupportedDatasourceString(supportedDatasourcesString);
-  if (!is.undefined(p)) {
-    supportedDatasources = p;
-  }
 
   if (is.nullOrUndefined(apiBaseUrl) || is.nullOrUndefined(token)) {
     logger.trace('merge confidence API usage is disabled');

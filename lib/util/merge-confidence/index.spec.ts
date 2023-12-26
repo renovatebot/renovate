@@ -308,12 +308,22 @@ describe('util/merge-confidence/index', () => {
           .get(`/api/mc/availability`)
           .reply(200);
 
-        await expect(initMergeConfidence('["go"]')).toResolve();
+        await expect(initMergeConfidence()).toResolve();
         expect(logger.trace).toHaveBeenCalledWith(
           'using default merge confidence API base URL',
         );
         expect(logger.debug).toHaveBeenCalledWith(
-          { supportedDatasources: ['go'] },
+          {
+            supportedDatasources: [
+              'go',
+              'maven',
+              'npm',
+              'nuget',
+              'packagist',
+              'pypi',
+              'rubygems',
+            ],
+          },
           'merge confidence API - successfully authenticated',
         );
       });
@@ -332,17 +342,7 @@ describe('util/merge-confidence/index', () => {
           'invalid merge confidence API base URL found in environment variables - using default value instead',
         );
         expect(logger.debug).toHaveBeenCalledWith(
-          {
-            supportedDatasources: [
-              'go',
-              'maven',
-              'npm',
-              'nuget',
-              'packagist',
-              'pypi',
-              'rubygems',
-            ],
-          },
+          expect.anything(),
           'merge confidence API - successfully authenticated',
         );
       });
