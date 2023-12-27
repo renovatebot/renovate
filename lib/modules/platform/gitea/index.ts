@@ -83,10 +83,6 @@ let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
 let botUserName: string;
 
-function isReconfigurePr(branchName: string): boolean {
-  return reconfigurePrRegex.test(branchName);
-}
-
 function toRenovateIssue(data: Issue): Issue {
   return {
     number: data.number,
@@ -118,7 +114,7 @@ function toRenovatePR(data: PR): Pr | null {
   if (
     createdBy &&
     botUserName &&
-    !isReconfigurePr(data.head.label) &&
+    !reconfigurePrRegex.test(data.head.label) &&
     createdBy !== botUserName
   ) {
     return null;
