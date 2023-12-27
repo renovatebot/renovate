@@ -126,6 +126,11 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 If set, Renovate will query this API for Merge Confidence data.
 This feature is in private beta.
 
+## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`
+
+If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
+The expected value for this environment variable is a JSON array of strings.
+
 ## `RENOVATE_X_PLATFORM_VERSION`
 
 If set, Renovate will use this string as GitLab server version instead of checking via the GitLab API.
