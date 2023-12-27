@@ -2,6 +2,7 @@ import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import {
+  GitPullRequest,
   GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
@@ -1124,7 +1125,10 @@ describe('modules/platform/azure/index', () => {
               usePlatformAutomerge: true,
             },
           });
-          expect(pr).toMatchSnapshot();
+
+          expect((pr as GitPullRequest).completionOptions?.mergeStrategy).toBe(
+            prMergeStrategy,
+          );
           expect(updateFn).toHaveBeenCalled();
           expect(
             updateFn.mock.calls[0][0].completionOptions.mergeStrategy,
