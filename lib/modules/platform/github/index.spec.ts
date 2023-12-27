@@ -2449,7 +2449,14 @@ describe('modules/platform/github/index', () => {
           state: 'open',
           includeOtherAuthors: true,
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        number: 1,
+        sourceBranch: 'branch-a',
+        sourceRepo: 'some/repo',
+        state: 'open',
+        title: 'branch a pr',
+        updated_at: undefined,
+      });
     });
 
     it('returns null if no pr found - (includeOtherAuthors)', async () => {

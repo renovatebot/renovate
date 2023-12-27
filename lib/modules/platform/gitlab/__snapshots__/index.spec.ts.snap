@@ -62,15 +62,6 @@ exports[`modules/platform/gitlab/index createPr(branchName, title, body) uses de
 }
 `;
 
-exports[`modules/platform/gitlab/index findPr(branchName, prTitle, state) finds reconfigure pr 1`] = `
-{
-  "number": 1,
-  "sourceBranch": "branch",
-  "state": "open",
-  "title": "branch a pr",
-}
-`;
-
 exports[`modules/platform/gitlab/index getBranchPr(branchName) should return the PR object 1`] = `
 {
   "bodyStruct": {

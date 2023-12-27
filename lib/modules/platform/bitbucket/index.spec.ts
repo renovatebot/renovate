@@ -967,7 +967,13 @@ describe('modules/platform/bitbucket/index', () => {
           state: 'open',
           includeOtherAuthors: true,
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        number: 5,
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        title: 'title',
+        state: 'open',
+      });
     });
 
     it('returns null if no open pr exists - (includeOtherAuthors)', async () => {

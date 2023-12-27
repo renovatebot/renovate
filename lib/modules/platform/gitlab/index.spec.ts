@@ -1679,7 +1679,7 @@ describe('modules/platform/gitlab/index', () => {
       expect(res).toBeDefined();
     });
 
-    it('finds reconfigure pr', async () => {
+    it('finds pr from other authors', async () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
@@ -1699,7 +1699,12 @@ describe('modules/platform/gitlab/index', () => {
           state: 'open',
           includeOtherAuthors: true,
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        number: 1,
+        sourceBranch: 'branch',
+        state: 'open',
+        title: 'branch a pr',
+      });
     });
 
     it('returns null if no pr found - (includeOtherAuthors)', async () => {

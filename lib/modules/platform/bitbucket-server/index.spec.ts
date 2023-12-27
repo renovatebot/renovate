@@ -1323,7 +1323,13 @@ describe('modules/platform/bitbucket-server/index', () => {
               state: 'open',
               includeOtherAuthors: true,
             }),
-          ).toMatchSnapshot();
+          ).toMatchObject({
+            number: 5,
+            sourceBranch: 'userName1/pullRequest5',
+            targetBranch: 'master',
+            title: 'title',
+            state: 'open',
+          });
         });
 
         it('returns null if no pr found - (includeOtherAuthors)', async () => {

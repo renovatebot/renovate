@@ -71,6 +71,7 @@ interface GiteaRepoConfig {
 export const id = 'gitea';
 
 const DRAFT_PREFIX = 'WIP: ';
+const reconfigurePrRegex = regEx(/reconfigure$/g);
 
 const defaults = {
   hostType: 'gitea',
@@ -83,8 +84,7 @@ let botUserID: number;
 let botUserName: string;
 
 function isReconfigurePr(branchName: string): boolean {
-  logger.debug({ branchName }, 'isReconfigurePr');
-  return regEx(/reconfigure$/g).test(branchName);
+  return reconfigurePrRegex.test(branchName);
 }
 
 function toRenovateIssue(data: Issue): Issue {
@@ -465,7 +465,7 @@ const platform: Platform = {
       config.prList = helper
         .searchPRs(config.repository, { state: 'all' }, { memCache: false })
         .then((prs) => {
-          const prList = prs.map((pr) => toRenovatePR(pr)).filter(is.truthy);
+          const prList = prs.map(toRenovatePR).filter(is.truthy);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
           return prList;
         });
