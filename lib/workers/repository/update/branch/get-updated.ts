@@ -6,6 +6,7 @@ import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
   PackageDependency,
+  BumpedPackageFile,
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
 import type { FileAddition, FileChange } from '../../../../util/git/types';
@@ -18,6 +19,21 @@ export interface PackageFilesResult {
   reuseExistingBranch?: boolean;
   updatedPackageFiles: FileChange[];
   updatedArtifacts: FileChange[];
+}
+
+async function getFileContent(
+  updatedFileContents: Record<string, string>,
+  filePath: string,
+  config: BranchConfig,
+): Promise<string | null> {
+  let fileContent: string | null = updatedFileContents[filePath];
+  if (!fileContent) {
+    fileContent = await getFile(
+      filePath,
+      config.reuseExistingBranch ? config.branchName : config.baseBranch,
+    );
+  }
+  return fileContent;
 }
 
 export async function getUpdatedPackageFiles(
@@ -46,23 +62,19 @@ export async function getUpdatedPackageFiles(
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
     packageFileUpdatedDeps[packageFile].push({ ...upgrade });
-    let packageFileContent: string | null = updatedFileContents[packageFile];
-    if (!packageFileContent) {
-      packageFileContent = await getFile(
-        packageFile,
-        reuseExistingBranch ? config.branchName : config.baseBranch,
-      );
-    }
+    const packageFileContent = await getFileContent(
+      updatedFileContents,
+      packageFile,
+      config,
+    );
     let lockFileContent: string | null = null;
     const lockFile = upgrade.lockFile ?? upgrade.lockFiles?.[0] ?? '';
     if (lockFile) {
-      lockFileContent = updatedFileContents[lockFile];
-      if (!lockFileContent) {
-        lockFileContent = await getFile(
-          lockFile,
-          reuseExistingBranch ? config.branchName : config.baseBranch,
-        );
-      }
+      lockFileContent = await getFileContent(
+        updatedFileContents,
+        lockFile,
+        config,
+      );
     }
     // istanbul ignore if
     if (
@@ -174,17 +186,20 @@ export async function getUpdatedPackageFiles(
         );
         firstUpdate = false;
         if (res) {
+          let bumpedPackageFiles: BumpedPackageFile[] = [];
           if (
             bumpPackageVersion &&
             upgrade.bumpVersion &&
             upgrade.packageFileVersion
           ) {
-            const { bumpedContent } = await bumpPackageVersion(
+            const bumpResult = await bumpPackageVersion(
               res,
               upgrade.packageFileVersion,
               upgrade.bumpVersion,
+              packageFile,
             );
-            res = bumpedContent;
+            res = bumpResult.bumpedContent;
+            bumpedPackageFiles = bumpResult.bumpedFiles ?? [];
           }
           if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
@@ -192,6 +207,18 @@ export async function getUpdatedPackageFiles(
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res!;
             delete nonUpdatedFileContents[packageFile];
+            // indicates that the version was bumped in one or more files in
+            // addition to or instead of the packageFile
+            if (bumpedPackageFiles) {
+              for (const bumpedPackageFile of bumpedPackageFiles) {
+                logger.debug(
+                  { bumpedPackageFile, depName },
+                  'Updating bumpedPackageFile content',
+                );
+                updatedFileContents[bumpedPackageFile.fileName] =
+                  bumpedPackageFile.newContent;
+              }
+            }
           }
           continue;
         } else if (reuseExistingBranch) {
@@ -217,6 +244,7 @@ export async function getUpdatedPackageFiles(
           newContent,
           upgrade.packageFileVersion,
           upgrade.bumpVersion,
+          packageFile,
         );
         newContent = bumpedContent;
       }
