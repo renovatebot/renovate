@@ -9,7 +9,6 @@ import {
   GitVersionDescriptor,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import type { MergeStrategy } from '../../../config/types';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
@@ -53,6 +52,7 @@ import {
   getRenovatePRFormat,
   getRepoByName,
   getStorageExtraCloneOpts,
+  mapMergeStrategy,
   max4000Chars,
 } from './util';
 
@@ -460,22 +460,6 @@ async function getMergeStrategy(
       config.defaultBranch,
     ))
   );
-}
-
-function mapMergeStrategy(
-  mergeStrategy?: MergeStrategy,
-): GitPullRequestMergeStrategy {
-  switch (mergeStrategy) {
-    case 'rebase':
-    case 'fast-forward':
-      return GitPullRequestMergeStrategy.Rebase;
-    case 'merge-commit':
-      return GitPullRequestMergeStrategy.NoFastForward;
-    case 'squash':
-      return GitPullRequestMergeStrategy.Squash;
-    default:
-      return GitPullRequestMergeStrategy.NoFastForward;
-  }
 }
 
 export async function createPr({
