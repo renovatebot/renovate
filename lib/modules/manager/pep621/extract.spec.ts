@@ -346,6 +346,13 @@ describe('modules/manager/pep621/extract', () => {
 
       expect(result?.deps).toEqual([
         {
+          currentValue: '==2.30.0',
+          datasource: 'pypi',
+          depName: 'requests',
+          depType: 'project.dependencies',
+          packageName: 'requests',
+        },
+        {
           currentValue: '==1.18.0',
           datasource: 'pypi',
           depName: 'hatchling',
