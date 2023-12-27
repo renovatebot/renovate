@@ -1,5 +1,37 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions in all files if multiple files were bumped 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "version: 0.0.2",
+      "name": "/test/Chart.yaml",
+    },
+    Object {
+      "contents": "# Version 0.0.2",
+      "name": "/test/README.md",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions with a bumpPackageFile different from the packageFile 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "version: 0.0.2",
+      "name": "/test/Chart.yaml",
+    },
+  ],
+}
+`;
+
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() bumps versions in autoReplace managers 1`] = `
 {
   "artifactErrors": [],
@@ -184,6 +216,39 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
       "stderr": "some error",
     },
   ],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [],
+}
+`;
+
+exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions 1`] = `
+{
+  "artifactErrors": [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
+      "contents": "version: 0.0.2",
+      "path": "Chart.yaml",
+      "type": "addition",
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions in all files if multiple files were bumped 1`] = `
+{
+  "artifactErrors": [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [],
+}
+`;
+
+exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions with a bumpPackageFile different from the packageFile 1`] = `
+{
+  "artifactErrors": [],
   "reuseExistingBranch": undefined,
   "updatedArtifacts": [],
   "updatedPackageFiles": [],

@@ -406,12 +406,11 @@ Instead, set the old `branchPrefix` value as `branchPrefixOld` to allow Renovate
 ## branchTopic
 
 This field is combined with `branchPrefix` and `additionalBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
-This is an advance field and it's recommend you seek a config review before applying it.
+This is an advanced field, and it's recommend you seek a config review before applying it.
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, `nuget`, `maven`, `pep621` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
-Currently this setting supports `helmv3`, `npm`, `nuget`, `maven`, `pep621`, `poetry` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently, this setting supports `helmv3`, `helm-values`, `npm`, `nuget`, `maven`, `pep621`, `poetry` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
