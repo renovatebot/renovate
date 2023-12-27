@@ -15,6 +15,7 @@ export const depTypes = {
   dependencies: 'project.dependencies',
   optionalDependencies: 'project.optional-dependencies',
   pdmDevDependencies: 'tool.pdm.dev-dependencies',
+  buildSystemRequires: 'build-system.requires',
 };
 
 export function parsePEP508(
