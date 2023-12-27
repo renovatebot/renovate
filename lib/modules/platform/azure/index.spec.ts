@@ -912,7 +912,7 @@ describe('modules/platform/azure/index', () => {
             id: prResult.createdBy.id,
           },
           completionOptions: {
-            squashMerge: true,
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
             deleteSourceBranch: true,
             mergeCommitMessage: 'The Title',
           },
@@ -962,7 +962,7 @@ describe('modules/platform/azure/index', () => {
               id: prResult[0].createdBy.id,
             },
             completionOptions: {
-              squashMerge: true,
+              mergeStrategy: GitPullRequestMergeStrategy.Squash,
               deleteSourceBranch: true,
               mergeCommitMessage: 'The Title',
             },
@@ -973,7 +973,7 @@ describe('modules/platform/azure/index', () => {
               id: prResult[1].createdBy.id,
             },
             completionOptions: {
-              squashMerge: true,
+              mergeStrategy: GitPullRequestMergeStrategy.Squash,
               deleteSourceBranch: true,
               mergeCommitMessage: 'The Second Title',
             },
@@ -1047,7 +1047,7 @@ describe('modules/platform/azure/index', () => {
               id: prResult.createdBy.id,
             },
             completionOptions: {
-              squashMerge: true,
+              mergeStrategy: GitPullRequestMergeStrategy.Squash,
               deleteSourceBranch: true,
               mergeCommitMessage: 'The Title',
             },
@@ -1101,7 +1101,6 @@ describe('modules/platform/azure/index', () => {
             },
             completionOptions: {
               mergeStrategy: prMergeStrategy,
-              squashMerge: false,
               deleteSourceBranch: true,
               mergeCommitMessage: 'The Title',
             },
