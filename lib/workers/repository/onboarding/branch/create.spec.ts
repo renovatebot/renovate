@@ -58,11 +58,11 @@ describe('workers/repository/onboarding/branch/create', () => {
     });
 
     describe('applies the commitBody value', () => {
-      const commitBody = 'Signed Off: {{gitAuthor}}';
-      const gitAuthor = 'Bot bot@botland.com';
-
       it('to the default commit message', async () => {
-        await createOnboardingBranch({ ...config, commitBody, gitAuthor });
+        await createOnboardingBranch({
+          ...config,
+          commitBody: 'some commit body',
+        });
         expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
@@ -73,7 +73,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             },
           ],
           force: true,
-          message: `Add renovate.json\n\nSigned Off: Bot bot@botland.com`,
+          message: `Add renovate.json\n\nsome commit body`,
           platformCommit: false,
         });
       });
@@ -84,7 +84,11 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         config.onboardingCommitMessage = message;
 
-        await createOnboardingBranch({ ...config, commitBody, gitAuthor });
+        await createOnboardingBranch({
+          ...config,
+          commitBody: 'Signed Off: {{{gitAuthor}}}',
+          gitAuthor: '<Bot bot@botland.com>',
+        });
         expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
@@ -95,7 +99,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             },
           ],
           force: true,
-          message: `We can Renovate if we want to, we can leave PRs in decline\n\nSigned Off: Bot bot@botland.com`,
+          message: `We can Renovate if we want to, we can leave PRs in decline\n\nSigned Off: <Bot bot@botland.com>`,
           platformCommit: false,
         });
       });
