@@ -31,14 +31,33 @@ describe('config/validation', () => {
     it('catches global options in repo config', async () => {
       const config = {
         binarySource: 'something',
+        username: 'user',
       };
       const { warnings } = await configValidation.validateConfig(false, config);
-      expect(warnings).toHaveLength(1);
+      expect(warnings).toHaveLength(2);
       expect(warnings).toMatchObject([
         {
           message: `The "binarySource" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
         },
+        {
+          message: `The "username" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+        },
       ]);
+    });
+
+    // false globals are the options which have names same to the another globalOnly option
+    it('does warn for false globals in repo config', async () => {
+      const config = {
+        hostRules: [
+          {
+            username: 'user',
+            token: 'token',
+            password: 'pass',
+          },
+        ],
+      };
+      const { warnings } = await configValidation.validateConfig(false, config);
+      expect(warnings).toHaveLength(0);
     });
 
     it('catches invalid templates', async () => {
