@@ -145,8 +145,8 @@ For example:
 
 ## autodiscoverTopics
 
-Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
-topics. Set this variable to a list of strings, all of which will be topics for the auto-discovered repositories.
+Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those topics.
+Set this variable to a list of strings, all of which will be topics for the auto-discovered repositories.
 
 For example:
 
@@ -687,7 +687,7 @@ To create the key pair with GPG use the following commands:
 ```
 ❯ gpg --full-generate-key
 gpg (GnuPG) 2.2.24; Copyright (C) 2020 Free Software Foundation, Inc.
-This is free software: you're free to change and redistribute it.
+This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
 Please select what kind of key you want:

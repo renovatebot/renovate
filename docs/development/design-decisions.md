@@ -47,9 +47,9 @@ You could limit Renovate to only update the `package.json` in the root of the re
 
 ## Separate Branches per dependency
 
-By default, `renovate` will maintain separate branches for each dependency.
-So if 20 dependencies need updating, there will be at least 20 branches/PRs.
-Although this may seem undesirable, it's even less desirable if all 20 were in the same Pull Request, and it's very difficult to work out which upgrade caused the test failure.
+We decided that Renovate should create a separate branch for each dependency, at least by default.
+So if 20 dependencies need to be updated, you'll get 20 branches (and 20 PRs) from Renovate.
+This may look bad, but it's better than putting all 20 dependencies in a single branch, which makes it hard to work out which upgrade causes a test failure.
 
 But you can override the default templates for branch name to get a single branch for all dependencies.
 The `groupName` configuration option can be used at a repository level (e.g. give it the value `All`) and then all dependency updates will be in the same branch/PR.

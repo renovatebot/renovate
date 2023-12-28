@@ -194,7 +194,7 @@ e.g. are you interested in a Renovate feature where you get a lockfile-only PR a
 
 A good argument made by [@LinusU](https://github.com/LinusU) is:
 
-> In many cases, pinning will only protect you against breakage in a small percentage of your packages. If you for example have installed Express and pinned it, you'll only protect yourself against a bad Express release, it will not help with the 30 dependencies that Express has.
+> Pinning will only protect you against breakage in a, in many cases, small percentage of your packages. If you for example have installed Express and pinned it, you will only protect yourself against a bad Express release, it will not help with the 30 dependencies that Express has.
 >
 > Because of this, I personally think that pinning dependencies just creates a false sense of security, and that using a lock file is superior in every way.
 
