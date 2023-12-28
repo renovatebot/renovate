@@ -18,3 +18,9 @@ export interface HelmDockerImageDependencyVersion
 export type HelmDockerImageDependency =
   | HelmDockerImageDependencyTag
   | HelmDockerImageDependencyVersion;
+
+export interface ChartDefinition {
+  apiVersion: string;
+  name: string;
+  version: string;
+}

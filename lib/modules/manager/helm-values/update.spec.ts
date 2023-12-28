@@ -2,6 +2,8 @@ import yaml from 'js-yaml';
 import { fs } from '../../../../test/util';
 import * as helmValuesUpdater from './update';
 
+jest.mock('../../../util/fs');
+
 describe('modules/manager/helm-values/update', () => {
   describe('.bumpPackageVersion()', () => {
     const chartContent = yaml.dump({
@@ -19,8 +21,8 @@ describe('modules/manager/helm-values/update', () => {
 
     beforeEach(() => {
       jest.resetAllMocks();
-      fs.readLocalFile = jest.fn();
       fs.readLocalFile.mockResolvedValueOnce(chartContent);
+      fs.getSiblingFileName.mockReturnValueOnce('test/Chart.yaml');
     });
 
     it('increments', async () => {
@@ -29,13 +31,15 @@ describe('modules/manager/helm-values/update', () => {
           helmValuesContent,
           '0.0.2',
           'patch',
-          'values.yaml',
+          'test/values.yaml',
         );
       expect(bumpedContent).toEqual(helmValuesContent);
       expect(bumpedFiles).toHaveLength(1);
       const bumpedFile = bumpedFiles![0];
-      expect(bumpedFile.fileName).toBe('Chart.yaml');
-      expect(bumpedFile.newContent).toMatchSnapshot();
+      expect(bumpedFile.fileName).toBe('test/Chart.yaml');
+      expect(bumpedFile.newContent).toBe(
+        'apiVersion: v2\nname: test\nversion: 0.0.3\n',
+      );
     });
 
     it('no ops', async () => {
@@ -58,13 +62,15 @@ describe('modules/manager/helm-values/update', () => {
           helmValuesContent,
           '0.0.1',
           'minor',
-          'values.yaml',
+          'test/values.yaml',
         );
       expect(bumpedContent).toEqual(helmValuesContent);
       expect(bumpedFiles).toHaveLength(1);
       const bumpedFile = bumpedFiles![0];
-      expect(bumpedFile.fileName).toBe('Chart.yaml');
-      expect(bumpedFile.newContent).toMatchSnapshot();
+      expect(bumpedFile.fileName).toBe('test/Chart.yaml');
+      expect(bumpedFile.newContent).toBe(
+        'apiVersion: v2\nname: test\nversion: 0.1.0\n',
+      );
     });
 
     it('returns content if bumping errors', async () => {
@@ -81,7 +87,6 @@ describe('modules/manager/helm-values/update', () => {
 
     it('returns content if retrieving Chart.yaml fails', async () => {
       jest.resetAllMocks();
-      fs.readLocalFile = jest.fn();
       fs.readLocalFile.mockRejectedValueOnce(null);
       const { bumpedContent, bumpedFiles } =
         await helmValuesUpdater.bumpPackageVersion(

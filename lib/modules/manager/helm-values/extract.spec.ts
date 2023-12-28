@@ -2,6 +2,8 @@ import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';
 
+jest.mock('../../../util/fs');
+
 const helmDefaultChartInitValues = Fixtures.get(
   'default_chart_init_values.yaml',
 );
@@ -12,10 +14,6 @@ const helmMultiAndNestedImageValues = Fixtures.get(
 
 describe('modules/manager/helm-values/extract', () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
-      fs.readLocalFile = jest.fn();
-    });
-
     it('returns null for invalid yaml file content', async () => {
       const result = await extractPackageFile('nothing here: [', 'some file');
       expect(result).toBeNull();

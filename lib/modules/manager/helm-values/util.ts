@@ -1,9 +1,9 @@
-import yaml from 'js-yaml';
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
-import type { HelmDockerImageDependency } from './types';
+import { parseSingleYaml } from '../../../util/yaml';
+import type { ChartDefinition, HelmDockerImageDependency } from './types';
 
 const parentKeyRe = regEx(/image$/i);
 
@@ -71,14 +71,14 @@ export async function getSiblingChartYamlContent(
  */
 export async function getParsedSiblingChartYaml(
   fileName: string,
-): Promise<any> {
+): Promise<ChartDefinition | null> {
   try {
     const chartContents = await getSiblingChartYamlContent(fileName);
     if (!chartContents) {
       logger.debug({ fileName }, 'Failed to find helm Chart.yaml');
       return null;
     }
-    const chart = yaml.load(chartContents, { json: true }) as any;
+    const chart = parseSingleYaml(chartContents) as ChartDefinition;
     if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { fileName },
