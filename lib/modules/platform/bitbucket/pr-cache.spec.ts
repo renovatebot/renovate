@@ -1,5 +1,9 @@
 import * as httpMock from '../../../../test/http-mock';
-import { getCache, resetCache } from '../../../util/cache/repository';
+import { reset as memCacheReset } from '../../../util/cache/memory';
+import {
+  getCache,
+  resetCache as repoCacheReset,
+} from '../../../util/cache/repository';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import { BitbucketPrCache } from './pr-cache';
 import type { PrResponse } from './types';
@@ -42,7 +46,8 @@ describe('modules/platform/bitbucket/pr-cache', () => {
   let cache = getCache();
 
   beforeEach(() => {
-    resetCache();
+    memCacheReset();
+    repoCacheReset();
     cache = getCache();
   });
 
@@ -56,13 +61,17 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       });
 
     const res = await BitbucketPrCache.init(
+      http,
       'some-workspace/some-repo',
       'some-author',
-    )
-      .sync(http)
-      .then((cache) => cache.getPrs());
+    ).then((cache) => cache.getPrs());
 
-    expect(res).toEqual([pr1]);
+    expect(res).toMatchObject([
+      {
+        number: 1,
+        title: 'title',
+      },
+    ]);
     expect(cache).toEqual({
       platform: {
         bitbucket: {
@@ -100,13 +109,15 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       });
 
     const res = await BitbucketPrCache.init(
+      http,
       'some-workspace/some-repo',
       'some-author',
-    )
-      .sync(http)
-      .then((cache) => cache.getPrs());
+    ).then((cache) => cache.getPrs());
 
-    expect(res).toEqual([pr1, pr2]);
+    expect(res).toMatchObject([
+      { number: 1, title: 'title' },
+      { number: 2, title: 'title' },
+    ]);
     expect(cache).toEqual({
       platform: {
         bitbucket: {

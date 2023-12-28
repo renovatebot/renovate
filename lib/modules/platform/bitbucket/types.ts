@@ -1,5 +1,3 @@
-import type { Pr } from '../types';
-
 export type BitbucketMergeStrategy = 'fast_forward' | 'merge_commit' | 'squash';
 
 export interface MergeRequestBody {
@@ -13,7 +11,6 @@ export interface Config {
   has_issues: boolean;
   mergeMethod: string;
   owner: string;
-  prList: Pr[];
   repository: string;
   ignorePrAuthor: boolean;
   is_private: boolean;

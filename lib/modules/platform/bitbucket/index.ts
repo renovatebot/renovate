@@ -274,16 +274,12 @@ function matchesState(state: string, desiredState: string): boolean {
 
 export async function getPrList(): Promise<Pr[]> {
   logger.debug('getPrList()');
-  if (!config.prList) {
-    logger.debug('Retrieving PR list');
-    const bitbucketPrCache = await BitbucketPrCache.init(
-      config.repository,
-      renovateUserUuid,
-    ).sync(bitbucketHttp);
-    config.prList = bitbucketPrCache.getPrs().map(utils.prInfo);
-    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
-  }
-  return config.prList;
+  const bitbucketPrCache = await BitbucketPrCache.init(
+    bitbucketHttp,
+    config.repository,
+    renovateUserUuid,
+  );
+  return bitbucketPrCache.getPrs();
 }
 
 export async function findPr({
@@ -292,12 +288,13 @@ export async function findPr({
   state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
-  const prList = await getPrList();
-  const pr = prList.find(
-    (p) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-      matchesState(p.state, state),
+  const pr = await getPrList().then((prs) =>
+    prs.find(
+      (p) =>
+        p.sourceBranch === branchName &&
+        (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
+        matchesState(p.state, state),
+    ),
   );
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
@@ -883,9 +880,13 @@ export async function createPr({
         },
       )
     ).body;
-    BitbucketPrCache.init(config.repository, renovateUserUuid).addPr(prRes);
     const pr = utils.prInfo(prRes);
-    config.prList?.push(pr);
+    await BitbucketPrCache.addPr(
+      bitbucketHttp,
+      config.repository,
+      renovateUserUuid,
+      pr,
+    );
     return pr;
   } catch (err) /* istanbul ignore next */ {
     // Try sanitizing reviewers
@@ -906,9 +907,13 @@ export async function createPr({
           },
         )
       ).body;
-      BitbucketPrCache.init(config.repository, renovateUserUuid).addPr(prRes);
       const pr = utils.prInfo(prRes);
-      config.prList?.push(pr);
+      await BitbucketPrCache.addPr(
+        bitbucketHttp,
+        config.repository,
+        renovateUserUuid,
+        pr,
+      );
       return pr;
     }
   }

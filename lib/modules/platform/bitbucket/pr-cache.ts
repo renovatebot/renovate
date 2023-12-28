@@ -1,9 +1,12 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
+import { logger } from '../../../logger';
+import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
 import type { BitbucketHttp } from '../../../util/http/bitbucket';
+import type { Pr } from '../types';
 import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types';
-import { prFieldsFilter, prStates } from './utils';
+import { prFieldsFilter, prInfo, prStates } from './utils';
 
 export class BitbucketPrCache {
   private cache: BitbucketPrCacheData;
@@ -11,6 +14,7 @@ export class BitbucketPrCache {
   private constructor(
     private repo: string,
     private author: string | null,
+    private prList: Pr[] = [],
   ) {
     const repoCache = getCache();
     repoCache.platform ??= {};
@@ -29,16 +33,35 @@ export class BitbucketPrCache {
     this.cache = pullRequestCache;
   }
 
-  static init(repo: string, author: string | null): BitbucketPrCache {
-    return new BitbucketPrCache(repo, author);
+  static async init(
+    http: BitbucketHttp,
+    repo: string,
+    author: string | null,
+  ): Promise<BitbucketPrCache> {
+    const prList = memCache.get<Pr[] | undefined>('bitbucket-pr-cache');
+    const res = new BitbucketPrCache(repo, author, prList);
+    if (!prList) {
+      await res.sync(http);
+    }
+    return res;
   }
 
-  getPrs(): PrResponse[] {
-    return Object.values(this.cache.items);
+  getPrs(): Pr[] {
+    return this.prList;
   }
 
-  addPr(item: PrResponse): void {
-    this.cache.items[item.id] = item;
+  private addPr(pr: Pr): void {
+    this.prList.push(pr);
+  }
+
+  static async addPr(
+    http: BitbucketHttp,
+    repo: string,
+    author: string | null,
+    item: Pr,
+  ): Promise<void> {
+    const prCache = await BitbucketPrCache.init(http, repo, author);
+    prCache.addPr(item);
   }
 
   private reconcile(newItems: PrResponse[]): void {
@@ -86,11 +109,13 @@ export class BitbucketPrCache {
     return `/2.0/repositories/${this.repo}/pullrequests?${query}`;
   }
 
-  async sync(http: BitbucketHttp): Promise<BitbucketPrCache> {
+  private async sync(http: BitbucketHttp): Promise<BitbucketPrCache> {
+    logger.debug('Syncing PR list');
     const url = this.getUrl();
     const opts = { paginate: true, pagelen: 50 };
     const res = await http.getJson<PagedResult<PrResponse>>(url, opts);
     this.reconcile(res.body.values);
+    this.prList = Object.values(this.cache.items).map(prInfo);
     return this;
   }
 }
