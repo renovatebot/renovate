@@ -245,6 +245,7 @@ export const PoetrySources = LooseArray(PoetrySource, {
 
 export const PoetrySectionSchema = z
   .object({
+    version: z.string().optional().catch(undefined),
     dependencies: withDepType(PoetryDependencies, 'dependencies').optional(),
     'dev-dependencies': withDepType(
       PoetryDependencies,
@@ -256,6 +257,7 @@ export const PoetrySectionSchema = z
   })
   .transform(
     ({
+      version,
       dependencies = [],
       'dev-dependencies': devDependencies = [],
       extras: extraDependencies = [],
@@ -269,7 +271,7 @@ export const PoetrySectionSchema = z
         ...groupDependencies,
       ];
 
-      const res: PackageFileContent = { deps };
+      const res: PackageFileContent = { deps, packageFileVersion: version };
 
       if (sourceUrls.length) {
         for (const dep of res.deps) {
