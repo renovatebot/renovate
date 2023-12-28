@@ -59,7 +59,7 @@ This benefits when upgrading versions as well as when rolling back in case of pr
 
 ### Upgrading pinned versions
 
-Let's say that a "faulty" version `1.2.0` of `foobar` is released, and it breaks one of your tests.
+Let's say that a "faulty" version `1.2.0` of `foobar` is released which breaks one of your tests.
 
 If you were using default caret SemVer ranges, then your `main` branch is now "broken" because its `package.json` says that any version 1.x above 1.1.0 is acceptable, and npm will choose the latest (`1.2.0`).
 You would need to manually check and work out which dependency caused the failure (`foobar` may not have been the only dependency to have "automatically" upgraded since the last time your tests passed) and then you would need to pin the dependency yourself to stop `npm` installing `1.2.0`.
@@ -135,7 +135,7 @@ To learn all about controlling Renovate's schedule, read the [key concepts, sche
 ### Grouping related packages
 
 Although it's good to isolate each dependency update for ease of troubleshooting, there are times when the extra noise isn't worth it, or when packages naturally belong together anyway (such as all `babel` packages).
-You can add a package rule in our Renovate configuration to group these together, and you'll get one branch combined even if multiple packages have updates available.
+You can add a package rule in your Renovate configuration to group these together, and you'll get one branch combined even if multiple packages have updates available.
 
 ## Pinning Dependencies and Lock Files
 
@@ -208,7 +208,7 @@ But Linus also points out that a _false_ sense of security is a cost too.
 
 Don't forget that there is some form of transitive trust too.
 You need to pick your direct dependencies carefully, and which versions of them you use.
-Hopefully in doing that you pick dependencies partly for how well _they_ look after their own dependencies and versions (e.g. do they have good enough test coverage, do they use something like Renovate to keep updated, etc.?).
+Hopefully in doing that you pick dependencies partly for how well _they_ look after their own dependencies and versions (e.g. do they have good enough test coverage, do they use something like Renovate to keep updated, and so on).
 So the reality is that even if 90% of the entries in your lock file are indirect dependencies, those are ones you have somewhat "delegated" responsibility for to your dependencies.
 e.g. I'd hope that Express are even better at watching their dependencies for breaks than I am, to use the example above.
 

@@ -25,5 +25,5 @@ This means we let Renovate force-push a single new commit whenever it needs to.
 For example:
 
 1. Renovate creates a `renovate/jest` branch to update the Jest package to `1.0.1`
-2. Renovate later finds a newer `1.1.0` version
-3. Renovate force-pushes a new commit for the `1.1.0` update into its `renovate/jest` branch
+1. Renovate later finds a newer `1.1.0` version
+1. Renovate force-pushes a new commit for the `1.1.0` update into its `renovate/jest` branch

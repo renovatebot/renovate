@@ -16,8 +16,8 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 ## How It Works
 
 1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
-2. Matching files are parsed, Renovate checks if the file(s) has any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
-3. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
+1. Matching files are parsed, Renovate checks if the file(s) has any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
+1. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
 
 ## Preservation of Version Precision
 
@@ -276,8 +276,8 @@ Google Artifact Registry supports `_json_key_base64` and a base64 encoded servic
 If all your dependencies are on the Google Artifact Registry, you can base64 encode and use the service account directly:
 
 1. Download your JSON service account and store it on your machine. Make sure that the service account has `read` (and only `read`) permissions to your artifacts
-2. Base64 encode the service account credentials by running `cat service-account.json | base64`
-3. Add the encoded service account to your configuration file
+1. Base64 encode the service account credentials by running `cat service-account.json | base64`
+1. Add the encoded service account to your configuration file
 
    1. If you want to add it to your self-hosted configuration file:
 
@@ -293,7 +293,7 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
       }
       ```
 
-   2. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
+   1. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
 
       ```json
       {
@@ -312,7 +312,7 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
 If you have dependencies on Google Container Registry (and Artifact Registry) you need to use `_json_key` and a slightly different encoding:
 
 1. Download your JSON service account and store it on your machine. Make sure that the service account has `read` (and only `read`) permissions to your artifacts
-2. Open the file and prefix the content with `_json_key:`. The file should look like this:
+1. Open the file and prefix the content with `_json_key:`. The file should look like this:
 
    ```
    _json_key:{
@@ -329,8 +329,8 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
    }
    ```
 
-3. Base64 encode the prefixed service account credentials by running `cat prefixed-service-account.json | base64`
-4. Add the prefixed and encoded service account to your configuration file
+1. Base64 encode the prefixed service account credentials by running `cat prefixed-service-account.json | base64`
+1. Add the prefixed and encoded service account to your configuration file
 
    1. If you want to add it to your self-hosted configuration file:
 
@@ -346,7 +346,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
       }
       ```
 
-   2. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
+   1. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
 
       ```json
       {

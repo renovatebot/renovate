@@ -92,7 +92,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 
 <!-- prettier-ignore -->
 !!! tip
-    You can't combine the path and sub-preset syntax.
+    You can't combine the path and sub-preset syntaxes.
     This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
     One workaround is to use distinct files instead of sub-presets.
 

@@ -18,7 +18,7 @@ By default, this includes:
 
 - .NET Core 1.0 and above
 - .NET Standard class libraries
-- `.csproj`, `.fsproj` or `.vbproj` files that use the SDK-style syntaxes
+- `.csproj`, `.fsproj` or `.vbproj` files that use SDK-style syntaxes
 
 To convert your .NET Framework `.csproj`, `.fsproj` or `.vbproj` files into an SDK-style project, follow the steps in this [guide](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/).
 

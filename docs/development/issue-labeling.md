@@ -198,8 +198,8 @@ Add a label `auto:format-code` to any Discussion which needs code formatting.
 Add a label `auto:logs` to indicate that there's a problem with the logs, and the contributor needs to do one of these things:
 
 1. Provide logs (if there are none yet)
-2. Provide more logs (in case current logs are insufficient)
-3. Format their logs properly
+1. Provide more logs (in case current logs are insufficient)
+1. Format their logs properly
 
 Add a label `auto:needs-details` to discussions which need more details to move forward.
 

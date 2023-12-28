@@ -15,7 +15,7 @@ Otherwise, the process for adding new repositories to a Renovate installation ca
 
 Follow these steps to install and enable the Mend Renovate App:
 
-First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and select the "Install" button:
+First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and select the _Install_ button:
 
 ![The Mend Renovate App Install button](../assets/images/github-app-install.png){ loading=lazy }
 
@@ -27,7 +27,7 @@ Renovate will ignore any repositories that don't have known package files, as we
 That said, most people run Renovate on selected repositories.
 Unfortunately GitHub doesn't offer a "select all except X, Y, Z" option, so you must select each repository where you want Renovate to run.
 
-Once you're done selecting repositories for Renovate to run on, select the green "Install" button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
+Once you're done selecting repositories for Renovate to run on, select the green _Install_ button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
 
 <!-- prettier-ignore -->
 !!! note
@@ -131,10 +131,10 @@ There are two recommended approaches:
 If you want to make config edits directly, follow these steps:
 
 1. Create a new Git branch to work on
-2. Install or update the `renovate` package globally (`npm i -g renovate` or `yarn global add renovate`) to get the `renovate-config-validator` program
-3. Edit your Renovate configuration file
-4. [Validate your config](../config-validation.md)
-5. If the improved config passes the validation, merge the branch into your mainline branch
+1. Install or update the `renovate` package globally (`npm i -g renovate` or `yarn global add renovate`) to get the `renovate-config-validator` program
+1. Edit your Renovate configuration file
+1. [Validate your config](../config-validation.md)
+1. If the improved config passes the validation, merge the branch into your mainline branch
 
 ### Nuke config and re-onboard
 
@@ -143,8 +143,8 @@ You can follow the steps below to nuke the config and get a new PR.
 Any existing Renovate PRs will be closed after you've completed these steps.
 
 1. Find your original `Configure Renovate` PR
-2. Rename the original PR to something else, e.g. `Configure Renovate - old`
-3. Remove the current Renovate configuration file (e.g. `renovate.json`) from your mainline branch
+1. Rename the original PR to something else, e.g. `Configure Renovate - old`
+1. Remove the current Renovate configuration file (e.g. `renovate.json`) from your mainline branch
 
 Following these steps will trick Renovate into thinking that your repository was _never_ onboarded, and will trigger a new "Configure Renovate" PR.
 If you're using the Mend Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.

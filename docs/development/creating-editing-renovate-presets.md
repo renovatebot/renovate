@@ -8,7 +8,7 @@ Follow the rules below to increase the chance that your pull request gets merged
 ## General rules
 
 1. Avoid creating presets for problems which can be fixed upstream
-2. The internal preset should be helpful for a significant number of Renovate users
+1. The internal preset should be helpful for a significant number of Renovate users
 
 ### Specific rules
 
@@ -27,20 +27,20 @@ We have multiple kinds of `group:` presets, with different rules.
 ##### Rules for `group:*` presets
 
 1. Finally, any other `group:*` presets can be added if they are beneficial to a wide number of users
-2. They don't need to be added to `group:recommended`, meaning that users will "opt in" to them one by one and not get them automatically from `config:recommended`, which includes `group:monorepo` and `group:recommended`
+1. They don't need to be added to `group:recommended`, meaning that users will "opt in" to them one by one and not get them automatically from `config:recommended`, which includes `group:monorepo` and `group:recommended`
 
 #### Replacement presets
 
 Rules:
 
 1. Replacement PRs should ideally propose a replacement only once the user is on a compatible version, by specifying a compatible `matchCurrentVersion` constraint
-2. If no compatible replacement upgrade is possible, it's acceptable to propose an incompatible one (e.g. a major version upgrade)
-3. Replacements should update the user to the first recommended version of the new dependency and not include any new changes - whether breaking or not - if they can be avoided
+1. If no compatible replacement upgrade is possible, it's acceptable to propose an incompatible one (e.g. a major version upgrade)
+1. Replacements should update the user to the first recommended version of the new dependency and not include any new changes - whether breaking or not - if they can be avoided
 
 #### Monorepo presets
 
 Rules:
 
 1. The primary use case of monorepo presets is finding packages from the same origin source repository which should be updated together
-2. Packages from the same repository which are developed and versioned independently do not need to be grouped as a monorepo, but in many cases we still do
-3. Packages from separate repositories but which are released together and dependent on each other may also be added to the "monorepo" definitions even if not strictly true
+1. Packages from the same repository which are developed and versioned independently do not need to be grouped as a monorepo, but in many cases we still do
+1. Packages from separate repositories but which are released together and dependent on each other may also be added to the "monorepo" definitions even if not strictly true

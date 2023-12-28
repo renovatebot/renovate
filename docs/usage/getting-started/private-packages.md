@@ -10,7 +10,7 @@ First, a quick note on terminology:
 
 ## When does Renovate need credentials?
 
-By default, the only credentials Renovate has, are those for the "platform", i.e. GitHub, GitLab, etc.
+By default, Renovate only has "platform" credentials, for GitHub, GitLab, and so on.
 If the token used has sufficient permissions, this will enable Renovate to lookup dependencies located in alternative repositories on the same host or any hosted on any embedded package registry on the same host.
 
 It's also quite common to need to look up packages on other protected hosts, including npmjs, Docker Hub, or private registries like Nexus or Artifactory.
@@ -31,7 +31,7 @@ There are four times in Renovate's behavior when it may need credentials:
 
 Renovate supports config presets, including those which are private.
 
-Although npm presets were the first type supported, they are now deprecated, and it is recommended that all users migrate to git-hosted "local" presets instead.
+Although npm presets were the first type supported, they are now deprecated, and we recommend that all users migrate to git-hosted "local" presets instead.
 However, if you do still use them, private modules should work if you configure `hostRules` (recommended) or `npmrc` including token credentials in your bot global config.
 It is strongly recommended not to use private modules on a private registry and a warning will be logged if that is found.
 Credentials stored on disk (e.g. in `~/.npmrc`) are no longer supported.

@@ -431,7 +431,7 @@ Information provided mainly in debug log level.
 ## executionTimeout
 
 Default execution timeout in minutes for child processes Renovate creates.
-If this option is not set, Renovate will fall back to 15 minutes.
+If this option is not set, Renovate defaults to 15 minutes.
 
 ## exposeAllEnv
 
@@ -471,7 +471,7 @@ This can be used if you're migrating from user-based forks to organization-based
 If you've set a `forkOrg` then Renovate will:
 
 1. Check if a fork exists in the preferred organization before checking it exists in the fork user's account
-2. If no fork exists: it will be created in the `forkOrg`, not the user account
+1. If no fork exists: it will be created in the `forkOrg`, not the user account
 
 ## forkToken
 
@@ -502,7 +502,7 @@ It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 
 1. Run `gpg import` (if you haven't before)
-2. Run `git config user.signingkey` and `git config commit.gpgsign true`
+1. Run `git config user.signingkey` and `git config commit.gpgsign true`
 
 The `git` commands are run locally in the cloned repo instead of globally.
 This reduces the chance of unintended consequences of global Git configs on shared systems.
@@ -894,7 +894,7 @@ Secret names must start with an upper or lower case character and can have only 
 ## skipInstalls
 
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
-If this is set to false, then a full installation of modules will be done.
+If this is set to `false`, then a full installation of modules will be done.
 This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token

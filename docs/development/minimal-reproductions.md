@@ -45,12 +45,12 @@ There are two ways to create a minimal reproduction:
 General steps:
 
 1. Create your minimal reproduction repository on GitHub, only use GitLab or Bitbucket if really needed
-2. Use the fewest number of repository files and dependencies
-3. Reduce the Renovate config to a minimum
-4. Remove private or secret information
-5. Create a `readme.md` file that explains the current behavior and expected behavior
-6. Set the repository visibility to `public`
-7. Give us the link to the repository
+1. Use the fewest number of repository files and dependencies
+1. Reduce the Renovate config to a minimum
+1. Remove private or secret information
+1. Create a `readme.md` file that explains the current behavior and expected behavior
+1. Set the repository visibility to `public`
+1. Give us the link to the repository
 
 ### Why we won't use your production repository to debug
 

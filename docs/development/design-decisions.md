@@ -32,10 +32,10 @@ This means that specific configuration options always override more general conf
 From most specific to least specific:
 
 1. Update type (e.g. `major`, `minor`, `patch`)
-2. Package (e.g. `lodash`, `django`)
-3. Manager (e.g. `npm`, `pypi`)
-4. Repository config
-5. Global configuration
+1. Package (e.g. `lodash`, `django`)
+1. Manager (e.g. `npm`, `pypi`)
+1. Repository config
+1. Global configuration
 
 ## Automatic discovery of package file locations
 

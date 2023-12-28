@@ -56,12 +56,12 @@ Renovate can validate configuration changes in Pull Requests when you use a spec
 Follow these steps to validate your configuration:
 
 1. Create a new Git branch that matches the `{{branchPrefix}}reconfigure` pattern. For example, if you're using the default prefix `renovate/`, your branch name must be `renovate/reconfigure`.
-2. Commit your updated Renovate config file to this branch, and push it to your Git hosting platform.
+1. Commit your updated Renovate config file to this branch, and push it to your Git hosting platform.
 
 The next time Renovate runs on that repo it will:
 
 1. Search for a branch that matches the special reconfigure pattern.
-2. Check for a config file in the reconfigure branch. Renovate can even find a renamed configuration file (compared to the config file in the default branch).
-3. Add a passing or failing status to the branch, depending on the outcome of the config validation run.
-4. If there's an _open_ pull request with validation errors from the _reconfigure_ branch then Renovate comments in the PR with details.
-5. Validate each commit the next time Renovate runs on the repository, until the PR is merged.
+1. Check for a config file in the reconfigure branch. Renovate can even find a renamed configuration file (compared to the config file in the default branch).
+1. Add a passing or failing status to the branch, depending on the outcome of the config validation run.
+1. If there's an _open_ pull request with validation errors from the _reconfigure_ branch then Renovate comments in the PR with details.
+1. Validate each commit the next time Renovate runs on the repository, until the PR is merged.

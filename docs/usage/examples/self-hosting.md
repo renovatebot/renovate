@@ -281,7 +281,7 @@ Only add the script to `cron` after you checked it works.
 
 This section describes how to use a Git binary with SSH for GitLab, to avoid API shortcomings.
 
-You first need to create an SSH key, then add the public part to GitLab (see this [guide](https://docs.gitlab.com/ee/ssh/)).
+Create an SSH key and then add the public part to GitLab (see this [guide](https://docs.gitlab.com/ee/ssh/)).
 
 Then, you need to create the secret to add the SSH key, and the following config to your container:
 

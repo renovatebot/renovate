@@ -96,18 +96,19 @@ The Renovate project uses the [pnpm](https://github.com/pnpm/pnpm) package manag
 To ensure everything is working properly on your end, you must:
 
 1. Install all dependencies with `pnpm install`
-2. Make a build with `pnpm build`, which should pass with no errors
-3. Verify all tests pass and have 100% test coverage, by running `pnpm test`
-4. Verify the installation by running `pnpm start`. You must see this error: `You must configure a GitHub personal access token`
+1. Make a build with `pnpm build`, which should pass with no errors
+1. Verify all tests pass and have 100% test coverage, by running `pnpm test`
+1. Verify the installation by running `pnpm start`. You must see this error: `You must configure a GitHub personal access token`
 
-Do not worry about the token error for now, as you'll be given instructions on how to configure the token a little later down in this document.
+Don't worry about the token error for now.
+You'll configure the token properly a little later, so keep reading.
 
 You only need to do these steps once.
 
 Before you submit a pull request you should:
 
 1. Install newer dependencies with `pnpm install`
-2. Run the tests with `pnpm test`
+1. Run the tests with `pnpm test`
 
 ## Platform Account Setup
 
@@ -215,9 +216,9 @@ You can debug Renovate with Chrome's inspect tool.
 Here's an example:
 
 1. Open `chrome://inspect` in Chrome, then select "Open dedicated DevTools for Node"
-2. Add a `debugger;` statement somewhere in the source code where you want to start debugging
-3. Run Renovate using `pnpm debug ...` instead of `pnpm start ...`
-4. Select "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
+1. Add a `debugger;` statement somewhere in the source code where you want to start debugging
+1. Run Renovate using `pnpm debug ...` instead of `pnpm start ...`
+1. Select "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
 
 ### VS Code
 

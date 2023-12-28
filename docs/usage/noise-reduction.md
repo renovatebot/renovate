@@ -196,7 +196,7 @@ First of all, if you ever have any ideas about how to make Renovate less noisy, 
 Our philosophy is:
 
 1. Nearly everyone should use Renovate-like dependency update automation
-2. Over time, you should "see" Renovate less and less
+1. Over time, you should "see" Renovate less and less
 
 One of our hopes with preset configs is that a set of "sensible" configs can be maintained by the community that combine grouping, scheduling and automerging to reduce the amount of noise in repositories with little downside or increased risk.
 Such lists could be maintained and used somewhat like Adblock lists - kept up to date by maintainers but for the majority of users they are simply trusted/automatic/invisible.
