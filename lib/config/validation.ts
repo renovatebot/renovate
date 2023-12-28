@@ -153,6 +153,7 @@ export async function validateConfig(
           topic: 'Configuration Error',
           message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
         });
+        continue;
       }
     }
     if (key === 'enabledManagers' && val) {
