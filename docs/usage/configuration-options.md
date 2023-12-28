@@ -646,7 +646,7 @@ When `constraintsFiltering=strict`, the following logic applies:
 Here are some examples:
 
 | Your repo `engines.node` | Dependency release `engines.node` | Result   |
-|--------------------------|-----------------------------------|----------|
+| ------------------------ | --------------------------------- | -------- |
 | `18`                     | `16 \|\| 18`                      | allowed  |
 | `^18.10.0`               | `>=18`                            | allowed  |
 | `^16.10.0 \|\| >=18.0.0` | `>= 16.0.0`                       | allowed  |
@@ -1847,7 +1847,7 @@ For example, using this option could be used whenever authentication using Git f
 Supported artifactAuth and hostType combinations:
 
 | artifactAuth | hostTypes                                   |
-|--------------|---------------------------------------------|
+| ------------ | ------------------------------------------- |
 | `composer`   | `gitlab`, `packagist`, `github`, `git-tags` |
 
 ### matchHost
@@ -2997,7 +2997,7 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 Table with options:
 
 | Name                         | Description                                                                                                                                                |
-|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `bundlerConservative`        | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
 | `gomodMassage`               | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
 | `gomodTidy`                  | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |

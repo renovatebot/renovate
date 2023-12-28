@@ -14,7 +14,7 @@ Renovate always creates one commit per branch, even when updating multiple files
 This keeps Renovate's branches neat, so we can use the following logic:
 
 | Last commit in branch made by | Behavior                                                    |
-|-------------------------------|-------------------------------------------------------------|
+| ----------------------------- | ----------------------------------------------------------- |
 | Renovate                      | Assume branch is clean                                      |
 | Someone or something else     | Assume branch edited by user, do not push to branch anymore |
 

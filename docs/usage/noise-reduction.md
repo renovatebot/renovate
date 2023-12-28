@@ -185,7 +185,7 @@ Using lock files greatly increases the chance that merging one PR will result in
 The table below highlights different noise reduction strategies and their effect on pull request and potential lock file conflicts:
 
 | Action                               | Effect on pull requests  | Chance of lock file conflicts |
-|--------------------------------------|--------------------------|-------------------------------|
+| ------------------------------------ | ------------------------ | ----------------------------- |
 | Group dependencies together          | Decreases separate PRs   | Decreases                     |
 | Automerge dependencies               | Decreases concurrent PRs | Decreases                     |
 | Decrease scheduled time for Renovate | Increases concurrent PRs | Increases                     |

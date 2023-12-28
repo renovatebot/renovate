@@ -8,7 +8,7 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 ## Table of features
 
 | Feature                                   | Renovate                                                                                                                       | Dependabot                                                                                                                                                                   |
-|-------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Dependency Dashboard                      | Yes                                                                                                                            | No                                                                                                                                                                           |
 | Grouped updates                           | Yes, use community-provided groups, or create your own                                                                         | Yes, create [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups) manually     |
 | Upgrades common monorepo packages at once | Yes                                                                                                                            | No                                                                                                                                                                           |
@@ -68,7 +68,7 @@ If you're an advanced user, you may use the [`dependabot-core` repository](https
 ### Show changelogs
 
 | Feature                               | Renovate                     | Dependabot                      |
-|---------------------------------------|------------------------------|---------------------------------|
+| ------------------------------------- | ---------------------------- | ------------------------------- |
 | Link to GitHub release                | Yes, to specific release tag | Yes, to "releases landing page" |
 | Link to GitHub's comparing changes UI | Yes                          | Yes                             |
 | Release notes                         | Yes                          | Yes                             |

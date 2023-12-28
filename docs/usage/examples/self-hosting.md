@@ -393,7 +393,7 @@ When you use `LOG_LEVEL=debug` and `LOG_FORMAT=json`, Renovate uses numbers in t
 The logging level output is controlled by the Bunyan logging library.
 
 | Level | Meaning |
-|------:|---------|
+| ----: | ------- |
 |    10 | trace   |
 |    20 | debug   |
 |    30 | info    |

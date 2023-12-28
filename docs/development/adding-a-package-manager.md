@@ -16,7 +16,7 @@ Common application logic for Renovate, not specific to particular managers, usua
 The manager's `index.ts` file supports the following values or functions:
 
 | Value/function                | Optional | Async |
-|-------------------------------|----------|-------|
+| ----------------------------- | -------- | ----- |
 | `bumpPackageVersion`          | yes      |       |
 | `extractPackageFile`          |          | yes   |
 | `extractAllPackageFiles`      | yes      | yes   |

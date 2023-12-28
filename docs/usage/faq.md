@@ -39,7 +39,7 @@ Major releases of Renovate are held back until the maintainers are reasonably ce
 ## Renovate core features not supported on all platforms
 
 | Feature               | Platforms which lack feature                               | See Renovate issue(s)                                        |
-|-----------------------|------------------------------------------------------------|--------------------------------------------------------------|
+| --------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
 | Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server                         | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
 | The Mend Renovate App | Azure, Bitbucket, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
 
@@ -48,7 +48,7 @@ Major releases of Renovate are held back until the maintainers are reasonably ce
 Some major platform features are not supported at all by Renovate.
 
 | Feature name                            | Platform                                  | See Renovate issue(s)                                                                                                                                                                        |
-|-----------------------------------------|-------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| --------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Jira issues                             | Bitbucket                                 | [#20568](https://github.com/renovatebot/renovate/issues/20568)                                                                                                                               |
 | Jira issues                             | Bitbucket Server                          | [#3796](https://github.com/renovatebot/renovate/issues/3796)                                                                                                                                 |
 | Merge trains                            | GitLab                                    | [#5573](https://github.com/renovatebot/renovate/issues/5573)                                                                                                                                 |
