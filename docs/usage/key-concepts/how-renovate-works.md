@@ -28,15 +28,15 @@ Renovate's modules are:
 Renovate uses these modules in order:
 
 1. The platform module interacts with the source control platform and clones the repository
-2. The manager module looks for files based on their name and extracts the dependencies (each dependency has a datasource)
-3. The datasource module looks up versions of the dependency
-4. The versioning module validates and sorts the returned versions
+1. The manager module looks for files based on their name and extracts the dependencies (each dependency has a datasource)
+1. The datasource module looks up versions of the dependency
+1. The versioning module validates and sorts the returned versions
 
 For example:
 
 1. The `gitlabci` manager finds a dependency: `python:3.10-alpine` which has the `docker` datasource
-2. The `docker` datasource looks for versions and finds: `[python:3.9,python:3.9-alpine,python:3.10,python:3.10-alpine,python:3.11,python:3.11-alpine]`
-3. The `docker` versioning returns `python:3.11-alpine`, because that version is compatible with `python:3.10-alpine`
+1. The `docker` datasource looks for versions and finds: `[python:3.9,python:3.9-alpine,python:3.10,python:3.10-alpine,python:3.11,python:3.11-alpine]`
+1. The `docker` versioning returns `python:3.11-alpine`, because that version is compatible with `python:3.10-alpine`
 
 # Workflow
 

@@ -42,9 +42,9 @@ You can customize when Renovate runs, by using the `timezone` and `schedule` con
 At a high level you need to follow these steps:
 
 1. Tell Renovate what `timezone` you want to use
-2. Learn about the scheduling syntax
-3. Optional: configure an "in repository schedule"
-4. Optional: create packageRules with a custom `schedule` for specific packages
+1. Learn about the scheduling syntax
+1. Optional: configure an "in repository schedule"
+1. Optional: create packageRules with a custom `schedule` for specific packages
 
 ### Setting your timezone
 

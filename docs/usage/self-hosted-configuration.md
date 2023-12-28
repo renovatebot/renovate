@@ -623,8 +623,8 @@ This is similar to what happens when you change the `onboardingBranch` config op
 When this option is `true`, Renovate will do the following during repository initialization:
 
 1. Try to fetch the default config file (e.g. `renovate.json`)
-2. Check if the file contains `"enabled": false`
-3. If so, skip cloning and skip the repository immediately
+1. Check if the file contains `"enabled": false`
+1. If so, skip cloning and skip the repository immediately
 
 If `onboardingConfigFileName` is set, that file name will be used instead of the default.
 

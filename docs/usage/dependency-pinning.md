@@ -219,9 +219,9 @@ But certainly "does it give a false sense of security" is not a question we can 
 We recommend:
 
 1. Any apps (web or Node.js) that aren't `require()`'d by other packages should pin all types of dependencies for greatest reliability/predictability
-2. Browser or dual browser/node.js libraries that are consumed/`required()`'d by others should keep using SemVer ranges for `dependencies` but can use pinned dependencies for `devDependencies`
-3. Node.js-only libraries can consider pinning all dependencies, because application size/duplicate dependencies are not as much a concern in Node.js compared to the browser. Of course, don't do that if your library is a micro one likely to be consumed in disk-sensitive environments
-4. Use a lock file
+1. Browser or dual browser/node.js libraries that are consumed/`required()`'d by others should keep using SemVer ranges for `dependencies` but can use pinned dependencies for `devDependencies`
+1. Node.js-only libraries can consider pinning all dependencies, because application size/duplicate dependencies are not as much a concern in Node.js compared to the browser. Of course, don't do that if your library is a micro one likely to be consumed in disk-sensitive environments
+1. Use a lock file
 
 As noted earlier, when you pin dependencies then you'll see an increase in the raw volume of dependency updates, compared to if you use ranges.
 If/when this starts bothering you, add Renovate rules to reduce the volume, such as scheduling updates, grouping them, or automerging "safe" ones.

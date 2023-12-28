@@ -226,7 +226,7 @@ You can also debug Renovate with VS Code.
 Here's an example:
 
 1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your Personal Access Token
-2. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:
+1. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:
 
    ```javascript
    module.exports = {
@@ -235,5 +235,5 @@ Here's an example:
    };
    ```
 
-3. Set a breakpoint somewhere in the source code and launch the application in debug mode with selected configuration as `debug`
-4. Wait for your breakpoint to be triggered
+1. Set a breakpoint somewhere in the source code and launch the application in debug mode with selected configuration as `debug`
+1. Wait for your breakpoint to be triggered

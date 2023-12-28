@@ -10,9 +10,9 @@ Renovate supports upgrading dependencies in Bundler's Gemfiles and associated `G
 ## How it works
 
 1. Renovate searches in each repository for any Gemfiles
-2. Existing dependencies are extracted from the Gemfiles
-3. Renovate resolves the dependency on Rubygems.org (or elsewhere if configured), and checks for newer versions
-4. A PR is created which updates the `Gemfile` and `Gemfile.lock` in a single commit
+1. Existing dependencies are extracted from the Gemfiles
+1. Renovate resolves the dependency on Rubygems.org (or elsewhere if configured), and checks for newer versions
+1. A PR is created which updates the `Gemfile` and `Gemfile.lock` in a single commit
 
 ## Warnings
 

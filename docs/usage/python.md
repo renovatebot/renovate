@@ -19,9 +19,9 @@ Legacy versions with the `===` prefix are ignored.
 ## How it works
 
 1. Renovate searches through each repository for package files
-2. Existing dependencies are extracted from the package files
-3. Renovate searches for the latest version on [PyPI](https://pypi.org/) to decide if there are upgrades
-4. If the source package includes a GitHub URL as its source, and has a "changelog" file _or_ uses GitHub releases, a Release Note will be embedded in the generated PR
+1. Existing dependencies are extracted from the package files
+1. Renovate searches for the latest version on [PyPI](https://pypi.org/) to decide if there are upgrades
+1. If the source package includes a GitHub URL as its source, and has a "changelog" file _or_ uses GitHub releases, a Release Note will be embedded in the generated PR
 
 ## Alternative file names
 

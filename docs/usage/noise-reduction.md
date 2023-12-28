@@ -72,8 +72,8 @@ In that case, you might schedule Renovate to run every Tuesday after midnight to
 There are multiple reasons why Renovate may need to "recreate" PRs after you merge another:
 
 1. Conflict with `package.json` (sometimes)
-2. Conflict with lock files (often)
-3. If you have configured Renovate or GitHub that PRs must always be kept up-to-date with the base branch
+1. Conflict with lock files (often)
+1. If you have configured Renovate or GitHub that PRs must always be kept up-to-date with the base branch
 
 Any of the above reasons can lead to a Renovate branch being considered "stale" and then Renovate needs to rebase it off the base branch before you can test and merge again, and Renovate won't do this until it's back in schedule.
 

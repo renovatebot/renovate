@@ -25,9 +25,9 @@ To convert your .NET Framework `.csproj`, `.fsproj` or `.vbproj` files into an S
 ## How it works
 
 1. Renovate searches in each repository for any files with a `.csproj`, `.fsproj`, or `.vbproj` extension
-2. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
-3. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or an alternative feed if configured) to see if any upgrades are available
-4. If the source package includes a GitHub URL as its source, and has either:
+1. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
+1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or an alternative feed if configured) to see if any upgrades are available
+1. If the source package includes a GitHub URL as its source, and has either:
 
    - a "changelog" file, or
    - uses GitHub releases

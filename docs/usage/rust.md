@@ -10,10 +10,10 @@ Renovate supports upgrading dependencies in `Cargo.toml` files and associated `C
 ## How it works
 
 1. Renovate searches in each repository for any `Cargo.toml` files
-2. Renovate extracts existing dependencies from `[dependencies]`, `[dev-dependencies]`, `[build-dependencies]` and `[workspace.dependencies]`
-3. Renovate looks up Cargo configuration to find index URLs for private registries
-4. Renovate resolves the dependency's version using the crates.io API or by cloning the index URL
-5. If Renovate finds an update, Renovate will use `cargo update` to update both `Cargo.toml` and `Cargo.lock`
+1. Renovate extracts existing dependencies from `[dependencies]`, `[dev-dependencies]`, `[build-dependencies]` and `[workspace.dependencies]`
+1. Renovate looks up Cargo configuration to find index URLs for private registries
+1. Renovate resolves the dependency's version using the crates.io API or by cloning the index URL
+1. If Renovate finds an update, Renovate will use `cargo update` to update both `Cargo.toml` and `Cargo.lock`
 
 ## Enabling Rust Modules Updating
 

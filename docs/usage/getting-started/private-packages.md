@@ -228,8 +228,8 @@ If you need to configure per-repository credentials then you can also configure 
 The recommended approaches in order of preference are:
 
 1. **Self-hosted hostRules**: Configure a hostRules entry in the bot's `config.js` with the `hostType`, `matchHost` and `token` specified
-2. **The Mend Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
-3. **The Mend Renovate App with a private registry**: Add a plaintext `npmrc` plus an encrypted `npmToken` in config
+1. **The Mend Renovate App with private modules from npmjs.org**: Add an encrypted `npmToken` to your Renovate config
+1. **The Mend Renovate App with a private registry**: Add a plaintext `npmrc` plus an encrypted `npmToken` in config
 
 These approaches are described in full below.
 
@@ -323,8 +323,8 @@ If instead you use an alternative registry or need an `.npmrc` file for some oth
 Renovate will then use the following logic:
 
 1. If no `npmrc` string is present in config then one will be created with the `_authToken` pointing to the default npmjs registry
-2. If an `npmrc` string is present and has a `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
-3. If an `npmrc` string is present but doesn't have a `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
+1. If an `npmrc` string is present and has a `${NPM_TOKEN}` then that placeholder will be replaced with the decrypted token
+1. If an `npmrc` string is present but doesn't have a `${NPM_TOKEN}` then the file will have `_authToken=<token>` appended to it
 
 #### Encrypted entire .npmrc file into config
 

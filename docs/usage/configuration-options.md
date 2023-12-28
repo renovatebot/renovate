@@ -11,15 +11,15 @@ Any config you define applies to the whole repository (e.g. if you have a monore
 You can store your Renovate configuration file in one of these locations:
 
 1. `renovate.json`
-2. `renovate.json5`
-3. `.github/renovate.json`
-4. `.github/renovate.json5`
-5. `.gitlab/renovate.json`
-6. `.gitlab/renovate.json5`
-7. `.renovaterc`
-8. `.renovaterc.json`
-9. `.renovaterc.json5`
-10. `package.json` _(within a `"renovate"` section)_
+1. `renovate.json5`
+1. `.github/renovate.json`
+1. `.github/renovate.json5`
+1. `.gitlab/renovate.json`
+1. `.gitlab/renovate.json5`
+1. `.renovaterc`
+1. `.renovaterc.json`
+1. `.renovaterc.json5`
+1. `package.json` _(within a `"renovate"` section)_
 
 <!-- prettier-ignore -->
 !!! warning
@@ -1575,8 +1575,8 @@ Example for configuring `docker` auth:
 If multiple `hostRules` match a request, then they will be applied in the following order/priority:
 
 1. rules with only `hostType` specified
-2. rules with only `matchHost` specified (sorted by `matchHost` length if multiple match)
-3. rules with both `matchHost` and `hostType` specified (sorted by `matchHost` length if multiple match)
+1. rules with only `matchHost` specified (sorted by `matchHost` length if multiple match)
+1. rules with both `matchHost` and `hostType` specified (sorted by `matchHost` length if multiple match)
 
 To disable requests to a particular host, you can configure a rule like:
 
@@ -3192,10 +3192,10 @@ Slowing Renovate down can be handy when you're onboarding a repository with a lo
 What may happen if you don't set a `prHourlyLimit`:
 
 1. Renovate creates an Onboarding PR
-2. You merge the onboarding PR to activate Renovate
-3. Renovate creates a "Pin Dependencies" PR (if needed)
-4. You merge the "Pin Dependencies" PR
-5. Renovate creates every single upgrade PR needed, which can be a lot
+1. You merge the onboarding PR to activate Renovate
+1. Renovate creates a "Pin Dependencies" PR (if needed)
+1. You merge the "Pin Dependencies" PR
+1. Renovate creates every single upgrade PR needed, which can be a lot
 
 The above may cause:
 
@@ -3229,11 +3229,11 @@ By default, Renovate sorts/prioritizes based on the update type, going from the 
 Renovate creates update PRs in this order:
 
 1. `pinDigest`
-2. `pin`
-3. `digest`
-4. `patch`
-5. `minor`
-6. `major`
+1. `pin`
+1. `digest`
+1. `patch`
+1. `minor`
+1. `major`
 
 If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting.
 The default value is 0, so setting a negative value will make dependencies sort last, while higher values sort first.
@@ -3297,9 +3297,9 @@ Behavior:
 Renovate's `"auto"` strategy works like this for npm:
 
 1. Widen `peerDependencies`
-2. If an existing range already ends with an "or" operator like `"^1.0.0 || ^2.0.0"`, then Renovate widens it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
-3. Otherwise, if the update is outside the existing range, Renovate replaces the range. So `"^2.0.0"` is replaced by `"^3.0.0"`
-4. Finally, if the update is in-range, Renovate will update the lockfile with the new exact version.
+1. If an existing range already ends with an "or" operator like `"^1.0.0 || ^2.0.0"`, then Renovate widens it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
+1. Otherwise, if the update is outside the existing range, Renovate replaces the range. So `"^2.0.0"` is replaced by `"^3.0.0"`
+1. Finally, if the update is in-range, Renovate will update the lockfile with the new exact version.
 
 By default, Renovate assumes that if you're using ranges then it's because you want them to be wide/open.
 Renovate won't deliberately "narrow" any range by increasing the semver value inside.
@@ -3756,11 +3756,11 @@ For this to work, you must enable the [Dependency graph](https://docs.github.com
 Follow these steps:
 
 1. While logged in to GitHub, navigate to your repository
-2. Select the "Settings" tab
-3. Select "Code security and analysis" in the sidebar
-4. Enable the "Dependency graph"
-5. Enable "Dependabot alerts"
-6. If you're running Renovate in app mode: make sure the app has `read` permissions for "Dependabot alerts".
+1. Select the "Settings" tab
+1. Select "Code security and analysis" in the sidebar
+1. Enable the "Dependency graph"
+1. Enable "Dependabot alerts"
+1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Dependabot alerts".
    If you're the account administrator, browse to the app (for example [the Mend Renovate App](https://github.com/apps/renovate)), select "Configure", and then scroll down to the "Permissions" section and make sure that `read` access to "Dependabot alerts" is mentioned
 
 Once the above conditions are met, and you got one or more vulnerability alerts from GitHub for this repository, then Renovate tries to raise fix PRs.

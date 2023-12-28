@@ -24,14 +24,14 @@ As explained above, Renovate PRs normally have some "uniqueness" in their title 
 When you close a "unique" PR, Renovate assumes you don't want to see that PR again in the future, for example:
 
 1. You ignored `lodash@4.17.21` by closing Renovate's PR
-2. Renovate assumes you don't want any updates to `4.17.21` of `lodash`
-3. Renovate creates a new PR when the branch + title "uniqueness" exists again, like when `lodash@4.17.22` releases
+1. Renovate assumes you don't want any updates to `4.17.21` of `lodash`
+1. Renovate creates a new PR when the branch + title "uniqueness" exists again, like when `lodash@4.17.22` releases
 
 Renovate behaves similarly for `major` updates, for example:
 
 1. You ignored a `major` update for Lodash (pr title: "Update lodash to v4") by closing Renovate's PR
-2. Renovate assumes you don't want any updates to `v4` of `lodash`
-3. Renovate won't create any update PRs for `v4` of `lodash`, even if there are newer versions of `v4`
+1. Renovate assumes you don't want any updates to `v4` of `lodash`
+1. Renovate won't create any update PRs for `v4` of `lodash`, even if there are newer versions of `v4`
 
 ## Immortal PRs
 

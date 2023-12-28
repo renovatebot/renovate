@@ -54,8 +54,8 @@ To troubleshoot further, you usually need to look at `DEBUG` logs.
 We recommend you follow this process:
 
 1. Try to narrow in on the problem area e.g. by looking for relevant branches or `WARN` or `ERROR` messages
-2. Find all relevant `DEBUG` or `INFO` messages from before and after the problem occurred
-3. Copy/paste the relevant parts of the logs into your discussion post or bug report
+1. Find all relevant `DEBUG` or `INFO` messages from before and after the problem occurred
+1. Copy/paste the relevant parts of the logs into your discussion post or bug report
 
 If you cannot fix the problem yourself after reading the logs, and reading - or searching through - our documentation, search the [`renovatebot/renovate` discussion](https://github.com/renovatebot/renovate/discussions) forum to see if somebody has asked a similar or related question.
 
