@@ -14,7 +14,7 @@ export const supportsRanges = false;
 
 const alphaNumPattern = regEx(/([a-zA-Z]+)|(\d+)|(~)/g);
 const epochPattern = regEx(/^\d+$/);
-const leadingZerosPattern = regEx(/^0+(?!$)|^$/);
+const leadingZerosPattern = new RegExp(/^0+(?!$)|^$/);
 
 export interface RpmVersion extends GenericVersion {
   /**
