@@ -753,8 +753,8 @@ function validateRegexManagerFields(
 
 /**  An option is a false global if it has the same name as a global only option
  *   but is actually just the field of a non global option or field an children of the non global option
- *   eg. token-> it's global option used as the bot's token as well and
- *   also it can be the token used for a platform inside the histRules configuration
+ *   eg. token: it's global option used as the bot's token as well and
+ *   also it can be the token used for a platform inside the hostRules configuration
  */
 function isFalseGlobal(optionName: string, parentPath?: string): boolean {
   if (parentPath?.includes('hostRules')) {
