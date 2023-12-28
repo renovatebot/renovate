@@ -118,14 +118,6 @@ export async function validateConfig(
       }
     });
   }
-  if (!optionGlobals) {
-    optionGlobals = new Set<string>();
-    for (const option of options) {
-      if (option.globalOnly) {
-        optionGlobals.add(option.name);
-      }
-    }
-  }
 
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
@@ -147,14 +139,20 @@ export async function validateConfig(
       });
     }
     if (!isGlobalConfig) {
-      if (optionGlobals.has(key)) {
-        // token is a global config option and a field of repo config option hostRules.encrypted
-        if (!(key === 'token' && parentPath?.includes('hostRules'))) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
-          });
+      if (!optionGlobals) {
+        optionGlobals = new Set<string>();
+        for (const option of options) {
+          if (option.globalOnly) {
+            optionGlobals.add(option.name);
+          }
         }
+      }
+
+      if (optionGlobals.has(key) && !isFalseGlobal(key, parentPath)) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+        });
       }
     }
     if (key === 'enabledManagers' && val) {
@@ -751,4 +749,23 @@ function validateRegexManagerFields(
       });
     }
   }
+}
+
+/**  An option is a false global if it has the same name as a global only option
+ *   but is actually just the field of a non global option or field an children of the non global option
+ *   eg. token-> it's global option used as the bot's token as well and
+ *   also it can be the token used for a platform inside the histRules configuration
+ */
+function isFalseGlobal(optionName: string, parentPath?: string): boolean {
+  if (parentPath?.includes('hostRules')) {
+    if (
+      optionName === 'token' ||
+      optionName === 'username' ||
+      optionName === 'password'
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }
