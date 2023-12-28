@@ -544,8 +544,9 @@ const platform: Platform = {
         if (semver.gte(defaults.version, '1.17.0')) {
           try {
             await helper.mergePR(config.repository, gpr.number, {
-              // TODO: pass strategy (#16884)
-              Do: config.mergeMethod,
+              Do:
+                getMergeMethod(platformOptions?.automergeStrategy) ??
+                config.mergeMethod,
               merge_when_checks_succeed: true,
             });
 
