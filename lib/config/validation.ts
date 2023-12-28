@@ -761,9 +761,7 @@ function isFalseGlobal(optionName: string, parentPath?: string): boolean {
     if (
       optionName === 'token' ||
       optionName === 'username' ||
-      optionName === 'password' ||
-      optionName === 'platform' ||
-      optionName === 'endpoint'
+      optionName === 'password'
     ) {
       return true;
     }
