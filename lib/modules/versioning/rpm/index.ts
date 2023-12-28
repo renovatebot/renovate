@@ -14,7 +14,7 @@ export const supportsRanges = false;
 
 const alphaNumPattern = regEx(/([a-zA-Z]+)|(\d+)|(~)/g);
 const epochPattern = regEx(/^\d+$/);
-const leadingZerosPattern = regEx(/^0+/);
+const leadingZerosPattern = regEx(/^0+(?!$)|^$/);
 
 export interface RpmVersion extends GenericVersion {
   /**
@@ -192,8 +192,8 @@ class RpmVersioningApi extends GenericVersioningApi {
         //We clearly have a number here, so return which is greater
         //Don't use Number.parseInt, because if we have a '0', the above
         //lines turns it into '', and parseInt will give us NaN
-        const num1 = Number(matchv1);
-        const num2 = Number(matchv2);
+        const num1 = Number.parseInt(matchv1, 10);
+        const num2 = Number.parseInt(matchv2, 10);
 
         const result = num1 - num2;
 
