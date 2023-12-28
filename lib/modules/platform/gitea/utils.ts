@@ -78,3 +78,5 @@ export function getMergeMethod(
       return null;
   }
 }
+
+export const API_PATH = '/api/v1';

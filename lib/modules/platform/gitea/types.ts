@@ -23,6 +23,7 @@ export interface PR {
   body: string;
   mergeable: boolean;
   created_at: string;
+  updated_at: string;
   closed_at: string;
   diff_url: string;
   base?: {
@@ -185,11 +186,6 @@ export interface PRUpdateParams {
   base?: string;
 }
 
-export interface PRSearchParams {
-  state?: PRState;
-  labels?: number[];
-}
-
 export interface PRMergeParams {
   Do: PRMergeMethod;
   merge_when_checks_succeed?: boolean;
@@ -206,4 +202,9 @@ export interface CommitStatusCreateParams {
   description?: string;
   state?: CommitStatusType;
   target_url?: string;
+}
+
+export interface GiteaPrCacheData {
+  items: Record<number, PR>;
+  updated_at: string | null;
 }

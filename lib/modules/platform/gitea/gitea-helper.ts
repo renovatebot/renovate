@@ -1,6 +1,7 @@
 import type { BranchStatus } from '../../../types';
 import { GiteaHttp, GiteaHttpOptions } from '../../../util/http/gitea';
 import { getQueryString } from '../../../util/url';
+import { GiteaPrCache } from './pr-cache';
 import type {
   Branch,
   CombinedCommitStatus,
@@ -19,7 +20,6 @@ import type {
   PR,
   PRCreateParams,
   PRMergeParams,
-  PRSearchParams,
   PRUpdateParams,
   PrReviewersParams,
   Repo,
@@ -28,10 +28,9 @@ import type {
   RepoSearchResults,
   User,
 } from './types';
+import { API_PATH } from './utils';
 
 const giteaHttp = new GiteaHttp();
-
-const API_PATH = '/api/v1';
 
 const urlEscape = (raw: string): string => encodeURIComponent(raw);
 const commitStatusStates: CommitStatusType[] = [
@@ -181,19 +180,11 @@ export async function requestPrReviewers(
   });
 }
 
-export async function searchPRs(
-  repoPath: string,
-  params: PRSearchParams,
-  options?: GiteaHttpOptions,
-): Promise<PR[]> {
-  const query = getQueryString(params);
-  const url = `${API_PATH}/repos/${repoPath}/pulls?${query}`;
-  const res = await giteaHttp.getJson<PR[]>(url, {
-    ...options,
-    paginate: true,
-  });
-
-  return res.body;
+export async function searchPRs(repoPath: string): Promise<PR[]> {
+  const res = await GiteaPrCache.init(repoPath)
+    .sync(giteaHttp)
+    .then((prCache) => prCache.getPrs());
+  return res;
 }
 
 export async function createIssue(

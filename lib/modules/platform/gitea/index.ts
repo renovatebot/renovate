@@ -54,12 +54,13 @@ import {
   smartLinks,
   trimTrailingApiPath,
 } from './utils';
+import { GiteaPrCache } from './pr-cache';
 
 interface GiteaRepoConfig {
   repository: string;
   mergeMethod: PRMergeMethod;
 
-  prList: Promise<Pr[]> | null;
+  prList?: Pr[];
   issueList: Promise<Issue[]> | null;
   labelList: Promise<Label[]> | null;
   defaultBranch: string;
@@ -332,7 +333,7 @@ const platform: Platform = {
     });
 
     // Reset cached resources
-    config.prList = null;
+    delete config.prList;
     config.issueList = null;
     config.labelList = null;
     config.hasIssuesEnabled = !repo.external_tracker && repo.has_issues;
@@ -449,17 +450,12 @@ const platform: Platform = {
     return 'yellow';
   },
 
-  getPrList(): Promise<Pr[]> {
-    if (config.prList === null) {
-      config.prList = helper
-        .searchPRs(config.repository, { state: 'all' }, { memCache: false })
-        .then((prs) => {
-          const prList = prs.map(toRenovatePR).filter(is.truthy);
-          logger.debug(`Retrieved ${prList.length} Pull Requests`);
-          return prList;
-        });
-    }
-
+  async getPrList(): Promise<Pr[]> {
+    config.prList ??= await helper.searchPRs(config.repository).then((prs) => {
+      const prList = prs.map(toRenovatePR).filter(is.truthy);
+      logger.debug(`Retrieved ${prList.length} Pull Requests`);
+      return prList;
+    });
     return config.prList;
   },
 
@@ -475,9 +471,8 @@ const platform: Platform = {
       pr = toRenovatePR(gpr);
 
       // Add pull request to cache for further lookups / queries
-      if (config.prList !== null) {
-        // TODO #22198
-        (await config.prList).push(pr!);
+      if (pr) {
+        config.prList?.push(pr);
       }
     }
 
@@ -572,10 +567,9 @@ const platform: Platform = {
       if (!pr) {
         throw new Error('Can not parse newly created Pull Request');
       }
-      if (config.prList !== null) {
-        (await config.prList).push(pr);
-      }
 
+      GiteaPrCache.init(config.repository).addPr(gpr);
+      config.prList?.push(pr);
       return pr;
     } catch (err) {
       // When the user manually deletes a branch from Renovate, the PR remains but is no longer linked to any branch. In
@@ -588,7 +582,6 @@ const platform: Platform = {
         );
 
         // Refresh cached PR list and search for pull request with matching information
-        config.prList = null;
         const pr = await platform.findPr({
           branchName: sourceBranch,
           state: 'open',
@@ -642,7 +635,12 @@ const platform: Platform = {
       prUpdateParams.base = targetBranch;
     }
 
-    await helper.updatePR(config.repository, number, prUpdateParams);
+    const gpr = await helper.updatePR(
+      config.repository,
+      number,
+      prUpdateParams,
+    );
+    GiteaPrCache.init(config.repository).addPr(gpr);
   },
 
   async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {
