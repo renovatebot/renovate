@@ -89,7 +89,7 @@ If you use an environment variable or the CLI to set the value for `autodiscover
 Commas will be used as delimiter for a new filter.
 
 ```
-# DO NOT use commas inside the filter if your are using env or cli variables to configure it.
+# DO NOT use commas inside the filter if you're using env or cli variables to configure it.
 RENOVATE_AUTODISCOVER_FILTER="/MyOrg/{my-repo,foo-repo}"
 
 
@@ -146,7 +146,7 @@ For example:
 ## autodiscoverTopics
 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
-topics. Set this variable to a list of strings, all of which will be topics for the autodiscovered repositories.
+topics. Set this variable to a list of strings, all of which will be topics for the auto-discovered repositories.
 
 For example:
 
@@ -158,7 +158,7 @@ For example:
 
 ## baseDir
 
-By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
+By default, Renovate uses a temporary directory like `/tmp/renovate` to store its data.
 You can override this default with the `baseDir` option.
 
 For example:
@@ -189,9 +189,9 @@ Renovate supports four possible ways to access those tools:
 - `hermit`: Uses the [Hermit](https://github.com/cashapp/hermit) tool installation approach.
 
 Starting in v36, Renovate's default Docker image (previously referred to as the "slim" image) uses `binarySource=install` while the "full" Docker image uses `binarySource=global`.
-If you are running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
+If you're running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
 
-If you are building your own Renovate image, e.g. by installing Renovate using `npm`, then you will need to ensure that all necessary tools are installed globally before running Renovate so that `binarySource=global` will work.
+If you're building your own Renovate image, e.g. by installing Renovate using `npm`, then you'll need to ensure that all necessary tools are installed globally before running Renovate so that `binarySource=global` will work.
 
 The `binarySource=docker` approach should not be necessary in most cases now and `binarySource=install` is recommended instead.
 If you have a use case where you cannot use `binarySource=install` but can use `binarySource=docker` then please share it in a GitHub Discussion so that the maintainers can understand it.
@@ -199,7 +199,7 @@ For this to work, `docker` needs to be installed and the Docker socket available
 
 ## cacheDir
 
-By default Renovate stores cache data in a temporary directory like `/tmp/renovate/cache`.
+By default, Renovate stores cache data in a temporary directory like `/tmp/renovate/cache`.
 Use the `cacheDir` option to override this default.
 
 The `baseDir` and `cacheDir` option may point to different directories.
@@ -251,11 +251,11 @@ Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/
 
 This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
 
-Use this option if you need such downloads to be stored outside of Renovate's regular cache directory (`cacheDir`).
+Use this option if you need such downloads to be stored outside Renovate's regular cache directory (`cacheDir`).
 
 ## customEnvVariables
 
-This configuration will be applied after all other environment variables so you can use it to override defaults.
+This configuration will be applied after all other environment variables, so you can use it to override defaults.
 
 ## detectGlobalManagerConfig
 
@@ -263,7 +263,7 @@ The purpose of this config option is to allow you (as a bot admin) to configure 
 
 This config option is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
 
-Currently this config option is supported for the `npm` manager only - specifically the `~/.npmrc` file.
+Currently, this config option is supported for the `npm` manager only - specifically the `~/.npmrc` file.
 If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set to `true`.
 
 ## detectHostRulesFromEnv
@@ -372,11 +372,11 @@ You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar 
 
 For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `docker run` command that limits the amount of memory Renovate's sidecar Docker container can use to 4 gigabytes.
 
-Read the [Docker Docs, configure runtime resource contraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
+Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
 
 ## dockerSidecarImage
 
-By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
+By default, Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
 You can use the `dockerSidecarImage` option to override this default.
 
 Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
@@ -431,7 +431,7 @@ Information provided mainly in debug log level.
 ## executionTimeout
 
 Default execution timeout in minutes for child processes Renovate creates.
-If this option is not set, Renovate will fallback to 15 minutes.
+If this option is not set, Renovate will fall back to 15 minutes.
 
 ## exposeAllEnv
 
@@ -471,7 +471,7 @@ This can be used if you're migrating from user-based forks to organization-based
 If you've set a `forkOrg` then Renovate will:
 
 1. Check if a fork exists in the preferred organization before checking it exists in the fork user's account
-1. If no fork exists: it will be created in the `forkOrg`, not the user account
+2. If no fork exists: it will be created in the `forkOrg`, not the user account
 
 ## forkToken
 
@@ -502,10 +502,10 @@ It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 
 1. Run `gpg import` (if you haven't before)
-1. Run `git config user.signingkey` and `git config commit.gpgsign true`
+2. Run `git config user.signingkey` and `git config commit.gpgsign true`
 
 The `git` commands are run locally in the cloned repo instead of globally.
-This reduces the chance of unintended consequences with global Git configs on shared systems.
+This reduces the chance of unintended consequences of global Git configs on shared systems.
 
 ## gitTimeout
 
@@ -593,7 +593,7 @@ Only set this to `false` if all three statements are true:
     This setting is independent of `branchPrefix`.
 
 For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar.
-If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
+If you have an existing Renovate installation, and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
 ## onboardingCommitMessage
 
@@ -613,7 +613,7 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 
 ## onboardingPrTitle
 
-If you have an existing Renovate installation and you change the `onboardingPrTitle`: then you may get onboarding PRs _again_ for repositories with closed non-merged onboarding PRs.
+If you have an existing Renovate installation, and you change the `onboardingPrTitle`: then you may get onboarding PRs _again_ for repositories with closed non-merged onboarding PRs.
 This is similar to what happens when you change the `onboardingBranch` config option.
 
 ## onboardingRebaseCheckbox
@@ -623,8 +623,8 @@ This is similar to what happens when you change the `onboardingBranch` config op
 When this option is `true`, Renovate will do the following during repository initialization:
 
 1. Try to fetch the default config file (e.g. `renovate.json`)
-1. Check if the file contains `"enabled": false`
-1. If so, skip cloning and skip the repository immediately
+2. Check if the file contains `"enabled": false`
+3. If so, skip cloning and skip the repository immediately
 
 If `onboardingConfigFileName` is set, that file name will be used instead of the default.
 
@@ -676,7 +676,7 @@ TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachet
 This private key is used to decrypt config files.
 
 The corresponding public key can be used to create encrypted values for config files.
-If you want a UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
+If you want a UI to encrypt values you can put the public key in a webpage similar to <https://app.renovatebot.com/encrypt>.
 
 To create the key pair with GPG use the following commands:
 
@@ -687,7 +687,7 @@ To create the key pair with GPG use the following commands:
 ```
 ❯ gpg --full-generate-key
 gpg (GnuPG) 2.2.24; Copyright (C) 2020 Free Software Foundation, Inc.
-This is free software: you are free to change and redistribute it.
+This is free software: you're free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
 Please select what kind of key you want:
@@ -754,7 +754,7 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 Use this field if you need to perform a "key rotation" and support more than one keypair at a time.
 Decryption with this key will be tried after `privateKey`.
 
-If you are migrating from the legacy public key encryption approach to use GPG, then move your legacy private key from `privateKey` to `privateKeyOld` and then put your new GPG private key in `privateKey`.
+If you're migrating from the legacy public key encryption approach to use GPG, then move your legacy private key from `privateKey` to `privateKeyOld` and then put your new GPG private key in `privateKey`.
 Doing so will mean that Renovate will first try to decrypt using the GPG key but fall back to the legacy key and try that next.
 
 You can remove the `privateKeyOld` config option once all the old encrypted values have been migrated, or if you no longer want to support the old key and let the processing of repositories fail.
@@ -780,7 +780,7 @@ For non encrypted connections,
 
 Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 
-For TLS/SSL-enabled connections, use rediss prefix
+For TLS/SSL-enabled connections, use the rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
@@ -827,7 +827,7 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 <!-- prettier-ignore -->
 !!! note
-    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
+    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
 
 ## requireConfig
 
@@ -842,11 +842,11 @@ You can choose any of these settings:
 This feature is closely related to the `onboarding` config option.
 The combinations of `requireConfig` and `onboarding` are:
 
-|                          | `onboarding=true`                                                                                                                                       | `onboarding=false`                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `requireConfig=required` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, then the repository is skipped.   | Repository is skipped unless a config file is added manually. |
-| `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
-| `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                     | Repository is processed, any config file is ignored.          |
+|                          | `onboarding=true`                                                                                                                                        | `onboarding=false`                                            |
+|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------|
+| `requireConfig=required` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed, and there's no config file, the repository is skipped.        | Repository is skipped unless a config file is added manually. |
+| `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed, and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
+| `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                      | Repository is processed, any config file is ignored.          |
 
 ## secrets
 
@@ -894,7 +894,7 @@ Secret names must start with an upper or lower case character and can have only 
 ## skipInstalls
 
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
-If this is set to false, then a full install of modules will be done.
+If this is set to false, then a full installation of modules will be done.
 This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token

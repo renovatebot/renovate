@@ -13,20 +13,20 @@ The general triage workflow is similar for bug reports and feature requests, but
 Take the following steps on an incoming bug report:
 
 1. Determine if this is a valid bug report at all, close and optionally delete obvious spam.
-1. If poster is asking a configuration question, or has not made a convincing case that it's really a bug, then convert to a "Ask a question" discussion, add either a response or at least a note that it's been converted.
-1. Determine if this is a duplicate of an open issue/discussion, if duplicate: link to earlier issue/discussion, apply `duplicate` label and close the issue/discussion.
-1. Check what version of Renovate is used, if not on current major version: apply the `auto:retry-latest` label. This makes a bot comment to try again with a newer version of Renovate.
-1. Check if the _relevant_ logs are provided. If not apply the `auto:logs` label.
+2. If poster is asking a configuration question, or has not made a convincing case that it's really a bug, then convert to an "Ask a question" discussion, add either a response or at least a note that it's been converted.
+3. Determine if this is a duplicate of an open issue/discussion, if duplicate: link to earlier issue/discussion, apply `duplicate` label and close the issue/discussion.
+4. Check what version of Renovate is used, if not on current major version: apply the `auto:retry-latest` label. This makes a bot comment to try again with a newer version of Renovate.
+5. Check if the _relevant_ logs are provided. If not apply the `auto:logs` label.
 
 ### Triaging feature requests workflow
 
 Take the following steps on an incoming feature request:
 
 1. Determine if this is a valid feature request at all, close and optionally delete obvious spam.
-1. If poster is asking a configuration question, or has not made a convincing case that it's really a feature request, then convert to a "Ask a question" discussion, add either a response or at least a note that it's been converted.
-1. Determine if this is a duplicate of an open issue, if duplicate: link to earlier issue/discussion, apply `duplicate` label and close the issue/discussion.
-1. Check what version of Renovate is used, if not on current major version: apply the `auto:retry-latest` label. This makes a bot comment to try again with a newer version of Renovate.
-1. Make a best-effort judgement if this is a reasonable feature to put into Renovate. If in doubt, let the core maintainers decide.
+2. If poster is asking a configuration question, or has not made a convincing case that it's really a feature request, then convert to an "Ask a question" discussion, add either a response or at least a note that it's been converted.
+3. Determine if this is a duplicate of an open issue, if duplicate: link to earlier issue/discussion, apply `duplicate` label and close the issue/discussion.
+4. Check what version of Renovate is used, if not on current major version: apply the `auto:retry-latest` label. This makes a bot comment to try again with a newer version of Renovate.
+5. Make a best-effort judgement if this is a reasonable feature to put into Renovate. If in doubt, let the core maintainers decide.
 
 ## Creating new issues from discussions
 
@@ -40,7 +40,7 @@ In short: users create discussions, and when it's clear what we need to do, the 
 
 ## What a triagist is allowed to do
 
-If you've been given triage rights, you are allowed to do the following things:
+If you've been given triage rights, you're allowed to do the following things:
 
 - Apply labels to issues/discussions
 - Close, reopen, and assign all issues and pull requests
@@ -100,8 +100,8 @@ You can assign whoever makes sense.
 If you see an issue/discussion that's an obvious duplicate:
 
 1. Attach a `duplicate` label
-1. Use the "Duplicate of" functionality [GitHub docs, about duplicate issues and pull requests](https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/about-duplicate-issues-and-pull-requests)
-1. Close the issue/discussion
+2. Use the "Duplicate of" functionality [GitHub docs, about duplicate issues and pull requests](https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/about-duplicate-issues-and-pull-requests)
+3. Close the issue/discussion
 
 Follow the same workflow to mark duplicate PRs.
 
@@ -116,7 +116,7 @@ Ideally warn the user with an `auto:bad-vibes` label first, and then use the `au
 
 ### Going from `status:requirements` to actionable issue
 
-One of the most important non-code contributions people can do is help features and fixes go from `status:requirements` to a actionable issue.
+One of the most important non-code contributions people can do is help features and fixes go from `status:requirements` to an actionable issue.
 We use the label `status:requirements` to mean "more information or research is needed before someone could start coding this".
 
 It can sometimes be an oversight of the maintainers, but more often it's because there are requirements or edge cases to consider and the user hasn't got an opinion or time to think about them and contribute enough.

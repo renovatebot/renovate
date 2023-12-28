@@ -28,9 +28,9 @@ Renovate's modules are:
 Renovate uses these modules in order:
 
 1. The platform module interacts with the source control platform and clones the repository
-1. The manager module looks for files based on their name and extracts the dependencies (each dependency has a datasource)
-1. The datasource module looks up versions of the dependency
-1. The versioning module validates and sorts the returned versions
+2. The manager module looks for files based on their name and extracts the dependencies (each dependency has a datasource)
+3. The datasource module looks up versions of the dependency
+4. The versioning module validates and sorts the returned versions
 
 For example:
 

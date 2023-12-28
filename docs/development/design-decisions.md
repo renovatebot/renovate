@@ -32,10 +32,10 @@ This means that specific configuration options always override more general conf
 From most specific to least specific:
 
 1. Update type (e.g. `major`, `minor`, `patch`)
-1. Package (e.g. `lodash`, `django`)
-1. Manager (e.g. `npm`, `pypi`)
-1. Repository config
-1. Global configuration
+2. Package (e.g. `lodash`, `django`)
+3. Manager (e.g. `npm`, `pypi`)
+4. Repository config
+5. Global configuration
 
 ## Automatic discovery of package file locations
 
@@ -49,7 +49,7 @@ You could limit Renovate to only update the `package.json` in the root of the re
 
 By default, `renovate` will maintain separate branches for each dependency.
 So if 20 dependencies need updating, there will be at least 20 branches/PRs.
-Although this may seem undesirable, it's even less desirable if all 20 were in the same Pull Request and it's very difficult to work out which upgrade caused the test failure.
+Although this may seem undesirable, it's even less desirable if all 20 were in the same Pull Request, and it's very difficult to work out which upgrade caused the test failure.
 
 But you can override the default templates for branch name to get a single branch for all dependencies.
 The `groupName` configuration option can be used at a repository level (e.g. give it the value `All`) and then all dependency updates will be in the same branch/PR.
@@ -83,7 +83,7 @@ Note: You can configure the branch names by using the string template `branchNam
 By default, the script does not create a new PR if it finds a previously-closed PR with the same branch name and PR title (assuming the PR title has a version in it).
 This allows users to close unwelcome upgrade PRs and not worry about them being recreated every run.
 
-## Rebasing Unmergeable Pull Requests
+## Rebasing unmergeable Pull Requests
 
 With the default behavior of one branch per dependency, it's often the case that a PR gets merge conflicts after an adjacent dependency update is merged.
 On most platforms you can use a web interface to resolve merge conflicts, but you're still resolving the conflicts manually, which is annoying.
@@ -107,6 +107,6 @@ Alternatively, consider using a Configuration File.
 
 Renovate uses the following convention for log levels:
 
-- logger.error should only be used for problems that are likely to be a Renovate bug or require Renovate improvements. These are the types of errors that Renovate administrators should be alerted to immediately
-- logger.warn should be used for problems that might be a Renovate problem so should be checked periodically in batches
+- `logger.error` should only be used for problems that are likely to be a Renovate bug or require Renovate improvements. These are the types of errors that Renovate administrators should be alerted to immediately
+- `logger.warn` should be used for problems that might be a Renovate problem so should be checked periodically in batches
 - For _user_ problems (e.g. configuration errors), these should not warn or error on the server side and instead use logger.info

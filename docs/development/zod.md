@@ -100,7 +100,7 @@ const Box = z.object({
     red: z.number(),
     green: z.number(),
     blue: z.number(),
-  })
+  }),
   weight: z.number(),
 });
 

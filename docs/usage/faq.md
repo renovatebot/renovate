@@ -10,7 +10,7 @@ description: Frequently Asked Questions for Renovate Configuration
 Renovate will:
 
 - Look for configuration options in a configuration file (e.g. `renovate.json`) and in each `package.json` file
-- Find and process all package files (e.g. `package.json`, `composer.json`, `Dockerfile`, etc) in each repository
+- Find and process all package files (e.g. `package.json`, `composer.json`, `Dockerfile`, etc.) in each repository
 - Use separate branches/PR for each dependency
 - Use separate branches for each _major_ version of each dependency
 - Pin devDependencies to a single version, rather than use ranges
@@ -27,7 +27,7 @@ The Renovate team only fixes bugs in an older version if:
 - some critical bug needs to be fixed and the new major is blocked
 
 If you're using the Mend Renovate App, you don't need to do anything, as the Renovate maintainers update it regularly.
-If you're self hosting Renovate, use the latest release if possible.
+If you're self-hosting Renovate, use the latest release if possible.
 
 ## When is the Mend Renovate App updated with new Renovate versions?
 
@@ -39,7 +39,7 @@ Major releases of Renovate are held back until the maintainers are reasonably ce
 ## Renovate core features not supported on all platforms
 
 | Feature               | Platforms which lack feature                               | See Renovate issue(s)                                        |
-| --------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+|-----------------------|------------------------------------------------------------|--------------------------------------------------------------|
 | Dependency Dashboard  | Azure, Bitbucket, Bitbucket Server                         | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
 | The Mend Renovate App | Azure, Bitbucket, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
 
@@ -48,7 +48,7 @@ Major releases of Renovate are held back until the maintainers are reasonably ce
 Some major platform features are not supported at all by Renovate.
 
 | Feature name                            | Platform                                  | See Renovate issue(s)                                                                                                                                                                        |
-| --------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|-----------------------------------------|-------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Jira issues                             | Bitbucket                                 | [#20568](https://github.com/renovatebot/renovate/issues/20568)                                                                                                                               |
 | Jira issues                             | Bitbucket Server                          | [#3796](https://github.com/renovatebot/renovate/issues/3796)                                                                                                                                 |
 | Merge trains                            | GitLab                                    | [#5573](https://github.com/renovatebot/renovate/issues/5573)                                                                                                                                 |
@@ -67,7 +67,7 @@ We replaced `master` with `main` in our documentation where possible.
 A branch name has no special meaning within the Git program, it's only a name.
 The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
 
-## What if I need to .. ?
+## What if I need to ... ?
 
 ### Troubleshoot Renovate
 
@@ -106,7 +106,7 @@ The basic idea is that you create a new `packageRules` entry and describe what k
 ```
 
 You may even configure Renovate bot to ask for approval for _all_ updates.
-The `dependencyDashboardApproval` config option is outside of a `packageRules` array, and so applies to all updates:
+The `dependencyDashboardApproval` config option is outside a `packageRules` array, and so applies to all updates:
 
 ```json
 {

@@ -164,7 +164,7 @@ Finally, allow Renovate to automerge by setting `automerge=true` in your Renovat
 
 If you _don't_ use GitHub Actions as your CI provider, follow these steps:
 
-Update your CI provider's configuration so it also runs tests on the temporary `gh-readonly-queue/{base_branch}` branches, read your CI providers's documentation to learn how to do this.
+Update your CI provider's configuration, so it also runs tests on the temporary `gh-readonly-queue/{base_branch}` branches, read your CI provider's documentation to learn how to do this.
 
 On `github.com`, go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section and [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge).
 Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting.
@@ -189,7 +189,7 @@ This is a lot better than you waking up to two PRs and then having to deal with 
 
 ## Branch vs PR automerging
 
-Even if you automerge PRs, you are likely to still get notification noise - one when the PR is created and another when it is merged.
+Even if you automerge PRs, you're likely to still get notification noise - one when the PR is created and another when it is merged.
 For this reason we recommend you consider setting `automergeType=branch` which will mean:
 
 - Renovate first creates a branch and no PR
@@ -199,7 +199,7 @@ For this reason we recommend you consider setting `automergeType=branch` which w
 Add the `renovate/**` branch to your testing workflow files, or Renovate will not work properly with the `automergeType=branch` setting.
 
 The result is that passing updates are essentially "silent" - the only sign of them are the commits Renovate pushes to your base branch.
-If you have enabled branch protection which prevents Renovate from automerging directly to the base branch, then this won't work and you should stick with the default PR-based automerging instead.
+If you have enabled branch protection which prevents Renovate from automerging directly to the base branch, then this won't work, and you should stick with the default PR-based automerging instead.
 
 ## Assignees and Reviewers
 
@@ -224,7 +224,7 @@ If you have no tests but still want Renovate to automerge, you need to add `"ign
 
 <!-- prettier-ignore -->
 !!! tip
-    We strongly recommend you have tests in any project where you are regularly updating dependencies.
+    We strongly recommend you have tests in any project where you're regularly updating dependencies.
 
 ### Committer restrictions
 
@@ -249,7 +249,7 @@ Depending on the platform, having a `CODEOWNERS` file could block automerging, b
 
 ### Overriding global automerge
 
-You might have setup a global configuration in a `.github` repository, that has a `renovate.json` file that turns on automerge for certain dependencies.
+You might have set up a global configuration in a `.github` repository, that has a `renovate.json` file that turns on automerge for certain dependencies.
 It does not matter where you've put the global config, the important point in this example is that you're extending from a global config that's somewhere else.
 For this example we'll assume you put your config in a repository on GitHub, called `.github`.
 

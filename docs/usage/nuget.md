@@ -18,16 +18,16 @@ By default, this includes:
 
 - .NET Core 1.0 and above
 - .NET Standard class libraries
-- `.csproj`, `.fsproj` or `.vbproj` files that use the SDK-style syntax
+- `.csproj`, `.fsproj` or `.vbproj` files that use the SDK-style syntaxes
 
 To convert your .NET Framework `.csproj`, `.fsproj` or `.vbproj` files into an SDK-style project, follow the steps in this [guide](https://natemcmaster.com/blog/2017/03/09/vs2015-to-vs2017-upgrade/).
 
 ## How it works
 
 1. Renovate searches in each repository for any files with a `.csproj`, `.fsproj`, or `.vbproj` extension
-1. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
-1. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or an alternative feed if configured) to see if any upgrades are available
-1. If the source package includes a GitHub URL as its source, and has either:
+2. Existing dependencies are extracted from `<PackageReference>` and `<PackageVersion>` tags
+3. Renovate looks up the latest version on [nuget.org](https://nuget.org) (or an alternative feed if configured) to see if any upgrades are available
+4. If the source package includes a GitHub URL as its source, and has either:
 
    - a "changelog" file, or
    - uses GitHub releases
@@ -39,7 +39,7 @@ Find out here how to [migrate from `packages.config` to `PackageReference`](http
 
 ## Alternate feeds
 
-By default Renovate performs all lookups on `https://api.nuget.org/v3/index.json`, but you can set alternative NuGet feeds.
+By default, Renovate performs all lookups on `https://api.nuget.org/v3/index.json`, but you can set alternative NuGet feeds.
 You can set alternative feeds:
 
 - in a [`NuGet.config` file](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file#package-source-sections) within your repository (Renovate will not search outside the repository), or

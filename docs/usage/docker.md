@@ -16,20 +16,20 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 ## How It Works
 
 1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
-1. Matching files are parsed, Renovate checks if the file(s) has any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
-1. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
+2. Matching files are parsed, Renovate checks if the file(s) has any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
+3. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
 
 ## Preservation of Version Precision
 
 By default, Renovate preserves the precision level specified in the Docker images.
 For example, if the existing image is pinned at `myimage:1.1` then Renovate only proposes upgrades to `myimage:1.2` or `myimage:1.3`.
-This means that you will not get upgrades to a more specific versions like `myimage:1.2.0` or `myimage:1.3.0`.
+This means that you'll not get upgrades to a more specific versions like `myimage:1.2.0` or `myimage:1.3.0`.
 Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, but it's a feature we'd like to work on one day.
 
 ## Version compatibility
 
 Although suffixes in SemVer indicate pre-releases (e.g. `v1.2.0-alpha.2`), in Docker they typically indicate compatibility, e.g. `1.2.0-alpine`.
-By default Renovate assumes suffixes indicate compatibility, for this reason Renovate will not _change_ any suffixes.
+By default, Renovate assumes suffixes indicate compatibility, for this reason Renovate will not _change_ any suffixes.
 Renovate will update `1.2.0-alpine` to `1.2.1-alpine` but never updates to `1.2.1` or `1.2.1-stretch` as that would change the suffix.
 
 If this behavior does not suit a particular package you have, Renovate allows you to customize the `versioning` scheme it uses.
@@ -91,13 +91,13 @@ When pinning a digest, Renovate retains the Docker tag in the `FROM` line for re
 
 ## Digest Updating
 
-If you follow our advice to replace a tag like `node:14` with a pinned digest like `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you will get Renovate PRs whenever the `node:14` image is updated on Docker Hub.
+If you follow our advice to replace a tag like `node:14` with a pinned digest like `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you'll get Renovate PRs whenever the `node:14` image is updated on Docker Hub.
 
 Previously this update would have been "invisible" to you - one day you pull code that represents `node:14.15.0` and the next day you pull code that represents `node:14.15.1`.
 But you can never be sure, especially as Docker caches.
 Maybe some of your colleagues, or worse still your build machine, are stuck on an older version with a security vulnerability.
 
-By pinning to a digest instead, you will get these updates via Pull Requests, or even committed directly to your repository if you enable branch automerge for convenience.
+By pinning to a digest instead, you'll get these updates via Pull Requests, or even committed directly to your repository if you enable branch automerge for convenience.
 This makes sure everyone on your team uses the latest versions.
 
 ## Version Upgrading
@@ -276,8 +276,8 @@ Google Artifact Registry supports `_json_key_base64` and a base64 encoded servic
 If all your dependencies are on the Google Artifact Registry, you can base64 encode and use the service account directly:
 
 1. Download your JSON service account and store it on your machine. Make sure that the service account has `read` (and only `read`) permissions to your artifacts
-1. Base64 encode the service account credentials by running `cat service-account.json | base64`
-1. Add the encoded service account to your configuration file
+2. Base64 encode the service account credentials by running `cat service-account.json | base64`
+3. Add the encoded service account to your configuration file
 
    1. If you want to add it to your self-hosted configuration file:
 
@@ -293,7 +293,7 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
       }
       ```
 
-   1. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
+   2. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
 
       ```json
       {
@@ -312,7 +312,7 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
 If you have dependencies on Google Container Registry (and Artifact Registry) you need to use `_json_key` and a slightly different encoding:
 
 1. Download your JSON service account and store it on your machine. Make sure that the service account has `read` (and only `read`) permissions to your artifacts
-1. Open the file and prefix the content with `_json_key:`. The file should look like this:
+2. Open the file and prefix the content with `_json_key:`. The file should look like this:
 
    ```
    _json_key:{
@@ -329,8 +329,8 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
    }
    ```
 
-1. Base64 encode the prefixed service account credentials by running `cat prefixed-service-account.json | base64`
-1. Add the prefixed and encoded service account to your configuration file
+3. Base64 encode the prefixed service account credentials by running `cat prefixed-service-account.json | base64`
+4. Add the prefixed and encoded service account to your configuration file
 
    1. If you want to add it to your self-hosted configuration file:
 
@@ -346,7 +346,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
       }
       ```
 
-   1. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
+   2. If you want to add it to your repository Renovate configuration file, [encrypt](./configuration-options.md#encrypted) it and then add it:
 
       ```json
       {
@@ -364,12 +364,12 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
 
 ##### Using short-lived access tokens
 
-Assume you are running GitLab CI in the Google Cloud, and you are storing your Docker images in the Google Container Registry (GCR).
+Assume you're running GitLab CI in the Google Cloud, and you're storing your Docker images in the Google Container Registry (GCR).
 
 Access to the GCR uses Bearer token based authentication.
 This token can be obtained by running `gcloud auth print-access-token`, which requires the Google Cloud SDK to be installed.
 
-The token expires after 60 minutes so you cannot store it in a variable for subsequent builds (like you can with `RENOVATE_TOKEN`).
+The token expires after 60 minutes, so you cannot store it in a variable for subsequent builds (like you can with `RENOVATE_TOKEN`).
 
 When running Renovate in this context the Google access token must be retrieved and injected into the `hostRules` configuration just before Renovate is started.
 

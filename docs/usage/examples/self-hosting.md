@@ -158,7 +158,7 @@ spec:
     Do you know how to get `daniel-shuy/renovate` version `3` working?
     Then please open a pull request to update the docs and close [Renovate issue #13428](https://github.com/renovatebot/renovate/issues/13428).
 
-If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
+If you're using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
 
 By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
 
@@ -230,7 +230,7 @@ If you want to override the cache directory then set your own value for `cacheDi
 
 The following example uses the Renovate CLI tool, which you can install by running `npm i -g renovate`.
 
-If running your own Renovate bot then you will need a user account that Renovate will run as.
+If running your own Renovate bot then you'll need a user account that Renovate will run as.
 We recommend you create and use a dedicated account for the bot, e.g. name it `renovate-bot` if on your own instance.
 Create and save a PAT for this account.
 
@@ -275,13 +275,13 @@ Only add the script to `cron` after you checked it works.
 <!-- prettier-ignore -->
 !!! note
     The GitHub.com token as an environment variable is needed to fetch changelogs that are usually hosted on github.com.
-    You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
+    You don't need to add it if you're already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
 ## Kubernetes for GitLab, using Git over SSH
 
 This section describes how to use a Git binary with SSH for GitLab, to avoid API shortcomings.
 
-You need to first create a SSH key, then add the public part to GitLab (see this [guide](https://docs.gitlab.com/ee/ssh/)).
+You first need to create an SSH key, then add the public part to GitLab (see this [guide](https://docs.gitlab.com/ee/ssh/)).
 
 Then, you need to create the secret to add the SSH key, and the following config to your container:
 
@@ -393,7 +393,7 @@ When you use `LOG_LEVEL=debug` and `LOG_FORMAT=json`, Renovate uses numbers in t
 The logging level output is controlled by the Bunyan logging library.
 
 | Level | Meaning |
-| ----: | ------- |
+|------:|---------|
 |    10 | trace   |
 |    20 | debug   |
 |    30 | info    |
@@ -416,7 +416,7 @@ This means Renovate can safely connect to systems using that certificate or cert
 
 Helper programs like Git and npm use the system trust store.
 For those programs to trust a self-signed certificate you must add it to the systems trust store.
-On Ubuntu/Debian and many Linux-based systems, this can be done by copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards.
+On Ubuntu/Debian and many Linux-based systems, this can be done by copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterward.
 
 ### Renovate Docker image
 

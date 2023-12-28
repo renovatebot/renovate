@@ -29,7 +29,7 @@ You'll use the same code editor and have the same config as all other developers
 
 - Waiting for the remote container to start
 - If your internet is down you can't work
-- If Codespaces is down you can't work
+- If GitHub Codespaces is down you can't work
 
 ## GitHub Codespaces
 

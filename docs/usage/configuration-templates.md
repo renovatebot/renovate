@@ -14,7 +14,7 @@ If you change the `branchPrefix` while you have ignored some upgrades (closed PR
 
 `branchName` default value is `{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}`.
 
-The most common branch name you will see looks like this: `renovate/react-18.x`.
+The most common branch name you'll see looks like this: `renovate/react-18.x`.
 In this example, the `branchPrefix` is the default `renovate/`, `additionalBranchPrefix` is empty, and `branchTopic` is `react-18.x`.
 
 Most users will be happy with the default `branchPrefix` of `renovate/`, but you can change this if you don't like the default.
@@ -23,7 +23,7 @@ The onboarding PR will always use `renovate/configure`.
 
 `additionalBranchPrefix` is optional and by default is empty.
 
-`branchTopic` depends on the package manager and upgrade type, so you will see a lot of variety.
+`branchTopic` depends on the package manager and upgrade type, so you'll see a lot of variety.
 This is probably a setting you want to change yourself.
 Be careful, and consider creating a new "config help" post at the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) to get help from the Renovate team with your config.
 

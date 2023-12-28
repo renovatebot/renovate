@@ -16,7 +16,7 @@ Common application logic for Renovate, not specific to particular managers, usua
 The manager's `index.ts` file supports the following values or functions:
 
 | Value/function                | Optional | Async |
-| ----------------------------- | -------- | ----- |
+|-------------------------------|----------|-------|
 | `bumpPackageVersion`          | yes      |       |
 | `extractPackageFile`          |          | yes   |
 | `extractAllPackageFiles`      | yes      | yes   |
@@ -42,7 +42,7 @@ It takes as arguments the file's content and optionally the file's full file pat
 The function returns an array of detected or extracted dependencies, including the:
 
 - dependency name
-- dependency type (dependencies, devDependencies, etc)
+- dependency type (dependencies, devDependencies, etc.)
 - currentValue
 - versioning used (like SemVer, PEP 440)
 

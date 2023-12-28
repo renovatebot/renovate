@@ -185,7 +185,7 @@ Add a label `duplicate` to issues/PRs that are a duplicate of an earlier issue/P
 Add a label `good first issue` to issues that are small, easy to fix, and do-able for a newcomer.
 This label is sometimes picked up by tools or websites that try to encourage people to contribute to open source.
 
-Add the label `help wanted` to indicate that we need the original poster or someone else to do some work or it is unlikely to get done.
+Add the label `help wanted` to indicate that we need the original poster or someone else to do some work, or it is unlikely to get done.
 
 Add a label `auto:bad-vibes` to any discussion containing rude comments such as excessive criticism or ungratefulness.
 
@@ -198,8 +198,8 @@ Add a label `auto:format-code` to any Discussion which needs code formatting.
 Add a label `auto:logs` to indicate that there's a problem with the logs, and the contributor needs to do one of these things:
 
 1. Provide logs (if there are none yet)
-1. Provide more logs (in case current logs are insufficient)
-1. Format their logs properly
+2. Provide more logs (in case current logs are insufficient)
+3. Format their logs properly
 
 Add a label `auto:needs-details` to discussions which need more details to move forward.
 

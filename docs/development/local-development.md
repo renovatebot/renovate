@@ -52,7 +52,7 @@ If you already installed a part, skip the corresponding step.
 
 #### VS Code Dev Containers
 
-If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/devcontainers/containers) instead.
+If you're using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/devcontainers/containers) instead.
 
 - Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
 - Open the repository folder in VS Code
@@ -96,18 +96,18 @@ The Renovate project uses the [pnpm](https://github.com/pnpm/pnpm) package manag
 To ensure everything is working properly on your end, you must:
 
 1. Install all dependencies with `pnpm install`
-1. Make a build with `pnpm build`, which should pass with no errors
-1. Verify all tests pass and have 100% test coverage, by running `pnpm test`
-1. Verify the installation by running `pnpm start`. You must see this error: `You must configure a GitHub personal access token`
+2. Make a build with `pnpm build`, which should pass with no errors
+3. Verify all tests pass and have 100% test coverage, by running `pnpm test`
+4. Verify the installation by running `pnpm start`. You must see this error: `You must configure a GitHub personal access token`
 
-Do not worry about the token error for now, as you will be given instructions on how to configure the token a little later down in this document.
+Do not worry about the token error for now, as you'll be given instructions on how to configure the token a little later down in this document.
 
 You only need to do these steps once.
 
 Before you submit a pull request you should:
 
 1. Install newer dependencies with `pnpm install`
-1. Run the tests with `pnpm test`
+2. Run the tests with `pnpm test`
 
 ## Platform Account Setup
 
@@ -132,9 +132,9 @@ You are better off to instead export the Environment Variable `RENOVATE_TOKEN` f
 
 ### Run against a real repo
 
-To make sure everything is working, create a test repo in your account, e.g. like `https://github.com/r4harry/testrepo1`.
+To make sure everything is working, create a test repo in your account, e.g. like `https://github.com/<account>/testrepo1`.
 Now, add a file called `.nvmrc` with the content `8.13.0`.
-Now run against the test repo you created, e.g. `pnpm start r4harry/testrepo1`.
+Now run against the test repo you created, e.g. `pnpm start <account>/testrepo1`.
 If your token is set up correctly, you should find that Renovate created a "Configure Renovate" PR in the `testrepo1`.
 
 If this is working then in future you can create other test repos to verify your code changes against.
@@ -151,7 +151,7 @@ Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
 Run the Jest unit tests with the `pnpm jest` command.
 You can also run a subset of the Jest tests using file matching, e.g. `pnpm jest composer` or `pnpm jest workers/repository/update/branch`.
-If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
+If you get a test failure due to a "snapshot" mismatch, and you're sure that you need to update the snapshot, then you can append `-u` to the end.
 e.g. `pnpm jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
 
 ### Coverage
@@ -215,9 +215,9 @@ You can debug Renovate with Chrome's inspect tool.
 Here's an example:
 
 1. Open `chrome://inspect` in Chrome, then select "Open dedicated DevTools for Node"
-1. Add a `debugger;` statement somewhere in the source code where you want to start debugging
-1. Run Renovate using `pnpm debug ...` instead of `pnpm start ...`
-1. Select "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
+2. Add a `debugger;` statement somewhere in the source code where you want to start debugging
+3. Run Renovate using `pnpm debug ...` instead of `pnpm start ...`
+4. Select "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
 
 ### VS Code
 
@@ -227,14 +227,12 @@ Here's an example:
 1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your Personal Access Token
 2. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:
 
-```javascript
-module.exports = {
-  token: 'xxxxxxxx',
-  repositories: ['r4harry/testrepo1'],
-};
-```
-
-<!-- markdownlint-disable MD029 -->
+   ```javascript
+   module.exports = {
+     token: 'xxxxxxxx',
+     repositories: ['r4harry/testrepo1'],
+   };
+   ```
 
 3. Set a breakpoint somewhere in the source code and launch the application in debug mode with selected configuration as `debug`
 4. Wait for your breakpoint to be triggered

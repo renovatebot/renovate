@@ -22,8 +22,8 @@ Example package files include:
 Renovate:
 
 1. Scans your repositories to find package files and their dependencies
-1. Checks if any newer versions exist
-1. Raises Pull Requests for available updates
+2. Checks if any newer versions exist
+3. Raises Pull Requests for available updates
 
 The Pull Requests patch the package files directly, and include changelogs for the newer versions (if they are available).
 
@@ -43,11 +43,11 @@ This is why Renovate lets the package manager do the lock file update.
 A simplified example:
 
 1. The repository has a `package.json` and `package-lock.json` with version `1.0.0` of a dependency
-1. Renovate sees that version `1.1.0` is available
-1. Renovate patches the `package.json` to change the dependency's version from `1.0.0` to `1.1.0`
-1. Renovate runs `npm install` to let `npm` update the `package-lock.json`
-1. Renovate commits the `package.json` and `package-lock.json`
-1. Renovate creates the PR
+2. Renovate sees that version `1.1.0` is available
+3. Renovate patches the `package.json` to change the dependency's version from `1.0.0` to `1.1.0`
+4. Renovate runs `npm install` to let `npm` update the `package-lock.json`
+5. Renovate commits the `package.json` and `package-lock.json`
+6. Renovate creates the PR
 
 ### Custom dependency extraction
 
@@ -63,7 +63,7 @@ You configure the custom manager by telling it:
 
 - Which file pattern(s) to match
 - How to find the dependency name and version from within the file
-- Which datasource (e.g. Docker registry, npm registry, etc) to use to look up new versions
+- Which datasource (e.g. Docker registry, npm registry, etc.) to use to look up new versions
 
 The end result is that Renovate can keep dependencies in custom file formats up-to-date as long as the dependency datasource is known to Renovate.
 
@@ -136,14 +136,14 @@ We use these Renovate features to automerge an internal dependency:
 We split our work over two repositories:
 
 1. The [`renovatebot/renovate`](https://github.com/renovatebot/renovate) repository, which has the Renovate code, and most of the Markdown documentation files
-1. The [`renovatebot/renovatebot.github.io`](https://github.com/renovatebot/renovatebot.github.io) repository, which has a submodule link to the `renovatebot/renovate` repository
+2. The [`renovatebot/renovatebot.github.io`](https://github.com/renovatebot/renovatebot.github.io) repository, which has a submodule link to the `renovatebot/renovate` repository
 
 ##### Update process
 
 1. We edit our documentation files on the main Renovate repository `renovatebot/renovate`
-1. Renovate sees the change(s) to the `renovatebot/renovate` Git submodule, and creates an update branch on the _documentation build_ repository
-1. If the tests pass Renovate automerges the update branch into the `main` branch.
-1. A GitHub Actions workflow runs on `main` to build the documentation site and push the build live on our GitHub Pages domain
+2. Renovate sees the change(s) to the `renovatebot/renovate` Git submodule, and creates an update branch on the _documentation build_ repository
+3. If the tests pass Renovate automerges the update branch into the `main` branch.
+4. A GitHub Actions workflow runs on `main` to build the documentation site and push the build live on our GitHub Pages domain
 
 ##### Benefits
 
@@ -152,7 +152,7 @@ The way we've set things up means we avoid:
 - reviewing PRs
 - manually merging PRs
 
-In fact we don't even get the update PR anymore!
+In fact, we don't even get the update PR anymore!
 
 ## Advanced configuration
 
@@ -189,7 +189,7 @@ If you want to get an update ahead of schedule, or want to retry a previously cl
 
 ### Dependency Dashboard Approval
 
-If you enable the Dependency Dashboard you can opt-in to a different workflow for some, or even all of your packages.
+If you enable the Dependency Dashboard you can opt in to a different workflow for some, or even all of your packages.
 We call this the "Dependency Dashboard Approval" workflow.
 
 Here's how it works:

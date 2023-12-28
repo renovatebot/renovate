@@ -15,9 +15,9 @@ If you don't want to read the in-depth discussion, you can skip ahead to our rec
 To ensure we're all talking about the same thing, it's important to define exactly what we mean by dependency "pinning".
 
 Historically, projects use SemVer ranges in their `package.json`.
-For instance, if you run `npm install foobar` you will see an entry like `"foobar": "^1.1.0"` added to your `package.json`.
+For instance, if you run `npm install foobar` you'll see an entry like `"foobar": "^1.1.0"` added to your `package.json`.
 Verbosely, this means "any foobar version greater than or equal to 1.1.0 but less than 2".
-The project will automatically use `1.1.1` if it's released, or `1.2.0`, or `1.2.1`, etc - meaning you will get not only patch updates but also feature (minor) releases too.
+The project will automatically use `1.1.1` if it's released, or `1.2.0`, or `1.2.1`, etc. - meaning you'll get not only patch updates but also feature (minor) releases too.
 
 Another alternative is ranges like `"foobar": "~1.1.0"` which means "any foobar version greater than or equal to 1.1.0 but less than 1.2".
 This narrows the range to only patch updates to the 1.1 range.
@@ -27,14 +27,14 @@ If instead you "pin" your dependencies rather than use ranges, it means you use 
 ## Why use ranges?
 
 For projects of any type, the main reason to use ranges is so that you can "automatically" get updated releases - which may even include security fixes.
-By "automatically", we mean that any time you run `npm install` you will get the very latest version matching your SemVer - assuming you're not using a lock file, that is.
+By "automatically", we mean that any time you run `npm install` you'll get the very latest version matching your SemVer - assuming you're not using a lock file, that is.
 
 ### Tilde vs Caret
 
 If you're familiar with the theory of SemVer, you might think that you only need to use tilde ranges (e.g. `"~1.1.0"`) to get bug fixes, rather than caret ranges (e.g. `"^1.1.0"`).
 This is true in theory but not in practice.
 The reality is that for most projects, fixes are not "backported" to previous minor releases, and minor releases themselves may include fixes.
-So for example release `1.2.0` may include one new feature and one fix, so if you stick with `1.1.0` then you will miss out on the fix as there will never be a `1.1.1` once `1.2.0` is already released.
+So for example release `1.2.0` may include one new feature and one fix, so if you stick with `1.1.0` then you'll miss out on the fix as there will never be a `1.1.1` once `1.2.0` is already released.
 This is the _reality_ of most open source packages.
 
 ### Ranges for Libraries
@@ -44,7 +44,7 @@ In this case, it is usually a bad idea to pin all your dependencies because it w
 
 For example, you might have pinned `foobar` to version `1.1.0` and another author pinned his/her `foobar` dependency to `1.2.2`.
 Any user of both your packages will end up with npm trying to install two separate versions of `foobar`, which might not even work.
-Even if both projects use a service like Renovate to keep their pinned dependencies up to date with the very latest versions, it's still not a good idea - there will always be times when one package has updated/released before the other one and they will be out of sync.
+Even if both projects use a service like Renovate to keep their pinned dependencies up to date with the very latest versions, it's still not a good idea - there will always be times when one package has updated/released before the other one, and they will be out of sync.
 e.g. there might be a space of 30 minutes where your package specifies foobar `1.1.0` and the other one specifies `1.1.1` and your joint downstream users end up with a duplicate.
 
 ## Why pin dependencies?
@@ -59,7 +59,7 @@ This benefits when upgrading versions as well as when rolling back in case of pr
 
 ### Upgrading pinned versions
 
-Let's say that a "faulty" version `1.2.0` of `foobar` is released and it breaks one of your tests.
+Let's say that a "faulty" version `1.2.0` of `foobar` is released, and it breaks one of your tests.
 
 If you were using default caret SemVer ranges, then your `main` branch is now "broken" because its `package.json` says that any version 1.x above 1.1.0 is acceptable, and npm will choose the latest (`1.2.0`).
 You would need to manually check and work out which dependency caused the failure (`foobar` may not have been the only dependency to have "automatically" upgraded since the last time your tests passed) and then you would need to pin the dependency yourself to stop `npm` installing `1.2.0`.
@@ -67,9 +67,9 @@ You would need to manually check and work out which dependency caused the failur
 Consider the same situation if instead you were _pinning_ dependency versions.
 Your `main` branch would not be broken because it's pinned to `foobar@1.1.0` - instead you'd have a Pull Request for upgrading to `foobar@1.2.0` which would fail.
 You'd know not to merge it and can wait for `foobar@1.2.1` or later when it's fixed.
-By pinning dependencies you know exactly what you're running and you know exactly what failed.
+By pinning dependencies you know exactly what you're running, and you know exactly what failed.
 
-Now consider a similar theoretical scenario where `foobar@1.2.0` is faulty but it is _not_ caught by any of your automated tests.
+Now consider a similar theoretical scenario where `foobar@1.2.0` is faulty, but it is _not_ caught by any of your automated tests.
 This is more common and more dangerous.
 
 If you were using SemVer ranges then this new version of `foobar` will likely be deployed to production automatically one day, sometime after which you notice errors and realise you need to fix it.
@@ -78,10 +78,10 @@ Like before, you need to manually work out which dependency caused it - assuming
 Alternatively, if you were instead pinning `foobar` then you would get a PR for `foobar@1.2.0` which awaits your approval.
 So first of all, you can choose to read the changelogs and/or visually inspect the branch yourself before merging, hopefully saving you from pushing this faulty code to production.
 
-If you did not catch the fault before merging, you are still better off with a pinned version.
+If you did not catch the fault before merging, you're still better off with a pinned version.
 If you discover something wrong in production, you can easily "roll back" commits in your development environment until you find which rollback fixes the problem.
 Then you can simply revert that commit (reversing `foobar@1.1.0` -> `foobar@1.2.0`) and push that to `main`.
-When the next release of `foobar` comes out (e.g. `1.2.1`) you will be prompted with a new PR and hopefully inspect it carefully this time before merge!
+When the next release of `foobar` comes out (e.g. `1.2.1`) you'll be prompted with a new PR and hopefully inspect it carefully this time before merge!
 
 As you can see in the above, pinning dependencies makes your build more consistent and predictable as a developer.
 
@@ -101,7 +101,7 @@ To some extent this is simply a trade-off for having your dependencies pinned an
 There are some dependencies that either (a) don't have the potential to break something in production, or (b) are fully tested by your tests.
 
 For example, it's very hard for `eslint` to break anything in production.
-If your build/tests pass, then you are fine.
+If your build/tests pass, then you're fine.
 Consider enabling automerge for all lint packages to save yourself the work of manually approving the update each time.
 In this case you might wake up to 5/10 of your overnight Pull Requests having already merged themselves.
 
@@ -118,7 +118,7 @@ In that case, you could set `automergeType` to `branch`, which means Renovate wi
 - Push the commit directly to `main` if tests pass, or
 - Raise a PR only if tests failed
 
-With this approach, updates will be essentially "silent" - causing no notifications - but you will be able to see each commit on `main` of course.
+With this approach, updates will be essentially "silent" - causing no notifications - but you'll be able to see each commit on `main` of course.
 
 ### Scheduling
 
@@ -135,7 +135,7 @@ To learn all about controlling Renovate's schedule, read the [key concepts, sche
 ### Grouping related packages
 
 Although it's good to isolate each dependency update for ease of troubleshooting, there are times when the extra noise isn't worth it, or when packages naturally belong together anyway (such as all `babel` packages).
-You can add a package rule in our Renovate configuration to group these together and you'll get one branch combined even if multiple packages have updates available.
+You can add a package rule in our Renovate configuration to group these together, and you'll get one branch combined even if multiple packages have updates available.
 
 ## Pinning Dependencies and Lock Files
 
@@ -156,14 +156,14 @@ To reuse an earlier example, this means that you could have `foobar@^1.1.0` in y
 
 If a lock file gets out of sync with its `package.json`, it can no longer be guaranteed to lock anything, and the `package.json` will be the source of truth for installs.
 
-The lock file has only delayed the inevitable problem, and provides much less visibility than `package.json`, because it's not designed to be human readable and is quite dense.
+The lock file has only delayed the inevitable problem, and provides much less visibility than `package.json`, because it's not designed to be human-readable and is quite dense.
 
 ![all-dead](assets/images/all-dead.jpg){ loading=lazy }
 
 If the `package.json` has a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
 
 The upside is that the lockfile will hold back `foobar` to `1.1.0` unless it's forced to upgrade, so the break is postponed.
-The downside is _how_ you will discover the break eventually.
+The downside is _how_ you'll discover the break eventually.
 
 The easiest case is if for some reason you _need_ to upgrade `foobar`, e.g. for a new feature it has, so you might run something like `yarn upgrade foobar`.
 Then you might either discover the break during your development or when you push your new development to CI for testing.
@@ -180,7 +180,7 @@ You also may be missing out on really important patches you're not even aware of
 
 Reconsider the same scenario if `foobar` had instead been pinned to `1.1.0` in `package.json`.
 The (broken) upgrade to `1.2.0` would have been explicitly proposed to you via a Renovate PR, you would see the break, and know that the version is bad.
-Meanwhile you could be upgrading all the other essential fixes of other dependencies without worrying about `foobar`.
+Meanwhile, you could be upgrading all the other essential fixes of other dependencies without worrying about `foobar`.
 You could even be running `yarn upgrade` regularly to be getting _indirect_ package updates in the lockfile and seeing if everything still passes.
 
 So the lock file does not solve the same SemVer problems that pinning solves - but it compliments it.
@@ -194,7 +194,7 @@ e.g. are you interested in a Renovate feature where you get a lockfile-only PR a
 
 A good argument made by [@LinusU](https://github.com/LinusU) is:
 
-> Pinning will only protect you against breakage in a, in many cases, small percentage of your packages. If you for example have installed Express and pinned it, you will only protect yourself against a bad Express release, it will not help with the 30 dependencies that Express has.
+> In many cases, pinning will only protect you against breakage in a small percentage of your packages. If you for example have installed Express and pinned it, you'll only protect yourself against a bad Express release, it will not help with the 30 dependencies that Express has.
 >
 > Because of this, I personally think that pinning dependencies just creates a false sense of security, and that using a lock file is superior in every way.
 
@@ -208,7 +208,7 @@ But Linus also points out that a _false_ sense of security is a cost too.
 
 Don't forget that there is some form of transitive trust too.
 You need to pick your direct dependencies carefully, and which versions of them you use.
-Hopefully in doing that you pick dependencies partly for how well _they_ look after their own dependencies and versions (e.g. do they have good enough test coverage, do they use something like Renovate to keep updated, etc?).
+Hopefully in doing that you pick dependencies partly for how well _they_ look after their own dependencies and versions (e.g. do they have good enough test coverage, do they use something like Renovate to keep updated, etc.?).
 So the reality is that even if 90% of the entries in your lock file are indirect dependencies, those are ones you have somewhat "delegated" responsibility for to your dependencies.
 e.g. I'd hope that Express are even better at watching their dependencies for breaks than I am, to use the example above.
 
@@ -223,11 +223,11 @@ We recommend:
 3. Node.js-only libraries can consider pinning all dependencies, because application size/duplicate dependencies are not as much a concern in Node.js compared to the browser. Of course, don't do that if your library is a micro one likely to be consumed in disk-sensitive environments
 4. Use a lock file
 
-As noted earlier, when you pin dependencies then you will see an increase in the raw volume of dependency updates, compared to if you use ranges.
+As noted earlier, when you pin dependencies then you'll see an increase in the raw volume of dependency updates, compared to if you use ranges.
 If/when this starts bothering you, add Renovate rules to reduce the volume, such as scheduling updates, grouping them, or automerging "safe" ones.
 
 ## References
 
-This is a "living" document and we plan to update it whenever we think of something new or someone makes a valid point we've missed or misunderstood.
+This is a "living" document, and we plan to update it whenever we think of something new or someone makes a valid point we've missed or misunderstood.
 
 Updated 2018-01-19 after [excellent feedback on lockfiles](https://github.com/commitizen/cz-conventional-changelog-default-export/pull/4#issuecomment-358038966) by [@LinusU](https://github.com/LinusU)

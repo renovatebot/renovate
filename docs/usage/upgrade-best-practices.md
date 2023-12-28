@@ -2,7 +2,7 @@
 
 This page explains what we (the Renovate maintainers) recommend you do to update your dependencies.
 
-We'll cover starting a new project, updating a year-old project, and updating a project with five year old dependencies.
+We'll cover starting a new project, updating a year-old project, and updating a project with dependencies that are five years old.
 We explain why you should update often, and how to nudge your team to update their dependencies.
 
 ## General recommendations
@@ -80,7 +80,7 @@ The [GitHub Docs, using third-party actions](https://docs.github.com/en/actions/
 We recommend pinning _all_ Actions.
 That's why the `helpers:pinGitHubActionDigests` preset pins all GitHub Actions.
 
-For an in-depth explanation why you should pin your Github Actions, read the [Palo Alto Networks blogpost about the GitHub Actions worm](https://www.paloaltonetworks.com/blog/prisma-cloud/github-actions-worm-dependencies/).
+For an in-depth explanation why you should pin your GitHub Actions, read the [Palo Alto Networks blogpost about the GitHub Actions worm](https://www.paloaltonetworks.com/blog/prisma-cloud/github-actions-worm-dependencies/).
 
 #### Extends `:pinDevDependencies`
 
@@ -116,7 +116,7 @@ This is because you already:
 
 #### You'll be ready for CVE patches
 
-Thirdly, you'll be ready when a upstream package releases a patch for a critical CVE.
+Thirdly, you'll be ready when an upstream package releases a patch for a critical CVE.
 If you're current, you can review and merge Renovate's PR quickly.
 
 When you're behind on updates, you'll have a bad time, because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
@@ -138,7 +138,7 @@ After pushing the initial commit, you should enable and onboard Renovate.
 
 Now you'll have to stay on the "update often" train.
 
-## Project with one year old dependencies
+## Project with dependencies that are a year old
 
 If you have a project that's a year behind on dependencies, you'll need to do some work.
 Let's assume that most dependencies need a `patch` or `minor` update, and at _least_ one dependency needs a `major` update.
@@ -147,7 +147,7 @@ Start small, and get the `patch` and `minor` updates first.
 Read the changelogs for your updates.
 You may have to make small changes to get things working again.
 
-When you have the latest `patch` and `minor` versions, you are ready for `major` updates.
+When you have the latest `patch` and `minor` versions, you're ready for `major` updates.
 Start with `major` version updates for tools like Prettier or ESLint.
 
 Then work on `major` updates for your framework or library.
@@ -156,9 +156,9 @@ Let multiple team members review your work before merging, it's easy to miss som
 
 Finally, update your development tools.
 
-Now you're up to date, you should think how to make updating a regular habit.
+Now you're up-to-date, you should think how to make updating a regular habit.
 
-## Project with five year old dependencies
+## Project with dependencies that are five years old
 
 Let's assume your Dependency Dashboard lists more than 50 updates, and you have a few `major` version updates pending.
 If your project is this badly behind on updates, you have two problems:
@@ -199,7 +199,7 @@ Use the [`:separateMultipleMajorReleases`](./presets-default.md#separatemultiple
 
 ### Update development tools
 
-Finally update development tools like Prettier, ESLint, TSLint, Cypress, and so on.
+Finally, update development tools like Prettier, ESLint, TSLint, Cypress, and so on.
 
 ### Improve the human side
 
@@ -212,7 +212,7 @@ Avoid blaming developers for not updating often.
 
 ## Why developers avoid updating
 
-Let's assume most developers _want_ a project that's up to date.
+Let's assume most developers _want_ a project that's up-to-date.
 So why are your developers avoiding updates?
 Some common reasons:
 
@@ -230,7 +230,7 @@ Make it easy and fast to update dependencies.
 ### Talk with your team about the update process
 
 Listen to your team, write down their problems.
-Then fix each problem as best as you can.
+Then fix each problem the best you can.
 
 ### Make updating easy and fast
 
@@ -250,7 +250,7 @@ Respect your developer's time and brains:
 
 As a starting point:
 
-- Avoid long lived branches that diverge from `main` over time
+- Avoid long-lived branches that diverge from `main` over time
 - Dig beyond "developer error" when things go wrong, again: focus on the process
 - Ensure company policy allows frequent updates
 

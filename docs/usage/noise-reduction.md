@@ -7,7 +7,7 @@ description: How to reduce the "noise" associated with module updates
 
 Generally, the first reaction people have to automated dependency updates like Renovate is "oh great/feel the power of automation".
 The next reaction a few days or weeks later is often "this is getting overwhelming".
-Indeed, if you leave Renovate on its default settings of raising a PR every single time any dependency receives any update.. you will get a lot of PRs and related notifications.
+Indeed, if you leave Renovate on its default settings of raising a PR every single time any dependency receives any update, you'll get a lot of PRs and related notifications.
 This document will give you some ideas of how to reduce the amount of "noise" in your repository and the Pros/Cons of each approach.
 
 Of course, please keep in mind that people's definitions of "noise" may differ.
@@ -50,7 +50,7 @@ Grouping dependencies versus single PRs:
 - Grouping dependencies increases the chance that the branch has an error ("break" your build)
 - When you upgrade multiple dependencies in one PR, it takes longer to find out which package broke the build
 - If a group PR "breaks", you'll have to wait upgrading your other dependencies until _all_ updates in the PR pass
-- You will have less flexibility when one (or more) dependencies in the group have a major upgrade, but the other dependencies are good to go
+- You'll have less flexibility when one (or more) dependencies in the group have a major upgrade, but the other dependencies are good to go
 
 ## Scheduling Renovate
 
@@ -72,15 +72,15 @@ In that case, you might schedule Renovate to run every Tuesday after midnight to
 There are multiple reasons why Renovate may need to "recreate" PRs after you merge another:
 
 1. Conflict with `package.json` (sometimes)
-1. Conflict with lock files (often)
-1. If you have configured Renovate or GitHub that PRs must always be kept up-to-date with the base branch
+2. Conflict with lock files (often)
+3. If you have configured Renovate or GitHub that PRs must always be kept up-to-date with the base branch
 
 Any of the above reasons can lead to a Renovate branch being considered "stale" and then Renovate needs to rebase it off the base branch before you can test and merge again, and Renovate won't do this until it's back in schedule.
 
 ### Selective scheduling
 
 Don't think that you need to apply blanket rules to scheduling.
-Remember that Renovate's configuration is highly flexible so you can configure `automerge` anywhere from globally (entire repo) right down to a package/upgrade type level.
+Remember that Renovate's configuration is highly flexible, so you can configure `automerge` anywhere from globally (entire repo) right down to a package/upgrade type level.
 You could even configure a nonsensical rule like: "patch updates of `jquery` are for Mondays only".
 
 Remember our example of grouping all `eslint` packages?
@@ -125,7 +125,7 @@ In short: it means that Renovate can merge PRs or even branches itself if they p
 
 We recommend that you enable automerge for any type of dependency update where you would select Merge anyway.
 We all know that there are some types of updates that we (nearly) always verify manually before merging, and plenty of others that we don't bother looking at unless tests fail.
-Every time you select Merge on a Renovate PR without manually testing it, you should consider if you can enable automerge and save yourself the time in future.
+Every time you select Merge on a Renovate PR without manually testing it, you should consider if you can enable automerge and save yourself the time in the future.
 
 Automerge works particularly well for `devDependencies` and for production `dependencies` that have great test coverage.
 
@@ -135,7 +135,7 @@ If you have an API with 100% test coverage and `express` is updated: automerge i
 
 ### Branch automerging
 
-Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged.
+Those of you familiar with GitHub might note that even if you automerge PRs, you're still going to get notifications (noise) anyway - one when the PR is created and another when it is merged.
 For this reason we recommend you consider setting `automergeType=branch` which will mean:
 
 - Renovate first creates a branch and no PR
@@ -185,7 +185,7 @@ Using lock files greatly increases the chance that merging one PR will result in
 The table below highlights different noise reduction strategies and their effect on pull request and potential lock file conflicts:
 
 | Action                               | Effect on pull requests  | Chance of lock file conflicts |
-| ------------------------------------ | ------------------------ | ----------------------------- |
+|--------------------------------------|--------------------------|-------------------------------|
 | Group dependencies together          | Decreases separate PRs   | Decreases                     |
 | Automerge dependencies               | Decreases concurrent PRs | Decreases                     |
 | Decrease scheduled time for Renovate | Increases concurrent PRs | Increases                     |
@@ -196,7 +196,7 @@ First of all, if you ever have any ideas about how to make Renovate less noisy, 
 Our philosophy is:
 
 1. Nearly everyone should use Renovate-like dependency update automation
-1. Over time, you should "see" Renovate less and less
+2. Over time, you should "see" Renovate less and less
 
 One of our hopes with preset configs is that a set of "sensible" configs can be maintained by the community that combine grouping, scheduling and automerging to reduce the amount of noise in repositories with little downside or increased risk.
 Such lists could be maintained and used somewhat like Adblock lists - kept up to date by maintainers but for the majority of users they are simply trusted/automatic/invisible.

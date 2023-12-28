@@ -31,7 +31,7 @@ We apply the Principle of Least Privilege (PoLP) but do need substantial privile
 These permissions are always needed to run the respective app.
 
 | Permission        | The Mend Renovate App |  Forking Renovate  | Why                                                           |
-| ----------------- | :-------------------: | :----------------: | ------------------------------------------------------------- |
+|-------------------|:---------------------:|:------------------:|---------------------------------------------------------------|
 | Dependabot alerts |        `read`         |       `read`       | Create vulnerability fix PRs                                  |
 | Administration    |        `read`         |       `read`       | Read branch protections and to be able to assign teams to PRs |
 | Metadata          |        `read`         |       `read`       | Mandatory for all apps                                        |
@@ -44,11 +44,11 @@ These permissions are always needed to run the respective app.
 
 ### User permissions
 
-Renovate can also request users's permission to the following resources.
+Renovate can also request users' permission to the following resources.
 These permissions will be requested and authorized on an individual-user basis.
 
 | Permission | The Mend Renovate App | Forking Renovate | Why                                                      |
-| ---------- | :-------------------: | :--------------: | -------------------------------------------------------- |
+|------------|:---------------------:|:----------------:|----------------------------------------------------------|
 | email      |        `read`         |  not applicable  | Per-user consent requested if logging into App dashboard |
 
 ## Privacy

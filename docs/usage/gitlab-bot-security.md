@@ -13,7 +13,7 @@ Make sure you understand GitLab's security model, before you run a "bot" service
 ## `CI_JOB_TOKEN` permissions
 
 The concept of `CI_JOB_TOKEN` permissions was [overhauled in GitLab release 8.12](https://about.gitlab.com/releases/2016/09/22/gitlab-8-12-released/), jobs now run with the permissions of the user account which _triggered_ the pipeline.
-For security reasons the token was limited to read-only permissions and a limited set of API endpoints, but it’s been extended to allow [write access to the GitLab Package Registry](https://docs.gitlab.com/ee/api/index.html#gitlab-ci-job-token).
+For security reasons the token was limited to read-only permissions and a limited set of API endpoints, but it’s been extended to allow [write-access to the GitLab Package Registry](https://docs.gitlab.com/ee/api/index.html#gitlab-ci-job-token).
 Any pipeline triggered by a user account thus has permissions to:
 
 - read any repository which that account has access to
@@ -25,12 +25,12 @@ Because that project could maliciously steal repository data, publish fake relea
 ## Risks of hosting a Renovate GitLab app/bot/service
 
 With GitLab's current security model, we find the risks of running a _public_ bot service like Renovate are too high.
-Therefore we stopped hosting Renovate on GitLab, and are waiting for a better security model.
+Therefore, we stopped hosting Renovate on GitLab, and are waiting for a better security model.
 
 You should remember that when accounts are invited into projects or groups on GitLab, acceptance happens automatically.
 This was a useful feature to leverage for a shared service.
 
-If you are running a self-hosted Renovate service, we recommend you:
+If you're running a self-hosted Renovate service, we recommend you:
 
 - Run a shared service only within projects which have shared visibility/security within the users, or which have a low risk that a user would try to gain access to a private project they don't otherwise have access to
 - If running with `autodiscover`, also configure a value for `autodiscoverFilter` so that the bot can't be invited to projects or groups you don't intend

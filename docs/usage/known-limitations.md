@@ -23,7 +23,7 @@ For scheduled action to take place, both these need to happen:
 
 ### The Mend Renovate app and scheduled jobs
 
-The Mend Renovate App checks each active repository roughly every three hours, if no activity has been seen before then (merged PRs, etc).
+The Mend Renovate App checks each active repository roughly every three hours, if no activity has been seen before then (merged PRs, etc.).
 
 For this reason, you should set your schedule window to at least three or four hours.
 This makes it likely that Renovate bot checks your repository at least once during the schedule.

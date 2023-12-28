@@ -21,17 +21,17 @@ But if you group PRs and use titles like "All non-major updates", then multiple 
 ## Normal PRs
 
 As explained above, Renovate PRs normally have some "uniqueness" in their title relating to the version in the upgrade.
-When you close a "unique" PR, Renovate assumes you don't want to see that PR again in future, for example:
+When you close a "unique" PR, Renovate assumes you don't want to see that PR again in the future, for example:
 
 1. You ignored `lodash@4.17.21` by closing Renovate's PR
-1. Renovate assumes you don't want any updates to `4.17.21` of `lodash`
-1. Renovate creates a new PR when the branch + title "uniqueness" exists again, like when `lodash@4.17.22` releases
+2. Renovate assumes you don't want any updates to `4.17.21` of `lodash`
+3. Renovate creates a new PR when the branch + title "uniqueness" exists again, like when `lodash@4.17.22` releases
 
 Renovate behaves similarly for `major` updates, for example:
 
 1. You ignored a `major` update for Lodash (pr title: "Update lodash to v4") by closing Renovate's PR
-1. Renovate assumes you don't want any updates to `v4` of `lodash`
-1. Renovate won't create any update PRs for `v4` of `lodash`, even if there are newer versions of `v4`
+2. Renovate assumes you don't want any updates to `v4` of `lodash`
+3. Renovate won't create any update PRs for `v4` of `lodash`, even if there are newer versions of `v4`
 
 ## Immortal PRs
 
@@ -45,7 +45,7 @@ This document explains why we have immortal PRs, and how you can fix them.
 
 ### Why we have immortal PRs
 
-First off, we don't have immortal PRs for some philosphical reason like: "don't ignore this update, it's good for you!".
+First off, we don't have immortal PRs for some philosophical reason like: "don't ignore this update, it's good for you!".
 We have no good way to ignore some PRs after they're closed.
 
 #### Branch name and PR title are cache keys

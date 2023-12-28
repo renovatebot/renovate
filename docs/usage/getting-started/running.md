@@ -28,7 +28,7 @@ If you're running Renovate Community Edition or Renovate Enterprise Edition, ref
 Renovate's Open Source CLI is built and distributed as the npm package `renovate`.
 You can run this package in any Node.js environment - even via `npx` - and it will process all the repositories it is configured with, before exiting.
 
-When installing Renovate via npm you are responsible for installing any third-party tools or languages like Ruby, Python, Composer, Bundler, Poetry, etc.
+When installing Renovate via npm you're responsible for installing any third-party tools or languages like Ruby, Python, Composer, Bundler, Poetry, etc.
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
 
@@ -45,7 +45,7 @@ In general, you can run Renovate natively on Windows as long as you have all too
 There are two Docker image flavors:
 
 - The default image, which installs required tools at runtime (default for `latest` tag),
-- The `-full` image, which comes with latest or very recent versions of every tool pre-installed
+- The `-full` image, which comes with latest or very recent versions of every tool preinstalled
 
 ##### The default image (formerly `slim`)
 
@@ -64,12 +64,12 @@ Read the [`binarySource` config option docs](../self-hosted-configuration.md#bin
 ##### The full image
 
 The `-full` image comes with most package managers that Renovate supports, but not _all_ package managers.
-Update your Docker images regularly to keep the pre-installed tools up-to-date.
+Update your Docker images regularly to keep the preinstalled tools up-to-date.
 
 The full image is for users who don't want to download or install things at runtime.
 This image has some downsides, because it:
 
-- Comes pre-installed with _one_ version of each language/manager - usually the latest
+- Comes preinstalled with _one_ version of each language/manager - usually the latest
 - Weighs several gigabytes
 
 #### GitHub Action
@@ -136,7 +136,7 @@ If you use Forking Renovate, you'll miss out on these features of the regular Re
 After deciding on a Renovate distribution, you need to decide where and how to run it.
 
 For the GitHub Action and GitLab Runner approaches, they will naturally run on their respective CI infrastructure.
-For the npm package approach or Docker images, you will need some form of VM or container infrastructure to run Renovate on.
+For the npm package approach or Docker images, you'll need some form of VM or container infrastructure to run Renovate on.
 
 In all the above cases you must make sure that some form of cron-like capability exists to schedule when Renovate runs.
 We recommend that you run Renovate hourly, if possible.
@@ -151,16 +151,16 @@ Renovate's server-side/admin config is referred to as its "global" config, and c
 - environment variables, or
 - CLI parameters
 
-By default Renovate checks if a file named `config.js` is present.
+By default, Renovate checks if a file named `config.js` is present.
 Any other (`*.js`, `*.json`, `*.json5`, `*.yaml` or `*.yml`) file is supported, when you reference it with the `RENOVATE_CONFIG_FILE` environment variable (for example: `RENOVATE_CONFIG_FILE=config.yaml`).
 
 Some config is global-only, meaning that either it is only applicable to the bot administrator or it can only be controlled by the administrator and not repository users.
 Those are documented in [Self-hosted Configuration](../self-hosted-configuration.md).
-Your bot's global config can include both global as well as non-global configuration options, while user/repo config can only include non-global options.
+Your bot's global config can include both global and non-global configuration options, while user/repo config can only include non-global options.
 We recommend that you keep as much of the non-global config as possible in repository config files.
 This way the Renovate end users can see as much of the bot's configuration as possible.
 
-If you are configuring Renovate using environment variables, there are two possibilities:
+If you're configuring Renovate using environment variables, there are two possibilities:
 
 - Upper-cased, camel-cased, `RENOVATE_`-prefixed single config options like `RENOVATE_TOKEN=abc123` or `RENOVATE_GIT_AUTHOR=a@b.com`
 - Set `RENOVATE_CONFIG` to a [stringified](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify) version of the full JSON config, for example: `RENOVATE_CONFIG='{"token":"abc123","gitAuthor":"a@b.com"}'`
@@ -200,7 +200,7 @@ We also recommend you configure `config.gitAuthor` with the same identity as you
 
 #### Docs
 
-Read the platform-specific docs to learn how to setup authentication on your platform:
+Read the platform-specific docs to learn how to set up authentication on your platform:
 
 - [Azure DevOps](../modules/platform/azure/index.md)
 - [Bitbucket Cloud](../modules/platform/bitbucket/index.md)
@@ -211,7 +211,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 
 ### GitHub.com token for changelogs
 
-If you are running on any platform except github.com, you should also set the environment variable `GITHUB_COM_TOKEN` and put the Personal Access Token for github.com in it.
+If you're running on any platform except github.com, you should also set the environment variable `GITHUB_COM_TOKEN` and put the Personal Access Token for github.com in it.
 This account can be _any_ account on GitHub, and needs only `read-only` access.
 It's used when fetching changelogs for repositories in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
@@ -219,7 +219,7 @@ It's also OK to configure the same as a host rule instead, if you prefer that.
 <!-- prettier-ignore -->
 !!! note
     If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT (classic).
-    Otherwise you will exceed the rate limit for the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+    Otherwise, you'll exceed the rate limit for the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ### Self-hosting examples
 

@@ -95,7 +95,7 @@ If set, Renovate will terminate the whole process group of a terminated child pr
 
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
-If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergable before trying to automerge.
+If set to a positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
 The formula for the delay between attempts is `250 * attempt * attempt` milliseconds.
 
 Default value: `5` (attempts results in max. 13.75 seconds timeout).

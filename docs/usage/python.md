@@ -10,7 +10,7 @@ See [all supported managers](./modules/manager/index.md).
 
 ## Versioning support
 
-We've written a JavaScript version of the [PEP440 specification](https://www.python.org/dev/peps/pep-0440/) so we can use it in Renovate bot.
+We've written a JavaScript version of the [PEP440 specification](https://www.python.org/dev/peps/pep-0440/), so we can use it in Renovate bot.
 You can find this project in our [`renovatebot/pep440` repository](https://github.com/renovatebot/pep440).
 
 Our PEP440 implementation supports pinned versions and ranges.
@@ -19,9 +19,9 @@ Legacy versions with the `===` prefix are ignored.
 ## How it works
 
 1. Renovate searches through each repository for package files
-1. Existing dependencies are extracted from the package files
-1. Renovate searches for the latest version on [PyPI](https://pypi.org/) to decide if there are upgrades
-1. If the source package includes a GitHub URL as its source, and has a "changelog" file _or_ uses GitHub releases, a Release Note will be embedded in the generated PR
+2. Existing dependencies are extracted from the package files
+3. Renovate searches for the latest version on [PyPI](https://pypi.org/) to decide if there are upgrades
+4. If the source package includes a GitHub URL as its source, and has a "changelog" file _or_ uses GitHub releases, a Release Note will be embedded in the generated PR
 
 ## Alternative file names
 
@@ -43,7 +43,7 @@ You can tell Renovate where to find your file(s) by setting your own `fileMatch`
 
 ## Alternate registries
 
-By default Renovate checks for upgrades on the `pypi.org` registry.
+By default, Renovate checks for upgrades on the `pypi.org` registry.
 
 If you want, you can set alternative index URLs.
 There are three ways to do this:

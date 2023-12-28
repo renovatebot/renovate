@@ -6,7 +6,7 @@ Please follow these points whenever interacting in this repo.
 ## Be positive and polite
 
 This project is open source, and has the work of a lot of contributors who are proud of it.
-Please avoid unnecessary criticism, especially if you are new to the project or have not contributed anything.
+Please avoid unnecessary criticism, especially if you're new to the project or have not contributed anything.
 You are welcome to make it better, and do not need to criticize the works of others first.
 
 ## Be considerate of the time of people helping you
@@ -77,5 +77,5 @@ Don't raise a bug report unless it's definitely a bug.
 "I don't like this" or "I didn't expect this to happen" is not the same thing as a bug.
 
 Many unjustified bug reports are filed because people they think it will get them more attention.
-Instead, you may be wasting maintainer time because we have to reclassify your invalid bug report or convert it to a discussion, and you are much less likely to get the attention you're hoping for.
+Instead, you may be wasting maintainer time because we have to reclassify your invalid bug report or convert it to a discussion, and you're much less likely to get the attention you're hoping for.
 If in doubt, start a discussion instead.
