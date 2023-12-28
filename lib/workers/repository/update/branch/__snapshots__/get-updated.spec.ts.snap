@@ -195,11 +195,47 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() i
   "artifactErrors": [],
   "reuseExistingBranch": undefined,
   "updatedArtifacts": [],
-  "updatedPackageFiles": [],
+  "updatedPackageFiles": [
+    {
+      "contents": "new content",
+      "path": "values.yaml",
+      "type": "addition",
+    },
+    {
+      "contents": "version: 0.0.2",
+      "path": "/test/Chart.yaml",
+      "type": "addition",
+    },
+    {
+      "contents": "# Version 0.0.2",
+      "path": "/test/README.md",
+      "type": "addition",
+    },
+  ],
 }
 `;
 
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions with a bumpPackageFile different from the packageFile 1`] = `
+{
+  "artifactErrors": [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
+      "contents": "new content",
+      "path": "values.yaml",
+      "type": "addition",
+    },
+    {
+      "contents": "version: 0.0.2",
+      "path": "/test/Chart.yaml",
+      "type": "addition",
+    },
+  ],
+}
+`;
+
+exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() in autoReplace managers doesn't bump versions if content wasn't changed 1`] = `
 {
   "artifactErrors": [],
   "reuseExistingBranch": undefined,

@@ -78,5 +78,20 @@ describe('modules/manager/helm-values/update', () => {
       expect(bumpedContent).toEqual(helmValuesContent);
       expect(bumpedFiles).toBeUndefined();
     });
+
+    it('returns content if retrieving Chart.yaml fails', async () => {
+      jest.resetAllMocks();
+      fs.readLocalFile = jest.fn();
+      fs.readLocalFile.mockRejectedValueOnce(null);
+      const { bumpedContent, bumpedFiles } =
+        await helmValuesUpdater.bumpPackageVersion(
+          helmValuesContent,
+          '0.0.2',
+          'minor',
+          'values.yaml',
+        );
+      expect(bumpedContent).toEqual(helmValuesContent);
+      expect(bumpedFiles).toBeUndefined();
+    });
   });
 });
