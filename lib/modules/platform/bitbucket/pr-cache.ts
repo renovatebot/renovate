@@ -29,7 +29,7 @@ export class BitbucketPrCache {
     this.cache = pullRequestCache;
   }
 
-  static async init(
+  private static async init(
     http: BitbucketHttp,
     repo: string,
     author: string | null,
@@ -47,8 +47,17 @@ export class BitbucketPrCache {
     return res;
   }
 
-  getPrs(): Pr[] {
+  private getPrs(): Pr[] {
     return Object.values(this.cache.items);
+  }
+
+  static async getPrs(
+    http: BitbucketHttp,
+    repo: string,
+    author: string | null,
+  ): Promise<Pr[]> {
+    const prCache = await BitbucketPrCache.init(http, repo, author);
+    return prCache.getPrs();
   }
 
   private addPr(pr: Pr): void {

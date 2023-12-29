@@ -61,11 +61,11 @@ describe('modules/platform/bitbucket/pr-cache', () => {
         values: [pr1],
       });
 
-    const res = await BitbucketPrCache.init(
+    const res = await BitbucketPrCache.getPrs(
       http,
       'some-workspace/some-repo',
       'some-author',
-    ).then((cache) => cache.getPrs());
+    );
 
     expect(res).toMatchObject([
       {
@@ -109,11 +109,11 @@ describe('modules/platform/bitbucket/pr-cache', () => {
         values: [pr2],
       });
 
-    const res = await BitbucketPrCache.init(
+    const res = await BitbucketPrCache.getPrs(
       http,
       'some-workspace/some-repo',
       'some-author',
-    ).then((cache) => cache.getPrs());
+    );
 
     expect(res).toMatchObject([
       { number: 1, title: 'title' },
