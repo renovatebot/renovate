@@ -7,6 +7,7 @@ import {
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import { BitbucketPrCache } from './pr-cache';
 import type { PrResponse } from './types';
+import { prInfo } from './utils';
 
 const http = new BitbucketHttp();
 
@@ -78,7 +79,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
           pullRequestsCache: {
             author: 'some-author',
             items: {
-              '1': pr1,
+              '1': prInfo(pr1),
             },
             updated_on: '2020-01-01T00:00:00.000Z',
           },
@@ -92,7 +93,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       bitbucket: {
         pullRequestsCache: {
           items: {
-            '1': pr1,
+            '1': prInfo(pr1),
           },
           author: 'some-author',
           updated_on: '2020-01-01T00:00:00.000Z',
@@ -123,8 +124,8 @@ describe('modules/platform/bitbucket/pr-cache', () => {
         bitbucket: {
           pullRequestsCache: {
             items: {
-              '1': pr1,
-              '2': pr2,
+              '1': prInfo(pr1),
+              '2': prInfo(pr2),
             },
             author: 'some-author',
             updated_on: '2023-01-01T00:00:00.000Z',

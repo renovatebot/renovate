@@ -1,3 +1,5 @@
+import type { Pr } from '../types';
+
 export type BitbucketMergeStrategy = 'fast_forward' | 'merge_commit' | 'squash';
 
 export interface MergeRequestBody {
@@ -105,7 +107,7 @@ export interface EffectiveReviewer {
 }
 
 export interface BitbucketPrCacheData {
-  items: Record<number, PrResponse>;
+  items: Record<number, Pr>;
   updated_on: string | null;
   author: string | null;
 }

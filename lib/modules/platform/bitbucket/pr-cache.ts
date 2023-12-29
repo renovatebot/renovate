@@ -11,11 +11,7 @@ import { prFieldsFilter, prInfo, prStates } from './utils';
 export class BitbucketPrCache {
   private cache: BitbucketPrCacheData;
 
-  private constructor(
-    private repo: string,
-    private author: string | null,
-    private prList: Pr[] = [],
-  ) {
+  private constructor(private repo: string, private author: string | null) {
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.bitbucket ??= {};
@@ -38,24 +34,25 @@ export class BitbucketPrCache {
     repo: string,
     author: string | null,
   ): Promise<BitbucketPrCache> {
-    const prList = memCache.get<Pr[] | undefined>(
-      `bitbucket-pr-cache:${repo}:${author}`,
+    const res = new BitbucketPrCache(repo, author);
+    const isSynced = memCache.get<true | undefined>(
+      'bitbucket-pr-cache-synced',
     );
-    const res = new BitbucketPrCache(repo, author, prList);
 
-    if (!prList) {
+    if (!isSynced) {
       await res.sync(http);
+      memCache.set('bitbucket-pr-cache-synced', true);
     }
 
     return res;
   }
 
   getPrs(): Pr[] {
-    return this.prList;
+    return Object.values(this.cache.items);
   }
 
   private addPr(pr: Pr): void {
-    this.prList.push(pr);
+    this.cache.items[pr.number] = pr;
   }
 
   static async addPr(
@@ -68,23 +65,25 @@ export class BitbucketPrCache {
     prCache.addPr(item);
   }
 
-  private reconcile(newItems: PrResponse[]): void {
+  private reconcile(rawItems: PrResponse[]): void {
     const { items: oldItems } = this.cache;
     let { updated_on } = this.cache;
 
-    for (const newItem of newItems) {
-      const itemId = newItem.id;
-      const oldItem = oldItems[itemId];
+    for (const rawItem of rawItems) {
+      const id = rawItem.id;
 
-      const itemNewTime = DateTime.fromISO(newItem.updated_on);
+      const oldItem = oldItems[id];
+      const newItem = prInfo(rawItem);
+
+      const itemNewTime = DateTime.fromISO(rawItem.updated_on);
 
       if (!dequal(oldItem, newItem)) {
-        oldItems[itemId] = newItem;
+        oldItems[id] = newItem;
       }
 
       const cacheOldTime = updated_on ? DateTime.fromISO(updated_on) : null;
       if (!cacheOldTime || itemNewTime > cacheOldTime) {
-        updated_on = newItem.updated_on;
+        updated_on = rawItem.updated_on;
       }
     }
 
@@ -119,10 +118,6 @@ export class BitbucketPrCache {
     const opts = { paginate: true, pagelen: 50 };
     const res = await http.getJson<PagedResult<PrResponse>>(url, opts);
     this.reconcile(res.body.values);
-
-    this.prList = Object.values(this.cache.items).map(prInfo);
-    memCache.set(`bitbucket-pr-cache:${this.repo}:${this.author}`, this.prList);
-
     return this;
   }
 }
