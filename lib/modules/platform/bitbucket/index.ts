@@ -289,6 +289,7 @@ export async function findPr({
   includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
+
   if (includeOtherAuthors) {
     // PR might have been created by anyone, so don't use the cached Renovate PR list
     const prs = (
@@ -314,15 +315,16 @@ export async function findPr({
     ),
   );
 
-  if (pr) {
-    logger.debug(`Found PR #${pr.number}`);
+  if (!pr) {
+    return null;
   }
+  logger.debug(`Found PR #${pr.number}`);
 
   /**
    * Bitbucket doesn't support renaming or reopening declined PRs.
    * Instead, we have to use comment-driven signals.
    */
-  if (pr?.state === 'closed') {
+  if (pr.state === 'closed') {
     const reopenComments = await comments.reopenComments(config, pr.number);
 
     if (is.nonEmptyArray(reopenComments)) {
@@ -345,7 +347,7 @@ export async function findPr({
     }
   }
 
-  return pr ?? null;
+  return pr;
 }
 
 // Gets details for a PR
