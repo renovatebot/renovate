@@ -11,7 +11,10 @@ import { prFieldsFilter, prInfo, prStates } from './utils';
 export class BitbucketPrCache {
   private cache: BitbucketPrCacheData;
 
-  private constructor(private repo: string, private author: string | null) {
+  private constructor(
+    private repo: string,
+    private author: string | null,
+  ) {
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.bitbucket ??= {};
