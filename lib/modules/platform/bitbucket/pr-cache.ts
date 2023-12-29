@@ -38,11 +38,15 @@ export class BitbucketPrCache {
     repo: string,
     author: string | null,
   ): Promise<BitbucketPrCache> {
-    const prList = memCache.get<Pr[] | undefined>('bitbucket-pr-cache');
+    const prList = memCache.get<Pr[] | undefined>(
+      `bitbucket-pr-cache:${repo}:${author}`,
+    );
     const res = new BitbucketPrCache(repo, author, prList);
+
     if (!prList) {
       await res.sync(http);
     }
+
     return res;
   }
 
@@ -115,7 +119,10 @@ export class BitbucketPrCache {
     const opts = { paginate: true, pagelen: 50 };
     const res = await http.getJson<PagedResult<PrResponse>>(url, opts);
     this.reconcile(res.body.values);
+
     this.prList = Object.values(this.cache.items).map(prInfo);
+    memCache.set(`bitbucket-pr-cache:${this.repo}:${this.author}`, this.prList);
+
     return this;
   }
 }
