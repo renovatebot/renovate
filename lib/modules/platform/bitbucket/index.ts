@@ -306,13 +306,12 @@ export async function findPr({
     return utils.prInfo(prs[0]);
   }
 
-  const pr = await getPrList().then((prs) =>
-    prs.find(
-      (p) =>
-        p.sourceBranch === branchName &&
-        (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
-        matchesState(p.state, state),
-    ),
+  const prList = await getPrList();
+  const pr = prList.find(
+    (p) =>
+      p.sourceBranch === branchName &&
+      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
+      matchesState(p.state, state),
   );
 
   if (!pr) {
