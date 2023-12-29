@@ -215,10 +215,8 @@ class GerritClient {
   }
 
   normalizeMessage(message: string): string {
-    const trimmedMessage = message.trim(); //the last \n was removed from gerrit after the comment was added...
-    return trimmedMessage.length > 0x4000
-      ? trimmedMessage.slice(0, 0x4000)
-      : trimmedMessage;
+    //the last \n was removed from gerrit after the comment was added...
+    return message.substring(0, 0x4000).trim();
   }
 
   private static buildSearchFilters(
