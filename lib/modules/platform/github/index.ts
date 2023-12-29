@@ -798,8 +798,26 @@ export async function findPr({
   branchName,
   prTitle,
   state = 'all',
+  includeOtherAuthors,
 }: FindPRConfig): Promise<GhPr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
+
+  if (includeOtherAuthors) {
+    const repo = config.parentRepo ?? config.repository;
+    // PR might have been created by anyone, so don't use the cached Renovate PR list
+    const response = await githubApi.getJson<GhRestPr[]>(
+      `repos/${repo}/pulls?head=${repo}:${branchName}&state=open`,
+    );
+
+    const { body: prList } = response;
+    if (!prList.length) {
+      logger.debug(`No PR found for branch ${branchName}`);
+      return null;
+    }
+
+    return coerceRestPr(prList[0]);
+  }
+
   const prList = await getPrList();
   const pr = prList.find((p) => {
     if (p.sourceBranch !== branchName) {

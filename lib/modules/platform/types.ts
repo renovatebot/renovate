@@ -143,6 +143,7 @@ export interface FindPRConfig {
   state?: 'open' | 'closed' | '!open' | 'all';
   refreshCache?: boolean;
   targetBranch?: string | null;
+  includeOtherAuthors?: boolean;
 }
 export interface MergePRConfig {
   branchName?: string;

@@ -863,8 +863,36 @@ export async function findPr({
   branchName,
   prTitle,
   state = 'all',
+  includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle!}, ${state})`);
+
+  if (includeOtherAuthors) {
+    // PR might have been created by anyone, so don't use the cached Renovate MR list
+    const response = await gitlabApi.getJson<GitLabMergeRequest[]>(
+      `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
+    );
+
+    const { body: mrList } = response;
+    if (!mrList.length) {
+      logger.debug(`No MR found for branch ${branchName}`);
+      return null;
+    }
+
+    // return the latest merge request
+    const mr = mrList[0];
+
+    // only pass necessary info
+    const pr: GitlabPr = {
+      sourceBranch: mr.source_branch,
+      number: mr.iid,
+      state: 'open',
+      title: mr.title,
+    };
+
+    return massagePr(pr);
+  }
+
   const prList = await getPrList();
   return (
     prList.find(
