@@ -1824,6 +1824,49 @@ describe('modules/platform/gitlab/index', () => {
       ]);
     });
 
+    it('should parse detailed_merge_status attribute on >= 15.6', async () => {
+      await initPlatform('15.6.0-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200);
+      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '250';
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        platformOptions: {
+          usePlatformAutomerge: true,
+        },
+      });
+      expect(pr).toEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+      expect(timers.setTimeout.mock.calls).toMatchObject([
+        [250],
+        [1000],
+        [2250],
+      ]);
+    });
+
     it('raises with squash enabled when repository squash option is default_on', async () => {
       await initPlatform('14.0.0');
 
