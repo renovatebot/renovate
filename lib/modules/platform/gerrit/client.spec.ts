@@ -256,6 +256,18 @@ describe('modules/platform/gerrit/client', () => {
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(client.addMessage(123456, 'message')).toResolve();
     });
+
+    it('add too big message', async () => {
+      const okMessage = 'a'.repeat(0x4000);
+      const tooBigMessage = okMessage + 'b';
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/revisions/current/review', {
+          message: okMessage,
+        })
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      await expect(client.addMessage(123456, tooBigMessage)).toResolve();
+    });
   });
 
   describe('checkForExistingMessage()', () => {
