@@ -66,7 +66,10 @@ export async function autodiscoverRepositories(
     );
   }
 
-  logger.info({ repositories: discovered }, `Autodiscovered repositories`);
+  logger.info(
+    { length: discovered.length, repositories: discovered },
+    `Autodiscovered repositories`
+  );
 
   // istanbul ignore if
   if (config.repositories?.length) {
