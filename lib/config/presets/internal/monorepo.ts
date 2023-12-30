@@ -287,7 +287,7 @@ const repoGroups = {
   gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
   'github-workflows-kt':
     'https://github.com/typesafegithub/github-workflows-kt',
-  'gocloud.dev': 'https://github.com/google/go-cloud',
+  'go-cloud': 'https://github.com/google/go-cloud',
   'google-api-dotnet-client':
     'https://github.com/googleapis/google-api-dotnet-client',
   grafana: 'https://github.com/grafana/grafana',
