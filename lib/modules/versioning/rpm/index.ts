@@ -14,7 +14,6 @@ export const supportsRanges = false;
 
 const alphaNumPattern = regEx(/([a-zA-Z]+)|(\d+)|(~)/g);
 const epochPattern = regEx(/^\d+$/);
-const leadingZerosPattern = new RegExp(/^0+(?!$)|^$/);
 
 export interface RpmVersion extends GenericVersion {
   /**
@@ -165,8 +164,8 @@ class RpmVersioningApi extends GenericVersioningApi {
     const matches = Math.min(matchesv1.length, matchesv2.length);
 
     for (let i = 0; i < matches; i++) {
-      let matchv1 = matchesv1[i];
-      let matchv2 = matchesv2[i];
+      const matchv1 = matchesv1[i];
+      const matchv2 = matchesv2[i];
 
       // compare tildes
       if (matchv1?.[0] === '~' || matchv2?.[0] === '~') {
@@ -184,10 +183,6 @@ class RpmVersioningApi extends GenericVersioningApi {
         if (!is.numericString(matchv2?.[0])) {
           return 1;
         }
-
-        // trim leading zeros
-        matchv1 = matchv1?.replace(leadingZerosPattern, '');
-        matchv2 = matchv2?.replace(leadingZerosPattern, '');
 
         //We clearly have a number here, so return which is greater
         const num1 = Number.parseInt(matchv1, 10);
