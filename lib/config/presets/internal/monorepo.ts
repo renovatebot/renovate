@@ -287,6 +287,7 @@ const repoGroups = {
   gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
   'github-workflows-kt':
     'https://github.com/typesafegithub/github-workflows-kt',
+  'go-cloud': 'https://github.com/google/go-cloud',
   'google-api-dotnet-client':
     'https://github.com/googleapis/google-api-dotnet-client',
   grafana: 'https://github.com/grafana/grafana',
@@ -457,6 +458,7 @@ const repoGroups = {
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
   'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
+  'testcontainers-go': 'https://github.com/testcontainers/testcontainers-go',
   'testcontainers-java':
     'https://github.com/testcontainers/testcontainers-java',
   'testcontainers-node':

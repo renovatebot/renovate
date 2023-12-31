@@ -121,9 +121,10 @@ class GerritClient {
 
   async addMessage(
     changeNumber: number,
-    message: string,
+    fullMessage: string,
     tag?: string,
   ): Promise<void> {
+    const message = this.normalizeMessage(fullMessage);
     await this.gerritHttp.postJson(
       `a/changes/${changeNumber}/revisions/current/review`,
       { body: { message, tag } },
@@ -148,7 +149,7 @@ class GerritClient {
     message: string,
     tag?: string,
   ): Promise<void> {
-    const newMsg = message.trim(); //the last \n was removed from gerrit after the comment was added...
+    const newMsg = this.normalizeMessage(message);
     if (!(await this.checkForExistingMessage(changeNumber, newMsg, tag))) {
       await this.addMessage(changeNumber, newMsg, tag);
     }
@@ -211,6 +212,11 @@ class GerritClient {
       change.labels?.['Code-Review'].approved &&
       change.labels['Code-Review'].approved.username === username
     );
+  }
+
+  normalizeMessage(message: string): string {
+    //the last \n was removed from gerrit after the comment was added...
+    return message.substring(0, 0x4000).trim();
   }
 
   private static buildSearchFilters(
