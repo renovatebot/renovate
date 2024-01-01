@@ -2,8 +2,11 @@ import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
-import { parseSingleYaml } from '../../../util/yaml';
-import type { ChartDefinition, HelmDockerImageDependency } from './types';
+import {
+  type ChartDefinition,
+  ChartDefinitionYaml,
+  type HelmDockerImageDependency,
+} from './types';
 
 const parentKeyRe = regEx(/image$/i);
 
@@ -78,15 +81,7 @@ export async function getParsedSiblingChartYaml(
       logger.debug({ fileName }, 'Failed to find helm Chart.yaml');
       return null;
     }
-    const chart = parseSingleYaml(chartContents) as ChartDefinition;
-    if (!(chart?.apiVersion && chart.name && chart.version)) {
-      logger.debug(
-        { fileName },
-        'Failed to find required fields in Chart.yaml',
-      );
-      return null;
-    }
-    return chart;
+    return ChartDefinitionYaml.parse(chartContents);
   } catch (err) {
     logger.debug({ fileName }, 'Failed to parse helm Chart.yaml');
     return null;

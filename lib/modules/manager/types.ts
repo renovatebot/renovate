@@ -199,12 +199,6 @@ export interface UpdateDependencyConfig<T = Record<string, any>> {
 
 export interface BumpPackageVersionResult {
   bumpedContent: string | null;
-  // describes files that was changed instead of or in addition to the packageFile
-  bumpedFiles?: BumpedPackageFile[];
-}
-export interface BumpedPackageFile {
-  fileName: string;
-  newContent: string;
 }
 
 export interface UpdateLockedConfig {

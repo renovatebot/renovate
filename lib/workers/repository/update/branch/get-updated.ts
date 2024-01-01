@@ -5,7 +5,6 @@ import { logger } from '../../../../logger';
 import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
-  BumpedPackageFile,
   PackageDependency,
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
@@ -186,20 +185,18 @@ export async function getUpdatedPackageFiles(
         );
         firstUpdate = false;
         if (res) {
-          let bumpedPackageFiles: BumpedPackageFile[] = [];
           if (
             bumpPackageVersion &&
             upgrade.bumpVersion &&
             upgrade.packageFileVersion
           ) {
-            const bumpResult = await bumpPackageVersion(
+            const { bumpedContent } = await bumpPackageVersion(
               res,
               upgrade.packageFileVersion,
               upgrade.bumpVersion,
               packageFile,
             );
-            res = bumpResult.bumpedContent;
-            bumpedPackageFiles = bumpResult.bumpedFiles ?? [];
+            res = bumpedContent;
           }
           if (res === packageFileContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
@@ -207,18 +204,6 @@ export async function getUpdatedPackageFiles(
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res!;
             delete nonUpdatedFileContents[packageFile];
-            // indicates that the version was bumped in one or more files in
-            // addition to or instead of the packageFile
-            if (bumpedPackageFiles) {
-              for (const bumpedPackageFile of bumpedPackageFiles) {
-                logger.debug(
-                  { bumpedPackageFile, depName },
-                  'Updating bumpedPackageFile content',
-                );
-                updatedFileContents[bumpedPackageFile.fileName] =
-                  bumpedPackageFile.newContent;
-              }
-            }
           }
           continue;
         } else if (reuseExistingBranch) {

@@ -1,5 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() bumps versions in autoReplace managers 1`] = `
+{
+  "artifactErrors": [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": [],
+  "updatedPackageFiles": [
+    {
+      "contents": "version: 0.0.2",
+      "path": "Chart.yaml",
+      "type": "addition",
+    },
+  ],
+}
+`;
+
 exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() bumps versions in updateDependency managers 1`] = `
 {
   "artifactErrors": [],
@@ -169,75 +184,6 @@ exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() h
       "stderr": "some error",
     },
   ],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": [],
-  "updatedPackageFiles": [],
-}
-`;
-
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions 1`] = `
-{
-  "artifactErrors": [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": [],
-  "updatedPackageFiles": [
-    {
-      "contents": "version: 0.0.2",
-      "path": "Chart.yaml",
-      "type": "addition",
-    },
-  ],
-}
-`;
-
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions in all files if multiple files were bumped 1`] = `
-{
-  "artifactErrors": [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": [],
-  "updatedPackageFiles": [
-    {
-      "contents": "new content",
-      "path": "values.yaml",
-      "type": "addition",
-    },
-    {
-      "contents": "version: 0.0.2",
-      "path": "/test/Chart.yaml",
-      "type": "addition",
-    },
-    {
-      "contents": "# Version 0.0.2",
-      "path": "/test/README.md",
-      "type": "addition",
-    },
-  ],
-}
-`;
-
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() in autoReplace managers bumps versions with a bumpPackageFile different from the packageFile 1`] = `
-{
-  "artifactErrors": [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": [],
-  "updatedPackageFiles": [
-    {
-      "contents": "new content",
-      "path": "values.yaml",
-      "type": "addition",
-    },
-    {
-      "contents": "version: 0.0.2",
-      "path": "/test/Chart.yaml",
-      "type": "addition",
-    },
-  ],
-}
-`;
-
-exports[`workers/repository/update/branch/get-updated getUpdatedPackageFiles() in autoReplace managers doesn't bump versions if content wasn't changed 1`] = `
-{
-  "artifactErrors": [],
   "reuseExistingBranch": undefined,
   "updatedArtifacts": [],
   "updatedPackageFiles": [],
