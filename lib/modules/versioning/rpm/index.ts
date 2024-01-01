@@ -185,10 +185,7 @@ class RpmVersioningApi extends GenericVersioningApi {
         }
 
         //We clearly have a number here, so return which is greater
-        const num1 = Number.parseInt(matchv1, 10);
-        const num2 = Number.parseInt(matchv2, 10);
-
-        const result = num1 - num2;
+        const result = matchv1.localCompare(matchv2, undefined, { numeric: true });
 
         if (result === 0) {
           continue;
