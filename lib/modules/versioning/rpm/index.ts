@@ -185,7 +185,9 @@ class RpmVersioningApi extends GenericVersioningApi {
         }
 
         //We clearly have a number here, so return which is greater
-        const result = matchv1.localCompare(matchv2, undefined, { numeric: true });
+        const result = matchv1.localCompare(matchv2, undefined, {
+          numeric: true,
+        });
 
         if (result === 0) {
           continue;
