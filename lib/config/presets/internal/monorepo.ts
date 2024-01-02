@@ -340,6 +340,7 @@ const repoGroups = {
   'material-ui': [
     'https://github.com/mui-org/material-ui', // Previous organization name (see: https://github.com/mui/material-ui/pull/30944)
     'https://github.com/mui/material-ui',
+    'https://github.com/mui/mui-x',
   ],
   'mdc-react': 'material-components/material-components-web-react',
   mdx: 'https://github.com/mdx-js/mdx',
