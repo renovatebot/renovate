@@ -68,9 +68,15 @@ describe('modules/manager/nuget/extract', () => {
     });
 
     it('extracts ContainerBaseImage', async () => {
-      const packageFile = 'with-container-base-image/with-tag.csproj';
-      const contents = Fixtures.get(packageFile);
-      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+      const contents = `
+      <Project Sdk="Microsoft.NET.Sdk.Worker">
+        <PropertyGroup>
+          <Version>0.1.0</Version>
+          <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:7.0.10</ContainerBaseImage>
+        </PropertyGroup>
+      </Project>`;
+
+      expect(await extractPackageFile(contents, contents, config)).toEqual({
         deps: [
           {
             depName: 'mcr.microsoft.com/dotnet/runtime',
@@ -84,9 +90,15 @@ describe('modules/manager/nuget/extract', () => {
     });
 
     it('extracts ContainerBaseImage with pinned digest', async () => {
-      const packageFile = 'with-container-base-image/with-pinned-digest.csproj';
-      const contents = Fixtures.get(packageFile);
-      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
+      const contents = `
+      <Project Sdk="Microsoft.NET.Sdk.Worker">
+        <PropertyGroup>
+          <Version>0.1.0</Version>
+          <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:7.0.10@sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19</ContainerBaseImage>
+        </PropertyGroup>
+      </Project>`;
+
+      expect(await extractPackageFile(contents, contents, config)).toEqual({
         deps: [
           {
             depName: 'mcr.microsoft.com/dotnet/runtime',
