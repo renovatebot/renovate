@@ -52,6 +52,7 @@ describe('modules/platform/gitlab/index', () => {
     delete process.env.GITLAB_IGNORE_REPO_URL;
     delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY;
     delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
+    delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
   });
 
   async function initFakePlatform(version: string) {
@@ -1843,7 +1844,7 @@ describe('modules/platform/gitlab/index', () => {
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
       process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
-      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '250';
+      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '100';
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
