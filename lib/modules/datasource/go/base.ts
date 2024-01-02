@@ -1,5 +1,6 @@
 // TODO: types (#22198)
 import URL from 'node:url';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import * as hostRules from '../../../util/host-rules';
@@ -154,17 +155,35 @@ export class BaseGoDatasource {
       const parsedUrl = URL.parse(goSourceUrl);
 
       // TODO: `parsedUrl.pathname` can be undefined
-      const packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
+      let packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
 
-      const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+      const endpoint = GlobalConfig.get('endpoint');
+
+      const endpointPrefix = endpoint?.match('https://[^/]*/(.*)api/v4/?');
+
+      if (endpointPrefix) {
+        packageName = packageName.replace(endpointPrefix[1], '');
+      }
+
+      const registryUrl =
+        endpoint?.replaceAll('api/v4/', '') ??
+        `${parsedUrl.protocol}//${parsedUrl.host}`;
 
       // a .git path indicates a concrete git repository, which can be different from metadata returned by gitlab
       const vcsIndicatedModule = BaseGoDatasource.gitVcsRegexp.exec(goModule);
       if (vcsIndicatedModule?.groups?.module) {
+        if (endpointPrefix) {
+          packageName = vcsIndicatedModule.groups?.module.replace(
+            endpointPrefix[1],
+            '',
+          );
+        } else {
+          packageName = vcsIndicatedModule.groups?.module;
+        }
         return {
           datasource: GitlabTagsDatasource.id,
           registryUrl,
-          packageName: vcsIndicatedModule.groups?.module,
+          packageName,
         };
       }
 
