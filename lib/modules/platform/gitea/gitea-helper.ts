@@ -1,6 +1,7 @@
 import type { BranchStatus } from '../../../types';
 import { GiteaHttp, GiteaHttpOptions } from '../../../util/http/gitea';
 import { getQueryString } from '../../../util/url';
+import type { Pr } from '../types';
 import { GiteaPrCache } from './pr-cache';
 import type {
   Branch,
@@ -30,7 +31,7 @@ import type {
 } from './types';
 import { API_PATH } from './utils';
 
-const giteaHttp = new GiteaHttp();
+export const giteaHttp = new GiteaHttp();
 
 const urlEscape = (raw: string): string => encodeURIComponent(raw);
 const commitStatusStates: CommitStatusType[] = [
@@ -180,11 +181,8 @@ export async function requestPrReviewers(
   });
 }
 
-export async function searchPRs(repoPath: string): Promise<PR[]> {
-  const res = await GiteaPrCache.init(repoPath)
-    .sync(giteaHttp)
-    .then((prCache) => prCache.getPrs());
-  return res;
+export async function searchPRs(repo: string, author: string): Promise<Pr[]> {
+  return await GiteaPrCache.getPrs(giteaHttp, repo, author);
 }
 
 export async function createIssue(

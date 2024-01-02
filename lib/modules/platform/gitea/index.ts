@@ -36,12 +36,13 @@ import type {
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
+import { giteaHttp } from './gitea-helper';
+import { GiteaPrCache } from './pr-cache';
 import type {
   CombinedCommitStatus,
   Comment,
   IssueState,
   Label,
-  PR,
   PRMergeMethod,
   PRUpdateParams,
   Repo,
@@ -49,18 +50,18 @@ import type {
   SortMethod,
 } from './types';
 import {
+  DRAFT_PREFIX,
   getMergeMethod,
   getRepoUrl,
   smartLinks,
+  toRenovatePR,
   trimTrailingApiPath,
 } from './utils';
-import { GiteaPrCache } from './pr-cache';
 
 interface GiteaRepoConfig {
   repository: string;
   mergeMethod: PRMergeMethod;
 
-  prList?: Pr[];
   issueList: Promise<Issue[]> | null;
   labelList: Promise<Label[]> | null;
   defaultBranch: string;
@@ -69,8 +70,6 @@ interface GiteaRepoConfig {
 }
 
 export const id = 'gitea';
-
-const DRAFT_PREFIX = 'WIP: ';
 
 const defaults = {
   hostType: 'gitea',
@@ -88,54 +87,6 @@ function toRenovateIssue(data: Issue): Issue {
     state: data.state,
     title: data.title,
     body: data.body,
-  };
-}
-
-// TODO #22198
-function toRenovatePR(data: PR): Pr | null {
-  if (!data) {
-    return null;
-  }
-
-  if (
-    !data.base?.ref ||
-    !data.head?.label ||
-    !data.head?.sha ||
-    !data.head?.repo?.full_name
-  ) {
-    logger.trace(
-      `Skipping Pull Request #${data.number} due to missing base and/or head branch`,
-    );
-    return null;
-  }
-
-  const createdBy = data.user?.username;
-  if (createdBy && botUserName && createdBy !== botUserName) {
-    return null;
-  }
-
-  let title = data.title;
-  let isDraft = false;
-  if (title.startsWith(DRAFT_PREFIX)) {
-    title = title.substring(DRAFT_PREFIX.length);
-    isDraft = true;
-  }
-
-  return {
-    number: data.number,
-    state: data.state,
-    title,
-    isDraft,
-    bodyStruct: getPrBodyStruct(data.body),
-    sha: data.head.sha,
-    sourceBranch: data.head.label,
-    targetBranch: data.base.ref,
-    sourceRepo: data.head.repo.full_name,
-    createdAt: data.created_at,
-    cannotMergeReason: data.mergeable
-      ? undefined
-      : `pr.mergeable="${data.mergeable}"`,
-    hasAssignees: !!(data.assignee?.login ?? is.nonEmptyArray(data.assignees)),
   };
 }
 
@@ -333,7 +284,6 @@ const platform: Platform = {
     });
 
     // Reset cached resources
-    delete config.prList;
     config.issueList = null;
     config.labelList = null;
     config.hasIssuesEnabled = !repo.external_tracker && repo.has_issues;
@@ -451,12 +401,7 @@ const platform: Platform = {
   },
 
   async getPrList(): Promise<Pr[]> {
-    config.prList ??= await helper.searchPRs(config.repository).then((prs) => {
-      const prList = prs.map(toRenovatePR).filter(is.truthy);
-      logger.debug(`Retrieved ${prList.length} Pull Requests`);
-      return prList;
-    });
-    return config.prList;
+    return await helper.searchPRs(config.repository, botUserName);
   },
 
   async getPr(number: number): Promise<Pr | null> {
@@ -468,11 +413,11 @@ const platform: Platform = {
     } else {
       logger.debug('PR not found in cached PRs - trying to fetch directly');
       const gpr = await helper.getPR(config.repository, number);
-      pr = toRenovatePR(gpr);
+      pr = toRenovatePR(gpr, botUserName);
 
       // Add pull request to cache for further lookups / queries
       if (pr) {
-        config.prList?.push(pr);
+        await GiteaPrCache.addPr(giteaHttp, config.repository, botUserName, pr);
       }
     }
 
@@ -563,13 +508,12 @@ const platform: Platform = {
         }
       }
 
-      const pr = toRenovatePR(gpr);
+      const pr = toRenovatePR(gpr, botUserName);
       if (!pr) {
         throw new Error('Can not parse newly created Pull Request');
       }
 
-      GiteaPrCache.init(config.repository).addPr(gpr);
-      config.prList?.push(pr);
+      await GiteaPrCache.addPr(giteaHttp, config.repository, botUserName, pr);
       return pr;
     } catch (err) {
       // When the user manually deletes a branch from Renovate, the PR remains but is no longer linked to any branch. In
@@ -640,7 +584,10 @@ const platform: Platform = {
       number,
       prUpdateParams,
     );
-    GiteaPrCache.init(config.repository).addPr(gpr);
+    const pr = toRenovatePR(gpr, botUserName);
+    if (pr) {
+      await GiteaPrCache.addPr(giteaHttp, config.repository, botUserName, pr);
+    }
   },
 
   async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {

@@ -1,4 +1,5 @@
 import type { LongCommitSha } from '../../../util/git/types';
+import type { Pr } from '../types';
 
 export interface PrReviewersParams {
   reviewers?: string[];
@@ -205,6 +206,7 @@ export interface CommitStatusCreateParams {
 }
 
 export interface GiteaPrCacheData {
-  items: Record<number, PR>;
+  items: Record<number, Pr>;
   updated_at: string | null;
+  author: string | null;
 }
