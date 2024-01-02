@@ -90,7 +90,7 @@ describe('modules/manager/nuget/extract', () => {
     });
 
     it('extracts ContainerBaseImage with pinned digest', async () => {
-      const contents = `
+      const contents = codeBlock`
       <Project Sdk="Microsoft.NET.Sdk.Worker">
         <PropertyGroup>
           <Version>0.1.0</Version>
