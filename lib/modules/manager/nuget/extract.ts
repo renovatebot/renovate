@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import { XmlDocument, XmlElement, XmlNode } from 'xmldoc';
-import { DockerDatasource } from '../../datasource/docker';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
+import { DockerDatasource } from '../../datasource/docker';
 import { NugetDatasource } from '../../datasource/nuget';
 import { getDep } from '../dockerfile/extract';
 import type {
