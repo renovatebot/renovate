@@ -1217,6 +1217,81 @@ describe('modules/platform/gitea/index', () => {
       });
       expect(helper.mergePR).not.toHaveBeenCalled();
     });
+
+    it('should create PR with repository merge method when automergeStrategy is auto', async () => {
+      helper.createPR.mockResolvedValueOnce(mockNewPR);
+      await initFakePlatform('1.17.0');
+      await initFakeRepo();
+      await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: {
+          automergeStrategy: 'auto',
+          usePlatformAutomerge: true,
+        },
+      });
+
+      expect(helper.createPR).toHaveBeenCalledTimes(1);
+      expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
+        base: mockNewPR.base.ref,
+        head: mockNewPR.head.label,
+        title: mockNewPR.title,
+        body: mockNewPR.body,
+        labels: [],
+      });
+      expect(helper.mergePR).toHaveBeenCalledWith(
+        mockRepo.full_name,
+        mockNewPR.number,
+        {
+          Do: 'rebase',
+          merge_when_checks_succeed: true,
+        },
+      );
+    });
+
+    it.each`
+      automergeStrategy | prMergeStrategy
+      ${'fast-forward'} | ${'rebase'}
+      ${'merge-commit'} | ${'merge'}
+      ${'rebase'}       | ${'rebase-merge'}
+      ${'squash'}       | ${'squash'}
+    `(
+      'should create PR with mergeStrategy $prMergeStrategy',
+      async ({ automergeStrategy, prMergeStrategy }) => {
+        helper.createPR.mockResolvedValueOnce(mockNewPR);
+        await initFakePlatform('1.17.0');
+        await initFakeRepo();
+        await gitea.createPr({
+          sourceBranch: mockNewPR.head.label,
+          targetBranch: 'master',
+          prTitle: mockNewPR.title,
+          prBody: mockNewPR.body,
+          platformOptions: {
+            automergeStrategy,
+            usePlatformAutomerge: true,
+          },
+        });
+
+        expect(helper.createPR).toHaveBeenCalledTimes(1);
+        expect(helper.createPR).toHaveBeenCalledWith(mockRepo.full_name, {
+          base: mockNewPR.base.ref,
+          head: mockNewPR.head.label,
+          title: mockNewPR.title,
+          body: mockNewPR.body,
+          labels: [],
+        });
+        expect(helper.mergePR).toHaveBeenCalledWith(
+          mockRepo.full_name,
+          mockNewPR.number,
+          {
+            Do: prMergeStrategy,
+            merge_when_checks_succeed: true,
+          },
+        );
+      },
+    );
   });
 
   describe('updatePr', () => {
