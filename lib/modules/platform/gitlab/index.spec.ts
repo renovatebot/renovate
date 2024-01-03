@@ -1861,11 +1861,7 @@ describe('modules/platform/gitlab/index', () => {
         sourceBranch: 'some-branch',
         title: 'some title',
       });
-      expect(timers.setTimeout.mock.calls).toMatchObject([
-        [250],
-        [1000],
-        [2250],
-      ]);
+      expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400], [900]]);
     });
 
     it('raises with squash enabled when repository squash option is default_on', async () => {
