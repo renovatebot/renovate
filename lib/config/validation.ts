@@ -650,8 +650,16 @@ export async function validateConfig(
     if (key === 'hostRules' && is.array(val)) {
       const allowedHeaders = GlobalConfig.get('allowedHeaders');
       for (const rule of val as HostRule[]) {
-        const headers = rule.headers ?? {};
-        for (const [header] of Object.entries(headers)) {
+        if (!rule.headers) {
+          continue;
+        }
+        for (const [header] of Object.entries(rule.headers)) {
+          if (!is.string(header)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `Invalid hostRules header configuration: should be a string`,
+            });
+          }
           if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
             errors.push({
               topic: 'Configuration Error',
