@@ -352,7 +352,7 @@ Example config:
 
 <!-- prettier-ignore -->
 !!! warning
-    Leaving PRs/branches as unlimited or as a high number, increases the time it takes for Renovate to process a repository.
+    Leaving PRs/branches as unlimited or as a high number increases the time it takes for Renovate to process a repository.
     If you find that Renovate is too slow when rebasing out-of-date branches, decrease the `branchConcurrentLimit`.
 
 If you have too many concurrent branches which rebase themselves each run, Renovate can take a lot of time to rebase.
@@ -406,7 +406,7 @@ Instead, set the old `branchPrefix` value as `branchPrefixOld` to allow Renovate
 ## branchTopic
 
 This field is combined with `branchPrefix` and `additionalBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
-This is an advanced field, and it's recommended you seek a config review before applying it.
+This is an advanced field, and we recommend you seek a config review before applying it.
 
 ## bumpVersion
 
@@ -3581,7 +3581,7 @@ If you wish to distinguish between patch and minor upgrades, for example if you 
 ## separateMultipleMajor
 
 Configure this to `true` if you wish to get one PR for every separate major version upgrade of a dependency.
-E.g. if you're on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
+For example, if you're on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
 ## statusCheckNames
@@ -3658,7 +3658,7 @@ When schedules are in use, it generally means "no updates".
 However, there are cases where updates might be desirable - e.g. if you have configured `prCreation=not-pending`, or you have `rebaseWhen=behind-base-branch` and the base branch is updated, so you want Renovate PRs to be rebased.
 
 This defaults to `true`, meaning that Renovate will perform certain "desirable" updates to _existing_ PRs even when outside of schedule.
-If you wish to disable all updates outside scheduled hours then configure this field to `false`.
+If you only want updates _within_ the scheduled hours, then set this field to `false`.
 
 ## updatePinnedDependencies
 
@@ -3744,7 +3744,7 @@ Renovate also uses custom versioning, like `"docker"` to address the most common
 Otherwise, Renovate does its best to sort and compare.
 
 By exposing `versioning` to config, you can override the default versioning for a package manager if needed.
-We do not recommend overriding the default versioning, but there are some cases such as Docker or Gradle where versioning is not strictly defined, and you may need to specify the versioning type per-package.
+We recommend you stick with the default versioning, but there are some cases such as Docker or Gradle where versioning is not strictly defined, and you may need to specify the versioning type per-package.
 
 Renovate supports 4-part versions (1.2.3.4) in full for the NuGet package manager.
 Other managers can use the `"loose"` versioning fallback: the first 3 parts are used as the version, all trailing parts are used for alphanumeric sorting.
