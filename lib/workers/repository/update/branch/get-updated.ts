@@ -20,21 +20,6 @@ export interface PackageFilesResult {
   updatedArtifacts: FileChange[];
 }
 
-async function getFileContent(
-  updatedFileContents: Record<string, string>,
-  filePath: string,
-  config: BranchConfig,
-): Promise<string | null> {
-  let fileContent: string | null = updatedFileContents[filePath];
-  if (!fileContent) {
-    fileContent = await getFile(
-      filePath,
-      config.reuseExistingBranch ? config.branchName : config.baseBranch,
-    );
-  }
-  return fileContent;
-}
-
 export async function getUpdatedPackageFiles(
   config: BranchConfig,
 ): Promise<PackageFilesResult> {
@@ -61,19 +46,23 @@ export async function getUpdatedPackageFiles(
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
     packageFileUpdatedDeps[packageFile].push({ ...upgrade });
-    const packageFileContent = await getFileContent(
-      updatedFileContents,
-      packageFile,
-      config,
-    );
+    let packageFileContent: string | null = updatedFileContents[packageFile];
+    if (!packageFileContent) {
+      packageFileContent = await getFile(
+        packageFile,
+        reuseExistingBranch ? config.branchName : config.baseBranch,
+      );
+    }
     let lockFileContent: string | null = null;
     const lockFile = upgrade.lockFile ?? upgrade.lockFiles?.[0] ?? '';
     if (lockFile) {
-      lockFileContent = await getFileContent(
-        updatedFileContents,
-        lockFile,
-        config,
-      );
+      lockFileContent = updatedFileContents[lockFile];
+      if (!lockFileContent) {
+        lockFileContent = await getFile(
+          lockFile,
+          reuseExistingBranch ? config.branchName : config.baseBranch,
+        );
+      }
     }
     // istanbul ignore if
     if (
