@@ -954,6 +954,46 @@ describe('modules/platform/bitbucket/index', () => {
       });
       expect(pr?.number).toBe(5);
     });
+
+    it('finds pr from other authors', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"&state=open',
+        )
+        .reply(200, { values: [pr] });
+      expect(
+        await bitbucket.findPr({
+          branchName: 'branch',
+          state: 'open',
+          includeOtherAuthors: true,
+        }),
+      ).toMatchObject({
+        number: 5,
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        title: 'title',
+        state: 'open',
+      });
+    });
+
+    it('returns null if no open pr exists - (includeOtherAuthors)', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"&state=open',
+        )
+        .reply(200, {
+          values: [],
+        });
+
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        state: 'open',
+        includeOtherAuthors: true,
+      });
+      expect(pr).toBeNull();
+    });
   });
 
   describe('createPr()', () => {

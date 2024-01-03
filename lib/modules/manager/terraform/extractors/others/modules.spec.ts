@@ -148,6 +148,9 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       const subfolderWithDoubleSlash = bitbucketRefMatchRegex.exec(
         'bitbucket.org/hashicorp/example.git//terraform?ref=v1.0.0',
       )?.groups;
+      const subfolderWithGitInName = bitbucketRefMatchRegex.exec(
+        'bitbucket.org/hashicorp/example.git//terraform-git?ref=v1.0.0',
+      )?.groups;
       const depth = bitbucketRefMatchRegex.exec(
         'git::https://git@bitbucket.org/hashicorp/example.git?depth=1&ref=v1.0.0',
       )?.groups;
@@ -176,6 +179,11 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
         tag: 'v1.0.0',
       });
       expect(subfolderWithDoubleSlash).toMatchObject({
+        workspace: 'hashicorp',
+        project: 'example',
+        tag: 'v1.0.0',
+      });
+      expect(subfolderWithGitInName).toMatchObject({
         workspace: 'hashicorp',
         project: 'example',
         tag: 'v1.0.0',

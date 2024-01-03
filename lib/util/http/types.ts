@@ -2,6 +2,7 @@ import type { IncomingHttpHeaders } from 'node:http';
 import type {
   OptionsOfBufferResponseBody,
   OptionsOfJSONResponseBody,
+  ParseJsonFunction,
 } from 'got';
 
 export type GotContextOptions = {
@@ -79,6 +80,7 @@ export interface InternalHttpOptions extends HttpOptions {
   json?: HttpOptions['body'];
   responseType?: 'json' | 'buffer';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
+  parseJson?: ParseJsonFunction;
 }
 
 export interface HttpHeaders extends IncomingHttpHeaders {
