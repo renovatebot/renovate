@@ -20,7 +20,6 @@ describe('modules/manager/helm-values/update', () => {
     });
 
     beforeEach(() => {
-      jest.resetAllMocks();
       fs.readLocalFile.mockResolvedValueOnce(chartContent);
     });
 

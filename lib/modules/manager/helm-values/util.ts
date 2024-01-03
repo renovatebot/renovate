@@ -2,11 +2,8 @@ import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
-import {
-  type ChartDefinition,
-  ChartDefinitionYaml,
-  type HelmDockerImageDependency,
-} from './types';
+import { type ChartDefinition, ChartDefinitionYaml } from './schema';
+import type { HelmDockerImageDependency } from './types';
 
 const parentKeyRe = regEx(/image$/i);
 
