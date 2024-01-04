@@ -412,14 +412,32 @@ describe('modules/datasource/go/base', () => {
           'example.com/gitlab/my-project/my-repo.git',
         );
 
-        GlobalConfig.reset();
-        hostRules.hostType.mockReturnValue('');
 
         expect(res).toEqual({
           datasource: GitlabTagsDatasource.id,
           packageName: 'my-project/my-repo',
           registryUrl: 'https://example.com/gitlab/',
         });
+
+        GlobalConfig.set({ endpoint: 'https://example.com/gitlab/' });
+
+        httpMock
+          .scope('https://example.com')
+          .get('/gitlab/my-project/my-repo.git?go-get=1')
+          .reply(200, meta);
+
+        const res2 = await BaseGoDatasource.getDatasource(
+          'example.com/gitlab/my-project/my-repo.git',
+        );
+
+        expect(res2).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'my-project/my-repo',
+          registryUrl: 'https://example.com/gitlab/',
+        });
+
+        GlobalConfig.reset();
+        hostRules.hostType.mockReturnValue('');
       });
     });
   });
