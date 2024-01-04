@@ -40,5 +40,37 @@ describe('modules/manager/ocb/update', () => {
       const { bumpedContent } = bumpPackageVersion(content, '1.0.0', 'patch');
       expect(bumpedContent).toEqual(expected);
     });
+
+    it('no ops', () => {
+      const content = codeBlock`
+      dist:
+        version: '0.0.2'
+    `;
+      const { bumpedContent } = bumpPackageVersion(content, '0.0.1', 'patch');
+      expect(bumpedContent).toEqual(content);
+    });
+
+    it('updates', () => {
+      const content = codeBlock`
+      dist:
+        version: '0.0.2'
+    `;
+      const { bumpedContent } = bumpPackageVersion(content, '0.0.1', 'minor');
+      const expected = content.replace('0.0.2', '0.1.0');
+      expect(bumpedContent).toEqual(expected);
+    });
+
+    it('returns content if bumping errors', () => {
+      const content = codeBlock`
+      dist:
+        version: '1.0.0'
+    `;
+      const { bumpedContent } = bumpPackageVersion(
+        content,
+        '0.0.2',
+        true as any,
+      );
+      expect(bumpedContent).toEqual(content);
+    });
   });
 });
