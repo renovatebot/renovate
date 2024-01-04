@@ -924,5 +924,31 @@ describe('config/validation', () => {
         },
       ]);
     });
+
+    it('errors if headers values are not string', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'https://domain.com/all-versions',
+            headers: {
+              'X-Auth-Token': 10,
+            } as unknown as Record<string, string>,
+          },
+        ],
+      };
+      const { warnings, errors } =
+        await configValidation.validateConfig(config);
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid hostRules header value configuration: should be a string.',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
   });
 });

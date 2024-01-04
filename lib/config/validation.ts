@@ -653,11 +653,11 @@ export async function validateConfig(
         if (!rule.headers) {
           continue;
         }
-        for (const [header] of Object.entries(rule.headers)) {
-          if (!is.string(header)) {
+        for (const [header, value] of Object.entries(rule.headers)) {
+          if (!is.string(value)) {
             errors.push({
               topic: 'Configuration Error',
-              message: `Invalid hostRules header configuration: should be a string`,
+              message: `Invalid hostRules header value configuration: should be a string.`,
             });
           }
           if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
