@@ -34,45 +34,51 @@ export class PypiDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    let dependency: ReleaseResult | null = null;
+    const dependency: ReleaseResult = { releases: [] };
     // TODO: null check (#22198)
-    const hostUrl = ensureTrailingSlash(
-      registryUrl!.replace('https://pypi.org/simple', 'https://pypi.org/pypi'),
-    );
+    let hostUrl = ensureTrailingSlash(registryUrl!);
     const normalizedLookupName = PypiDatasource.normalizeName(packageName);
 
-    // not all simple indexes use this identifier, but most do
-    if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
-      logger.trace(
-        { packageName, hostUrl },
-        'Looking up pypi simple dependency',
-      );
-      dependency = await this.getSimpleDependency(
-        normalizedLookupName,
-        hostUrl,
-      );
-    } else {
-      logger.trace({ packageName, hostUrl }, 'Looking up pypi api dependency');
-      try {
-        // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
-        dependency = await this.getDependency(normalizedLookupName, hostUrl);
-      } catch (err) {
-        if (err.statusCode !== 404) {
-          throw err;
-        }
+    // convert pypi json api url to simple
+    hostUrl = hostUrl.replace(
+      'https://pypi.org/pypi',
+      'https://pypi.org/simple',
+    );
 
-        // error contacting json-style api -- attempt to fallback to a simple-style api
-        logger.trace(
-          { packageName, hostUrl },
-          'Looking up pypi simple dependency via fallback',
-        );
-        dependency = await this.getSimpleDependency(
-          normalizedLookupName,
-          hostUrl,
-        );
+    const simpleFound = await this.addResultsViaSimple(
+      normalizedLookupName,
+      hostUrl,
+      dependency,
+    ).catch((err) => {
+      if (err.statusCode !== 404) {
+        throw err;
       }
+      logger.trace(
+        'Simple api not found. Looking up pypijson api as fallback.',
+      );
+      return false;
+    });
+    // convert pypi simple api url to json
+    hostUrl = hostUrl.replace(
+      'https://pypi.org/simple',
+      'https://pypi.org/pypi',
+    );
+    logger.trace('Querying json api for metadata');
+    const jsonFound = await this.addResultsViaPyPiJson(
+      normalizedLookupName,
+      hostUrl,
+      dependency,
+    ).catch((err) => {
+      if (!simpleFound) {
+        throw err;
+      }
+      logger.trace('Json api lookup failed but got simple results.');
+      return false;
+    });
+    if (simpleFound || jsonFound) {
+      return dependency;
     }
-    return dependency;
+    return null;
   }
 
   private static normalizeName(input: string): string {
@@ -83,21 +89,21 @@ export class PypiDatasource extends Datasource {
     return input.toLowerCase().replace(regEx(/(_|\.|-)+/g), '-');
   }
 
-  private async getDependency(
+  private async addResultsViaPyPiJson(
     packageName: string,
     hostUrl: string,
-  ): Promise<ReleaseResult | null> {
+    dependency: ReleaseResult,
+  ): Promise<boolean> {
     const lookupUrl = url.resolve(
       hostUrl,
       `${PypiDatasource.normalizeNameForUrlLookup(packageName)}/json`,
     );
-    const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const rep = await this.http.getJson<PypiJSON>(lookupUrl);
     const dep = rep?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');
-      return null;
+      return false;
     }
     if (rep.authorization) {
       dependency.isPrivate = true;
@@ -148,26 +154,30 @@ export class PypiDatasource extends Datasource {
 
     if (dep.releases) {
       const versions = Object.keys(dep.releases);
-      dependency.releases = versions.map((version) => {
-        const releases = coerceArray(dep.releases?.[version]);
-        const { upload_time: releaseTimestamp } = releases[0] || {};
-        const isDeprecated = releases.some(({ yanked }) => yanked);
-        const result: Release = {
-          version,
-          releaseTimestamp,
-        };
-        if (isDeprecated) {
-          result.isDeprecated = isDeprecated;
-        }
-        // There may be multiple releases with different requires_python, so we return all in an array
-        result.constraints = {
-          // TODO: string[] isn't allowed here
-          python: releases.map(({ requires_python }) => requires_python) as any,
-        };
-        return result;
-      });
+      dependency.releases = dependency.releases.concat(
+        versions.map((version) => {
+          const releases = coerceArray(dep.releases?.[version]);
+          const { upload_time: releaseTimestamp } = releases[0] || {};
+          const isDeprecated = releases.some(({ yanked }) => yanked);
+          const result: Release = {
+            version,
+            releaseTimestamp,
+          };
+          if (isDeprecated) {
+            result.isDeprecated = isDeprecated;
+          }
+          // There may be multiple releases with different requires_python, so we return all in an array
+          result.constraints = {
+            // TODO: string[] isn't allowed here
+            python: releases.map(
+              ({ requires_python }) => requires_python,
+            ) as any,
+          };
+          return result;
+        }),
+      );
     }
-    return dependency;
+    return true;
   }
 
   private static extractVersionFromLinkText(
@@ -221,22 +231,25 @@ export class PypiDatasource extends Datasource {
     );
   }
 
-  private async getSimpleDependency(
+  private async addResultsViaSimple(
     packageName: string,
     hostUrl: string,
-  ): Promise<ReleaseResult | null> {
+    dependency: ReleaseResult,
+  ): Promise<boolean> {
     const lookupUrl = url.resolve(
-      hostUrl,
+      hostUrl.replace('https://pypi.org/pypi', 'https://pypi.org/simple'),
       ensureTrailingSlash(
         PypiDatasource.normalizeNameForUrlLookup(packageName),
       ),
     );
-    const dependency: ReleaseResult = { releases: [] };
     const response = await this.http.get(lookupUrl);
     const dep = response?.body;
     if (!dep) {
-      logger.trace({ dependency: packageName }, 'pip package not found');
-      return null;
+      logger.trace(
+        { dependency: packageName },
+        'pip package not found via simple api',
+      );
+      return false;
     }
     if (response.authorization) {
       dependency.isPrivate = true;
@@ -264,22 +277,24 @@ export class PypiDatasource extends Datasource {
       }
     }
     const versions = Object.keys(releases);
-    dependency.releases = versions.map((version) => {
-      const versionReleases = coerceArray(releases[version]);
-      const isDeprecated = versionReleases.some(({ yanked }) => yanked);
-      const result: Release = { version };
-      if (isDeprecated) {
-        result.isDeprecated = isDeprecated;
-      }
-      // There may be multiple releases with different requires_python, so we return all in an array
-      result.constraints = {
-        // TODO: string[] isn't allowed here
-        python: versionReleases.map(
-          ({ requires_python }) => requires_python,
-        ) as any,
-      };
-      return result;
-    });
-    return dependency;
+    dependency.releases = dependency.releases.concat(
+      versions.map((version) => {
+        const versionReleases = coerceArray(releases[version]);
+        const isDeprecated = versionReleases.some(({ yanked }) => yanked);
+        const result: Release = { version };
+        if (isDeprecated) {
+          result.isDeprecated = isDeprecated;
+        }
+        // There may be multiple releases with different requires_python, so we return all in an array
+        result.constraints = {
+          // TODO: string[] isn't allowed here
+          python: versionReleases.map(
+            ({ requires_python }) => requires_python,
+          ) as any,
+        };
+        return result;
+      }),
+    );
+    return true;
   }
 }
