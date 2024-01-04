@@ -428,8 +428,8 @@ importers:
         specifier: 4.14.202
         version: 4.14.202
       '@types/luxon':
-        specifier: 3.3.5
-        version: 3.3.5
+        specifier: 3.3.7
+        version: 3.3.7
       '@types/markdown-it':
         specifier: 13.0.7
         version: 13.0.7
@@ -3833,8 +3833,8 @@ packages:
     resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
     dev: true
 
-  /@types/luxon@3.3.5:
-    resolution: {integrity: sha512-1cyf6Ge/94zlaWIZA2ei1pE6SZ8xpad2hXaYa5JEFiaUH0YS494CZwyi4MXNpXD9oEuv6ZH0Bmh0e7F9sPhmZA==}
+  /@types/luxon@3.3.7:
+    resolution: {integrity: sha512-gKc9P2d4g5uYwmy4s/MO/yOVPmvHyvzka1YH6i5dM03UrFofHSmgc0D0ymbDRStFWHusk6cwwF6nhLm/ckBbbQ==}
     dev: true
 
   /@types/markdown-it@13.0.7:
