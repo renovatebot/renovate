@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
@@ -12,6 +13,7 @@ export const supportedDatasources = [
   PypiDatasource.id,
   GithubTagsDatasource.id,
   GithubReleasesDatasource.id,
+  GitRefsDatasource.id,
 ];
 
 export const supportsLockFileMaintenance = true;
