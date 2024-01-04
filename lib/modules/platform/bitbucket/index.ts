@@ -31,6 +31,7 @@ import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
+import { BitbucketPrCache } from './pr-cache';
 import type {
   Account,
   BitbucketStatus,
@@ -44,7 +45,7 @@ import type {
   RepoInfoBody,
 } from './types';
 import * as utils from './utils';
-import { mergeBodyTransformer, prFieldsFilter } from './utils';
+import { mergeBodyTransformer } from './utils';
 
 export const id = 'bitbucket';
 
@@ -273,28 +274,11 @@ function matchesState(state: string, desiredState: string): boolean {
 
 export async function getPrList(): Promise<Pr[]> {
   logger.debug('getPrList()');
-  if (!config.prList) {
-    logger.debug('Retrieving PR list');
-    const querySearchParams = new URL.URLSearchParams();
-    for (const state of utils.prStates.all) {
-      querySearchParams.append('state', state);
-    }
-    if (renovateUserUuid && !config.ignorePrAuthor) {
-      querySearchParams.append('q', `author.uuid="${renovateUserUuid}"`);
-    }
-    querySearchParams.append('fields', prFieldsFilter);
-    const query = querySearchParams.toString();
-    const url = `/2.0/repositories/${config.repository}/pullrequests?${query}`;
-    const prs = (
-      await bitbucketHttp.getJson<PagedResult<PrResponse>>(url, {
-        paginate: true,
-        pagelen: 50,
-      })
-    ).body.values;
-    config.prList = prs.map(utils.prInfo);
-    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
-  }
-  return config.prList;
+  return await BitbucketPrCache.getPrs(
+    bitbucketHttp,
+    config.repository,
+    renovateUserUuid,
+  );
 }
 
 export async function findPr({
@@ -328,15 +312,17 @@ export async function findPr({
       (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
       matchesState(p.state, state),
   );
-  if (pr) {
-    logger.debug(`Found PR #${pr.number}`);
+
+  if (!pr) {
+    return null;
   }
+  logger.debug(`Found PR #${pr.number}`);
 
   /**
    * Bitbucket doesn't support renaming or reopening declined PRs.
    * Instead, we have to use comment-driven signals.
    */
-  if (pr?.state === 'closed') {
+  if (pr.state === 'closed') {
     const reopenComments = await comments.reopenComments(config, pr.number);
 
     if (is.nonEmptyArray(reopenComments)) {
@@ -359,7 +345,7 @@ export async function findPr({
     }
   }
 
-  return pr ?? null;
+  return pr;
 }
 
 // Gets details for a PR
@@ -913,10 +899,12 @@ export async function createPr({
       )
     ).body;
     const pr = utils.prInfo(prRes);
-    // istanbul ignore if
-    if (config.prList) {
-      config.prList.push(pr);
-    }
+    await BitbucketPrCache.addPr(
+      bitbucketHttp,
+      config.repository,
+      renovateUserUuid,
+      pr,
+    );
     return pr;
   } catch (err) /* istanbul ignore next */ {
     // Try sanitizing reviewers
@@ -938,10 +926,12 @@ export async function createPr({
         )
       ).body;
       const pr = utils.prInfo(prRes);
-      // istanbul ignore if
-      if (config.prList) {
-        config.prList.push(pr);
-      }
+      await BitbucketPrCache.addPr(
+        bitbucketHttp,
+        config.repository,
+        renovateUserUuid,
+        pr,
+      );
       return pr;
     }
   }
