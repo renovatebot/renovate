@@ -8,7 +8,7 @@ export { extractPackageFile } from './extract';
 export const categories: Category[] = ['ansible', 'iac'];
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)requirements\\.ya?ml$', '(^|/)galaxy\\.ya?ml$'],
+  fileMatch: ['(^|/)(galaxy|requirements)(\\.ansible)?\\.ya?ml$'],
 };
 
 export const supportedDatasources = [

@@ -1678,6 +1678,49 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(res).toBeDefined();
     });
+
+    it('finds pr from other authors', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?source_branch=branch&state=opened',
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch',
+            title: 'branch a pr',
+            state: 'opened',
+          },
+        ]);
+      expect(
+        await gitlab.findPr({
+          branchName: 'branch',
+          state: 'open',
+          includeOtherAuthors: true,
+        }),
+      ).toMatchObject({
+        number: 1,
+        sourceBranch: 'branch',
+        state: 'open',
+        title: 'branch a pr',
+      });
+    });
+
+    it('returns null if no pr found - (includeOtherAuthors)', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?source_branch=branch&state=opened',
+        )
+        .reply(200, []);
+      const pr = await gitlab.findPr({
+        branchName: 'branch',
+        state: 'open',
+        includeOtherAuthors: true,
+      });
+      expect(pr).toBeNull();
+    });
   });
 
   async function initPlatform(gitlabVersion: string) {
