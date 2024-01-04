@@ -86,6 +86,7 @@ describe('modules/manager/nuget/extract', () => {
             depType: 'docker',
             datasource: 'docker',
             currentValue: '7.0.10',
+            replaceString: 'mcr.microsoft.com/dotnet/runtime:7.0.10',
           },
         ],
         packageFileVersion: '0.1.0',
@@ -112,6 +113,8 @@ describe('modules/manager/nuget/extract', () => {
             currentValue: '7.0.10',
             currentDigest:
               'sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19',
+            replaceString:
+              'mcr.microsoft.com/dotnet/runtime:7.0.10@sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19',
           },
         ],
         packageFileVersion: '0.1.0',

@@ -60,6 +60,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
           depName: dep.depName,
           currentValue: dep.currentValue,
           currentDigest: dep.currentDigest,
+          replaceString: child.val,
         });
       }
     }
