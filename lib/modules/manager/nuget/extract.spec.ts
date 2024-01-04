@@ -80,6 +80,8 @@ describe('modules/manager/nuget/extract', () => {
       expect(await extractPackageFile(contents, contents, config)).toEqual({
         deps: [
           {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             depName: 'mcr.microsoft.com/dotnet/runtime',
             depType: 'docker',
             datasource: 'docker',
@@ -102,6 +104,8 @@ describe('modules/manager/nuget/extract', () => {
       expect(await extractPackageFile(contents, contents, config)).toEqual({
         deps: [
           {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             depName: 'mcr.microsoft.com/dotnet/runtime',
             depType: 'docker',
             datasource: 'docker',
