@@ -53,14 +53,13 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
 
       if (is.nonEmptyStringAndNotWhitespace(dep.depName)) {
         results.push({
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          autoReplaceStringTemplate: dep.autoReplaceStringTemplate,
           datasource: DockerDatasource.id,
           depType: 'docker',
           depName: dep.depName,
           currentValue: dep.currentValue,
           currentDigest: dep.currentDigest,
-          replaceString: child.val,
+          replaceString: dep.replaceString,
         });
       }
     }
