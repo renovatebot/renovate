@@ -36,18 +36,17 @@ export class PypiDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const dependency: ReleaseResult = { releases: [] };
     // TODO: null check (#22198)
-    let hostUrl = ensureTrailingSlash(registryUrl!);
+    const hostUrl = ensureTrailingSlash(registryUrl!);
     const normalizedLookupName = PypiDatasource.normalizeName(packageName);
 
-    // convert pypi json api url to simple
-    hostUrl = hostUrl.replace(
+    const simpleHostUrl = hostUrl.replace(
       'https://pypi.org/pypi',
       'https://pypi.org/simple',
     );
 
     const simpleFound = await this.addResultsViaSimple(
       normalizedLookupName,
-      hostUrl,
+      simpleHostUrl,
       dependency,
     ).catch((err) => {
       if (err.statusCode !== 404) {
@@ -58,15 +57,14 @@ export class PypiDatasource extends Datasource {
       );
       return false;
     });
-    // convert pypi simple api url to json
-    hostUrl = hostUrl.replace(
+    logger.trace('Querying json api for metadata');
+    const pypiJsonHostUrl = hostUrl.replace(
       'https://pypi.org/simple',
       'https://pypi.org/pypi',
     );
-    logger.trace('Querying json api for metadata');
     const jsonFound = await this.addResultsViaPyPiJson(
       normalizedLookupName,
-      hostUrl,
+      pypiJsonHostUrl,
       dependency,
     ).catch((err) => {
       if (!simpleFound) {
@@ -237,7 +235,7 @@ export class PypiDatasource extends Datasource {
     dependency: ReleaseResult,
   ): Promise<boolean> {
     const lookupUrl = url.resolve(
-      hostUrl.replace('https://pypi.org/pypi', 'https://pypi.org/simple'),
+      hostUrl,
       ensureTrailingSlash(
         PypiDatasource.normalizeNameForUrlLookup(packageName),
       ),
