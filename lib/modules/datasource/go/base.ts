@@ -159,7 +159,9 @@ export class BaseGoDatasource {
 
       const endpoint = GlobalConfig.get('endpoint')!;
 
-      const endpointPrefix = regEx('https://[^/]*/(.*?/)(api/v4/?)?'),exec(endpoint);
+      const endpointPrefix = regEx('https://[^/]*/(.*?/)(api/v4/?)?').exec(
+        endpoint,
+      );
 
       if (endpointPrefix) {
         packageName = packageName.replace(endpointPrefix[1], '');
