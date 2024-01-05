@@ -412,7 +412,6 @@ describe('modules/datasource/go/base', () => {
           'example.com/gitlab/my-project/my-repo.git',
         );
 
-
         expect(res).toEqual({
           datasource: GitlabTagsDatasource.id,
           packageName: 'my-project/my-repo',
