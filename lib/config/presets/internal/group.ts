@@ -442,6 +442,7 @@ const staticGroups = {
       'group:springWebflow',
       'group:springWs',
       'group:symfony',
+      'group:vite',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -760,6 +761,15 @@ const staticGroups = {
         extends: 'packages:unitTest',
         groupName: 'unit test packages',
         matchUpdateTypes: ['minor', 'patch'],
+      },
+    ],
+  },
+  vite: {
+    description: 'Group all Vite related packages together.',
+    packageRules: [
+      {
+        extends: 'packages:vite',
+        groupName: 'Vite packages',
       },
     ],
   },
