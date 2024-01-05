@@ -410,7 +410,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently, this setting supports following managers only:
+Currently, this config option only works with these managers:
 
 - `helmv3`
 - `npm`
@@ -421,7 +421,7 @@ Currently, this setting supports following managers only:
 - `poetry`
 - `sbt`
 
-Raise a feature request if you have a use for it with other package managers.
+Raise a feature request if you want to use this config option with other package managers.
 
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
