@@ -34,7 +34,6 @@ export class PypiDatasource extends Datasource {
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const dependency: ReleaseResult = { releases: [] };
     // TODO: null check (#22198)
     const hostUrl = ensureTrailingSlash(registryUrl!);
     const normalizedLookupName = PypiDatasource.normalizeName(packageName);
@@ -43,11 +42,9 @@ export class PypiDatasource extends Datasource {
       'https://pypi.org/pypi',
       'https://pypi.org/simple',
     );
-
-    const simpleFound = await this.addResultsViaSimple(
+    const simpleDependencies = await this.getResultsViaSimple(
       normalizedLookupName,
       simpleHostUrl,
-      dependency,
     ).catch((err) => {
       if (err.statusCode !== 404) {
         throw err;
@@ -56,31 +53,31 @@ export class PypiDatasource extends Datasource {
         { packageName, hostUrl },
         'Simple api not found. Looking up pypijson api as fallback.',
       );
-      return false;
+      return null;
     });
     logger.trace({ packageName, hostUrl }, 'Querying json api for metadata');
     const pypiJsonHostUrl = hostUrl.replace(
       'https://pypi.org/simple',
       'https://pypi.org/pypi',
     );
-    const jsonFound = await this.addResultsViaPyPiJson(
+    const pypiJsonDependencies = await this.getResultsViaPyPiJson(
       normalizedLookupName,
       pypiJsonHostUrl,
-      dependency,
     ).catch((err) => {
-      if (!simpleFound) {
+      if (simpleDependencies === null) {
         throw err;
       }
       logger.trace(
         { packageName, hostUrl },
         'Json api lookup failed but got simple results.',
       );
-      return false;
+      return null;
     });
-    if (simpleFound || jsonFound) {
-      return dependency;
+    if (simpleDependencies === null && pypiJsonDependencies === null) {
+      return null;
     }
-    return null;
+    // merge results
+    return Object.assign({}, simpleDependencies, pypiJsonDependencies);
   }
 
   private static normalizeName(input: string): string {
@@ -91,11 +88,11 @@ export class PypiDatasource extends Datasource {
     return input.toLowerCase().replace(regEx(/(_|\.|-)+/g), '-');
   }
 
-  private async addResultsViaPyPiJson(
+  private async getResultsViaPyPiJson(
     packageName: string,
     hostUrl: string,
-    dependency: ReleaseResult,
-  ): Promise<boolean> {
+  ): Promise<ReleaseResult | null> {
+    const dependency: ReleaseResult = { releases: [] };
     const lookupUrl = url.resolve(
       hostUrl,
       `${PypiDatasource.normalizeNameForUrlLookup(packageName)}/json`,
@@ -105,7 +102,7 @@ export class PypiDatasource extends Datasource {
     const dep = rep?.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');
-      return false;
+      return null;
     }
     if (rep.authorization) {
       dependency.isPrivate = true;
@@ -156,30 +153,26 @@ export class PypiDatasource extends Datasource {
 
     if (dep.releases) {
       const versions = Object.keys(dep.releases);
-      dependency.releases = dependency.releases.concat(
-        versions.map((version) => {
-          const releases = coerceArray(dep.releases?.[version]);
-          const { upload_time: releaseTimestamp } = releases[0] || {};
-          const isDeprecated = releases.some(({ yanked }) => yanked);
-          const result: Release = {
-            version,
-            releaseTimestamp,
-          };
-          if (isDeprecated) {
-            result.isDeprecated = isDeprecated;
-          }
-          // There may be multiple releases with different requires_python, so we return all in an array
-          result.constraints = {
-            // TODO: string[] isn't allowed here
-            python: releases.map(
-              ({ requires_python }) => requires_python,
-            ) as any,
-          };
-          return result;
-        }),
-      );
+      dependency.releases = versions.map((version) => {
+        const releases = coerceArray(dep.releases?.[version]);
+        const { upload_time: releaseTimestamp } = releases[0] || {};
+        const isDeprecated = releases.some(({ yanked }) => yanked);
+        const result: Release = {
+          version,
+          releaseTimestamp,
+        };
+        if (isDeprecated) {
+          result.isDeprecated = isDeprecated;
+        }
+        // There may be multiple releases with different requires_python, so we return all in an array
+        result.constraints = {
+          // TODO: string[] isn't allowed here
+          python: releases.map(({ requires_python }) => requires_python) as any,
+        };
+        return result;
+      });
     }
-    return true;
+    return dependency;
   }
 
   private static extractVersionFromLinkText(
@@ -233,11 +226,11 @@ export class PypiDatasource extends Datasource {
     );
   }
 
-  private async addResultsViaSimple(
+  private async getResultsViaSimple(
     packageName: string,
     hostUrl: string,
-    dependency: ReleaseResult,
-  ): Promise<boolean> {
+  ): Promise<ReleaseResult | null> {
+    const dependency: ReleaseResult = { releases: [] };
     const lookupUrl = url.resolve(
       hostUrl,
       ensureTrailingSlash(
@@ -251,7 +244,7 @@ export class PypiDatasource extends Datasource {
         { dependency: packageName },
         'pip package not found via simple api',
       );
-      return false;
+      return null;
     }
     if (response.authorization) {
       dependency.isPrivate = true;
@@ -279,24 +272,22 @@ export class PypiDatasource extends Datasource {
       }
     }
     const versions = Object.keys(releases);
-    dependency.releases = dependency.releases.concat(
-      versions.map((version) => {
-        const versionReleases = coerceArray(releases[version]);
-        const isDeprecated = versionReleases.some(({ yanked }) => yanked);
-        const result: Release = { version };
-        if (isDeprecated) {
-          result.isDeprecated = isDeprecated;
-        }
-        // There may be multiple releases with different requires_python, so we return all in an array
-        result.constraints = {
-          // TODO: string[] isn't allowed here
-          python: versionReleases.map(
-            ({ requires_python }) => requires_python,
-          ) as any,
-        };
-        return result;
-      }),
-    );
-    return true;
+    dependency.releases = versions.map((version) => {
+      const versionReleases = coerceArray(releases[version]);
+      const isDeprecated = versionReleases.some(({ yanked }) => yanked);
+      const result: Release = { version };
+      if (isDeprecated) {
+        result.isDeprecated = isDeprecated;
+      }
+      // There may be multiple releases with different requires_python, so we return all in an array
+      result.constraints = {
+        // TODO: string[] isn't allowed here
+        python: versionReleases.map(
+          ({ requires_python }) => requires_python,
+        ) as any,
+      };
+      return result;
+    });
+    return dependency;
   }
 }
