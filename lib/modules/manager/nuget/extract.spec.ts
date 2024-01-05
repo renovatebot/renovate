@@ -82,7 +82,6 @@ describe('modules/manager/nuget/extract', () => {
           {
             autoReplaceStringTemplate:
               '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-            currentDigest: undefined,
             depName: 'mcr.microsoft.com/dotnet/runtime',
             depType: 'docker',
             datasource: 'docker',
