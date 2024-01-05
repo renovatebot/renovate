@@ -8,24 +8,30 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { type Module, OCBConfigSchema } from './schema';
+import { type Module, type OCBConfig, OCBConfigSchema } from './schema';
 
 export function extractPackageFile(
   content: string,
   packageFile: string,
   _config?: ExtractConfig,
 ): PackageFileContent | null {
-  const yaml = parseSingleYaml(content);
-  const parsed = OCBConfigSchema.safeParse(yaml);
-  if (!parsed.success) {
-    logger.trace(
-      { packageFile, error: parsed.error },
-      'Failed to parse OCB schema',
-    );
+  let definition: OCBConfig | null = null;
+  try {
+    const yaml = parseSingleYaml(content);
+    const parsed = OCBConfigSchema.safeParse(yaml);
+    if (!parsed.success) {
+      logger.trace(
+        { packageFile, error: parsed.error },
+        'Failed to parse OCB schema',
+      );
+      return null;
+    }
+
+    definition = parsed.data;
+  } catch (error) {
+    logger.trace({ packageFile, error }, 'Failed to parse OCB file as YAML');
     return null;
   }
-
-  const definition = parsed.data;
 
   const deps: PackageDependency[] = [];
   if (definition.dist.module && definition.dist.otelcol_version) {
