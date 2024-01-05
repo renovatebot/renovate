@@ -166,7 +166,7 @@ export class BaseGoDatasource {
       }
 
       const registryUrl =
-        endpoint?.replaceAll('api/v4/', '') ??
+        endpoint?.replace(regEx('api/v4/?$'), '') ??
         `${parsedUrl.protocol}//${parsedUrl.host}`;
 
       // a .git path indicates a concrete git repository, which can be different from metadata returned by gitlab
