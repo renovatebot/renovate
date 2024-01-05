@@ -74,7 +74,7 @@ exports[`modules/manager/helmv3/artifacts do not add registryAliases to reposito
     },
   },
   {
-    "cmd": "helm repo add nginx https://kubernetes.github.io/ingress-nginx --force-update --force-update",
+    "cmd": "helm repo add nginx https://kubernetes.github.io/ingress-nginx --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
