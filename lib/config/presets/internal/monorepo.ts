@@ -16,6 +16,7 @@ const repoGroups = {
   'algoliasearch-autocomplete': 'https://github.com/algolia/autocomplete',
   'algoliasearch-client-javascript':
     'https://github.com/algolia/algoliasearch-client-javascript',
+  analog: 'https://github.com/analogjs/analog',
   angular: 'https://github.com/angular/angular',
   'angular-cli': 'https://github.com/angular/angular-cli',
   'angular-eslint': 'https://github.com/angular-eslint/angular-eslint',

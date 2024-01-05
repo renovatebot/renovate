@@ -4,7 +4,6 @@ import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
-import { DockerDatasource } from '../../datasource/docker';
 import { NugetDatasource } from '../../datasource/nuget';
 import { getDep } from '../dockerfile/extract';
 import type {
@@ -49,16 +48,10 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
     const { name, attr } = child;
 
     if (name === 'ContainerBaseImage') {
-      const dep = getDep(child.val, true);
+      const { depName, ...dep } = getDep(child.val, true);
 
-      if (is.nonEmptyStringAndNotWhitespace(dep.depName)) {
-        results.push({
-          datasource: DockerDatasource.id,
-          depType: 'docker',
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        });
+      if (is.nonEmptyStringAndNotWhitespace(depName)) {
+        results.push({ ...dep, depName, depType: 'docker' });
       }
     }
 
