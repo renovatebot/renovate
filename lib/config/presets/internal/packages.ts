@@ -148,5 +148,5 @@ export const presets: Record<string, Preset> = {
     description: 'All Vite related packages',
     matchDatasources: ['npm'],
     matchPackagePatterns: ['^vite$', 'vite-plugin', '@vitejs'],
-  }
+  },
 };
