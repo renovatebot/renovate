@@ -51,7 +51,9 @@ export async function applyPrettierFormatting(
       prettierConfigFilenames.has(file),
     );
 
-    const editroconfExists = fileList.some((file) => file === '.editorconfig');
+    const editorconfigExists = fileList.some(
+      (file) => file === '.editorconfig',
+    );
 
     if (!prettierExists) {
       try {
@@ -75,7 +77,7 @@ export async function applyPrettierFormatting(
       useTabs: indent?.type === 'tab',
     };
 
-    if (editroconfExists) {
+    if (editorconfigExists) {
       const editorconf = await EditorConfig.getCodeFormat(filename);
 
       // https://github.com/prettier/prettier/blob/bab892242a1f9d8fcae50514b9304bf03f2e25ab/src/config/editorconfig/editorconfig-to-prettier.js#L47
