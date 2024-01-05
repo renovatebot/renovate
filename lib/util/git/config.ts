@@ -17,13 +17,16 @@ export function getNoVerify(): GitNoVerifyOption[] {
   return noVerify;
 }
 
-export function simpleGitConfig(): Partial<SimpleGitOptions> {
+export function simpleGitConfig(extraConfig: SimpleGitOptions['config'] = []): Partial<SimpleGitOptions> {
   const config: Partial<SimpleGitOptions> = {
     completion: {
       onClose: true,
       onExit: false,
     },
-    config: ['core.quotePath=false'],
+    config: [
+      ...extraConfig,
+      'core.quotePath=false',
+    ],
   };
   // https://github.com/steveukx/git-js/pull/591
   const gitTimeout = GlobalConfig.get('gitTimeout');

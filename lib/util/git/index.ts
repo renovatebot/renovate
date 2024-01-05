@@ -232,7 +232,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig()).env({
+  git = simpleGit(GlobalConfig.get('localDir'), simpleGitConfig(config.authorization ? [`http.extraHeader=Authorization: Bearer ${config.authorization}`] : undefined)).env({
     ...process.env,
     LANG: 'C.UTF-8',
     LC_ALL: 'C.UTF-8',

@@ -16,7 +16,7 @@ import {
   BitbucketServerHttp,
   setBaseUrl,
 } from '../../../util/http/bitbucket-server';
-import type { HttpResponse } from '../../../util/http/types';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash, getQueryString } from '../../../util/url';
@@ -63,7 +63,7 @@ export const id = 'bitbucket-server';
 
 let config: BbsConfig = {} as any;
 
-const bitbucketServerHttp = new BitbucketServerHttp();
+let bitbucketServerHttp: BitbucketServerHttp;
 
 const defaults: {
   endpoint?: string;
@@ -83,15 +83,28 @@ export function initPlatform({
   endpoint,
   username,
   password,
+  token,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
-  if (!(username && password)) {
+  if (!(username && password) && !token) {
     throw new Error(
-      'Init: You must configure a Bitbucket Server username/password',
+      'Init: You must configure either a Bitbucket Server token or username and password'
     );
   }
+
+  let options: HttpOptions | undefined = undefined;
+  if (token) {
+    options = {
+      headers: {
+        'authorization': `Bearer ${token}`,
+      },
+    };
+  }
+
+  bitbucketServerHttp = new BitbucketServerHttp(options)
+
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
@@ -205,6 +218,7 @@ export async function initRepo({
       url,
       cloneSubmodules,
       fullClone: true,
+      authorization: opts.token,
     });
 
     config.mergeMethod = 'merge';
@@ -302,7 +316,9 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     };
     if (!config.ignorePrAuthor) {
       searchParams['role.1'] = 'AUTHOR';
-      searchParams['username.1'] = config.username;
+      if(config.username){
+        searchParams['username.1'] = config.username;
+      }
     }
     const query = getQueryString(searchParams);
     const values = await utils.accumulateValues(

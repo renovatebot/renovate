@@ -17,6 +17,7 @@ export type LongCommitSha = string & { __longCommitSha: never };
 export interface StorageConfig {
   currentBranch?: string;
   url: string;
+  authorization?: string,
   extraCloneOpts?: GitOptions;
   cloneSubmodules?: boolean;
   fullClone?: boolean;
