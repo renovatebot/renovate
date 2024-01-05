@@ -12,7 +12,7 @@ We did not test Gerrit `2.x` with NoteDB (only in `2.15` and `2.16`), but could 
 ## Authentication
 
 <figure markdown>
-  ![Gerrit HTTP access token](/assets/images/gerrit-http-password.png){ loading=lazy }
+  ![Gerrit HTTP access token](../../../assets/images/gerrit-http-password.png){ loading=lazy }
   <figcaption>First, create a HTTP access token for the Renovate account.</figcaption>
 </figure>
 
