@@ -243,8 +243,8 @@ importers:
         specifier: 3.3.7
         version: 3.3.7
       node-html-parser:
-        specifier: 6.1.11
-        version: 6.1.11
+        specifier: 6.1.12
+        version: 6.1.12
       openpgp:
         specifier: 5.11.0
         version: 5.11.0
@@ -428,8 +428,8 @@ importers:
         specifier: 4.14.202
         version: 4.14.202
       '@types/luxon':
-        specifier: 3.3.5
-        version: 3.3.5
+        specifier: 3.3.8
+        version: 3.3.8
       '@types/markdown-it':
         specifier: 13.0.7
         version: 13.0.7
@@ -3833,8 +3833,8 @@ packages:
     resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
     dev: true
 
-  /@types/luxon@3.3.5:
-    resolution: {integrity: sha512-1cyf6Ge/94zlaWIZA2ei1pE6SZ8xpad2hXaYa5JEFiaUH0YS494CZwyi4MXNpXD9oEuv6ZH0Bmh0e7F9sPhmZA==}
+  /@types/luxon@3.3.8:
+    resolution: {integrity: sha512-jYvz8UMLDgy3a5SkGJne8H7VA7zPV2Lwohjx0V8V31+SqAjNmurWMkk9cQhfvlcnXWudBpK9xPM1n4rljOcHYQ==}
     dev: true
 
   /@types/markdown-it@13.0.7:
@@ -8399,8 +8399,8 @@ packages:
     dev: false
     optional: true
 
-  /node-html-parser@6.1.11:
-    resolution: {integrity: sha512-FAgwwZ6h0DSDWxfD0Iq1tsDcBCxdJB1nXpLPPxX8YyVWzbfCjKWEzaynF4gZZ/8hziUmp7ZSaKylcn0iKhufUQ==}
+  /node-html-parser@6.1.12:
+    resolution: {integrity: sha512-/bT/Ncmv+fbMGX96XG9g05vFt43m/+SYKIs9oAemQVYyVcZmDAI2Xq/SbNcpOA35eF0Zk2av3Ksf+Xk8Vt8abA==}
     dependencies:
       css-select: 5.1.0
       he: 1.2.0
