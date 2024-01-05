@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
@@ -65,6 +66,52 @@ describe('modules/manager/nuget/extract', () => {
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(17);
+    });
+
+    it('extracts ContainerBaseImage', async () => {
+      const contents = codeBlock`
+      <Project Sdk="Microsoft.NET.Sdk.Worker">
+        <PropertyGroup>
+          <Version>0.1.0</Version>
+          <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:7.0.10</ContainerBaseImage>
+        </PropertyGroup>
+      </Project>`;
+
+      expect(await extractPackageFile(contents, contents, config)).toEqual({
+        deps: [
+          {
+            depName: 'mcr.microsoft.com/dotnet/runtime',
+            depType: 'docker',
+            datasource: 'docker',
+            currentValue: '7.0.10',
+          },
+        ],
+        packageFileVersion: '0.1.0',
+      });
+    });
+
+    it('extracts ContainerBaseImage with pinned digest', async () => {
+      const contents = codeBlock`
+      <Project Sdk="Microsoft.NET.Sdk.Worker">
+        <PropertyGroup>
+          <Version>0.1.0</Version>
+          <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:7.0.10@sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19</ContainerBaseImage>
+        </PropertyGroup>
+      </Project>`;
+
+      expect(await extractPackageFile(contents, contents, config)).toEqual({
+        deps: [
+          {
+            depName: 'mcr.microsoft.com/dotnet/runtime',
+            depType: 'docker',
+            datasource: 'docker',
+            currentValue: '7.0.10',
+            currentDigest:
+              'sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19',
+          },
+        ],
+        packageFileVersion: '0.1.0',
+      });
     });
 
     it('considers NuGet.config', async () => {

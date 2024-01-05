@@ -39,6 +39,7 @@ Renovate works on these platforms:
 - [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
 - [AWS CodeCommit](https://docs.renovatebot.com/modules/platform/codecommit/)
 - [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
+- [Gerrit (experimental)](https://docs.renovatebot.com/modules/platform/gerrit/)
 
 ## Who Uses Renovate?
 

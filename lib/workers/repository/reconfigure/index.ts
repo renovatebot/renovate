@@ -161,10 +161,11 @@ export async function validateReconfigureBranch(
     );
 
     // add comment to reconfigure PR if it exists
-    const branchPr = await platform.getBranchPr(
+    const branchPr = await platform.findPr({
       branchName,
-      config.defaultBranch,
-    );
+      state: 'open',
+      includeOtherAuthors: true,
+    });
     if (branchPr) {
       let body = `There is an error with this repository's Renovate configuration that needs to be fixed.\n\n`;
       body += `Location: \`${configFileName}\`\n`;
@@ -179,6 +180,7 @@ export async function validateReconfigureBranch(
         content: body,
       });
     }
+
     await setBranchStatus(branchName, 'Validation Failed', 'red', context);
     setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.baseBranch!);

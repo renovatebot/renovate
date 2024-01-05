@@ -13,6 +13,7 @@ import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
+import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
 import { getPrBodyStruct, hashBody } from '../pr-body';
@@ -70,6 +71,7 @@ interface GiteaRepoConfig {
 export const id = 'gitea';
 
 const DRAFT_PREFIX = 'WIP: ';
+const reconfigurePrRegex = regEx(/reconfigure$/g);
 
 const defaults = {
   hostType: 'gitea',
@@ -109,7 +111,12 @@ function toRenovatePR(data: PR): Pr | null {
   }
 
   const createdBy = data.user?.username;
-  if (createdBy && botUserName && createdBy !== botUserName) {
+  if (
+    createdBy &&
+    botUserName &&
+    !reconfigurePrRegex.test(data.head.label) &&
+    createdBy !== botUserName
+  ) {
     return null;
   }
 
@@ -493,6 +500,7 @@ const platform: Platform = {
     branchName,
     prTitle: title,
     state = 'all',
+    includeOtherAuthors,
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
     const prList = await platform.getPrList();
@@ -544,8 +552,9 @@ const platform: Platform = {
         if (semver.gte(defaults.version, '1.17.0')) {
           try {
             await helper.mergePR(config.repository, gpr.number, {
-              // TODO: pass strategy (#16884)
-              Do: config.mergeMethod,
+              Do:
+                getMergeMethod(platformOptions?.automergeStrategy) ??
+                config.mergeMethod,
               merge_when_checks_succeed: true,
             });
 
