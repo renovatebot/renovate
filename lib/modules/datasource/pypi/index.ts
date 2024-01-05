@@ -92,11 +92,11 @@ export class PypiDatasource extends Datasource {
     packageName: string,
     hostUrl: string,
   ): Promise<ReleaseResult | null> {
-    const dependency: ReleaseResult = { releases: [] };
     const lookupUrl = url.resolve(
       hostUrl,
       `${PypiDatasource.normalizeNameForUrlLookup(packageName)}/json`,
     );
+    const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
     const rep = await this.http.getJson<PypiJSON>(lookupUrl);
     const dep = rep?.body;
@@ -230,13 +230,13 @@ export class PypiDatasource extends Datasource {
     packageName: string,
     hostUrl: string,
   ): Promise<ReleaseResult | null> {
-    const dependency: ReleaseResult = { releases: [] };
     const lookupUrl = url.resolve(
       hostUrl,
       ensureTrailingSlash(
         PypiDatasource.normalizeNameForUrlLookup(packageName),
       ),
     );
+    const dependency: ReleaseResult = { releases: [] };
     const response = await this.http.get(lookupUrl);
     const dep = response?.body;
     if (!dep) {
