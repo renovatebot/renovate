@@ -53,11 +53,12 @@ export class PypiDatasource extends Datasource {
         throw err;
       }
       logger.trace(
+        { packageName, hostUrl },
         'Simple api not found. Looking up pypijson api as fallback.',
       );
       return false;
     });
-    logger.trace('Querying json api for metadata');
+    logger.trace({ packageName, hostUrl }, 'Querying json api for metadata');
     const pypiJsonHostUrl = hostUrl.replace(
       'https://pypi.org/simple',
       'https://pypi.org/pypi',
@@ -70,7 +71,10 @@ export class PypiDatasource extends Datasource {
       if (!simpleFound) {
         throw err;
       }
-      logger.trace('Json api lookup failed but got simple results.');
+      logger.trace(
+        { packageName, hostUrl },
+        'Json api lookup failed but got simple results.',
+      );
       return false;
     });
     if (simpleFound || jsonFound) {
