@@ -157,7 +157,7 @@ export class BaseGoDatasource {
       // TODO: `parsedUrl.pathname` can be undefined
       let packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
 
-      const endpoint = GlobalConfig.get('endpoint');
+      const endpoint = GlobalConfig.get('endpoint')!;
 
       const endpointPrefix = endpoint?.match('https://[^/]*/(.*?/)(api/v4/?)?');
 
