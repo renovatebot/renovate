@@ -51,12 +51,12 @@ export class PypiDatasource extends Datasource {
         throw err;
       }
       logger.trace(
-        { packageName, hostUrl },
+        { packageName, hostUrl: simpleHostUrl },
         'Simple api not found. Looking up pypijson api as fallback.',
       );
       return null;
     });
-    logger.trace({ packageName, hostUrl }, 'Querying json api for metadata');
+    logger.trace({ packageName, hostUrl: pypiJsonHostUrl }, 'Querying json api for metadata');
     const pypiJsonDependencies = await this.getResultsViaPyPiJson(
       normalizedLookupName,
       pypiJsonHostUrl,
@@ -74,7 +74,10 @@ export class PypiDatasource extends Datasource {
       return null;
     }
     // merge results
-    return Object.assign({}, simpleDependencies, pypiJsonDependencies);
+    return {
+      ...simpleDependencies,
+      ...pypiJsonDependencies
+    };
   }
 
   private static normalizeName(input: string): string {
