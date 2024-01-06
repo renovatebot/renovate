@@ -11,6 +11,9 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { isGitHubRepo } from './common';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
 
+const jsonPyPiUrl = 'https://pypi.org/pypi';
+const simplePyPiUrl = 'https://pypi.org/simple';
+
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
 
@@ -36,12 +39,10 @@ export class PypiDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     // TODO: null check (#22198)
     const hostUrl = ensureTrailingSlash(registryUrl!);
+    const simpleHostUrl = hostUrl.replace(jsonPyPiUrl, simplePyPiUrl);
+    const pypiJsonHostUrl = hostUrl.replace(simplePyPiUrl, jsonPyPiUrl);
     const normalizedLookupName = PypiDatasource.normalizeName(packageName);
 
-    const simpleHostUrl = hostUrl.replace(
-      'https://pypi.org/pypi',
-      'https://pypi.org/simple',
-    );
     const simpleDependencies = await this.getResultsViaSimple(
       normalizedLookupName,
       simpleHostUrl,
@@ -56,10 +57,6 @@ export class PypiDatasource extends Datasource {
       return null;
     });
     logger.trace({ packageName, hostUrl }, 'Querying json api for metadata');
-    const pypiJsonHostUrl = hostUrl.replace(
-      'https://pypi.org/simple',
-      'https://pypi.org/pypi',
-    );
     const pypiJsonDependencies = await this.getResultsViaPyPiJson(
       normalizedLookupName,
       pypiJsonHostUrl,
