@@ -68,7 +68,8 @@ describe('modules/manager/ocb/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         content,
         '0.0.2',
-        true as any,
+        // @ts-expect-error supplying a wrong parameter to trigger an exception
+        true,
       );
       expect(bumpedContent).toEqual(content);
     });

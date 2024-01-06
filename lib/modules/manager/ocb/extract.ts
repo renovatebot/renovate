@@ -29,7 +29,7 @@ export function extractPackageFile(
 
     definition = parsed.data;
   } catch (error) {
-    logger.trace({ packageFile, error }, 'Failed to parse OCB file as YAML');
+    logger.debug({ packageFile, error }, 'Failed to parse OCB file as YAML');
     return null;
   }
 
