@@ -56,7 +56,10 @@ export class PypiDatasource extends Datasource {
       );
       return null;
     });
-    logger.trace({ packageName, hostUrl: pypiJsonHostUrl }, 'Querying json api for metadata');
+    logger.trace(
+      { packageName, hostUrl: pypiJsonHostUrl },
+      'Querying json api for metadata',
+    );
     const pypiJsonDependencies = await this.getResultsViaPyPiJson(
       normalizedLookupName,
       pypiJsonHostUrl,
@@ -75,8 +78,9 @@ export class PypiDatasource extends Datasource {
     }
     // merge results
     return {
+      releases: [],
       ...simpleDependencies,
-      ...pypiJsonDependencies
+      ...pypiJsonDependencies,
     };
   }
 
