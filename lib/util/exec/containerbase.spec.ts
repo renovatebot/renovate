@@ -209,6 +209,7 @@ describe('util/exec/containerbase', () => {
       ${'>2.19.0'}         | ${'2.19.0-81.0.dev'}
       ${'<=2.17.5'}        | ${'2.17.5'}
       ${'<2.17.5'}         | ${'2.19.0-81.0.dev'}
+      ${'<2.17.6'}         | ${'2.17.5'}
     `(
       'supports dart ranges "$version" => "$expected"',
       async ({ version: constraint, expected }) => {
