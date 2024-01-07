@@ -996,7 +996,7 @@ describe('modules/platform/gitea/index', () => {
         .reply(200, [
           {
             id: 1,
-            status: 'unknown',
+            status: 'xyz',
             context: 'some-context',
             description: '',
             target_url: '',
