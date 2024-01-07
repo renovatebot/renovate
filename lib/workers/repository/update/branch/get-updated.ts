@@ -183,7 +183,6 @@ export async function getUpdatedPackageFiles(
               res,
               upgrade.packageFileVersion,
               upgrade.bumpVersion,
-              packageFile,
             );
             res = bumpedContent;
           }
@@ -218,7 +217,6 @@ export async function getUpdatedPackageFiles(
           newContent,
           upgrade.packageFileVersion,
           upgrade.bumpVersion,
-          packageFile,
         );
         newContent = bumpedContent;
       }
