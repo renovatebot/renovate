@@ -110,7 +110,7 @@ describe('modules/platform/gitea/index', () => {
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
       created_at: '2011-08-18T22:30:39Z',
       closed_at: '2016-01-09T10:03:22Z',
-      mergeable: true,
+      mergeable: false,
       base: { ref: 'draft-base-branch' },
       head: {
         label: 'draft-head-branch',

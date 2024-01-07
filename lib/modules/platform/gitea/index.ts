@@ -140,7 +140,7 @@ function toRenovatePR(data: PR): Pr | null {
     createdAt: data.created_at,
     cannotMergeReason: data.mergeable
       ? undefined
-      : /* istanbul ignore next */ `pr.mergeable="${data.mergeable}"`,
+      : `pr.mergeable="${data.mergeable}"`,
     hasAssignees: !!(data.assignee?.login ?? is.nonEmptyArray(data.assignees)),
   };
 }
