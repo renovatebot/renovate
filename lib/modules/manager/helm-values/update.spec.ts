@@ -64,7 +64,6 @@ describe('modules/manager/helm-values/update', () => {
     });
 
     it('returns content if retrieving Chart.yaml fails', async () => {
-      jest.resetAllMocks();
       fs.readLocalFile.mockRejectedValueOnce(null);
       const { bumpedContent } = await helmValuesUpdater.bumpPackageVersion(
         helmValuesContent,
