@@ -235,7 +235,6 @@ export interface ManagerApi extends ModuleApi {
     content: string,
     currentValue: string,
     bumpVersion: ReleaseType,
-    packageFile?: string,
   ): Result<BumpPackageVersionResult>;
 
   detectGlobalConfig?(): Result<GlobalManagerConfig>;
