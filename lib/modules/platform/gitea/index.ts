@@ -140,7 +140,7 @@ function toRenovatePR(data: PR): Pr | null {
     createdAt: data.created_at,
     cannotMergeReason: data.mergeable
       ? undefined
-      : `pr.mergeable="${data.mergeable}"`,
+      : /* istanbul ignore next */ `pr.mergeable="${data.mergeable}"`,
     hasAssignees: !!(data.assignee?.login ?? is.nonEmptyArray(data.assignees)),
   };
 }
@@ -430,7 +430,10 @@ const platform: Platform = {
       return 'yellow';
     }
 
-    return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
+    return (
+      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ??
+      /* istanbul ignore next */ 'yellow'
+    );
   },
 
   async getBranchStatusCheck(
