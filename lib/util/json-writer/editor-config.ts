@@ -13,6 +13,7 @@ export class EditorConfig {
       return {
         indentationSize: EditorConfig.getIndentationSize(knownProps),
         indentationType: EditorConfig.getIndentationType(knownProps),
+        maxLineLength: knownProps.max_line_length as number | 'off' | undefined,
       };
     } catch (err) {
       logger.warn({ err }, 'Failed to parse editor config');
