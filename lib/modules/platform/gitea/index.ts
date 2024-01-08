@@ -430,7 +430,10 @@ const platform: Platform = {
       return 'yellow';
     }
 
-    return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
+    return (
+      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ??
+      /* istanbul ignore next */ 'yellow'
+    );
   },
 
   async getBranchStatusCheck(
