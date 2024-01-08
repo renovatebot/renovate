@@ -172,6 +172,68 @@ describe('util/exec/containerbase', () => {
         }),
       ).toBe('2020.8.13');
     });
+
+    it.each`
+      version                             | expected
+      ${'>=2.5.0 <2.6.0'}                 | ${'2.5.1'}
+      ${'>=2.6.0-0.0.pre <2.7.0-0.0.pre'} | ${'2.6.0-0.0.pre'}
+      ${'>=2.8.0'}                        | ${'2.8.1'}
+      ${'<2.9.0-0.1.pre'}                 | ${'2.8.1'}
+      ${'2.10.0-0.2.pre'}                 | ${'2.10.0-0.2.pre'}
+      ${'>=2.11.0-0.1.pre'}               | ${'2.12.0-4.1.pre'}
+      ${'<=2.10.0'}                       | ${'2.8.1'}
+    `(
+      'supports flutter ranges "$version" => "$expected"',
+      async ({ version: constraint, expected }) => {
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [
+            { version: '2.5.0-1.0.pre', isStable: false },
+            { version: '2.5.0', isStable: true },
+            { version: '2.5.1', isStable: true },
+            { version: '2.6.0-0.0.pre', isStable: false },
+            { version: '2.8.0', isStable: true },
+            { version: '2.8.1', isStable: true },
+            { version: '2.9.0-0.1.pre', isStable: false },
+            { version: '2.12.0-4.1.pre', isStable: false },
+          ],
+        });
+        expect(
+          await resolveConstraint({ toolName: 'flutter', constraint }),
+        ).toBe(expected);
+      },
+    );
+
+    it.each`
+      version              | expected
+      ${'>2.17.0 <2.17.8'} | ${'2.17.7'}
+      ${'>2.19.0'}         | ${'2.19.0-81.0.dev'}
+      ${'<=2.17.5'}        | ${'2.17.5'}
+      ${'<2.17.5'}         | ${'2.19.0-81.0.dev'}
+      ${'<2.17.6'}         | ${'2.17.5'}
+    `(
+      'supports dart ranges "$version" => "$expected"',
+      async ({ version: constraint, expected }) => {
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [
+            { version: '2.17.0-69.2.beta', isStable: false },
+            { version: '2.17.0-7.0.dev', isStable: false },
+            { version: '2.17.5', isStable: true },
+            { version: '2.17.6', isStable: true },
+            { version: '2.17.7', isStable: true },
+            { version: '2.18.0', isStable: true },
+            { version: '2.18.0-44.1.beta', isStable: false },
+            { version: '2.18.0-99.0.dev', isStable: false },
+            { version: '2.18.4', isStable: true },
+            { version: '2.18.5', isStable: true },
+            { version: '2.19.0-255.2.beta', isStable: false },
+            { version: '2.19.0-81.0.dev', isStable: false },
+          ],
+        });
+        expect(await resolveConstraint({ toolName: 'dart', constraint })).toBe(
+          expected,
+        );
+      },
+    );
   });
 
   describe('generateInstallCommands()', () => {
