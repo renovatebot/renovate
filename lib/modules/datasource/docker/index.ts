@@ -915,8 +915,7 @@ export class DockerDatasource extends Datasource {
 
   @cache({
     namespace: 'datasource-docker-hub-tags',
-    key: (registryHost: string, dockerRepository: string) =>
-      `${registryHost}:${dockerRepository}`,
+    key: (dockerRepository: string) => `${dockerRepository}`,
   })
   async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
     const result: Release[] = [];
