@@ -43,6 +43,12 @@ export function extractPackageFile(
       def.project?.['optional-dependencies'],
     ),
   );
+  deps.push(
+    ...parseDependencyList(
+      depTypes.buildSystemRequires,
+      def['build-system']?.requires,
+    ),
+  );
 
   // process specific tool sets
   let processedDeps = deps;

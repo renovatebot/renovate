@@ -1,9 +1,9 @@
 import * as httpMock from '../../../../test/http-mock';
 import type { logger as _logger } from '../../../logger';
+import { reset as memCacheReset } from '../../../util/cache/memory';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
-import { prFieldsFilter } from './utils';
 
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
@@ -43,6 +43,7 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     setBaseUrl(baseUrl);
+    memCacheReset();
   });
 
   async function initRepoMock(
@@ -235,9 +236,8 @@ describe('modules/platform/bitbucket/index', () => {
     it('bitbucket finds PR for branch', async () => {
       const scope = await initRepoMock();
       scope
-        .get(
-          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
-        )
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
         .reply(200, { values: [pr] })
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr);
@@ -248,9 +248,8 @@ describe('modules/platform/bitbucket/index', () => {
     it('returns null if no PR for branch', async () => {
       const scope = await initRepoMock();
       scope
-        .get(
-          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
-        )
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
         .reply(200, { values: [pr] });
 
       const res = await bitbucket.getBranchPr('branch_without_pr');
@@ -753,9 +752,8 @@ describe('modules/platform/bitbucket/index', () => {
       await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
       await initRepoMock(undefined, null, scope);
       scope
-        .get(
-          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&q=author.uuid="12345"&fields=${prFieldsFilter}&pagelen=50`,
-        )
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
         .reply(200, {
           values: [
             {
@@ -779,9 +777,8 @@ describe('modules/platform/bitbucket/index', () => {
     it('finds pr', async () => {
       const scope = await initRepoMock();
       scope
-        .get(
-          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
-        )
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
         .reply(200, { values: [pr] });
       expect(
         await bitbucket.findPr({
@@ -805,9 +802,8 @@ describe('modules/platform/bitbucket/index', () => {
 
       const scope = await initRepoMock();
       scope
-        .get(
-          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
-        )
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
         .reply(200, {
           values: [
             {
@@ -843,9 +839,8 @@ describe('modules/platform/bitbucket/index', () => {
 
       const scope = await initRepoMock({}, { is_private: true });
       scope
-        .get(
-          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
-        )
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
         .reply(200, {
           values: [
             {
@@ -883,9 +878,8 @@ describe('modules/platform/bitbucket/index', () => {
 
       const scope = await initRepoMock({}, { is_private: false });
       scope
-        .get(
-          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
-        )
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
         .reply(200, {
           values: [
             {
@@ -927,9 +921,8 @@ describe('modules/platform/bitbucket/index', () => {
 
       const scope = await initRepoMock({}, { is_private: false });
       scope
-        .get(
-          `/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&fields=${prFieldsFilter}&pagelen=50`,
-        )
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
         .reply(200, {
           values: [
             {
@@ -953,6 +946,46 @@ describe('modules/platform/bitbucket/index', () => {
         prTitle: 'title',
       });
       expect(pr?.number).toBe(5);
+    });
+
+    it('finds pr from other authors', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"&state=open',
+        )
+        .reply(200, { values: [pr] });
+      expect(
+        await bitbucket.findPr({
+          branchName: 'branch',
+          state: 'open',
+          includeOtherAuthors: true,
+        }),
+      ).toMatchObject({
+        number: 5,
+        sourceBranch: 'branch',
+        targetBranch: 'master',
+        title: 'title',
+        state: 'open',
+      });
+    });
+
+    it('returns null if no open pr exists - (includeOtherAuthors)', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?q=source.branch.name="branch"&state=open',
+        )
+        .reply(200, {
+          values: [],
+        });
+
+      const pr = await bitbucket.findPr({
+        branchName: 'branch',
+        state: 'open',
+        includeOtherAuthors: true,
+      });
+      expect(pr).toBeNull();
     });
   });
 
@@ -985,7 +1018,12 @@ describe('modules/platform/bitbucket/index', () => {
           values: [projectReviewer, repoReviewer],
         })
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 });
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
       const pr = await bitbucket.createPr({
         sourceBranch: 'branch',
         targetBranch: 'master',
@@ -1063,7 +1101,12 @@ describe('modules/platform/bitbucket/index', () => {
           account_status: 'inactive',
         })
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 });
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
       const pr = await bitbucket.createPr({
         sourceBranch: 'branch',
         targetBranch: 'master',
@@ -1121,7 +1164,12 @@ describe('modules/platform/bitbucket/index', () => {
         )
         .reply(200)
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 });
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
       const pr = await bitbucket.createPr({
         sourceBranch: 'branch',
         targetBranch: 'master',
@@ -1217,7 +1265,12 @@ describe('modules/platform/bitbucket/index', () => {
           },
         })
         .post('/2.0/repositories/some/repo/pullrequests')
-        .reply(200, { id: 5 });
+        .reply(200, { id: 5 })
+        .get(`/2.0/repositories/some/repo/pullrequests`)
+        .query(true)
+        .reply(200, {
+          values: [{ id: 5 }],
+        });
       const pr = await bitbucket.createPr({
         sourceBranch: 'branch',
         targetBranch: 'master',

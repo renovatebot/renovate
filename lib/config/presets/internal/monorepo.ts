@@ -16,6 +16,7 @@ const repoGroups = {
   'algoliasearch-autocomplete': 'https://github.com/algolia/autocomplete',
   'algoliasearch-client-javascript':
     'https://github.com/algolia/algoliasearch-client-javascript',
+  analog: 'https://github.com/analogjs/analog',
   angular: 'https://github.com/angular/angular',
   'angular-cli': 'https://github.com/angular/angular-cli',
   'angular-eslint': 'https://github.com/angular-eslint/angular-eslint',
@@ -287,6 +288,7 @@ const repoGroups = {
   gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
   'github-workflows-kt':
     'https://github.com/typesafegithub/github-workflows-kt',
+  'go-cloud': 'https://github.com/google/go-cloud',
   'google-api-dotnet-client':
     'https://github.com/googleapis/google-api-dotnet-client',
   grafana: 'https://github.com/grafana/grafana',
@@ -339,6 +341,7 @@ const repoGroups = {
   'material-ui': [
     'https://github.com/mui-org/material-ui', // Previous organization name (see: https://github.com/mui/material-ui/pull/30944)
     'https://github.com/mui/material-ui',
+    'https://github.com/mui/mui-x',
   ],
   'mdc-react': 'material-components/material-components-web-react',
   mdx: 'https://github.com/mdx-js/mdx',
@@ -434,6 +437,7 @@ const repoGroups = {
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
+  'sentry-rust': 'https://github.com/getsentry/sentry-rust',
   serde: 'https://github.com/serde-rs/serde',
   shedlock: 'https://github.com/lukas-krecan/ShedLock',
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
@@ -457,6 +461,7 @@ const repoGroups = {
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
   'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
+  'testcontainers-go': 'https://github.com/testcontainers/testcontainers-go',
   'testcontainers-java':
     'https://github.com/testcontainers/testcontainers-java',
   'testcontainers-node':

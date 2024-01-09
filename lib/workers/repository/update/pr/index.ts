@@ -55,6 +55,7 @@ export function getPlatformPrOptions(
 
   return {
     autoApprove: !!config.autoApprove,
+    automergeStrategy: config.automergeStrategy,
     azureWorkItemId: config.azureWorkItemId ?? 0,
     bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,
     gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
