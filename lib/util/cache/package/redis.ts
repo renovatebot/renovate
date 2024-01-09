@@ -5,9 +5,10 @@ import { logger } from '../../../logger';
 import { compress, decompress } from '../../compress';
 
 let client: ReturnType<typeof createClient> | undefined;
+let rprefix: string | undefined;
 
 function getKey(namespace: string, key: string): string {
-  return `${namespace}-${key}`;
+  return `${rprefix}${namespace}-${key}`;
 }
 
 export async function end(): Promise<void> {
@@ -20,7 +21,7 @@ export async function end(): Promise<void> {
 }
 
 async function rm(namespace: string, key: string): Promise<void> {
-  logger.trace({ namespace, key }, 'Removing cache entry');
+  logger.trace({ rprefix, namespace, key }, 'Removing cache entry');
   await client?.del(getKey(namespace, key));
 }
 
@@ -37,7 +38,7 @@ export async function get<T = never>(
     const cachedValue = res && JSON.parse(res);
     if (cachedValue) {
       if (DateTime.local() < DateTime.fromISO(cachedValue.expiry)) {
-        logger.trace({ namespace, key }, 'Returning cached value');
+        logger.trace({ rprefix, namespace, key }, 'Returning cached value');
         // istanbul ignore if
         if (!cachedValue.compress) {
           return cachedValue.value;
@@ -49,7 +50,7 @@ export async function get<T = never>(
       await rm(namespace, key);
     }
   } catch (err) {
-    logger.trace({ namespace, key }, 'Cache miss');
+    logger.trace({ rprefix, namespace, key }, 'Cache miss');
   }
   return undefined;
 }
@@ -60,7 +61,7 @@ export async function set(
   value: unknown,
   ttlMinutes = 5,
 ): Promise<void> {
-  logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
+  logger.trace({ rprefix, namespace, key, ttlMinutes }, 'Saving cached value');
 
   // Redis requires TTL to be integer, not float
   const redisTTL = Math.floor(ttlMinutes * 60);
@@ -80,10 +81,14 @@ export async function set(
   }
 }
 
-export async function init(url: string): Promise<void> {
+export async function init(
+  url: string,
+  prefix: string | undefined,
+): Promise<void> {
   if (!url) {
     return;
   }
+  rprefix = prefix ?? '';
   logger.debug('Redis cache init');
   client = createClient({
     url,

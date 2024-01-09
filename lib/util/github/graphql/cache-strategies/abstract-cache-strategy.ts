@@ -35,7 +35,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    * These fields will be persisted.
    */
   private items: Record<string, GithubItem> | undefined;
-  protected createdAt = this.now;
+  protected createdAt: DateTime = this.now;
 
   /**
    * This flag indicates whether there is any new or updated items

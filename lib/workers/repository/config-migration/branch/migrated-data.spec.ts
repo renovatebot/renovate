@@ -5,12 +5,14 @@ import { mockedFunction, scm } from '../../../../../test/util';
 import { migrateConfig } from '../../../../config/migration';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
+import { EditorConfig } from '../../../../util/json-writer';
 import { detectRepoFileConfig } from '../../init/merge';
 import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
 
 jest.mock('../../../../config/migration');
 jest.mock('../../../../util/git');
 jest.mock('../../../../util/fs');
+jest.mock('../../../../util/json-writer');
 jest.mock('../../init/merge');
 jest.mock('detect-indent');
 
@@ -191,13 +193,42 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     });
 
     it('formats with default 2 spaces', async () => {
-      mockedFunction(scm.getFileList).mockResolvedValue(['.prettierrc']);
+      mockedFunction(scm.getFileList).mockResolvedValue([
+        '.prettierrc',
+        '.editorconfig',
+      ]);
+      mockedFunction(EditorConfig.getCodeFormat).mockResolvedValueOnce({
+        maxLineLength: 80,
+      });
       await expect(
-        applyPrettierFormatting(migratedData.content, 'json', {
+        applyPrettierFormatting('.prettierrc', migratedData.content, 'json', {
           amount: 0,
           indent: '  ',
         }),
       ).resolves.toEqual(formattedMigratedData.content);
+    });
+
+    it('formats with printWith=Infinity', async () => {
+      mockedFunction(scm.getFileList).mockResolvedValue([
+        '.prettierrc',
+        '.editorconfig',
+      ]);
+      mockedFunction(EditorConfig.getCodeFormat).mockResolvedValueOnce({
+        maxLineLength: 'off',
+      });
+      await expect(
+        applyPrettierFormatting(
+          '.prettierrc',
+          `{\n"extends":[":separateMajorReleases",":prImmediately",":renovatePrefix",":semanticPrefixFixDepsChoreOthers"]}`,
+          'json',
+          {
+            amount: 0,
+            indent: '  ',
+          },
+        ),
+      ).resolves.toBe(
+        `{\n  "extends": [":separateMajorReleases", ":prImmediately", ":renovatePrefix", ":semanticPrefixFixDepsChoreOthers"]\n}\n`,
+      );
     });
   });
 });

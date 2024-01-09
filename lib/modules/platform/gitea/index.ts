@@ -374,7 +374,10 @@ const platform: Platform = {
       return 'yellow';
     }
 
-    return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
+    return (
+      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ??
+      /* istanbul ignore next */ 'yellow'
+    );
   },
 
   async getBranchStatusCheck(
@@ -433,6 +436,7 @@ const platform: Platform = {
     branchName,
     prTitle: title,
     state = 'all',
+    includeOtherAuthors,
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
     const prList = await platform.getPrList();

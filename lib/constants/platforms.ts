@@ -3,6 +3,7 @@ export type PlatformId =
   | 'codecommit'
   | 'bitbucket'
   | 'bitbucket-server'
+  | 'gerrit'
   | 'gitea'
   | 'github'
   | 'gitlab'
