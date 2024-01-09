@@ -23,7 +23,7 @@ export const presets: Record<string, Preset> = {
       {
         customType: 'regex',
         fileMatch: [
-          '(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/[^/]+\\.ya?ml$',
+          '(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$',
           '(^|/)action\\.ya?ml$',
         ],
         matchStrings: [
