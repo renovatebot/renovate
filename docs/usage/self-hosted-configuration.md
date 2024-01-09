@@ -904,6 +904,12 @@ This is currently applicable to `npm` only, and only used in cases where bugs in
 If enabled emoji shortcodes are replaced with their Unicode equivalents.
 For example: `:warning:` will be replaced with `⚠️`.
 
+## useCloudMetadataServices
+
+Some cloud providers offer services to receive metadata about the current instance, for example [AWS Instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html)
+or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).
+Use this option to control whether Renovate should try to access these services.
+
 ## username
 
 You may need to set a `username` if you:
