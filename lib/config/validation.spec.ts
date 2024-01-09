@@ -915,7 +915,6 @@ describe('config/validation', () => {
       const { warnings, errors } =
         await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
       expect(errors).toMatchObject([
         {
           message:
@@ -941,7 +940,6 @@ describe('config/validation', () => {
       const { warnings, errors } =
         await configValidation.validateConfig(config);
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
       expect(errors).toMatchObject([
         {
           message:
