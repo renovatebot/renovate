@@ -17,7 +17,12 @@ import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
 import { hashBody } from '../pr-body';
-import type { CreatePRConfig, RepoParams, UpdatePrConfig } from '../types';
+import type {
+  CreatePRConfig,
+  RefreshPrConfig,
+  RepoParams,
+  UpdatePrConfig,
+} from '../types';
 import * as branch from './branch';
 import type { ApiPageCache, GhRestPr } from './types';
 import * as github from '.';
@@ -3108,6 +3113,86 @@ describe('modules/platform/github/index', () => {
       scope.patch('/repos/some/repo/pulls/1234').reply(200, pr);
 
       await expect(github.updatePr(pr)).toResolve();
+    });
+  });
+
+  describe('refreshPr(prNo, platformOptions)', () => {
+    const getPrResp = {
+      number: 123,
+      node_id: 'abcd',
+      head: { repo: { full_name: 'some/repo' } },
+    };
+
+    const graphqlAutomergeResp = {
+      data: {
+        enablePullRequestAutoMerge: {
+          pullRequest: {
+            number: 123,
+          },
+        },
+      },
+    };
+
+    const pr: RefreshPrConfig = {
+      number: 123,
+      platformOptions: { usePlatformAutomerge: true },
+    };
+
+    const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', repoOpts);
+      scope.get('/repos/some/repo/pulls/123').reply(200, getPrResp);
+      await github.initRepo({ repository: 'some/repo' });
+      return scope;
+    };
+
+    const graphqlGetRepo = {
+      method: 'POST',
+      url: 'https://api.github.com/graphql',
+      graphql: { query: { repository: {} } },
+    };
+
+    const restGetPr = {
+      method: 'GET',
+      url: 'https://api.github.com/repos/some/repo/pulls/123',
+    };
+
+    const graphqlAutomerge = {
+      method: 'POST',
+      url: 'https://api.github.com/graphql',
+      graphql: {
+        mutation: {
+          __vars: {
+            $pullRequestId: 'ID!',
+            $mergeMethod: 'PullRequestMergeMethod!',
+          },
+          enablePullRequestAutoMerge: {
+            __args: {
+              input: {
+                pullRequestId: '$pullRequestId',
+                mergeMethod: '$mergeMethod',
+              },
+            },
+          },
+        },
+        variables: {
+          pullRequestId: 'abcd',
+          mergeMethod: 'REBASE',
+        },
+      },
+    };
+
+    it('should set automatic merge', async () => {
+      const scope = await mockScope();
+      scope.post('/graphql').reply(200, graphqlAutomergeResp);
+
+      await expect(github.refreshPr(pr)).toResolve();
+
+      expect(httpMock.getTrace()).toMatchObject([
+        graphqlGetRepo,
+        restGetPr,
+        graphqlAutomerge,
+      ]);
     });
   });
 

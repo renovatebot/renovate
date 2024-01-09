@@ -36,7 +36,7 @@ import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelogs } from '../../changelog';
-import { ensurePr } from '../pr';
+import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
@@ -572,7 +572,10 @@ export async function processBranch(
     }
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
-      await platform.refreshPr(branchPr.number);
+      await platform.refreshPr({
+        number: branchPr.number,
+        platformOptions: getPlatformPrOptions(config),
+      });
     }
     if (!commitSha && !branchExists) {
       return {

@@ -33,6 +33,7 @@ import type {
   PlatformParams,
   PlatformResult,
   Pr,
+  RefreshPrConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -373,11 +374,13 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
 }
 
 // istanbul ignore next
-export async function refreshPr(number: number): Promise<void> {
+export async function refreshPr({
+  number: prNo,
+}: RefreshPrConfig): Promise<void> {
   // wait for pr change propagation
   await setTimeout(1000);
   // refresh cache
-  await getPr(number, true);
+  await getPr(prNo, true);
 }
 
 async function getStatus(

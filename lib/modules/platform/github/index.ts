@@ -56,6 +56,7 @@ import type {
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
+  RefreshPrConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -1728,6 +1729,28 @@ export async function updatePr({
       throw err;
     }
     logger.warn({ err }, 'Error updating PR');
+  }
+}
+
+export async function refreshPr({
+  number: prNo,
+  platformOptions,
+}: RefreshPrConfig): Promise<void> {
+  try {
+    const { body: ghPr } = await githubApi.getJson<GhRestPr>(
+      `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`,
+    );
+    const result = coerceRestPr(ghPr);
+    const { number, node_id } = result;
+
+    await tryPrAutomerge(number, node_id, platformOptions);
+
+    logger.debug(`PR refreshed...prNo: ${prNo}`);
+  } catch (err) /* istanbul ignore next */ {
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
+    logger.warn({ err }, 'Error refreshing PR');
   }
 }
 
