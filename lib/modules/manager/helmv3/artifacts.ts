@@ -70,7 +70,7 @@ async function helmCommands(
   // add helm repos if an alias or credentials for the url are defined
   classicRepositories.forEach((value) => {
     const { username, password } = value.hostRule;
-    const parameters = [`${value.repository}`];
+    const parameters = [`${value.repository}`, `--force-update`];
     const isPrivateRepo = username && password;
     if (isPrivateRepo) {
       parameters.push(`--username ${quote(username)}`);
