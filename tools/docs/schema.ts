@@ -85,18 +85,14 @@ function addChildrenArrayInParents(): void {
   for (const option of options) {
     if (option.parent) {
       properties[option.parent].items = {
-        allOf: [
-          {
-            type: 'object',
-            properties: {
-              description: {
-                type: 'string',
-                description:
-                  'A custom description for this configuration object',
-              },
-            },
+        type: 'object',
+        properties: {
+          description: {
+            type: 'string',
+            description: 'A custom description for this configuration object',
           },
-        ],
+        },
+        additionalProperties: false,
       };
     }
   }
@@ -105,7 +101,7 @@ function addChildrenArrayInParents(): void {
 function createSchemaForChildConfigs(): void {
   for (const option of options) {
     if (option.parent) {
-      properties[option.parent].items.allOf[0].properties[option.name] =
+      properties[option.parent].items.properties[option.name] =
         createSingleConfig(option);
     }
   }
