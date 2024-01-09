@@ -5,7 +5,9 @@ description: Self-Hosted configuration usable in config file, CLI or environment
 
 # Self-Hosted configuration options
 
-You can only use these configuration options when you're self-hosting Renovate.
+You can only use these configuration options when you're self-hosting Renovate, because they can only be configured within the bot/admin config.
+Bot/admin config means environment variables, CLI options, or file-based (e.g. `config.js`).
+If any of the below options are used in "repository config" (e.g. `renovate.json`) then they will be ignored, and potentially a config error issue raised.
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
