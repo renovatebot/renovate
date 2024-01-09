@@ -15,6 +15,7 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRule, findMatchingRule } from './host-rules';
 import { getQueue } from './queue';
+import { getRetryAfter, wrapWithRetry } from './retry-after';
 import { Throttle, getThrottle } from './throttle';
 import type {
   GotJSONOptions,
@@ -130,11 +131,14 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     protected hostType: string,
     options: HttpOptions = {},
   ) {
-    this.options = merge<GotOptions>(options, { context: { hostType } });
-
-    if (process.env.NODE_ENV === 'test') {
-      this.options.retry = 0;
-    }
+    const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
+    this.options = merge<GotOptions>(options, {
+      context: { hostType },
+      retry: {
+        limit: retryLimit,
+        maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
+      },
+    });
   }
 
   protected getThrottle(url: string): Throttle | null {
@@ -226,7 +230,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         ? () => queue.add<HttpResponse<T>>(throttledTask)
         : throttledTask;
 
-      resPromise = queuedTask();
+      const { maxRetryAfter = 60 } = hostRule;
+      resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
 
       if (memCacheKey) {
         memCache.set(memCacheKey, resPromise);
