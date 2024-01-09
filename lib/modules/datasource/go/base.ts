@@ -167,9 +167,9 @@ export class BaseGoDatasource {
         packageName = packageName.replace(endpointPrefix[1], '');
       }
 
-      const registryUrl =
-        endpoint?.replace(regEx('api/v4/?$'), '') ??
-        `${parsedUrl.protocol}//${parsedUrl.host}`;
+      const registryUrl = endpointPrefix
+        ? endpoint.replace(regEx('api/v4/?$'), '')
+        : `${parsedUrl.protocol}//${parsedUrl.host}`;
 
       // a .git path indicates a concrete git repository, which can be different from metadata returned by gitlab
       const vcsIndicatedModule = BaseGoDatasource.gitVcsRegexp.exec(goModule);

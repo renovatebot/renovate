@@ -1,4 +1,5 @@
 import { mockDeep } from 'jest-mock-extended';
+import { ConfigSet } from 'ts-jest';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
@@ -35,6 +36,7 @@ describe('modules/datasource/go/base', () => {
     beforeEach(() => {
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
+      GlobalConfig.reset();
     });
 
     describe('meta name=go-source', () => {
@@ -434,9 +436,6 @@ describe('modules/datasource/go/base', () => {
           packageName: 'my-project/my-repo',
           registryUrl: 'https://example.com/gitlab/',
         });
-
-        GlobalConfig.reset();
-        hostRules.hostType.mockReturnValue('');
       });
     });
   });
