@@ -1,5 +1,4 @@
 import { mockDeep } from 'jest-mock-extended';
-import { ConfigSet } from 'ts-jest';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
