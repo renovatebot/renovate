@@ -1733,19 +1733,19 @@ export async function updatePr({
 }
 
 export async function reattemptPlatformAutomerge({
-  number: prNo,
+  number,
   platformOptions,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
   try {
     const { body: ghPr } = await githubApi.getJson<GhRestPr>(
-      `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`,
+      `repos/${config.parentRepo ?? config.repository}/pulls/${number}`,
     );
     const result = coerceRestPr(ghPr);
-    const { number, node_id } = result;
+    const { node_id } = result;
 
     await tryPrAutomerge(number, node_id, platformOptions);
 
-    logger.debug(`PR refreshed...prNo: ${prNo}`);
+    logger.debug(`PR refreshed...prNo: ${number}`);
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
