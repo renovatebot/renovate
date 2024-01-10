@@ -2980,7 +2980,7 @@ If you have enabled `automerge` and set `automergeType=pr` in the Renovate confi
 
 On most platforms, Renovate tries platform-native automerge only when it initially creates the PR.
 Any PR that is being updated will be automerged with the Renovate-based automerge.
-On GitHub, Renovate re-enables the PR for automerge whenever it's rebased, so that merge conflicts enocuntered in the Merge Queue can be resolved.
+On GitHub, Renovate re-enables the PR for automerge whenever it's rebased, so that merge conflicts encountered in the Merge Queue can be resolved.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
 This option is available for Azure, Gitea, GitHub and GitLab.
