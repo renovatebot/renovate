@@ -1745,12 +1745,12 @@ export async function reattemptPlatformAutomerge({
 
     await tryPrAutomerge(number, node_id, platformOptions);
 
-    logger.debug(`PR refreshed...prNo: ${number}`);
+    logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    logger.warn({ err }, 'Error refreshing PR');
+    logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
 }
 
