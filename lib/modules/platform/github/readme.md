@@ -13,7 +13,7 @@ Let Renovate use your PAT by doing _one_ of the following:
 
 Remember to set `platform=github` somewhere in your Renovate config file.
 
-If you use GitHub Enterprise Server then `endpoint` must point to `https://github.enterprise.com/api/v3/`.
+If you use GitHub Enterprise Server then `endpoint` must point to `https://github-enterprise.example.com/api/v3/`.
 You can choose where you want to set `endpoint`:
 
 - In your `config.js` file
