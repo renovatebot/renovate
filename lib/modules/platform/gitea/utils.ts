@@ -84,6 +84,7 @@ export function getMergeMethod(
 export const API_PATH = '/api/v1';
 
 export const DRAFT_PREFIX = 'WIP: ';
+const reconfigurePrRegex = regEx(/reconfigure$/g);
 
 export function toRenovatePR(data: PR, author: string | null): Pr | null {
   if (!data) {
@@ -103,7 +104,12 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
   }
 
   const createdBy = data.user?.username;
-  if (createdBy && author && createdBy !== author) {
+  if (
+    createdBy &&
+    author &&
+    !reconfigurePrRegex.test(data.head.label) &&
+    createdBy !== author
+  ) {
     return null;
   }
 

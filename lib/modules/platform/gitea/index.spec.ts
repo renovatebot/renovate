@@ -11,6 +11,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
+import * as memCache from '../../../util/cache/memory';
 import type * as _git from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gitea';
@@ -1041,11 +1042,15 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('getPrList', () => {
+    beforeEach(() => {
+      memCache.init();
+    });
+
     it('should return list of pull requests', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -1080,7 +1085,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, [
           thirdPartyPr,
           ...mockPRs.map((pr) => ({
@@ -1104,7 +1109,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -1121,7 +1126,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -1136,7 +1141,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, [])
         .get('/repos/some/repo/pulls/1')
         .reply(200, pr);
@@ -1152,7 +1157,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, [])
         .get('/repos/some/repo/pulls/42')
         .reply(200); // TODO: 404 should be handled
@@ -1170,7 +1175,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -1187,7 +1192,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -1207,7 +1212,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -1227,7 +1232,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -1248,7 +1253,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -1270,7 +1275,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -1292,7 +1297,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -1321,6 +1326,7 @@ describe('modules/platform/gitea/index', () => {
       mergeable: true,
       created_at: '2014-04-01T05:14:20Z',
       closed_at: '2017-12-28T12:17:48Z',
+      updated_at: '2017-12-28T12:17:48Z',
     };
 
     it('should use base branch by default', async () => {
