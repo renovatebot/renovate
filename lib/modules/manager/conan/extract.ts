@@ -52,6 +52,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
             if (matches.groups.userChannel) {
               userAndChannel = matches.groups.userChannel;
               replaceString = `${depName}/${currentValue}${userAndChannel}`;
+              if (!userAndChannel.includes('/')) {
+                userAndChannel = `${userAndChannel}/_`;
+              }
             }
             const packageName = `${depName}/${currentValue}${userAndChannel}`;
 

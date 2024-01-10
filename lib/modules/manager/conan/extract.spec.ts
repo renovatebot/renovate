@@ -156,7 +156,7 @@ describe('modules/manager/conan/extract', () => {
           currentValue: '6.1',
           depName: 'req_x',
           depType: 'requires',
-          packageName: 'req_x/6.1@useronly',
+          packageName: 'req_x/6.1@useronly/_',
           replaceString: 'req_x/6.1@useronly',
         },
         {
