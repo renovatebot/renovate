@@ -3134,7 +3134,7 @@ describe('modules/platform/github/index', () => {
     };
 
     const pr: ReattemptPlatformAutomergeConfig = {
-      number: 123,
+      prNo: 123,
       platformOptions: { usePlatformAutomerge: true },
     };
 

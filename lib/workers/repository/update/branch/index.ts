@@ -574,7 +574,7 @@ export async function processBranch(
     if (branchPr) {
       if (platform.reattemptPlatformAutomerge) {
         await platform.reattemptPlatformAutomerge({
-          number: branchPr.number,
+          prNo: branchPr.number,
           platformOptions: getPlatformPrOptions(config),
         });
       }
