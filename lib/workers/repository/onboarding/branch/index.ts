@@ -69,7 +69,7 @@ export async function checkOnboardingBranch(
       }
       // istanbul ignore if
       if (platform.refreshPr) {
-        await platform.refreshPr({ number: onboardingPr.number });
+        await platform.refreshPr(onboardingPr.number);
       }
     }
     if (config.onboardingRebaseCheckbox) {

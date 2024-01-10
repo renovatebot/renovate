@@ -19,7 +19,7 @@ import { toBase64 } from '../../../util/string';
 import { hashBody } from '../pr-body';
 import type {
   CreatePRConfig,
-  RefreshPrConfig,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   UpdatePrConfig,
 } from '../types';
@@ -3116,7 +3116,7 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  describe('refreshPr(prNo, platformOptions)', () => {
+  describe('reattemptPlatformAutomerge(prNo, platformOptions)', () => {
     const getPrResp = {
       number: 123,
       node_id: 'abcd',
@@ -3133,7 +3133,7 @@ describe('modules/platform/github/index', () => {
       },
     };
 
-    const pr: RefreshPrConfig = {
+    const pr: ReattemptPlatformAutomergeConfig = {
       number: 123,
       platformOptions: { usePlatformAutomerge: true },
     };
@@ -3186,7 +3186,7 @@ describe('modules/platform/github/index', () => {
       const scope = await mockScope();
       scope.post('/graphql').reply(200, graphqlAutomergeResp);
 
-      await expect(github.refreshPr(pr)).toResolve();
+      await expect(github.reattemptPlatformAutomerge(pr)).toResolve();
 
       expect(httpMock.getTrace()).toMatchObject([
         graphqlGetRepo,

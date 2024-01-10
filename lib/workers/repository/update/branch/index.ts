@@ -570,12 +570,18 @@ export async function processBranch(
       await scm.checkoutBranch(config.baseBranch);
       updatesVerified = true;
     }
-    // istanbul ignore if
-    if (branchPr && platform.refreshPr) {
-      await platform.refreshPr({
-        number: branchPr.number,
-        platformOptions: getPlatformPrOptions(config),
-      });
+
+    if (branchPr) {
+      if (platform.reattemptPlatformAutomerge) {
+        await platform.reattemptPlatformAutomerge({
+          number: branchPr.number,
+          platformOptions: getPlatformPrOptions(config),
+        });
+      }
+      // istanbul ignore if
+      if (platform.refreshPr) {
+        await platform.refreshPr(branchPr.number);
+      }
     }
     if (!commitSha && !branchExists) {
       return {

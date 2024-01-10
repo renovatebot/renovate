@@ -56,7 +56,7 @@ import type {
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
-  RefreshPrConfig,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -1732,10 +1732,10 @@ export async function updatePr({
   }
 }
 
-export async function refreshPr({
+export async function reattemptPlatformAutomerge({
   number: prNo,
   platformOptions,
-}: RefreshPrConfig): Promise<void> {
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
   try {
     const { body: ghPr } = await githubApi.getJson<GhRestPr>(
       `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`,

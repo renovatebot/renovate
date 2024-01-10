@@ -62,7 +62,7 @@ export async function checkConfigMigrationBranch(
         config.baseBranch,
       );
       if (configMigrationPr) {
-        await platform.refreshPr({ number: configMigrationPr.number });
+        await platform.refreshPr(configMigrationPr.number);
       }
     }
   } else {
