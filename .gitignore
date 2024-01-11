@@ -16,7 +16,7 @@ renovate-v0.0.0-semantic-release.tgz
 .eslintcache
 junit.xml
 /test-results
-renovate-schema.json
+
 **/gradle-wrapper/__fixtures__/**/.gradle
 .clinic/
 
