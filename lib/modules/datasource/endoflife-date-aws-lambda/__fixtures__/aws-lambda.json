@@ -1,0 +1,200 @@
+[
+    {
+        "cycle": "python3.12",
+        "releaseLabel": "Python 3.12",
+        "releaseDate": "2023-12-14",
+        "support": true,
+        "eol": false,
+        "link": "https://aws.amazon.com/about-aws/whats-new/2023/12/aws-lambda-support-python-3-12/",
+        "latest": "python3.12",
+        "latestReleaseDate": "2023-12-14",
+        "lts": false
+    },
+    {
+        "cycle": "nodejs20.x",
+        "releaseLabel": "Node.js 20",
+        "releaseDate": "2023-11-15",
+        "support": true,
+        "eol": false,
+        "link": "https://aws.amazon.com/blogs/compute/node-js-20-x-runtime-now-available-in-aws-lambda/",
+        "latest": "nodejs20.x",
+        "latestReleaseDate": "2023-11-15",
+        "lts": false
+    },
+    {
+        "cycle": "python3.11",
+        "releaseLabel": "Python 3.11",
+        "releaseDate": "2023-07-27",
+        "support": true,
+        "eol": false,
+        "link": "https://aws.amazon.com/blogs/compute/python-3-11-runtime-now-available-in-aws-lambda/",
+        "latest": "python3.11",
+        "latestReleaseDate": "2023-07-27",
+        "lts": false
+    },
+    {
+        "cycle": "python3.10",
+        "releaseLabel": "Python 3.10",
+        "releaseDate": "2023-04-18",
+        "support": true,
+        "eol": false,
+        "link": "https://aws.amazon.com/blogs/compute/python-3-10-runtime-now-available-in-aws-lambda/",
+        "latest": "python3.10",
+        "latestReleaseDate": "2023-04-18",
+        "lts": false
+    },
+    {
+        "cycle": "nodejs18.x",
+        "releaseLabel": "Node.js 18",
+        "releaseDate": "2022-11-18",
+        "support": true,
+        "eol": false,
+        "link": "https://aws.amazon.com/blogs/compute/node-js-18-x-runtime-now-available-in-aws-lambda/",
+        "latest": "nodejs18.x",
+        "latestReleaseDate": "2022-11-18",
+        "lts": false
+    },
+    {
+        "cycle": "nodejs16.x",
+        "releaseLabel": "Node.js 16",
+        "releaseDate": "2022-05-12",
+        "support": "2024-06-12",
+        "eol": "2024-08-15",
+        "link": "https://aws.amazon.com/blogs/compute/node-js-16-x-runtime-now-available-in-aws-lambda/",
+        "latest": "nodejs16.x",
+        "latestReleaseDate": "2022-05-12",
+        "lts": false
+    },
+    {
+        "cycle": "python3.9",
+        "releaseLabel": "Python 3.9",
+        "releaseDate": "2021-08-16",
+        "support": true,
+        "eol": false,
+        "link": "https://aws.amazon.com/blogs/compute/python-3-9-runtime-now-available-in-aws-lambda/",
+        "latest": "python3.9",
+        "latestReleaseDate": "2021-08-16",
+        "lts": false
+    },
+    {
+        "cycle": "provided.al2",
+        "releaseLabel": "Custom Runtime (AL2)",
+        "releaseDate": "2020-08-12",
+        "support": true,
+        "eol": false,
+        "link": "https://aws.amazon.com/about-aws/whats-new/2020/08/aws-lambda-supports-custom-runtimes-amazon-linux-2/",
+        "latest": "provided.al2",
+        "latestReleaseDate": "2020-08-12",
+        "lts": false
+    },
+    {
+        "cycle": "nodejs12.x",
+        "releaseLabel": "Node.js 12",
+        "releaseDate": "2019-11-18",
+        "support": "2023-03-31",
+        "eol": "2023-04-30",
+        "link": "https://aws.amazon.com/blogs/compute/node-js-12-x-runtime-now-available-in-aws-lambda/",
+        "latest": "nodejs12.x",
+        "latestReleaseDate": "2019-11-18",
+        "lts": false
+    },
+    {
+        "cycle": "python3.8",
+        "releaseLabel": "Python 3.8",
+        "releaseDate": "2019-11-18",
+        "support": "2024-10-14",
+        "eol": "2025-01-07",
+        "link": "https://aws.amazon.com/blogs/compute/python-3-8-runtime-now-available-in-aws-lambda/",
+        "latest": "python3.8",
+        "latestReleaseDate": "2019-11-18",
+        "lts": false
+    },
+    {
+        "cycle": "nodejs10.x",
+        "releaseLabel": "Node.js 10",
+        "releaseDate": "2019-05-15",
+        "support": "2021-07-30",
+        "eol": "2022-02-14",
+        "link": "https://aws.amazon.com/about-aws/whats-new/2019/05/aws_lambda_adds_support_for_node_js_v10/",
+        "latest": "nodejs10.x",
+        "latestReleaseDate": "2019-05-15",
+        "lts": false
+    },
+    {
+        "cycle": "python3.7",
+        "releaseLabel": "Python 3.7",
+        "releaseDate": "2018-11-19",
+        "support": "2023-12-04",
+        "eol": "2024-02-08",
+        "link": "https://aws.amazon.com/blogs/compute/python-3-7-runtime-now-available-in-aws-lambda/",
+        "latest": "python3.7",
+        "latestReleaseDate": "2018-11-19",
+        "lts": false
+    },
+    {
+        "cycle": "nodejs8.10",
+        "releaseLabel": "Node.js 8.10",
+        "releaseDate": "2018-04-02",
+        "support": "2020-03-06",
+        "eol": "2020-03-06",
+        "link": "https://aws.amazon.com/blogs/compute/node-js-8-10-runtime-now-available-in-aws-lambda/",
+        "latest": "nodejs8.10",
+        "latestReleaseDate": "2018-04-02",
+        "lts": false
+    },
+    {
+        "cycle": "python3.6",
+        "releaseLabel": "Python 3.6",
+        "releaseDate": "2017-04-18",
+        "support": "2022-07-18",
+        "eol": "2022-08-29",
+        "link": "https://aws.amazon.com/about-aws/whats-new/2017/04/aws-lambda-supports-python-3-6/",
+        "latest": "python3.6",
+        "latestReleaseDate": "2017-04-18",
+        "lts": false
+    },
+    {
+        "cycle": "nodejs6.10",
+        "releaseLabel": "Node.js 6.10",
+        "releaseDate": "2017-03-22",
+        "support": "2019-08-12",
+        "eol": "2019-08-12",
+        "link": "https://aws.amazon.com/about-aws/whats-new/2017/03/aws-lambda-supports-node-js-6-10/",
+        "latest": "nodejs6.10",
+        "latestReleaseDate": "2017-03-22",
+        "lts": false
+    },
+    {
+        "cycle": "nodejs4.3",
+        "releaseLabel": "Node.js 4.3",
+        "releaseDate": "2016-04-07",
+        "support": "2020-03-05",
+        "eol": "2020-03-05",
+        "link": "https://aws.amazon.com/blogs/compute/node-js-4-3-2-runtime-now-available-on-lambda/",
+        "latest": "nodejs4.3-edge",
+        "latestReleaseDate": "2017-07-17",
+        "lts": false
+    },
+    {
+        "cycle": "python2.7",
+        "releaseLabel": "Python 2.7",
+        "releaseDate": "2015-10-08",
+        "support": "2021-07-15",
+        "eol": "2022-05-30",
+        "link": "https://aws.amazon.com/about-aws/whats-new/2015/10/aws-lambda-supports-python-versioning-scheduled-jobs-and-5-minute-functions/",
+        "latest": "python2.7",
+        "latestReleaseDate": "2015-10-08",
+        "lts": false
+    },
+    {
+        "cycle": "nodejs",
+        "releaseLabel": "Node.js 0.10",
+        "releaseDate": "2014-11-13",
+        "support": "2016-10-31",
+        "eol": "2016-10-31",
+        "link": "https://aws.amazon.com/blogs/aws/run-code-cloud/",
+        "latest": "nodejs",
+        "latestReleaseDate": "2014-11-13",
+        "lts": false
+    }
+]
