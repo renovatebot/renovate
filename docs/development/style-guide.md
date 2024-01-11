@@ -24,6 +24,7 @@ And so on.
 ## Avoid contractions
 
 Avoid:
+
 ```markdown
 don't
 won't
