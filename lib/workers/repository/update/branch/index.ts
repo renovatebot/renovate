@@ -574,7 +574,7 @@ export async function processBranch(
     if (branchPr) {
       const platformOptions = getPlatformPrOptions(config);
       if (
-        platformOptions.usePlatformAutomerge &&
+        platformOptions?.usePlatformAutomerge &&
         config.autoMergeAllowed &&
         platform.reattemptPlatformAutomerge
       ) {
