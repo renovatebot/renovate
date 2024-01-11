@@ -30,10 +30,10 @@ Therefore, we stopped hosting Renovate on GitLab, and are waiting for a better s
 You should remember that when accounts are invited into projects or groups on GitLab, acceptance happens automatically.
 This was a useful feature to leverage for a shared service.
 
-If you're running a self-hosted Renovate service, we recommend you:
+If you are running a self-hosted Renovate service, we recommend you:
 
-- Run a shared service only within projects which have shared visibility/security within the users, or which have a low risk that a user would try to gain access to a private project they don't otherwise have access to
-- If running with `autodiscover`, also configure a value for `autodiscoverFilter` so that the bot can't be invited to projects or groups you don't intend
+- Run a shared service only within projects which have shared visibility/security within the users, or which have a low risk that a user would try to gain access to a private project they do not otherwise have access to
+- If running with `autodiscover`, also configure a value for `autodiscoverFilter` so that the bot can not be invited to projects or groups you do not intend
 
 ## Security solutions and workarounds
 
@@ -45,7 +45,7 @@ If you only run a bot service on _public_ projects, the risk of unauthorized use
 But malicious users can still spoof or spam packages to any other public project they are not a member of, this rules out this approach for a public hosted service.
 
 A public-visibility-only bot service should be low risk for most self-hosted GitLab instances.
-But you _can't stop users_ from inviting the bot into _private_ projects by accident, which is risky.
+But you _can not stop users_ from inviting the bot into _private_ projects by accident, which is risky.
 
 ### Project Access Tokens
 
@@ -68,7 +68,7 @@ Permissions and visibility _must_ be kept uniform throughout the group to preven
 Many GitLab users _do not_ have uniform permissions and visibility throughout groups today, so this is a risk of Group Access Tokens in general.
 The [`gitlab-org` organization on GitLab](https://gitlab.com/gitlab-org) shows how common it is to mix project visibility within a same group.
 
-And the same as with PATs, if Group Access Tokens becomes a paid feature then users on a free plan can't use the feature.
+And the same as with PATs, if Group Access Tokens becomes a paid feature then users on a free plan can not use the feature.
 
 ### Skipping CI
 
@@ -91,7 +91,7 @@ Read the [renovate-bot/renovate-runner README on GitLab](https://gitlab.com/reno
 
 ## Status of the Renovate app for GitLab
 
-We're trying to find a workable design for the GitLab app, so we can enable it safely again.
+We are trying to find a workable design for the GitLab app, so we can enable it safely again.
 If you have any ideas, please open a [discussion](https://github.com/renovatebot/renovate/discussions) and let us know!
 
 GitLab introduced Group Access Tokens & API for paid & self-hosted instances, but a good permission setup/flow is still not possible.

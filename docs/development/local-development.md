@@ -37,12 +37,12 @@ To enter a development shell with the necessary packages, run `nix-shell --packa
 Follow these steps to set up your development environment on Windows 10.
 If you already installed a part, skip the corresponding step.
 
-- Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
+- Install [Git](https://git-scm.com/downloads). Make sure you have [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
 - In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
 - Enable corepack: `corepack enable`
 
-  You can see what versions you're using like this:
+  You can see what versions you are using like this:
 
   ```powershell
   PS C:\Windows\system32> git --version
@@ -52,7 +52,7 @@ If you already installed a part, skip the corresponding step.
 
 #### VS Code Dev Containers
 
-If you're using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/devcontainers/containers) instead.
+If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/devcontainers/containers) instead.
 
 - Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
 - Open the repository folder in VS Code
@@ -68,7 +68,7 @@ pnpm build
 
 #### Local Docker
 
-If, for some reason, you can't run the relevant versions on your local machine, you can run everything from a Docker image.
+If, for some reason, you can not run the relevant versions on your local machine, you can run everything from a Docker image.
 To build the correct docker image:
 
 ```
@@ -100,8 +100,8 @@ To ensure everything is working properly on your end, you must:
 1. Verify all tests pass and have 100% test coverage, by running `pnpm test`
 1. Verify the installation by running `pnpm start`. You must see this error: `You must configure a GitHub personal access token`
 
-Don't worry about the token error for now.
-You'll configure the token properly a little later, so keep reading.
+Do not worry about the token error for now.
+You will configure the token properly a little later, so keep reading.
 
 You only need to do these steps once.
 
@@ -112,12 +112,12 @@ Before you submit a pull request you should:
 
 ## Platform Account Setup
 
-Although it's possible to make small source code improvements without testing against a real repository, in most cases you should run a "real" test on a repository before you submit a feature or fix.
-It's possible to do this against GitHub, GitLab or Bitbucket public servers.
+Although it is possible to make small source code improvements without testing against a real repository, in most cases you should run a "real" test on a repository before you submit a feature or fix.
+It is possible to do this against GitHub, GitLab or Bitbucket public servers.
 
 ### Register new account (optional)
 
-If you're going to be doing a lot of Renovate development then it's recommended that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
+If you are going to be doing a lot of Renovate development then it's recommended that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
 
 e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing" for use with Renovate.
 
@@ -152,13 +152,13 @@ Refactor PRs should ideally not change or remove tests (adding tests is OK).
 
 Run the Jest unit tests with the `pnpm jest` command.
 You can also run a subset of the Jest tests using file matching, e.g. `pnpm jest composer` or `pnpm jest workers/repository/update/branch`.
-If you get a test failure due to a "snapshot" mismatch, and you're sure that you need to update the snapshot, then you can append `-u` to the end.
+If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
 e.g. `pnpm jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
 
 ### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
-Using `// istanbul ignore` is not ideal, but can be a pragmatic solution if adding more tests wouldn't really prove anything.
+Using `// istanbul ignore` is not ideal, but can be a pragmatic solution if adding more tests would not really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
 
@@ -170,9 +170,9 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 
 We use [Prettier](https://github.com/prettier/prettier) to format our code.
 If your code fails `pnpm test` due to a `prettier` rule then run `pnpm lint-fix` to fix it or most `eslint` errors automatically before running `pnpm test` again.
-You usually don't need to fix any Prettier errors by hand.
+You usually do not need to fix any Prettier errors by hand.
 
-If you're only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
+If you are only working on the documentation files, you can use the `pnpm doc-fix` command to format your work.
 
 ## Keeping your Renovate fork up to date
 
@@ -210,10 +210,10 @@ Also create documentation for the option in the `docs/usage/configuration-option
 
 ## Debugging
 
-### Chrome's inspect tool
+### Google Chrome DevTools
 
-You can debug Renovate with Chrome's inspect tool.
-Here's an example:
+You can debug Renovate with Google Chrome DevTools.
+Here is an example:
 
 1. Open `chrome://inspect` in Chrome, then select "Open dedicated DevTools for Node"
 1. Add a `debugger;` statement somewhere in the source code where you want to start debugging
@@ -223,7 +223,7 @@ Here's an example:
 ### VS Code
 
 You can also debug Renovate with VS Code.
-Here's an example:
+Here is an example:
 
 1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your Personal Access Token
 1. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:

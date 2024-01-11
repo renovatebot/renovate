@@ -23,16 +23,16 @@ The only choice you need to make is whether to run Renovate on all repositories 
 
 ![The Mend Renovate App repositories](../assets/images/github-app-choose-repos.png){ loading=lazy }
 
-Renovate will ignore any repositories that don't have known package files, as well as any forks, so you can enable Renovate for all your repositories with no problems.
+Renovate will ignore any repositories that do not have known package files, as well as any forks, so you can enable Renovate for all your repositories with no problems.
 That said, most people run Renovate on selected repositories.
-Unfortunately GitHub doesn't offer a "select all except X, Y, Z" option, so you must select each repository where you want Renovate to run.
+Unfortunately GitHub does not offer a "select all except X, Y, Z" option, so you must select each repository where you want Renovate to run.
 
-Once you're done selecting repositories for Renovate to run on, select the green _Install_ button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
+Once you are done selecting repositories for Renovate to run on, select the green _Install_ button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
 
 <!-- prettier-ignore -->
 !!! note
-    If you're using the Mend Renovate App then it has a custom behavior for forked repositories.
-    If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they're a fork.
+    If you are using the Mend Renovate App then it has a custom behavior for forked repositories.
+    If you choose "All repositories" when installing then forked repositories will be skipped by default, while if you choose "Select repositories" then they will be processed by Renovate even if they are a fork.
 
 ### Hosted GitLab.com App
 
@@ -53,16 +53,16 @@ You can also set the line endings in your repository by adding `* text=auto eol=
 
 ## Repository onboarding
 
-Once you have enabled Renovate on a repository, you'll get a "Configure Renovate" Pull Request looking something like this:
+Once you have enabled Renovate on a repository, you will get a "Configure Renovate" Pull Request looking something like this:
 
 ![Onboarding](../assets/images/onboarding.png){ loading=lazy }
 
 ### No risk onboarding
 
 Conveniently, Renovate will not make any changes to your repository or raise any further Pull Requests until after you _merge_ the onboarding Pull Request.
-If there is anything about the Pull Request that you don't like or understand, take your time to read the [documentation](../index.md) or ask questions on the [discussions forum on GitHub](https://github.com/renovatebot/renovate/discussions) and merge the PR only once you're satisfied with the result.
+If there is anything about the Pull Request that you do not like or understand, take your time to read the [documentation](../index.md) or ask questions on the [discussions forum on GitHub](https://github.com/renovatebot/renovate/discussions) and merge the PR only once you are satisfied with the result.
 
-You can edit your Renovate configuration **within the `renovate/configure` branch** and Renovate will keep updating the description in the PR to match, so you can work on the config until you're satisfied with the results.
+You can edit your Renovate configuration **within the `renovate/configure` branch** and Renovate will keep updating the description in the PR to match, so you can work on the config until you are satisfied with the results.
 
 ### Check for warnings
 
@@ -72,7 +72,7 @@ Warnings and errors should be fixed on the base branch (e.g. `main`) so that Ren
 ### Configuration location
 
 The "Configure Renovate" PR will include a `renovate.json` file in the root directory, with suggested default settings.
-If you don't want a `renovate.json` file in your repository you can use one of the following files instead:
+If you do not want a `renovate.json` file in your repository you can use one of the following files instead:
 
 - `renovate.json5`
 - `.github/renovate.json`
@@ -92,7 +92,7 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 
 You can add the same settings to a `"renovate"` section in your `package.json` file instead.
 The `package.json` file must be located at the root of your repository.
-This is handy if you're already using a `package.json` file anyway, e.g. when you're working on a JavaScript project.
+This is handy if you are already using a `package.json` file anyway, e.g. when you are working on a JavaScript project.
 The configuration in your `package.json` will apply to the whole project (this includes other, nested `package.json` files).
 
 ### Customized defaults
@@ -116,7 +116,7 @@ Renovate will update your PR description each time it finds changes.
 
 ### Merge
 
-Once you're done checking and configuring in your Configure Renovate PR, it's time to merge it to enable the real Pull Requests to begin.
+Once you are done checking and configuring in your Configure Renovate PR, it's time to merge it to enable the real Pull Requests to begin.
 
 ## Repository re-configuration
 
@@ -140,11 +140,11 @@ If you want to make config edits directly, follow these steps:
 
 Perhaps you really liked the interactive onboarding PR and want to use it again.
 You can follow the steps below to nuke the config and get a new PR.
-Any existing Renovate PRs will be closed after you've completed these steps.
+Any existing Renovate PRs will be closed after you have completed these steps.
 
 1. Find your original `Configure Renovate` PR
 1. Rename the original PR to something else, e.g. `Configure Renovate - old`
 1. Remove the current Renovate configuration file (e.g. `renovate.json`) from your mainline branch
 
 Following these steps will trick Renovate into thinking that your repository was _never_ onboarded, and will trigger a new "Configure Renovate" PR.
-If you're using the Mend Renovate App and you don't get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.
+If you are using the Mend Renovate App and you do not get a new onboarding PR within a few hours, then please create a Discussions post to request staff trigger it manually.

@@ -29,7 +29,7 @@ The Pull Requests patch the package files directly, and include changelogs for t
 
 By default:
 
-- You'll get separate Pull Requests for each dependency
+- You will get separate Pull Requests for each dependency
 - Major updates are kept separate from non-major updates
 
 ### Package managers with lock files
@@ -38,7 +38,7 @@ Many package managers support "lock files", which "freeze" the entire dependency
 npm, Yarn, Bundler, Composer, Poetry, Pipenv, and Cargo all support or use lock files.
 
 If you use a lock file then changes to your package file must come with a compatible change to the lock file.
-Renovate can patch/update package files directly, but can't "reverse engineer" lock files.
+Renovate can patch/update package files directly, but can not "reverse engineer" lock files.
 This is why Renovate lets the package manager do the lock file update.
 A simplified example:
 
@@ -99,11 +99,11 @@ Renovate understands both formats and raises updates like these:
 #### Docker digests
 
 You can check and update versions like `14.17.4` yourself.
-But looking up image digests like `341976f40d963a425d627a349a9b0034e1eafffbf4c82a173c1465ee403878d9` and updating them yourself doesn't scale.
+But looking up image digests like `341976f40d963a425d627a349a9b0034e1eafffbf4c82a173c1465ee403878d9` and updating them yourself does not scale.
 So let Renovate update your Docker digests.
 
 You can even configure Renovate to "pin" your Docker digests.
-When you're using tag+digest based images, you'll have immutable builds.
+When you are using tag+digest based images, you will have immutable builds.
 
 ### Internal package updates
 
@@ -147,12 +147,12 @@ We split our work over two repositories:
 
 ##### Benefits
 
-The way we've set things up means we avoid:
+The way we have set things up means we avoid:
 
 - reviewing PRs
 - manually merging PRs
 
-In fact, we don't even get the update PR anymore!
+In fact, we do not even get the update PR anymore!
 
 ## Advanced configuration
 
@@ -170,7 +170,7 @@ You can configure batched updates by setting a `groupName` as part of `packageRu
 
 You may want to limit the times when Renovate is allowed to raise updates.
 This reduces "noise" during your working hours, and reduces the chance of CI contention.
-You can tell Renovate to "not bother you" during times when you're using the CI resources, or want to focus on your work.
+You can tell Renovate to "not bother you" during times when you are using the CI resources, or want to focus on your work.
 
 You can set the time ranges during which Renovate creates updates in the `schedule` field.
 
@@ -201,7 +201,7 @@ Here's how it works:
 
 Benefits of using Dependency Dashboard Approval:
 
-- By not raising PRs automatically, it allows you to request updates on-demand when you're ready, and
+- By not raising PRs automatically, it allows you to request updates on-demand when you are ready, and
 - It offers you an alternative to permanently ignoring/disabling certain types of updates, like major updates
 
 When you use the Dependency Dashboard Approval workflow you have full visibility and control over your updates.

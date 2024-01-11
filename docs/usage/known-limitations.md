@@ -5,16 +5,16 @@ Learn about the limitations of Renovate bot.
 ## Introduction
 
 Renovate, like any computer program has limitations.
-Sometimes these are functionality limitations - perhaps something is impossible or too complex to do, or we simply haven't implemented it yet.
+Sometimes these are functionality limitations - perhaps something is impossible or too complex to do, or we simply have not implemented it yet.
 At other times it may be a "performance" limitation, because jobs neither start nor complete instantly, even if the user may start with that expectation.
 
-This document tries to list out the most commonly seen limitations and describe whether they're permanent and if there's any plans to improving the situation.
+This document tries to list out the most commonly seen limitations and describe whether they are permanent and if there is any plans to improving the situation.
 
 ## Time/schedule based limitations
 
 When a user configures a schedule in their repo config, they may think that this schedule "controls" when Renovate runs.
 In actuality, Renovate may be running frequently, but skipping updates to the repo if the configured schedule is not met.
-Additionally, the Renovate admin may have put the bot on its own schedule, or the job queue may be too long, so Renovate doesn't even get a chance to run on your repository during a certain scheduled time window.
+Additionally, the Renovate admin may have put the bot on its own schedule, or the job queue may be too long, so Renovate does not even get a chance to run on your repository during a certain scheduled time window.
 
 For scheduled action to take place, both these need to happen:
 

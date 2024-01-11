@@ -8,18 +8,18 @@ For example, if you think anything is unclear, or you think something needs to b
 
 Read the [local development docs](./local-development.md) first.
 
-## What's remote development?
+## What is remote development?
 
 When you work locally, you install the tooling and code editor on your computer.
 You are responsible for setting up the environment correctly.
 
-With remote development you use a container that's hosted somewhere else.
-You'll use the same code editor and have the same config as all other developers.
+With remote development you use a container that is hosted somewhere else.
+You will use the same code editor and have the same config as all other developers.
 
 ### Benefits
 
 - You only need a browser and internet
-- You don't need to install development dependencies on your computer
+- You do not need to install development dependencies on your computer
 - Start work in a fresh environment every time
 - Reproducible development environment
 - Similar config for all developers
@@ -28,8 +28,8 @@ You'll use the same code editor and have the same config as all other developers
 ### Drawbacks
 
 - Waiting for the remote container to start
-- If your internet is down you can't work
-- If GitHub Codespaces is down you can't work
+- If your internet is down you can not work
+- If GitHub Codespaces is down you can not work
 
 ## GitHub Codespaces
 

@@ -1,12 +1,12 @@
 # Best practices
 
 This document explains our best practices.
-Follow these best practices when you're working on our code.
+Follow these best practices when you are working on our code.
 
 ## Git branch names
 
 Branch names should start with a [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) scope like `feat/` or `fix/`.
-If you're closing an issue with your PR then put the issue number after the scope.
+If you are closing an issue with your PR then put the issue number after the scope.
 Finally, describe the changes in the branch in a few words.
 
 Some good branch names:
@@ -18,7 +18,7 @@ Some good branch names:
 
 Avoid branch names like `patch-1`.
 
-If you don't know the correct Conventional Commit scope: give your branch a descriptive name like `issue-1-feature-foo`.
+If you do not know the correct Conventional Commit scope: give your branch a descriptive name like `issue-1-feature-foo`.
 
 If you forgot to pick a good branch name when you started work, then rename the branch before creating the pull request.
 Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/renaming-a-branch) to learn how to rename your branch on GitHub.
@@ -73,7 +73,7 @@ Source: [Google TypeScript Style Guide, function declarations](https://google.gi
 ### Write understandable code
 
 Write code that is easier to read, review and maintain.
-Avoid "clever" code that's hard to understand.
+Avoid "clever" code that is hard to understand.
 
 Prefer verbose code which is easier for others to read and maintain than concise code which may be hard or slower for others to understand.
 For example, Array `reduce()` functions are often hard to understand first time, and can be replaced with simpler `for` loops.
@@ -162,8 +162,8 @@ Also, inline the metadata if the metadata object is complex.
 
 `WARN`, `ERROR` and `FATAL` messages are often used in metrics or error catching services.
 These log messages should have a consistent `msg` component, so they can be automatically grouped or associated.
-Metadata that's separate from its message is hard for humans to read.
-Try to combine the metadata into the message, unless it's too complex to do so.
+Metadata that is separate from its message is hard for humans to read.
+Try to combine the metadata into the message, unless it is too complex to do so.
 
 Good:
 

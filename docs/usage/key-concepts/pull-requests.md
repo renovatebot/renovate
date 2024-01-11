@@ -21,17 +21,17 @@ But if you group PRs and use titles like "All non-major updates", then multiple 
 ## Normal PRs
 
 As explained above, Renovate PRs normally have some "uniqueness" in their title relating to the version in the upgrade.
-When you close a "unique" PR, Renovate assumes you don't want to see that PR again in the future, for example:
+When you close a "unique" PR, Renovate assumes you do not want to see that PR again in the future, for example:
 
 1. You ignored `lodash@4.17.21` by closing Renovate's PR
-1. Renovate assumes you don't want any updates to `4.17.21` of `lodash`
+1. Renovate assumes you do not want any updates to `4.17.21` of `lodash`
 1. Renovate creates a new PR when the branch + title "uniqueness" exists again, like when `lodash@4.17.22` releases
 
 Renovate behaves similarly for `major` updates, for example:
 
 1. You ignored a `major` update for Lodash (pr title: "Update lodash to v4") by closing Renovate's PR
-1. Renovate assumes you don't want any updates to `v4` of `lodash`
-1. Renovate won't create any update PRs for `v4` of `lodash`, even if there are newer versions of `v4`
+1. Renovate assumes you do not want any updates to `v4` of `lodash`
+1. Renovate does not create any update PRs for `v4` of `lodash`, even if there are newer versions of `v4`
 
 ## Immortal PRs
 
@@ -45,8 +45,8 @@ This document explains why we have immortal PRs, and how you can fix them.
 
 ### Why we have immortal PRs
 
-First off, we don't have immortal PRs for some philosophical reason like: "don't ignore this update, it's good for you!".
-We have no good way to ignore some PRs after they're closed.
+First off, we do not have immortal PRs for some philosophical reason like: "do not ignore this update, it's good for you!".
+We have no good way to ignore some PRs after they are closed.
 
 #### Branch name and PR title are cache keys
 
@@ -70,7 +70,7 @@ Then the update becomes "Update react (major)", which is not safely ignorable, i
 ### Future plans for immortal PRs
 
 In the future we may embed metadata in each PR identifying the exact files and packages + versions that PR contains.
-Then we could allow such PRs to be closed/ignored but then as soon as there's any chance to files/packages/versions being updated then we'd be cache busted and create a new PR.
+Then we could allow such PRs to be closed/ignored but then as soon as there's any chance to files/packages/versions being updated then we would be cache busted and create a new PR.
 If you regularly wish to close immortal PRs, it's an indication that you may be grouping too widely.
 
 ### How to fix immortal PRs

@@ -6,7 +6,7 @@ description: Node.js versions support in Renovate
 # Node.js Versions
 
 Renovate can upgrade the [Node.js](https://nodejs.org/en/) runtime used by your project.
-This way you're using the latest bug fixes, performance improvements, security mitigations, etc.
+This way you are using the latest bug fixes, performance improvements, security mitigations, etc.
 
 ## LTS codenames
 

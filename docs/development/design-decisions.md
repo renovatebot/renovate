@@ -48,7 +48,7 @@ You could limit Renovate to only update the `package.json` in the root of the re
 ## Separate Branches per dependency
 
 We decided that Renovate should create a separate branch for each dependency, at least by default.
-So if 20 dependencies need to be updated, you'll get 20 branches (and 20 PRs) from Renovate.
+So if 20 dependencies need to be updated, you will get 20 branches (and 20 PRs) from Renovate.
 This may look bad, but it's better than putting all 20 dependencies in a single branch, which makes it hard to work out which upgrade causes a test failure.
 
 But you can override the default templates for branch name to get a single branch for all dependencies.
@@ -61,7 +61,7 @@ For example, if the current example is 1.6.0 and upgrades to 1.7.0 and 2.0.0 exi
 
 Our reasons for separating minor and major PRs:
 
-- It's often the case that projects can't upgrade major dependency versions immediately
+- It's often the case that projects can not upgrade major dependency versions immediately
 - It's also often the case that previous major versions continue receiving Minor or Patch updates
 - Projects should get Minor and Patch updates for their current Major release even if a new Major release exists
 
@@ -73,7 +73,7 @@ Branches have names like `renovate/webpack-1.x` instead of `renovate/webpack-1.2
 
 We do this because:
 
-- Branches often get updates (e.g. new patches) before they're merged
+- Branches often get updates (e.g. new patches) before they are merged
 - Naming the branch like `1.x` means its name still makes sense if a `1.2.1` release happens
 
 Note: You can configure the branch names by using the string template `branchName` and/or its sub-templates `branchPrefix` and `branchTopic`.
@@ -86,11 +86,11 @@ This allows users to close unwelcome upgrade PRs and not worry about them being 
 ## Rebasing unmergeable Pull Requests
 
 With the default behavior of one branch per dependency, it's often the case that a PR gets merge conflicts after an adjacent dependency update is merged.
-On most platforms you can use a web interface to resolve merge conflicts, but you're still resolving the conflicts manually, which is annoying.
+On most platforms you can use a web interface to resolve merge conflicts, but you are still resolving the conflicts manually, which is annoying.
 
 `renovate` will rebase any unmergeable branches and add the latest necessary commit on top of the most recent `main` commit.
 
-Note: `renovate` will only do this if the original branch hasn't been modified by anyone else.
+Note: `renovate` will only do this if the original branch has not been modified by anyone else.
 
 ## Suppressing string templates from CLI
 

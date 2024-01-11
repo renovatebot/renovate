@@ -38,7 +38,7 @@ For example:
 ### `extractPackageFile(content, packageFile, config)` (async, semi-mandatory)
 
 This function is mandatory, unless you use `extractAllPackageFiles` instead.
-It takes as arguments the file's content and optionally the file's full file pathname and config.
+It takes as arguments the content of the file and optionally the full file pathname and config.
 The function returns an array of detected or extracted dependencies, including the:
 
 - dependency name
@@ -46,12 +46,12 @@ The function returns an array of detected or extracted dependencies, including t
 - currentValue
 - versioning used (like SemVer, PEP 440)
 
-The `extractPackageFile` function doesn't need to fully _understand_ the file or syntax that it gets.
+The `extractPackageFile` function does not need to fully _understand_ the file or syntax that it gets.
 It needs to understand enough to extract a correct list of dependencies.
 
-In general, we extract _all_ dependencies from each dependency file, even if they have values we don't support.
+In general, we extract _all_ dependencies from each dependency file, even if they have values we do not support.
 
-If the function reads parts of a dependency file that it can't parse, it should give a `skipReason` message to the `extractPackageFile` function.
+If the function reads parts of a dependency file that it can not parse, it should give a `skipReason` message to the `extractPackageFile` function.
 Make sure the `skipReason` message is helpful to someone reading the logs.
 
 If `extractPackageFile` is passed a file which is a "false match", so not a package file, or a file with no dependencies then it can return `null`.
@@ -60,7 +60,7 @@ Downstream this results in the file being ignored and removed from the list of p
 ### `extractAllPackageFiles(packageFiles)` (async, optional)
 
 Normally a package manager parses or extracts all package files in _parallel_, and can thus use the `extractPackageFile` function.
-If the package manager you're adding works in _serial_, use this function instead.
+If the package manager you are adding works in _serial_, use this function instead.
 
 For example the npm and Yarn package manager must process the `package.json` and `package-lock` or `yarn.lock` files together.
 This allows features like Workspaces to work.
@@ -100,7 +100,7 @@ To _directly_ update dependencies in lock files: use `updateLockedDependency` in
 
 Use `updateDependency` if _both_ conditions apply:
 
-- the manager can't be updated to use the standard replacing mechanism
+- the manager can not be updated to use the standard replacing mechanism
 - a custom replacement has to be provided
 
 ### `updateLockedDependency` (optional)

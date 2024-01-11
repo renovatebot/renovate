@@ -2,11 +2,11 @@
 
 Did you read our documentation on adding a package manager?
 
-- [ ] I've read the [adding a package manager](adding-a-package-manager.md) documentation.
+- [ ] I have read the [adding a package manager](adding-a-package-manager.md) documentation.
 
 ## Basics
 
-### What's the name of the package manager?
+### What is the name of the package manager?
 
 ### What language(s) does this package manager support?
 

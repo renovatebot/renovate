@@ -48,10 +48,10 @@ If the default `fileMatch` regular expression for a manager does not match again
 
 #### Ignoring files that match the default fileMatch
 
-Renovate will _extend_ the existing [`fileMatch`](../../configuration-options.md#filematch), meaning you don't need to include the default regular expressions like `Dockerfile` in your own array.
+Renovate will _extend_ the existing [`fileMatch`](../../configuration-options.md#filematch), meaning you do not need to include the default regular expressions like `Dockerfile` in your own array.
 In other words, the regular expression are "additive".
-If a manager matches a file that you _don't_ want it to, ignore it using the [`ignorePaths`](../../configuration-options.md#ignorepaths) configuration option.
-Also, if you ever find that Renovate is _not_ matching a file name that you're certain it should, check your preset config isn't the cause of it.
+If a manager matches a file that you _do not_ want it to, ignore it using the [`ignorePaths`](../../configuration-options.md#ignorepaths) configuration option.
+Also, if you ever find that Renovate is _not_ matching a file name that you are certain it should, check your preset config is not the cause of it.
 The `config:recommended` preset ignores common test and example directory names, for example.
 
 ### Enabling and disabling managers
@@ -59,7 +59,7 @@ The `config:recommended` preset ignores common test and example directory names,
 #### Enabling experimental managers
 
 Most managers are enabled by default.
-For those that aren't, typically because they are considered experimental, you can opt in manually.
+For those that are not, typically because they are considered experimental, you can opt in manually.
 If there was a manager called `some-new-manager` you would enable it like this:
 
 ```json
@@ -84,7 +84,7 @@ Please check the [list of supported managers](#supported-managers).
 
 #### Limiting enabled managers
 
-Say you only want to use Renovate for JavaScript packages, and to update your Dockerfile, and don't want any other updates.
+Say you only want to use Renovate for JavaScript packages, and to update your Dockerfile, and do not want any other updates.
 You can use the `enabledManagers` array, to list the managers you want to use (`npm`, `dockerfile`):
 
 ```json

@@ -2,7 +2,7 @@
 
 We may ask you to create a "minimal reproduction" repository to help us fix bugs or work on a feature.
 
-This document explains why we need a minimal reproduction, why we won't use your production repository to debug, and how to create a good minimal reproduction.
+This document explains why we need a minimal reproduction, why we will not use your production repository to debug, and how to create a good minimal reproduction.
 
 ## Help yourself by creating a minimal reproduction
 
@@ -16,13 +16,13 @@ It's fastest if you - as the bug reporter or feature requester - create the repr
 
 ## How the Renovate developers use your minimal reproduction
 
-The first benefit of a public reproduction is to prove that the problem is not caused by your environment or by a setting you left out of your description, thinking it wasn't relevant.
-If there were any doubts about whether you'd found a genuine problem before, they are usually removed once a reproduction is made.
+The first benefit of a public reproduction is to prove that the problem is not caused by your environment or by a setting you left out of your description, thinking it was not relevant.
+If there were any doubts about whether you had found a genuine problem before, they are usually removed once a reproduction is made.
 
 Next, when a reproduction has minimal config, it can often let us narrow down or even identify the root cause, suggest workarounds, etc.
 This means we can often help you from code inspection alone.
 
-Finally, by making the code/dependencies minimal, it usually makes the problem feasible to step through using a debugging if code inspection wasn't sufficient.
+Finally, by making the code/dependencies minimal, it usually makes the problem feasible to step through using a debugging if code inspection was not sufficient.
 Production repositories or non-minimal reproductions are often very difficult to debug because break points get triggered dozens or hundreds or times.
 
 ## What is a minimal reproduction?
@@ -33,7 +33,7 @@ A minimal reproduction helps the developers see where the bug or missing feature
 ## Where to host the minimal reproduction
 
 If you can, use GitHub to host your reproduction.
-If the reproduction needs to be on GitLab or Bitbucket, that's also okay.
+If the reproduction needs to be on GitLab or Bitbucket, that is also okay.
 
 ## Creating a minimal reproduction
 
@@ -52,7 +52,7 @@ General steps:
 1. Set the repository visibility to `public`
 1. Give us the link to the repository
 
-### Why we won't use your production repository to debug
+### Why we do not use your production repository to debug
 
 You may think:
 
@@ -74,10 +74,10 @@ Reducing the config to a minimum helps us find out exactly which config elements
 
 ### "It's too much work to create a minimal reproduction"
 
-We'd love to get down to zero reported bugs or feature requests remaining, but we have a lot to do and must set our priorities.
+We would love to get down to zero reported bugs or feature requests remaining, but we have a lot to do and must set our priorities.
 This means we prefer working on issues with a minimal reproduction, as they allow us to spend our time efficiently.
 
-If you don't create a minimal reproduction, we won't prioritize working on your issue.
+If you do not create a minimal reproduction, we will not prioritize working on your issue.
 
 Issues without a reproduction will probably stay open until you, or somebody else, creates a minimal reproduction.
 After a while, issues without a reproduction may be closed unfixed.
@@ -85,7 +85,7 @@ After a while, issues without a reproduction may be closed unfixed.
 ### "I already described what you need in the issue"
 
 Thank you for describing your issue in detail.
-But we still need a minimal reproduction in a repository, and we'd like you to be the one to make sure it matches both your description and expected behavior.
+But we still need a minimal reproduction in a repository, and we would like you to be the one to make sure it matches both your description and expected behavior.
 
 ### Forcing Renovate to create a lot of pending updates
 
@@ -105,4 +105,4 @@ Set a high `minimumReleaseAge` for that dependency, for example:
 }
 ```
 
-You'll get a lot of pending updates, which you can see on the Dependency Dashboard.
+You will get a lot of pending updates, which you can see on the Dependency Dashboard.

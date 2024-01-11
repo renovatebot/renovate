@@ -15,7 +15,7 @@ It analyzes test and release adoption data from the Mend Renovate App users.
 Merge Confidence adds the following badges to your pull requests:
 
 - **Age**: The age of the package
-- **Adoption**: The percentage of this package's users (within Renovate) which are using this release
+- **Adoption**: The percentage of users of this package (within Renovate) who are using this release
 - **Passing**: The percentage of updates which have passing tests for this package
 - **Confidence**: The confidence level for this update
 
@@ -43,7 +43,7 @@ We plan to support more languages soon.
 
 If you use the Mend Renovate App then the badges are enabled automatically.
 
-If you're self-hosting Renovate, you can enable the badges by adding the `mergeConfidence:all-badges` preset to the `extends` array in your Renovate config:
+If you are self-hosting Renovate, you can enable the badges by adding the `mergeConfidence:all-badges` preset to the `extends` array in your Renovate config:
 
 ```json
 {
@@ -68,8 +68,8 @@ If you want to disable the badges in the Mend Renovate App, add the `mergeConfid
 Merge Confidence uses the following confidence levels:
 
 - **Low**: We think the update contains breaking changes. Often this is expected because it's a `major` version update, but updates can have unknown breaking changes
-- **Neutral**: We don't have enough data about the update, or we can't decide if the update should be Low or High confidence
-- **High**: We rank updates as High confidence when the combination of `Age`, `Adoption` and `Passing` tests means there's a very low chance of breaking changes
+- **Neutral**: We do not have enough data about the update, or we can not decide if the update should be Low or High confidence
+- **High**: We rank updates as High confidence when the combination of `Age`, `Adoption` and `Passing` tests means there is a very low chance of breaking changes
 - **Very High**: We only use this for updates which are months old and have either high `Adoption` or have very high test `Passing` scores
 
 ## How it works
@@ -81,7 +81,7 @@ This way we can find packages that have undeclared breaking changes.
 ### Algorithm
 
 The algorithm that decides on the values is private and is not something we plan to share.
-Similar to a search engine's algorithm, we plan to adjust and improve it over time, for example by using historical data to set a baseline confidence level for packages.
+Similar to a search engine algorithm, we plan to adjust and improve it over time, for example by using historical data to set a baseline confidence level for packages.
 
 ### Data
 
@@ -97,8 +97,8 @@ This is why npm packages can only get the **High** Confidence badge when they ar
 ### Percentage values weighting
 
 The percentages for `Adoption` and `Passing` are weighted towards Organizations, private repositories, and projects with high test reliability.
-This means those values aren't _raw_ percentages.
+This means those values are not _raw_ percentages.
 
 ## Questions and feedback
 
-You are invited to [start a discussion](https://github.com/renovatebot/renovate/discussions/new/choose) if you have anything you'd like to discuss.
+You are invited to [start a discussion](https://github.com/renovatebot/renovate/discussions/new/choose) if you have anything you would like to discuss.

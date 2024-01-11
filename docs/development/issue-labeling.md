@@ -55,7 +55,7 @@ For example, use `status:requirements` to mean that an issue is not yet ready fo
 
 Use these to label the type of issue.
 For example, use `type:bug` to label a bug type issue, and use `type:feature` for feature requests.
-Only use `type:refactor` for code changes, don't use `type:refactor` for documentation type changes.
+Only use `type:refactor` for code changes, do not use `type:refactor` for documentation type changes.
 
 All issues should have a `type:*` label.
 Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+-label%3Atype%3Abug+-label%3Atype%3Afeature+-label%3Atype%3Adocs+-label%3Atype%3Arefactor+) to find issues without a `type:*` label.
@@ -195,7 +195,7 @@ Add a label `auto:discussion-first` to any PR which needs discussing first.
 
 Add a label `auto:format-code` to any Discussion which needs code formatting.
 
-Add a label `auto:logs` to indicate that there's a problem with the logs, and the contributor needs to do one of these things:
+Add a label `auto:logs` to indicate that there is a problem with the logs, and the contributor needs to do one of these things:
 
 1. Provide logs (if there are none yet)
 1. Provide more logs (in case current logs are insufficient)
@@ -207,7 +207,7 @@ Add a label `auto:no-coverage-ignore` if PR authors avoid needed unit tests by i
 
 Add a label `auto:no-done-comments` if PR authors unnecessary "Done" comments, or type comments to ask for a review instead of requesting a new review through GitHub's UI.
 
-Add a label `auto:reproduction` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
+Add a label `auto:reproduction` if nobody has reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 
 Add a label `auto:retry-latest` to any Discussion where the user should retry the latest version of Renovate to see if the problem persists.
 

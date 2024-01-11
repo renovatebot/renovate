@@ -93,7 +93,7 @@ If you use an environment variable or the CLI to set the value for `autodiscover
 Commas will be used as delimiter for a new filter.
 
 ```
-# DO NOT use commas inside the filter if you're using env or cli variables to configure it.
+# DO NOT use commas inside the filter if you are using env or cli variables to configure it.
 RENOVATE_AUTODISCOVER_FILTER="/MyOrg/{my-repo,foo-repo}"
 
 
@@ -124,7 +124,7 @@ All text inside the start and end `/` will be treated as a regular expression.
 ```
 
 You can negate the regex by putting an `!` in front.
-Only use a single negation and don't mix with other filters because all filters are combined with `or`.
+Only use a single negation and do not mix with other filters because all filters are combined with `or`.
 If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
@@ -193,9 +193,9 @@ Renovate supports four possible ways to access those tools:
 - `hermit`: Uses the [Hermit](https://github.com/cashapp/hermit) tool installation approach.
 
 Starting in v36, Renovate's default Docker image (previously referred to as the "slim" image) uses `binarySource=install` while the "full" Docker image uses `binarySource=global`.
-If you're running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
+If you are running Renovate in an environment where runtime download and install of tools is not possible then you should use the "full" image.
 
-If you're building your own Renovate image, e.g. by installing Renovate using `npm`, then you'll need to ensure that all necessary tools are installed globally before running Renovate so that `binarySource=global` will work.
+If you are building your own Renovate image, e.g. by installing Renovate using `npm`, then you will need to ensure that all necessary tools are installed globally before running Renovate so that `binarySource=global` will work.
 
 The `binarySource=docker` approach should not be necessary in most cases now and `binarySource=install` is recommended instead.
 If you have a use case where you cannot use `binarySource=install` but can use `binarySource=docker` then please share it in a GitHub Discussion so that the maintainers can understand it.
@@ -265,7 +265,7 @@ This configuration will be applied after all other environment variables, so you
 
 The purpose of this config option is to allow you (as a bot admin) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
 
-This config option is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
+This config option is disabled by default because it may prove surprising or undesirable for some users who do not expect Renovate to go into their home directory and import registry or credential information.
 
 Currently, this config option is supported for the `npm` manager only - specifically the `~/.npmrc` file.
 If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set to `true`.
@@ -285,7 +285,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 <!-- prettier-ignore -->
 !!! note
-    You can't use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
+    You can not use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
     In addition, platform host rules will only be picked up when `matchHost` is supplied.
 
 ### npmjs registry token example
@@ -410,7 +410,7 @@ Set this to `1001:1002` to use UID 1001 and GID 1002.
 
 If you use `binarySource=docker|install` read the section below.
 
-If you need to change the Docker user please make sure to use the root (`0`) group, otherwise you'll get in trouble with missing file and directory permissions.
+If you need to change the Docker user please make sure to use the root (`0`) group, otherwise you will get in trouble with missing file and directory permissions.
 Like this:
 
 ```
@@ -470,9 +470,9 @@ This configuration option lets you choose an organization you want repositories 
 It must be set to a GitHub Organization name and not a GitHub user account.
 When set, "allow edits by maintainers" will be false for PRs because GitHub does not allow this setting for organizations.
 
-This can be used if you're migrating from user-based forks to organization-based forks.
+This can be used if you are migrating from user-based forks to organization-based forks.
 
-If you've set a `forkOrg` then Renovate will:
+If you have set a `forkOrg` then Renovate will:
 
 1. Check if a fork exists in the preferred organization before checking it exists in the fork user's account
 1. If no fork exists: it will be created in the `forkOrg`, not the user account
@@ -500,12 +500,12 @@ Replace the newlines with `\n` before adding the resulting single-line value to 
 
 <!-- prettier-ignore -->
 !!! note
-    The private key can't be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
+    The private key can not be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
 
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 
-1. Run `gpg import` (if you haven't before)
+1. Run `gpg import` (if you have not before)
 1. Run `git config user.signingkey` and `git config commit.gpgsign true`
 
 The `git` commands are run locally in the cloned repo instead of globally.
@@ -530,7 +530,7 @@ Possible values:
 
 By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
 By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
-Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
+Disabling the warning is helpful for self-hosted environments that can not access the `github.com` domain, because the warning is useless in these environments.
 
 ## globalExtends
 
@@ -541,7 +541,7 @@ Use the `extends` field instead of this if, for example, you need the ability fo
 
 <!-- prettier-ignore -->
 !!! warning
-    `globalExtends` presets can't be private.
+    `globalExtends` presets can not be private.
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
 
@@ -580,13 +580,13 @@ In the above example any reference to the `@company` preset will be replaced wit
 
 <!-- prettier-ignore -->
 !!! tip
-    Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
+    Combine `migratePresets` with `configMigration` if you would like your config migrated by PR.
 
 ## onboarding
 
 Only set this to `false` if all three statements are true:
 
-- You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
+- You have configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
 - You want to run Renovate on every repository the bot has access to
 - You want to skip all onboarding PRs
 
@@ -596,8 +596,8 @@ Only set this to `false` if all three statements are true:
 !!! note
     This setting is independent of `branchPrefix`.
 
-For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar.
-If you have an existing Renovate installation, and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
+For example, if you configure `branchPrefix` to be `renovate-` then you would still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar.
+If you have an existing Renovate installation, and you change `onboardingBranch` then it's possible that you will get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
 ## onboardingCommitMessage
 
@@ -672,7 +672,7 @@ TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachet
 
 <!-- prettier-ignore -->
 !!! warning
-     Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
+     Doing so improves efficiency because shared presets do not need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
      You should only enable this when all repositories are trusted, such as a corporate environment.
 
 ## privateKey
@@ -751,14 +751,14 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 !!! note
     You could use public key encryption with earlier versions of Renovate.
     We deprecated this approach and removed the documentation for it.
-    If you're _still_ using public key encryption then we recommend that you use private keys instead.
+    If you are _still_ using public key encryption then we recommend that you use private keys instead.
 
 ## privateKeyOld
 
 Use this field if you need to perform a "key rotation" and support more than one keypair at a time.
 Decryption with this key will be tried after `privateKey`.
 
-If you're migrating from the legacy public key encryption approach to use GPG, then move your legacy private key from `privateKey` to `privateKeyOld` and then put your new GPG private key in `privateKey`.
+If you are migrating from the legacy public key encryption approach to use GPG, then move your legacy private key from `privateKey` to `privateKeyOld` and then put your new GPG private key in `privateKey`.
 Doing so will mean that Renovate will first try to decrypt using the GPG key but fall back to the legacy key and try that next.
 
 You can remove the `privateKeyOld` config option once all the old encrypted values have been migrated, or if you no longer want to support the old key and let the processing of repositories fail.
@@ -831,7 +831,7 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 <!-- prettier-ignore -->
 !!! tip
-    If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
+    If you are storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
     For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
 
 <!-- prettier-ignore -->
@@ -920,7 +920,7 @@ You may need to set a `username` if you:
 - use the Bitbucket platform, or
 - use a self-hosted GitHub App with CLI (required)
 
-If you're using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
+If you are using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
 
 ## writeDiscoveredRepos
 

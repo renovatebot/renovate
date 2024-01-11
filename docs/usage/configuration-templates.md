@@ -14,16 +14,16 @@ If you change the `branchPrefix` while you have ignored some upgrades (closed PR
 
 `branchName` default value is `{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}`.
 
-The most common branch name you'll see looks like this: `renovate/react-18.x`.
+The most common branch name you will see, looks like this: `renovate/react-18.x`.
 In this example, the `branchPrefix` is the default `renovate/`, `additionalBranchPrefix` is empty, and `branchTopic` is `react-18.x`.
 
-Most users will be happy with the default `branchPrefix` of `renovate/`, but you can change this if you don't like the default.
-Say you don't want the forward slashes, in that case you would use `renovate-` as your `branchPrefix`.
+Most users will be happy with the default `branchPrefix` of `renovate/`, but you can change this if you do not like the default.
+Say you do not want the forward slashes, in that case you would use `renovate-` as your `branchPrefix`.
 The onboarding PR will always use `renovate/configure`.
 
 `additionalBranchPrefix` is optional and by default is empty.
 
-`branchTopic` depends on the package manager and upgrade type, so you'll see a lot of variety.
+`branchTopic` depends on the package manager and upgrade type, so you will see a lot of variety.
 This is probably a setting you want to change yourself.
 Be careful, and consider creating a new "config help" post at the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) to get help from the Renovate team with your config.
 
@@ -34,11 +34,11 @@ The `commitMessage` reflects the contents of the branch and is usually the same 
 
 `commitMessage` has a default value of `{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}`, with the intention that you only edit some of those subcomponents.
 
-You usually don't need to edit `commitMessagePrefix`, this option is used by Renovate if it needs to add a prefix to conform to the Semantic Commit convention.
-Avoid editing the commit message, unless you know what you're doing.
+You usually do not need to edit `commitMessagePrefix`, this option is used by Renovate if it needs to add a prefix to conform to the Semantic Commit convention.
+Avoid editing the commit message, unless you know what you are doing.
 
 `commitMessageAction` is usually one word, like 'Update', 'Pin', 'Refresh', etc.
-You're probably fine leaving this setting alone, though you can change it.
+You are probably fine leaving this setting alone, though you can change it.
 e.g. if you prefer that Renovate uses the term 'Upgrade' instead of 'Update' then you could configure `"commitMessageAction": "Upgrade"`.
 
 `commitMessageTopic` is usually two to three words that show _what_ is being updated.
@@ -48,7 +48,7 @@ If you think your new `commitMessageTopic` is helpful for others, please [open a
 
 `commitMessageExtra` refers to the version being updated to.
 e.g. `to v18` for a major upgrade, or `to v18.0.2` for a patch update.
-It can be empty in some cases, like if the action/topic doesn't change a package version, e.g. `Pin Docker digests`.
+It can be empty in some cases, like if the action/topic does not change a package version, e.g. `Pin Docker digests`.
 
 `commitMessageSuffix` defaults to empty but is currently used in two cases:
 

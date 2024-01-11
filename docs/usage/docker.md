@@ -15,7 +15,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 ## How It Works
 
-1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
+1. Renovate searches in each repository for any files matching the configured `fileMatch` pattern(s) for each manager
 1. Matching files are parsed, Renovate checks if the file(s) has any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
 1. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
 
@@ -23,8 +23,8 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 By default, Renovate preserves the precision level specified in the Docker images.
 For example, if the existing image is pinned at `myimage:1.1` then Renovate only proposes upgrades to `myimage:1.2` or `myimage:1.3`.
-This means that you'll not get upgrades to a more specific versions like `myimage:1.2.0` or `myimage:1.3.0`.
-Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, but it's a feature we'd like to work on one day.
+This means that you will not get upgrades to a more specific versions like `myimage:1.2.0` or `myimage:1.3.0`.
+Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, but it's a feature we would like to work on one day.
 
 ## Version compatibility
 
@@ -64,7 +64,7 @@ Another example is the official `python` image, which follows `pep440` versionin
 }
 ```
 
-If traditional versioning doesn't work, try Renovate's built-in `loose` `versioning`.
+If traditional versioning does not work, try Renovate's built-in `loose` `versioning`.
 Renovate will perform a best-effort sort of the versions, regardless of whether they have letters or digits.
 
 If both the traditional versioning, and the `loose` versioning do not give the results you want, try the `regex` `versioning`.
@@ -81,9 +81,9 @@ For example, if you set a version like `2.0.1`, you and your colleagues always g
 
 Docker's tags are not immutable versions, even if tags _look_ like a version.
 You probably expect `myimage:1` and `myimage:1.2` to change over time, but you might incorrectly assume that `myimage:1.2.0` never changes.
-Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
+Although it probably _should not_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
-By replacing Docker tags with Docker digests as the image's primary identifier you'll get immutable builds.
+By replacing Docker tags with Docker digests as the primary identifier of the image you will get immutable builds.
 Working with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e` is hard.
 Luckily Renovate can update the digests for you.
 
@@ -91,13 +91,13 @@ When pinning a digest, Renovate retains the Docker tag in the `FROM` line for re
 
 ## Digest Updating
 
-If you follow our advice to replace a tag like `node:14` with a pinned digest like `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you'll get Renovate PRs whenever the `node:14` image is updated on Docker Hub.
+If you follow our advice to replace a tag like `node:14` with a pinned digest like `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you will get Renovate PRs whenever the `node:14` image is updated on Docker Hub.
 
 Previously this update would have been "invisible" to you - one day you pull code that represents `node:14.15.0` and the next day you pull code that represents `node:14.15.1`.
 But you can never be sure, especially as Docker caches.
 Maybe some of your colleagues, or worse still your build machine, are stuck on an older version with a security vulnerability.
 
-By pinning to a digest instead, you'll get these updates via Pull Requests, or even committed directly to your repository if you enable branch automerge for convenience.
+By pinning to a digest instead, you will get these updates via Pull Requests, or even committed directly to your repository if you enable branch automerge for convenience.
 This makes sure everyone on your team uses the latest versions.
 
 ## Version Upgrading
@@ -258,7 +258,7 @@ Renovate can authenticate with AWS ECR using AWS access key id & secret as the u
 ##### Using Application Default Credentials / Workload Identity (Self-Hosted only)
 
 Just configure [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc) /
-[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) as normal and _don't_
+[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) as normal and _do not_
 provide a username, password or token. Renovate will automatically retrieve the credentials using the
 google-auth-library.
 
@@ -364,7 +364,7 @@ If you have dependencies on Google Container Registry (and Artifact Registry) yo
 
 ##### Using short-lived access tokens
 
-Assume you're running GitLab CI in the Google Cloud, and you're storing your Docker images in the Google Container Registry (GCR).
+Assume you are running GitLab CI in the Google Cloud, and you are storing your Docker images in the Google Container Registry (GCR).
 
 Access to the GCR uses Bearer token based authentication.
 This token can be obtained by running `gcloud auth print-access-token`, which requires the Google Cloud SDK to be installed.

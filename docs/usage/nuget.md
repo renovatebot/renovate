@@ -57,7 +57,7 @@ You can set alternative feeds:
 }
 ```
 
-In the example above we've set three NuGet feeds.
+In the example above we have set three NuGet feeds.
 The package resolving process uses the `merge` strategy to handle the three feeds.
 All feeds are checked for dependency updates, and duplicate updates are merged into a single dependency update.
 
@@ -107,7 +107,7 @@ Credentials for authenticated/private feeds can be given via host rules in the c
 }
 ```
 
-If you're using Azure DevOps, you can set `matchHost` to `pkgs.dev.azure.com`.
+If you are using Azure DevOps, you can set `matchHost` to `pkgs.dev.azure.com`.
 
 <!-- prettier-ignore -->
 !!! note

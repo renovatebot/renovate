@@ -7,7 +7,7 @@ description: How to reduce the "noise" associated with module updates
 
 Generally, the first reaction people have to automated dependency updates like Renovate is "oh great/feel the power of automation".
 The next reaction a few days or weeks later is often "this is getting overwhelming".
-Indeed, if you leave Renovate on its default settings of raising a PR every single time any dependency receives any update, you'll get a lot of PRs and related notifications.
+Indeed, if you leave Renovate on its default settings of raising a PR every single time any dependency receives any update, you will get a lot of PRs and related notifications.
 This document will give you some ideas of how to reduce the amount of "noise" in your repository and the Pros/Cons of each approach.
 
 Of course, please keep in mind that people's definitions of "noise" may differ.
@@ -43,14 +43,14 @@ By setting `matchPackagePatterns` to "eslint", it means that any package with ES
 ### Be smart about grouping dependencies
 
 Grouping dependencies _may_ help you, but can also cause problems.
-Sometimes you're better off getting a single PR per dependency!
+Sometimes you are better off getting a single PR per dependency!
 
 Grouping dependencies versus single PRs:
 
 - Grouping dependencies increases the chance that the branch has an error ("break" your build)
 - When you upgrade multiple dependencies in one PR, it takes longer to find out which package broke the build
-- If a group PR "breaks", you'll have to wait upgrading your other dependencies until _all_ updates in the PR pass
-- You'll have less flexibility when one (or more) dependencies in the group have a major upgrade, but the other dependencies are good to go
+- If a group PR "breaks", you will have to wait upgrading your other dependencies until _all_ updates in the PR pass
+- You will have less flexibility when one (or more) dependencies in the group have a major upgrade, but the other dependencies are good to go
 
 ## Scheduling Renovate
 
@@ -75,17 +75,17 @@ There are multiple reasons why Renovate may need to "recreate" PRs after you mer
 1. Conflict with lock files (often)
 1. If you have configured Renovate or GitHub that PRs must always be kept up-to-date with the base branch
 
-Any of the above reasons can lead to a Renovate branch being considered "stale" and then Renovate needs to rebase it off the base branch before you can test and merge again, and Renovate won't do this until it's back in schedule.
+Any of the above reasons can lead to a Renovate branch being considered "stale" and then Renovate needs to rebase it off the base branch before you can test and merge again, and Renovate will not do this until it's back in schedule.
 
 ### Selective scheduling
 
-Don't think that you need to apply blanket rules to scheduling.
+Do not think that you need to apply blanket rules to scheduling.
 Remember that Renovate's configuration is highly flexible, so you can configure `automerge` anywhere from globally (entire repo) right down to a package/upgrade type level.
 You could even configure a nonsensical rule like: "patch updates of `jquery` are for Mondays only".
 
 Remember our example of grouping all `eslint` packages?
-If you think about it, updates to `eslint` rules don't exactly need to be applied in real time!
-You don't want to get too far behind, so how about we update `eslint` packages only once a month?
+If you think about it, updates to `eslint` rules do not exactly need to be applied in real time!
+You do not want to get too far behind, so how about we update `eslint` packages only once a month?
 
 ```json title="Update ESLint packages once a month"
 {
@@ -113,7 +113,7 @@ Or perhaps at least weekly:
 }
 ```
 
-If you're wondering what is supported and not, under the hood, the schedule is parsed using [@breejs/later](https://github.com/breejs/later) using the `later.parse.text(scheduleString)` API.
+If you are wondering what is supported and not, under the hood, the schedule is parsed using [@breejs/later](https://github.com/breejs/later) using the `later.parse.text(scheduleString)` API.
 Read the parser documentation at [breejs.github.io/later/parsers.html#text](https://breejs.github.io/later/parsers.html#text).
 Renovate does not support scheduled minutes or "at an exact time" granularity.
 Granularity must be at least one hour.
@@ -124,7 +124,7 @@ Automerging is a Renovate feature that can save you a lot of time/noise directly
 In short: it means that Renovate can merge PRs or even branches itself if they pass your tests.
 
 We recommend that you enable automerge for any type of dependency update where you would select Merge anyway.
-We all know that there are some types of updates that we (nearly) always verify manually before merging, and plenty of others that we don't bother looking at unless tests fail.
+We all know that there are some types of updates that we (nearly) always verify manually before merging, and plenty of others that we do not bother looking at unless tests fail.
 Every time you select Merge on a Renovate PR without manually testing it, you should consider if you can enable automerge and save yourself the time in the future.
 
 Automerge works particularly well for `devDependencies` and for production `dependencies` that have great test coverage.
@@ -135,7 +135,7 @@ If you have an API with 100% test coverage and `express` is updated: automerge i
 
 ### Branch automerging
 
-Those of you familiar with GitHub might note that even if you automerge PRs, you're still going to get notifications (noise) anyway - one when the PR is created and another when it is merged.
+Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged.
 For this reason we recommend you consider setting `automergeType=branch` which will mean:
 
 - Renovate first creates a branch and no PR

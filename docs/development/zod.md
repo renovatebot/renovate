@@ -22,7 +22,7 @@ We decided that Renovate should use [Zod](https://github.com/colinhacks/zod) for
 This means that any new manager or datasource should use Zod as well.
 This document explains _how_ and _why_ you should use Zod features.
 
-When writing schema validation you're aiming for a balance between strictness of explicit contracts between separately developed systems, and the permissiveness of Renovate.
+When writing schema validation you are aiming for a balance between strictness of explicit contracts between separately developed systems, and the permissiveness of Renovate.
 We want Renovate to be only as strict as it _needs_ to be.
 
 Renovate should _not_ assume a field is always present.
@@ -67,7 +67,7 @@ Avoid names like `ComplexNumberSchema`.
 
 ### Inferred types
 
-Create inferred types after schemas if they're needed somewhere in the code.
+Create inferred types after schemas if they are needed somewhere in the code.
 Place such inferred types just after the schema definition using the same name.
 
 While IDEs may confuse schema and type name sometimes, it's obvious which is which from the syntactic context.
@@ -109,7 +109,7 @@ const volume = width * height * length;
 ```
 
 The code above refers to the `color` and `weight` fields, which Renovate does _not_ need to do its job.
-Here's the **correct** code:
+Here is the **correct** code:
 
 ```ts
 const Box = z.object({

@@ -158,7 +158,7 @@ spec:
     Do you know how to get `daniel-shuy/renovate` version `3` working?
     Then please open a pull request to update the docs and close [Renovate issue #13428](https://github.com/renovatebot/renovate/issues/13428).
 
-If you're using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
+If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
 
 By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
 
@@ -216,7 +216,7 @@ Renovate's cache, and the caches(s) for npm, Yarn, Composer, and so on, are stor
 
 ### Overriding the default directory
 
-If you don't want to use the default `tmp/renovate` directory you can:
+If you do not want to use the default `tmp/renovate` directory you can:
 
 - Set a value for `baseDir` in `config.js`
 - Use an environment variable `RENOVATE_BASE_DIR`
@@ -230,7 +230,7 @@ If you want to override the cache directory then set your own value for `cacheDi
 
 The following example uses the Renovate CLI tool, which you can install by running `npm i -g renovate`.
 
-If running your own Renovate bot then you'll need a user account that Renovate will run as.
+If running your own Renovate bot then you will need a user account that Renovate will run as.
 We recommend you create and use a dedicated account for the bot, e.g. name it `renovate-bot` if on your own instance.
 Create and save a PAT for this account.
 
@@ -251,7 +251,7 @@ module.exports = {
 Here change the `logFile` and `repositories` to something appropriate.
 Also replace `gitlab-token` value with the one created during the previous step.
 
-If you're running against GitHub Enterprise Server, then change the `gitlab` values in the example to the equivalent GitHub ones.
+If you are running against GitHub Enterprise Server, then change the `gitlab` values in the example to the equivalent GitHub ones.
 
 You can save this file as anything you want and then use the `RENOVATE_CONFIG_FILE` environment variable to tell Renovate where to find it.
 
@@ -275,7 +275,7 @@ Only add the script to `cron` after you checked it works.
 <!-- prettier-ignore -->
 !!! note
     The GitHub.com token as an environment variable is needed to fetch changelogs that are usually hosted on github.com.
-    You don't need to add it if you're already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
+    You do not need to add it if you are already running the bot against github.com, but you do need to add it if you are using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
 ## Kubernetes for GitLab, using Git over SSH
 
@@ -383,7 +383,7 @@ spec:
 
 ## Logging
 
-If you're ingesting/parsing logs into another system then we recommend you set `LOG_LEVEL=debug` and `LOG_FORMAT=json` in your environment variables.
+If you are ingesting/parsing logs into another system then we recommend you set `LOG_LEVEL=debug` and `LOG_FORMAT=json` in your environment variables.
 Debug logging is usually needed for any debugging, while JSON format will mean that the output is parseable.
 
 ### About the log level numbers
@@ -420,7 +420,7 @@ On Ubuntu/Debian and many Linux-based systems, this can be done by copying the s
 
 ### Renovate Docker image
 
-If you're using the official [Renovate Docker image](#docker) then we recommend you add the self-signed certificate and build your own modified Docker image.
+If you are using the official [Renovate Docker image](#docker) then we recommend you add the self-signed certificate and build your own modified Docker image.
 
 ```dockerfile title="Example of a Dockerfile that uses a self-signed certificate"
 FROM renovate/renovate

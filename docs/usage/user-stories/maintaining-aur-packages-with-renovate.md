@@ -20,7 +20,7 @@ title: Maintaining AUR packages with Renovate
 
 One big advantage that Arch Linux has over other distributions, apart from being able to say “BTW I use Arch.”, is the Arch User Repository (AUR).
 It’s a community-driven repository with over 80,000 packages.
-If you’re looking for a package, chances are you'll find it in the AUR.
+If you’re looking for a package, chances are you will find it in the AUR.
 
 Keeping all those packages up to date, takes a lot of manual effort by a lot of volunteers.
 People have created and used tools, like [`urlwatch`](https://github.com/thp/urlwatch) and [`aurpublish`](https://github.com/eli-schwartz/aurpublish), to let them know when upstream releases are cut and automate some parts of the process.

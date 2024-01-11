@@ -26,7 +26,7 @@ If set to any integer, Renovate will use this integer instead of the default npm
 ## `RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK`
 
 If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
-Skipping the check will speed things up, but may result in versions being returned which don't properly exist on the server.
+Skipping the check will speed things up, but may result in versions being returned which do not properly exist on the server.
 
 ## `RENOVATE_PAGINATE_ALL`
 
@@ -104,7 +104,7 @@ Default value: `5` (attempts results in max. 13.75 seconds timeout).
 
 Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
 
-Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
+Can be useful for slow-running, self-hosted GitLab instances that do not react fast enough for the default delay to help.
 
 Default value: `1000` (milliseconds).
 

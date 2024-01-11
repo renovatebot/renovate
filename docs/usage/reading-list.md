@@ -15,11 +15,11 @@ We created reading lists for these types of users:
 - Advanced
 
 Start with the "Beginners" reading list.
-If you're self-hosting or need to update private packages, complete the relevant reading lists for those.
+If you are self-hosting or need to update private packages, complete the relevant reading lists for those.
 
-## I don't know where to start
+## I do not know where to start
 
-If you're new to Renovate, you should:
+If you are new to Renovate, you should:
 
 - Use the Mend Renovate App, or let someone else host Renovate for you
 - Stick with the `config:recommended` preset
@@ -65,7 +65,7 @@ Then read:
 
 ## Self-hosting Renovate
 
-If you're going to self-host Renovate then read:
+If you are going to self-host Renovate then read:
 
 - [Running Renovate](./getting-started/running.md)
 - [Self-hosting examples](./examples/self-hosting.md)

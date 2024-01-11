@@ -16,8 +16,8 @@ Shareable config presets must use the JSON or JSON5 formats, other formats are n
 
 <!-- prettier-ignore -->
 !!! warning
-    We've deprecated using a `renovate.json` file for presets, as this causes issues if the repository configuration _also_ uses a `renovate.json` file.
-    If you're using a `renovate.json` file to share your presets, rename it to `default.json`.
+    We have deprecated using a `renovate.json` file for presets, as this causes issues if the repository configuration _also_ uses a `renovate.json` file.
+    If you are using a `renovate.json` file to share your presets, rename it to `default.json`.
 
 <!-- prettier-ignore -->
 !!! tip
@@ -92,7 +92,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 
 <!-- prettier-ignore -->
 !!! tip
-    You can't combine the path and sub-preset syntaxes.
+    You ca not combine the path and sub-preset syntaxes.
     This means that anything in the form `provider>owner/repo//path/to/file:subsubpreset` is not supported.
     One workaround is to use distinct files instead of sub-presets.
 
@@ -112,7 +112,7 @@ It mostly uses Renovate config defaults but adds a few smart customizations such
 ## How to Use Preset Configs
 
 By default, Renovate App's onboarding PR suggests the `["config:recommended]"` preset.
-If you're self-hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your bot's config.
+If you are self-hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your bot's config.
 
 Read the [Full Config Presets](./presets-config.md) page to learn more about our `config:` presets.
 
@@ -124,8 +124,8 @@ A typical onboarding `renovate.json` looks like this:
 }
 ```
 
-Here's an example of using presets to change Renovate's behavior.
-You're happy with the `config:recommended` preset, but want Renovate to create PRs when you're not at the office.
+Here is an example of using presets to change Renovate's behavior.
+You are happy with the `config:recommended` preset, but want Renovate to create PRs when you are not at the office.
 You look at our `schedule:` presets, and find the `schedule:nonOfficeHours` preset.
 You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json` file, like this:
 
@@ -137,7 +137,7 @@ You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json`
 
 ## Preset Parameters
 
-If you browse the "default" presets, you'll see some that have parameters, e.g.:
+If you browse the "default" presets, you will see some that have parameters, e.g.:
 
 ```json
 {
@@ -163,14 +163,14 @@ Here is how you would use these in your Renovate config:
 In short, the number of `{{argx}}` parameters in the definition is how many parameters you need to provide.
 Parameters must be strings, non-quoted, and separated by commas if there are more than one.
 
-If you find that you're repeating config a lot, you might consider publishing one of these types of parameterised presets yourself.
+If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself.
 Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository, see [Contributing to presets](#contributing-to-presets).
 
 ## GitHub-hosted Presets
 
 To host your preset config on GitHub:
 
-- Create a new repository. Normally you'd call it `renovate-config` but it can be named anything
+- Create a new repository. Normally you would call it `renovate-config` but it can be named anything
 - Add configuration files to this new repo for any presets you want to share. For the default preset, `default.json` will be checked. For named presets, `<preset-name>.json` will be loaded. For example, loading preset `library` would load `library.json`. No other files are necessary.
 - In other repos, reference it in an extends array like `github>owner/name`, for example:
 
@@ -189,7 +189,7 @@ For a private GitLab repository Renovate requires at least `Reporter` level acce
 
 To host your preset config on GitLab:
 
-- Create a new repository on GitLab. Normally you'd call it `renovate-config` but it can be named anything
+- Create a new repository on GitLab. Normally you would call it `renovate-config` but it can be named anything
 - Add a `default.json` to this new repo containing the preset config. No other files are necessary
 - In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
 
@@ -197,7 +197,7 @@ To host your preset config on GitLab:
 
 To host your preset config on Gitea:
 
-- Create a new repository on Gitea. Normally you'd call it `renovate-config` but you can use any name you want
+- Create a new repository on Gitea. Normally you would call it `renovate-config` but you can use any name you want
 - Add a `default.json` to this new repository containing the preset config. No other files are necessary
 - In other repositories, reference it in an extends array like `"gitea>owner/name"`, e.g. `"gitea>rarkins/renovate-config"`
 
@@ -215,7 +215,7 @@ Please consider contributing it to the [Renovate repository](https://github.com/
 
 Create a [discussion](https://github.com/renovatebot/renovate/discussions) to propose your preset to the Renovate maintainers.
 The maintainers can also help improve the preset, and let you know where to put it in the code.
-If you're proposing a "monorepo" preset addition then it's OK to raise a PR directly as that can be more efficient than a GitHub Discussion.
+If you are proposing a "monorepo" preset addition then it's OK to raise a PR directly as that can be more efficient than a GitHub Discussion.
 
 ## Group/Organization level presets
 

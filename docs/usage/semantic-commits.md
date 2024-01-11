@@ -65,7 +65,7 @@ For example:
 
 ## Changing the Semantic Commit scope
 
-You can set your own word for the scope if you don't like the default "deps" scope.
+You can set your own word for the scope if you do not like the default "deps" scope.
 For example, to set the scope to "package", add the preset `":semanticCommitScope(package)"` to your `extends` array:
 
 ```json

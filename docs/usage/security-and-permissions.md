@@ -63,7 +63,7 @@ Self-hosted Renovate does not send or submit any package data to Mend for the pu
 According to a strict definition, Renovate may "send data" to third-party registries and source code hosts directly to look up new releases.
 For example, if you have an `npm` package and do not configure a private registry then Renovate will query URLs on `https://registry.npmjs.org` including names of packages used in your repositories.
 You could avoid this by configuring private registries but such registries need to query public registries anyway.
-We don't know of any public registries which reverse lookup IP addresses to associate companies with packages.
+We do not know of any public registries which reverse lookup IP addresses to associate companies with packages.
 
 ### Hosted/SaaS (the Mend Renovate App)
 

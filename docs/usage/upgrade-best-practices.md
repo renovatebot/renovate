@@ -2,7 +2,7 @@
 
 This page explains what we (the Renovate maintainers) recommend you do to update your dependencies.
 
-We'll cover starting a new project, updating a year-old project, and updating a project with dependencies that are five years old.
+We will cover starting a new project, updating a year-old project, and updating a project with dependencies that are five years old.
 We explain why you should update often, and how to nudge your team to update their dependencies.
 
 ## General recommendations
@@ -32,7 +32,7 @@ You should extend from the `config:best-practices` preset:
 }
 ```
 
-If you're using `config:recommended` now, replace it with `config:best-practices`:
+If you are using `config:recommended` now, replace it with `config:best-practices`:
 
 ```diff
 - "extends": ["config:recommended"]
@@ -62,7 +62,7 @@ The next sections explain each part of the preset.
 Renovate creates a config migration PR to replace old config option names with their new replacements.
 This way your configuration file and the Renovate docs always use the same terms.
 
-You'll get config migration PRs no matter _how_ you run Renovate: self-hosting or the Mend Renovate app.
+You will get config migration PRs no matter _how_ you run Renovate: self-hosting or the Mend Renovate app.
 
 #### Extends `config:recommended`
 
@@ -95,35 +95,35 @@ But updating regularly actually _saves_ you time, because:
 
 - Regular updates tend to be small
 - Applying `major` updates is easier
-- You'll be ready for CVE patches
-- You'll look for ways to automate the updates
+- You will be ready for CVE patches
+- You will look for ways to automate the updates
 
 #### Regular updates tend to be small
 
 Firstly, when you update regularly updates tend to be small.
 The update's changelogs are small, quick to read, and easy to understand.
 You probably only need to make changes in a few places (if at all) to merge the PR and get going again.
-Because you're reading the changelogs regularly, you'll get a feel for the direction of the upstream project.
+Because you are reading the changelogs regularly, you will get a feel for the direction of the upstream project.
 
 #### Applying `major` updates is easier
 
-Secondly, when you're current with upstream, `major` updates are easier.
+Secondly, when you are current with upstream, `major` updates are easier.
 This is because you already:
 
 - follow the latest best practices of upstream
 - use the latest names for features/variables
 - read the previous changelogs
 
-#### You'll be ready for CVE patches
+#### You will be ready for CVE patches
 
-Thirdly, you'll be ready when an upstream package releases a patch for a critical CVE.
-If you're current, you can review and merge Renovate's PR quickly.
+Thirdly, you will be ready when an upstream package releases a patch for a critical CVE.
+If you are current, you can review and merge Renovate's PR quickly.
 
-When you're behind on updates, you'll have a bad time, because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
+When you are behind on updates, you will have a bad time, because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
 
-#### You'll look for ways to automate the updates
+#### You will look for ways to automate the updates
 
-Finally, when you're updating often, you'll start looking for ways to automate the updates.
+Finally, when you are updating often, you will start looking for ways to automate the updates.
 You may start to [`automerge`](./configuration-options.md#automerge) development dependencies like Prettier, or ESLint when the linter passes.
 Or you may decide to automerge any `patch` type upgrades, by using the [`default:automergePatch`](./presets-default.md#automergepatch) preset.
 
@@ -132,22 +132,22 @@ Renovate does not support GitLab's Merge Trains, see [issue #5573](https://githu
 
 ## Starting from a new project
 
-Let's assume you're starting a new project.
+Let's assume you are starting a new project.
 You created a new Git repository, installed the latest frameworks, libraries and development tools.
 After pushing the initial commit, you should enable and onboard Renovate.
 
-Now you'll have to stay on the "update often" train.
+Now you will have to stay on the "update often" train.
 
 ## Project with dependencies that are a year old
 
-If you have a project that's a year behind on dependencies, you'll need to do some work.
+If you have a project that's a year behind on dependencies, you will need to do some work.
 Let's assume that most dependencies need a `patch` or `minor` update, and at _least_ one dependency needs a `major` update.
 
 Start small, and get the `patch` and `minor` updates first.
 Read the changelogs for your updates.
 You may have to make small changes to get things working again.
 
-When you have the latest `patch` and `minor` versions, you're ready for `major` updates.
+When you have the latest `patch` and `minor` versions, you are ready for `major` updates.
 Start with `major` version updates for tools like Prettier or ESLint.
 
 Then work on `major` updates for your framework or library.
@@ -156,7 +156,7 @@ Let multiple team members review your work before merging, it's easy to miss som
 
 Finally, update your development tools.
 
-Now you're up-to-date, you should think how to make updating a regular habit.
+Now you are up-to-date, you should think how to make updating a regular habit.
 
 ## Project with dependencies that are five years old
 
@@ -171,7 +171,7 @@ If your project is this badly behind on updates, you have two problems:
 Fix the easier problem first: getting back up to date.
 Update any dependencies that have critical updates for CVEs or other security related improvements.
 
-If you're on the GitHub platform: follow the steps listed in the [`vulnerabilityAlerts`](./configuration-options.md#vulnerabilityalerts) docs to make sure Renovate is reading GitHub's Vulnerability Alerts.
+If you are on the GitHub platform: follow the steps listed in the [`vulnerabilityAlerts`](./configuration-options.md#vulnerabilityalerts) docs to make sure Renovate is reading GitHub's Vulnerability Alerts.
 
 You may want to enable the experimental `osvVulnerabilityAlerts` config option, to get OSV-based vulnerability alerts for _direct_ dependencies.
 Read the [`osvVulnerabilityAlerts` config option docs](./configuration-options.md#osvvulnerabilityalerts) to learn more.
@@ -189,9 +189,9 @@ Then update all dependencies to their latest `minor` or `patch` version, to prep
 ### Take `major` updates in sequence
 
 Take `major` updates in sequence.
-This way you'll read the changelogs for each `major` version, and learn _why_ upstream made certain breaking changes.
+This way you will read the changelogs for each `major` version, and learn _why_ upstream made certain breaking changes.
 
-Say you're on version `1` of a dependency, and the latest `major` version is at `4`.
+Say you are on version `1` of a dependency, and the latest `major` version is at `4`.
 You should update to `2`, then `3` and finally `4`.
 Avoid updating from `1` directly to `4`.
 
@@ -203,7 +203,7 @@ Finally, update development tools like Prettier, ESLint, TSLint, Cypress, and so
 
 ### Improve the human side
 
-You're done with the _technical_ side.
+You are done with the _technical_ side.
 Now comes the harder part, fixing the _human_ side.
 There are probably a number of reasons why the project got this badly out of date.
 
@@ -221,7 +221,7 @@ Some common reasons:
 - The test suite is slow
 - Releasing a new version of the project must be done by hand
 - Updating must be done by hand
-- The company doesn't allow developer time for updates
+- The company does not allow developer time for updates
 - The company has complex rules about updates
 
 If updating is painful, or takes a lot of time, developers tend to avoid it.
@@ -241,7 +241,7 @@ Respect your developer's time and brains:
 - Building the project _must_ be as fast as possible
 - Have automated tests for the critical path of your project
 - Run the automated tests on _every_ pull request
-- If you're on GitHub: use [GitHub's Merge Queue](./key-concepts/automerge.md#github-merge-queue) to speed up merges
+- If you are on GitHub: use [GitHub's Merge Queue](./key-concepts/automerge.md#github-merge-queue) to speed up merges
 - Follow SemVer versioning
 - Use the [`semantic-release` bot](https://github.com/semantic-release/semantic-release) to automate the release process
 - Refactor existing code to make future changes easier

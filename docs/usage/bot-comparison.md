@@ -1,7 +1,7 @@
 # Bot comparison
 
 This page explains the key differences between Renovate and Dependabot, to help you choose a bot.
-We're trying to be as objective as possible, so this is not a "versus" or anti-Dependabot page.
+We are trying to be as objective as possible, so this is not a "versus" or anti-Dependabot page.
 
 If you see anything wrong on this page, please let us know by creating a [Discussion](https://github.com/renovatebot/renovate/discussions), or edit this page with a PR.
 
@@ -27,7 +27,7 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 
 This section explains the key differences between the Mend Renovate app and the GitHub-native Dependabot.
 
-Even if you're going to self-host a bot, read the hosted app section first, because many features and concepts are similar.
+Even if you are going to self-host a bot, read the hosted app section first, because many features and concepts are similar.
 Then read the self-hosted section.
 
 ### Dependency Dashboard
@@ -58,7 +58,7 @@ Renovate works on multiple platforms, including GitHub.
 Read the [list of Renovate platforms](./modules/platform/index.md) to learn more.
 
 The _official_ Dependabot program only works on GitHub.
-If you're an advanced user, you may use the [`dependabot-core` repository](https://github.com/dependabot/dependabot-core) as a base to build your own Dependabot, which you can run on other platforms.
+If you are an advanced user, you may use the [`dependabot-core` repository](https://github.com/dependabot/dependabot-core) as a base to build your own Dependabot, which you can run on other platforms.
 
 ### Supported languages
 
@@ -82,7 +82,7 @@ If you're an advanced user, you may use the [`dependabot-core` repository](https
 Renovate shows four _Merge Confidence_ badges in its PRs:
 
 - **Age**: The age of the package
-- **Adoption**: The percentage of this package's users (within Renovate) which are using this release
+- **Adoption**: The percentage of users of this package (within Renovate) who are using this release
 - **Passing**: The percentage of updates which have passing tests for this package
 - **Confidence**: The confidence level for this update
 
@@ -161,4 +161,4 @@ The Dependabot team has a community-maintained collection of scripts to start se
 
 #### `dependabot-gitlab/dependabot`
 
-There's also a community-maintained Dependabot for GitLab: [`dependabot-gitlab/dependabot`](https://gitlab.com/dependabot-gitlab/dependabot).
+There is also a community-maintained Dependabot for GitLab: [`dependabot-gitlab/dependabot`](https://gitlab.com/dependabot-gitlab/dependabot).
