@@ -209,13 +209,6 @@ describe('modules/manager/conan/extract', () => {
           replaceString: 'req_g/[>1.0 <1.8]@user/stable',
         },
         {
-          currentValue: '[>1.0 <1.8, include_prerelease]',
-          depName: 'req_z',
-          depType: 'requires',
-          packageName: 'req_z/[>1.0 <1.8, include_prerelease]@user/stable',
-          replaceString: 'req_z/[>1.0 <1.8, include_prerelease]@user/stable',
-        },
-        {
           autoReplaceStringTemplate:
             '{{depName}}/{{newValue}}@user/stable{{#if newDigest}}#{{newDigest}}{{/if}}',
           currentDigest: 'bc592346b33fd19c1fbffce25d1e4236',
