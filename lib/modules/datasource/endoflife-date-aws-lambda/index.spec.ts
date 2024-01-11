@@ -33,12 +33,12 @@ describe('modules/datasource/endoflife-date-aws-lambda/index', () => {
           {
             isDeprecated: true,
             releaseTimestamp: '2016-04-07T00:00:00.000Z',
-            version: '4.3-edge',
+            version: '4.3',
           },
           {
             isDeprecated: true,
             releaseTimestamp: '2017-03-22T00:00:00.000Z',
-            version: '6.10',
+            version: '6.10-edge',
           },
           {
             isDeprecated: true,
@@ -184,12 +184,12 @@ describe('modules/datasource/endoflife-date-aws-lambda/index', () => {
           {
             isDeprecated: true,
             releaseTimestamp: '2016-04-07T00:00:00.000Z',
-            version: '4.3-edge',
+            version: '4.3',
           },
           {
             isDeprecated: true,
             releaseTimestamp: '2017-03-22T00:00:00.000Z',
-            version: '6.10',
+            version: '6.10-edge',
           },
           {
             isDeprecated: true,
@@ -240,12 +240,12 @@ describe('modules/datasource/endoflife-date-aws-lambda/index', () => {
           {
             isDeprecated: true,
             releaseTimestamp: '2016-04-07T00:00:00.000Z',
-            version: '4.3-edge',
+            version: '4.3',
           },
           {
             isDeprecated: true,
             releaseTimestamp: '2017-03-22T00:00:00.000Z',
-            version: '6.10',
+            version: '6.10-edge',
           },
           {
             isDeprecated: true,

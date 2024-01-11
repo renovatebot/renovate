@@ -160,7 +160,7 @@
         "support": "2019-08-12",
         "eol": "2019-08-12",
         "link": "https://aws.amazon.com/about-aws/whats-new/2017/03/aws-lambda-supports-node-js-6-10/",
-        "latest": "nodejs6.10",
+        "latest": "nodejs6.10-edge",
         "latestReleaseDate": "2017-03-22",
         "lts": false
     },
@@ -171,7 +171,6 @@
         "support": "2020-03-05",
         "eol": "2020-03-05",
         "link": "https://aws.amazon.com/blogs/compute/node-js-4-3-2-runtime-now-available-on-lambda/",
-        "latest": "nodejs4.3-edge",
         "latestReleaseDate": "2017-07-17",
         "lts": false
     },
