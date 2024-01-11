@@ -21,6 +21,32 @@ Second sentence on a new line.
 And so on.
 ```
 
+## Avoid contractions
+
+Avoid:
+```markdown
+don't
+won't
+shouldn't
+wouldn't
+manager's
+file's
+Renovate's
+```
+
+Do:
+
+```markdown
+do not
+will not
+does not
+should not
+would not
+```
+
+For contractions like "manager's", "file's", and "Renovate's" often require rewriting the sentence.
+Therefore, those words do not have an example listed above.
+
 ## Avoid manually ordering numbered lists
 
 Avoid:
