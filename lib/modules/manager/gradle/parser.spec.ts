@@ -925,6 +925,7 @@ describe('modules/manager/gradle/parser', () => {
       ${''}              | ${'unknown { toolVersion = "1.2.3" }'}                           | ${null}
       ${''}              | ${'composeOptions { kotlinCompilerExtensionVersion = "1.2.3" }'} | ${{ depName: 'composeOptions', packageName: GRADLE_PLUGINS['composeOptions'][1], currentValue: '1.2.3' }}
       ${''}              | ${'jmh { jmhVersion = "1.2.3" }'}                                | ${{ depName: 'jmh', packageName: GRADLE_PLUGINS['jmh'][1], currentValue: '1.2.3' }}
+      ${''}              | ${'micronaut { version = "1.2.3" }'}                             | ${{ depName: 'micronaut', packageName: GRADLE_PLUGINS['micronaut'][1], currentValue: '1.2.3' }}
     `('$def | $input', ({ def, input, output }) => {
       const { deps } = parseGradle([def, input].join('\n'));
       expect(deps).toMatchObject([output].filter(is.truthy));

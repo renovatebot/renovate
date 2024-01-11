@@ -189,12 +189,12 @@ const allToolConfig: Record<string, ToolConfig> = {
   dart: {
     datasource: 'dart-version',
     packageName: 'dart',
-    versioning: semverVersioningId,
+    versioning: npmVersioningId,
   },
   flutter: {
     datasource: 'flutter-version',
     packageName: 'flutter',
-    versioning: semverVersioningId,
+    versioning: npmVersioningId,
   },
 };
 

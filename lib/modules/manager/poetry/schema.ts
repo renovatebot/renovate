@@ -7,6 +7,7 @@ import { uniq } from '../../../util/uniq';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
+import * as gitVersioning from '../../versioning/git';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import { dependencyPattern } from '../pip_requirements/extract';
@@ -35,39 +36,45 @@ const PoetryGitDependency = z
     git: z.string(),
     tag: z.string().optional().catch(undefined),
     version: z.string().optional().catch(undefined),
+    branch: z.string().optional().catch(undefined),
+    rev: z.string().optional().catch(undefined),
   })
-  .transform(({ git, tag, version }): PackageDependency => {
-    if (!tag) {
-      const res: PackageDependency = {
-        datasource: GitRefsDatasource.id,
-        packageName: git,
-        skipReason: 'git-dependency',
-      };
-
-      if (version) {
-        res.currentValue = version;
+  .transform(({ git, tag, version, branch, rev }): PackageDependency => {
+    if (tag) {
+      const { source, owner, name } = parseGitUrl(git);
+      if (source === 'github.com') {
+        const repo = `${owner}/${name}`;
+        return {
+          datasource: GithubTagsDatasource.id,
+          currentValue: tag,
+          packageName: repo,
+        };
+      } else {
+        return {
+          datasource: GitRefsDatasource.id,
+          currentValue: tag,
+          packageName: git,
+          skipReason: 'git-dependency',
+        };
       }
-
-      return res;
     }
 
-    const parsedUrl = parseGitUrl(git);
-    if (parsedUrl.source !== 'github.com') {
+    if (rev) {
       return {
         datasource: GitRefsDatasource.id,
-        currentValue: tag,
+        currentValue: branch,
+        currentDigest: rev,
+        replaceString: rev,
+        packageName: git,
+      };
+    } else {
+      return {
+        datasource: GitRefsDatasource.id,
+        currentValue: version,
         packageName: git,
         skipReason: 'git-dependency',
       };
     }
-
-    const { owner, name } = parsedUrl;
-    const repo = `${owner}/${name}`;
-    return {
-      datasource: GithubTagsDatasource.id,
-      currentValue: tag,
-      packageName: repo,
-    };
   });
 
 const PoetryPypiDependency = z.union([
@@ -111,6 +118,11 @@ export const PoetryDependencies = LooseRecord(
   z.string(),
   PoetryDependency.transform((dep) => {
     if (dep.skipReason) {
+      return dep;
+    }
+
+    if (dep.datasource === GitRefsDatasource.id && dep.currentDigest) {
+      dep.versioning = gitVersioning.id;
       return dep;
     }
 
