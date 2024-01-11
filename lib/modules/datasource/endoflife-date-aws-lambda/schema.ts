@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { UtcDate } from '../../../util/schema-utils';
 import type { Release } from '../types';
 
-const ExpireableField = z.union([
+const AWSLambdaExpireableField = z.union([
   UtcDate.transform((x) => {
     const now = DateTime.now().toUTC();
     return x <= now;
@@ -16,8 +16,8 @@ export const EndoflifeDateAwsLambdaVersions = z
     cycle: z.string(),
     latest: z.optional(z.string()),
     releaseDate: z.optional(z.string()),
-    eol: z.optional(ExpireableField),
-    discontinued: z.optional(ExpireableField),
+    eol: z.optional(AWSLambdaExpireableField),
+    discontinued: z.optional(AWSLambdaExpireableField),
   })
   .transform(
     ({
