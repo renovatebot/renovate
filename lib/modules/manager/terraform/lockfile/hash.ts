@@ -115,13 +115,19 @@ export class TerraformProviderHash {
       return null;
     }
 
-    let zhHashes: string[] = [];
-    if (builds.length > 0 && builds[0].shasums_url) {
-      zhHashes =
-        (await TerraformProviderHash.terraformDatasource.getZipHashes(
-          builds[0].shasums_url,
-        )) ?? [];
-    }
+    const zhHashes = (
+      await Promise.all(
+        builds.map((build) =>
+          build.shasums_url
+            ? TerraformProviderHash.terraformDatasource.getZipHashes(
+                build.shasums_url,
+              )
+            : [],
+        ),
+      )
+    )
+      .flat()
+      .filter((hash) => hash !== undefined);
 
     const h1Hashes =
       await TerraformProviderHash.calculateHashScheme1Hashes(builds);
