@@ -34,7 +34,7 @@ lambdas:
           cidr_ip: 0.0.0.0/0
           rule_desc: 'access to aws services needed'
       environment_variables:
-        ENV: "{{ env }}"
+        ENV: '{{ env }}'
         CUSTOMER: 'tst'
         DEBUG: "{{ debug | default('false') }}"
       memory_size: 1024
@@ -55,7 +55,7 @@ lambdas:
           cidr_ip: 0.0.0.0/0
           rule_desc: 'access to aws services needed'
       environment_variables:
-        ENV: "{{ env }}"
+        ENV: '{{ env }}'
         CUSTOMER: 'tst'
         DEBUG: "{{ debug | default('false') }}"
       memory_size: 1024

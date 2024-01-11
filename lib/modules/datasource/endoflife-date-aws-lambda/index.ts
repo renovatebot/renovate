@@ -41,16 +41,21 @@ export class EndoflifeDateAwsLambdaPackagesource extends Datasource {
     const url = joinUrlParts(registryUrl, `aws-lambda.json`);
 
     try {
-      const response = await this.http.getJson(url, EndoflifeDateAwsLambdaVersions);
+      const response = await this.http.getJson(
+        url,
+        EndoflifeDateAwsLambdaVersions,
+      );
 
       // filter results by packagename
 
       result.releases.push(...response.body);
 
-      result.releases = result.releases.filter((release) => release.version.includes(packageName));
+      result.releases = result.releases.filter((release) =>
+        release.version.includes(packageName),
+      );
       result.releases = result.releases.map((release) => {
-        release.version = release.version.replace(packageName,'')
-        return release
+        release.version = release.version.replace(packageName, '');
+        return release;
       });
 
       return result.releases.length ? result : null;

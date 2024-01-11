@@ -84,7 +84,10 @@ api.set(DenoDatasource.id, new DenoDatasource());
 api.set(DockerDatasource.id, new DockerDatasource());
 api.set(DotnetVersionDatasource.id, new DotnetVersionDatasource());
 api.set(EndoflifeDatePackagesource.id, new EndoflifeDatePackagesource());
-api.set(EndoflifeDateAwsLambdaPackagesource.id, new EndoflifeDateAwsLambdaPackagesource());
+api.set(
+  EndoflifeDateAwsLambdaPackagesource.id,
+  new EndoflifeDateAwsLambdaPackagesource(),
+);
 api.set(FlutterVersionDatasource.id, new FlutterVersionDatasource());
 api.set(GalaxyDatasource.id, new GalaxyDatasource());
 api.set(GalaxyCollectionDatasource.id, new GalaxyCollectionDatasource());
