@@ -30,12 +30,7 @@ export function makeVersion(
 export function cleanVersion(version: string): string {
   if (version) {
     return version
-      .replace(
-        regEx(
-          /,|\[|\]|"|include_prerelease=|include_prerelease|loose=|True|False/g,
-        ),
-        '',
-      )
+      .replace(regEx(/,|\[|\]|"|include_prerelease=|loose=|True|False/g), '')
       .trim();
   }
   return version;
@@ -49,7 +44,7 @@ export function getOptions(input: string): {
   let loose = true;
   if (input) {
     includePrerelease =
-      input.includes('include_prerelease') &&
+      input.includes('include_prerelease=True') &&
       !input.includes('include_prerelease=False');
     loose = input.includes('loose=True') || !input.includes('loose=False');
   }
