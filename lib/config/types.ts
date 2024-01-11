@@ -393,13 +393,7 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?:
-    | 'customDatasources'
-    | 'hostRules'
-    | 'packageRules'
-    | 'postUpgradeTasks'
-    | 'customManagers';
-
+  parents?: string[];
   stage?: RenovateConfigStage;
 
   experimental?: boolean;
