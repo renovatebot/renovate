@@ -1,0 +1,74 @@
+module.exports = {
+  endpoint: 'https://git.cambiahealth.com/api/v4/',
+  platform: 'gitlab',
+  hostRules: [
+    {
+      hostType: 'clojure',
+      matchHost: 'cambiahealth.jfrog.io',
+      username: process.env.ARTIFACTORY_USERNAME,
+      password: process.env.ARTIFACTORY_PASSWORD,
+      authType: 'Basic'
+    },
+    {
+      hostType: 'gradle',
+      matchHost: 'cambiahealth.jfrog.io',
+      username: process.env.ARTIFACTORY_USERNAME,
+      password: process.env.ARTIFACTORY_PASSWORD,
+      authType: 'Basic'
+    },
+    {
+      hostType: 'npm',
+      matchHost: 'cambiahealth.jfrog.io',
+      username: process.env.ARTIFACTORY_USERNAME,
+      password: process.env.ARTIFACTORY_PASSWORD,
+      authType: 'Basic'
+    },
+    {
+      hostType: 'maven',
+      matchHost: 'cambiahealth.jfrog.io',
+      username: process.env.ARTIFACTORY_USERNAME,
+      password: process.env.ARTIFACTORY_PASSWORD,
+      authType: 'Basic'
+    },
+    {
+      hostType: 'pypi',
+      matchHost: 'cambiahealth.jfrog.io',
+      username: process.env.ARTIFACTORY_USERNAME,
+      password: process.env.ARTIFACTORY_PASSWORD,
+      authType: 'Basic'
+    },
+    {
+      hostType: 'rubygems',
+      matchHost: 'cambiahealth.jfrog.io',
+      username: process.env.ARTIFACTORY_USERNAME,
+      password: process.env.ARTIFACTORY_PASSWORD,
+      authType: 'Basic'
+    },
+    {
+      hostType: 'docker',
+      matchHost: 'cambiahealth.jfrog.io',
+      username: process.env.ARTIFACTORY_USERNAME,
+      password: process.env.ARTIFACTORY_PASSWORD,
+      authType: 'Basic'
+    },
+    {
+      hostType: 'docker',
+      matchHost: 'docker.artifactory.cambiahealth.com',
+      username: '',
+      password: '',
+      authType: 'Basic'
+    },
+    {
+      hostType: 'docker',
+      matchHost: 'index.docker.io',
+      username: process.env.DOCKER_HUB_USER,
+      password: process.env.DOCKER_HUB_PASSWORD,
+      authType: 'Basic'
+    }
+  ],
+  onboardingConfig: {
+    "extends": [
+      "local>cmb-psw/renovatebot"
+    ]
+  }
+};

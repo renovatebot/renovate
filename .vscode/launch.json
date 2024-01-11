@@ -7,16 +7,16 @@
       "name": "debug",
       "program": "${workspaceFolder}/lib/renovate.ts",
       "env": {
-        "LOG_LEVEL": "debug"
+        "LOG_LEVEL": "debug",
+        "RENOVATE_TOKEN": "2M8dsBRD5ZUSmPsT9udx"
       },
       "console": "integratedTerminal",
       "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
+      "args": ["cmb-psw/poc-renovate-private-registry"],
       "skipFiles": ["<node_internals>/**/*.js"]
     },
     {
-      "type": "node",
-      "request": "launch",
-      "name": "debug (clean cache)",
+      "type": "node"      "name": "debug (clean cache)",
       "program": "${workspaceFolder}/lib/renovate.ts",
       "env": {
         "LOG_LEVEL": "debug"
