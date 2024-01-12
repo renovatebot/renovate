@@ -61,9 +61,12 @@ export async function init(config: AllConfig): Promise<void> {
       get: redisCache.get,
       set: redisCache.set,
     };
-  } else if (config.cacheDir && config.useSqliteCache) {
+    return;
+  }
+
+  // istanbul ignore if
+  if (config.cacheDir && config.useSqliteCache) {
     const sqlite = await SqlitePackageCache.init(config.cacheDir);
-    // istanbul ignore next
     cacheProxy = {
       get: (namespace: string, key: string) =>
         Promise.resolve(sqlite.get(namespace, key)),
@@ -78,13 +81,17 @@ export async function init(config: AllConfig): Promise<void> {
         return Promise.resolve();
       },
     };
-  } else if (config.cacheDir) {
+    return;
+  }
+
+  if (config.cacheDir) {
     fileCache.init(config.cacheDir);
     cacheProxy = {
       get: fileCache.get,
       set: fileCache.set,
       cleanup: fileCache.cleanup,
     };
+    return;
   }
 }
 
