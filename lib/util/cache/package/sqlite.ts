@@ -38,6 +38,11 @@ export class SqlitePackageCache {
       )
       .run();
     client.prepare('CREATE INDEX IF NOT EXISTS expiry ON cache (expiry)').run();
+    client
+      .prepare(
+        'CREATE INDEX IF NOT EXISTS namespace_key ON cache (namespace, key)',
+      )
+      .run();
 
     this.upsertStatement = client.prepare(`
       INSERT INTO cache (namespace, key, data, expiry)
