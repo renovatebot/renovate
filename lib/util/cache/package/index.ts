@@ -2,6 +2,7 @@ import type { AllConfig } from '../../../config/types';
 import * as memCache from '../memory';
 import * as fileCache from './file';
 import * as redisCache from './redis';
+import { SqlitePackageCache } from './sqlite';
 import type { PackageCache } from './types';
 
 let cacheProxy: PackageCache | undefined;
@@ -59,6 +60,22 @@ export async function init(config: AllConfig): Promise<void> {
     cacheProxy = {
       get: redisCache.get,
       set: redisCache.set,
+    };
+  } else if (config.cacheDir && config.useSqliteCache) {
+    const sqlite = await SqlitePackageCache.init(config.cacheDir);
+    cacheProxy = {
+      get: (namespace: string, key: string) =>
+        Promise.resolve(sqlite.get(namespace, key)),
+      set: (
+        namespace: string,
+        key: string,
+        value: unknown,
+        ttlMinutes: number,
+      ) => Promise.resolve(sqlite.set(namespace, key, value, ttlMinutes)),
+      cleanup: () => {
+        sqlite.close();
+        return Promise.resolve();
+      },
     };
   } else if (config.cacheDir) {
     fileCache.init(config.cacheDir);
