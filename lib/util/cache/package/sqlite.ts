@@ -45,10 +45,10 @@ export class SqlitePackageCache {
 
     this.upsertStatement = client.prepare(`
       INSERT INTO cache (namespace, key, data, expiry)
-      VALUES (@namespace, @key, @data, @expiry)
+      VALUES (@namespace, @key, @data, unixepoch() + @ttlSeconds)
       ON CONFLICT (namespace, key) DO UPDATE SET
         data = @data,
-        expiry = @expiry
+        expiry = unixepoch() + @ttlSeconds
     `);
 
     this.getStatement = client
@@ -56,21 +56,21 @@ export class SqlitePackageCache {
         `
           SELECT data FROM cache
           WHERE
-            namespace = @namespace AND key = @key
+            namespace = @namespace AND key = @key AND expiry > unixepoch()
         `,
       )
       .pluck(true);
 
     this.cleanupStatement = client.prepare(`
       DELETE FROM cache
-      WHERE expiry <= @now
+      WHERE expiry <= unixepoch()
     `);
   }
 
   set(namespace: string, key: string, value: unknown, ttlMinutes = 5): void {
     const data = JSON.stringify(value);
-    const expiry = Date.now() + ttlMinutes * 60 * 1000;
-    this.upsertStatement.run({ namespace, key, data, expiry });
+    const ttlSeconds = ttlMinutes * 60;
+    this.upsertStatement.run({ namespace, key, data, ttlSeconds });
   }
 
   get<T = never>(namespace: string, key: string): T | undefined {
@@ -79,10 +79,11 @@ export class SqlitePackageCache {
   }
 
   private cleanup(): void {
-    const now = Date.now();
-    this.cleanupStatement.run({ now });
-    const timeMs = Date.now() - now;
-    logger.trace(`SQLite cache cleanup: ${timeMs}ms`);
+    const start = Date.now();
+    this.cleanupStatement.run();
+    const finish = Date.now();
+    const durationMs = finish - start;
+    logger.trace(`SQLite cache cleanup: ${durationMs}ms`);
   }
 
   close(): void {
