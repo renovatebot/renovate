@@ -85,7 +85,7 @@ export class SqlitePackageCache {
 
   private cleanup(): void {
     const start = Date.now();
-    const totalCount = this.countStatement.get();
+    const totalCount = this.countStatement.get() as number;
     const { changes: deletedCount } = this.cleanupStatement.run();
     const finish = Date.now();
     const durationMs = finish - start;
