@@ -1,6 +1,5 @@
 import Sqlite from 'better-sqlite3';
 import type { Database, Statement } from 'better-sqlite3';
-import { DateTime } from 'luxon';
 import * as upath from 'upath';
 import { logger } from '../../../logger';
 import { ensureDir } from '../../fs';
@@ -70,7 +69,7 @@ export class SqlitePackageCache {
 
   set(namespace: string, key: string, value: unknown, ttlMinutes = 5): void {
     const data = JSON.stringify(value);
-    const expiry = DateTime.utc().plus({ minutes: ttlMinutes }).toMillis();
+    const expiry = Date.now() + ttlMinutes * 60 * 1000;
     this.upsertStatement.run({ namespace, key, data, expiry });
   }
 
@@ -80,9 +79,9 @@ export class SqlitePackageCache {
   }
 
   private cleanup(): void {
-    const now = DateTime.utc().toMillis();
+    const now = Date.now();
     this.cleanupStatement.run({ now });
-    const timeMs = DateTime.utc().toMillis() - now;
+    const timeMs = Date.now() - now;
     logger.trace(`SQLite cache cleanup: ${timeMs}ms`);
   }
 

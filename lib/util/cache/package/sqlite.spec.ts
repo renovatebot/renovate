@@ -23,9 +23,11 @@ describe('util/cache/package/sqlite', () => {
 
   it('should set and get', async () => {
     const res = await withSqlite((sqlite) => {
-      sqlite.set('foo', 'bar', { foo: 'bar' });
+      sqlite.set('foo', 'bar', { foo: 'foo' });
+      sqlite.set('foo', 'bar', { bar: 'bar' });
+      sqlite.set('foo', 'bar', { baz: 'baz' });
       return sqlite.get('foo', 'bar');
     });
-    expect(res).toEqual({ foo: 'bar' });
+    expect(res).toEqual({ baz: 'baz' });
   });
 });
