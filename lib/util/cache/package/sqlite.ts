@@ -8,6 +8,7 @@ export class SqlitePackageCache {
   private readonly upsertStatement: Statement<unknown[]>;
   private readonly getStatement: Statement<unknown[]>;
   private readonly cleanupStatement: Statement<unknown[]>;
+  private readonly countStatement: Statement<unknown[]>;
 
   static async init(cacheDir: string): Promise<SqlitePackageCache> {
     const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
@@ -65,6 +66,10 @@ export class SqlitePackageCache {
       DELETE FROM cache
       WHERE expiry <= unixepoch()
     `);
+
+    this.countStatement = client
+      .prepare('SELECT COUNT(*) FROM cache')
+      .pluck(true);
   }
 
   set(namespace: string, key: string, value: unknown, ttlMinutes = 5): void {
@@ -80,10 +85,13 @@ export class SqlitePackageCache {
 
   private cleanup(): void {
     const start = Date.now();
-    this.cleanupStatement.run();
+    const totalCount = this.countStatement.get();
+    const { changes: deletedCount } = this.cleanupStatement.run();
     const finish = Date.now();
     const durationMs = finish - start;
-    logger.trace(`SQLite cache cleanup: ${durationMs}ms`);
+    logger.debug(
+      `SQLite package cache: deleted ${deletedCount} of ${totalCount} entries in ${durationMs}ms`,
+    );
   }
 
   close(): void {
