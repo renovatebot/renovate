@@ -173,12 +173,14 @@ describe('workers/repository/stats', () => {
             "count": 4,
             "maxMs": 100,
             "medianMs": 20,
+            "totalMs": 160,
           },
           "set": {
             "avgMs": 70,
             "count": 3,
             "maxMs": 110,
             "medianMs": 80,
+            "totalMs": 210,
           },
         }
       `);
