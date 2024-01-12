@@ -4,6 +4,9 @@
 
 First, [create a Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account.
 
+If you are using a Group access token, the token must have Developer role or higher permissions in order to create issues and merge requests.
+The token must have Maintainer permissions in order to perform Automerge.
+
 For real runs, give the PAT these scopes:
 
 - `read_user`

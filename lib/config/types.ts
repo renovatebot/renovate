@@ -117,6 +117,7 @@ export interface GlobalOnlyConfig {
   repositories?: RenovateRepository[];
   platform?: PlatformId;
   endpoint?: string;
+  useCloudMetadataServices?: boolean;
   useSqliteCache?: boolean;
 }
 

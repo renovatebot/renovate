@@ -22,6 +22,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'useCloudMetadataServices',
+    description:
+      'If `false`, Renovate does not try to access cloud metadata services.',
+    type: 'boolean',
+    default: true,
+    globalOnly: true,
+  },
+  {
     name: 'allowPostUpgradeCommandTemplating',
     description:
       'Set this to `false` to disable template compilation for post-upgrade commands.',
