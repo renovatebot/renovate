@@ -630,13 +630,13 @@ export class DockerDatasource extends Datasource {
     let url: string | null =
       `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
-    const headers =
-      (await getAuthHeaders(this.http, registryHost, dockerRepository, url)) ||
-      {}; // uses empty headers if no authentication headers were provided by the registry
+    const headers = (await getAuthHeaders(
+      this.http,
+      registryHost,
+      dockerRepository,
+      url,
+    )) || { 'Content-Type': 'application/json' }; // if empty headers are provided, error will not be caught
 
-    if (Object.keys(headers).length === 0) {
-      logger.debug('No authentication headers were found for getTags lookup');
-    }
     let page = 0;
     const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
       ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
@@ -655,6 +655,7 @@ export class DockerDatasource extends Datasource {
           err instanceof HttpError &&
           isECRMaxResultsError(err)
         ) {
+          logger.debug("Retrying getTags with maxResults of '1000'");
           const maxResults = 1000;
           url = `${registryHost}/${dockerRepository}/tags/list?n=${maxResults}`;
           url = ensurePathPrefix(url, '/v2');
