@@ -86,4 +86,5 @@ export const prFieldsFilter = [
   'values.reviewers.nickname',
   'values.reviewers.account_status',
   'values.created_on',
+  'values.updated_on',
 ].join(',');
