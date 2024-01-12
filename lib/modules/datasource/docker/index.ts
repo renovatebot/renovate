@@ -635,7 +635,7 @@ export class DockerDatasource extends Datasource {
       registryHost,
       dockerRepository,
       url,
-    )) || { 'Content-Type': 'application/json' }; // if empty headers are provided, error will not be caught
+    )) ?? { 'Content-Type': 'application/json' }; // if empty headers are provided, error will not be caught
 
     if (headers['Content-Type'] === 'application/json') {
       logger.debug('No authentication headers found, using default headers');
