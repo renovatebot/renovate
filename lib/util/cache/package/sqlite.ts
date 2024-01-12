@@ -10,7 +10,7 @@ export class SqlitePackageCache {
   private readonly cleanupStatement: Statement<unknown[]>;
 
   static async init(cacheDir: string): Promise<SqlitePackageCache> {
-    const sqliteDir = upath.join(cacheDir, '/renovate/renovate-cache-sqlite');
+    const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
     await ensureDir(sqliteDir);
     const sqliteFile = upath.join(sqliteDir, 'db.sqlite');
     const client = new Sqlite(sqliteFile);
