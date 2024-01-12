@@ -637,6 +637,10 @@ export class DockerDatasource extends Datasource {
       url,
     )) || { 'Content-Type': 'application/json' }; // if empty headers are provided, error will not be caught
 
+    if (headers['Content-Type'] === 'application/json') {
+      logger.debug('No authentication headers found, using default headers');
+    }
+
     let page = 0;
     const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
       ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
