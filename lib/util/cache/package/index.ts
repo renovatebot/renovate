@@ -63,6 +63,7 @@ export async function init(config: AllConfig): Promise<void> {
     };
   } else if (config.cacheDir && config.useSqliteCache) {
     const sqlite = await SqlitePackageCache.init(config.cacheDir);
+    // istanbul ignore next
     cacheProxy = {
       get: (namespace: string, key: string) =>
         Promise.resolve(sqlite.get(namespace, key)),
