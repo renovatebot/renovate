@@ -47,11 +47,15 @@ export class SqlitePackageCache {
         expiry = @expiry
     `);
 
-    this.getStatement = client.prepare(`
-      SELECT data FROM cache
-      WHERE
-        namespace = @namespace AND key = @key AND expiry > @now
-    `);
+    this.getStatement = client
+      .prepare(
+        `
+          SELECT data FROM cache
+          WHERE
+            namespace = @namespace AND key = @key
+        `,
+      )
+      .pluck(true);
 
     this.cleanupStatement = client.prepare(`
       DELETE FROM cache
@@ -66,15 +70,8 @@ export class SqlitePackageCache {
   }
 
   get<T = never>(namespace: string, key: string): T | undefined {
-    const now = DateTime.utc().toMillis();
-    const res = this.getStatement.get({ namespace, key, now }) as
-      | { data: string }
-      | undefined;
-    if (!res) {
-      return undefined;
-    }
-
-    return JSON.parse(res.data);
+    const res = this.getStatement.get({ namespace, key }) as string | undefined;
+    return res ? JSON.parse(res) : undefined;
   }
 
   private cleanup(): void {
@@ -85,7 +82,6 @@ export class SqlitePackageCache {
   }
 
   close(): void {
-    this.cleanup();
     this.client.close();
   }
 }
