@@ -195,7 +195,7 @@ export async function validateConfig(
       if (
         !isPreset &&
         optionParents[key] &&
-        optionParents[key]?.includes(parentName)
+        !optionParents[key]?.includes(parentName)
       ) {
         // TODO: types (#22198)
         const message = `${key} should only be configured within a "${optionParents[
