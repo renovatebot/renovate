@@ -919,6 +919,10 @@ Some cloud providers offer services to receive metadata about the current instan
 or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).
 Use this option to control whether Renovate should try to access these services.
 
+## useSqliteCache
+
+For improved performance, set this to `true` and Renovate will use a SQLite database for its package cache instead of the local file system.
+
 ## username
 
 You may need to set a `username` if you:
