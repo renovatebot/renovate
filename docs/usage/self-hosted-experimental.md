@@ -96,7 +96,7 @@ If set, Renovate will terminate the whole process group of a terminated child pr
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
 If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergable before trying to automerge.
-The formula for the delay between attempts is `250 * attempt * attempt` milliseconds.
+The formula for the delay between attempts is `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY * attempt * attempt` milliseconds.
 
 Default value: `5` (attempts results in max. 13.75 seconds timeout).
 
@@ -107,6 +107,12 @@ Adjust default time (in milliseconds) given to GitLab to create pipelines for a 
 Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
 
 Default value: `1000` (milliseconds).
+
+## `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY`
+
+If set, Renovate will use this as a delay to proceed with an automerge.
+
+Default value: `250` (milliseconds).
 
 ## `RENOVATE_X_HARD_EXIT`
 
@@ -125,6 +131,11 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 
 If set, Renovate will query this API for Merge Confidence data.
 This feature is in private beta.
+
+## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`
+
+If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
+The expected value for this environment variable is a JSON array of strings.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 

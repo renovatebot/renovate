@@ -113,6 +113,7 @@ export interface GlobalOnlyConfig {
   privateKeyPath?: string;
   privateKeyPathOld?: string;
   redisUrl?: string;
+  redisPrefix?: string;
   repositories?: RenovateRepository[];
   platform?: PlatformId;
   endpoint?: string;
@@ -209,6 +210,7 @@ export interface RenovateConfig
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
+  commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
   defaultBranch?: string;

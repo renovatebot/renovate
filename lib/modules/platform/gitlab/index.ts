@@ -644,26 +644,46 @@ async function tryPrAutomerge(
         await ignoreApprovals(pr);
       }
 
-      const desiredStatus = 'can_be_merged';
+      let desiredStatus = 'can_be_merged';
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
       const retryTimes = parseInteger(
         process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
         5,
       );
 
+      if (semver.gte(defaults.version, '15.6.0')) {
+        logger.trace(
+          { version: defaults.version },
+          'In GitLab 15.6 merge_status, using detailed_merge_status to check the merge request status',
+        );
+        desiredStatus = 'mergeable';
+      }
+
+      const mergeDelay = parseInteger(
+        process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY,
+        250,
+      );
+
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
         const { body } = await gitlabApi.getJson<{
           merge_status: string;
+          detailed_merge_status?: string;
           pipeline: string;
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
         // Only continue if the merge request can be merged and has a pipeline.
-        if (body.merge_status === desiredStatus && body.pipeline !== null) {
+        if (
+          ((desiredStatus === 'mergeable' &&
+            body.detailed_merge_status === desiredStatus) ||
+            (desiredStatus === 'can_be_merged' &&
+              body.merge_status === desiredStatus)) &&
+          body.pipeline !== null
+        ) {
           break;
         }
-        await setTimeout(250 * attempt ** 2); // exponential backoff
+        await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
 
       await gitlabApi.putJson(
@@ -863,8 +883,36 @@ export async function findPr({
   branchName,
   prTitle,
   state = 'all',
+  includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle!}, ${state})`);
+
+  if (includeOtherAuthors) {
+    // PR might have been created by anyone, so don't use the cached Renovate MR list
+    const response = await gitlabApi.getJson<GitLabMergeRequest[]>(
+      `projects/${config.repository}/merge_requests?source_branch=${branchName}&state=opened`,
+    );
+
+    const { body: mrList } = response;
+    if (!mrList.length) {
+      logger.debug(`No MR found for branch ${branchName}`);
+      return null;
+    }
+
+    // return the latest merge request
+    const mr = mrList[0];
+
+    // only pass necessary info
+    const pr: GitlabPr = {
+      sourceBranch: mr.source_branch,
+      number: mr.iid,
+      state: 'open',
+      title: mr.title,
+    };
+
+    return massagePr(pr);
+  }
+
   const prList = await getPrList();
   return (
     prList.find(

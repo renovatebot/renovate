@@ -5,7 +5,11 @@ description: Self-Hosted configuration usable in config file, CLI or environment
 
 # Self-Hosted configuration options
 
-You can only use these configuration options when you're self-hosting Renovate.
+Only use these configuration options when you _self-host_ Renovate.
+
+Do _not_ put the self-hosted config options listed on this page in your "repository config" file (`renovate.json` for example), because Renovate will ignore those config options, and may also create a config error issue.
+
+The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
@@ -770,6 +774,11 @@ Used as an alternative to `privateKeyOld`, if you want the key to be read from d
 ## productLinks
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
+
+## redisPrefix
+
+If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
+It's only used if `redisUrl` is configured.
 
 ## redisUrl
 

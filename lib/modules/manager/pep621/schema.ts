@@ -16,6 +16,11 @@ export const PyProjectSchema = z.object({
       'optional-dependencies': DependencyRecordSchema,
     })
     .optional(),
+  'build-system': z
+    .object({
+      requires: DependencyListSchema,
+    })
+    .optional(),
   tool: z
     .object({
       pdm: z

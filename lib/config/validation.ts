@@ -129,7 +129,11 @@ export async function validateConfig(
       });
       continue;
     }
-    if (parentPath && topLevelObjects.includes(key)) {
+    if (
+      parentPath &&
+      parentPath !== 'onboardingConfig' &&
+      topLevelObjects.includes(key)
+    ) {
       errors.push({
         topic: 'Configuration Error',
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
