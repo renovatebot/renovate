@@ -28,3 +28,7 @@ export function isNotNullOrUndefined<T>(
 export function toArray<T>(value: T | T[]): T[] {
   return is.array(value) ? value : [value];
 }
+
+export function deduplicateArray<T>(array: T[]): T[] {
+  return Array.from(new Set(array));
+}
