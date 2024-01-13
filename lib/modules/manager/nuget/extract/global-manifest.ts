@@ -56,5 +56,5 @@ export function extractMsbuildGlobalManifest(
     }
   }
 
-  return { deps, extractedConstraints };
+  return { deps, ...(extractedConstraints && { extractedConstraints }) };
 }
