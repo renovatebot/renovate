@@ -16,7 +16,6 @@ export class SqlitePackageCache {
     const sqliteFile = upath.join(sqliteDir, 'db.sqlite');
     const client = new Sqlite(sqliteFile);
     const res = new SqlitePackageCache(client);
-    res.cleanup();
     return res;
   }
 
@@ -95,6 +94,7 @@ export class SqlitePackageCache {
   }
 
   close(): void {
+    this.cleanup();
     this.client.close();
   }
 }
