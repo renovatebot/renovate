@@ -296,9 +296,7 @@ describe('modules/manager/nuget/extract', () => {
     it('extracts msbuild-sdks from global.json', async () => {
       const packageFile = 'msbuild-sdk-files/global.json';
       const contents = Fixtures.get(packageFile);
-      expect(
-        await extractPackageFile(contents, packageFile, config),
-      ).toMatchObject({
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
           {
             currentValue: '5.0.302',
@@ -313,24 +311,26 @@ describe('modules/manager/nuget/extract', () => {
             depType: 'msbuild-sdk',
           },
         ],
+        extractedConstraints: { 'dotnet-sdk': '5.0.302' },
       });
     });
 
     it('extracts dotnet-sdk from global.json', async () => {
       const packageFile = 'msbuild-sdk-files/global.1.json';
       const contents = Fixtures.get(packageFile);
-      expect(
-        await extractPackageFile(contents, 'global.json', config),
-      ).toMatchObject({
-        deps: [
-          {
-            currentValue: '5.0.302',
-            depName: 'dotnet-sdk',
-            depType: 'dotnet-sdk',
-            datasource: DotnetVersionDatasource.id,
-          },
-        ],
-      });
+      expect(await extractPackageFile(contents, 'global.json', config)).toEqual(
+        {
+          deps: [
+            {
+              currentValue: '5.0.302',
+              depName: 'dotnet-sdk',
+              depType: 'dotnet-sdk',
+              datasource: DotnetVersionDatasource.id,
+            },
+          ],
+          extractedConstraints: { 'dotnet-sdk': '5.0.302' },
+        },
+      );
     });
 
     it('handles malformed global.json', async () => {

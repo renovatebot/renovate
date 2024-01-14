@@ -1,16 +1,16 @@
-import { logger, mocked } from '../../../test/util';
+import { logger } from '../../../test/util';
 import type { Logger } from '../../logger/types';
-import * as _memCache from '../../util/cache/memory';
+import * as memCache from '../../util/cache/memory';
 import type { LookupStats } from '../../util/cache/memory/types';
-import type { RequestStats } from '../../util/http/types';
 import { printLookupStats, printRequestStats } from './stats';
 
-jest.mock('../../util/cache/memory');
-
-const memCache = mocked(_memCache);
 const log = logger.logger as jest.Mocked<Logger>;
 
 describe('workers/repository/stats', () => {
+  beforeEach(() => {
+    memCache.init();
+  });
+
   describe('printLookupStats()', () => {
     it('runs', () => {
       const stats: LookupStats[] = [
@@ -27,7 +27,7 @@ describe('workers/repository/stats', () => {
           duration: 1000,
         },
       ];
-      memCache.get.mockImplementationOnce(() => stats as any);
+      memCache.set('lookup-stats', stats);
       expect(printLookupStats()).toBeUndefined();
       expect(log.debug).toHaveBeenCalledTimes(1);
       expect(log.debug.mock.calls[0][0]).toMatchInlineSnapshot(`
@@ -51,13 +51,9 @@ describe('workers/repository/stats', () => {
 
   describe('printRequestStats()', () => {
     it('runs', () => {
-      const getStats: number[] = [30, 100, 10, 20];
-      // TODO: fix types, jest is using wrong overload (#22198)
-      memCache.get.mockImplementationOnce(() => getStats as any);
-      const setStats: number[] = [110, 80, 20];
-      // TODO: fix types, jest is using wrong overload (#22198)
-      memCache.get.mockImplementationOnce(() => setStats as any);
-      const httpStats: RequestStats[] = [
+      memCache.set('package-cache-gets', [30, 100, 10, 20]);
+      memCache.set('package-cache-sets', [110, 80, 20]);
+      memCache.set('http-requests', [
         {
           method: 'get',
           url: 'https://api.github.com/api/v3/user',
@@ -100,9 +96,7 @@ describe('workers/repository/stats', () => {
           queueDuration: 0,
           statusCode: 401,
         },
-      ];
-      // TODO: fix types, jest is using wrong overload (#22198)
-      memCache.get.mockImplementationOnce(() => httpStats as any);
+      ]);
       expect(printRequestStats()).toBeUndefined();
       expect(log.trace).toHaveBeenCalledOnce();
       expect(log.debug).toHaveBeenCalledTimes(2);
