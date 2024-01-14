@@ -302,6 +302,7 @@ const repoGroups = {
   ],
   groovy: 'https://github.com/apache/groovy',
   'grpc-dotnet': 'https://github.com/grpc/grpc-dotnet',
+  'grpc-java': 'https://github.com/grpc/grpc-java',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   'hickory-dns': 'https://github.com/hickory-dns/hickory-dns',
