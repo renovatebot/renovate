@@ -403,8 +403,8 @@ const platform: Platform = {
     return 'yellow';
   },
 
-  async getPrList(): Promise<Pr[]> {
-    return await helper.searchPRs(config.repository, botUserName);
+  getPrList(): Promise<Pr[]> {
+    return GiteaPrCache.getPrs(giteaHttp, config.repository, botUserName);
   },
 
   async getPr(number: number): Promise<Pr | null> {
@@ -530,6 +530,7 @@ const platform: Platform = {
         );
 
         // Refresh cached PR list and search for pull request with matching information
+        GiteaPrCache.forceSync();
         const pr = await platform.findPr({
           branchName: sourceBranch,
           state: 'open',

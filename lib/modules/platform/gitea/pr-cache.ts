@@ -31,6 +31,10 @@ export class GiteaPrCache {
     this.cache = pullRequestCache;
   }
 
+  static forceSync(): void {
+    memCache.set('gitea-pr-cache-synced', false);
+  }
+
   private static async init(
     http: GiteaHttp,
     repo: string,

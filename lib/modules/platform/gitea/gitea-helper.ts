@@ -1,8 +1,6 @@
 import type { BranchStatus } from '../../../types';
 import { GiteaHttp, GiteaHttpOptions } from '../../../util/http/gitea';
 import { getQueryString } from '../../../util/url';
-import type { Pr } from '../types';
-import { GiteaPrCache } from './pr-cache';
 import type {
   Branch,
   CombinedCommitStatus,
@@ -179,10 +177,6 @@ export async function requestPrReviewers(
     ...options,
     body: params,
   });
-}
-
-export async function searchPRs(repo: string, author: string): Promise<Pr[]> {
-  return await GiteaPrCache.getPrs(giteaHttp, repo, author);
 }
 
 export async function createIssue(

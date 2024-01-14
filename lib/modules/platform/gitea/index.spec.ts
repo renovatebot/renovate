@@ -1122,6 +1122,10 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('getPr', () => {
+    beforeEach(() => {
+      memCache.init();
+    });
+
     it('should return enriched pull request which exists if open', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
@@ -1309,6 +1313,11 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('createPr', () => {
+    beforeEach(() => {
+      memCache.init();
+      memCache.set('gitea-pr-cache-synced', true);
+    });
+
     const mockNewPR: MockPr = {
       number: 42,
       state: 'open',
@@ -1404,9 +1413,6 @@ describe('modules/platform/gitea/index', () => {
     it('should ensure new pull request gets added to cached pull requests', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
-        .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
-        .reply(200, mockPRs)
         .post('/repos/some/repo/pulls')
         .reply(200, mockNewPR);
       await initFakePlatform(scope);
@@ -1433,7 +1439,7 @@ describe('modules/platform/gitea/index', () => {
         .post('/repos/some/repo/pulls')
         .reply(409)
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, [mockNewPR]);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -1457,7 +1463,7 @@ describe('modules/platform/gitea/index', () => {
         .post('/repos/some/repo/pulls')
         .reply(409)
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, [mockNewPR])
         .patch('/repos/some/repo/pulls/42')
         .reply(200);
@@ -1496,6 +1502,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should use platform automerge', async () => {
+      memCache.set('gitea-pr-cache-synced', true);
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1520,6 +1527,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('continues on platform automerge error', async () => {
+      memCache.set('gitea-pr-cache-synced', true);
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1548,6 +1556,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('continues if platform automerge is not supported', async () => {
+      memCache.set('gitea-pr-cache-synced', true);
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1574,6 +1583,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should create PR with repository merge method when automergeStrategy is auto', async () => {
+      memCache.set('gitea-pr-cache-synced', true);
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1609,6 +1619,7 @@ describe('modules/platform/gitea/index', () => {
     `(
       'should create PR with mergeStrategy $prMergeStrategy',
       async ({ automergeStrategy, prMergeStrategy }) => {
+        memCache.set('gitea-pr-cache-synced', true);
         const scope = httpMock
           .scope('https://gitea.com/api/v1')
           .post('/repos/some/repo/pulls')
@@ -1641,14 +1652,19 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('updatePr', () => {
+    beforeEach(() => {
+      memCache.init();
+    });
+
     it('should update pull request with title', async () => {
+      const pr = mockPRs.find((pr) => pr.number === 1);
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs)
         .patch('/repos/some/repo/pulls/1', { title: 'New Title' })
-        .reply(200);
+        .reply(200, pr);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
 
@@ -1661,7 +1677,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs)
         .patch('/repos/some/repo/pulls/1', {
           title: 'New Title',
@@ -1684,7 +1700,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs)
         .patch('/repos/some/repo/pulls/1', {
           title: 'New Title',
@@ -1707,7 +1723,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs)
         .patch('/repos/some/repo/pulls/3', {
           title: 'WIP: New Title',
@@ -1730,7 +1746,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs)
         .patch('/repos/some/repo/pulls/1', {
           title: 'New Title',
@@ -2479,11 +2495,15 @@ describe('modules/platform/gitea/index', () => {
   });
 
   describe('getBranchPr', () => {
+    beforeEach(() => {
+      memCache.init();
+    });
+
     it('should return existing pull request for branch', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
@@ -2497,7 +2517,7 @@ describe('modules/platform/gitea/index', () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/some/repo/pulls')
-        .query({ state: 'all' })
+        .query({ state: 'all', sort: 'recentupdate' })
         .reply(200, mockPRs);
       await initFakePlatform(scope);
       await initFakeRepo(scope);
