@@ -26,7 +26,7 @@ export class SqlitePackageCache {
     client
       .prepare(
         `
-          CREATE TABLE IF NOT EXISTS cache (
+          CREATE TABLE IF NOT EXISTS package_cache (
             namespace TEXT NOT NULL,
             key TEXT NOT NULL,
             data TEXT NOT NULL,
@@ -36,15 +36,17 @@ export class SqlitePackageCache {
         `,
       )
       .run();
-    client.prepare('CREATE INDEX IF NOT EXISTS expiry ON cache (expiry)').run();
+    client
+      .prepare('CREATE INDEX IF NOT EXISTS expiry ON package_cache (expiry)')
+      .run();
     client
       .prepare(
-        'CREATE INDEX IF NOT EXISTS namespace_key ON cache (namespace, key)',
+        'CREATE INDEX IF NOT EXISTS namespace_key ON package_cache (namespace, key)',
       )
       .run();
 
     this.upsertStatement = client.prepare(`
-      INSERT INTO cache (namespace, key, data, expiry)
+      INSERT INTO package_cache (namespace, key, data, expiry)
       VALUES (@namespace, @key, @data, unixepoch() + @ttlSeconds)
       ON CONFLICT (namespace, key) DO UPDATE SET
         data = @data,
@@ -54,7 +56,7 @@ export class SqlitePackageCache {
     this.getStatement = client
       .prepare(
         `
-          SELECT data FROM cache
+          SELECT data FROM package_cache
           WHERE
             namespace = @namespace AND key = @key AND expiry > unixepoch()
         `,
@@ -62,12 +64,12 @@ export class SqlitePackageCache {
       .pluck(true);
 
     this.cleanupStatement = client.prepare(`
-      DELETE FROM cache
+      DELETE FROM package_cache
       WHERE expiry <= unixepoch()
     `);
 
     this.countStatement = client
-      .prepare('SELECT COUNT(*) FROM cache')
+      .prepare('SELECT COUNT(*) FROM package_cache')
       .pluck(true);
   }
 
