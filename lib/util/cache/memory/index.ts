@@ -1,23 +1,19 @@
-declare const global: {
-  renovateMemCache: Record<string, any> | undefined;
-};
-
-global.renovateMemCache = undefined;
+let repoCache: Record<string, any> | undefined;
 
 export function init(): void {
-  global.renovateMemCache = {};
+  repoCache = {};
 }
 
 export function reset(): void {
-  global.renovateMemCache = undefined;
+  repoCache = undefined;
 }
 
 export function get<T = any>(key: string): T {
-  return global.renovateMemCache?.[key];
+  return repoCache?.[key];
 }
 
 export function set(key: string, value: unknown): void {
-  if (global.renovateMemCache) {
-    global.renovateMemCache[key] = value;
+  if (repoCache) {
+    repoCache[key] = value;
   }
 }
