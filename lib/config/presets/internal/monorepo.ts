@@ -445,7 +445,7 @@ const repoGroups = {
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',
   skiasharp: 'https://github.com/mono/SkiaSharp',
-  slf4j: 'https://github.com/qos-ch/slf4j'
+  slf4j: 'https://github.com/qos-ch/slf4j',
   'spectre-console': 'https://github.com/spectreconsole/spectre.console',
   springfox: 'https://github.com/springfox/springfox',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
