@@ -113,9 +113,11 @@ export interface GlobalOnlyConfig {
   privateKeyPath?: string;
   privateKeyPathOld?: string;
   redisUrl?: string;
+  redisPrefix?: string;
   repositories?: RenovateRepository[];
   platform?: PlatformId;
   endpoint?: string;
+  useCloudMetadataServices?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -190,6 +192,14 @@ export type RenovateRepository =
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 
+export const allowedStatusCheckStrings = [
+  'minimumReleaseAge',
+  'mergeConfidence',
+  'configValidation',
+  'artifactError',
+] as const;
+export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
+
 // TODO: Proper typings
 export interface RenovateConfig
   extends LegacyAdminConfig,
@@ -200,6 +210,7 @@ export interface RenovateConfig
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
+  commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
   defaultBranch?: string;
@@ -261,6 +272,8 @@ export interface RenovateConfig
 
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
+
+  statusCheckNames?: Record<StatusCheckKey, string | null>;
 }
 
 const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;

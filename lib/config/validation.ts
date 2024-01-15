@@ -16,11 +16,13 @@ import {
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
-import type {
-  RenovateConfig,
-  RenovateOptions,
-  ValidationMessage,
-  ValidationResult,
+import {
+  type RenovateConfig,
+  type RenovateOptions,
+  type StatusCheckKey,
+  type ValidationMessage,
+  type ValidationResult,
+  allowedStatusCheckStrings,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
 
@@ -127,7 +129,11 @@ export async function validateConfig(
       });
       continue;
     }
-    if (parentPath && topLevelObjects.includes(key)) {
+    if (
+      parentPath &&
+      parentPath !== 'onboardingConfig' &&
+      topLevelObjects.includes(key)
+    ) {
       errors.push({
         topic: 'Configuration Error',
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
@@ -562,6 +568,30 @@ export async function validateConfig(
                   topic: 'Configuration Error',
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
+              }
+            } else if (key === 'statusCheckNames') {
+              for (const [statusCheckKey, statusCheckValue] of Object.entries(
+                val,
+              )) {
+                if (
+                  !allowedStatusCheckStrings.includes(
+                    statusCheckKey as StatusCheckKey,
+                  )
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed.`,
+                  });
+                }
+                if (
+                  !(is.string(statusCheckValue) || is.null_(statusCheckValue))
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: status check is not a string.`,
+                  });
+                  continue;
+                }
               }
             } else if (key === 'customDatasources') {
               const allowedKeys = [

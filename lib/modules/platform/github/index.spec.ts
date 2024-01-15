@@ -2428,6 +2428,51 @@ describe('modules/platform/github/index', () => {
       res = await github.findPr({ branchName: 'branch-b' });
       expect(res).toBeNull();
     });
+
+    it('finds pr from other authors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/pulls?head=some/repo:branch&state=open')
+        .reply(200, [
+          {
+            number: 1,
+            head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+            title: 'branch a pr',
+            state: 'open',
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+      expect(
+        await github.findPr({
+          branchName: 'branch',
+          state: 'open',
+          includeOtherAuthors: true,
+        }),
+      ).toMatchObject({
+        number: 1,
+        sourceBranch: 'branch-a',
+        sourceRepo: 'some/repo',
+        state: 'open',
+        title: 'branch a pr',
+        updated_at: undefined,
+      });
+    });
+
+    it('returns null if no pr found - (includeOtherAuthors)', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/pulls?head=some/repo:branch&state=open')
+        .reply(200, []);
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = await github.findPr({
+        branchName: 'branch',
+        state: 'open',
+        includeOtherAuthors: true,
+      });
+      expect(pr).toBeNull();
+    });
   });
 
   describe('createPr()', () => {
