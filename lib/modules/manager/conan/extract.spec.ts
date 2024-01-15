@@ -153,6 +153,13 @@ describe('modules/manager/conan/extract', () => {
           replaceString: 'req_l/2.1@otheruser/testing',
         },
         {
+          currentValue: '6.1',
+          depName: 'req_x',
+          depType: 'requires',
+          packageName: 'req_x/6.1@useronly/_',
+          replaceString: 'req_x/6.1@useronly',
+        },
+        {
           currentValue: '0.1',
           depName: 'req_b',
           depType: 'requires',
