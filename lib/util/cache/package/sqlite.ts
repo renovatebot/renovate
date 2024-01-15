@@ -1,22 +1,26 @@
-import { brotliCompressSync, brotliDecompressSync, constants } from 'node:zlib';
+import { promisify } from 'node:util';
+import zlib, { constants } from 'node:zlib';
 import Sqlite from 'better-sqlite3';
 import type { Database, Statement } from 'better-sqlite3';
 import * as upath from 'upath';
 import { logger } from '../../../logger';
 import { ensureDir } from '../../fs';
 
-function compress(input: unknown): Buffer {
+const brotliCompress = promisify(zlib.brotliCompress);
+const brotliDecompress = promisify(zlib.brotliDecompress);
+
+function compress(input: unknown): Promise<Buffer> {
   const jsonStr = JSON.stringify(input);
-  return brotliCompressSync(jsonStr, {
+  return brotliCompress(jsonStr, {
     params: {
       [constants.BROTLI_PARAM_MODE]: constants.BROTLI_MODE_TEXT,
-      [constants.BROTLI_PARAM_QUALITY]: 8,
+      [constants.BROTLI_PARAM_QUALITY]: 6,
     },
   });
 }
 
-function decompress<T>(input: Buffer): T {
-  const buf = brotliDecompressSync(input);
+async function decompress<T>(input: Buffer): Promise<T> {
+  const buf = await brotliDecompress(input);
   const jsonStr = buf.toString('utf8');
   return JSON.parse(jsonStr) as T;
 }
@@ -90,27 +94,28 @@ export class SqlitePackageCache {
       .pluck(true);
   }
 
-  set(
+  async set(
     namespace: string,
     key: string,
     value: unknown,
     ttlMinutes = 5,
   ): Promise<void> {
-    const data = compress(value);
+    const data = await compress(value);
     const ttlSeconds = ttlMinutes * 60;
     this.upsertStatement.run({ namespace, key, data, ttlSeconds });
     return Promise.resolve();
   }
 
-  get<T = never>(namespace: string, key: string): Promise<T | undefined> {
+  async get<T = never>(namespace: string, key: string): Promise<T | undefined> {
     const data = this.getStatement.get({ namespace, key }) as
       | Buffer
       | undefined;
+
     if (!data) {
-      return Promise.resolve(undefined);
+      return undefined;
     }
-    const res = decompress<T>(data);
-    return Promise.resolve(res);
+
+    return await decompress<T>(data);
   }
 
   private cleanupExpired(): void {
