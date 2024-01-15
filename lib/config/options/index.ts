@@ -180,6 +180,19 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'statusCheckNames',
+    description: 'Custom strings to use as status check names.',
+    type: 'object',
+    mergeable: true,
+    advancedUse: true,
+    default: {
+      artifactError: 'renovate/artifacts',
+      configValidation: 'renovate/config-validation',
+      mergeConfidence: 'renovate/merge-confidence',
+      minimumReleaseAge: 'renovate/stability-days',
+    },
+  },
+  {
     name: 'extends',
     description: 'Configuration presets to use or extend.',
     stage: 'package',
@@ -331,6 +344,13 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'redisPrefix',
+    description: 'Key prefix for redis cache entries.',
+    stage: 'global',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'baseDir',
     description:
       'The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.',
@@ -389,7 +409,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.30.0',
+    default: 'ghcr.io/containerbase/sidecar:9.31.3',
     globalOnly: true,
   },
   {
@@ -1038,7 +1058,7 @@ const options: RenovateOptions[] = [
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure', 'gitlab'],
+    supportedPlatforms: ['azure', 'gerrit', 'gitlab'],
   },
   // depType
   {
@@ -1824,7 +1844,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
-    supportedPlatforms: ['bitbucket', 'gitea'],
+    supportedPlatforms: ['azure', 'bitbucket', 'gitea'],
   },
   {
     name: 'automergeComment',
@@ -2759,6 +2779,17 @@ const options: RenovateOptions[] = [
     experimental: true,
     globalOnly: true,
     default: [],
+  },
+  {
+    name: 'maxRetryAfter',
+    description:
+      'Maximum retry-after header value to wait for before retrying a failed request.',
+    type: 'integer',
+    default: 60,
+    stage: 'package',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
   },
 ];
 

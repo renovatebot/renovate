@@ -53,6 +53,7 @@ describe('modules/versioning/loose/index', () => {
     a                               | b                               | expected
     ${'2.4.0'}                      | ${'2.4'}                        | ${true}
     ${'2.4.2'}                      | ${'2.4.1'}                      | ${true}
+    ${'2.4.100'}                    | ${'2.4.99'}                     | ${true}
     ${'2.4.beta'}                   | ${'2.4.alpha'}                  | ${true}
     ${'1.9'}                        | ${'2'}                          | ${false}
     ${'1.9'}                        | ${'1.9.1'}                      | ${false}
@@ -63,6 +64,7 @@ describe('modules/versioning/loose/index', () => {
     ${'2024-07-21T11-33-05.abc123'} | ${'2023-06-21T11-33-05.abc123'} | ${true}
     ${'2023-07-21T11-33-05.abc123'} | ${'2023-07-21T11-33-04.abc123'} | ${true}
     ${'2023-07-21-113305-abc123'}   | ${'2023-07-21-113304-abc123'}   | ${true}
+    ${'1.1.5-100'}                  | ${'1.1.5-99'}                   | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(loose.isGreaterThan(a, b)).toBe(expected);
   });

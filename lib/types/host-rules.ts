@@ -12,6 +12,7 @@ export interface HostRuleSearchResult {
   concurrentRequestLimit?: number;
   maxRequestsPerSecond?: number;
   header?: Record<string, string>;
+  maxRetryAfter?: number;
 
   dnsCache?: boolean;
   keepAlive?: boolean;

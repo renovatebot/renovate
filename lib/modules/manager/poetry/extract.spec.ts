@@ -1,8 +1,10 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { PypiDatasource } from '../../datasource/pypi';
 import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
@@ -76,29 +78,6 @@ describe('modules/manager/poetry/extract', () => {
       const res = await extractPackageFile(pyproject12toml, filename);
       expect(res).not.toBeNull();
       expect(res?.deps).toHaveLength(3);
-    });
-
-    it('extracts registries', async () => {
-      const res = await extractPackageFile(pyproject6toml, filename);
-      expect(res?.registryUrls).toMatchSnapshot();
-      expect(res?.registryUrls).toHaveLength(3);
-    });
-
-    it('can parse empty registries', async () => {
-      const res = await extractPackageFile(pyproject7toml, filename);
-      expect(res?.registryUrls).toBeUndefined();
-    });
-
-    it('can parse missing registries', async () => {
-      const res = await extractPackageFile(pyproject1toml, filename);
-      expect(res?.registryUrls).toBeUndefined();
-    });
-
-    it('dedupes registries', async () => {
-      const res = await extractPackageFile(pyproject8toml, filename);
-      expect(res).toMatchObject({
-        registryUrls: ['https://pypi.org/pypi/', 'https://bar.baz/+simple/'],
-      });
     });
 
     it('extracts mixed versioning types', async () => {
@@ -190,6 +169,107 @@ describe('modules/manager/poetry/extract', () => {
           { depName: 'boto3', lockedVersion: '1.17.5' },
         ],
       });
+    });
+
+    it('parses git dependencies long commit hashs on http urls', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "https://github.com/tiangolo/fastapi.git", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+        dep = "^2.0"
+      `;
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toMatchObject([
+        {
+          depType: 'dependencies',
+          depName: 'fastapi',
+          datasource: GitRefsDatasource.id,
+          currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          packageName: 'https://github.com/tiangolo/fastapi.git',
+        },
+        {
+          depType: 'dependencies',
+          depName: 'dep',
+          datasource: PypiDatasource.id,
+          currentValue: '^2.0',
+        },
+      ]);
+    });
+
+    it('parses git dependencies short commit hashs on http urls', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "https://github.com/tiangolo/fastapi.git", rev="6f5aa81"}
+        dep = "^2.0"
+      `;
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toMatchObject([
+        {
+          depType: 'dependencies',
+          depName: 'fastapi',
+          datasource: GitRefsDatasource.id,
+          currentDigest: '6f5aa81',
+          replaceString: '6f5aa81',
+          packageName: 'https://github.com/tiangolo/fastapi.git',
+        },
+        {
+          depType: 'dependencies',
+          depName: 'dep',
+          datasource: PypiDatasource.id,
+          currentValue: '^2.0',
+        },
+      ]);
+    });
+
+    it('parses git dependencies long commit hashs on ssh urls', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "git@github.com:tiangolo/fastapi.git", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+        dep = "^2.0"
+      `;
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toMatchObject([
+        {
+          depType: 'dependencies',
+          depName: 'fastapi',
+          datasource: GitRefsDatasource.id,
+          currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          packageName: 'git@github.com:tiangolo/fastapi.git',
+        },
+        {
+          depType: 'dependencies',
+          depName: 'dep',
+          datasource: PypiDatasource.id,
+          currentValue: '^2.0',
+        },
+      ]);
+    });
+
+    it('parses git dependencies long commit hashs on http urls with branch marker', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "https://github.com/tiangolo/fastapi.git", branch="develop", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+        dep = "^2.0"
+      `;
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toMatchObject([
+        {
+          depType: 'dependencies',
+          depName: 'fastapi',
+          datasource: GitRefsDatasource.id,
+          currentValue: 'develop',
+          currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          packageName: 'https://github.com/tiangolo/fastapi.git',
+        },
+        {
+          depType: 'dependencies',
+          depName: 'dep',
+          datasource: PypiDatasource.id,
+          currentValue: '^2.0',
+        },
+      ]);
     });
 
     it('parses github dependencies tags on ssh urls', async () => {
@@ -303,6 +383,100 @@ describe('modules/manager/poetry/extract', () => {
         datasource: GithubReleasesDatasource.id,
         commitMessageTopic: 'Python',
         registryUrls: null,
+      });
+    });
+
+    describe('registry URLs', () => {
+      it('can parse empty registries', async () => {
+        const res = await extractPackageFile(pyproject7toml, filename);
+        expect(res?.registryUrls).toBeUndefined();
+      });
+
+      it('can parse missing registries', async () => {
+        const res = await extractPackageFile(pyproject1toml, filename);
+        expect(res?.registryUrls).toBeUndefined();
+      });
+
+      it('extracts registries', async () => {
+        const res = await extractPackageFile(pyproject6toml, filename);
+        expect(res?.registryUrls).toMatchObject([
+          'https://foo.bar/simple/',
+          'https://bar.baz/+simple/',
+          'https://pypi.org/pypi/',
+        ]);
+      });
+
+      it('dedupes registries', async () => {
+        const res = await extractPackageFile(pyproject8toml, filename);
+        expect(res?.registryUrls).toMatchObject([
+          'https://pypi.org/pypi/',
+          'https://bar.baz/+simple/',
+        ]);
+      });
+
+      it('source with priority="default" and implicit PyPI priority="primary"', async () => {
+        const content = codeBlock`
+          [tool.poetry.dependencies]
+          python = "^3.11"
+
+          [[tool.poetry.source]]
+          name = "foo"
+          url = "https://foo.bar/simple/"
+          priority = "default"
+
+          [[tool.poetry.source]]
+          name = "PyPI"
+        `;
+        const res = await extractPackageFile(content, filename);
+        expect(res?.registryUrls).toMatchObject([
+          'https://foo.bar/simple/',
+          'https://pypi.org/pypi/',
+        ]);
+      });
+
+      it('source with implicit priority and PyPI with priority="explicit"', async () => {
+        const content = codeBlock`
+          [tool.poetry.dependencies]
+          python = "^3.11"
+
+          [[tool.poetry.source]]
+          name = "foo"
+          url = "https://foo.bar/simple/"
+
+          [[tool.poetry.source]]
+          name = "PyPI"
+          priority = "explicit"
+        `;
+        const res = await extractPackageFile(content, filename);
+        expect(res?.registryUrls).toMatchObject(['https://foo.bar/simple/']);
+      });
+
+      it('supports dependencies with explicit source', async () => {
+        const content = codeBlock`
+        [tool.poetry.dependencies]
+        attrs = "^23.1.0"
+        typer = { version = "^0.9.0", source = "pypi" }
+        requests-cache = { version = "^1.1.0", source = "artifactory" }
+
+        [[tool.poetry.source]]
+        name = "artifactory"
+        url = "https://example.com"
+        priority = "explicit"
+      `;
+        const res = await extractPackageFile(content, filename);
+        expect(res?.deps).toMatchObject([
+          { depName: 'attrs', currentValue: '^23.1.0' },
+          {
+            depName: 'typer',
+            currentValue: '^0.9.0',
+            registryUrls: ['https://pypi.org/pypi/'],
+          },
+          {
+            depName: 'requests-cache',
+            currentValue: '^1.1.0',
+            registryUrls: ['https://example.com'],
+          },
+        ]);
       });
     });
   });

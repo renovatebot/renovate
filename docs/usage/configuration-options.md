@@ -410,9 +410,21 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, `nuget`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
-Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
-Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
+Currently, this config option only works with these managers:
+
+- `helmv3`
+- `npm`
+- `nuget`
+- `maven`
+- `ocb`
+- `pep621`
+- `poetry`
+- `sbt`
+
+Raise a feature request if you want to use this config option with other package managers.
+
+Use `bumpVersion` if you want Renovate to update the `version` field in your package file when it updates the dependencies in that file.
+This can be handy when you have automated your package's release, as you you don't need extra steps after the Renovate upgrade, you can just release a new version.
 
 Configure this value to `"prerelease"`, `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited package file.
 e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
@@ -1763,6 +1775,26 @@ Example config:
     {
       "matchHost": "api.github.com",
       "maxRequestsPerSecond": 2
+    }
+  ]
+}
+```
+
+### maxRetryAfter
+
+A remote host may return a `4xx` response with a `Retry-After` header value, which indicates that Renovate has been rate-limited.
+Renovate may try to contact the host again after waiting a certain time, that's set by the host.
+By default, Renovate tries again after the `Retry-After` header value has passed, up to a maximum of 60 seconds.
+If the `Retry-After` value is more than 60 seconds, Renovate will abort the request instead of waiting.
+
+You can configure a different maximum value in seconds using `maxRetryAfter`:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "maxRetryAfter": 25
     }
   ]
 }
@@ -3584,6 +3616,23 @@ If you wish to distinguish between patch and minor upgrades, for example if you 
 Configure this to `true` if you wish to get one PR for every separate major version upgrade of a dependency.
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
+
+## statusCheckNames
+
+You can customize the name/context of status checks that Renovate adds to commits/branches/PRs.
+
+This option enables you to modify any existing status checks name/context, but adding new status checks this way is _not_ supported.
+Setting the value to `null` or an empty string, effectively disables or skips that status check.
+This option is mergeable, which means you only have to specify the status checks that you want to modify.
+
+```json title="Example of overriding status check strings"
+{
+  "statusCheckNames": {
+    "minimumReleaseAge": "custom/stability-days",
+    "mergeConfidence": "custom/merge-confidence-level"
+  }
+}
+```
 
 ## stopUpdatingLabel
 
