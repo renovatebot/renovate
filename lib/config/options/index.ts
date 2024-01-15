@@ -31,6 +31,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'useCloudMetadataServices',
+    description:
+      'If `false`, Renovate does not try to access cloud metadata services.',
+    type: 'boolean',
+    default: true,
+    globalOnly: true,
+  },
+  {
     name: 'allowPostUpgradeCommandTemplating',
     description:
       'Set this to `false` to disable template compilation for post-upgrade commands.',
@@ -409,7 +417,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.31.3',
+    default: 'ghcr.io/containerbase/sidecar:9.31.4',
     globalOnly: true,
   },
   {

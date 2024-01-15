@@ -117,6 +117,7 @@ export interface GlobalOnlyConfig {
   repositories?: RenovateRepository[];
   platform?: PlatformId;
   endpoint?: string;
+  useCloudMetadataServices?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable

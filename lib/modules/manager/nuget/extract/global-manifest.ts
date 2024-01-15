@@ -16,7 +16,7 @@ export function extractMsbuildGlobalManifest(
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   let manifest: MsbuildGlobalManifest;
-
+  let extractedConstraints: Record<string, string> | undefined;
   try {
     manifest = JSON.parse(content);
   } catch (err) {
@@ -36,6 +36,8 @@ export function extractMsbuildGlobalManifest(
       currentValue: manifest.sdk?.version,
       datasource: DotnetVersionDatasource.id,
     });
+
+    extractedConstraints = { 'dotnet-sdk': manifest.sdk?.version };
   }
 
   if (manifest['msbuild-sdks']) {
@@ -54,5 +56,5 @@ export function extractMsbuildGlobalManifest(
     }
   }
 
-  return { deps };
+  return { deps, ...(extractedConstraints && { extractedConstraints }) };
 }

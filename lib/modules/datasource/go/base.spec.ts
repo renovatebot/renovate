@@ -2,6 +2,7 @@ import { mockDeep } from 'jest-mock-extended';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import * as _hostRules from '../../../util/host-rules';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
@@ -34,6 +35,7 @@ describe('modules/datasource/go/base', () => {
     beforeEach(() => {
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
+      GlobalConfig.reset();
     });
 
     describe('meta name=go-source', () => {
@@ -393,6 +395,46 @@ describe('modules/datasource/go/base', () => {
         );
 
         expect(res).toBeNull();
+      });
+
+      it('it correctly splits a URL where the endpoint is contained', async () => {
+        hostRules.hostType.mockReturnValue('gitlab');
+
+        GlobalConfig.set({ endpoint: 'https://example.com/gitlab/api/v4/' });
+
+        const meta =
+          '<meta name="go-import" content="example.com/gitlab/my-project/my-repo.git git https://example.com/gitlab/my-project/my-repo" />';
+        httpMock
+          .scope('https://example.com')
+          .get('/gitlab/my-project/my-repo.git?go-get=1')
+          .reply(200, meta);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'example.com/gitlab/my-project/my-repo.git',
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'my-project/my-repo',
+          registryUrl: 'https://example.com/gitlab/',
+        });
+
+        GlobalConfig.set({ endpoint: 'https://example.com/gitlab/' });
+
+        httpMock
+          .scope('https://example.com')
+          .get('/gitlab/my-project/my-repo.git?go-get=1')
+          .reply(200, meta);
+
+        const res2 = await BaseGoDatasource.getDatasource(
+          'example.com/gitlab/my-project/my-repo.git',
+        );
+
+        expect(res2).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'my-project/my-repo',
+          registryUrl: 'https://example.com/gitlab/',
+        });
       });
     });
   });

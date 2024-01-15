@@ -5,7 +5,11 @@ description: Self-Hosted configuration usable in config file, CLI or environment
 
 # Self-Hosted configuration options
 
-You can only use these configuration options when you're self-hosting Renovate.
+Only use these configuration options when you _self-host_ Renovate.
+
+Do _not_ put the self-hosted config options listed on this page in your "repository config" file (`renovate.json` for example), because Renovate will ignore those config options, and may also create a config error issue.
+
+The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
@@ -943,6 +947,12 @@ This is currently applicable to `npm` only, and only used in cases where bugs in
 
 If enabled emoji shortcodes are replaced with their Unicode equivalents.
 For example: `:warning:` will be replaced with `⚠️`.
+
+## useCloudMetadataServices
+
+Some cloud providers offer services to receive metadata about the current instance, for example [AWS Instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html)
+or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).
+Use this option to control whether Renovate should try to access these services.
 
 ## username
 
