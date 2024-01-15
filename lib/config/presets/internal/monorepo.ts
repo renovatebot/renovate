@@ -308,6 +308,7 @@ const repoGroups = {
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
+  jackson: 'https://github.com/FasterXML/jackson',
   jasmine: 'https://github.com/jasmine/jasmine',
   javahamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   javascriptengineswitcher:
@@ -390,6 +391,7 @@ const repoGroups = {
   'opentelemetry-erlang-contrib':
     'https://github.com/open-telemetry/opentelemetry-erlang-contrib',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
+  'opentelemetry-java': 'https://github.com/open-telemetry/opentelemetry-java',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   orleans: 'https://github.com/dotnet/orleans',
   'panda-css': 'https://github.com/chakra-ui/panda',
@@ -443,6 +445,7 @@ const repoGroups = {
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',
   skiasharp: 'https://github.com/mono/SkiaSharp',
+  slf4j: 'https://github.com/qos-ch/slf4j'
   'spectre-console': 'https://github.com/spectreconsole/spectre.console',
   springfox: 'https://github.com/springfox/springfox',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
