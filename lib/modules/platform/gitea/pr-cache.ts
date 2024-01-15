@@ -88,7 +88,7 @@ export class GiteaPrCache {
     for (const rawItem of rawItems) {
       const id = rawItem.number;
 
-      const newItem = this.toRenovatePR(rawItem);
+      const newItem = toRenovatePR(rawItem, this.author);
       if (!newItem) {
         continue;
       }
@@ -136,9 +136,5 @@ export class GiteaPrCache {
     }
 
     return this;
-  }
-
-  private toRenovatePR(data: PR): Pr | null {
-    return toRenovatePR(data, this.author);
   }
 }

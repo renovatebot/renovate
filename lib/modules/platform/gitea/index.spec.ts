@@ -78,7 +78,8 @@ describe('modules/platform/gitea/index', () => {
       state: 'open',
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/1.diff',
       created_at: '2015-03-22T20:36:16Z',
-      closed_at: undefined,
+      closed_at: '2015-03-22T21:36:16Z',
+      updated_at: '2015-03-22T21:36:16Z',
       mergeable: true,
       base: { ref: 'some-base-branch' },
       head: {
@@ -95,6 +96,7 @@ describe('modules/platform/gitea/index', () => {
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/2.diff',
       created_at: '2011-08-18T22:30:38Z',
       closed_at: '2016-01-09T10:03:21Z',
+      updated_at: '2016-01-09T10:03:21Z',
       mergeable: true,
       base: { ref: 'other-base-branch' },
       head: {
@@ -111,6 +113,7 @@ describe('modules/platform/gitea/index', () => {
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
       created_at: '2011-08-18T22:30:39Z',
       closed_at: '2016-01-09T10:03:22Z',
+      updated_at: '2017-01-09T10:03:22Z',
       mergeable: false,
       base: { ref: 'draft-base-branch' },
       head: {
@@ -1119,6 +1122,27 @@ describe('modules/platform/gitea/index', () => {
       const res2 = await gitea.getPrList();
 
       expect(res1).toEqual(res2);
+    });
+
+    it('should update cache results', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, mockPRs.slice(0, 2))
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, mockPRs.slice(1));
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+
+      const res1 = await gitea.getPrList();
+      expect(res1).toMatchObject([{ number: 1 }, { number: 2 }]);
+
+      memCache.set('gitea-pr-cache-synced', false);
+
+      const res2 = await gitea.getPrList();
+      expect(res2).toMatchObject([{ number: 1 }, { number: 2 }, { number: 3 }]);
     });
   });
 
