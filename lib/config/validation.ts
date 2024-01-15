@@ -29,7 +29,7 @@ import * as managerValidator from './validation-helpers/managers';
 const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
-let optionParents: Record<string, RenovateOptions['parents']>;
+let optionParents: Record<string, string[]>;
 
 const managerList = getManagerList();
 
@@ -199,7 +199,7 @@ export async function validateConfig(
       if (
         !isPreset &&
         optionParents[key] &&
-        !optionParents[key]?.includes(parentName)
+        !optionParents[key].includes(parentName)
       ) {
         // TODO: types (#22198)
         const message = `${key} should only be configured within a "${optionParents[
