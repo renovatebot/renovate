@@ -164,23 +164,23 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
     options.lookup = dnsLookup;
   }
 
-  if (hostRule.headers) {
-    const allowedHeaders = GlobalConfig.get('allowedHeaders');
-    const filteredHeaders: Record<string, string> = {};
+  if (hostRule.header) {
+    const allowedHeader = GlobalConfig.get('allowedHeader');
+    const filteredHeader: Record<string, string> = {};
 
-    for (const [header, value] of Object.entries(hostRule.headers)) {
-      if (anyMatchRegexOrMinimatch(allowedHeaders, header)) {
-        filteredHeaders[header] = value;
+    for (const [header, value] of Object.entries(hostRule.header)) {
+      if (anyMatchRegexOrMinimatch(allowedHeader, header)) {
+        filteredHeader[header] = value;
       } else {
         logger.once.error(
-          { allowedHeaders, header },
+          { allowedHeader, header },
           'Disallowed hostRules header',
         );
       }
     }
 
     options.headers = {
-      ...filteredHeaders,
+      ...filteredHeader,
       ...options.headers,
     };
   }

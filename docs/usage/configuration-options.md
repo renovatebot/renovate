@@ -1777,11 +1777,11 @@ It uses `QuickLRU` with a `maxSize` of `1000`.
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
 
-### headers
+### header
 
-You can provide `headers` object that includes fields to be forwarded to the HTTP request headers. By default, all headers starting with "X-" are allowed, a bot administrator may configure an override for [allowedHeaders](self-hosted-configuration.md#allowedHeaders) to configure more permitted headers.
+You can provide `header` object that includes fields to be forwarded to the HTTP request header. By default, all header starting with "X-" are allowed, a bot administrator may configure an override for [allowedHeader](self-hosted-configuration.md#allowedHeader) to configure more permitted header.
 
-Any `headers` value configured in bot admin `hostRules` (e.g. `config.js`) won't be validated so can contain any desired header regardless of `allowedHeaders`.
+Any `header` value configured in bot admin `hostRules` (e.g. `config.js`) won't be validated so can contain any desired header regardless of `allowedHeader`.
 
 Example:
 
@@ -1790,7 +1790,7 @@ Example:
   "hostRules": [
     {
       "matchHost": "https://domain.com/all-versions",
-      "headers": {
+      "header": {
         "X-custom-header": "secret"
       }
     }

@@ -6,7 +6,7 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
-    name: 'allowedHeaders',
+    name: 'allowedHeader',
     description:
       'List of allowed patterns for header names in repo hostRules config.',
     type: 'array',
@@ -2376,9 +2376,9 @@ const options: RenovateOptions[] = [
     advancedUse: true,
   },
   {
-    name: 'headers',
+    name: 'header',
     description:
-      'An object that includes fields to be forwarded to the HTTP request headers.',
+      'An object that includes fields to be forwarded to the HTTP request header.',
     type: 'object',
     parent: 'hostRules',
     cli: false,

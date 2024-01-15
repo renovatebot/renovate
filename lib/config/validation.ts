@@ -37,7 +37,7 @@ const topLevelObjects = managerList;
 
 const ignoredNodes = [
   '$schema',
-  'headers',
+  'header',
   'depType',
   'npmToken',
   'packageFile',
@@ -648,22 +648,22 @@ export async function validateConfig(
     }
 
     if (key === 'hostRules' && is.array(val)) {
-      const allowedHeaders = GlobalConfig.get('allowedHeaders');
+      const allowedHeader = GlobalConfig.get('allowedHeader');
       for (const rule of val as HostRule[]) {
-        if (!rule.headers) {
+        if (!rule.header) {
           continue;
         }
-        for (const [header, value] of Object.entries(rule.headers)) {
+        for (const [header, value] of Object.entries(rule.header)) {
           if (!is.string(value)) {
             errors.push({
               topic: 'Configuration Error',
               message: `Invalid hostRules header value configuration: should be a string.`,
             });
           }
-          if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
+          if (!anyMatchRegexOrMinimatch(allowedHeader, header)) {
             errors.push({
               topic: 'Configuration Error',
-              message: `hostRules header \`${header}\` is not permitted by this bot's \`allowedHeaders\`.`,
+              message: `hostRules header \`${header}\` is not permitted by this bot's \`allowedHeader\`.`,
             });
           }
         }

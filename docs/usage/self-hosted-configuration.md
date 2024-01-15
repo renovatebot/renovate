@@ -59,12 +59,12 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowScripts
 
-## allowedHeaders
+## allowedHeader
 
 This is option particularly useful when a registry employs a specific authentication system not already covered by Renovate's standard credential handling in `hostRules`.
-By default, all headers starting with "X-" are allowed, but you can permit additional headers using this option.
-If declared, it will override the default "X-" allowed headers, so you should include them in your config if you wish for them to remain allowed.
-`allowedHeaders` is an array of minimatch-compatible globs or re2-compatible regex strings.
+By default, all header starting with "X-" are allowed, but you can permit additional header using this option.
+If declared, it will override the default "X-" allowed header, so you should include them in your config if you wish for them to remain allowed.
+`allowedHeader` is an array of minimatch-compatible globs or re2-compatible regex strings.
 
 Examples:
 
@@ -78,7 +78,7 @@ Examples:
   "hostRules": [
     {
       "matchHost": "https://domain.com/all-versions",
-      "headers": {
+      "header": {
         "X-Auth-Token": "secret"
       }
     }
@@ -86,11 +86,11 @@ Examples:
 }
 ```
 
-or with custom `allowedHeaders`:
+or with custom `allowedHeader`:
 
 ```js title="config.js"
 module.exports = {
-  allowedHeaders: ['custom-header'],
+  allowedHeader: ['custom-header'],
 };
 ```
 

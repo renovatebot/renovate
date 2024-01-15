@@ -545,10 +545,10 @@ describe('util/http/host-rules', () => {
   });
 
   it('should remove unallowed header from request', () => {
-    GlobalConfig.set({ allowedHeaders: ['X-*'] });
+    GlobalConfig.set({ allowedHeader: ['X-*'] });
     const hostRule = {
       matchHost: 'https://domain.com/all-versions',
-      headers: {
+      header: {
         'X-Auth-Token': 'token',
         unallowedHeader: 'token',
       },
