@@ -11,7 +11,6 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
-import * as memCache from '../../../util/cache/memory';
 import type * as _git from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gitea';
@@ -38,6 +37,7 @@ describe('modules/platform/gitea/index', () => {
   let logger: jest.Mocked<typeof _logger>;
   let git: jest.Mocked<typeof _git>;
   let hostRules: typeof import('../../../util/host-rules');
+  let memCache: typeof import('../../../util/cache/memory');
 
   const mockCommitHash =
     '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
@@ -193,6 +193,7 @@ describe('modules/platform/gitea/index', () => {
   beforeEach(async () => {
     jest.resetModules();
 
+    memCache = await import('../../../util/cache/memory');
     gitea = await import('.');
     logger = mocked(await import('../../../logger')).logger;
     git = jest.requireMock('../../../util/git');
