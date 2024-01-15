@@ -2,6 +2,11 @@ import crypto from 'node:crypto';
 import extract from 'extract-zip';
 import upath from 'upath';
 import { logger } from '../../../../logger';
+import {
+  coerceArray,
+  deduplicateArray,
+  isNotNullOrUndefined,
+} from '../../../../util/array';
 import { cache } from '../../../../util/cache/package/decorator';
 import * as fs from '../../../../util/fs';
 import { ensureCacheDir } from '../../../../util/fs';
@@ -115,12 +120,18 @@ export class TerraformProviderHash {
       return null;
     }
 
-    let zhHashes: string[] = [];
-    if (builds.length > 0 && builds[0].shasums_url) {
-      zhHashes =
-        (await TerraformProviderHash.terraformDatasource.getZipHashes(
-          builds[0].shasums_url,
-        )) ?? [];
+    // check if the publisher uses one shasum file for all builds or separate ones
+    // we deduplicate to reduce the number of API calls
+    const shaUrls = deduplicateArray(
+      builds.map((build) => build.shasums_url).filter(isNotNullOrUndefined),
+    );
+
+    const zhHashes: string[] = [];
+    for (const shaUrl of shaUrls) {
+      const hashes =
+        await TerraformProviderHash.terraformDatasource.getZipHashes(shaUrl);
+
+      zhHashes.push(...coerceArray(hashes));
     }
 
     const h1Hashes =

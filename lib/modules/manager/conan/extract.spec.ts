@@ -153,6 +153,13 @@ describe('modules/manager/conan/extract', () => {
           replaceString: 'req_l/2.1@otheruser/testing',
         },
         {
+          currentValue: '6.1',
+          depName: 'req_x',
+          depType: 'requires',
+          packageName: 'req_x/6.1@useronly/_',
+          replaceString: 'req_x/6.1@useronly',
+        },
+        {
           currentValue: '0.1',
           depName: 'req_b',
           depType: 'requires',
@@ -200,6 +207,13 @@ describe('modules/manager/conan/extract', () => {
           depType: 'requires',
           packageName: 'req_g/[>1.0 <1.8]@user/stable',
           replaceString: 'req_g/[>1.0 <1.8]@user/stable',
+        },
+        {
+          currentValue: '[>1.0 <1.8, include_prerelease]',
+          depName: 'req_z',
+          depType: 'requires',
+          packageName: 'req_z/[>1.0 <1.8, include_prerelease]@user/stable',
+          replaceString: 'req_z/[>1.0 <1.8, include_prerelease]@user/stable',
         },
         {
           autoReplaceStringTemplate:
