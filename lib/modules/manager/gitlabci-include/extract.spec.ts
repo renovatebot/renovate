@@ -57,6 +57,10 @@ describe('modules/manager/gitlabci-include/extract', () => {
     });
 
     it('extracts component references', () => {
+      GlobalConfig.set({
+        endpoint: 'https://gitlab.example.com',
+      });
+
       const includeWithoutProjectRef = `include:
         - component: gitlab.example.com/an-org/a-project/a-component@1.0
           inputs:
@@ -69,10 +73,11 @@ describe('modules/manager/gitlabci-include/extract', () => {
         - component: gitlab.example.com/malformed-component-reference
         - component:
             malformed: true
-        - component: gitlab.example.com/an-org/a-component@1.0`;
+        - component: gitlab.example.com/an-org/a-component@1.0
+        - component: other-gitlab.example.com/an-org/a-project/a-component@1.0`;
       const res = extractPackageFile(includeWithoutProjectRef);
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(4);
+      expect(res?.deps).toHaveLength(5);
     });
 
     it('normalizes configured endpoints', () => {

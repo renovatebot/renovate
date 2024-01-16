@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parseUrl } from '../../../util/url';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type {
@@ -43,6 +44,7 @@ function extractDepFromIncludeFile(
 
 function extractDepFromIncludeComponent(
   includeComponent: GitlabIncludeComponent,
+  endpoint: string | undefined,
 ): PackageDependency | null {
   const componentReferenceMatch = componentReferenceRegex?.exec(
     includeComponent.component,
@@ -69,7 +71,6 @@ function extractDepFromIncludeComponent(
     depName: componentReferenceMatch.groups.projectPath,
     depType: 'repository',
     currentValue: componentReferenceMatch.groups.specificVersion,
-    registryUrls: [componentReferenceMatch.groups.fqdn],
   };
   if (dep.currentValue === componentReferenceLatestVersion) {
     logger.debug(
@@ -77,6 +78,17 @@ function extractDepFromIncludeComponent(
       'Ignoring component version',
     );
     dep.skipReason = 'unsupported-version';
+  }
+  const endpointUrl = parseUrl(endpoint);
+  if (
+    endpointUrl &&
+    endpointUrl.hostname !== componentReferenceMatch.groups.fqdn
+  ) {
+    logger.debug(
+      { componentReference: includeComponent.component },
+      'Ignoring external component reference',
+    );
+    dep.skipReason = 'invalid-value';
   }
   return dep;
 }
@@ -163,7 +175,7 @@ export function extractPackageFile(
     }
     const includedComponents = getAllIncludeComponents(doc);
     for (const includedComponent of includedComponents) {
-      const dep = extractDepFromIncludeComponent(includedComponent);
+      const dep = extractDepFromIncludeComponent(includedComponent, endpoint);
       if (dep) {
         deps.push(dep);
       }
