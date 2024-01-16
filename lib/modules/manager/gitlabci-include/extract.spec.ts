@@ -68,7 +68,8 @@ describe('modules/manager/gitlabci-include/extract', () => {
             stage: test
         - component: gitlab.example.com/malformed-component-reference
         - component:
-            malformed: true`;
+            malformed: true
+        - component: gitlab.example.com/an-org/a-component@1.0`;
       const res = extractPackageFile(includeWithoutProjectRef);
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(4);

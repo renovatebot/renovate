@@ -21,7 +21,7 @@ import {
 
 // See https://docs.gitlab.com/ee/ci/components/index.html#use-a-component
 const componentReferenceRegex = regEx(
-  /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(?<componentName>.+)@(?<specificVersion>.+)/,
+  /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(.+)@(?<specificVersion>.+)/,
 );
 const componentReferenceLatestVersion = '~latest';
 
@@ -54,11 +54,21 @@ function extractDepFromIncludeComponent(
     );
     return null;
   }
+  const projectPathParts =
+    componentReferenceMatch.groups.projectPath.split('/');
+  if (projectPathParts.length < 2) {
+    logger.debug(
+      { componentReference: includeComponent.component },
+      'Ignoring component reference with incomplete project path',
+    );
+    return null;
+  }
+
   const dep: PackageDependency = {
     datasource: GitlabTagsDatasource.id,
     depName: componentReferenceMatch.groups.projectPath,
     depType: 'repository',
-
+    currentValue: componentReferenceMatch.groups.specificVersion,
     registryUrls: [componentReferenceMatch.groups.fqdn],
   };
   if (dep.currentValue === componentReferenceLatestVersion) {
