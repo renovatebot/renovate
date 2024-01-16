@@ -61,7 +61,7 @@ describe('modules/manager/gitlabci-include/extract', () => {
         endpoint: 'https://gitlab.example.com',
       });
 
-      const includeWithoutProjectRef = `include:
+      const content = `include:
         - component: gitlab.example.com/an-org/a-project/a-component@1.0
           inputs:
             stage: build
@@ -75,7 +75,7 @@ describe('modules/manager/gitlabci-include/extract', () => {
             malformed: true
         - component: gitlab.example.com/an-org/a-component@1.0
         - component: other-gitlab.example.com/an-org/a-project/a-component@1.0`;
-      const res = extractPackageFile(includeWithoutProjectRef);
+      const res = extractPackageFile(content);
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(5);
     });
