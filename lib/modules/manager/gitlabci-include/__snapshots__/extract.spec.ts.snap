@@ -1,5 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`modules/manager/gitlabci-include/extract extractPackageFile() extracts component references 1`] = `
+[
+  {
+    "datasource": "gitlab-tags",
+    "depName": "an-org/a-project",
+    "depType": "repository",
+    "registryUrls": [
+      "gitlab.example.com",
+    ],
+  },
+  {
+    "datasource": "gitlab-tags",
+    "depName": "an-org/a-subgroup/a-project",
+    "depType": "repository",
+    "registryUrls": [
+      "gitlab.example.com",
+    ],
+  },
+  {
+    "datasource": "gitlab-tags",
+    "depName": "an-org/a-subgroup/another-project",
+    "depType": "repository",
+    "registryUrls": [
+      "gitlab.example.com",
+    ],
+  },
+  {
+    "datasource": "gitlab-tags",
+    "depName": "another-org/a-project",
+    "depType": "repository",
+    "registryUrls": [
+      "gitlab.example.com",
+    ],
+  },
+]
+`;
+
 exports[`modules/manager/gitlabci-include/extract extractPackageFile() extracts multiple include blocks 1`] = `
 [
   {

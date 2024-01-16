@@ -56,6 +56,24 @@ describe('modules/manager/gitlabci-include/extract', () => {
       expect(res).toBeNull();
     });
 
+    it('extracts component references', () => {
+      const includeWithoutProjectRef = `include:
+        - component: gitlab.example.com/an-org/a-project/a-component@1.0
+          inputs:
+            stage: build
+        - component: gitlab.example.com/an-org/a-subgroup/a-project/a-component@e3262fdd0914fa823210cdb79a8c421e2cef79d8
+        - component: gitlab.example.com/an-org/a-subgroup/another-project/a-component@main
+        - component: gitlab.example.com/another-org/a-project/a-component@~latest
+          inputs:
+            stage: test
+        - component: gitlab.example.com/malformed-component-reference
+        - component:
+            malformed: true`;
+      const res = extractPackageFile(includeWithoutProjectRef);
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(4);
+    });
+
     it('normalizes configured endpoints', () => {
       const endpoints = [
         'http://gitlab.test/api/v4',

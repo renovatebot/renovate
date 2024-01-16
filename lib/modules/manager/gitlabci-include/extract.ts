@@ -6,6 +6,7 @@ import { parseSingleYaml } from '../../../util/yaml';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type {
   GitlabInclude,
+  GitlabIncludeComponent,
   GitlabIncludeProject,
   GitlabPipeline,
 } from '../gitlabci/types';
@@ -13,9 +14,16 @@ import { replaceReferenceTags } from '../gitlabci/utils';
 import type { PackageDependency, PackageFileContent } from '../types';
 import {
   filterIncludeFromGitlabPipeline,
+  isGitlabIncludeComponent,
   isGitlabIncludeProject,
   isNonEmptyObject,
 } from './common';
+
+// See https://docs.gitlab.com/ee/ci/components/index.html#use-a-component
+const componentReferenceRegex = regEx(
+  /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(?<componentName>.+)@(?<specificVersion>.+)/,
+);
+const componentReferenceLatestVersion = '~latest';
 
 function extractDepFromIncludeFile(
   includeObj: GitlabIncludeProject,
@@ -30,6 +38,36 @@ function extractDepFromIncludeFile(
     return dep;
   }
   dep.currentValue = includeObj.ref;
+  return dep;
+}
+
+function extractDepFromIncludeComponent(
+  includeComponent: GitlabIncludeComponent,
+): PackageDependency | null {
+  const componentReferenceMatch = componentReferenceRegex?.exec(
+    includeComponent.component,
+  );
+  if (!componentReferenceMatch?.groups) {
+    logger.debug(
+      { componentReference: includeComponent.component },
+      'Ignoring malformed component reference',
+    );
+    return null;
+  }
+  const dep: PackageDependency = {
+    datasource: GitlabTagsDatasource.id,
+    depName: componentReferenceMatch.groups.projectPath,
+    depType: 'repository',
+
+    registryUrls: [componentReferenceMatch.groups.fqdn],
+  };
+  if (dep.currentValue === componentReferenceLatestVersion) {
+    logger.debug(
+      { componentVersion: dep.currentValue },
+      'Ignoring component version',
+    );
+    dep.skipReason = 'unsupported-version';
+  }
   return dep;
 }
 
@@ -63,6 +101,37 @@ function getAllIncludeProjects(data: GitlabPipeline): GitlabIncludeProject[] {
   return childrenData;
 }
 
+function getIncludeComponentsFromInclude(
+  includeValue: GitlabInclude[] | GitlabInclude,
+): GitlabIncludeComponent[] {
+  const includes = is.array(includeValue) ? includeValue : [includeValue];
+
+  // Filter out includes that dont have a file & project.
+  return includes.filter(isGitlabIncludeComponent);
+}
+function getAllIncludeComponents(
+  data: GitlabPipeline,
+): GitlabIncludeComponent[] {
+  // If Array, search each element.
+  if (is.array(data)) {
+    return (data as GitlabPipeline[])
+      .filter(isNonEmptyObject)
+      .map(getAllIncludeComponents)
+      .flat();
+  }
+
+  const childrenData = Object.values(filterIncludeFromGitlabPipeline(data))
+    .filter(isNonEmptyObject)
+    .map(getAllIncludeComponents)
+    .flat();
+
+  // Process include key.
+  if (data.include) {
+    childrenData.push(...getIncludeComponentsFromInclude(data.include));
+  }
+  return childrenData;
+}
+
 export function extractPackageFile(
   content: string,
   packageFile?: string,
@@ -81,6 +150,13 @@ export function extractPackageFile(
         dep.registryUrls = [endpoint.replace(regEx(/\/api\/v4\/?/), '')];
       }
       deps.push(dep);
+    }
+    const includedComponents = getAllIncludeComponents(doc);
+    for (const includedComponent of includedComponents) {
+      const dep = extractDepFromIncludeComponent(includedComponent);
+      if (dep) {
+        deps.push(dep);
+      }
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
