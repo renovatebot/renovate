@@ -30,6 +30,7 @@ export const presets: Record<string, Preset> = {
       'replacements:rollup-babel-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
       'replacements:rome-to-biome',
+      'replacements:semantic-release-replace-plugin-to-unscoped',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
