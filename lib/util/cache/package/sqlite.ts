@@ -14,7 +14,7 @@ function compress(input: unknown): Promise<Buffer> {
   return brotliCompress(jsonStr, {
     params: {
       [constants.BROTLI_PARAM_MODE]: constants.BROTLI_MODE_TEXT,
-      [constants.BROTLI_PARAM_QUALITY]: 6,
+      [constants.BROTLI_PARAM_QUALITY]: 3,
     },
   });
 }
