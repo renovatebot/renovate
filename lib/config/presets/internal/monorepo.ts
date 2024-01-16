@@ -324,6 +324,7 @@ const repoGroups = {
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
+  lamar: 'https://github.com/JasperFx/lamar',
   lerna: 'https://github.com/lerna/lerna',
   lexical: 'https://github.com/facebook/lexical',
   linguijs: 'https://github.com/lingui/js-lingui',
@@ -465,6 +466,8 @@ const repoGroups = {
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
   'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
+  'testcontainers-dotnet':
+    'https://github.com/testcontainers/testcontainers-dotnet',
   'testcontainers-go': 'https://github.com/testcontainers/testcontainers-go',
   'testcontainers-java':
     'https://github.com/testcontainers/testcontainers-java',
