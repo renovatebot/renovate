@@ -17,10 +17,7 @@ import {
 import { logger, removeMeta } from '../../../../logger';
 import { getAdditionalFiles } from '../../../../modules/manager/npm/post-update';
 import { Pr, platform } from '../../../../modules/platform';
-import {
-  ensureComment,
-  ensureCommentRemoval,
-} from '../../../../modules/platform/comment';
+import { ensureComment, ensureCommentRemoval } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedMs } from '../../../../util/date';
@@ -48,6 +45,7 @@ import { handleClosedPr, handleModifiedPr } from './handle-existing';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setConfidence, setStability } from './status-checks';
+import { runWebhook } from './webhook';
 
 async function rebaseCheck(
   config: RenovateConfig,
@@ -438,7 +436,7 @@ export async function processBranch(
         result: 'no-work',
       };
     }
-    // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
+      // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
     // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
     else if (
       branchPr?.targetBranch &&
@@ -879,6 +877,8 @@ export async function processBranch(
     logger.error({ err }, `Error ensuring PR`);
   }
   if (!branchExists) {
+    runWebhook(config, branchPr);
+
     return {
       branchExists: true,
       updatesVerified,

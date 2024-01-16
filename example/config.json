@@ -1,0 +1,13 @@
+{
+  "autodiscover": false,
+  "gitAuthor": "Renovate Bot <renovatebot@plural.sh>",
+  "platform": "github",
+  "repositories": ["floreks/cd-renovate"],
+  "enabledManagers": ["plural"],
+  "onboarding": false,
+  "recreateWhen": "always",
+  "branchConcurrentLimit": 0,
+  "prConcurrentLimit": 0,
+  "prHourlyLimit": 0,
+  "requireConfig": "ignored"
+}
