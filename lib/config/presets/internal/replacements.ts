@@ -751,6 +751,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'semantic-release-replace-plugin-to-unscoped': {
+    description:
+      '`semantic-release-replace-plugin` was moved out of the `google` organization.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@google/semantic-release-replace-plugin'],
+        replacementName: 'semantic-release-replace-plugin',
+        replacementVersion: '1.2.1',
+      },
+    ],
+  },
   'spectre-cli-to-spectre-console-cli': {
     description:
       'The `Spectre.Cli` package was renamed to `Spectre.Console.Cli`.',
