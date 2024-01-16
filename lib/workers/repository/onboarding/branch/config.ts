@@ -1,3 +1,5 @@
+import is from '@sindresorhus/is';
+import { currentRenovateCompatibility } from '../../../../config/compatibility';
 import { GlobalConfig } from '../../../../config/global';
 import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
@@ -12,7 +14,7 @@ import { EditorConfig, JSONWriter } from '../../../../util/json-writer';
 async function getOnboardingConfig(
   config: RenovateConfig,
 ): Promise<RenovateSharedConfig | undefined> {
-  let onboardingConfig = clone(config.onboardingConfig);
+  let onboardingConfig = clone(config.onboardingConfig) ?? {};
 
   let foundPreset: string | undefined;
 
@@ -88,6 +90,17 @@ async function getOnboardingConfig(
     logger.debug(
       'No default org/owner preset found, so the default onboarding config will be used instead.',
     );
+  }
+
+  if (is.number(config.renovateCompatibility)) {
+    logger.debug(
+      `renovateCompatibility was found in admin config, so skipping from onboardingConfig`,
+    );
+  } else {
+    logger.debug(
+      `No renovateCompatibility found in admin config, adding renovateCompatibility ${currentRenovateCompatibility} to onboarding config`,
+    );
+    onboardingConfig.renovateCompatibility = currentRenovateCompatibility;
   }
 
   logger.debug({ config: onboardingConfig }, 'onboarding config');

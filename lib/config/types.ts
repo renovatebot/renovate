@@ -35,6 +35,7 @@ export interface RenovateSharedConfig {
   branchPrefixOld?: string;
   branchName?: string;
   branchNameStrict?: boolean;
+  branchTopic?: string;
   manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
@@ -75,6 +76,7 @@ export interface RenovateSharedConfig {
   rebaseWhen?: string;
   recreateWhen?: RecreateWhen;
   recreateClosed?: boolean;
+  renovateCompatibility?: number;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   repositoryCacheType?: RepositoryCacheType;
@@ -218,7 +220,7 @@ export interface RenovateConfig
   description?: string | string[];
   force?: RenovateConfig;
   errors?: ValidationMessage[];
-
+  renovateCompatibility?: number;
   gitAuthor?: string;
 
   hostRules?: HostRule[];
