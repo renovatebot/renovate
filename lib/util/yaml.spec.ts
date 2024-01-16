@@ -102,6 +102,10 @@ describe('util/yaml', () => {
           codeBlock`
       myObject:
         aString: {{value}}
+        {% if test.enabled %}
+        myNestedObject:
+          aNestedString: {{value}}
+        {% endif %}
       `,
           { removeTemplates: true },
         ),
