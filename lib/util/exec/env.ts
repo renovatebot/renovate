@@ -24,6 +24,17 @@ const basicEnvVars = [
   'PROGRAMFILES(X86)',
   'APPDATA',
   'LOCALAPPDATA',
+  // Corepack: https://github.com/nodejs/corepack
+  'COREPACK_DEFAULT_TO_LATEST',
+  'COREPACK_ENABLE_NETWORK',
+  'COREPACK_ENABLE_STRICT',
+  'COREPACK_ENABLE_PROJECT_SPEC',
+  'COREPACK_HOME',
+  'COREPACK_NPM_REGISTRY',
+  'COREPACK_NPM_TOKEN',
+  'COREPACK_NPM_USERNAME',
+  'COREPACK_NPM_PASSWORD',
+  'COREPACK_ROOT',
 ];
 
 export function getChildProcessEnv(
