@@ -544,7 +544,7 @@ describe('util/http/host-rules', () => {
     });
   });
 
-  it('should remove unallowed header from request', () => {
+  it('should remove forbidden header from request', () => {
     GlobalConfig.set({ allowedHeader: ['X-*'] });
     const hostRule = {
       matchHost: 'https://domain.com/all-versions',

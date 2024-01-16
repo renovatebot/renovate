@@ -65,17 +65,20 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowedHeader
 
-This is option particularly useful when a registry employs a specific authentication system not already covered by Renovate's standard credential handling in `hostRules`.
-By default, all header starting with "X-" are allowed, but you can permit additional header using this option.
-If declared, it will override the default "X-" allowed header, so you should include them in your config if you wish for them to remain allowed.
-`allowedHeader` is an array of minimatch-compatible globs or re2-compatible regex strings.
+`allowedHeader` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
+By default, all headers starting with "X-" are allowed.
+If needed, you can allow additional headers with the `allowedHeader` option.
+Any set `allowedHeader` overrides the default "X-" allowed header, so you should include them in your config if you wish for them to remain allowed.
+The `allowedHeader` config option takes an array of minimatch-compatible globs or re2-compatible regex strings.
 
 Examples:
 
-- `/X/` - any header with `X` anywhere in the name (regex)
-- `!/X/` - any header without `X` anywhere in the name (regex)
-- `X-*` - any header starting with `X-` (glob pattern)
-- `X` - only the header matching exactly `X` (exact match glob)
+| Example header | Kind of pattern  | Explanation                                 |
+| -------------- | ---------------- | ------------------------------------------- |
+| `/X/`          | Regex            | Any header with `x` anywhere in the name    |
+| `!/X/`         | Regex            | Any header without `X` anywhere in the name |
+| `X-*`          | Global pattern   | Any header starting with `X-`               |
+| `X`            | Exact match glob | Only the header matching exactly `X`        |
 
 ```json
 {
@@ -90,7 +93,7 @@ Examples:
 }
 ```
 
-or with custom `allowedHeader`:
+Or with custom `allowedHeader`:
 
 ```js title="config.js"
 module.exports = {

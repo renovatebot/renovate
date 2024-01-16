@@ -922,7 +922,7 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('errors if unallowed header in hostRules', async () => {
+    it('errors if forbidden header in hostRules', async () => {
       GlobalConfig.set({ allowedHeader: ['X-*'] });
 
       const config = {
@@ -967,7 +967,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid hostRules header value configuration: should be a string.',
+            'Invalid hostRules header value configuration: header must be a string.',
           topic: 'Configuration Error',
         },
       ]);

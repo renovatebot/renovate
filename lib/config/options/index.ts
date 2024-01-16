@@ -8,7 +8,7 @@ const options: RenovateOptions[] = [
   {
     name: 'allowedHeader',
     description:
-      'List of allowed patterns for header names in repo hostRules config.',
+      'List of allowed patterns for header names in repository hostRules config.',
     type: 'array',
     default: ['X-*'],
     subType: 'string',
@@ -2406,7 +2406,7 @@ const options: RenovateOptions[] = [
   {
     name: 'header',
     description:
-      'An object that includes fields to be forwarded to the HTTP request header.',
+      'Put fields to be forwarded to the HTTP request header in the header config option.',
     type: 'object',
     parent: 'hostRules',
     cli: false,
