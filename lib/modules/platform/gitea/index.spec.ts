@@ -70,9 +70,7 @@ describe('modules/platform/gitea/index', () => {
     partial<Repo>({ full_name: 'e/f', mirror: true }),
   ];
 
-  const mockTopicRepos: Repo[] = [
-    partial<Repo>({ full_name: 'a/b' }),
-  ];
+  const mockTopicRepos: Repo[] = [partial<Repo>({ full_name: 'a/b' })];
 
   const mockPRs: MockPr[] = [
     partial<MockPr>({
@@ -387,7 +385,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakePlatform(scope);
 
       const repos = await gitea.getRepos({
-        topics: ['renovate', 'renovatebot']
+        topics: ['renovate', 'renovatebot'],
       });
       expect(repos).toEqual(['a/b']);
     });
