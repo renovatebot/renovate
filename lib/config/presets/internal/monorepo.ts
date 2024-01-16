@@ -465,6 +465,8 @@ const repoGroups = {
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
   'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
+  'testcontainers-dotnet':
+    'https://github.com/testcontainers/testcontainers-dotnet',
   'testcontainers-go': 'https://github.com/testcontainers/testcontainers-go',
   'testcontainers-java':
     'https://github.com/testcontainers/testcontainers-java',
