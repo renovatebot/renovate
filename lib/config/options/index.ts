@@ -853,7 +853,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['github', 'gitlab'],
+    supportedPlatforms: ['gitea', 'github', 'gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',

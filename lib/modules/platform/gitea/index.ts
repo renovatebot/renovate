@@ -17,6 +17,7 @@ import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
 import { getPrBodyStruct, hashBody } from '../pr-body';
 import type {
+  AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -152,6 +153,24 @@ async function lookupLabelByName(name: string): Promise<number | null> {
   logger.debug(`lookupLabelByName(${name})`);
   const labelList = await getLabelList();
   return labelList.find((l) => l.name === name)?.id ?? null;
+}
+
+async function fetchRepositories(topic?: string): Promise<string[]> {
+  const repos = await helper.searchRepos({
+    uid: botUserID,
+    archived: false,
+    ...(topic && {
+      topic: true,
+      q: topic,
+    }),
+    ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT && {
+      sort: process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT as RepoSortMethod,
+    }),
+    ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER && {
+      order: process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER as SortMethod,
+    }),
+  });
+  return repos.filter((r) => !r.mirror).map((r) => r.full_name);
 }
 
 const platform: Platform = {
@@ -295,20 +314,16 @@ const platform: Platform = {
     };
   },
 
-  async getRepos(): Promise<string[]> {
+  async getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug('Auto-discovering Gitea repositories');
     try {
-      const repos = await helper.searchRepos({
-        uid: botUserID,
-        archived: false,
-        ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT && {
-          sort: process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT as RepoSortMethod,
-        }),
-        ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER && {
-          order: process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER as SortMethod,
-        }),
-      });
-      return repos.filter((r) => !r.mirror).map((r) => r.full_name);
+      const topics = config?.topics || [undefined];
+      let repos: string[] = [];
+      for (const topic of topics) {
+        const r = await fetchRepositories(topic);
+        repos = [...new Set([...repos, ...r])];
+      }
+      return repos;
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;

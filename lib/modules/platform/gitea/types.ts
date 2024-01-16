@@ -144,6 +144,8 @@ export type SortMethod = 'asc' | 'desc';
 export interface RepoSearchParams {
   uid?: number;
   archived?: boolean;
+  topic?: boolean;
+  q?: string;
 
   /**
    * Repo sort type, defaults to `alpha`.
