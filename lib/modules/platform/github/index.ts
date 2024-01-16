@@ -1737,10 +1737,7 @@ export async function reattemptPlatformAutomerge({
   platformOptions,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
   try {
-    const { body: ghPr } = await githubApi.getJson<GhRestPr>(
-      `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`,
-    );
-    const result = coerceRestPr(ghPr);
+    const result = getPr(prNo);
     const { number, node_id } = result;
 
     await tryPrAutomerge(number, node_id, platformOptions);
