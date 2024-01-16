@@ -113,8 +113,8 @@ describe('util/yaml', () => {
         myObject: {
           aString: null,
           myNestedObject: {
-            aNestedString: null
-          }
+            aNestedString: null,
+          },
         },
       });
     });
