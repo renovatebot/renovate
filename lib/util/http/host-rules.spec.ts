@@ -544,11 +544,11 @@ describe('util/http/host-rules', () => {
     });
   });
 
-  it('should remove forbidden header from request', () => {
-    GlobalConfig.set({ allowedHeader: ['X-*'] });
+  it('should remove forbidden headers from request', () => {
+    GlobalConfig.set({ allowedHeaders: ['X-*'] });
     const hostRule = {
       matchHost: 'https://domain.com/all-versions',
-      header: {
+      headers: {
         'X-Auth-Token': 'token',
         unallowedHeader: 'token',
       },

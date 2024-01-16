@@ -923,13 +923,13 @@ describe('config/validation', () => {
     });
 
     it('errors if forbidden header in hostRules', async () => {
-      GlobalConfig.set({ allowedHeader: ['X-*'] });
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
 
       const config = {
         hostRules: [
           {
             matchHost: 'https://domain.com/all-versions',
-            header: {
+            headers: {
               'X-Auth-Token': 'token',
               unallowedHeader: 'token',
             },
@@ -942,20 +942,20 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            "hostRules header `unallowedHeader` is not permitted by this bot's `allowedHeader`.",
+            "hostRules header `unallowedHeader` is not allowed by this bot's `allowedHeaders`.",
           topic: 'Configuration Error',
         },
       ]);
     });
 
-    it('errors if header values are not string', async () => {
-      GlobalConfig.set({ allowedHeader: ['X-*'] });
+    it('errors if headers values are not string', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
 
       const config = {
         hostRules: [
           {
             matchHost: 'https://domain.com/all-versions',
-            header: {
+            headers: {
               'X-Auth-Token': 10,
             } as unknown as Record<string, string>,
           },
@@ -967,7 +967,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid hostRules header value configuration: header must be a string.',
+            'Invalid hostRules headers value configuration: header must be a string.',
           topic: 'Configuration Error',
         },
       ]);
