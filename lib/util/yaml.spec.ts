@@ -112,6 +112,9 @@ describe('util/yaml', () => {
       ).toEqual({
         myObject: {
           aString: null,
+          myNestedObject: {
+            aNestedString: null
+          }
         },
       });
     });
