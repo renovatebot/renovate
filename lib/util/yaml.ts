@@ -37,8 +37,8 @@ function massageContent(content: string, options?: YamlOptions): string {
   if (options?.removeTemplates) {
     return content
       .replace(regEx(/{{`.+?`}}/gs), '')
-      .replace(regEx(/{{.+?}}/g), '').
-      .replace(regEx(/{%`.+?`%}/gs), '').
+      .replace(regEx(/{{.+?}}/g), '')
+      .replace(regEx(/{%`.+?`%}/gs), '')
       .replace(regEx(/{%.+?%}/g), '');
   }
 
