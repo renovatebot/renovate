@@ -752,7 +752,8 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'semantic-release-replace-plugin-to-unscoped': {
-    description: '`semantic-release-replace-plugin` was moved out of the `google` organization.',
+    description:
+      '`semantic-release-replace-plugin` was moved out of the `google` organization.',
     packageRules: [
       {
         matchDatasources: ['npm'],
