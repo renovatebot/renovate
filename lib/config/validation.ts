@@ -30,6 +30,7 @@ const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, RenovateOptions['parent']>;
+let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
 
@@ -98,6 +99,7 @@ export function getParentName(parentPath: string | undefined): string {
 }
 
 export async function validateConfig(
+  isGlobalConfig: boolean,
   config: RenovateConfig,
   isPreset?: boolean,
   parentPath?: string,
@@ -116,6 +118,7 @@ export async function validateConfig(
       }
     });
   }
+
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
@@ -138,6 +141,24 @@ export async function validateConfig(
         topic: 'Configuration Error',
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
+    }
+    if (!isGlobalConfig) {
+      if (!optionGlobals) {
+        optionGlobals = new Set<string>();
+        for (const option of options) {
+          if (option.globalOnly) {
+            optionGlobals.add(option.name);
+          }
+        }
+      }
+
+      if (optionGlobals.has(key) && !isFalseGlobal(key, parentPath)) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+        });
+        continue;
+      }
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
@@ -273,6 +294,7 @@ export async function validateConfig(
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
                 const subValidation = await validateConfig(
+                  isGlobalConfig,
                   subval as RenovateConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`,
@@ -656,6 +678,7 @@ export async function validateConfig(
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
                 const subValidation = await validateConfig(
+                  isGlobalConfig,
                   val,
                   isPreset,
                   currentPath,
@@ -731,4 +754,23 @@ function validateRegexManagerFields(
       });
     }
   }
+}
+
+/**  An option is a false global if it has the same name as a global only option
+ *   but is actually just the field of a non global option or field an children of the non global option
+ *   eg. token: it's global option used as the bot's token as well and
+ *   also it can be the token used for a platform inside the hostRules configuration
+ */
+function isFalseGlobal(optionName: string, parentPath?: string): boolean {
+  if (parentPath?.includes('hostRules')) {
+    if (
+      optionName === 'token' ||
+      optionName === 'username' ||
+      optionName === 'password'
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }
