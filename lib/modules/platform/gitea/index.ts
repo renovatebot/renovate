@@ -317,7 +317,7 @@ const platform: Platform = {
   async getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug('Auto-discovering Gitea repositories');
     try {
-      const topics = config?.topics || [undefined];
+      const topics = config?.topics ?? [undefined];
       let repos: string[] = [];
       for (const topic of topics) {
         const r = await fetchRepositories(topic);
