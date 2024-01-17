@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import semver from 'semver';
 import pMap from 'p-map';
+import semver from 'semver';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
