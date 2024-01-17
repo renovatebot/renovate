@@ -1737,7 +1737,7 @@ export async function reattemptPlatformAutomerge({
   platformOptions,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
   try {
-    const result = getPr(prNo);
+    const result = await getPr(prNo);
     const { number, node_id } = result;
 
     await tryPrAutomerge(number, node_id, platformOptions);
