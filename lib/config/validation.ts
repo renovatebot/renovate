@@ -7,12 +7,15 @@ import type {
   RegexManagerTemplates,
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
+import type { HostRule } from '../types/host-rules';
+import { anyMatchRegexOrMinimatch } from '../util/package-rules/match';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
   hasValidSchedule,
   hasValidTimezone,
 } from '../workers/repository/update/branch/schedule';
+import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
@@ -38,6 +41,7 @@ const topLevelObjects = managerList;
 
 const ignoredNodes = [
   '$schema',
+  'headers',
   'depType',
   'npmToken',
   'packageFile',
@@ -691,6 +695,29 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be a json object`,
+            });
+          }
+        }
+      }
+    }
+
+    if (key === 'hostRules' && is.array(val)) {
+      const allowedHeaders = GlobalConfig.get('allowedHeaders');
+      for (const rule of val as HostRule[]) {
+        if (!rule.headers) {
+          continue;
+        }
+        for (const [header, value] of Object.entries(rule.headers)) {
+          if (!is.string(value)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `Invalid hostRules headers value configuration: header must be a string.`,
+            });
+          }
+          if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,
             });
           }
         }
