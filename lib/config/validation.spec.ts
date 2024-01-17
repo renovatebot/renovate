@@ -1021,8 +1021,10 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { warnings, errors } =
-        await configValidation.validateConfig(config);
+      const { warnings, errors } = await configValidation.validateConfig(
+        false,
+        config,
+      );
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchObject([
         {
@@ -1046,8 +1048,10 @@ describe('config/validation', () => {
           },
         ],
       };
-      const { warnings, errors } =
-        await configValidation.validateConfig(config);
+      const { warnings, errors } = await configValidation.validateConfig(
+        false,
+        config,
+      );
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchObject([
         {
