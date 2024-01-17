@@ -96,7 +96,8 @@ When Renovate runs against repositories on `github.com`, and the environment var
 - `rubygems.pkg.github.com`
 
 <!-- prettier-ignore -->
-!!! warning Users have reported that this feature is not working correctly, so it has been reverted to experimental mode.
+!!! warning
+    We reverted the Package Registry Credentials feature to experimental mode, because users reported it's not working correctly with app tokens.
 
 ## Features awaiting implementation
 
