@@ -64,7 +64,7 @@ export async function init(config: AllConfig): Promise<void> {
     return;
   }
 
-  if (process.env.RENOVATE_X_SQLITE_CACHE) {
+  if (process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE) {
     cacheProxy = await SqlitePackageCache.init(config.cacheDir!);
     return;
   }

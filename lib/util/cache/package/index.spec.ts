@@ -6,7 +6,7 @@ jest.mock('./sqlite');
 
 describe('util/cache/package/index', () => {
   afterAll(() => {
-    delete process.env.RENOVATE_X_SQLITE_CACHE;
+    delete process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE;
   });
 
   it('returns undefined if not initialized', async () => {
@@ -35,7 +35,7 @@ describe('util/cache/package/index', () => {
   });
 
   it('sets and gets sqlite', async () => {
-    process.env.RENOVATE_X_SQLITE_CACHE = 'true';
+    process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE = 'true';
     await init({ cacheDir: 'some-dir' });
     expect(
       await set('some-namespace', 'some-key', 'some-value', 1),
