@@ -46,7 +46,7 @@ function extractDepFromIncludeComponent(
   includeComponent: GitlabIncludeComponent,
   endpoint: string | undefined,
 ): PackageDependency | null {
-  const componentReferenceMatch = componentReferenceRegex?.exec(
+  const componentReferenceMatch = componentReferenceRegex.exec(
     includeComponent.component,
   );
   if (!componentReferenceMatch?.groups) {
