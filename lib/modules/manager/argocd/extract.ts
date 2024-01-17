@@ -33,7 +33,8 @@ export function extractPackageFile(
 
   let definitions: ApplicationDefinition[];
   try {
-    definitions = parseYaml(content) as ApplicationDefinition[];
+    // TODO: use schema (#9610)
+    definitions = parseYaml(content);
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse ArgoCD definition.');
     return null;

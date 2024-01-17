@@ -6,6 +6,15 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'allowedHeaders',
+    description:
+      'List of allowed patterns for header names in repository hostRules config.',
+    type: 'array',
+    default: ['X-*'],
+    subType: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'detectGlobalManagerConfig',
     description:
       'If `true`, Renovate tries to detect global manager configuration from the file system.',
@@ -2398,6 +2407,16 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     parent: 'hostRules',
     default: false,
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
+    name: 'headers',
+    description:
+      'Put fields to be forwarded to the HTTP request headers in the headers config option.',
+    type: 'object',
+    parent: 'hostRules',
     cli: false,
     env: false,
     advancedUse: true,
