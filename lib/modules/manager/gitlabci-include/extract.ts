@@ -46,18 +46,17 @@ function extractDepFromIncludeComponent(
   includeComponent: GitlabIncludeComponent,
   endpoint: string | undefined,
 ): PackageDependency | null {
-  const componentReferenceMatch = componentReferenceRegex.exec(
+  const componentReference = componentReferenceRegex.exec(
     includeComponent.component,
-  );
-  if (!componentReferenceMatch?.groups) {
+  )?.groups;
+  if (!componentReference) {
     logger.debug(
       { componentReference: includeComponent.component },
       'Ignoring malformed component reference',
     );
     return null;
   }
-  const projectPathParts =
-    componentReferenceMatch.groups.projectPath.split('/');
+  const projectPathParts = componentReference.projectPath.split('/');
   if (projectPathParts.length < 2) {
     logger.debug(
       { componentReference: includeComponent.component },
@@ -68,9 +67,9 @@ function extractDepFromIncludeComponent(
 
   const dep: PackageDependency = {
     datasource: GitlabTagsDatasource.id,
-    depName: componentReferenceMatch.groups.projectPath,
+    depName: componentReference.projectPath,
     depType: 'repository',
-    currentValue: componentReferenceMatch.groups.specificVersion,
+    currentValue: componentReference.specificVersion,
   };
   if (dep.currentValue === componentReferenceLatestVersion) {
     logger.debug(
@@ -80,10 +79,7 @@ function extractDepFromIncludeComponent(
     dep.skipReason = 'unsupported-version';
   }
   const endpointUrl = parseUrl(endpoint);
-  if (
-    endpointUrl &&
-    endpointUrl.hostname !== componentReferenceMatch.groups.fqdn
-  ) {
+  if (endpointUrl && endpointUrl.hostname !== componentReference.fqdn) {
     logger.debug(
       { componentReference: includeComponent.component },
       'Ignoring external component reference',
