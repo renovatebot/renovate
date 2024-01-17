@@ -30,8 +30,8 @@ importers:
         specifier: 4.2.0
         version: 4.2.0
       '@cdktf/hcl2json':
-        specifier: 0.19.2
-        version: 0.19.2
+        specifier: 0.20.0
+        version: 0.20.0
       '@opentelemetry/api':
         specifier: 1.7.0
         version: 1.7.0
@@ -1901,8 +1901,8 @@ packages:
     engines: {node: '>= 10'}
     dev: false
 
-  /@cdktf/hcl2json@0.19.2:
-    resolution: {integrity: sha512-gFj36AshWSyPKq/eNjQtMnWj0QM0tPtMulFpQ0FrB+eWj0GvxgWg9d65gGCZ8Y/o33VV/2Kv5l8VlDEYDW2S7Q==}
+  /@cdktf/hcl2json@0.20.0:
+    resolution: {integrity: sha512-de5GaNsJqKX934EJG5xnsbpvyVf99f36/7ScK53znsbamnTJvl791fCR/tgkF+zrmZYAw0QSSEX1bHY4IPluzw==}
     dependencies:
       fs-extra: 11.2.0
     dev: false
