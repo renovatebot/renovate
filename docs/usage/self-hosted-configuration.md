@@ -956,10 +956,6 @@ For example: `:warning:` will be replaced with `⚠️`.
 Some cloud providers offer services to receive metadata about the current instance, for example [AWS Instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html) or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).
 You can control if Renovate should try to access these services with the `useCloudMetadataServices` config option.
 
-## useSqliteCache
-
-For improved performance, set this to `true` and Renovate will use a SQLite database for its package cache instead of the local file system.
-
 ## username
 
 You may need to set a `username` if you:

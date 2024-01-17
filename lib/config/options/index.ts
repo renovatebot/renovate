@@ -374,14 +374,6 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
-    name: 'useSqliteCache',
-    description:
-      'If set to `true`, Renovate uses a SQLite database for its cache instead of the default file system.',
-    globalOnly: true,
-    type: 'boolean',
-    experimental: true,
-  },
-  {
     name: 'containerbaseDir',
     description:
       'The directory where Renovate stores its containerbase cache. If left empty, Renovate creates a subdirectory within the `cacheDir`.',

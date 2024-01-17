@@ -118,7 +118,6 @@ export interface GlobalOnlyConfig {
   platform?: PlatformId;
   endpoint?: string;
   useCloudMetadataServices?: boolean;
-  useSqliteCache?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
