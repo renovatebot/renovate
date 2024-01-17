@@ -9,7 +9,7 @@ import {
   isNonEmptyObject,
 } from './common';
 
-const yamlFileMultiConfig = Fixtures.get('gitlab-ci.1.yaml');
+const yamlFileMultiConfig = Fixtures.get('include.2.yaml');
 // TODO: use schema (#9610)
 const pipeline = parseSingleYaml<GitlabPipeline>(
   replaceReferenceTags(yamlFileMultiConfig),
