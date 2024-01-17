@@ -1,3 +1,4 @@
+import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
@@ -1001,6 +1002,61 @@ describe('config/validation', () => {
         {
           message:
             'Invalid schedule: `Invalid schedule: "30 5 * * *" has cron syntax, but doesn\'t have * as minutes`',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('errors if forbidden header in hostRules', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'https://domain.com/all-versions',
+            headers: {
+              'X-Auth-Token': 'token',
+              unallowedHeader: 'token',
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        false,
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            "hostRules header `unallowedHeader` is not allowed by this bot's `allowedHeaders`.",
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('errors if headers values are not string', async () => {
+      GlobalConfig.set({ allowedHeaders: ['X-*'] });
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'https://domain.com/all-versions',
+            headers: {
+              'X-Auth-Token': 10,
+            } as unknown as Record<string, string>,
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        false,
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'Invalid hostRules headers value configuration: header must be a string.',
           topic: 'Configuration Error',
         },
       ]);
