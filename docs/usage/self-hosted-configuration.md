@@ -63,6 +63,44 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowScripts
 
+## allowedHeaders
+
+`allowedHeaders` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
+By default, all headers starting with "X-" are allowed.
+If needed, you can allow additional headers with the `allowedHeaders` option.
+Any set `allowedHeaders` overrides the default "X-" allowed headers, so you should include them in your config if you wish for them to remain allowed.
+The `allowedHeaders` config option takes an array of minimatch-compatible globs or re2-compatible regex strings.
+
+Examples:
+
+| Example header | Kind of pattern  | Explanation                                 |
+| -------------- | ---------------- | ------------------------------------------- |
+| `/X/`          | Regex            | Any header with `x` anywhere in the name    |
+| `!/X/`         | Regex            | Any header without `X` anywhere in the name |
+| `X-*`          | Global pattern   | Any header starting with `X-`               |
+| `X`            | Exact match glob | Only the header matching exactly `X`        |
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://domain.com/all-versions",
+      "headers": {
+        "X-Auth-Token": "secret"
+      }
+    }
+  ]
+}
+```
+
+Or with custom `allowedHeaders`:
+
+```js title="config.js"
+module.exports = {
+  allowedHeaders: ['custom-header'],
+};
+```
+
 ## allowedPostUpgradeCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
@@ -912,6 +950,11 @@ This is currently applicable to `npm` only, and only used in cases where bugs in
 
 If enabled emoji shortcodes are replaced with their Unicode equivalents.
 For example: `:warning:` will be replaced with `⚠️`.
+
+## useCloudMetadataServices
+
+Some cloud providers offer services to receive metadata about the current instance, for example [AWS Instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html) or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).
+You can control if Renovate should try to access these services with the `useCloudMetadataServices` config option.
 
 ## username
 

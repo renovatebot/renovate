@@ -117,6 +117,7 @@ export interface GlobalOnlyConfig {
   repositories?: RenovateRepository[];
   platform?: PlatformId;
   endpoint?: string;
+  useCloudMetadataServices?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -126,6 +127,7 @@ export interface RepoGlobalConfig {
   allowPlugins?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
+  allowedHeaders?: string[];
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;

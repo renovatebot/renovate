@@ -302,12 +302,14 @@ const repoGroups = {
   ],
   groovy: 'https://github.com/apache/groovy',
   'grpc-dotnet': 'https://github.com/grpc/grpc-dotnet',
+  'grpc-java': 'https://github.com/grpc/grpc-java',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
   'hickory-dns': 'https://github.com/hickory-dns/hickory-dns',
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
+  jackson: 'https://github.com/FasterXML/jackson',
   jasmine: 'https://github.com/jasmine/jasmine',
   javahamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   javascriptengineswitcher:
@@ -322,6 +324,7 @@ const repoGroups = {
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
+  lamar: 'https://github.com/JasperFx/lamar',
   lerna: 'https://github.com/lerna/lerna',
   lexical: 'https://github.com/facebook/lexical',
   linguijs: 'https://github.com/lingui/js-lingui',
@@ -390,6 +393,7 @@ const repoGroups = {
   'opentelemetry-erlang-contrib':
     'https://github.com/open-telemetry/opentelemetry-erlang-contrib',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
+  'opentelemetry-java': 'https://github.com/open-telemetry/opentelemetry-java',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   orleans: 'https://github.com/dotnet/orleans',
   'panda-css': 'https://github.com/chakra-ui/panda',
@@ -443,6 +447,7 @@ const repoGroups = {
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',
   skiasharp: 'https://github.com/mono/SkiaSharp',
+  slf4j: 'https://github.com/qos-ch/slf4j',
   'spectre-console': 'https://github.com/spectreconsole/spectre.console',
   springfox: 'https://github.com/springfox/springfox',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
@@ -461,6 +466,8 @@ const repoGroups = {
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
   'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
+  'testcontainers-dotnet':
+    'https://github.com/testcontainers/testcontainers-dotnet',
   'testcontainers-go': 'https://github.com/testcontainers/testcontainers-go',
   'testcontainers-java':
     'https://github.com/testcontainers/testcontainers-java',
