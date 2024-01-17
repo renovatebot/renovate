@@ -64,7 +64,6 @@ export async function init(config: AllConfig): Promise<void> {
     return;
   }
 
-  // istanbul ignore if
   if (process.env.RENOVATE_X_SQLITE_CACHE) {
     cacheProxy = await SqlitePackageCache.init(config.cacheDir!);
     return;
