@@ -134,14 +134,6 @@ function getIncludeComponentsFromInclude(
 function getAllIncludeComponents(
   data: GitlabPipeline,
 ): GitlabIncludeComponent[] {
-  // If Array, search each element.
-  if (is.array(data)) {
-    return (data as GitlabPipeline[])
-      .filter(isNonEmptyObject)
-      .map(getAllIncludeComponents)
-      .flat();
-  }
-
   const childrenData = Object.values(filterIncludeFromGitlabPipeline(data))
     .filter(isNonEmptyObject)
     .map(getAllIncludeComponents)
