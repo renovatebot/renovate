@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
@@ -61,23 +62,57 @@ describe('modules/manager/gitlabci-include/extract', () => {
         endpoint: 'https://gitlab.example.com',
       });
 
-      const content = `include:
-        - component: gitlab.example.com/an-org/a-project/a-component@1.0
-          inputs:
-            stage: build
-        - component: gitlab.example.com/an-org/a-subgroup/a-project/a-component@e3262fdd0914fa823210cdb79a8c421e2cef79d8
-        - component: gitlab.example.com/an-org/a-subgroup/another-project/a-component@main
-        - component: gitlab.example.com/another-org/a-project/a-component@~latest
-          inputs:
-            stage: test
-        - component: gitlab.example.com/malformed-component-reference
-        - component:
-            malformed: true
-        - component: gitlab.example.com/an-org/a-component@1.0
-        - component: other-gitlab.example.com/an-org/a-project/a-component@1.0`;
+      const content = codeBlock`
+        include:
+          - component: gitlab.example.com/an-org/a-project/a-component@1.0
+            inputs:
+              stage: build
+          - component: gitlab.example.com/an-org/a-subgroup/a-project/a-component@e3262fdd0914fa823210cdb79a8c421e2cef79d8
+          - component: gitlab.example.com/an-org/a-subgroup/another-project/a-component@main
+          - component: gitlab.example.com/another-org/a-project/a-component@~latest
+            inputs:
+              stage: test
+          - component: gitlab.example.com/malformed-component-reference
+          - component:
+              malformed: true
+          - component: gitlab.example.com/an-org/a-component@1.0
+          - component: other-gitlab.example.com/an-org/a-project/a-component@1.0
+      `;
       const res = extractPackageFile(content);
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(5);
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '1.0',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-project',
+          depType: 'repository',
+        },
+        {
+          currentValue: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-subgroup/a-project',
+          depType: 'repository',
+        },
+        {
+          currentValue: 'main',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-subgroup/another-project',
+          depType: 'repository',
+        },
+        {
+          currentValue: '~latest',
+          datasource: 'gitlab-tags',
+          depName: 'another-org/a-project',
+          depType: 'repository',
+          skipReason: 'unsupported-version',
+        },
+        {
+          currentValue: '1.0',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-project',
+          depType: 'repository',
+          skipReason: 'invalid-value',
+        },
+      ]);
     });
 
     it('normalizes configured endpoints', () => {
