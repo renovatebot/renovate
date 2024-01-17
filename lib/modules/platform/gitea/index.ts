@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
+import pMap from 'p-map';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -317,12 +318,15 @@ const platform: Platform = {
   async getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug('Auto-discovering Gitea repositories');
     try {
-      const topics = config?.topics ?? [undefined];
+      if (!config?.topics) {
+        return await fetchRepositories();
+      }
+
       let repos: string[] = [];
-      for (const topic of topics) {
+      await pMap(config.topics, async (topic: string) => {
         const r = await fetchRepositories(topic);
         repos = [...new Set([...repos, ...r])];
-      }
+      });
       return repos;
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
