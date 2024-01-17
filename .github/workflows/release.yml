@@ -121,11 +121,11 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Build docker images ${{ env.RENOVATE_VERSION }}
-        run: docker builx bake --set settings.platform=${{ env.DOCKER_PLATFORMS }} --file tools/docker/bake.hcl build
+        run: docker buildx bake --set settings.platform=${{ env.DOCKER_PLATFORMS }} --file tools/docker/bake.hcl build
 
       - name: Publish docker images ${{ env.RENOVATE_VERSION }}
         if: false
-        run: docker builx bake --set settings.platform=${{ env.DOCKER_PLATFORMS }} --file tools/docker/bake.hcl push
+        run: docker buildx bake --set settings.platform=${{ env.DOCKER_PLATFORMS }} --file tools/docker/bake.hcl push
 
       - name: Sign images
         if: false
