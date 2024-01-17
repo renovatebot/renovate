@@ -10,9 +10,10 @@ import {
 } from './common';
 
 const yamlFileMultiConfig = Fixtures.get('gitlab-ci.1.yaml');
-const pipeline = parseSingleYaml(
+// TODO: use schema (#9610)
+const pipeline = parseSingleYaml<GitlabPipeline>(
   replaceReferenceTags(yamlFileMultiConfig),
-) as GitlabPipeline;
+);
 const includeLocal = { local: 'something' };
 const includeProject = { project: 'something' };
 
