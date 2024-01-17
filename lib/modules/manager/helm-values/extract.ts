@@ -5,6 +5,7 @@ import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { HelmDockerImageDependency } from './types';
 import {
+  getParsedSiblingChartYaml,
   matchesHelmValuesDockerHeuristic,
   matchesHelmValuesInlineImage,
 } from './util';
@@ -57,10 +58,10 @@ function findDependencies(
   return packageDependencies;
 }
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
-  packageFile?: string,
-): PackageFileContent | null {
+  packageFile: string,
+): Promise<PackageFileContent | null> {
   let parsedContent: Record<string, unknown>[] | HelmDockerImageDependency[];
   try {
     // a parser that allows extracting line numbers would be preferable, with
@@ -79,6 +80,17 @@ export function extractPackageFile(
     }
 
     if (deps.length) {
+      // in Helm, the current package version is the version of the chart.
+      // This fetches this version by reading it from the Chart.yaml
+      // found in the same folder as the currently processed values file.
+      const siblingChart = await getParsedSiblingChartYaml(packageFile);
+      const packageFileVersion = siblingChart?.version;
+      if (packageFileVersion) {
+        return {
+          deps,
+          packageFileVersion,
+        };
+      }
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
