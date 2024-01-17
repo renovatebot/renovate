@@ -106,7 +106,10 @@ export class SqlitePackageCache {
     return Promise.resolve();
   }
 
-  async get<T = unknown>(namespace: string, key: string): Promise<T | undefined> {
+  async get<T = unknown>(
+    namespace: string,
+    key: string,
+  ): Promise<T | undefined> {
     const data = this.getStatement.get({ namespace, key }) as
       | Buffer
       | undefined;
