@@ -108,6 +108,11 @@ jobs:
           fi
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
+      - name: docker-config
+        uses: containerbase/internal-tools@81f4a6aefea3fb22d7ed60b5be72a4cb2d922ed0 # v3.0.46
+        with:
+          command: docker-config
+
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           ref: ${{ env.GIT_SHA }}
