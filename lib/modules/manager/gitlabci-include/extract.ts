@@ -80,11 +80,12 @@ function extractDepFromIncludeComponent(
   }
   const endpointUrl = parseUrl(endpoint);
   if (endpointUrl && endpointUrl.hostname !== componentReference.fqdn) {
+    const registryUrl = `https://${componentReference.fqdn}`;
     logger.debug(
       { componentReference: includeComponent.component },
-      'Ignoring external component reference',
+      'Setting registry URL for external component reference',
     );
-    dep.skipReason = 'invalid-value';
+    dep.registryUrls = [registryUrl];
   }
   return dep;
 }

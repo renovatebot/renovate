@@ -110,7 +110,7 @@ describe('modules/manager/gitlabci-include/extract', () => {
           datasource: 'gitlab-tags',
           depName: 'an-org/a-project',
           depType: 'repository',
-          skipReason: 'invalid-value',
+          registryUrls: ['https://other-gitlab.example.com'],
         },
       ]);
     });
