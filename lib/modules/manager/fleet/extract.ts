@@ -119,16 +119,20 @@ export function extractPackageFile(
 
   try {
     if (regEx('fleet.ya?ml').test(packageFile)) {
-      // TODO: fix me (#9610)
-      const docs = parseYaml(content, null, { json: true }) as FleetFile[];
+      // TODO: use schema (#9610)
+      const docs = parseYaml<FleetFile>(content, null, {
+        json: true,
+      });
       const fleetDeps = docs
         .filter((doc) => is.truthy(doc?.helm))
         .flatMap((doc) => extractFleetFile(doc));
 
       deps.push(...fleetDeps);
     } else {
-      // TODO: fix me (#9610)
-      const docs = parseYaml(content, null, { json: true }) as GitRepo[];
+      // TODO: use schema (#9610)
+      const docs = parseYaml<GitRepo>(content, null, {
+        json: true,
+      });
       const gitRepoDeps = docs
         .filter((doc) => doc.kind === 'GitRepo') // ensure only GitRepo manifests are processed
         .flatMap((doc) => extractGitRepo(doc));

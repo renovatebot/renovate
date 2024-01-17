@@ -83,9 +83,10 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   let deps: PackageDependency[] = [];
   try {
+    // TODO: use schema (#9610)
     const doc = parseSingleYaml(replaceReferenceTags(content), {
       json: true,
-    }) as Record<string, Image | Services | Job>;
+    });
     if (is.object(doc)) {
       for (const [property, value] of Object.entries(doc)) {
         switch (property) {
@@ -146,9 +147,10 @@ export async function extractAllPackageFiles(
     }
     let doc: GitlabPipeline;
     try {
+      // TODO: use schema (#9610)
       doc = parseSingleYaml(replaceReferenceTags(content), {
         json: true,
-      }) as GitlabPipeline;
+      });
     } catch (err) {
       logger.debug(
         { err, packageFile: file },

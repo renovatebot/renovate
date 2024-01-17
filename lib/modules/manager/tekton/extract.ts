@@ -22,7 +22,8 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   let docs: TektonResource[];
   try {
-    docs = parseYaml(content) as TektonResource[];
+    // TODO: use schema (#9610)
+    docs = parseYaml(content);
   } catch (err) {
     logger.debug(
       { err, packageFile },
