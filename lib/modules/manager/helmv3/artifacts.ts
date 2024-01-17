@@ -114,12 +114,13 @@ export async function updateArtifacts({
   }
   try {
     // get repositories and registries defined in the package file
-    const packages = yaml.parseSingleYaml(
+    // TODO: use schema (#9610)
+    const packages = yaml.parseSingleYaml<ChartDefinition>(
       newPackageFileContent,
-    ) as ChartDefinition; //TODO #9610
+    );
     const locks = existingLockFileContent
-      ? (yaml.parseSingleYaml(existingLockFileContent) as ChartDefinition)
-      : { dependencies: [] }; //TODO #9610
+      ? yaml.parseSingleYaml<ChartDefinition>(existingLockFileContent)
+      : { dependencies: [] };
 
     const chartDefinitions: ChartDefinition[] = [];
     // prioritize registryAlias naming for Helm repositories

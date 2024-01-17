@@ -68,10 +68,10 @@ export function extractPackageFile(
   _config: ExtractConfig,
 ): PackageFileContent | null {
   try {
-    // TODO: fix me (#9610)
-    const doc = parseSingleYaml(content, {
+    // TODO: use schema (#9610)
+    const doc = parseSingleYaml<HelmsmanDocument>(content, {
       json: true,
-    }) as HelmsmanDocument;
+    });
     if (!doc.apps) {
       logger.debug({ packageFile }, `Missing apps keys`);
       return null;

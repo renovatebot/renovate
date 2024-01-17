@@ -11,9 +11,10 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   let doc: TravisYaml;
   try {
+    // TODO: use schema (#9610)
     doc = parseSingleYaml(content, {
       json: true,
-    }) as TravisYaml;
+    });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse .travis.yml file.');
     return null;
