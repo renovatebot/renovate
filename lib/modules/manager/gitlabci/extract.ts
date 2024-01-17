@@ -1,17 +1,38 @@
 import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { trimLeadingSlash } from '../../../util/url';
+import { regEx } from '../../../util/regex';
+import { parseUrl, trimLeadingSlash } from '../../../util/url';
 import { parseSingleYaml } from '../../../util/yaml';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { isGitlabIncludeLocal } from './common';
-import type { GitlabPipeline, Image, Job, Services } from './types';
+import {
+  filterIncludeFromGitlabPipeline,
+  isGitlabIncludeComponent,
+  isGitlabIncludeLocal,
+  isNonEmptyObject,
+} from './common';
+import type {
+  GitlabInclude,
+  GitlabIncludeComponent,
+  GitlabPipeline,
+  Image,
+  Job,
+  Services,
+} from './types';
 import { getGitlabDep, replaceReferenceTags } from './utils';
+
+// See https://docs.gitlab.com/ee/ci/components/index.html#use-a-component
+const componentReferenceRegex = regEx(
+  /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(.+)@(?<specificVersion>.+)/,
+);
+const componentReferenceLatestVersion = '~latest';
 
 export function extractFromImage(
   image: Image | undefined,
@@ -76,15 +97,86 @@ export function extractFromJob(
   return deps;
 }
 
+function getIncludeComponentsFromInclude(
+  includeValue: GitlabInclude[] | GitlabInclude,
+): GitlabIncludeComponent[] {
+  const includes = is.array(includeValue) ? includeValue : [includeValue];
+
+  // Filter out includes that dont have a file & project.
+  return includes.filter(isGitlabIncludeComponent);
+}
+function getAllIncludeComponents(
+  data: GitlabPipeline,
+): GitlabIncludeComponent[] {
+  const childrenData = Object.values(filterIncludeFromGitlabPipeline(data))
+    .filter(isNonEmptyObject)
+    .map(getAllIncludeComponents)
+    .flat();
+
+  // Process include key.
+  if (data.include) {
+    childrenData.push(...getIncludeComponentsFromInclude(data.include));
+  }
+  return childrenData;
+}
+function extractDepFromIncludeComponent(
+  includeComponent: GitlabIncludeComponent,
+  endpoint: string | undefined,
+): PackageDependency | null {
+  const componentReference = componentReferenceRegex.exec(
+    includeComponent.component,
+  )?.groups;
+  if (!componentReference) {
+    logger.debug(
+      { componentReference: includeComponent.component },
+      'Ignoring malformed component reference',
+    );
+    return null;
+  }
+  const projectPathParts = componentReference.projectPath.split('/');
+  if (projectPathParts.length < 2) {
+    logger.debug(
+      { componentReference: includeComponent.component },
+      'Ignoring component reference with incomplete project path',
+    );
+    return null;
+  }
+
+  const dep: PackageDependency = {
+    datasource: GitlabTagsDatasource.id,
+    depName: componentReference.projectPath,
+    depType: 'repository',
+    currentValue: componentReference.specificVersion,
+  };
+  if (dep.currentValue === componentReferenceLatestVersion) {
+    logger.debug(
+      { componentVersion: dep.currentValue },
+      'Ignoring component version',
+    );
+    dep.skipReason = 'unsupported-version';
+  }
+  const endpointUrl = parseUrl(endpoint);
+  if (endpointUrl && endpointUrl.hostname !== componentReference.fqdn) {
+    const registryUrl = `https://${componentReference.fqdn}`;
+    logger.debug(
+      { componentReference: includeComponent.component },
+      'Setting registry URL for external component reference',
+    );
+    dep.registryUrls = [registryUrl];
+  }
+  return dep;
+}
+
 export function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig,
 ): PackageFileContent | null {
   let deps: PackageDependency[] = [];
+  const endpoint = GlobalConfig.get('endpoint');
   try {
     // TODO: use schema (#9610)
-    const doc = parseSingleYaml(replaceReferenceTags(content), {
+    const doc = parseSingleYaml<GitlabPipeline>(replaceReferenceTags(content), {
       json: true,
     });
     if (is.object(doc)) {
@@ -115,11 +207,26 @@ export function extractPackageFile(
       }
       deps = deps.filter(is.truthy);
     }
+
+    const includedComponents = getAllIncludeComponents(doc);
+    for (const includedComponent of includedComponents) {
+      const dep = extractDepFromIncludeComponent(includedComponent, endpoint);
+      if (dep) {
+        deps.push(dep);
+      }
+    }
   } catch (err) /* istanbul ignore next */ {
-    logger.debug(
-      { err, packageFile },
-      'Error extracting GitLab CI dependencies',
-    );
+    if (err.stack?.startsWith('YAMLException:')) {
+      logger.debug(
+        { err, packageFile },
+        'YAML exception extracting GitLab CI includes',
+      );
+    } else {
+      logger.debug(
+        { err, packageFile },
+        'Error extracting GitLab CI dependencies',
+      );
+    }
   }
 
   return deps.length ? { deps } : null;
