@@ -4,6 +4,11 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import {
+  filterIncludeFromGitlabPipeline,
+  isGitlabIncludeProject,
+  isNonEmptyObject,
+} from '../gitlabci/common';
 import type {
   GitlabInclude,
   GitlabIncludeProject,
@@ -11,11 +16,6 @@ import type {
 } from '../gitlabci/types';
 import { replaceReferenceTags } from '../gitlabci/utils';
 import type { PackageDependency, PackageFileContent } from '../types';
-import {
-  filterIncludeFromGitlabPipeline,
-  isGitlabIncludeProject,
-  isNonEmptyObject,
-} from './common';
 
 function extractDepFromIncludeFile(
   includeObj: GitlabIncludeProject,
