@@ -1,4 +1,4 @@
-import { Fixtures } from '../../../../test/fixtures';
+import { codeBlock } from 'common-tags';
 import { parseSingleYaml } from '../../../util/yaml';
 import type { GitlabPipeline } from '../gitlabci/types';
 import { replaceReferenceTags } from '../gitlabci/utils';
@@ -9,10 +9,22 @@ import {
   isNonEmptyObject,
 } from './common';
 
-const yamlFileMultiConfig = Fixtures.get('include.2.yaml');
 // TODO: use schema (#9610)
 const pipeline = parseSingleYaml<GitlabPipeline>(
-  replaceReferenceTags(yamlFileMultiConfig),
+  replaceReferenceTags(codeBlock`
+    include:
+    - project: mikebryant/include-source-example
+      file: /template.yaml
+      ref: 1.0.0
+    -   project: mikebryant/include-source-example2
+        file: /template.yaml
+        ref: master
+    - {"project":"mikebryant/include-source-example3", "file": "/template.yaml",}
+    - {}
+
+    script:
+    - !reference [.setup, script]
+    - !reference [arbitrary job name with space and no starting dot, nested1, nested2, nested3]`),
 );
 const includeLocal = { local: 'something' };
 const includeProject = { project: 'something' };
