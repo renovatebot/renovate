@@ -30,8 +30,8 @@ importers:
         specifier: 4.2.0
         version: 4.2.0
       '@cdktf/hcl2json':
-        specifier: 0.20.0
-        version: 0.20.0
+        specifier: 0.20.1
+        version: 0.20.1
       '@opentelemetry/api':
         specifier: 1.7.0
         version: 1.7.0
@@ -183,8 +183,8 @@ importers:
         specifier: 1.1.23
         version: 1.1.23
       google-auth-library:
-        specifier: 9.4.1
-        version: 9.4.1
+        specifier: 9.4.2
+        version: 9.4.2
       got:
         specifier: 11.8.6
         version: 11.8.6
@@ -1901,8 +1901,8 @@ packages:
     engines: {node: '>= 10'}
     dev: false
 
-  /@cdktf/hcl2json@0.20.0:
-    resolution: {integrity: sha512-de5GaNsJqKX934EJG5xnsbpvyVf99f36/7ScK53znsbamnTJvl791fCR/tgkF+zrmZYAw0QSSEX1bHY4IPluzw==}
+  /@cdktf/hcl2json@0.20.1:
+    resolution: {integrity: sha512-pFSs2QfCS0I5qRhO9SI0VK87Zz8ZJK4MO8GlYprEO2s1aXo1VH6WWJw5tFFqMgntbzeci+Xj0kx7VaLgr21cTQ==}
     dependencies:
       fs-extra: 11.2.0
     dev: false
@@ -6395,8 +6395,8 @@ packages:
       moo: 0.5.2
     dev: false
 
-  /google-auth-library@9.4.1:
-    resolution: {integrity: sha512-Chs7cuzDuav8W/BXOoRgSXw4u0zxYtuqAHETDR5Q6dG1RwNwz7NUKjsDDHAsBV3KkiiJBtJqjbzy1XU1L41w1g==}
+  /google-auth-library@9.4.2:
+    resolution: {integrity: sha512-rTLO4gjhqqo3WvYKL5IdtlCvRqeQ4hxUx/p4lObobY2xotFW3bCQC+Qf1N51CYOfiqfMecdMwW9RIo7dFWYjqw==}
     engines: {node: '>=14'}
     dependencies:
       base64-js: 1.5.1
