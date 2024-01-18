@@ -102,8 +102,8 @@ importers:
         specifier: 1.12.0
         version: 1.12.0
       azure-devops-node-api:
-        specifier: 12.2.0
-        version: 12.2.0
+        specifier: 12.3.0
+        version: 12.3.0
       bunyan:
         specifier: 1.8.15
         version: 1.8.15
@@ -4523,8 +4523,8 @@ packages:
     resolution: {integrity: sha512-NmWvPnx0F1SfrQbYwOi7OeaNGokp9XhzNioJ/CSBs8Qa4vxug81mhJEAVZwxXuBmYB5KDRfMq/F3RR0BIU7sWg==}
     dev: false
 
-  /azure-devops-node-api@12.2.0:
-    resolution: {integrity: sha512-htza/rAmMNdLWpoFh5kG7CQFaZ17ylDEGCcQCTIu39R33YFCB8LIJNzjIL9Uqudzc5VdU47sxcXxAJvcuwc3Tw==}
+  /azure-devops-node-api@12.3.0:
+    resolution: {integrity: sha512-5HDhBFIXJxiFhcJ+A3hN87gwo92PrDNLJvcvRHjr+p7AsuUSF64yQU+M6wcBDczkIDVV7m+MrraKQ2tqUxSbCA==}
     dependencies:
       tunnel: 0.0.6
       typed-rest-client: 1.8.11
