@@ -105,8 +105,8 @@ importers:
         specifier: 1.12.0
         version: 1.12.0
       azure-devops-node-api:
-        specifier: 12.1.0
-        version: 12.1.0
+        specifier: 12.3.0
+        version: 12.3.0
       better-sqlite3:
         specifier: 9.2.2
         version: 9.2.2
@@ -4535,8 +4535,8 @@ packages:
     resolution: {integrity: sha512-NmWvPnx0F1SfrQbYwOi7OeaNGokp9XhzNioJ/CSBs8Qa4vxug81mhJEAVZwxXuBmYB5KDRfMq/F3RR0BIU7sWg==}
     dev: false
 
-  /azure-devops-node-api@12.1.0:
-    resolution: {integrity: sha512-VY+G45eNKVJfMIO0uyZfbi4PzUR8JHEfsHQjEUAXUGRkYhhBbhGHjy8cpiyYFxLXc3a4PL5cqgqqV/YD1SaCXg==}
+  /azure-devops-node-api@12.3.0:
+    resolution: {integrity: sha512-5HDhBFIXJxiFhcJ+A3hN87gwo92PrDNLJvcvRHjr+p7AsuUSF64yQU+M6wcBDczkIDVV7m+MrraKQ2tqUxSbCA==}
     dependencies:
       tunnel: 0.0.6
       typed-rest-client: 1.8.11
@@ -10763,6 +10763,7 @@ packages:
 
   /wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+    requiresBuild: true
 
   /write-file-atomic@3.0.3:
     resolution: {integrity: sha512-AvHcyZ5JnSfq3ioSyjrBkH9yW4m7Ayk8/9My/DD9onKeu/94fwrMocemO2QAJFAlnnDN+ZDS+ZjAR5ua1/PV/Q==}
