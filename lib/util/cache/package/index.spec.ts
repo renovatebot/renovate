@@ -5,7 +5,7 @@ jest.mock('./redis');
 jest.mock('./sqlite');
 
 describe('util/cache/package/index', () => {
-  afterAll(() => {
+  beforeEach(() => {
     delete process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE;
   });
 
