@@ -112,7 +112,7 @@ describe('modules/platform/gerrit/client', () => {
         },
       ],
       [
-        'message:fix(deps): update dependency react-router-dom to v6.21.2',
+        'message:"fix(deps): update dependency react-router-dom to v6.21.2"',
         {
           branchName: 'dependency-xyz',
           prTitle: 'fix(deps): update dependency react-router-dom to v6.21.2',
