@@ -18,6 +18,10 @@ const parsedGoproxy: Record<string, GoproxyItem[]> = {};
 
 const modRegex = regEx(/^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\d+))?$/);
 
+const pversionRegexp = regEx(
+  /v\d+\.\d+\.\d+-(?:"\w+\.)?(?:0\.)?(?<releaseTimestamp>\d{14})-(?<digest>[a-f0-9]{12})/,
+);
+
 export class GoProxyDatasource extends Datasource {
   static readonly id = 'go-proxy';
 
@@ -211,10 +215,24 @@ export class GoProxyDatasource extends Datasource {
       .split(newlineRegex)
       .filter(is.nonEmptyStringAndNotWhitespace)
       .map((str) => {
-        const [version, releaseTimestamp] = str.split(regEx(/\s+/));
-        return DateTime.fromISO(releaseTimestamp).isValid
-          ? { version, releaseTimestamp }
-          : { version };
+        let version: string | undefined;
+        let newDigest: string | undefined;
+        let releaseTimestamp: string | undefined;
+        [version, releaseTimestamp] = str.split(regEx(/\s+/));
+
+        if (!DateTime.fromISO(releaseTimestamp).isValid) {
+          version = str;
+          releaseTimestamp = undefined;
+        }
+        const digestMatch = pversionRegexp.exec(version);
+
+        if (!releaseTimestamp && digestMatch?.groups?.releaseTimestamp) {
+          releaseTimestamp = digestMatch.groups.releaseTimestamp;
+        }
+        if (digestMatch?.groups?.digest) {
+          newDigest = digestMatch.groups.digest;
+        }
+        return { version, newDigest, releaseTimestamp };
       });
   }
 
@@ -246,7 +264,7 @@ export class GoProxyDatasource extends Datasource {
       const res = await this.http.getJson<VersionInfo>(url);
       return res.body.Version;
     } catch (err) {
-      logger.debug({ err }, 'Failed to get latest version');
+      logger.trace({ err }, 'Failed to get latest version');
       return null;
     }
   }
@@ -272,10 +290,10 @@ export class GoProxyDatasource extends Datasource {
       try {
         const res = await this.listVersions(baseUrl, pkg);
         const releases = await p.map(res, async (versionInfo) => {
-          const { version, releaseTimestamp } = versionInfo;
+          const { version, newDigest, releaseTimestamp } = versionInfo;
 
           if (releaseTimestamp) {
-            return { version, releaseTimestamp };
+            return { version, newDigest, releaseTimestamp };
           }
 
           try {
