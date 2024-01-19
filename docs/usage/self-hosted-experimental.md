@@ -167,3 +167,4 @@ Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://doc
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 
 If set, Renovate will use SQLite as the backend for the package cache.
+Don't combine with `redisUrl`, Redis would be preferred over SQlite.
