@@ -4,6 +4,7 @@ import type { GitlabPipeline } from '../gitlabci/types';
 import { replaceReferenceTags } from '../gitlabci/utils';
 import {
   filterIncludeFromGitlabPipeline,
+  isGitlabIncludeComponent,
   isGitlabIncludeLocal,
   isGitlabIncludeProject,
   isNonEmptyObject,
@@ -28,6 +29,7 @@ const pipeline = parseSingleYaml<GitlabPipeline>(
 );
 const includeLocal = { local: 'something' };
 const includeProject = { project: 'something' };
+const includeComponent = { component: 'something' };
 
 describe('modules/manager/gitlabci/common', () => {
   describe('filterIncludeFromGitlabPipeline()', () => {
@@ -58,6 +60,16 @@ describe('modules/manager/gitlabci/common', () => {
 
     it('returns false if GitlabInclude is not GitlabIncludeProject', () => {
       expect(isGitlabIncludeProject(includeLocal)).toBe(false);
+    });
+  });
+
+  describe('isGitlabIncludeComponent()', () => {
+    it('returns true if GitlabInclude is GitlabIncludeComponent', () => {
+      expect(isGitlabIncludeComponent(includeComponent)).toBe(true);
+    });
+
+    it('returns false if GitlabInclude is not GitlabIncludeComponent', () => {
+      expect(isGitlabIncludeComponent(includeLocal)).toBe(false);
     });
   });
 
