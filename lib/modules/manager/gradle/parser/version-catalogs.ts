@@ -79,7 +79,7 @@ const qVersionCatalogPlugins = q
       .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
       .end(),
   })
-  .opt(qVersionCatalogVersion)
+  .join(qVersionCatalogVersion)
   .handler(handlePlugin)
   .handler(cleanupTempVars);
 

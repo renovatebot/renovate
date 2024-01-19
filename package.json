@@ -152,7 +152,7 @@
     "@aws-sdk/client-s3": "3.363.0",
     "@aws-sdk/credential-providers": "3.363.0",
     "@breejs/later": "4.2.0",
-    "@cdktf/hcl2json": "0.20.0",
+    "@cdktf/hcl2json": "0.20.1",
     "@opentelemetry/api": "1.7.0",
     "@opentelemetry/context-async-hooks": "1.19.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.46.0",
@@ -176,7 +176,7 @@
     "aggregate-error": "3.1.0",
     "auth-header": "1.0.0",
     "aws4": "1.12.0",
-    "azure-devops-node-api": "12.1.0",
+    "azure-devops-node-api": "12.3.0",
     "bunyan": "1.8.15",
     "cacache": "18.0.2",
     "cacheable-lookup": "5.0.4",
@@ -203,7 +203,7 @@
     "glob": "10.3.10",
     "global-agent": "3.0.0",
     "good-enough-parser": "1.1.23",
-    "google-auth-library": "9.4.1",
+    "google-auth-library": "9.4.2",
     "got": "11.8.6",
     "graph-data-structure": "3.5.0",
     "handlebars": "4.7.8",
@@ -348,7 +348,7 @@
     "typescript": "5.3.3",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@8.14.0",
+  "packageManager": "pnpm@8.14.1",
   "files": [
     "dist",
     "renovate-schema.json"
