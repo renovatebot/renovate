@@ -101,10 +101,9 @@ function getIncludeComponentsFromInclude(
   includeValue: GitlabInclude[] | GitlabInclude,
 ): GitlabIncludeComponent[] {
   const includes = is.array(includeValue) ? includeValue : [includeValue];
-
-  // Filter out includes that dont have a file & project.
   return includes.filter(isGitlabIncludeComponent);
 }
+
 function getAllIncludeComponents(
   data: GitlabPipeline,
 ): GitlabIncludeComponent[] {
@@ -119,6 +118,7 @@ function getAllIncludeComponents(
   }
   return childrenData;
 }
+
 function extractDepFromIncludeComponent(
   includeComponent: GitlabIncludeComponent,
   endpoint: string | undefined,
