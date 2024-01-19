@@ -1,4 +1,5 @@
 import { withDir } from 'tmp-promise';
+import { GlobalConfig } from '../../../config/global';
 import { SqlitePackageCache } from './sqlite';
 
 function withSqlite<T>(
@@ -6,6 +7,7 @@ function withSqlite<T>(
 ): Promise<T> {
   return withDir(
     async ({ path }) => {
+      GlobalConfig.set({ cacheDir: path });
       const sqlite = await SqlitePackageCache.init(path);
       const res = await fn(sqlite);
       await sqlite.cleanup();
@@ -29,5 +31,25 @@ describe('util/cache/package/sqlite', () => {
       return sqlite.get('foo', 'bar');
     });
     expect(res).toEqual({ baz: 'baz' });
+  });
+
+  it('reopens', async () => {
+    const res = await withDir(
+      async ({ path }) => {
+        GlobalConfig.set({ cacheDir: path });
+
+        const client1 = await SqlitePackageCache.init(path);
+        await client1.set('foo', 'bar', 'baz');
+        await client1.cleanup();
+
+        const client2 = await SqlitePackageCache.init(path);
+        const res = await client2.get('foo', 'bar');
+        await client2.cleanup();
+        return res;
+      },
+      { unsafeCleanup: true },
+    );
+
+    expect(res).toBe('baz');
   });
 });
