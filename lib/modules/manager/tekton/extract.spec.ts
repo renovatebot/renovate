@@ -27,6 +27,13 @@ describe('modules/manager/tekton/extract', () => {
             packageName: 'foo/bar',
           },
           {
+            currentValue: 'v0.0.12',
+            datasource: 'git-tags',
+            depName: 'github.com/foo/baz',
+            depType: 'tekton-annotation',
+            packageName: 'https://github.com/foo/baz',
+          },
+          {
             currentValue: 'v0.0.6',
             datasource: 'git-tags',
             depName: 'github.com/foo/bar',
@@ -34,11 +41,25 @@ describe('modules/manager/tekton/extract', () => {
             packageName: 'https://github.com/foo/bar',
           },
           {
+            currentValue: 'v0.0.12',
+            datasource: 'git-tags',
+            depName: 'github.com/foo/baz',
+            depType: 'tekton-annotation',
+            packageName: 'https://github.com/foo/baz',
+          },
+          {
             currentValue: 'v0.0.8',
             datasource: 'git-tags',
             depName: 'github.com/foo/bar',
             depType: 'tekton-annotation',
             packageName: 'https://github.com/foo/bar',
+          },
+          {
+            currentValue: 'v0.0.14',
+            datasource: 'git-tags',
+            depName: 'github.com/foo/baz',
+            depType: 'tekton-annotation',
+            packageName: 'https://github.com/foo/baz',
           },
           {
             currentValue: 'v0.0.9',
@@ -60,6 +81,13 @@ describe('modules/manager/tekton/extract', () => {
             depName: 'github.com/foo/bar',
             depType: 'tekton-annotation',
             packageName: 'https://github.com/foo/bar',
+          },
+          {
+            currentValue: 'v0.0.25',
+            datasource: 'git-tags',
+            depName: 'github.com/foo/baz',
+            depType: 'tekton-annotation',
+            packageName: 'https://github.com/foo/baz',
           },
         ],
       });
