@@ -4,7 +4,7 @@ import Sqlite from 'better-sqlite3';
 import type { Database, Statement } from 'better-sqlite3';
 import * as upath from 'upath';
 import { logger } from '../../../logger';
-import { ensureDir } from '../../fs';
+import { cachePathExists, ensureDir } from '../../fs';
 
 const brotliCompress = promisify(zlib.brotliCompress);
 const brotliDecompress = promisify(zlib.brotliDecompress);
@@ -35,6 +35,13 @@ export class SqlitePackageCache {
     const sqliteDir = upath.join(cacheDir, 'renovate/renovate-cache-sqlite');
     await ensureDir(sqliteDir);
     const sqliteFile = upath.join(sqliteDir, 'db.sqlite');
+
+    if (await cachePathExists(sqliteFile)) {
+      logger.debug(`Using SQLite package cache: ${sqliteFile}`);
+    } else {
+      logger.debug(`Creating SQLite package cache: ${sqliteFile}`);
+    }
+
     const client = new Sqlite(sqliteFile);
     const res = new SqlitePackageCache(client);
     return res;

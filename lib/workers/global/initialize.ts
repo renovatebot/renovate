@@ -1,6 +1,7 @@
 import os from 'node:os';
 import fs from 'fs-extra';
 import upath from 'upath';
+import { GlobalConfig } from '../../config/global';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
@@ -29,6 +30,7 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
     logger.debug('Using cacheDir: ' + config.cacheDir);
   }
   await fs.ensureDir(config.cacheDir);
+  GlobalConfig.set({ ...GlobalConfig.get(), cacheDir: config.cacheDir });
   if (config.binarySource === 'docker' || config.binarySource === 'install') {
     if (config.containerbaseDir) {
       logger.debug(
