@@ -9,11 +9,11 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import * as p from '../../../util/promises';
 import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
+import * as p from '../../../util/promises';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
 import { getPrBodyStruct, hashBody } from '../pr-body';
