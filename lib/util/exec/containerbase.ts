@@ -63,6 +63,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'fluxcd/flux2',
     versioning: semverVersioningId,
   },
+  gleam: {
+    datasource: 'github-releases',
+    packageName: 'gleam-lang/gleam',
+    versioning: semverVersioningId,
+  },
   golang: {
     datasource: 'golang-version',
     packageName: 'golang',

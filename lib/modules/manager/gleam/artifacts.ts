@@ -5,6 +5,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
+  findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -15,17 +16,19 @@ export async function updateArtifacts(
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, updatedDeps, newPackageFileContent, config } =
     updateArtifact;
-  logger.debug(`bun.updateArtifacts(${packageFileName})`);
+  logger.debug(`gleam.updateArtifacts(${packageFileName})`);
   const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
 
   if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
-    logger.debug('No updated bun deps - returning null');
+    logger.debug('No updated gleam deps - returning null');
     return null;
   }
 
-  // Find the first bun dependency in order to handle mixed manager updates
-  const lockFileName = updatedDeps.find((dep) => dep.manager === 'bun')
-    ?.lockFiles?.[0];
+  // Find the first gleam dependency in order to handle mixed manager updates
+  const lockFileName = await findLocalSiblingOrParent(
+    packageFileName,
+    'manifest.toml',
+  );
 
   if (!lockFileName) {
     logger.debug(`No ${lockFileName} found`);
@@ -49,13 +52,13 @@ export async function updateArtifacts(
       docker: {},
       toolConstraints: [
         {
-          toolName: 'bun',
-          constraint: updateArtifact?.config?.constraints?.bun,
+          toolName: 'gleam',
+          constraint: updateArtifact?.config?.constraints?.gleam,
         },
       ],
     };
 
-    await exec('bun install', execOptions);
+    await exec('gleam deps download', execOptions);
     const newLockFileContent = await readLocalFile(lockFileName);
     if (
       !newLockFileContent ||
