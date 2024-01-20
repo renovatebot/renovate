@@ -45,7 +45,7 @@ export function parseYaml<ResT = unknown>(
       parsed.push(singleParsed);
     } catch (error) {
       if (options?.failureBehaviour !== 'filter') {
-        throw new Error('Failed to parse YAML file', { cause: error });
+        throw new Error('Failed to parse YAML file', { cause: error.cause });
       }
       logger.debug(
         { error, document: element },
