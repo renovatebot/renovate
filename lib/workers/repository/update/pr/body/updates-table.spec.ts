@@ -87,13 +87,40 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       displayFrom: '^6.2.3',
       displayTo: '6.2.3',
     });
+
+    const upgrade4 = partial<BranchUpgradeConfig>({
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      prBodyDefinitions: {
+        Package: '{{{depNameLinked}}}',
+        Type: '{{{depType}}}',
+        Update: '{{{updateType}}}',
+        'Current value': '{{{currentValue}}}',
+        'New value': '{{{newValue}}}',
+        Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+        Pending: '{{{displayPending}}}',
+        References: '{{{references}}}',
+        'Package file': '{{{packageFile}}}',
+      },
+      updateType: 'pin',
+      depNameLinked:
+        '[mocha](https://mochajs.org/) ([source](https://github.com/mochajs/mocha))',
+      depType: 'devDependencies',
+      depName: 'mocha',
+      currentValue: '^6.2.3',
+      newValue: '6.2.3',
+      currentVersion: '6.2.3',
+      newVersion: '6.2.3',
+      displayFrom: '^6.2.3',
+      displayTo: '6.2.3',
+    });
     // TODO #22198 allow or filter undefined
     const upgrade3 = undefined as never;
     const configObj: BranchConfig = {
       manager: 'some-manager',
       branchName: 'some-branch',
       baseBranch: 'base',
-      upgrades: [upgrade0, upgrade1, upgrade2, upgrade3],
+      upgrades: [upgrade0, upgrade1, upgrade2, upgrade3, upgrade4],
       prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
       prBodyDefinitions: {
         Package: '{{{depNameLinked}}}',

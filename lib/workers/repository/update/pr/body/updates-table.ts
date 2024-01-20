@@ -44,7 +44,9 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     logger.warn('getPrUpdatesTable - prBodyColumns is undefined');
     return '';
   }
-  const tableValues = config.upgrades
+
+  const uniqueUpgrades = filterDuplicateUpgrades(config.upgrades);
+  const tableValues = uniqueUpgrades
     .filter((upgrade) => upgrade !== undefined)
     .map((upgrade) => {
       const res: Record<string, string> = {};
@@ -88,4 +90,31 @@ export function getPrUpdatesTable(config: BranchConfig): string {
   res += uniqueRows.join('');
   res += '\n\n';
   return res;
+}
+
+function filterDuplicateUpgrades(
+  upgrades: BranchUpgradeConfig[],
+): BranchUpgradeConfig[] {
+  // Create an empty object to track unique combinations of properties
+  const uniqueObjects: Record<string, boolean> = {};
+
+  // Filter the array to remove duplicates
+  const resultArray = upgrades
+    .filter((upgrade) => upgrade !== undefined)
+    .filter((obj) => {
+      // Create a key based on the specified properties
+      const key = `${obj.depName}_${obj.depType}_${obj.newValue}_${obj.currentValue}`;
+
+      // Check if the key already exists in the uniqueObjects
+      // If it doesn't exist, add the key and return true (keep the object)
+      if (!uniqueObjects[key]) {
+        uniqueObjects[key] = true;
+        return true;
+      }
+
+      // If the key already exists, return false (filter out the duplicate object)
+      return false;
+    });
+
+  return resultArray;
 }
