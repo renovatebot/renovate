@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
@@ -10,6 +11,7 @@ import type {
   ToolConstraint,
 } from '../../../../util/exec/types';
 import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
+import { uniqueStrings } from '../../../../util/string';
 import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeToolConstraint } from './node-version';
@@ -68,14 +70,30 @@ export async function generateLockFile(
     }
     const commands: string[] = [];
 
-    cmd = 'pnpm';
-    let args = 'install --recursive --lockfile-only';
+    cmd = 'pnpm install';
+    let args = '--recursive --lockfile-only';
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
     }
     logger.trace({ cmd, args }, 'pnpm command');
     commands.push(`${cmd} ${args}`);
+
+    // rangeStrategy = update-lockfile
+    const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
+
+    if (lockUpdates.length) {
+      logger.debug('Performing lockfileUpdate (pnpm)');
+      // `yarn up -R` updates to the latest release in each range
+      commands.push(
+        `pnpm update --no-save ${lockUpdates
+          // TODO: types (#22198)
+          .map((update) => `${update.packageName!}@${update.newVersion!}`)
+          .filter(uniqueStrings)
+          .map(quote)
+          .join(' ')} ${args}`,
+      );
+    }
 
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {

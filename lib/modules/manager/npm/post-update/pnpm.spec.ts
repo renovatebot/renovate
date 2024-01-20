@@ -56,6 +56,44 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('performs lock file updates', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
+      {
+        packageName: 'some-other-dep',
+        newVersion: '1.1.0',
+        isLockfileUpdate: true,
+      },
+    ]);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+        options: {
+          cwd: 'some-folder',
+          encoding: 'utf-8',
+          env: {
+            HTTP_PROXY: 'http://example.com',
+            HTTPS_PROXY: 'https://example.com',
+            NO_PROXY: 'localhost',
+            HOME: '/home/user',
+            PATH: '/tmp/path',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
