@@ -71,16 +71,18 @@ function extractFromSection(
       const dep: PackageDependency = {
         depType: section,
         depName,
-        currentValue,
         managerData: {},
       };
-      if (currentValue?.startsWith('==')) {
-        dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
+      if (currentValue) {
+        dep.currentValue = currentValue;
       }
       if (skipReason) {
         dep.skipReason = skipReason;
       } else {
         dep.datasource = PypiDatasource.id;
+      }
+      if (currentValue?.startsWith('==')) {
+        dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
       }
       if (nestedVersion) {
         // TODO #22198
