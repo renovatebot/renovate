@@ -2,8 +2,6 @@ import type { Category } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as version from '../../versioning/hex';
 
-// export { extractPackageFile } from './extract';
-
 export const displayName = 'gleam';
 export const url = 'https://gleam.run/';
 

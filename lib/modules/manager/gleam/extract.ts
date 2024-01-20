@@ -23,13 +23,13 @@ function toPackageDep({
   name: string;
   version: string;
   dev: boolean;
-}) {
+}): PackageDependency {
   return {
     depName: name,
     depType: dev ? 'devDependencies' : 'dependencies',
     datasource: 'hex',
     currentValue: version,
-  } satisfies PackageDependency;
+  };
 }
 
 function extractGleamTomlDeps(gleamToml: GleamToml): PackageDependency[] {
@@ -37,8 +37,8 @@ function extractGleamTomlDeps(gleamToml: GleamToml): PackageDependency[] {
     ...Object.entries(gleamToml.dependencies ?? {}).map(([name, version]) =>
       toPackageDep({ name, version, dev: false }),
     ),
-    ...Object.entries(gleamToml.['dev-dependencies'] ?? {}).map(([name, version]) =>
-      toPackageDep({ name, version, dev: false }),
+    ...Object.entries(gleamToml['dev-dependencies'] ?? {}).map(
+      ([name, version]) => toPackageDep({ name, version, dev: false }),
     ),
   ];
 }
