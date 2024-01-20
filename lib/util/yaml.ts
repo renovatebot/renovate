@@ -40,18 +40,19 @@ export function parseYaml<ResT = unknown>(
 
   const parsed: ResT[] = [];
   for (const element of rawDocuments) {
-    try {
-      const singleParsed = schema.parse(element);
-      parsed.push(singleParsed);
-    } catch (error) {
-      if (options?.failureBehaviour !== 'filter') {
-        throw new Error('Failed to parse YAML file', { cause: error.cause });
-      }
-      logger.debug(
-        { error, document: element },
-        'Failed to parse schema for YAML',
-      );
+    const result = schema.safeParse(element);
+    if (result.success) {
+      parsed.push(result.data);
+      continue;
     }
+
+    if (options?.failureBehaviour !== 'filter') {
+      throw new Error('Failed to parse YAML file', { cause: result.error });
+    }
+    logger.debug(
+      { error: result.error, document: element },
+      'Failed to parse schema for YAML',
+    );
   }
   return parsed;
 }
