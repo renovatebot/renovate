@@ -235,7 +235,9 @@ class GerritClient {
       filters.push(`label:Code-Review=${searchConfig.label}`);
     }
     if (searchConfig.prTitle) {
-      filters.push(`message:${encodeURIComponent(searchConfig.prTitle)}`);
+      filters.push(
+        `message:${encodeURIComponent('"' + searchConfig.prTitle + '"')}`,
+      );
     }
     return filters;
   }
