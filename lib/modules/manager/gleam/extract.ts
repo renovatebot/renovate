@@ -1,5 +1,4 @@
 import assert from 'assert';
-// import semver, { satisfies } from 'semver';
 import { logger } from '../../../logger';
 import { parse as parseToml } from '../../../util/toml';
 import type { PackageDependency, PackageFileContent } from '../types';
