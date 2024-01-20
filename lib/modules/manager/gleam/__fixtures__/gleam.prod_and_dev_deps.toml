@@ -1,0 +1,9 @@
+name = "test_gleam_toml"
+version = "1.0.0"
+
+[dependencies]
+gleam_json = "~> 0.6.0"
+
+[dev-dependencies]
+gleeunit = "~> 1.0"
+

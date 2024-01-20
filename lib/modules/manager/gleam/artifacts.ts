@@ -5,7 +5,6 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
-  findLocalSiblingOrParent,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -25,10 +24,8 @@ export async function updateArtifacts(
   }
 
   // Find the first gleam dependency in order to handle mixed manager updates
-  const lockFileName = await findLocalSiblingOrParent(
-    packageFileName,
-    'manifest.toml',
-  );
+  const lockFileName = updatedDeps.find((dep) => dep.manager === 'gleam')
+    ?.lockFiles?.[0];
 
   if (!lockFileName) {
     logger.debug(`No ${lockFileName} found`);
