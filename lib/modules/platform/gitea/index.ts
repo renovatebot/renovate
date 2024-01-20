@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import pMap from 'p-map';
 import semver from 'semver';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -10,6 +9,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import * as p from '../../../util/promises';
 import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
@@ -323,7 +323,7 @@ const platform: Platform = {
       }
 
       let repos: string[] = [];
-      await pMap(config.topics, async (topic: string) => {
+      await p.map(config.topics, async (topic: string) => {
         const r = await fetchRepositories(topic);
         repos = [...new Set([...repos, ...r])];
       });
