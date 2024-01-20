@@ -29,7 +29,7 @@ import { getGitlabDep, replaceReferenceTags } from './utils';
 
 // See https://docs.gitlab.com/ee/ci/components/index.html#use-a-component
 const componentReferenceRegex = regEx(
-  /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(.+)@(?<specificVersion>.+)/,
+  /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(?:.+)@(?<specificVersion>.+)/,
 );
 const componentReferenceLatestVersion = '~latest';
 
