@@ -1,9 +1,8 @@
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
-import { parseUrl, trimLeadingSlash } from '../../../util/url';
+import { trimLeadingSlash } from '../../../util/url';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type {
@@ -121,7 +120,6 @@ function getAllIncludeComponents(
 
 function extractDepFromIncludeComponent(
   includeComponent: GitlabIncludeComponent,
-  endpoint: string | undefined,
 ): PackageDependency | null {
   const componentReference = componentReferenceRegex.exec(
     includeComponent.component,
@@ -147,6 +145,7 @@ function extractDepFromIncludeComponent(
     depName: componentReference.projectPath,
     depType: 'repository',
     currentValue: componentReference.specificVersion,
+    registryUrls: [`https://${componentReference.fqdn}`],
   };
   if (dep.currentValue === componentReferenceLatestVersion) {
     logger.debug(
@@ -154,15 +153,6 @@ function extractDepFromIncludeComponent(
       'Ignoring component version',
     );
     dep.skipReason = 'unsupported-version';
-  }
-  const endpointUrl = parseUrl(endpoint);
-  if (endpointUrl && endpointUrl.hostname !== componentReference.fqdn) {
-    const registryUrl = `https://${componentReference.fqdn}`;
-    logger.debug(
-      { componentReference: includeComponent.component },
-      'Setting registry URL for external component reference',
-    );
-    dep.registryUrls = [registryUrl];
   }
   return dep;
 }
@@ -173,7 +163,6 @@ export function extractPackageFile(
   config: ExtractConfig,
 ): PackageFileContent | null {
   let deps: PackageDependency[] = [];
-  const endpoint = GlobalConfig.get('endpoint');
   try {
     // TODO: use schema (#9610)
     const doc = parseSingleYaml<GitlabPipeline>(replaceReferenceTags(content), {
@@ -210,7 +199,7 @@ export function extractPackageFile(
 
     const includedComponents = getAllIncludeComponents(doc);
     for (const includedComponent of includedComponents) {
-      const dep = extractDepFromIncludeComponent(includedComponent, endpoint);
+      const dep = extractDepFromIncludeComponent(includedComponent);
       if (dep) {
         deps.push(dep);
       }

@@ -350,10 +350,6 @@ describe('modules/manager/gitlabci/extract', () => {
     });
 
     it('extracts component references', () => {
-      GlobalConfig.set({
-        endpoint: 'https://gitlab.example.com',
-      });
-
       const content = codeBlock`
         include:
           - component: gitlab.example.com/an-org/a-project/a-component@1.0
@@ -377,24 +373,28 @@ describe('modules/manager/gitlabci/extract', () => {
           datasource: 'gitlab-tags',
           depName: 'an-org/a-project',
           depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
         },
         {
           currentValue: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
           datasource: 'gitlab-tags',
           depName: 'an-org/a-subgroup/a-project',
           depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
         },
         {
           currentValue: 'main',
           datasource: 'gitlab-tags',
           depName: 'an-org/a-subgroup/another-project',
           depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
         },
         {
           currentValue: '~latest',
           datasource: 'gitlab-tags',
           depName: 'another-org/a-project',
           depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
           skipReason: 'unsupported-version',
         },
         {
