@@ -406,7 +406,7 @@ Instead, set the old `branchPrefix` value as `branchPrefixOld` to allow Renovate
 ## branchTopic
 
 This field is combined with `branchPrefix` and `additionalBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
-This is an advance field and it's recommend you seek a config review before applying it.
+This is an advanced field, and it's recommend you seek a config review before applying it.
 
 ## bumpVersion
 
