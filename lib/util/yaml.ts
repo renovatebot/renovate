@@ -6,20 +6,28 @@ import {
   dump as upstreamDump,
 } from 'js-yaml';
 import type { ZodType } from 'zod';
+import { logger } from '../logger';
 import { regEx } from './regex';
 
-type YamlOptions<
+interface YamlOptions<
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
-> = {
+> extends LoadOptions {
   customSchema?: Schema;
   removeTemplates?: boolean;
-} & LoadOptions;
+}
+
+interface YamlOptionsMultiple<
+  ResT = unknown,
+  Schema extends ZodType<ResT> = ZodType<ResT>,
+> extends YamlOptions<ResT, Schema> {
+  failureBehaviour?: 'throw' | 'filter';
+}
 
 export function parseYaml<ResT = unknown>(
   content: string,
   iterator?: null | undefined,
-  options?: YamlOptions<ResT>,
+  options?: YamlOptionsMultiple<ResT>,
 ): ResT[] {
   const massagedContent = massageContent(content, options);
 
@@ -32,8 +40,18 @@ export function parseYaml<ResT = unknown>(
 
   const parsed: ResT[] = [];
   for (const element of rawDocuments) {
-    const singleParsed = schema.parse(element);
-    parsed.push(singleParsed);
+    try {
+      const singleParsed = schema.parse(element);
+      parsed.push(singleParsed);
+    } catch (error) {
+      if (options?.failureBehaviour !== 'filter') {
+        throw new Error('Failed to parse YAML file', { cause: error });
+      }
+      logger.debug(
+        { error, document: element },
+        'Failed to parse schema for YAML',
+      );
+    }
   }
   return parsed;
 }
