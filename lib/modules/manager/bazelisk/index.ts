@@ -1,5 +1,5 @@
 import type { Category } from '../../../constants';
-import { GithubReleasesDatasource } from '../../datasource/github-releases';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as semverVersioning from '../../versioning/semver';
 
 export { extractPackageFile } from './extract';
@@ -12,4 +12,4 @@ export const defaultConfig = {
 
 export const categories: Category[] = ['bazel'];
 
-export const supportedDatasources = [GithubReleasesDatasource.id];
+export const supportedDatasources = [GithubTagsDatasource.id];

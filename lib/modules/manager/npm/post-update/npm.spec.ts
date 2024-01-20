@@ -199,7 +199,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     ]);
   });
 
-  it('deduplicates dependencies after installation with npm <= 6', async () => {
+  it('deduplicates package-lock.json dependencies after installation with npm <= 6', async () => {
     const execSnapshots = mockExecAll();
     // package.json
     fs.readLocalFile.mockResolvedValueOnce('{}');
@@ -221,6 +221,45 @@ describe('modules/manager/npm/post-update/npm', () => {
       updates,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(res.error).toBeFalse();
+    expect(res.lockFile).toBe(packageLockContents);
+    expect(execSnapshots).toHaveLength(2);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'npm install --no-audit --ignore-scripts',
+      },
+      {
+        cmd: 'npm dedupe',
+      },
+    ]);
+  });
+
+  it('deduplicates npm-shrinkwrap.json dependencies after installation with npm <= 6', async () => {
+    const execSnapshots = mockExecAll();
+    // package.json
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const packageLockContents = JSON.stringify({
+      dependencies: {},
+      lockfileVersion: 1,
+    });
+    fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
+    fs.readLocalFile.mockResolvedValueOnce(packageLockContents);
+    const postUpdateOptions = ['npmDedupe'];
+    const updates = [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+    ];
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'npm-shrinkwrap.json',
+      { postUpdateOptions },
+      updates,
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
+    expect(fs.readLocalFile).toHaveBeenCalledWith(
+      'some-dir/npm-shrinkwrap.json',
+      'utf8',
+    );
     expect(res.error).toBeFalse();
     expect(res.lockFile).toBe(packageLockContents);
     expect(execSnapshots).toHaveLength(2);
