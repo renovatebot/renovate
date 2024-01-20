@@ -29,7 +29,6 @@ const pipeline = parseSingleYaml<GitlabPipeline>(
 );
 const includeLocal = { local: 'something' };
 const includeProject = { project: 'something' };
-const includeComponent = { component: 'something' };
 
 describe('modules/manager/gitlabci/common', () => {
   describe('filterIncludeFromGitlabPipeline()', () => {
@@ -65,7 +64,7 @@ describe('modules/manager/gitlabci/common', () => {
 
   describe('isGitlabIncludeComponent()', () => {
     it('returns true if GitlabInclude is GitlabIncludeComponent', () => {
-      expect(isGitlabIncludeComponent(includeComponent)).toBe(true);
+      expect(isGitlabIncludeComponent({ component: 'something' })).toBe(true);
     });
 
     it('returns false if GitlabInclude is not GitlabIncludeComponent', () => {
