@@ -44,14 +44,12 @@ describe('modules/manager/pipenv/extract', () => {
             depType: 'packages',
             depName: '_invalid-package',
             currentValue: '==1.0.0',
-            currentVersion: '1.0.0',
             skipReason: 'invalid-name',
           },
           {
             depType: 'packages',
             depName: 'invalid-version',
             currentValue: '==0 0',
-            currentVersion: '0 0',
             skipReason: 'invalid-version',
           },
           {

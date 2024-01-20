@@ -81,7 +81,7 @@ function extractFromSection(
       } else {
         dep.datasource = PypiDatasource.id;
       }
-      if (currentValue?.startsWith('==')) {
+      if (!skipReason && currentValue?.startsWith('==')) {
         dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
       }
       if (nestedVersion) {
