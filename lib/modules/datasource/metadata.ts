@@ -87,15 +87,14 @@ export function normalizeDate(input: any): string | null {
     //   2. Format of `input` is very exotic
     //      (from `DateTime.fromISO()` perspective)
     //
-    if (input.match(regEx(/^\d{14}$/))) {
-      const luxonDate = DateTime.fromFormat(input, 'yyyyMMddHHmmss', {
-        zone: 'UTC',
-      });
-      if (luxonDate.isValid) {
-        return luxonDate.toISO();
-      }
+
+    let luxonDate = DateTime.fromISO(input, { zone: 'UTC' });
+    if (luxonDate.isValid) {
+      return luxonDate.toISO();
     }
-    const luxonDate = DateTime.fromISO(input, { zone: 'UTC' });
+    luxonDate = DateTime.fromFormat(input, 'yyyyMMddHHmmss', {
+      zone: 'UTC',
+    });
     if (luxonDate.isValid) {
       return luxonDate.toISO();
     }
