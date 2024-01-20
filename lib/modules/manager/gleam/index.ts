@@ -1,6 +1,6 @@
 import type { Category } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
-import * as version from '../../versioning/hex';
+import * as hexVersioning from '../../versioning/hex';
 
 export const displayName = 'gleam';
 export const url = 'https://gleam.run/';
