@@ -366,7 +366,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
             newDigest: '4464c06fa399',
             releaseTimestamp: '20230721020619',
             version:
-              'v1.28.1-20230721020619-4464c06fa399.4v1.28.1-20230721020619-4464c06fa399.4',
+              'v1.28.1-20230721020619-4464c06fa399.4',
           },
         ],
         sourceUrl: 'https://github.com/google/btree',
