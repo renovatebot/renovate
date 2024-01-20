@@ -10,6 +10,7 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { deduplicateArray } from '../../../util/array';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
@@ -322,12 +323,11 @@ const platform: Platform = {
         return await fetchRepositories();
       }
 
-      let repos: string[] = [];
-      await p.map(config.topics, async (topic: string) => {
-        const r = await fetchRepositories(topic);
-        repos = [...new Set([...repos, ...r])];
-      });
-      return repos;
+      const repos = await p.map(
+        config.topics,
+        async (topic: string) => await fetchRepositories(topic),
+      );
+      return deduplicateArray(repos.flat());
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;
