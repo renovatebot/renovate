@@ -11,6 +11,7 @@ const Categories = [
   'dotnet',
   'elixir',
   'golang',
+  'gleam',
   'helm',
   'iac',
   'java',
