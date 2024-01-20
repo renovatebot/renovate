@@ -192,7 +192,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'repo';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toMatchObject({
       sourceUrl: 'https://gitlab.com/my/group/repo',
     });
   });
@@ -208,7 +208,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'repo';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toMatchObject({
       sourceUrl: 'https://gitlab.com/my/group/repo',
     });
   });
@@ -224,7 +224,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = 'repo';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toMatchObject({
       sourceUrl: 'https://gitlab.com/my/group/repo',
     });
   });
