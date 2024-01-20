@@ -344,7 +344,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           codeBlock`
             v1.0.0 2018-08-13T15:31:12Z
             v1.0.1
-            v1.28.1-20230721020619-4464c06fa399.4v1.28.1-20230721020619-4464c06fa399.4
+            v1.28.1-20230721020619-4464c06fa399.4
           `,
         )
         .get('/@v/v1.0.1.info')
