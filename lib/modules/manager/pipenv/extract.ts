@@ -71,10 +71,11 @@ function extractFromSection(
       const dep: PackageDependency = {
         depType: section,
         depName,
+        currentValue,
         managerData: {},
       };
-      if (currentValue) {
-        dep.currentValue = currentValue;
+      if (currentValue?.startsWith('==')) {
+        dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
       }
       if (skipReason) {
         dep.skipReason = skipReason;
