@@ -260,6 +260,9 @@ importers:
       p-throttle:
         specifier: 4.1.1
         version: 4.1.1
+      parse-git-url:
+        specifier: 1.2.0
+        version: 1.2.0
       parse-link-header:
         specifier: 2.0.0
         version: 2.0.0
@@ -8827,6 +8830,10 @@ packages:
       is-alphanumerical: 1.0.4
       is-decimal: 1.0.4
       is-hexadecimal: 1.0.4
+    dev: false
+
+  /parse-git-url@1.2.0:
+    resolution: {integrity: sha512-BRwzYeuI8/1ObsInJJSOkUUShwkJhx9BPMoX8CDGIbm5E5e+4OmcVKwlWc9CPMy+OEeNVrQOpCKRsGiTfaJLcA==}
     dev: false
 
   /parse-json@4.0.0:

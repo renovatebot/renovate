@@ -181,6 +181,54 @@ describe('modules/datasource/metadata', () => {
     });
   });
 
+  it('Should handle nested gitlab groups', () => {
+    const dep: ReleaseResult = {
+      sourceUrl: 'https://gitlab.com/my/group/repo.git',
+      releases: [
+        { version: '1.0.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
+      ],
+    };
+    const datasource = NpmDatasource.id;
+    const packageName = 'repo';
+
+    addMetaData(dep, datasource, packageName);
+    expect(dep).toMatchSnapshot({
+      sourceUrl: 'https://gitlab.com/my/group/repo',
+    });
+  });
+
+  it('Should handle nested gitlab groups also for git+ssh', () => {
+    const dep: ReleaseResult = {
+      sourceUrl: 'git+ssh://gitlab.com/my/group/repo.git',
+      releases: [
+        { version: '1.0.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
+      ],
+    };
+    const datasource = NpmDatasource.id;
+    const packageName = 'repo';
+
+    addMetaData(dep, datasource, packageName);
+    expect(dep).toMatchSnapshot({
+      sourceUrl: 'https://gitlab.com/my/group/repo',
+    });
+  });
+
+  it('Should handle nested gitlab groups also for git+ssh with user', () => {
+    const dep: ReleaseResult = {
+      sourceUrl: 'git+ssh://foo:bar@gitlab.com/my/group/repo.git',
+      releases: [
+        { version: '1.0.0', releaseTimestamp: '2020-02-14T13:12:00.000Z' },
+      ],
+    };
+    const datasource = NpmDatasource.id;
+    const packageName = 'repo';
+
+    addMetaData(dep, datasource, packageName);
+    expect(dep).toMatchSnapshot({
+      sourceUrl: 'https://gitlab.com/my/group/repo',
+    });
+  });
+
   it('Should handle failed parsing of sourceUrls for GitLab', () => {
     const dep = {
       sourceUrl: 'https://gitlab-nope',

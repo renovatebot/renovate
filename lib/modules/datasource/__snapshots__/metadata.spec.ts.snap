@@ -81,6 +81,42 @@ exports[`modules/datasource/metadata Should handle manualSourceUrls 1`] = `
 }
 `;
 
+exports[`modules/datasource/metadata Should handle nested gitlab groups 1`] = `
+{
+  "releases": [
+    {
+      "releaseTimestamp": "2020-02-14T13:12:00.000Z",
+      "version": "1.0.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/my/group/repo",
+}
+`;
+
+exports[`modules/datasource/metadata Should handle nested gitlab groups also for git+ssh 1`] = `
+{
+  "releases": [
+    {
+      "releaseTimestamp": "2020-02-14T13:12:00.000Z",
+      "version": "1.0.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/my/group/repo",
+}
+`;
+
+exports[`modules/datasource/metadata Should handle nested gitlab groups also for git+ssh with user 1`] = `
+{
+  "releases": [
+    {
+      "releaseTimestamp": "2020-02-14T13:12:00.000Z",
+      "version": "1.0.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/my/group/repo",
+}
+`;
+
 exports[`modules/datasource/metadata Should handle non-url 1`] = `
 {
   "releases": [
