@@ -14,7 +14,7 @@ import { deduplicateArray } from '../../../util/array';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
-import * as p from '../../../util/promises';
+import { map } from '../../../util/promises';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
 import { getPrBodyStruct, hashBody } from '../pr-body';
@@ -323,10 +323,7 @@ const platform: Platform = {
         return await fetchRepositories();
       }
 
-      const repos = await p.map(
-        config.topics,
-        fetchRepositories,
-      );
+      const repos = await map(config.topics, fetchRepositories);
       return deduplicateArray(repos.flat());
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
