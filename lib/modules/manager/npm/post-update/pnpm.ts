@@ -38,7 +38,7 @@ export async function generateLockFile(
   let lockFile: string | null = null;
   let stdout: string | undefined;
   let stderr: string | undefined;
-  let cmd = 'pnpm';
+  const commands: string[] = [];
   try {
     const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
     const pnpmToolConstraint: ToolConstraint = {
@@ -68,16 +68,14 @@ export async function generateLockFile(
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
-    const commands: string[] = [];
 
-    cmd = 'pnpm install';
-    let args = '--recursive --lockfile-only';
+    let cmdOptions = '--recursive --lockfile-only';
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
-      args += ' --ignore-scripts';
-      args += ' --ignore-pnpmfile';
+      cmdOptions += ' --ignore-scripts';
+      cmdOptions += ' --ignore-pnpmfile';
     }
-    logger.trace({ cmd, args }, 'pnpm command');
-    commands.push(`${cmd} ${args}`);
+    logger.trace({ cmdOptions }, 'pnpm command options');
+    commands.push(`pnpm install ${cmdOptions}`);
 
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
@@ -91,7 +89,7 @@ export async function generateLockFile(
           .map((update) => `${update.packageName!}@${update.newVersion!}`)
           .filter(uniqueStrings)
           .map(quote)
-          .join(' ')} ${args}`,
+          .join(' ')} ${cmdOptions}`,
       );
     }
 
@@ -122,7 +120,7 @@ export async function generateLockFile(
     }
     logger.debug(
       {
-        cmd,
+        commands,
         err,
         stdout,
         stderr,
