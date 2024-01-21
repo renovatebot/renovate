@@ -325,7 +325,7 @@ const platform: Platform = {
 
       const repos = await p.map(
         config.topics,
-        async (topic: string) => await fetchRepositories(topic),
+        fetchRepositories,
       );
       return deduplicateArray(repos.flat());
     } catch (err) {
