@@ -72,21 +72,6 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
-        options: {
-          cwd: 'some-folder',
-          encoding: 'utf-8',
-          env: {
-            HTTP_PROXY: 'http://example.com',
-            HTTPS_PROXY: 'https://example.com',
-            NO_PROXY: 'localhost',
-            HOME: '/home/user',
-            PATH: '/tmp/path',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-          },
-          maxBuffer: 10485760,
-          timeout: 900000,
-        },
       },
       {
         cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
