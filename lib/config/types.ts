@@ -368,7 +368,7 @@ export interface ValidationMessage {
   message: string;
 }
 
-type AllowedParents =
+export type AllowedParents =
   | 'customManagers'
   | 'customDatasources'
   | 'hostRules'

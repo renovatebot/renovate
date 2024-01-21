@@ -20,6 +20,7 @@ import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import {
+  AllowedParents,
   type RenovateConfig,
   type RenovateOptions,
   type StatusCheckKey,
@@ -224,7 +225,7 @@ export async function validateConfig(
       if (
         !isPreset &&
         optionParents[key] &&
-        !optionParents[key].includes(parentName)
+        !optionParents[key]?.includes(parentName as AllowedParents)
       ) {
         // TODO: types (#22198)
         const message = `${key} should only be configured within one of "${optionParents[
