@@ -45,6 +45,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     return '';
   }
 
+  // filter duplicate upgrades
   const uniqueUpgrades = filterDuplicateUpgrades(config.upgrades);
   const tableValues = uniqueUpgrades
     .filter((upgrade) => upgrade !== undefined)
@@ -95,26 +96,26 @@ export function getPrUpdatesTable(config: BranchConfig): string {
 function filterDuplicateUpgrades(
   upgrades: BranchUpgradeConfig[],
 ): BranchUpgradeConfig[] {
-  // Create an empty object to track unique combinations of properties
-  const uniqueObjects: Record<string, boolean> = {};
+  const uniqueUpgradeKeys = new Set();
 
-  // Filter the array to remove duplicates
-  const resultArray = upgrades
+  const uniqueUpgrades = upgrades
     .filter((upgrade) => upgrade !== undefined)
-    .filter((obj) => {
-      // Create a key based on the specified properties
-      const key = `${obj.depName}_${obj.depType}_${obj.newValue}_${obj.currentValue}`;
+    .filter((upgrade) => {
+      // Create a key based on the properties which are significant in the updates table
+      const key = `${upgrade.depName ?? ''}_${upgrade.depType ?? ''}_${
+        upgrade.newValue ?? upgrade.newValue ?? ''
+      }_${upgrade.currentValue ?? upgrade.currentVersion ?? ''}_${
+        upgrade.updateType ?? ''
+      }`;
 
-      // Check if the key already exists in the uniqueObjects
-      // If it doesn't exist, add the key and return true (keep the object)
-      if (!uniqueObjects[key]) {
-        uniqueObjects[key] = true;
+      // Check if the key already exists
+      if (!uniqueUpgradeKeys.has(key)) {
+        uniqueUpgradeKeys.add(key);
         return true;
       }
 
-      // If the key already exists, return false (filter out the duplicate object)
       return false;
     });
 
-  return resultArray;
+  return uniqueUpgrades;
 }
