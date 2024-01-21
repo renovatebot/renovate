@@ -43,6 +43,16 @@ describe('modules/manager/conan/extract', () => {
           depName: 'cairo',
           depType: 'requires',
           packageName: 'cairo/1.17.2@_/_',
+          replaceString: 'cairo/1.17.2#aff2d03608351db075ec1348a3afc9ff',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}/{{newValue}}@_/_{{#if newDigest}}#{{newDigest}}{{/if}}',
+          currentDigest: 'aff2d03608351db075ec1348a3afc9ff',
+          currentValue: '1.17.2',
+          depName: 'cairo',
+          depType: 'requires',
+          packageName: 'cairo/1.17.2@_/_',
           replaceString: 'cairo/1.17.2@_/_#aff2d03608351db075ec1348a3afc9ff',
         },
         {
@@ -151,6 +161,13 @@ describe('modules/manager/conan/extract', () => {
           depType: 'requires',
           packageName: 'req_l/2.1@otheruser/testing',
           replaceString: 'req_l/2.1@otheruser/testing',
+        },
+        {
+          currentValue: '6.1',
+          depName: 'req_x',
+          depType: 'requires',
+          packageName: 'req_x/6.1@useronly/_',
+          replaceString: 'req_x/6.1@useronly',
         },
         {
           currentValue: '0.1',

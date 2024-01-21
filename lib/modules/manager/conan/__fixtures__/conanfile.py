@@ -3,7 +3,7 @@ from conans import ConanFile
 class Pkg(ConanFile):
    python_requires = "pyreq/0.1@user/channel"  # recipe to reuse code from
    build_requires = "tool_a/0.2@user/testing", "tool_b/0.2@user/testing"
-   requires = "req_a/1.0", "req_l/2.1@otheruser/testing"
+   requires = "req_a/1.0", "req_l/2.1@otheruser/testing", "req_x/6.1@useronly"
 
    requires = [("req_b/0.1@user/testing"),
                ("req_d/0.2@dummy/stable", "override"),

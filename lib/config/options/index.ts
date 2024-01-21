@@ -6,6 +6,15 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'allowedHeaders',
+    description:
+      'List of allowed patterns for header names in repository hostRules config.',
+    type: 'array',
+    default: ['X-*'],
+    subType: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'detectGlobalManagerConfig',
     description:
       'If `true`, Renovate tries to detect global manager configuration from the file system.',
@@ -19,6 +28,14 @@ const options: RenovateOptions[] = [
       'If `true`, Renovate tries to detect host rules from environment variables.',
     type: 'boolean',
     default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'useCloudMetadataServices',
+    description:
+      'If `false`, Renovate does not try to access cloud metadata services.',
+    type: 'boolean',
+    default: true,
     globalOnly: true,
   },
   {
@@ -400,7 +417,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.31.4',
+    default: 'ghcr.io/containerbase/sidecar:9.31.5',
     globalOnly: true,
   },
   {
@@ -845,7 +862,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['github', 'gitlab'],
+    supportedPlatforms: ['gitea', 'github', 'gitlab'],
   },
   {
     name: 'prCommitsPerRunLimit',
@@ -2382,6 +2399,16 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     parents: ['hostRules'],
     default: false,
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
+    name: 'headers',
+    description:
+      'Put fields to be forwarded to the HTTP request headers in the headers config option.',
+    type: 'object',
+    parent: 'hostRules',
     cli: false,
     env: false,
     advancedUse: true,
