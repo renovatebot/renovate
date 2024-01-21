@@ -75,7 +75,14 @@ export async function generateLockFile(
       cmdOptions += ' --ignore-pnpmfile';
     }
     logger.trace({ cmdOptions }, 'pnpm command options');
-    commands.push(`pnpm install ${cmdOptions}`);
+
+    if (
+      upgrades.length === 0 ||
+      !upgrades.every((upgrade) => upgrade.isLockfileUpdate)
+    ) {
+      // This command updates the lock file based on package.json
+      commands.push(`pnpm install ${cmdOptions}`);
+    }
 
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
