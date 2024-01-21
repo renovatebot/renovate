@@ -2408,7 +2408,7 @@ const options: RenovateOptions[] = [
     description:
       'Put fields to be forwarded to the HTTP request headers in the headers config option.',
     type: 'object',
-    parent: 'hostRules',
+    parents: ['hostRules'],
     cli: false,
     env: false,
     advancedUse: true,

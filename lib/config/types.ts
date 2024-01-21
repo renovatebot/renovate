@@ -368,6 +368,12 @@ export interface ValidationMessage {
   message: string;
 }
 
+type AllowedParents =
+  | 'customManagers'
+  | 'customDatasources'
+  | 'hostRules'
+  | 'postUpgradeTasks'
+  | 'packageRules';
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
@@ -396,7 +402,8 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parents?: string[];
+  parents?: AllowedParents[];
+
   stage?: RenovateConfigStage;
 
   experimental?: boolean;

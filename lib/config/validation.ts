@@ -32,7 +32,7 @@ import * as managerValidator from './validation-helpers/managers';
 const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
-let optionParents: Record<string, string[]>;
+let optionParents: Record<string, RenovateOptions['parents']>;
 let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
