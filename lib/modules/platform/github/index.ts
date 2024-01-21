@@ -283,8 +283,8 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   }
 
   logger.debug({ topics: config.topics }, 'Filtering by topics');
-  const topicRepositories = nonArchivedRepositories.filter(
-    (repo) => repo.topics?.some((topic) => config?.topics?.includes(topic)),
+  const topicRepositories = nonArchivedRepositories.filter((repo) =>
+    repo.topics?.some((topic) => config?.topics?.includes(topic)),
   );
 
   if (topicRepositories.length < nonArchivedRepositories.length) {
