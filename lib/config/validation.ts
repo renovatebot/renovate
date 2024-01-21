@@ -227,7 +227,7 @@ export async function validateConfig(
         !optionParents[key].includes(parentName)
       ) {
         // TODO: types (#22198)
-        const message = `${key} should only be configured within a "${optionParents[
+        const message = `${key} should only be configured within one of "${optionParents[
           key
         ]?.join(',')}" object. Was found in ${parentName}`;
         warnings.push({
