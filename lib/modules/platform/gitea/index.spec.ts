@@ -70,6 +70,8 @@ describe('modules/platform/gitea/index', () => {
     partial<Repo>({ full_name: 'e/f', mirror: true }),
   ];
 
+  const mockTopicRepos: Repo[] = [partial<Repo>({ full_name: 'a/b' })];
+
   const mockPRs: MockPr[] = [
     partial<MockPr>({
       number: 1,
@@ -349,6 +351,43 @@ describe('modules/platform/gitea/index', () => {
 
       const repos = await gitea.getRepos();
       expect(repos).toEqual(['a/b', 'c/d']);
+    });
+
+    it('should return an filtered array of repos', async () => {
+      const scope = httpMock.scope('https://gitea.com/api/v1');
+
+      scope
+        .get('/repos/search')
+        .query({
+          uid: 1,
+          archived: false,
+          q: 'renovate',
+          topic: true,
+        })
+        .reply(200, {
+          ok: true,
+          data: mockTopicRepos,
+        });
+
+      scope
+        .get('/repos/search')
+        .query({
+          uid: 1,
+          archived: false,
+          q: 'renovatebot',
+          topic: true,
+        })
+        .reply(200, {
+          ok: true,
+          data: mockTopicRepos,
+        });
+
+      await initFakePlatform(scope);
+
+      const repos = await gitea.getRepos({
+        topics: ['renovate', 'renovatebot'],
+      });
+      expect(repos).toEqual(['a/b']);
     });
 
     it('Sorts repos', async () => {
