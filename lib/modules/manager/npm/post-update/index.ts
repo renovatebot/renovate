@@ -51,8 +51,8 @@ export function determineLockFileDirs(
   for (const upgrade of config.upgrades) {
     if (
       upgrade.updateType === 'lockFileMaintenance' ||
-      (upgrade.isRemediation ?? false) ||
-      (upgrade.isLockfileUpdate ?? false)
+      (upgrade.isRemediation === true) ||
+      (upgrade.isLockfileUpdate === true)
     ) {
       yarnLockDirs.push(upgrade.managerData?.yarnLock);
       npmLockDirs.push(upgrade.managerData?.npmLock);
