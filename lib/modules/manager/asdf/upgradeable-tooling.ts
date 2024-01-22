@@ -344,6 +344,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'casey/just',
     },
   },
+  kind: {
+    asdfPluginUrl: 'https://github.com/johnlayton/asdf-kind',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'kubernetes-sigs/kind',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   kotlin: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-kotlin',
     config: {
@@ -374,6 +382,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
       packageName: 'lua/lua',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  maven: {
+    asdfPluginUrl: 'https://github.com/halcyon/asdf-maven',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'apache/maven',
     },
   },
   nim: {
@@ -581,6 +596,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'hashicorp/vault',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  yq: {
+    asdfPluginUrl: 'https://github.com/sudermanjr/asdf-yq',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'mikefarah/yq',
       extractVersion: '^v(?<version>\\S+)',
     },
   },
