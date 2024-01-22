@@ -175,6 +175,16 @@ async function fetchRepositories(topic?: string): Promise<string[]> {
   return repos.filter((r) => !r.mirror).map((r) => r.full_name);
 }
 
+async function fetchOrgRepositories(organization?: string): Promise<string[]> {
+  logger.debug('organizations');
+  if (!organization) {
+    return [];
+  }
+  const repos = await helper.orgListRepos(organization);
+  logger.debug(repos);
+  return repos.filter((r) => !r.mirror && !r.archived).map((r) => r.full_name);
+}
+
 const platform: Platform = {
   async initPlatform({
     endpoint,
@@ -318,13 +328,19 @@ const platform: Platform = {
 
   async getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug('Auto-discovering Gitea repositories');
+    logger.debug({ config }, 'Auto-discovering Gitea repositories');
     try {
-      if (!config?.topics) {
+      // if (!config?.topics) {
+      //   return await fetchRepositories();
+      // }
+      // "config": {"topics": null, "includeMirrors": false, "namespaces": ["bke"]}
+      if (config?.namespaces) {
+        logger.debug('Auto-discovering Gitea repositories by org');
+        const repos = await map(config.namespaces, fetchOrgRepositories);
+        return deduplicateArray(repos.flat());
+      } else {
         return await fetchRepositories();
       }
-
-      const repos = await map(config.topics, fetchRepositories);
-      return deduplicateArray(repos.flat());
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;
