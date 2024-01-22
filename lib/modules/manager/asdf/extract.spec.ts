@@ -527,7 +527,7 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
-            currentValue: '0.33.0',
+            currentValue: '4.40.5',
             datasource: 'github-releases',
             packageName: 'mikefarah/yq',
             depName: 'yq',
