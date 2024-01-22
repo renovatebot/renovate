@@ -265,10 +265,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
           );
           cache.httpCache[url] = {
             etag: resCopy.headers.etag,
-            httpResponse: copyResponse(
-              res,
-              deepCopyNeeded,
-            ),
+            httpResponse: copyResponse(res, deepCopyNeeded),
             timeStamp: new Date().toISOString(),
           };
         }
