@@ -230,7 +230,7 @@ export async function validateConfig(
         // TODO: types (#22198)
         const message = `${key} should only be configured within one of "${optionParents[
           key
-        ]?.join(',')}" objects. Was found in ${parentName}`;
+        ]?.join(' or ')}" objects. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
           message,
