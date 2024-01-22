@@ -69,7 +69,6 @@ import { remoteBranchExists } from './branch';
 import { coerceRestPr, githubApi } from './common';
 import {
   enableAutoMergeMutation,
-  getIssuesQuery,
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
@@ -286,8 +285,8 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   }
 
   logger.debug({ topics: config.topics }, 'Filtering by topics');
-  const topicRepositories = nonArchivedRepositories.filter((repo) =>
-    repo.topics?.some((topic) => config?.topics?.includes(topic)),
+  const topicRepositories = nonArchivedRepositories.filter(
+    (repo) => repo.topics?.some((topic) => config?.topics?.includes(topic)),
   );
 
   if (topicRepositories.length < nonArchivedRepositories.length) {
@@ -1171,23 +1170,22 @@ export async function setBranchStatus({
 
 /* istanbul ignore next */
 async function getIssues(): Promise<Issue[]> {
-  const result = await githubApi.queryRepoField<Issue>(
-    getIssuesQuery,
-    'issues',
-    {
-      variables: {
-        owner: config.repositoryOwner,
-        name: config.repositoryName,
-        user: config.renovateUsername,
-      },
-    },
-  );
+  const result: Issue[] = (
+    await githubApi.getJson<Issue[]>(
+      `repos/${config.parentRepo ?? config.repository}/issues?creator=${
+        config.renovateUsername
+      }&state=all`,
+      { repoCache: true },
+    )
+  ).body.map((issue: any) => ({
+    number: issue.number,
+    state: issue.state?.toLowerCase(),
+    title: issue.title,
+    body: issue.body,
+  }));
 
   logger.debug(`Retrieved ${result.length} issues`);
-  return result.map((issue) => ({
-    ...issue,
-    state: issue.state?.toLowerCase(),
-  }));
+  return result;
 }
 
 export async function getIssueList(): Promise<Issue[]> {
@@ -1209,6 +1207,14 @@ export async function getIssue(
   // istanbul ignore if
   if (config.hasIssuesEnabled === false) {
     return null;
+  }
+  if (useCache) {
+    const issueList = await getIssueList();
+    const issue = issueList.find((i) => i.number === number);
+    if (issue) {
+      logger.debug(`Returning issue from cache`);
+      return issue;
+    }
   }
   try {
     const issueBody = (
