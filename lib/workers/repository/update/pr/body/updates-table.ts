@@ -46,8 +46,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
   }
 
   // filter duplicate upgrades
-  const uniqueUpgrades = filterDuplicateUpgrades(config.upgrades);
-  const tableValues = uniqueUpgrades
+  const tableValues = filterDuplicateUpgrades(config.upgrades)
     .filter((upgrade) => upgrade !== undefined)
     .map((upgrade) => {
       const res: Record<string, string> = {};
