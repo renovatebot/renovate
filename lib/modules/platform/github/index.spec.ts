@@ -3336,6 +3336,16 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('getVulnerabilityAlerts()', () => {
+    it('avoids fetching if repo has vulnerability alerts disabled', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', {
+        hasVulnerabilityAlertsEnabled: false,
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res).toHaveLength(0);
+    });
+
     it('returns empty if error', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
       const res = await github.getVulnerabilityAlerts();
