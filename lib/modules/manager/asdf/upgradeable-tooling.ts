@@ -344,6 +344,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'casey/just',
     },
   },
+  kind: {
+    asdfPluginUrl: 'https://github.com/johnlayton/asdf-kind',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'kubernetes-sigs/kind',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   kotlin: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-kotlin',
     config: {
