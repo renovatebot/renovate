@@ -175,13 +175,10 @@ async function fetchRepositories(topic?: string): Promise<string[]> {
   return repos.filter((r) => !r.mirror).map((r) => r.full_name);
 }
 
-async function fetchOrgRepositories(organization?: string): Promise<string[]> {
-  logger.debug('organizations');
-  if (!organization) {
-    return [];
-  }
+async function fetchOrgRepositories(organization: string): Promise<string[]> {
   const repos = await helper.orgListRepos(organization);
-  logger.debug(repos);
+
+  // filter archived repositories because Gitea orgListRepos does not support this.
   return repos.filter((r) => !r.mirror && !r.archived).map((r) => r.full_name);
 }
 
@@ -328,14 +325,13 @@ const platform: Platform = {
 
   async getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug('Auto-discovering Gitea repositories');
-    logger.debug({ config }, 'Auto-discovering Gitea repositories');
     try {
-      // if (!config?.topics) {
-      //   return await fetchRepositories();
-      // }
-      // "config": {"topics": null, "includeMirrors": false, "namespaces": ["bke"]}
-      if (config?.namespaces) {
-        logger.debug('Auto-discovering Gitea repositories by org');
+      if (config?.topics) {
+        logger.debug('Auto-discovering Gitea repositories by topics');
+        const repos = await map(config.topics, fetchRepositories);
+        return deduplicateArray(repos.flat());
+      } else if (config?.namespaces) {
+        logger.debug('Auto-discovering Gitea repositories by organization');
         const repos = await map(config.namespaces, fetchOrgRepositories);
         return deduplicateArray(repos.flat());
       } else {
