@@ -82,6 +82,7 @@ kotlin 1.7.20
 kubectl 1.26.3
 kustomize 4.5.7
 lua 5.4.4
+maven 3.9.6
 nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
@@ -369,6 +370,12 @@ dummy 1.2.3
             packageName: 'lua/lua',
             depName: 'lua',
             extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '3.9.6',
+            datasource: 'github-releases',
+            packageName: 'apache/maven',
+            depName: 'maven',
           },
           {
             currentValue: '1.6.8',
