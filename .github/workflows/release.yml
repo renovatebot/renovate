@@ -109,7 +109,7 @@ jobs:
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
       - name: docker-config
-        uses: containerbase/internal-tools@7c13bdfa5d608c7be54358b6e9dbd7e1a509a5e7 # v3.0.47
+        uses: containerbase/internal-tools@9260121e8a5b13c1dc200f952833a3973723ca80 # v3.0.48
         with:
           command: docker-config
 
