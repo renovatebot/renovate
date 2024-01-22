@@ -889,7 +889,7 @@ None detected
         body: '',
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
-      expect(platform.ensureIssue.mock.calls).toBeEmpty();
+      expect(platform.ensureIssue).not.toHaveBeenCalled();
     });
 
     it('forwards configured labels to the ensure issue call', async () => {
