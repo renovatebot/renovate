@@ -78,6 +78,7 @@ idris 1.3.4
 java adoptopenjdk-16.0.0+36
 julia 1.8.2
 just 1.7.0
+kind 0.19.0
 kotlin 1.7.20
 kubectl 1.26.3
 kustomize 4.5.7
@@ -342,6 +343,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'casey/just',
             depName: 'just',
+          },
+          {
+            currentValue: '0.19.0',
+            datasource: 'github-releases',
+            packageName: 'kubernetes-sigs/kind',
+            depName: 'kind',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '1.7.20',
