@@ -20,6 +20,7 @@ import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import {
+  AllowedParents,
   type RenovateConfig,
   type RenovateOptions,
   type StatusCheckKey,
@@ -32,7 +33,7 @@ import * as managerValidator from './validation-helpers/managers';
 const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
-let optionParents: Record<string, RenovateOptions['parent']>;
+let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
@@ -117,8 +118,8 @@ export async function validateConfig(
   if (!optionParents) {
     optionParents = {};
     options.forEach((option) => {
-      if (option.parent) {
-        optionParents[option.name] = option.parent;
+      if (option.parents) {
+        optionParents[option.name] = option.parents;
       }
     });
   }
@@ -224,10 +225,12 @@ export async function validateConfig(
       if (
         !isPreset &&
         optionParents[key] &&
-        optionParents[key] !== parentName
+        !optionParents[key].includes(parentName as AllowedParents)
       ) {
         // TODO: types (#22198)
-        const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
+        const message = `${key} should only be configured within one of "${optionParents[
+          key
+        ]?.join(' or ')}" objects. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
           message,
