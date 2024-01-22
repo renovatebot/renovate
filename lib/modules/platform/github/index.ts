@@ -1188,7 +1188,7 @@ async function getIssues(): Promise<Issue[]> {
       `repos/${config.parentRepo ?? config.repository}/issues?creator=${
         config.renovateUsername
       }&state=all`,
-      { repoCache: true },
+      { repoCache: true, paginate: true },
     )
   ).body.map((issue) => ({
     number: issue.number,
