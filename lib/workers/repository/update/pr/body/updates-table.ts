@@ -104,7 +104,7 @@ function filterDuplicateUpgrades(
       const key = `${upgrade.depName ?? ''}_${upgrade.depType ?? ''}_${
         upgrade.newValue ?? upgrade.newValue ?? ''
       }_${upgrade.currentValue ?? upgrade.currentVersion ?? ''}_${
-        upgrade.updateType ?? ''
+        upgrade.updateType
       }`;
 
       // Check if the key already exists
