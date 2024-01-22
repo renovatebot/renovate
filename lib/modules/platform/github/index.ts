@@ -35,7 +35,10 @@ import type {
 import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
 import type { GithubHttpOptions } from '../../../util/http/github';
-import type { HttpResponse } from '../../../util/http/types';
+import type {
+  HttpResponse,
+  InternalHttpOptions,
+} from '../../../util/http/types';
 import { coerceObject } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -316,11 +319,15 @@ export async function getRawFile(
   branchOrTag?: string,
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
+  const httpOptions: InternalHttpOptions = {
+    // Only cache response if it's from the same repo
+    repoCache: repo === config.repository,
+  };
   let url = `repos/${repo}/contents/${fileName}`;
   if (branchOrTag) {
     url += `?ref=` + branchOrTag;
   }
-  const res = await githubApi.getJson<{ content: string }>(url);
+  const res = await githubApi.getJson<{ content: string }>(url, httpOptions);
   const buf = res.body.content;
   const str = fromBase64(buf);
   return str;
@@ -1220,7 +1227,7 @@ export async function getIssue(
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
         `repos/${config.parentRepo ?? config.repository}/issues/${number}`,
-        { memCache: useCache },
+        { memCache: useCache, repoCache: true },
       )
     ).body.body;
     return {
@@ -1306,6 +1313,7 @@ export async function ensureIssue({
           `repos/${config.parentRepo ?? config.repository}/issues/${
             issue.number
           }`,
+          { repoCache: true },
         )
       ).body.body;
       if (
