@@ -89,7 +89,6 @@ export async function generateLockFile(
 
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (pnpm)');
-      // `yarn up -R` updates to the latest release in each range
       commands.push(
         `pnpm update --no-save ${lockUpdates
           // TODO: types (#22198)
