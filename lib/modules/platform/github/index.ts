@@ -1177,7 +1177,7 @@ async function getIssues(): Promise<Issue[]> {
       }&state=all`,
       { repoCache: true },
     )
-  ).body.map((issue: any) => ({
+  ).body.map((issue) => ({
     number: issue.number,
     state: issue.state?.toLowerCase(),
     title: issue.title,
