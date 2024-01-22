@@ -589,6 +589,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'mikefarah/yq',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   zig: {
