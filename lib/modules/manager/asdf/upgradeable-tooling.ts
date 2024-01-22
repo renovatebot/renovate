@@ -599,6 +599,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  yq: {
+    asdfPluginUrl: 'https://github.com/sudermanjr/asdf-yq',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'mikefarah/yq',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   zig: {
     asdfPluginUrl: 'https://github.com/cheetah/asdf-zig',
     config: {

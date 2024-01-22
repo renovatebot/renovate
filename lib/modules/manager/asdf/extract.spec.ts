@@ -107,6 +107,7 @@ tflint 0.44.1
 tfsec 1.28.1
 trivy 0.33.0
 vault 1.15.1
+yq 4.40.5
 zig 0.9.1
 maestro 1.24.0
 detekt 1.21.0
@@ -538,6 +539,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'hashicorp/vault',
             depName: 'vault',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '4.40.5',
+            datasource: 'github-releases',
+            packageName: 'mikefarah/yq',
+            depName: 'yq',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
