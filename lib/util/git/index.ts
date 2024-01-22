@@ -412,6 +412,9 @@ export async function syncGit(): Promise<void> {
     const cloneStart = Date.now();
     try {
       const opts: string[] = [];
+      if (config.defaultBranch) {
+        opts.push('-b', config.defaultBranch);
+      }
       if (config.fullClone) {
         logger.debug('Performing full clone');
       } else {
@@ -467,7 +470,10 @@ export async function syncGit(): Promise<void> {
     }
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
-  config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  config.currentBranch =
+    config.currentBranch ||
+    config.defaultBranch ||
+    (await getDefaultBranch(git));
   delete getCache()?.semanticCommits;
 }
 
