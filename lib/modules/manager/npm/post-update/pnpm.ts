@@ -69,19 +69,19 @@ export async function generateLockFile(
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
 
-    let cmdOptions = '--recursive --lockfile-only';
+    let args = '--recursive --lockfile-only';
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
-      cmdOptions += ' --ignore-scripts';
-      cmdOptions += ' --ignore-pnpmfile';
+      args += ' --ignore-scripts';
+      args += ' --ignore-pnpmfile';
     }
-    logger.trace({ cmdOptions }, 'pnpm command options');
+    logger.trace({ args }, 'pnpm command options');
 
     if (
       upgrades.length === 0 ||
       !upgrades.every((upgrade) => upgrade.isLockfileUpdate)
     ) {
       // This command updates the lock file based on package.json
-      commands.push(`pnpm install ${cmdOptions}`);
+      commands.push(`pnpm install ${args}`);
     }
 
     // rangeStrategy = update-lockfile
@@ -96,7 +96,7 @@ export async function generateLockFile(
           .map((update) => `${update.packageName!}@${update.newVersion!}`)
           .filter(uniqueStrings)
           .map(quote)
-          .join(' ')} ${cmdOptions}`,
+          .join(' ')} ${args}`,
       );
     }
 
