@@ -268,7 +268,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
             httpResponse: copyResponse(
               res,
               deepCopyNeeded,
-            ) as HttpResponse<string>,
+            ),
             timeStamp: new Date().toISOString(),
           };
         }
