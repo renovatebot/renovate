@@ -21,7 +21,7 @@
     "allowJs": true,
     "checkJs": true,
     "importsNotUsedAsValues": "error",
-    "ignoreDeprecations": "5.0"
+    "ignoreDeprecations": "5.0",
   },
   "include": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
   "exclude": [
@@ -31,11 +31,11 @@
     "**/__mocks__/*",
     "coverage",
     "config.js",
-    "tmp"
+    "tmp",
   ],
   "ts-node": {
     "transpileOnly": true,
     "esm": false,
-    "swc": true
-  }
+    "swc": true,
+  },
 }
