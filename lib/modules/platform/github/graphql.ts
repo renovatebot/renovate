@@ -6,6 +6,7 @@ query($owner: String!, $name: String!) {
     isArchived
     nameWithOwner
     hasIssuesEnabled
+    hasVulnerabilityAlertsEnabled
     autoMergeAllowed
     mergeCommitAllowed
     rebaseMergeAllowed

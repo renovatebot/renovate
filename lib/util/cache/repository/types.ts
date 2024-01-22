@@ -127,7 +127,7 @@ export interface BranchCache {
 
 export interface HttpCache {
   etag: string;
-  httpResponse: HttpResponse;
+  httpResponse: HttpResponse<unknown>;
   timeStamp: string;
 }
 
