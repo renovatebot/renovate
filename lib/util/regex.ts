@@ -65,7 +65,7 @@ export function escapeRegExp(input: string): string {
 export const newlineRegex = regEx(/\r?\n/);
 
 const configValStart = regEx(/^!?\//);
-const configValEnd = regEx(/\/$/);
+const configValEnd = regEx(/\/i?$/);
 
 export function isConfigRegex(input: unknown): input is string {
   return (
@@ -78,7 +78,8 @@ function parseConfigRegex(input: string): RegExp | null {
     const regexString = input
       .replace(configValStart, '')
       .replace(configValEnd, '');
-    return regEx(regexString);
+    const isCaseSensitive = input.endsWith('i');
+    return isCaseSensitive ? regEx(regexString, 'i') : regEx(regexString);
   } catch (err) {
     // no-op
   }
