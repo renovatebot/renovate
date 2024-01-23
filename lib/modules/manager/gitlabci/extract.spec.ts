@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { logger } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -346,6 +347,64 @@ describe('modules/manager/gitlabci/extract', () => {
       ];
       expect(extractFromJob(undefined)).toBeEmptyArray();
       expect(extractFromJob({ image: 'image:test' })).toEqual(expectedRes);
+    });
+
+    it('extracts component references', () => {
+      const content = codeBlock`
+        include:
+          - component: gitlab.example.com/an-org/a-project/a-component@1.0
+            inputs:
+              stage: build
+          - component: gitlab.example.com/an-org/a-subgroup/a-project/a-component@e3262fdd0914fa823210cdb79a8c421e2cef79d8
+          - component: gitlab.example.com/an-org/a-subgroup/another-project/a-component@main
+          - component: gitlab.example.com/another-org/a-project/a-component@~latest
+            inputs:
+              stage: test
+          - component: gitlab.example.com/malformed-component-reference
+          - component:
+              malformed: true
+          - component: gitlab.example.com/an-org/a-component@1.0
+          - component: other-gitlab.example.com/an-org/a-project/a-component@1.0
+      `;
+      const res = extractPackageFile(content, '', {});
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '1.0',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
+        },
+        {
+          currentValue: 'e3262fdd0914fa823210cdb79a8c421e2cef79d8',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-subgroup/a-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
+        },
+        {
+          currentValue: 'main',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-subgroup/another-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
+        },
+        {
+          currentValue: '~latest',
+          datasource: 'gitlab-tags',
+          depName: 'another-org/a-project',
+          depType: 'repository',
+          registryUrls: ['https://gitlab.example.com'],
+          skipReason: 'unsupported-version',
+        },
+        {
+          currentValue: '1.0',
+          datasource: 'gitlab-tags',
+          depName: 'an-org/a-project',
+          depType: 'repository',
+          registryUrls: ['https://other-gitlab.example.com'],
+        },
+      ]);
     });
   });
 });
