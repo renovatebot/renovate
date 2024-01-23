@@ -855,6 +855,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const repos = await azureApiGit.getRepositories();
   const repo = repos.filter((c) => c.id === config.repoId)[0];
   const requiredReviewerPrefix = 'required:';
+  const validReviewers: string[] = [];
 
   // TODO #22198
   const teams = await azureApiCore.getTeams(repo.project!.id!);
@@ -890,6 +891,8 @@ async function getUserIds(users: string[]): Promise<User[]> {
               name: reviewer,
               isRequired,
             });
+
+            validReviewers.push(reviewer);
           }
         }
       });
@@ -908,9 +911,18 @@ async function getUserIds(users: string[]): Promise<User[]> {
         if (ids.filter((c) => c.id === t.id).length === 0) {
           // TODO #22198
           ids.push({ id: t.id!, name: reviewer, isRequired });
+
+          validReviewers.push(reviewer);
         }
       }
     });
+  });
+
+  users.forEach((u) => {
+    let reviewer = u;
+    if (validReviewers.indexOf(reviewer) == -1) {
+      logger.warn(`${reviewer} is neither an Azure DevOps Team nor a user associated with a Team`);
+    }
   });
 
   return ids;
