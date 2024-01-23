@@ -78,7 +78,7 @@ function parseConfigRegex(input: string): RegExp | null {
     const regexString = input
       .replace(configValStart, '')
       .replace(configValEnd, '');
-    return input.endsWith('i') ? regEx(regexString, 'i') : regEx(regexString));
+    return input.endsWith('i') ? regEx(regexString, 'i') : regEx(regexString);
   } catch (err) {
     // no-op
   }
