@@ -2,9 +2,10 @@ import { promisify } from 'node:util';
 import zlib, { constants } from 'node:zlib';
 import Sqlite from 'better-sqlite3';
 import type { Database, Statement } from 'better-sqlite3';
+import { exists } from 'fs-extra';
 import * as upath from 'upath';
 import { logger } from '../../../logger';
-import { cachePathExists, ensureDir } from '../../fs';
+import { ensureDir } from '../../fs';
 
 const brotliCompress = promisify(zlib.brotliCompress);
 const brotliDecompress = promisify(zlib.brotliDecompress);
@@ -36,7 +37,7 @@ export class SqlitePackageCache {
     await ensureDir(sqliteDir);
     const sqliteFile = upath.join(sqliteDir, 'db.sqlite');
 
-    if (await cachePathExists(sqliteFile)) {
+    if (await exists(sqliteFile)) {
       logger.debug(`Using SQLite package cache: ${sqliteFile}`);
     } else {
       logger.debug(`Creating SQLite package cache: ${sqliteFile}`);

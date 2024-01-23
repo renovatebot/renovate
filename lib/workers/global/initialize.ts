@@ -30,7 +30,6 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
     logger.debug('Using cacheDir: ' + config.cacheDir);
   }
   await fs.ensureDir(config.cacheDir);
-  GlobalConfig.set({ ...GlobalConfig.get(), cacheDir: config.cacheDir });
   if (config.binarySource === 'docker' || config.binarySource === 'install') {
     if (config.containerbaseDir) {
       logger.debug(
