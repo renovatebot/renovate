@@ -78,8 +78,7 @@ function parseConfigRegex(input: string): RegExp | null {
     const regexString = input
       .replace(configValStart, '')
       .replace(configValEnd, '');
-    const isCaseSensitive = !input.endsWith('i');
-    return isCaseSensitive ? regEx(regexString) : regEx(regexString, 'i');
+    return input.endsWith('i') ? regEx(regexString, 'i') : regEx(regexString));
   } catch (err) {
     // no-op
   }
