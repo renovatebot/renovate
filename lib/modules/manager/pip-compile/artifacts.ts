@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { quote, split } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -7,44 +6,13 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
-  ensureCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
-import type {
-  UpdateArtifact,
-  UpdateArtifactsConfig,
-  UpdateArtifactsResult,
-} from '../types';
-
-function getPythonConstraint(
-  config: UpdateArtifactsConfig,
-): string | undefined | null {
-  const { constraints = {} } = config;
-  const { python } = constraints;
-
-  if (python) {
-    logger.debug('Using python constraint from config');
-    return python;
-  }
-
-  return undefined;
-}
-
-// TODO(not7cd): rename to getPipToolsVersionConstraint, as constraints have their meaning in pip
-function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
-  const { constraints = {} } = config;
-  const { pipTools } = constraints;
-
-  if (is.string(pipTools)) {
-    logger.debug('Using pipTools constraint from config');
-    return pipTools;
-  }
-
-  return '';
-}
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { getExecOptions } from './common';
 
 const constraintLineRegex = regEx(
   /^(#.*?\r?\n)+# {4}pip-compile(?<arguments>.*?)\r?\n/,
@@ -124,25 +92,10 @@ export async function updateArtifacts({
       inputFileName,
       outputFileName,
     );
-    const constraint = getPythonConstraint(config);
-    const pipToolsConstraint = getPipToolsConstraint(config);
-    const execOptions: ExecOptions = {
-      cwdFile: inputFileName,
-      docker: {},
-      toolConstraints: [
-        {
-          toolName: 'python',
-          constraint,
-        },
-        {
-          toolName: 'pip-tools',
-          constraint: pipToolsConstraint,
-        },
-      ],
-      extraEnv: {
-        PIP_CACHE_DIR: await ensureCacheDir('pip'),
-      },
-    };
+    const execOptions: ExecOptions = await getExecOptions(
+      config,
+      inputFileName,
+    );
     logger.trace({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);
     const status = await getRepoStatus();
