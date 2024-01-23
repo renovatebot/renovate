@@ -18,10 +18,12 @@ import { find as _find } from '../../../util/host-rules';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import * as pipenv from '.';
+import type { PipfileLockSchema } from './schema';
+import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);
 const find = mockedFunction(_find);
+const getPkgReleases = mockedFunction(_getPkgReleases);
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
@@ -31,8 +33,6 @@ jest.mock('../../../util/http');
 jest.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
-
-const getPkgReleases = mockedFunction(_getPkgReleases);
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -48,10 +48,11 @@ const dockerAdminConfig = {
 
 const config: UpdateArtifactsConfig = {};
 const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
+const pipenvCacheDir = '/tmp/renovate/cache/others/pipenv';
+const pipCacheDir = '/tmp/renovate/cache/others/pip';
 
 describe('modules/manager/pipenv/artifacts', () => {
-  // TODO: #22198
-  let pipFileLock: any;
+  let pipFileLock: PipfileLockSchema;
 
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue({
@@ -90,7 +91,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('returns if no Pipfile.lock found', async () => {
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: '',
@@ -100,46 +101,64 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    pipFileLock._meta.requires.python_full_version = '3.7.6';
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
+    pipFileLock._meta!.requires!.python_full_version = '3.7.6';
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
   });
 
   it('handles no constraint', async () => {
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.readLocalFile.mockResolvedValueOnce('unparseable pipfile lock');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('unparseable pipfile lock');
+
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
   });
 
   it('returns updated Pipfile.lock', async () => {
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.readLocalFile.mockResolvedValueOnce('current pipfile.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
@@ -148,24 +167,34 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
+
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config: { ...config, constraints: { python: '== 3.8.*' } },
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
   });
 
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    pipFileLock._meta.requires.python_version = '3.7';
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
-    fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
+    pipFileLock._meta!.requires!.python_version = '3.7';
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
+    fs.ensureCacheDir.mockResolvedValueOnce(pipCacheDir);
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     // pipenv
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -178,24 +207,52 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
+
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e PIPENV_CACHE_DIR ' +
+          '-e PIP_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/containerbase/sidecar' +
+          ' bash -l -c "' +
+          'install-tool python 3.7.6' +
+          ' && ' +
+          'install-tool pipenv 2013.6.12' +
+          ' && ' +
+          'pipenv lock' +
+          '"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+            PIP_CACHE_DIR: pipCacheDir,
+          },
+        },
+      },
+    ]);
   });
 
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    pipFileLock._meta.requires.python_full_version = '3.7.6';
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
-    fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
+    pipFileLock._meta!.requires!.python_full_version = '3.7.6';
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
+    fs.ensureCacheDir.mockResolvedValueOnce(pipCacheDir);
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     // pipenv
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -208,31 +265,41 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
+
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
     ).not.toBeNull();
+
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.7.6' },
       { cmd: 'install-tool pipenv 2013.6.12' },
-      { cmd: 'pipenv lock', options: { cwd: '/tmp/github/some/repo' } },
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+            PIP_CACHE_DIR: pipCacheDir,
+          },
+        },
+      },
     ]);
   });
 
   it('catches errors', async () => {
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.readLocalFile.mockResolvedValueOnce('Current Pipfile.lock');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
+
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: '{}',
@@ -244,9 +311,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('returns updated Pipenv.lock when doing lockfile maintenance', async () => {
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.readLocalFile.mockResolvedValueOnce('Current Pipfile.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
@@ -255,23 +320,33 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
+
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: lockMaintenanceConfig,
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
   });
 
   it('uses pipenv version from Pipfile', async () => {
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     GlobalConfig.set(dockerAdminConfig);
-    pipFileLock.default.pipenv.version = '==2020.8.13';
+    pipFileLock.default!['pipenv'].version = '==2020.8.13';
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
@@ -280,23 +355,49 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
+
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e PIPENV_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/containerbase/sidecar' +
+          ' bash -l -c "' +
+          'install-tool python 3.10.2' +
+          ' && ' +
+          'install-tool pipenv 2020.8.13' +
+          ' && ' +
+          'pipenv lock' +
+          '"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
   });
 
   it('uses pipenv version from Pipfile dev packages', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    pipFileLock.develop.pipenv.version = '==2020.8.13';
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
+    pipFileLock.develop!['pipenv'].version = '==2020.8.13';
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
@@ -305,23 +406,49 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
+
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config,
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e PIPENV_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/containerbase/sidecar' +
+          ' bash -l -c "' +
+          'install-tool python 3.10.2' +
+          ' && ' +
+          'install-tool pipenv 2020.8.13' +
+          ' && ' +
+          'pipenv lock' +
+          '"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
   });
 
   it('uses pipenv version from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
-    pipFileLock.default.pipenv.version = '==2020.8.13';
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
+    pipFileLock.default!['pipenv'].version = '==2020.8.13';
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
@@ -330,21 +457,47 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
+
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
         config: { ...config, constraints: { pipenv: '==2020.1.1' } },
       }),
     ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e PIPENV_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'ghcr.io/containerbase/sidecar' +
+          ' bash -l -c "' +
+          'install-tool python 3.10.2' +
+          ' && ' +
+          'install-tool pipenv 2020.1.1' +
+          ' && ' +
+          'pipenv lock' +
+          '"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
   });
 
   it('passes private credential environment vars', async () => {
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.readLocalFile.mockResolvedValueOnce('current pipfile.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
@@ -359,13 +512,11 @@ describe('modules/manager/pipenv/artifacts', () => {
       password: 'passwordTwo',
     });
 
-    const pipfile = Fixtures.get('Pipfile6');
-
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: pipfile,
+        newPackageFileContent: Fixtures.get('Pipfile6'),
         config: { ...config, constraints: { python: '== 3.8.*' } },
       }),
     ).toEqual([
@@ -383,30 +534,18 @@ describe('modules/manager/pipenv/artifacts', () => {
         cmd: 'pipenv lock',
         options: {
           cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
           env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PASSWORD: 'passwordTwo',
-            PATH: '/tmp/path',
-            PIPENV_CACHE_DIR: '/tmp/renovate/cache/others/pipenv',
+            PIPENV_CACHE_DIR: pipenvCacheDir,
             USERNAME: 'usernameOne',
+            PASSWORD: 'passwordTwo',
           },
-          maxBuffer: 10485760,
-          timeout: 900000,
         },
       },
     ]);
   });
 
   it('does not pass private credential environment vars if variable names differ from allowed', async () => {
-    fs.ensureCacheDir.mockResolvedValueOnce(
-      '/tmp/renovate/cache/others/pipenv',
-    );
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.readLocalFile.mockResolvedValueOnce('current pipfile.lock');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
@@ -416,13 +555,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
 
-    const pipfile = Fixtures.get('Pipfile7');
-
     expect(
-      await pipenv.updateArtifacts({
+      await updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: pipfile,
+        newPackageFileContent: Fixtures.get('Pipfile7'),
         config: { ...config, constraints: { python: '== 3.8.*' } },
       }),
     ).toEqual([
@@ -440,19 +577,9 @@ describe('modules/manager/pipenv/artifacts', () => {
         cmd: 'pipenv lock',
         options: {
           cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
           env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-            PIPENV_CACHE_DIR: '/tmp/renovate/cache/others/pipenv',
+            PIPENV_CACHE_DIR: pipenvCacheDir,
           },
-          maxBuffer: 10485760,
-          timeout: 900000,
         },
       },
     ]);

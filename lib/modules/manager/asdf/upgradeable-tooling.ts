@@ -305,8 +305,9 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: semeruJreMatches.version,
         };
       }
-      const temurinJdkMatches = version.match(/^temurin-(?<version>\d\S+)/)
-        ?.groups;
+      const temurinJdkMatches = version.match(
+        /^temurin-(?<version>\d\S+)/,
+      )?.groups;
       if (temurinJdkMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -314,8 +315,9 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: temurinJdkMatches.version,
         };
       }
-      const temurinJreMatches = version.match(/^temurin-jre-(?<version>\d\S+)/)
-        ?.groups;
+      const temurinJreMatches = version.match(
+        /^temurin-jre-(?<version>\d\S+)/,
+      )?.groups;
       if (temurinJreMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -340,6 +342,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'casey/just',
+    },
+  },
+  kind: {
+    asdfPluginUrl: 'https://github.com/johnlayton/asdf-kind',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'kubernetes-sigs/kind',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   kotlin: {
@@ -372,6 +382,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
       packageName: 'lua/lua',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  maven: {
+    asdfPluginUrl: 'https://github.com/halcyon/asdf-maven',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'apache/maven',
     },
   },
   nim: {
@@ -579,6 +596,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'hashicorp/vault',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  yq: {
+    asdfPluginUrl: 'https://github.com/sudermanjr/asdf-yq',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'mikefarah/yq',
       extractVersion: '^v(?<version>\\S+)',
     },
   },

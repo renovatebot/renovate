@@ -8,6 +8,7 @@ import type { BitbucketPrCacheData } from '../../../modules/platform/bitbucket/t
 import type { GiteaPrCacheData } from '../../../modules/platform/gitea/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { PrBlockedBy } from '../../../workers/types';
+import type { HttpResponse } from '../../http/types';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
@@ -124,8 +125,15 @@ export interface BranchCache {
   result?: string;
 }
 
+export interface HttpCache {
+  etag: string;
+  httpResponse: HttpResponse<unknown>;
+  timeStamp: string;
+}
+
 export interface RepoCacheData {
   configFileName?: string;
+  httpCache?: Record<string, HttpCache>;
   semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
   init?: RepoInitConfig;

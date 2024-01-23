@@ -284,6 +284,7 @@ describe('modules/datasource/metadata', () => {
         { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
         { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
         { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+        { version: '1.0.4', releaseTimestamp: '20000103150210' },
       ],
     };
     addMetaData(dep, MavenDatasource.id, 'foobar');
@@ -291,6 +292,7 @@ describe('modules/datasource/metadata', () => {
       { releaseTimestamp: '2000-01-01T12:34:56.000Z' },
       { releaseTimestamp: '2000-01-02T12:34:56.000Z' },
       { releaseTimestamp: '2000-01-03T12:34:56.000Z' },
+      { releaseTimestamp: '2000-01-03T15:02:10.000Z' },
     ]);
   });
 

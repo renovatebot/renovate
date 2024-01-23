@@ -1,8 +1,5 @@
-import { logger } from '../../../logger';
-import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
-import { type ChartDefinition, ChartDefinitionYaml } from './schema';
 import type { HelmDockerImageDependency } from './types';
 
 const parentKeyRe = regEx(/image$/i);
@@ -43,44 +40,4 @@ export function matchesHelmValuesInlineImage(
   data: unknown,
 ): data is string {
   return !!(parentKeyRe.test(parentKey) && data && typeof data === 'string');
-}
-
-/**
- * This function looks for a Chart.yaml in the same directory as @param fileName and
- * returns its raw contents.
- *
- * @param fileName
- */
-export async function getSiblingChartYamlContent(
-  fileName: string,
-): Promise<string | null> {
-  try {
-    const chartFileName = getSiblingFileName(fileName, 'Chart.yaml');
-    return await readLocalFile(chartFileName, 'utf8');
-  } catch (err) {
-    logger.debug({ fileName }, 'Failed to read helm Chart.yaml');
-    return null;
-  }
-}
-
-/**
- * This function looks for a Chart.yaml in the same directory as @param fileName and
- * if it looks like a valid Helm Chart.yaml, it is parsed and returned as an object.
- *
- * @param fileName
- */
-export async function getParsedSiblingChartYaml(
-  fileName: string,
-): Promise<ChartDefinition | null> {
-  try {
-    const chartContents = await getSiblingChartYamlContent(fileName);
-    if (!chartContents) {
-      logger.debug({ fileName }, 'Failed to find helm Chart.yaml');
-      return null;
-    }
-    return ChartDefinitionYaml.parse(chartContents);
-  } catch (err) {
-    logger.debug({ fileName }, 'Failed to parse helm Chart.yaml');
-    return null;
-  }
 }

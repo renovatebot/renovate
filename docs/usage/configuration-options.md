@@ -413,7 +413,6 @@ This is an advanced field, and it's recommend you seek a config review before ap
 Currently, this config option only works with these managers:
 
 - `helmv3`
-- `helm-values`
 - `npm`
 - `nuget`
 - `maven`
