@@ -471,8 +471,8 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch =
-    config.currentBranch ||
-    config.defaultBranch ||
+    config.currentBranch ??
+    config.defaultBranch ??
     (await getDefaultBranch(git));
   delete getCache()?.semanticCommits;
 }
