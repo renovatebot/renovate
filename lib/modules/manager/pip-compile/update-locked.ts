@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
+import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
-import { extractLockFileEntries } from './locked-version';
 
 export function updateLockedDependency(
   config: UpdateLockedConfig,
@@ -11,11 +11,21 @@ export function updateLockedDependency(
     `pip-compile.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
   );
   try {
-    const locked = extractLockFileEntries(lockFileContent ?? '');
-    if (locked.get(depName ?? '') === newVersion) {
+    // lock files are always of "requirements.txt" type
+    const locked = extractRequirementsFile(lockFileContent ?? '');
+    if (locked === null) {
+      throw Error('is null');
+    }
+    if (
+      locked.deps &&
+      locked.deps.find((d) => d.depName ?? '' === depName)?.currentVersion ===
+        newVersion
+    ) {
       return { status: 'already-updated' };
     }
     // exec pip-compile --upgrade-package ${depName}==${newVersion}
+    // return { status: 'updated', files: { [lockFile]: newLockFileContent } }
+    logger.debug({ depName }, 'TRIED UPDATING LOCKED DEP'); // TODO
     return { status: 'unsupported' };
   } catch (err) {
     logger.debug({ err }, 'bundler.updateLockedDependency() error');
