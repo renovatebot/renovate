@@ -12,58 +12,21 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { getExecOptions } from './common';
-
-const constraintLineRegex = regEx(
-  /^(#.*?\r?\n)+# {4}pip-compile(?<arguments>.*?)\r?\n/,
-);
-const allowedPipArguments = [
-  '--allow-unsafe',
-  '--generate-hashes',
-  '--no-emit-index-url', // handle this!!!
-  '--strip-extras',
-];
+import {
+  allowedPipArguments,
+  constraintLineRegex,
+  extractHeaderCommand,
+  getExecOptions,
+  parseHeaderCommand,
+} from './common';
 
 export function constructPipCompileCmd(
   content: string,
   inputFileName: string,
   outputFileName: string,
 ): string {
+  const pipCompileArgs = extractHeaderCommand(content);
   const headers = constraintLineRegex.exec(content);
-  const args = ['./pip-compile-wrapped'];
-  if (headers?.groups) {
-    logger.debug(`Found pip-compile header: ${headers[0]}`);
-    for (const argument of split(headers.groups.arguments)) {
-      if (allowedPipArguments.includes(argument)) {
-        args.push(argument);
-        // TODO(not7cd) -o arg
-      } else if (argument.startsWith('--output-file=')) {
-        const file = upath.parse(outputFileName).base;
-        if (argument !== `--output-file=${file}`) {
-          // we don't trust the user-supplied output-file argument; use our value here
-          logger.warn(
-            { argument },
-            'pip-compile was previously executed with an unexpected `--output-file` filename',
-          );
-        }
-        args.push(`--output-file=${file}`);
-      } else if (argument.startsWith('--resolver=')) {
-        const value = extractResolver(argument);
-        if (value) {
-          args.push(`--resolver=${value}`);
-        }
-      } else if (argument.startsWith('--')) {
-        logger.trace(
-          { argument },
-          'pip-compile argument is not (yet) supported',
-        );
-      } else {
-        // TODO(not7cd): get position arguments and infer original files
-        // ignore position argument (.in file)
-      }
-    }
-  }
-  args.push(upath.parse(inputFileName).base);
 
   return args.map((argument) => quote(argument)).join(' ');
 }

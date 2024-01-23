@@ -8,18 +8,22 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type { ExtractConfig, PackageFile } from '../types';
+import { extractHeaderCommand } from './common';
 
 export async function extractAllPackageFiles(
-  config: ExtractConfig,
+  config: ExtractConfig, // NOTE(not7cd): ignore, useless in this use-case
   packageFiles: string[],
-): Promise<PackageFile<NpmManagerData>[]> {
-  const pipReqFiles: PackageFile<NpmManagerData>[] = [];
+): Promise<PackageFile[]> {
+  const pipReqFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
+    logger.debug({ packageFile }, 'READING FILE');
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
     if (content) {
-      const deps = await extractRequirementsFile(content, packageFile, config);
+      // TODO(not7cd): extract based on manager: setup.py, pep621, pip_requirements
+      const pipCompileArgs = extractHeaderCommand(content, packageFile);
+      const deps = extractRequirementsFile(content);
       if (deps) {
         pipReqFiles.push({
           ...deps,
@@ -31,6 +35,7 @@ export async function extractAllPackageFiles(
     }
   }
 
-  await postExtract(pipReqFiles);
+  // TODO(not7cd): in post extract there is mono repo detection and "get locked versions"
+  // await postExtract(pipReqFiles);
   return pipReqFiles;
 }
