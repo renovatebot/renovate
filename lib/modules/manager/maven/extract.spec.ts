@@ -7,6 +7,7 @@ const simpleContent = Fixtures.get(`simple.pom.xml`);
 const mirrorSettingsContent = Fixtures.get(`mirror.settings.xml`);
 const profileSettingsContent = Fixtures.get(`profile.settings.xml`);
 const complexSettingsContent = Fixtures.get(`complex.settings.xml`);
+const settingsUpatedContent = Fixtures.get(`settings.updated.schema.xml`);
 
 describe('modules/manager/maven/extract', () => {
   describe('extractDependencies', () => {
@@ -171,6 +172,13 @@ describe('modules/manager/maven/extract', () => {
         'https://repo.adobe.com/v2/nexus/content/groups/public',
         'https://repo.adobe.com/v3/nexus/content/groups/public',
         'https://repo.adobe.com/v4/nexus/content/groups/public',
+      ]);
+    });
+
+    it('extract registries from a settings file that uses updated schema', () => {
+      const res = extractRegistries(settingsUpatedContent);
+      expect(res).toStrictEqual([
+        'https:/proxy-repo.com/artifactory/apache-maven',
       ]);
     });
   });

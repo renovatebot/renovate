@@ -337,7 +337,6 @@ export function extractRegistries(rawContent: string): string[] {
     const repositoryUrls = parseUrls(profile, 'repositories');
     urls.push(...repositoryUrls);
   });
-
   // filter out duplicates
   return [...new Set(urls)];
 }
@@ -367,7 +366,11 @@ export function parseSettings(raw: string): XmlDocument | null {
   if (name !== 'settings') {
     return null;
   }
-  if (attr.xmlns === 'http://maven.apache.org/SETTINGS/1.0.0') {
+  if (
+    attr.xmlns === 'http://maven.apache.org/SETTINGS/1.0.0' ||
+    attr.xmlns === 'http://maven.apache.org/SETTINGS/1.1.0' ||
+    attr.xmlns === 'http://maven.apache.org/SETTINGS/1.2.0'
+  ) {
     return settings;
   }
   return null;
@@ -464,8 +467,8 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
     delete packageFile.parent;
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
+      //Add Registry From SuperPom
       dep.registryUrls?.push(MAVEN_REPO);
-      logger.info(dep);
     });
   });
   return packageFiles;
