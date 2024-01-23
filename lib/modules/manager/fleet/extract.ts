@@ -6,7 +6,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { checkIfStringIsPath } from '../terraform/util';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { FleetFile, type FleetHelmBlock, GitRepo } from './types';
+import { FleetFile, type FleetHelmBlock, GitRepo } from './schema';
 
 function extractGitRepo(doc: GitRepo): PackageDependency {
   const dep: PackageDependency = {
