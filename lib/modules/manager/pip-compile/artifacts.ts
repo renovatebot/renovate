@@ -33,6 +33,7 @@ function getPythonConstraint(
   return undefined;
 }
 
+// TODO(not7cd): rename to getPipToolsVersionConstraint, as constraints have their meaning in pip
 function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
   const { constraints = {} } = config;
   const { pipTools } = constraints;
@@ -51,7 +52,7 @@ const constraintLineRegex = regEx(
 const allowedPipArguments = [
   '--allow-unsafe',
   '--generate-hashes',
-  '--no-emit-index-url',
+  '--no-emit-index-url', // handle this!!!
   '--strip-extras',
 ];
 
@@ -61,12 +62,13 @@ export function constructPipCompileCmd(
   outputFileName: string,
 ): string {
   const headers = constraintLineRegex.exec(content);
-  const args = ['pip-compile'];
+  const args = ['./pip-compile-wrapped'];
   if (headers?.groups) {
     logger.debug(`Found pip-compile header: ${headers[0]}`);
     for (const argument of split(headers.groups.arguments)) {
       if (allowedPipArguments.includes(argument)) {
         args.push(argument);
+        // TODO(not7cd) -o arg
       } else if (argument.startsWith('--output-file=')) {
         const file = upath.parse(outputFileName).base;
         if (argument !== `--output-file=${file}`) {
@@ -88,6 +90,7 @@ export function constructPipCompileCmd(
           'pip-compile argument is not (yet) supported',
         );
       } else {
+        // TODO(not7cd): get position arguments and infer original files
         // ignore position argument (.in file)
       }
     }

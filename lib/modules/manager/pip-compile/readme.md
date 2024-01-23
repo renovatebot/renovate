@@ -17,6 +17,10 @@ You can "activate" the manager by specifying a `fileMatch` pattern such as:
 }
 ```
 
+### Assumption of header with a command
+
+TODO
+
 ### Assumption of `.in`/`.txt`
 
 If Renovate matches/extracts a file, it assumes that the corresponding output file is found by swapping the `.in` for `.txt`.
@@ -49,3 +53,7 @@ Renovate reads the `requirements.txt` file and extracts these `pip-compile` argu
 - `--no-emit-index-url`
 - `--strip-extras`
 - `--resolver`
+
+#### `CUSTOM_COMPILE_COMMAND`
+
+If a wrapper is used, it should not obstruct these arguments.
