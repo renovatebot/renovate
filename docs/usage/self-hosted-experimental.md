@@ -48,6 +48,8 @@ If set to any string, Renovate will use this as the `user-agent` it sends with H
 
 The order method for autodiscover server side repository search.
 
+> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
+
 Allowed values:
 
 - `asc`
@@ -62,6 +64,8 @@ Default value: `asc`.
     For the Forgejo and Gitea platform only.
 
 The sort method for autodiscover server side repository search.
+
+> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
 Allowed values:
 

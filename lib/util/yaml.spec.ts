@@ -122,6 +122,56 @@ describe('util/yaml', () => {
       ).toThrow();
     });
 
+    it('should throw if schema does not match and failureBehaviour "throw"', () => {
+      expect(() =>
+        parseYaml(
+          codeBlock`
+      myObject:
+        aString: foo
+      ---
+      aString: bar
+      `,
+          null,
+          {
+            customSchema: z.object({
+              myObject: z.object({
+                aString: z.string(),
+              }),
+            }),
+            failureBehaviour: 'throw',
+          },
+        ),
+      ).toThrow();
+    });
+
+    it('should still return valid elements if schema does not match with "filter" behaviour', () => {
+      expect(
+        parseYaml(
+          codeBlock`
+      myObject:
+        aString: foo
+      ---
+      aString: bar
+      `,
+          null,
+          {
+            customSchema: z.object({
+              myObject: z.object({
+                aString: z.string(),
+              }),
+            }),
+            failureBehaviour: 'filter',
+          },
+        ),
+      ).toEqual([
+        {
+          myObject: {
+            aString: 'foo',
+          },
+        },
+      ]);
+    });
+
     it('should parse content with templates', () => {
       expect(
         parseYaml(
