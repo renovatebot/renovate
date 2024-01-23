@@ -76,6 +76,7 @@ interface PipCompileArgs {
   fullCommand: string; // parsed and reconstructed
 }
 
+// TODO(not7cd): test on all correct headers, even with CUSTOM_COMPILE_COMMAND
 export function extractHeaderCommand(
   content: string,
   outputFileName: string,
@@ -97,7 +98,7 @@ export function extractHeaderCommand(
         if (value) {
           const file = upath.parse(outputFileName).base;
           if (value !== file) {
-            // we don't trust the user-supplied output-file argument; use our value here
+            // we don't trust the user-supplied output-file argument; TODO(not7cd): use our value here
             logger.warn(
               { argument },
               'pip-compile was previously executed with an unexpected `--output-file` filename',
@@ -121,4 +122,5 @@ export function extractHeaderCommand(
   }
   // args.push(upath.parse(inputFileName).base);
   logger.trace({ compileCommand }, 'Failed to parse command');
+  return pipCompileArgs;
 }
