@@ -12,6 +12,7 @@ const pomParent = Fixtures.get('parent.pom.xml');
 const pomChild = Fixtures.get('child.pom.xml');
 const origContent = Fixtures.get('grouping.pom.xml');
 const settingsContent = Fixtures.get('mirror.settings.xml');
+const profileSettingsContent = Fixtures.get('profile.settings.xml');
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
@@ -40,9 +41,9 @@ describe('modules/manager/maven/index', () => {
         'simple.pom.xml',
       ]);
       const urls = [
-        'https://repo.maven.apache.org/maven2',
-        'https://maven.atlassian.com/content/repositories/atlassian-public/',
         'https://artifactory.company.com/artifactory/my-maven-repo',
+        'https://maven.atlassian.com/content/repositories/atlassian-public/',
+        'https://repo.maven.apache.org/maven2',
       ];
       for (const pkg of packages) {
         for (const dep of pkg.deps) {
@@ -316,7 +317,29 @@ describe('modules/manager/maven/index', () => {
       packages.forEach(({ deps }) => {
         deps.forEach(({ registryUrls }) => {
           const depUrls = new Set([...registryUrls!]);
-          expect(depUrls).toEqual(urls);
+          expect(depUrls).toStrictEqual(urls);
+        });
+      });
+      expect(packages).toMatchSnapshot();
+    });
+
+    it('should include registryUrls in the correct order', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(pomContent)
+        .mockResolvedValueOnce(profileSettingsContent);
+      const packages = await extractAllPackageFiles({}, [
+        'simple.pom.xml',
+        'profile.settings.xml',
+      ]);
+      const urls = new Set([
+        'https://repo.adobe.com/nexus/content/groups/public',
+        'https://maven.atlassian.com/content/repositories/atlassian-public/',
+        'https://repo.maven.apache.org/maven2',
+      ]);
+      packages.forEach(({ deps }) => {
+        deps.forEach(({ registryUrls }) => {
+          const depUrls = new Set([...registryUrls!]);
+          expect(depUrls).toStrictEqual(urls);
         });
       });
       expect(packages).toMatchSnapshot();

@@ -12,9 +12,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "parent",
         "fileReplacePosition": 185,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/nexus/xyz",
           "http://example.com/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -26,9 +26,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "fileReplacePosition": 470,
         "groupName": "quuxVersion",
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
     ],
@@ -44,9 +44,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "parent",
         "fileReplacePosition": 186,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -56,9 +56,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 806,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -68,9 +68,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 954,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -80,9 +80,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "build",
         "fileReplacePosition": 1188,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -92,9 +92,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "build",
         "fileReplacePosition": 1386,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -104,9 +104,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 2131,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
         "skipReason": "name-placeholder",
       },
@@ -117,9 +117,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 2281,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
         "skipReason": "name-placeholder",
       },
@@ -130,9 +130,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 2574,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -142,9 +142,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 2714,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -154,9 +154,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 2872,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -166,9 +166,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 3134,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
         "skipReason": "version-placeholder",
       },
@@ -179,13 +179,245 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "build",
         "fileReplacePosition": 3410,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
     ],
     "packageFile": "child.pom.xml",
+    "packageFileVersion": "0.0.1",
+  },
+]
+`;
+
+exports[`modules/manager/maven/index updateDependency should include registryUrls in the correct order 1`] = `
+[
+  {
+    "datasource": "maven",
+    "deps": [
+      {
+        "currentValue": "42",
+        "datasource": "maven",
+        "depName": "org.example:parent",
+        "depType": "parent",
+        "fileReplacePosition": 186,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "0.0.1",
+        "datasource": "maven",
+        "depName": "org.example:foo",
+        "depType": "compile",
+        "fileReplacePosition": 905,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "1.0.0",
+        "datasource": "maven",
+        "depName": "org.example:bar",
+        "depType": "compile",
+        "fileReplacePosition": 1093,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "2.4.2",
+        "datasource": "maven",
+        "depName": "org.apache.maven.plugins:maven-release-plugin",
+        "depType": "build",
+        "fileReplacePosition": 1347,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "1.8.1",
+        "datasource": "maven",
+        "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
+        "depType": "build",
+        "fileReplacePosition": 1545,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "1.0",
+        "datasource": "maven",
+        "depName": "org.example:extension-artefact",
+        "depType": "build",
+        "fileReplacePosition": 2276,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "0.0.1",
+        "datasource": "maven",
+        "depName": "org.example:\${artifact-id-placeholder}",
+        "depType": "compile",
+        "fileReplacePosition": 2484,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+        "skipReason": "name-placeholder",
+      },
+      {
+        "currentValue": "0.0.1",
+        "datasource": "maven",
+        "depName": "\${group-id-placeholder}:baz",
+        "depType": "compile",
+        "fileReplacePosition": 2634,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+        "skipReason": "name-placeholder",
+      },
+      {
+        "currentValue": "1.2.3.4",
+        "datasource": "maven",
+        "depName": "org.example:quux",
+        "depType": "compile",
+        "fileReplacePosition": 698,
+        "groupName": "quuxVersion",
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "1.2.3.4",
+        "datasource": "maven",
+        "depName": "org.example:quux-test",
+        "depType": "compile",
+        "fileReplacePosition": 698,
+        "groupName": "quuxVersion",
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "1.2.3",
+        "datasource": "maven",
+        "depName": "org.example:quuz",
+        "depType": "test",
+        "fileReplacePosition": 3086,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "it's not a version",
+        "datasource": "maven",
+        "depName": "org.example:quuuz",
+        "depType": "compile",
+        "fileReplacePosition": 3252,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "[1.0.0]",
+        "datasource": "maven",
+        "depName": "org.example:hard-range",
+        "depType": "compile",
+        "fileReplacePosition": 3410,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "1.0.0",
+        "datasource": "maven",
+        "depName": "org.example:optional",
+        "depType": "optional",
+        "fileReplacePosition": 3555,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "1.0",
+        "datasource": "maven",
+        "depName": "org.example:relocation-artifact",
+        "fileReplacePosition": 3787,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "\${profile-placeholder}",
+        "datasource": "maven",
+        "depName": "org.example:profile-artifact",
+        "depType": "compile",
+        "fileReplacePosition": 4119,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+        "skipReason": "version-placeholder",
+      },
+      {
+        "currentValue": "2.17",
+        "datasource": "maven",
+        "depName": "org.example:profile-build-artefact",
+        "depType": "build",
+        "fileReplacePosition": 4375,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+      {
+        "currentValue": "2.17",
+        "datasource": "maven",
+        "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
+        "depType": "build",
+        "fileReplacePosition": 4769,
+        "registryUrls": [
+          "https://repo.adobe.com/nexus/content/groups/public",
+          "https://maven.atlassian.com/content/repositories/atlassian-public/",
+          "https://repo.maven.apache.org/maven2",
+        ],
+      },
+    ],
+    "packageFile": "simple.pom.xml",
     "packageFileVersion": "0.0.1",
   },
 ]

@@ -58,7 +58,7 @@ function depFromNode(
     const versionNode = node.descendantWithPath('version')!;
     const fileReplacePosition = versionNode.position;
     const datasource = MavenDatasource.id;
-    const registryUrls = [MAVEN_REPO];
+    const registryUrls: string[] = [];
     const result: PackageDependency = {
       datasource,
       depName,
@@ -464,6 +464,8 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
     delete packageFile.parent;
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
+      dep.registryUrls?.push(MAVEN_REPO);
+      logger.info(dep);
     });
   });
   return packageFiles;
@@ -505,7 +507,7 @@ export async function extractAllPackageFiles(
       for (const dep of pkgFile.deps) {
         /* istanbul ignore else */
         if (dep.registryUrls) {
-          dep.registryUrls.push(...additionalRegistryUrls);
+          dep.registryUrls.unshift(...additionalRegistryUrls);
         } else {
           dep.registryUrls = [...additionalRegistryUrls];
         }
