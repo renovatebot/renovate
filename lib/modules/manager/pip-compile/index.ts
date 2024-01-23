@@ -2,8 +2,11 @@ import type { Category } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 
-export { extractPackageFile } from '../pip_requirements/extract';
+// TODO(not7cd): unsure if both extract* exports can exist in a single manager
+// export { extractPackageFile } from '../pip_requirements/extract';
+export { extractAllPackageFiles } from './extract';
 export { updateArtifacts } from './artifacts';
+export { updateLockedDependency } from './update-locked';
 
 export const supportsLockFileMaintenance = true;
 
