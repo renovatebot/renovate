@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../logger';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
 import type {
@@ -6,20 +7,25 @@ import type {
   RegexManagerTemplates,
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
+import type { HostRule } from '../types/host-rules';
+import { anyMatchRegexOrMinimatch } from '../util/package-rules/match';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import {
   hasValidSchedule,
   hasValidTimezone,
 } from '../workers/repository/update/branch/schedule';
+import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
-import type {
-  RenovateConfig,
-  RenovateOptions,
-  ValidationMessage,
-  ValidationResult,
+import {
+  type RenovateConfig,
+  type RenovateOptions,
+  type StatusCheckKey,
+  type ValidationMessage,
+  type ValidationResult,
+  allowedStatusCheckStrings,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
 
@@ -27,6 +33,7 @@ const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, RenovateOptions['parent']>;
+let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
 
@@ -34,6 +41,7 @@ const topLevelObjects = managerList;
 
 const ignoredNodes = [
   '$schema',
+  'headers',
   'depType',
   'npmToken',
   'packageFile',
@@ -95,6 +103,7 @@ export function getParentName(parentPath: string | undefined): string {
 }
 
 export async function validateConfig(
+  isGlobalConfig: boolean,
   config: RenovateConfig,
   isPreset?: boolean,
   parentPath?: string,
@@ -113,6 +122,7 @@ export async function validateConfig(
       }
     });
   }
+
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
@@ -126,11 +136,33 @@ export async function validateConfig(
       });
       continue;
     }
-    if (parentPath && topLevelObjects.includes(key)) {
+    if (
+      parentPath &&
+      parentPath !== 'onboardingConfig' &&
+      topLevelObjects.includes(key)
+    ) {
       errors.push({
         topic: 'Configuration Error',
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
+    }
+    if (!isGlobalConfig) {
+      if (!optionGlobals) {
+        optionGlobals = new Set<string>();
+        for (const option of options) {
+          if (option.globalOnly) {
+            optionGlobals.add(option.name);
+          }
+        }
+      }
+
+      if (optionGlobals.has(key) && !isFalseGlobal(key, parentPath)) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+        });
+        continue;
+      }
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
@@ -266,6 +298,7 @@ export async function validateConfig(
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
                 const subValidation = await validateConfig(
+                  isGlobalConfig,
                   subval as RenovateConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`,
@@ -562,6 +595,30 @@ export async function validateConfig(
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
               }
+            } else if (key === 'statusCheckNames') {
+              for (const [statusCheckKey, statusCheckValue] of Object.entries(
+                val,
+              )) {
+                if (
+                  !allowedStatusCheckStrings.includes(
+                    statusCheckKey as StatusCheckKey,
+                  )
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed.`,
+                  });
+                }
+                if (
+                  !(is.string(statusCheckValue) || is.null_(statusCheckValue))
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: status check is not a string.`,
+                  });
+                  continue;
+                }
+              }
             } else if (key === 'customDatasources') {
               const allowedKeys = [
                 'description',
@@ -625,6 +682,7 @@ export async function validateConfig(
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
                 const subValidation = await validateConfig(
+                  isGlobalConfig,
                   val,
                   isPreset,
                   currentPath,
@@ -637,6 +695,29 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be a json object`,
+            });
+          }
+        }
+      }
+    }
+
+    if (key === 'hostRules' && is.array(val)) {
+      const allowedHeaders = GlobalConfig.get('allowedHeaders');
+      for (const rule of val as HostRule[]) {
+        if (!rule.headers) {
+          continue;
+        }
+        for (const [header, value] of Object.entries(rule.headers)) {
+          if (!is.string(value)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `Invalid hostRules headers value configuration: header must be a string.`,
+            });
+          }
+          if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,
             });
           }
         }
@@ -667,7 +748,11 @@ function validateRegexManagerFields(
     for (const matchString of customManager.matchStrings) {
       try {
         regEx(matchString);
-      } catch (e) {
+      } catch (err) {
+        logger.debug(
+          { err },
+          'customManager.matchStrings regEx validation error',
+        );
         errors.push({
           topic: 'Configuration Error',
           message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
@@ -696,4 +781,23 @@ function validateRegexManagerFields(
       });
     }
   }
+}
+
+/**  An option is a false global if it has the same name as a global only option
+ *   but is actually just the field of a non global option or field an children of the non global option
+ *   eg. token: it's global option used as the bot's token as well and
+ *   also it can be the token used for a platform inside the hostRules configuration
+ */
+function isFalseGlobal(optionName: string, parentPath?: string): boolean {
+  if (parentPath?.includes('hostRules')) {
+    if (
+      optionName === 'token' ||
+      optionName === 'username' ||
+      optionName === 'password'
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }

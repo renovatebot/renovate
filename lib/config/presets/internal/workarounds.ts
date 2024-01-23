@@ -140,10 +140,14 @@ export const presets: Record<string, Preset> = {
   },
   nodeDockerVersioning: {
     description: 'Use node versioning for `node` docker images.',
-    matchDatasources: ['docker'],
-    matchPackageNames: ['node'],
-    versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
-    versioning: 'node',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchDepNames: ['node'],
+        versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
+        versioning: 'node',
+      },
+    ],
   },
   reduceRepologyServerLoad: {
     description:

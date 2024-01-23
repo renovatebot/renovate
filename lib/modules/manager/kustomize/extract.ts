@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
-import { load } from '../../../util/yaml';
+import { parseSingleYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -158,7 +158,8 @@ export function parseKustomize(
 ): Kustomize | null {
   let pkg: Kustomize | null = null;
   try {
-    pkg = load(content, { json: true }) as Kustomize;
+    // TODO: use schema (#9610)
+    pkg = parseSingleYaml(content, { json: true });
   } catch (e) /* istanbul ignore next */ {
     logger.debug({ packageFile }, 'Error parsing kustomize file');
     return null;

@@ -10,7 +10,7 @@ import type {
   ToolConstraint,
 } from '../../../../util/exec/types';
 import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
-import { load } from '../../../../util/yaml';
+import { parseSingleYaml } from '../../../../util/yaml';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
@@ -126,7 +126,8 @@ export async function getConstraintFromLockFile(
     if (!lockfileContent) {
       return null;
     }
-    const pnpmLock = load(lockfileContent) as PnpmLockFile;
+    // TODO: use schema (#9610)
+    const pnpmLock = parseSingleYaml<PnpmLockFile>(lockfileContent);
     if (!is.number(pnpmLock?.lockfileVersion)) {
       return null;
     }

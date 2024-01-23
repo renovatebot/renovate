@@ -282,6 +282,13 @@ describe('modules/manager/pep621/extract', () => {
           packageName: 'requests',
         },
         {
+          datasource: 'pypi',
+          depName: 'hatchling',
+          depType: 'build-system.requires',
+          packageName: 'hatchling',
+          skipReason: 'unspecified-version',
+        },
+        {
           currentValue: '==6.5',
           datasource: 'pypi',
           depName: 'coverage',
@@ -308,6 +315,56 @@ describe('modules/manager/pep621/extract', () => {
           depType: 'tool.hatch.envs.experimental',
           packageName: 'baz',
           skipReason: 'unspecified-version',
+        },
+      ]);
+    });
+
+    it('should extract project version', () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.0.2"
+        dependencies = [ "requests==2.30.0" ]
+      `;
+
+      const res = extractPackageFile(content, 'pyproject.toml');
+      expect(res?.packageFileVersion).toBe('0.0.2');
+    });
+
+    it('should extract dependencies from build-system.requires', function () {
+      const content = codeBlock`
+        [build-system]
+        requires = ["hatchling==1.18.0", "setuptools==69.0.3"]
+        build-backend = "hatchling.build"
+
+        [project]
+        name = "test"
+        version = "0.0.2"
+        dependencies = [ "requests==2.30.0" ]
+      `;
+      const result = extractPackageFile(content, 'pyproject.toml');
+
+      expect(result?.deps).toEqual([
+        {
+          currentValue: '==2.30.0',
+          datasource: 'pypi',
+          depName: 'requests',
+          depType: 'project.dependencies',
+          packageName: 'requests',
+        },
+        {
+          currentValue: '==1.18.0',
+          datasource: 'pypi',
+          depName: 'hatchling',
+          depType: 'build-system.requires',
+          packageName: 'hatchling',
+        },
+        {
+          currentValue: '==69.0.3',
+          datasource: 'pypi',
+          depName: 'setuptools',
+          depType: 'build-system.requires',
+          packageName: 'setuptools',
         },
       ]);
     });

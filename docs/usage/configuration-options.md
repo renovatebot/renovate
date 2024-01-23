@@ -406,13 +406,25 @@ Instead, set the old `branchPrefix` value as `branchPrefixOld` to allow Renovate
 ## branchTopic
 
 This field is combined with `branchPrefix` and `additionalBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
-This is an advance field and it's recommend you seek a config review before applying it.
+This is an advanced field, and it's recommend you seek a config review before applying it.
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, `nuget`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
-Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
-Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
+Currently, this config option only works with these managers:
+
+- `helmv3`
+- `npm`
+- `nuget`
+- `maven`
+- `ocb`
+- `pep621`
+- `poetry`
+- `sbt`
+
+Raise a feature request if you want to use this config option with other package managers.
+
+Use `bumpVersion` if you want Renovate to update the `version` field in your package file when it updates the dependencies in that file.
+This can be handy when you have automated your package's release, as you you don't need extra steps after the Renovate upgrade, you can just release a new version.
 
 Configure this value to `"prerelease"`, `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited package file.
 e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
@@ -625,7 +637,12 @@ Renovate supports two options:
 More advanced filtering options may come in future.
 
 There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
-This feature is limited to `packagist`, `npm`, and `pypi` datasources.
+This feature is limited to the folllowing datasources:
+
+- `jenkins-plugins`
+- `npm`
+- `packagist`
+- `pypi`
 
 <!-- prettier-ignore -->
 !!! warning
@@ -1763,6 +1780,26 @@ Example config:
 }
 ```
 
+### maxRetryAfter
+
+A remote host may return a `4xx` response with a `Retry-After` header value, which indicates that Renovate has been rate-limited.
+Renovate may try to contact the host again after waiting a certain time, that's set by the host.
+By default, Renovate tries again after the `Retry-After` header value has passed, up to a maximum of 60 seconds.
+If the `Retry-After` value is more than 60 seconds, Renovate will abort the request instead of waiting.
+
+You can configure a different maximum value in seconds using `maxRetryAfter`:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "maxRetryAfter": 25
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
@@ -1771,6 +1808,30 @@ It uses `QuickLRU` with a `maxSize` of `1000`.
 ### enableHttp2
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
+
+### headers
+
+You can provide a `headers` object that includes fields to be forwarded to the HTTP request headers.
+By default, all headers starting with "X-" are allowed.
+
+A bot administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedHeaders) to configure more permitted headers.
+
+`headers` value(s) configured in the bot admin `hostRules` (for example in a `config.js` file) are _not_ validated, so it may contain any header regardless of `allowedHeaders`.
+
+For example:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://domain.com/all-versions",
+      "headers": {
+        "X-custom-header": "secret"
+      }
+    }
+  ]
+}
+```
 
 ### hostType
 
@@ -3039,9 +3100,7 @@ If set to `branch` the postUpgradeTask is executed for the whole branch.
 
 Use this array to provide a list of column names you wish to include in the PR tables.
 
-For example, if you wish to add the package file name to the table, you would add this to your config:
-
-```json
+```json title="Adding the package file name to the table"
 {
   "prBodyColumns": [
     "Package",
@@ -3060,11 +3119,12 @@ For example, if you wish to add the package file name to the table, you would ad
 
 ## prBodyDefinitions
 
-You can configure this object to either (a) modify the template for an existing table column in PR bodies, or (b) you wish to _add_ a definition for a new/additional column.
+You can configure this object to either:
 
-Here is an example of modifying the default value for the `"Package"` column to put it inside a `<code></code>` block:
+- modify the template for an existing table column in PR bodies, or
+- _add_ a definition for a new/additional column.
 
-```json
+```json title="Modifying the default value for the Package column to put it inside a code block"
 {
   "prBodyDefinitions": {
     "Package": "`{{{depName}}}`"
@@ -3072,9 +3132,7 @@ Here is an example of modifying the default value for the `"Package"` column to 
 }
 ```
 
-Here is an example of adding a custom `"Sourcegraph"` column definition:
-
-```json
+```json title="Adding a custom Sourcegraph column definition"
 {
   "prBodyDefinitions": {
     "Sourcegraph": "[![code search for \"{{{depName}}}\"](https://sourcegraph.com/search/badge?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}}&label=matches)](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}})"
@@ -3097,9 +3155,7 @@ Here is an example of adding a custom `"Sourcegraph"` column definition:
 
 Use this field to add custom content inside PR bodies, including conditionally.
 
-e.g. if you wish to add an extra Warning to major updates:
-
-```json
+```json title="Adding an extra Warning to major updates"
 {
   "prBodyNotes": ["{{#if isMajor}}:warning: MAJOR MAJOR MAJOR :warning:{{/if}}"]
 }
@@ -3271,7 +3327,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, and update nothing otherwise
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, `yarn`, `terraform` and `poetry` so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `npm`, `yarn`, `terraform` and `poetry` so far
 - `in-range-only` = Update the lock file when in-range updates are available, ignore package file updates
 
 Renovate's `"auto"` strategy works like this for npm:
@@ -3563,6 +3619,23 @@ If you wish to distinguish between patch and minor upgrades, for example if you 
 Configure this to `true` if you wish to get one PR for every separate major version upgrade of a dependency.
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
+
+## statusCheckNames
+
+You can customize the name/context of status checks that Renovate adds to commits/branches/PRs.
+
+This option enables you to modify any existing status checks name/context, but adding new status checks this way is _not_ supported.
+Setting the value to `null` or an empty string, effectively disables or skips that status check.
+This option is mergeable, which means you only have to specify the status checks that you want to modify.
+
+```json title="Example of overriding status check strings"
+{
+  "statusCheckNames": {
+    "minimumReleaseAge": "custom/stability-days",
+    "mergeConfidence": "custom/merge-confidence-level"
+  }
+}
+```
 
 ## stopUpdatingLabel
 

@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { trimTrailingSlash } from '../../../util/url';
-import { loadAll } from '../../../util/yaml';
+import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
@@ -33,7 +33,8 @@ export function extractPackageFile(
 
   let definitions: ApplicationDefinition[];
   try {
-    definitions = loadAll(content) as ApplicationDefinition[];
+    // TODO: use schema (#9610)
+    definitions = parseYaml(content);
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse ArgoCD definition.');
     return null;

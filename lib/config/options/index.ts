@@ -6,6 +6,15 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'allowedHeaders',
+    description:
+      'List of allowed patterns for header names in repository hostRules config.',
+    type: 'array',
+    default: ['X-*'],
+    subType: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'detectGlobalManagerConfig',
     description:
       'If `true`, Renovate tries to detect global manager configuration from the file system.',
@@ -19,6 +28,14 @@ const options: RenovateOptions[] = [
       'If `true`, Renovate tries to detect host rules from environment variables.',
     type: 'boolean',
     default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'useCloudMetadataServices',
+    description:
+      'If `false`, Renovate does not try to access cloud metadata services.',
+    type: 'boolean',
+    default: true,
     globalOnly: true,
   },
   {
@@ -168,6 +185,19 @@ const options: RenovateOptions[] = [
     default: {},
     additionalProperties: {
       type: 'string',
+    },
+  },
+  {
+    name: 'statusCheckNames',
+    description: 'Custom strings to use as status check names.',
+    type: 'object',
+    mergeable: true,
+    advancedUse: true,
+    default: {
+      artifactError: 'renovate/artifacts',
+      configValidation: 'renovate/config-validation',
+      mergeConfidence: 'renovate/merge-confidence',
+      minimumReleaseAge: 'renovate/stability-days',
     },
   },
   {
@@ -340,6 +370,13 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'redisPrefix',
+    description: 'Key prefix for redis cache entries.',
+    stage: 'global',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'baseDir',
     description:
       'The base directory for Renovate to store local files, including repository files and cache. If left empty, Renovate will create its own temporary directory to use.',
@@ -398,7 +435,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.26.0',
+    default: 'ghcr.io/containerbase/sidecar:9.31.5',
     globalOnly: true,
   },
   {
@@ -1047,7 +1084,7 @@ const options: RenovateOptions[] = [
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure', 'gitlab'],
+    supportedPlatforms: ['azure', 'gerrit', 'gitlab'],
   },
   // depType
   {
@@ -1833,7 +1870,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'fast-forward', 'merge-commit', 'rebase', 'squash'],
     default: 'auto',
-    supportedPlatforms: ['bitbucket', 'gitea'],
+    supportedPlatforms: ['azure', 'bitbucket', 'gitea'],
   },
   {
     name: 'automergeComment',
@@ -2385,6 +2422,16 @@ const options: RenovateOptions[] = [
     advancedUse: true,
   },
   {
+    name: 'headers',
+    description:
+      'Put fields to be forwarded to the HTTP request headers in the headers config option.',
+    type: 'object',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
     name: 'artifactAuth',
     description:
       'A list of package managers to enable artifact auth. Only managers on the list are enabled. All are enabled if `null`.',
@@ -2758,6 +2805,17 @@ const options: RenovateOptions[] = [
     experimental: true,
     globalOnly: true,
     default: [],
+  },
+  {
+    name: 'maxRetryAfter',
+    description:
+      'Maximum retry-after header value to wait for before retrying a failed request.',
+    type: 'integer',
+    default: 60,
+    stage: 'package',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
   },
 ];
 

@@ -4,6 +4,8 @@ import type {
   UpdateType,
 } from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
+import type { BitbucketPrCacheData } from '../../../modules/platform/bitbucket/types';
+import type { GiteaPrCacheData } from '../../../modules/platform/gitea/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { PrBlockedBy } from '../../../workers/types';
 
@@ -130,7 +132,13 @@ export interface RepoCacheData {
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
+    gitea?: {
+      pullRequestsCache?: GiteaPrCacheData;
+    };
     github?: Record<string, unknown>;
+    bitbucket?: {
+      pullRequestsCache?: BitbucketPrCacheData;
+    };
   };
   prComments?: Record<number, Record<string, string>>;
   onboardingBranchCache?: OnboardingBranchCache;

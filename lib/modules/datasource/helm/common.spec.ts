@@ -1,12 +1,12 @@
 import { Fixtures } from '../../../../test/fixtures';
-import { load } from '../../../util/yaml';
+import { parseSingleYaml } from '../../../util/yaml';
 import { findSourceUrl } from './common';
 import type { HelmRepository } from './types';
 
 // Truncated index.yaml file
-const repo = load(Fixtures.get('sample.yaml'), {
+const repo = parseSingleYaml<HelmRepository>(Fixtures.get('sample.yaml'), {
   json: true,
-}) as HelmRepository;
+});
 
 describe('modules/datasource/helm/common', () => {
   describe('findSourceUrl', () => {

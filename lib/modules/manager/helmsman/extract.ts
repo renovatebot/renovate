@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
-import { load } from '../../../util/yaml';
+import { parseSingleYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type {
@@ -68,10 +68,10 @@ export function extractPackageFile(
   _config: ExtractConfig,
 ): PackageFileContent | null {
   try {
-    // TODO: fix me (#9610)
-    const doc = load(content, {
+    // TODO: use schema (#9610)
+    const doc = parseSingleYaml<HelmsmanDocument>(content, {
       json: true,
-    }) as HelmsmanDocument;
+    });
     if (!doc.apps) {
       logger.debug({ packageFile }, `Missing apps keys`);
       return null;

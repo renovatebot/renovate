@@ -1,15 +1,16 @@
 import { codeBlock } from 'common-tags';
-import { load, loadAll } from './yaml';
+import { z } from 'zod';
+import { parseSingleYaml, parseYaml } from './yaml';
 
 describe('util/yaml', () => {
   describe('loadAll', () => {
     it('should return empty array for empty string', () => {
-      expect(loadAll(``)).toEqual([]);
+      expect(parseYaml(``)).toEqual([]);
     });
 
     it('should parse content with single document', () => {
       expect(
-        loadAll(codeBlock`
+        parseYaml(codeBlock`
       myObject:
         aString: value
       `),
@@ -22,9 +23,34 @@ describe('util/yaml', () => {
       ]);
     });
 
+    it('should parse content with single document with schema', () => {
+      expect(
+        parseYaml(
+          codeBlock`
+      myObject:
+        aString: value
+      `,
+          null,
+          {
+            customSchema: z.object({
+              myObject: z.object({
+                aString: z.string(),
+              }),
+            }),
+          },
+        ),
+      ).toEqual([
+        {
+          myObject: {
+            aString: 'value',
+          },
+        },
+      ]);
+    });
+
     it('should parse content with multiple documents', () => {
       expect(
-        loadAll(codeBlock`
+        parseYaml(codeBlock`
       myObject:
         aString: value
       ---
@@ -42,9 +68,113 @@ describe('util/yaml', () => {
       ]);
     });
 
+    it('should parse content with multiple documents with schema', () => {
+      expect(
+        parseYaml(
+          codeBlock`
+      myObject:
+        aString: foo
+      ---
+      myObject:
+        aString: bar
+      `,
+          null,
+          {
+            customSchema: z.object({
+              myObject: z.object({
+                aString: z.string(),
+              }),
+            }),
+          },
+        ),
+      ).toEqual([
+        {
+          myObject: {
+            aString: 'foo',
+          },
+        },
+        {
+          myObject: {
+            aString: 'bar',
+          },
+        },
+      ]);
+    });
+
+    it('should throw if schema does not match', () => {
+      expect(() =>
+        parseYaml(
+          codeBlock`
+      myObject:
+        aString: foo
+      ---
+      aString: bar
+      `,
+          null,
+          {
+            customSchema: z.object({
+              myObject: z.object({
+                aString: z.string(),
+              }),
+            }),
+          },
+        ),
+      ).toThrow();
+    });
+
+    it('should throw if schema does not match and failureBehaviour "throw"', () => {
+      expect(() =>
+        parseYaml(
+          codeBlock`
+      myObject:
+        aString: foo
+      ---
+      aString: bar
+      `,
+          null,
+          {
+            customSchema: z.object({
+              myObject: z.object({
+                aString: z.string(),
+              }),
+            }),
+            failureBehaviour: 'throw',
+          },
+        ),
+      ).toThrow();
+    });
+
+    it('should still return valid elements if schema does not match with "filter" behaviour', () => {
+      expect(
+        parseYaml(
+          codeBlock`
+      myObject:
+        aString: foo
+      ---
+      aString: bar
+      `,
+          null,
+          {
+            customSchema: z.object({
+              myObject: z.object({
+                aString: z.string(),
+              }),
+            }),
+            failureBehaviour: 'filter',
+          },
+        ),
+      ).toEqual([
+        {
+          myObject: {
+            aString: 'foo',
+          },
+        },
+      ]);
+    });
+
     it('should parse content with templates', () => {
       expect(
-        loadAll(
+        parseYaml(
           codeBlock`
       myObject:
         aString: {{ value }}
@@ -69,12 +199,12 @@ describe('util/yaml', () => {
 
   describe('load', () => {
     it('should return undefined', () => {
-      expect(load(``)).toBeUndefined();
+      expect(parseSingleYaml(``)).toBeUndefined();
     });
 
     it('should parse content with single document', () => {
       expect(
-        load(codeBlock`
+        parseSingleYaml(codeBlock`
       myObject:
         aString: value
       `),
@@ -85,9 +215,48 @@ describe('util/yaml', () => {
       });
     });
 
+    it('should parse content with single document with schema', () => {
+      expect(
+        parseSingleYaml(
+          codeBlock`
+      myObject:
+        aString: value
+      `,
+          {
+            customSchema: z.object({
+              myObject: z.object({
+                aString: z.string(),
+              }),
+            }),
+          },
+        ),
+      ).toEqual({
+        myObject: {
+          aString: 'value',
+        },
+      });
+    });
+
+    it('should throw with single document with schema if parsing fails', () => {
+      expect(() =>
+        parseSingleYaml(
+          codeBlock`
+      myObject: foo
+      `,
+          {
+            customSchema: z.object({
+              myObject: z.object({
+                aString: z.string(),
+              }),
+            }),
+          },
+        ),
+      ).toThrow();
+    });
+
     it('should parse content with multiple documents', () => {
       expect(() =>
-        load(codeBlock`
+        parseSingleYaml(codeBlock`
       myObject:
         aString: value
       ---
@@ -98,16 +267,23 @@ describe('util/yaml', () => {
 
     it('should parse content with template', () => {
       expect(
-        load(
+        parseSingleYaml(
           codeBlock`
       myObject:
         aString: {{value}}
+        {% if test.enabled %}
+        myNestedObject:
+          aNestedString: {{value}}
+        {% endif %}
       `,
           { removeTemplates: true },
         ),
       ).toEqual({
         myObject: {
           aString: null,
+          myNestedObject: {
+            aNestedString: null,
+          },
         },
       });
     });

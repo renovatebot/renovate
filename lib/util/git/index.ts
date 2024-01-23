@@ -350,7 +350,6 @@ export async function cloneSubmodules(shouldClone: boolean): Promise<void> {
   }
   submodulesInitizialized = true;
   await syncGit();
-  await git.addConfig('submodule.recurse', 'true');
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
     try {
@@ -521,7 +520,13 @@ export async function checkoutBranch(
   logger.debug(`Setting current branch to ${branchName}`);
   await syncGit();
   try {
-    await gitRetry(() => git.checkout(['-f', branchName, '--']));
+    await gitRetry(() =>
+      git.checkout(
+        submodulesInitizialized
+          ? ['-f', '--recurse-submodules', branchName, '--']
+          : ['-f', branchName, '--'],
+      ),
+    );
     config.currentBranch = branchName;
     config.currentBranchSha = (
       await git.raw(['rev-parse', 'HEAD'])

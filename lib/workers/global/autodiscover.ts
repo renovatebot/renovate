@@ -61,12 +61,12 @@ export async function autodiscoverRepositories(
       logger.debug('None of the discovered repositories matched the filter');
       return config;
     }
-    logger.debug(
-      `Autodiscovered ${discovered.length} repositories after filter`,
-    );
   }
 
-  logger.info({ repositories: discovered }, `Autodiscovered repositories`);
+  logger.info(
+    { length: discovered.length, repositories: discovered },
+    `Autodiscovered repositories`,
+  );
 
   // istanbul ignore if
   if (config.repositories?.length) {

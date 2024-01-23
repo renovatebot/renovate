@@ -7,7 +7,7 @@ import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
 import { readSystemFile } from '../../../../util/fs';
-import { load } from '../../../../util/yaml';
+import { parseSingleYaml } from '../../../../util/yaml';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   if (upath.basename(file) === '.renovaterc') {
@@ -16,9 +16,9 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
   switch (upath.extname(file)) {
     case '.yaml':
     case '.yml':
-      return load(await readSystemFile(file, 'utf8'), {
+      return parseSingleYaml(await readSystemFile(file, 'utf8'), {
         json: true,
-      }) as RenovateConfig;
+      });
     case '.json5':
     case '.json':
       return parseJson(
