@@ -27,7 +27,7 @@ export interface LocalConfig extends StorageConfig {
   additionalBranches: string[];
   currentBranch: string;
   currentBranchSha: LongCommitSha;
-  defaultBranch: string;
+  defaultBranch?: string;
   branchCommits: Record<string, LongCommitSha>;
   branchIsModified: Record<string, boolean>;
   commitBranches: Record<string, string[]>;
