@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -12,6 +13,19 @@ describe('modules/manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       GlobalConfig.set({ localDir });
+    });
+
+    it('skip null YAML document', async () => {
+      const content = codeBlock`
+        ~
+        `;
+      const fileName = 'helmfile.yaml';
+      const result = await extractPackageFile(content, fileName, {
+        registryAliases: {
+          stable: 'https://charts.helm.sh/stable',
+        },
+      });
+      expect(result).toBeNull();
     });
 
     it('returns null if no releases', async () => {

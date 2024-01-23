@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { minimatch } from 'minimatch';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
+import { minimatchFilter } from '../../util/minimatch';
 import { configRegexPredicate, isConfigRegex } from '../../util/regex';
 
 // istanbul ignore next
@@ -61,12 +61,12 @@ export async function autodiscoverRepositories(
       logger.debug('None of the discovered repositories matched the filter');
       return config;
     }
-    logger.debug(
-      `Autodiscovered ${discovered.length} repositories after filter`,
-    );
   }
 
-  logger.info({ repositories: discovered }, `Autodiscovered repositories`);
+  logger.info(
+    { length: discovered.length, repositories: discovered },
+    `Autodiscovered repositories`,
+  );
 
   // istanbul ignore if
   if (config.repositories?.length) {
@@ -107,7 +107,7 @@ export function applyFilters(repos: string[], filters: string[]): string[] {
       }
       res = repos.filter(autodiscoveryPred);
     } else {
-      res = repos.filter(minimatch.filter(filter, { dot: true, nocase: true }));
+      res = repos.filter(minimatchFilter(filter, { dot: true, nocase: true }));
     }
     for (const repository of res) {
       matched.add(repository);

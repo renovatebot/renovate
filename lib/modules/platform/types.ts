@@ -78,7 +78,7 @@ export interface Pr {
   labels?: string[];
   number: number;
   reviewers?: string[];
-  sha?: string;
+  sha?: LongCommitSha;
   sourceRepo?: string;
   state: string;
   targetBranch?: string;
@@ -97,6 +97,7 @@ export interface Issue {
 }
 export type PlatformPrOptions = {
   autoApprove?: boolean;
+  automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
@@ -165,6 +166,7 @@ export interface FindPRConfig {
   state?: 'open' | 'closed' | '!open' | 'all';
   refreshCache?: boolean;
   targetBranch?: string | null;
+  includeOtherAuthors?: boolean;
 }
 export interface MergePRConfig {
   branchName?: string;

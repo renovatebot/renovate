@@ -1,3 +1,6 @@
+import type { LongCommitSha } from '../../../util/git/types';
+import type { Pr } from '../types';
+
 export interface PrReviewersParams {
   reviewers?: string[];
   team_reviewers?: string[];
@@ -25,6 +28,7 @@ export interface PR {
   body: string;
   mergeable: boolean;
   created_at: string;
+  updated_at: string;
   closed_at: string;
   diff_url: string;
   base?: {
@@ -32,7 +36,7 @@ export interface PR {
   };
   head?: {
     label: string;
-    sha: string;
+    sha: LongCommitSha;
     repo?: Repo;
   };
   assignee?: {
@@ -70,6 +74,8 @@ export interface Repo {
   allow_squash_merge: boolean;
   archived: boolean;
   clone_url?: string;
+  external_tracker?: unknown;
+  has_issues: boolean;
   ssh_url?: string;
   default_branch: string;
   empty: boolean;
@@ -146,6 +152,8 @@ export type SortMethod = 'asc' | 'desc';
 export interface RepoSearchParams {
   uid?: number;
   archived?: boolean;
+  topic?: boolean;
+  q?: string;
 
   /**
    * Repo sort type, defaults to `alpha`.
@@ -189,11 +197,6 @@ export interface PRUpdateParams {
   base?: string;
 }
 
-export interface PRSearchParams {
-  state?: PRState;
-  labels?: number[];
-}
-
 export interface PRMergeParams {
   Do: PRMergeMethod;
   merge_when_checks_succeed?: boolean;
@@ -210,4 +213,10 @@ export interface CommitStatusCreateParams {
   description?: string;
   state?: CommitStatusType;
   target_url?: string;
+}
+
+export interface GiteaPrCacheData {
+  items: Record<number, Pr>;
+  updated_at: string | null;
+  author: string | null;
 }

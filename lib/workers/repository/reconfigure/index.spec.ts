@@ -4,12 +4,15 @@ import {
   fs,
   git,
   mocked,
+  partial,
   platform,
   scm,
 } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform/types';
 import * as _cache from '../../../util/cache/repository';
+import type { LongCommitSha } from '../../../util/git/types';
 import * as _merge from '../init/merge';
 import { validateReconfigureBranch } from '.';
 
@@ -25,6 +28,9 @@ describe('workers/repository/reconfigure/index', () => {
   const config: RenovateConfig = {
     branchPrefix: 'prefix/',
     baseBranch: 'base',
+    statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+      configValidation: 'renovate/config-validation',
+    }),
   };
 
   beforeEach(() => {
@@ -32,10 +38,10 @@ describe('workers/repository/reconfigure/index', () => {
     merge.detectConfigFile.mockResolvedValue('renovate.json');
     scm.branchExists.mockResolvedValue(true);
     cache.getCache.mockReturnValue({});
-    git.getBranchCommit.mockReturnValue('sha');
+    git.getBranchCommit.mockReturnValue('sha' as LongCommitSha);
     fs.readLocalFile.mockResolvedValue(null);
-    platform.getBranchPr.mockResolvedValue(null);
     platform.getBranchStatusCheck.mockResolvedValue(null);
+    GlobalConfig.reset();
   });
 
   it('no effect on repo with no reconfigure branch', async () => {
@@ -121,7 +127,7 @@ describe('workers/repository/reconfigure/index', () => {
             "enabledManagers": ["docker"]
         }
         `);
-    platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
+    platform.findPr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
     await validateReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
       { errors: expect.any(String) },
@@ -150,6 +156,46 @@ describe('workers/repository/reconfigure/index', () => {
     });
   });
 
+  it('skips adding status check if statusCheckNames.configValidation is null', async () => {
+    cache.getCache.mockReturnValueOnce({
+      reconfigureBranchCache: {
+        reconfigureBranchSha: 'new-sha',
+        isConfigValid: false,
+      },
+    });
+
+    await validateReconfigureBranch({
+      ...config,
+      statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+        configValidation: null,
+      }),
+    });
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Status check is null or an empty string, skipping status check addition.',
+    );
+    expect(platform.setBranchStatus).not.toHaveBeenCalled();
+  });
+
+  it('skips adding status check if statusCheckNames.configValidation is empty string', async () => {
+    cache.getCache.mockReturnValueOnce({
+      reconfigureBranchCache: {
+        reconfigureBranchSha: 'new-sha',
+        isConfigValid: false,
+      },
+    });
+
+    await validateReconfigureBranch({
+      ...config,
+      statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+        configValidation: '',
+      }),
+    });
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Status check is null or an empty string, skipping status check addition.',
+    );
+    expect(platform.setBranchStatus).not.toHaveBeenCalled();
+  });
+
   it('skips validation if cache is valid', async () => {
     cache.getCache.mockReturnValueOnce({
       reconfigureBranchCache: {
@@ -173,7 +219,7 @@ describe('workers/repository/reconfigure/index', () => {
     platform.getBranchStatusCheck.mockResolvedValueOnce('green');
     await validateReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
-      'Skipping validation check as status check already exists',
+      'Skipping validation check because status check already exists.',
     );
   });
 
@@ -184,7 +230,6 @@ describe('workers/repository/reconfigure/index', () => {
             "enabledManagers": ["npm",]
         }
         `);
-    platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
     await validateReconfigureBranch(config);
     expect(platform.setBranchStatus).toHaveBeenCalledWith({
       branchName: 'prefix/reconfigure',

@@ -1,4 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
+import type { LongCommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { toBase64 } from '../../../util/string';
 import {
@@ -23,7 +24,6 @@ import {
   mergePR,
   requestPrReviewers,
   searchIssues,
-  searchPRs,
   searchRepos,
   unassignLabel,
   updateComment,
@@ -49,7 +49,8 @@ describe('modules/platform/gitea/gitea-helper', () => {
   const giteaApiHost = 'https://gitea.renovatebot.com/';
   const baseUrl = `${giteaApiHost}api/v1`;
 
-  const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
+  const mockCommitHash =
+    '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
 
   const mockUser: User = {
     id: 1,
@@ -85,6 +86,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
       push: true,
       admin: false,
     },
+    has_issues: true,
   };
 
   const otherMockRepo: Repo = {
@@ -121,6 +123,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
     },
     created_at: '2018-08-13T20:45:37Z',
     closed_at: '2020-04-01T19:19:22Z',
+    updated_at: '2020-04-01T19:19:22Z',
   };
 
   const mockIssue: Issue = {
@@ -417,33 +420,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
       await expect(
         requestPrReviewers(mockRepo.full_name, mockPR.number, {}),
       ).toResolve();
-    });
-  });
-
-  describe('searchPRs', () => {
-    it('should call /api/v1/repos/[repo]/pulls endpoint', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/pulls`)
-        .reply(200, [mockPR]);
-
-      const res = await searchPRs(mockRepo.full_name, {});
-      expect(res).toEqual([mockPR]);
-    });
-
-    it('should construct proper query parameters', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get(
-          `/repos/${mockRepo.full_name}/pulls?state=open&labels=${mockLabel.id}&labels=${otherMockLabel.id}`,
-        )
-        .reply(200, [mockPR]);
-
-      const res = await searchPRs(mockRepo.full_name, {
-        state: 'open',
-        labels: [mockLabel.id, otherMockLabel.id],
-      });
-      expect(res).toEqual([mockPR]);
     });
   });
 

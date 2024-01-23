@@ -104,7 +104,12 @@ function parseDashboardIssue(issueBody: string): DependencyDashboard {
 export async function readDashboardBody(
   config: SelectAllConfig,
 ): Promise<void> {
-  config.dependencyDashboardChecks = {};
+  let dashboardChecks: DependencyDashboard = {
+    dependencyDashboardChecks: {},
+    dependencyDashboardAllPending: false,
+    dependencyDashboardRebaseAllOpen: false,
+    dependencyDashboardAllRateLimited: false,
+  };
   const stringifiedConfig = JSON.stringify(config);
   if (
     config.dependencyDashboard === true ||
@@ -116,24 +121,21 @@ export async function readDashboardBody(
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
-      const dashboardChecks = parseDashboardIssue(issue.body ?? '');
-
-      if (config.checkedBranches) {
-        const checkedBranchesRec: Record<string, string> = Object.fromEntries(
-          config.checkedBranches.map((branchName) => [
-            branchName,
-            'global-config',
-          ]),
-        );
-        dashboardChecks.dependencyDashboardChecks = {
-          ...dashboardChecks.dependencyDashboardChecks,
-          ...checkedBranchesRec,
-        };
-      }
-
-      Object.assign(config, dashboardChecks);
+      dashboardChecks = parseDashboardIssue(issue.body ?? '');
     }
   }
+
+  if (config.checkedBranches) {
+    const checkedBranchesRec: Record<string, string> = Object.fromEntries(
+      config.checkedBranches.map((branchName) => [branchName, 'global-config']),
+    );
+    dashboardChecks.dependencyDashboardChecks = {
+      ...dashboardChecks.dependencyDashboardChecks,
+      ...checkedBranchesRec,
+    };
+  }
+
+  Object.assign(config, dashboardChecks);
 }
 
 function getListItem(branch: BranchConfig, type: string): string {
@@ -421,6 +423,18 @@ export async function ensureDependencyDashboard(
   issueBody += footer;
 
   if (config.dependencyDashboardIssue) {
+    // If we're not changing the dashboard issue then we can skip checking if the user changed it
+    // The cached issue we get back here will reflect its state at the _start_ of our run
+    const cachedIssue = await platform.getIssue?.(
+      config.dependencyDashboardIssue,
+    );
+    if (cachedIssue?.body === issueBody) {
+      logger.debug('No changes to dependency dashboard issue needed');
+      return;
+    }
+
+    // Skip cache when getting the issue to ensure we get the latest body,
+    // including any updates the user made after we started the run
     const updatedIssue = await platform.getIssue?.(
       config.dependencyDashboardIssue,
       false,

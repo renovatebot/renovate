@@ -39,7 +39,7 @@
     "series": "potato",
     "created": "1999-03-09",
     "release": "2000-08-15",
-    "eol": "2003-07-30"
+    "eol": "2003-06-30"
   },
   "v3": {
     "codename": "Woody",
@@ -118,14 +118,18 @@
     "series": "bullseye",
     "created": "2019-07-06",
     "release": "2021-08-14",
-    "eol": "2024-08-14"
+    "eol": "2024-08-14",
+    "eol_lts": "2026-08-31",
+    "eol_elts": "2031-06-30"
   },
   "v12": {
     "codename": "Bookworm",
     "series": "bookworm",
     "created": "2021-08-14",
     "release": "2023-06-10",
-    "eol": "2026-06-10"
+    "eol": "2026-06-10",
+    "eol_lts": "2028-06-30",
+    "eol_elts": "2033-06-30"
   },
   "v13": {
     "codename": "Trixie",

@@ -7,6 +7,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import type * as _git from '../../../util/git';
+import type { LongCommitSha } from '../../../util/git/types';
 import type { Platform } from '../types';
 
 jest.mock('timers/promises');
@@ -215,7 +216,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         git.branchExists.mockReturnValue(true);
         git.isBranchBehindBase.mockResolvedValue(false);
         git.getBranchCommit.mockReturnValue(
-          '0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+          '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
         );
         const endpoint =
           scenarioName === 'endpoint with path'
@@ -1304,6 +1305,50 @@ describe('modules/platform/bitbucket-server/index', () => {
               state: 'closed',
             }),
           ).toBeNull();
+        });
+
+        it('finds pr from other authors', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [prMock(url, 'SOME', 'repo')],
+            });
+          expect(
+            await bitbucket.findPr({
+              branchName: 'branch',
+              state: 'open',
+              includeOtherAuthors: true,
+            }),
+          ).toMatchObject({
+            number: 5,
+            sourceBranch: 'userName1/pullRequest5',
+            targetBranch: 'master',
+            title: 'title',
+            state: 'open',
+          });
+        });
+
+        it('returns null if no pr found - (includeOtherAuthors)', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
+
+          const pr = await bitbucket.findPr({
+            branchName: 'branch',
+            state: 'open',
+            includeOtherAuthors: true,
+          });
+          expect(pr).toBeNull();
         });
       });
 

@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
 import type { Release, ReleaseResult } from '../types';
@@ -19,6 +20,15 @@ export const HexRelease = z
         inserted_at: z.string().optional(),
       }),
     ).refine((releases) => releases.length > 0, 'No releases found'),
+    retirements: z
+      .record(
+        z.string(),
+        z.object({
+          message: z.string().nullable(),
+          reason: z.string(),
+        }),
+      )
+      .optional(),
   })
   .transform((hexResponse): ReleaseResult => {
     const releases: Release[] = hexResponse.releases.map(
@@ -27,6 +37,10 @@ export const HexRelease = z
 
         if (releaseTimestamp) {
           release.releaseTimestamp = releaseTimestamp;
+        }
+
+        if (is.plainObject(hexResponse.retirements?.[version])) {
+          release.isDeprecated = true;
         }
 
         return release;

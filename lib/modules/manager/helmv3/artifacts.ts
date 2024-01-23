@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
 import pMap from 'p-map';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -14,6 +13,7 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import * as yaml from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -70,7 +70,7 @@ async function helmCommands(
   // add helm repos if an alias or credentials for the url are defined
   classicRepositories.forEach((value) => {
     const { username, password } = value.hostRule;
-    const parameters = [`${value.repository}`];
+    const parameters = [`${value.repository}`, `--force-update`];
     const isPrivateRepo = username && password;
     if (isPrivateRepo) {
       parameters.push(`--username ${quote(username)}`);
@@ -114,10 +114,13 @@ export async function updateArtifacts({
   }
   try {
     // get repositories and registries defined in the package file
-    const packages = yaml.load(newPackageFileContent) as ChartDefinition; //TODO #9610
+    // TODO: use schema (#9610)
+    const packages = yaml.parseSingleYaml<ChartDefinition>(
+      newPackageFileContent,
+    );
     const locks = existingLockFileContent
-      ? (yaml.load(existingLockFileContent) as ChartDefinition)
-      : { dependencies: [] }; //TODO #9610
+      ? yaml.parseSingleYaml<ChartDefinition>(existingLockFileContent)
+      : { dependencies: [] };
 
     const chartDefinitions: ChartDefinition[] = [];
     // prioritize registryAlias naming for Helm repositories

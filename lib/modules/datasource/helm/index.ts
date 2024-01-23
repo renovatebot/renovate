@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
 import { ensureTrailingSlash } from '../../../util/url';
+import { parseSingleYaml } from '../../../util/yaml';
 import * as helmVersioning from '../../versioning/helm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -48,9 +48,10 @@ export class HelmDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
     try {
-      const doc = load(res.body, {
+      // TODO: use schema (#9610)
+      const doc = parseSingleYaml<HelmRepository>(res.body, {
         json: true,
-      }) as HelmRepository;
+      });
       if (!is.plainObject<HelmRepository>(doc)) {
         logger.warn(
           { helmRepository },

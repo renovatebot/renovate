@@ -11,6 +11,9 @@ exports[`modules/datasource/nuget/index getReleases handles paginated results (v
       "version": "2.0.0",
     },
   ],
+  "tags": {
+    "latest": "2.0.0",
+  },
 }
 `;
 
@@ -200,6 +203,9 @@ exports[`modules/datasource/nuget/index getReleases processes real data (v2) 1`]
     },
   ],
   "sourceUrl": "https://nunit.org/",
+  "tags": {
+    "latest": "3.12.0",
+  },
 }
 `;
 
@@ -1692,6 +1698,9 @@ exports[`modules/datasource/nuget/index getReleases processes real data with no 
     },
   ],
   "sourceUrl": "https://nunit.org",
+  "tags": {
+    "latest": "3.11.0",
+  },
 }
 `;
 
@@ -1829,6 +1838,9 @@ exports[`modules/datasource/nuget/index getReleases processes real data without 
       "version": "3.11.0",
     },
   ],
+  "tags": {
+    "latest": "3.11.0",
+  },
 }
 `;
 

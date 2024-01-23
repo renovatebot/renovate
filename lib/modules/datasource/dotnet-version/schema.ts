@@ -26,17 +26,22 @@ export const DotnetSdkReleases = z
   .object({
     releases: LooseArray(
       ReleaseBase.extend({
-        sdk: ReleaseDetails,
+        sdks: z.array(ReleaseDetails),
       }),
     ).catch([]),
   })
   .transform(({ releases }): Release[] =>
-    releases.map(
+    releases.flatMap(
       ({
-        sdk: { version },
+        sdks,
         'release-date': releaseTimestamp,
         'release-notes': changelogUrl,
-      }) => ({ version, releaseTimestamp, changelogUrl }),
+      }) =>
+        sdks.map(({ version }) => ({
+          version,
+          releaseTimestamp,
+          changelogUrl,
+        })),
     ),
   );
 
