@@ -1097,7 +1097,7 @@ const options: RenovateOptions[] = [
     description:
       'Matches the current age of the package derived from its release timestamp. Valid only within a `packageRules` object.',
     type: 'string',
-    parent: 'packageRules',
+    parents: ['packageRules'],
     stage: 'package',
     mergeable: true,
     cli: false,
