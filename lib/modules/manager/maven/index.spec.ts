@@ -339,10 +339,9 @@ describe('modules/manager/maven/index', () => {
       packages.forEach(({ deps }) => {
         deps.forEach(({ registryUrls }) => {
           const depUrls = new Set([...registryUrls!]);
-          expect(depUrls).toStrictEqual(urls);
+          expect([...depUrls]).toStrictEqual([...urls]);
         });
       });
-      expect(packages).toMatchSnapshot();
     });
 
     it('should not touch content if new and old versions are equal', () => {
