@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { detectPlatform } from '../../../util/common';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -158,7 +158,8 @@ export function extractPackageFile(
   type ParsedContent = Record<string, unknown> | PreCommitConfig;
   let parsedContent: ParsedContent;
   try {
-    parsedContent = load(content, { json: true }) as ParsedContent;
+    // TODO: use schema (#9610)
+    parsedContent = parseSingleYaml(content, { json: true });
   } catch (err) {
     logger.debug(
       { filename: packageFile, err },

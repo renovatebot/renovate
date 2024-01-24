@@ -18,9 +18,9 @@ import * as yarnHelper from './yarn';
 
 jest.mock('fs-extra', () =>
   jest
-    .requireActual<typeof import('../../../../../test/fixtures')>(
-      '../../../../../test/fixtures',
-    )
+    .requireActual<
+      typeof import('../../../../../test/fixtures')
+    >('../../../../../test/fixtures')
     .fsExtra(),
 );
 jest.mock('../../../../util/exec/env');

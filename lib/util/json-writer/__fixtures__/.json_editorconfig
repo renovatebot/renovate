@@ -1,2 +1,5 @@
+[*]
+max_line_length = off
+
 [*.json]
 indent_style = tab

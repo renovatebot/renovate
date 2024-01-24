@@ -7,14 +7,16 @@ import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
+import { getCache } from '../cache/repository';
 import { clone } from '../clone';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
-import { applyHostRules } from './host-rules';
+import { applyHostRule, findMatchingRule } from './host-rules';
 import { getQueue } from './queue';
+import { getRetryAfter, wrapWithRetry } from './retry-after';
 import { Throttle, getThrottle } from './throttle';
 import type {
   GotJSONOptions,
@@ -130,11 +132,14 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     protected hostType: string,
     options: HttpOptions = {},
   ) {
-    this.options = merge<GotOptions>(options, { context: { hostType } });
-
-    if (process.env.NODE_ENV === 'test') {
-      this.options.retry = 0;
-    }
+    const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
+    this.options = merge<GotOptions>(options, {
+      context: { hostType },
+      retry: {
+        limit: retryLimit,
+        maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
+      },
+    });
   }
 
   protected getThrottle(url: string): Throttle | null {
@@ -159,6 +164,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       httpOptions,
     );
 
+    logger.trace(`HTTP request: ${options.method.toUpperCase()} ${url}`);
+
     const etagCache =
       httpOptions.etagCache && options.method === 'get'
         ? httpOptions.etagCache
@@ -176,7 +183,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     applyDefaultHeaders(options);
 
-    options = applyHostRules(url, options);
+    const hostRule = findMatchingRule(url, options);
+    options = applyHostRule(url, options, hostRule);
     if (options.enabled === false) {
       logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
       throw new Error(HOST_DISABLED);
@@ -205,6 +213,16 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     // istanbul ignore else: no cache tests
     if (!resPromise) {
+      if (httpOptions.repoCache) {
+        const cachedEtag = getCache().httpCache?.[url]?.etag;
+        if (cachedEtag) {
+          logger.debug(`Using cached etag for ${url}`);
+          options.headers = {
+            ...options.headers,
+            'If-None-Match': cachedEtag,
+          };
+        }
+      }
       const startTime = Date.now();
       const httpTask: GotTask<T> = () => {
         const queueDuration = Date.now() - startTime;
@@ -225,7 +243,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         ? () => queue.add<HttpResponse<T>>(throttledTask)
         : throttledTask;
 
-      resPromise = queuedTask();
+      const { maxRetryAfter = 60 } = hostRule;
+      resPromise = wrapWithRetry(queuedTask, url, getRetryAfter, maxRetryAfter);
 
       if (memCacheKey) {
         memCache.set(memCacheKey, resPromise);
@@ -237,6 +256,31 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
+      if (httpOptions.repoCache) {
+        const cache = getCache();
+        cache.httpCache ??= {};
+        if (resCopy.statusCode === 200 && resCopy.headers?.etag) {
+          logger.debug(
+            `Saving response to cache: ${url} with etag ${resCopy.headers.etag}`,
+          );
+          cache.httpCache[url] = {
+            etag: resCopy.headers.etag,
+            httpResponse: copyResponse(res, deepCopyNeeded),
+            timeStamp: new Date().toISOString(),
+          };
+        }
+        if (resCopy.statusCode === 304 && cache.httpCache[url]?.httpResponse) {
+          logger.debug(
+            `Using cached response: ${url} with etag ${resCopy.headers.etag} from ${cache.httpCache[url].timeStamp}`,
+          );
+          const cacheCopy = copyResponse(
+            cache.httpCache[url].httpResponse,
+            deepCopyNeeded,
+          );
+          cacheCopy.authorization = !!options?.headers?.authorization;
+          return cacheCopy as HttpResponse<T>;
+        }
+      }
       return resCopy;
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
@@ -486,7 +530,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
 
     applyDefaultHeaders(combinedOptions);
-    combinedOptions = applyHostRules(resolvedUrl, combinedOptions);
+    const hostRule = findMatchingRule(url, combinedOptions);
+    combinedOptions = applyHostRule(resolvedUrl, combinedOptions, hostRule);
     if (combinedOptions.enabled === false) {
       throw new Error(HOST_DISABLED);
     }

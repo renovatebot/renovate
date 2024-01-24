@@ -4,6 +4,9 @@
 
 First, [create a Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account.
 
+If you are using a Group access token, the token must have Developer role or higher permissions in order to create issues and merge requests.
+The token must have Maintainer permissions in order to perform Automerge.
+
 For real runs, give the PAT these scopes:
 
 - `read_user`
@@ -40,7 +43,7 @@ If you're using a private [GitLab container registry](https://docs.gitlab.com/ee
 ## Server version dependent features
 
 We use the GitLab [version API](https://docs.gitlab.com/ee/api/version.html) to fetch the server version.
-You can use the experimental feature flag [`RENOVATE_X_PLATFORM_VERSION`](https://docs.renovatebot.com/self-hosted-experimental/#renovate_x_platform_version) to set a specific server version.
+You can use the experimental feature flag [`RENOVATE_X_PLATFORM_VERSION`](../../../self-hosted-experimental.md#renovate_x_platform_version) to set a specific server version.
 By setting the server version yourself, you save a API call that fetches the server version.
 
 - Use `Draft:` MR prefix instead of `WIP:` prefix since `v13.2.0`

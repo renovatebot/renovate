@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
+import { parseSingleYaml } from '../../../util/yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import type {
   ExtractConfig,
@@ -17,7 +17,7 @@ export function extractPackageFile(
   // TODO: fix type
   let doc: any;
   try {
-    doc = load(content, { json: true }); // TODO #9610
+    doc = parseSingleYaml(content, { json: true }); // TODO #9610
   } catch (err) {
     logger.debug({ packageFile }, `Failed to parse helm requirements.yaml`);
     return null;

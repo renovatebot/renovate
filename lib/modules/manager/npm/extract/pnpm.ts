@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
-import { load } from 'js-yaml';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -10,6 +9,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
+import { parseSingleYaml } from '../../../../util/yaml';
 import type { PackageFile } from '../../types';
 import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
 import type { NpmManagerData } from '../types';
@@ -23,10 +23,13 @@ export async function extractPnpmFilters(
   fileName: string,
 ): Promise<string[] | undefined> {
   try {
-    // TODO #22198
-    const contents = load((await readLocalFile(fileName, 'utf8'))!, {
-      json: true,
-    }) as PnpmWorkspaceFile;
+    // TODO: use schema (#9610,#22198)
+    const contents = parseSingleYaml<PnpmWorkspaceFile>(
+      (await readLocalFile(fileName, 'utf8'))!,
+      {
+        json: true,
+      },
+    );
     if (
       !Array.isArray(contents.packages) ||
       !contents.packages.every((item) => is.string(item))
@@ -148,7 +151,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       throw new Error('Unable to read pnpm-lock.yaml');
     }
 
-    const lockParsed = load(pnpmLockRaw);
+    const lockParsed = parseSingleYaml(pnpmLockRaw);
     if (!isPnpmLockfile(lockParsed)) {
       throw new Error('Invalid or empty lockfile');
     }

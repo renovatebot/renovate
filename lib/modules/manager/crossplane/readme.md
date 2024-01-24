@@ -1,9 +1,20 @@
-The `crossplane` manager has no `fileMatch` default patterns, so it won't match any files until you configure it with a pattern.
-This is because there is no commonly accepted file/directory naming convention for crossplane YAML files and we don't want to check every single `*.yaml` file in repositories just in case any of them have Crossplane Packages definitions: Configurations, Providers, Functions.
+To use the `crossplane` manager you must set your own `fileMatch` pattern.
+The `crossplane` manager has no default `fileMatch` pattern, because there is no common filename or directory name convention for Crossplane YAML files.
+By setting your own `fileMatch` Renovate avoids having to check each `*.yaml` file in a repository for a Crossplane Package definition.
 
-If most `.yaml` files in your repository are Crossplane ones, then you could add this to your config:
+The `crossplane` manager supports these `depType`s:
 
-```json
+- `configuration`
+- `function`
+- `provider`
+
+You can use these `depType`'s to control which dependencies Renovate will upgrade.
+
+If you need to change the versioning format, read the [versioning](../../../modules/versioning.md) documentation to learn more.
+
+Some configuration examples:
+
+```json title="If most .yaml files are for Crossplane"
 {
   "crossplane": {
     "fileMatch": ["\\.yaml$"]
@@ -11,9 +22,7 @@ If most `.yaml` files in your repository are Crossplane ones, then you could add
 }
 ```
 
-If instead you have them all inside a `packages/` directory, you would add this:
-
-```json
+```json title="For Crossplane files in a packages/ directory"
 {
   "crossplane": {
     "fileMatch": ["packages/.+\\.yaml$"]
@@ -21,20 +30,10 @@ If instead you have them all inside a `packages/` directory, you would add this:
 }
 ```
 
-Or if it's only a single file then something like this:
-
-```json
+```json title="For a single Crossplane file"
 {
   "crossplane": {
     "fileMatch": ["^config/provider\\.yaml$"]
   }
 }
 ```
-
-If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.
-
-The `crossplane` manager has three `depType`s to allow a fine-grained control of which dependencies are upgraded:
-
-- `configuration`
-- `function`
-- `provider`

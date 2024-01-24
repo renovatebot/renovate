@@ -85,13 +85,16 @@ export class JenkinsPluginsDatasource extends Datasource {
       versions[name] = Object.keys(plugins[name]).map((version) => {
         const downloadUrl = plugins[name][version]?.url;
         const buildDate = plugins[name][version]?.buildDate;
-        const releaseTimestamp = buildDate
-          ? new Date(`${buildDate} UTC`).toISOString()
-          : null;
+        const releaseTimestamp =
+          plugins[name][version]?.releaseTimestamp ??
+          (buildDate ? new Date(`${buildDate} UTC`).toISOString() : null);
+        const jenkins = plugins[name][version]?.requiredCore;
+        const constraints = jenkins ? { jenkins: [`>=${jenkins}`] } : undefined;
         return {
           version,
           downloadUrl,
           releaseTimestamp,
+          ...(constraints && { constraints }),
         };
       });
     }

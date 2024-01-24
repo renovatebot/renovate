@@ -318,7 +318,7 @@ const staticGroups = {
       {
         groupName: 'PHPStan packages',
         matchDatasources: ['packagist'],
-        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-'],
+        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-', '/larastan'],
       },
     ],
   },
@@ -413,6 +413,7 @@ const staticGroups = {
       'group:phpstan',
       'group:polymer',
       'group:react',
+      'group:remark',
       'group:resilience4j',
       'group:rubyOnRails',
       'group:rubyOmniauth',
@@ -443,6 +444,16 @@ const staticGroups = {
       'group:symfony',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  remark: {
+    description: 'Group remark packages together.',
+    packageRules: [
+      {
+        groupName: 'remark',
+        matchDatasources: ['npm'],
+        matchSourceUrlPrefixes: ['https://github.com/remarkjs/'],
+      },
+    ],
   },
   resilience4j: {
     description: 'Group Java Resilience4j packages.',
