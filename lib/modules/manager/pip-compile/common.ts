@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { Command } from 'commander';
 import { split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger';
@@ -67,6 +68,15 @@ export const allowedPipArguments = [
   '--strip-extras',
 ];
 
+// as commander.js is already used, we will reuse it's argument parsing capability
+const dummyPipCompile = new Command()
+  .option('-o, --output-file <path>')
+  // .option('--no-emit-index-url')
+  .option('--extra-index-url')
+  // .enablePositionalOptions()
+  .allowUnknownOption()
+  .allowExcessArguments();
+
 interface PipCompileArgs {
   command: string;
   output?: string;
@@ -89,6 +99,28 @@ export function extractHeaderCommand(
     sourceFiles: [],
   };
   if (compileCommand?.groups) {
+    const argv = [
+      compileCommand.groups.command,
+      ...split(compileCommand.groups.arguments),
+    ];
+    try {
+      const isCustomCommand = argv[0] !== 'pip-compile';
+      const parsedCommand = dummyPipCompile.parse(argv);
+      const options = parsedCommand.opts();
+      const args = parsedCommand.args;
+      logger.debug(
+        { argv, options, srcFiles: args, isCustomCommand },
+        'Parsed pip-compile command from header',
+      );
+    } catch (error) {
+      logger.error(
+        error,
+        'Failed to parse pip-compile command from header with commander',
+      );
+    }
+  }
+
+  if (compileCommand?.groups) {
     const command = compileCommand.groups.command;
     _fullCommand.push(command);
     logger.debug(`Found pip-compile header: ${compileCommand[0]}`);
@@ -96,6 +128,7 @@ export function extractHeaderCommand(
       if (argument.startsWith('--output-file=') || argument.startsWith('-o=')) {
         const value = argument.split('=')[1];
         if (value) {
+          // TODO(not7cd): This file path can be relative like `reqs/main.txt`
           const file = upath.parse(outputFileName).base;
           if (value !== file) {
             // we don't trust the user-supplied output-file argument; TODO(not7cd): use our value here
