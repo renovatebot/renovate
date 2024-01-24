@@ -12,33 +12,51 @@ export interface VersioningApi {
   // validation
 
   /**
-   * Check whether the `version` is compatible with the `current` value
-   * constraint.
-   */
-  isCompatible(version: string, current?: string): boolean;
-
-  /**
-   * Check whether the `version` constraint is not a range, i.e. it only allows a
-   * single specific version.
-   */
-  isSingleVersion(version: string): boolean;
-
-  /**
-   * Check whether the `version` is considered to be "stable".
+   * Check whether the `input` is the valid version or range.
    *
-   * Example: in SemVer the version must not have a pre-release marker.
-   */
-  isStable(version: string): boolean;
-
-  /**
-   * Check whether the `input` is a valid version or a valid version range constraint.
+   * For some managers, ranges are called "constraints","specifiers", "requirements", etc.
+   * We stick to the term "range" for all of it.
    */
   isValid(input: string): boolean;
 
   /**
-   * Check whether the `input` is a valid version string.
+   * Check whether the `input` is a valid version.
+   *
+   * There is no direct way to determine whether the `input` is the range,
+   * but combination of `isVersion` and `isValid` can be used for that:
+   *
+   *    `isValid(input) && !isVersion(input)`
    */
   isVersion(input: string | undefined | null): boolean;
+
+  /**
+   * Check whether the `input` is the:
+   *
+   *   1. Version, or
+   *   2. Range with the special syntax of matching exactly one version:
+   *      - `==1.2.3` or `===1.2.3` for Python,
+   *      - `=1.2.3` for NPM,
+   *      - `[1.2.3]` for Maven or NuGet.
+   *
+   * This is used to provide pinning functionality.
+   */
+  isSingleVersion(input: string): boolean;
+
+  /**
+   * Check whether the `version` is considered to be "stable".
+   */
+  isStable(version: string): boolean;
+
+  /**
+   * Determines whether the version is compatible with the current one,
+   * in some manager-dependent way.
+   *
+   * For most managers, all valid versions are compatible between each other.
+   *
+   * However, for example, Docker versions `1.2.3` and `1.2.4-alpine` are not compatible,
+   * i.e. `1.2.4-alpine` is not a valid upgrade for `1.2.3`.
+   */
+  isCompatible(version: string, current?: string): boolean;
 
   // digestion of version
 

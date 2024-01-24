@@ -113,9 +113,11 @@ export interface GlobalOnlyConfig {
   privateKeyPath?: string;
   privateKeyPathOld?: string;
   redisUrl?: string;
+  redisPrefix?: string;
   repositories?: RenovateRepository[];
   platform?: PlatformId;
   endpoint?: string;
+  useCloudMetadataServices?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -125,6 +127,7 @@ export interface RepoGlobalConfig {
   allowPlugins?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
+  allowedHeaders?: string[];
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;
@@ -190,6 +193,14 @@ export type RenovateRepository =
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 
+export const allowedStatusCheckStrings = [
+  'minimumReleaseAge',
+  'mergeConfidence',
+  'configValidation',
+  'artifactError',
+] as const;
+export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
+
 // TODO: Proper typings
 export interface RenovateConfig
   extends LegacyAdminConfig,
@@ -200,6 +211,7 @@ export interface RenovateConfig
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
+  commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
   defaultBranch?: string;
@@ -261,6 +273,8 @@ export interface RenovateConfig
 
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
+
+  statusCheckNames?: Record<StatusCheckKey, string | null>;
 }
 
 const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
@@ -354,6 +368,12 @@ export interface ValidationMessage {
   message: string;
 }
 
+export type AllowedParents =
+  | 'customManagers'
+  | 'customDatasources'
+  | 'hostRules'
+  | 'postUpgradeTasks'
+  | 'packageRules';
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
@@ -382,12 +402,7 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?:
-    | 'customDatasources'
-    | 'hostRules'
-    | 'packageRules'
-    | 'postUpgradeTasks'
-    | 'customManagers';
+  parents?: AllowedParents[];
 
   stage?: RenovateConfigStage;
 

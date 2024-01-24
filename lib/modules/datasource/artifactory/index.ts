@@ -69,7 +69,7 @@ export class ArtifactoryDatasource extends Datasource {
                 : node.innerHTML;
 
             const published = ArtifactoryDatasource.parseReleaseTimestamp(
-              node.nextSibling?.text,
+              node.nextSibling!.text, // TODO: can be null (#22198)
             );
 
             const thisRelease: Release = {

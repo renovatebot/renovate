@@ -17,6 +17,7 @@ import {
   extractLocks,
   findLockFile,
   isPinnedVersion,
+  massageNewValue,
   readLockFile,
   writeLockUpdates,
 } from './util';
@@ -70,8 +71,15 @@ export function getNewConstraint(
   dep: Upgrade<Record<string, unknown>>,
   oldConstraint: string | undefined,
 ): string | undefined {
-  const { currentValue, currentVersion, newValue, newVersion, packageName } =
-    dep;
+  const {
+    currentValue,
+    currentVersion,
+    newValue: rawNewValue,
+    newVersion,
+    packageName,
+  } = dep;
+
+  const newValue = massageNewValue(rawNewValue);
 
   if (oldConstraint && currentValue && newValue && currentValue === newValue) {
     logger.debug(

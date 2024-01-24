@@ -57,7 +57,8 @@ function extractYaml(
   const deps: PackageDependency[] = [];
 
   try {
-    const doc = parseSingleYaml(content, { json: true }) as JenkinsPlugins;
+    // TODO: use schema (#9610)
+    const doc = parseSingleYaml<JenkinsPlugins>(content, { json: true });
     if (is.nonEmptyArray(doc?.plugins)) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {

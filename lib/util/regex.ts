@@ -49,9 +49,11 @@ export function regEx(
     }
     return instance;
   } catch (err) {
+    logger.trace({ err }, 'RegEx constructor error');
     const error = new Error(CONFIG_VALIDATION);
+    error.validationMessage = err.message;
     error.validationSource = pattern.toString();
-    error.validationError = `Invalid regular expression: ${pattern.toString()}`;
+    error.validationError = `Invalid regular expression (re2): ${pattern.toString()}`;
     throw error;
   }
 }
@@ -63,7 +65,7 @@ export function escapeRegExp(input: string): string {
 export const newlineRegex = regEx(/\r?\n/);
 
 const configValStart = regEx(/^!?\//);
-const configValEnd = regEx(/\/$/);
+const configValEnd = regEx(/\/i?$/);
 
 export function isConfigRegex(input: unknown): input is string {
   return (
@@ -76,7 +78,7 @@ function parseConfigRegex(input: string): RegExp | null {
     const regexString = input
       .replace(configValStart, '')
       .replace(configValEnd, '');
-    return regEx(regexString);
+    return input.endsWith('i') ? regEx(regexString, 'i') : regEx(regexString);
   } catch (err) {
     // no-op
   }

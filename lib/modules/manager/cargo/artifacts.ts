@@ -59,6 +59,7 @@ async function cargoUpdatePrecise(
   }
 
   const execOptions: ExecOptions = {
+    extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
     docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
