@@ -841,6 +841,10 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboardIssue = 1;
       mockedFunction(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
+        body: '',
+      });
+      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 
         ## Pending Approval
@@ -861,6 +865,31 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+    });
+
+    it('skips fetching issue if content unchanged', async () => {
+      const branches: BranchConfig[] = [];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardChecks = {};
+      config.dependencyDashboardIssue = 1;
+      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
+        body: `This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+None detected
+
+`,
+      });
+      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
+        body: '',
+      });
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      expect(platform.ensureIssue).not.toHaveBeenCalled();
     });
 
     it('forwards configured labels to the ensure issue call', async () => {

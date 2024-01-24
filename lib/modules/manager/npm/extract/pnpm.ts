@@ -23,10 +23,13 @@ export async function extractPnpmFilters(
   fileName: string,
 ): Promise<string[] | undefined> {
   try {
-    // TODO #22198
-    const contents = parseSingleYaml((await readLocalFile(fileName, 'utf8'))!, {
-      json: true,
-    }) as PnpmWorkspaceFile;
+    // TODO: use schema (#9610,#22198)
+    const contents = parseSingleYaml<PnpmWorkspaceFile>(
+      (await readLocalFile(fileName, 'utf8'))!,
+      {
+        json: true,
+      },
+    );
     if (
       !Array.isArray(contents.packages) ||
       !contents.packages.every((item) => is.string(item))

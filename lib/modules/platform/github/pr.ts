@@ -67,6 +67,7 @@ export async function getPrCache(
       if (pageIdx === 1 && isInitial) {
         // Speed up initial fetch
         opts.paginate = true;
+        opts.repoCache = true;
       }
 
       const perPage = isInitial ? 100 : 20;

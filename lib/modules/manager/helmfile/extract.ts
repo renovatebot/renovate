@@ -35,10 +35,11 @@ export async function extractPackageFile(
   // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
   let needKustomize = false;
   try {
+    // TODO: use schema (#9610)
     docs = parseYaml(content, null, {
       removeTemplates: true,
       json: true,
-    }) as Doc[];
+    });
   } catch (err) {
     logger.debug(
       { err, packageFile },

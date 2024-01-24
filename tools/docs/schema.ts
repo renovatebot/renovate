@@ -75,7 +75,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
 
 function createSchemaForParentConfigs(): void {
   for (const option of options) {
-    if (!option.parent) {
+    if (!option.parents) {
       properties[option.name] = createSingleConfig(option);
     }
   }
@@ -83,30 +83,34 @@ function createSchemaForParentConfigs(): void {
 
 function addChildrenArrayInParents(): void {
   for (const option of options) {
-    if (option.parent) {
-      properties[option.parent].items = {
-        allOf: [
-          {
-            type: 'object',
-            properties: {
-              description: {
-                type: 'string',
-                description:
-                  'A custom description for this configuration object',
+    if (option.parents) {
+      for (const parent of option.parents) {
+        properties[parent].items = {
+          allOf: [
+            {
+              type: 'object',
+              properties: {
+                description: {
+                  type: 'string',
+                  description:
+                    'A custom description for this configuration object',
+                },
               },
             },
-          },
-        ],
-      };
+          ],
+        };
+      }
     }
   }
 }
 
 function createSchemaForChildConfigs(): void {
   for (const option of options) {
-    if (option.parent) {
-      properties[option.parent].items.allOf[0].properties[option.name] =
-        createSingleConfig(option);
+    if (option.parents) {
+      for (const parent of option.parents) {
+        properties[parent].items.allOf[0].properties[option.name] =
+          createSingleConfig(option);
+      }
     }
   }
 }

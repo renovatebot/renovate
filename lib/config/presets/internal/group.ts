@@ -32,6 +32,17 @@ const staticGroups = {
       },
     ],
   },
+  allDigest: {
+    description: 'Group all `digest` updates together.',
+    packageRules: [
+      {
+        groupName: 'all digest updates',
+        groupSlug: 'all-digest',
+        matchPackagePatterns: ['*'],
+        matchUpdateTypes: ['digest'],
+      },
+    ],
+  },
   allNonMajor: {
     description: 'Group all `minor` and `patch` updates together.',
     packageRules: [
@@ -318,7 +329,7 @@ const staticGroups = {
       {
         groupName: 'PHPStan packages',
         matchDatasources: ['packagist'],
-        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-'],
+        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-', '/larastan'],
       },
     ],
   },
