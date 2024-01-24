@@ -84,6 +84,7 @@ kubectl 1.26.3
 kustomize 4.5.7
 lua 5.4.4
 maven 3.9.6
+mimirtool 2.11.0
 nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
@@ -385,6 +386,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'apache/maven',
             depName: 'maven',
+          },
+          {
+            currentValue: '2.11.0',
+            datasource: 'github-releases',
+            packageName: 'grafana/mimir',
+            depName: 'mimirtool',
+            extractVersion: '^mimir-(?<version>\\S+)',
           },
           {
             currentValue: '1.6.8',
