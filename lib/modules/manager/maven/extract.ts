@@ -367,9 +367,11 @@ export function parseSettings(raw: string): XmlDocument | null {
     return null;
   }
   if (
-    attr.xmlns === 'http://maven.apache.org/SETTINGS/1.0.0' ||
-    attr.xmlns === 'http://maven.apache.org/SETTINGS/1.1.0' ||
-    attr.xmlns === 'http://maven.apache.org/SETTINGS/1.2.0'
+    [
+      'http://maven.apache.org/SETTINGS/1.0.0',
+      'http://maven.apache.org/SETTINGS/1.1.0',
+      'http://maven.apache.org/SETTINGS/1.2.0'
+     ].includes(attr.xmlns)
   ) {
     return settings;
   }
