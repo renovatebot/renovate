@@ -490,7 +490,7 @@ const platform: Platform = {
     logger.debug(`Creating pull request: ${title} (${head} => ${base})`);
     try {
       const labels = Array.isArray(labelNames)
-        ? await Promise.all(labelNames.map(lookupLabelByName))
+        ? await map(labelNames, lookupLabelByName)
         : [];
       const gpr = await helper.createPR(config.repository, {
         base,
