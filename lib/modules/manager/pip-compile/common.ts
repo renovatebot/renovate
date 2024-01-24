@@ -59,7 +59,7 @@ export async function getExecOptions(
 } // TODO(not7cd): rename to getPipToolsVersionConstraint, as constraints have their meaning in pipexport function extractHeaderCommand(content: string): string {
 
 export const constraintLineRegex = regEx(
-  /^(#.*?\r?\n)+# {4}(?<command>\S*)(?<arguments> .*?)\r?\n/,
+  /^(#.*?\r?\n)+# {4}(?<command>\S*)(?<arguments> .*?)?\r?\n/,
 );
 export const allowedPipArguments = [
   '--allow-unsafe',
@@ -92,6 +92,12 @@ export function extractHeaderCommand(
   outputFileName: string,
 ): PipCompileArgs {
   const compileCommand = constraintLineRegex.exec(content);
+  if (compileCommand?.groups) {
+    logger.debug(`Found pip-compile header: ${compileCommand[0]}`);
+  } else {
+    logger.error('Failed to extract command from header');
+    // TODO(not7cd): throw
+  }
   const _fullCommand = [];
   const pipCompileArgs: PipCompileArgs = {
     fullCommand: '',
@@ -99,10 +105,11 @@ export function extractHeaderCommand(
     sourceFiles: [],
   };
   if (compileCommand?.groups) {
-    const argv = [
-      compileCommand.groups.command,
-      ...split(compileCommand.groups.arguments),
-    ];
+    const argv = [compileCommand.groups.command];
+    // all arguments are optional, TODO(not7cd): decide if require explicit args
+    if (compileCommand.groups.arguments) {
+      argv.push(...split(compileCommand.groups.arguments));
+    }
     try {
       const isCustomCommand = argv[0] !== 'pip-compile';
       const parsedCommand = dummyPipCompile.parse(argv);
@@ -112,6 +119,12 @@ export function extractHeaderCommand(
         { argv, options, srcFiles: args, isCustomCommand },
         'Parsed pip-compile command from header',
       );
+      if (args.length === 0) {
+        logger.debug('Assuming impicit source file of requirements.in');
+        pipCompileArgs.sourceFiles.push('requirements.in'); // implicit
+      } else {
+        pipCompileArgs.sourceFiles.push(...args);
+      }
     } catch (error) {
       logger.error(
         error,
@@ -120,10 +133,10 @@ export function extractHeaderCommand(
     }
   }
 
-  if (compileCommand?.groups) {
+  // TODO(not7cd)
+  if (false && compileCommand?.groups) {
     const command = compileCommand.groups.command;
     _fullCommand.push(command);
-    logger.debug(`Found pip-compile header: ${compileCommand[0]}`);
     for (const argument of split(compileCommand.groups.arguments)) {
       if (argument.startsWith('--output-file=') || argument.startsWith('-o=')) {
         const value = argument.split('=')[1];
