@@ -588,8 +588,7 @@ const platform: Platform = {
     targetBranch,
   }: UpdatePrConfig): Promise<void> {
     let title = prTitle;
-    const pr = (await getPrList()).find((pr) => pr.number === number);
-    if (pr?.isDraft) {
+    if ((await getPrList()).find((pr) => pr.number === number)?.isDraft) {
       title = DRAFT_PREFIX + title;
     }
 
@@ -602,7 +601,28 @@ const platform: Platform = {
       prUpdateParams.base = targetBranch;
     }
 
-    await helper.updatePR(config.repository, number, prUpdateParams);
+    /**
+     * Update PR labels.
+     * In the Gitea API, labels are replaced on each update if the field is present.
+     * If the field is not present (i.e., undefined), labels aren't updated.
+     * However, the labels array must contain label IDs instead of names,
+     * so a lookup is performed to fetch the details (including the ID) of each label.
+     */
+    if (Array.isArray(labels)) {
+      prUpdateParams.labels = (
+        await Promise.all(labels.map(lookupLabelByName))
+      ).filter(is.number);
+    }
+
+    const gpr = await helper.updatePR(
+      config.repository,
+      number,
+      prUpdateParams,
+    );
+    const pr = toRenovatePR(gpr, botUserName);
+    if (pr) {
+      await GiteaPrCache.addPr(giteaHttp, config.repository, botUserName, pr);
+    }
   },
 
   async mergePr({ id, strategy }: MergePRConfig): Promise<boolean> {

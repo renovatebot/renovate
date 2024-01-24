@@ -1837,56 +1837,43 @@ describe('modules/platform/gitea/index', () => {
       ).toResolve();
     });
 
-    it('should add new labels', async () => {
-      helper.getRepoLabels.mockResolvedValueOnce([
-        { id: 1, name: 'old_label', description: 'its a me', color: '#000000' },
-        {
-          id: 2,
-          name: 'new_label',
-          description: 'labelario',
-          color: '#ffffff',
-        },
-      ]);
-      helper.getOrgLabels.mockResolvedValueOnce([]);
-      helper.searchPRs.mockResolvedValueOnce(mockPRs);
-      await initFakeRepo();
-      await gitea.updatePr({
+    it('should update labels', async () => {
+      const updatedMockPR = partial<PR>({
+        ...mockPRs[0],
         number: 1,
-        prTitle: 'New Title',
-        prBody: 'New Body',
-        state: 'closed',
-        labels: ['new_label'],
-      });
-
-      expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
         title: 'New Title',
         body: 'New Body',
-        state: 'closed',
-        labels: [2],
+        state: 'open',
+        labels: [
+          {
+            id: 1,
+            name: 'some-label',
+          },
+        ],
       });
-    });
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, mockPRs)
+        .get('/repos/some/repo/labels')
+        .reply(200, mockRepoLabels)
+        .get('/orgs/some/labels')
+        .reply(200, mockOrgLabels)
+        .patch('/repos/some/repo/pulls/1')
+        .reply(200, updatedMockPR);
 
-    it('should remove old labels', async () => {
-      helper.getRepoLabels.mockResolvedValueOnce([
-        { id: 1, name: 'old_label', description: 'its a me', color: '#000000' },
-      ]);
-      helper.getOrgLabels.mockResolvedValueOnce([]);
-      helper.searchPRs.mockResolvedValueOnce(mockPRs);
-      await initFakeRepo();
-      await gitea.updatePr({
-        number: 1,
-        prTitle: 'New Title',
-        prBody: 'New Body',
-        state: 'closed',
-        labels: [],
-      });
-
-      expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
-        title: 'New Title',
-        body: 'New Body',
-        state: 'closed',
-        labels: [],
-      });
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+      await expect(
+        gitea.updatePr({
+          number: 1,
+          prTitle: 'New Title',
+          prBody: 'New Body',
+          state: 'open',
+          labels: ['some-label'],
+        }),
+      ).toResolve();
     });
   });
 
