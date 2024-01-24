@@ -2398,16 +2398,16 @@ Use the syntax `!/ /` like the following:
 
 ### matchCurrentAge
 
-Use this field if you want to match packages that satisfy the specified age range.
+Use this field if you want to match packages based on the age of the _current_ (existing, in-repo) version.
 
-For example, if you want to group packages which are older than 2 months:
+For example, if you want to group updates for dependencies where the existing version is more than 2 years old:
 
 ```json
 {
   "packageRules": [
     {
-      "matchCurrentAge": "> 2 months",
-      "groupName": "vital"
+      "matchCurrentAge": "> 2 years",
+      "groupName": "old dependencies"
     }
   ]
 }
