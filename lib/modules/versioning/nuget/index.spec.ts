@@ -45,6 +45,51 @@ describe('modules/versioning/nuget/index', () => {
       ${'3.0.0.beta'}              | ${false}
       ${'5.1.2-+'}                 | ${false}
       ${'1--'}                     | ${true}
+      ${'1.0.0+*'}                 | ${false}
+      ${'1.0.**'}                  | ${false}
+      ${'1.*.0'}                   | ${false}
+      ${'1.0.*-*bla'}              | ${false}
+      ${'1.0.*-*bla+*'}            | ${false}
+      ${'**'}                      | ${false}
+      ${'1.0.0-preview.*+blabla'}  | ${false}
+      ${'1.0.*--'}                 | ${false}
+      ${'1.0.*-alpha*+'}           | ${false}
+      ${'1.0.*-'}                  | ${false}
+      ${null}                      | ${false}
+      ${''}                        | ${false}
+      ${'1.0.0-preview.*'}         | ${true}
+      ${'1.0.*-bla*'}              | ${true}
+      ${'1.0.*-*'}                 | ${true}
+      ${'1.0.*-preview.1.*'}       | ${true}
+      ${'1.0.*-preview.1*'}        | ${true}
+      ${'1.0.0--'}                 | ${true}
+      ${'1.0.0-bla*'}              | ${true}
+      ${'1.0.*--*'}                | ${true}
+      ${'1.0.0--*'}                | ${true}
+      ${'1.0.0+*'}                 | ${false}
+      ${'1.0.**'}                  | ${false}
+      ${'1.*.0'}                   | ${false}
+      ${'1.0.*-*bla'}              | ${false}
+      ${'1.0.*-*bla+*'}            | ${false}
+      ${'**'}                      | ${false}
+      ${'1.0.0-preview.*+blabla'}  | ${false}
+      ${'1.0.*--'}                 | ${false}
+      ${'1.0.*-alpha*+'}           | ${false}
+      ${'1.0.*-'}                  | ${false}
+      ${'1.0.0-preview.*'}         | ${true}
+      ${'1.0.*-bla*'}              | ${true}
+      ${'1.0.*-*'}                 | ${true}
+      ${'1.0.*-preview.1.*'}       | ${true}
+      ${'1.0.*-preview.1*'}        | ${true}
+      ${'1.0.0--'}                 | ${true}
+      ${'1.0.0-bla*'}              | ${true}
+      ${'1.0.*--*'}                | ${true}
+      ${'1.0.0--*'}                | ${true}
+      ${'1.0.0.*-*'}               | ${true}
+      ${'1.0.*-*'}                 | ${true}
+      ${'1.*-*'}                   | ${true}
+      ${'*-rc.*'}                  | ${true}
+      ${'*-*'}                     | ${true}
     `('isValid("$input") === $expected', ({ input, expected }) => {
       expect(nuget.isValid(input)).toBe(expected);
       expect(nuget.isCompatible(input)).toBe(expected);
@@ -170,11 +215,20 @@ describe('modules/versioning/nuget/index', () => {
 
   describe('getSatisfyingVersion()', () => {
     it.each`
-      versions                              | range       | expected
-      ${[]}                                 | ${'[1,2)'}  | ${null}
-      ${['foobar']}                         | ${'[1,2)'}  | ${null}
-      ${['1', '2', '3']}                    | ${'foobar'} | ${null}
-      ${['0.1', '1', '1.1', '2-beta', '2']} | ${'[1,2)'}  | ${'2-beta'}
+      versions                                                                    | range               | expected
+      ${[]}                                                                       | ${'[1,2)'}          | ${null}
+      ${['foobar']}                                                               | ${'[1,2)'}          | ${null}
+      ${['1', '2', '3']}                                                          | ${'foobar'}         | ${null}
+      ${['0.1', '1', '1.1', '2-beta', '2']}                                       | ${'[1,2)'}          | ${'2-beta'}
+      ${['0.1.0', '1.0.0-alpha.2', '2.0.0', '2.2.0', '3.0.0']}                    | ${'[1.0.*, 2.0.0)'} | ${null}
+      ${['0.1.0', '0.2.0', '1.0.0-alpha.2']}                                      | ${'[1.0.*, 2.0.0)'} | ${null}
+      ${['2.0.0', '2.0.0-alpha.2', '3.1.0']}                                      | ${'[1.0.*, 2.0.0)'} | ${null}
+      ${['0.1.0', '0.2.0', '1.0.0-alpha.2']}                                      | ${'[1.0.*, )'}      | ${null}
+      ${['0.1.0', '0.2.0', '1.0.0-alpha.2', '101.0.0']}                           | ${'[1.0.*, )'}      | ${'101.0.0'}
+      ${['1.0.0', '1.0.1', '2.0.0']}                                              | ${'1.0.0'}          | ${'1.0.0'}
+      ${['0.1.0', '1.0.0', '1.2.0', '2.0.0']}                                     | ${'1.*'}            | ${'1.2.0'}
+      ${['0.1.0', '2.0.0', '2.5.0', '3.3.0']}                                     | ${'*'}              | ${'3.3.0'}
+      ${['0.1.0-alpha', '1.0.0-alpha01', '1.0.0-alpha02', '2.0.0-beta', '2.0.1']} | ${'1.0.0-alpha*'}   | ${'1.0.0-alpha02'}
     `(
       'getSatisfyingVersion($versions, $range) === $expected',
       ({ versions, range, expected }) => {
@@ -355,6 +409,11 @@ describe('modules/versioning/nuget/index', () => {
       ${'1.2.3.4-beta'} | ${'1.2.3.*'}   | ${false}
       ${'1.2.3.4'}      | ${'1.2.3.*-*'} | ${true}
       ${'1.2.3.4-beta'} | ${'1.2.3.*-*'} | ${true}
+      ${'1.0.0-alpha'}  | ${'1.0.0-*'}   | ${true}
+      ${'1.0.0-beta'}   | ${'1.0.0-*'}   | ${true}
+      ${'1.0.0'}        | ${'1.0.0-*'}   | ${true}
+      ${'1.0.1-alpha'}  | ${'1.0.0-*'}   | ${false}
+      ${'1.0.1'}        | ${'1.0.0-*'}   | ${false}
     `(
       'matches("$version", "$range") === $expected',
       ({ version, range, expected }) => {
