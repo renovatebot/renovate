@@ -1,100 +1,24 @@
-import is from '@sindresorhus/is';
-import { quote, split } from 'shlex';
-import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
-  ensureCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
-import type {
-  UpdateArtifact,
-  UpdateArtifactsConfig,
-  UpdateArtifactsResult,
-} from '../types';
-
-function getPythonConstraint(
-  config: UpdateArtifactsConfig,
-): string | undefined | null {
-  const { constraints = {} } = config;
-  const { python } = constraints;
-
-  if (python) {
-    logger.debug('Using python constraint from config');
-    return python;
-  }
-
-  return undefined;
-}
-
-function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
-  const { constraints = {} } = config;
-  const { pipTools } = constraints;
-
-  if (is.string(pipTools)) {
-    logger.debug('Using pipTools constraint from config');
-    return pipTools;
-  }
-
-  return '';
-}
-
-const constraintLineRegex = regEx(
-  /^(#.*?\r?\n)+# {4}pip-compile(?<arguments>.*?)\r?\n/,
-);
-const allowedPipArguments = [
-  '--allow-unsafe',
-  '--generate-hashes',
-  '--no-emit-index-url',
-  '--strip-extras',
-];
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { extractHeaderCommand, getExecOptions } from './common';
 
 export function constructPipCompileCmd(
   content: string,
-  inputFileName: string,
   outputFileName: string,
 ): string {
-  const headers = constraintLineRegex.exec(content);
-  const args = ['pip-compile'];
-  if (headers?.groups) {
-    logger.debug(`Found pip-compile header: ${headers[0]}`);
-    for (const argument of split(headers.groups.arguments)) {
-      if (allowedPipArguments.includes(argument)) {
-        args.push(argument);
-      } else if (argument.startsWith('--output-file=')) {
-        const file = upath.parse(outputFileName).base;
-        if (argument !== `--output-file=${file}`) {
-          // we don't trust the user-supplied output-file argument; use our value here
-          logger.warn(
-            { argument },
-            'pip-compile was previously executed with an unexpected `--output-file` filename',
-          );
-        }
-        args.push(`--output-file=${file}`);
-      } else if (argument.startsWith('--resolver=')) {
-        const value = extractResolver(argument);
-        if (value) {
-          args.push(`--resolver=${value}`);
-        }
-      } else if (argument.startsWith('--')) {
-        logger.trace(
-          { argument },
-          'pip-compile argument is not (yet) supported',
-        );
-      } else {
-        // ignore position argument (.in file)
-      }
-    }
-  }
-  args.push(upath.parse(inputFileName).base);
-
-  return args.map((argument) => quote(argument)).join(' ');
+  const pipCompileArgs = extractHeaderCommand(content, outputFileName);
+  // TODO(not7cd): sanitize args that require quotes, .map((argument) => quote(argument))
+  return pipCompileArgs.argv.join(' ');
 }
 
 export async function updateArtifacts({
@@ -113,33 +37,15 @@ export async function updateArtifacts({
   }
   try {
     await writeLocalFile(inputFileName, newInputContent);
+    // TODO(not7cd): check --rebuild and --upgrade option
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(outputFileName);
     }
-    const cmd = constructPipCompileCmd(
-      existingOutput,
+    const cmd = constructPipCompileCmd(existingOutput, outputFileName);
+    const execOptions: ExecOptions = await getExecOptions(
+      config,
       inputFileName,
-      outputFileName,
     );
-    const constraint = getPythonConstraint(config);
-    const pipToolsConstraint = getPipToolsConstraint(config);
-    const execOptions: ExecOptions = {
-      cwdFile: inputFileName,
-      docker: {},
-      toolConstraints: [
-        {
-          toolName: 'python',
-          constraint,
-        },
-        {
-          toolName: 'pip-tools',
-          constraint: pipToolsConstraint,
-        },
-      ],
-      extraEnv: {
-        PIP_CACHE_DIR: await ensureCacheDir('pip'),
-      },
-    };
     logger.trace({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);
     const status = await getRepoStatus();
@@ -173,6 +79,7 @@ export async function updateArtifacts({
   }
 }
 
+// TODO(not7cd): remove, legacy resolver is deprecated and will be removed
 export function extractResolver(argument: string): string | null {
   const value = argument.replace('--resolver=', '');
   if (['backtracking', 'legacy'].includes(value)) {

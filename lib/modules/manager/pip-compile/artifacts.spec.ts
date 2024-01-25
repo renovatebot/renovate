@@ -277,7 +277,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
       expect(
         constructPipCompileCmd(
           Fixtures.get('requirementsNoHeaders.txt'),
-          'subdir/requirements.in',
           'subdir/requirements.txt',
         ),
       ).toBe('pip-compile requirements.in');
@@ -287,7 +286,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
       expect(
         constructPipCompileCmd(
           Fixtures.get('requirementsWithHashes.txt'),
-          'subdir/requirements.in',
           'subdir/requirements.txt',
         ),
       ).toBe(
@@ -299,7 +297,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
       expect(
         constructPipCompileCmd(
           Fixtures.get('requirementsWithUnknownArguments.txt'),
-          'subdir/requirements.in',
           'subdir/requirements.txt',
         ),
       ).toBe('pip-compile --generate-hashes requirements.in');
@@ -317,7 +314,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
       expect(
         constructPipCompileCmd(
           Fixtures.get('requirementsWithExploitingArguments.txt'),
-          'subdir/requirements.in',
           'subdir/requirements.txt',
         ),
       ).toBe(
