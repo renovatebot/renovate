@@ -101,13 +101,13 @@ function addPipelineAsCodeAnnotations(
   let countPipelines = 0;
 
   for (const [key, value] of Object.entries(annotations)) {
-    let match = annotationRegex.exec(key);
+    const groups = annotationRegex.exec(key)?.groups;
 
-    if (!match) {
+    if (!groups) {
       continue;
     }
 
-    if (match?.groups?.type == 'pipeline') {
+    if (groups.type === 'pipeline') {
       countPipelines++;
       if (countPipelines > 1) {
         continue;
