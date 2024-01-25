@@ -149,6 +149,7 @@ export async function validateConfig(
 
     if (isGlobalConfig) {
       validateGlobalConfig(key, val, optionTypes[key], warnings, currentPath);
+      continue;
     } else {
       if (!globalOptions) {
         globalOptions = new Set();

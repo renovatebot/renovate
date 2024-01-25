@@ -29,25 +29,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
-    it('catches global options in repo config', async () => {
-      const config = {
-        binarySource: 'something',
-        username: 'user',
-      };
-      const { warnings } = await configValidation.validateConfig(false, config);
-      expect(warnings).toHaveLength(2);
-      expect(warnings).toMatchObject([
-        {
-          message: `The "binarySource" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
-        },
-        {
-          message: `The "username" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
-        },
-      ]);
-    });
-
-    // false globals are the options which have names same to the another globalOnly option
-    it('does warn for false globals in repo config', async () => {
+    it('does not warn for false globals in repo config', async () => {
       const config = {
         hostRules: [
           {
@@ -427,7 +409,7 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         false,
         config,
-        false,
+        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
@@ -968,42 +950,6 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
     });
 
-    it('validates valid customEnvVariables objects', async () => {
-      const config = {
-        customEnvVariables: {
-          example1: 'abc',
-          example2: 'https://www.example2.com/example',
-        },
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        true,
-        config,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
-    });
-
-    it('errors on invalid customEnvVariables objects', async () => {
-      const config = {
-        customEnvVariables: {
-          example1: 'abc',
-          example2: 123,
-        },
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        true,
-        config,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
-        {
-          message:
-            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value is not a string',
-          topic: 'Configuration Error',
-        },
-      ]);
-    });
-
     it('errors if schedule is cron and has no * minutes', async () => {
       const config = {
         schedule: ['30 5 * * *'],
@@ -1073,6 +1019,40 @@ describe('config/validation', () => {
           message:
             'Invalid hostRules headers value configuration: header must be a string.',
           topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('catches global options in repo config', async () => {
+      const config = {
+        binarySource: 'something',
+        username: 'user',
+      };
+      const { warnings } = await configValidation.validateConfig(false, config);
+      expect(warnings).toHaveLength(2);
+      expect(warnings).toMatchObject([
+        {
+          message: `The "binarySource" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+        },
+        {
+          message: `The "username" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+        },
+      ]);
+    });
+
+    // adding this test explicitly because we used to validate the customEnvVariables inside repo config previously
+    it('warns if customEnvVariables are found in repo config', async () => {
+      const config = {
+        customEnvVariables: {
+          example1: 'abc',
+          example2: 123,
+        },
+      };
+      const { warnings } = await configValidation.validateConfig(false, config);
+      expect(warnings).toMatchObject([
+        {
+          topic: 'Configuration Error',
+          message: `The "customEnvVariables" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
         },
       ]);
     });
@@ -1164,6 +1144,38 @@ describe('config/validation', () => {
             'Invalid `cacheTtlOverride.cacheTtlOverride.someField` configuration: value is not a string',
         },
       ]);
+    });
+
+    it('warns on invalid customEnvVariables objects', async () => {
+      const config = {
+        customEnvVariables: {
+          example1: 'abc',
+          example2: 123,
+        },
+      };
+      const { warnings } = await configValidation.validateConfig(true, config);
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value is not a string',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('validates valid customEnvVariables objects', async () => {
+      const config = {
+        customEnvVariables: {
+          example1: 'abc',
+          example2: 'https://www.example2.com/example',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        true,
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
     });
   });
 });
