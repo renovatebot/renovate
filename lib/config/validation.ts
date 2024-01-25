@@ -151,7 +151,7 @@ export async function validateConfig(
       validateGlobalConfig(key, val, optionTypes[key], warnings, currentPath);
     } else {
       if (!globalOptions) {
-        globalOptions = new Set<string>();
+        globalOptions = new Set();
         for (const option of options) {
           if (option.globalOnly) {
             globalOptions.add(option.name);
