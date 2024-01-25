@@ -26,6 +26,7 @@ export async function updateArtifacts({
   newPackageFileContent: newInputContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+  // TODO(not7cd): must be extracted again or passed from PackageFileContent.lockFiles
   const outputFileName = inputFileName.replace(regEx(/(\.in)?$/), '.txt');
   logger.debug(
     `pipCompile.updateArtifacts(${inputFileName}->${outputFileName})`,
