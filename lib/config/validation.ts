@@ -146,8 +146,10 @@ export async function validateConfig(
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
     }
-        
-    if (!isGlobalConfig) {
+
+    if (isGlobalConfig) {
+      validateGlobalConfig(key, val, optionTypes[key], warnings, currentPath);
+    } else {
       if (!optionGlobals) {
         optionGlobals = new Set<string>();
         for (const option of options) {
@@ -164,8 +166,6 @@ export async function validateConfig(
         });
         continue;
       }
-    } else {
-      validateGlobalConfig(key, val, optionTypes[key], warnings, currentPath);
     }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
@@ -305,7 +305,6 @@ export async function validateConfig(
                 const subValidation = await validateConfig(
                   isGlobalConfig,
                   subval as RenovateConfig,
-                  isGlobalConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`,
                 );
@@ -666,22 +665,6 @@ export async function validateConfig(
                   }
                 }
               }
-            } else if (
-              [
-                'customEnvVariables',
-                'migratePresets',
-                'productLinks',
-                'secrets',
-                'customizeDashboard',
-              ].includes(key)
-            ) {
-              const res = validatePlainObject(val);
-              if (res !== true) {
-                errors.push({
-                  topic: 'Configuration Error',
-                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
-                });
-              }
             } else {
               const ignoredObjects = options
                 .filter((option) => option.freeChoice)
@@ -690,7 +673,6 @@ export async function validateConfig(
                 const subValidation = await validateConfig(
                   isGlobalConfig,
                   val,
-                  isGlobalConfig,
                   isPreset,
                   currentPath,
                 );
@@ -846,7 +828,8 @@ function validateGlobalConfig(
       });
     }
   }
-    
+}
+
 /**  An option is a false global if it has the same name as a global only option
  *   but is actually just the field of a non global option or field an children of the non global option
  *   eg. token: it's global option used as the bot's token as well and

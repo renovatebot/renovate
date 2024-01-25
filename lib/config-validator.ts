@@ -21,8 +21,7 @@ async function validate(
   desc: string,
   config: RenovateConfig,
   strict: boolean,
-  isGlobalConfig: boolean,
-  isPreset: boolean,
+  isPreset = false,
 ): Promise<void> {
   const { isMigrated, migratedConfig } = migrateConfig(config);
   if (isMigrated) {
@@ -77,7 +76,7 @@ type PackageJson = {
         const parsedContent = await getParsedContent(file);
         try {
           logger.info(`Validating ${file}`);
-          await validate(true, file, parsedContent, strict); // allow global options when validating files from command line
+          await validate(true, file, parsedContent, strict);
         } catch (err) {
           logger.warn({ file, err }, 'File is not valid Renovate config');
           returnVal = 1;
@@ -129,8 +128,6 @@ type PackageJson = {
             'package.json > renovate-config',
             presetConfig,
             strict,
-            false,
-            true,
           );
         }
       }

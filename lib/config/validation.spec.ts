@@ -428,7 +428,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
@@ -469,7 +468,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -489,7 +487,6 @@ describe('config/validation', () => {
         false,
         config as any,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -518,7 +515,6 @@ describe('config/validation', () => {
         false,
         config as any,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -548,7 +544,6 @@ describe('config/validation', () => {
         false,
         config as any,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -586,7 +581,6 @@ describe('config/validation', () => {
         false,
         config as RenovateConfig,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
@@ -618,7 +612,6 @@ describe('config/validation', () => {
         false,
         config as any,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -641,7 +634,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -663,7 +655,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(4);
@@ -688,7 +679,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
@@ -712,7 +702,6 @@ describe('config/validation', () => {
         false,
         config as any,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -734,7 +723,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toMatchSnapshot();
@@ -749,7 +737,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
@@ -763,7 +750,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
@@ -777,7 +763,6 @@ describe('config/validation', () => {
         false,
         config as never, // TODO: #15963
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
@@ -791,7 +776,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
@@ -925,7 +909,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -941,7 +924,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(1);
       expect(warnings).toMatchSnapshot();
@@ -961,7 +943,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
@@ -982,7 +963,6 @@ describe('config/validation', () => {
         false,
         config,
         false,
-        true,
       );
       expect(errors).toHaveLength(0);
       expect(warnings).toHaveLength(1);
@@ -1104,7 +1084,7 @@ describe('config/validation', () => {
         binarySource: 'docker',
         gitUrl: false as never,
       };
-      const { warnings } = await configValidation.validateConfig(config, true);
+      const { warnings } = await configValidation.validateConfig(true, config);
       expect(warnings).toMatchObject([
         {
           message: 'Configuration option `gitUrl` should be a string',
@@ -1118,7 +1098,7 @@ describe('config/validation', () => {
         unicodeEmoji: false,
         detectGlobalManagerConfig: 'invalid-type' as never,
       };
-      const { warnings } = await configValidation.validateConfig(config, true);
+      const { warnings } = await configValidation.validateConfig(true, config);
       expect(warnings).toMatchObject([
         {
           message: `Configuration option \`detectGlobalManagerConfig\` should be a boolean. Found: ${JSON.stringify(
@@ -1134,7 +1114,7 @@ describe('config/validation', () => {
         prCommitsPerRunLimit: 2,
         gitTimeout: 'invalid-type' as never,
       };
-      const { warnings } = await configValidation.validateConfig(config, true);
+      const { warnings } = await configValidation.validateConfig(true, config);
       expect(warnings).toMatchObject([
         {
           message: `Configuration option \`gitTimeout\` should be an integer. Found: ${JSON.stringify(
@@ -1150,7 +1130,7 @@ describe('config/validation', () => {
         allowedPostUpgradeCommands: ['cmd'],
         checkedBranches: 'invalid-type' as never,
       };
-      const { warnings } = await configValidation.validateConfig(config, true);
+      const { warnings } = await configValidation.validateConfig(true, config);
       expect(warnings).toMatchObject([
         {
           message:
@@ -1172,7 +1152,7 @@ describe('config/validation', () => {
           someField: false as never,
         },
       };
-      const { warnings } = await configValidation.validateConfig(config, true);
+      const { warnings } = await configValidation.validateConfig(true, config);
       expect(warnings).toMatchObject([
         {
           message: 'Configuration option `secrets` should be a JSON object',
