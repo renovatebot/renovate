@@ -369,6 +369,7 @@ export async function validateConfig(
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
+              'matchCurrentAge',
               'matchRepositories',
             ];
             if (key === 'packageRules') {
