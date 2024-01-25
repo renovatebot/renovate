@@ -772,7 +772,9 @@ function validateRegexManagerFields(
   }
 }
 
-// basic validation for global config options
+/**
+ * Basic validation for global config options
+ */
 function validateGlobalConfig(
   key: string,
   val: unknown,
