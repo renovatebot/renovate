@@ -128,6 +128,7 @@ type PackageJson = {
             'package.json > renovate-config',
             presetConfig,
             strict,
+            true,
           );
         }
       }
