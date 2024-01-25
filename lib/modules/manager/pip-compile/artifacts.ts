@@ -3,6 +3,7 @@ import { quote, split } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import type { HostRuleSearchResult } from '../../../types';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
@@ -12,6 +13,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
+import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import type {
   UpdateArtifact,
@@ -55,10 +57,20 @@ const allowedPipArguments = [
   '--strip-extras',
 ];
 
+function buildRegistryUrl(url: string, hostRule: HostRuleSearchResult): string {
+  const ret = new URL(url);
+  if (!ret.username) {
+    ret.username = hostRule.username ?? '';
+    ret.password = hostRule.password ?? '';
+  }
+  return ret.href;
+}
+
 export function constructPipCompileCmd(
   content: string,
   inputFileName: string,
   outputFileName: string,
+  registryUrls: string[],
 ): string {
   const headers = constraintLineRegex.exec(content);
   const args = ['pip-compile'];
@@ -92,6 +104,13 @@ export function constructPipCompileCmd(
       }
     }
   }
+
+  for (const registryUrl of registryUrls) {
+    const hostRule = hostRules.find({ url: registryUrl });
+    const arg = `--extra-index-url=${buildRegistryUrl(registryUrl, hostRule)}`;
+    args.push(arg);
+  }
+
   args.push(upath.parse(inputFileName).base);
 
   return args.map((argument) => quote(argument)).join(' ');
@@ -120,6 +139,7 @@ export async function updateArtifacts({
       existingOutput,
       inputFileName,
       outputFileName,
+      config.registryUrls ?? [],
     );
     const constraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);

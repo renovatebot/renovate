@@ -455,6 +455,27 @@ verify_ssl = true
 name = "pypi"
 ```
 
+### pip-compile
+
+The pip-compile manager can be configured with extra index URLs to use when resolving indirect dependencies and performing lockfile maintanence by adding a `registryUrls` array to its configuration block.  These URLs will
+pull credentials from matching `hostRules` blocks:
+
+```json
+{
+  "pip-compile": {
+    "fileMatch": ["requirements.in"],
+    "indexUrls": ["https://pypi.my.domain/pypi/simple"]
+  },
+  "hostRules": [
+    {
+      "matchHost": "pypi.my.domain",
+      "username": "myuser",
+      "password": "mypassword"
+    }
+  ]
+}
+```
+
 ### poetry
 
 For every Poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`, where `X` represents the normalized name of the source in `pyproject.toml`.

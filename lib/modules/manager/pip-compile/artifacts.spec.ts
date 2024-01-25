@@ -2,7 +2,14 @@ import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
+import {
+  env,
+  fs,
+  git,
+  hostRules,
+  mocked,
+  partial,
+} from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -279,6 +286,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsNoHeaders.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          [],
         ),
       ).toBe('pip-compile requirements.in');
     });
@@ -289,6 +297,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsWithHashes.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          [],
         ),
       ).toBe(
         'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
@@ -301,6 +310,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsWithUnknownArguments.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          [],
         ),
       ).toBe('pip-compile --generate-hashes requirements.in');
       expect(logger.trace).toHaveBeenCalledWith(
@@ -319,6 +329,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsWithExploitingArguments.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          [],
         ),
       ).toBe(
         'pip-compile --generate-hashes --output-file=requirements.txt requirements.in',
@@ -326,6 +337,37 @@ describe('modules/manager/pip-compile/artifacts', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         { argument: '--output-file=/etc/shadow' },
         'pip-compile was previously executed with an unexpected `--output-file` filename',
+      );
+    });
+
+    it('uses extra index URLs with no auth', () => {
+      hostRules.find.mockReturnValue({});
+      expect(
+        constructPipCompileCmd(
+          Fixtures.get('requirementsNoHeaders.txt'),
+          'subdir/requirements.in',
+          'subdir/requirements.txt',
+          ['https://example.com/pypi/simple'],
+        ),
+      ).toBe(
+        'pip-compile --extra-index-url=https://example.com/pypi/simple requirements.in',
+      );
+    });
+
+    it('uses auth from extra index URLs matching host rules', () => {
+      hostRules.find.mockReturnValue({
+        username: 'user',
+        password: 'password',
+      });
+      expect(
+        constructPipCompileCmd(
+          Fixtures.get('requirementsNoHeaders.txt'),
+          'subdir/requirements.in',
+          'subdir/requirements.txt',
+          ['https://example.com/pypi/simple'],
+        ),
+      ).toBe(
+        'pip-compile --extra-index-url=https://user:password@example.com/pypi/simple requirements.in',
       );
     });
   });
