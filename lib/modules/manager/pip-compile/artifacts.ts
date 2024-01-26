@@ -25,6 +25,7 @@ import {
   getPipToolsConstraint,
   getPythonConstraint,
 } from './common';
+import type { GetRegistryUrlVarsResult } from './types';
 
 function buildRegistryUrl(url: string): string {
   const hostRule = hostRules.find({ url });
@@ -36,16 +37,11 @@ function buildRegistryUrl(url: string): string {
   return ret.href;
 }
 
-interface GetRegistryUrlFlagsResult {
-  PIP_INDEX_URL?: string;
-  PIP_EXTRA_INDEX_URL?: string;
-}
-
 export function getRegistryUrlVarsFromPackageFile(
   packageFile: PackageFileContent | null,
-): GetRegistryUrlFlagsResult {
-  const ret: GetRegistryUrlFlagsResult = {};
-  // There should only ever be element in registryUrls, since pip_requirements gets them from --index-url
+): GetRegistryUrlVarsResult {
+  const ret: GetRegistryUrlVarsResult = {};
+  // There should only ever be one element in registryUrls, since pip_requirements gets them from --index-url
   // flags in the input file, and that only makes sense once
   const registryUrls = packageFile?.registryUrls
     ?.map(buildRegistryUrl)
