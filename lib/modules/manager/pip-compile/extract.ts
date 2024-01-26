@@ -16,20 +16,26 @@ function matchManager(filename: string): string {
   if (filename.endsWith('pyproject.toml')) {
     return 'pep621';
   }
-  // naive, could be improved, pip_requirements.fileMatch ???
+  // naive, could be improved, maybe use pip_requirements.fileMatch
   if (filename.endsWith('.in')) {
     return 'pip_requirements';
   }
   return 'unknown';
 }
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   _packageFile: string,
   _config: ExtractConfig,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
+  logger.trace('pip-compile.extractPackageFile()');
   const manager = matchManager(_packageFile);
+  // TODO(not7cd): extract based on manager: pep621, identify other missing source types
   switch (manager) {
+    case 'pip_setup':
+      return extractSetupPyFile(content, _packageFile, _config);
+    case 'setup-cfg':
+      return await extractSetupCfgFile(content);
     case 'pip_requirements':
       return extractRequirementsFile(content);
     default:
@@ -42,9 +48,9 @@ export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[],
 ): Promise<PackageFile[]> {
+  logger.trace('pip-compile.extractAllPackageFiles()');
   const result: PackageFile[] = [];
   for (const lockFile of packageFiles) {
-    logger.debug({ packageFile: lockFile }, 'READING FILE');
     const content = await readLocalFile(lockFile, 'utf8');
     // istanbul ignore else
     if (content) {
@@ -54,37 +60,18 @@ export async function extractAllPackageFiles(
       for (const sourceFile of pipCompileArgs.sourceFiles) {
         const content = await readLocalFile(sourceFile, 'utf8');
         if (content) {
-          // TODO(not7cd): refactor with extractPackageFile
-          if (sourceFile.endsWith('.in')) {
-            const deps = extractRequirementsFile(content);
-            if (deps) {
-              result.push({
-                ...deps,
-                lockFiles: [lockFile],
-                packageFile: sourceFile,
-              });
-            }
-          } else if (sourceFile.endsWith('.py')) {
-            const deps = extractSetupPyFile(content, sourceFile, config);
-            if (deps) {
-              result.push({
-                ...deps,
-                lockFiles: [lockFile],
-                packageFile: sourceFile,
-              });
-            }
-          } else if (sourceFile.endsWith('.cfg')) {
-            const deps = await extractSetupCfgFile(content);
-            if (deps) {
-              result.push({
-                ...deps,
-                lockFiles: [lockFile],
-                packageFile: sourceFile,
-              });
-            }
+          const deps = await extractPackageFile(content, sourceFile, config);
+          if (deps) {
+            result.push({
+              ...deps,
+              lockFiles: [lockFile],
+              packageFile: sourceFile,
+            });
           } else {
-            // TODO(not7cd): extract based on manager: pep621, etc.
-            logger.debug({ packageFile: sourceFile }, 'Not supported');
+            logger.error(
+              { packageFile: sourceFile },
+              'Failed to extract dependencies',
+            );
           }
         } else {
           logger.debug({ packageFile: sourceFile }, 'No content found');
@@ -94,5 +81,6 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile: lockFile }, 'No content found');
     }
   }
+  // TODO(not7cd): sort by requirement layering (-r -c within .in files)
   return result;
 }
