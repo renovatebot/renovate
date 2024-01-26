@@ -19,19 +19,20 @@ export function constructPipCompileCmd(
   const defaultSourceFile = outputFileName.replace('.txt', '.in');
   try {
     const pipCompileArgs = extractHeaderCommand(content, outputFileName);
+    if (pipCompileArgs.argv.length === 0) {
+      throw new Error('Failed to parse extracted command');
+    }
     if (strict && pipCompileArgs.isCustomCommand) {
       logger.error({ command: pipCompileArgs.command }, 'Custom command');
+      throw new Error(
+        'Custom command detected, disable strict mode if self-hosted',
+      );
     }
-    const newCmd = [];
-    if (!pipCompileArgs.command || pipCompileArgs.command === '') {
-      logger.trace('No command detected, assuming pip-compile');
-      newCmd.push('pip-compile');
+    if (pipCompileArgs.sourceFiles.length === 0) {
+      throw new Error(
+        'No source files detected in command, pass at least one package file explicitly',
+      );
     }
-    // if (pipCompileArgs.sourceFiles.length === 0) {
-    //   logger.warn('Assuming implicit source file of requirements.in');
-    //   pipCompileArgs.sourceFiles.push('requirements.in'); // implicit
-    //   pipCompileArgs.argv.push('requirements.in'); // TODO(not7cd): dedup
-    // }
     // TODO(not7cd): sanitize args that require quotes, .map((argument) => quote(argument))
     return pipCompileArgs.argv.join(' ');
   } catch (error) {
@@ -63,7 +64,7 @@ export async function updateArtifacts({
     }
     try {
       await writeLocalFile(inputFileName, newInputContent);
-      // TODO(not7cd): check --rebuild and --upgrade option
+      // TODO(not7cd): use --upgrade option instead deleting
       if (config.isLockFileMaintenance) {
         await deleteLocalFile(outputFileName);
       }
