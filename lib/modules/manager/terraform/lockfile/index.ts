@@ -98,7 +98,7 @@ export function getNewConstraint(
       `Updating constraint "${oldConstraint}" to replace "${currentValue}" with "${newValue}" for "${packageName}"`,
     );
     //remove surplus .0 version
-    return oldConstraint.replace(
+    return oldConstraint.replaceAll(
       regEx(`${escapeRegExp(currentValue)}(\\.0)*`),
       newValue,
     );
@@ -113,7 +113,7 @@ export function getNewConstraint(
     logger.debug(
       `Updating constraint "${oldConstraint}" to replace "${currentVersion}" with "${newVersion}" for "${packageName}"`,
     );
-    return oldConstraint.replace(currentVersion, newVersion);
+    return oldConstraint.replaceAll(currentVersion, newVersion);
   }
 
   if (isPinnedVersion(newValue)) {
