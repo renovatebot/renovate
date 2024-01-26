@@ -15,9 +15,9 @@ import {
   VersioningApi,
   get as getVersioning,
 } from '../../../modules/versioning';
+import { find } from '../../../util/host-rules';
 import { sanitizeMarkdown } from '../../../util/markdown';
 import * as p from '../../../util/promises';
-import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { titleCase } from '../../../util/string';
 import type {
