@@ -14,10 +14,14 @@ import { extractHeaderCommand, getExecOptions } from './common';
 export function constructPipCompileCmd(
   content: string,
   outputFileName: string,
+  strict: boolean = true,
 ): string {
   const defaultSourceFile = outputFileName.replace('.txt', '.in');
   try {
     const pipCompileArgs = extractHeaderCommand(content, outputFileName);
+    if (strict && pipCompileArgs.isCustomCommand) {
+      logger.error({ command: pipCompileArgs.command }, 'Custom command');
+    }
     const newCmd = [];
     if (!pipCompileArgs.command || pipCompileArgs.command === '') {
       logger.trace('No command detected, assuming pip-compile');

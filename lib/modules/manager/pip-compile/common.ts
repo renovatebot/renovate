@@ -80,6 +80,7 @@ dummyPipCompile
 
 interface PipCompileArgs {
   command: string;
+  isCustomCommand: boolean;
   outputFile?: string;
   extra?: string[];
   constraint?: string[];
@@ -101,9 +102,11 @@ export function extractHeaderCommand(
     logger.error(`Failed to extract command from header in ${outputFileName}`);
     // TODO(not7cd): throw
   }
+  // TODO(not7cd): construct at return
   const pipCompileArgs: PipCompileArgs = {
     argv: [],
     command: '',
+    isCustomCommand: false,
     sourceFiles: [],
   };
   if (compileCommand?.groups) {
@@ -117,7 +120,7 @@ export function extractHeaderCommand(
       'Extracted pip-compile command from header',
     );
     try {
-      const isCustomCommand = pipCompileArgs.argv[0] !== 'pip-compile';
+      pipCompileArgs.isCustomCommand = pipCompileArgs.argv[0] !== 'pip-compile';
       const parsedCommand = dummyPipCompile.parse(
         // parse is expecting argv[0] to be process.execPath
         [''].concat(pipCompileArgs.argv),
@@ -131,7 +134,7 @@ export function extractHeaderCommand(
           options,
           sourceFiles: pipCompileArgs.sourceFiles,
           args: parsedCommand.args,
-          isCustomCommand,
+          isCustomCommand: pipCompileArgs.isCustomCommand,
         },
         'Parsed pip-compile command from header',
       );
