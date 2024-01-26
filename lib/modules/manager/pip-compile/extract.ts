@@ -59,7 +59,7 @@ export async function extractAllPackageFiles(
       try {
         const pipCompileArgs = extractHeaderCommand(lockFileContent, lockFile);
         // TODO(not7cd): handle locked deps
-        // const lockedDeps = extractRequirementsFile(content);
+        const lockedDeps = extractRequirementsFile(lockFileContent)?.deps;
         for (const sourceFile of pipCompileArgs.sourceFiles) {
           if (packageFiles.includes(sourceFile)) {
             // TODO(not7cd): do something about it
@@ -75,10 +75,20 @@ export async function extractAllPackageFiles(
           }
           const content = await readLocalFile(sourceFile, 'utf8');
           if (content) {
-            const deps = extractPackageFile(content, sourceFile, config);
-            if (deps) {
+            const extracted = extractPackageFile(content, sourceFile, config);
+            if (extracted) {
+              for (const dep of extracted.deps) {
+                dep.lockedVersion = lockedDeps?.find(
+                  (lockedDep) => lockedDep.depName === dep.depName,
+                )?.currentVersion;
+                if (!dep.lockedVersion) {
+                  logger.warn(
+                    `No locked version found for dependency "${dep.depName}" in source file "${sourceFile}"`,
+                  );
+                }
+              }
               result.set(sourceFile, {
-                ...deps,
+                ...extracted,
                 lockFiles: [lockFile],
                 packageFile: sourceFile,
               });
