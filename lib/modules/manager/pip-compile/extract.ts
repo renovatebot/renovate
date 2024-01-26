@@ -7,18 +7,18 @@ import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
 import { extractHeaderCommand } from './common';
 
 function matchManager(filename: string): string {
-  // naive, could be improved
-  if (filename.endsWith('.in')) {
-    return 'pip_requirements';
-  }
-  if (filename.endsWith('.py')) {
+  if (filename.endsWith('setup.py')) {
     return 'pip_setup';
   }
-  if (filename.endsWith('.cfg')) {
+  if (filename.endsWith('setup.cfg')) {
     return 'setup-cfg';
   }
-  if (filename.endsWith('.toml')) {
+  if (filename.endsWith('pyproject.toml')) {
     return 'pep621';
+  }
+  // naive, could be improved, pip_requirements.fileMatch ???
+  if (filename.endsWith('.in')) {
+    return 'pip_requirements';
   }
   return 'unknown';
 }
