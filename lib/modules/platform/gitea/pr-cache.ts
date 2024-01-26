@@ -132,7 +132,12 @@ export class GiteaPrCache {
         break;
       }
 
-      url = parseLinkHeader(res.headers.link)?.next?.url;
+      const urlWithBaseUrl = parseLinkHeader(res.headers.link)?.next?.url;
+      if (urlWithBaseUrl) {
+        url = new URL(urlWithBaseUrl).pathname;
+      } else {
+        url = undefined;
+      }
     }
 
     return this;
