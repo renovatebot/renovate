@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { quote, split } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -15,47 +14,13 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
-import type {
-  UpdateArtifact,
-  UpdateArtifactsConfig,
-  UpdateArtifactsResult,
-} from '../types';
-
-function getPythonConstraint(
-  config: UpdateArtifactsConfig,
-): string | undefined | null {
-  const { constraints = {} } = config;
-  const { python } = constraints;
-
-  if (python) {
-    logger.debug('Using python constraint from config');
-    return python;
-  }
-
-  return undefined;
-}
-
-function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
-  const { constraints = {} } = config;
-  const { pipTools } = constraints;
-
-  if (is.string(pipTools)) {
-    logger.debug('Using pipTools constraint from config');
-    return pipTools;
-  }
-
-  return '';
-}
-
-const constraintLineRegex = regEx(
-  /^(#.*?\r?\n)+# {4}pip-compile(?<arguments>.*?)\r?\n/,
-);
-const allowedPipArguments = [
-  '--allow-unsafe',
-  '--generate-hashes',
-  '--no-emit-index-url',
-  '--strip-extras',
-];
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import {
+  allowedPipArguments,
+  constraintLineRegex,
+  getPipToolsConstraint,
+  getPythonConstraint,
+} from './common';
 
 function buildRegistryUrl(url: string, hostRule: HostRuleSearchResult): string {
   const ret = new URL(url);

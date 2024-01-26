@@ -13,7 +13,7 @@ export const OCBConfigSchema = z.object({
     module: z.string().optional(),
     version: z.string().optional(),
   }),
-  extension: ModuleSchema,
+  extensions: ModuleSchema,
   exporters: ModuleSchema,
   receivers: ModuleSchema,
   processors: ModuleSchema,
