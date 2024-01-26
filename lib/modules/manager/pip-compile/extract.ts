@@ -4,7 +4,12 @@ import { extractPackageFile as extractRequirementsFile } from '../pip_requiremen
 // TODO(not7cd): enable in the next PR, when this can be properly tested
 // import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 // import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
-import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
 import { extractHeaderCommand } from './common';
 
 function matchManager(filename: string): string {
@@ -75,9 +80,13 @@ export async function extractAllPackageFiles(
           }
           const content = await readLocalFile(sourceFile, 'utf8');
           if (content) {
-            const extracted = extractPackageFile(content, sourceFile, config);
-            if (extracted) {
-              for (const dep of extracted.deps) {
+            const extractedSourceFile = extractPackageFile(
+              content,
+              sourceFile,
+              config,
+            );
+            if (extractedSourceFile) {
+              for (const dep of extractedSourceFile.deps) {
                 dep.lockedVersion = lockedDeps?.find(
                   (lockedDep) => lockedDep.depName === dep.depName,
                 )?.currentVersion;
@@ -87,16 +96,28 @@ export async function extractAllPackageFiles(
                   );
                 }
               }
+
+              // will work only for a first file, conflicts when versions differ between locks
+              if (lockedDeps) {
+                for (const lockedDep of lockedDeps) {
+                  if (
+                    !extractedSourceFile.deps.find(
+                      (dep) => dep.depName === lockedDep.depName,
+                    )
+                  ) {
+                    extractedSourceFile.deps.push(
+                      indirectDependency(lockedDep),
+                    );
+                  }
+                }
+              }
               result.set(sourceFile, {
-                ...extracted,
+                ...extractedSourceFile,
                 lockFiles: [lockFile],
                 packageFile: sourceFile,
               });
             } else {
-              logger.error(
-                { packageFile: sourceFile },
-                'Failed to extract dependencies',
-              );
+              logger.debug({ packageFile: sourceFile }, 'Failed to parse');
             }
           } else {
             logger.debug({ packageFile: sourceFile }, 'No content found');
@@ -112,4 +133,24 @@ export async function extractAllPackageFiles(
   }
   // TODO(not7cd): sort by requirement layering (-r -c within .in files)
   return Array.from(result.values());
+}
+
+function indirectDependency({
+  depName,
+  datasource,
+  versioning,
+  registryUrls,
+  currentVersion,
+  currentValue,
+}: PackageDependency): PackageDependency {
+  return {
+    depName,
+    datasource,
+    versioning,
+    registryUrls,
+    currentVersion,
+    currentValue,
+    depType: 'pip-indirect',
+    lockedVersion: currentVersion,
+  };
 }
