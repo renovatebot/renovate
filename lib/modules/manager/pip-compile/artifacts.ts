@@ -49,58 +49,58 @@ export async function updateArtifacts({
     logger.error(`No lock files associated with ${inputFileName}`);
     return null;
   }
-  // TODO(not7cd): for each
-  const outputFileName = config.lockFiles[0];
   logger.debug(
-    `pipCompile.updateArtifacts(${inputFileName}->${outputFileName})`,
+    `pipCompile.updateArtifacts(${inputFileName}->${JSON.stringify(
+      config.lockFiles,
+    )})`,
   );
-  const existingOutput = await readLocalFile(outputFileName, 'utf8');
-  if (!existingOutput) {
-    logger.debug('No pip-compile output file found');
-    return null;
-  }
-  try {
-    await writeLocalFile(inputFileName, newInputContent);
-    // TODO(not7cd): check --rebuild and --upgrade option
-    if (config.isLockFileMaintenance) {
-      await deleteLocalFile(outputFileName);
-    }
-    const cmd = constructPipCompileCmd(existingOutput, outputFileName);
-    const execOptions: ExecOptions = await getExecOptions(
-      config,
-      inputFileName,
-    );
-    logger.trace({ cmd }, 'pip-compile command');
-    await exec(cmd, execOptions);
-    const status = await getRepoStatus();
-    if (!status?.modified.includes(outputFileName)) {
+  const result: UpdateArtifactsResult[] = [];
+  for (const outputFileName of config.lockFiles) {
+    const existingOutput = await readLocalFile(outputFileName, 'utf8');
+    if (!existingOutput) {
+      logger.debug('No pip-compile output file found');
       return null;
     }
-    logger.debug('Returning updated pip-compile result');
-    return [
-      {
+    try {
+      await writeLocalFile(inputFileName, newInputContent);
+      // TODO(not7cd): check --rebuild and --upgrade option
+      if (config.isLockFileMaintenance) {
+        await deleteLocalFile(outputFileName);
+      }
+      const cmd = constructPipCompileCmd(existingOutput, outputFileName);
+      const execOptions: ExecOptions = await getExecOptions(
+        config,
+        inputFileName,
+      );
+      logger.trace({ cmd }, 'pip-compile command');
+      await exec(cmd, execOptions);
+      const status = await getRepoStatus();
+      if (!status?.modified.includes(outputFileName)) {
+        return null;
+      }
+      result.push({
         file: {
           type: 'addition',
           path: outputFileName,
           contents: await readLocalFile(outputFileName, 'utf8'),
         },
-      },
-    ];
-  } catch (err) {
-    // istanbul ignore if
-    if (err.message === TEMPORARY_ERROR) {
-      throw err;
-    }
-    logger.debug({ err }, 'Failed to pip-compile');
-    return [
-      {
+      });
+    } catch (err) {
+      // istanbul ignore if
+      if (err.message === TEMPORARY_ERROR) {
+        throw err;
+      }
+      logger.debug({ err }, 'Failed to pip-compile');
+      result.push({
         artifactError: {
           lockFile: outputFileName,
           stderr: err.message,
         },
-      },
-    ];
+      });
+    }
   }
+  logger.debug('Returning updated pip-compile result');
+  return result;
 }
 
 // TODO(not7cd): remove, legacy resolver is deprecated and will be removed
