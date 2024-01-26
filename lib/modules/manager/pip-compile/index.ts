@@ -2,7 +2,7 @@ import type { Category } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 
-export { extractAllPackageFiles } from './extract';
+export { extractAllPackageFiles, extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 
 export const supportsLockFileMaintenance = true;

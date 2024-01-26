@@ -74,8 +74,8 @@ dummyPipCompile
   .argument('<sourceFile...>')
   .option('-o, --output-file <path>')
   // .option('--no-emit-index-url')
-  .option('--extra-index-url <url...>');
-// .allowUnknownOption()
+  .option('--extra-index-url <url...>')
+  .allowUnknownOption();
 // .allowExcessArguments()
 
 interface PipCompileArgs {

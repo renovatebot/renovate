@@ -3,8 +3,40 @@ import { readLocalFile } from '../../../util/fs';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
-import type { ExtractConfig, PackageFile } from '../types';
+import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
 import { extractHeaderCommand } from './common';
+
+function matchManager(filename: string): string {
+  // naive, could be improved
+  if (filename.endsWith('.in')) {
+    return 'pip_requirements';
+  }
+  if (filename.endsWith('.py')) {
+    return 'pip_setup';
+  }
+  if (filename.endsWith('.cfg')) {
+    return 'setup-cfg';
+  }
+  if (filename.endsWith('.toml')) {
+    return 'pep621';
+  }
+  return 'unknown';
+}
+
+export function extractPackageFile(
+  content: string,
+  _packageFile: string,
+  _config: ExtractConfig,
+): PackageFileContent | null {
+  const manager = matchManager(_packageFile);
+  switch (manager) {
+    case 'pip_requirements':
+      return extractRequirementsFile(content);
+    default:
+      logger.error(`Unsupported manager ${manager} for ${_packageFile}`);
+      return null;
+  }
+}
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
@@ -22,6 +54,7 @@ export async function extractAllPackageFiles(
       for (const sourceFile of pipCompileArgs.sourceFiles) {
         const content = await readLocalFile(sourceFile, 'utf8');
         if (content) {
+          // TODO(not7cd): refactor with extractPackageFile
           if (sourceFile.endsWith('.in')) {
             const deps = extractRequirementsFile(content);
             if (deps) {

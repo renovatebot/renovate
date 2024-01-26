@@ -8,7 +8,6 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { extractHeaderCommand, getExecOptions } from './common';
 
@@ -16,18 +15,38 @@ export function constructPipCompileCmd(
   content: string,
   outputFileName: string,
 ): string {
-  const pipCompileArgs = extractHeaderCommand(content, outputFileName);
-  // TODO(not7cd): sanitize args that require quotes, .map((argument) => quote(argument))
-  return pipCompileArgs.argv.join(' ');
+  const defaultSourceFile = outputFileName.replace('.txt', '.in');
+  try {
+    const pipCompileArgs = extractHeaderCommand(content, outputFileName);
+    const newCmd = [];
+    if (!pipCompileArgs.command || pipCompileArgs.command === '') {
+      logger.trace('No command detected, assuming pip-compile');
+      newCmd.push('pip-compile');
+    }
+    // if (pipCompileArgs.sourceFiles.length === 0) {
+    //   logger.warn('Assuming implicit source file of requirements.in');
+    //   pipCompileArgs.sourceFiles.push('requirements.in'); // implicit
+    //   pipCompileArgs.argv.push('requirements.in'); // TODO(not7cd): dedup
+    // }
+    // TODO(not7cd): sanitize args that require quotes, .map((argument) => quote(argument))
+    return pipCompileArgs.argv.join(' ');
+  } catch (error) {
+    return `pip-compile ${defaultSourceFile}`;
+  }
 }
 
 export async function updateArtifacts({
   packageFileName: inputFileName,
   newPackageFileContent: newInputContent,
+  updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  // TODO(not7cd): must be extracted again or passed from PackageFileContent.lockFiles
-  const outputFileName = inputFileName.replace(regEx(/(\.in)?$/), '.txt');
+  if (!config.lockFiles) {
+    logger.error(`No lock files associated with ${inputFileName}`);
+    return null;
+  }
+  // TODO(not7cd): for each
+  const outputFileName = config.lockFiles[0];
   logger.debug(
     `pipCompile.updateArtifacts(${inputFileName}->${outputFileName})`,
   );
