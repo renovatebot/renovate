@@ -2,7 +2,6 @@ import { quote, split } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { HostRuleSearchResult } from '../../../types';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
@@ -14,7 +13,12 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import * as pipRequirements from '../pip_requirements';
+import type {
+  PackageFileContent,
+  UpdateArtifact,
+  UpdateArtifactsResult,
+} from '../types';
 import {
   allowedPipArguments,
   constraintLineRegex,
@@ -22,7 +26,8 @@ import {
   getPythonConstraint,
 } from './common';
 
-function buildRegistryUrl(url: string, hostRule: HostRuleSearchResult): string {
+function buildRegistryUrl(url: string): string {
+  const hostRule = hostRules.find({ url });
   const ret = new URL(url);
   if (!ret.username) {
     ret.username = hostRule.username ?? '';
@@ -31,11 +36,37 @@ function buildRegistryUrl(url: string, hostRule: HostRuleSearchResult): string {
   return ret.href;
 }
 
+interface GetRegistryUrlFlagsResult {
+  PIP_INDEX_URL?: string;
+  PIP_EXTRA_INDEX_URL?: string;
+}
+
+export function getRegistryUrlVarsFromPackageFile(
+  packageFile: PackageFileContent | null,
+): GetRegistryUrlFlagsResult {
+  const ret: GetRegistryUrlFlagsResult = {};
+  // There should only ever be element in registryUrls, since pip_requirements gets them from --index-url
+  // flags in the input file, and that only makes sense once
+  const registryUrls = packageFile?.registryUrls
+    ?.map(buildRegistryUrl)
+    .join(' ');
+  if (registryUrls) {
+    ret.PIP_INDEX_URL = registryUrls;
+  }
+
+  const additionalRegistryUrls = packageFile?.additionalRegistryUrls
+    ?.map(buildRegistryUrl)
+    .join(' ');
+  if (additionalRegistryUrls) {
+    ret.PIP_EXTRA_INDEX_URL = additionalRegistryUrls;
+  }
+  return ret;
+}
+
 export function constructPipCompileCmd(
   content: string,
   inputFileName: string,
   outputFileName: string,
-  registryUrls: string[],
 ): string {
   const headers = constraintLineRegex.exec(content);
   const args = ['pip-compile'];
@@ -69,13 +100,6 @@ export function constructPipCompileCmd(
       }
     }
   }
-
-  for (const registryUrl of registryUrls) {
-    const hostRule = hostRules.find({ url: registryUrl });
-    const arg = `--extra-index-url=${buildRegistryUrl(registryUrl, hostRule)}`;
-    args.push(arg);
-  }
-
   args.push(upath.parse(inputFileName).base);
 
   return args.map((argument) => quote(argument)).join(' ');
@@ -104,10 +128,10 @@ export async function updateArtifacts({
       existingOutput,
       inputFileName,
       outputFileName,
-      config.registryUrls ?? [],
     );
     const constraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);
+    const packageFile = pipRequirements.extractPackageFile(newInputContent);
     const execOptions: ExecOptions = {
       cwdFile: inputFileName,
       docker: {},
@@ -123,9 +147,13 @@ export async function updateArtifacts({
       ],
       extraEnv: {
         PIP_CACHE_DIR: await ensureCacheDir('pip'),
+        // Using environment variables for these since pip-compile's --no-emit-index-url flag doesn't prevent
+        // index URLs passed as command line parameters from being included in the header comment
+        ...getRegistryUrlVarsFromPackageFile(packageFile),
       },
     };
     logger.trace({ cmd }, 'pip-compile command');
+    logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
     await exec(cmd, execOptions);
     const status = await getRepoStatus();
     if (!status?.modified.includes(outputFileName)) {

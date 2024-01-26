@@ -38,7 +38,6 @@ export interface UpdateArtifactsConfig {
   newMajor?: number;
   registryAliases?: Record<string, string>;
   lockFiles?: string[];
-  registryUrls?: string[] | null;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {

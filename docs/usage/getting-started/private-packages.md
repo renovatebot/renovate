@@ -457,14 +457,21 @@ name = "pypi"
 
 ### pip-compile
 
-The pip-compile manager can be configured with extra index URLs to use when resolving indirect dependencies and performing lockfile maintanence by adding a `registryUrls` array to its configuration block.  These URLs will
-pull credentials from matching `hostRules` blocks:
+The pip-compile manager will extract `--index-url` and `--extra-index-url` directives from its input file. These URLs will pull credentials from matching `hostRules` blocks and pass appropriate `--index-url` or `--extra-index-url`
+flags to `pip-compile` with those credentials while generating the output file.
+
+requirements.in:
+
+```
+--extra-index-url https://pypi.my.domain/simple
+
+private-package==1.2.3
+```
 
 ```json
 {
   "pip-compile": {
-    "fileMatch": ["requirements.in"],
-    "indexUrls": ["https://pypi.my.domain/pypi/simple"]
+    "fileMatch": ["requirements.in"]
   },
   "hostRules": [
     {
