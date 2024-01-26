@@ -385,7 +385,7 @@ jobs:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
       - name: Download coverage reports
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
           name: coverage
           path: coverage
@@ -520,7 +520,7 @@ jobs:
         run: corepack enable
 
       - name: Download package
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
           name: renovate-package
 
