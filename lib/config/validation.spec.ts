@@ -89,6 +89,10 @@ describe('config/validation', () => {
             matchPackageNames: ['quack'],
             allowedVersions: '!/***$}{]][/',
           },
+          {
+            matchPackageNames: ['quack'],
+            allowedVersions: '/quaCk/i',
+          },
         ],
       };
       const { errors } = await configValidation.validateConfig(false, config);
@@ -112,6 +116,11 @@ describe('config/validation', () => {
           {
             matchPackageNames: ['quack'],
             matchCurrentValue: '<1.0.0',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['foo'],
+            matchCurrentValue: '/^2/i',
             enabled: true,
           },
         ],
@@ -141,6 +150,11 @@ describe('config/validation', () => {
           {
             matchPackageNames: ['quack'],
             matchCurrentVersion: '!/***$}{]][/',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['foo'],
+            matchCurrentVersion: '/^2/i',
             enabled: true,
           },
         ],
@@ -218,7 +232,7 @@ describe('config/validation', () => {
 
     it('catches invalid baseBranches regex', async () => {
       const config = {
-        baseBranches: ['/***$}{]][/'],
+        baseBranches: ['/***$}{]][/', '/branch/i'],
       };
       const { errors } = await configValidation.validateConfig(false, config);
       expect(errors).toEqual([

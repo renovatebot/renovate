@@ -87,7 +87,14 @@ export function normalizeDate(input: any): string | null {
     //   2. Format of `input` is very exotic
     //      (from `DateTime.fromISO()` perspective)
     //
-    const luxonDate = DateTime.fromISO(input, { zone: 'UTC' });
+
+    let luxonDate = DateTime.fromISO(input, { zone: 'UTC' });
+    if (luxonDate.isValid) {
+      return luxonDate.toISO();
+    }
+    luxonDate = DateTime.fromFormat(input, 'yyyyMMddHHmmss', {
+      zone: 'UTC',
+    });
     if (luxonDate.isValid) {
       return luxonDate.toISO();
     }
