@@ -69,13 +69,14 @@ export const allowedPipArguments = [
 ];
 
 // as commander.js is already used, we will reuse it's argument parsing capability
-const dummyPipCompile = new Command()
+const dummyPipCompile = new Command();
+dummyPipCompile
+  .argument('<sourceFile...>')
   .option('-o, --output-file <path>')
   // .option('--no-emit-index-url')
-  .option('--extra-index-url')
-  // .enablePositionalOptions()
-  .allowUnknownOption()
-  .allowExcessArguments();
+  .option('--extra-index-url <url...>');
+// .allowUnknownOption()
+// .allowExcessArguments()
 
 interface PipCompileArgs {
   command: string;
@@ -93,9 +94,11 @@ export function extractHeaderCommand(
 ): PipCompileArgs {
   const compileCommand = constraintLineRegex.exec(content);
   if (compileCommand?.groups) {
-    logger.debug(`Found pip-compile header: ${compileCommand[0]}`);
+    logger.debug(
+      `Found pip-compile header in ${outputFileName}: \n${compileCommand[0]}`,
+    );
   } else {
-    logger.error('Failed to extract command from header');
+    logger.error(`Failed to extract command from header in ${outputFileName}`);
     // TODO(not7cd): throw
   }
   const pipCompileArgs: PipCompileArgs = {
@@ -109,17 +112,25 @@ export function extractHeaderCommand(
     if (compileCommand.groups.arguments) {
       pipCompileArgs.argv.push(...split(compileCommand.groups.arguments));
     }
+    logger.debug(
+      { argv: pipCompileArgs.argv },
+      'Extracted pip-compile command from header',
+    );
     try {
       const isCustomCommand = pipCompileArgs.argv[0] !== 'pip-compile';
-      const parsedCommand = dummyPipCompile.parse(pipCompileArgs.argv);
+      const parsedCommand = dummyPipCompile.parse(
+        // parse is expecting argv[0] to be process.execPath
+        [''].concat(pipCompileArgs.argv),
+      );
       const options = parsedCommand.opts();
       // TODO(not7cd): trace unsupported options
-      const args = parsedCommand.args;
+      pipCompileArgs.sourceFiles = parsedCommand.args;
       logger.debug(
         {
           argv: pipCompileArgs.argv,
           options,
-          sourceFiles: args,
+          sourceFiles: pipCompileArgs.sourceFiles,
+          args: parsedCommand.args,
           isCustomCommand,
         },
         'Parsed pip-compile command from header',
@@ -135,12 +146,6 @@ export function extractHeaderCommand(
           );
         }
         pipCompileArgs.outputFile = options.outputFile;
-      }
-      if (args.length === 0) {
-        logger.warn('Assuming implicit source file of requirements.in');
-        pipCompileArgs.sourceFiles.push('requirements.in'); // implicit
-      } else {
-        pipCompileArgs.sourceFiles.push(...args);
       }
     } catch (error) {
       logger.error(
