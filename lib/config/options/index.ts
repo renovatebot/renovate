@@ -1094,6 +1094,17 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'matchCurrentAge',
+    description:
+      'Matches the current age of the package derived from its release timestamp. Valid only within a `packageRules` object.',
+    type: 'string',
+    parents: ['packageRules'],
+    stage: 'package',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchCategories',
     description:
       'List of categories to match (for example: `["python"]`). Valid only within a `packageRules` object.',
