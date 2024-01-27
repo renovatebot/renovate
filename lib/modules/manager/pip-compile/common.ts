@@ -135,6 +135,10 @@ export function extractHeaderCommand(
       }
       logger.debug({ argv }, 'Extracted pip-compile command from header');
       for (const arg of argv) {
+        // TODO(not7cd): check for "--option -- argument" case
+        if (!arg.startsWith('-')) {
+          continue;
+        }
         throwForDisallowedOption(arg);
         throwForNoEqualSignInOptionWithArgument(arg);
         if (strict) {
@@ -208,9 +212,6 @@ function throwForNoEqualSignInOptionWithArgument(arg: string): void {
 }
 
 function throwForUnknownOption(arg: string): void {
-  if (!arg.startsWith('-')) {
-    return;
-  }
   for (const allowedOption of allowedPipOptions) {
     if (arg.startsWith(allowedOption)) {
       return;
