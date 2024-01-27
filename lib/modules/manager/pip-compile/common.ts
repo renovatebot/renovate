@@ -103,7 +103,7 @@ interface PipCompileArgs {
 export function extractHeaderCommand(
   content: string,
   outputFileName: string,
-): PipCompileArgs {
+): PipCompileArgs | null {
   const strict: boolean = true; // TODO(not7cd): add to function params
   const compileCommand = constraintLineRegex.exec(content);
   if (compileCommand?.groups) {
@@ -115,57 +115,45 @@ export function extractHeaderCommand(
       `Failed to extract command from header in ${outputFileName}`,
     );
   }
-  // TODO(not7cd): construct at return
-  const pipCompileArgs: PipCompileArgs = {
-    argv: [],
-    command: '',
-    isCustomCommand: false,
-    sourceFiles: [],
-  };
   if (compileCommand?.groups) {
-    const command = compileCommand.groups.command;
-    const argv: string[] = [command];
-    const isCustomCommand = command !== 'pip-compile';
-    if (strict && isCustomCommand) {
-      throw new Error(
-        `Command "${command}" != "pip-compile", header modified or set by CUSTOM_COMPILE_COMMAND`,
-      );
-    }
-    if (isCustomCommand) {
-      logger.debug(`Custom command ${command} detected`);
-    }
-
-    // all arguments are optional, TODO(not7cd): decide if require explicit args
-    if (compileCommand.groups.arguments) {
-      argv.push(...split(compileCommand.groups.arguments));
-    }
-    logger.debug(
-      { argv: pipCompileArgs.argv },
-      'Extracted pip-compile command from header',
-    );
-    for (const arg of argv) {
-      throwForDisallowedOption(arg);
-      throwForNoEqualSignInOptionWithArgument(arg);
-      if (strict) {
-        throwForUnknownOption(arg);
-      }
-    }
     try {
-      pipCompileArgs.isCustomCommand = pipCompileArgs.argv[0] !== 'pip-compile';
+      const command = compileCommand.groups.command;
+      const argv: string[] = [command];
+      const isCustomCommand = command !== 'pip-compile';
+      if (strict && isCustomCommand) {
+        throw new Error(
+          `Command "${command}" != "pip-compile", header modified or set by CUSTOM_COMPILE_COMMAND`,
+        );
+      }
+      if (isCustomCommand) {
+        logger.debug(`Custom command ${command} detected`);
+      }
+
+      // all arguments are optional, TODO(not7cd): decide if require explicit args
+      if (compileCommand.groups.arguments) {
+        argv.push(...split(compileCommand.groups.arguments));
+      }
+      logger.debug({ argv }, 'Extracted pip-compile command from header');
+      for (const arg of argv) {
+        throwForDisallowedOption(arg);
+        throwForNoEqualSignInOptionWithArgument(arg);
+        if (strict) {
+          throwForUnknownOption(arg);
+        }
+      }
+
       const parsedCommand = dummyPipCompile.parse(
         // parse is expecting argv[0] to be process.execPath
-        [''].concat(pipCompileArgs.argv),
+        [''].concat(argv),
       );
       const options = parsedCommand.opts();
-      // TODO(not7cd): trace unsupported options
-      pipCompileArgs.sourceFiles = parsedCommand.args;
+      const sourceFiles = parsedCommand.args;
       logger.debug(
         {
-          argv: pipCompileArgs.argv,
+          argv,
           options,
-          sourceFiles: pipCompileArgs.sourceFiles,
-          args: parsedCommand.args,
-          isCustomCommand: pipCompileArgs.isCustomCommand,
+          sourceFiles,
+          isCustomCommand,
         },
         'Parsed pip-compile command from header',
       );
@@ -179,7 +167,14 @@ export function extractHeaderCommand(
             'pip-compile was previously executed with an unexpected `--output-file` filename',
           );
         }
-        pipCompileArgs.outputFile = options.outputFile;
+        const outputFile = options.outputFile;
+        return {
+          argv,
+          command,
+          isCustomCommand,
+          outputFile,
+          sourceFiles,
+        };
       }
     } catch (error) {
       logger.error(
@@ -187,10 +182,9 @@ export function extractHeaderCommand(
         'Failed to parse pip-compile command from header with commander',
       );
     }
-    return pipCompileArgs;
   }
   logger.trace({ compileCommand }, 'Failed to parse command');
-  return pipCompileArgs;
+  return null;
 }
 
 function throwForDisallowedOption(arg: string): void {
