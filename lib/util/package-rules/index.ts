@@ -91,6 +91,21 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
       delete config.matchCurrentValue;
       delete config.matchCurrentVersion;
       delete config.matchCurrentAge;
+      delete config.excludeDepNames;
+      delete config.excludeDepPatterns;
+      delete config.excludeRepositories;
+      delete config.matchCategories;
+      delete config.matchRepositories;
+      delete config.matchBaseBranches;
+      delete config.matchManagers;
+      delete config.matchDatasources;
+      delete config.matchFileNames;
+      delete config.matchDepNames;
+      delete config.matchDepPatterns;
+      delete config.matchSourceUrlPrefixes;
+      delete config.matchSourceUrls;
+      delete config.matchUpdateTypes;
+      delete config.matchConfidence;
     }
   }
   return config;

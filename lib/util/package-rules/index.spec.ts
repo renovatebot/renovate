@@ -43,6 +43,7 @@ describe('util/package-rules/index', () => {
       depName: 'a',
       isBump: true,
       currentValue: '1.0.0',
+      labels: ['bump'],
       packageRules: [
         {
           matchPackagePatterns: ['*'],
@@ -69,7 +70,7 @@ describe('util/package-rules/index', () => {
     };
     expect(applyPackageRules(config)).toEqual({
       ...config,
-      matchUpdateTypes: ['bump'],
+      labels: ['bump'],
     });
   });
 
