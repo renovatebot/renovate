@@ -73,7 +73,7 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
     // This rule is considered matched if there was at least one positive match and no negative matches
     if (matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
-      const toApply = { ...packageRule };
+      const toApply = removeMatchers({ ...packageRule });
       if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {
         // Need to apply groupSlug otherwise the existing one will take precedence
         toApply.groupSlug = slugify(packageRule.groupName, {
@@ -81,32 +81,20 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
         });
       }
       config = mergeChildConfig(config, toApply);
-      delete config.matchPackageNames;
-      delete config.matchPackagePatterns;
-      delete config.matchPackagePrefixes;
-      delete config.excludePackageNames;
-      delete config.excludePackagePatterns;
-      delete config.excludePackagePrefixes;
-      delete config.matchDepTypes;
-      delete config.matchCurrentValue;
-      delete config.matchCurrentVersion;
-      delete config.matchCurrentAge;
-      delete config.excludeDepNames;
-      delete config.excludeDepPatterns;
-      delete config.excludeRepositories;
-      delete config.matchCategories;
-      delete config.matchRepositories;
-      delete config.matchBaseBranches;
-      delete config.matchManagers;
-      delete config.matchDatasources;
-      delete config.matchFileNames;
-      delete config.matchDepNames;
-      delete config.matchDepPatterns;
-      delete config.matchSourceUrlPrefixes;
-      delete config.matchSourceUrls;
-      delete config.matchUpdateTypes;
-      delete config.matchConfidence;
     }
   }
   return config;
+}
+
+function removeMatchers(
+  packageRule: PackageRule & PackageRuleInputConfig,
+): Record<string, unknown> {
+  const toApply: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(packageRule)) {
+    if (!key.includes('match') && !key.includes('exclude')) {
+      toApply[key] = value;
+    }
+  }
+
+  return toApply;
 }
