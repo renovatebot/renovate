@@ -2,7 +2,7 @@ import type { DEFAULT_REGISTRY_URL } from './utils';
 
 export interface CargoPackage {
   /** Semver version */
-  version: string
+  version: string;
 }
 
 export interface CargoDep {
@@ -31,7 +31,7 @@ export interface CargoSection {
 export interface CargoManifest extends CargoSection {
   target?: Record<string, CargoSection>;
   workspace?: CargoSection;
-  package?: CargoPackage
+  package?: CargoPackage;
 }
 
 export interface CargoConfig {
