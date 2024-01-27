@@ -8,6 +8,7 @@ import { ensureCacheDir } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifactsConfig } from '../types';
 
+// TODO(not7cd): rename to getPipToolsVersionConstraint, as constraints have their meaning in pip
 export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
   const { constraints = {} } = config;
   const { pipTools } = constraints;
@@ -56,16 +57,26 @@ export async function getExecOptions(
     },
   };
   return execOptions;
-} // TODO(not7cd): rename to getPipToolsVersionConstraint, as constraints have their meaning in pipexport function extractHeaderCommand(content: string): string {
+}
 
 export const constraintLineRegex = regEx(
   /^(#.*?\r?\n)+# {4}(?<command>\S*)(?<arguments> .*?)?\r?\n/,
 );
-export const allowedPipArguments = [
+
+export const disallowedPipOptions = [
+  '--no-header', // header is required by this manager
+];
+export const optionsWithArguments = [
+  '--output-file',
+  '--extra',
+  '--extra-index-url',
+];
+export const allowedPipOptions = [
   '--allow-unsafe',
   '--generate-hashes',
-  '--no-emit-index-url', // handle this!!!
+  '--no-emit-index-url', // TODO: handle this!!!
   '--strip-extras',
+  ...optionsWithArguments,
 ];
 
 // as commander.js is already used, we will reuse it's argument parsing capability
@@ -93,14 +104,16 @@ export function extractHeaderCommand(
   content: string,
   outputFileName: string,
 ): PipCompileArgs {
+  const strict: boolean = true; // TODO(not7cd): add to function params
   const compileCommand = constraintLineRegex.exec(content);
   if (compileCommand?.groups) {
     logger.debug(
       `Found pip-compile header in ${outputFileName}: \n${compileCommand[0]}`,
     );
   } else {
-    logger.error(`Failed to extract command from header in ${outputFileName}`);
-    // TODO(not7cd): throw
+    throw new Error(
+      `Failed to extract command from header in ${outputFileName}`,
+    );
   }
   // TODO(not7cd): construct at return
   const pipCompileArgs: PipCompileArgs = {
@@ -110,15 +123,33 @@ export function extractHeaderCommand(
     sourceFiles: [],
   };
   if (compileCommand?.groups) {
-    pipCompileArgs.argv = [compileCommand.groups.command];
+    const command = compileCommand.groups.command;
+    const argv: string[] = [command];
+    const isCustomCommand = command !== 'pip-compile';
+    if (strict && isCustomCommand) {
+      throw new Error(
+        `Command "${command}" != "pip-compile", header modified or set by CUSTOM_COMPILE_COMMAND`,
+      );
+    }
+    if (isCustomCommand) {
+      logger.debug(`Custom command ${command} detected`);
+    }
+
     // all arguments are optional, TODO(not7cd): decide if require explicit args
     if (compileCommand.groups.arguments) {
-      pipCompileArgs.argv.push(...split(compileCommand.groups.arguments));
+      argv.push(...split(compileCommand.groups.arguments));
     }
     logger.debug(
       { argv: pipCompileArgs.argv },
       'Extracted pip-compile command from header',
     );
+    for (const arg of argv) {
+      throwForDisallowedOption(arg);
+      throwForNoEqualSignInOptionWithArgument(arg);
+      if (strict) {
+        throwForUnknownOption(arg);
+      }
+    }
     try {
       pipCompileArgs.isCustomCommand = pipCompileArgs.argv[0] !== 'pip-compile';
       const parsedCommand = dummyPipCompile.parse(
@@ -160,4 +191,36 @@ export function extractHeaderCommand(
   }
   logger.trace({ compileCommand }, 'Failed to parse command');
   return pipCompileArgs;
+}
+
+function throwForDisallowedOption(arg: string): void {
+  for (const disallowedPipOption of disallowedPipOptions) {
+    if (arg.startsWith(disallowedPipOption)) {
+      throw new Error(
+        `Option ${disallowedPipOption} not allowed for this manager`,
+      );
+    }
+  }
+}
+
+function throwForNoEqualSignInOptionWithArgument(arg: string): void {
+  for (const option of optionsWithArguments) {
+    if (arg.startsWith(option) && !arg.startsWith(`${option}=`)) {
+      throw new Error(
+        `Option ${option} must have equal sign '=' separating it's argument`,
+      );
+    }
+  }
+}
+
+function throwForUnknownOption(arg: string): void {
+  if (!arg.startsWith('-')) {
+    return;
+  }
+  for (const allowedOption of allowedPipOptions) {
+    if (arg.startsWith(allowedOption)) {
+      return;
+    }
+  }
+  throw new Error(`Option ${arg} not supported (yet)`);
 }
