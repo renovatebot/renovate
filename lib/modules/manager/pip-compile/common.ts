@@ -70,6 +70,7 @@ export const optionsWithArguments = [
   '--output-file',
   '--extra',
   '--extra-index-url',
+  '--resolver',
 ];
 export const allowedPipOptions = [
   '--allow-unsafe',
@@ -159,17 +160,28 @@ export function extractHeaderCommand(
         'No source files detected in command, pass at least one package file explicitly',
       );
     }
+    let outputFile = '';
     if (options.outputFile) {
       // TODO(not7cd): This file path can be relative like `reqs/main.txt`
       const file = upath.parse(outputFileName).base;
-      if (options.outputFile !== file) {
-        // we don't trust the user-supplied output-file argument; TODO(not7cd): use our value here
+      // const cwd = upath.parse(outputFileName).dir;
+      if (options.outputFile === file) {
+        outputFile = options.outputFile;
+      } else {
+        // we don't trust the user-supplied output-file argument;
+        // TODO(not7cd): allow relative paths
         logger.warn(
           { outputFile: options.outputFile, actualPath: file },
           'pip-compile was previously executed with an unexpected `--output-file` filename',
         );
+        // TODO(not7cd): this shouldn't be changed in extract function
+        outputFile = file;
+        argv.forEach((item, i) => {
+          if (item.startsWith('--output-file=')) {
+            argv[i] = `--output-file=${file}`;
+          }
+        });
       }
-      const outputFile = options.outputFile;
       return {
         argv,
         command,
@@ -183,7 +195,7 @@ export function extractHeaderCommand(
       argv,
       command,
       isCustomCommand,
-      outputFile: '',
+      outputFile,
       sourceFiles,
     };
   }
