@@ -46,5 +46,14 @@ describe('modules/manager/cargo/update', () => {
       );
       expect(bumpedContent).toEqual(content);
     });
+
+    it('does not bump version if version is not a semantic version', () => {
+      const { bumpedContent } = projectUpdater.bumpPackageVersion(
+        content,
+        '1',
+        'patch',
+      );
+      expect(bumpedContent).toEqual(content);
+    });
   });
 });
