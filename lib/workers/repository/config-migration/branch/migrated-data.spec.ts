@@ -16,8 +16,6 @@ jest.mock('../../../../util/json-writer');
 jest.mock('../../init/merge');
 jest.mock('detect-indent');
 
-const rawNonMigrated = Fixtures.get('./renovate.json');
-const rawNonMigratedJson5 = Fixtures.get('./renovate.json5');
 const migratedData = Fixtures.getJson('./migrated-data.json');
 const migratedDataJson5 = Fixtures.getJson('./migrated-data.json5');
 const migratedConfigObj = Fixtures.getJson('./migrated.json');
@@ -35,7 +33,6 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       });
       mockedFunction(detectRepoFileConfig).mockResolvedValue({
         configFileName: 'renovate.json',
-        configFileRaw: rawNonMigrated,
       });
       mockedFunction(migrateConfig).mockReturnValue({
         isMigrated: true,
@@ -102,7 +99,6 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     it('Migrate a JSON5 config file', async () => {
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json5',
-        configFileRaw: rawNonMigratedJson5,
       });
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
@@ -131,7 +127,6 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       });
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json',
-        configFileRaw: rawNonMigrated,
       });
       mockedFunction(migrateConfig).mockReturnValueOnce({
         isMigrated: true,
