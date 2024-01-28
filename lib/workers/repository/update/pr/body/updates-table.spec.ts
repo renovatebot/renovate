@@ -190,7 +190,6 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         'New value': '{{{newValue}}}',
         Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
         Pending: '{{{displayPending}}}',
-        displayPending: 'some-string',
       },
       updateType: 'pin',
       depNameLinked:
@@ -201,6 +200,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       newValue: '6.2.3',
       displayFrom: '^6.2.3',
       displayTo: '6.2.3',
+      displayPending: 'some-string',
     });
 
     // duplicate of upgrade1
