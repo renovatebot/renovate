@@ -72,7 +72,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     if (configFileRaw) {
       let configFileParsed = parseJson(configFileRaw, configFileName) as any;
       if (configFileName !== 'package.json') {
-        return { configFileName, configFileRaw, configFileParsed };
+        return { configFileName, configFileParsed };
       }
       configFileParsed = configFileParsed.renovate;
       return { configFileName, configFileParsed }; // don't return raw 'package.json'
@@ -103,7 +103,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     const parsedConfig = cachedConfig ? JSON.parse(cachedConfig) : undefined;
     if (parsedConfig) {
       setOnboardingConfigDetails(configFileName, JSON.stringify(parsedConfig));
-      return { configFileName, configFileRaw, configFileParsed: parsedConfig };
+      return { configFileName, configFileParsed: parsedConfig };
     }
   }
 
@@ -202,7 +202,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   }
 
   setOnboardingConfigDetails(configFileName, JSON.stringify(configFileParsed));
-  return { configFileName, configFileRaw, configFileParsed };
+  return { configFileName, configFileParsed };
 }
 
 export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
