@@ -51,10 +51,14 @@ export async function extractAllPackageFiles(
   logger.trace('pip-compile.extractAllPackageFiles()');
   const result: PackageFile[] = [];
   for (const lockFile of packageFiles) {
-    const content = await readLocalFile(lockFile, 'utf8');
+    const lockFileContent = await readLocalFile(lockFile, 'utf8');
     // istanbul ignore else
-    if (content) {
-      const pipCompileArgs = extractHeaderCommand(content, lockFile);
+    if (lockFileContent) {
+      const pipCompileArgs = extractHeaderCommand(lockFileContent, lockFile);
+      if (!pipCompileArgs) {
+        logger.warn({ lockFile }, 'Failed to parse command in header');
+        continue;
+      }
       // TODO(not7cd): handle locked deps
       // const lockedDeps = extractRequirementsFile(content);
       for (const sourceFile of pipCompileArgs.sourceFiles) {
