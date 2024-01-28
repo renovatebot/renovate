@@ -190,6 +190,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         'New value': '{{{newValue}}}',
         Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
         Pending: '{{{displayPending}}}',
+        displayPending: 'some-string',
       },
       updateType: 'pin',
       depNameLinked:
