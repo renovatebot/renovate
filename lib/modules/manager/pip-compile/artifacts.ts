@@ -19,18 +19,10 @@ export function constructPipCompileCmd(
   const defaultSourceFile = outputFileName.replace('.txt', '.in');
   try {
     const pipCompileArgs = extractHeaderCommand(content, outputFileName);
-    if (pipCompileArgs.argv.length === 0) {
-      throw new Error('Failed to parse extracted command');
-    }
     if (strict && pipCompileArgs.isCustomCommand) {
       logger.error({ command: pipCompileArgs.command }, 'Custom command');
       throw new Error(
         'Custom command detected, disable strict mode if self-hosted',
-      );
-    }
-    if (pipCompileArgs.sourceFiles.length === 0) {
-      throw new Error(
-        'No source files detected in command, pass at least one package file explicitly',
       );
     }
     // TODO(not7cd): sanitize args that require quotes, .map((argument) => quote(argument))

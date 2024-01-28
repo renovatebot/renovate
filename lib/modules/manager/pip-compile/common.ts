@@ -103,88 +103,90 @@ interface PipCompileArgs {
 export function extractHeaderCommand(
   content: string,
   outputFileName: string,
-): PipCompileArgs | null {
+): PipCompileArgs {
   const strict: boolean = true; // TODO(not7cd): add to function params
   const compileCommand = constraintLineRegex.exec(content);
-  if (compileCommand?.groups) {
-    logger.debug(
-      `Found pip-compile header in ${outputFileName}: \n${compileCommand[0]}`,
-    );
-  } else {
+  if (compileCommand?.groups === undefined) {
     throw new Error(
       `Failed to extract command from header in ${outputFileName}`,
     );
-  }
-  if (compileCommand?.groups) {
-    try {
-      const command = compileCommand.groups.command;
-      const argv: string[] = [command];
-      const isCustomCommand = command !== 'pip-compile';
-      if (strict && isCustomCommand) {
-        throw new Error(
-          `Command "${command}" != "pip-compile", header modified or set by CUSTOM_COMPILE_COMMAND`,
-        );
-      }
-      if (isCustomCommand) {
-        logger.debug(`Custom command ${command} detected`);
-      }
-      if (compileCommand.groups.arguments) {
-        argv.push(...split(compileCommand.groups.arguments));
-      }
-      logger.debug({ argv }, 'Extracted pip-compile command from header');
-      for (const arg of argv) {
-        // TODO(not7cd): check for "--option -- argument" case
-        if (!arg.startsWith('-')) {
-          continue;
-        }
-        throwForDisallowedOption(arg);
-        throwForNoEqualSignInOptionWithArgument(arg);
-        if (strict) {
-          throwForUnknownOption(arg);
-        }
-      }
-
-      // Commander.parse is expecting argv[0] to be process.execPath, pass empty string as first value
-      const parsedCommand = dummyPipCompile.parse(['', ...argv]);
-      const options = parsedCommand.opts();
-      const sourceFiles = parsedCommand.args;
-      logger.debug(
-        {
-          argv,
-          options,
-          sourceFiles,
-          isCustomCommand,
-        },
-        'Parsed pip-compile command from header',
-      );
-      if (options.outputFile) {
-        // TODO(not7cd): This file path can be relative like `reqs/main.txt`
-        const file = upath.parse(outputFileName).base;
-        if (options.outputFile !== file) {
-          // we don't trust the user-supplied output-file argument; TODO(not7cd): use our value here
-          logger.warn(
-            { outputFile: options.outputFile, actualPath: file },
-            'pip-compile was previously executed with an unexpected `--output-file` filename',
-          );
-        }
-        const outputFile = options.outputFile;
-        return {
-          argv,
-          command,
-          isCustomCommand,
-          outputFile,
-          sourceFiles,
-        };
-      }
-    } catch (error) {
-      logger.error(
-        error,
-        'Failed to parse pip-compile command from header with commander',
+  } else {
+    logger.debug(
+      `Found pip-compile header in ${outputFileName}: \n${compileCommand[0]}`,
+    );
+    const command = compileCommand.groups.command;
+    const argv: string[] = [command];
+    const isCustomCommand = command !== 'pip-compile';
+    if (strict && isCustomCommand) {
+      throw new Error(
+        `Command "${command}" != "pip-compile", header modified or set by CUSTOM_COMPILE_COMMAND`,
       );
     }
+    if (isCustomCommand) {
+      logger.debug(`Custom command ${command} detected`);
+    }
+    if (compileCommand.groups.arguments) {
+      argv.push(...split(compileCommand.groups.arguments));
+    }
+    logger.debug({ argv }, 'Extracted pip-compile command from header');
+    for (const arg of argv) {
+      // TODO(not7cd): check for "--option -- argument" case
+      if (!arg.startsWith('-')) {
+        continue;
+      }
+      throwForDisallowedOption(arg);
+      throwForNoEqualSignInOptionWithArgument(arg);
+      if (strict) {
+        throwForUnknownOption(arg);
+      }
+    }
+
+    // Commander.parse is expecting argv[0] to be process.execPath, pass empty string as first value
+    const parsedCommand = dummyPipCompile.parse(['', ...argv]);
+    const options = parsedCommand.opts();
+    const sourceFiles = parsedCommand.args;
+    logger.debug(
+      {
+        argv,
+        options,
+        sourceFiles,
+        isCustomCommand,
+      },
+      'Parsed pip-compile command from header',
+    );
+    if (sourceFiles.length === 0) {
+      throw new Error(
+        'No source files detected in command, pass at least one package file explicitly',
+      );
+    }
+    if (options.outputFile) {
+      // TODO(not7cd): This file path can be relative like `reqs/main.txt`
+      const file = upath.parse(outputFileName).base;
+      if (options.outputFile !== file) {
+        // we don't trust the user-supplied output-file argument; TODO(not7cd): use our value here
+        logger.warn(
+          { outputFile: options.outputFile, actualPath: file },
+          'pip-compile was previously executed with an unexpected `--output-file` filename',
+        );
+      }
+      const outputFile = options.outputFile;
+      return {
+        argv,
+        command,
+        isCustomCommand,
+        outputFile,
+        sourceFiles,
+      };
+    }
+    logger.debug('Implicit output file');
+    return {
+      argv,
+      command,
+      isCustomCommand,
+      outputFile: '',
+      sourceFiles,
+    };
   }
-  logger.trace({ compileCommand }, 'Failed to parse command');
-  return null;
 }
 
 function throwForDisallowedOption(arg: string): void {

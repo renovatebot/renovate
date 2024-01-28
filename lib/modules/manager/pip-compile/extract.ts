@@ -54,32 +54,33 @@ export async function extractAllPackageFiles(
     const lockFileContent = await readLocalFile(lockFile, 'utf8');
     // istanbul ignore else
     if (lockFileContent) {
-      const pipCompileArgs = extractHeaderCommand(lockFileContent, lockFile);
-      if (!pipCompileArgs) {
-        logger.warn({ lockFile }, 'Failed to parse command in header');
-        continue;
-      }
-      // TODO(not7cd): handle locked deps
-      // const lockedDeps = extractRequirementsFile(content);
-      for (const sourceFile of pipCompileArgs.sourceFiles) {
-        const content = await readLocalFile(sourceFile, 'utf8');
-        if (content) {
-          const deps = await extractPackageFile(content, sourceFile, config);
-          if (deps) {
-            result.push({
-              ...deps,
-              lockFiles: [lockFile],
-              packageFile: sourceFile,
-            });
+      try {
+        const pipCompileArgs = extractHeaderCommand(lockFileContent, lockFile);
+        // TODO(not7cd): handle locked deps
+        // const lockedDeps = extractRequirementsFile(content);
+        for (const sourceFile of pipCompileArgs.sourceFiles) {
+          const content = await readLocalFile(sourceFile, 'utf8');
+          if (content) {
+            const deps = await extractPackageFile(content, sourceFile, config);
+            if (deps) {
+              result.push({
+                ...deps,
+                lockFiles: [lockFile],
+                packageFile: sourceFile,
+              });
+            } else {
+              logger.error(
+                { packageFile: sourceFile },
+                'Failed to extract dependencies',
+              );
+            }
           } else {
-            logger.error(
-              { packageFile: sourceFile },
-              'Failed to extract dependencies',
-            );
+            logger.debug({ packageFile: sourceFile }, 'No content found');
           }
-        } else {
-          logger.debug({ packageFile: sourceFile }, 'No content found');
         }
+      } catch (error) {
+        logger.warn(error, 'Failed to parse pip-compile command from header');
+        continue;
       }
     } else {
       logger.debug({ packageFile: lockFile }, 'No content found');
