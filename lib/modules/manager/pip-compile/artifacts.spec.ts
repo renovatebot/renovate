@@ -166,7 +166,11 @@ describe('modules/manager/pip-compile/artifacts', () => {
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: { ...config, constraints: { python: '3.10.2' } },
+        config: {
+          ...config,
+          constraints: { python: '3.10.2' },
+          lockFiles: ['requirements.txt'],
+        },
       }),
     ).not.toBeNull();
 
@@ -191,7 +195,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config,
+        config: { ...config, lockFiles: ['requirements.txt'] },
       }),
     ).toEqual([
       {
@@ -215,7 +219,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: lockMaintenanceConfig,
+        config: { ...lockMaintenanceConfig, lockFiles: ['requirements.txt'] },
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchObject([
@@ -245,6 +249,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         config: {
           ...config,
           constraints: { python: '3.10.2', pipTools: '6.13.0' },
+          lockFiles: ['requirements.txt'],
         },
       }),
     ).not.toBeNull();
