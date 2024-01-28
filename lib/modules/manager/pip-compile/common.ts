@@ -128,8 +128,6 @@ export function extractHeaderCommand(
       if (isCustomCommand) {
         logger.debug(`Custom command ${command} detected`);
       }
-
-      // all arguments are optional, TODO(not7cd): decide if require explicit args
       if (compileCommand.groups.arguments) {
         argv.push(...split(compileCommand.groups.arguments));
       }
@@ -146,10 +144,8 @@ export function extractHeaderCommand(
         }
       }
 
-      const parsedCommand = dummyPipCompile.parse(
-        // parse is expecting argv[0] to be process.execPath
-        [''].concat(argv),
-      );
+      // Commander.parse is expecting argv[0] to be process.execPath, pass empty string as first value
+      const parsedCommand = dummyPipCompile.parse(['', ...argv]);
       const options = parsedCommand.opts();
       const sourceFiles = parsedCommand.args;
       logger.debug(
