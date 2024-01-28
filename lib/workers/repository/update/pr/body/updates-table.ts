@@ -121,6 +121,9 @@ function compareTableValues(
   let score = 0;
 
   for (const header of prBodyColumns) {
+    if (!b[header] && !a[header]) {
+      continue;
+    }
     if (!b[header]) {
       score--;
       continue;
@@ -130,8 +133,9 @@ function compareTableValues(
       continue;
     }
 
-    a[header].length < b[header].length ? score++ : score--;
+    if (a[header] !== b[header]) {
+      a[header].length < b[header].length ? score++ : score--;
+    }
   }
-
   return score > 0 ? b : a;
 }

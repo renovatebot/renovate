@@ -162,6 +162,29 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         Update: '{{{updateType}}}',
         'Current value': '{{{currentValue}}}',
         'New value': '{{{newValue}}}',
+        Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
+      },
+      updateType: 'pin',
+      depNameLinked:
+        '[mocha](https://mochajs.org/) ([source](https://github.com/mochajs/mocha))',
+      depType: 'devDependencies',
+      depName: 'mocha',
+      currentValue: '^6.2.3',
+      newValue: '6.2.3',
+      displayFrom: '^6.2.3',
+      displayTo: '6.2.3',
+    });
+
+    // duplicate of upgrade1
+    const upgrade2 = partial<BranchUpgradeConfig>({
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      prBodyDefinitions: {
+        Package: '{{{depNameLinked}}}',
+        Type: '{{{depType}}}',
+        Update: '{{{updateType}}}',
+        'Current value': '{{{currentValue}}}',
+        'New value': '{{{newValue}}}',
         Change:
           "[{{#if displayFrom}}`{{{displayFrom}}}` -> {{else}}{{#if currentValue}}`{{{currentValue}}}` -> {{/if}}{{/if}}{{#if displayTo}}`{{{displayTo}}}`{{else}}`{{{newValue}}}`{{/if}}]({{#if depName}}https://renovatebot.com/diffs/npm/{{replace '/' '%2f' depName}}/{{{currentVersion}}}/{{{newVersion}}}{{/if}})",
       },
@@ -179,19 +202,13 @@ describe('workers/repository/update/pr/body/updates-table', () => {
     });
 
     // duplicate of upgrade1
-    const upgrade2 = partial<BranchUpgradeConfig>({
+    const upgrade3 = partial<BranchUpgradeConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
+      updateType: 'pin',
       prBodyDefinitions: {
-        Package: '{{{depNameLinked}}}',
-        Type: '{{{depType}}}',
-        Update: '{{{updateType}}}',
-        'Current value': '{{{currentValue}}}',
-        'New value': '{{{newValue}}}',
-        Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',
         Pending: '{{{displayPending}}}',
       },
-      updateType: 'pin',
       depNameLinked:
         '[mocha](https://mochajs.org/) ([source](https://github.com/mochajs/mocha))',
       depType: 'devDependencies',
@@ -201,21 +218,6 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       displayFrom: '^6.2.3',
       displayTo: '6.2.3',
       displayPending: 'some-string',
-    });
-
-    // duplicate of upgrade1
-    const upgrade3 = partial<BranchUpgradeConfig>({
-      manager: 'some-manager',
-      branchName: 'some-branch',
-      updateType: 'pin',
-      depNameLinked:
-        '[mocha](https://mochajs.org/) ([source](https://github.com/mochajs/mocha))',
-      depType: 'devDependencies',
-      depName: 'mocha',
-      currentValue: '^6.2.3',
-      newValue: '6.2.3',
-      displayFrom: '^6.2.3',
-      displayTo: '6.2.3',
     });
 
     const configObj: BranchConfig = {
