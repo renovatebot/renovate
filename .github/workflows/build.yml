@@ -264,7 +264,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@455b6612a7b7a80f28be9e019b70abdd11696e4e # v14.0.0
+        uses: DavidAnson/markdownlint-cli2-action@510b996878fc0d1a46c8a04ec86b06dbfba09de7 # v15.0.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
