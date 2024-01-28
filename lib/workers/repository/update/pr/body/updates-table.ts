@@ -50,7 +50,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     if (upgrade) {
       // Create a key based on the properties which are significant in the updates table
       const key = `${upgrade.depName ?? ''}_${upgrade.depType ?? ''}_${
-        upgrade.newValue ?? upgrade.newValue ?? ''
+        upgrade.newValue ?? upgrade.newVersion ?? ''
       }_${upgrade.currentValue ?? upgrade.currentVersion ?? ''}_${
         upgrade.updateType
       }`;
@@ -121,12 +121,12 @@ function compareTableValues(
   let score = 0;
 
   for (const header of prBodyColumns) {
-    if (!a[header]) {
-      score++;
-      continue;
-    }
     if (!b[header]) {
       score--;
+      continue;
+    }
+    if (!a[header]) {
+      score++;
       continue;
     }
 
