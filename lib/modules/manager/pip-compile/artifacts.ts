@@ -16,20 +16,15 @@ export function constructPipCompileCmd(
   outputFileName: string,
   strict: boolean = true,
 ): string {
-  const defaultSourceFile = outputFileName.replace('.txt', '.in');
-  try {
-    const pipCompileArgs = extractHeaderCommand(content, outputFileName);
-    if (strict && pipCompileArgs.isCustomCommand) {
-      logger.error({ command: pipCompileArgs.command }, 'Custom command');
-      throw new Error(
-        'Custom command detected, disable strict mode if self-hosted',
-      );
-    }
-    // TODO(not7cd): sanitize args that require quotes, .map((argument) => quote(argument))
-    return pipCompileArgs.argv.join(' ');
-  } catch (error) {
-    return `pip-compile ${defaultSourceFile}`;
+  const pipCompileArgs = extractHeaderCommand(content, outputFileName);
+  if (strict && pipCompileArgs.isCustomCommand) {
+    logger.error({ command: pipCompileArgs.command }, 'Custom command');
+    throw new Error(
+      'Custom command detected, disable strict mode if self-hosted',
+    );
   }
+  // TODO(not7cd): sanitize args that require quotes, .map((argument) => quote(argument))
+  return pipCompileArgs.argv.join(' ');
 }
 
 export async function updateArtifacts({
