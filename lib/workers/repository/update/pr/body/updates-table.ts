@@ -45,12 +45,18 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     return '';
   }
 
-  // filter duplicate upgrades
-  const tableValues = filterDuplicateUpgrades(config.upgrades)
-    .filter((upgrade) => upgrade !== undefined)
-    .map((upgrade) => {
+  const tableKeyValuePairs: Record<string, Record<string, string>> = {};
+  for (const upgrade of config.upgrades) {
+    if (upgrade) {
+      // Create a key based on the properties which are significant in the updates table
+      const key = `${upgrade.depName ?? ''}_${upgrade.depType ?? ''}_${
+        upgrade.newValue ?? upgrade.newValue ?? ''
+      }_${upgrade.currentValue ?? upgrade.currentVersion ?? ''}_${
+        upgrade.updateType
+      }`;
+
       const res: Record<string, string> = {};
-      const rowDefinition = getRowDefinition(config.prBodyColumns!, upgrade);
+      const rowDefinition = getRowDefinition(config.prBodyColumns, upgrade);
       for (const column of rowDefinition) {
         const { header, value } = column;
         try {
@@ -66,8 +72,22 @@ export function getPrUpdatesTable(config: BranchConfig): string {
           logger.warn({ header, value, err }, 'Handlebars compilation error');
         }
       }
-      return res;
-    });
+
+      if (tableKeyValuePairs[key]) {
+        // compare the duplicate upgrades as per their table values
+        // and select one with better values
+        tableKeyValuePairs[key] = compareTableValues(
+          tableKeyValuePairs[key],
+          res,
+          config.prBodyColumns,
+        );
+      } else {
+        tableKeyValuePairs[key] = res;
+      }
+    }
+  }
+
+  const tableValues = Object.values(tableKeyValuePairs);
   const tableColumns = getNonEmptyColumns(config.prBodyColumns, tableValues);
   let res = '\n\nThis PR contains the following updates:\n\n';
   res += '| ' + tableColumns.join(' | ') + ' |\n';
@@ -92,29 +112,26 @@ export function getPrUpdatesTable(config: BranchConfig): string {
   return res;
 }
 
-function filterDuplicateUpgrades(
-  upgrades: BranchUpgradeConfig[],
-): BranchUpgradeConfig[] {
-  const uniqueUpgradeKeys = new Set();
+// return the row with better table values
+function compareTableValues(
+  a: Record<string, string>,
+  b: Record<string, string>,
+  prBodyColumns: string[],
+): Record<string, string> {
+  let score = 0;
 
-  const uniqueUpgrades = upgrades
-    .filter((upgrade) => upgrade !== undefined)
-    .filter((upgrade) => {
-      // Create a key based on the properties which are significant in the updates table
-      const key = `${upgrade.depName ?? ''}_${upgrade.depType ?? ''}_${
-        upgrade.newValue ?? upgrade.newValue ?? ''
-      }_${upgrade.currentValue ?? upgrade.currentVersion ?? ''}_${
-        upgrade.updateType
-      }`;
+  for (const header of prBodyColumns) {
+    if (!a[header]) {
+      score++;
+      continue;
+    }
+    if (!b[header]) {
+      score--;
+      continue;
+    }
 
-      // Check if the key already exists
-      if (!uniqueUpgradeKeys.has(key)) {
-        uniqueUpgradeKeys.add(key);
-        return true;
-      }
+    a[header].length < b[header].length ? score++ : score--;
+  }
 
-      return false;
-    });
-
-  return uniqueUpgrades;
+  return score > 0 ? b : a;
 }
