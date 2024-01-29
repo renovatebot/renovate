@@ -1,8 +1,10 @@
+import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 import type { NugetRange, NugetVersion } from './types';
 
 const version =
-  /(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?(?:-([^+]+))?(?:\+([^+]+))?/.source;
+  /(\d+)(?:\s*\.\s*(\d+))?(?:\s*\.\s*(\d+))?(?:\s*\.\s*(\d+))?(?:-([^+*^]+))?(?:\+([^+*^]+))?/
+    .source;
 
 const [
   versionPattern,
@@ -49,25 +51,47 @@ function num(s: string | undefined): number | undefined {
 }
 
 export function parseVersion(input: string): NugetVersion | null {
-  const versionMatch = versionPattern.exec(input);
+  if (!input) {
+    return null;
+  }
+
+  const versionMatch = versionPattern.exec(input.trim());
   if (!versionMatch) {
     return null;
   }
 
-  const [, major, minor, patch, revision, prerelease, metadata] = versionMatch;
+  const [, majorStr, minorStr, patchStr, revisionStr, prerelease, metadata] =
+    versionMatch;
+  const major = num(majorStr)!;
+  const minor = num(minorStr);
+  const patch = num(patchStr);
+  const revision = num(revisionStr);
+
+  if (
+    [major, minor, patch, revision].some((n) =>
+      is.number(n) ? n >= 0x80000000 : false,
+    )
+  ) {
+    return null;
+  }
+
   return {
     type: 'version',
-    major: num(major)!,
-    minor: num(minor),
-    patch: num(patch),
-    revision: num(revision),
+    major,
+    minor,
+    patch,
+    revision,
     prerelease,
     metadata,
   };
 }
 
 export function parseRange(input: string): NugetRange | null {
-  const exactMatch = exactPattern.exec(input);
+  if (!input) {
+    return null;
+  }
+
+  const exactMatch = exactPattern.exec(input.trim());
   if (exactMatch) {
     const [, major, minor, patch, revision, prerelease, metadata] = exactMatch;
     return {
