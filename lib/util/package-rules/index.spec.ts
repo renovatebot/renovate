@@ -43,7 +43,6 @@ describe('util/package-rules/index', () => {
       depName: 'a',
       isBump: true,
       currentValue: '1.0.0',
-      labels: ['bump'],
       packageRules: [
         {
           matchPackagePatterns: ['*'],
@@ -58,6 +57,7 @@ describe('util/package-rules/index', () => {
         },
         {
           matchUpdateTypes: ['bump'],
+          labels: ['bump'],
         },
         {
           excludePackageNames: ['a'],
