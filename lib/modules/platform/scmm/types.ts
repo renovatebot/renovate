@@ -6,17 +6,17 @@ export type Page<T> = {
 
 export interface Links {
   [link: string]: Link | Link[] | undefined;
-};
+}
 
 export interface Link {
   href: string;
   name?: string;
   templated?: boolean;
-};
+}
 
 export interface PullRequestPage {
   pullRequests: PullRequest[];
-};
+}
 
 export interface PullRequestCreateParams extends PullRequestUpdateParams {
   source: string;

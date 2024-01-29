@@ -1,5 +1,6 @@
-import type { AxiosInstance } from 'axios';
-import axios from 'axios';
+import { Http } from '../../../util/http';
+import type { HttpOptions } from '../../../util/http/types';
+import { resolveBaseUrl } from '../../../util/url';
 import type {
   Link,
   Page,
@@ -13,11 +14,13 @@ import type {
 } from './types';
 
 const URLS = {
-  ME: 'me',
-  ALLREPOS: 'repositories',
+  ME: '/me',
+  ALL_REPOS: 'repositories?pageSize=1000000',
   REPO: (repoPath: string) => `repositories/${repoPath}`,
   PULLREQUESTS: (repoPath: string) => `pull-requests/${repoPath}`,
-  PULLREQUESTBYID: (repoPath: string, id: number) =>
+  PULLREQUESTS_WITH_PAGINATION: (repoPath: string) =>
+    `pull-requests/${repoPath}?status=ALL&pageSize=1000000`,
+  PULLREQUEST_BY_ID: (repoPath: string, id: number) =>
     `pull-requests/${repoPath}/${id}`,
 };
 
@@ -26,94 +29,89 @@ const CONTENT_TYPES = {
 };
 
 export default class ScmClient {
-  private httpClient: AxiosInstance;
+  private readonly httpClient: Http;
+  private readonly endpoint: string;
 
   constructor(endpoint: string, token: string) {
-    this.httpClient = axios.create({
-      baseURL: endpoint,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: '*',
-        'X-Scm-Client': 'WUI',
-      },
+    this.endpoint = endpoint;
+    this.httpClient = new Http<HttpOptions>('scmm', {
+      throwHttpErrors: true,
     });
   }
 
   public getEndpoint(): string {
-    /* istanbul ignore next */
-    if (!this.httpClient.defaults.baseURL) {
-      throw new Error('BaseURL is not defined');
-    }
-
-    return this.httpClient.defaults.baseURL;
+    return this.endpoint;
   }
 
   public async getCurrentUser(): Promise<User> {
-    const response = await this.httpClient.get<User>(URLS.ME);
-    return response.data;
+    const response = await this.httpClient.getJson<User>(
+      resolveBaseUrl(this.endpoint, URLS.ME),
+    );
+    return response.body;
   }
 
   public async getRepo(repoPath: string): Promise<Repo> {
-    const response = await this.httpClient.get<Repo>(URLS.REPO(repoPath));
-    return response.data;
+    const response = await this.httpClient.getJson<Repo>(
+      resolveBaseUrl(this.endpoint, URLS.REPO(repoPath)),
+    );
+    return response.body;
   }
 
   public async getAllRepos(): Promise<Repo[]> {
-    const response = await this.httpClient.get<Page<RepoPage>>(URLS.ALLREPOS, {
-      params: { pageSize: 1000000 },
-    });
+    const response = await this.httpClient.getJson<Page<RepoPage>>(
+      resolveBaseUrl(this.endpoint, URLS.ALL_REPOS),
+    );
 
-    return response.data._embedded.repositories;
+    return response.body._embedded.repositories;
   }
 
   public async getDefaultBranch(repo: Repo): Promise<string> {
     const defaultBranchUrl = repo._links['defaultBranch'] as Link;
-    const response = await this.httpClient.get<{ defaultBranch: string }>(
+    const response = await this.httpClient.getJson<{ defaultBranch: string }>(
       defaultBranchUrl.href,
-      { baseURL: undefined },
     );
 
-    return response.data.defaultBranch;
+    return response.body.defaultBranch;
   }
 
   public async getAllRepoPrs(repoPath: string): Promise<PullRequest[]> {
-    const response = await this.httpClient.get<Page<PullRequestPage>>(
-      URLS.PULLREQUESTS(repoPath),
-      {
-        params: { status: 'ALL', pageSize: 1000000 },
-      },
+    const response = await this.httpClient.getJson<Page<PullRequestPage>>(
+      resolveBaseUrl(
+        this.endpoint,
+        URLS.PULLREQUESTS_WITH_PAGINATION(repoPath),
+      ),
     );
-    return response.data._embedded.pullRequests;
+    return response.body._embedded.pullRequests;
   }
 
   public async getRepoPr(repoPath: string, id: number): Promise<PullRequest> {
-    const response = await this.httpClient.get<PullRequest>(
-      URLS.PULLREQUESTBYID(repoPath, id),
+    const response = await this.httpClient.getJson<PullRequest>(
+      resolveBaseUrl(this.endpoint, URLS.PULLREQUEST_BY_ID(repoPath, id)),
     );
 
-    return response.data;
+    return response.body;
   }
 
   public async createPr(
     repoPath: string,
     params: PullRequestCreateParams,
   ): Promise<PullRequest> {
-    const createPrResponse = await this.httpClient.post(
-      URLS.PULLREQUESTS(repoPath),
-      params,
+    const createPrResponse = await this.httpClient.postJson(
+      resolveBaseUrl(this.endpoint, URLS.PULLREQUESTS(repoPath)),
       {
+        body: params,
         headers: {
           'Content-Type': CONTENT_TYPES.PULLREQUESTS,
         },
       },
     );
 
-    const getCreatedPrResponse = await this.httpClient.get<PullRequest>(
-      createPrResponse.headers.location,
-      { baseURL: undefined },
+    const getCreatedPrResponse = await this.httpClient.getJson<PullRequest>(
+      /* istanbul ignore next: Just to please the compiler, location would never be undefined */
+      createPrResponse.headers.location ?? '',
     );
 
-    return getCreatedPrResponse.data;
+    return getCreatedPrResponse.body;
   }
 
   public async updatePr(
@@ -121,10 +119,14 @@ export default class ScmClient {
     id: number,
     params: PullRequestUpdateParams,
   ): Promise<void> {
-    await this.httpClient.put(URLS.PULLREQUESTBYID(repoPath, id), params, {
-      headers: {
-        'Content-Type': CONTENT_TYPES.PULLREQUESTS,
+    await this.httpClient.putJson(
+      resolveBaseUrl(this.endpoint, URLS.PULLREQUEST_BY_ID(repoPath, id)),
+      {
+        body: params,
+        headers: {
+          'Content-Type': CONTENT_TYPES.PULLREQUESTS,
+        },
       },
-    });
+    );
   }
 }
