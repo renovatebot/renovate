@@ -4,6 +4,7 @@ import { PypiDatasource } from '../../datasource/pypi';
 
 export { extractAllPackageFiles, extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
+export { updateLockedDependency } from './update-locked';
 
 export const supportsLockFileMaintenance = true;
 

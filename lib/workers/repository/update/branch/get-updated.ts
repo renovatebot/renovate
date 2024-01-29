@@ -91,7 +91,12 @@ export async function getUpdatedPackageFiles(
     }
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
-    } else if (upgrade.isRemediation) {
+    } else if (upgrade.isRemediation || upgrade.depType === 'pip-indirect') {
+      // TODO(not7cd): refactor this hack
+      logger.debug(
+        { depType: upgrade.depType, depName },
+        'updateLockedDependency',
+      );
       const { status, files } = await updateLockedDependency({
         ...upgrade,
         depName,
