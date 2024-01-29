@@ -325,15 +325,18 @@ async function resetNpmrcContent(
 export function fuzzyMatchAdditionalYarnrcYml<
   T extends { npmRegistries?: Record<string, unknown> },
 >(additionalYarnRcYml: T, existingYarnrRcYml: T): T {
+  const keys = new Map(
+    Object.keys(existingYarnrRcYml.npmRegistries ?? {}).map((x) => [
+      x.replace(/\/$/, '').replace(/^https?:/, ''),
+      x,
+    ]),
+  );
+
   return {
     ...additionalYarnRcYml,
     npmRegistries: Object.entries(additionalYarnRcYml.npmRegistries ?? {})
       .map(([k, v]) => {
-        const key =
-          Object.keys(existingYarnrRcYml.npmRegistries ?? {}).find(
-            // match without trailing slashes
-            (x) => x.replace(/\/$/, '').endsWith(k.replace(/\/$/, '')),
-          ) ?? k;
+        const key = keys.get(k.replace(/\/$/, '')) ?? k;
         return { [key]: v };
       })
       .reduce((acc, cur) => ({ ...acc, ...cur }), {}),
