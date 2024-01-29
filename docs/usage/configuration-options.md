@@ -412,6 +412,7 @@ This is an advanced field, and it's recommend you seek a config review before ap
 
 Currently, this config option only works with these managers:
 
+- `cargo`
 - `helmv3`
 - `npm`
 - `nuget`
@@ -2395,6 +2396,32 @@ Use the syntax `!/ /` like the following:
   ]
 }
 ```
+
+### matchCurrentAge
+
+Use this field if you want to match packages based on the age of the _current_ (existing, in-repo) version.
+
+For example, if you want to group updates for dependencies where the existing version is more than 2 years old:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchCurrentAge": "> 2 years",
+      "groupName": "old dependencies"
+    }
+  ]
+}
+```
+
+The `matchCurrentAge` string must start with one of `>`, `>=`, `<` or `<=`.
+
+Only _one_ date part is supported, so you _cannot_ do `> 1 year 1 month`.
+Instead you should do `> 13 months`.
+
+<!-- prettier-ignore -->
+!!! note
+    We recommend you only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
 
 ### matchDepTypes
 
