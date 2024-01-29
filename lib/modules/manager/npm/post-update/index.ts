@@ -601,7 +601,7 @@ export async function getAdditionalFiles(
 
           await writeLocalFile(yarnRcYmlFilename, dump(updatedYarnYrcYml));
           logger.debug('Added authentication to .yarnrc.yml');
-        } catch (err) {
+        } catch (err) /* istanbul ignore next */ {
           logger.warn({ err }, 'Error appending .yarnrc.yml content');
         }
       }
