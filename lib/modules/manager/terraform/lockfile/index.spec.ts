@@ -1118,7 +1118,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
       ).toBe('>= 2.36.0, 2.46.0');
     });
 
-    it('update constraint with multiple element ranges', () => {
+    it('update constraint when current version is matched multiple times', () => {
       expect(
         getNewConstraint(
           {
@@ -1128,7 +1128,7 @@ describe('modules/manager/terraform/lockfile/index', () => {
           },
           '>= 2.41.0, 2.41.0',
         ),
-      ).toBe('>= 2.46.0, 2.46.0');
+      ).toBe('>= 2.41.0, 2.46.0');
     });
 
     it('create constraint with full version', () => {
