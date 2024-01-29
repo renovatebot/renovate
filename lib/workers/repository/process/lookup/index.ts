@@ -257,8 +257,11 @@ export async function lookupUpdates(
           latestVersion!,
           allVersions.map((v) => v.version),
         )!;
-      // istanbul ignore if
-      if (!currentVersion! && config.lockedVersion) {
+
+      if (!currentVersion) {
+        if (!config.lockedVersion) {
+          res.skipReason = 'invalid-value';
+        }
         return res;
       }
 
