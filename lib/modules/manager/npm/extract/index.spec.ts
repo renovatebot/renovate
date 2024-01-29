@@ -366,8 +366,7 @@ describe('modules/manager/npm/extract/index', () => {
           {
             depName: 'node',
             currentValue: '>= 8.9.2',
-            datasource: 'github-tags',
-            versioning: 'node',
+            datasource: 'node-version',
             depType: 'engines',
           },
           {
@@ -462,12 +461,10 @@ describe('modules/manager/npm/extract/index', () => {
           {
             commitMessageTopic: 'Node.js',
             currentValue: '8.9.2',
-            datasource: 'github-tags',
+            datasource: 'node-version',
             depName: 'node',
             depType: 'volta',
-            packageName: 'nodejs/node',
             prettyDepType: 'volta',
-            versioning: 'node',
           },
           {
             commitMessageTopic: 'Yarn',
@@ -506,12 +503,10 @@ describe('modules/manager/npm/extract/index', () => {
           {
             commitMessageTopic: 'Node.js',
             currentValue: '16.0.0',
-            datasource: 'github-tags',
+            datasource: 'node-version',
             depName: 'node',
             depType: 'volta',
-            packageName: 'nodejs/node',
             prettyDepType: 'volta',
-            versioning: 'node',
           },
           {
             commitMessageTopic: 'Yarn',
@@ -683,12 +678,10 @@ describe('modules/manager/npm/extract/index', () => {
           {
             commitMessageTopic: 'Node.js',
             currentValue: '8.9.2',
-            datasource: 'github-tags',
+            datasource: 'node-version',
             depName: 'node',
             depType: 'engines',
-            packageName: 'nodejs/node',
             prettyDepType: 'engine',
-            versioning: 'node',
           },
           {
             commitMessageTopic: 'Yarn',
