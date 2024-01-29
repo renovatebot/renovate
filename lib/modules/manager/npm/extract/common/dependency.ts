@@ -3,6 +3,7 @@ import validateNpmPackageName from 'validate-npm-package-name';
 import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags';
+import { NodeVersionDatasource } from '../../../../datasource/node-version';
 import { NpmDatasource } from '../../../../datasource/npm';
 import * as nodeVersioning from '../../../../versioning/node';
 import { api, isValid, isVersion } from '../../../../versioning/npm';
@@ -38,9 +39,7 @@ export function extractDependency(
   dep.currentValue = input.trim();
   if (depType === 'engines' || depType === 'packageManager') {
     if (depName === 'node') {
-      dep.datasource = GithubTagsDatasource.id;
-      dep.packageName = 'nodejs/node';
-      dep.versioning = nodeVersioning.id;
+      dep.datasource = NodeVersionDatasource.id;
     } else if (depName === 'yarn') {
       dep.datasource = NpmDatasource.id;
       dep.commitMessageTopic = 'Yarn';
@@ -70,9 +69,7 @@ export function extractDependency(
   // support for volta
   if (depType === 'volta') {
     if (depName === 'node') {
-      dep.datasource = GithubTagsDatasource.id;
-      dep.packageName = 'nodejs/node';
-      dep.versioning = nodeVersioning.id;
+      dep.datasource = NodeVersionDatasource.id;
     } else if (depName === 'yarn') {
       dep.datasource = NpmDatasource.id;
       dep.commitMessageTopic = 'Yarn';
