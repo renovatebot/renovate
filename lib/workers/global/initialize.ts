@@ -1,7 +1,6 @@
 import os from 'node:os';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { GlobalConfig } from '../../config/global';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
