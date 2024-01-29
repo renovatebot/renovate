@@ -331,15 +331,14 @@ describe('modules/manager/maven/index', () => {
         'simple.pom.xml',
         'profile.settings.xml',
       ]);
-      const urls = new Set([
+      const urls = [
         'https://repo.adobe.com/nexus/content/groups/public',
         'https://maven.atlassian.com/content/repositories/atlassian-public/',
         'https://repo.maven.apache.org/maven2',
-      ]);
+      ];
       packages.forEach(({ deps }) => {
         deps.forEach(({ registryUrls }) => {
-          const depUrls = new Set([...registryUrls!]);
-          expect([...depUrls]).toStrictEqual([...urls]);
+          expect(registryUrls).toStrictEqual(urls);
         });
       });
     });

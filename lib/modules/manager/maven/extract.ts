@@ -370,8 +370,8 @@ export function parseSettings(raw: string): XmlDocument | null {
     [
       'http://maven.apache.org/SETTINGS/1.0.0',
       'http://maven.apache.org/SETTINGS/1.1.0',
-      'http://maven.apache.org/SETTINGS/1.2.0'
-     ].includes(attr.xmlns)
+      'http://maven.apache.org/SETTINGS/1.2.0',
+    ].includes(attr.xmlns)
   ) {
     return settings;
   }
