@@ -4,17 +4,17 @@ export type Page<T> = {
   _embedded: T;
 };
 
-export type Links = {
+export interface Links {
   [link: string]: Link | Link[] | undefined;
 };
 
-export type Link = {
+export interface Link {
   href: string;
   name?: string;
   templated?: boolean;
 };
 
-export type PullRequestPage = {
+export interface PullRequestPage {
   pullRequests: PullRequest[];
 };
 
