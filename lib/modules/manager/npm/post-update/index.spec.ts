@@ -12,6 +12,7 @@ import type { AdditionalPackageFiles } from './types';
 import * as yarn from './yarn';
 import {
   determineLockFileDirs,
+  fuzzyMatchAdditionalYarnrcYml,
   getAdditionalFiles,
   updateYarnBinary,
   writeExistingFiles,
@@ -23,7 +24,6 @@ jest.mock('../../../../util/git');
 jest.mock('./npm');
 jest.mock('./yarn');
 jest.mock('./pnpm');
-jest.mock('./rules');
 
 describe('modules/manager/npm/post-update/index', () => {
   let baseConfig: PostUpdateConfig;
@@ -691,7 +691,7 @@ describe('modules/manager/npm/post-update/index', () => {
           additionalNpmrcContent: [],
           additionalYarnRcYml: {
             npmRegistries: {
-              '//my-private-regsistry': {
+              '//my-private-registry': {
                 npmAuthToken: 'xxxxxx',
               },
             },
@@ -705,7 +705,7 @@ describe('modules/manager/npm/post-update/index', () => {
           if (f === '.yarnrc.yml') {
             return Promise.resolve(
               'npmRegistries:\n' +
-                '  https://my-private-regsistry:\n' +
+                '  https://my-private-registry:\n' +
                 '    npmAlwaysAuth: true\n',
             );
           }
@@ -724,7 +724,7 @@ describe('modules/manager/npm/post-update/index', () => {
         expect(fs.writeLocalFile).toHaveBeenCalledWith(
           '.yarnrc.yml',
           'npmRegistries:\n' +
-            '  https://my-private-regsistry:\n' +
+            '  https://my-private-registry:\n' +
             '    npmAlwaysAuth: true\n' +
             '    npmAuthToken: xxxxxx\n',
         );
@@ -735,7 +735,7 @@ describe('modules/manager/npm/post-update/index', () => {
           if (f === '.yarnrc.yml') {
             return Promise.resolve(
               'npmRegistries:\n' +
-                '  https://my-private-regsistry/:\n' +
+                '  https://my-private-registry/:\n' +
                 '    npmAlwaysAuth: true\n',
             );
           }
@@ -754,7 +754,7 @@ describe('modules/manager/npm/post-update/index', () => {
         expect(fs.writeLocalFile).toHaveBeenCalledWith(
           '.yarnrc.yml',
           'npmRegistries:\n' +
-            '  https://my-private-regsistry/:\n' +
+            '  https://my-private-registry/:\n' +
             '    npmAlwaysAuth: true\n' +
             '    npmAuthToken: xxxxxx\n',
         );
@@ -765,7 +765,7 @@ describe('modules/manager/npm/post-update/index', () => {
           additionalNpmrcContent: [],
           additionalYarnRcYml: {
             npmRegistries: {
-              '//my-private-regsistry/': {
+              '//my-private-registry/': {
                 npmAuthToken: 'xxxxxx',
               },
             },
@@ -776,7 +776,7 @@ describe('modules/manager/npm/post-update/index', () => {
           if (f === '.yarnrc.yml') {
             return Promise.resolve(
               'npmRegistries:\n' +
-                '  https://my-private-regsistry:\n' +
+                '  https://my-private-registry:\n' +
                 '    npmAlwaysAuth: true\n',
             );
           }
@@ -795,7 +795,7 @@ describe('modules/manager/npm/post-update/index', () => {
         expect(fs.writeLocalFile).toHaveBeenCalledWith(
           '.yarnrc.yml',
           'npmRegistries:\n' +
-            '  https://my-private-regsistry:\n' +
+            '  https://my-private-registry:\n' +
             '    npmAlwaysAuth: true\n' +
             '    npmAuthToken: xxxxxx\n',
         );
@@ -806,7 +806,7 @@ describe('modules/manager/npm/post-update/index', () => {
           if (f === '.yarnrc.yml') {
             return Promise.resolve(
               'npmRegistries:\n' +
-                '  https://some-other-private-regsistry:\n' +
+                '  https://some-other-private-registry:\n' +
                 '    npmAlwaysAuth: true\n',
             );
           }
@@ -825,9 +825,9 @@ describe('modules/manager/npm/post-update/index', () => {
         expect(fs.writeLocalFile).toHaveBeenCalledWith(
           '.yarnrc.yml',
           'npmRegistries:\n' +
-            '  https://some-other-private-regsistry:\n' +
+            '  https://some-other-private-registry:\n' +
             '    npmAlwaysAuth: true\n' +
-            '  //my-private-regsistry:\n' +
+            '  //my-private-registry:\n' +
             '    npmAuthToken: xxxxxx\n',
         );
       });
@@ -853,11 +853,64 @@ describe('modules/manager/npm/post-update/index', () => {
         );
         expect(fs.writeLocalFile).toHaveBeenCalledWith(
           '.yarnrc.yml',
-          'yarnPath: .yarn/releases/yarn-3.0.1.cjs\na: b\nnpmRegistries:\n' +
-            '  //my-private-regsistry:\n' +
+          'yarnPath: .yarn/releases/yarn-3.0.1.cjs\n' +
+            'a: b\n' +
+            'npmRegistries:\n' +
+            '  //my-private-registry:\n' +
             '    npmAuthToken: xxxxxx\n',
         );
       });
     });
+  });
+
+  describe('fuzzyMatchAdditionalYarnrcYml', () => {
+    it.each`
+      additionalRegistry            | existingRegistry                    | expectedRegistry
+      ${['//my-private-registry']}  | ${['//my-private-registry']}        | ${['//my-private-registry']}
+      ${[]}                         | ${['//my-private-registry']}        | ${[]}
+      ${[]}                         | ${[]}                               | ${[]}
+      ${null}                       | ${null}                             | ${[]}
+      ${['//my-private-registry']}  | ${[]}                               | ${['//my-private-registry']}
+      ${['//my-private-registry']}  | ${['https://my-private-registry']}  | ${['https://my-private-registry']}
+      ${['//my-private-registry']}  | ${['http://my-private-registry']}   | ${['http://my-private-registry']}
+      ${['//my-private-registry']}  | ${['http://my-private-registry/']}  | ${['http://my-private-registry/']}
+      ${['//my-private-registry']}  | ${['https://my-private-registry/']} | ${['https://my-private-registry/']}
+      ${['//my-private-registry']}  | ${['//my-private-registry/']}       | ${['//my-private-registry/']}
+      ${['//my-private-registry/']} | ${['//my-private-registry/']}       | ${['//my-private-registry/']}
+      ${['//my-private-registry/']} | ${['//my-private-registry']}        | ${['//my-private-registry']}
+    `(
+      'should return $expectedRegistry when parsing $additionalRegistry against local $existingRegistry',
+      ({
+        additionalRegistry,
+        existingRegistry,
+        expectedRegistry,
+      }: Record<
+        'additionalRegistry' | 'existingRegistry' | 'expectedRegistry',
+        string[]
+      >) => {
+        expect(
+          fuzzyMatchAdditionalYarnrcYml(
+            {
+              npmRegistries: additionalRegistry?.reduce(
+                (acc, cur) => ({
+                  ...acc,
+                  [cur]: { npmAuthToken: 'xxxxxx' },
+                }),
+                {},
+              ),
+            },
+            {
+              npmRegistries: existingRegistry?.reduce(
+                (acc, cur) => ({
+                  ...acc,
+                  [cur]: { npmAuthToken: 'xxxxxx' },
+                }),
+                {},
+              ),
+            },
+          ).npmRegistries,
+        ).toContainAllKeys(expectedRegistry);
+      },
+    );
   });
 });

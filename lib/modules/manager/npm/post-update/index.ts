@@ -322,6 +322,24 @@ async function resetNpmrcContent(
   }
 }
 
+export function fuzzyMatchAdditionalYarnrcYml<
+  T extends { npmRegistries?: Record<string, unknown> },
+>(additionalYarnRcYml: T, existingYarnrRcYml: T): T {
+  return {
+    ...additionalYarnRcYml,
+    npmRegistries: Object.entries(additionalYarnRcYml.npmRegistries ?? {})
+      .map(([k, v]) => {
+        const key =
+          Object.keys(existingYarnrRcYml.npmRegistries ?? {}).find(
+            // match without trailing slashes
+            (x) => x.replace(/\/$/, '').endsWith(k.replace(/\/$/, '')),
+          ) ?? k;
+        return { [key]: v };
+      })
+      .reduce((acc, cur) => ({ ...acc, ...cur }), {}),
+  };
+}
+
 // istanbul ignore next
 async function updateYarnOffline(
   lockFileDir: string,
@@ -573,25 +591,12 @@ export async function getAdditionalFiles(
             existingYarnrcYmlContent,
           );
 
-          const fuzzyMatchAdditionalYarnRcYml = {
-            ...additionalYarnRcYml,
-            npmRegistries: Object.entries(
-              additionalYarnRcYml.npmRegistries || {},
-            )
-              .map(([k, v]) => {
-                const key =
-                  Object.keys(existingYarnrRcYml.npmRegistries || {}).find(
-                    // match without trailing slashes
-                    (x) => x.replace(/\/$/, '').endsWith(k.replace(/\/$/, '')),
-                  ) ?? k;
-                return { [key]: v };
-              })
-              .reduce((acc, cur) => ({ ...acc, ...cur }), {}),
-          };
-
           const updatedYarnYrcYml = deepmerge(
             existingYarnrRcYml,
-            fuzzyMatchAdditionalYarnRcYml,
+            fuzzyMatchAdditionalYarnrcYml(
+              additionalYarnRcYml,
+              existingYarnrRcYml,
+            ),
           );
 
           await writeLocalFile(yarnRcYmlFilename, dump(updatedYarnYrcYml));
