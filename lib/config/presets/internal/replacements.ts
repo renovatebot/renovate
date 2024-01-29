@@ -24,6 +24,7 @@ export const presets: Record<string, Preset> = {
       'replacements:now-to-vercel',
       'replacements:npm-run-all-to-maintenance-fork',
       'replacements:parcel-css-to-lightningcss',
+      'replacements:passport-saml',
       'replacements:react-query-devtools-to-scoped',
       'replacements:react-query-to-scoped',
       'replacements:react-scripts-ts-to-react-scripts',
@@ -637,6 +638,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['@parcel/css'],
         replacementName: 'lightningcss',
         replacementVersion: '1.14.0',
+      },
+    ],
+  },
+  'passport-saml': {
+    description: '`passport-saml` was renamed to `@node-saml/passport-saml`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['passport-saml'],
+        replacementName: '@node-saml/passport-saml',
+        replacementVersion: '4.0.4',
       },
     ],
   },

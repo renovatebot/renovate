@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { NodeVersionDatasource } from '../../datasource/node-version';
 import { NpmDatasource } from '../../datasource/npm';
 import * as npmVersioning from '../../versioning/npm';
 
@@ -31,4 +32,8 @@ export const defaultConfig = {
 
 export const categories: Category[] = ['js'];
 
-export const supportedDatasources = [GithubTagsDatasource.id, NpmDatasource.id];
+export const supportedDatasources = [
+  GithubTagsDatasource.id,
+  NpmDatasource.id,
+  NodeVersionDatasource.id,
+];

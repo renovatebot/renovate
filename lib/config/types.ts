@@ -337,6 +337,7 @@ export interface PackageRule
   isVulnerabilityAlert?: boolean;
   matchFileNames?: string[];
   matchBaseBranches?: string[];
+  matchCurrentAge?: string;
   matchManagers?: string[];
   matchDatasources?: string[];
   matchDepTypes?: string[];
@@ -502,7 +503,9 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
+  releaseTimestamp?: string | null;
   repository?: string;
+  currentVersionTimestamp?: string;
 }
 
 export interface ConfigMigration {
