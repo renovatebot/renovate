@@ -2,7 +2,6 @@ import type { Category } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NodeVersionDatasource } from '../../datasource/node-version';
 import { NpmDatasource } from '../../datasource/npm';
-import * as npmVersioning from '../../versioning/npm';
 
 export { detectGlobalConfig } from './detect';
 export { extractAllPackageFiles } from './extract';
@@ -17,7 +16,6 @@ export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)package\\.json$'],
-  versioning: npmVersioning.id,
   digest: {
     prBodyDefinitions: {
       Change:
