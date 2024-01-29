@@ -563,7 +563,6 @@ export async function getAdditionalFiles(
     await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
     let yarnRcYmlFilename: string | undefined;
     let existingYarnrcYmlContent: string | undefined | null;
-    // istanbul ignore if: needs test
     if (additionalYarnRcYml) {
       yarnRcYmlFilename = getSiblingFileName(yarnLock, '.yarnrc.yml');
       existingYarnrcYmlContent = await readLocalFile(yarnRcYmlFilename, 'utf8');
@@ -573,10 +572,28 @@ export async function getAdditionalFiles(
           const existingYarnrRcYml = parseSingleYaml<Record<string, unknown>>(
             existingYarnrcYmlContent,
           );
+
+          const fuzzyMatchAdditionalYarnRcYml = {
+            ...additionalYarnRcYml,
+            npmRegistries: Object.entries(
+              additionalYarnRcYml.npmRegistries || {},
+            )
+              .map(([k, v]) => {
+                const key =
+                  Object.keys(existingYarnrRcYml.npmRegistries || {}).find(
+                    // match without trailing slashes
+                    (x) => x.replace(/\/$/, '').endsWith(k.replace(/\/$/, '')),
+                  ) ?? k;
+                return { [key]: v };
+              })
+              .reduce((acc, cur) => ({ ...acc, ...cur }), {}),
+          };
+
           const updatedYarnYrcYml = deepmerge(
             existingYarnrRcYml,
-            additionalYarnRcYml,
+            fuzzyMatchAdditionalYarnRcYml,
           );
+
           await writeLocalFile(yarnRcYmlFilename, dump(updatedYarnYrcYml));
           logger.debug('Added authentication to .yarnrc.yml');
         } catch (err) {
