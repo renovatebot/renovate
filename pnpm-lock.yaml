@@ -72,8 +72,8 @@ importers:
         specifier: 3.0.17
         version: 3.0.17
       '@renovatebot/ruby-semver':
-        specifier: 3.0.22
-        version: 3.0.22
+        specifier: 3.0.23
+        version: 3.0.23
       '@sindresorhus/is':
         specifier: 4.6.0
         version: 4.6.0
@@ -2868,8 +2868,8 @@ packages:
     engines: {node: ^18.12.0 || >= 20.0.0, pnpm: ^8.6.11}
     dev: false
 
-  /@renovatebot/ruby-semver@3.0.22:
-    resolution: {integrity: sha512-ErJPEznhUJv5S6xOnZz2keH1i+xl5icsaZQFrxELu1iY12NK8jTPZ7TwyfwCz/nGpwVtNbVTfVng0hDaNlCiZA==}
+  /@renovatebot/ruby-semver@3.0.23:
+    resolution: {integrity: sha512-YGvsvvyxOgv5Uq+sFEdD1yviyrPGs9hocjhIo7uWTj/EAIlbGyk5YA5JrHql3EkJf0tVsyfmEkM3kLK+45hmIw==}
     engines: {node: ^18.12.0 || >= 20.0.0, pnpm: ^8.6.11}
     dev: false
 
@@ -4319,6 +4319,7 @@ packages:
   /agent-base@7.1.0:
     resolution: {integrity: sha512-o/zjMZRhJxny7OyEF+Op8X+efiELC7k7yOjMzgfzVqOzXqkBkWI79YoTdOtsuWd5BWhAGAuOY/Xa6xpiaWXiNg==}
     engines: {node: '>= 14'}
+    requiresBuild: true
     dependencies:
       debug: 4.3.4
     transitivePeerDependencies:
