@@ -366,8 +366,7 @@ describe('modules/manager/npm/extract/index', () => {
           {
             depName: 'node',
             currentValue: '>= 8.9.2',
-            datasource: 'github-tags',
-            versioning: 'node',
+            datasource: 'node-version',
             depType: 'engines',
           },
           {

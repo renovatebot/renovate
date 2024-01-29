@@ -5,7 +5,6 @@ import { regEx } from '../../../../../util/regex';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags';
 import { NodeVersionDatasource } from '../../../../datasource/node-version';
 import { NpmDatasource } from '../../../../datasource/npm';
-import * as nodeVersioning from '../../../../versioning/node';
 import { api, isValid, isVersion } from '../../../../versioning/npm';
 import type { PackageDependency } from '../../../types';
 
