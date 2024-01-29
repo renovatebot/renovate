@@ -863,7 +863,7 @@ describe('modules/manager/npm/post-update/index', () => {
     });
   });
 
-  describe('fuzzyMatchAdditionalYarnrcYml', () => {
+  describe('fuzzyMatchAdditionalYarnrcYml()', () => {
     it.each`
       additionalRegistry            | existingRegistry                    | expectedRegistry
       ${['//my-private-registry']}  | ${['//my-private-registry']}        | ${['//my-private-registry']}
