@@ -89,12 +89,11 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
 function removeMatchers(
   packageRule: PackageRule & PackageRuleInputConfig,
 ): Record<string, unknown> {
-  const toApply: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(packageRule)) {
-    if (!key.includes('match') && !key.includes('exclude')) {
-      toApply[key] = value;
+  for (const key of Object.keys(packageRule)) {
+    if (key.includes('match') || key.includes('exclude')) {
+      delete packageRule[key];
     }
   }
 
-  return toApply;
+  return packageRule;
 }
