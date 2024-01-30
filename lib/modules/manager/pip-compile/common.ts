@@ -104,8 +104,8 @@ interface PipCompileArgs {
 export function extractHeaderCommand(
   content: string,
   outputFileName: string,
+  strict: boolean = true,
 ): PipCompileArgs {
-  const strict: boolean = true; // TODO(not7cd): add to function params
   const compileCommand = constraintLineRegex.exec(content);
   if (compileCommand?.groups === undefined) {
     throw new Error(

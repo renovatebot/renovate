@@ -14,7 +14,7 @@ import { extractHeaderCommand, getExecOptions } from './common';
 export function constructPipCompileCmd(
   content: string,
   outputFileName: string,
-  strict: boolean = true,
+  strict: boolean = false,
 ): string {
   const pipCompileArgs = extractHeaderCommand(content, outputFileName);
   if (strict && pipCompileArgs.isCustomCommand) {
