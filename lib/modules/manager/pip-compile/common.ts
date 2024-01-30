@@ -73,6 +73,7 @@ export const optionsWithArguments = [
   '--resolver',
 ];
 export const allowedPipOptions = [
+  '-v',
   '--allow-unsafe',
   '--generate-hashes',
   '--no-emit-index-url', // TODO: handle this!!!
