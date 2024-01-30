@@ -12,7 +12,6 @@ const pomParent = Fixtures.get('parent.pom.xml');
 const pomChild = Fixtures.get('child.pom.xml');
 const origContent = Fixtures.get('grouping.pom.xml');
 const settingsContent = Fixtures.get('mirror.settings.xml');
-const profileSettingsContent = Fixtures.get('profile.settings.xml');
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
   return deps.find((dep) => dep.depName === name);
@@ -324,6 +323,7 @@ describe('modules/manager/maven/index', () => {
     });
 
     it('should include registryUrls in the correct order', async () => {
+      const profileSettingsContent = Fixtures.get('profile.settings.xml');
       fs.readLocalFile
         .mockResolvedValueOnce(pomContent)
         .mockResolvedValueOnce(profileSettingsContent);
@@ -336,11 +336,11 @@ describe('modules/manager/maven/index', () => {
         'https://maven.atlassian.com/content/repositories/atlassian-public/',
         'https://repo.maven.apache.org/maven2',
       ];
-      packages.forEach(({ deps }) => {
-        deps.forEach(({ registryUrls }) => {
-          expect(registryUrls).toStrictEqual(urls);
-        });
-      });
+      for (const pkg of packages) {
+        for (const dep of pkg.deps) {
+          expect(dep.registryUrls).toStrictEqual(urls);
+        }
+      }
     });
 
     it('should not touch content if new and old versions are equal', () => {

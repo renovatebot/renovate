@@ -337,6 +337,7 @@ export function extractRegistries(rawContent: string): string[] {
     const repositoryUrls = parseUrls(profile, 'repositories');
     urls.push(...repositoryUrls);
   });
+
   // filter out duplicates
   return [...new Set(urls)];
 }
@@ -356,6 +357,12 @@ function parseUrls(xmlNode: XmlElement, path: string): string[] {
 }
 
 export function parseSettings(raw: string): XmlDocument | null {
+  const supportedNamespaces = [
+    'http://maven.apache.org/SETTINGS/1.0.0',
+    'http://maven.apache.org/SETTINGS/1.1.0',
+    'http://maven.apache.org/SETTINGS/1.2.0',
+  ];
+
   let settings: XmlDocument;
   try {
     settings = new XmlDocument(raw);
@@ -366,13 +373,7 @@ export function parseSettings(raw: string): XmlDocument | null {
   if (name !== 'settings') {
     return null;
   }
-  if (
-    [
-      'http://maven.apache.org/SETTINGS/1.0.0',
-      'http://maven.apache.org/SETTINGS/1.1.0',
-      'http://maven.apache.org/SETTINGS/1.2.0',
-    ].includes(attr.xmlns)
-  ) {
+  if (supportedNamespaces.includes(attr.xmlns)) {
     return settings;
   }
   return null;

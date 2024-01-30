@@ -7,7 +7,6 @@ const simpleContent = Fixtures.get(`simple.pom.xml`);
 const mirrorSettingsContent = Fixtures.get(`mirror.settings.xml`);
 const profileSettingsContent = Fixtures.get(`profile.settings.xml`);
 const complexSettingsContent = Fixtures.get(`complex.settings.xml`);
-const settingsUpatedContent = Fixtures.get(`settings.updated.schema.xml`);
 
 describe('modules/manager/maven/extract', () => {
   describe('extractDependencies', () => {
@@ -176,6 +175,7 @@ describe('modules/manager/maven/extract', () => {
     });
 
     it('extract registries from a settings file that uses updated schema', () => {
+      const settingsUpatedContent = Fixtures.get(`settings.updated.schema.xml`);
       const res = extractRegistries(settingsUpatedContent);
       expect(res).toStrictEqual([
         'https:/proxy-repo.com/artifactory/apache-maven',
