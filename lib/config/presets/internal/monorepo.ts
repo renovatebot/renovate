@@ -324,6 +324,7 @@ const repoGroups = {
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
+  kroki: 'https://github.com/yuzutech/kroki',
   lamar: 'https://github.com/JasperFx/lamar',
   lerna: 'https://github.com/lerna/lerna',
   lexical: 'https://github.com/facebook/lexical',
