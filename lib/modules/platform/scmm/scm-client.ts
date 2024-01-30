@@ -1,5 +1,9 @@
 import { Http } from '../../../util/http';
-import type { HttpOptions } from '../../../util/http/types';
+import type {
+  HttpRequestOptions,
+  HttpResponse,
+  InternalHttpOptions,
+} from '../../../util/http/types';
 import { resolveBaseUrl } from '../../../util/url';
 import type {
   Link,
@@ -10,6 +14,7 @@ import type {
   PullRequestUpdateParams,
   Repo,
   RepoPage,
+  ScmmHttpOptions,
   User,
 } from './types';
 
@@ -25,18 +30,34 @@ const URLS = {
 };
 
 const CONTENT_TYPES = {
-  PULLREQUESTS: 'application/vnd.scmm-pullrequest+json;v=2',
+  ME: 'application/vnd.scmm-me+json;v=2',
+  REPOSITORY: 'application/vnd.scmm-repository+json;v=2',
+  REPOSITORIES: 'application/vnd.scmm-repositoryCollection+json;v=2',
+  GIT_CONFIG: 'application/vnd.scmm-gitDefaultBranch+json;v=2',
+  PULLREQUEST: 'application/vnd.scmm-pullRequest+json;v=2',
+  PULLREQUESTS: 'application/vnd.scmm-pullRequestCollection+json;v=2',
 };
 
-export default class ScmClient {
-  private readonly httpClient: Http;
+export default class ScmClient extends Http<ScmmHttpOptions> {
   private readonly endpoint: string;
 
   constructor(endpoint: string, token: string) {
+    super('scmm', { throwHttpErrors: true, token });
     this.endpoint = endpoint;
-    this.httpClient = new Http<HttpOptions>('scmm', {
-      throwHttpErrors: true,
-    });
+  }
+
+  protected override async request<T>(
+    requestUrl: string | URL,
+    options?: InternalHttpOptions & ScmmHttpOptions & HttpRequestOptions<T>,
+  ): Promise<HttpResponse<T>> {
+    const opts = {
+      ...options,
+      headers: {
+        ...options?.headers,
+        accept: options?.scmmContentType,
+      },
+    };
+    return await super.request(resolveBaseUrl(this.endpoint, requestUrl), opts);
   }
 
   public getEndpoint(): string {
@@ -44,49 +65,55 @@ export default class ScmClient {
   }
 
   public async getCurrentUser(): Promise<User> {
-    const response = await this.httpClient.getJson<User>(
-      resolveBaseUrl(this.endpoint, URLS.ME),
-    );
+    const response = await this.getJson<User>(URLS.ME, {
+      scmmContentType: CONTENT_TYPES.ME,
+    });
     return response.body;
   }
 
   public async getRepo(repoPath: string): Promise<Repo> {
-    const response = await this.httpClient.getJson<Repo>(
-      resolveBaseUrl(this.endpoint, URLS.REPO(repoPath)),
-    );
+    const response = await this.getJson<Repo>(URLS.REPO(repoPath), {
+      scmmContentType: CONTENT_TYPES.REPOSITORY,
+    });
     return response.body;
   }
 
   public async getAllRepos(): Promise<Repo[]> {
-    const response = await this.httpClient.getJson<Page<RepoPage>>(
-      resolveBaseUrl(this.endpoint, URLS.ALL_REPOS),
-    );
+    const response = await this.getJson<Page<RepoPage>>(URLS.ALL_REPOS, {
+      scmmContentType: CONTENT_TYPES.REPOSITORIES,
+    });
 
     return response.body._embedded.repositories;
   }
 
   public async getDefaultBranch(repo: Repo): Promise<string> {
     const defaultBranchUrl = repo._links['defaultBranch'] as Link;
-    const response = await this.httpClient.getJson<{ defaultBranch: string }>(
+    const response = await this.getJson<{ defaultBranch: string }>(
       defaultBranchUrl.href,
+      {
+        scmmContentType: CONTENT_TYPES.GIT_CONFIG,
+      },
     );
 
     return response.body.defaultBranch;
   }
 
   public async getAllRepoPrs(repoPath: string): Promise<PullRequest[]> {
-    const response = await this.httpClient.getJson<Page<PullRequestPage>>(
-      resolveBaseUrl(
-        this.endpoint,
-        URLS.PULLREQUESTS_WITH_PAGINATION(repoPath),
-      ),
+    const response = await this.getJson<Page<PullRequestPage>>(
+      URLS.PULLREQUESTS_WITH_PAGINATION(repoPath),
+      {
+        scmmContentType: CONTENT_TYPES.PULLREQUESTS,
+      },
     );
     return response.body._embedded.pullRequests;
   }
 
   public async getRepoPr(repoPath: string, id: number): Promise<PullRequest> {
-    const response = await this.httpClient.getJson<PullRequest>(
-      resolveBaseUrl(this.endpoint, URLS.PULLREQUEST_BY_ID(repoPath, id)),
+    const response = await this.getJson<PullRequest>(
+      URLS.PULLREQUEST_BY_ID(repoPath, id),
+      {
+        scmmContentType: CONTENT_TYPES.PULLREQUEST,
+      },
     );
 
     return response.body;
@@ -96,17 +123,15 @@ export default class ScmClient {
     repoPath: string,
     params: PullRequestCreateParams,
   ): Promise<PullRequest> {
-    const createPrResponse = await this.httpClient.postJson(
-      resolveBaseUrl(this.endpoint, URLS.PULLREQUESTS(repoPath)),
-      {
-        body: params,
-        headers: {
-          'Content-Type': CONTENT_TYPES.PULLREQUESTS,
-        },
+    const createPrResponse = await this.postJson(URLS.PULLREQUESTS(repoPath), {
+      scmmContentType: CONTENT_TYPES.PULLREQUEST,
+      body: params,
+      headers: {
+        'Content-Type': CONTENT_TYPES.PULLREQUEST,
       },
-    );
+    });
 
-    const getCreatedPrResponse = await this.httpClient.getJson<PullRequest>(
+    const getCreatedPrResponse = await this.getJson<PullRequest>(
       /* istanbul ignore next: Just to please the compiler, location would never be undefined */
       createPrResponse.headers.location ?? '',
     );
@@ -119,14 +144,11 @@ export default class ScmClient {
     id: number,
     params: PullRequestUpdateParams,
   ): Promise<void> {
-    await this.httpClient.putJson(
-      resolveBaseUrl(this.endpoint, URLS.PULLREQUEST_BY_ID(repoPath, id)),
-      {
-        body: params,
-        headers: {
-          'Content-Type': CONTENT_TYPES.PULLREQUESTS,
-        },
+    await this.putJson(URLS.PULLREQUEST_BY_ID(repoPath, id), {
+      body: params,
+      headers: {
+        'Content-Type': CONTENT_TYPES.PULLREQUEST,
       },
-    );
+    });
   }
 }
