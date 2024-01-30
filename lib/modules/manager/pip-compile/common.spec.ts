@@ -82,5 +82,26 @@ describe('modules/manager/pip-compile/common', () => {
         ).toThrow(/not supported/);
       },
     );
+
+    it.each(['--no-header'])(
+      'always errors on not allowed options',
+      (argument: string) => {
+        expect(() =>
+          extractHeaderCommand(
+            getCommandInHeader(`pip-compile ${argument} reqs.in`),
+            'reqs.txt',
+          ),
+        ).toThrow(/not allowed/);
+      },
+    );
+
+    test('error when no source files passed as arguments', () => {
+      expect(() =>
+        extractHeaderCommand(
+          getCommandInHeader(`pip-compile --extra=color`),
+          'reqs.txt',
+        ),
+      ).toThrow(/source/);
+    });
   });
 });
