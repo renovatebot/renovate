@@ -1,3 +1,4 @@
+import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
@@ -1058,18 +1059,125 @@ describe('config/validation', () => {
   });
 
   describe('validate globalOptions()', () => {
-    it('validates string type options', async () => {
-      const config = {
-        binarySource: 'docker',
-        gitUrl: false as never,
-      };
-      const { warnings } = await configValidation.validateConfig(true, config);
-      expect(warnings).toMatchObject([
-        {
-          message: 'Configuration option `gitUrl` should be a string',
-          topic: 'Configuration Error',
-        },
-      ]);
+    describe('validates string type options', () => {
+      it('binarySource', async () => {
+        const config = {
+          binarySource: 'invalid' as never,
+        };
+        const { warnings } = await configValidation.validateConfig(
+          true,
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            message:
+              'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('baseDir', async () => {
+        const config = {
+          baseDir: false as never,
+        };
+        const { warnings } = await configValidation.validateConfig(
+          true,
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            message: 'Configuration option `baseDir` should be a string',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('requireConfig', async () => {
+        const config = {
+          requireConfig: 'invalid' as never,
+        };
+        const { warnings } = await configValidation.validateConfig(
+          true,
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            message:
+              'Invalid value `invalid` for `requireConfig`. The allowed values are required, optional, ignored',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('dryRun', async () => {
+        const config = {
+          dryRun: 'invalid' as never,
+        };
+        const { warnings } = await configValidation.validateConfig(
+          true,
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            message:
+              'Invalid value `invalid` for `dryRun`. The allowed values are extract, lookup, full',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('repositoryCache', async () => {
+        const config = {
+          repositoryCache: 'invalid' as never,
+        };
+        const { warnings } = await configValidation.validateConfig(
+          true,
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            message:
+              'Invalid value `invalid` for `repositoryCache`. The allowed values are enabled, disabled, reset',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('onboardingConfigFileName', async () => {
+        const config = {
+          onboardingConfigFileName: 'invalid' as never,
+        };
+        const { warnings } = await configValidation.validateConfig(
+          true,
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            message:
+              'Invalid value `invalid` for `onboardingConfigFileName`. The allowed values are ' +
+              configFileNames.join(', '),
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
+      it('gitUrl', async () => {
+        const config = {
+          gitUrl: 'invalid' as never,
+        };
+        const { warnings } = await configValidation.validateConfig(
+          true,
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            message:
+              'Invalid value `invalid` for `gitUrl`. The allowed values are default, ssh, endpoint',
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
     });
 
     it('validates boolean type options', async () => {
@@ -1108,12 +1216,18 @@ describe('config/validation', () => {
       const config = {
         allowedPostUpgradeCommands: ['cmd'],
         checkedBranches: 'invalid-type' as never,
+        gitNoVerify: ['invalid'],
       };
       const { warnings } = await configValidation.validateConfig(true, config);
       expect(warnings).toMatchObject([
         {
           message:
             'Configuration option `checkedBranches` should be a list (Array)',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'Invalid value for `gitNoVerify`. The allowed values are commit, push',
           topic: 'Configuration Error',
         },
       ]);

@@ -7,7 +7,6 @@ import type {
   RegexManagerTemplates,
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
-import { getPlatformList } from '../modules/platform';
 import type { HostRule } from '../types/host-rules';
 import { anyMatchRegexOrMinimatch } from '../util/package-rules/match';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
@@ -794,7 +793,7 @@ function validateGlobalConfig(
       ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${configFileNames.join(',')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${configFileNames.join(', ')}`,
         });
       } else if (
         key === 'repositoryCache' &&
@@ -802,7 +801,7 @@ function validateGlobalConfig(
       ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${configFileNames.join(',')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['enabled', 'disabled', 'reset'].join(', ')}`,
         });
       } else if (
         key === 'dryRun' &&
@@ -810,7 +809,7 @@ function validateGlobalConfig(
       ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${['extract', 'lookup', 'full'].join(',')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['extract', 'lookup', 'full'].join(', ')}`,
         });
       } else if (
         key === 'binarySource' &&
@@ -818,7 +817,7 @@ function validateGlobalConfig(
       ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(',')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}`,
         });
       } else if (
         key === 'requireConfig' &&
@@ -826,12 +825,15 @@ function validateGlobalConfig(
       ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${['required', 'optional', 'ignored'].join(',')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['required', 'optional', 'ignored'].join(', ')}`,
         });
-      } else if (key === 'platform' && !getPlatformList().includes(val)) {
+      } else if (
+        key === 'gitUrl' &&
+        !['default', 'ssh', 'endpoint'].includes(val)
+      ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${getPlatformList().join(',')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}`,
         });
       }
     } else {
@@ -866,7 +868,7 @@ function validateGlobalConfig(
           if (!allowedValues.includes(value)) {
             warnings.push({
               topic: 'Configuration Error',
-              message: `Invalid value for ${currentPath}. The allowed values are ${allowedValues.join(',')}`,
+              message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}`,
             });
           }
         }
