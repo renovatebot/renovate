@@ -2852,6 +2852,43 @@ describe('modules/platform/github/index', () => {
         ]);
       });
     });
+
+    it('should set the milestone on the PR', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .post(
+          '/repos/some/repo/pulls',
+          (body) => body.title === 'bump someDep to v2',
+        )
+        .reply(200, {
+          number: 123,
+          head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+        });
+      scope
+        .get('/repos/some/repo/milestones?state=open&per_page=100')
+        .reply(200, [
+          {
+            id: 12345,
+            number: 1,
+            title: 'vNext',
+            description: 'my milestone',
+            state: 'open',
+          },
+        ]);
+      scope
+        .patch('/repos/some/repo/issues/123', (body) => body.milestone === 1)
+        .reply(200, {});
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = await github.createPr({
+        targetBranch: 'main',
+        sourceBranch: 'renovate/someDep-v2',
+        prTitle: 'bump someDep to v2',
+        prBody: 'many informations about someDep',
+        milestone: 'vNext',
+      });
+      expect(pr?.number).toBe(123);
+    });
   });
 
   describe('getPr(prNo)', () => {
