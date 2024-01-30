@@ -860,6 +860,40 @@ describe('modules/manager/npm/post-update/index', () => {
             '    npmAuthToken: xxxxxx\n',
         );
       });
+
+      it('should warn if there is an error writing the yarnrc.yml', async () => {
+        fs.readLocalFile.mockImplementation((f): Promise<any> => {
+          if (f === '.yarnrc.yml') {
+            return Promise.resolve(
+              `yarnPath: .yarn/releases/yarn-3.0.1.cjs\na: b\n`,
+            );
+          }
+          return Promise.resolve(null);
+        });
+
+        fs.writeLocalFile.mockImplementation((f): Promise<any> => {
+          if (f === '.yarnrc.yml') {
+            throw new Error();
+          }
+          return Promise.resolve(null);
+        });
+
+        spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
+
+        await getAdditionalFiles(
+          {
+            ...updateConfig,
+            updateLockFiles: true,
+            reuseExistingBranch: true,
+          },
+          additionalFiles,
+        ).catch(() => {});
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          expect.anything(),
+          'Error appending .yarnrc.yml content',
+        );
+      });
     });
   });
 
