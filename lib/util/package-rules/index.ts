@@ -90,7 +90,7 @@ function removeMatchers(
   packageRule: PackageRule & PackageRuleInputConfig,
 ): Record<string, unknown> {
   for (const key of Object.keys(packageRule)) {
-    if (key.includes('match') || key.includes('exclude')) {
+    if (key.startsWith('match') || key.startsWith('exclude')) {
       delete packageRule[key];
     }
   }
