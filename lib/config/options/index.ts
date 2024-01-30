@@ -2818,6 +2818,16 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
   },
+  {
+    name: 'logLevelRemap',
+    description: 'Remap log levels to different levels.',
+    type: 'array',
+    subType: 'object',
+    default: [],
+    stage: 'global',
+    cli: false,
+    env: false,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

@@ -6,11 +6,13 @@ import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import { once, reset as onceReset } from './once';
 import { RenovateStream } from './pretty-stdout';
-import type { BunyanRecord, Logger } from './types';
+import { getRemappedLevel, resetRemapMatcherCache } from './remap';
+import type { BunyanRecord, LogLevelRemap, Logger } from './types';
 import { ProblemStream, validateLogLevel, withSanitizer } from './utils';
 
 let logContext: string = process.env.LOG_CONTEXT ?? nanoid();
 let curMeta: Record<string, unknown> = {};
+let logLevelRemaps: LogLevelRemap[] | null = null;
 
 const problems = new ProblemStream();
 
@@ -61,20 +63,37 @@ const bunyanLogger = bunyan.createLogger({
   ].map(withSanitizer),
 });
 
-const logFactory =
-  (level: bunyan.LogLevelString) =>
-  (p1: any, p2: any): void => {
+const logFactory = (
+  _level: bunyan.LogLevelString,
+): ((p1: unknown, p2: unknown) => void) => {
+  let level = _level;
+  return (p1: any, p2: any): void => {
     if (p2) {
       // meta and msg provided
-      bunyanLogger[level]({ logContext, ...curMeta, ...p1 }, p2);
+      const msg = p2;
+      const meta: Record<string, unknown> = { logContext, ...curMeta, ...p1 };
+      const newLevel = getRemappedLevel(logLevelRemaps, msg);
+      if (newLevel) {
+        meta.oldLevel = level;
+        level = newLevel;
+      }
+      bunyanLogger[level](meta, msg);
     } else if (is.string(p1)) {
       // only message provided
-      bunyanLogger[level]({ logContext, ...curMeta }, p1);
+      const msg = p1;
+      const meta: Record<string, unknown> = { logContext, ...curMeta };
+      const newLevel = getRemappedLevel(logLevelRemaps, msg);
+      if (newLevel) {
+        meta.oldLevel = level;
+        level = newLevel;
+      }
+      bunyanLogger[level](meta, msg);
     } else {
       // only meta provided
       bunyanLogger[level]({ logContext, ...curMeta, ...p1 });
     }
   };
+};
 
 const loggerLevels: bunyan.LogLevelString[] = [
   'trace',
@@ -146,4 +165,16 @@ export function getProblems(): BunyanRecord[] {
 
 export function clearProblems(): void {
   return problems.clearProblems();
+}
+
+export function setLogLevelRemaps(
+  remaps: LogLevelRemap[] | null | undefined,
+): void {
+  resetRemapMatcherCache();
+  logLevelRemaps = remaps ?? null;
+}
+
+export function clearLogLevelRemaps(): void {
+  resetRemapMatcherCache();
+  logLevelRemaps = null;
 }
