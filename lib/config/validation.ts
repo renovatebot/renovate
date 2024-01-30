@@ -7,6 +7,7 @@ import type {
   RegexManagerTemplates,
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
+import { getPlatformList } from '../modules/platform';
 import type { HostRule } from '../types/host-rules';
 import { anyMatchRegexOrMinimatch } from '../util/package-rules/match';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
@@ -15,6 +16,7 @@ import {
   hasValidSchedule,
   hasValidTimezone,
 } from '../workers/repository/update/branch/schedule';
+import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
@@ -785,7 +787,54 @@ function validateGlobalConfig(
   currentPath: string | undefined,
 ): void {
   if (type === 'string') {
-    if (!is.string(val)) {
+    if (is.string(val)) {
+      if (
+        key === 'onboardingConfigFileName' &&
+        !configFileNames.includes(val)
+      ) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${configFileNames.join(',')}`,
+        });
+      } else if (
+        key === 'repositoryCache' &&
+        !['enabled', 'disabled', 'reset'].includes(val)
+      ) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${configFileNames.join(',')}`,
+        });
+      } else if (
+        key === 'dryRun' &&
+        !['extract', 'lookup', 'full'].includes(val)
+      ) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${['extract', 'lookup', 'full'].join(',')}`,
+        });
+      } else if (
+        key === 'binarySource' &&
+        !['docker', 'global', 'install', 'hermit'].includes(val)
+      ) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(',')}`,
+        });
+      } else if (
+        key === 'requireConfig' &&
+        !['required', 'optional', 'ignored'].includes(val)
+      ) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${['required', 'optional', 'ignored'].join(',')}`,
+        });
+      } else if (key === 'platform' && !getPlatformList().includes(val)) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Invalid value ${val} for ${currentPath}. The allowed values are ${getPlatformList().join(',')}`,
+        });
+      }
+    } else {
       warnings.push({
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be a string`,
@@ -810,7 +859,19 @@ function validateGlobalConfig(
       });
     }
   } else if (type === 'array') {
-    if (!is.array(val)) {
+    if (is.array(val)) {
+      if (key === 'gitNoVerify') {
+        const allowedValues = ['commit', 'push'];
+        for (const value of val as string[]) {
+          if (!allowedValues.includes(value)) {
+            warnings.push({
+              topic: 'Configuration Error',
+              message: `Invalid value for ${currentPath}. The allowed values are ${allowedValues.join(',')}`,
+            });
+          }
+        }
+      }
+    } else {
       warnings.push({
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be a list (Array)`,
@@ -818,12 +879,23 @@ function validateGlobalConfig(
     }
   } else if (type === 'object') {
     if (is.plainObject(val)) {
-      const res = validatePlainObject(val);
-      if (res !== true) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
-        });
+      if (key === 'cacheTtlOverride') {
+        for (const [subKey, subValue] of Object.entries(val)) {
+          if (!is.number(subValue)) {
+            warnings.push({
+              topic: 'Configuration Error',
+              message: `Invalid \`${currentPath}.${subKey}\` configuration: value is not an integer`,
+            });
+          }
+        }
+      } else {
+        const res = validatePlainObject(val);
+        if (res !== true) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
+          });
+        }
       }
     } else {
       warnings.push({

@@ -1140,7 +1140,7 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            'Invalid `cacheTtlOverride.cacheTtlOverride.someField` configuration: value is not a string',
+            'Invalid `cacheTtlOverride.someField` configuration: value is not an integer',
         },
       ]);
     });
