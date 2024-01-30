@@ -881,6 +881,38 @@ describe('modules/manager/bundler/artifacts', () => {
           { cmd: 'bundler lock --update foo bar' },
         ]);
       });
+
+      it('handles failure of strict updating', async () => {
+        const execError = new ExecError('Exec error', {
+          cmd: '',
+          stdout: '',
+          stderr: 'version solving has failed',
+          options: { encoding: 'utf8' },
+        });
+        fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
+        const execSnapshots = mockExecSequence([
+          execError,
+          { stdout: '', stderr: '' },
+        ]);
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: ['Gemfile.lock'],
+          }),
+        );
+
+        const res = await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [{ depName: 'foo', updateType: 'minor' }],
+          newPackageFileContent: '{}',
+          config,
+        });
+
+        expect(res).toMatchObject([{ file: { path: 'Gemfile.lock' } }]);
+        expect(execSnapshots).toMatchObject([
+          { cmd: 'bundler lock --minor --strict --update foo' },
+          { cmd: 'bundler lock --minor --conservative --update foo' },
+        ]);
+      });
     });
   });
 });
