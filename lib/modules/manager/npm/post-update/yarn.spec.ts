@@ -727,7 +727,6 @@ describe('modules/manager/npm/post-update/yarn', () => {
     });
   });
 
-
   describe('fuzzyMatchAdditionalYarnrcYml()', () => {
     it.each`
       additionalRegistry            | existingRegistry                    | expectedRegistry

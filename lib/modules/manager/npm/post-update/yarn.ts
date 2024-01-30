@@ -316,7 +316,6 @@ export async function generateLockFile(
   return { lockFile };
 }
 
-
 export function fuzzyMatchAdditionalYarnrcYml<
   T extends { npmRegistries?: Record<string, unknown> },
 >(additionalYarnRcYml: T, existingYarnrRcYml: T): T {
