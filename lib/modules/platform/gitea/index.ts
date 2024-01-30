@@ -609,9 +609,9 @@ const platform: Platform = {
      * so a lookup is performed to fetch the details (including the ID) of each label.
      */
     if (Array.isArray(labels)) {
-      prUpdateParams.labels = (
-        await map(labels, lookupLabelByName)
-      ).filter(is.number);
+      prUpdateParams.labels = (await map(labels, lookupLabelByName)).filter(
+        is.number,
+      );
     }
 
     const gpr = await helper.updatePR(
