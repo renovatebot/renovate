@@ -610,7 +610,7 @@ const platform: Platform = {
      */
     if (Array.isArray(labels)) {
       prUpdateParams.labels = (
-        await Promise.all(labels.map(lookupLabelByName))
+        await map(labels, lookupLabelByName)
       ).filter(is.number);
     }
 
