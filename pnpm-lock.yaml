@@ -108,8 +108,8 @@ importers:
         specifier: 12.3.0
         version: 12.3.0
       better-sqlite3:
-        specifier: 9.2.2
-        version: 9.2.2
+        specifier: 9.3.0
+        version: 9.3.0
       bunyan:
         specifier: 1.8.15
         version: 1.8.15
@@ -4655,8 +4655,8 @@ packages:
   /before-after-hook@2.2.3:
     resolution: {integrity: sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==}
 
-  /better-sqlite3@9.2.2:
-    resolution: {integrity: sha512-qwjWB46il0lsDkeB4rSRI96HyDQr8sxeu1MkBVLMrwusq1KRu4Bpt1TMI+8zIJkDUtZ3umjAkaEjIlokZKWCQw==}
+  /better-sqlite3@9.3.0:
+    resolution: {integrity: sha512-ww73jVpQhRRdS9uMr761ixlkl4bWoXi8hMQlBGhoN6vPNlUHpIsNmw4pKN6kjknlt/wopdvXHvLk1W75BI+n0Q==}
     requiresBuild: true
     dependencies:
       bindings: 1.5.0
