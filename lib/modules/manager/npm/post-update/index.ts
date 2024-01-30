@@ -322,27 +322,6 @@ async function resetNpmrcContent(
   }
 }
 
-export function fuzzyMatchAdditionalYarnrcYml<
-  T extends { npmRegistries?: Record<string, unknown> },
->(additionalYarnRcYml: T, existingYarnrRcYml: T): T {
-  const keys = new Map(
-    Object.keys(existingYarnrRcYml.npmRegistries ?? {}).map((x) => [
-      x.replace(/\/$/, '').replace(/^https?:/, ''),
-      x,
-    ]),
-  );
-
-  return {
-    ...additionalYarnRcYml,
-    npmRegistries: Object.entries(additionalYarnRcYml.npmRegistries ?? {})
-      .map(([k, v]) => {
-        const key = keys.get(k.replace(/\/$/, '')) ?? k;
-        return { [key]: v };
-      })
-      .reduce((acc, cur) => ({ ...acc, ...cur }), {}),
-  };
-}
-
 // istanbul ignore next
 async function updateYarnOffline(
   lockFileDir: string,
@@ -596,7 +575,7 @@ export async function getAdditionalFiles(
 
           const updatedYarnYrcYml = deepmerge(
             existingYarnrRcYml,
-            fuzzyMatchAdditionalYarnrcYml(
+            yarn.fuzzyMatchAdditionalYarnrcYml(
               additionalYarnRcYml,
               existingYarnrRcYml,
             ),

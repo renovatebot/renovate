@@ -12,7 +12,6 @@ import type { AdditionalPackageFiles } from './types';
 import * as yarn from './yarn';
 import {
   determineLockFileDirs,
-  fuzzyMatchAdditionalYarnrcYml,
   getAdditionalFiles,
   updateYarnBinary,
   writeExistingFiles,
@@ -700,7 +699,12 @@ describe('modules/manager/npm/post-update/index', () => {
         fs.getSiblingFileName.mockReturnValue('.yarnrc.yml');
       });
 
-      it('should set 1 registry when the registries are the same except for the protocol', async () => {
+      it('should fuzzy merge the yarnrc Files', async () => {
+        (yarn.fuzzyMatchAdditionalYarnrcYml as jest.Mock).mockReturnValue({
+          npmRegistries: {
+            'https://my-private-registry': { npmAuthToken: 'xxxxxx' },
+          },
+        });
         fs.readLocalFile.mockImplementation((f): Promise<any> => {
           if (f === '.yarnrc.yml') {
             return Promise.resolve(
@@ -726,137 +730,6 @@ describe('modules/manager/npm/post-update/index', () => {
           'npmRegistries:\n' +
             '  https://my-private-registry:\n' +
             '    npmAlwaysAuth: true\n' +
-            '    npmAuthToken: xxxxxx\n',
-        );
-      });
-
-      it('should set 1 registry when the registries are the same except for a trailing slash in the existingYarnrRcYml', async () => {
-        fs.readLocalFile.mockImplementation((f): Promise<any> => {
-          if (f === '.yarnrc.yml') {
-            return Promise.resolve(
-              'npmRegistries:\n' +
-                '  https://my-private-registry/:\n' +
-                '    npmAlwaysAuth: true\n',
-            );
-          }
-          return Promise.resolve(null);
-        });
-
-        spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
-        await getAdditionalFiles(
-          {
-            ...updateConfig,
-            updateLockFiles: true,
-            reuseExistingBranch: true,
-          },
-          additionalFiles,
-        );
-        expect(fs.writeLocalFile).toHaveBeenCalledWith(
-          '.yarnrc.yml',
-          'npmRegistries:\n' +
-            '  https://my-private-registry/:\n' +
-            '    npmAlwaysAuth: true\n' +
-            '    npmAuthToken: xxxxxx\n',
-        );
-      });
-
-      it('should set 1 registry when the registries are the same except for a trailing slash in the additionalYarnRcYml', async () => {
-        spyProcessHostRules.mockReturnValue({
-          additionalNpmrcContent: [],
-          additionalYarnRcYml: {
-            npmRegistries: {
-              '//my-private-registry/': {
-                npmAuthToken: 'xxxxxx',
-              },
-            },
-          },
-        });
-
-        fs.readLocalFile.mockImplementation((f): Promise<any> => {
-          if (f === '.yarnrc.yml') {
-            return Promise.resolve(
-              'npmRegistries:\n' +
-                '  https://my-private-registry:\n' +
-                '    npmAlwaysAuth: true\n',
-            );
-          }
-          return Promise.resolve(null);
-        });
-
-        spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
-        await getAdditionalFiles(
-          {
-            ...updateConfig,
-            updateLockFiles: true,
-            reuseExistingBranch: true,
-          },
-          additionalFiles,
-        );
-        expect(fs.writeLocalFile).toHaveBeenCalledWith(
-          '.yarnrc.yml',
-          'npmRegistries:\n' +
-            '  https://my-private-registry:\n' +
-            '    npmAlwaysAuth: true\n' +
-            '    npmAuthToken: xxxxxx\n',
-        );
-      });
-
-      it("should set 2 registry when the registries don't match", async () => {
-        fs.readLocalFile.mockImplementation((f): Promise<any> => {
-          if (f === '.yarnrc.yml') {
-            return Promise.resolve(
-              'npmRegistries:\n' +
-                '  https://some-other-private-registry:\n' +
-                '    npmAlwaysAuth: true\n',
-            );
-          }
-          return Promise.resolve(null);
-        });
-
-        spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
-        await getAdditionalFiles(
-          {
-            ...updateConfig,
-            updateLockFiles: true,
-            reuseExistingBranch: true,
-          },
-          additionalFiles,
-        );
-        expect(fs.writeLocalFile).toHaveBeenCalledWith(
-          '.yarnrc.yml',
-          'npmRegistries:\n' +
-            '  https://some-other-private-registry:\n' +
-            '    npmAlwaysAuth: true\n' +
-            '  //my-private-registry:\n' +
-            '    npmAuthToken: xxxxxx\n',
-        );
-      });
-
-      it('should set 1 registry when the existingYarnrRcYml has no registries set', async () => {
-        fs.readLocalFile.mockImplementation((f): Promise<any> => {
-          if (f === '.yarnrc.yml') {
-            return Promise.resolve(
-              `yarnPath: .yarn/releases/yarn-3.0.1.cjs\na: b\n`,
-            );
-          }
-          return Promise.resolve(null);
-        });
-
-        spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
-        await getAdditionalFiles(
-          {
-            ...updateConfig,
-            updateLockFiles: true,
-            reuseExistingBranch: true,
-          },
-          additionalFiles,
-        );
-        expect(fs.writeLocalFile).toHaveBeenCalledWith(
-          '.yarnrc.yml',
-          'yarnPath: .yarn/releases/yarn-3.0.1.cjs\n' +
-            'a: b\n' +
-            'npmRegistries:\n' +
-            '  //my-private-registry:\n' +
             '    npmAuthToken: xxxxxx\n',
         );
       });
@@ -895,56 +768,5 @@ describe('modules/manager/npm/post-update/index', () => {
         );
       });
     });
-  });
-
-  describe('fuzzyMatchAdditionalYarnrcYml()', () => {
-    it.each`
-      additionalRegistry            | existingRegistry                    | expectedRegistry
-      ${['//my-private-registry']}  | ${['//my-private-registry']}        | ${['//my-private-registry']}
-      ${[]}                         | ${['//my-private-registry']}        | ${[]}
-      ${[]}                         | ${[]}                               | ${[]}
-      ${null}                       | ${null}                             | ${[]}
-      ${['//my-private-registry']}  | ${[]}                               | ${['//my-private-registry']}
-      ${['//my-private-registry']}  | ${['https://my-private-registry']}  | ${['https://my-private-registry']}
-      ${['//my-private-registry']}  | ${['http://my-private-registry']}   | ${['http://my-private-registry']}
-      ${['//my-private-registry']}  | ${['http://my-private-registry/']}  | ${['http://my-private-registry/']}
-      ${['//my-private-registry']}  | ${['https://my-private-registry/']} | ${['https://my-private-registry/']}
-      ${['//my-private-registry']}  | ${['//my-private-registry/']}       | ${['//my-private-registry/']}
-      ${['//my-private-registry/']} | ${['//my-private-registry/']}       | ${['//my-private-registry/']}
-      ${['//my-private-registry/']} | ${['//my-private-registry']}        | ${['//my-private-registry']}
-    `(
-      'should return $expectedRegistry when parsing $additionalRegistry against local $existingRegistry',
-      ({
-        additionalRegistry,
-        existingRegistry,
-        expectedRegistry,
-      }: Record<
-        'additionalRegistry' | 'existingRegistry' | 'expectedRegistry',
-        string[]
-      >) => {
-        expect(
-          fuzzyMatchAdditionalYarnrcYml(
-            {
-              npmRegistries: additionalRegistry?.reduce(
-                (acc, cur) => ({
-                  ...acc,
-                  [cur]: { npmAuthToken: 'xxxxxx' },
-                }),
-                {},
-              ),
-            },
-            {
-              npmRegistries: existingRegistry?.reduce(
-                (acc, cur) => ({
-                  ...acc,
-                  [cur]: { npmAuthToken: 'xxxxxx' },
-                }),
-                {},
-              ),
-            },
-          ).npmRegistries,
-        ).toContainAllKeys(expectedRegistry);
-      },
-    );
   });
 });
