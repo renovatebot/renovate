@@ -309,7 +309,11 @@ const repoGroups = {
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
-  jackson: 'https://github.com/FasterXML/jackson',
+  jackson: [
+    'https://github.com/FasterXML/jackson',
+    'https://github.com/FasterXML/jackson-dataformats-binary',
+    'https://github.com/FasterXML/jackson-dataformats-text'
+  ],
   jasmine: 'https://github.com/jasmine/jasmine',
   javahamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   javascriptengineswitcher:
