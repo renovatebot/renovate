@@ -173,8 +173,3 @@ export function setLogLevelRemaps(
   resetRemapMatcherCache();
   logLevelRemaps = remaps ?? null;
 }
-
-export function clearLogLevelRemaps(): void {
-  resetRemapMatcherCache();
-  logLevelRemaps = null;
-}
