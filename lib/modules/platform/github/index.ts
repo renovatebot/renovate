@@ -86,6 +86,7 @@ import type {
   GhRestPr,
   GhRestRepo,
   LocalRepoConfig,
+  Milestone,
   PlatformConfig,
 } from './types';
 import { getAppDetails, getUserDetails, getUserEmail } from './user';
@@ -1378,6 +1379,55 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   }
 }
 
+async function addMilestone(
+  issueNo: number,
+  milestoneTitle: string,
+): Promise<void> {
+  logger.debug(`Adding milestone '${milestoneTitle}' to #${issueNo}`);
+  // first, find the milestone id
+  const milestones = await getMilestones(issueNo);
+  const milestone = milestones.find((m) => m.title === milestoneTitle);
+  if (!milestone) {
+    logger.warn(
+      `Milestone '${milestoneTitle}' did not exists. Adding of milestone skipped.`,
+    );
+    return;
+  }
+
+  // then, add the milestone id to the PR
+  const repository = config.parentRepo ?? config.repository;
+  await githubApi.patchJson(`repos/${repository}/issues/${issueNo}`, {
+    body: {
+      milestone: milestone.number,
+    },
+  });
+}
+
+async function getMilestones(
+  issueNo: number,
+  state = 'open',
+): Promise<Milestone[]> {
+  logger.debug(`Getting ${state} milestones for #${issueNo}`);
+  const url = `repos/${
+    config.parentRepo ?? config.repository
+  }/milestones?state=${state}&per_page=100`;
+  try {
+    const milestones = (
+      await githubApi.getJson<Milestone[]>(url, {
+        paginate: true,
+      })
+    ).body;
+    logger.debug(`Found ${milestones.length} ${state} milestones`);
+    return milestones;
+  } catch (err) /* istanbul ignore next */ {
+    if (err.statusCode === 404) {
+      logger.debug(`404 response when retrieving ${state} milestones`);
+      throw new ExternalHostError(err, 'github');
+    }
+    throw err;
+  }
+}
+
 export async function addAssignees(
   issueNo: number,
   assignees: string[],
@@ -1658,6 +1708,7 @@ export async function createPr({
   labels,
   draftPR = false,
   platformOptions,
+  milestone,
 }: CreatePRConfig): Promise<GhPr | null> {
   const body = sanitize(rawBody);
   const base = targetBranch;
@@ -1698,6 +1749,9 @@ export async function createPr({
 
   await addLabels(number, labels);
   await tryPrAutomerge(number, node_id, platformOptions);
+  if (milestone) {
+    await addMilestone(number, milestone);
+  }
 
   cachePr(result);
   return result;

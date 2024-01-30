@@ -2818,6 +2818,13 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
   },
+  {
+    name: 'milestone',
+    description: `The title of a milestone. If set, the milestone will be set on the PR.`,
+    type: 'string',
+    default: null,
+    supportedPlatforms: ['github'],
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

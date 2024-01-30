@@ -142,6 +142,14 @@ export interface ApiPageItem {
   updated_at: string;
 }
 
+export interface Milestone {
+  id: number;
+  number: number;
+  title: string;
+  description: string;
+  state: string;
+}
+
 /**
  * Mutable object designed to be used in the repository cache
  */
