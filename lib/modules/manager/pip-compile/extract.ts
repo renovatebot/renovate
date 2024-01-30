@@ -124,7 +124,10 @@ export async function extractAllPackageFiles(
           }
         }
       } catch (error) {
-        logger.warn(error, 'Failed to parse pip-compile command from header');
+        logger.warn(
+          { error: error.message.toString() },
+          'Failed to parse pip-compile command from header',
+        );
         continue;
       }
     } else {
