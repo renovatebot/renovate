@@ -245,7 +245,11 @@ export async function updateArtifacts(
       memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
-    if (recursionLimit > 0 && output.includes('version solving has failed')) {
+    if (
+      recursionLimit > 0 &&
+      (output.includes('version solving has failed') ||
+        output.includes('Could not find gem'))
+    ) {
       logger.debug('Failed to lock strictly, retrying non-strict');
       const newConfig = {
         ...config,
