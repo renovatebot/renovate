@@ -384,6 +384,7 @@ const repoGroups = {
     'https://github.com/nuxt/nuxt',
   ],
   okhttp: 'https://github.com/square/okhttp',
+  opencost: 'https://github.com/opencost/opencost',
   openiddict: 'https://github.com/openiddict/openiddict-core',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
