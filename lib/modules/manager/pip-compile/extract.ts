@@ -1,8 +1,9 @@
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
-import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
-import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
+// TODO(not7cd): enable in the next PR, when this can be properly tested
+// import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
+// import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
 import { extractHeaderCommand } from './common';
 
@@ -23,19 +24,20 @@ function matchManager(filename: string): string {
   return 'unknown';
 }
 
-export async function extractPackageFile(
+export function extractPackageFile(
   content: string,
   _packageFile: string,
   _config: ExtractConfig,
-): Promise<PackageFileContent | null> {
+): PackageFileContent | null {
   logger.trace('pip-compile.extractPackageFile()');
   const manager = matchManager(_packageFile);
-  // TODO(not7cd): extract based on manager: pep621, identify other missing source types
+  // TODO(not7cd): extract based on manager: pep621, setupdools, identify other missing source types
   switch (manager) {
-    case 'pip_setup':
-      return extractSetupPyFile(content, _packageFile, _config);
-    case 'setup-cfg':
-      return await extractSetupCfgFile(content);
+    // TODO(not7cd): enable in the next PR, when this can be properly tested
+    // case 'pip_setup':
+    //   return extractSetupPyFile(content, _packageFile, _config);
+    // case 'setup-cfg':
+    //   return await extractSetupCfgFile(content);
     case 'pip_requirements':
       return extractRequirementsFile(content);
     default:
@@ -61,7 +63,7 @@ export async function extractAllPackageFiles(
         for (const sourceFile of pipCompileArgs.sourceFiles) {
           const content = await readLocalFile(sourceFile, 'utf8');
           if (content) {
-            const deps = await extractPackageFile(content, sourceFile, config);
+            const deps = extractPackageFile(content, sourceFile, config);
             if (deps) {
               result.push({
                 ...deps,
