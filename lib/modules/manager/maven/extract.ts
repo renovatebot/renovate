@@ -9,6 +9,12 @@ import { MAVEN_REPO } from '../../datasource/maven/common';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { MavenProp } from './types';
 
+const supportedNamespaces = [
+  'http://maven.apache.org/SETTINGS/1.0.0',
+  'http://maven.apache.org/SETTINGS/1.1.0',
+  'http://maven.apache.org/SETTINGS/1.2.0',
+];
+
 function parsePom(raw: string, packageFile: string): XmlDocument | null {
   let project: XmlDocument;
   try {
@@ -357,12 +363,6 @@ function parseUrls(xmlNode: XmlElement, path: string): string[] {
 }
 
 export function parseSettings(raw: string): XmlDocument | null {
-  const supportedNamespaces = [
-    'http://maven.apache.org/SETTINGS/1.0.0',
-    'http://maven.apache.org/SETTINGS/1.1.0',
-    'http://maven.apache.org/SETTINGS/1.2.0',
-  ];
-
   let settings: XmlDocument;
   try {
     settings = new XmlDocument(raw);

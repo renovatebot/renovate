@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackage, extractRegistries } from './extract';
 
@@ -175,7 +176,21 @@ describe('modules/manager/maven/extract', () => {
     });
 
     it('extract registries from a settings file that uses updated schema', () => {
-      const settingsUpatedContent = Fixtures.get(`settings.updated.schema.xml`);
+      const settingsUpatedContent = codeBlock`
+        <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd">
+          <mirrors>
+                <mirror>
+                    <id>Test-Internal-repository</id>
+                    <name>Proxy Repository Manager</name>
+                    <url>https:/proxy-repo.com/artifactory/apache-maven</url>
+                    <mirrorOf>central</mirrorOf>
+                </mirror>
+            </mirrors>
+          <profiles/>
+          <activeProfiles/>
+        </settings>
+        `;
       const res = extractRegistries(settingsUpatedContent);
       expect(res).toStrictEqual([
         'https:/proxy-repo.com/artifactory/apache-maven',
