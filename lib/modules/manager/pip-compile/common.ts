@@ -118,11 +118,6 @@ export function extractHeaderCommand(
     const command = compileCommand.groups.command;
     const argv: string[] = [command];
     const isCustomCommand = command !== 'pip-compile';
-    if (strict && isCustomCommand) {
-      throw new Error(
-        `Command "${command}" != "pip-compile", header modified or set by CUSTOM_COMPILE_COMMAND`,
-      );
-    }
     if (isCustomCommand) {
       logger.debug(`Custom command ${command} detected`);
     }

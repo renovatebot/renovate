@@ -329,6 +329,16 @@ describe('modules/manager/pip-compile/artifacts', () => {
       ).toThrow(/supported/);
     });
 
+    it('throws on custom command when strict', () => {
+      expect(() =>
+        constructPipCompileCmd(
+          Fixtures.get('requirementsCustomCommand.txt'),
+          'subdir/requirements.txt',
+          true,
+        ),
+      ).toThrow(/custom/);
+    });
+
     // TODO(not7cd): check for explotiable commands
     // it('skips exploitable subcommands and files', () => {
     //   expect(

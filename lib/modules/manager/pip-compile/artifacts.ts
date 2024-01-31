@@ -18,9 +18,8 @@ export function constructPipCompileCmd(
 ): string {
   const pipCompileArgs = extractHeaderCommand(content, outputFileName);
   if (strict && pipCompileArgs.isCustomCommand) {
-    logger.error({ command: pipCompileArgs.command }, 'Custom command');
     throw new Error(
-      'Custom command detected, disable strict mode if self-hosted',
+      'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
   }
   // TODO(not7cd): sanitize args that require quotes, .map((argument) => quote(argument))
