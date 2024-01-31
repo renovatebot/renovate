@@ -1139,9 +1139,9 @@ describe('modules/manager/terraform/lockfile/index', () => {
             newValue: '<= 2.46.0',
             newVersion: '2.46.0',
           },
-          '>= 2.41.0, <= 2.41.0, >= 2',
+          '>= 2.41.0, <= 2.41.0, >= 2.0.0',
         ),
-      ).toBe('>= 2.41.0, <= 2.46.0, >= 2');
+      ).toBe('>= 2.41.0, <= 2.46.0, >= 2.0.0');
     });
 
     it('create constraint with full version', () => {
