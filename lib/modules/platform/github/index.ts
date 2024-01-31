@@ -35,7 +35,10 @@ import type {
 import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
 import type { GithubHttpOptions } from '../../../util/http/github';
-import type { HttpResponse } from '../../../util/http/types';
+import type {
+  HttpResponse,
+  InternalHttpOptions,
+} from '../../../util/http/types';
 import { coerceObject } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -283,8 +286,8 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   }
 
   logger.debug({ topics: config.topics }, 'Filtering by topics');
-  const topicRepositories = nonArchivedRepositories.filter(
-    (repo) => repo.topics?.some((topic) => config?.topics?.includes(topic)),
+  const topicRepositories = nonArchivedRepositories.filter((repo) =>
+    repo.topics?.some((topic) => config?.topics?.includes(topic)),
   );
 
   if (topicRepositories.length < nonArchivedRepositories.length) {
@@ -316,11 +319,15 @@ export async function getRawFile(
   branchOrTag?: string,
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
+  const httpOptions: InternalHttpOptions = {
+    // Only cache response if it's from the same repo
+    repoCache: repo === config.repository,
+  };
   let url = `repos/${repo}/contents/${fileName}`;
   if (branchOrTag) {
     url += `?ref=` + branchOrTag;
   }
-  const res = await githubApi.getJson<{ content: string }>(url);
+  const res = await githubApi.getJson<{ content: string }>(url, httpOptions);
   const buf = res.body.content;
   const str = fromBase64(buf);
   return str;
@@ -465,6 +472,18 @@ export async function initRepo({
       infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
     }
 
+    // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
+    if (
+      platformConfig.isGhe &&
+      // semver not null safe, accepts null and undefined
+      semver.satisfies(platformConfig.gheVersion!, '<3.9.0')
+    ) {
+      infoQuery = infoQuery.replace(
+        /\n\s*hasVulnerabilityAlertsEnabled\s*\n/,
+        '\n',
+      );
+    }
+
     const res = await githubApi.requestGraphql<{
       repository: GhRepo;
     }>(infoQuery, {
@@ -526,6 +545,7 @@ export async function initRepo({
     }
     config.autoMergeAllowed = repo.autoMergeAllowed;
     config.hasIssuesEnabled = repo.hasIssuesEnabled;
+    config.hasVulnerabilityAlertsEnabled = repo.hasVulnerabilityAlertsEnabled;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
@@ -1207,7 +1227,7 @@ export async function getIssue(
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
         `repos/${config.parentRepo ?? config.repository}/issues/${number}`,
-        { memCache: useCache },
+        { memCache: useCache, repoCache: true },
       )
     ).body.body;
     return {
@@ -1293,6 +1313,7 @@ export async function ensureIssue({
           `repos/${config.parentRepo ?? config.repository}/issues/${
             issue.number
           }`,
+          { repoCache: true },
         )
       ).body.body;
       if (
@@ -1848,6 +1869,10 @@ export function massageMarkdown(input: string): string {
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+  if (config.hasVulnerabilityAlertsEnabled === false) {
+    logger.debug('No vulnerability alerts enabled for repo');
+    return [];
+  }
   let vulnerabilityAlerts: { node: VulnerabilityAlert }[] | undefined;
 
   // TODO #22198
