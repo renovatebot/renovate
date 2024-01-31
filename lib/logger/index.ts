@@ -66,8 +66,8 @@ const bunyanLogger = bunyan.createLogger({
 const logFactory = (
   _level: bunyan.LogLevelString,
 ): ((p1: unknown, p2: unknown) => void) => {
-  let level = _level;
   return (p1: any, p2: any): void => {
+    let level = _level;
     if (p2) {
       // meta and msg provided
       const msg = p2;
