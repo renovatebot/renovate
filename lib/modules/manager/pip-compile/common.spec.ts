@@ -5,7 +5,7 @@ import { env } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
-import { extractHeaderCommand } from './common';
+import { allowedPipOptions, extractHeaderCommand } from './common';
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
@@ -103,5 +103,35 @@ describe('modules/manager/pip-compile/common', () => {
         ),
       ).toThrow(/source/);
     });
+
+    test('returned sourceFiles returns all source files', () => {
+      const exampleSourceFiles = [
+        'requirements.in',
+        'reqs/testing.in',
+        'base.txt',
+        './lib/setup.py',
+        'pyproject.toml',
+      ];
+      expect(
+        extractHeaderCommand(
+          getCommandInHeader(
+            `pip-compile --extra=color ${exampleSourceFiles.join(' ')}`,
+          ),
+          'reqs.txt',
+        ).sourceFiles,
+      ).toEqual(exampleSourceFiles);
+    });
+
+    it.each(allowedPipOptions)(
+      'returned sourceFiles must not contain options',
+      (argument: string) => {
+        const sourceFiles = extractHeaderCommand(
+          getCommandInHeader(`pip-compile ${argument}=dd reqs.in`),
+          'reqs.txt',
+        ).sourceFiles;
+        expect(sourceFiles).not.toContainEqual(argument);
+        expect(sourceFiles).toEqual(['reqs.in']);
+      },
+    );
   });
 });

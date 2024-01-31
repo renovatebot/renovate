@@ -84,12 +84,11 @@ export const allowedPipOptions = [
 // as commander.js is already used, we will reuse it's argument parsing capability
 const dummyPipCompile = new Command();
 dummyPipCompile
-  .argument('<sourceFile...>')
-  .option('-o, --output-file <path>')
-  // .option('--no-emit-index-url')
+  .argument('[sourceFile...]') // optional, so extractHeaderCommand can throw an explicit error
+  .option('--output-file <path>')
+  .option('--extra <extra...>')
   .option('--extra-index-url <url...>')
   .allowUnknownOption();
-// .allowExcessArguments()
 
 interface PipCompileArgs {
   command: string;
@@ -146,7 +145,10 @@ export function extractHeaderCommand(
     // Commander.parse is expecting argv[0] to be process.execPath, pass empty string as first value
     const parsedCommand = dummyPipCompile.parse(['', ...argv]);
     const options = parsedCommand.opts();
-    const sourceFiles = parsedCommand.args;
+    // workaround, not sure how Commander returns named arguments
+    const sourceFiles = parsedCommand.args.filter(
+      (arg) => !arg.startsWith('-'),
+    );
     logger.debug(
       {
         argv,
@@ -214,7 +216,7 @@ function throwForDisallowedOption(arg: string): void {
 
 function throwForNoEqualSignInOptionWithArgument(arg: string): void {
   for (const option of optionsWithArguments) {
-    if (arg.startsWith(option) && !arg.startsWith(`${option}=`)) {
+    if (arg === option) {
       throw new Error(
         `Option ${option} must have equal sign '=' separating it's argument`,
       );
