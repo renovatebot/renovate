@@ -33,7 +33,11 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   if (!config.lockFiles) {
-    throw new Error(`No lock files associated with ${inputFileName}`);
+    logger.warn(
+      { packageFileName: inputFileName },
+      'No lock files associated with a package file',
+    );
+    return null;
   }
   logger.debug(
     `pipCompile.updateArtifacts(${inputFileName}->${JSON.stringify(

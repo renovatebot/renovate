@@ -93,6 +93,25 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ]);
   });
 
+  it('returns null if no config.lockFiles', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    fs.readLocalFile.mockResolvedValueOnce('new lock');
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.in',
+        updatedDeps: [],
+        newPackageFileContent: 'some new content',
+        config: {
+          ...config,
+        },
+      }),
+    ).toBeNull();
+    expect(logger.warn).toHaveBeenCalledWith(
+      { packageFileName: 'requirements.in' },
+      'No lock files associated with a package file',
+    );
+  });
+
   it('returns updated requirements.txt', async () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
     const execSnapshots = mockExecAll();
