@@ -1118,6 +1118,32 @@ describe('modules/manager/terraform/lockfile/index', () => {
       ).toBe('>= 2.36.0, 2.46.0');
     });
 
+    it('update constraint when current version is matched multiple times', () => {
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '2.41.0',
+            newValue: '2.46.0',
+            newVersion: '2.46.0',
+          },
+          '>= 2.41.0, 2.41.0',
+        ),
+      ).toBe('>= 2.41.0, 2.46.0');
+    });
+
+    it('update constraint when current version is in a complicated constraint', () => {
+      expect(
+        getNewConstraint(
+          {
+            currentValue: '<= 2.41.0',
+            newValue: '<= 2.46.0',
+            newVersion: '2.46.0',
+          },
+          '>= 2.41.0, <= 2.41.0, >= 2.0.0',
+        ),
+      ).toBe('>= 2.41.0, <= 2.46.0, >= 2.0.0');
+    });
+
     it('create constraint with full version', () => {
       expect(
         getNewConstraint(
