@@ -61,6 +61,14 @@ export async function extractAllPackageFiles(
         // TODO(not7cd): handle locked deps
         // const lockedDeps = extractRequirementsFile(content);
         for (const sourceFile of pipCompileArgs.sourceFiles) {
+          if (packageFiles.includes(sourceFile)) {
+            // TODO(not7cd): do something about it
+            logger.warn(
+              { sourceFile, lockFile },
+              'lock file acts as source file for another lock file',
+            );
+            continue;
+          }
           if (result.has(sourceFile)) {
             result.get(sourceFile)?.lockFiles?.push(lockFile);
             continue;
