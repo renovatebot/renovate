@@ -1801,6 +1801,21 @@ You can configure a different maximum value in seconds using `maxRetryAfter`:
 }
 ```
 
+### newLogLevel
+
+For log level remapping, `newLogLevel` will set for the particular log message:
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/error/",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
@@ -2159,6 +2174,25 @@ To enable `lockFileMaintenance` add this to your configuration:
 
 To reduce "noise" in the repository, Renovate performs `lockFileMaintenance` `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
 Depending on its running schedule, Renovate may run a few times within that time window - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
+
+## logLevelRemap
+
+This option allows you to remap log levels for specific messages.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "*branch*",
+      "newLogLevel": "info"
+    },
+    {
+      "matchMessage": "/PR|pull request/",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
 
 ## major
 
@@ -2592,6 +2626,21 @@ Use this field to restrict rules to a particular package manager. e.g.
 ```
 
 For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
+
+### matchMessage
+
+For log level remapping, use this field to match against the particular log messages.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "*error*",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
 
 ### matchDatasources
 
