@@ -78,8 +78,8 @@ importers:
         specifier: 4.6.0
         version: 4.6.0
       '@types/better-sqlite3':
-        specifier: 7.6.8
-        version: 7.6.8
+        specifier: 7.6.9
+        version: 7.6.9
       '@types/ms':
         specifier: 0.7.34
         version: 0.7.34
@@ -3674,8 +3674,8 @@ packages:
       '@babel/types': 7.23.6
     dev: true
 
-  /@types/better-sqlite3@7.6.8:
-    resolution: {integrity: sha512-ASndM4rdGrzk7iXXqyNC4fbwt4UEjpK0i3j4q4FyeQrLAthfB6s7EF135ZJE0qQxtKIMFwmyT6x0switET7uIw==}
+  /@types/better-sqlite3@7.6.9:
+    resolution: {integrity: sha512-FvktcujPDj9XKMJQWFcl2vVl7OdRIqsSRX9b0acWwTmwLK9CF2eqo/FRcmMLNpugKoX/avA6pb7TorDLmpgTnQ==}
     dependencies:
       '@types/node': 18.19.11
     dev: false
