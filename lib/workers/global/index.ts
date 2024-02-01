@@ -20,6 +20,7 @@ import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
+import { regexEngineStatus } from '../../util/regex';
 import { addSecretForSanitizing } from '../../util/sanitize';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
@@ -111,6 +112,18 @@ export async function resolveGlobalExtends(
 }
 
 export async function start(): Promise<number> {
+  // istanbul ignore next
+  if (regexEngineStatus.type === 'available') {
+    logger.debug('Using RE2 regex engine');
+  } else if (regexEngineStatus.type === 'unavailable') {
+    logger.warn(
+      { err: regexEngineStatus.err },
+      'RE2 not usable, falling back to RegExp',
+    );
+  } else if (regexEngineStatus.type === 'ignored') {
+    logger.debug('RE2 regex engine is ignored via RENOVATE_X_IGNORE_RE2');
+  }
+
   let config: AllConfig;
   try {
     if (is.nonEmptyStringAndNotWhitespace(process.env.AWS_SECRET_ACCESS_KEY)) {
