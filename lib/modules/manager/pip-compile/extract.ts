@@ -51,7 +51,7 @@ export async function extractAllPackageFiles(
   packageFiles: string[],
 ): Promise<PackageFile[]> {
   logger.trace('pip-compile.extractAllPackageFiles()');
-  const result: PackageFile[] = [];
+  const result = new Map<string, PackageFile>();
   for (const lockFile of packageFiles) {
     const lockFileContent = await readLocalFile(lockFile, 'utf8');
     // istanbul ignore else
@@ -61,11 +61,15 @@ export async function extractAllPackageFiles(
         // TODO(not7cd): handle locked deps
         // const lockedDeps = extractRequirementsFile(content);
         for (const sourceFile of pipCompileArgs.sourceFiles) {
+          if (result.has(sourceFile)) {
+            result.get(sourceFile)?.lockFiles?.push(lockFile);
+            continue;
+          }
           const content = await readLocalFile(sourceFile, 'utf8');
           if (content) {
             const deps = extractPackageFile(content, sourceFile, config);
             if (deps) {
-              result.push({
+              result.set(sourceFile, {
                 ...deps,
                 lockFiles: [lockFile],
                 packageFile: sourceFile,
@@ -89,5 +93,5 @@ export async function extractAllPackageFiles(
     }
   }
   // TODO(not7cd): sort by requirement layering (-r -c within .in files)
-  return result;
+  return Array.from(result.values());
 }
