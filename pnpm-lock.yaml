@@ -189,8 +189,8 @@ importers:
         specifier: 1.1.23
         version: 1.1.23
       google-auth-library:
-        specifier: 9.5.0
-        version: 9.5.0
+        specifier: 9.6.1
+        version: 9.6.1
       got:
         specifier: 11.8.6
         version: 11.8.6
@@ -6474,8 +6474,8 @@ packages:
       moo: 0.5.2
     dev: false
 
-  /google-auth-library@9.5.0:
-    resolution: {integrity: sha512-OUbP509lWVlZxuMY+Cgomw49VzZFP9myIcVeYEpeBlbXJbPC4R+K4BmO9hd3ciYM5QIwm5W1PODcKjqxtkye9Q==}
+  /google-auth-library@9.6.1:
+    resolution: {integrity: sha512-rPL44wV0yJnA11+ggxA348ylUY1o7mkcHLwlZNlLZsKROPLl7q3LgMU5nM65h1QpxhJu/shk2FLml7173XIthA==}
     engines: {node: '>=14'}
     dependencies:
       base64-js: 1.5.1
