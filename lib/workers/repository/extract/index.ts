@@ -14,13 +14,16 @@ export async function extractAllDependencies(
   config: RenovateConfig,
 ): Promise<ExtractResult> {
   const managerList = getEnabledManagersList(config.enabledManagers);
-  const extractList: WorkerExtractConfig[] = [];
+  const extractList: [ManagerConfig, WorkerExtractConfig][] = [];
   const fileList = await scm.getFileList();
 
   const tryConfig = (managerConfig: ManagerConfig): void => {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
     if (matchingFileList.length) {
-      extractList.push({ ...managerConfig, fileList: matchingFileList });
+      extractList.push([
+        managerConfig,
+        { ...managerConfig, fileList: matchingFileList },
+      ]);
     }
   };
 
@@ -46,15 +49,18 @@ export async function extractAllDependencies(
 
   // Store the fingerprint of all managers which match any file (even if they do not find any dependencies)
   // The cached result needs to be invalidated if the fingerprint of any matching manager changes
-  for (const { manager } of extractList) {
+  for (const [, { manager }] of extractList) {
     extractResult.extractionFingerprints[manager] = hashMap.get(manager);
   }
 
   const extractDurations: Record<string, number> = {};
   const extractResults = await Promise.all(
-    extractList.map(async (managerConfig) => {
+    extractList.map(async ([managerConfig, workerExtractConfig]) => {
       const start = Date.now();
-      const packageFiles = await getManagerPackageFiles(managerConfig);
+      const packageFiles = await getManagerPackageFiles(
+        workerExtractConfig,
+        managerConfig,
+      );
       const durationMs = Math.round(Date.now() - start);
       extractDurations[managerConfig.manager] = durationMs;
       return { manager: managerConfig.manager, packageFiles };

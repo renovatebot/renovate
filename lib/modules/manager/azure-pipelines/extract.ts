@@ -18,40 +18,40 @@ import {
   Repository,
   Step,
 } from './schema';
+import type { AzurePipelinesExtractConfig } from './index';
 
 const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
 
 export function extractRepository(
   repository: Repository,
+  config: AzurePipelinesExtractConfig,
 ): PackageDependency | null {
   let repositoryUrl = null;
 
   if (repository.type === 'github') {
     repositoryUrl = `https://github.com/${repository.name}.git`;
   } else if (repository.type === 'git') {
-    // "git" type indicates an AzureDevOps repository.
-    // The repository URL is only deducible if we are running on AzureDevOps (so can use the endpoint)
-    // and the name is of the form `Project/Repository`.
-    // The name could just be the repository name, in which case AzureDevOps defaults to the
-    // same project, which is not currently accessible here. It could be deduced later by exposing
-    // the repository URL to managers.
-    // https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/resources-repositories-repository?view=azure-pipelines#types
     const platform = GlobalConfig.get('platform');
     const endpoint = GlobalConfig.get('endpoint');
+    let projectName = '';
+    let repoName = '';
+
     if (platform === 'azure' && endpoint) {
+      // extract the project name if the repository from which the pipline is referencing templates contains the Azure DevOps project name
       if (repository.name.includes('/')) {
-        const [projectName, repoName] = repository.name.split('/');
-        repositoryUrl = joinUrlParts(
-          endpoint,
-          encodeURIComponent(projectName),
-          '_git',
-          encodeURIComponent(repoName),
+        const [_projectName, _repoName] = repository.name.split('/');
+        projectName = _projectName;
+        repoName = _repoName;
+
+        // if the repository from which the pipline is referencing templates does not contain the Azure DevOps project name, get the project name from the repository containing the pipeline file being process
+      } else if (config.repository && config.repository.includes('/')) {
+        projectName = config.repository.substring(
+          0,
+          config.repository.indexOf('/'),
         );
-      } else {
-        logger.debug(
-          'Renovate cannot update repositories that do not include the project name',
-        );
+        repoName = repository.name;
       }
+      repositoryUrl = buildRepositoryUrl(endpoint, projectName, repoName);
     }
   }
 
@@ -168,6 +168,7 @@ function extractJobs(jobs: Jobs | undefined): PackageDependency[] {
 export function extractPackageFile(
   content: string,
   packageFile: string,
+  config: AzurePipelinesExtractConfig,
 ): PackageFileContent | null {
   logger.trace(`azurePipelines.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
@@ -178,7 +179,7 @@ export function extractPackageFile(
   }
 
   for (const repository of coerceArray(pkg.resources?.repositories)) {
-    const dep = extractRepository(repository);
+    const dep = extractRepository(repository, config);
     if (dep) {
       deps.push(dep);
     }
@@ -202,4 +203,20 @@ export function extractPackageFile(
     return null;
   }
   return { deps };
+}
+
+function buildRepositoryUrl(
+  endpoint: string,
+  projectName: string,
+  repoName: string,
+): string | null {
+  if ([endpoint, projectName, repoName].some((x) => !x || x === '')) {
+    return null;
+  }
+  return joinUrlParts(
+    endpoint,
+    encodeURIComponent(projectName),
+    '_git',
+    encodeURIComponent(repoName),
+  );
 }

@@ -35,11 +35,16 @@ describe('modules/manager/azure-pipelines/extract', () => {
   describe('extractRepository()', () => {
     it('should extract repository information', () => {
       expect(
-        extractRepository({
-          type: 'github',
-          name: 'user/repo',
-          ref: 'refs/tags/v1.0.0',
-        }),
+        extractRepository(
+          {
+            type: 'github',
+            name: 'user/repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          {
+            repository: 'user/repo',
+          },
+        ),
       ).toMatchObject({
         depName: 'user/repo',
         packageName: 'https://github.com/user/repo.git',
@@ -48,30 +53,45 @@ describe('modules/manager/azure-pipelines/extract', () => {
 
     it('should return null when repository type is not github', () => {
       expect(
-        extractRepository({
-          type: 'bitbucket',
-          name: 'user/repo',
-          ref: 'refs/tags/v1.0.0',
-        }),
+        extractRepository(
+          {
+            type: 'bitbucket',
+            name: 'user/repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          {
+            repository: 'user/repo',
+          },
+        ),
       ).toBeNull();
     });
 
     it('should return null when reference is not defined specified', () => {
       expect(
-        extractRepository({
-          type: 'github',
-          name: 'user/repo',
-        }),
+        extractRepository(
+          {
+            type: 'github',
+            name: 'user/repo',
+          },
+          {
+            repository: 'user/repo',
+          },
+        ),
       ).toBeNull();
     });
 
     it('should return null when reference is invalid tag format', () => {
       expect(
-        extractRepository({
-          type: 'github',
-          name: 'user/repo',
-          ref: 'refs/head/master',
-        }),
+        extractRepository(
+          {
+            type: 'github',
+            name: 'user/repo',
+            ref: 'refs/head/master',
+          },
+          {
+            repository: 'user/repo',
+          },
+        ),
       ).toBeNull();
     });
 
@@ -82,29 +102,62 @@ describe('modules/manager/azure-pipelines/extract', () => {
       });
 
       expect(
-        extractRepository({
-          type: 'git',
-          name: 'project/repo',
-          ref: 'refs/tags/v1.0.0',
-        }),
+        extractRepository(
+          {
+            type: 'git',
+            name: 'project/repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          {
+            repository: '',
+          },
+        ),
       ).toMatchObject({
         depName: 'project/repo',
         packageName: 'https://dev.azure.com/renovate-org/project/_git/repo',
       });
     });
 
-    it('should return null if repository type is git and project not in name', () => {
+    it('should extract Azure repository information if project is not in name but is extract config repository name', () => {
       GlobalConfig.set({
         platform: 'azure',
         endpoint: 'https://dev.azure.com/renovate-org',
       });
 
       expect(
-        extractRepository({
-          type: 'git',
-          name: 'repo',
-          ref: 'refs/tags/v1.0.0',
-        }),
+        extractRepository(
+          {
+            type: 'git',
+            name: 'repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          {
+            repository: 'project/otherrepo',
+          },
+        ),
+      ).toMatchObject({
+        depName: 'project/repo',
+        packageName: 'https://dev.azure.com/renovate-org/project/_git/repo',
+      });
+    });
+
+    it('should return null if repository type is git and project not in name nor in config repository name', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/renovate-org',
+      });
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          {
+            repository: '',
+          },
+        ),
       ).toBeNull();
     });
 
@@ -114,11 +167,16 @@ describe('modules/manager/azure-pipelines/extract', () => {
       });
 
       expect(
-        extractRepository({
-          type: 'git',
-          name: 'project/repo',
-          ref: 'refs/tags/v1.0.0',
-        }),
+        extractRepository(
+          {
+            type: 'git',
+            name: 'project/repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          {
+            repository: '',
+          },
+        ),
       ).toBeNull();
     });
   });
@@ -153,11 +211,15 @@ describe('modules/manager/azure-pipelines/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for invalid azure pipelines files', () => {
-      expect(extractPackageFile('}', azurePipelinesFilename)).toBeNull();
+      expect(
+        extractPackageFile('}', azurePipelinesFilename, { repository: 'repo' }),
+      ).toBeNull();
     });
 
     it('extracts dependencies', () => {
-      const res = extractPackageFile(azurePipelines, azurePipelinesFilename);
+      const res = extractPackageFile(azurePipelines, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toMatchObject([
         {
           depName: 'user/repo',
@@ -180,7 +242,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
 
     it('should return null when there is no dependency found', () => {
       expect(
-        extractPackageFile(azurePipelinesNoDependency, azurePipelinesFilename),
+        extractPackageFile(azurePipelinesNoDependency, azurePipelinesFilename, {
+          repository: 'repo',
+        }),
       ).toBeNull();
     });
 
@@ -196,7 +260,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
                     inputs:
                       script: 'echo Hello World'
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -219,7 +285,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
                       inputs:
                         script: 'echo Hello World'
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -242,7 +310,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
                       inputs:
                         script: 'echo Hello World'
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -264,7 +334,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
                     inputs:
                       script: 'echo Hello World'
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -286,7 +358,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
                     inputs:
                       script: 'echo Hello World'
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -308,7 +382,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
                     inputs:
                       script: 'echo Hello World'
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -330,7 +406,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
                     inputs:
                       script: 'echo Hello World'
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -352,7 +430,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
                     inputs:
                       script: 'echo Hello World'
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -373,7 +453,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
                   inputs:
                     script: 'echo Hello World'
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -392,7 +474,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
               inputs:
                 script: 'echo Hello World'
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -409,7 +493,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
           inputs:
             script: 'echo Hello World'
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res?.deps).toEqual([
         {
           depName: 'Bash',
@@ -424,7 +510,9 @@ describe('modules/manager/azure-pipelines/extract', () => {
         steps:
         - bash: 'echo Hello World';
       `;
-      const res = extractPackageFile(packageFile, azurePipelinesFilename);
+      const res = extractPackageFile(packageFile, azurePipelinesFilename, {
+        repository: 'repo',
+      });
       expect(res).toBeNull();
     });
   });
