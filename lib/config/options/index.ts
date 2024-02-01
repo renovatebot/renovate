@@ -15,6 +15,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'allowedEnv',
+    description: 'List of enviroment variables names allowed in repo config.',
+    type: 'array',
+    default: [],
+    subType: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'detectGlobalManagerConfig',
     description:
       'If `true`, Renovate tries to detect global manager configuration from the file system.',
@@ -386,6 +394,12 @@ const options: RenovateOptions[] = [
     description:
       'Custom environment variables for child processes and sidecar Docker containers.',
     globalOnly: true,
+    type: 'object',
+    default: {},
+  },
+  {
+    name: 'env',
+    description: 'User configured environment variables',
     type: 'object',
     default: {},
   },

@@ -152,6 +152,7 @@ export interface RepoGlobalConfig {
   platform?: PlatformId;
   endpoint?: string;
   includeMirrors?: boolean;
+  allowedEnv?: string[];
 }
 
 export interface LegacyAdminConfig {
@@ -275,6 +276,7 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  env?: Record<string, string>;
 }
 
 const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
