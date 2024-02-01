@@ -215,6 +215,29 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
     });
 
+    it('catches invalid env vars', async () => {
+      GlobalConfig.set({ allowedEnv: ['SOME_VAR', 'SOME_OTHER_VAR'] });
+      const config = {
+        env: {
+          randomKey: '',
+          SOME_VAR: 'some_value',
+          SOME_OTHER_VAR: 10 as never,
+        },
+      };
+      const { warnings } = await configValidation.validateConfig(false, config);
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'Enviroment variable inside `env.SOME_OTHER_VAR` should be a string.',
+        },
+        {
+          message:
+            'Invalid enviroment variable name `randomKey` found in `env`. Allowed values are SOME_VAR, SOME_OTHER_VAR.',
+        },
+      ]);
+      expect(warnings).toHaveLength(2);
+    });
+
     it('catches invalid customDatasources record type', async () => {
       const config = {
         customDatasources: {

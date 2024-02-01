@@ -599,6 +599,21 @@ export async function validateConfig(
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
               }
+            } else if (key === 'env') {
+              const allowedEnvVars = GlobalConfig.get('allowedEnv');
+              for (const [envVarName, envVarValue] of Object.entries(val)) {
+                if (!is.string(envVarValue)) {
+                  warnings.push({
+                    topic: 'Configuration Error',
+                    message: `Enviroment variable inside \`${currentPath}.${envVarName}\` should be a string.`,
+                  });
+                } else if (!allowedEnvVars?.includes(envVarName)) {
+                  warnings.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid enviroment variable name \`${envVarName}\` found in \`${currentPath}\`. Allowed values are ${allowedEnvVars?.join(', ')}.`,
+                  });
+                }
+              }
             } else if (key === 'statusCheckNames') {
               for (const [statusCheckKey, statusCheckValue] of Object.entries(
                 val,
