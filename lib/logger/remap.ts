@@ -44,14 +44,15 @@ function match(remap: LogLevelRemap, input: string): boolean {
 }
 
 export function getRemappedLevel(
-  logLevelRemaps: LogLevelRemap[] | null,
   msg: string,
+  logLevelRemaps: LogLevelRemap[] | undefined,
 ): LogLevelString | null {
   if (!logLevelRemaps) {
     return null;
   }
 
-  for (const logLevelRemap of logLevelRemaps) {
+  for (let idx = logLevelRemaps.length - 1; idx >= 0; idx -= 1) {
+    const logLevelRemap = logLevelRemaps[idx];
     if (match(logLevelRemap, msg)) {
       return logLevelRemap.newLogLevel;
     }

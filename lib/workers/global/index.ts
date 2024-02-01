@@ -16,7 +16,7 @@ import type {
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
-import { getProblems, logger, setLogLevelRemaps, setMeta } from '../../logger';
+import { getProblems, logger, setLogLevelRemap, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
@@ -180,10 +180,10 @@ export async function start(): Promise<number> {
           // host rules can change concurrency
           queue.clear();
           throttle.clear();
+          setLogLevelRemap(repoConfig.logLevelRemap);
 
           await repositoryWorker.renovateRepository(repoConfig);
           setMeta({});
-          setLogLevelRemaps(null);
         },
         {
           attributes: {

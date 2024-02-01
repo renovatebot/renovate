@@ -12,7 +12,8 @@ import { ProblemStream, validateLogLevel, withSanitizer } from './utils';
 
 let logContext: string = process.env.LOG_CONTEXT ?? nanoid();
 let curMeta: Record<string, unknown> = {};
-let logLevelRemaps: LogLevelRemap[] | null = null;
+
+let logLevelRemap: LogLevelRemap[] | undefined;
 
 const problems = new ProblemStream();
 
@@ -72,7 +73,7 @@ const logFactory = (
       // meta and msg provided
       const msg = p2;
       const meta: Record<string, unknown> = { logContext, ...curMeta, ...p1 };
-      const newLevel = getRemappedLevel(logLevelRemaps, msg);
+      const newLevel = getRemappedLevel(msg, logLevelRemap);
       if (newLevel) {
         meta.oldLevel = level;
         level = newLevel;
@@ -82,7 +83,7 @@ const logFactory = (
       // only message provided
       const msg = p1;
       const meta: Record<string, unknown> = { logContext, ...curMeta };
-      const newLevel = getRemappedLevel(logLevelRemaps, msg);
+      const newLevel = getRemappedLevel(msg, logLevelRemap);
       if (newLevel) {
         meta.oldLevel = level;
         level = newLevel;
@@ -167,9 +168,7 @@ export function clearProblems(): void {
   return problems.clearProblems();
 }
 
-export function setLogLevelRemaps(
-  remaps: LogLevelRemap[] | null | undefined,
-): void {
+export function setLogLevelRemap(remaps: LogLevelRemap[] | undefined): void {
   resetRemapMatcherCache();
-  logLevelRemaps = remaps ?? null;
+  logLevelRemap = remaps;
 }
