@@ -1,7 +1,9 @@
 With the `regex` manager you can configure Renovate so it finds dependencies that are not detected by its other built-in package managers.
 
-Renovate uses the `ECMAScript (JavaScript)` flavor of regex.
+Renovate supports the `ECMAScript (JavaScript)` flavor of regex.
 
+Renovate uses the `uhop/node-re2` package that provides bindings for [`google/re2`](https://github.com/google/re2).
+Read about [`uhop/node-re2`'s limitations in their readme](https://github.com/uhop/node-re2#limitations-things-re2-does-not-support).
 The `regex` manager is unique in Renovate because:
 
 - It is configurable via regex named capture groups
