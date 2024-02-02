@@ -75,5 +75,48 @@ describe('modules/manager/pip-compile/extract', () => {
         return expect(packageFiles[0]).toHaveProperty('lockFiles', lockFiles);
       });
     });
+
+    it('no lock files in returned package files', () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        getSimpleRequirementsFile('pip-compile --output-file=foo.txt foo.in', [
+          'foo==1.0.1',
+        ]),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('foo>=1.0.0');
+      fs.readLocalFile.mockResolvedValueOnce(
+        getSimpleRequirementsFile(
+          'pip-compile --output-file=bar.txt bar.in foo.txt',
+          ['foo==1.0.1', 'bar==2.0.0'],
+        ),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('bar>=1.0.0');
+
+      const lockFiles = ['foo.txt', 'bar.txt'];
+      return extractAllPackageFiles({}, lockFiles).then((packageFiles) => {
+        return packageFiles.forEach((packageFile) => {
+          expect(packageFile).not.toHaveProperty('packageFile', 'foo.txt');
+        });
+      });
+    });
+  });
+
+  it('return nothing for malformed files', () => {
+    fs.readLocalFile.mockResolvedValueOnce('');
+    fs.readLocalFile.mockResolvedValueOnce(
+      Fixtures.get('requirementsNoHeaders.txt'),
+    );
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=foo.txt malformed.in empty.in',
+        ['foo==1.0.1'],
+      ),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('!@#$');
+    fs.readLocalFile.mockResolvedValueOnce('');
+
+    const lockFiles = ['empty.txt', 'noHeader.txt', 'badSource.txt'];
+    return extractAllPackageFiles({}, lockFiles).then((packageFiles) => {
+      return expect(packageFiles).toBeEmptyArray();
+    });
   });
 });

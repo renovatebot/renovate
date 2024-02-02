@@ -31,12 +31,12 @@ function matchManager(filename: string): string {
 
 export function extractPackageFile(
   content: string,
-  _packageFile: string,
+  packageFile: string,
   _config: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace('pip-compile.extractPackageFile()');
-  const manager = matchManager(_packageFile);
-  // TODO(not7cd): extract based on manager: pep621, setupdools, identify other missing source types
+  const manager = matchManager(packageFile);
+  // TODO(not7cd): extract based on manager: pep621, setuptools, identify other missing source types
   switch (manager) {
     // TODO(not7cd): enable in the next PR, when this can be properly tested
     // case 'pip_setup':
@@ -45,97 +45,110 @@ export function extractPackageFile(
     //   return await extractSetupCfgFile(content);
     case 'pip_requirements':
       return extractRequirementsFile(content);
+    case 'unknown':
+      logger.warn(
+        { packageFile },
+        `pip-compile: could not determine manager for source file`,
+      );
+      return null;
     default:
-      logger.error(`Unsupported manager ${manager} for ${_packageFile}`);
+      logger.warn(
+        { packageFile, manager },
+        `pip-compile: support for manager is not yet implemented`,
+      );
       return null;
   }
 }
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  packageFiles: string[],
+  fileMatches: string[],
 ): Promise<PackageFile[]> {
   logger.trace('pip-compile.extractAllPackageFiles()');
-  const result = new Map<string, PackageFile>();
-  for (const lockFile of packageFiles) {
-    const lockFileContent = await readLocalFile(lockFile, 'utf8');
-    // istanbul ignore else
-    if (lockFileContent) {
-      try {
-        const pipCompileArgs = extractHeaderCommand(lockFileContent, lockFile);
-        // TODO(not7cd): handle locked deps
-        const lockedDeps = extractRequirementsFile(lockFileContent)?.deps;
-        for (const sourceFile of pipCompileArgs.sourceFiles) {
-          if (packageFiles.includes(sourceFile)) {
-            // TODO(not7cd): do something about it
-            logger.warn(
-              { sourceFile, lockFile },
-              'lock file acts as source file for another lock file',
-            );
-            continue;
-          }
-          if (result.has(sourceFile)) {
-            result.get(sourceFile)?.lockFiles?.push(lockFile);
-            continue;
-          }
-          const content = await readLocalFile(sourceFile, 'utf8');
-          if (content) {
-            const extractedSourceFile = extractPackageFile(
-              content,
-              sourceFile,
-              config,
-            );
-            if (extractedSourceFile) {
-              for (const dep of extractedSourceFile.deps) {
-                dep.lockedVersion = lockedDeps?.find(
-                  (lockedDep) => lockedDep.depName === dep.depName,
-                )?.currentVersion;
-                if (!dep.lockedVersion) {
-                  logger.warn(
-                    `No locked version found for dependency "${dep.depName}" in source file "${sourceFile}"`,
-                  );
-                }
-              }
-
-              // will work only for a first file, conflicts when versions differ between locks
-              if (lockedDeps) {
-                for (const lockedDep of lockedDeps) {
-                  if (
-                    !extractedSourceFile.deps.find(
-                      (dep) => dep.depName === lockedDep.depName,
-                    )
-                  ) {
-                    extractedSourceFile.deps.push(
-                      indirectDependency(lockedDep),
-                    );
-                  }
-                }
-              }
-              result.set(sourceFile, {
-                ...extractedSourceFile,
-                lockFiles: [lockFile],
-                packageFile: sourceFile,
-              });
-            } else {
-              logger.debug({ packageFile: sourceFile }, 'Failed to parse');
-            }
-          } else {
-            logger.debug({ packageFile: sourceFile }, 'No content found');
-          }
-        }
-      } catch (error) {
+  const packageFiles = new Map<string, PackageFile>();
+  for (const fileMatch of fileMatches) {
+    const fileContent = await readLocalFile(fileMatch, 'utf8');
+    if (!fileContent) {
+      logger.debug(`pip-compile: no content found for fileMatch ${fileMatch}`);
+      continue;
+    }
+    let pipCompileArgs;
+    try {
+      pipCompileArgs = extractHeaderCommand(fileContent, fileMatch);
+    } catch (error) {
+      logger.warn(
+        { fileMatch, error },
+        'Failed to parse pip-compile command from header',
+      );
+      continue;
+    }
+    const lockedDeps = extractRequirementsFile(fileContent)?.deps;
+    for (const packageFile of pipCompileArgs.sourceFiles) {
+      if (fileMatches.includes(packageFile)) {
+        // TODO(not7cd): do something about it
         logger.warn(
-          { error: error.message.toString() },
-          'Failed to parse pip-compile command from header',
+          { sourceFile: packageFile, lockFile: fileMatch },
+          'pip-compile: lock file acts as source file for another lock file',
         );
         continue;
       }
-    } else {
-      logger.debug({ packageFile: lockFile }, 'No content found');
+      if (packageFiles.has(packageFile)) {
+        logger.debug(
+          `pip-compile: ${packageFile} used in multiple output files`,
+        );
+        packageFiles.get(packageFile)?.lockFiles?.push(fileMatch);
+        continue;
+      }
+      const content = await readLocalFile(packageFile, 'utf8');
+      if (!content) {
+        logger.debug(`pip-compile: No content for source file ${packageFile}`);
+        continue;
+      }
+
+      const extractedPackageFile = extractPackageFile(
+        content,
+        packageFile,
+        config,
+      );
+      if (extractedPackageFile) {
+        for (const dep of extractedPackageFile.deps) {
+          dep.lockedVersion = lockedDeps?.find(
+            (lockedDep) => lockedDep.depName === dep.depName,
+          )?.currentVersion;
+          if (!dep.lockedVersion) {
+            logger.warn(
+              `pip-compile: No locked version found for dependency "${dep.depName}" in source file "${packageFile}"`,
+            );
+          }
+        }
+
+        // will work only for a first file, conflicts when versions differ between locks
+        if (lockedDeps) {
+          for (const lockedDep of lockedDeps) {
+            if (
+              !extractedPackageFile.deps.find(
+                (dep) => dep.depName === lockedDep.depName,
+              )
+            ) {
+              extractedPackageFile.deps.push(indirectDependency(lockedDep));
+            }
+          }
+        }
+        packageFiles.set(packageFile, {
+          ...extractedPackageFile,
+          lockFiles: [fileMatch],
+          packageFile,
+        });
+      } else {
+        logger.warn(
+          { packageFile },
+          'pip-compile: failed to find dependencies in source file',
+        );
+      }
     }
   }
   // TODO(not7cd): sort by requirement layering (-r -c within .in files)
-  return Array.from(result.values());
+  return Array.from(packageFiles.values());
 }
 
 function indirectDependency({
