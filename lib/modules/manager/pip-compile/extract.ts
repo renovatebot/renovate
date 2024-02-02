@@ -54,7 +54,6 @@ export async function extractAllPackageFiles(
   const result = new Map<string, PackageFile>();
   for (const lockFile of packageFiles) {
     const lockFileContent = await readLocalFile(lockFile, 'utf8');
-    // istanbul ignore else
     if (!lockFileContent) {
       logger.debug({ lockFile }, 'No content found');
       continue;

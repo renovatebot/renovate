@@ -93,7 +93,7 @@ describe('modules/manager/pip-compile/extract', () => {
 
       const lockFiles = ['foo.txt', 'bar.txt'];
       return extractAllPackageFiles({}, lockFiles).then((packageFiles) => {
-        packageFiles.forEach((packageFile) => {
+        return packageFiles.forEach((packageFile) => {
           expect(packageFile).not.toHaveProperty('packageFile', 'foo.txt');
         });
       });
