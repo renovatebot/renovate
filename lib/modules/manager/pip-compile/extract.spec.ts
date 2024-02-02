@@ -101,6 +101,7 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   it('return nothing for malformed files', () => {
+    fs.readLocalFile.mockResolvedValueOnce('');
     fs.readLocalFile.mockResolvedValueOnce(
       Fixtures.get('requirementsNoHeaders.txt'),
     );
@@ -113,7 +114,7 @@ describe('modules/manager/pip-compile/extract', () => {
     fs.readLocalFile.mockResolvedValueOnce('!@#$');
     fs.readLocalFile.mockResolvedValueOnce('');
 
-    const lockFiles = ['foo.txt', 'bar.txt'];
+    const lockFiles = ['empty.txt', 'noHeader.txt', 'badSource.txt'];
     return extractAllPackageFiles({}, lockFiles).then((packageFiles) => {
       return expect(packageFiles).toBeEmptyArray();
     });
