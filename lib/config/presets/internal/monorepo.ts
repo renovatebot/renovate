@@ -62,6 +62,7 @@ const repoGroups = {
   'azure azure-sdk-for-net': 'https://github.com/Azure/azure-sdk-for-net',
   'azure azure-storage-net': 'https://github.com/Azure/azure-storage-net',
   babel: 'https://github.com/babel/babel',
+  backstage: 'https://github.com/backstage/backstage',
   baset: 'https://github.com/igmat/baset',
   brave: 'https://github.com/openzipkin/brave',
   'bugsnag-js': 'https://github.com/bugsnag/bugsnag-js',
