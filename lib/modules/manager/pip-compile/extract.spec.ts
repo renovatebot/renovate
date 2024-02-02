@@ -99,4 +99,23 @@ describe('modules/manager/pip-compile/extract', () => {
       });
     });
   });
+
+  it('return nothing for malformed files', () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      Fixtures.get('requirementsNoHeaders.txt'),
+    );
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=foo.txt malformed.in empty.in',
+        ['foo==1.0.1'],
+      ),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('!@#$');
+    fs.readLocalFile.mockResolvedValueOnce('');
+
+    const lockFiles = ['foo.txt', 'bar.txt'];
+    return extractAllPackageFiles({}, lockFiles).then((packageFiles) => {
+      return expect(packageFiles).toBeEmptyArray();
+    });
+  });
 });
