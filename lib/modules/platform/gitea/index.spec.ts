@@ -72,6 +72,12 @@ describe('modules/platform/gitea/index', () => {
 
   const mockTopicRepos: Repo[] = [partial<Repo>({ full_name: 'a/b' })];
 
+  const mockNamespaceRepos: Repo[] = [
+    partial<Repo>({ full_name: 'org1/repo' }),
+    partial<Repo>({ full_name: 'org2/repo' }),
+    partial<Repo>({ full_name: 'org2/repo2', archived: true }),
+  ];
+
   const mockPRs: MockPr[] = [
     partial<MockPr>({
       number: 1,
@@ -388,6 +394,20 @@ describe('modules/platform/gitea/index', () => {
         topics: ['renovate', 'renovatebot'],
       });
       expect(repos).toEqual(['a/b']);
+    });
+
+    it('should query the organization endpoint for each namespace', async () => {
+      const scope = httpMock.scope('https://gitea.com/api/v1');
+
+      scope.get('/orgs/org1/repos').reply(200, mockNamespaceRepos);
+      scope.get('/orgs/org2/repos').reply(200, mockNamespaceRepos);
+
+      await initFakePlatform(scope);
+
+      const repos = await gitea.getRepos({
+        namespaces: ['org1', 'org2'],
+      });
+      expect(repos).toEqual(['org1/repo', 'org2/repo']);
     });
 
     it('Sorts repos', async () => {

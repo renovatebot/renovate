@@ -75,6 +75,19 @@ export async function searchRepos(
   return res.body.data;
 }
 
+export async function orgListRepos(
+  organization: string,
+  options?: GiteaHttpOptions,
+): Promise<Repo[]> {
+  const url = `${API_PATH}/orgs/${organization}/repos`;
+  const res = await giteaHttp.getJson<Repo[]>(url, {
+    ...options,
+    paginate: true,
+  });
+
+  return res.body;
+}
+
 export async function getRepo(
   repoPath: string,
   options?: GiteaHttpOptions,
