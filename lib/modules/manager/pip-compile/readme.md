@@ -47,7 +47,6 @@ Because `pip-compile` will update source files with their associated manager you
     "enabled": false
   }
 }
-
 ```
 
 ### Configuration of Python version
