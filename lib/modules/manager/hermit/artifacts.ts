@@ -206,7 +206,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
 
   const execOptions: ExecOptions = {
     docker: {},
-    userConfiguredEnv: update.config.env,
+    userConfiguredEnv: update?.config?.env,
     cwdFile: update.packageFileName,
   };
 
