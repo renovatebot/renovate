@@ -99,8 +99,8 @@ export function getNewConstraint(
     );
     //remove surplus .0 version
     return oldConstraint.replace(
-      regEx(`${escapeRegExp(currentValue)}(\\.0)*`),
-      newValue,
+      regEx(`(,\\s|^)${escapeRegExp(currentValue)}(\\.0)*`),
+      `$1${newValue}`,
     );
   }
 

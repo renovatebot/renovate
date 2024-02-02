@@ -50,6 +50,19 @@ describe('util/package-rules/current-version', () => {
       expect(result).toBeFalse();
     });
 
+    it('case insensitive match', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'pep440',
+          currentValue: 'bbbbbb',
+        },
+        {
+          matchCurrentVersion: '/BBB.*/i',
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
     it('return false for regex version non match', () => {
       const result = matcher.matches(
         {

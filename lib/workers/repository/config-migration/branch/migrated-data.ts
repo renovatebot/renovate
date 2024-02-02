@@ -130,11 +130,8 @@ export class MigratedDataFactory {
   private static async build(): Promise<MigratedData | null> {
     let res: MigratedData | null = null;
     try {
-      const {
-        configFileName,
-        configFileRaw: raw,
-        configFileParsed = {},
-      } = await detectRepoFileConfig();
+      const { configFileName, configFileParsed = {} } =
+        await detectRepoFileConfig();
 
       // get migrated config
       const { isMigrated, migratedConfig } = migrateConfig(configFileParsed);
@@ -147,6 +144,7 @@ export class MigratedDataFactory {
 
       // indent defaults to 2 spaces
       // TODO #22198
+      const raw = await readLocalFile(configFileName!, 'utf8');
       const indent = detectIndent(raw!);
       const indentSpace = indent.indent ?? '  ';
       const filename = configFileName!;
