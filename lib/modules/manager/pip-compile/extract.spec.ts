@@ -75,5 +75,28 @@ describe('modules/manager/pip-compile/extract', () => {
         return expect(packageFiles[0]).toHaveProperty('lockFiles', lockFiles);
       });
     });
+
+    it('no lock files in returned package files', () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        getSimpleRequirementsFile('pip-compile --output-file=foo.txt foo.in', [
+          'foo==1.0.1',
+        ]),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('foo>=1.0.0');
+      fs.readLocalFile.mockResolvedValueOnce(
+        getSimpleRequirementsFile(
+          'pip-compile --output-file=bar.txt bar.in foo.txt',
+          ['foo==1.0.1', 'bar==2.0.0'],
+        ),
+      );
+      fs.readLocalFile.mockResolvedValueOnce('bar>=1.0.0');
+
+      const lockFiles = ['foo.txt', 'bar.txt'];
+      return extractAllPackageFiles({}, lockFiles).then((packageFiles) => {
+        packageFiles.forEach((packageFile) => {
+          expect(packageFile).not.toHaveProperty('packageFile', 'foo.txt');
+        });
+      });
+    });
   });
 });
