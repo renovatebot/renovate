@@ -288,7 +288,7 @@ export async function getUpdatedPackageFiles(
   for (const packageFile of updatedPackageFiles) {
     const updatedDeps = packageFileUpdatedDeps[packageFile.path];
     const managers = packageFileManagers[packageFile.path];
-    if (managers !== undefined) {
+    if (is.nonEmptyArray(managers)) {
       for (const manager of managers) {
         const updateArtifacts = get(manager, 'updateArtifacts');
         if (updateArtifacts) {
@@ -323,7 +323,7 @@ export async function getUpdatedPackageFiles(
   for (const packageFile of nonUpdatedPackageFiles) {
     const updatedDeps = packageFileUpdatedDeps[packageFile.path];
     const managers = packageFileManagers[packageFile.path];
-    if (managers !== undefined) {
+    if (is.nonEmptyArray(managers)) {
       for (const manager of managers) {
         const updateArtifacts = get(manager, 'updateArtifacts');
         if (updateArtifacts) {
@@ -354,7 +354,7 @@ export async function getUpdatedPackageFiles(
     // Only perform lock file maintenance if it's a fresh commit
     for (const packageFile of lockFileMaintenanceFiles) {
       const managers = packageFileManagers[packageFile];
-      if (managers !== undefined) {
+      if (is.nonEmptyArray(managers)) {
         for (const manager of managers) {
           const updateArtifacts = get(manager, 'updateArtifacts');
           if (updateArtifacts) {
