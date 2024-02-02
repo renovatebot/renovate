@@ -91,6 +91,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: inputFileName,
       docker: {},
+      userConfiguredEnv: config.env,
       toolConstraints: [
         {
           toolName: 'python',

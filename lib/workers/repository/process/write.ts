@@ -156,7 +156,12 @@ export async function writeUpdates(
       branchState,
       commitFingerprint,
     );
-    const res = await processBranch(branch);
+    // no need to include the env object in the fingerprint;
+    // the SHA changes when the user modifies the config file, and we'll update the branch regardless
+    const res = await processBranch({
+      ...branch,
+      userConfiguredEnv: config.env,
+    });
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;

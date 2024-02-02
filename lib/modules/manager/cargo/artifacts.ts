@@ -17,6 +17,7 @@ import { extractLockFileContentVersions } from './locked-version';
 async function cargoUpdate(
   manifestPath: string,
   isLockFileMaintenance: boolean,
+  userConfiguredEnv: Record<string, string> = {},
   constraint: string | undefined,
 ): Promise<void> {
   let cmd = `cargo update --config net.git-fetch-with-cli=true --manifest-path ${quote(
@@ -29,6 +30,7 @@ async function cargoUpdate(
   }
 
   const execOptions: ExecOptions = {
+    userConfiguredEnv,
     extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
     docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
@@ -39,6 +41,7 @@ async function cargoUpdate(
 async function cargoUpdatePrecise(
   manifestPath: string,
   updatedDeps: Upgrade[],
+  userConfiguredEnv: Record<string, string> = {},
   constraint: string | undefined,
 ): Promise<void> {
   // First update all dependencies that have been bumped in `Cargo.toml`.
@@ -59,6 +62,7 @@ async function cargoUpdatePrecise(
   }
 
   const execOptions: ExecOptions = {
+    userConfiguredEnv,
     extraEnv: { ...getGitEnvironmentVariables(['cargo']) },
     docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
@@ -118,7 +122,12 @@ async function updateArtifactsImpl(
     logger.debug('Updating ' + lockFileName);
 
     if (isLockFileMaintenance) {
-      await cargoUpdate(packageFileName, true, config.constraints?.rust);
+      await cargoUpdate(
+        packageFileName,
+        true,
+        config.env,
+        config.constraints?.rust,
+      );
     } else {
       const missingDep = updatedDeps.find((dep) => !dep.lockedVersion);
       if (missingDep) {
@@ -127,12 +136,18 @@ async function updateArtifactsImpl(
         logger.warn(
           `Missing locked version for dependency \`${missingDep.depName}\``,
         );
-        await cargoUpdate(packageFileName, false, config.constraints?.rust);
+        await cargoUpdate(
+          packageFileName,
+          false,
+          config.env,
+          config.constraints?.rust,
+        );
       } else {
         // If all dependencies have locked versions then update them precisely.
         await cargoUpdatePrecise(
           packageFileName,
           updatedDeps,
+          config.env,
           config.constraints?.rust,
         );
       }
