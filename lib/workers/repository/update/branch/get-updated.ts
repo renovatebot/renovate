@@ -57,11 +57,9 @@ export async function getUpdatedPackageFiles(
     const newVersion = upgrade.newVersion!;
     const currentVersion = upgrade.currentVersion!;
     const updateLockedDependency = get(manager, 'updateLockedDependency')!;
-    packageFileManagers[packageFile] =
-      packageFileManagers[packageFile] || new Set<string>();
+    packageFileManagers[packageFile] ??= new Set<string>();
     packageFileManagers[packageFile].add(manager);
-    packageFileUpdatedDeps[packageFile] =
-      packageFileUpdatedDeps[packageFile] || [];
+    packageFileUpdatedDeps[packageFile] ??= [];
     packageFileUpdatedDeps[packageFile].push({ ...upgrade });
     const packageFileContent = await getFileContent(
       updatedFileContents,
