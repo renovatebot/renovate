@@ -31,7 +31,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.trace('pip-compile.extractPackageFile()');
   const manager = matchManager(_packageFile);
-  // TODO(not7cd): extract based on manager: pep621, setupdools, identify other missing source types
+  // TODO(not7cd): extract based on manager: pep621, setuptools, identify other missing source types
   switch (manager) {
     // TODO(not7cd): enable in the next PR, when this can be properly tested
     // case 'pip_setup':
@@ -58,46 +58,47 @@ export async function extractAllPackageFiles(
       logger.debug({ lockFile }, 'No content found');
       continue;
     }
+    let pipCompileArgs;
     try {
-      const pipCompileArgs = extractHeaderCommand(lockFileContent, lockFile);
-      // TODO(not7cd): handle locked deps
-      // const lockedDeps = extractRequirementsFile(content);
-      for (const sourceFile of pipCompileArgs.sourceFiles) {
-        if (packageFiles.includes(sourceFile)) {
-          // TODO(not7cd): do something about it
-          logger.warn(
-            { sourceFile, lockFile },
-            'lock file acts as source file for another lock file',
-          );
-          continue;
-        }
-        if (result.has(sourceFile)) {
-          result.get(sourceFile)?.lockFiles?.push(lockFile);
-          continue;
-        }
-        const content = await readLocalFile(sourceFile, 'utf8');
-        if (!content) {
-          logger.debug({ sourceFile }, 'No content found');
-          continue;
-        }
-
-        const deps = extractPackageFile(content, sourceFile, config);
-        if (deps) {
-          result.set(sourceFile, {
-            ...deps,
-            lockFiles: [lockFile],
-            packageFile: sourceFile,
-          });
-        } else {
-          logger.error(
-            { packageFile: sourceFile },
-            'Failed to extract dependencies',
-          );
-        }
-      }
+      pipCompileArgs = extractHeaderCommand(lockFileContent, lockFile);
     } catch (error) {
       logger.warn(error, 'Failed to parse pip-compile command from header');
       continue;
+    }
+    // TODO(not7cd): handle locked deps
+    // const lockedDeps = extractRequirementsFile(content);
+    for (const sourceFile of pipCompileArgs.sourceFiles) {
+      if (packageFiles.includes(sourceFile)) {
+        // TODO(not7cd): do something about it
+        logger.warn(
+          { sourceFile, lockFile },
+          'lock file acts as source file for another lock file',
+        );
+        continue;
+      }
+      if (result.has(sourceFile)) {
+        result.get(sourceFile)?.lockFiles?.push(lockFile);
+        continue;
+      }
+      const content = await readLocalFile(sourceFile, 'utf8');
+      if (!content) {
+        logger.debug({ sourceFile }, 'No content found');
+        continue;
+      }
+
+      const deps = extractPackageFile(content, sourceFile, config);
+      if (deps) {
+        result.set(sourceFile, {
+          ...deps,
+          lockFiles: [lockFile],
+          packageFile: sourceFile,
+        });
+      } else {
+        logger.warn(
+          { packageFile: sourceFile },
+          'Failed to extract dependencies',
+        );
+      }
     }
   }
   // TODO(not7cd): sort by requirement layering (-r -c within .in files)
