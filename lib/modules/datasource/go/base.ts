@@ -73,20 +73,22 @@ export class BaseGoDatasource {
 
     if (goModule.startsWith('dev.azure.com/')) {
       const split = goModule.split('/');
-      const packageName =
-        'https://dev.azure.com/' +
-        split[1] +
-        '/' +
-        split[2] +
-        '/_git/' +
-        (split[3] === '_git' ? split[4] : split[3]).replace(
-          regEx(/\.git$/),
-          '',
-        );
-      return {
-        datasource: GitTagsDatasource.id,
-        packageName,
-      };
+      if ((split.length > 4 && split[3] === '_git') || split.length > 3) {
+        const packageName =
+          'https://dev.azure.com/' +
+          split[1] +
+          '/' +
+          split[2] +
+          '/_git/' +
+          (split[3] === '_git' ? split[4] : split[3]).replace(
+            regEx(/\.git$/),
+            '',
+          );
+        return {
+          datasource: GitTagsDatasource.id,
+          packageName,
+        };
+      }
     }
 
     return await BaseGoDatasource.goGetDatasource(goModule);
