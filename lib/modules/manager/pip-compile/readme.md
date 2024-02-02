@@ -24,7 +24,7 @@ If Renovate matches a `pip-compile` output file it will extract original command
 - Use default header generation, don't use `--no-header` option.
 - Pass all source files explicitly.
 
-In turn `pip-compile` manager will find all source files and parse them as package files.
+In turn `pip-compile` manager will find all source files and parse them as package files. Currently only `*.in` files associated with `pip_requirements` manager are handled.
 
 Example header:
 
@@ -35,6 +35,19 @@ Example header:
 #
 #    pip-compile --no-emit-index-url --output-file=requirements.txt requirements.in
 #
+```
+
+### Conflicts with other managers
+
+Because `pip-compile` will update source files with their associated manager you should disable them to avoid running these managers twice.
+
+```json
+{
+  "pip_requirements": {
+    "enabled": false
+  }
+}
+
 ```
 
 ### Configuration of Python version
@@ -57,8 +70,4 @@ Renovate reads the `requirements.txt` file and extracts these `pip-compile` argu
 - source files as positional arguments
 - `--output-file`
 
-All other arguments will be passed over without modification.
-
-#### `CUSTOM_COMPILE_COMMAND`
-
-If a wrapper is used, it should not obstruct these arguments.
+All other allowed `pip-compile` arguments will be passed over without modification.
