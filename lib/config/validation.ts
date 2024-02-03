@@ -793,7 +793,7 @@ function validateGlobalConfig(
       ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${configFileNames.join(', ')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${configFileNames.join(', ')}.`,
         });
       } else if (
         key === 'repositoryCache' &&
@@ -801,7 +801,7 @@ function validateGlobalConfig(
       ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['enabled', 'disabled', 'reset'].join(', ')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['enabled', 'disabled', 'reset'].join(', ')}.`,
         });
       } else if (
         key === 'dryRun' &&
@@ -809,7 +809,7 @@ function validateGlobalConfig(
       ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['extract', 'lookup', 'full'].join(', ')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['extract', 'lookup', 'full'].join(', ')}.`,
         });
       } else if (
         key === 'binarySource' &&
@@ -817,7 +817,7 @@ function validateGlobalConfig(
       ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}.`,
         });
       } else if (
         key === 'requireConfig' &&
@@ -825,7 +825,7 @@ function validateGlobalConfig(
       ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['required', 'optional', 'ignored'].join(', ')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['required', 'optional', 'ignored'].join(', ')}.`,
         });
       } else if (
         key === 'gitUrl' &&
@@ -833,13 +833,13 @@ function validateGlobalConfig(
       ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}`,
+          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
         });
       }
     } else {
       warnings.push({
         topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a string`,
+        message: `Configuration option \`${currentPath}\` should be a string.`,
       });
     }
   } else if (type === 'integer') {
@@ -848,7 +848,7 @@ function validateGlobalConfig(
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
           val,
-        )} (${typeof val})`,
+        )} (${typeof val}).`,
       });
     }
   } else if (type === 'boolean') {
@@ -857,7 +857,7 @@ function validateGlobalConfig(
         topic: 'Configuration Error',
         message: `Configuration option \`${currentPath}\` should be a boolean. Found: ${JSON.stringify(
           val,
-        )} (${typeof val})`,
+        )} (${typeof val}).`,
       });
     }
   } else if (type === 'array') {
@@ -868,7 +868,7 @@ function validateGlobalConfig(
           if (!allowedValues.includes(value)) {
             warnings.push({
               topic: 'Configuration Error',
-              message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}`,
+              message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
             });
           }
         }
@@ -876,7 +876,7 @@ function validateGlobalConfig(
     } else {
       warnings.push({
         topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a list (Array)`,
+        message: `Configuration option \`${currentPath}\` should be a list (Array).`,
       });
     }
   } else if (type === 'object') {
@@ -886,7 +886,7 @@ function validateGlobalConfig(
           if (!is.number(subValue)) {
             warnings.push({
               topic: 'Configuration Error',
-              message: `Invalid \`${currentPath}.${subKey}\` configuration: value is not an integer`,
+              message: `Invalid \`${currentPath}.${subKey}\` configuration: value is not an integer.`,
             });
           }
         }
@@ -895,14 +895,14 @@ function validateGlobalConfig(
         if (res !== true) {
           warnings.push({
             topic: 'Configuration Error',
-            message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
+            message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string.`,
           });
         }
       }
     } else {
       warnings.push({
         topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a JSON object`,
+        message: `Configuration option \`${currentPath}\` should be a JSON object.`,
       });
     }
   }

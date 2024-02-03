@@ -1071,7 +1071,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit',
+              'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
             topic: 'Configuration Error',
           },
         ]);
@@ -1087,7 +1087,7 @@ describe('config/validation', () => {
         );
         expect(warnings).toEqual([
           {
-            message: 'Configuration option `baseDir` should be a string',
+            message: 'Configuration option `baseDir` should be a string.',
             topic: 'Configuration Error',
           },
         ]);
@@ -1104,7 +1104,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              'Invalid value `invalid` for `requireConfig`. The allowed values are required, optional, ignored',
+              'Invalid value `invalid` for `requireConfig`. The allowed values are required, optional, ignored.',
             topic: 'Configuration Error',
           },
         ]);
@@ -1121,7 +1121,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              'Invalid value `invalid` for `dryRun`. The allowed values are extract, lookup, full',
+              'Invalid value `invalid` for `dryRun`. The allowed values are extract, lookup, full.',
             topic: 'Configuration Error',
           },
         ]);
@@ -1138,7 +1138,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              'Invalid value `invalid` for `repositoryCache`. The allowed values are enabled, disabled, reset',
+              'Invalid value `invalid` for `repositoryCache`. The allowed values are enabled, disabled, reset.',
             topic: 'Configuration Error',
           },
         ]);
@@ -1154,9 +1154,7 @@ describe('config/validation', () => {
         );
         expect(warnings).toEqual([
           {
-            message:
-              'Invalid value `invalid` for `onboardingConfigFileName`. The allowed values are ' +
-              configFileNames.join(', '),
+            message: `Invalid value \`invalid\` for \`onboardingConfigFileName\`. The allowed values are ${configFileNames.join(', ')}.`,
             topic: 'Configuration Error',
           },
         ]);
@@ -1173,7 +1171,7 @@ describe('config/validation', () => {
         expect(warnings).toEqual([
           {
             message:
-              'Invalid value `invalid` for `gitUrl`. The allowed values are default, ssh, endpoint',
+              'Invalid value `invalid` for `gitUrl`. The allowed values are default, ssh, endpoint.',
             topic: 'Configuration Error',
           },
         ]);
@@ -1190,7 +1188,7 @@ describe('config/validation', () => {
         {
           message: `Configuration option \`detectGlobalManagerConfig\` should be a boolean. Found: ${JSON.stringify(
             'invalid-type',
-          )} (string)`,
+          )} (string).`,
           topic: 'Configuration Error',
         },
       ]);
@@ -1206,7 +1204,7 @@ describe('config/validation', () => {
         {
           message: `Configuration option \`gitTimeout\` should be an integer. Found: ${JSON.stringify(
             'invalid-type',
-          )} (string)`,
+          )} (string).`,
           topic: 'Configuration Error',
         },
       ]);
@@ -1222,12 +1220,12 @@ describe('config/validation', () => {
       expect(warnings).toMatchObject([
         {
           message:
-            'Configuration option `checkedBranches` should be a list (Array)',
+            'Configuration option `checkedBranches` should be a list (Array).',
           topic: 'Configuration Error',
         },
         {
           message:
-            'Invalid value for `gitNoVerify`. The allowed values are commit, push',
+            'Invalid value for `gitNoVerify`. The allowed values are commit, push.',
           topic: 'Configuration Error',
         },
       ]);
@@ -1248,13 +1246,13 @@ describe('config/validation', () => {
       const { warnings } = await configValidation.validateConfig(true, config);
       expect(warnings).toMatchObject([
         {
-          message: 'Configuration option `secrets` should be a JSON object',
+          message: 'Configuration option `secrets` should be a JSON object.',
           topic: 'Configuration Error',
         },
         {
           topic: 'Configuration Error',
           message:
-            'Invalid `cacheTtlOverride.someField` configuration: value is not an integer',
+            'Invalid `cacheTtlOverride.someField` configuration: value is not an integer.',
         },
       ]);
     });
@@ -1270,7 +1268,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchObject([
         {
           message:
-            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value is not a string',
+            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value is not a string.',
           topic: 'Configuration Error',
         },
       ]);
