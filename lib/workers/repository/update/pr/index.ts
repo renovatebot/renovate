@@ -430,7 +430,7 @@ export async function ensurePr(
         // for Gitea
         updatePrConfig.labels = configuredLabels;
 
-        // for Github, Gitlab
+        // for GitHub, GitLab
         updatePrConfig.addLabels = addLabels;
         updatePrConfig.removeLabels = removeLabels;
       }
