@@ -602,15 +602,16 @@ export async function validateConfig(
             } else if (key === 'env') {
               const allowedEnvVars = GlobalConfig.get('allowedEnv');
               for (const [envVarName, envVarValue] of Object.entries(val)) {
+                if (!allowedEnvVars?.includes(envVarName)) {
+                  warnings.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid enviroment variable name \`${envVarName}\` found in \`${currentPath}\`. Allowed values are ${allowedEnvVars?.join(', ')}.`,
+                  });
+                }
                 if (!is.string(envVarValue)) {
                   warnings.push({
                     topic: 'Configuration Error',
                     message: `Enviroment variable inside \`${currentPath}.${envVarName}\` should be a string.`,
-                  });
-                } else if (!allowedEnvVars?.includes(envVarName)) {
-                  warnings.push({
-                    topic: 'Configuration Error',
-                    message: `Invalid enviroment variable name \`${envVarName}\` found in \`${currentPath}\`. Allowed values are ${allowedEnvVars?.join(', ')}.`,
                   });
                 }
               }
