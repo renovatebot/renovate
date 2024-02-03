@@ -1,7 +1,6 @@
 import { fs, mocked, partial } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import * as _html from '../../../modules/manager/html';
-import type { WorkerExtractConfig } from '../../types';
 import * as _fileMatch from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
@@ -22,26 +21,14 @@ describe('workers/repository/extract/manager-files', () => {
 
     it('returns empty of manager is disabled', async () => {
       const managerConfig = { manager: 'travis', enabled: false, fileList: [] };
-      const workerExtractConfig: WorkerExtractConfig = {
-        ...managerConfig,
-      };
-      const res = await getManagerPackageFiles(
-        workerExtractConfig,
-        managerConfig,
-      );
+      const res = await getManagerPackageFiles(managerConfig);
       expect(res).toHaveLength(0);
     });
 
     it('returns empty of manager is not enabled', async () => {
       config.enabledManagers = ['npm'];
       const managerConfig = { manager: 'docker', enabled: true, fileList: [] };
-      const workerExtractConfig: WorkerExtractConfig = {
-        ...managerConfig,
-      };
-      const res = await getManagerPackageFiles(
-        workerExtractConfig,
-        managerConfig,
-      );
+      const res = await getManagerPackageFiles(managerConfig);
       expect(res).toHaveLength(0);
     });
 
@@ -51,14 +38,8 @@ describe('workers/repository/extract/manager-files', () => {
         fileList: [],
         enabled: true,
       };
-      const workerExtractConfig: WorkerExtractConfig = {
-        ...managerConfig,
-      };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
-      const res = await getManagerPackageFiles(
-        workerExtractConfig,
-        managerConfig,
-      );
+      const res = await getManagerPackageFiles(managerConfig);
       expect(res).toHaveLength(0);
     });
 
@@ -68,18 +49,12 @@ describe('workers/repository/extract/manager-files', () => {
         enabled: true,
         fileList: ['Dockerfile'],
       };
-      const workerExtractConfig: WorkerExtractConfig = {
-        ...managerConfig,
-      };
       fileMatch.getMatchingFiles.mockReturnValue(['Dockerfile']);
       fs.readLocalFile.mockResolvedValueOnce('some content');
       html.extractPackageFile = jest.fn(() => ({
         deps: [{}, { replaceString: 'abc' }],
       })) as never;
-      const res = await getManagerPackageFiles(
-        workerExtractConfig,
-        managerConfig,
-      );
+      const res = await getManagerPackageFiles(managerConfig);
       expect(res).toEqual([
         {
           packageFile: 'Dockerfile',
@@ -94,17 +69,11 @@ describe('workers/repository/extract/manager-files', () => {
         enabled: true,
         fileList: ['package.json'],
       };
-      const workerExtractConfig: WorkerExtractConfig = {
-        ...managerConfig,
-      };
       fileMatch.getMatchingFiles.mockReturnValue(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce(
         '{"dependencies":{"chalk":"2.0.0"}}',
       );
-      const res = await getManagerPackageFiles(
-        workerExtractConfig,
-        managerConfig,
-      );
+      const res = await getManagerPackageFiles(managerConfig);
       expect(res).toMatchObject([
         {
           packageFile: 'package.json',

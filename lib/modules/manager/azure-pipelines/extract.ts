@@ -6,7 +6,11 @@ import { joinUrlParts } from '../../../util/url';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import {
   AzurePipelines,
   AzurePipelinesYaml,
@@ -18,40 +22,50 @@ import {
   Repository,
   Step,
 } from './schema';
-import type { AzurePipelinesExtractConfig } from './index';
 
 const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
 
 export function extractRepository(
   repository: Repository,
-  config: AzurePipelinesExtractConfig,
+  currentRepository?: string,
 ): PackageDependency | null {
   let repositoryUrl = null;
+
+  let depName = repository.name;
 
   if (repository.type === 'github') {
     repositoryUrl = `https://github.com/${repository.name}.git`;
   } else if (repository.type === 'git') {
     const platform = GlobalConfig.get('platform');
     const endpoint = GlobalConfig.get('endpoint');
-    let projectName = '';
-    let repoName = '';
 
     if (platform === 'azure' && endpoint) {
       // extract the project name if the repository from which the pipline is referencing templates contains the Azure DevOps project name
       if (repository.name.includes('/')) {
-        const [_projectName, _repoName] = repository.name.split('/');
-        projectName = _projectName;
-        repoName = _repoName;
+        const [projectName, repoName] = repository.name.split('/');
+        depName = `${projectName}/${repository.name}`;
+        repositoryUrl = joinUrlParts(
+          endpoint,
+          encodeURIComponent(projectName),
+          '_git',
+          encodeURIComponent(repoName),
+        );
 
         // if the repository from which the pipline is referencing templates does not contain the Azure DevOps project name, get the project name from the repository containing the pipeline file being process
-      } else if (config.repository && config.repository.includes('/')) {
-        projectName = config.repository.substring(
-          0,
-          config.repository.indexOf('/'),
+      } else if (currentRepository && currentRepository.includes('/')) {
+        const projectName = currentRepository.split('/')[0];
+        depName = `${projectName}/${repository.name}`;
+        repositoryUrl = joinUrlParts(
+          endpoint,
+          encodeURIComponent(projectName),
+          '_git',
+          encodeURIComponent(repository.name),
         );
-        repoName = repository.name;
+      } else {
+        logger.debug(
+          "Renovate cannot update Azure pipelines in 'git' repositories when neither the current repository nor the target repository contains the Azure DevOps project name.",
+        );
       }
-      repositoryUrl = buildRepositoryUrl(endpoint, projectName, repoName);
     }
   }
 
@@ -67,7 +81,7 @@ export function extractRepository(
     autoReplaceStringTemplate: 'refs/tags/{{newValue}}',
     currentValue: repository.ref.replace('refs/tags/', ''),
     datasource: GitTagsDatasource.id,
-    depName: repository.name,
+    depName,
     depType: 'gitTags',
     packageName: repositoryUrl,
     replaceString: repository.ref,
@@ -168,7 +182,7 @@ function extractJobs(jobs: Jobs | undefined): PackageDependency[] {
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: AzurePipelinesExtractConfig,
+  config: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace(`azurePipelines.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
@@ -179,7 +193,7 @@ export function extractPackageFile(
   }
 
   for (const repository of coerceArray(pkg.resources?.repositories)) {
-    const dep = extractRepository(repository, config);
+    const dep = extractRepository(repository, config.repository);
     if (dep) {
       deps.push(dep);
     }
@@ -203,20 +217,4 @@ export function extractPackageFile(
     return null;
   }
   return { deps };
-}
-
-function buildRepositoryUrl(
-  endpoint: string,
-  projectName: string,
-  repoName: string,
-): string | null {
-  if ([endpoint, projectName, repoName].some((x) => !x || x === '')) {
-    return null;
-  }
-  return joinUrlParts(
-    endpoint,
-    encodeURIComponent(projectName),
-    '_git',
-    encodeURIComponent(repoName),
-  );
 }

@@ -1,25 +1,18 @@
 import is from '@sindresorhus/is';
-import type { ManagerConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
   extractPackageFile,
   get,
 } from '../../../modules/manager';
-import { ManagerKeys } from '../../../modules/manager/api';
-import type { AzurePipelinesExtractConfig } from '../../../modules/manager/azure-pipelines';
-import type {
-  ExtractConfig,
-  PackageFile,
-} from '../../../modules/manager/types';
+import type { PackageFile } from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
 import type { WorkerExtractConfig } from '../../types';
 
 export async function getManagerPackageFiles(
-  workerExtractConfig: WorkerExtractConfig,
-  managerConfig: ManagerConfig,
+  config: WorkerExtractConfig,
 ): Promise<PackageFile[] | null> {
-  const { enabled, manager, fileList } = workerExtractConfig;
+  const { enabled, manager, fileList } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
     logger.debug(`${manager} is disabled`);
@@ -35,10 +28,6 @@ export async function getManagerPackageFiles(
   } else {
     return [];
   }
-  const config = buildManagerSpecificExtractConfig(
-    managerConfig,
-    workerExtractConfig,
-  );
   // Extract package files synchronously if manager requires it
   if (get(manager, 'extractAllPackageFiles')) {
     const allPackageFiles = await extractAllPackageFiles(
@@ -70,18 +59,4 @@ export async function getManagerPackageFiles(
     }
   }
   return packageFiles;
-}
-
-function buildManagerSpecificExtractConfig(
-  managerConfig: ManagerConfig,
-  workerExtractConfig: WorkerExtractConfig,
-): ExtractConfig {
-  if (managerConfig.manager === ManagerKeys.AZURE_PIPELINES) {
-    const azurePipelinesExtractConfig: AzurePipelinesExtractConfig = {
-      ...workerExtractConfig,
-      repository: managerConfig.repository,
-    };
-    return azurePipelinesExtractConfig;
-  }
-  return workerExtractConfig;
 }

@@ -91,182 +91,91 @@ import * as woodpecker from './woodpecker';
 const api = new Map<string, ManagerApi>();
 export default api;
 
-export const ManagerKeys = {
-  ANISBLE: 'ansible',
-  ANISBLE_GALAXY: 'ansible-galaxy',
-  ARGOCD: 'argocd',
-  ASDF: 'asdf',
-  AZURE_PIPELINES: 'azure-pipelines',
-  BATECT: 'batect',
-  BATECT_WRAPPER: 'batect-wrapper',
-  BAZEL: 'bazel',
-  BAZEL_MODULE: 'bazel-module',
-  BAZELISK: 'bazelisk',
-  BICEP: 'bicep',
-  BITBUCKET_PIPELINES: 'bitbucket-pipelines',
-  BUILDKITE: 'buildkite',
-  BUN: 'bun',
-  BUNDLER: 'bundler',
-  CAKE: 'cake',
-  CARGO: 'cargo',
-  CDNURL: 'cdnurl',
-  CIRCLECI: 'circleci',
-  CLOUDBUILD: 'cloudbuild',
-  COCOAPODS: 'cocoapods',
-  COMPOSER: 'composer',
-  CONAN: 'conan',
-  CPANFILE: 'cpanfile',
-  CROSSPLANE: 'crossplane',
-  DEPS_EDN: 'deps-edn',
-  DOCKER_COMPOSE: 'docker-compose',
-  DOCKERFILE: 'dockerfile',
-  DRONECI: 'droneci',
-  FLEET: 'fleet',
-  FLUX: 'flux',
-  FVM: 'fvm',
-  GIT_SUBMODULES: 'git-submodules',
-  GITHUB_ACTIONS: 'github-actions',
-  GITLABCI: 'gitlabci',
-  GITLABCI_INCLUDE: 'gitlabci-include',
-  GOMOD: 'gomod',
-  GRADLE: 'gradle',
-  GRADLE_WRAPPER: 'gradle-wrapper',
-  HELM_REQUIREMENTS: 'helm-requirements',
-  HELM_VALUES: 'helm-values',
-  HELMFILE: 'helmfile',
-  HELMSMAN: 'helmsman',
-  HELMV3: 'helmv3',
-  HERMIT: 'hermit',
-  HOMEBREW: 'homebrew',
-  HTML: 'html',
-  JENKINS: 'jenkins',
-  JSONNET_BUNDLER: 'jsonnet-bundler',
-  KOTLIN_SCRIPT: 'kotlin-script',
-  KUBERNETES: 'kubernetes',
-  KUSTOMIZE: 'kustomize',
-  LEININGEN: 'leiningen',
-  MAVEN: 'maven',
-  MAVEN_WRAPPER: 'maven-wrapper',
-  METEOR: 'meteor',
-  MINT: 'mint',
-  MIX: 'mix',
-  NIX: 'nix',
-  NODENV: 'nodenv',
-  NPM: 'npm',
-  NUGET: 'nuget',
-  NVM: 'nvm',
-  OCB: 'ocb',
-  OSGI: 'osgi',
-  PEP621: 'pep621',
-  PIP_COMPILE: 'pip-compile',
-  PIP_REQUIREMENTS: 'pip_requirements',
-  PIP_SETUP: 'pip_setup',
-  PIPENV: 'pipenv',
-  POETRY: 'poetry',
-  PRE_COMMIT: 'pre-commit',
-  PUB: 'pub',
-  PUPPET: 'puppet',
-  PYENV: 'pyenv',
-  RUBY_VERSION: 'ruby-version',
-  SBT: 'sbt',
-  SETUP_CFG: 'setup-cfg',
-  SWIFT: 'swift',
-  TEKTON: 'tekton',
-  TERRAFORM: 'terraform',
-  TERRAFORM_VERSION: 'terraform-version',
-  TERRAGRUNT: 'terragrunt',
-  TERRAGRUNT_VERSION: 'terragrunt-version',
-  TFLINT_PLUGIN: 'tflint-plugin',
-  TRAVIS: 'travis',
-  VELACI: 'velaci',
-  WOODPECKER: 'woodpecker',
-} as const;
-
-api.set(ManagerKeys.ANISBLE, ansible);
-api.set(ManagerKeys.ANISBLE_GALAXY, ansibleGalaxy);
-api.set(ManagerKeys.ARGOCD, argoCD);
-api.set(ManagerKeys.ASDF, asdf);
-api.set(ManagerKeys.AZURE_PIPELINES, azurePipelines);
-api.set(ManagerKeys.BATECT, batect);
-api.set(ManagerKeys.BATECT_WRAPPER, batectWrapper);
-api.set(ManagerKeys.BAZEL, bazel);
-api.set(ManagerKeys.BAZEL_MODULE, bazelModule);
-api.set(ManagerKeys.BAZELISK, bazelisk);
-api.set(ManagerKeys.BICEP, bicep);
-api.set(ManagerKeys.BITBUCKET_PIPELINES, bitbucketPipelines);
-api.set(ManagerKeys.BUILDKITE, buildkite);
-api.set(ManagerKeys.BUN, bun);
-api.set(ManagerKeys.BUNDLER, bundler);
-api.set(ManagerKeys.CAKE, cake);
-api.set(ManagerKeys.CARGO, cargo);
-api.set(ManagerKeys.CDNURL, cdnurl);
-api.set(ManagerKeys.CIRCLECI, circleci);
-api.set(ManagerKeys.CLOUDBUILD, cloudbuild);
-api.set(ManagerKeys.COCOAPODS, cocoapods);
-api.set(ManagerKeys.COMPOSER, composer);
-api.set(ManagerKeys.CONAN, conan);
-api.set(ManagerKeys.CPANFILE, cpanfile);
-api.set(ManagerKeys.CROSSPLANE, crossplane);
-api.set(ManagerKeys.DEPS_EDN, depsEdn);
-api.set(ManagerKeys.DOCKER_COMPOSE, dockerCompose);
-api.set(ManagerKeys.DOCKERFILE, dockerfile);
-api.set(ManagerKeys.DRONECI, droneci);
-api.set(ManagerKeys.FLEET, fleet);
-api.set(ManagerKeys.FLEET, flux);
-api.set(ManagerKeys.FVM, fvm);
-api.set(ManagerKeys.GIT_SUBMODULES, gitSubmodules);
-api.set(ManagerKeys.GITHUB_ACTIONS, githubActions);
-api.set(ManagerKeys.GITLABCI, gitlabci);
-api.set(ManagerKeys.GITLABCI_INCLUDE, gitlabciInclude);
-api.set(ManagerKeys.GOMOD, gomod);
-api.set(ManagerKeys.GRADLE, gradle);
-api.set(ManagerKeys.GRADLE_WRAPPER, gradleWrapper);
-api.set(ManagerKeys.HELM_REQUIREMENTS, helmRequirements);
-api.set(ManagerKeys.HELM_VALUES, helmValues);
-api.set(ManagerKeys.HELMFILE, helmfile);
-api.set(ManagerKeys.HELMSMAN, helmsman);
-api.set(ManagerKeys.HELMV3, helmv3);
-api.set(ManagerKeys.HERMIT, hermit);
-api.set(ManagerKeys.HOMEBREW, homebrew);
-api.set(ManagerKeys.HTML, html);
-api.set(ManagerKeys.JENKINS, jenkins);
-api.set(ManagerKeys.JSONNET_BUNDLER, jsonnetBundler);
-api.set(ManagerKeys.KOTLIN_SCRIPT, kotlinScript);
-api.set(ManagerKeys.KUBERNETES, kubernetes);
-api.set(ManagerKeys.KUSTOMIZE, kustomize);
-api.set(ManagerKeys.LEININGEN, leiningen);
-api.set(ManagerKeys.MAVEN, maven);
-api.set(ManagerKeys.MAVEN_WRAPPER, mavenWrapper);
-api.set(ManagerKeys.METEOR, meteor);
-api.set(ManagerKeys.MINT, mint);
-api.set(ManagerKeys.MIX, mix);
-api.set(ManagerKeys.NIX, nix);
-api.set(ManagerKeys.NODENV, nodenv);
-api.set(ManagerKeys.NPM, npm);
-api.set(ManagerKeys.NUGET, nuget);
-api.set(ManagerKeys.NVM, nvm);
-api.set(ManagerKeys.OCB, ocb);
-api.set(ManagerKeys.OSGI, osgi);
-api.set(ManagerKeys.PEP621, pep621);
-api.set(ManagerKeys.PIP_COMPILE, pipCompile);
-api.set(ManagerKeys.PIP_REQUIREMENTS, pip_requirements);
-api.set(ManagerKeys.PIP_SETUP, pip_setup);
-api.set(ManagerKeys.PIPENV, pipenv);
-api.set(ManagerKeys.POETRY, poetry);
-api.set(ManagerKeys.PRE_COMMIT, preCommit);
-api.set(ManagerKeys.PUB, pub);
-api.set(ManagerKeys.PUPPET, puppet);
-api.set(ManagerKeys.PYENV, pyenv);
-api.set(ManagerKeys.RUBY_VERSION, rubyVersion);
-api.set(ManagerKeys.SBT, sbt);
-api.set(ManagerKeys.SETUP_CFG, setupCfg);
-api.set(ManagerKeys.SWIFT, swift);
-api.set(ManagerKeys.TEKTON, tekton);
-api.set(ManagerKeys.TERRAFORM, terraform);
-api.set(ManagerKeys.TERRAFORM_VERSION, terraformVersion);
-api.set(ManagerKeys.TERRAGRUNT, terragrunt);
-api.set(ManagerKeys.TERRAGRUNT_VERSION, terragruntVersion);
-api.set(ManagerKeys.TFLINT_PLUGIN, tflintPlugin);
-api.set(ManagerKeys.TRAVIS, travis);
-api.set(ManagerKeys.VELACI, velaci);
-api.set(ManagerKeys.WOODPECKER, woodpecker);
+api.set('ansible', ansible);
+api.set('ansible-galaxy', ansibleGalaxy);
+api.set('argocd', argoCD);
+api.set('asdf', asdf);
+api.set('azure-pipelines', azurePipelines);
+api.set('batect', batect);
+api.set('batect-wrapper', batectWrapper);
+api.set('bazel', bazel);
+api.set('bazel-module', bazelModule);
+api.set('bazelisk', bazelisk);
+api.set('bicep', bicep);
+api.set('bitbucket-pipelines', bitbucketPipelines);
+api.set('buildkite', buildkite);
+api.set('bun', bun);
+api.set('bundler', bundler);
+api.set('cake', cake);
+api.set('cargo', cargo);
+api.set('cdnurl', cdnurl);
+api.set('circleci', circleci);
+api.set('cloudbuild', cloudbuild);
+api.set('cocoapods', cocoapods);
+api.set('composer', composer);
+api.set('conan', conan);
+api.set('cpanfile', cpanfile);
+api.set('crossplane', crossplane);
+api.set('deps-edn', depsEdn);
+api.set('docker-compose', dockerCompose);
+api.set('dockerfile', dockerfile);
+api.set('droneci', droneci);
+api.set('fleet', fleet);
+api.set('flux', flux);
+api.set('fvm', fvm);
+api.set('git-submodules', gitSubmodules);
+api.set('github-actions', githubActions);
+api.set('gitlabci', gitlabci);
+api.set('gitlabci-include', gitlabciInclude);
+api.set('gomod', gomod);
+api.set('gradle', gradle);
+api.set('gradle-wrapper', gradleWrapper);
+api.set('helm-requirements', helmRequirements);
+api.set('helm-values', helmValues);
+api.set('helmfile', helmfile);
+api.set('helmsman', helmsman);
+api.set('helmv3', helmv3);
+api.set('hermit', hermit);
+api.set('homebrew', homebrew);
+api.set('html', html);
+api.set('jenkins', jenkins);
+api.set('jsonnet-bundler', jsonnetBundler);
+api.set('kotlin-script', kotlinScript);
+api.set('kubernetes', kubernetes);
+api.set('kustomize', kustomize);
+api.set('leiningen', leiningen);
+api.set('maven', maven);
+api.set('maven-wrapper', mavenWrapper);
+api.set('meteor', meteor);
+api.set('mint', mint);
+api.set('mix', mix);
+api.set('nix', nix);
+api.set('nodenv', nodenv);
+api.set('npm', npm);
+api.set('nuget', nuget);
+api.set('nvm', nvm);
+api.set('ocb', ocb);
+api.set('osgi', osgi);
+api.set('pep621', pep621);
+api.set('pip-compile', pipCompile);
+api.set('pip_requirements', pip_requirements);
+api.set('pip_setup', pip_setup);
+api.set('pipenv', pipenv);
+api.set('poetry', poetry);
+api.set('pre-commit', preCommit);
+api.set('pub', pub);
+api.set('puppet', puppet);
+api.set('pyenv', pyenv);
+api.set('ruby-version', rubyVersion);
+api.set('sbt', sbt);
+api.set('setup-cfg', setupCfg);
+api.set('swift', swift);
+api.set('tekton', tekton);
+api.set('terraform', terraform);
+api.set('terraform-version', terraformVersion);
+api.set('terragrunt', terragrunt);
+api.set('terragrunt-version', terragruntVersion);
+api.set('tflint-plugin', tflintPlugin);
+api.set('travis', travis);
+api.set('velaci', velaci);
+api.set('woodpecker', woodpecker);

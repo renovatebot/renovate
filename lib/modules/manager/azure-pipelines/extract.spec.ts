@@ -41,9 +41,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
             name: 'user/repo',
             ref: 'refs/tags/v1.0.0',
           },
-          {
-            repository: 'user/repo',
-          },
+          'user',
         ),
       ).toMatchObject({
         depName: 'user/repo',
@@ -59,9 +57,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
             name: 'user/repo',
             ref: 'refs/tags/v1.0.0',
           },
-          {
-            repository: 'user/repo',
-          },
+          'user/repo',
         ),
       ).toBeNull();
     });
@@ -73,9 +69,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
             type: 'github',
             name: 'user/repo',
           },
-          {
-            repository: 'user/repo',
-          },
+          'user/repo',
         ),
       ).toBeNull();
     });
@@ -88,9 +82,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
             name: 'user/repo',
             ref: 'refs/head/master',
           },
-          {
-            repository: 'user/repo',
-          },
+          'user/repo',
         ),
       ).toBeNull();
     });
@@ -108,9 +100,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
             name: 'project/repo',
             ref: 'refs/tags/v1.0.0',
           },
-          {
-            repository: '',
-          },
+          'otherProject/otherRepo',
         ),
       ).toMatchObject({
         depName: 'project/repo',
@@ -118,7 +108,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
       });
     });
 
-    it('should extract Azure repository information if project is not in name but is extract config repository name', () => {
+    it('should extract Azure repository information if project is not in name but is in the config repository', () => {
       GlobalConfig.set({
         platform: 'azure',
         endpoint: 'https://dev.azure.com/renovate-org',
@@ -131,9 +121,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
             name: 'repo',
             ref: 'refs/tags/v1.0.0',
           },
-          {
-            repository: 'project/otherrepo',
-          },
+          'project/otherrepo',
         ),
       ).toMatchObject({
         depName: 'project/repo',
@@ -154,14 +142,30 @@ describe('modules/manager/azure-pipelines/extract', () => {
             name: 'repo',
             ref: 'refs/tags/v1.0.0',
           },
-          {
-            repository: '',
-          },
+          '',
         ),
       ).toBeNull();
     });
 
-    it('should extract return null for git repo type if platform not Azure', () => {
+    it('should return null if repository type is git and currentRepository is undefined', () => {
+      GlobalConfig.set({
+        platform: 'azure',
+        endpoint: 'https://dev.azure.com/renovate-org',
+      });
+
+      expect(
+        extractRepository(
+          {
+            type: 'git',
+            name: 'repo',
+            ref: 'refs/tags/v1.0.0',
+          },
+          undefined,
+        ),
+      ).toBeNull();
+    });
+
+    it('should return null for git repo type if platform not Azure', () => {
       GlobalConfig.set({
         platform: 'github',
       });
@@ -173,9 +177,7 @@ describe('modules/manager/azure-pipelines/extract', () => {
             name: 'project/repo',
             ref: 'refs/tags/v1.0.0',
           },
-          {
-            repository: '',
-          },
+          '',
         ),
       ).toBeNull();
     });
