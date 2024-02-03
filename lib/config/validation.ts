@@ -8,8 +8,8 @@ import type {
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types/host-rules';
-import { anyMatchRegexOrMinimatch } from '../util/package-rules/match';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
+import { anyMatchRegexOrMinimatch } from '../util/string';
 import * as template from '../util/template';
 import {
   hasValidSchedule,
