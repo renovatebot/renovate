@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { Matcher } from './base';
 import { anyMatchRegexOrMinimatch } from '../string';
+import { Matcher } from './base';
 
 export class RepositoriesMatcher extends Matcher {
   override matches(

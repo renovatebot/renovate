@@ -10,11 +10,11 @@ import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
+import { anyMatchRegexOrMinimatch } from '../string';
 import { parseUrl } from '../url';
 import { dnsLookup } from './dns';
 import { keepAliveAgents } from './keep-alive';
 import type { GotOptions } from './types';
-import { anyMatchRegexOrMinimatch } from '../string';
 
 export type HostRulesGotOptions = Pick<
   GotOptions,
