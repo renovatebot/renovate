@@ -30,7 +30,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchSnapshot();
     });
 
-    it('does not warn for false globals in repo config', async () => {
+    it('only warns for actual globals in repo config', async () => {
       const config = {
         hostRules: [
           {
