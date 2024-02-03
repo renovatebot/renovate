@@ -245,9 +245,9 @@ export async function ensurePr(
     // TODO: types (#22198)
     const upgradeKey = `${upgrade.depType!}-${upgrade.depName!}-${
       upgrade.manager
-    }-${
-      upgrade.currentVersion ?? upgrade.currentValue!
-    }-${upgrade.newVersion!}`;
+    }-${upgrade.currentVersion ?? ''}-${
+      upgrade.currentValue! ?? ''
+    }-${upgrade.newVersion! ?? ''}-${upgrade.newValue! ?? ''}`;
     if (processedUpgrades.includes(upgradeKey)) {
       continue;
     }
