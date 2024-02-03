@@ -2112,7 +2112,7 @@ Behaviour details:
 
 - When Renovate creates a PR, it will add any configured labels to that PR
 - When another bot, or user, changes the labels on a open Renovate PR then Renovate won't change those labels
-- On GitHub, GitLab and Gitea: if the labels for a PR change through configuration , the changes will be applied to all PRs with unmodified labels
+- On GitHub, GitLab and Gitea: if the labels for a PR change through configuration, the changes will be applied to all PRs with unmodified labels
 
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
 If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
