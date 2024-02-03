@@ -49,7 +49,6 @@ import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setConfidence, setStability } from './status-checks';
 
-// TODO: pass userConifguredEnv to getUpdatedPackageFiles -> updateArtifacts (UpdateArtifactConfig)
 async function rebaseCheck(
   config: RenovateConfig,
   branchPr: Pr,
