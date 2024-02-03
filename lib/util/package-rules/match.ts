@@ -1,9 +1,8 @@
-import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { minimatch } from '../minimatch';
 import { regEx } from '../regex';
 
-export function matchRegexOrMinimatch(pattern: string, input: string): boolean {
+export function matchRegexOrMinimatch(input: string, pattern: string): boolean {
   if (pattern.length > 2 && pattern.startsWith('/') && pattern.endsWith('/')) {
     try {
       const regex = regEx(pattern.slice(1, -1));
@@ -18,14 +17,8 @@ export function matchRegexOrMinimatch(pattern: string, input: string): boolean {
 }
 
 export function anyMatchRegexOrMinimatch(
-  patterns: string[] | undefined,
-  input: string | undefined,
+  input: string,
+  patterns: string[],
 ): boolean | null {
-  if (is.undefined(patterns)) {
-    return null;
-  }
-  if (is.undefined(input)) {
-    return false;
-  }
-  return patterns.some((pattern) => matchRegexOrMinimatch(pattern, input));
+  return patterns.some((pattern) => matchRegexOrMinimatch(input, pattern));
 }
