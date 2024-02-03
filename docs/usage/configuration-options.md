@@ -1248,6 +1248,25 @@ This way the secret can be used in both the `org1` and `org2` organizations.
 
 For more information on how to use secrets for private packages, read [Private package support](./getting-started/private-packages.md).
 
+## env
+
+This option allows users to specify explicit environment variables and their corresponding values.
+
+Behavior:
+
+- Currently this option is only applicable to child processes, specifically within the `updateArtifcats()` function
+- Values defined in the env configuration take precedence over corresponding environment variables, including those from `customEnvVariables` and `process.env`
+- Before adding variables to the env configuration, ensure they are included in the [`allowedEnv`](./self-hosted-configuration.md#allowedEnv) list within the admin configuration
+  Example:
+
+```json
+{
+  "env": {
+    "SOME_ENV_VARIABLE": "SOME_STRING_VALUE"
+  }
+}
+```
+
 ## excludeCommitPaths
 
 Be careful you know what you're doing with this option.

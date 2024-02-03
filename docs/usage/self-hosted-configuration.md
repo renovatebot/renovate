@@ -63,6 +63,28 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowScripts
 
+## allowedEnv
+
+Users can specify a set of allowed environment variable names through `allowedEnv`, and only those specified in the list will be accepted in the env configuration.
+
+Examples:
+
+```json
+{
+  "env": {
+    "SOME_ENV_VARIABLE": "some_value"
+  }
+}
+```
+
+Or with custom `allowedEnv`:
+
+```js title="config.js"
+module.exports = {
+  allowedEnv: ['SOME_ENV_VARIABLE'],
+};
+```
+
 ## allowedHeaders
 
 `allowedHeaders` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
