@@ -420,7 +420,7 @@ export async function ensurePr(
         // ii) removeLabels: Labels that need to be removed
         // iii) labels: New labels for the PR, replacing the old labels array entirely.
         // This distinction is necessary because different platforms update labels differently
-        // For more details, refer to the updatePr function of each platform
+        // For more details, refer to the updatePr function of each platform.
 
         const [addLabels, removeLabels] = getChangedLabels(
           prCurrentLabels,

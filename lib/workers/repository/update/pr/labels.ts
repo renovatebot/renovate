@@ -52,7 +52,7 @@ export function areLabelsModified(
 }
 
 /**
- * Determine if labels should be updated in the Pull Request
+ * Determine if labels should be updated in the Pull Request.
  */
 export function shouldUpdateLabels(
   prInitialLabels: string[] | undefined,

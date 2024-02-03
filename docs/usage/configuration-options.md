@@ -2110,8 +2110,8 @@ With the above config, every PR raised by Renovate will have the label `dependen
 
 Behaviour details:
 
-- Renovate adds labels to the PR at time of PR creation, if any have been configured
-- If any other bot or users modifies labels in a PR which Renovate created, it won't touch labels again in that open PR
+- When Renovate creates a PR, it will add any configured labels to that PR
+- When another bot, or user, changes the labels on a open Renovate PR then Renovate won't change those labels
 - If the labels for a PR change through configuration or other means, they are applied to any open PRs with unmodified labels (GitHub, GitLab, and Gitea only)
 
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
