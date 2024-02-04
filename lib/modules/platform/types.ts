@@ -35,10 +35,6 @@ export interface RepoResult {
   repoFingerprint: string;
 }
 
-export interface PlatformBranchSettings {
-  mustRebase: boolean;
-}
-
 export type GitUrlOption = 'default' | 'ssh' | 'endpoint';
 
 export interface RepoParams {
