@@ -49,11 +49,7 @@ export function getPrUpdatesTable(config: BranchConfig): string {
   for (const upgrade of config.upgrades) {
     if (upgrade) {
       // Create a key based on the properties which are significant in the updates table
-      const key = `${upgrade.depName ?? ''}_${upgrade.depType ?? ''}_${
-        upgrade.newValue ?? upgrade.newVersion ?? ''
-      }_${upgrade.currentValue ?? upgrade.currentVersion ?? ''}_${
-        upgrade.updateType
-      }`;
+      const key = `${upgrade.depName ?? ''}_${upgrade.depType ?? ''}_${upgrade.newValue ?? ''}_${upgrade.newVersion ?? ''}_${upgrade.currentValue ?? ''}_${upgrade.currentVersion ?? ''}_${upgrade.updateType}`;
 
       const res: Record<string, string> = {};
       const rowDefinition = getRowDefinition(config.prBodyColumns, upgrade);
