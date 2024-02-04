@@ -115,7 +115,10 @@ describe('util/github/graphql/datasource-fetcher', () => {
       httpMock
         .scope('https://api.github.com/')
         .post('/graphql')
-        .reply(200, resp(false, []));
+        .reply(
+          200,
+          resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
+        );
 
       const res = await Datasource.query(
         { packageName: 'foo/bar' },
@@ -123,7 +126,9 @@ describe('util/github/graphql/datasource-fetcher', () => {
         adapter,
       );
 
-      expect(res).toBeEmptyArray();
+      expect(res).toEqual([
+        { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
+      ]);
     });
 
     it('throws on unknown errors', async () => {
