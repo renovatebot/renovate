@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/platform/github/index getRepoForceRebase should throw 401 1`] = `"Response code 401 (Unauthorized)"`;
+exports[`modules/platform/github/index getBranchForceRebase should throw 401 1`] = `"Response code 401 (Unauthorized)"`;
 
 exports[`modules/platform/github/index getRepos should return an array of repos 1`] = `
 [
