@@ -282,6 +282,13 @@ export class GithubGraphqlDatasourceFetcher<
       await this.doPaginatedFetch();
     }
 
+    const res = await this.cacheStrategy().finalizeAndReturn();
+    if (res.length) {
+      return res;
+    }
+
+    delete this.isPersistent;
+    await this.doPaginatedFetch();
     return this.cacheStrategy().finalizeAndReturn();
   }
 
