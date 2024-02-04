@@ -145,7 +145,7 @@ export class MigratedDataFactory {
 
       // TODO #22198
       const raw = await platform.getRawFile(configFileName!);
-      const indent = detectIndent(raw!);
+      const indent = detectIndent(raw ?? '');
       // indent defaults to 2 spaces
       const indentSpace = indent.indent ?? '  ';
       const filename = configFileName!;
