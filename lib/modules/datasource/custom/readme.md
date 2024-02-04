@@ -16,6 +16,7 @@ Options:
 Available template variables:
 
 - `packageName`
+- `currentValue`
 
 ```json
 {
