@@ -52,7 +52,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     let strategy = new GithubGraphqlMemoryCacheStrategy('foo', 'bar');
     let isPaginationDone = await strategy.reconcile([items['1']]);
-    let res = await strategy.finalize();
+    let res = await strategy.finalizeAndReturn();
 
     expect(res).toEqual(Object.values(items));
     expect(isPaginationDone).toBe(true);
@@ -64,7 +64,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     strategy = new GithubGraphqlMemoryCacheStrategy('foo', 'bar');
     isPaginationDone = await strategy.reconcile([]);
-    res = await strategy.finalize();
+    res = await strategy.finalizeAndReturn();
 
     expect(res).toEqual([]);
     expect(isPaginationDone).toBe(false);
@@ -94,7 +94,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     const strategy = new GithubGraphqlMemoryCacheStrategy('foo', 'bar');
     const isPaginationDone = await strategy.reconcile(page);
-    const res = await strategy.finalize();
+    const res = await strategy.finalizeAndReturn();
 
     expect(res).toEqual([...Object.values(oldItems), newItem]);
     expect(isPaginationDone).toBe(false);
@@ -202,7 +202,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     const strategy = new GithubGraphqlMemoryCacheStrategy('foo', 'bar');
     const isPaginationDone = await strategy.reconcile(page);
-    const res = await strategy.finalize();
+    const res = await strategy.finalizeAndReturn();
 
     expect(res).toEqual([
       { version: '0', releaseTimestamp: isoTs('2022-09-30 10:00') },

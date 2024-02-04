@@ -136,7 +136,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    * Handle removed items for packages that are not stabilized
    * and return the list of all items.
    */
-  async finalize(): Promise<GithubItem[]> {
+  async finalizeAndReturn(): Promise<GithubItem[]> {
     const cachedItems = await this.getItems();
     const resultItems: Record<string, GithubItem> = {};
 

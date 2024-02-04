@@ -383,13 +383,13 @@ describe('util/github/graphql/datasource-fetcher', () => {
       ];
 
       it.each`
-        isPrivate    | isCacheable
+        isPrivate    | isPersistent
         ${undefined} | ${false}
         ${true}      | ${false}
         ${false}     | ${true}
       `(
-        'private=$isPrivate => isCacheable=$isCacheable',
-        async ({ isPrivate, isCacheable }) => {
+        'private=$isPrivate => isPersistent=$isPersistent',
+        async ({ isPrivate, isPersistent }) => {
           httpMock
             .scope('https://api.github.com/')
             .post('/graphql')
@@ -402,7 +402,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
           );
           await instance.getItems();
 
-          expect(instance).toHaveProperty('isCacheable', isCacheable);
+          expect(instance).toHaveProperty('isPersistent', isPersistent);
         },
       );
     });
