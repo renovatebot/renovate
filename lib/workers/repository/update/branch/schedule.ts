@@ -166,7 +166,7 @@ export function isScheduledNow(
     logger.warn(validSchedule[1]);
     return true;
   }
-  let now = DateTime.local();
+  let now: DateTime = DateTime.local();
   logger.trace(`now=${now.toISO()!}`);
   // Adjust the time if repo is in a different timezone to renovate
   if (config.timezone) {

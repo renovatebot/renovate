@@ -21,6 +21,24 @@ Second sentence on a new line.
 And so on.
 ```
 
+## Avoid manually ordering numbered lists
+
+Avoid:
+
+```markdown
+1. First item
+2. Second item
+3. Third item
+```
+
+Do:
+
+```markdown
+1. First item
+1. Second item
+1. Third item
+```
+
 ## Avoid punctuation at the end of list items
 
 In Markdown files, avoid punctuation at the end of a list item.

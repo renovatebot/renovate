@@ -12,6 +12,7 @@ import {
 } from '../../../constants/error-messages';
 import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
+import type { LongCommitSha } from '../../../util/git/types';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/github';
 import { toBase64 } from '../../../util/string';
@@ -40,7 +41,7 @@ describe('modules/platform/github/index', () => {
 
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
-      '0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+      '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
     );
     hostRules.find.mockReturnValue({
       token: '123test',
@@ -888,7 +889,11 @@ describe('modules/platform/github/index', () => {
 
     const pr1: GhRestPr = {
       number: 1,
-      head: { ref: 'branch-1', sha: '111', repo: { full_name: 'some/repo' } },
+      head: {
+        ref: 'branch-1',
+        sha: '111' as LongCommitSha,
+        repo: { full_name: 'some/repo' },
+      },
       base: { repo: { pushed_at: '' }, ref: 'repo/fork_branch' },
       state: 'open',
       title: 'PR #1',
@@ -901,7 +906,11 @@ describe('modules/platform/github/index', () => {
     const pr2: GhRestPr = {
       ...pr1,
       number: 2,
-      head: { ref: 'branch-2', sha: '222', repo: { full_name: 'some/repo' } },
+      head: {
+        ref: 'branch-2',
+        sha: '222' as LongCommitSha,
+        repo: { full_name: 'some/repo' },
+      },
       state: 'open',
       title: 'PR #2',
       updated_at: t2,
@@ -910,7 +919,11 @@ describe('modules/platform/github/index', () => {
     const pr3: GhRestPr = {
       ...pr1,
       number: 3,
-      head: { ref: 'branch-3', sha: '333', repo: { full_name: 'some/repo' } },
+      head: {
+        ref: 'branch-3',
+        sha: '333' as LongCommitSha,
+        repo: { full_name: 'some/repo' },
+      },
       state: 'open',
       title: 'PR #3',
       updated_at: t3,
@@ -2415,6 +2428,51 @@ describe('modules/platform/github/index', () => {
       res = await github.findPr({ branchName: 'branch-b' });
       expect(res).toBeNull();
     });
+
+    it('finds pr from other authors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/pulls?head=some/repo:branch&state=open')
+        .reply(200, [
+          {
+            number: 1,
+            head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+            title: 'branch a pr',
+            state: 'open',
+          },
+        ]);
+      await github.initRepo({ repository: 'some/repo' });
+      expect(
+        await github.findPr({
+          branchName: 'branch',
+          state: 'open',
+          includeOtherAuthors: true,
+        }),
+      ).toMatchObject({
+        number: 1,
+        sourceBranch: 'branch-a',
+        sourceRepo: 'some/repo',
+        state: 'open',
+        title: 'branch a pr',
+        updated_at: undefined,
+      });
+    });
+
+    it('returns null if no pr found - (includeOtherAuthors)', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/pulls?head=some/repo:branch&state=open')
+        .reply(200, []);
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = await github.findPr({
+        branchName: 'branch',
+        state: 'open',
+        includeOtherAuthors: true,
+      });
+      expect(pr).toBeNull();
+    });
   });
 
   describe('createPr()', () => {
@@ -3278,6 +3336,16 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('getVulnerabilityAlerts()', () => {
+    it('avoids fetching if repo has vulnerability alerts disabled', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', {
+        hasVulnerabilityAlertsEnabled: false,
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res).toHaveLength(0);
+    });
+
     it('returns empty if error', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
       const res = await github.getVulnerabilityAlerts();
@@ -3520,12 +3588,14 @@ describe('modules/platform/github/index', () => {
     beforeEach(() => {
       git.prepareCommit.mockImplementation(({ files }) =>
         Promise.resolve({
-          parentCommitSha: '1234567',
-          commitSha: '7654321',
+          parentCommitSha: '1234567' as LongCommitSha,
+          commitSha: '7654321' as LongCommitSha,
           files,
         }),
       );
-      git.fetchBranch.mockImplementation(() => Promise.resolve('0abcdef'));
+      git.fetchBranch.mockImplementation(() =>
+        Promise.resolve('0abcdef' as LongCommitSha),
+      );
     });
 
     it('returns null if pre-commit phase has failed', async () => {

@@ -32,9 +32,8 @@ describe('modules/manager/travis/extract', () => {
         deps: [
           {
             currentValue: '11.10.1',
-            datasource: 'github-tags',
+            datasource: 'node-version',
             depName: 'node',
-            packageName: 'nodejs/node',
           },
         ],
       });
@@ -46,15 +45,13 @@ describe('modules/manager/travis/extract', () => {
         deps: [
           {
             currentValue: '11.10.1',
-            datasource: 'github-tags',
+            datasource: 'node-version',
             depName: 'node',
-            packageName: 'nodejs/node',
           },
           {
             currentValue: '11.10.2',
-            datasource: 'github-tags',
+            datasource: 'node-version',
             depName: 'node',
-            packageName: 'nodejs/node',
           },
         ],
       });
@@ -66,15 +63,13 @@ describe('modules/manager/travis/extract', () => {
         deps: [
           {
             currentValue: '11.10.1',
-            datasource: 'github-tags',
+            datasource: 'node-version',
             depName: 'node',
-            packageName: 'nodejs/node',
           },
           {
             currentValue: '11.10.2',
-            datasource: 'github-tags',
+            datasource: 'node-version',
             depName: 'node',
-            packageName: 'nodejs/node',
           },
         ],
       });
@@ -86,9 +81,8 @@ describe('modules/manager/travis/extract', () => {
         deps: [
           {
             currentValue: '11.10.1',
-            datasource: 'github-tags',
+            datasource: 'node-version',
             depName: 'node',
-            packageName: 'nodejs/node',
           },
         ],
       });

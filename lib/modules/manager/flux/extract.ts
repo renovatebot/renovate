@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { parseYaml } from '../../../util/yaml';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
@@ -52,7 +52,8 @@ function readManifest(
   };
   let resources: FluxResource[];
   try {
-    resources = loadAll(content, null, { json: true }) as FluxResource[];
+    // TODO: use schema (#9610)
+    resources = parseYaml(content, null, { json: true });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Flux manifest');
     return null;

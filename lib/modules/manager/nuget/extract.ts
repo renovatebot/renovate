@@ -5,14 +5,15 @@ import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
+import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
-import type { DotnetToolsManifest } from './types';
-import { findVersion, getConfiguredRegistries } from './util';
+import type { DotnetToolsManifest, NugetPackageDependency } from './types';
+import { applyRegistries, findVersion, getConfiguredRegistries } from './util';
 
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -39,12 +40,20 @@ function isXmlElem(node: XmlNode): boolean {
   return hasKey('name', node);
 }
 
-function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
-  const results: PackageDependency[] = [];
+function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
+  const results: NugetPackageDependency[] = [];
   const todo: XmlElement[] = [xmlNode];
   while (todo.length) {
     const child = todo.pop()!;
     const { name, attr } = child;
+
+    if (name === 'ContainerBaseImage') {
+      const { depName, ...dep } = getDep(child.val, true);
+
+      if (is.nonEmptyStringAndNotWhitespace(depName)) {
+        results.push({ ...dep, depName, depType: 'docker' });
+      }
+    }
 
     if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
@@ -79,9 +88,6 @@ export async function extractPackageFile(
   logger.trace(`nuget.extractPackageFile(${packageFile})`);
 
   const registries = await getConfiguredRegistries(packageFile);
-  const registryUrls = registries
-    ? registries.map((registry) => registry.url)
-    : undefined;
 
   if (packageFile.endsWith('dotnet-tools.json')) {
     const deps: PackageDependency[] = [];
@@ -102,15 +108,14 @@ export async function extractPackageFile(
     for (const depName of Object.keys(manifest.tools ?? {})) {
       const tool = manifest.tools[depName];
       const currentValue = tool.version;
-      const dep: PackageDependency = {
+      const dep: NugetPackageDependency = {
         depType: 'nuget',
         depName,
         currentValue,
         datasource: NugetDatasource.id,
       };
-      if (registryUrls) {
-        dep.registryUrls = registryUrls;
-      }
+
+      applyRegistries(dep, registries);
 
       deps.push(dep);
     }
@@ -119,17 +124,16 @@ export async function extractPackageFile(
   }
 
   if (packageFile.endsWith('global.json')) {
-    return extractMsbuildGlobalManifest(content, packageFile);
+    return extractMsbuildGlobalManifest(content, packageFile, registries);
   }
 
   let deps: PackageDependency[] = [];
   let packageFileVersion: string | undefined;
   try {
     const parsedXml = new XmlDocument(content);
-    deps = extractDepsFromXml(parsedXml).map((dep) => ({
-      ...dep,
-      ...(registryUrls && { registryUrls }),
-    }));
+    deps = extractDepsFromXml(parsedXml).map((dep) =>
+      applyRegistries(dep, registries),
+    );
     packageFileVersion = findVersion(parsedXml)?.val;
   } catch (err) {
     logger.debug({ err, packageFile }, `Failed to parse XML`);

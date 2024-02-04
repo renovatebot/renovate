@@ -1,4 +1,4 @@
-import { dump } from 'js-yaml';
+import { dump } from '../../../util/yaml';
 import * as helmv3Updater from '.';
 
 describe('modules/manager/helmv3/update', () => {

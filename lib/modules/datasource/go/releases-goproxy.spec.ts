@@ -344,6 +344,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           codeBlock`
             v1.0.0 2018-08-13T15:31:12Z
             v1.0.1
+            v1.28.1-20230721020619-4464c06fa399.4
           `,
         )
         .get('/@v/v1.0.1.info')
@@ -361,6 +362,11 @@ describe('modules/datasource/go/releases-goproxy', () => {
         releases: [
           { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
           { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
+          {
+            newDigest: '4464c06fa399',
+            releaseTimestamp: '20230721020619',
+            version: 'v1.28.1-20230721020619-4464c06fa399.4',
+          },
         ],
         sourceUrl: 'https://github.com/google/btree',
         tags: { latest: 'v1.0.1' },

@@ -79,4 +79,27 @@ describe('workers/global/initialize', () => {
       await expect(globalInitialize(config)).toResolve();
     });
   });
+
+  describe('configureThirdPartyLibraries()', () => {
+    beforeEach(() => {
+      delete process.env.AWS_EC2_METADATA_DISABLED;
+      delete process.env.METADATA_SERVER_DETECTION;
+    });
+
+    it('sets env vars when cloud metadata services disabled', async () => {
+      const config: RenovateConfig = { useCloudMetadataServices: false };
+      git.validateGitVersion.mockResolvedValueOnce(true);
+      await expect(globalInitialize(config)).toResolve();
+      expect(process.env.AWS_EC2_METADATA_DISABLED).toBe('true');
+      expect(process.env.METADATA_SERVER_DETECTION).toBe('none');
+    });
+
+    it('does not set env vars when cloud metadata services enabled', async () => {
+      const config: RenovateConfig = { useCloudMetadataServices: true };
+      git.validateGitVersion.mockResolvedValueOnce(true);
+      await expect(globalInitialize(config)).toResolve();
+      expect(process.env.AWS_EC2_METADATA_DISABLED).toBeUndefined();
+      expect(process.env.METADATA_SERVER_DETECTION).toBeUndefined();
+    });
+  });
 });
