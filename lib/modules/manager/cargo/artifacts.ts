@@ -125,7 +125,7 @@ async function updateArtifactsImpl(
       await cargoUpdate(
         packageFileName,
         true,
-        config.env,
+        config.env ?? {},
         config.constraints?.rust,
       );
     } else {
@@ -139,7 +139,7 @@ async function updateArtifactsImpl(
         await cargoUpdate(
           packageFileName,
           false,
-          config.env,
+          config.env ?? {},
           config.constraints?.rust,
         );
       } else {
@@ -147,7 +147,7 @@ async function updateArtifactsImpl(
         await cargoUpdatePrecise(
           packageFileName,
           updatedDeps,
-          config.env,
+          config.env ?? {},
           config.constraints?.rust,
         );
       }
