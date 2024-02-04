@@ -605,13 +605,13 @@ export async function validateConfig(
                 if (!allowedEnvVars?.includes(envVarName)) {
                   warnings.push({
                     topic: 'Configuration Error',
-                    message: `Invalid enviroment variable name \`${envVarName}\` found in \`${currentPath}\`. Allowed values are ${allowedEnvVars?.join(', ')}.`,
+                    message: `Invalid enviroment variable name \`${envVarName}\` found in \`${currentPath}\`. Allowed values are ${allowedEnvVars?.map((str) => `"${str}").join(', ')}.`,
                   });
                 }
                 if (!is.string(envVarValue)) {
                   warnings.push({
                     topic: 'Configuration Error',
-                    message: `Enviroment variable inside \`${currentPath}.${envVarName}\` should be a string.`,
+                    message: `Enviroment variable inside \`${currentPath}.${envVarName}\` must be a string.`,
                   });
                 }
               }

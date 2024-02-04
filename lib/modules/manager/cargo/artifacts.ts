@@ -17,7 +17,7 @@ import { extractLockFileContentVersions } from './locked-version';
 async function cargoUpdate(
   manifestPath: string,
   isLockFileMaintenance: boolean,
-  userConfiguredEnv: Record<string, string> = {},
+  userConfiguredEnv: Record<string, string>,
   constraint: string | undefined,
 ): Promise<void> {
   let cmd = `cargo update --config net.git-fetch-with-cli=true --manifest-path ${quote(
@@ -41,7 +41,7 @@ async function cargoUpdate(
 async function cargoUpdatePrecise(
   manifestPath: string,
   updatedDeps: Upgrade[],
-  userConfiguredEnv: Record<string, string> = {},
+  userConfiguredEnv: Record<string, string>,
   constraint: string | undefined,
 ): Promise<void> {
   // First update all dependencies that have been bumped in `Cargo.toml`.

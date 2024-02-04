@@ -65,7 +65,8 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowedEnv
 
-Users can specify a set of allowed environment variable names through `allowedEnv`, and only those specified in the list will be accepted in the [`env`](./configuration-options.md#env) configuration.
+Users can set allowed environment variable names through `allowedEnv`.
+Only the environment variables on the list will be accepted in the [`env`](./configuration-options.md#env) configuration.
 
 Examples:
 

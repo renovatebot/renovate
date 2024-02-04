@@ -1252,14 +1252,16 @@ For more information on how to use secrets for private packages, read [Private p
 
 This option allows users to specify explicit environment variables and their corresponding values.
 
+<!-- prettier-ignore -->
+!!! note
+    This option is only available to users if the bot administrator has configured an [`allowedEnv`](./self-hosted-configuration.md#allowedEnv) list permitting the env names you wish to use.
+
 Behavior:
 
-- Currently this option is only applicable to child processes, specifically within the `updateArtifcats()` function
+- This option is only applicable to when executing package manager commands, specifically within the `updateArtifacts()` function
 - Values defined in the env configuration take precedence over corresponding environment variables, including those from `customEnvVariables` and `process.env`
-- Before adding variables to the env configuration, ensure they are included in the [`allowedEnv`](./self-hosted-configuration.md#allowedEnv) list within the admin configuration
-  Example:
 
-```json
+```json title="Example renovate.json with env configuration"
 {
   "env": {
     "SOME_ENV_VARIABLE": "SOME_STRING_VALUE"
