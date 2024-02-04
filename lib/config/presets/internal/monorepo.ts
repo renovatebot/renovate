@@ -62,6 +62,7 @@ const repoGroups = {
   'azure azure-sdk-for-net': 'https://github.com/Azure/azure-sdk-for-net',
   'azure azure-storage-net': 'https://github.com/Azure/azure-storage-net',
   babel: 'https://github.com/babel/babel',
+  backstage: 'https://github.com/backstage/backstage',
   baset: 'https://github.com/igmat/baset',
   brave: 'https://github.com/openzipkin/brave',
   'bugsnag-js': 'https://github.com/bugsnag/bugsnag-js',
@@ -272,6 +273,8 @@ const repoGroups = {
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
   expo: 'https://github.com/expo/expo',
+  'fabric-chaincode-node':
+    'https://github.com/hyperledger/fabric-chaincode-node',
   'fabric8-kubernetes-client': 'https://github.com/fabric8io/kubernetes-client',
   feathers: 'https://github.com/feathersjs/feathers',
   feign: 'https://github.com/OpenFeign/feign',

@@ -171,6 +171,8 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       depName: 'mocha',
       currentValue: '^6.2.3',
       newValue: '6.2.3',
+      currentVersion: '6.2.3',
+      newVersion: '6.2.3',
       displayFrom: '^6.2.3',
       displayTo: '6.2.3',
     });
@@ -215,6 +217,8 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       depName: 'mocha',
       currentValue: '^6.2.3',
       newValue: '6.2.3',
+      currentVersion: '6.2.3',
+      newVersion: '6.2.3',
       displayFrom: '^6.2.3',
       displayTo: '6.2.3',
       displayPending: 'some-string',
