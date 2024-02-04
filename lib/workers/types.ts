@@ -79,6 +79,7 @@ export interface BranchUpgradeConfig
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
+  env?: Record<string, string>;
 }
 
 export type PrBlockedBy =
@@ -129,6 +130,7 @@ export interface BranchConfig
   isConflicted?: boolean;
   commitFingerprint?: string;
   skipBranchUpdate?: boolean;
+  env?: Record<string, string>;
 }
 
 export interface BranchMetadata {
@@ -181,6 +183,7 @@ export interface UpgradeFingerprintConfig {
   currentVersion?: string;
   datasource?: string;
   depName?: string;
+  env?: Record<string, string>;
   lockFile?: string;
   lockedVersion?: string;
   manager?: string | null;

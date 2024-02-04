@@ -21,7 +21,13 @@ export function generateCommitFingerprintConfig(
   const res = branch.upgrades.map((upgrade) => {
     const filteredUpgrade = {} as UpgradeFingerprintConfig;
     for (const field of upgradeFingerprintFields) {
-      filteredUpgrade[field] = upgrade[field];
+      // TS cannot narrow the type here
+      // I am not sure if this is the best way suggestions welcome
+      if (field !== 'env' && is.string(upgrade[field])) {
+        filteredUpgrade[field] = upgrade[field];
+      } else if (is.plainObject(upgrade[field])) {
+        filteredUpgrade.env = upgrade[field] as Record<string, string>;
+      }
     }
     return filteredUpgrade;
   });
@@ -156,12 +162,8 @@ export async function writeUpdates(
       branchState,
       commitFingerprint,
     );
-    // no need to include the env object in the fingerprint;
-    // the SHA changes when the user modifies the config file, and we'll update the branch regardless
-    const res = await processBranch({
-      ...branch,
-      userConfiguredEnv: config.env,
-    });
+
+    const res = await processBranch(branch);
     branch.prBlockedBy = res?.prBlockedBy;
     branch.prNo = res?.prNo;
     branch.result = res?.result;
