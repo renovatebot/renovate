@@ -1,6 +1,7 @@
 import AggregateError from 'aggregate-error';
 import * as httpMock from '../../../../test/http-mock';
-import { partial } from '../../../../test/util';
+import { mocked, partial } from '../../../../test/util';
+import * as _packageCache from '../../../util/cache/package';
 import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
 import { range } from '../../range';
 import {
@@ -12,6 +13,9 @@ import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
 } from './types';
+
+jest.mock('../../../util/cache/package');
+const packageCache = mocked(_packageCache);
 
 interface TestAdapterInput {
   version: string;
@@ -112,6 +116,27 @@ describe('util/github/graphql/datasource-fetcher', () => {
     });
 
     it('can perform query and receive result', async () => {
+      httpMock
+        .scope('https://api.github.com/')
+        .post('/graphql')
+        .reply(
+          200,
+          resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
+        );
+
+      const res = await Datasource.query(
+        { packageName: 'foo/bar' },
+        http,
+        adapter,
+      );
+
+      expect(res).toEqual([
+        { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
+      ]);
+    });
+
+    it('performs query when persistence flag is set and cache is expired', async () => {
+      packageCache.get.mockResolvedValueOnce(true);
       httpMock
         .scope('https://api.github.com/')
         .post('/graphql')
