@@ -223,19 +223,48 @@ describe('config/validation', () => {
           SOME_VAR: 'some_value',
           SOME_OTHER_VAR: 10 as never,
         },
+        npm: {
+          env: {
+            SOME_VAR: 'some_value',
+          },
+        },
+        packageRules: [
+          {
+            matchManagers: ['regex'],
+            env: {
+              SOME_VAR: 'some_value',
+            },
+          },
+        ],
       };
-      const { warnings } = await configValidation.validateConfig(false, config);
+      const { errors, warnings } = await configValidation.validateConfig(
+        false,
+        config,
+      );
       expect(warnings).toMatchObject([
         {
           message:
-            'Enviroment variable inside `env.SOME_OTHER_VAR` should be a string.',
+            'Enviroment variable inside `env.SOME_OTHER_VAR` must be a string.',
         },
         {
           message:
-            'Invalid enviroment variable name `randomKey` found in `env`. Allowed values are SOME_VAR, SOME_OTHER_VAR.',
+            'Invalid enviroment variable name `randomKey` found in `env`. Allowed values are "SOME_VAR", "SOME_OTHER_VAR".',
+        },
+      ]);
+      expect(errors).toMatchObject([
+        {
+          message:
+            'The "env" object can only be configured at the top level of a config but was found inside "npm"',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'The "env" object can only be configured at the top level of a config but was found inside "packageRules[0]"',
+          topic: 'Configuration Error',
         },
       ]);
       expect(warnings).toHaveLength(2);
+      expect(errors).toHaveLength(2);
     });
 
     it('catches invalid customDatasources record type', async () => {

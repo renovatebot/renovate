@@ -38,7 +38,7 @@ let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
 
-const topLevelObjects = managerList;
+const topLevelObjects = [...managerList, 'env'];
 
 const ignoredNodes = [
   '$schema',
@@ -602,16 +602,16 @@ export async function validateConfig(
             } else if (key === 'env') {
               const allowedEnvVars = GlobalConfig.get('allowedEnv');
               for (const [envVarName, envVarValue] of Object.entries(val)) {
-                if (!allowedEnvVars?.includes(envVarName)) {
-                  warnings.push({
-                    topic: 'Configuration Error',
-                    message: `Invalid enviroment variable name \`${envVarName}\` found in \`${currentPath}\`. Allowed values are ${allowedEnvVars?.map((str) => `"${str}").join(', ')}.`,
-                  });
-                }
                 if (!is.string(envVarValue)) {
                   warnings.push({
                     topic: 'Configuration Error',
                     message: `Enviroment variable inside \`${currentPath}.${envVarName}\` must be a string.`,
+                  });
+                }
+                if (!allowedEnvVars?.includes(envVarName)) {
+                  warnings.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid enviroment variable name \`${envVarName}\` found in \`${currentPath}\`. Allowed values are ${allowedEnvVars?.map((str) => `"${str}"`).join(', ')}.`,
                   });
                 }
               }
