@@ -298,9 +298,10 @@ export class GithubGraphqlDatasourceFetcher<
   }
 
   /**
-   * This method intentionally was made not async, though it returns `Promise`.
-   * This method doesn't make pages to be fetched concurrently.
-   * Instead, it ensures that same package release is not fetched twice.
+   * This method caches results for the same packages during repository run.
+   *
+   * It intentionally was made not async, though it returns `Promise`,
+   * to ensure the same package is prevented from being fetched twice.
    */
   private doConcurrentQuery(): Promise<ResultItem[]> {
     const cacheKey = `github-pending:${this.getCacheNs()}:${this.getCacheKey()}`;
