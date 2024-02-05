@@ -359,8 +359,8 @@ importers:
         specifier: 2.2.2
         version: 2.2.2
       '@openpgp/web-stream-tools':
-        specifier: 0.0.14
-        version: 0.0.14(typescript@5.3.3)
+        specifier: 0.1.1
+        version: 0.1.1(typescript@5.3.3)
       '@renovate/eslint-plugin':
         specifier: file:tools/eslint
         version: file:tools/eslint
@@ -2464,8 +2464,9 @@ packages:
     resolution: {integrity: sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw==}
     dev: false
 
-  /@openpgp/web-stream-tools@0.0.14(typescript@5.3.3):
-    resolution: {integrity: sha512-6btCNVf6YSsmlyIS7yw+IbzXeXCEcJxeSpxvSxkDuZj9B/ekt4fXkZj4oOaIxG4SKTftIK1svnlVroJ1cCMT4g==}
+  /@openpgp/web-stream-tools@0.1.1(typescript@5.3.3):
+    resolution: {integrity: sha512-1WkV+z78S8DJNlUiCPxSjsna6gfAGCVuepL2KUDlBztXzhvplwWr4lAvsWcYzFkHykaFoCSOV9ssiRRq7QzydQ==}
+    engines: {node: '>= 16.5.0'}
     peerDependencies:
       typescript: '>=4.2'
     peerDependenciesMeta:
