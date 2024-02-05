@@ -591,7 +591,7 @@ describe('modules/platform/bitbucket-server/index', () => {
                   },
                 },
               });
-            const actual = await bitbucket.getBranchForceRebase?.('main');
+            const actual = await bitbucket.getBranchForceRebase!('main');
             expect(actual).toBeFalse();
           },
         );
