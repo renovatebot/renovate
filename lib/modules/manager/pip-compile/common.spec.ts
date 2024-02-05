@@ -33,15 +33,6 @@ const adminConfig: RepoGlobalConfig = {
 process.env.CONTAINERBASE = 'true';
 
 describe('modules/manager/pip-compile/common', () => {
-  beforeEach(() => {
-    env.getChildProcessEnv.mockReturnValue({
-      ...envMock.basic,
-      LANG: 'en_US.UTF-8',
-      LC_ALL: 'en_US',
-    });
-    GlobalConfig.set(adminConfig);
-    docker.resetPrefetchedImages();
-  });
 
   describe('extractHeaderCommand()', () => {
     it.each([
