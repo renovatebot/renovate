@@ -108,7 +108,7 @@ export function resetConfigs(): void {
 resetConfigs();
 
 function escapeHash(input: string): string {
-  return input ? input.replace(regEx(/#/g), '%23') : input;
+  return input?.replace(regEx(/#/g), '%23');
 }
 
 export async function detectGhe(token: string): Promise<void> {
