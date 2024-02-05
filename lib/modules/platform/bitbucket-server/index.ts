@@ -228,7 +228,7 @@ export async function initRepo({
   }
 }
 
-export async function getBranchForceRebase(): Promise<boolean> {
+export async function getBranchForceRebase(_branchName: string): Promise<boolean> {
   // https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp342
   const res = await bitbucketServerHttp.getJson<{
     mergeConfig: { defaultStrategy: { id: string } };

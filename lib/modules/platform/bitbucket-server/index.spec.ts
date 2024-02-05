@@ -550,7 +550,7 @@ describe('modules/platform/bitbucket-server/index', () => {
                 defaultStrategy: null,
               },
             });
-          const actual = await bitbucket.getBranchForceRebase?.('main');
+          const actual = await bitbucket.getBranchForceRebase!('main');
           expect(actual).toBeFalse();
         });
 
@@ -570,7 +570,7 @@ describe('modules/platform/bitbucket-server/index', () => {
                   },
                 },
               });
-            const actual = await bitbucket.getBranchForceRebase?.('main');
+            const actual = await bitbucket.getBranchForceRebase!('main');
             expect(actual).toBeTrue();
           },
         );
