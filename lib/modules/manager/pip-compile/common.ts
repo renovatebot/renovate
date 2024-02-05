@@ -8,31 +8,6 @@ import { ensureCacheDir } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifactsConfig } from '../types';
 
-// TODO(not7cd): rename to getPipToolsVersionConstraint, as constraints have their meaning in pip
-export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
-  const { constraints = {} } = config;
-  const { pipTools } = constraints;
-
-  if (is.string(pipTools)) {
-    logger.debug('Using pipTools constraint from config');
-    return pipTools;
-  }
-
-  return '';
-}
-export function getPythonConstraint(
-  config: UpdateArtifactsConfig,
-): string | undefined | null {
-  const { constraints = {} } = config;
-  const { python } = constraints;
-
-  if (python) {
-    logger.debug('Using python constraint from config');
-    return python;
-  }
-
-  return undefined;
-}
 export async function getExecOptions(
   config: UpdateArtifactsConfig,
   inputFileName: string,
@@ -57,6 +32,31 @@ export async function getExecOptions(
     },
   };
   return execOptions;
+}
+// TODO(not7cd): rename to getPipToolsVersionConstraint, as constraints have their meaning in pip
+export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
+  const { constraints = {} } = config;
+  const { pipTools } = constraints;
+
+  if (is.string(pipTools)) {
+    logger.debug('Using pipTools constraint from config');
+    return pipTools;
+  }
+
+  return '';
+}
+export function getPythonConstraint(
+  config: UpdateArtifactsConfig,
+): string | undefined | null {
+  const { constraints = {} } = config;
+  const { python } = constraints;
+
+  if (python) {
+    logger.debug('Using python constraint from config');
+    return python;
+  }
+
+  return undefined;
 }
 
 export const constraintLineRegex = regEx(
