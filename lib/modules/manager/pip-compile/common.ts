@@ -34,18 +34,6 @@ export async function getExecOptions(
   };
   return execOptions;
 }
-// TODO(not7cd): rename to getPipToolsVersionConstraint, as constraints have their meaning in pip
-export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
-  const { constraints = {} } = config;
-  const { pipTools } = constraints;
-
-  if (is.string(pipTools)) {
-    logger.debug('Using pipTools constraint from config');
-    return pipTools;
-  }
-
-  return '';
-}
 export function getPythonConstraint(
   config: UpdateArtifactsConfig,
 ): string | undefined | null {
@@ -58,6 +46,18 @@ export function getPythonConstraint(
   }
 
   return undefined;
+}
+// TODO(not7cd): rename to getPipToolsVersionConstraint, as constraints have their meaning in pip
+export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
+  const { constraints = {} } = config;
+  const { pipTools } = constraints;
+
+  if (is.string(pipTools)) {
+    logger.debug('Using pipTools constraint from config');
+    return pipTools;
+  }
+
+  return '';
 }
 
 export const constraintLineRegex = regEx(
