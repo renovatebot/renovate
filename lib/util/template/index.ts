@@ -3,26 +3,27 @@ import handlebars from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { getChildEnv } from '../exec/utils';
+import { regEx } from '../regex';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
+
+handlebars.registerHelper('encodeBase64', (str: string) =>
+  Buffer.from(str ?? '').toString('base64'),
+);
 
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2),
 );
 
-// istanbul ignore next
-handlebars.registerHelper(
-  'replace',
-  (find, replace, context) =>
-    (context || '').replace(new RegExp(find, 'g'), replace), // TODO #12873
+handlebars.registerHelper('replace', (find, replace, context) =>
+  (context ?? '').replace(regEx(find, 'g'), replace),
 );
 
 handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
 
-handlebars.registerHelper(
-  'containsString',
-  (str, subStr) => str?.includes(subStr),
+handlebars.registerHelper('containsString', (str, subStr) =>
+  str?.includes(subStr),
 );
 
 handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
@@ -73,7 +74,7 @@ export const exposedConfigOptions = [
 export const allowedFields = {
   baseBranch: 'The baseBranch for this branch/PR',
   body: 'The body of the release notes',
-  category: 'The category of the manager of the dependency being updated',
+  categories: 'The categories of the manager of the dependency being updated',
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
@@ -210,8 +211,9 @@ export function proxyCompileInput(input: CompileInput): CompileInput {
   return new Proxy<CompileInput>(input, compileInputProxyHandler);
 }
 
-const templateRegex =
-  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g; // TODO #12873
+const templateRegex = regEx(
+  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g,
+);
 
 export function compile(
   template: string,

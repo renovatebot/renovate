@@ -30,12 +30,15 @@ import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
 import type {
   CommitFilesConfig,
   CommitResult,
-  CommitSha,
+  LongCommitSha,
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
 import type { GithubHttpOptions } from '../../../util/http/github';
-import type { HttpResponse } from '../../../util/http/types';
+import type {
+  HttpResponse,
+  InternalHttpOptions,
+} from '../../../util/http/types';
 import { coerceObject } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -283,8 +286,8 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   }
 
   logger.debug({ topics: config.topics }, 'Filtering by topics');
-  const topicRepositories = nonArchivedRepositories.filter(
-    (repo) => repo.topics?.some((topic) => config?.topics?.includes(topic)),
+  const topicRepositories = nonArchivedRepositories.filter((repo) =>
+    repo.topics?.some((topic) => config?.topics?.includes(topic)),
   );
 
   if (topicRepositories.length < nonArchivedRepositories.length) {
@@ -316,11 +319,15 @@ export async function getRawFile(
   branchOrTag?: string,
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
+  const httpOptions: InternalHttpOptions = {
+    // Only cache response if it's from the same repo
+    repoCache: repo === config.repository,
+  };
   let url = `repos/${repo}/contents/${fileName}`;
   if (branchOrTag) {
     url += `?ref=` + branchOrTag;
   }
-  const res = await githubApi.getJson<{ content: string }>(url);
+  const res = await githubApi.getJson<{ content: string }>(url, httpOptions);
   const buf = res.body.content;
   const str = fromBase64(buf);
   return str;
@@ -465,6 +472,18 @@ export async function initRepo({
       infoQuery = infoQuery.replace(/\n\s*hasIssuesEnabled\s*\n/, '\n');
     }
 
+    // GitHub Enterprise Server <3.9.0 doesn't support hasVulnerabilityAlertsEnabled objects
+    if (
+      platformConfig.isGhe &&
+      // semver not null safe, accepts null and undefined
+      semver.satisfies(platformConfig.gheVersion!, '<3.9.0')
+    ) {
+      infoQuery = infoQuery.replace(
+        /\n\s*hasVulnerabilityAlertsEnabled\s*\n/,
+        '\n',
+      );
+    }
+
     const res = await githubApi.requestGraphql<{
       repository: GhRepo;
     }>(infoQuery, {
@@ -526,6 +545,7 @@ export async function initRepo({
     }
     config.autoMergeAllowed = repo.autoMergeAllowed;
     config.hasIssuesEnabled = repo.hasIssuesEnabled;
+    config.hasVulnerabilityAlertsEnabled = repo.hasVulnerabilityAlertsEnabled;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
@@ -798,8 +818,26 @@ export async function findPr({
   branchName,
   prTitle,
   state = 'all',
+  includeOtherAuthors,
 }: FindPRConfig): Promise<GhPr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
+
+  if (includeOtherAuthors) {
+    const repo = config.parentRepo ?? config.repository;
+    // PR might have been created by anyone, so don't use the cached Renovate PR list
+    const response = await githubApi.getJson<GhRestPr[]>(
+      `repos/${repo}/pulls?head=${repo}:${branchName}&state=open`,
+    );
+
+    const { body: prList } = response;
+    if (!prList.length) {
+      logger.debug(`No PR found for branch ${branchName}`);
+      return null;
+    }
+
+    return coerceRestPr(prList[0]);
+  }
+
   const prList = await getPrList();
   const pr = prList.find((p) => {
     if (p.sourceBranch !== branchName) {
@@ -828,7 +866,10 @@ export async function findPr({
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
-async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
+async function ensureBranchSha(
+  branchName: string,
+  sha: LongCommitSha,
+): Promise<void> {
   const repository = config.repository!;
   try {
     const commitUrl = `/repos/${repository}/git/commits/${sha}`;
@@ -1186,7 +1227,7 @@ export async function getIssue(
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
         `repos/${config.parentRepo ?? config.repository}/issues/${number}`,
-        { memCache: useCache },
+        { memCache: useCache, repoCache: true },
       )
     ).body.body;
     return {
@@ -1272,6 +1313,7 @@ export async function ensureIssue({
           `repos/${config.parentRepo ?? config.repository}/issues/${
             issue.number
           }`,
+          { repoCache: true },
         )
       ).body.body;
       if (
@@ -1820,12 +1862,17 @@ export function massageMarkdown(input: string): string {
     )
     .replace(regEx(/]\(https:\/\/github\.com\//g), '](https://togithub.com/')
     .replace(regEx(/]: https:\/\/github\.com\//g), ']: https://togithub.com/')
+    .replace('> ℹ **Note**\n> \n', '> [!NOTE]\n')
     .replace('> ⚠ **Warning**\n> \n', '> [!WARNING]\n')
     .replace('> ❗ **Important**\n> \n', '> [!IMPORTANT]\n');
   return smartTruncate(massagedInput, GitHubMaxPrBodyLen);
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
+  if (config.hasVulnerabilityAlertsEnabled === false) {
+    logger.debug('No vulnerability alerts enabled for repo');
+    return [];
+  }
   let vulnerabilityAlerts: { node: VulnerabilityAlert }[] | undefined;
 
   // TODO #22198
@@ -1896,7 +1943,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
 async function pushFiles(
   { branchName, message }: CommitFilesConfig,
   { parentCommitSha, commitSha }: CommitResult,
-): Promise<CommitSha | null> {
+): Promise<LongCommitSha | null> {
   try {
     // Push the commit to GitHub using a custom ref
     // The associated blobs will be pushed automatically
@@ -1918,7 +1965,7 @@ async function pushFiles(
       `/repos/${config.repository}/git/commits`,
       { body: { message, tree: treeSha, parents: [parentCommitSha] } },
     );
-    const remoteCommitSha = commitRes.body.sha;
+    const remoteCommitSha = commitRes.body.sha as LongCommitSha;
     await ensureBranchSha(branchName, remoteCommitSha);
     return remoteCommitSha;
   } catch (err) {
@@ -1929,7 +1976,7 @@ async function pushFiles(
 
 export async function commitFiles(
   config: CommitFilesConfig,
-): Promise<CommitSha | null> {
+): Promise<LongCommitSha | null> {
   const commitResult = await git.prepareCommit(config); // Commit locally and don't push
   const { branchName, files } = config;
   if (!commitResult) {

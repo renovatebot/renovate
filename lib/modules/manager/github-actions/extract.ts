@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
@@ -166,7 +166,8 @@ function extractWithYAMLParser(
 
   let pkg: Workflow;
   try {
-    pkg = load(content, { json: true }) as Workflow;
+    // TODO: use schema (#9610)
+    pkg = parseSingleYaml(content, { json: true });
   } catch (err) {
     logger.debug(
       { packageFile, err },

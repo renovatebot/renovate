@@ -2,11 +2,16 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as p from '../../../util/promises';
+import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as pep440Versioning from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { GalaxyV3, GalaxyV3DetailedVersion, GalaxyV3Versions } from './schema';
+
+const repositoryRegex = regEx(
+  /^\S+\/api\/galaxy\/content\/(?<repository>[^/]+)/,
+);
 
 export class GalaxyCollectionDatasource extends Datasource {
   static readonly id = 'galaxy-collection';
@@ -15,9 +20,11 @@ export class GalaxyCollectionDatasource extends Datasource {
     super(GalaxyCollectionDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
-  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com'];
+  override readonly registryStrategy = 'hunt';
+
+  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/api/'];
 
   override readonly defaultVersioning = pep440Versioning.id;
 
@@ -31,10 +38,15 @@ export class GalaxyCollectionDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const [namespace, projectName] = packageName.split('.');
 
+    const repository =
+      repositoryRegex.exec(registryUrl!)?.groups?.repository ?? 'published';
+
     const baseUrl = ensureTrailingSlash(
       joinUrlParts(
         registryUrl!,
-        'api/v3/plugin/ansible/content/published/collections/index',
+        'v3/plugin/ansible/content',
+        repository,
+        'collections/index',
         namespace,
         projectName,
       ),
@@ -86,8 +98,14 @@ export class GalaxyCollectionDatasource extends Datasource {
     const filteredReleases = enrichedReleases.filter(is.truthy);
     // extract base information which are only provided on the release from the newest release
 
+    // Find the source URL of the highest version release
+    const sourceUrlOfHighestRelease = enrichedReleases.find(
+      (release) => baseProject.highest_version.version === release.version,
+    )?.sourceUrl;
+
     return {
       releases: filteredReleases,
+      sourceUrl: sourceUrlOfHighestRelease,
     };
   }
 

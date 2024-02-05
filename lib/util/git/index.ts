@@ -52,8 +52,8 @@ import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
   CommitResult,
-  CommitSha,
   LocalConfig,
+  LongCommitSha,
   PushFilesConfig,
   StatusResult,
   StorageConfig,
@@ -207,7 +207,8 @@ async function fetchBranchCommits(): Promise<void> {
       .filter(Boolean)
       .map((line) => line.trim().split(regEx(/\s+/)))
       .forEach(([sha, ref]) => {
-        config.branchCommits[ref.replace('refs/heads/', '')] = sha;
+        config.branchCommits[ref.replace('refs/heads/', '')] =
+          sha as LongCommitSha;
       });
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
@@ -250,7 +251,7 @@ async function resetToBranch(branchName: string): Promise<void> {
 }
 
 // istanbul ignore next
-export async function resetToCommit(commit: string): Promise<void> {
+export async function resetToCommit(commit: LongCommitSha): Promise<void> {
   logger.debug(`resetToCommit(${commit})`);
   await git.raw(['reset', '--hard', commit]);
 }
@@ -411,6 +412,9 @@ export async function syncGit(): Promise<void> {
     const cloneStart = Date.now();
     try {
       const opts: string[] = [];
+      if (config.defaultBranch) {
+        opts.push('-b', config.defaultBranch);
+      }
       if (config.fullClone) {
         logger.debug('Performing full clone');
       } else {
@@ -442,7 +446,9 @@ export async function syncGit(): Promise<void> {
     logger.debug({ durationMs }, 'git clone completed');
   }
   try {
-    config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+    config.currentBranchSha = (
+      await git.raw(['rev-parse', 'HEAD'])
+    ).trim() as LongCommitSha;
   } catch (err) /* istanbul ignore next */ {
     if (err.message?.includes('fatal: not a git repository')) {
       throw new Error(REPOSITORY_CHANGED);
@@ -464,7 +470,10 @@ export async function syncGit(): Promise<void> {
     }
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
-  config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  config.currentBranch =
+    config.currentBranch ??
+    config.defaultBranch ??
+    (await getDefaultBranch(git));
   delete getCache()?.semanticCommits;
 }
 
@@ -491,7 +500,7 @@ export function branchExists(branchName: string): boolean {
 }
 
 // Return the commit SHA for a branch
-export function getBranchCommit(branchName: string): CommitSha | null {
+export function getBranchCommit(branchName: string): LongCommitSha | null {
   return config.branchCommits[branchName] || null;
 }
 
@@ -511,13 +520,23 @@ export async function getCommitMessages(): Promise<string[]> {
   }
 }
 
-export async function checkoutBranch(branchName: string): Promise<CommitSha> {
+export async function checkoutBranch(
+  branchName: string,
+): Promise<LongCommitSha> {
   logger.debug(`Setting current branch to ${branchName}`);
   await syncGit();
   try {
-    await gitRetry(() => git.checkout(['-f', branchName, '--']));
+    await gitRetry(() =>
+      git.checkout(
+        submodulesInitizialized
+          ? ['-f', '--recurse-submodules', branchName, '--']
+          : ['-f', branchName, '--'],
+      ),
+    );
     config.currentBranch = branchName;
-    config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
+    config.currentBranchSha = (
+      await git.raw(['rev-parse', 'HEAD'])
+    ).trim() as LongCommitSha;
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
@@ -1050,7 +1069,9 @@ export async function prepareCommit({
       return null;
     }
 
-    const commitSha = (await git.revparse([branchName])).trim();
+    const commitSha = (
+      await git.revparse([branchName])
+    ).trim() as LongCommitSha;
     const result: CommitResult = {
       parentCommitSha,
       commitSha,
@@ -1100,13 +1121,13 @@ export async function pushCommit({
 
 export async function fetchBranch(
   branchName: string,
-): Promise<CommitSha | null> {
+): Promise<LongCommitSha | null> {
   await syncGit();
   logger.debug(`Fetching branch ${branchName}`);
   try {
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await gitRetry(() => git.pull(['origin', ref, '--force']));
-    const commit = (await git.revparse([branchName])).trim();
+    const commit = (await git.revparse([branchName])).trim() as LongCommitSha;
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
     return commit;
@@ -1117,7 +1138,7 @@ export async function fetchBranch(
 
 export async function commitFiles(
   commitConfig: CommitFilesConfig,
-): Promise<CommitSha | null> {
+): Promise<LongCommitSha | null> {
   try {
     const commitResult = await prepareCommit(commitConfig);
     if (commitResult) {
@@ -1295,7 +1316,9 @@ const treeShaRegex = regEx(/tree\s+(?<treeSha>[0-9a-f]{40})\s*/);
  *   > 100644 blob 7d2edde437ad4e7bceb70dbfe70e93350d99c98b    package.json
  *
  */
-export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
+export async function listCommitTree(
+  commitSha: LongCommitSha,
+): Promise<TreeItem[]> {
   const commitOutput = await git.catFile(['-p', commitSha]);
   const { treeSha } =
     treeShaRegex.exec(commitOutput)?.groups ??
@@ -1307,7 +1330,7 @@ export async function listCommitTree(commitSha: string): Promise<TreeItem[]> {
     const matchGroups = treeItemRegex.exec(line)?.groups;
     if (matchGroups) {
       const { path, mode, type, sha } = matchGroups;
-      result.push({ path, mode, type, sha });
+      result.push({ path, mode, type, sha: sha as LongCommitSha });
     }
   }
   return result;

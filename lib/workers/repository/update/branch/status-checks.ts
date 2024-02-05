@@ -62,7 +62,15 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   if (!config.stabilityStatus) {
     return;
   }
-  const context = `renovate/stability-days`;
+
+  const context = config.statusCheckNames?.minimumReleaseAge;
+  if (!context) {
+    logger.debug(
+      'Status check is null or an empty string, skipping status check addition.',
+    );
+    return;
+  }
+
   const description =
     config.stabilityStatus === 'green'
       ? 'Updates have met minimum release age requirement'
@@ -90,7 +98,14 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   ) {
     return;
   }
-  const context = `renovate/merge-confidence`;
+  const context = config.statusCheckNames?.mergeConfidence;
+  if (!context) {
+    logger.debug(
+      'Status check is null or an empty string, skipping status check addition.',
+    );
+    return;
+  }
+
   const description =
     config.confidenceStatus === 'green'
       ? 'Updates have met Merge Confidence requirement'

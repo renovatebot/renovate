@@ -32,6 +32,7 @@ import {
   getAuthHeaders,
   getRegistryRepository,
   gitRefLabel,
+  imageUrlLabel,
   isDockerHost,
   sourceLabel,
   sourceLabels,
@@ -175,7 +176,7 @@ export class DockerDatasource extends Datasource {
     ) => `${registryHost}:${dockerRepository}@${configDigest}`,
     ttlMinutes: 1440 * 28,
   })
-  public async getImageConfig(
+  async getImageConfig(
     registryHost: string,
     dockerRepository: string,
     configDigest: string,
@@ -220,7 +221,7 @@ export class DockerDatasource extends Datasource {
     ) => `${registryHost}:${dockerRepository}@${configDigest}`,
     ttlMinutes: 1440 * 28,
   })
-  public async getHelmConfig(
+  async getHelmConfig(
     registryHost: string,
     dockerRepository: string,
     configDigest: string,
@@ -335,7 +336,7 @@ export class DockerDatasource extends Datasource {
     ) => `${registryHost}:${dockerRepository}@${currentDigest}`,
     ttlMinutes: 1440 * 28,
   })
-  public async getImageArchitecture(
+  async getImageArchitecture(
     registryHost: string,
     dockerRepository: string,
     currentDigest: string,
@@ -433,7 +434,7 @@ export class DockerDatasource extends Datasource {
       `${registryHost}:${dockerRepository}:${tag}`,
     ttlMinutes: 24 * 60,
   })
-  public async getLabels(
+  async getLabels(
     registryHost: string,
     dockerRepository: string,
     tag: string,
@@ -626,9 +627,8 @@ export class DockerDatasource extends Datasource {
       ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)
         ? 1000
         : 10000;
-    let url:
-      | string
-      | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
+    let url: string | null =
+      `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
     const headers = await getAuthHeaders(
       this.http,
@@ -687,7 +687,7 @@ export class DockerDatasource extends Datasource {
     key: (registryHost: string, dockerRepository: string) =>
       `${registryHost}:${dockerRepository}`,
   })
-  public async getTags(
+  async getTags(
     registryHost: string,
     dockerRepository: string,
   ): Promise<string[] | null> {
@@ -913,11 +913,14 @@ export class DockerDatasource extends Datasource {
     return digest;
   }
 
+  @cache({
+    namespace: 'datasource-docker-hub-tags',
+    key: (dockerRepository: string) => `${dockerRepository}`,
+  })
   async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
     const result: Release[] = [];
-    let url:
-      | null
-      | string = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000`;
+    let url: null | string =
+      `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000`;
     while (url) {
       const { val, err } = await this.http
         .getJsonSafe(url, DockerHubTagsPage)
@@ -1027,6 +1030,9 @@ export class DockerDatasource extends Datasource {
           ret.sourceUrl = labels[label];
           break;
         }
+      }
+      if (is.nonEmptyString(labels[imageUrlLabel])) {
+        ret.homepage = labels[imageUrlLabel];
       }
     }
     return ret;

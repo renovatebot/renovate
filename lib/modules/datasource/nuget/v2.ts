@@ -40,6 +40,7 @@ export async function getReleases(
       try {
         const pkgIsLatestVersion = getPkgProp(pkgInfo, 'IsLatestVersion');
         if (pkgIsLatestVersion === 'true') {
+          dep['tags'] = { latest: removeBuildMeta(`${version}`) };
           const projectUrl = getPkgProp(pkgInfo, 'ProjectUrl');
           if (projectUrl) {
             dep.sourceUrl = massageUrl(projectUrl);

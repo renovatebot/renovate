@@ -73,12 +73,14 @@ export class GalaxyDatasource extends Datasource {
     }
 
     result.releases = versions.map(
-      (version: { name: string; created: string }) => {
+      (version: { name: string; created?: string }) => {
         const release: Release = {
           version: version.name,
-          releaseTimestamp: version.created,
         };
 
+        if (is.nonEmptyString(version.created)) {
+          release.releaseTimestamp = version.created;
+        }
         return release;
       },
     );

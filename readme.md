@@ -39,6 +39,7 @@ Renovate works on these platforms:
 - [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
 - [AWS CodeCommit](https://docs.renovatebot.com/modules/platform/codecommit/)
 - [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
+- [Gerrit (experimental)](https://docs.renovatebot.com/modules/platform/gerrit/)
 
 ## Who Uses Renovate?
 
@@ -71,7 +72,7 @@ Get started with Renovate by checking out our [tutorial](https://github.com/reno
 ### GitHub
 
 We recommend that you use the Mend Renovate App.
-Install the [the Mend Renovate App](https://github.com/apps/renovate) now.
+Install [the Mend Renovate App](https://github.com/apps/renovate) now.
 [More details on the Mend Renovate App installation](https://docs.renovatebot.com/getting-started/installing-onboarding/).
 
 ### Azure DevOps

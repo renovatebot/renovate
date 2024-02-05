@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants';
+import { DockerDatasource } from '../../datasource/docker';
 import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import { NugetDatasource } from '../../datasource/nuget';
 
@@ -18,6 +19,7 @@ export const defaultConfig = {
 export const categories: Category[] = ['dotnet'];
 
 export const supportedDatasources = [
+  DockerDatasource.id,
   DotnetVersionDatasource.id,
   NugetDatasource.id,
 ];

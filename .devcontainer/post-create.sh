@@ -7,6 +7,4 @@ if [[ "${CODESPACES}" == true ]]; then
   sudo chmod 1777 /tmp
 fi
 
-set -x
-
-exec pnpm install
+pnpm install
