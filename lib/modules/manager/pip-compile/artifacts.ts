@@ -22,8 +22,7 @@ export function constructPipCompileCmd(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
   }
-  // TODO(not7cd): sanitize args that require quotes, .map((argument) => quote(argument))
-  return pipCompileArgs.argv.join(' ');
+  return pipCompileArgs.argv.map(quote).join(' ');
 }
 
 export async function updateArtifacts({

@@ -175,7 +175,7 @@ export function extractHeaderCommand(
       outputFile = file;
       argv.forEach((item, i) => {
         if (item.startsWith('--output-file=')) {
-          argv[i] = `--output-file=${file}`;
+          argv[i] = `--output-file=${quote(file)}`;
         }
       });
     }
