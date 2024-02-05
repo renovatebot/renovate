@@ -7,6 +7,7 @@ import type { ExecOptions } from '../../../util/exec/types';
 import { ensureCacheDir } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifactsConfig } from '../types';
+import type { PipCompileArgs } from './types';
 
 export async function getExecOptions(
   config: UpdateArtifactsConfig,
@@ -89,16 +90,6 @@ dummyPipCompile
   .option('--extra <extra...>')
   .option('--extra-index-url <url...>')
   .allowUnknownOption();
-
-interface PipCompileArgs {
-  command: string;
-  isCustomCommand: boolean;
-  outputFile?: string;
-  extra?: string[];
-  constraint?: string[];
-  sourceFiles: string[]; // positional arguments
-  argv: string[]; // all arguments as a list
-}
 
 // TODO(not7cd): test on all correct headers, even with CUSTOM_COMPILE_COMMAND
 export function extractHeaderCommand(
