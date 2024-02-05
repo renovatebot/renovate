@@ -305,12 +305,10 @@ export class GithubGraphqlDatasourceFetcher<
   }
 
   /**
-   * This method caches results for the same packages during repository run.
-   *
-   * It intentionally was made not async, though it returns `Promise`,
-   * to ensure the same package is prevented from being fetched twice.
+   * This method ensures the only one query is executed
+   * to a particular package during single run.
    */
-  private doConcurrentQuery(): Promise<ResultItem[]> {
+  private doUniqueQuery(): Promise<ResultItem[]> {
     const cacheKey = `github-pending:${this.getCacheNs()}:${this.getCacheKey()}`;
     const resultPromise =
       memCache.get<Promise<ResultItem[]>>(cacheKey) ?? this.doCachedQuery();
@@ -319,7 +317,7 @@ export class GithubGraphqlDatasourceFetcher<
   }
 
   async getItems(): Promise<ResultItem[]> {
-    const res = await this.doConcurrentQuery();
+    const res = await this.doUniqueQuery();
     return res;
   }
 }
