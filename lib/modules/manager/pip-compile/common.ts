@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { Command } from 'commander';
-import { split } from 'shlex';
+import { quote, split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import type { ExecOptions } from '../../../util/exec/types';
