@@ -232,7 +232,7 @@ export class GithubGraphqlDatasourceFetcher<
 
   /**
    * This method is responsible for data synchronization.
-   * Also it detects persistence of the package, based on the first page result.
+   * It also detects persistence of the package, based on the first page result.
    */
   private async doPaginatedFetch(): Promise<void> {
     let hasNextPage = true;
