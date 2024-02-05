@@ -9,6 +9,7 @@ exports[`modules/manager/helmv3/extract extractPackageFile() extract correctly o
       "datasource": "docker",
       "depName": "library",
       "packageName": "ghcr.io/ankitabhopatkar13/library",
+      "pinDigests": false,
     },
     {
       "currentValue": "0.8.1",
@@ -68,6 +69,7 @@ exports[`modules/manager/helmv3/extract extractPackageFile() resolves aliased re
       "datasource": "docker",
       "depName": "oci-example",
       "packageName": "quay.example.com/organization/oci-example",
+      "pinDigests": false,
     },
   ],
   "packageFileVersion": "0.1.0",

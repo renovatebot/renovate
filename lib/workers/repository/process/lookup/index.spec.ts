@@ -11,6 +11,7 @@ import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags
 import { NpmDatasource } from '../../../../modules/datasource/npm';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist';
 import { PypiDatasource } from '../../../../modules/datasource/pypi';
+import { id as composerVersioningId } from '../../../../modules/versioning/composer';
 import { id as debianVersioningId } from '../../../../modules/versioning/debian';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { id as gitVersioningId } from '../../../../modules/versioning/git';
@@ -1845,6 +1846,27 @@ describe('workers/repository/process/lookup/index', () => {
             updateType: 'pinDigest',
           },
         ],
+      });
+    });
+
+    it('handles no fitting version and no version in lock file', async () => {
+      config.currentValue = '~9.5.0';
+      config.packageName = 'typo3/cms-saltedpasswords';
+      config.datasource = DockerDatasource.id;
+      config.versioning = composerVersioningId;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '8.0.0',
+          },
+          {
+            version: '8.1.0',
+          },
+        ],
+      });
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        skipReason: 'invalid-value',
       });
     });
 

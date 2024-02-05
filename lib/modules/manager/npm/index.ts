@@ -1,7 +1,7 @@
 import type { Category } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { NodeVersionDatasource } from '../../datasource/node-version';
 import { NpmDatasource } from '../../datasource/npm';
-import * as npmVersioning from '../../versioning/npm';
 
 export { detectGlobalConfig } from './detect';
 export { extractAllPackageFiles } from './extract';
@@ -16,7 +16,6 @@ export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)package\\.json$'],
-  versioning: npmVersioning.id,
   digest: {
     prBodyDefinitions: {
       Change:
@@ -31,4 +30,8 @@ export const defaultConfig = {
 
 export const categories: Category[] = ['js'];
 
-export const supportedDatasources = [GithubTagsDatasource.id, NpmDatasource.id];
+export const supportedDatasources = [
+  GithubTagsDatasource.id,
+  NpmDatasource.id,
+  NodeVersionDatasource.id,
+];
