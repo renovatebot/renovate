@@ -500,7 +500,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'merge',
         },
       );
-      expect(await gitlab.getBranchForceRebase?.('master')).toBeFalse();
+      expect(await gitlab.getBranchForceRebase!('master')).toBeFalse();
     });
 
     it('should return true', async () => {
@@ -514,7 +514,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'ff',
         },
       );
-      expect(await gitlab.getBranchForceRebase?.('master')).toBeTrue();
+      expect(await gitlab.getBranchForceRebase!('master')).toBeTrue();
     });
   });
 
