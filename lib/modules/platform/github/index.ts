@@ -107,6 +107,20 @@ export function resetConfigs(): void {
 
 resetConfigs();
 
+interface ScmConfig {
+  repository: string;
+  defaultBranch: string;
+  endpoint: string;
+}
+
+export function getScmConfig(): ScmConfig {
+  return {
+    repository: config.repository!,
+    defaultBranch: config.defaultBranch,
+    endpoint: platformConfig.endpoint,
+  };
+}
+
 function escapeHash(input: string): string {
   return input ? input.replace(regEx(/#/g), '%23') : input;
 }

@@ -556,6 +556,10 @@ export async function checkoutBranch(
   }
 }
 
+export function getCurrentBranch(): string {
+  return config.currentBranch;
+}
+
 export async function getFileList(): Promise<string[]> {
   await syncGit();
   const branch = config.currentBranch;
