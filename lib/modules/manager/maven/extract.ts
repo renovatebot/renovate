@@ -471,7 +471,7 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
       //Add Registry From SuperPom
-      dep.registryUrls?.push(MAVEN_REPO);
+      dep.registryUrls!.push(MAVEN_REPO);
     });
   });
   return packageFiles;
