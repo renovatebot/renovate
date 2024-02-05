@@ -457,9 +457,8 @@ name = "pypi"
 
 ### pip-compile
 
-The pip-compile manager will extract `--index-url` and `--extra-index-url` directives from its input file. These URLs will pull credentials from matching `hostRules` blocks and pass appropriate `--index-url` or `--extra-index-url`
-flags to `pip-compile` with those credentials while generating the output file.
-
+The pip-compile manager extracts `--index-url` and `--extra-index-url` directives from its input file.
+These URLs pull credentials from matching `hostRules` blocks and pass appropriate `--index-url` or `--extra-index-url` flags to `pip-compile` with those credentials while generating the output file.
 ``` title="requirements.in:"
 --extra-index-url https://pypi.my.domain/simple
 
