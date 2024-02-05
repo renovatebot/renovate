@@ -1,17 +1,4 @@
-import { mockDeep } from 'jest-mock-extended';
-import { join } from 'upath';
-import { envMock } from '../../../../test/exec-util';
-import { env } from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import * as docker from '../../../util/exec/docker';
 import { allowedPipOptions, extractHeaderCommand } from './common';
-
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules', () => mockDeep());
-jest.mock('../../../util/http');
 
 function getCommandInHeader(command: string) {
   return `#
@@ -23,17 +10,7 @@ function getCommandInHeader(command: string) {
 `;
 }
 
-const adminConfig: RepoGlobalConfig = {
-  // `join` fixes Windows CI
-  localDir: join('/tmp/github/some/repo'),
-  cacheDir: join('/tmp/renovate/cache'),
-  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
-};
-
-process.env.CONTAINERBASE = 'true';
-
 describe('modules/manager/pip-compile/common', () => {
-
   describe('extractHeaderCommand()', () => {
     it.each([
       '-v',
