@@ -20,7 +20,6 @@ metadata:
     pipelinesascode.tekton.dev/task: "git-clone"
     pipelinesascode.tekton.dev/task-1: "https://github.com/foo/bar/raw/v0.0.8/tasks/create-git-tag/create-git-tag.yaml"
     pipelinesascode.tekton.dev/pipeline: "https://github.com/foo/baz/raw/v0.0.14/pipeline/deploy/deploy.yaml"
-    pipelinesascode.tekton.dev/pipeline-1: "https://github.com/fizz/bar/raw/v0.0.2/pipeline/update/update.yaml"
 ---
 kind: PipelineRun
 metadata:

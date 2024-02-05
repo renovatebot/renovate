@@ -87,7 +87,7 @@ function getDeps(doc: TektonResource): PackageDependency[] {
 }
 
 const annotationRegex = regEx(
-  /^pipelinesascode\.tekton\.dev\/(?<type>task|pipeline)(-[0-9]+)?$/,
+  /^pipelinesascode\.tekton\.dev\/(task|pipeline)(-[0-9]+)?$/,
 );
 
 function addPipelineAsCodeAnnotations(
@@ -98,20 +98,9 @@ function addPipelineAsCodeAnnotations(
     return;
   }
 
-  let countPipelines = 0;
-
   for (const [key, value] of Object.entries(annotations)) {
-    const groups = annotationRegex.exec(key)?.groups;
-
-    if (!groups) {
+    if (!annotationRegex.test(key)) {
       continue;
-    }
-
-    if (groups.type === 'pipeline') {
-      countPipelines++;
-      if (countPipelines > 1) {
-        continue;
-      }
     }
 
     const values = value
