@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { configRegexPredicate } from '../regex';
+import { configRegexPredicate } from '../string-match';
 import { Matcher } from './base';
 
 export class BaseBranchesMatcher extends Matcher {
