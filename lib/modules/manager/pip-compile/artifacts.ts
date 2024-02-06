@@ -92,17 +92,3 @@ export async function updateArtifacts({
   logger.debug('Returning updated pip-compile result');
   return result;
 }
-
-// TODO(not7cd): remove, legacy resolver is deprecated and will be removed
-export function extractResolver(argument: string): string | null {
-  const value = argument.replace('--resolver=', '');
-  if (['backtracking', 'legacy'].includes(value)) {
-    return value;
-  }
-
-  logger.warn(
-    { argument },
-    'pip-compile was previously executed with an unexpected `--resolver` value',
-  );
-  return null;
-}
