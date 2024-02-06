@@ -113,6 +113,7 @@ If you're using Azure DevOps, you can set `matchHost` to `pkgs.dev.azure.com`.
 !!! note
     Only Basic HTTP authentication (via username and password) is supported.
     For Azure DevOps, you can use a PAT with `read` permissions on `Packaging` plus an empty username.
+    The generated `nuget.config` enforces basic authentication and cannot be overridden externally!
 
 ## Future work
 

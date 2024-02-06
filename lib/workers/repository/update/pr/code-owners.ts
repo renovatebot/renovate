@@ -31,7 +31,7 @@ interface FileOwnersScore {
 
 function matchFileToOwners(
   file: string,
-  rules: FileOwnerRule[]
+  rules: FileOwnerRule[],
 ): FileOwnersScore {
   const usernames = new Map<string, number>();
 
@@ -113,12 +113,12 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
 
     logger.debug(
       { prFiles, fileOwnerRules },
-      'PR files and rules to match for CODEOWNERS'
+      'PR files and rules to match for CODEOWNERS',
     );
 
     // Apply rules & get list of owners for each prFile
     const emptyRules = fileOwnerRules.filter(
-      (rule) => rule.usernames.length === 0
+      (rule) => rule.usernames.length === 0,
     );
     const fileOwners =
       // Map through all prFiles and match said file(s) with all the rules
@@ -128,7 +128,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
         // Match file again but this time only with emptyRules, to ensure that files which have no owner set remain owner-less
         .map((fileMatch) => {
           const matchEmpty = emptyRules.find((rule) =>
-            rule.match(fileMatch.file)
+            rule.match(fileMatch.file),
           );
           if (matchEmpty) {
             return { ...fileMatch, userScoreMap: new Map<string, number>() };
@@ -139,7 +139,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     logger.debug(
       `CODEOWNERS matched the following files: ${fileOwners
         .map((f) => f.file)
-        .join(', ')}`
+        .join(', ')}`,
     );
 
     // Get list of all matched users and the files they own (reverse keys of fileOwners)
@@ -151,13 +151,13 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
         user: userMatch.username,
         score: Array.from(userMatch.fileScoreMap.values()).reduce(
           (acc, score) => acc + score,
-          0
+          0,
         ),
       }))
       .sort((a, b) => b.score - a.score);
 
     logger.debug(
-      `CODEOWNERS matched the following users: ${JSON.stringify(userScore)}`
+      `CODEOWNERS matched the following users: ${JSON.stringify(userScore)}`,
     );
 
     return userScore.map((u) => u.user);

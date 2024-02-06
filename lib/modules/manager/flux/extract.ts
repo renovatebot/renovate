@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { parseYaml } from '../../../util/yaml';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
@@ -30,7 +30,7 @@ import type {
 
 function readManifest(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): FluxManifest | null {
   if (isSystemManifest(packageFile)) {
     const versionMatch = regEx(systemManifestHeaderRegex).exec(content);
@@ -52,7 +52,8 @@ function readManifest(
   };
   let resources: FluxResource[];
   try {
-    resources = loadAll(content, null, { json: true }) as FluxResource[];
+    // TODO: use schema (#9610)
+    resources = parseYaml(content, null, { json: true });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Flux manifest');
     return null;
@@ -102,18 +103,18 @@ function readManifest(
 }
 
 const githubUrlRegex = regEx(
-  /^(?:https:\/\/|git@)github\.com[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/
+  /^(?:https:\/\/|git@)github\.com[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/,
 );
 const gitlabUrlRegex = regEx(
-  /^(?:https:\/\/|git@)gitlab\.com[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/
+  /^(?:https:\/\/|git@)gitlab\.com[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/,
 );
 const bitbucketUrlRegex = regEx(
-  /^(?:https:\/\/|git@)bitbucket\.org[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/
+  /^(?:https:\/\/|git@)bitbucket\.org[/:](?<packageName>[^/]+\/[^/]+?)(?:\.git)?$/,
 );
 
 function resolveGitRepositoryPerSourceTag(
   dep: PackageDependency,
-  gitUrl: string
+  gitUrl: string,
 ): void {
   const githubMatchGroups = githubUrlRegex.exec(gitUrl)?.groups;
   if (githubMatchGroups) {
@@ -147,7 +148,7 @@ function resolveGitRepositoryPerSourceTag(
 }
 
 function resolveSystemManifest(
-  manifest: SystemFluxManifest
+  manifest: SystemFluxManifest,
 ): PackageDependency<FluxManagerData>[] {
   return [
     {
@@ -163,7 +164,7 @@ function resolveSystemManifest(
 
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
-  helmRepositories: HelmRepository[]
+  helmRepositories: HelmRepository[],
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   for (const resource of manifest.resources) {
@@ -181,7 +182,7 @@ function resolveResourceManifest(
             rep.metadata.name === resource.spec.chart.spec.sourceRef.name &&
             rep.metadata.namespace ===
               (resource.spec.chart.spec.sourceRef.namespace ??
-                resource.metadata?.namespace)
+                resource.metadata?.namespace),
         );
         if (matchingRepositories.length) {
           dep.registryUrls = matchingRepositories
@@ -264,7 +265,7 @@ function resolveResourceManifest(
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent<FluxManagerData> | null {
   const manifest = readManifest(content, packageFile);
   if (!manifest) {
@@ -293,7 +294,7 @@ export function extractPackageFile(
 
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
-  packageFiles: string[]
+  packageFiles: string[],
 ): Promise<PackageFile<FluxManagerData>[] | null> {
   const manifests: FluxManifest[] = [];
   const results: PackageFile<FluxManagerData>[] = [];

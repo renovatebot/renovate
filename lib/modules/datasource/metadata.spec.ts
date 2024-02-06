@@ -97,7 +97,7 @@ describe('modules/datasource/metadata', () => {
       expect(dep).toMatchObject({
         sourceUrl: expectedSourceUrl,
       });
-    }
+    },
   );
 
   it.each`
@@ -119,7 +119,7 @@ describe('modules/datasource/metadata', () => {
       addMetaData(dep, datasource, packageName);
       expect(dep.sourceDirectory).toBeUndefined();
       expect(dep).toMatchObject({ sourceUrl });
-    }
+    },
   );
 
   it('Should not overwrite any existing sourceDirectory', () => {
@@ -284,6 +284,7 @@ describe('modules/datasource/metadata', () => {
         { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
         { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
         { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+        { version: '1.0.4', releaseTimestamp: '20000103150210' },
       ],
     };
     addMetaData(dep, MavenDatasource.id, 'foobar');
@@ -291,6 +292,7 @@ describe('modules/datasource/metadata', () => {
       { releaseTimestamp: '2000-01-01T12:34:56.000Z' },
       { releaseTimestamp: '2000-01-02T12:34:56.000Z' },
       { releaseTimestamp: '2000-01-03T12:34:56.000Z' },
+      { releaseTimestamp: '2000-01-03T15:02:10.000Z' },
     ]);
   });
 
@@ -340,31 +342,31 @@ describe('modules/datasource/metadata', () => {
 
   it('Should massage github git@ url to valid https url', () => {
     expect(massageGithubUrl('git@example.com:foo/bar')).toMatch(
-      'https://example.com/foo/bar'
+      'https://example.com/foo/bar',
     );
   });
 
   it('Should massage github http url to valid https url', () => {
     expect(massageGithubUrl('http://example.com/foo/bar')).toMatch(
-      'https://example.com/foo/bar'
+      'https://example.com/foo/bar',
     );
   });
 
   it('Should massage github http and git url to valid https url', () => {
     expect(massageGithubUrl('http+git://example.com/foo/bar')).toMatch(
-      'https://example.com/foo/bar'
+      'https://example.com/foo/bar',
     );
   });
 
   it('Should massage github ssh git@ url to valid https url', () => {
     expect(massageGithubUrl('ssh://git@example.com/foo/bar')).toMatch(
-      'https://example.com/foo/bar'
+      'https://example.com/foo/bar',
     );
   });
 
   it('Should massage github git url to valid https url', () => {
     expect(massageGithubUrl('git://example.com/foo/bar')).toMatch(
-      'https://example.com/foo/bar'
+      'https://example.com/foo/bar',
     );
   });
 
@@ -502,7 +504,7 @@ describe('modules/datasource/metadata', () => {
     'shouldDeleteHomepage($sourceUrl, $homepage) -> $expected',
     ({ sourceUrl, homepage, expected }) => {
       expect(shouldDeleteHomepage(sourceUrl, homepage)).toBe(expected);
-    }
+    },
   );
 
   // for coverage
@@ -528,13 +530,13 @@ describe('modules/datasource/metadata', () => {
 
     it('works for string input', () => {
       expect(normalizeDate('2021-01-01')).toBe(
-        new Date('2021-01-01').toISOString()
+        new Date('2021-01-01').toISOString(),
       );
     });
 
     it('works for Date instance', () => {
       expect(normalizeDate(new Date('2021-01-01'))).toBe(
-        new Date('2021-01-01').toISOString()
+        new Date('2021-01-01').toISOString(),
       );
     });
   });

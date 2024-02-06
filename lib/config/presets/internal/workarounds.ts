@@ -13,6 +13,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreWeb3jCoreWithOldReleaseTimestamp',
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
+      'workarounds:nodeDockerVersioning',
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
@@ -121,6 +122,7 @@ export const presets: Record<string, Preset> = {
         matchPackagePatterns: [
           '^azul/zulu-openjdk',
           '^bellsoft/liberica-openj(dk|re)-',
+          '^cimg/openjdk',
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
@@ -137,13 +139,25 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  nodeDockerVersioning: {
+    description: 'Use node versioning for `node` docker images.',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchDepNames: ['node'],
+        versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
+        versioning: 'node',
+      },
+    ],
+  },
   reduceRepologyServerLoad: {
     description:
-      'Limit concurrent requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
+      'Limit requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
     hostRules: [
       {
         concurrentRequestLimit: 1,
         matchHost: 'repology.org',
+        maxRequestsPerSecond: 0.5,
       },
     ],
   },

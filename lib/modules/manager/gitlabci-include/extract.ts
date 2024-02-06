@@ -1,9 +1,14 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import {
+  filterIncludeFromGitlabPipeline,
+  isGitlabIncludeProject,
+  isNonEmptyObject,
+} from '../gitlabci/common';
 import type {
   GitlabInclude,
   GitlabIncludeProject,
@@ -11,14 +16,9 @@ import type {
 } from '../gitlabci/types';
 import { replaceReferenceTags } from '../gitlabci/utils';
 import type { PackageDependency, PackageFileContent } from '../types';
-import {
-  filterIncludeFromGitlabPipeline,
-  isGitlabIncludeProject,
-  isNonEmptyObject,
-} from './common';
 
 function extractDepFromIncludeFile(
-  includeObj: GitlabIncludeProject
+  includeObj: GitlabIncludeProject,
 ): PackageDependency {
   const dep: PackageDependency = {
     datasource: GitlabTagsDatasource.id,
@@ -34,7 +34,7 @@ function extractDepFromIncludeFile(
 }
 
 function getIncludeProjectsFromInclude(
-  includeValue: GitlabInclude[] | GitlabInclude
+  includeValue: GitlabInclude[] | GitlabInclude,
 ): GitlabIncludeProject[] {
   const includes = is.array(includeValue) ? includeValue : [includeValue];
 
@@ -65,15 +65,16 @@ function getAllIncludeProjects(data: GitlabPipeline): GitlabIncludeProject[] {
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   const platform = GlobalConfig.get('platform');
   const endpoint = GlobalConfig.get('endpoint');
   try {
-    const doc = load(replaceReferenceTags(content), {
+    // TODO: use schema (#9610)
+    const doc = parseSingleYaml<GitlabPipeline>(replaceReferenceTags(content), {
       json: true,
-    }) as GitlabPipeline;
+    });
     const includes = getAllIncludeProjects(doc);
     for (const includeObj of includes) {
       const dep = extractDepFromIncludeFile(includeObj);
@@ -86,7 +87,7 @@ export function extractPackageFile(
     if (err.stack?.startsWith('YAMLException:')) {
       logger.debug(
         { err, packageFile },
-        'YAML exception extracting GitLab CI includes'
+        'YAML exception extracting GitLab CI includes',
       );
     } else {
       logger.debug({ err, packageFile }, 'Error extracting GitLab CI includes');

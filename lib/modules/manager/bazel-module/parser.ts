@@ -23,7 +23,7 @@ const kvParams = q
   .op('=')
   .alt(
     q.str((ctx, token) => ctx.addString(token.value)),
-    q.sym<Ctx>(booleanValuesRegex, (ctx, token) => ctx.addBoolean(token.value))
+    q.sym<Ctx>(booleanValuesRegex, (ctx, token) => ctx.addBoolean(token.value)),
   );
 
 const moduleRules = q
@@ -34,7 +34,7 @@ const moduleRules = q
       maxDepth: 1,
       search: kvParams,
       postHandler: (ctx, tree) => ctx.endRule(),
-    })
+    }),
   );
 
 const rule = q.alt<Ctx>(moduleRules);

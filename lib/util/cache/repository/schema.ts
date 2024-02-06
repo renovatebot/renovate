@@ -10,7 +10,7 @@ export const RepoCacheV13 = Json.pipe(
       hash: z.string().min(1),
       fingerprint: z.string().min(1),
     })
-    .strict()
+    .strict(),
 );
 
 export type RepoCacheRecord = z.infer<typeof RepoCacheV13>;

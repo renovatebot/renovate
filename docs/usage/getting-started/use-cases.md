@@ -25,7 +25,7 @@ Renovate:
 1. Checks if any newer versions exist
 1. Raises Pull Requests for available updates
 
-The Pull Requests patch the package files directly, and include Release Notes for the newer versions (if they are available).
+The Pull Requests patch the package files directly, and include changelogs for the newer versions (if they are available).
 
 By default:
 
@@ -127,7 +127,7 @@ To learn more about "automerge" read the [key concepts, automerge](../key-concep
 
 We use these Renovate features to automerge an internal dependency:
 
-- [Git submodule support](https://docs.renovatebot.com/modules/manager/git-submodules/)
+- [Git submodule support](../modules/manager/git-submodules/index.md)
 - [`automerge`](../configuration-options.md#automerge) set to `true`
 - [`automergeType`](../configuration-options.md#automergetype) set to `branch`
 

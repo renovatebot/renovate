@@ -26,7 +26,7 @@ function shardParts(packageName: string): string[] {
 }
 
 const githubRegex = regEx(
-  /(?<hostURL>^https:\/\/[a-zA-Z0-9-.]+)\/(?<account>[^/]+)\/(?<repo>[^/]+?)(?:\.git|\/.*)?$/
+  /(?<hostURL>^https:\/\/[a-zA-Z0-9-.]+)\/(?<account>[^/]+)\/(?<repo>[^/]+?)(?:\.git|\/.*)?$/,
 );
 
 function releasesGithubUrl(
@@ -37,7 +37,7 @@ function releasesGithubUrl(
     repo: string;
     useShard: boolean;
     useSpecs: boolean;
-  }
+  },
 ): string {
   const { hostURL, account, repo, useShard, useSpecs } = opts;
   const prefix =
@@ -106,7 +106,7 @@ export class PodDatasource extends Datasource {
 
   private async requestCDN(
     url: string,
-    packageName: string
+    packageName: string,
   ): Promise<string | null> {
     try {
       const resp = await this.http.get(url);
@@ -122,7 +122,7 @@ export class PodDatasource extends Datasource {
 
   private async requestGithub<T = unknown>(
     url: string,
-    packageName: string
+    packageName: string,
   ): Promise<T | null> {
     try {
       const resp = await this.githubHttp.getJson<T>(url);
@@ -141,7 +141,7 @@ export class PodDatasource extends Datasource {
     opts: { hostURL: string; account: string; repo: string },
     useShard = true,
     useSpecs = true,
-    urlFormatOptions: URLFormatOptions = 'withShardWithSpec'
+    urlFormatOptions: URLFormatOptions = 'withShardWithSpec',
   ): Promise<ReleaseResult | null> {
     const url = releasesGithubUrl(packageName, { ...opts, useShard, useSpecs });
     const resp = await this.requestGithub<{ name: string }[]>(url, packageName);
@@ -158,7 +158,7 @@ export class PodDatasource extends Datasource {
           opts,
           true,
           false,
-          'withShardWithoutSpec'
+          'withShardWithoutSpec',
         );
       case 'withShardWithoutSpec':
         return this.getReleasesFromGithub(
@@ -166,7 +166,7 @@ export class PodDatasource extends Datasource {
           opts,
           false,
           true,
-          'withSpecsWithoutShard'
+          'withSpecsWithoutShard',
         );
       case 'withSpecsWithoutShard':
         return this.getReleasesFromGithub(
@@ -174,7 +174,7 @@ export class PodDatasource extends Datasource {
           opts,
           false,
           false,
-          'withoutSpecsWithoutShard'
+          'withoutSpecsWithoutShard',
         );
       case 'withoutSpecsWithoutShard':
       default:
@@ -184,7 +184,7 @@ export class PodDatasource extends Datasource {
 
   private async getReleasesFromCDN(
     packageName: string,
-    registryUrl: string
+    registryUrl: string,
   ): Promise<ReleaseResult | null> {
     const url = releasesCDNUrl(packageName, registryUrl);
     const resp = await this.requestCDN(url, packageName);

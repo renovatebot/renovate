@@ -59,7 +59,7 @@ function isLessThanRange(version: string, range: string): boolean {
  */
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const target = new BzlmodVersion(range);
   const result = versions.find((ver) => {
@@ -75,7 +75,7 @@ function getSatisfyingVersion(
  */
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return getSatisfyingVersion(versions, range);
 }

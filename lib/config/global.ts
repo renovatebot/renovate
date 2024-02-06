@@ -4,6 +4,7 @@ export class GlobalConfig {
   // TODO: once global config work is complete, add a test to make sure this list includes all options with globalOnly=true (#9603)
   private static readonly OPTIONS: (keyof RepoGlobalConfig)[] = [
     'allowCustomCrateRegistries',
+    'allowedHeaders',
     'allowedPostUpgradeCommands',
     'allowPlugins',
     'allowPostUpgradeCommandTemplating',
@@ -24,6 +25,7 @@ export class GlobalConfig {
     'githubTokenWarn',
     'localDir',
     'migratePresets',
+    'presetCachePersistence',
     'privateKey',
     'privateKeyOld',
     'gitTimeout',
@@ -35,15 +37,15 @@ export class GlobalConfig {
 
   static get(): RepoGlobalConfig;
   static get<Key extends keyof RepoGlobalConfig>(
-    key: Key
+    key: Key,
   ): RepoGlobalConfig[Key];
   static get<Key extends keyof RepoGlobalConfig>(
     key: Key,
-    defaultValue: Required<RepoGlobalConfig>[Key]
+    defaultValue: Required<RepoGlobalConfig>[Key],
   ): Required<RepoGlobalConfig>[Key];
   static get<Key extends keyof RepoGlobalConfig>(
     key?: Key,
-    defaultValue?: RepoGlobalConfig[Key]
+    defaultValue?: RepoGlobalConfig[Key],
   ): RepoGlobalConfig | RepoGlobalConfig[Key] {
     return key ? GlobalConfig.config[key] ?? defaultValue : GlobalConfig.config;
   }

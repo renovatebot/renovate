@@ -9,7 +9,7 @@ import type { RecordFragment } from './types';
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 

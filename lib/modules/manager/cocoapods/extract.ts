@@ -12,7 +12,7 @@ import type { ParsedLine } from './types';
 const regexMappings = [
   regEx(`^\\s*pod\\s+(['"])(?<spec>[^'"/]+)(/(?<subspec>[^'"]+))?(['"])`),
   regEx(
-    `^\\s*pod\\s+(['"])[^'"]+(['"])\\s*,\\s*(['"])(?<currentValue>[^'"]+)(['"])\\s*$`
+    `^\\s*pod\\s+(['"])[^'"]+(['"])\\s*,\\s*(['"])(?<currentValue>[^'"]+)(['"])\\s*$`,
   ),
   regEx(`,\\s*:git\\s*=>\\s*(['"])(?<git>[^'"]+)(['"])`),
   regEx(`,\\s*:tag\\s*=>\\s*(['"])(?<tag>[^'"]+)(['"])`),
@@ -54,7 +54,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   const { depName, git, tag } = parsedLine;
 
   const platformMatch = regEx(
-    /[@/](?<platform>github|gitlab)\.com[:/](?<account>[^/]+)\/(?<repo>[^/]+)/
+    /[@/](?<platform>github|gitlab)\.com[:/](?<account>[^/]+)\/(?<repo>[^/]+)/,
   ).exec(coerceString(git));
 
   if (platformMatch?.groups) {
@@ -83,7 +83,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
 
 export async function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): Promise<PackageFileContent | null> {
   logger.trace(`cocoapods.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];

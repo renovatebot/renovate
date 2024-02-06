@@ -6,7 +6,7 @@ const PubspecDependencySchema = LooseRecord(
   z.union([
     z.string(),
     z.object({ version: z.string().optional(), path: z.string().optional() }),
-  ])
+  ]),
 );
 
 export const PubspecSchema = z.object({

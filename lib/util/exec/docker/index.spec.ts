@@ -57,7 +57,7 @@ describe('util/exec/docker/index', () => {
         .mockResolvedValueOnce(undefined as never)
         .mockResolvedValueOnce(partial<modulesDatasource.ReleaseResult>())
         .mockResolvedValueOnce(
-          partial<modulesDatasource.ReleaseResult>({ releases: [] })
+          partial<modulesDatasource.ReleaseResult>({ releases: [] }),
         );
       expect(await getDockerTag('foo', '1.2.3', 'semver')).toBe('latest');
       expect(await getDockerTag('foo', '1.2.3', 'semver')).toBe('latest');
@@ -88,7 +88,7 @@ describe('util/exec/docker/index', () => {
       jest
         .spyOn(modulesDatasource, 'getPkgReleases')
         .mockResolvedValueOnce(
-          partial<modulesDatasource.ReleaseResult>({ releases })
+          partial<modulesDatasource.ReleaseResult>({ releases }),
         );
       expect(await getDockerTag('foo', '^1.2.3', 'npm')).toBe('1.9.9');
     });
@@ -103,7 +103,7 @@ describe('util/exec/docker/index', () => {
       jest
         .spyOn(modulesDatasource, 'getPkgReleases')
         .mockResolvedValueOnce(
-          partial<modulesDatasource.ReleaseResult>({ releases })
+          partial<modulesDatasource.ReleaseResult>({ releases }),
         );
       expect(await getDockerTag('foo', '>=12', 'node')).toBe('14.0.2');
     });
@@ -155,7 +155,7 @@ describe('util/exec/docker/index', () => {
       err.errno = 'ENOMEM';
       mockExecAll(err);
       await expect(removeDanglingContainers).rejects.toThrow(
-        SYSTEM_INSUFFICIENT_MEMORY
+        SYSTEM_INSUFFICIENT_MEMORY,
       );
     });
 
@@ -238,7 +238,7 @@ describe('util/exec/docker/index', () => {
       const res = await generateDockerCommand(
         commands,
         preCommands,
-        dockerOptions
+        dockerOptions,
       );
       expect(res).toBe(command(image));
     });
@@ -257,8 +257,8 @@ describe('util/exec/docker/index', () => {
       expect(res).toBe(
         command(
           image,
-          `-v "/tmp/foo":"/tmp/foo" -v "/tmp/bar":"/tmp/bar" -v "/tmp/baz":"/home/baz"`
-        )
+          `-v "/tmp/foo":"/tmp/foo" -v "/tmp/bar":"/tmp/bar" -v "/tmp/baz":"/home/baz"`,
+        ),
       );
     });
 
@@ -278,8 +278,8 @@ describe('util/exec/docker/index', () => {
       expect(res).toBe(
         command(
           image,
-          `-v "/tmp/cache":"/tmp/cache" -v "/tmp/containerbase":"/tmp/containerbase" -v "/tmp/foo":"/tmp/foo"`
-        )
+          `-v "/tmp/cache":"/tmp/cache" -v "/tmp/containerbase":"/tmp/containerbase" -v "/tmp/foo":"/tmp/foo"`,
+        ),
       );
     });
 
@@ -297,7 +297,7 @@ describe('util/exec/docker/index', () => {
         volumes: [...volumes, ...volumes],
       });
       expect(res).toBe(
-        command(image, `-v "/tmp/cache":"/tmp/cache" -v "/tmp/foo":"/tmp/foo"`)
+        command(image, `-v "/tmp/cache":"/tmp/cache" -v "/tmp/foo":"/tmp/foo"`),
       );
     });
 

@@ -17,7 +17,7 @@ describe('modules/datasource/cdnjs/index', () => {
         getPkgReleases({
           datasource: CdnJsDatasource.id,
           packageName: 'foo/bar',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -27,7 +27,7 @@ describe('modules/datasource/cdnjs/index', () => {
         getPkgReleases({
           datasource: CdnJsDatasource.id,
           packageName: 'foo/bar',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -37,7 +37,7 @@ describe('modules/datasource/cdnjs/index', () => {
         await getPkgReleases({
           datasource: CdnJsDatasource.id,
           packageName: 'foo/bar',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -50,7 +50,7 @@ describe('modules/datasource/cdnjs/index', () => {
         await getPkgReleases({
           datasource: CdnJsDatasource.id,
           packageName: 'doesnotexist/doesnotexist',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -60,7 +60,7 @@ describe('modules/datasource/cdnjs/index', () => {
         getPkgReleases({
           datasource: CdnJsDatasource.id,
           packageName: 'foo/bar',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -70,7 +70,7 @@ describe('modules/datasource/cdnjs/index', () => {
         getPkgReleases({
           datasource: CdnJsDatasource.id,
           packageName: 'foo/bar',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -80,7 +80,7 @@ describe('modules/datasource/cdnjs/index', () => {
         getPkgReleases({
           datasource: CdnJsDatasource.id,
           packageName: 'foo/bar',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -90,7 +90,7 @@ describe('modules/datasource/cdnjs/index', () => {
         getPkgReleases({
           datasource: CdnJsDatasource.id,
           packageName: 'foo/bar',
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 

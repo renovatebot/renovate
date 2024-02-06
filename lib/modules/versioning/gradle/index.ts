@@ -1,5 +1,6 @@
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
+import mavenVersion from '../maven';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
   TokenType,
@@ -155,7 +156,7 @@ const matches = (a: string, b: string): boolean => {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
@@ -172,7 +173,7 @@ function getSatisfyingVersion(
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
@@ -217,7 +218,7 @@ function getNewValue({
     }
   }
 
-  return null;
+  return mavenVersion.getNewValue({ currentValue, rangeStrategy, newVersion });
 }
 
 export const api: VersioningApi = {

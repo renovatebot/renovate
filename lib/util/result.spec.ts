@@ -42,7 +42,7 @@ describe('util/result', () => {
       it('wraps nullable callback', () => {
         const res: Result<number, 'oops'> = Result.wrapNullable(
           (): number | null => 42,
-          'oops'
+          'oops',
         );
         expect(res).toEqual(Result.ok(42));
       });
@@ -59,10 +59,10 @@ describe('util/result', () => {
 
       it('distincts between null and undefined callback results', () => {
         expect(Result.wrapNullable(() => null, 'null', 'undefined')).toEqual(
-          Result.err('null')
+          Result.err('null'),
         );
         expect(
-          Result.wrapNullable(() => undefined, 'null', 'undefined')
+          Result.wrapNullable(() => undefined, 'null', 'undefined'),
         ).toEqual(Result.err('undefined'));
       });
 
@@ -96,7 +96,7 @@ describe('util/result', () => {
             issues: [
               { code: 'invalid_type', expected: 'string', received: 'number' },
             ],
-          })
+          }),
         );
       });
     });
@@ -135,7 +135,7 @@ describe('util/result', () => {
             .transform(() => {
               throw 'oops';
             })
-            .unwrapOrElse(0)
+            .unwrapOrElse(0),
         ).toThrow('oops');
       });
 
@@ -146,7 +146,7 @@ describe('util/result', () => {
             .transform(() => {
               throw 'oops';
             })
-            .unwrap()
+            .unwrap(),
         ).toThrow('oops');
       });
 
@@ -177,7 +177,7 @@ describe('util/result', () => {
             .transform(() => {
               throw 'oops';
             })
-            .unwrapOrNull()
+            .unwrapOrNull(),
         ).toThrow('oops');
       });
     });
@@ -190,7 +190,7 @@ describe('util/result', () => {
 
       it('transforms value to Result', () => {
         const res = Result.ok('foo').transform((x) =>
-          Result.ok(x.toUpperCase())
+          Result.ok(x.toUpperCase()),
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
@@ -209,7 +209,7 @@ describe('util/result', () => {
         expect(res).toEqual(Result._uncaught('oops'));
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'oops' },
-          'Result: unhandled transform error'
+          'Result: unhandled transform error',
         );
       });
 
@@ -237,7 +237,7 @@ describe('util/result', () => {
 
       it('converts error to Result', () => {
         const result = Result.err<string>('oops').catch(() =>
-          Result.ok<number>(42)
+          Result.ok<number>(42),
         );
         expect(result).toEqual(Result.ok(42));
       });
@@ -333,21 +333,21 @@ describe('util/result', () => {
     describe('Wrapping', () => {
       it('wraps promise', async () => {
         const res: AsyncResult<number, string> = Result.wrap(
-          Promise.resolve(42)
+          Promise.resolve(42),
         );
         await expect(res).resolves.toEqual(Result.ok(42));
       });
 
       it('wraps Result promise', async () => {
         const res: AsyncResult<number, string> = Result.wrap(
-          Promise.resolve(Result.ok(42))
+          Promise.resolve(Result.ok(42)),
         );
         await expect(res).resolves.toEqual(Result.ok(42));
       });
 
       it('handles rejected promise', async () => {
         const res: AsyncResult<number, string> = Result.wrap(
-          Promise.reject('oops')
+          Promise.reject('oops'),
         );
         await expect(res).resolves.toEqual(Result.err('oops'));
       });
@@ -355,7 +355,7 @@ describe('util/result', () => {
       it('wraps nullable promise', async () => {
         const res: AsyncResult<number, 'oops'> = Result.wrapNullable(
           Promise.resolve<number | null>(42),
-          'oops'
+          'oops',
         );
         await expect(res).resolves.toEqual(Result.ok(42));
       });
@@ -372,11 +372,11 @@ describe('util/result', () => {
 
       it('distincts between null and undefined promise results', async () => {
         await expect(
-          Result.wrapNullable(Promise.resolve(null), 'null', 'undefined')
+          Result.wrapNullable(Promise.resolve(null), 'null', 'undefined'),
         ).resolves.toEqual(Result.err('null'));
 
         await expect(
-          Result.wrapNullable(Promise.resolve(undefined), 'null', 'undefined')
+          Result.wrapNullable(Promise.resolve(undefined), 'null', 'undefined'),
         ).resolves.toEqual(Result.err('undefined'));
       });
 
@@ -437,28 +437,28 @@ describe('util/result', () => {
     describe('Transforming', () => {
       it('transforms AsyncResult to pure value', async () => {
         const res = await AsyncResult.ok('foo').transform((x) =>
-          x.toUpperCase()
+          x.toUpperCase(),
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
 
       it('transforms AsyncResult to Result', async () => {
         const res = await AsyncResult.ok('foo').transform((x) =>
-          Result.ok(x.toUpperCase())
+          Result.ok(x.toUpperCase()),
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
 
       it('transforms Result to AsyncResult', async () => {
         const res = await Result.ok('foo').transform((x) =>
-          AsyncResult.ok(x.toUpperCase())
+          AsyncResult.ok(x.toUpperCase()),
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
 
       it('transforms AsyncResult to AsyncResult', async () => {
         const res = await AsyncResult.ok('foo').transform((x) =>
-          AsyncResult.ok(x.toUpperCase())
+          AsyncResult.ok(x.toUpperCase()),
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
@@ -472,28 +472,28 @@ describe('util/result', () => {
 
       it('asyncronously transforms successfull promise to value', async () => {
         const res = await AsyncResult.ok('foo').transform((x) =>
-          Promise.resolve(x.toUpperCase())
+          Promise.resolve(x.toUpperCase()),
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
 
       it('asynchronously transforms successful AsyncResult to Result', async () => {
         const res = await AsyncResult.ok('foo').transform((x) =>
-          Promise.resolve(Result.ok(x.toUpperCase()))
+          Promise.resolve(Result.ok(x.toUpperCase())),
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
 
       it('asynchronously transforms value to value', async () => {
         const res = await Result.ok('foo').transform((x) =>
-          Promise.resolve(x.toUpperCase())
+          Promise.resolve(x.toUpperCase()),
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
 
       it('asynchronously transforms value to Result', async () => {
         const res = await Result.ok('foo').transform((x) =>
-          Promise.resolve(Result.ok(x.toUpperCase()))
+          Promise.resolve(Result.ok(x.toUpperCase())),
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
@@ -526,11 +526,11 @@ describe('util/result', () => {
       it('handles error thrown on Result async transform', async () => {
         const res = Result.ok('foo');
         await expect(
-          res.transform((_) => Promise.reject('oops'))
+          res.transform((_) => Promise.reject('oops')),
         ).resolves.toEqual(Result._uncaught('oops'));
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'oops' },
-          'Result: unhandled async transform error'
+          'Result: unhandled async transform error',
         );
       });
 
@@ -539,22 +539,22 @@ describe('util/result', () => {
         await expect(
           res.transform(() => {
             throw 'bar';
-          })
+          }),
         ).resolves.toEqual(Result._uncaught('bar'));
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'bar' },
-          'AsyncResult: unhandled transform error'
+          'AsyncResult: unhandled transform error',
         );
       });
 
       it('handles error thrown on promise async transform', async () => {
         const res = AsyncResult.ok('foo');
         await expect(
-          res.transform(() => Promise.reject('bar'))
+          res.transform(() => Promise.reject('bar')),
         ).resolves.toEqual(Result._uncaught('bar'));
         expect(logger.logger.warn).toHaveBeenCalledWith(
           { err: 'bar' },
-          'AsyncResult: unhandled async transform error'
+          'AsyncResult: unhandled async transform error',
         );
       });
 
@@ -580,7 +580,7 @@ describe('util/result', () => {
       it('asynchronously transforms Result to zod values', async () => {
         const schema = z.string().transform((x) => x.toUpperCase());
         const res = await Result.ok('foo').transform((x) =>
-          Promise.resolve(schema.safeParse(x))
+          Promise.resolve(schema.safeParse(x)),
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
@@ -588,7 +588,7 @@ describe('util/result', () => {
       it('transforms AsyncResult to zod values', async () => {
         const schema = z.string().transform((x) => x.toUpperCase());
         const res = await AsyncResult.ok('foo').transform((x) =>
-          schema.safeParse(x)
+          schema.safeParse(x),
         );
         expect(res).toEqual(Result.ok('FOO'));
       });
@@ -597,7 +597,7 @@ describe('util/result', () => {
     describe('Catch', () => {
       it('converts error to AsyncResult', async () => {
         const result = await Result.err<string>('oops').catch(() =>
-          AsyncResult.ok(42)
+          AsyncResult.ok(42),
         );
         expect(result).toEqual(Result.ok(42));
       });
@@ -616,7 +616,7 @@ describe('util/result', () => {
 
       it('converts AsyncResult error to Result', async () => {
         const result = await AsyncResult.err<string>('oops').catch(() =>
-          AsyncResult.ok<number>(42)
+          AsyncResult.ok<number>(42),
         );
         expect(result).toEqual(Result.ok(42));
       });
@@ -631,7 +631,7 @@ describe('util/result', () => {
         .nullish();
 
       expect(await AsyncResult.ok('foo').parse(schema)).toEqual(
-        Result.ok('FOO')
+        Result.ok('FOO'),
       );
 
       expect(await AsyncResult.ok(42).parse(schema).unwrap()).toMatchObject({

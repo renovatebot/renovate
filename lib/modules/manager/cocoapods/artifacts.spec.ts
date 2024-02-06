@@ -60,7 +60,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -73,7 +73,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -90,7 +90,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config: {},
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -103,7 +103,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -115,7 +115,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: [],
-      })
+      }),
     );
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
@@ -125,7 +125,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -139,7 +139,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['Podfile.lock'],
-      })
+      }),
     );
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile');
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
@@ -149,7 +149,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: 'plugin "cocoapods-acknowledgements"',
         config,
-      })
+      }),
     ).toMatchObject([{ file: { contents: 'New Podfile' } }]);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -169,7 +169,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         not_added: ['Pods/New'],
         modified: ['Podfile.lock', 'Pods/Manifest.lock'],
         deleted: ['Pods/Deleted'],
-      })
+      }),
     );
     expect(
       await updateArtifacts({
@@ -177,7 +177,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toMatchObject([
       { file: { type: 'addition', path: 'Podfile.lock' } },
       { file: { type: 'addition', path: 'Pods/Manifest.lock' } },
@@ -201,7 +201,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toEqual([
       { artifactError: { lockFile: 'Podfile.lock', stderr: 'not found' } },
     ]);
@@ -222,7 +222,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         updatedDeps: [{ depName: 'foo' }],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toEqual([
       { artifactError: { lockFile: 'Podfile.lock', stderr: 'exec exception' } },
     ]);
@@ -242,7 +242,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['Podfile.lock'],
-      })
+      }),
     );
 
     await updateArtifacts({
@@ -285,7 +285,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: ['Podfile.lock'],
-      })
+      }),
     );
 
     await updateArtifacts({

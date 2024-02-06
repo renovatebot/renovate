@@ -24,7 +24,7 @@ describe('modules/datasource/docker/common', () => {
     it('handles local registries', () => {
       const res = getRegistryRepository(
         'registry:5000/org/package',
-        'https://index.docker.io'
+        'https://index.docker.io',
       );
       expect(res).toStrictEqual({
         dockerRepository: 'org/package',
@@ -35,7 +35,7 @@ describe('modules/datasource/docker/common', () => {
     it('supports registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
-        'https://my.local.registry/prefix'
+        'https://my.local.registry/prefix',
       );
       expect(res).toStrictEqual({
         dockerRepository: 'prefix/image',
@@ -46,7 +46,7 @@ describe('modules/datasource/docker/common', () => {
     it('supports http registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
-        'http://my.local.registry/prefix'
+        'http://my.local.registry/prefix',
       );
       expect(res).toStrictEqual({
         dockerRepository: 'prefix/image',
@@ -57,7 +57,7 @@ describe('modules/datasource/docker/common', () => {
     it('supports schemeless registryUrls', () => {
       const res = getRegistryRepository(
         'my.local.registry/prefix/image',
-        'my.local.registry/prefix'
+        'my.local.registry/prefix',
       );
       expect(res).toStrictEqual({
         dockerRepository: 'prefix/image',
@@ -69,7 +69,7 @@ describe('modules/datasource/docker/common', () => {
       hostRules.find.mockReturnValueOnce({ insecureRegistry: true });
       const res = getRegistryRepository(
         'prefix/image',
-        'my.local.registry/prefix'
+        'my.local.registry/prefix',
       );
       expect(res).toStrictEqual({
         dockerRepository: 'prefix/prefix/image',
@@ -102,6 +102,14 @@ describe('modules/datasource/docker/common', () => {
           registryHost: 'https://index.docker.io',
         },
       },
+      {
+        name: 'registry-1.docker.io/bitnamicharts/cert-manager',
+        url: 'https://index.docker.io',
+        res: {
+          dockerRepository: 'bitnamicharts/cert-manager',
+          registryHost: 'https://index.docker.io',
+        },
+      },
     ])('($name, $url)', ({ name, url, res }) => {
       expect(getRegistryRepository(name, url)).toStrictEqual(res);
     });
@@ -127,8 +135,8 @@ describe('modules/datasource/docker/common', () => {
           http,
           'https://my.local.registry',
           'repo',
-          'https://my.local.registry/v2/repo/tags/list?n=1000'
-        )
+          'https://my.local.registry/v2/repo/tags/list?n=1000',
+        ),
       ).rejects.toThrow(PAGE_NOT_FOUND_ERROR);
     });
 
@@ -146,7 +154,7 @@ describe('modules/datasource/docker/common', () => {
       const headers = await getAuthHeaders(
         http,
         'https://my.local.registry',
-        'https://my.local.registry/prefix'
+        'https://my.local.registry/prefix',
       );
 
       // do not inline, otherwise we get false positive from codeql
@@ -170,7 +178,7 @@ describe('modules/datasource/docker/common', () => {
       const headers = await getAuthHeaders(
         http,
         'https://my.local.registry',
-        'https://my.local.registry/prefix'
+        'https://my.local.registry/prefix',
       );
 
       // do not inline, otherwise we get false positive from codeql
@@ -197,7 +205,7 @@ describe('modules/datasource/docker/common', () => {
       const headers = await getAuthHeaders(
         http,
         'https://my.local.registry',
-        'https://my.local.registry/prefix'
+        'https://my.local.registry/prefix',
       );
 
       expect(headers).toBeNull();
@@ -212,7 +220,7 @@ describe('modules/datasource/docker/common', () => {
             'Bearer realm="https://my.local.registry/oauth2/token",service="my.local.registry",scope="repository:my/node:whatever"',
         })
         .get(
-          '/oauth2/token?service=my.local.registry&scope=repository:my/node:whatever'
+          '/oauth2/token?service=my.local.registry&scope=repository:my/node:whatever',
         )
         .reply(200, { token: 'some-token' });
 
@@ -220,7 +228,7 @@ describe('modules/datasource/docker/common', () => {
         http,
         'https://my.local.registry',
         'my/node/prefix',
-        'https://my.local.registry/v2/my/node/resource'
+        'https://my.local.registry/v2/my/node/resource',
       );
 
       // do not inline, otherwise we get false positive from codeql
@@ -241,8 +249,8 @@ describe('modules/datasource/docker/common', () => {
       findHelmSourceUrl(
         partial<OciHelmConfig>({
           home: 'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
-        })
-      )
+        }),
+      ),
     ).toBe('https://github.com/bitnami/charts/tree/main/bitnami/harbor');
 
     expect(findHelmSourceUrl(partial<OciHelmConfig>({}))).toBeNull();
@@ -253,16 +261,16 @@ describe('modules/datasource/docker/common', () => {
           sources: [
             'https://github.com/bitnami/charts/tree/main/bitnami/harbor',
           ],
-        })
-      )
+        }),
+      ),
     ).toBe('https://github.com/bitnami/charts/tree/main/bitnami/harbor');
 
     expect(
       findHelmSourceUrl(
         partial<OciHelmConfig>({
           sources: ['https://some.test'],
-        })
-      )
+        }),
+      ),
     ).toBe('https://some.test');
   });
 });

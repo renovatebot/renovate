@@ -28,7 +28,7 @@ export interface AutomergePrResult {
 
 export async function checkAutoMerge(
   pr: Pr,
-  config: BranchConfig
+  config: BranchConfig,
 ): Promise<AutomergePrResult> {
   logger.trace({ config }, 'checkAutoMerge');
   const {
@@ -60,7 +60,7 @@ export async function checkAutoMerge(
   }
   if (!ignoreTests && pr.cannotMergeReason) {
     logger.debug(
-      `Platform reported that PR is not ready for merge. Reason: [${pr.cannotMergeReason}]`
+      `Platform reported that PR is not ready for merge. Reason: [${pr.cannotMergeReason}]`,
     );
     return {
       automerged: false,
@@ -70,11 +70,11 @@ export async function checkAutoMerge(
   const branchStatus = await resolveBranchStatus(
     config.branchName,
     !!config.internalChecksAsSuccess,
-    config.ignoreTests
+    config.ignoreTests,
   );
   if (branchStatus !== 'green') {
     logger.debug(
-      `PR is not ready for merge (branch status is ${branchStatus})`
+      `PR is not ready for merge (branch status is ${branchStatus})`,
     );
     return {
       automerged: false,
@@ -95,7 +95,7 @@ export async function checkAutoMerge(
     // istanbul ignore if
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`
+        `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`,
       );
       return {
         automerged: false,
@@ -123,7 +123,7 @@ export async function checkAutoMerge(
     logger.info(
       `DRY-RUN: Would merge PR #${
         pr.number
-      } with strategy "${automergeStrategy!}"`
+      } with strategy "${automergeStrategy!}"`,
     );
     return {
       automerged: false,

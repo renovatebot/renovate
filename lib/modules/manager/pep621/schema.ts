@@ -10,9 +10,15 @@ const DependencyRecordSchema = z
 export const PyProjectSchema = z.object({
   project: z
     .object({
+      version: z.string().optional().catch(undefined),
       'requires-python': z.string().optional(),
       dependencies: DependencyListSchema,
       'optional-dependencies': DependencyRecordSchema,
+    })
+    .optional(),
+  'build-system': z
+    .object({
+      requires: DependencyListSchema,
     })
     .optional(),
   tool: z
@@ -26,7 +32,7 @@ export const PyProjectSchema = z.object({
                 url: z.string(),
                 name: z.string(),
                 verify_ssl: z.boolean().optional(),
-              })
+              }),
             )
             .optional(),
         })
@@ -41,7 +47,7 @@ export const PyProjectSchema = z.object({
                   dependencies: DependencyListSchema,
                   'extra-dependencies': DependencyListSchema,
                 })
-                .optional()
+                .optional(),
             )
             .optional(),
         })

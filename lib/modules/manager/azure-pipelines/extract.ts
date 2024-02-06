@@ -1,4 +1,3 @@
-import { load } from 'js-yaml';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
@@ -8,12 +7,22 @@ import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
-import type { AzurePipelines, Container, Repository } from './types';
+import {
+  AzurePipelines,
+  AzurePipelinesYaml,
+  Container,
+  Deploy,
+  Deployment,
+  Job,
+  Jobs,
+  Repository,
+  Step,
+} from './schema';
 
 const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
 
 export function extractRepository(
-  repository: Repository
+  repository: Repository,
 ): PackageDependency | null {
   let repositoryUrl = null;
 
@@ -36,11 +45,11 @@ export function extractRepository(
           endpoint,
           encodeURIComponent(projectName),
           '_git',
-          encodeURIComponent(repoName)
+          encodeURIComponent(repoName),
         );
       } else {
         logger.debug(
-          'Renovate cannot update repositories that do not include the project name'
+          'Renovate cannot update repositories that do not include the project name',
         );
       }
     }
@@ -66,12 +75,8 @@ export function extractRepository(
 }
 
 export function extractContainer(
-  container: Container
+  container: Container,
 ): PackageDependency | null {
-  if (!container.image) {
-    return null;
-  }
-
   const dep = getDep(container.image);
   logger.debug(
     {
@@ -79,7 +84,7 @@ export function extractContainer(
       currentValue: dep.currentValue,
       currentDigest: dep.currentDigest,
     },
-    'Azure pipelines docker image'
+    'Azure pipelines docker image',
   );
   dep.depType = 'docker';
 
@@ -87,7 +92,7 @@ export function extractContainer(
 }
 
 export function extractAzurePipelinesTasks(
-  task: string
+  task: string,
 ): PackageDependency | null {
   const match = AzurePipelinesTaskRegex.exec(task);
   if (match?.groups) {
@@ -102,22 +107,67 @@ export function extractAzurePipelinesTasks(
 
 export function parseAzurePipelines(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): AzurePipelines | null {
-  let pkg: AzurePipelines | null = null;
-  try {
-    pkg = load(content, { json: true }) as AzurePipelines;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ packageFile, err }, 'Error parsing azure-pipelines content');
-    return null;
+  const res = AzurePipelinesYaml.safeParse(content);
+  if (res.success) {
+    return res.data;
+  } else {
+    logger.debug(
+      { err: res.error, packageFile },
+      'Error parsing pubspec lockfile.',
+    );
   }
+  return null;
+}
 
-  return pkg;
+function extractSteps(
+  steps: Step[] | undefined,
+): PackageDependency<Record<string, any>>[] {
+  const deps = [];
+  for (const step of coerceArray(steps)) {
+    const task = extractAzurePipelinesTasks(step.task);
+    if (task) {
+      deps.push(task);
+    }
+  }
+  return deps;
+}
+
+function extractJob(job: Job | undefined): PackageDependency[] {
+  return extractSteps(job?.steps);
+}
+
+function extractDeploy(deploy: Deploy | undefined): PackageDependency[] {
+  const deps = extractJob(deploy?.deploy);
+  deps.push(...extractJob(deploy?.postRouteTraffic));
+  deps.push(...extractJob(deploy?.preDeploy));
+  deps.push(...extractJob(deploy?.routeTraffic));
+  deps.push(...extractJob(deploy?.on?.failure));
+  deps.push(...extractJob(deploy?.on?.success));
+  return deps;
+}
+
+function extractJobs(jobs: Jobs | undefined): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+  for (const jobOrDeployment of coerceArray(jobs)) {
+    const deployment = jobOrDeployment as Deployment;
+    if (deployment.strategy) {
+      deps.push(...extractDeploy(deployment.strategy.canary));
+      deps.push(...extractDeploy(deployment.strategy.rolling));
+      deps.push(...extractDeploy(deployment.strategy.runOnce));
+      continue;
+    }
+
+    const job = jobOrDeployment as Job;
+    deps.push(...extractJob(job));
+  }
+  return deps;
 }
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`azurePipelines.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
@@ -142,31 +192,11 @@ export function extractPackageFile(
   }
 
   for (const { jobs } of coerceArray(pkg.stages)) {
-    for (const { steps } of coerceArray(jobs)) {
-      for (const step of coerceArray(steps)) {
-        const task = extractAzurePipelinesTasks(step.task);
-        if (task) {
-          deps.push(task);
-        }
-      }
-    }
+    deps.push(...extractJobs(jobs));
   }
 
-  for (const { steps } of coerceArray(pkg.jobs)) {
-    for (const step of coerceArray(steps)) {
-      const task = extractAzurePipelinesTasks(step.task);
-      if (task) {
-        deps.push(task);
-      }
-    }
-  }
-
-  for (const step of coerceArray(pkg.steps)) {
-    const task = extractAzurePipelinesTasks(step.task);
-    if (task) {
-      deps.push(task);
-    }
-  }
+  deps.push(...extractJobs(pkg.jobs));
+  deps.push(...extractSteps(pkg.steps));
 
   if (!deps.length) {
     return null;

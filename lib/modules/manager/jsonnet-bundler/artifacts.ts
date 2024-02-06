@@ -22,7 +22,7 @@ function dependencyUrl(dep: PackageDependency): string {
 }
 
 export async function updateArtifacts(
-  updateArtifact: UpdateArtifact
+  updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName, updatedDeps, config } = updateArtifact;
   logger.trace({ packageFileName }, 'jsonnet-bundler.updateArtifacts()');
@@ -54,7 +54,7 @@ export async function updateArtifacts(
       if (dependencyUrls.length > 0) {
         await exec(
           `jb update ${dependencyUrls.map(quote).join(' ')}`,
-          execOptions
+          execOptions,
         );
       }
     }

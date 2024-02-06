@@ -16,6 +16,7 @@ const repoGroups = {
   'algoliasearch-autocomplete': 'https://github.com/algolia/autocomplete',
   'algoliasearch-client-javascript':
     'https://github.com/algolia/algoliasearch-client-javascript',
+  analog: 'https://github.com/analogjs/analog',
   angular: 'https://github.com/angular/angular',
   'angular-cli': 'https://github.com/angular/angular-cli',
   'angular-eslint': 'https://github.com/angular-eslint/angular-eslint',
@@ -46,14 +47,22 @@ const repoGroups = {
     'https://github.com/awslabs/aws-lambda-powertools-typescript',
     'https://github.com/aws-powertools/powertools-lambda-typescript',
   ],
+  'aws-sdk-go': 'https://github.com/aws/aws-sdk-go',
+  'aws-sdk-go-v2': 'https://github.com/aws/aws-sdk-go-v2',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
+  'aws-sdk-rust': [
+    'https://github.com/smithy-lang/smithy-rs',
+    'https://github.com/awslabs/smithy-rs',
+    'https://github.com/awslabs/aws-sdk-rust',
+  ],
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
   'azure azure-libraries-for-net':
     'https://github.com/Azure/azure-libraries-for-net',
   'azure azure-sdk-for-net': 'https://github.com/Azure/azure-sdk-for-net',
   'azure azure-storage-net': 'https://github.com/Azure/azure-storage-net',
   babel: 'https://github.com/babel/babel',
+  backstage: 'https://github.com/backstage/backstage',
   baset: 'https://github.com/igmat/baset',
   brave: 'https://github.com/openzipkin/brave',
   'bugsnag-js': 'https://github.com/bugsnag/bugsnag-js',
@@ -254,13 +263,18 @@ const repoGroups = {
   'dotnet-wcf': 'https://github.com/dotnet/wcf',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   'elastic-apm-agent-rum-js': 'https://github.com/elastic/apm-agent-rum-js',
-  'electron-forge': 'https://github.com/electron-userland/electron-forge',
+  'electron-forge': [
+    'https://github.com/electron-userland/electron-forge',
+    'https://github.com/electron/forge',
+  ],
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
   expo: 'https://github.com/expo/expo',
+  'fabric-chaincode-node':
+    'https://github.com/hyperledger/fabric-chaincode-node',
   'fabric8-kubernetes-client': 'https://github.com/fabric8io/kubernetes-client',
   feathers: 'https://github.com/feathersjs/feathers',
   feign: 'https://github.com/OpenFeign/feign',
@@ -275,6 +289,11 @@ const repoGroups = {
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
+  'github-workflows-kt':
+    'https://github.com/typesafegithub/github-workflows-kt',
+  'go-cloud': 'https://github.com/google/go-cloud',
+  'google-api-dotnet-client':
+    'https://github.com/googleapis/google-api-dotnet-client',
   grafana: 'https://github.com/grafana/grafana',
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
@@ -285,11 +304,15 @@ const repoGroups = {
     'https://github.com/dotansimha/graphql-codegen',
   ],
   groovy: 'https://github.com/apache/groovy',
+  'grpc-dotnet': 'https://github.com/grpc/grpc-dotnet',
+  'grpc-java': 'https://github.com/grpc/grpc-java',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
+  'hickory-dns': 'https://github.com/hickory-dns/hickory-dns',
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
+  jackson: 'https://github.com/FasterXML/jackson',
   jasmine: 'https://github.com/jasmine/jasmine',
   javahamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   javascriptengineswitcher:
@@ -299,11 +322,17 @@ const repoGroups = {
     'https://github.com/facebook/jest', // old repo
     'https://github.com/jestjs/jest',
   ],
+  jna: 'https://github.com/java-native-access/jna',
+  'json-smart-v2': 'https://github.com/netplex/json-smart-v2',
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
+  kroki: 'https://github.com/yuzutech/kroki',
+  lamar: 'https://github.com/JasperFx/lamar',
   lerna: 'https://github.com/lerna/lerna',
+  lexical: 'https://github.com/facebook/lexical',
   linguijs: 'https://github.com/lingui/js-lingui',
+  log4j2: 'https://github.com/apache/logging-log4j2',
   loopback: [
     'https://github.com/strongloop/loopback-next', // old repo (see: https://github.com/loopbackio/loopback-next/issues/7595)
     'https://github.com/loopbackio/loopback-next',
@@ -319,11 +348,13 @@ const repoGroups = {
   'material-ui': [
     'https://github.com/mui-org/material-ui', // Previous organization name (see: https://github.com/mui/material-ui/pull/30944)
     'https://github.com/mui/material-ui',
+    'https://github.com/mui/mui-x',
   ],
   'mdc-react': 'material-components/material-components-web-react',
   mdx: 'https://github.com/mdx-js/mdx',
   'middy-js': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
+  'ml-dotnet': 'https://github.com/dotnet/machinelearning',
   mockito: 'https://github.com/mockito/mockito',
   'mongo-csharp-driver': 'https://github.com/mongodb/mongo-csharp-driver',
   mstest: 'https://github.com/microsoft/testfx',
@@ -356,11 +387,21 @@ const repoGroups = {
     'https://github.com/nuxt/nuxt',
   ],
   okhttp: 'https://github.com/square/okhttp',
+  opencost: 'https://github.com/opencost/opencost',
+  openiddict: 'https://github.com/openiddict/openiddict-core',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
+  'opentelemetry-dotnet-contrib':
+    'https://github.com/open-telemetry/opentelemetry-dotnet-contrib',
+  'opentelemetry-erlang':
+    'https://github.com/open-telemetry/opentelemetry-erlang',
+  'opentelemetry-erlang-contrib':
+    'https://github.com/open-telemetry/opentelemetry-erlang-contrib',
   'opentelemetry-go': 'https://github.com/open-telemetry/opentelemetry-go',
+  'opentelemetry-java': 'https://github.com/open-telemetry/opentelemetry-java',
   'opentelemetry-js': 'https://github.com/open-telemetry/opentelemetry-js',
   orleans: 'https://github.com/dotnet/orleans',
+  'panda-css': 'https://github.com/chakra-ui/panda',
   parcel: 'https://github.com/parcel-bundler/parcel',
   'percy-cli': 'https://github.com/percy/cli',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
@@ -368,7 +409,8 @@ const repoGroups = {
     'https://github.com/pixijs/pixi.js', // old repo
     'https://github.com/pixijs/pixijs',
   ],
-  playwright: 'https://github.com/Microsoft/playwright',
+  playwright: 'https://github.com/microsoft/playwright',
+  'playwright-dotnet': 'https://github.com/microsoft/playwright-dotnet',
   pnpjs: 'https://github.com/pnp/pnpjs',
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
@@ -404,11 +446,13 @@ const repoGroups = {
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
+  'sentry-rust': 'https://github.com/getsentry/sentry-rust',
   serde: 'https://github.com/serde-rs/serde',
   shedlock: 'https://github.com/lukas-krecan/ShedLock',
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',
   skiasharp: 'https://github.com/mono/SkiaSharp',
+  slf4j: 'https://github.com/qos-ch/slf4j',
   'spectre-console': 'https://github.com/spectreconsole/spectre.console',
   springfox: 'https://github.com/springfox/springfox',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
@@ -421,11 +465,15 @@ const repoGroups = {
     'https://github.com/domaindrivendev/Swashbuckle.AspNetCore',
   'system.io.abstractions':
     'https://github.com/System-IO-Abstractions/System.IO.Abstractions/',
+  tamagui: 'https://github.com/tamagui/tamagui',
   'tanstack-query': 'https://github.com/TanStack/query',
   tauri: 'https://github.com/tauri-apps/tauri',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
   'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
+  'testcontainers-dotnet':
+    'https://github.com/testcontainers/testcontainers-dotnet',
+  'testcontainers-go': 'https://github.com/testcontainers/testcontainers-go',
   'testcontainers-java':
     'https://github.com/testcontainers/testcontainers-java',
   'testcontainers-node':
@@ -435,6 +483,7 @@ const repoGroups = {
   tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
+  'trust-dns': 'https://github.com/bluejekyll/trust-dns',
   tsoa: 'https://github.com/lukeautry/tsoa',
   turbo: 'https://github.com/vercel/turbo',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
@@ -443,6 +492,7 @@ const repoGroups = {
   unocss: 'https://github.com/unocss/unocss',
   uppy: 'https://github.com/transloadit/uppy',
   vaadinWebComponents: 'https://github.com/vaadin/web-components',
+  visx: 'https://github.com/airbnb/visx',
   vitest: 'https://github.com/vitest-dev/vitest',
   vstest: 'https://github.com/microsoft/vstest',
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
@@ -461,6 +511,7 @@ const repoGroups = {
     'https://github.com/xunit/xunit.analyzers',
   ],
   yarn: 'https://github.com/yarnpkg/berry',
+  'zag-js': 'https://github.com/chakra-ui/zag',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 
@@ -490,6 +541,9 @@ const patternGroups = {
   fullcalendar: '^@fullcalendar/',
   hotchocolate: '^HotChocolate\\.',
   'prometheus-simpleclient': '^io.prometheus:simpleclient',
+  // Can't specify the russh repo (https://github.com/warp-tech/russh) in repoGroups because parts
+  // of it (e.g. russh-config) are released separately.
+  russh: ['^russh$', '^russh-keys$'],
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',

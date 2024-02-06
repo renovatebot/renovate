@@ -82,7 +82,7 @@ describe('modules/datasource/go/index', () => {
         .reply(200, '');
       const res = await datasource.getDigest(
         { packageName: 'golang.org/y/text' },
-        null
+        null,
       );
       expect(res).toBeNull();
     });
@@ -94,7 +94,7 @@ describe('modules/datasource/go/index', () => {
         .reply(200, Fixtures.get('go-get-github.html'));
       const res = await datasource.getDigest(
         { packageName: 'golang.org/y/text' },
-        null
+        null,
       );
       expect(res).toBeNull();
     });
@@ -107,7 +107,7 @@ describe('modules/datasource/go/index', () => {
       getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
-        null
+        null,
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
@@ -120,7 +120,7 @@ describe('modules/datasource/go/index', () => {
       getDigestGitMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'renovatebot.com/abc/def' },
-        null
+        null,
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
@@ -134,7 +134,7 @@ describe('modules/datasource/go/index', () => {
       getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
-        branch
+        branch,
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
     });
@@ -147,7 +147,7 @@ describe('modules/datasource/go/index', () => {
       getDigestGithubMock.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'golang.org/x/text' },
-        'v1.2.3'
+        'v1.2.3',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
       expect(getDigestGithubMock).toHaveBeenCalledWith(
@@ -156,7 +156,7 @@ describe('modules/datasource/go/index', () => {
           packageName: 'golang/text',
           registryUrl: 'https://github.com',
         },
-        'v1.2.3'
+        'v1.2.3',
       );
     });
 
@@ -168,7 +168,7 @@ describe('modules/datasource/go/index', () => {
       getDigestGithubMock.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'golang.org/x/text' },
-        'v0.0.0'
+        'v0.0.0',
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');
       expect(getDigestGithubMock).toHaveBeenCalledWith(
@@ -177,7 +177,7 @@ describe('modules/datasource/go/index', () => {
           packageName: 'golang/text',
           registryUrl: 'https://github.com',
         },
-        undefined
+        undefined,
       );
     });
 
@@ -187,7 +187,7 @@ describe('modules/datasource/go/index', () => {
         {
           packageName: 'bitbucket.org/golang/text',
         },
-        null
+        null,
       );
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();

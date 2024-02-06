@@ -76,7 +76,7 @@ describe('modules/manager/gradle/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['build.gradle', 'gradle.lockfile'],
-      })
+      }),
     );
 
     // TODO: fix types, jest is using wrong overload (#22198)
@@ -107,11 +107,11 @@ describe('modules/manager/gradle/artifacts', () => {
           updatedDeps: [],
           newPackageFileContent: '',
           config: {},
-        })
+        }),
       ).toBeNull();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'No Gradle dependency lockfiles or verification metadata found - skipping update'
+        'No Gradle dependency lockfiles or verification metadata found - skipping update',
       );
       expect(execSnapshots).toBeEmptyArray();
     });
@@ -126,11 +126,11 @@ describe('modules/manager/gradle/artifacts', () => {
           updatedDeps: [],
           newPackageFileContent: '',
           config: {},
-        })
+        }),
       ).toBeNull();
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Found Gradle dependency lockfiles but no gradlew - aborting update'
+        'Found Gradle dependency lockfiles but no gradlew - aborting update',
       );
       expect(execSnapshots).toBeEmptyArray();
     });
@@ -267,11 +267,11 @@ describe('modules/manager/gradle/artifacts', () => {
           updatedDeps: [],
           newPackageFileContent: '',
           config: { isLockFileMaintenance: true },
-        })
+        }),
       ).toBeNull();
 
       expect(logger.logger.trace).toHaveBeenCalledWith(
-        'No build.gradle(.kts) file or not in root project - skipping lock file maintenance'
+        'No build.gradle(.kts) file or not in root project - skipping lock file maintenance',
       );
     });
 
@@ -462,7 +462,7 @@ describe('modules/manager/gradle/artifacts', () => {
           updatedDeps: [],
           newPackageFileContent: '',
           config: { isLockFileMaintenance: true },
-        })
+        }),
       ).toBeNull();
     });
 
@@ -475,7 +475,7 @@ describe('modules/manager/gradle/artifacts', () => {
           updatedDeps: [],
           newPackageFileContent: '',
           config: { isLockFileMaintenance: true },
-        })
+        }),
       ).toEqual([
         {
           artifactError: {
@@ -510,7 +510,7 @@ describe('modules/manager/gradle/artifacts', () => {
           updatedDeps: [],
           newPackageFileContent: '{}',
           config: {},
-        })
+        }),
       ).rejects.toThrow(TEMPORARY_ERROR);
     });
 
@@ -567,7 +567,7 @@ describe('modules/manager/gradle/artifacts', () => {
       git.getRepoStatus.mockResolvedValue(
         partial<StatusResult>({
           modified: ['build.gradle', 'gradle/verification-metadata.xml'],
-        })
+        }),
       );
 
       const res = await updateArtifacts({
@@ -617,7 +617,7 @@ describe('modules/manager/gradle/artifacts', () => {
             'gradle.lockfile',
             'gradle/verification-metadata.xml',
           ],
-        })
+        }),
       );
 
       const res = await updateArtifacts({
@@ -682,7 +682,7 @@ describe('modules/manager/gradle/artifacts', () => {
       git.getRepoStatus.mockResolvedValue(
         partial<StatusResult>({
           modified: ['build.gradle', 'gradle/verification-metadata.xml'],
-        })
+        }),
       );
       fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
         let content = '';
@@ -725,7 +725,7 @@ describe('modules/manager/gradle/artifacts', () => {
       git.getRepoStatus.mockResolvedValue(
         partial<StatusResult>({
           modified: ['build.gradle', 'gradle/verification-metadata.xml'],
-        })
+        }),
       );
       fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
         let content = '';
@@ -767,7 +767,7 @@ describe('modules/manager/gradle/artifacts', () => {
       git.getRepoStatus.mockResolvedValue(
         partial<StatusResult>({
           modified: ['build.gradle', 'gradle/verification-metadata.xml'],
-        })
+        }),
       );
       fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
         let content = '';

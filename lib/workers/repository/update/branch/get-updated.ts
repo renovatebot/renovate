@@ -20,13 +20,28 @@ export interface PackageFilesResult {
   updatedArtifacts: FileChange[];
 }
 
+async function getFileContent(
+  updatedFileContents: Record<string, string>,
+  filePath: string,
+  config: BranchConfig,
+): Promise<string | null> {
+  let fileContent: string | null = updatedFileContents[filePath];
+  if (!fileContent) {
+    fileContent = await getFile(
+      filePath,
+      config.reuseExistingBranch ? config.branchName : config.baseBranch,
+    );
+  }
+  return fileContent;
+}
+
 export async function getUpdatedPackageFiles(
-  config: BranchConfig
+  config: BranchConfig,
 ): Promise<PackageFilesResult> {
   logger.trace({ config });
   const reuseExistingBranch = config.reuseExistingBranch!;
   logger.debug(
-    `manager.getUpdatedPackageFiles() reuseExistingBranch=${reuseExistingBranch}`
+    `manager.getUpdatedPackageFiles() reuseExistingBranch=${reuseExistingBranch}`,
   );
   let updatedFileContents: Record<string, string> = {};
   const nonUpdatedFileContents: Record<string, string> = {};
@@ -46,23 +61,19 @@ export async function getUpdatedPackageFiles(
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
     packageFileUpdatedDeps[packageFile].push({ ...upgrade });
-    let packageFileContent: string | null = updatedFileContents[packageFile];
-    if (!packageFileContent) {
-      packageFileContent = await getFile(
-        packageFile,
-        reuseExistingBranch ? config.branchName : config.baseBranch
-      );
-    }
+    const packageFileContent = await getFileContent(
+      updatedFileContents,
+      packageFile,
+      config,
+    );
     let lockFileContent: string | null = null;
     const lockFile = upgrade.lockFile ?? upgrade.lockFiles?.[0] ?? '';
     if (lockFile) {
-      lockFileContent = updatedFileContents[lockFile];
-      if (!lockFileContent) {
-        lockFileContent = await getFile(
-          lockFile,
-          reuseExistingBranch ? config.branchName : config.baseBranch
-        );
-      }
+      lockFileContent = await getFileContent(
+        updatedFileContents,
+        lockFile,
+        config,
+      );
     }
     // istanbul ignore if
     if (
@@ -71,7 +82,7 @@ export async function getUpdatedPackageFiles(
     ) {
       logger.debug(
         { packageFile, depName },
-        'Rebasing branch after file not found'
+        'Rebasing branch after file not found',
       );
       return getUpdatedPackageFiles({
         ...config,
@@ -96,7 +107,7 @@ export async function getUpdatedPackageFiles(
       if (reuseExistingBranch && status !== 'already-updated') {
         logger.debug(
           { lockFile, depName, status },
-          'Need to retry branch as it is not already up-to-date'
+          'Need to retry branch as it is not already up-to-date',
         );
         return getUpdatedPackageFiles({
           ...config,
@@ -106,7 +117,7 @@ export async function getUpdatedPackageFiles(
       if (files) {
         updatedFileContents = { ...updatedFileContents, ...files };
         Object.keys(files).forEach(
-          (file) => delete nonUpdatedFileContents[file]
+          (file) => delete nonUpdatedFileContents[file],
         );
       }
       if (status === 'update-failed' || status === 'unsupported') {
@@ -132,14 +143,14 @@ export async function getUpdatedPackageFiles(
           }
         } else if (status === 'already-updated') {
           logger.debug(
-            `Upgrade of ${depName} to ${newVersion} is already done in existing branch`
+            `Upgrade of ${depName} to ${newVersion} is already done in existing branch`,
           );
         } else {
           // something changed
           if (reuseExistingBranch) {
             logger.debug(
               { lockFile, depName, status },
-              'Need to retry branch as upgrade requirements are not mets'
+              'Need to retry branch as upgrade requirements are not mets',
             );
             return getUpdatedPackageFiles({
               ...config,
@@ -149,14 +160,14 @@ export async function getUpdatedPackageFiles(
           if (files) {
             updatedFileContents = { ...updatedFileContents, ...files };
             Object.keys(files).forEach(
-              (file) => delete nonUpdatedFileContents[file]
+              (file) => delete nonUpdatedFileContents[file],
             );
           }
         }
       } else {
         logger.debug(
           { manager },
-          'isLockFileUpdate without updateLockedDependency'
+          'isLockFileUpdate without updateLockedDependency',
         );
         if (!updatedFileContents[packageFile]) {
           nonUpdatedFileContents[packageFile] = packageFileContent!;
@@ -170,7 +181,7 @@ export async function getUpdatedPackageFiles(
           upgrade,
           packageFileContent!,
           reuseExistingBranch,
-          firstUpdate
+          firstUpdate,
         );
         firstUpdate = false;
         if (res) {
@@ -182,7 +193,8 @@ export async function getUpdatedPackageFiles(
             const { bumpedContent } = await bumpPackageVersion(
               res,
               upgrade.packageFileVersion,
-              upgrade.bumpVersion
+              upgrade.bumpVersion,
+              packageFile,
             );
             res = bumpedContent;
           }
@@ -216,7 +228,8 @@ export async function getUpdatedPackageFiles(
         const { bumpedContent } = await bumpPackageVersion(
           newContent,
           upgrade.packageFileVersion,
-          upgrade.bumpVersion
+          upgrade.bumpVersion,
+          packageFile,
         );
         newContent = bumpedContent;
       }
@@ -224,7 +237,7 @@ export async function getUpdatedPackageFiles(
         if (reuseExistingBranch) {
           logger.debug(
             { packageFile, depName },
-            'Rebasing branch after error updating content'
+            'Rebasing branch after error updating content',
           );
           return getUpdatedPackageFiles({
             ...config,
@@ -233,7 +246,7 @@ export async function getUpdatedPackageFiles(
         }
         logger.debug(
           { existingContent: packageFileContent, config: upgrade },
-          'Error updating file'
+          'Error updating file',
         );
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
@@ -242,7 +255,7 @@ export async function getUpdatedPackageFiles(
           // This ensure it's always 1 commit from the bot
           logger.debug(
             { packageFile, depName },
-            'Need to update package file so will rebase first'
+            'Need to update package file so will rebase first',
           );
           return getUpdatedPackageFiles({
             ...config,
@@ -250,7 +263,7 @@ export async function getUpdatedPackageFiles(
           });
         }
         logger.debug(
-          `Updating ${depName} in ${coerceString(packageFile, lockFile)}`
+          `Updating ${depName} in ${coerceString(packageFile, lockFile)}`,
         );
         updatedFileContents[packageFile] = newContent;
         delete nonUpdatedFileContents[packageFile];
@@ -264,7 +277,7 @@ export async function getUpdatedPackageFiles(
     }
   }
   const updatedPackageFiles: FileAddition[] = Object.keys(
-    updatedFileContents
+    updatedFileContents,
   ).map((name) => ({
     type: 'addition',
     path: name,
@@ -297,7 +310,7 @@ export async function getUpdatedPackageFiles(
     }
   }
   const nonUpdatedPackageFiles: FileAddition[] = Object.keys(
-    nonUpdatedFileContents
+    nonUpdatedFileContents,
   ).map((name) => ({
     type: 'addition',
     path: name,

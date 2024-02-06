@@ -20,11 +20,11 @@ const LOCKFILE_HEADER_TEXT =
  */
 export function usesGcv(
   versionsPropsFilename: string,
-  fileContents: Record<string, string | null>
+  fileContents: Record<string, string | null>,
 ): boolean {
   const versionsLockFile: string = fs.getSiblingFileName(
     versionsPropsFilename,
-    VERSIONS_LOCK
+    VERSIONS_LOCK,
   );
   return (
     fileContents[versionsLockFile]?.startsWith(LOCKFILE_HEADER_TEXT) ?? false
@@ -58,7 +58,7 @@ export function isGcvLockFile(fileName: string): boolean {
  */
 export function parseGcv(
   propsFileName: string,
-  fileContents: Record<string, string | null>
+  fileContents: Record<string, string | null>,
 ): PackageDependency<GradleManagerData>[] {
   const propsFileContent = coerceString(fileContents[propsFileName]);
   const lockFileName = fs.getSiblingFileName(propsFileName, VERSIONS_LOCK);
@@ -120,7 +120,7 @@ function globToRegex(depName: string): RegExp {
     depName
       .replace(/\*/g, '_WC_CHAR_')
       .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
-      .replace(/_WC_CHAR_/g, '.*?')
+      .replace(/_WC_CHAR_/g, '.*?'),
   );
 }
 
@@ -139,7 +139,7 @@ interface VersionWithDepType {
  */
 export function parseLockFile(input: string): Map<string, VersionWithDepType> {
   const lockLineRegex = regEx(
-    `^(?<depName>[^:]+:[^:]+):(?<lockVersion>[^ ]+) \\(\\d+ constraints: [0-9a-f]+\\)$`
+    `^(?<depName>[^:]+:[^:]+):(?<lockVersion>[^ ]+) \\(\\d+ constraints: [0-9a-f]+\\)$`,
   );
 
   const depVerMap = new Map<string, VersionWithDepType>();
@@ -159,7 +159,7 @@ export function parseLockFile(input: string): Map<string, VersionWithDepType> {
     }
   }
   logger.trace(
-    `Found ${depVerMap.size} locked dependencies in ${VERSIONS_LOCK}.`
+    `Found ${depVerMap.size} locked dependencies in ${VERSIONS_LOCK}.`,
   );
   return depVerMap;
 }
@@ -170,10 +170,10 @@ export function parseLockFile(input: string): Map<string, VersionWithDepType> {
  * @return two maps, first being exact matches, second regex matches
  */
 export function parsePropsFile(
-  input: string
+  input: string,
 ): [Map<string, VersionWithPosition>, Map<string, VersionWithPosition>] {
   const propsLineRegex = regEx(
-    `^(?<depName>[^:]+:[^=]+?) *= *(?<propsVersion>.*)$`
+    `^(?<depName>[^:]+:[^=]+?) *= *(?<propsVersion>.*)$`,
   );
   const depVerExactMap = new Map<string, VersionWithPosition>();
   const depVerRegexMap = new Map<string, VersionWithPosition>();
@@ -207,7 +207,7 @@ export function parsePropsFile(
     startOfLineIdx += line.length + (isCrLf ? 2 : 1);
   }
   logger.trace(
-    `Found ${depVerExactMap.size} dependencies and ${depVerRegexMap.size} wildcard dependencies in ${VERSIONS_PROPS}.`
+    `Found ${depVerExactMap.size} dependencies and ${depVerRegexMap.size} wildcard dependencies in ${VERSIONS_PROPS}.`,
   );
   return [depVerExactMap, new Map([...depVerRegexMap].sort().reverse())];
 }

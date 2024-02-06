@@ -2,29 +2,39 @@ import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { re2 } from '../expose.cjs';
 
-import { logger } from '../logger';
-
-let RegEx: RegExpConstructor;
-
 const cache = new Map<string, RegExp>();
 
-if (!process.env.RENOVATE_X_IGNORE_RE2) {
+type RegExpEngineStatus =
+  | { type: 'available' }
+  | {
+      type: 'unavailable';
+      err: Error;
+    }
+  | { type: 'ignored' };
+
+let status: RegExpEngineStatus;
+let RegEx: RegExpConstructor = RegExp;
+// istanbul ignore next
+if (process.env.RENOVATE_X_IGNORE_RE2) {
+  status = { type: 'ignored' };
+} else {
   try {
     const RE2 = re2();
     // Test if native is working
     new RE2('.*').exec('test');
-    logger.debug('Using RE2 as regex engine');
     RegEx = RE2;
+    status = { type: 'available' };
   } catch (err) {
-    logger.warn({ err }, 'RE2 not usable, falling back to RegExp');
+    status = { type: 'unavailable', err };
   }
 }
-RegEx ??= RegExp;
+
+export const regexEngineStatus = status;
 
 export function regEx(
   pattern: string | RegExp,
   flags?: string | undefined,
-  useCache = true
+  useCache = true,
 ): RegExp {
   let canBeCached = useCache;
   if (canBeCached && flags?.includes('g')) {
@@ -43,15 +53,16 @@ export function regEx(
   }
 
   try {
-    const instance = new RegEx(pattern, flags);
+    const instance = flags ? new RegEx(pattern, flags) : new RegEx(pattern);
     if (canBeCached) {
       cache.set(key, instance);
     }
     return instance;
   } catch (err) {
     const error = new Error(CONFIG_VALIDATION);
+    error.validationMessage = err.message;
     error.validationSource = pattern.toString();
-    error.validationError = `Invalid regular expression: ${pattern.toString()}`;
+    error.validationError = `Invalid regular expression (re2): ${pattern.toString()}`;
     throw error;
   }
 }
@@ -63,7 +74,7 @@ export function escapeRegExp(input: string): string {
 export const newlineRegex = regEx(/\r?\n/);
 
 const configValStart = regEx(/^!?\//);
-const configValEnd = regEx(/\/$/);
+const configValEnd = regEx(/\/i?$/);
 
 export function isConfigRegex(input: unknown): input is string {
   return (
@@ -76,7 +87,7 @@ function parseConfigRegex(input: string): RegExp | null {
     const regexString = input
       .replace(configValStart, '')
       .replace(configValEnd, '');
-    return regEx(regexString);
+    return input.endsWith('i') ? regEx(regexString, 'i') : regEx(regexString);
   } catch (err) {
     // no-op
   }
@@ -86,7 +97,7 @@ function parseConfigRegex(input: string): RegExp | null {
 type ConfigRegexPredicate = (s: string) => boolean;
 
 export function configRegexPredicate(
-  input: string
+  input: string,
 ): ConfigRegexPredicate | null {
   if (isConfigRegex(input)) {
     const configRegex = parseConfigRegex(input);
@@ -99,12 +110,4 @@ export function configRegexPredicate(
     }
   }
   return null;
-}
-
-const UUIDRegex = regEx(
-  /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i
-);
-
-export function isUUID(input: string): boolean {
-  return UUIDRegex.test(input);
 }

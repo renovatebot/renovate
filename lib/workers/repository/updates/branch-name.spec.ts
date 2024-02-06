@@ -15,6 +15,19 @@ describe('workers/repository/updates/branch-name', () => {
       expect(upgrade.branchName).toBe('some-group-name-grouptopic');
     });
 
+    it('compile groupName before slugging', () => {
+      const upgrade: RenovateConfig = {
+        groupName: '{{parentDir}}',
+        parentDir: 'myService',
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('myservice-grouptopic');
+    });
+
     it('uses groupSlug if defined', () => {
       const upgrade: RenovateConfig = {
         groupName: 'some group name',
@@ -113,7 +126,7 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe(
-        'update-branch-patch-some-group-slug-update-topic'
+        'update-branch-patch-some-group-slug-update-topic',
       );
     });
 
@@ -358,7 +371,7 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe(
-        'some-group-name-dollarpercentand-or-lessgreater-version-grouptopic'
+        'some-group-name-dollarpercentand-or-lessgreater-version-grouptopic',
       );
     });
 
@@ -373,7 +386,7 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe(
-        'some-group-name.dollarpercentversion-grouptopic'
+        'some-group-name.dollarpercentversion-grouptopic',
       );
     });
   });

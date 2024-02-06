@@ -20,13 +20,13 @@ function matchesMMP(version: VersioningApi, v1: string, v2: string): boolean {
 function matchesUnstable(
   version: VersioningApi,
   v1: string,
-  v2: string
+  v2: string,
 ): boolean {
   return !version.isStable(v1) && matchesMMP(version, v1, v2);
 }
 
 export async function getInRangeReleases(
-  config: BranchUpgradeConfig
+  config: BranchUpgradeConfig,
 ): Promise<Release[] | null> {
   const versioning = config.versioning!;
   const currentVersion = config.currentVersion!;
@@ -43,20 +43,20 @@ export async function getInRangeReleases(
 
     const previousReleases = pkgReleases
       .filter((release) =>
-        version.isCompatible(release.version, currentVersion)
+        version.isCompatible(release.version, currentVersion),
       )
       .filter((release) => !version.isGreaterThan(release.version, newVersion))
       .filter(
         (release) =>
           version.isStable(release.version) ||
           matchesUnstable(version, currentVersion, release.version) ||
-          matchesUnstable(version, newVersion, release.version)
+          matchesUnstable(version, newVersion, release.version),
       );
 
     const releases = previousReleases.filter(
       (release) =>
         version.equals(release.version, currentVersion) ||
-        version.isGreaterThan(release.version, currentVersion)
+        version.isGreaterThan(release.version, currentVersion),
     );
 
     /**

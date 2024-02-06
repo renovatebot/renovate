@@ -9,6 +9,7 @@ import {
   initConfig,
   initMergeConfidence,
   isActiveConfidenceLevel,
+  parseSupportedDatasourceString,
   resetConfig,
   satisfiesConfidenceLevel,
 } from '.';
@@ -75,8 +76,8 @@ describe('util/merge-confidence/index', () => {
             'renovate',
             '25.0.0',
             '25.0.0',
-            undefined as never
-          )
+            undefined as never,
+          ),
         ).toBe('neutral');
       });
 
@@ -87,8 +88,8 @@ describe('util/merge-confidence/index', () => {
             'renovate',
             '24.1.0',
             '25.0.0',
-            'bump'
-          )
+            'bump',
+          ),
         ).toBe('neutral');
       });
 
@@ -99,8 +100,8 @@ describe('util/merge-confidence/index', () => {
             'renovate',
             '25.0.1',
             '25.0.1',
-            'pin'
-          )
+            'pin',
+          ),
         ).toBe('high');
       });
 
@@ -114,8 +115,8 @@ describe('util/merge-confidence/index', () => {
             'renovate',
             '24.2.0',
             '25.0.0',
-            'major'
-          )
+            'major',
+          ),
         ).toBeUndefined();
       });
 
@@ -126,8 +127,8 @@ describe('util/merge-confidence/index', () => {
             'renovate',
             '24.2.0',
             '25.0.0',
-            'major'
-          )
+            'major',
+          ),
         ).toBeUndefined();
       });
 
@@ -139,7 +140,7 @@ describe('util/merge-confidence/index', () => {
         httpMock
           .scope(apiBaseUrl)
           .get(
-            `/api/mc/json/${datasource}/${depName}/${currentVersion}/${newVersion}`
+            `/api/mc/json/${datasource}/${depName}/${currentVersion}/${newVersion}`,
           )
           .reply(200, { confidence: 'high' });
 
@@ -149,8 +150,8 @@ describe('util/merge-confidence/index', () => {
             depName,
             currentVersion,
             newVersion,
-            'major'
-          )
+            'major',
+          ),
         ).toBe('high');
       });
 
@@ -163,7 +164,7 @@ describe('util/merge-confidence/index', () => {
         httpMock
           .scope(apiBaseUrl)
           .get(
-            `/api/mc/json/${datasource}/${escapedPackageName}/${currentVersion}/${newVersion}`
+            `/api/mc/json/${datasource}/${escapedPackageName}/${currentVersion}/${newVersion}`,
           )
           .reply(200, { confidence: 'high' });
 
@@ -173,8 +174,8 @@ describe('util/merge-confidence/index', () => {
             packageName,
             currentVersion,
             newVersion,
-            'major'
-          )
+            'major',
+          ),
         ).toBe('high');
       });
 
@@ -186,7 +187,7 @@ describe('util/merge-confidence/index', () => {
         httpMock
           .scope(apiBaseUrl)
           .get(
-            `/api/mc/json/${datasource}/${depName}/${currentVersion}/${newVersion}`
+            `/api/mc/json/${datasource}/${depName}/${currentVersion}/${newVersion}`,
           )
           .reply(200, { invalid: 'invalid' });
 
@@ -196,8 +197,8 @@ describe('util/merge-confidence/index', () => {
             depName,
             currentVersion,
             newVersion,
-            'minor'
-          )
+            'minor',
+          ),
         ).toBe('neutral');
       });
 
@@ -209,7 +210,7 @@ describe('util/merge-confidence/index', () => {
         httpMock
           .scope(apiBaseUrl)
           .get(
-            `/api/mc/json/${datasource}/${depName}/${currentVersion}/${newVersion}`
+            `/api/mc/json/${datasource}/${depName}/${currentVersion}/${newVersion}`,
           )
           .reply(400);
 
@@ -219,12 +220,12 @@ describe('util/merge-confidence/index', () => {
             depName,
             currentVersion,
             newVersion,
-            'minor'
-          )
+            'minor',
+          ),
         ).toBe('neutral');
         expect(logger.warn).toHaveBeenCalledWith(
           expect.anything(),
-          'error fetching merge confidence data'
+          'error fetching merge confidence data',
         );
       });
 
@@ -236,7 +237,7 @@ describe('util/merge-confidence/index', () => {
         httpMock
           .scope(apiBaseUrl)
           .get(
-            `/api/mc/json/${datasource}/${packageName}/${currentVersion}/${newVersion}`
+            `/api/mc/json/${datasource}/${packageName}/${currentVersion}/${newVersion}`,
           )
           .reply(403);
 
@@ -246,12 +247,12 @@ describe('util/merge-confidence/index', () => {
             packageName,
             currentVersion,
             newVersion,
-            'minor'
-          )
+            'minor',
+          ),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
-          'merge confidence API token rejected - aborting run'
+          'merge confidence API token rejected - aborting run',
         );
       });
 
@@ -263,7 +264,7 @@ describe('util/merge-confidence/index', () => {
         httpMock
           .scope(apiBaseUrl)
           .get(
-            `/api/mc/json/${datasource}/${packageName}/${currentVersion}/${newVersion}`
+            `/api/mc/json/${datasource}/${packageName}/${currentVersion}/${newVersion}`,
           )
           .reply(503);
 
@@ -273,12 +274,12 @@ describe('util/merge-confidence/index', () => {
             packageName,
             currentVersion,
             newVersion,
-            'minor'
-          )
+            'minor',
+          ),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
-          'merge confidence API failure: 5xx - aborting run'
+          'merge confidence API failure: 5xx - aborting run',
         );
       });
 
@@ -289,15 +290,18 @@ describe('util/merge-confidence/index', () => {
             'renovate',
             '25.0.1',
             '25.0.1',
-            'pinDigest'
-          )
+            'pinDigest',
+          ),
         ).toBe('high');
       });
     });
 
     describe('initMergeConfidence()', () => {
-      it('using default base url if none is set', async () => {
+      beforeEach(() => {
         resetConfig();
+      });
+
+      it('using default base url if none is set', async () => {
         delete process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL;
         httpMock
           .scope(defaultApiBaseUrl)
@@ -306,15 +310,25 @@ describe('util/merge-confidence/index', () => {
 
         await expect(initMergeConfidence()).toResolve();
         expect(logger.trace).toHaveBeenCalledWith(
-          'using default merge confidence API base URL'
+          'using default merge confidence API base URL',
         );
         expect(logger.debug).toHaveBeenCalledWith(
-          'merge confidence API - successfully authenticated'
+          {
+            supportedDatasources: [
+              'go',
+              'maven',
+              'npm',
+              'nuget',
+              'packagist',
+              'pypi',
+              'rubygems',
+            ],
+          },
+          'merge confidence API - successfully authenticated',
         );
       });
 
       it('warns and then resolves if base url is invalid', async () => {
-        resetConfig();
         process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL =
           'invalid-url.com';
         httpMock
@@ -325,20 +339,20 @@ describe('util/merge-confidence/index', () => {
         await expect(initMergeConfidence()).toResolve();
         expect(logger.warn).toHaveBeenCalledWith(
           expect.anything(),
-          'invalid merge confidence API base URL found in environment variables - using default value instead'
+          'invalid merge confidence API base URL found in environment variables - using default value instead',
         );
         expect(logger.debug).toHaveBeenCalledWith(
-          'merge confidence API - successfully authenticated'
+          expect.anything(),
+          'merge confidence API - successfully authenticated',
         );
       });
 
       it('resolves if no token', async () => {
-        resetConfig();
         hostRules.clear();
 
         await expect(initMergeConfidence()).toResolve();
         expect(logger.trace).toHaveBeenCalledWith(
-          'merge confidence API usage is disabled'
+          'merge confidence API usage is disabled',
         );
       });
 
@@ -347,7 +361,8 @@ describe('util/merge-confidence/index', () => {
 
         await expect(initMergeConfidence()).toResolve();
         expect(logger.debug).toHaveBeenCalledWith(
-          'merge confidence API - successfully authenticated'
+          expect.anything(),
+          'merge confidence API - successfully authenticated',
         );
       });
 
@@ -355,11 +370,11 @@ describe('util/merge-confidence/index', () => {
         httpMock.scope(apiBaseUrl).get(`/api/mc/availability`).reply(403);
 
         await expect(initMergeConfidence()).rejects.toThrow(
-          EXTERNAL_HOST_ERROR
+          EXTERNAL_HOST_ERROR,
         );
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
-          'merge confidence API token rejected - aborting run'
+          'merge confidence API token rejected - aborting run',
         );
       });
 
@@ -367,11 +382,11 @@ describe('util/merge-confidence/index', () => {
         httpMock.scope(apiBaseUrl).get(`/api/mc/availability`).reply(503);
 
         await expect(initMergeConfidence()).rejects.toThrow(
-          EXTERNAL_HOST_ERROR
+          EXTERNAL_HOST_ERROR,
         );
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
-          'merge confidence API failure: 5xx - aborting run'
+          'merge confidence API failure: 5xx - aborting run',
         );
       });
 
@@ -382,11 +397,62 @@ describe('util/merge-confidence/index', () => {
           .replyWithError({ code: 'ECONNRESET' });
 
         await expect(initMergeConfidence()).rejects.toThrow(
-          EXTERNAL_HOST_ERROR
+          EXTERNAL_HOST_ERROR,
         );
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
-          'merge confidence API request failed - aborting run'
+          'merge confidence API request failed - aborting run',
+        );
+      });
+
+      describe('parseSupportedDatasourceList()', () => {
+        type ParseSupportedDatasourceTestCase = {
+          name: string;
+          datasourceListString: string | undefined;
+          expected: string[] | undefined;
+        };
+
+        afterEach(() => {
+          delete process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES;
+        });
+
+        it.each([
+          {
+            name: 'it should do nothing when the input is undefined',
+            datasourceListString: undefined,
+            expected: undefined,
+          },
+          {
+            name: 'it should successfully parse the given datasource list',
+            datasourceListString: `["go","npm"]`,
+            expected: ['go', 'npm'],
+          },
+          {
+            name: 'it should gracefully handle invalid json',
+            datasourceListString: `{`,
+            expected: undefined,
+          },
+          {
+            name: 'it should discard non-array JSON input',
+            datasourceListString: `{}`,
+            expected: undefined,
+          },
+          {
+            name: 'it should discard non-string array JSON input',
+            datasourceListString: `[1,2]`,
+            expected: undefined,
+          },
+        ])(
+          `$name`,
+          ({
+            datasourceListString,
+            expected,
+          }: ParseSupportedDatasourceTestCase) => {
+            process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES =
+              datasourceListString;
+
+            expect(parseSupportedDatasourceString()).toStrictEqual(expected);
+          },
         );
       });
     });

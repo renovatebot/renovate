@@ -129,7 +129,7 @@ describe('modules/manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
       expect(res).toContain(
-        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible'
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible',
       );
     });
 
@@ -272,7 +272,7 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod1);
       // Assert that the version still contains +incompatible tag.
       expect(res).toContain(
-        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible'
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible',
       );
     });
 
@@ -286,10 +286,10 @@ describe('modules/manager/gomod/update', () => {
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).not.toEqual(gomod1);
       expect(res).not.toContain(
-        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible+incompatible'
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible+incompatible',
       );
       expect(res).toContain(
-        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible'
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible',
       );
     });
 

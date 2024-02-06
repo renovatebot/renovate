@@ -93,6 +93,6 @@ describe('modules/versioning/helm/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 });

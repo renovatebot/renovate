@@ -14,7 +14,7 @@ describe('config/migrations/migrations-service', () => {
 
       const migratedConfig = MigrationsService.run(originalConfig);
       expect(
-        MigrationsService.isMigrated(originalConfig, migratedConfig)
+        MigrationsService.isMigrated(originalConfig, migratedConfig),
       ).toBeTrue();
       expect(migratedConfig).toEqual({});
     }
@@ -31,7 +31,7 @@ describe('config/migrations/migrations-service', () => {
 
       const migratedConfig = MigrationsService.run(originalConfig);
       expect(
-        MigrationsService.isMigrated(originalConfig, migratedConfig)
+        MigrationsService.isMigrated(originalConfig, migratedConfig),
       ).toBeTrue();
       expect(migratedConfig).toEqual({
         [newPropertyName]: 'test',
@@ -48,11 +48,11 @@ describe('config/migrations/migrations-service', () => {
     const migratedConfig = MigrationsService.run(originalConfig);
 
     const mappedProperties = Object.keys(originalConfig).map((property) =>
-      MigrationsService.renamedProperties.get(property)
+      MigrationsService.renamedProperties.get(property),
     );
 
     expect(
-      MigrationsService.isMigrated(originalConfig, migratedConfig)
+      MigrationsService.isMigrated(originalConfig, migratedConfig),
     ).toBeTrue();
     expect(mappedProperties).toEqual(Object.keys(migratedConfig));
   });
@@ -74,7 +74,7 @@ describe('config/migrations/migrations-service', () => {
     class CustomMigrationsService extends MigrationsService {
       public static override getMigrations(
         original: RenovateConfig,
-        migrated: RenovateConfig
+        migrated: RenovateConfig,
       ): ReadonlyArray<Migration> {
         return [new CustomMigration(original, migrated)];
       }
@@ -107,7 +107,7 @@ describe('config/migrations/migrations-service', () => {
       .filter((name) => !name.includes('spec.ts'));
 
     expect(MigrationsService.customMigrations).toHaveLength(
-      allDefinedMigrationClasses.length
+      allDefinedMigrationClasses.length,
     );
   });
 });

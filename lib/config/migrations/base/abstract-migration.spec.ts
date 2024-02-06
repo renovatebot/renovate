@@ -13,7 +13,7 @@ describe('config/migrations/base/abstract-migration', () => {
       {
         fooBar: true,
       },
-      {}
+      {},
     );
 
     expect(() => customMigration.run()).toThrow();
@@ -31,7 +31,7 @@ describe('config/migrations/base/abstract-migration', () => {
       {
         fooBar: true,
       },
-      {}
+      {},
     );
 
     expect(() => customMigration.run()).toThrow();

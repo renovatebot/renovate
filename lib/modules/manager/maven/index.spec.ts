@@ -220,7 +220,7 @@ describe('modules/manager/maven/index', () => {
         upgrade,
       })!;
       const updatedDep = selectDep(
-        extractPackage(updatedContent, 'some-file')!.deps
+        extractPackage(updatedContent, 'some-file')!.deps,
       );
 
       expect(updatedDep?.currentValue).toEqual(newValue);
@@ -268,7 +268,7 @@ describe('modules/manager/maven/index', () => {
       const [{ deps }] = resolveParents([
         extractPackage(
           Fixtures.get('multiple_usages_props.pom.xml'),
-          'some-file'
+          'some-file',
         )!,
       ]);
       expect(deps).toMatchObject([
@@ -283,7 +283,7 @@ describe('modules/manager/maven/index', () => {
       const [{ deps }] = resolveParents([
         extractPackage(
           Fixtures.get('infinite_recursive_props.pom.xml'),
-          'some-file'
+          'some-file',
         )!,
       ]);
       expect(deps).toMatchObject([
@@ -349,13 +349,13 @@ describe('modules/manager/maven/index', () => {
       const updatedOutside = origContent.replace('1.0.0', '1.0.1');
 
       expect(
-        updateDependency({ fileContent: origContent, upgrade: upgrade1 })
+        updateDependency({ fileContent: origContent, upgrade: upgrade1 }),
       ).toEqual(origContent.replace('1.0.0', '1.0.2'));
       expect(
         updateDependency({
           fileContent: updatedOutside,
           upgrade: upgrade1,
-        })
+        }),
       ).toEqual(origContent.replace('1.0.0', '1.0.2'));
 
       const updatedByPrevious = updateDependency({
@@ -367,17 +367,17 @@ describe('modules/manager/maven/index', () => {
         updateDependency({
           fileContent: updatedByPrevious,
           upgrade: upgrade2,
-        })
+        }),
       ).toEqual(origContent.replace('1.0.0', '1.0.3'));
       expect(
         updateDependency({
           fileContent: updatedOutside,
           upgrade: upgrade2,
-        })
+        }),
       ).toEqual(origContent.replace('1.0.0', '1.0.3'));
 
       expect(
-        updateDependency({ fileContent: origContent, upgrade: upgrade2 })
+        updateDependency({ fileContent: origContent, upgrade: upgrade2 }),
       ).toEqual(origContent.replace('1.0.0', '1.0.3'));
     });
 
@@ -388,7 +388,7 @@ describe('modules/manager/maven/index', () => {
       const upgrade = { ...dep, newValue: '2.0.2' };
       const updatedOutside = origContent.replace('2.0.0', '2.0.1');
       expect(
-        updateDependency({ fileContent: updatedOutside, upgrade })
+        updateDependency({ fileContent: updatedOutside, upgrade }),
       ).toBeNull();
     });
 
@@ -416,7 +416,7 @@ describe('modules/manager/maven/index', () => {
       const upgrade = { ...dep, newValue };
       const newContent = extractPackage(
         updateDependency({ fileContent: pomContent, upgrade })!,
-        'some-file'
+        'some-file',
       );
       const newDep = select(newContent!);
       expect(newDep?.currentValue).toEqual(newValue);
@@ -431,7 +431,7 @@ describe('modules/manager/maven/index', () => {
       expect(dep).not.toBeNull();
       const upgrade = { ...dep, newValue };
       expect(updateDependency({ fileContent: pomContent, upgrade })).toEqual(
-        pomContent
+        pomContent,
       );
     });
 

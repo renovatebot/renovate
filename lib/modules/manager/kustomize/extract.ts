@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -14,19 +14,19 @@ import type { HelmChart, Image, Kustomize } from './types';
 // URL specifications should follow the hashicorp URL format
 // https://github.com/hashicorp/go-getter#url-format
 const gitUrl = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/,
 );
 // regex to match URLs with ".git" delimiter
 const dotGitRegex = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(\.git))))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(\.git))))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/,
 );
 // regex to match URLs with "_git" delimiter
 const underscoreGitRegex = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/,
 );
 // regex to match URLs having an extra "//"
 const gitUrlWithPath = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])(?<project>[^?\s]+)))(?:\/\/)(?<subdir>[^?\s]+)\?ref=(?<currentValue>.+)$/
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])(?<project>[^?\s]+)))(?:\/\/)(?<subdir>[^?\s]+)\?ref=(?<currentValue>.+)$/,
 );
 
 export function extractResource(base: string): PackageDependency | null {
@@ -78,7 +78,7 @@ export function extractImage(image: Image): PackageDependency | null {
   if (digest && newTag) {
     logger.debug(
       { newTag, digest },
-      'Kustomize ignores newTag when digest is provided. Pick one, or use `newTag: tag@digest`'
+      'Kustomize ignores newTag when digest is provided. Pick one, or use `newTag: tag@digest`',
     );
     return {
       depName,
@@ -121,6 +121,8 @@ export function extractImage(image: Image): PackageDependency | null {
       ...dep,
       datasource: DockerDatasource.id,
       replaceString: newTag,
+      autoReplaceStringTemplate:
+        '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
     };
   }
 
@@ -136,7 +138,7 @@ export function extractImage(image: Image): PackageDependency | null {
 }
 
 export function extractHelmChart(
-  helmChart: HelmChart
+  helmChart: HelmChart,
 ): PackageDependency | null {
   if (!helmChart.name) {
     return null;
@@ -152,11 +154,12 @@ export function extractHelmChart(
 
 export function parseKustomize(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): Kustomize | null {
   let pkg: Kustomize | null = null;
   try {
-    pkg = load(content, { json: true }) as Kustomize;
+    // TODO: use schema (#9610)
+    pkg = parseSingleYaml(content, { json: true });
   } catch (e) /* istanbul ignore next */ {
     logger.debug({ packageFile }, 'Error parsing kustomize file');
     return null;
@@ -177,7 +180,7 @@ export function parseKustomize(
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string // TODO: fix tests
+  packageFile?: string, // TODO: fix tests
 ): PackageFileContent | null {
   logger.trace(`kustomize.extractPackageFile(${packageFile!})`);
   const deps: PackageDependency[] = [];

@@ -2,7 +2,7 @@ import { regEx } from '../../../util/regex';
 
 const re = regEx(
   `(?<preNotes>.*### Release Notes)(?<releaseNotes>.*)### Configuration(?<postNotes>.*)`,
-  's'
+  's',
 );
 
 export function smartTruncate(input: string, len: number): string {

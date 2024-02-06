@@ -8,7 +8,7 @@ describe('config/migrations/custom/package-name-migration', () => {
       },
       {
         packageNames: ['test'],
-      }
+      },
     );
   });
 });

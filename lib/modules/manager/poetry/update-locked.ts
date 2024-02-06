@@ -4,12 +4,12 @@ import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
 import { Lockfile } from './schema';
 
 export function updateLockedDependency(
-  config: UpdateLockedConfig
+  config: UpdateLockedConfig,
 ): UpdateLockedResult {
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
-    `poetry.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
+    `poetry.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
   );
 
   const LockedVersionSchema = Lockfile.transform(({ lock }) => lock[depName]);
@@ -18,7 +18,7 @@ export function updateLockedDependency(
       (lockedVersion): UpdateLockedResult =>
         lockedVersion === newVersion
           ? { status: 'already-updated' }
-          : { status: 'unsupported' }
+          : { status: 'unsupported' },
     )
     .unwrapOrElse({ status: 'unsupported' });
 }

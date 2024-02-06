@@ -37,7 +37,7 @@ export const GoTarget = z
 
       if (remote) {
         const remoteMatch = regEx(
-          /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/
+          /https:\/\/github\.com(?:.*\/)(([a-zA-Z]+)([-])?([a-zA-Z]+))/,
         ).exec(remote);
         if (remoteMatch && remoteMatch[0].length === remote.length) {
           dep.packageName = remote.replace('https://', '');
@@ -47,5 +47,5 @@ export const GoTarget = z
       }
 
       return [dep];
-    }
+    },
   );

@@ -1,8 +1,11 @@
+import { minimatch } from './minimatch';
+import { regEx } from './regex';
+
 // Return true if the match string is found at index in content
 export function matchAt(
   content: string,
   index: number,
-  match: string
+  match: string,
 ): boolean {
   return content.substring(index, index + match.length) === match;
 }
@@ -12,7 +15,7 @@ export function replaceAt(
   content: string,
   index: number,
   oldString: string,
-  newString: string
+  newString: string,
 ): string {
   return (
     content.substring(0, index) +
@@ -38,14 +41,14 @@ export function fromBase64(input: string): string {
 export function uniqueStrings(
   element: string,
   index: number,
-  elements: string[]
+  elements: string[],
 ): boolean {
   return elements.indexOf(element) === index;
 }
 
 export function looseEquals(
   a: string | null | undefined,
-  b: string | null | undefined
+  b: string | null | undefined,
 ): boolean {
   if (!(a && b)) {
     return a === b;
@@ -90,7 +93,35 @@ export function copystr(x: string): string {
  */
 export function coerceString(
   val: string | null | undefined,
-  def?: string
+  def?: string,
 ): string {
   return val ?? def ?? '';
+}
+
+export function matchRegexOrMinimatch(input: string, pattern: string): boolean {
+  if (pattern.length > 2 && pattern.startsWith('/') && pattern.endsWith('/')) {
+    try {
+      const regex = regEx(pattern.slice(1, -1));
+      return regex.test(input);
+    } catch (err) {
+      return false;
+    }
+  }
+
+  return minimatch(pattern, { dot: true }).match(input);
+}
+
+export function anyMatchRegexOrMinimatch(
+  input: string,
+  patterns: string[],
+): boolean | null {
+  return patterns.some((pattern) => matchRegexOrMinimatch(input, pattern));
+}
+
+const UUIDRegex = regEx(
+  /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i,
+);
+
+export function isUUID(input: string): boolean {
+  return UUIDRegex.test(input);
 }

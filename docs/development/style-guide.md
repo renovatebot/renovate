@@ -10,6 +10,11 @@ This document describes the correct style for user-facing text in the:
 
 Set your spell checker to the correct language.
 
+Guidelines:
+
+- Use `ize` instead of `ise` in words like customize and analyze
+- Drop the British `u` in words like behavior
+
 ## One sentence per line
 
 In Markdown files, use one sentence per line.
@@ -19,6 +24,24 @@ Like this:
 First sentence on one line.
 Second sentence on a new line.
 And so on.
+```
+
+## Avoid manually ordering numbered lists
+
+Avoid:
+
+```markdown
+1. First item
+2. Second item
+3. Third item
+```
+
+Do:
+
+```markdown
+1. First item
+1. Second item
+1. Third item
 ```
 
 ## Avoid punctuation at the end of list items

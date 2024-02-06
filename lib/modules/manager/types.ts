@@ -234,34 +234,35 @@ export interface ManagerApi extends ModuleApi {
   bumpPackageVersion?(
     content: string,
     currentValue: string,
-    bumpVersion: ReleaseType
+    bumpVersion: ReleaseType,
+    packageFile: string,
   ): Result<BumpPackageVersionResult>;
 
   detectGlobalConfig?(): Result<GlobalManagerConfig>;
 
   extractAllPackageFiles?(
     config: ExtractConfig,
-    files: string[]
+    files: string[],
   ): Result<PackageFile[] | null>;
 
   extractPackageFile?(
     content: string,
     packageFile?: string,
-    config?: ExtractConfig
+    config?: ExtractConfig,
   ): Result<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
   updateArtifacts?(
-    updateArtifact: UpdateArtifact
+    updateArtifact: UpdateArtifact,
   ): Result<UpdateArtifactsResult[] | null>;
 
   updateDependency?(
-    updateDependencyConfig: UpdateDependencyConfig
+    updateDependencyConfig: UpdateDependencyConfig,
   ): Result<string | null>;
 
   updateLockedDependency?(
-    config: UpdateLockedConfig
+    config: UpdateLockedConfig,
   ): Result<UpdateLockedResult>;
 }
 

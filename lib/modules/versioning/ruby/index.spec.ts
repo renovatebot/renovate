@@ -27,7 +27,7 @@ describe('modules/versioning/ruby/index', () => {
       expect(semverRuby.getMajor(version)).toBe(major);
       expect(semverRuby.getMinor(version)).toBe(minor);
       expect(semverRuby.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -129,7 +129,7 @@ describe('modules/versioning/ruby/index', () => {
     'minSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(semverRuby.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -144,7 +144,7 @@ describe('modules/versioning/ruby/index', () => {
     'getSatisfyingVersion($versions, "$range") === "$expected"',
     ({ versions, range, expected }) => {
       expect(semverRuby.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -161,7 +161,7 @@ describe('modules/versioning/ruby/index', () => {
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(semverRuby.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -180,7 +180,7 @@ describe('modules/versioning/ruby/index', () => {
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(semverRuby.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -397,8 +397,8 @@ describe('modules/versioning/ruby/index', () => {
           rangeStrategy,
           currentVersion,
           newVersion,
-        })
+        }),
       ).toBe(expected);
-    }
+    },
   );
 });

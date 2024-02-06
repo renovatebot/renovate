@@ -83,14 +83,14 @@ export const matches = (version: string, range: string): boolean =>
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return maxSatisfying(versions.map(vtrim), vtrim(range));
 }
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return minSatisfying(versions.map(vtrim), vtrim(range));
 }
@@ -151,12 +151,12 @@ const getNewValue = ({
       .map((element) =>
         element.replace(
           regEx(`^(?<whitespace>\\s*)`),
-          `$<whitespace>${delimiter}`
-        )
+          `$<whitespace>${delimiter}`,
+        ),
       )
       .map(
         (element) =>
-          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`) // TODO #12875 adds ' at front when re2 is used
+          element.replace(/(?<whitespace>\s*)$/, `${delimiter}$<whitespace>`), // TODO #12875 adds ' at front when re2 is used
       )
       .join(',');
   }

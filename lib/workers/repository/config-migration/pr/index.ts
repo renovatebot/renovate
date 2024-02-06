@@ -18,17 +18,17 @@ import { getMigrationBranchName } from '../common';
 
 export async function ensureConfigMigrationPr(
   config: RenovateConfig,
-  migratedConfigData: MigratedData
+  migratedConfigData: MigratedData,
 ): Promise<void> {
   logger.debug('ensureConfigMigrationPr()');
   const docsLink = joinUrlParts(
     coerceString(config.productLinks?.documentation),
-    'configuration-options/#configmigration'
+    'configuration-options/#configmigration',
   );
   const branchName = getMigrationBranchName(config);
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
-    migratedConfigData.filename
+    migratedConfigData.filename,
   );
 
   const prTitle = commitMessageFactory.getPrTitle();
@@ -52,7 +52,7 @@ ${
 
 :question: Got questions? Does something look wrong to you? Please don't hesitate to [request help here](${
       config.productLinks?.help
-    }).\n\n`
+    }).\n\n`,
   );
 
   if (is.string(config.prHeader)) {
@@ -116,12 +116,12 @@ ${
     if (
       err.response?.statusCode === 422 &&
       err.response?.body?.errors?.[0]?.message?.startsWith(
-        'A pull request already exists'
+        'A pull request already exists',
       )
     ) {
       logger.warn(
         { err },
-        'Migration PR already exists but cannot find it. It was probably created by a different user.'
+        'Migration PR already exists but cannot find it. It was probably created by a different user.',
       );
       await scm.deleteBranch(branchName);
       return;

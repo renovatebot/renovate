@@ -5,7 +5,11 @@ description: Self-Hosted configuration usable in config file, CLI or environment
 
 # Self-Hosted configuration options
 
-You can only use these configuration options when you're self-hosting Renovate.
+Only use these configuration options when you _self-host_ Renovate.
+
+Do _not_ put the self-hosted config options listed on this page in your "repository config" file (`renovate.json` for example), because Renovate will ignore those config options, and may also create a config error issue.
+
+The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
@@ -59,6 +63,44 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowScripts
 
+## allowedHeaders
+
+`allowedHeaders` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
+By default, all headers starting with "X-" are allowed.
+If needed, you can allow additional headers with the `allowedHeaders` option.
+Any set `allowedHeaders` overrides the default "X-" allowed headers, so you should include them in your config if you wish for them to remain allowed.
+The `allowedHeaders` config option takes an array of minimatch-compatible globs or re2-compatible regex strings.
+
+Examples:
+
+| Example header | Kind of pattern  | Explanation                                 |
+| -------------- | ---------------- | ------------------------------------------- |
+| `/X/`          | Regex            | Any header with `x` anywhere in the name    |
+| `!/X/`         | Regex            | Any header without `X` anywhere in the name |
+| `X-*`          | Global pattern   | Any header starting with `X-`               |
+| `X`            | Exact match glob | Only the header matching exactly `X`        |
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://domain.com/all-versions",
+      "headers": {
+        "X-Auth-Token": "secret"
+      }
+    }
+  ]
+}
+```
+
+Or with custom `allowedHeaders`:
+
+```js title="config.js"
+module.exports = {
+  allowedHeaders: ['custom-header'],
+};
+```
+
 ## allowedPostUpgradeCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
@@ -80,6 +122,7 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 ## autodiscoverFilter
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
+The pattern matches against the organization/repo path.
 It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
 
 If you set multiple filters, then the matches of each filter are added to the overall result.
@@ -89,17 +132,20 @@ Commas will be used as delimiter for a new filter.
 
 ```
 # DO NOT use commas inside the filter if your are using env or cli variables to configure it.
-RENOVATE_AUTODISCOVER_FILTER="/myapp/{readme.md,src/**}"
+RENOVATE_AUTODISCOVER_FILTER="/MyOrg/{my-repo,foo-repo}"
+
 
 # in this example you can use regex instead
-RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
+RENOVATE_AUTODISCOVER_FILTER="/MyOrg\/(my|foo)-repo/"
 ```
 
 **Minimatch**:
 
+The configuration:
+
 ```json
 {
-  "autodiscoverFilter": ["project/*"]
+  "autodiscoverFilter": ["my-org/*"]
 }
 ```
 
@@ -266,11 +312,11 @@ If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set t
 
 The format of the environment variables must follow:
 
-- Datasource name (e.g. `NPM`, `PYPI`)
+- Datasource name (e.g. `NPM`, `PYPI`) or Platform name (only `GITHUB`)
 - Underscore (`_`)
 - `matchHost`
 - Underscore (`_`)
-- Field name (`TOKEN`, `USERNAME`, or `PASSWORD`)
+- Field name (`TOKEN`, `USERNAME`, `PASSWORD`, `HTTPSPRIVATEKEY`, `HTTPSCERTIFICATE`, `HTTPSCERTIFICATEAUTHORITY`)
 
 Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
 Periods (`.`) in host names must be replaced with a single underscore (`_`).
@@ -278,6 +324,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 <!-- prettier-ignore -->
 !!! note
     You can't use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
+    In addition, platform host rules will only be picked up when `matchHost` is supplied.
 
 ### npmjs registry token example
 
@@ -330,6 +377,24 @@ You can skip the host part, and use only the datasource and credentials.
 }
 ```
 
+### Platform with https authentication options
+
+`GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATE=certificate GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSPRIVATEKEY=private-key GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATEAUTHORITY=certificate-authority`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "github",
+      "matchHost": "some.github-enterprise.host",
+      "httpsPrivateKey": "private-key",
+      "httpsCertificate": "certificate",
+      "httpsCertificateAuthority": "certificate-authority"
+    }
+  ]
+}
+```
+
 ## dockerChildPrefix
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
@@ -374,9 +439,8 @@ The user-id (UID) and group-id (GID) must match the user that executes Renovate.
 
 Read the [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
 Set this to `1001:1002` to use UID 1001 and GID 1002.
-For example:
 
-```json
+```json title="Setting UID to 1001 and GID to 1002"
 {
   "dockerUser": "1001:1002"
 }
@@ -638,6 +702,17 @@ CI jobs are usually triggered by these events: pull-request creation, pull-reque
 Set as an integer.
 Default is no limit.
 
+## presetCachePersistence
+
+When this feature is enabled, resolved presets will be cached in Renovate's package cache, enabling reuse across multiple repositories.
+
+TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachettloverride).
+
+<!-- prettier-ignore -->
+!!! warning
+     Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
+     You should only enable this when all repositories are trusted, such as a corporate environment.
+
 ## privateKey
 
 This private key is used to decrypt config files.
@@ -738,11 +813,23 @@ Used as an alternative to `privateKeyOld`, if you want the key to be read from d
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
+## redisPrefix
+
+If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
+It's only used if `redisUrl` is configured.
+
 ## redisUrl
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
-The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs.
+The global cache is used to store lookup results (e.g. dependency versions and changelogs) between repositories and runs.
+
+For non encrypted connections,
+
 Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
+
+For TLS/SSL-enabled connections, use rediss prefix
+
+Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
 ## repositories
 
@@ -762,9 +849,7 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ## repositoryCacheType
 
-Set this to an S3 URI to enable S3 backed repository cache.
-
-```ts
+```ts title="Set repositoryCacheType to an S3 URI to enable S3 backed repository cache"
 {
   repositoryCacheType: 's3://bucket-name';
 }
@@ -865,6 +950,11 @@ This is currently applicable to `npm` only, and only used in cases where bugs in
 
 If enabled emoji shortcodes are replaced with their Unicode equivalents.
 For example: `:warning:` will be replaced with `⚠️`.
+
+## useCloudMetadataServices
+
+Some cloud providers offer services to receive metadata about the current instance, for example [AWS Instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html) or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).
+You can control if Renovate should try to access these services with the `useCloudMetadataServices` config option.
 
 ## username
 

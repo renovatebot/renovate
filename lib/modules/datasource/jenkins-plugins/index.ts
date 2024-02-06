@@ -54,11 +54,11 @@ export class JenkinsPluginsDatasource extends Datasource {
     ttlMinutes: 1440,
   })
   async getJenkinsPluginInfo(
-    updateSiteUrl: string
+    updateSiteUrl: string,
   ): Promise<Record<string, ReleaseResult>> {
     const { plugins } =
       await this.getJenkinsUpdateCenterResponse<JenkinsPluginsInfoResponse>(
-        `${updateSiteUrl}${JenkinsPluginsDatasource.packageInfoPath}`
+        `${updateSiteUrl}${JenkinsPluginsDatasource.packageInfoPath}`,
       );
 
     const info: Record<string, ReleaseResult> = {};
@@ -73,11 +73,11 @@ export class JenkinsPluginsDatasource extends Datasource {
 
   @cache({ namespace: JenkinsPluginsDatasource.id, key: 'versions' })
   async getJenkinsPluginVersions(
-    updateSiteUrl: string
+    updateSiteUrl: string,
   ): Promise<Record<string, Release[]>> {
     const { plugins } =
       await this.getJenkinsUpdateCenterResponse<JenkinsPluginsVersionsResponse>(
-        `${updateSiteUrl}${JenkinsPluginsDatasource.packageVersionsPath}`
+        `${updateSiteUrl}${JenkinsPluginsDatasource.packageVersionsPath}`,
       );
 
     const versions: Record<string, Release[]> = {};
@@ -85,13 +85,16 @@ export class JenkinsPluginsDatasource extends Datasource {
       versions[name] = Object.keys(plugins[name]).map((version) => {
         const downloadUrl = plugins[name][version]?.url;
         const buildDate = plugins[name][version]?.buildDate;
-        const releaseTimestamp = buildDate
-          ? new Date(`${buildDate} UTC`).toISOString()
-          : null;
+        const releaseTimestamp =
+          plugins[name][version]?.releaseTimestamp ??
+          (buildDate ? new Date(`${buildDate} UTC`).toISOString() : null);
+        const jenkins = plugins[name][version]?.requiredCore;
+        const constraints = jenkins ? { jenkins: [`>=${jenkins}`] } : undefined;
         return {
           version,
           downloadUrl,
           releaseTimestamp,
+          ...(constraints && { constraints }),
         };
       });
     }
@@ -108,7 +111,7 @@ export class JenkinsPluginsDatasource extends Datasource {
       const durationMs = Math.round(Date.now() - startTime);
       logger.debug(
         { durationMs },
-        `jenkins-plugins: Fetched Jenkins plugins from ${url}`
+        `jenkins-plugins: Fetched Jenkins plugins from ${url}`,
       );
     } catch (err) /* istanbul ignore next */ {
       this.handleGenericErrors(err);

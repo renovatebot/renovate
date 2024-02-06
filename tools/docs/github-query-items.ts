@@ -55,7 +55,7 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
       {
         paginationField: 'items',
         paginate: true,
-      }
+      },
     );
     const rawItems = res.body?.items ?? [];
 
@@ -68,7 +68,10 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
     return renovateOpenItems;
   } catch (err) {
     logger.error({ err }, 'Error getting query results');
-    throw err;
+    if (process.env.CI) {
+      throw err;
+    }
+    return { managers: {}, platforms: {}, datasources: {} };
   }
 }
 
@@ -119,7 +122,7 @@ function stringifyIssues(items: ItemsEntity[] | undefined): string {
 
 export function generateFeatureAndBugMarkdown(
   issuesMap: OpenItems,
-  key: string
+  key: string,
 ): string {
   let md = '\n\n';
 

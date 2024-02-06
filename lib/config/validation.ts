@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../logger';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
 import type {
@@ -6,27 +7,34 @@ import type {
   RegexManagerTemplates,
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
+import type { HostRule } from '../types/host-rules';
 import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
+import { anyMatchRegexOrMinimatch } from '../util/string';
 import * as template from '../util/template';
 import {
   hasValidSchedule,
   hasValidTimezone,
 } from '../workers/repository/update/branch/schedule';
+import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
-import type {
-  RenovateConfig,
-  RenovateOptions,
-  ValidationMessage,
-  ValidationResult,
+import {
+  AllowedParents,
+  type RenovateConfig,
+  type RenovateOptions,
+  type StatusCheckKey,
+  type ValidationMessage,
+  type ValidationResult,
+  allowedStatusCheckStrings,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
 
 const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
-let optionParents: Record<string, RenovateOptions['parent']>;
+let optionParents: Record<string, AllowedParents[]>;
+let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
 
@@ -34,6 +42,7 @@ const topLevelObjects = managerList;
 
 const ignoredNodes = [
   '$schema',
+  'headers',
   'depType',
   'npmToken',
   'packageFile',
@@ -71,7 +80,7 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
 
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
-    (manager) => !allManagersList.includes(manager)
+    (manager) => !allManagersList.includes(manager.replace('custom.', '')),
   );
 }
 
@@ -95,9 +104,10 @@ export function getParentName(parentPath: string | undefined): string {
 }
 
 export async function validateConfig(
+  isGlobalConfig: boolean,
   config: RenovateConfig,
   isPreset?: boolean,
-  parentPath?: string
+  parentPath?: string,
 ): Promise<ValidationResult> {
   if (!optionTypes) {
     optionTypes = {};
@@ -108,11 +118,12 @@ export async function validateConfig(
   if (!optionParents) {
     optionParents = {};
     options.forEach((option) => {
-      if (option.parent) {
-        optionParents[option.name] = option.parent;
+      if (option.parents) {
+        optionParents[option.name] = option.parents;
       }
     });
   }
+
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
@@ -126,21 +137,43 @@ export async function validateConfig(
       });
       continue;
     }
-    if (parentPath && topLevelObjects.includes(key)) {
+    if (
+      parentPath &&
+      parentPath !== 'onboardingConfig' &&
+      topLevelObjects.includes(key)
+    ) {
       errors.push({
         topic: 'Configuration Error',
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
     }
+    if (!isGlobalConfig) {
+      if (!optionGlobals) {
+        optionGlobals = new Set<string>();
+        for (const option of options) {
+          if (option.globalOnly) {
+            optionGlobals.add(option.name);
+          }
+        }
+      }
+
+      if (optionGlobals.has(key) && !isFalseGlobal(key, parentPath)) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+        });
+        continue;
+      }
+    }
     if (key === 'enabledManagers' && val) {
       const unsupportedManagers = getUnsupportedEnabledManagers(
-        val as string[]
+        val as string[],
       );
       if (is.nonEmptyArray(unsupportedManagers)) {
         errors.push({
           topic: 'Configuration Error',
           message: `The following managers configured in enabledManagers are not supported: "${unsupportedManagers.join(
-            ', '
+            ', ',
           )}"`,
         });
       }
@@ -192,10 +225,12 @@ export async function validateConfig(
       if (
         !isPreset &&
         optionParents[key] &&
-        optionParents[key] !== parentName
+        !optionParents[key].includes(parentName as AllowedParents)
       ) {
         // TODO: types (#22198)
-        const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
+        const message = `${key} should only be configured within one of "${optionParents[
+          key
+        ]?.join(' or ')}" objects. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
           message,
@@ -248,7 +283,7 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be boolean. Found: ${JSON.stringify(
-                val
+                val,
               )} (${typeof val})`,
             });
           }
@@ -257,7 +292,7 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-                val
+                val,
               )} (${typeof val})`,
             });
           }
@@ -266,9 +301,10 @@ export async function validateConfig(
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
                 const subValidation = await validateConfig(
+                  isGlobalConfig,
                   subval as RenovateConfig,
                   isPreset,
-                  `${currentPath}[${subIndex}]`
+                  `${currentPath}[${subIndex}]`,
                 );
                 warnings = warnings.concat(subValidation.warnings);
                 errors = errors.concat(subValidation.errors);
@@ -331,6 +367,7 @@ export async function validateConfig(
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
+              'matchCurrentAge',
               'matchRepositories',
             ];
             if (key === 'packageRules') {
@@ -340,19 +377,19 @@ export async function validateConfig(
                     packageRules: [
                       await resolveConfigPresets(
                         packageRule as RenovateConfig,
-                        config
+                        config,
                       ),
                     ],
                   }).migratedConfig.packageRules![0];
                   errors.push(
-                    ...managerValidator.check({ resolvedRule, currentPath })
+                    ...managerValidator.check({ resolvedRule, currentPath }),
                   );
                   const selectorLength = Object.keys(resolvedRule).filter(
-                    (ruleKey) => selectors.includes(ruleKey)
+                    (ruleKey) => selectors.includes(ruleKey),
                   ).length;
                   if (!selectorLength) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one match* or exclude* selector. Rule: ${JSON.stringify(
-                      packageRule
+                      packageRule,
                     )}`;
                     errors.push({
                       topic: 'Configuration Error',
@@ -361,7 +398,7 @@ export async function validateConfig(
                   }
                   if (selectorLength === Object.keys(resolvedRule).length) {
                     const message = `${currentPath}[${subIndex}]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: ${JSON.stringify(
-                      packageRule
+                      packageRule,
                     )}`;
                     warnings.push({
                       topic: 'Configuration Error',
@@ -389,7 +426,7 @@ export async function validateConfig(
                     for (const option of preLookupOptions) {
                       if (resolvedRule[option] !== undefined) {
                         const message = `${currentPath}[${subIndex}]: packageRules cannot combine both matchUpdateTypes and ${option}. Rule: ${JSON.stringify(
-                          packageRule
+                          packageRule,
                         )}`;
                         errors.push({
                           topic: 'Configuration Error',
@@ -426,16 +463,16 @@ export async function validateConfig(
               for (const customManager of val as CustomManager[]) {
                 if (
                   Object.keys(customManager).some(
-                    (k) => !allowedKeys.includes(k)
+                    (k) => !allowedKeys.includes(k),
                   )
                 ) {
                   const disallowedKeys = Object.keys(customManager).filter(
-                    (k) => !allowedKeys.includes(k)
+                    (k) => !allowedKeys.includes(k),
                   );
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Custom Manager contains disallowed fields: ${disallowedKeys.join(
-                      ', '
+                      ', ',
                     )}`,
                   });
                 } else if (
@@ -448,7 +485,7 @@ export async function validateConfig(
                         validateRegexManagerFields(
                           customManager,
                           currentPath,
-                          errors
+                          errors,
                         );
                         break;
                     }
@@ -563,6 +600,30 @@ export async function validateConfig(
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
               }
+            } else if (key === 'statusCheckNames') {
+              for (const [statusCheckKey, statusCheckValue] of Object.entries(
+                val,
+              )) {
+                if (
+                  !allowedStatusCheckStrings.includes(
+                    statusCheckKey as StatusCheckKey,
+                  )
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${key}.${statusCheckKey}\` configuration: key is not allowed.`,
+                  });
+                }
+                if (
+                  !(is.string(statusCheckValue) || is.null_(statusCheckValue))
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid \`${currentPath}.${statusCheckKey}\` configuration: status check is not a string.`,
+                  });
+                  continue;
+                }
+              }
             } else if (key === 'customDatasources') {
               const allowedKeys = [
                 'description',
@@ -582,7 +643,7 @@ export async function validateConfig(
                   continue;
                 }
                 for (const [subKey, subValue] of Object.entries(
-                  customDatasourceValue
+                  customDatasourceValue,
                 )) {
                   if (!allowedKeys.includes(subKey)) {
                     errors.push({
@@ -626,9 +687,10 @@ export async function validateConfig(
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
                 const subValidation = await validateConfig(
+                  isGlobalConfig,
                   val,
                   isPreset,
-                  currentPath
+                  currentPath,
                 );
                 warnings = warnings.concat(subValidation.warnings);
                 errors = errors.concat(subValidation.errors);
@@ -638,6 +700,29 @@ export async function validateConfig(
             errors.push({
               topic: 'Configuration Error',
               message: `Configuration option \`${currentPath}\` should be a json object`,
+            });
+          }
+        }
+      }
+    }
+
+    if (key === 'hostRules' && is.array(val)) {
+      const allowedHeaders = GlobalConfig.get('allowedHeaders', []);
+      for (const rule of val as HostRule[]) {
+        if (!rule.headers) {
+          continue;
+        }
+        for (const [header, value] of Object.entries(rule.headers)) {
+          if (!is.string(value)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `Invalid hostRules headers value configuration: header must be a string.`,
+            });
+          }
+          if (!anyMatchRegexOrMinimatch(header, allowedHeaders)) {
+            errors.push({
+              topic: 'Configuration Error',
+              message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,
             });
           }
         }
@@ -662,13 +747,17 @@ export async function validateConfig(
 function validateRegexManagerFields(
   customManager: Partial<RegexManagerConfig>,
   currentPath: string,
-  errors: ValidationMessage[]
+  errors: ValidationMessage[],
 ): void {
   if (is.nonEmptyArray(customManager.matchStrings)) {
     for (const matchString of customManager.matchStrings) {
       try {
         regEx(matchString);
-      } catch (e) {
+      } catch (err) {
+        logger.debug(
+          { err },
+          'customManager.matchStrings regEx validation error',
+        );
         errors.push({
           topic: 'Configuration Error',
           message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
@@ -688,7 +777,7 @@ function validateRegexManagerFields(
     if (
       !customManager[templateField] &&
       !customManager.matchStrings?.some((matchString) =>
-        matchString.includes(`(?<${field}>`)
+        matchString.includes(`(?<${field}>`),
       )
     ) {
       errors.push({
@@ -697,4 +786,23 @@ function validateRegexManagerFields(
       });
     }
   }
+}
+
+/**  An option is a false global if it has the same name as a global only option
+ *   but is actually just the field of a non global option or field an children of the non global option
+ *   eg. token: it's global option used as the bot's token as well and
+ *   also it can be the token used for a platform inside the hostRules configuration
+ */
+function isFalseGlobal(optionName: string, parentPath?: string): boolean {
+  if (parentPath?.includes('hostRules')) {
+    if (
+      optionName === 'token' ||
+      optionName === 'username' ||
+      optionName === 'password'
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }

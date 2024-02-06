@@ -16,7 +16,7 @@ describe('workers/repository/config-migration/branch/create', () => {
   const filename = 'renovate.json';
   const prettierSpy = jest.spyOn(
     MigratedDataFactory,
-    'applyPrettierFormatting'
+    'applyPrettierFormatting',
   );
 
   let config: RenovateConfig;

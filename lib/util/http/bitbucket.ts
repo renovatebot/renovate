@@ -26,7 +26,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
   protected override async request<T>(
     path: string,
-    options?: BitbucketHttpOptions & HttpRequestOptions<T>
+    options?: BitbucketHttpOptions & HttpRequestOptions<T>,
   ): Promise<HttpResponse<T>> {
     const opts = { baseUrl, ...options };
 
@@ -53,7 +53,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
       while (is.nonEmptyString(nextURL) && page <= MAX_PAGES) {
         const nextResult = await super.request<PagedResult<T>>(
           nextURL,
-          options as BitbucketHttpOptions
+          options as BitbucketHttpOptions,
         );
 
         resultBody.values.push(...nextResult.body.values);

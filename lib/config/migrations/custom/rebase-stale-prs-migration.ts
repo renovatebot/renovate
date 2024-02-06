@@ -12,7 +12,7 @@ export class RebaseStalePrsMigration extends AbstractMigration {
       if (is.boolean(value)) {
         this.setSafely(
           'rebaseWhen',
-          value ? 'behind-base-branch' : 'conflicted'
+          value ? 'behind-base-branch' : 'conflicted',
         );
       }
 

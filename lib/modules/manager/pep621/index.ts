@@ -1,5 +1,6 @@
 import type { Category } from '../../../constants';
 import { PypiDatasource } from '../../datasource/pypi';
+export { bumpPackageVersion } from './update';
 export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 

@@ -21,14 +21,14 @@ interface EnsureBitbucketCommentConfig extends EnsureCommentConfig {
 
 async function getComments(
   config: CommentsConfig,
-  prNo: number
+  prNo: number,
 ): Promise<Comment[]> {
   const comments = (
     await bitbucketHttp.getJson<PagedResult<Comment>>(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
       {
         paginate: true,
-      }
+      },
     )
   ).body.values;
 
@@ -39,13 +39,13 @@ async function getComments(
 async function addComment(
   config: CommentsConfig,
   prNo: number,
-  raw: string
+  raw: string,
 ): Promise<void> {
   await bitbucketHttp.postJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
     {
       body: { content: { raw } },
-    }
+    },
   );
 }
 
@@ -53,23 +53,23 @@ async function editComment(
   config: CommentsConfig,
   prNo: number,
   commentId: number,
-  raw: string
+  raw: string,
 ): Promise<void> {
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments/${commentId}`,
     {
       body: { content: { raw } },
-    }
+    },
   );
 }
 
 async function deleteComment(
   config: CommentsConfig,
   prNo: number,
-  commentId: number
+  commentId: number,
 ): Promise<void> {
   await bitbucketHttp.deleteJson(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments/${commentId}`
+    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments/${commentId}`,
   );
 }
 
@@ -111,7 +111,7 @@ export async function ensureComment({
       await addComment(config, prNo, body);
       logger.info(
         { repository: config.repository, prNo, topic },
-        'Comment added'
+        'Comment added',
       );
     } else if (commentNeedsUpdating) {
       await editComment(config, prNo, commentId, body);
@@ -128,12 +128,12 @@ export async function ensureComment({
 
 export async function reopenComments(
   config: CommentsConfig,
-  prNo: number
+  prNo: number,
 ): Promise<Comment[]> {
   const comments = await getComments(config, prNo);
 
   const reopenComments = comments.filter((comment) =>
-    comment.content.raw.startsWith(REOPEN_PR_COMMENT_KEYWORD)
+    comment.content.raw.startsWith(REOPEN_PR_COMMENT_KEYWORD),
   );
 
   return reopenComments;
@@ -141,7 +141,7 @@ export async function reopenComments(
 
 export async function ensureCommentRemoval(
   config: CommentsConfig,
-  deleteConfig: EnsureCommentRemovalConfig
+  deleteConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
   try {
     const { number: prNo } = deleteConfig;
@@ -176,10 +176,10 @@ function sanitizeCommentBody(body: string): string {
   return body
     .replace(
       'checking the rebase/retry box above',
-      'renaming this PR to start with "rebase!"'
+      'renaming this PR to start with "rebase!"',
     )
     .replace(
       'rename this PR to get a fresh replacement',
-      'add a comment starting with "reopen!" to get a fresh replacement'
+      'add a comment starting with "reopen!" to get a fresh replacement',
     );
 }

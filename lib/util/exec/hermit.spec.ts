@@ -43,7 +43,7 @@ describe('util/exec/hermit', () => {
         expect(await findHermitCwd(cwd)).toBe(upath.join(localDir, expected));
 
         expect(findUp.mock.calls[0][1]?.cwd).toBe(cwd);
-      }
+      },
     );
 
     it('should throw error when hermit cwd is not found', async () => {
@@ -75,7 +75,7 @@ describe('util/exec/hermit', () => {
       const resp = await getHermitEnvs(
         partial<RawExecOptions>({
           cwd: fullCwd,
-        })
+        }),
       );
 
       expect(findUp.mock.calls[0][1]?.cwd).toEqual(fullCwd);

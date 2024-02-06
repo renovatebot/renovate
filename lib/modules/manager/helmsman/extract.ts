@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type {
@@ -15,7 +15,7 @@ const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
 
 function createDep(
   key: string,
-  doc: HelmsmanDocument
+  doc: HelmsmanDocument,
 ): PackageDependency | null {
   const dep: PackageDependency = {
     depName: key,
@@ -65,13 +65,13 @@ function createDep(
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config: ExtractConfig
+  _config: ExtractConfig,
 ): PackageFileContent | null {
   try {
-    // TODO: fix me (#9610)
-    const doc = load(content, {
+    // TODO: use schema (#9610)
+    const doc = parseSingleYaml<HelmsmanDocument>(content, {
       json: true,
-    }) as HelmsmanDocument;
+    });
     if (!doc.apps) {
       logger.debug({ packageFile }, `Missing apps keys`);
       return null;

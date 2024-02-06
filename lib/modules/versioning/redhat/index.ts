@@ -8,7 +8,7 @@ export const urls = [];
 export const supportsRanges = false;
 
 const pattern = regEx(
-  /^(?<major>\d+)(?:\.(?<minor>\d+))?(?:\.(?<patch>\d+))?(?:-(?<releaseMajor>\d+)(?:\.(?<releaseMinor>\d+))?)?$/
+  /^(?<major>\d+)(?:\.(?<minor>\d+))?(?:\.(?<patch>\d+))?(?:-(?<releaseMajor>\d+)(?:\.(?<releaseMinor>\d+))?)?$/,
 );
 
 class RedhatVersioningApi extends GenericVersioningApi {

@@ -6,7 +6,7 @@ import type { BumpPackageVersionResult } from '../../../types';
 type MirrorBumpVersion = `mirror:${string}`;
 
 function isMirrorBumpVersion(
-  bumpVersion: string
+  bumpVersion: string,
 ): bumpVersion is MirrorBumpVersion {
   return bumpVersion.startsWith('mirror:');
 }
@@ -14,11 +14,11 @@ function isMirrorBumpVersion(
 export function bumpPackageVersion(
   content: string,
   currentValue: string,
-  bumpVersion: ReleaseType | `mirror:${string}`
+  bumpVersion: ReleaseType | `mirror:${string}`,
 ): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
-    'Checking if we should bump package.json version'
+    'Checking if we should bump package.json version',
   );
   // TODO: types (#22198)
   let newPjVersion: string | null;
@@ -44,7 +44,7 @@ export function bumpPackageVersion(
     logger.debug(`newPjVersion: ${newPjVersion!}`);
     bumpedContent = content.replace(
       regEx(`(?<version>"version":\\s*")[^"]*`),
-      `$<version>${newPjVersion!}`
+      `$<version>${newPjVersion!}`,
     );
     if (bumpedContent === content) {
       logger.debug('Version was already bumped');
@@ -58,7 +58,7 @@ export function bumpPackageVersion(
         currentValue,
         bumpVersion,
       },
-      'Failed to bumpVersion'
+      'Failed to bumpVersion',
     );
   }
   return { bumpedContent };

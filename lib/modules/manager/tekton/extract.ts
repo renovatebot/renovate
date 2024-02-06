@@ -1,7 +1,10 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { regEx } from '../../../util/regex';
+import { parseYaml } from '../../../util/yaml';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type {
@@ -13,17 +16,18 @@ import type {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`tekton.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
   let docs: TektonResource[];
   try {
-    docs = loadAll(content) as TektonResource[];
+    // TODO: use schema (#9610)
+    docs = parseYaml(content);
   } catch (err) {
     logger.debug(
       { err, packageFile },
-      'Failed to parse YAML resource as a Tekton resource'
+      'Failed to parse YAML resource as a Tekton resource',
     );
     return null;
   }
@@ -52,6 +56,8 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   // Handle PipelineRun resource
   addDep(doc.spec?.pipelineRef, deps);
 
+  addPipelineAsCodeAnnotations(doc.metadata?.annotations, deps);
+
   // Handle PipelineRun resource with inline Pipeline definition
   const pipelineSpec = doc.spec?.pipelineSpec;
   if (is.truthy(pipelineSpec)) {
@@ -78,6 +84,77 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   }
 
   return deps;
+}
+
+const taskAnnotation = regEx(/^pipelinesascode\.tekton\.dev\/task(-[0-9]+)?$/);
+
+function addPipelineAsCodeAnnotations(
+  annotations: Record<string, string> | undefined | null,
+  deps: PackageDependency[],
+): void {
+  if (is.nullOrUndefined(annotations)) {
+    return;
+  }
+
+  for (const [key, value] of Object.entries(annotations)) {
+    if (!taskAnnotation.test(key)) {
+      continue;
+    }
+
+    const tasks = value
+      .replace(regEx(/]$/), '')
+      .replace(regEx(/^\[/), '')
+      .split(',');
+    for (const task of tasks) {
+      const dep = getAnnotationDep(task.trim());
+      if (!dep) {
+        continue;
+      }
+      deps.push(dep);
+    }
+  }
+}
+
+const githubRelease = regEx(
+  /^(?<url>(?:(?:http|https):\/\/)?(?<path>(?:[^:/\s]+[:/])?(?<project>[^/\s]+\/[^/\s]+)))\/releases\/download\/(?<currentValue>.+)\/(?<subdir>[^?\s]*)$/,
+);
+
+const gitUrl = regEx(
+  /^(?<url>(?:(?:http|https):\/\/)?(?<path>(?:[^:/\s]+[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?:\/raw)?\/(?<currentValue>.+?)\/(?<subdir>[^?\s]*)$/,
+);
+
+function getAnnotationDep(url: string): PackageDependency | null {
+  const dep: PackageDependency = {};
+  dep.depType = 'tekton-annotation';
+
+  let groups = githubRelease.exec(url)?.groups;
+
+  if (groups) {
+    dep.datasource = GithubReleasesDatasource.id;
+
+    dep.depName = groups.path;
+    dep.packageName = groups.project;
+    dep.currentValue = groups.currentValue;
+    return dep;
+  }
+
+  groups = gitUrl.exec(url)?.groups;
+  if (groups) {
+    dep.datasource = GitTagsDatasource.id;
+
+    dep.depName = groups.path.replace(
+      'raw.githubusercontent.com',
+      'github.com',
+    );
+    dep.packageName = groups.url.replace(
+      'raw.githubusercontent.com',
+      'github.com',
+    );
+    dep.currentValue = groups.currentValue;
+    return dep;
+  }
+
+  return null;
 }
 
 function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
@@ -108,14 +185,14 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
       currentValue: dep.currentValue,
       currentDigest: dep.currentDigest,
     },
-    'Tekton bundle dependency found'
+    'Tekton bundle dependency found',
   );
   deps.push(dep);
 }
 
 function addStepImageSpec(
   spec: TektonResourceSpec | undefined,
-  deps: PackageDependency[]
+  deps: PackageDependency[],
 ): void {
   if (is.nullOrUndefined(spec)) {
     return;
@@ -138,14 +215,14 @@ function addStepImageSpec(
         currentValue: dep.currentValue,
         currentDigest: dep.currentDigest,
       },
-      'Tekton step image dependency found'
+      'Tekton step image dependency found',
     );
     deps.push(dep);
   }
 }
 
 function getBundleValue(
-  fields: TektonResolverParamsField[] | undefined
+  fields: TektonResolverParamsField[] | undefined,
 ): string | undefined {
   for (const field of coerceArray(fields)) {
     if (field.name === 'bundle') {

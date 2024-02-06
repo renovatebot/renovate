@@ -8,7 +8,7 @@ describe('config/migrations/custom/upgrade-in-range-migration', () => {
       },
       {
         rangeStrategy: 'bump',
-      }
+      },
     );
   });
 
@@ -17,7 +17,7 @@ describe('config/migrations/custom/upgrade-in-range-migration', () => {
       {
         upgradeInRange: false,
       },
-      {}
+      {},
     );
   });
 });

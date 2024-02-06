@@ -14,6 +14,10 @@ describe('util/exec/env', () => {
     'SSL_CERT_FILE',
     'URL_REPLACE_1_FROM',
     'URL_REPLACE_1_TO',
+    'PROGRAMFILES',
+    'PROGRAMFILES(X86)',
+    'APPDATA',
+    'LOCALAPPDATA',
   ];
 
   beforeEach(() => {
@@ -39,6 +43,10 @@ describe('util/exec/env', () => {
       SSL_CERT_FILE: 'SSL_CERT_FILE',
       URL_REPLACE_1_FROM: 'URL_REPLACE_1_FROM',
       URL_REPLACE_1_TO: 'URL_REPLACE_1_TO',
+      PROGRAMFILES: 'PROGRAMFILES',
+      'PROGRAMFILES(X86)': 'PROGRAMFILES(X86)',
+      APPDATA: 'APPDATA',
+      LOCALAPPDATA: 'LOCALAPPDATA',
     });
   });
 

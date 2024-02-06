@@ -91,7 +91,7 @@ function isLessThanRange(version: string, range: string): boolean {
   const options = getOptions(range);
   const looseResult: any = looseAPI.isLessThanRange?.(
     cleanedVersion,
-    cleanRange
+    cleanRange,
   );
   try {
     return semver.ltr(cleanedVersion, cleanRange, options) || looseResult;
@@ -148,14 +148,14 @@ function isStable(version: string): boolean {
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return findSatisfyingVersion(versions, range, MIN);
 }
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return findSatisfyingVersion(versions, range, MAX);
 }
@@ -176,12 +176,12 @@ function getNewValue({
   if (rangeStrategy === 'widen') {
     newValue = widenRange(
       { currentValue: cleanRange, rangeStrategy, currentVersion, newVersion },
-      options
+      options,
     );
   } else if (rangeStrategy === 'bump') {
     newValue = bumpRange(
       { currentValue: cleanRange, rangeStrategy, currentVersion, newVersion },
-      options
+      options,
     );
   } else {
     newValue = replaceRange({

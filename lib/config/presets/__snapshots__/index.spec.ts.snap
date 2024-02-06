@@ -31,7 +31,7 @@ exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = 
   "automergeType": "pr",
   "branchPrefix": "renovate/",
   "description": [
-    "Prefix \`renovate/\` to all branch names.",
+    "Add the \`renovate/\` prefix to all branch names.",
     "Use semantic commit type \`fix\` for dependencies and \`chore\` for all others if semantic commits are in use.",
     "Require all status checks to pass before any automerging.",
     "Pin dependency versions for \`devDependencies\` and retain SemVer ranges for others.",

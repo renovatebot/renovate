@@ -77,14 +77,15 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
     if (distinctHostValues.size > 1) {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'config';
-      error.validationMessage = `hostRules cannot contain more than one host-matching field - use "matchHost" only.`;
+      error.validationMessage =
+        '`hostRules` cannot contain more than one host-matching field - use `matchHost` only.';
       error.validationError =
         'The renovate configuration file contains some invalid settings';
       throw error;
     } else {
       logger.warn(
         { hosts },
-        'Duplicate host values found, please only use `matchHost` to specify the host'
+        'Duplicate host values found, please only use `matchHost` to specify the host',
       );
     }
   }
@@ -99,7 +100,7 @@ function massageUrl(url: string): string {
 }
 
 function removeUndefinedFields(
-  obj: Record<string, any>
+  obj: Record<string, any>,
 ): Record<string, string> {
   const result: Record<string, string> = {};
   for (const key of Object.keys(obj)) {

@@ -114,7 +114,7 @@ describe('modules/datasource/github-releases/index', () => {
           packageName,
           currentValue,
         },
-        newValue
+        newValue,
       );
       expect(digest).toBe(newDigest);
     });
@@ -122,7 +122,7 @@ describe('modules/datasource/github-releases/index', () => {
     it('should be independent of the current value', async () => {
       const digest = await getDigest(
         { datasource: GithubReleasesDatasource.id, packageName },
-        newValue
+        newValue,
       );
       expect(digest).toBe(newDigest);
     });
@@ -135,7 +135,7 @@ describe('modules/datasource/github-releases/index', () => {
           currentValue,
           currentDigest,
         },
-        newValue
+        newValue,
       );
       expect(digest).toEqual(newDigest);
     });
@@ -148,7 +148,7 @@ describe('modules/datasource/github-releases/index', () => {
           currentValue,
           currentDigest,
         },
-        'unknown-tag'
+        'unknown-tag',
       );
       expect(digest).toBeNull();
     });

@@ -113,9 +113,11 @@ export interface GlobalOnlyConfig {
   privateKeyPath?: string;
   privateKeyPathOld?: string;
   redisUrl?: string;
+  redisPrefix?: string;
   repositories?: RenovateRepository[];
   platform?: PlatformId;
   endpoint?: string;
+  useCloudMetadataServices?: boolean;
 }
 
 // Config options used within the repository worker, but not user configurable
@@ -125,6 +127,7 @@ export interface RepoGlobalConfig {
   allowPlugins?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
+  allowedHeaders?: string[];
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;
@@ -140,6 +143,7 @@ export interface RepoGlobalConfig {
   exposeAllEnv?: boolean;
   githubTokenWarn?: boolean;
   migratePresets?: Record<string, string>;
+  presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
   localDir?: string;
@@ -176,7 +180,7 @@ export interface PostUpgradeTasks {
 }
 
 export type UpdateConfig<
-  T extends RenovateSharedConfig = RenovateSharedConfig
+  T extends RenovateSharedConfig = RenovateSharedConfig,
 > = Partial<Record<UpdateType, T | null>>;
 
 export type RenovateRepository =
@@ -189,6 +193,14 @@ export type RenovateRepository =
 export type UseBaseBranchConfigType = 'merge' | 'none';
 export type ConstraintsFilter = 'strict' | 'none';
 
+export const allowedStatusCheckStrings = [
+  'minimumReleaseAge',
+  'mergeConfidence',
+  'configValidation',
+  'artifactError',
+] as const;
+export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
+
 // TODO: Proper typings
 export interface RenovateConfig
   extends LegacyAdminConfig,
@@ -199,6 +211,7 @@ export interface RenovateConfig
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
+  commitBody?: string;
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
   defaultBranch?: string;
@@ -250,7 +263,7 @@ export interface RenovateConfig
   customManagers?: CustomManager[];
   customDatasources?: Record<string, CustomDatasourceConfig>;
 
-  fetchReleaseNotes?: FetchReleaseNotesOptions;
+  fetchChangeLogs?: FetchChangeLogsOptions;
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
@@ -260,11 +273,16 @@ export interface RenovateConfig
 
   checkedBranches?: string[];
   customizeDashboard?: Record<string, string>;
+
+  statusCheckNames?: Record<StatusCheckKey, string | null>;
 }
+
+const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
+export type CustomDatasourceFormats = (typeof CustomDatasourceFormats)[number];
 
 export interface CustomDatasourceConfig {
   defaultRegistryUrlTemplate?: string;
-  format?: 'json' | 'plain';
+  format?: CustomDatasourceFormats;
   transformTemplates?: string[];
 }
 
@@ -275,6 +293,7 @@ export interface AllConfig
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
+  expandCodeOwnersGroups?: boolean;
   assignees?: string[];
   assigneesSampleSize?: number;
   ignoreReviewers?: string[];
@@ -298,7 +317,7 @@ export type UpdateType =
   | 'bump'
   | 'replacement';
 
-export type FetchReleaseNotesOptions = 'off' | 'branch' | 'pr';
+export type FetchChangeLogsOptions = 'off' | 'branch' | 'pr';
 
 export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
@@ -318,6 +337,7 @@ export interface PackageRule
   isVulnerabilityAlert?: boolean;
   matchFileNames?: string[];
   matchBaseBranches?: string[];
+  matchCurrentAge?: string;
   matchManagers?: string[];
   matchDatasources?: string[];
   matchDepTypes?: string[];
@@ -349,6 +369,12 @@ export interface ValidationMessage {
   message: string;
 }
 
+export type AllowedParents =
+  | 'customManagers'
+  | 'customDatasources'
+  | 'hostRules'
+  | 'postUpgradeTasks'
+  | 'packageRules';
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
@@ -377,12 +403,7 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?:
-    | 'customDatasources'
-    | 'hostRules'
-    | 'packageRules'
-    | 'postUpgradeTasks'
-    | 'customManagers';
+  parents?: AllowedParents[];
 
   stage?: RenovateConfigStage;
 
@@ -396,7 +417,7 @@ export interface RenovateOptionBase {
 }
 
 export interface RenovateArrayOption<
-  T extends string | number | Record<string, unknown> = Record<string, unknown>
+  T extends string | number | Record<string, unknown> = Record<string, unknown>,
 > extends RenovateOptionBase {
   default?: T[] | null;
   mergeable?: boolean;
@@ -482,7 +503,9 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
+  releaseTimestamp?: string | null;
   repository?: string;
+  currentVersionTimestamp?: string;
 }
 
 export interface ConfigMigration {

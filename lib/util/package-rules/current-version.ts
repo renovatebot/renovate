@@ -13,7 +13,7 @@ export class CurrentVersionMatcher extends Matcher {
       currentValue,
       currentVersion,
     }: PackageRuleInputConfig,
-    { matchCurrentVersion }: PackageRule
+    { matchCurrentVersion }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchCurrentVersion)) {
       return null;
@@ -23,7 +23,7 @@ export class CurrentVersionMatcher extends Matcher {
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
     const matchCurrentVersionPred = configRegexPredicate(
-      matchCurrentVersionStr
+      matchCurrentVersionStr,
     );
 
     if (matchCurrentVersionPred) {
@@ -59,7 +59,7 @@ export class CurrentVersionMatcher extends Matcher {
     }
     logger.debug(
       { matchCurrentVersionStr, currentValue },
-      'Could not find a version to compare'
+      'Could not find a version to compare',
     );
     return false;
   }

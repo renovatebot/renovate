@@ -31,7 +31,7 @@ describe('modules/manager/ansible/extract', () => {
           registryAliases: {
             'quay.io': 'my-quay-mirror.registry.com',
           },
-        }
+        },
       );
       expect(res).toEqual({
         deps: [
@@ -61,7 +61,7 @@ describe('modules/manager/ansible/extract', () => {
           registryAliases: {
             'index.docker.io': 'my-docker-mirror.registry.com',
           },
-        }
+        },
       );
       expect(res).toEqual({
         deps: [
@@ -92,7 +92,7 @@ describe('modules/manager/ansible/extract', () => {
             'quay.io': 'my-quay-mirror.registry.com',
             'my-quay-mirror.registry.com': 'quay.io',
           },
-        }
+        },
       );
       expect(res).toEqual({
         deps: [
