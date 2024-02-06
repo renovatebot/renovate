@@ -1,14 +1,6 @@
-import { configRegexPredicate, isUUID } from './string-match';
+import { configRegexPredicate } from './string-match';
 
 describe('util/string-match', () => {
-  describe('isUUID', () => {
-    it('proper checks valid and invalid UUID strings', () => {
-      expect(isUUID('{90b6646d-1724-4a64-9fd9-539515fe94e9}')).toBe(true);
-      expect(isUUID('{90B6646D-1724-4A64-9FD9-539515FE94E9}')).toBe(true);
-      expect(isUUID('not-a-uuid')).toBe(false);
-    });
-  });
-
   describe('configRegexPredicate', () => {
     it('allows valid regex pattern', () => {
       expect(configRegexPredicate('/hello/')).not.toBeNull();
