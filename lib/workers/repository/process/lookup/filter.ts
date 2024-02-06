@@ -6,7 +6,7 @@ import type { VersioningApi } from '../../../../modules/versioning';
 import * as npmVersioning from '../../../../modules/versioning/npm';
 import * as pep440 from '../../../../modules/versioning/pep440';
 import * as poetryVersioning from '../../../../modules/versioning/poetry';
-import { configRegexPredicate } from '../../../../util/regex';
+import { configRegexPredicate } from '../../../../util/string-match';
 import type { FilterConfig } from './types';
 
 export function filterVersions(

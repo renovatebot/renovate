@@ -1,6 +1,3 @@
-import { minimatch } from './minimatch';
-import { regEx } from './regex';
-
 // Return true if the match string is found at index in content
 export function matchAt(
   content: string,
@@ -56,10 +53,6 @@ export function looseEquals(
   return a.localeCompare(b, undefined, { sensitivity: 'base' }) === 0;
 }
 
-export function isDockerDigest(input: string): boolean {
-  return /^sha256:[a-f0-9]{64}$/i.test(input);
-}
-
 export function titleCase(input: string): string {
   const words = input.toLowerCase().split(' ');
 
@@ -96,32 +89,4 @@ export function coerceString(
   def?: string,
 ): string {
   return val ?? def ?? '';
-}
-
-export function matchRegexOrMinimatch(input: string, pattern: string): boolean {
-  if (pattern.length > 2 && pattern.startsWith('/') && pattern.endsWith('/')) {
-    try {
-      const regex = regEx(pattern.slice(1, -1));
-      return regex.test(input);
-    } catch (err) {
-      return false;
-    }
-  }
-
-  return minimatch(pattern, { dot: true }).match(input);
-}
-
-export function anyMatchRegexOrMinimatch(
-  input: string,
-  patterns: string[],
-): boolean | null {
-  return patterns.some((pattern) => matchRegexOrMinimatch(input, pattern));
-}
-
-const UUIDRegex = regEx(
-  /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i,
-);
-
-export function isUUID(input: string): boolean {
-  return UUIDRegex.test(input);
 }
