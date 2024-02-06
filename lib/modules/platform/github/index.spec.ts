@@ -1730,6 +1730,35 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeNull();
     });
 
+    it('reopens issue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+          },
+          {
+            number: 1,
+            state: 'closed',
+            title: 'title-1',
+          },
+        ])
+        .get('/repos/some/repo/issues/1')
+        .reply(200)
+        .patch('/repos/some/repo/issues/1')
+        .reply(200);
+      const res = await github.ensureIssue({
+        title: 'title-1',
+        body: 'new-content',
+      });
+      expect(res).not.toBeNull();
+    });
+
     it('creates issue with labels', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
