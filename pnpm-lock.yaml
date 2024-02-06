@@ -87,8 +87,8 @@ importers:
         specifier: 0.2.6
         version: 0.2.6
       '@yarnpkg/core':
-        specifier: 4.0.2
-        version: 4.0.2(typanion@3.14.0)
+        specifier: 4.0.3
+        version: 4.0.3(typanion@3.14.0)
       '@yarnpkg/parsers':
         specifier: 3.0.0
         version: 3.0.0
@@ -4182,15 +4182,15 @@ packages:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
 
-  /@yarnpkg/core@4.0.2(typanion@3.14.0):
-    resolution: {integrity: sha512-YSibU3htZ3ZyslCUCG0aI4xcnmPZwZnHSUYl8TgC/Ck3++9xr474Mzh3t4Zv8olh9BguMC7FmRSpKAThiaFafw==}
+  /@yarnpkg/core@4.0.3(typanion@3.14.0):
+    resolution: {integrity: sha512-O+WGCjB9aIBxdRMBxXdsIy08MW4RbxfCS2AfywWb8DPS9H0LICahUJgNAaE0fwCsW7/gNzQbLYlh9DQQwzONrA==}
     engines: {node: '>=18.12.0'}
     dependencies:
       '@arcanis/slice-ansi': 1.1.1
       '@types/semver': 7.5.6
       '@types/treeify': 1.0.3
-      '@yarnpkg/fslib': 3.0.1
-      '@yarnpkg/libzip': 3.0.0(@yarnpkg/fslib@3.0.1)
+      '@yarnpkg/fslib': 3.0.2
+      '@yarnpkg/libzip': 3.0.1(@yarnpkg/fslib@3.0.2)
       '@yarnpkg/parsers': 3.0.0
       '@yarnpkg/shell': 4.0.0(typanion@3.14.0)
       camelcase: 5.3.1
@@ -4216,21 +4216,21 @@ packages:
       - typanion
     dev: false
 
-  /@yarnpkg/fslib@3.0.1:
-    resolution: {integrity: sha512-TtodA4zcpKfMRI8iEBEGIRdwJ7uhj/ic2bDCBSdt6KU8WoLv9b91oqi6t37ttY7+c8B9z750W0PZHmQR3lpLNA==}
+  /@yarnpkg/fslib@3.0.2:
+    resolution: {integrity: sha512-dqSpZCj9ZeqMZzITHvpi5qKS9MCLWZYCl6NHCSl3a+BqiyLApehWAy60zjv9F1fxKZ6RKDgHLhBWhx8RwPm6Dw==}
     engines: {node: '>=18.12.0'}
     dependencies:
       tslib: 2.6.2
     dev: false
 
-  /@yarnpkg/libzip@3.0.0(@yarnpkg/fslib@3.0.1):
-    resolution: {integrity: sha512-31NR8oHG/NLnSEqQOy48tnjNHgYPujOtammmvoItNAfsWAmaOqtDimwPRRPXGTNxC2SYYBYrk6pli5yti/Qmfw==}
+  /@yarnpkg/libzip@3.0.1(@yarnpkg/fslib@3.0.2):
+    resolution: {integrity: sha512-fiqRLk2fyd2r34/Qc7HlP8fKIo1CK5CZpLNObJwnbFmZQN2hVanovFlG++3oH3qYJymEmjPl5EGsygcEJZl4Pg==}
     engines: {node: '>=18.12.0'}
     peerDependencies:
-      '@yarnpkg/fslib': ^3.0.0
+      '@yarnpkg/fslib': ^3.0.2
     dependencies:
       '@types/emscripten': 1.39.10
-      '@yarnpkg/fslib': 3.0.1
+      '@yarnpkg/fslib': 3.0.2
       tslib: 2.6.2
     dev: false
 
@@ -4247,7 +4247,7 @@ packages:
     engines: {node: '>=18.12.0'}
     hasBin: true
     dependencies:
-      '@yarnpkg/fslib': 3.0.1
+      '@yarnpkg/fslib': 3.0.2
       '@yarnpkg/parsers': 3.0.0
       chalk: 3.0.0
       clipanion: 4.0.0-rc.2(typanion@3.14.0)
