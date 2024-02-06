@@ -234,8 +234,8 @@ const options: RenovateOptions[] = [
     name: 'presetCachePersistence',
     description: 'Cache resolved presets in package cache.',
     type: 'boolean',
-    globalOnly: true,
     default: false,
+    globalOnly: true,
   },
   {
     name: 'globalExtends',
@@ -261,6 +261,7 @@ const options: RenovateOptions[] = [
     description: `Enable or disable Renovate bot.`,
     stage: 'package',
     type: 'boolean',
+    default: true,
   },
   {
     name: 'constraintsFiltering',
@@ -417,7 +418,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.31.5',
+    default: 'ghcr.io/containerbase/sidecar:9.33.3',
     globalOnly: true,
   },
   {
@@ -697,6 +698,7 @@ const options: RenovateOptions[] = [
       'Whether to update branches when not scheduled. Renovate will not create branches outside of the schedule.',
     stage: 'branch',
     type: 'boolean',
+    default: true,
   },
   // Bot administration
   {
@@ -704,8 +706,8 @@ const options: RenovateOptions[] = [
     description:
       'If set to `true`: keep repository data between runs instead of deleting the data.',
     type: 'boolean',
-    globalOnly: true,
     default: false,
+    globalOnly: true,
   },
   {
     name: 'exposeAllEnv',
@@ -816,6 +818,7 @@ const options: RenovateOptions[] = [
     name: 'updateLockFiles',
     description: 'Set to `false` to disable lock file updating.',
     type: 'boolean',
+    default: true,
   },
   {
     name: 'skipInstalls',
@@ -976,6 +979,7 @@ const options: RenovateOptions[] = [
   {
     name: 'registryAliases',
     description: 'Aliases for registries.',
+    mergeable: true,
     type: 'object',
     default: {},
     additionalProperties: {
@@ -1091,6 +1095,17 @@ const options: RenovateOptions[] = [
     type: 'array',
     stage: 'package',
     mergeable: true,
+  },
+  {
+    name: 'matchCurrentAge',
+    description:
+      'Matches the current age of the package derived from its release timestamp. Valid only within a `packageRules` object.',
+    type: 'string',
+    parents: ['packageRules'],
+    stage: 'package',
+    mergeable: true,
+    cli: false,
+    env: false,
   },
   {
     name: 'matchCategories',
@@ -1488,6 +1503,7 @@ const options: RenovateOptions[] = [
     description:
       'If set to `false`, Renovate will upgrade dependencies to their latest release only. Renovate will not separate major or minor branches.',
     type: 'boolean',
+    default: true,
   },
   {
     name: 'separateMultipleMajor',
@@ -1509,6 +1525,7 @@ const options: RenovateOptions[] = [
     description: 'Ignore versions with unstable SemVer.',
     stage: 'package',
     type: 'boolean',
+    default: true,
   },
   {
     name: 'ignoreDeprecated',
@@ -1532,6 +1549,7 @@ const options: RenovateOptions[] = [
     description: 'Ignore versions newer than npm "latest" version.',
     stage: 'package',
     type: 'boolean',
+    default: true,
   },
   {
     name: 'rangeStrategy',
@@ -2026,8 +2044,8 @@ const options: RenovateOptions[] = [
     description:
       'Whether to bypass appending extra context to the Pull Request title.',
     type: 'boolean',
-    experimental: true,
     default: false,
+    experimental: true,
     cli: false,
   },
   {
@@ -2192,8 +2210,8 @@ const options: RenovateOptions[] = [
     description:
       'Disallow maintainers to push to Renovate pull requests when running in fork mode.',
     type: 'boolean',
-    supportedPlatforms: ['github'],
     default: false,
+    supportedPlatforms: ['github'],
   },
   {
     name: 'confidential',
@@ -2312,6 +2330,7 @@ const options: RenovateOptions[] = [
     name: 'insecureRegistry',
     description: 'Explicitly turn on insecure Docker registry access (HTTP).',
     type: 'boolean',
+    default: false,
     stage: 'repository',
     parents: ['hostRules'],
     cli: false,
@@ -2323,9 +2342,9 @@ const options: RenovateOptions[] = [
     description:
       'If enabled, Renovate aborts its run when HTTP request errors occur.',
     type: 'boolean',
+    default: false,
     stage: 'repository',
     parents: ['hostRules'],
-    default: false,
     cli: false,
     env: false,
   },
@@ -2344,9 +2363,9 @@ const options: RenovateOptions[] = [
     name: 'enableHttp2',
     description: 'Enable got HTTP/2 support.',
     type: 'boolean',
+    default: false,
     stage: 'repository',
     parents: ['hostRules'],
-    default: false,
     cli: false,
     env: false,
   },
@@ -2385,9 +2404,9 @@ const options: RenovateOptions[] = [
     name: 'dnsCache',
     description: 'Enable got DNS cache.',
     type: 'boolean',
+    default: false,
     stage: 'repository',
     parents: ['hostRules'],
-    default: false,
     cli: false,
     env: false,
     experimental: true,
@@ -2396,9 +2415,9 @@ const options: RenovateOptions[] = [
     name: 'keepAlive',
     description: 'Enable HTTP keep-alive for hosts.',
     type: 'boolean',
+    default: false,
     stage: 'repository',
     parents: ['hostRules'],
-    default: false,
     cli: false,
     env: false,
     advancedUse: true,
@@ -2746,8 +2765,8 @@ const options: RenovateOptions[] = [
     name: 'platformAutomerge',
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
-    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
     default: true,
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'userStrings',

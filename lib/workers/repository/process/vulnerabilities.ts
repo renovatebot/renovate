@@ -15,6 +15,7 @@ import {
   VersioningApi,
   get as getVersioning,
 } from '../../../modules/versioning';
+import { find } from '../../../util/host-rules';
 import { sanitizeMarkdown } from '../../../util/markdown';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
@@ -46,7 +47,13 @@ export class Vulnerabilities {
   private constructor() {}
 
   private async initialize(): Promise<void> {
-    this.osvOffline = await OsvOffline.create();
+    // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
+    const gitHubHostRule = find({
+      hostType: 'github',
+      url: 'https://api.github.com/',
+    });
+
+    this.osvOffline = await OsvOffline.create(gitHubHostRule?.token);
   }
 
   static async create(): Promise<Vulnerabilities> {
