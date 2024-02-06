@@ -64,13 +64,12 @@ function depFromNode(
     const versionNode = node.descendantWithPath('version')!;
     const fileReplacePosition = versionNode.position;
     const datasource = MavenDatasource.id;
-    const registryUrls: string[] = [];
     const result: PackageDependency = {
       datasource,
       depName,
       currentValue,
       fileReplacePosition,
-      registryUrls,
+      registryUrls: [],
     };
 
     switch (node.name) {
