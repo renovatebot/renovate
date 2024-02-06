@@ -10,6 +10,7 @@ import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
+import { isUUID } from '../../../util/string-match';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -46,7 +47,6 @@ import type {
 } from './types';
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
-import { isUUID } from '../../../util/string-match';
 
 export const id = 'bitbucket';
 
