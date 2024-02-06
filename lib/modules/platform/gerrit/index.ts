@@ -352,10 +352,6 @@ export async function getJsonFile(
   return parseJson(raw, fileName);
 }
 
-export function getRepoForceRebase(): Promise<boolean> {
-  return Promise.resolve(false);
-}
-
 export async function addReviewers(
   number: number,
   reviewers: string[],

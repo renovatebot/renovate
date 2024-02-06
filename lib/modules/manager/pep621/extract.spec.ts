@@ -62,6 +62,7 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '==20.0.0',
+          currentVersion: '20.0.0',
         },
         {
           packageName: 'pyproject-hooks',
@@ -276,6 +277,7 @@ describe('modules/manager/pep621/extract', () => {
       expect(result?.deps).toEqual([
         {
           currentValue: '==2.30.0',
+          currentVersion: '2.30.0',
           datasource: 'pypi',
           depName: 'requests',
           depType: 'project.dependencies',
@@ -290,6 +292,7 @@ describe('modules/manager/pep621/extract', () => {
         },
         {
           currentValue: '==6.5',
+          currentVersion: '6.5',
           datasource: 'pypi',
           depName: 'coverage',
           depType: 'tool.hatch.envs.default',
@@ -347,6 +350,7 @@ describe('modules/manager/pep621/extract', () => {
       expect(result?.deps).toEqual([
         {
           currentValue: '==2.30.0',
+          currentVersion: '2.30.0',
           datasource: 'pypi',
           depName: 'requests',
           depType: 'project.dependencies',
@@ -354,6 +358,7 @@ describe('modules/manager/pep621/extract', () => {
         },
         {
           currentValue: '==1.18.0',
+          currentVersion: '1.18.0',
           datasource: 'pypi',
           depName: 'hatchling',
           depType: 'build-system.requires',
@@ -361,6 +366,7 @@ describe('modules/manager/pep621/extract', () => {
         },
         {
           currentValue: '==69.0.3',
+          currentVersion: '69.0.3',
           datasource: 'pypi',
           depName: 'setuptools',
           depType: 'build-system.requires',

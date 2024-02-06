@@ -8,8 +8,9 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
 import type { HttpOptions } from '../../../util/http/types';
-import { isUUID, regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
+import { isUUID } from '../../../util/string';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -253,12 +254,6 @@ export async function initRepo({
     repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
   return repoConfig;
-}
-
-// Returns true if repository has rule enforcing PRs are up-to-date with base branch before merging
-export function getRepoForceRebase(): Promise<boolean> {
-  // BB doesn't have an option to flag staled branches
-  return Promise.resolve(false);
 }
 
 // istanbul ignore next
