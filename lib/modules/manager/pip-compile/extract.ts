@@ -6,8 +6,9 @@ import { extractPackageFile as extractRequirementsFile } from '../pip_requiremen
 // import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
 import { extractHeaderCommand } from './common';
+import type { PipCompileArgs, SupportedManagers } from './types';
 
-function matchManager(filename: string): string {
+function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
     return 'pip_setup';
   }
@@ -58,7 +59,7 @@ export function extractPackageFile(
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   fileMatches: string[],
-): Promise<PackageFile[]> {
+): Promise<PackageFile[] | null> {
   logger.trace('pip-compile.extractAllPackageFiles()');
   const packageFiles = new Map<string, PackageFile>();
   for (const fileMatch of fileMatches) {
@@ -67,7 +68,7 @@ export async function extractAllPackageFiles(
       logger.debug(`pip-compile: no content found for fileMatch ${fileMatch}`);
       continue;
     }
-    let pipCompileArgs;
+    let pipCompileArgs: PipCompileArgs;
     try {
       pipCompileArgs = extractHeaderCommand(fileContent, fileMatch);
     } catch (error) {
@@ -92,7 +93,7 @@ export async function extractAllPackageFiles(
         logger.debug(
           `pip-compile: ${packageFile} used in multiple output files`,
         );
-        packageFiles.get(packageFile)?.lockFiles?.push(fileMatch);
+        packageFiles.get(packageFile)!.lockFiles!.push(fileMatch);
         continue;
       }
       const content = await readLocalFile(packageFile, 'utf8');
@@ -117,5 +118,8 @@ export async function extractAllPackageFiles(
     }
   }
   // TODO(not7cd): sort by requirement layering (-r -c within .in files)
+  if (packageFiles.size === 0) {
+    return null;
+  }
   return Array.from(packageFiles.values());
 }

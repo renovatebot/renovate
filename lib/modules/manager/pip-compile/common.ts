@@ -130,11 +130,12 @@ export function extractHeaderCommand(
     }
   }
 
-  // Commander.parse is expecting argv[0] to be process.execPath, pass empty string as first value
-  const parsedCommand = dummyPipCompile.parse(['', ...argv]);
+  const parsedCommand = dummyPipCompile.parse(argv, { from: 'user' });
   const options = parsedCommand.opts();
   // workaround, not sure how Commander returns named arguments
-  const sourceFiles = parsedCommand.args.filter((arg) => !arg.startsWith('-'));
+  const sourceFiles = parsedCommand.args.filter(
+    (arg) => !arg.startsWith('-') && arg !== command,
+  );
   logger.trace(
     {
       argv,

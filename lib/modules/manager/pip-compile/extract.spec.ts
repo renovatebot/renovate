@@ -41,7 +41,7 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   describe('extractAllPackageFiles()', () => {
-    it('support package file with multiple lock files', () => {
+    it('support package file with multiple lock files', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
         getSimpleRequirementsFile(
           'pip-compile --output-file=requirements1.txt requirements.in',
@@ -68,13 +68,13 @@ describe('modules/manager/pip-compile/extract', () => {
         'requirements2.txt',
         'requirements3.txt',
       ];
-      return extractAllPackageFiles({}, lockFiles).then((packageFiles) => {
-        expect(packageFiles).not.toBeNull();
-        return expect(packageFiles[0]).toHaveProperty('lockFiles', lockFiles);
-      });
+      const packageFiles = await extractAllPackageFiles({}, lockFiles);
+      expect(packageFiles).toBeDefined();
+      expect(packageFiles).not.toBeNull();
+      expect(packageFiles!.pop()).toHaveProperty('lockFiles', lockFiles);
     });
 
-    it('no lock files in returned package files', () => {
+    it('no lock files in returned package files', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
         getSimpleRequirementsFile('pip-compile --output-file=foo.txt foo.in', [
           'foo==1.0.1',
@@ -90,15 +90,16 @@ describe('modules/manager/pip-compile/extract', () => {
       fs.readLocalFile.mockResolvedValueOnce('bar>=1.0.0');
 
       const lockFiles = ['foo.txt', 'bar.txt'];
-      return extractAllPackageFiles({}, lockFiles).then((packageFiles) => {
-        return packageFiles.forEach((packageFile) => {
-          expect(packageFile).not.toHaveProperty('packageFile', 'foo.txt');
-        });
+      const packageFiles = await extractAllPackageFiles({}, lockFiles);
+      expect(packageFiles).toBeDefined();
+      expect(packageFiles).not.toBeNull();
+      packageFiles!.forEach((packageFile) => {
+        expect(packageFile).not.toHaveProperty('packageFile', 'foo.txt');
       });
     });
   });
 
-  it('return nothing for malformed files', () => {
+  it('return null for malformed files', async () => {
     fs.readLocalFile.mockResolvedValueOnce('');
     fs.readLocalFile.mockResolvedValueOnce(
       Fixtures.get('requirementsNoHeaders.txt'),
@@ -113,8 +114,7 @@ describe('modules/manager/pip-compile/extract', () => {
     fs.readLocalFile.mockResolvedValueOnce('');
 
     const lockFiles = ['empty.txt', 'noHeader.txt', 'badSource.txt'];
-    return extractAllPackageFiles({}, lockFiles).then((packageFiles) => {
-      return expect(packageFiles).toBeEmptyArray();
-    });
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeNull();
   });
 });
