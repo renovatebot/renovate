@@ -16,8 +16,6 @@ ${deps.join('\n')}`;
 }
 
 describe('modules/manager/pip-compile/extract', () => {
-  beforeEach(() => {});
-
   describe('extractPackageFile()', () => {
     it('returns object for requirements.in', () => {
       expect(
