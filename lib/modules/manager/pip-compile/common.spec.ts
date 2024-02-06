@@ -63,7 +63,7 @@ describe('modules/manager/pip-compile/common', () => {
       },
     );
 
-    test('error when no source files passed as arguments', () => {
+    it('error when no source files passed as arguments', () => {
       expect(() =>
         extractHeaderCommand(
           getCommandInHeader(`pip-compile --extra=color`),
@@ -72,7 +72,7 @@ describe('modules/manager/pip-compile/common', () => {
       ).toThrow(/source/);
     });
 
-    test('returned sourceFiles returns all source files', () => {
+    it('returned sourceFiles returns all source files', () => {
       const exampleSourceFiles = [
         'requirements.in',
         'reqs/testing.in',
