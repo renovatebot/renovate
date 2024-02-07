@@ -18,13 +18,13 @@ ${deps.join('\n')}`;
 describe('modules/manager/pip-compile/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns object for requirements.in', () => {
-      expect(
-        extractPackageFile(
-          Fixtures.get('requirementsWithHashes.txt'),
-          'requirements.in',
-          {},
-        ),
-      ).toBeObject();
+      const packageFile = extractPackageFile(
+        Fixtures.get('requirementsWithHashes.txt'),
+        'requirements.in',
+        {},
+      );
+      expect(packageFile).toHaveProperty('deps');
+      expect(packageFile?.deps[0]).toHaveProperty('depName', 'attrs');
     });
 
     it.each([

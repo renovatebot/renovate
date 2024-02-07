@@ -1,8 +1,6 @@
 import is from '@sindresorhus/is';
-import { Command } from 'commander';
 import { quote, split } from 'shlex';
 import upath from 'upath';
-import { camelCase } from '../../../../tools/utils';
 import { logger } from '../../../logger';
 import type { ExecOptions } from '../../../util/exec/types';
 import { ensureCacheDir } from '../../../util/fs';
@@ -140,12 +138,12 @@ export function extractHeaderCommand(
       } else if (option === '--extra-index-url') {
         result.extraIndexUrl = result.extraIndexUrl ?? [];
         result.extraIndexUrl.push(value);
-        // TODO: add to secrets
+        // TODO: add to secrets? next PR
       } else if (option === '--output-file') {
         result.outputFile = value;
       } else if (option === '--index-url') {
         result.indexUrl = value;
-        // TODO: add to secrets
+        // TODO: add to secrets? next PR
       }
       continue;
     }
