@@ -105,7 +105,7 @@ export function extractHeaderCommand(
     `pip-compile: found header in ${fileName}: \n${compileCommand[0]}`,
   );
   const command = compileCommand.groups.command;
-  const argv: string[] = [command];
+  const argv = [command];
   const isCustomCommand = command !== 'pip-compile';
   if (isCustomCommand) {
     logger.debug(
