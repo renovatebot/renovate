@@ -93,7 +93,7 @@ export function extractHeaderCommand(
   if (compileCommand?.groups === undefined) {
     throw new Error(`Failed to extract command from header in ${fileName}`);
   }
-  logger.debug(
+  logger.trace(
     `pip-compile: found header in ${fileName}: \n${compileCommand[0]}`,
   );
   const command = compileCommand.groups.command;
