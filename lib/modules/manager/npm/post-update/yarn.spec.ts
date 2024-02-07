@@ -726,4 +726,55 @@ describe('modules/manager/npm/post-update/yarn', () => {
       expect(Fixtures.toJSON()['/tmp/renovate/.yarnrc']).toBe('\n\n');
     });
   });
+
+  describe('fuzzyMatchAdditionalYarnrcYml()', () => {
+    it.each`
+      additionalRegistry            | existingRegistry                    | expectedRegistry
+      ${['//my-private-registry']}  | ${['//my-private-registry']}        | ${['//my-private-registry']}
+      ${[]}                         | ${['//my-private-registry']}        | ${[]}
+      ${[]}                         | ${[]}                               | ${[]}
+      ${null}                       | ${null}                             | ${[]}
+      ${['//my-private-registry']}  | ${[]}                               | ${['//my-private-registry']}
+      ${['//my-private-registry']}  | ${['https://my-private-registry']}  | ${['https://my-private-registry']}
+      ${['//my-private-registry']}  | ${['http://my-private-registry']}   | ${['http://my-private-registry']}
+      ${['//my-private-registry']}  | ${['http://my-private-registry/']}  | ${['http://my-private-registry/']}
+      ${['//my-private-registry']}  | ${['https://my-private-registry/']} | ${['https://my-private-registry/']}
+      ${['//my-private-registry']}  | ${['//my-private-registry/']}       | ${['//my-private-registry/']}
+      ${['//my-private-registry/']} | ${['//my-private-registry/']}       | ${['//my-private-registry/']}
+      ${['//my-private-registry/']} | ${['//my-private-registry']}        | ${['//my-private-registry']}
+    `(
+      'should return $expectedRegistry when parsing $additionalRegistry against local $existingRegistry',
+      ({
+        additionalRegistry,
+        existingRegistry,
+        expectedRegistry,
+      }: Record<
+        'additionalRegistry' | 'existingRegistry' | 'expectedRegistry',
+        string[]
+      >) => {
+        expect(
+          yarnHelper.fuzzyMatchAdditionalYarnrcYml(
+            {
+              npmRegistries: additionalRegistry?.reduce(
+                (acc, cur) => ({
+                  ...acc,
+                  [cur]: { npmAuthToken: 'xxxxxx' },
+                }),
+                {},
+              ),
+            },
+            {
+              npmRegistries: existingRegistry?.reduce(
+                (acc, cur) => ({
+                  ...acc,
+                  [cur]: { npmAuthToken: 'xxxxxx' },
+                }),
+                {},
+              ),
+            },
+          ).npmRegistries,
+        ).toContainAllKeys(expectedRegistry);
+      },
+    );
+  });
 });

@@ -71,7 +71,7 @@ export async function set(
       getKey(namespace, key),
       JSON.stringify({
         compress: true,
-        value: await compressToBase64(value),
+        value: await compressToBase64(JSON.stringify(value)),
         expiry: DateTime.local().plus({ minutes: ttlMinutes }),
       }),
       { EX: redisTTL },
