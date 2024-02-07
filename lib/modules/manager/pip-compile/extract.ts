@@ -6,7 +6,11 @@ import { extractPackageFile as extractRequirementsFile } from '../pip_requiremen
 // import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
 import { extractHeaderCommand } from './common';
-import type { PipCompileArgs, SupportedManagers } from './types';
+import type {
+  DependencyBetweenFiles,
+  PipCompileArgs,
+  SupportedManagers,
+} from './types';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
@@ -57,7 +61,7 @@ export function extractPackageFile(
 }
 
 function generateMermaidFlowchart(
-  depsBetweenFiles: Array<{ sourceFile: string; outputFile: string }>,
+  depsBetweenFiles: DependencyBetweenFiles[],
   lockFileArgs: Map<string, PipCompileArgs>,
 ): string {
   const lockFiles = [];
@@ -68,8 +72,8 @@ function generateMermaidFlowchart(
     //   .join('\n');
     lockFiles.push(`  ${lockFile}[[${lockFile}]]`);
   }
-  const edges = depsBetweenFiles.map(({ sourceFile, outputFile }) => {
-    return `  ${sourceFile} --> ${outputFile}`;
+  const edges = depsBetweenFiles.map(({ sourceFile, outputFile, type }) => {
+    return `  ${sourceFile} -${type === 'constraint' ? '.' : ''}-> ${outputFile}`;
   });
   return `graph TD\n${lockFiles.join('\n')}\n${edges.join('\n')}`;
 }
@@ -80,10 +84,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[] | null> {
   logger.trace('pip-compile.extractAllPackageFiles()');
   const lockFileArgs = new Map<string, PipCompileArgs>();
-  const depsBetweenFiles = new Array<{
-    sourceFile: string;
-    outputFile: string;
-  }>();
+  const depsBetweenFiles = new Array<DependencyBetweenFiles>();
   // for debugging only ^^^ (for now)
   const packageFiles = new Map<string, PackageFile>();
   for (const fileMatch of fileMatches) {
@@ -103,12 +104,20 @@ export async function extractAllPackageFiles(
       );
       continue;
     }
+    for (const constraint in pipCompileArgs.constraints) {
+      depsBetweenFiles.push({
+        sourceFile: constraint,
+        outputFile: fileMatch,
+        type: 'constraint',
+      });
+    }
     // TODO(not7cd): handle locked deps
     // const lockedDeps = extractRequirementsFile(content);
     for (const packageFile of pipCompileArgs.sourceFiles) {
       depsBetweenFiles.push({
         sourceFile: packageFile,
         outputFile: fileMatch,
+        type: 'requirement',
       });
       if (fileMatches.includes(packageFile)) {
         // TODO(not7cd): do something about it

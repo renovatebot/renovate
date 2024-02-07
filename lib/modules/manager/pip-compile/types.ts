@@ -12,7 +12,13 @@ export interface PipCompileArgs {
   extraIndexUrl?: string[];
   outputFile?: string;
   extra?: string[];
-  constraint?: string[];
+  constraints?: string[];
   sourceFiles: string[]; // positional arguments
   argv: string[]; // all arguments as a list
+}
+
+export interface DependencyBetweenFiles {
+  sourceFile: string;
+  outputFile: string;
+  type: 'requirement' | 'constraint';
 }

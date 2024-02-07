@@ -71,6 +71,7 @@ export const optionsWithArguments = [
   '--extra',
   '--extra-index-url',
   '--resolver',
+  '--constraint',
 ];
 export const allowedPipOptions = [
   '-v',
@@ -139,6 +140,9 @@ export function extractHeaderCommand(
         result.extraIndexUrl = result.extraIndexUrl ?? [];
         result.extraIndexUrl.push(value);
         // TODO: add to secrets? next PR
+      } else if (option === '--constraint') {
+        result.constraints = result.constraints ?? [];
+        result.constraints.push(value);
       } else if (option === '--output-file') {
         result.outputFile = value;
       } else if (option === '--index-url') {
