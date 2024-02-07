@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { Command } from 'commander';
 import { quote, split } from 'shlex';
 import upath from 'upath';
+import { camelCase } from '../../../../tools/utils';
 import { logger } from '../../../logger';
 import type { ExecOptions } from '../../../util/exec/types';
 import { ensureCacheDir } from '../../../util/fs';
@@ -79,17 +80,9 @@ export const allowedPipOptions = [
   '--generate-hashes',
   '--no-emit-index-url', // TODO: handle this!!!
   '--strip-extras',
+  '--index-url',
   ...optionsWithArguments,
 ];
-
-// as commander.js is already used, we will reuse it's argument parsing capability
-const dummyPipCompile = new Command();
-dummyPipCompile
-  .argument('[sourceFile...]') // optional, so extractHeaderCommand can throw an explicit error
-  .option('--output-file <path>')
-  .option('--extra <extra...>')
-  .option('--extra-index-url <url...>')
-  .allowUnknownOption();
 
 // TODO(not7cd): test on all correct headers, even with CUSTOM_COMPILE_COMMAND
 export function extractHeaderCommand(
@@ -118,9 +111,19 @@ export function extractHeaderCommand(
   logger.debug(
     `pip-compile: extracted command from header: ${JSON.stringify(argv)}`,
   );
-  for (const arg of argv) {
+
+  const result: PipCompileArgs = {
+    argv,
+    command,
+    isCustomCommand,
+    outputFile: '',
+    sourceFiles: [],
+  };
+  // const options: Record<string, string | string[] | boolean> = {};
+  for (const arg of argv.slice(1)) {
     // TODO(not7cd): check for "--option -- argument" case
     if (!arg.startsWith('-')) {
+      result.sourceFiles.push(arg);
       continue;
     }
     throwForDisallowedOption(arg);
@@ -128,43 +131,49 @@ export function extractHeaderCommand(
     if (strict) {
       throwForUnknownOption(arg);
     }
+
+    if (arg.includes('=')) {
+      const [option, value] = arg.split('=');
+      if (option === '--extra') {
+        result.extra = result.extra ?? [];
+        result.extra.push(value);
+      } else if (option === '--extra-index-url') {
+        result.extraIndexUrl = result.extraIndexUrl ?? [];
+        result.extraIndexUrl.push(value);
+        // TODO: add to secrets
+      } else if (option === '--output-file') {
+        result.outputFile = value;
+      } else if (option === '--index-url') {
+        result.indexUrl = value;
+        // TODO: add to secrets
+      }
+      continue;
+    }
   }
 
-  const parsedCommand = dummyPipCompile.parse(argv, { from: 'user' });
-  const options = parsedCommand.opts();
-  // workaround, not sure how Commander returns named arguments
-  const sourceFiles = parsedCommand.args.filter(
-    (arg) => !arg.startsWith('-') && arg !== command,
-  );
   logger.trace(
     {
-      argv,
-      options,
-      sourceFiles,
-      isCustomCommand,
+      ...result,
     },
     'Parsed pip-compile command from header',
   );
-  if (sourceFiles.length === 0) {
+  if (result.sourceFiles.length === 0) {
     throw new Error(
       'No source files detected in command, pass at least one package file explicitly',
     );
   }
-  let outputFile = '';
-  if (options.outputFile) {
+  if (result.outputFile) {
     // TODO(not7cd): This file path can be relative like `reqs/main.txt`
     const file = upath.parse(fileName).base;
-    if (options.outputFile === file) {
-      outputFile = options.outputFile;
-    } else {
+    if (result.outputFile !== file) {
       // we don't trust the user-supplied output-file argument;
       // TODO(not7cd): allow relative paths
       logger.warn(
-        { outputFile: options.outputFile, actualPath: file },
+        { outputFile: result.outputFile, actualPath: file },
         'pip-compile was previously executed with an unexpected `--output-file` filename',
       );
       // TODO(not7cd): this shouldn't be changed in extract function
-      outputFile = file;
+      result.outputFile = file;
       argv.forEach((item, i) => {
         if (item.startsWith('--output-file=')) {
           argv[i] = `--output-file=${quote(file)}`;
@@ -174,13 +183,7 @@ export function extractHeaderCommand(
   } else {
     logger.debug(`pip-compile: implicit output file (${fileName})`);
   }
-  return {
-    argv,
-    command,
-    isCustomCommand,
-    outputFile,
-    sourceFiles,
-  };
+  return result;
 }
 
 function throwForDisallowedOption(arg: string): void {

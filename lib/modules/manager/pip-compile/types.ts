@@ -8,6 +8,8 @@ export type SupportedManagers =
 export interface PipCompileArgs {
   command: string;
   isCustomCommand: boolean;
+  indexUrl?: string;
+  extraIndexUrl?: string[];
   outputFile?: string;
   extra?: string[];
   constraint?: string[];
