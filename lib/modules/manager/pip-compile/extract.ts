@@ -61,13 +61,12 @@ function generateMermaidFlowchart(
   lockFileArgs: Map<string, PipCompileArgs>,
 ): string {
   const lockFiles = [];
-  for (const [lockFile, pipCompileArgs] of lockFileArgs.entries()) {
-    const extraArgs = pipCompileArgs.extra
-      ?.map((v) => '--extra=' + v)
-      .join('\n');
-    lockFiles.push(
-      `  ${lockFile}[[${lockFile}${extraArgs ? '\n' + extraArgs : ''}]]`,
-    );
+  for (const lockFile of lockFileArgs.keys()) {
+    // TODO: add extra args to the lock file ${extraArgs ? '\n' + extraArgs : ''}
+    // const extraArgs = pipCompileArgs.extra
+    //   ?.map((v) => '--extra=' + v)
+    //   .join('\n');
+    lockFiles.push(`  ${lockFile}[[${lockFile}]]`);
   }
   const edges = depsBetweenFiles.map(({ sourceFile, outputFile }) => {
     return `  ${sourceFile} --> ${outputFile}`;
