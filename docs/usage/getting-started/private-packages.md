@@ -464,7 +464,7 @@ name = "pypi"
 ### pip-compile
 
 The pip-compile manager extracts `--index-url` and `--extra-index-url` directives from its input file.
-These URLs pull credentials from matching `hostRules` blocks and pass appropriate `--index-url` or `--extra-index-url` flags to `pip-compile` with those credentials while generating the output file.
+Renovate will match those URLs with credentials from matching `hostRules` blocks in its configuration and pass appropriate `PIP_INDEX_URL` or `PIP_EXTRA_INDEX_URL` environment variables `pip-compile` with those credentials while generating the output file.
 ``` title="requirements.in"
 --extra-index-url https://pypi.my.domain/simple
 
@@ -485,6 +485,7 @@ private-package==1.2.3
   ]
 }
 ```
+Note: When credentials are passed to `pip-compile` this way Renovate will also pass the `--no-emit-index-url` flag to avoid leaking plain-text credentials to the output file.
 
 ### poetry
 
