@@ -83,7 +83,7 @@ describe('util/cache/package/decorator', () => {
 
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
-      'namespace',
+      '_test-namespace',
       'cache-decorator:key',
       { cachedAt: expect.any(String), value: null },
       30,
@@ -131,8 +131,8 @@ describe('util/cache/package/decorator', () => {
 
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
-      'some-namespace',
-      'cache-decorator:some-key',
+      '_test-namespace',
+      'cache-decorator:_test-key',
       { cachedAt: expect.any(String), value: '111' },
       30,
     );
@@ -153,7 +153,7 @@ describe('util/cache/package/decorator', () => {
 
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
-      'namespace',
+      '_test-namespace',
       'cache-decorator:key',
       { cachedAt: expect.any(String), value: '111' },
       30,
@@ -189,7 +189,7 @@ describe('util/cache/package/decorator', () => {
       expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
-        'namespace',
+        '_test-namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
         2,
@@ -199,7 +199,7 @@ describe('util/cache/package/decorator', () => {
       expect(await obj.getReleases()).toBe('222');
       expect(getValue).toHaveBeenCalledTimes(2);
       expect(setCache).toHaveBeenLastCalledWith(
-        'namespace',
+        '_test-namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '222' },
         2,
@@ -208,7 +208,7 @@ describe('util/cache/package/decorator', () => {
 
     it('overrides soft ttl and updates result', async () => {
       GlobalConfig.set({
-        cacheTtlOverride: { namespace: 2 },
+        cacheTtlOverride: { '_test-namespace': 2 },
         cacheHardTtlMinutes: 3,
       });
       const obj = new Class();
@@ -216,7 +216,7 @@ describe('util/cache/package/decorator', () => {
       expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
-        'namespace',
+        '_test-namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
         3,
@@ -231,7 +231,7 @@ describe('util/cache/package/decorator', () => {
       expect(await obj.getReleases()).toBe('222');
       expect(getValue).toHaveBeenCalledTimes(2);
       expect(setCache).toHaveBeenLastCalledWith(
-        'namespace',
+        '_test-namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '222' },
         3,
@@ -244,7 +244,7 @@ describe('util/cache/package/decorator', () => {
       expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
-        'namespace',
+        '_test-namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
         2,
@@ -263,7 +263,7 @@ describe('util/cache/package/decorator', () => {
       expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
-        'namespace',
+        '_test-namespace',
         'cache-decorator:key',
         { cachedAt: expect.any(String), value: '111' },
         2,

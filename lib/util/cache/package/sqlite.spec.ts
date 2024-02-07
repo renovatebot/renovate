@@ -19,16 +19,18 @@ function withSqlite<T>(
 
 describe('util/cache/package/sqlite', () => {
   it('should get undefined', async () => {
-    const res = await withSqlite((sqlite) => sqlite.get('foo', 'bar'));
+    const res = await withSqlite((sqlite) =>
+      sqlite.get('_test-namespace', 'bar'),
+    );
     expect(res).toBeUndefined();
   });
 
   it('should set and get', async () => {
     const res = await withSqlite(async (sqlite) => {
-      await sqlite.set('foo', 'bar', { foo: 'foo' });
-      await sqlite.set('foo', 'bar', { bar: 'bar' });
-      await sqlite.set('foo', 'bar', { baz: 'baz' });
-      return sqlite.get('foo', 'bar');
+      await sqlite.set('_test-namespace', 'bar', { foo: 'foo' });
+      await sqlite.set('_test-namespace', 'bar', { bar: 'bar' });
+      await sqlite.set('_test-namespace', 'bar', { baz: 'baz' });
+      return sqlite.get('_test-namespace', 'bar');
     });
     expect(res).toEqual({ baz: 'baz' });
   });
@@ -39,11 +41,11 @@ describe('util/cache/package/sqlite', () => {
         GlobalConfig.set({ cacheDir: path });
 
         const client1 = await SqlitePackageCache.init(path);
-        await client1.set('foo', 'bar', 'baz');
+        await client1.set('_test-namespace', 'bar', 'baz');
         await client1.cleanup();
 
         const client2 = await SqlitePackageCache.init(path);
-        const res = await client2.get('foo', 'bar');
+        const res = await client2.get('_test-namespace', 'bar');
         await client2.cleanup();
         return res;
       },
