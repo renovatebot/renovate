@@ -382,14 +382,20 @@ For example, the Renovate configuration:
 
 will update `.yarnrc.yml` as following:
 
+If no registry currently set
+
 ```yaml
 npmRegistries:
   //npm.pkg.github.com/:
     npmAuthToken: <Decrypted PAT Token>
-  //npm.pkg.github.com:
-    # this will not be overwritten and may conflict
-  https://npm.pkg.github.com/:
-    # this will not be overwritten and may conflict
+```
+
+If current registry key has protocol set:
+
+```yaml
+npmRegistries:
+  https://npm.pkg.github.com:
+    npmAuthToken: <Decrypted PAT Token>
 ```
 
 ### maven

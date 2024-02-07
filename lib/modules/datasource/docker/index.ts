@@ -8,7 +8,7 @@ import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { type AsyncResult, Result } from '../../../util/result';
-import { isDockerDigest } from '../../../util/string';
+import { isDockerDigest } from '../../../util/string-match';
 import {
   ensurePathPrefix,
   joinUrlParts,

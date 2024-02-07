@@ -42,4 +42,19 @@ describe('util/package-rules/package-patterns', () => {
       expect(result).toBeTrue();
     });
   });
+
+  describe('exclude', () => {
+    it('should exclude packageName', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          excludePackagePatterns: ['def'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
+  });
 });

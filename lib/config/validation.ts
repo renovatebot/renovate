@@ -8,8 +8,12 @@ import type {
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types/host-rules';
-import { anyMatchRegexOrMinimatch } from '../util/package-rules/match';
-import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
+import { regEx } from '../util/regex';
+import {
+  anyMatchRegexOrMinimatch,
+  configRegexPredicate,
+  isConfigRegex,
+} from '../util/string-match';
 import * as template from '../util/template';
 import {
   hasValidSchedule,
@@ -706,7 +710,7 @@ export async function validateConfig(
     }
 
     if (key === 'hostRules' && is.array(val)) {
-      const allowedHeaders = GlobalConfig.get('allowedHeaders');
+      const allowedHeaders = GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (!rule.headers) {
           continue;
@@ -718,7 +722,7 @@ export async function validateConfig(
               message: `Invalid hostRules headers value configuration: header must be a string.`,
             });
           }
-          if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
+          if (!anyMatchRegexOrMinimatch(header, allowedHeaders)) {
             errors.push({
               topic: 'Configuration Error',
               message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,

@@ -257,14 +257,19 @@ export async function lookupUpdates(
           latestVersion!,
           allVersions.map((v) => v.version),
         )!;
-      // istanbul ignore if
-      if (!currentVersion! && config.lockedVersion) {
+
+      if (!currentVersion) {
+        if (!config.lockedVersion) {
+          res.skipReason = 'invalid-value';
+        }
         return res;
       }
 
       res.currentVersion = currentVersion!;
-      const currentVersionTimestamp = allVersions.find((v) =>
-        versioning.equals(v.version, currentVersion),
+      const currentVersionTimestamp = allVersions.find(
+        (v) =>
+          versioning.isValid(v.version) &&
+          versioning.equals(v.version, currentVersion),
       )?.releaseTimestamp;
 
       if (

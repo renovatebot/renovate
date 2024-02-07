@@ -17,6 +17,9 @@ export function parseRepository(
       case 'oci:':
         res.datasource = DockerDatasource.id;
         res.packageName = `${repositoryURL.replace('oci://', '')}/${depName}`;
+        // https://github.com/helm/helm/issues/10312
+        // https://github.com/helm/helm/issues/10678
+        res.pinDigests = false;
         break;
       case 'file:':
         res.skipReason = 'local-dependency';
