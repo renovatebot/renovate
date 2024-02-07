@@ -6,15 +6,15 @@ export type SupportedManagers =
   | 'pep621';
 
 export interface PipCompileArgs {
+  argv: string[]; // all arguments as a list
   command: string;
   isCustomCommand: boolean;
-  indexUrl?: string;
-  extraIndexUrl?: string[];
-  outputFile?: string;
+  constraintsFiles?: string[];
   extra?: string[];
-  constraintFiles?: string[];
+  extraIndexUrl?: string[];
+  indexUrl?: string;
+  outputFile?: string;
   sourceFiles: string[]; // positional arguments
-  argv: string[]; // all arguments as a list
 }
 
 export interface DependencyBetweenFiles {

@@ -141,8 +141,8 @@ export function extractHeaderCommand(
         result.extraIndexUrl.push(value);
         // TODO: add to secrets? next PR
       } else if (option === '--constraint') {
-        result.constraintFiles = result.constraintFiles ?? [];
-        result.constraintFiles.push(value);
+        result.constraintsFiles = result.constraintsFiles ?? [];
+        result.constraintsFiles.push(value);
       } else if (option === '--output-file') {
         result.outputFile = value;
       } else if (option === '--index-url') {
