@@ -71,7 +71,7 @@ function extractWithRegex(content: string): PackageDependency[] {
         path = '',
         tag,
         replaceString,
-        registryUrl,
+        registryUrl = '',
       } = tagMatch.groups;
       let quotes = '';
       if (replaceString.indexOf("'") >= 0) {
@@ -87,7 +87,7 @@ function extractWithRegex(content: string): PackageDependency[] {
         versioning: dockerVersioning.id,
         depType: 'action',
         replaceString,
-        autoReplaceStringTemplate: `${quotes}${registryUrl ?? ''}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
+        autoReplaceStringTemplate: `${quotes}${registryUrl}{{depName}}${path}@{{#if newDigest}}{{newDigest}}${quotes}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}${quotes}{{/unless}}`,
         ...(registryUrl
           ? detectDatasource(registryUrl)
           : customRegistryUrlsPackageDependency),
