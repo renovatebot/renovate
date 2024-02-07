@@ -29,7 +29,7 @@ export async function updateArtifacts({
 
   const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
   const isUpdateOptionAddVendirArchives = config.postUpdateOptions?.includes(
-    'vendirUpdateSubChartArchives'
+    'vendirUpdateSubChartArchives',
   );
 
   if (

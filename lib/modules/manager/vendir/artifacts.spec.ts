@@ -44,7 +44,7 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps,
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -55,7 +55,7 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -65,7 +65,7 @@ describe('modules/manager/vendir/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1 as any);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
@@ -75,7 +75,7 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps,
         newPackageFileContent: vendirFile,
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -86,7 +86,7 @@ describe('modules/manager/vendir/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
@@ -96,7 +96,7 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps,
         newPackageFileContent: vendirFile,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -115,7 +115,7 @@ describe('modules/manager/vendir/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
     expect(
@@ -124,7 +124,7 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: vendirFile,
         config: { ...config, updateType: 'lockFileMaintenance' },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -141,7 +141,7 @@ describe('modules/manager/vendir/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1 as any);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
@@ -153,7 +153,7 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps,
         newPackageFileContent: vendirFile,
         config,
-      })
+      }),
     ).toEqual([
       {
         artifactError: {
@@ -170,7 +170,7 @@ describe('modules/manager/vendir/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2 as never);
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -180,7 +180,7 @@ describe('modules/manager/vendir/artifacts', () => {
       partial<StatusResult>({
         not_added: ['vendor/Chart.yaml', 'vendor/my-chart/Chart.yaml'],
         deleted: ['vendor/removed.yaml'],
-      })
+      }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
     const test = await vendir.updateArtifacts({
@@ -244,7 +244,7 @@ describe('modules/manager/vendir/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
     const execSnapshots = mockExecAll();
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -254,7 +254,7 @@ describe('modules/manager/vendir/artifacts', () => {
       partial<StatusResult>({
         not_added: ['vendor/Chart.yaml'],
         deleted: ['vendor/removed.yaml'],
-      })
+      }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -266,7 +266,7 @@ describe('modules/manager/vendir/artifacts', () => {
           postUpdateOptions: ['vendirUpdateVendoredFiles'],
           ...config,
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -305,7 +305,7 @@ describe('modules/manager/vendir/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
     const execSnapshots = mockExecAll();
     fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
+      '/tmp/renovate/cache/__renovate-private-cache',
     );
     fs.getParentDir.mockReturnValue('');
 
@@ -314,7 +314,7 @@ describe('modules/manager/vendir/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         not_added: ['vendor/Chart.yaml'],
-      })
+      }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -326,7 +326,7 @@ describe('modules/manager/vendir/artifacts', () => {
           postUpdateOptions: ['vendirUpdateVendoredFiles'],
           ...config,
         },
-      })
+      }),
     ).toEqual([
       {
         file: {

@@ -10,7 +10,7 @@ import { isHelmChart } from './utils';
 // Recommend looking at the kustomize manager for more information on support.
 
 export function extractHelmChart(
-  helmChart: HelmChart
+  helmChart: HelmChart,
 ): PackageDependency | null {
   if (!helmChart.name) {
     return null;
@@ -26,7 +26,7 @@ export function extractHelmChart(
 
 export function parseVendir(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): Vendir | null {
   let pkg: Vendir | null = null;
   try {
@@ -51,7 +51,7 @@ export function parseVendir(
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string // TODO: fix tests
+  packageFile?: string, // TODO: fix tests
 ): PackageFileContent | null {
   logger.trace(`vendir.extractPackageFile(${packageFile!})`);
   const deps: PackageDependency[] = [];
