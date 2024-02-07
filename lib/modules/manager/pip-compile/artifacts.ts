@@ -27,48 +27,75 @@ import {
 } from './common';
 import type { GetRegistryUrlVarsResult } from './types';
 
-function buildRegistryUrl(url: string): string {
+function buildRegistryUrl(url: string): URL {
   const hostRule = hostRules.find({ url });
   const ret = new URL(url);
   if (!ret.username) {
     ret.username = hostRule.username ?? '';
     ret.password = hostRule.password ?? '';
   }
-  return ret.href;
+  return ret;
+}
+
+function getRegistryUrlVarFromUrls(
+  varName: keyof GetRegistryUrlVarsResult['environmentVars'],
+  urls: URL[],
+): GetRegistryUrlVarsResult {
+  let haveCredentials = false;
+  for (const url of urls) {
+    if (url.username) {
+      haveCredentials = true;
+    }
+  }
+  const registryUrlsString = urls.map((url) => url.href).join(' ');
+  const ret: GetRegistryUrlVarsResult = {
+    haveCredentials,
+    environmentVars: {},
+  };
+  if (registryUrlsString) {
+    ret.environmentVars[varName] = registryUrlsString;
+  }
+  return ret;
 }
 
 export function getRegistryUrlVarsFromPackageFile(
   packageFile: PackageFileContent | null,
 ): GetRegistryUrlVarsResult {
-  const ret: GetRegistryUrlVarsResult = {};
   // There should only ever be one element in registryUrls, since pip_requirements gets them from --index-url
   // flags in the input file, and that only makes sense once
-  const registryUrls = packageFile?.registryUrls
-    ?.map(buildRegistryUrl)
-    .join(' ');
-  if (registryUrls) {
-    ret.PIP_INDEX_URL = registryUrls;
-  }
+  const indexUrl = getRegistryUrlVarFromUrls(
+    'PIP_INDEX_URL',
+    packageFile?.registryUrls?.map(buildRegistryUrl) ?? [],
+  );
+  const extraIndexUrls = getRegistryUrlVarFromUrls(
+    'PIP_EXTRA_INDEX_URL',
+    packageFile?.additionalRegistryUrls?.map(buildRegistryUrl) ?? [],
+  );
 
-  const additionalRegistryUrls = packageFile?.additionalRegistryUrls
-    ?.map(buildRegistryUrl)
-    .join(' ');
-  if (additionalRegistryUrls) {
-    ret.PIP_EXTRA_INDEX_URL = additionalRegistryUrls;
-  }
-  return ret;
+  return {
+    haveCredentials: indexUrl.haveCredentials || extraIndexUrls.haveCredentials,
+    environmentVars: {
+      ...indexUrl.environmentVars,
+      ...extraIndexUrls.environmentVars,
+    },
+  };
 }
 
 export function constructPipCompileCmd(
   content: string,
   inputFileName: string,
   outputFileName: string,
+  haveCredentials: boolean,
 ): string {
   const headers = constraintLineRegex.exec(content);
   const args = ['pip-compile'];
-  if (headers?.groups) {
-    logger.debug(`Found pip-compile header: ${headers[0]}`);
-    for (const argument of split(headers.groups.arguments)) {
+  if (!!headers?.groups || haveCredentials) {
+    logger.debug(`Found pip-compile header: ${headers?.[0]}`);
+    const headerArguments = split(headers?.groups?.arguments ?? '');
+    if (haveCredentials && !headerArguments.includes('--no-emit-index-url')) {
+      headerArguments.push('--no-emit-index-url');
+    }
+    for (const argument of headerArguments) {
       if (allowedPipArguments.includes(argument)) {
         args.push(argument);
       } else if (argument.startsWith('--output-file=')) {
@@ -120,14 +147,16 @@ export async function updateArtifacts({
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(outputFileName);
     }
+    const packageFile = pipRequirements.extractPackageFile(newInputContent);
+    const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
     const cmd = constructPipCompileCmd(
       existingOutput,
       inputFileName,
       outputFileName,
+      registryUrlVars.haveCredentials,
     );
     const constraint = getPythonConstraint(config);
     const pipToolsConstraint = getPipToolsConstraint(config);
-    const packageFile = pipRequirements.extractPackageFile(newInputContent);
     const execOptions: ExecOptions = {
       cwdFile: inputFileName,
       docker: {},
@@ -145,7 +174,7 @@ export async function updateArtifacts({
         PIP_CACHE_DIR: await ensureCacheDir('pip'),
         // Using environment variables for these since pip-compile's --no-emit-index-url flag doesn't prevent
         // index URLs passed as command line parameters from being included in the header comment
-        ...getRegistryUrlVarsFromPackageFile(packageFile),
+        ...registryUrlVars.environmentVars,
       },
     };
     logger.trace({ cmd }, 'pip-compile command');

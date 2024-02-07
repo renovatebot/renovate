@@ -290,8 +290,20 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsNoHeaders.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          false,
         ),
       ).toBe('pip-compile requirements.in');
+    });
+
+    it('returns --no-emit-index-url when credentials are present in URLs', () => {
+      expect(
+        constructPipCompileCmd(
+          Fixtures.get('requirementsNoHeaders.txt'),
+          'subdir/requirements.in',
+          'subdir/requirements.txt',
+          true,
+        ),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
     it('returns extracted common arguments (like those featured in the README)', () => {
@@ -300,6 +312,20 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsWithHashes.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          false,
+        ),
+      ).toBe(
+        'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
+      );
+    });
+
+    it('returns --no-emit-index-url only once when its in the header and credentials are present in URLs', () => {
+      expect(
+        constructPipCompileCmd(
+          Fixtures.get('requirementsWithHashes.txt'),
+          'subdir/requirements.in',
+          'subdir/requirements.txt',
+          true,
         ),
       ).toBe(
         'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
@@ -312,6 +338,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsWithUnknownArguments.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          false,
         ),
       ).toBe('pip-compile --generate-hashes requirements.in');
       expect(logger.trace).toHaveBeenCalledWith(
@@ -330,6 +357,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsWithExploitingArguments.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          false,
         ),
       ).toBe(
         'pip-compile --generate-hashes --output-file=requirements.txt requirements.in',
@@ -351,8 +379,11 @@ describe('modules/manager/pip-compile/artifacts', () => {
           additionalRegistryUrls: ['https://example2.com/pypi/simple'],
         }),
       ).toEqual({
-        PIP_INDEX_URL: 'https://example.com/pypi/simple',
-        PIP_EXTRA_INDEX_URL: 'https://example2.com/pypi/simple',
+        haveCredentials: false,
+        environmentVars: {
+          PIP_INDEX_URL: 'https://example.com/pypi/simple',
+          PIP_EXTRA_INDEX_URL: 'https://example2.com/pypi/simple',
+        },
       });
     });
 
@@ -367,8 +398,11 @@ describe('modules/manager/pip-compile/artifacts', () => {
           ],
         }),
       ).toEqual({
-        PIP_EXTRA_INDEX_URL:
-          'https://example.com/pypi/simple https://example2.com/pypi/simple',
+        haveCredentials: false,
+        environmentVars: {
+          PIP_EXTRA_INDEX_URL:
+            'https://example.com/pypi/simple https://example2.com/pypi/simple',
+        },
       });
     });
 
@@ -379,7 +413,12 @@ describe('modules/manager/pip-compile/artifacts', () => {
           deps: [],
           registryUrls: ['https://example.com/pypi/simple'],
         }),
-      ).toEqual({ PIP_INDEX_URL: 'https://example.com/pypi/simple' });
+      ).toEqual({
+        haveCredentials: false,
+        environmentVars: {
+          PIP_INDEX_URL: 'https://example.com/pypi/simple',
+        },
+      });
     });
 
     it('uses auth from extra index URLs matching host rules', () => {
@@ -393,7 +432,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
           registryUrls: ['https://example.com/pypi/simple'],
         }),
       ).toEqual({
-        PIP_INDEX_URL: 'https://user:password@example.com/pypi/simple',
+        haveCredentials: true,
+        environmentVars: {
+          PIP_INDEX_URL: 'https://user:password@example.com/pypi/simple',
+        },
       });
     });
   });
