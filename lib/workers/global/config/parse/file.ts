@@ -18,7 +18,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
     case '.yml':
       return parseSingleYaml(await readSystemFile(file, 'utf8'), {
         json: true,
-      }) as RenovateConfig;
+      });
     case '.json5':
     case '.json':
       return parseJson(
@@ -73,7 +73,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       logger.fatal(err.message);
       process.exit(1);
     } else if (env.RENOVATE_CONFIG_FILE) {
-      logger.fatal('No custom config file found on disk');
+      logger.fatal('Error parsing config file');
       process.exit(1);
     }
     // istanbul ignore next: we can ignore this

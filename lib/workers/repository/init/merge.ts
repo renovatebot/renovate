@@ -42,7 +42,9 @@ export async function detectConfigFile(): Promise<string | null> {
           (await readLocalFile('package.json', 'utf8'))!,
         );
         if (pJson.renovate) {
-          logger.debug('Using package.json for global renovate config');
+          logger.warn(
+            'Using package.json for Renovate config is deprecated - please use a dedicated configuration file instead',
+          );
           return 'package.json';
         }
       } catch (err) {
@@ -71,11 +73,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     if (configFileRaw) {
       let configFileParsed = parseJson(configFileRaw, configFileName) as any;
-      if (configFileName !== 'package.json') {
-        return { configFileName, configFileRaw, configFileParsed };
+      if (configFileName === 'package.json') {
+        configFileParsed = configFileParsed.renovate;
       }
-      configFileParsed = configFileParsed.renovate;
-      return { configFileName, configFileParsed }; // don't return raw 'package.json'
+      return { configFileName, configFileParsed };
     } else {
       logger.debug('Existing config file no longer exists');
       delete cache.configFileName;
@@ -103,7 +104,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     const parsedConfig = cachedConfig ? JSON.parse(cachedConfig) : undefined;
     if (parsedConfig) {
       setOnboardingConfigDetails(configFileName, JSON.stringify(parsedConfig));
-      return { configFileName, configFileRaw, configFileParsed: parsedConfig };
+      return { configFileName, configFileParsed: parsedConfig };
     }
   }
 
@@ -202,7 +203,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   }
 
   setOnboardingConfigDetails(configFileName, JSON.stringify(configFileParsed));
-  return { configFileName, configFileRaw, configFileParsed };
+  return { configFileName, configFileParsed };
 }
 
 export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {

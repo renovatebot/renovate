@@ -139,8 +139,8 @@ function handleGotError(
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     } else if (
-      err.body?.errors?.find(
-        (e: any) => e.message?.startsWith('A pull request already exists'),
+      err.body?.errors?.find((e: any) =>
+        e.message?.startsWith('A pull request already exists'),
       )
     ) {
       return err;
@@ -338,7 +338,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
-                { ...opts, paginate: false },
+                { ...opts, paginate: false, repoCache: false },
                 okToRetry,
               );
             },

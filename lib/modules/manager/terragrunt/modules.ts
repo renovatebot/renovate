@@ -72,6 +72,9 @@ export function analyseTerragruntModule(
       tfrVersionMatch.groups.cloud;
     dep.currentValue = tfrVersionMatch.groups.currentValue;
     dep.datasource = TerraformModuleDatasource.id;
+    if (tfrVersionMatch.groups.registry) {
+      dep.registryUrls = [`https://${tfrVersionMatch.groups.registry}`];
+    }
   } else if (source) {
     const moduleParts = source.split('//')[0].split('/');
     if (moduleParts[0] === '..') {

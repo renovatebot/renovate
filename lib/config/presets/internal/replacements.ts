@@ -22,14 +22,21 @@ export const presets: Record<string, Preset> = {
       'replacements:k8s-registry-move',
       'replacements:middie-to-scoped',
       'replacements:now-to-vercel',
+      'replacements:npm-run-all-to-maintenance-fork',
       'replacements:parcel-css-to-lightningcss',
+      'replacements:passport-saml',
       'replacements:react-query-devtools-to-scoped',
       'replacements:react-query-to-scoped',
       'replacements:react-scripts-ts-to-react-scripts',
+      'replacements:read-pkg-up-rename',
+      'replacements:redux-devtools-extension-to-scope',
       'replacements:renovate-pep440-to-renovatebot-pep440',
       'replacements:rollup-babel-to-scoped',
+      'replacements:rollup-json-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
       'replacements:rome-to-biome',
+      'replacements:semantic-release-replace-plugin-to-unscoped',
+      'replacements:spectre-cli-to-spectre-console-cli',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
@@ -634,6 +641,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'passport-saml': {
+    description: '`passport-saml` was renamed to `@node-saml/passport-saml`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['passport-saml'],
+        replacementName: '@node-saml/passport-saml',
+        replacementVersion: '4.0.4',
+      },
+    ],
+  },
   'react-query-devtools-to-scoped': {
     description:
       '`react-query/devtools` became scoped under the `tanstack` organization.',
@@ -748,6 +766,18 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rome'],
         replacementName: '@biomejs/biome',
         replacementVersion: '1.0.0',
+      },
+    ],
+  },
+  'semantic-release-replace-plugin-to-unscoped': {
+    description:
+      '`semantic-release-replace-plugin` was moved out of the `google` organization.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@google/semantic-release-replace-plugin'],
+        replacementName: 'semantic-release-replace-plugin',
+        replacementVersion: '1.2.1',
       },
     ],
   },

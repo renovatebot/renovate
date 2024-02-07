@@ -127,6 +127,7 @@ export interface RepoGlobalConfig {
   allowPlugins?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
+  allowedHeaders?: string[];
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;
@@ -336,6 +337,7 @@ export interface PackageRule
   isVulnerabilityAlert?: boolean;
   matchFileNames?: string[];
   matchBaseBranches?: string[];
+  matchCurrentAge?: string;
   matchManagers?: string[];
   matchDatasources?: string[];
   matchDepTypes?: string[];
@@ -367,6 +369,12 @@ export interface ValidationMessage {
   message: string;
 }
 
+export type AllowedParents =
+  | 'customManagers'
+  | 'customDatasources'
+  | 'hostRules'
+  | 'postUpgradeTasks'
+  | 'packageRules';
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
@@ -395,12 +403,7 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?:
-    | 'customDatasources'
-    | 'hostRules'
-    | 'packageRules'
-    | 'postUpgradeTasks'
-    | 'customManagers';
+  parents?: AllowedParents[];
 
   stage?: RenovateConfigStage;
 
@@ -500,7 +503,9 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
+  releaseTimestamp?: string | null;
   repository?: string;
+  currentVersionTimestamp?: string;
 }
 
 export interface ConfigMigration {
