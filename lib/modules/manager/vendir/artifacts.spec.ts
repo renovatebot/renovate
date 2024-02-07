@@ -125,7 +125,7 @@ describe('modules/manager/vendir/artifacts', () => {
         newPackageFileContent: vendirFile,
         config: { ...config, updateType: 'lockFileMaintenance' },
       })
-    ).toMatchObject([
+    ).toEqual([
       {
         file: {
           type: 'addition',
@@ -154,7 +154,7 @@ describe('modules/manager/vendir/artifacts', () => {
         newPackageFileContent: vendirFile,
         config,
       })
-    ).toMatchObject([
+    ).toEqual([
       {
         artifactError: {
           lockFile: 'vendir.yml',

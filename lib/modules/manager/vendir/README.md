@@ -6,7 +6,7 @@ helmChart:
   # chart name (required)
   name: stable/redis
   # use specific chart version (string; optional)
-  version: "1.2.1"
+  version: '1.2.1'
   # specifies Helm repository to fetch from (optional)
   repository:
     # repository url; supports exprimental oci helm fetch via
@@ -23,5 +23,5 @@ helmChart:
       name: my-helm-auth
   # specify helm binary version to use;
   # '3' means binary 'helm3' needs to be on the path (optional)
-  helmVersion: "3"
+  helmVersion: '3'
 ```
