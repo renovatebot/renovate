@@ -58,7 +58,7 @@ export async function updateArtifacts({
         await deleteLocalFile(outputFileName);
       }
       const cmd = constructPipCompileCmd(existingOutput, outputFileName);
-      const execOptions: ExecOptions = await getExecOptions(
+      const execOptions = await getExecOptions(
         config,
         inputFileName,
       );

@@ -84,7 +84,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[] | null> {
   logger.trace('pip-compile.extractAllPackageFiles()');
   const lockFileArgs = new Map<string, PipCompileArgs>();
-  const depsBetweenFiles = new Array<DependencyBetweenFiles>();
+  const depsBetweenFiles: DependencyBetweenFiles[] = [];
   // for debugging only ^^^ (for now)
   const packageFiles = new Map<string, PackageFile>();
   for (const fileMatch of fileMatches) {
