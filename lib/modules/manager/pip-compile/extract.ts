@@ -56,11 +56,40 @@ export function extractPackageFile(
   }
 }
 
+function generateMermaidFlowchart(
+  packageFiles: PackageFile[],
+  lockFileArgs: Map<string, PipCompileArgs>,
+  sourceLockFiles: Array<{ sourceFile: string; lockFile: string }>,
+): string {
+  const lockFiles = [];
+  for (const [lockFile, pipCompileArgs] of lockFileArgs.entries()) {
+    const extraArgs = pipCompileArgs.extra
+      ?.map((v) => '--extra=' + v)
+      .join('\n');
+    lockFiles.push(
+      `  ${lockFile}[[${lockFile}${extraArgs ? '\n' + extraArgs : ''}]]`,
+    );
+  }
+
+  const edges = packageFiles.flatMap((packageFile) => {
+    return packageFile.lockFiles!.map((lockFile) => {
+      return `  ${packageFile.packageFile} --> ${lockFile}`;
+    });
+  });
+  const lockEdges = sourceLockFiles.map(({ sourceFile, lockFile }) => {
+    return `  ${sourceFile} --> ${lockFile}`;
+  });
+  return `graph TD\n${lockFiles.join('\n')}\n${edges.join('\n')}\n${lockEdges.join('\n')}`;
+}
+
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   fileMatches: string[],
 ): Promise<PackageFile[] | null> {
   logger.trace('pip-compile.extractAllPackageFiles()');
+  const lockFileArgs = new Map<string, PipCompileArgs>();
+  const sourceLockFiles = [];
+  // for debugging only ^^^ (for now)
   const packageFiles = new Map<string, PackageFile>();
   for (const fileMatch of fileMatches) {
     const fileContent = await readLocalFile(fileMatch, 'utf8');
@@ -71,6 +100,7 @@ export async function extractAllPackageFiles(
     let pipCompileArgs: PipCompileArgs;
     try {
       pipCompileArgs = extractHeaderCommand(fileContent, fileMatch);
+      lockFileArgs.set(fileMatch, pipCompileArgs);
     } catch (error) {
       logger.warn(
         { fileMatch, error },
@@ -87,6 +117,7 @@ export async function extractAllPackageFiles(
           { sourceFile: packageFile, lockFile: fileMatch },
           'pip-compile: lock file acts as source file for another lock file',
         );
+        sourceLockFiles.push({ sourceFile: packageFile, lockFile: fileMatch });
         continue;
       }
       if (packageFiles.has(packageFile)) {
@@ -121,5 +152,13 @@ export async function extractAllPackageFiles(
   if (packageFiles.size === 0) {
     return null;
   }
+  logger.debug(
+    'pip-compile: dependency flowchart:\n' +
+      generateMermaidFlowchart(
+        Array.from(packageFiles.values()),
+        lockFileArgs,
+        sourceLockFiles,
+      ),
+  );
   return Array.from(packageFiles.values());
 }
