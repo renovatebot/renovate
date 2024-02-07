@@ -246,7 +246,7 @@ export class PypiDatasource extends Datasource {
     const releases: Releases = {};
     for (const link of Array.from(links)) {
       const version = PypiDatasource.extractVersionFromLinkText(
-        link.text,
+        link.text?.trim(),
         packageName,
       );
       if (version) {

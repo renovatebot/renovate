@@ -421,6 +421,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'ocaml/ocaml',
     },
   },
+  opentofu: {
+    asdfPluginUrl: 'https://github.com/virtualroot/asdf-opentofu',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'opentofu/opentofu',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   perl: {
     asdfPluginUrl: 'https://github.com/ouest/asdf-perl',
     config: {

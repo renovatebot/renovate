@@ -55,5 +55,18 @@ describe('util/package-rules/package-prefixes', () => {
       );
       expect(result).toBeFalse();
     });
+
+    it('should return true if packageName matched', () => {
+      const result = packagePrefixesMatcher.excludes(
+        {
+          depName: 'abc1',
+          packageName: 'def1',
+        },
+        {
+          excludePackagePrefixes: ['def'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
   });
 });

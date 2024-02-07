@@ -1804,7 +1804,7 @@ You can configure a different maximum value in seconds using `maxRetryAfter`:
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
-It uses `QuickLRU` with a `maxSize` of `1000`.
+It uses [`lru-cache`](https://github.com/isaacs/node-lru-cache) with the `max` option set to `1000`.
 
 ### enableHttp2
 

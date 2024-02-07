@@ -55,7 +55,7 @@ jobs:
         run: corepack enable
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -109,7 +109,7 @@ jobs:
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
       - name: docker-config
-        uses: containerbase/internal-tools@6bbc5c952921fd03b8bb242934e57dc8d3d2be1b # v3.0.51
+        uses: containerbase/internal-tools@a12a7d23492f0805ce2237f46c9b69d9c3ba5f01 # v3.0.54
         with:
           command: docker-config
 
