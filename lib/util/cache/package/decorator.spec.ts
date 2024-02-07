@@ -39,7 +39,7 @@ describe('util/cache/package/decorator', () => {
 
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledExactlyOnceWith(
-      '__test_',
+      '_test-namespace',
       'cache-decorator:some-key',
       { cachedAt: expect.any(String), value: '111' },
       30,
