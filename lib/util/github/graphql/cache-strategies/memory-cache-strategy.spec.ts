@@ -44,7 +44,10 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items,
       createdAt: isoTs('2022-10-01 15:30'),
     };
-    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
+    memCache.set(
+      'github-graphql-cache:_test-namespace:bar',
+      clone(cacheRecord),
+    );
 
     // At this moment, cache is valid
     let now = '2022-10-31 15:29:59';
@@ -59,7 +62,9 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     expect(res).toEqual(Object.values(items));
     expect(isPaginationDone).toBe(true);
-    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual(cacheRecord);
+    expect(memCache.get('github-graphql-cache:_test-namespace:bar')).toEqual(
+      cacheRecord,
+    );
 
     // One second later, the cache is invalid
     now = '2022-10-31 15:30:00';
@@ -71,7 +76,9 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     expect(res).toEqual([]);
     expect(isPaginationDone).toBe(false);
-    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual(cacheRecord);
+    expect(memCache.get('github-graphql-cache:_test-namespace:bar')).toEqual(
+      cacheRecord,
+    );
   });
 
   it('reconciles old cache record with new items', async () => {
@@ -84,7 +91,10 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items: oldItems,
       createdAt: isoTs('2022-10-30 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
+    memCache.set(
+      'github-graphql-cache:_test-namespace:bar',
+      clone(cacheRecord),
+    );
 
     const now = '2022-10-31 15:30';
     mockTime(now);
@@ -104,7 +114,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     expect(res).toEqual([...Object.values(oldItems), newItem]);
     expect(isPaginationDone).toBe(false);
-    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual({
+    expect(memCache.get('github-graphql-cache:_test-namespace:bar')).toEqual({
       items: {
         ...oldItems,
         '4': newItem,
@@ -123,7 +133,10 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items: oldItems,
       createdAt: isoTs('2022-10-30 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
+    memCache.set(
+      'github-graphql-cache:_test-namespace:bar',
+      clone(cacheRecord),
+    );
 
     const now = '2022-10-31 15:30';
     mockTime(now);
@@ -152,7 +165,10 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items: oldItems,
       createdAt: isoTs('2022-12-31 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
+    memCache.set(
+      'github-graphql-cache:_test-namespace:bar',
+      clone(cacheRecord),
+    );
 
     const now = '2022-12-31 23:59';
     mockTime(now);
@@ -171,7 +187,9 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     const isPaginationDone = await strategy.reconcile(page);
 
     expect(isPaginationDone).toBe(true);
-    expect(memCache.get('github-graphql-cache:foo:bar')).toMatchObject({
+    expect(
+      memCache.get('github-graphql-cache:_test-namespace:bar'),
+    ).toMatchObject({
       items: {
         '1': { releaseTimestamp: isoTs('2022-12-31 10:00') },
         '2': { releaseTimestamp: isoTs('2022-12-31 11:00') },
@@ -199,7 +217,10 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       items,
       createdAt: isoTs('2022-10-30 12:00'),
     };
-    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
+    memCache.set(
+      'github-graphql-cache:_test-namespace:bar',
+      clone(cacheRecord),
+    );
 
     const now = '2022-10-31 15:30';
     mockTime(now);
@@ -228,7 +249,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
       { version: '8', releaseTimestamp: isoTs('2022-10-08 10:00') },
     ]);
     expect(isPaginationDone).toBe(true);
-    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual({
+    expect(memCache.get('github-graphql-cache:_test-namespace:bar')).toEqual({
       items: {
         '0': { version: '0', releaseTimestamp: isoTs('2022-09-30 10:00') },
         '1': { version: '1', releaseTimestamp: isoTs('2022-10-01 10:00') },
