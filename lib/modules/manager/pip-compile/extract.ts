@@ -104,7 +104,7 @@ export async function extractAllPackageFiles(
       );
       continue;
     }
-    for (const constraint in pipCompileArgs.constraints) {
+    for (const constraint in pipCompileArgs.constraintFiles) {
       // TODO(not7cd): handle constraints
       /* istanbul ignore next */
       depsBetweenFiles.push({

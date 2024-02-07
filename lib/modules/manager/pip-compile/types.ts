@@ -12,7 +12,7 @@ export interface PipCompileArgs {
   extraIndexUrl?: string[];
   outputFile?: string;
   extra?: string[];
-  constraints?: string[];
+  constraintFiles?: string[];
   sourceFiles: string[]; // positional arguments
   argv: string[]; // all arguments as a list
 }
