@@ -11,14 +11,6 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-async function vendirCommands(execOptions: ExecOptions): Promise<void> {
-  const cmd: string[] = [];
-
-  cmd.push(`vendir sync`);
-
-  await exec(cmd, execOptions);
-}
-
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -56,7 +48,9 @@ export async function updateArtifacts({
         { toolName: 'helm', constraint: config.constraints?.helm },
       ],
     };
-    await vendirCommands(execOptions);
+
+    await exec(`vendir sync`, execOptions);
+
     logger.debug('Returning updated Vendir artifacts');
 
     const fileChanges: UpdateArtifactsResult[] = [];

@@ -1,6 +1,6 @@
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
+import { envMock, mockExecAll, mockExecSequence } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
 import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -60,10 +60,10 @@ describe('modules/manager/vendir/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1 as any);
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
     fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1 as any);
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -77,7 +77,7 @@ describe('modules/manager/vendir/artifacts', () => {
         config,
       }),
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchSnapshot([{ cmd: 'vendir sync' }]);
   });
 
   it('returns updated vendir.lock', async () => {
@@ -110,10 +110,10 @@ describe('modules/manager/vendir/artifacts', () => {
   });
 
   it('returns updated vendir.yml for lockfile maintenance', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1 as never);
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
     fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2 as never);
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -139,7 +139,7 @@ describe('modules/manager/vendir/artifacts', () => {
 
   it('catches errors', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
-    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1 as any);
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -188,7 +188,7 @@ describe('modules/manager/vendir/artifacts', () => {
       updatedDeps,
       newPackageFileContent: vendirFile,
       config: {
-        postUpdateOptions: ['vendirUpdateVendoredFiles'],
+        postUpdateOptions: ['vendirUpdateSubChartArchives'],
         ...config,
       },
     });
@@ -263,7 +263,7 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps,
         newPackageFileContent: vendirFile,
         config: {
-          postUpdateOptions: ['vendirUpdateVendoredFiles'],
+          postUpdateOptions: ['vendirUpdateSubChartArchives'],
           ...config,
         },
       }),
@@ -323,7 +323,7 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps,
         newPackageFileContent: vendirFile,
         config: {
-          postUpdateOptions: ['vendirUpdateVendoredFiles'],
+          postUpdateOptions: ['vendirUpdateSubChartArchives'],
           ...config,
         },
       }),

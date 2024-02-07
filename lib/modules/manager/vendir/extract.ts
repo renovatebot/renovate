@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
+import { parseSingleYaml } from '../../../util/yaml';
 import { logger } from '../../../logger';
 import { HelmDatasource } from '../../datasource/helm';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -30,7 +30,7 @@ export function parseVendir(
 ): Vendir | null {
   let pkg: Vendir | null = null;
   try {
-    pkg = load(content, { json: true }) as Vendir;
+    pkg = parseSingleYaml(content);
   } catch (e) /* istanbul ignore next */ {
     logger.debug({ packageFile }, 'Error parsing vendir.yml file');
     return null;
