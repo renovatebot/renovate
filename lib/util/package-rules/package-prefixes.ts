@@ -6,7 +6,7 @@ import { Matcher } from './base';
 export class PackagePrefixesMatcher extends Matcher {
   override matches(
     { depName, packageName }: PackageRuleInputConfig,
-    { matchPackagePrefixes }: PackageRule
+    { matchPackagePrefixes }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchPackagePrefixes)) {
       return null;
@@ -25,7 +25,7 @@ export class PackagePrefixesMatcher extends Matcher {
     if (matchPackagePrefixes.some((prefix) => depName.startsWith(prefix))) {
       logger.once.info(
         { packageName, depName },
-        'Use matchDepPatterns instead of matchPackagePrefixes'
+        'Use matchDepPatterns instead of matchPackagePrefixes',
       );
       return true;
     }
@@ -34,9 +34,10 @@ export class PackagePrefixesMatcher extends Matcher {
   }
 
   override excludes(
-    { depName }: PackageRuleInputConfig,
-    { excludePackagePrefixes }: PackageRule
+    { depName, packageName }: PackageRuleInputConfig,
+    packageRule: PackageRule,
   ): boolean | null {
+    const { excludePackagePrefixes } = packageRule;
     if (is.undefined(excludePackagePrefixes)) {
       return null;
     }
@@ -44,6 +45,20 @@ export class PackagePrefixesMatcher extends Matcher {
       return false;
     }
 
-    return excludePackagePrefixes.some((prefix) => depName.startsWith(prefix));
+    if (
+      is.string(packageName) &&
+      excludePackagePrefixes.some((prefix) => packageName.startsWith(prefix))
+    ) {
+      return true;
+    }
+    if (excludePackagePrefixes.some((prefix) => depName.startsWith(prefix))) {
+      logger.once.info(
+        { packageName, depName },
+        'Use excludeDepPatterns instead of excludePackagePrefixes',
+      );
+      return true;
+    }
+
+    return false;
   }
 }

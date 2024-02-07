@@ -9,7 +9,7 @@ interface FvmConfig {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   let fvmConfig: FvmConfig;
   try {
@@ -22,7 +22,7 @@ export function extractPackageFile(
   if (!fvmConfig.flutterSdkVersion) {
     logger.debug(
       { contents: fvmConfig },
-      'FVM config does not have flutterSdkVersion specified'
+      'FVM config does not have flutterSdkVersion specified',
     );
     return null;
   } else if (!is.string(fvmConfig.flutterSdkVersion)) {

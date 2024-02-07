@@ -9,7 +9,7 @@ export function getCurrentVersion(
   versioning: VersioningApi,
   rangeStrategy: string,
   latestVersion: string,
-  allVersions: string[]
+  allVersions: string[],
 ): string | null {
   // istanbul ignore if
   if (!is.string(currentValue)) {
@@ -23,11 +23,11 @@ export function getCurrentVersion(
   }
   logger.trace(`currentValue ${currentValue} is range`);
   let useVersions = allVersions.filter((v) =>
-    versioning.matches(v, currentValue)
+    versioning.matches(v, currentValue),
   );
   if (latestVersion && versioning.matches(latestVersion, currentValue)) {
     useVersions = useVersions.filter(
-      (v) => !versioning.isGreaterThan(v, latestVersion)
+      (v) => !versioning.isGreaterThan(v, latestVersion),
     );
   }
   if (rangeStrategy === 'pin') {

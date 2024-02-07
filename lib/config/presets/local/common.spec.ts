@@ -9,17 +9,17 @@ describe('config/presets/local/common', () => {
       platform.getRawFile.mockResolvedValueOnce(null);
 
       await expect(fetchJSONFile('some/repo', 'default.json')).rejects.toThrow(
-        PRESET_DEP_NOT_FOUND
+        PRESET_DEP_NOT_FOUND,
       );
     });
 
     it('throws for ExternalHostError', async () => {
       platform.getRawFile.mockRejectedValueOnce(
-        new ExternalHostError(new Error())
+        new ExternalHostError(new Error()),
       );
 
       await expect(fetchJSONFile('some/repo', 'default.json')).rejects.toThrow(
-        ExternalHostError
+        ExternalHostError,
       );
     });
 
@@ -27,7 +27,7 @@ describe('config/presets/local/common', () => {
       platform.getRawFile.mockRejectedValueOnce(new Error());
 
       await expect(fetchJSONFile('some/repo', 'default.json')).rejects.toThrow(
-        PRESET_DEP_NOT_FOUND
+        PRESET_DEP_NOT_FOUND,
       );
     });
   });
@@ -40,8 +40,8 @@ describe('config/presets/local/common', () => {
           'some/repo',
           'default.json',
           undefined,
-          'dummy'
-        )
+          'dummy',
+        ),
       ).toEqual({});
     });
   });

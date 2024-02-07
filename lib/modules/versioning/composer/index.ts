@@ -53,7 +53,7 @@ function convertStabilityModifier(input: string): string {
   // 1.0@beta2 to 1.0-beta.2
   const stability = versionParts[1].replace(
     regEx(/(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi),
-    '$1.$2'
+    '$1.$2',
   );
 
   // If there is a stability part, npm semver expects the version
@@ -76,7 +76,7 @@ function normalizeVersion(input: string): string {
 function calculateSatisfyingVersionIntenal(
   versions: string[],
   range: string,
-  minMode: boolean
+  minMode: boolean,
 ): string | null {
   // Because composer -p versions are considered stable, we have to remove the suffix for the npm.XXX functions.
   const versionsMapped = versions.map((x) => {
@@ -135,12 +135,12 @@ function composer2npm(input: string): string {
       // ~4 to ^4 and ~4.1 to ^4.1
       output = output.replace(
         regEx(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g),
-        '^$1'
+        '^$1',
       );
       // ~0.4 to >=0.4 <1
       output = output.replace(
         regEx(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g),
-        '>=$1 <1'
+        '>=$1 <1',
       );
 
       // add extra digits to <8-DEV and <8.0-DEV
@@ -213,14 +213,14 @@ function matches(version: string, range: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return calculateSatisfyingVersionIntenal(versions, range, false);
 }
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return calculateSatisfyingVersionIntenal(versions, range, true);
 }
@@ -337,7 +337,7 @@ function getNewValue({
   if (!newValue) {
     logger.warn(
       { currentValue, rangeStrategy, currentVersion, newVersion },
-      'Unsupported composer value'
+      'Unsupported composer value',
     );
     newValue = newVersion;
   }

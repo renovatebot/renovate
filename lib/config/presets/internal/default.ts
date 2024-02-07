@@ -3,7 +3,7 @@ import type { Preset } from '../types';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 export const presets: Record<string, Preset> = {
   approveMajorUpdates: {
-    description: 'Require dependency dashboard approval for `major` updates.',
+    description: 'Require Dependency Dashboard approval for `major` updates.',
     packageRules: [
       {
         dependencyDashboardApproval: true,
@@ -137,7 +137,7 @@ export const presets: Record<string, Preset> = {
     description: 'Disable Renovate Dependency Dashboard creation.',
   },
   disableDevDependencies: {
-    description: 'Do not renovate `devDependencies` versions/ranges.',
+    description: 'Do not update `devDependencies` versions/ranges.',
     packageRules: [
       {
         enabled: false,
@@ -180,7 +180,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   disablePeerDependencies: {
-    description: 'Do not renovate `peerDependencies` versions/ranges.',
+    description: 'Do not update `peerDependencies` versions/ranges.',
     packageRules: [
       {
         enabled: false,
@@ -361,18 +361,6 @@ export const presets: Record<string, Preset> = {
       enabled: true,
     },
   },
-  onlyNpm: {
-    description: 'Renovate only npm dependencies.',
-    'docker-compose': {
-      enabled: false,
-    },
-    dockerfile: {
-      enabled: false,
-    },
-    meteor: {
-      enabled: false,
-    },
-  },
   pathSemanticCommitType: {
     description:
       'Use semanticCommitType `{{arg0}}` for all package files matching path `{{arg1}}`.',
@@ -497,7 +485,7 @@ export const presets: Record<string, Preset> = {
   },
   renovatePrefix: {
     branchPrefix: 'renovate/',
-    description: 'Prefix `renovate/` to all branch names.',
+    description: 'Add the `renovate/` prefix to all branch names.',
   },
   respectLatest: {
     description: 'Upgrade versions up to the "latest" tag in the npm registry.',

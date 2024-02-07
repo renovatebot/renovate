@@ -6,7 +6,7 @@ export function matcherOR(
   matchType: MatchType,
   groupMatchers: MatcherApi[],
   inputConfig: PackageRuleInputConfig,
-  packageRule: PackageRule
+  packageRule: PackageRule,
 ): boolean | null {
   let matchApplied = false;
   for (const matcher of groupMatchers) {

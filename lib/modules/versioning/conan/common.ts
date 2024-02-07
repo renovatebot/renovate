@@ -4,7 +4,7 @@ import { coerceString } from '../../../util/string';
 
 export function makeVersion(
   version: string,
-  options: semver.RangeOptions
+  options: semver.RangeOptions,
 ): string | boolean | null {
   const splitVersion = version.split('.');
   const prerelease = semver.prerelease(version, options);
@@ -30,7 +30,12 @@ export function makeVersion(
 export function cleanVersion(version: string): string {
   if (version) {
     return version
-      .replace(regEx(/,|\[|\]|"|include_prerelease=|loose=|True|False/g), '')
+      .replace(
+        regEx(
+          /,|\[|\]|"|include_prerelease=|include_prerelease|loose=|True|False/g,
+        ),
+        '',
+      )
       .trim();
   }
   return version;
@@ -44,7 +49,7 @@ export function getOptions(input: string): {
   let loose = true;
   if (input) {
     includePrerelease =
-      input.includes('include_prerelease=True') &&
+      input.includes('include_prerelease') &&
       !input.includes('include_prerelease=False');
     loose = input.includes('loose=True') || !input.includes('loose=False');
   }
@@ -58,7 +63,7 @@ export function containsOperators(input: string): boolean {
 export function matchesWithOptions(
   version: string,
   cleanRange: string,
-  options: semver.RangeOptions
+  options: semver.RangeOptions,
 ): boolean {
   let cleanedVersion = version;
   if (
@@ -75,7 +80,7 @@ export function matchesWithOptions(
 export function findSatisfyingVersion(
   versions: string[],
   range: string,
-  compareRt: number
+  compareRt: number,
 ): string | null {
   const options = getOptions(range);
   let cur: any = null;

@@ -16,7 +16,7 @@ import {
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  _config?: ExtractConfig
+  _config?: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace(`pep621.extractPackageFile(${packageFile})`);
 
@@ -26,6 +26,8 @@ export function extractPackageFile(
   if (is.nullOrUndefined(def)) {
     return null;
   }
+
+  const packageFileVersion = def.project?.version;
   const pythonConstraint = def.project?.['requires-python'];
   const extractedConstraints = is.nonEmptyString(pythonConstraint)
     ? { extractedConstraints: { python: pythonConstraint } }
@@ -33,13 +35,19 @@ export function extractPackageFile(
 
   // pyProject standard definitions
   deps.push(
-    ...parseDependencyList(depTypes.dependencies, def.project?.dependencies)
+    ...parseDependencyList(depTypes.dependencies, def.project?.dependencies),
   );
   deps.push(
     ...parseDependencyGroupRecord(
       depTypes.optionalDependencies,
-      def.project?.['optional-dependencies']
-    )
+      def.project?.['optional-dependencies'],
+    ),
+  );
+  deps.push(
+    ...parseDependencyList(
+      depTypes.buildSystemRequires,
+      def['build-system']?.requires,
+    ),
   );
 
   // process specific tool sets
@@ -49,6 +57,6 @@ export function extractPackageFile(
   }
 
   return processedDeps.length
-    ? { ...extractedConstraints, deps: processedDeps }
+    ? { ...extractedConstraints, deps: processedDeps, packageFileVersion }
     : null;
 }

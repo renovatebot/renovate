@@ -37,7 +37,7 @@ export interface ProcessResult {
 
 export function processResult(
   config: RenovateConfig,
-  res: string
+  res: string,
 ): ProcessResult {
   const disabledStatuses = [
     REPOSITORY_ACCESS_FORBIDDEN,
@@ -85,7 +85,7 @@ export function processResult(
   }
   logger.debug(
     // TODO: types (#22198)
-    `Repository result: ${res}, status: ${status}, enabled: ${enabled!}, onboarded: ${onboarded!}`
+    `Repository result: ${res}, status: ${status}, enabled: ${enabled!}, onboarded: ${onboarded!}`,
   );
   return { res, status, enabled, onboarded };
 }

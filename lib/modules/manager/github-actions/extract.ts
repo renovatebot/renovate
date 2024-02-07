@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { GithubRunnersDatasource } from '../../datasource/github-runners';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
@@ -13,7 +13,7 @@ import type { Workflow } from './types';
 
 const dockerActionRe = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
-  /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[.\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s*(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?@?(?<tag>v?\d+(?:\.\d+(?:\.\d+)?)?))?)/
+  /^\s+-?\s+?uses: (?<replaceString>['"]?(?<depName>[\w-]+\/[.\w-]+)(?<path>\/.*)?@(?<currentValue>[^\s'"]+)['"]?(?:\s+#\s*(?:renovate\s*:\s*)?(?:pin\s+|tag\s*=\s*)?@?(?<tag>v?\d+(?:\.\d+(?:\.\d+)?)?))?)/,
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
@@ -34,7 +34,7 @@ function detectCustomGitHubRegistryUrlsForActions(): PackageDependency {
       parsedEndpoint.host !== 'api.github.com'
     ) {
       registryUrls.unshift(
-        `${parsedEndpoint.protocol}//${parsedEndpoint.host}`
+        `${parsedEndpoint.protocol}//${parsedEndpoint.host}`,
       );
       return { registryUrls };
     }
@@ -115,7 +115,7 @@ function extractContainer(container: unknown): PackageDependency | undefined {
 }
 
 const runnerVersionRegex = regEx(
-  /^\s*(?<depName>[a-zA-Z]+)-(?<currentValue>[^\s]+)/
+  /^\s*(?<depName>[a-zA-Z]+)-(?<currentValue>[^\s]+)/,
 );
 
 function extractRunner(runner: string): PackageDependency | null {
@@ -159,18 +159,19 @@ function extractRunners(runner: unknown): PackageDependency[] {
 
 function extractWithYAMLParser(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageDependency[] {
   logger.trace('github-actions.extractWithYAMLParser()');
   const deps: PackageDependency[] = [];
 
   let pkg: Workflow;
   try {
-    pkg = load(content, { json: true }) as Workflow;
+    // TODO: use schema (#9610)
+    pkg = parseSingleYaml(content, { json: true });
   } catch (err) {
     logger.debug(
       { packageFile, err },
-      'Failed to parse GitHub Actions Workflow YAML'
+      'Failed to parse GitHub Actions Workflow YAML',
     );
     return [];
   }
@@ -198,7 +199,7 @@ function extractWithYAMLParser(
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`github-actions.extractPackageFile(${packageFile})`);
   const deps = [

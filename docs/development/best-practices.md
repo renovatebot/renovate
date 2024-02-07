@@ -146,6 +146,12 @@ function foo(str: string): boolean {
 }
 ```
 
+### Refactor one thing at a time
+
+Refactor the code _or_ refactor the tests.
+
+Avoid refactoring the code and tests at the same time, this can mask regression errors.
+
 ## Logging
 
 For `WARN`, `ERROR` and `FATAL log messages use logger metadata.
@@ -156,7 +162,7 @@ Also inline the metadata if the metadata object is complex.
 
 `WARN`, `ERROR` and `FATAL` messages are often used in metrics or error catching services.
 These log messages should have a consistent `msg` component, so they can be automatically grouped or associated.
-Metadata that's seperate from its message is hard for humans to read.
+Metadata that's separate from its message is hard for humans to read.
 Try to combine the metadata into the message, unless it's too complex to do so.
 
 Good:

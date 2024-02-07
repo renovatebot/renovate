@@ -5,7 +5,7 @@ import { Matcher } from './base';
 export class CategoriesMatcher extends Matcher {
   override matches(
     { categories }: PackageRuleInputConfig,
-    { matchCategories }: PackageRule
+    { matchCategories }: PackageRule,
   ): boolean | null {
     if (is.nullOrUndefined(matchCategories)) {
       return null;

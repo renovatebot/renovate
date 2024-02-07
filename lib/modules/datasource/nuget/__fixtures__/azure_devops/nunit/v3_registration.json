@@ -1,0 +1,56 @@
+{
+  "count": 1,
+  "items": [
+    {
+      "count": 4,
+      "items": [
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/3.13.2.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "listed": true,
+            "projectUrl": "https://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "version": "3.13.2"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/3.13.2/nunit.3.13.2.nupkg"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.7.1.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "listed": true,
+            "projectUrl": "http://nunitsoftware.com/nunitv2",
+            "published": "2021-12-03T03:20:52Z",
+            "version": "2.7.1"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.7.1/nunit.2.7.1.nupkg"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.6.5.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "listed": true,
+            "projectUrl": "http://nunit.org/",
+            "published": "2021-12-03T03:20:52Z",
+            "version": "2.6.5"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.6.5/nunit.2.6.5.nupkg"
+        },
+        {
+          "@id": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/registrations2/nunit/2.5.7.10213.json",
+          "@type": "Package",
+          "catalogEntry": {
+            "listed": true,
+            "projectUrl": "",
+            "published": "2021-12-03T03:20:52Z",
+            "version": "2.5.7.10213"
+          },
+          "packageContent": "https://pkgs.dev.azure.com/organisationName/_packaging/2745c5e9-610a-4537-9032-978c66527b51/nuget/v3/flat2/nunit/2.5.7.10213/nunit.2.5.7.10213.nupkg"
+        }
+      ],
+      "lower": "2.5.7.10213",
+      "upper": "3.13.2"
+    }
+  ]
+}

@@ -12,7 +12,7 @@ export const urls = [
 export const supportsRanges = false;
 
 const AZURE_REST_API_VERSION_REGEX = regEx(
-  /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})(?<prerelease>-[a-z]+)?$/
+  /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})(?<prerelease>-[a-z]+)?$/,
 );
 
 class AzureRestApiVersioningApi extends GenericVersioningApi {

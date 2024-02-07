@@ -37,7 +37,7 @@ describe('modules/manager/hermit/artifacts', () => {
               to: 'bin/jq-1.6',
             },
           ],
-        })
+        }),
       );
 
       const res = await updateArtifacts(
@@ -55,7 +55,7 @@ describe('modules/manager/hermit/artifacts', () => {
             },
           ],
           packageFileName: 'go/bin/hermit',
-        })
+        }),
       );
 
       expect(execSnapshots).toMatchObject([
@@ -155,7 +155,7 @@ describe('modules/manager/hermit/artifacts', () => {
               to: 'bin/jq-1.6',
             },
           ],
-        })
+        }),
       );
 
       const res = await updateArtifacts(
@@ -173,7 +173,7 @@ describe('modules/manager/hermit/artifacts', () => {
             },
           ],
           packageFileName: 'go/bin/hermit',
-        })
+        }),
       );
 
       expect(res).toEqual([
@@ -194,7 +194,7 @@ describe('modules/manager/hermit/artifacts', () => {
           options: {
             encoding: 'utf-8',
           },
-        })
+        }),
       );
 
       const res = await updateArtifacts(
@@ -212,7 +212,7 @@ describe('modules/manager/hermit/artifacts', () => {
             },
           ],
           packageFileName: 'go/bin/hermit',
-        })
+        }),
       );
 
       expect(res).toStrictEqual([
@@ -235,7 +235,7 @@ describe('modules/manager/hermit/artifacts', () => {
             },
           ],
           packageFileName: 'go/bin/hermit',
-        })
+        }),
       );
 
       expect(res).toStrictEqual([
@@ -256,7 +256,7 @@ describe('modules/manager/hermit/artifacts', () => {
             },
           ],
           packageFileName: 'go/bin/hermit',
-        })
+        }),
       );
 
       expect(res).toStrictEqual([
@@ -277,7 +277,7 @@ describe('modules/manager/hermit/artifacts', () => {
             },
           ],
           packageFileName: 'go/bin/hermit',
-        })
+        }),
       );
 
       expect(res).toStrictEqual([

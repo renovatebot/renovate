@@ -15,7 +15,7 @@ const depRequireInstall = new Set(['symfony/flex']);
 
 export function getComposerArguments(
   config: UpdateArtifactsConfig,
-  toolConstraint: ToolConstraint
+  toolConstraint: ToolConstraint,
 ): string {
   let args = '';
 
@@ -47,7 +47,7 @@ export function getComposerArguments(
 }
 
 export function getPhpConstraint(
-  constraints: Record<string, string>
+  constraints: Record<string, string>,
 ): string | null {
   const { php } = constraints;
 
@@ -71,7 +71,7 @@ export function requireComposerDependencyInstallation({
 
 export function extractConstraints(
   { config, require, requireDev }: PackageFile,
-  { pluginApiVersion }: Lockfile
+  { pluginApiVersion }: Lockfile,
 ): Record<string, string> {
   const res: Record<string, string> = { composer: '1.*' };
 

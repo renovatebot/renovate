@@ -16,7 +16,7 @@ export abstract class TerraformDatasource extends Datasource {
     ttlMinutes: 1440,
   })
   async getTerraformServiceDiscoveryResult(
-    registryUrl: string
+    registryUrl: string,
   ): Promise<ServiceDiscoveryResult> {
     const discoveryURL = TerraformDatasource.getDiscoveryUrl(registryUrl);
     const serviceDiscovery = (

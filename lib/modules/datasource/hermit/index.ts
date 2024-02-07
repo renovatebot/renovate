@@ -75,7 +75,7 @@ export class HermitDatasource extends Datasource {
 
     if (!res) {
       logger.debug(
-        `Could not find hermit package ${packageName} at URL ${registryUrl}`
+        `Could not find hermit package ${packageName} at URL ${registryUrl}`,
       );
       return null;
     }
@@ -112,7 +112,7 @@ export class HermitDatasource extends Datasource {
     if (!groups) {
       logger.warn(
         { registryUrl },
-        'failed to get owner and repo from given url'
+        'failed to get owner and repo from given url',
       );
       return null;
     }
@@ -122,18 +122,18 @@ export class HermitDatasource extends Datasource {
     const apiBaseUrl = getApiBaseUrl(`https://${host}`);
 
     const indexRelease = await this.http.getJson<GithubRestRelease>(
-      `${apiBaseUrl}repos/${owner}/${repo}/releases/tags/index`
+      `${apiBaseUrl}repos/${owner}/${repo}/releases/tags/index`,
     );
 
     // finds asset with name index.json
     const asset = indexRelease.body.assets.find(
-      (asset) => asset.name === 'index.json'
+      (asset) => asset.name === 'index.json',
     );
 
     if (!asset) {
       logger.warn(
         { registryUrl },
-        `can't find asset index.json in the given registryUrl`
+        `can't find asset index.json in the given registryUrl`,
       );
       return null;
     }
@@ -149,7 +149,7 @@ export class HermitDatasource extends Datasource {
         headers: {
           accept: 'application/octet-stream',
         },
-      })
+      }),
     );
 
     try {

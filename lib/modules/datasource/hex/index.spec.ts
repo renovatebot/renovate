@@ -27,7 +27,7 @@ describe('modules/datasource/hex/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'non_existent_package',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -40,42 +40,42 @@ describe('modules/datasource/hex/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'non_existent_package',
-        })
+        }),
       ).toBeNull();
     });
 
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').reply(404);
       expect(
-        await getPkgReleases({ datasource, packageName: 'some_package' })
+        await getPkgReleases({ datasource, packageName: 'some_package' }),
       ).toBeNull();
     });
 
     it('returns null for 401', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').reply(401);
       expect(
-        await getPkgReleases({ datasource, packageName: 'some_package' })
+        await getPkgReleases({ datasource, packageName: 'some_package' }),
       ).toBeNull();
     });
 
     it('throws for 429', async () => {
       httpMock.scope(baseUrl).get('/packages/some_crate').reply(429);
       await expect(
-        getPkgReleases({ datasource, packageName: 'some_crate' })
+        getPkgReleases({ datasource, packageName: 'some_crate' }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get('/packages/some_crate').reply(502);
       await expect(
-        getPkgReleases({ datasource, packageName: 'some_crate' })
+        getPkgReleases({ datasource, packageName: 'some_crate' }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').replyWithError('');
       expect(
-        await getPkgReleases({ datasource, packageName: 'some_package' })
+        await getPkgReleases({ datasource, packageName: 'some_package' }),
       ).toBeNull();
     });
 
@@ -129,6 +129,19 @@ describe('modules/datasource/hex/index', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
+    });
+
+    it('extracts depreceated info', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/packages/certifi')
+        .reply(200, certifiResponse);
+      hostRules.find.mockReturnValueOnce({});
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'certifi',
+      });
+      expect(res?.releases.some((rel) => rel.isDeprecated)).toBeTrue();
     });
 
     it('processes a private repo with auth', async () => {

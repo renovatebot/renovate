@@ -39,12 +39,12 @@ export class DenoDatasource extends Datasource {
     const massagedRegistryUrl = registryUrl!;
 
     const extractResult = regEx(
-      /^(https:\/\/deno.land\/)(?<rawPackageName>[^@\s]+)/
+      /^(https:\/\/deno.land\/)(?<rawPackageName>[^@\s]+)/,
     ).exec(packageName);
     const rawPackageName = extractResult?.groups?.rawPackageName;
     if (is.nullOrUndefined(rawPackageName)) {
       logger.debug(
-        `Could not extract rawPackageName from packageName: "${packageName}"`
+        `Could not extract rawPackageName from packageName: "${packageName}"`,
       );
       return null;
     }
@@ -56,7 +56,7 @@ export class DenoDatasource extends Datasource {
     const moduleAPIURL = joinUrlParts(
       massagedRegistryUrl,
       'v2/modules',
-      massagedPackageName
+      massagedPackageName,
     );
 
     return await this.getReleaseResult(moduleAPIURL);
@@ -70,7 +70,7 @@ export class DenoDatasource extends Datasource {
     const releasesCache: Record<string, Release> =
       (await packageCache.get(
         `datasource-${DenoDatasource.id}-details`,
-        moduleAPIURL
+        moduleAPIURL,
       )) ?? {};
     let cacheModified = false;
 
@@ -95,10 +95,10 @@ export class DenoDatasource extends Datasource {
           DenoAPIModuleVersionResponse.catch(({ error: err }) => {
             logger.warn(
               { err },
-              `Deno: failed to get version details for ${version}`
+              `Deno: failed to get version details for ${version}`,
             );
             return { version };
-          })
+          }),
         );
 
         releasesCache[release.version] = release;
@@ -106,7 +106,7 @@ export class DenoDatasource extends Datasource {
 
         return release;
       },
-      { concurrency: 5 }
+      { concurrency: 5 },
     );
 
     if (cacheModified) {
@@ -115,7 +115,7 @@ export class DenoDatasource extends Datasource {
         `datasource-${DenoDatasource.id}-details`,
         moduleAPIURL,
         releasesCache,
-        10080
+        10080,
       );
     }
 

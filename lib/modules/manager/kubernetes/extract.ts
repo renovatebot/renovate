@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { parseYaml } from '../../../util/yaml';
 import {
   KubernetesApiDatasource,
   supportedApis,
@@ -18,7 +18,7 @@ import type { KubernetesConfiguration } from './types';
 export function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace('kubernetes.extractPackageFile()');
 
@@ -39,7 +39,7 @@ export function extractPackageFile(
 
 function extractImages(
   content: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
@@ -54,7 +54,7 @@ function extractImages(
           currentValue: dep.currentValue,
           currentDigest: dep.currentDigest,
         },
-        'Kubernetes image'
+        'Kubernetes image',
       );
       deps.push(dep);
     }
@@ -65,12 +65,13 @@ function extractImages(
 
 function extractApis(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageDependency[] {
   let doc: KubernetesConfiguration[];
 
   try {
-    doc = loadAll(content) as KubernetesConfiguration[];
+    // TODO: use schema (#9610)
+    doc = parseYaml(content);
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Kubernetes manifest.');
     return [];
@@ -81,7 +82,7 @@ function extractApis(
     .filter(
       (m) =>
         is.nonEmptyStringAndNotWhitespace(m.kind) &&
-        is.nonEmptyStringAndNotWhitespace(m.apiVersion)
+        is.nonEmptyStringAndNotWhitespace(m.apiVersion),
     )
     .filter((m) => supportedApis.has(m.kind))
     .map((configuration) => ({

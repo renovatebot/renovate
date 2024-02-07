@@ -30,7 +30,7 @@ export async function updateArtifacts({
     hostRules.find({
       hostType: 'github',
       url: 'https://api.github.com/',
-    })
+    }),
   );
 
   if (token) {

@@ -18,7 +18,7 @@ describe('config/migrations/custom/path-rules-migration', () => {
             extends: ['foo'],
           },
         ],
-      }
+      },
     );
   });
 
@@ -40,7 +40,7 @@ describe('config/migrations/custom/path-rules-migration', () => {
             extends: ['foo'],
           },
         ],
-      }
+      },
     );
   });
 
@@ -49,7 +49,7 @@ describe('config/migrations/custom/path-rules-migration', () => {
       {
         pathRules: 'test',
       },
-      {}
+      {},
     );
   });
 
@@ -80,7 +80,7 @@ describe('config/migrations/custom/path-rules-migration', () => {
             extends: ['foo'],
           },
         ],
-      }
+      },
     );
   });
 });

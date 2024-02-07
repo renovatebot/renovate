@@ -14,7 +14,7 @@ describe('util/package-rules/current-version', () => {
         },
         {
           matchCurrentVersion: '1.2.3',
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -30,7 +30,7 @@ describe('util/package-rules/current-version', () => {
         },
         {
           matchCurrentVersion: '1.2.3',
-        }
+        },
       );
       expect(result).toBeFalse();
       expect(spy.mock.calls).toHaveLength(1);
@@ -45,9 +45,22 @@ describe('util/package-rules/current-version', () => {
         },
         {
           matchCurrentVersion: 'bbbbbb',
-        }
+        },
       );
       expect(result).toBeFalse();
+    });
+
+    it('case insensitive match', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'pep440',
+          currentValue: 'bbbbbb',
+        },
+        {
+          matchCurrentVersion: '/BBB.*/i',
+        },
+      );
+      expect(result).toBeTrue();
     });
 
     it('return false for regex version non match', () => {
@@ -59,7 +72,7 @@ describe('util/package-rules/current-version', () => {
         },
         {
           matchCurrentVersion: '/^v?[~ -]?0/',
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -73,7 +86,7 @@ describe('util/package-rules/current-version', () => {
         },
         {
           matchCurrentVersion: '/^v?[~ -]?0/',
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -86,7 +99,7 @@ describe('util/package-rules/current-version', () => {
         },
         {
           matchCurrentVersion: '/^v?[~ -]?0/',
-        }
+        },
       );
       expect(result).toBeFalse();
     });

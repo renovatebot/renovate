@@ -40,7 +40,7 @@ describe('workers/repository/init/apis', () => {
         initApis({
           ...config,
           optimizeForDisabled: true,
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_DISABLED);
     });
 
@@ -57,7 +57,7 @@ describe('workers/repository/init/apis', () => {
         initApis({
           ...config,
           forkProcessing: 'disabled',
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_FORKED);
     });
 
@@ -69,6 +69,19 @@ describe('workers/repository/init/apis', () => {
       });
       platform.getJsonFile.mockResolvedValueOnce({
         includeForks: true,
+      });
+      const workerPlatformConfig = await initApis(config);
+      expect(workerPlatformConfig).toBeTruthy();
+    });
+
+    it('does not throw for forkProcessing=enabled', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: true,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockResolvedValueOnce({
+        forkProcessing: 'enabled',
       });
       const workerPlatformConfig = await initApis(config);
       expect(workerPlatformConfig).toBeTruthy();
@@ -87,8 +100,23 @@ describe('workers/repository/init/apis', () => {
           optimizeForDisabled: true,
           forkProcessing: 'disabled',
           isFork: true,
-        })
+        }),
       ).resolves.not.toThrow();
+    });
+
+    it('throws for fork with platform.getJsonFile() failures', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: true,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockRejectedValue(new Error());
+      await expect(
+        initApis({
+          ...config,
+          forkProcessing: 'disabled',
+        }),
+      ).rejects.toThrow(REPOSITORY_FORKED);
     });
 
     it('uses the onboardingConfigFileName if set', async () => {
@@ -107,10 +135,10 @@ describe('workers/repository/init/apis', () => {
       });
       expect(workerPlatformConfig).toBeTruthy();
       expect(workerPlatformConfig.onboardingConfigFileName).toBe(
-        '.github/renovate.json'
+        '.github/renovate.json',
       );
       expect(platform.getJsonFile).toHaveBeenCalledWith(
-        '.github/renovate.json'
+        '.github/renovate.json',
       );
       expect(platform.getJsonFile).not.toHaveBeenCalledWith('renovate.json');
     });
@@ -181,7 +209,7 @@ describe('workers/repository/init/apis', () => {
           ...config,
           optimizeForDisabled: true,
           extends: [':disableRenovate'],
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_DISABLED);
     });
   });

@@ -3,12 +3,12 @@ import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
 import { extractLockFileEntries } from './locked-version';
 
 export function updateLockedDependency(
-  config: UpdateLockedConfig
+  config: UpdateLockedConfig,
 ): UpdateLockedResult {
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
-    `bundler.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
+    `bundler.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`,
   );
   try {
     const locked = extractLockFileEntries(lockFileContent ?? '');

@@ -8,7 +8,7 @@ describe('modules/manager/npm/extract/utils', () => {
 
       const isPackageInWorkspace = matchesAnyPattern(
         packageFile,
-        packageFilters
+        packageFilters,
       );
 
       expect(isPackageInWorkspace).toBeTrue();
@@ -20,7 +20,7 @@ describe('modules/manager/npm/extract/utils', () => {
 
       const isPackageInWorkspace = matchesAnyPattern(
         packageFile,
-        packageFilters
+        packageFilters,
       );
 
       expect(isPackageInWorkspace).toBeTrue();
@@ -32,7 +32,7 @@ describe('modules/manager/npm/extract/utils', () => {
 
       const isPackageInWorkspace = matchesAnyPattern(
         packageFile,
-        packageFilters
+        packageFilters,
       );
 
       expect(isPackageInWorkspace).toBeTrue();

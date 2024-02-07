@@ -1,7 +1,6 @@
 import type { Category } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NpmDatasource } from '../../datasource/npm';
-import * as npmVersioning from '../../versioning/npm';
 
 export { updateArtifacts } from './artifacts';
 export { extractAllPackageFiles } from './extract';
@@ -12,7 +11,6 @@ export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)bun\\.lockb$'],
-  versioning: npmVersioning.id,
   digest: {
     prBodyDefinitions: {
       Change:

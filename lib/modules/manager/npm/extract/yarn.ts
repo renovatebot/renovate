@@ -33,7 +33,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
           } catch (err) {
             logger.debug(
               { entry, err },
-              'Invalid descriptor or range found in yarn.lock'
+              'Invalid descriptor or range found in yarn.lock',
             );
           }
         }

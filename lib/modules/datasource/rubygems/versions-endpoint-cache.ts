@@ -36,7 +36,7 @@ function stripContentHead(content: string): string {
 
 function reconcilePackageVersions(
   packageVersions: PackageVersions,
-  versionLines: VersionLines
+  versionLines: VersionLines,
 ): PackageVersions {
   for (const line of versionLines) {
     const packageName = copystr(line.packageName);
@@ -67,7 +67,7 @@ function reconcilePackageVersions(
 function parseFullBody(body: string): VersionsEndpointResult {
   const packageVersions = reconcilePackageVersions(
     new Map<string, string[]>(),
-    VersionLines.parse(body)
+    VersionLines.parse(body),
   );
   const syncedAt = new Date();
   const contentLength = body.length;
@@ -87,7 +87,7 @@ export const memCache = new Map<string, VersionsEndpointResult>();
 
 function cacheResult(
   registryUrl: string,
-  result: VersionsEndpointResult
+  result: VersionsEndpointResult,
 ): void {
   const registryHostname = parseUrl(registryUrl)?.hostname;
   if (registryHostname === 'rubygems.org') {
@@ -119,8 +119,8 @@ const VersionLines = z
             }
           }
           return { packageName, deletedVersions, addedVersions };
-        })
-    )
+        }),
+    ),
   );
 type VersionLines = z.infer<typeof VersionLines>;
 
@@ -166,7 +166,7 @@ export class VersionsEndpointCache {
 
   async getVersions(
     registryUrl: string,
-    packageName: string
+    packageName: string,
   ): Promise<VersionsResult> {
     /**
      * Ensure that only one request for a given registryUrl is in flight at a time.
@@ -187,7 +187,7 @@ export class VersionsEndpointCache {
     if (!cachedData) {
       logger.debug(
         { packageName, registryUrl },
-        'Rubygems: endpoint not supported'
+        'Rubygems: endpoint not supported',
       );
       return Result.err('unsupported-api');
     }
@@ -196,7 +196,7 @@ export class VersionsEndpointCache {
     if (!versions?.length) {
       logger.debug(
         { packageName, registryUrl },
-        'Rubygems: versions not found'
+        'Rubygems: versions not found',
       );
       return Result.err('package-not-found');
     }
@@ -221,7 +221,7 @@ export class VersionsEndpointCache {
 
   private async deltaSync(
     oldCache: VersionsEndpointData,
-    registryUrl: string
+    registryUrl: string,
   ): Promise<VersionsEndpointResult> {
     try {
       const url = `${registryUrl}/versions`;
@@ -259,7 +259,7 @@ export class VersionsEndpointCache {
       const delta = stripContentHead(body);
       const packageVersions = reconcilePackageVersions(
         oldCache.packageVersions,
-        VersionLines.parse(delta)
+        VersionLines.parse(delta),
       );
       const syncedAt = new Date();
       const contentLength = oldCache.contentLength + delta.length;

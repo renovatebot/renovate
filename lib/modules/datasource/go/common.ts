@@ -11,7 +11,7 @@ export type GoproxyFallback =
   | '|'; // Always
 
 export function getSourceUrl(
-  dataSource?: DataSource | null
+  dataSource?: DataSource | null,
 ): string | undefined {
   if (dataSource) {
     const { datasource, registryUrl, packageName } = dataSource;

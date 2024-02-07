@@ -18,7 +18,7 @@ export const getVersionings = (): Map<
 
 export function get(versioning: string | null | undefined): VersioningApi {
   const res = Versioning.safeParse(
-    versioning ? versioning : defaultVersioning.id
+    versioning ? versioning : defaultVersioning.id,
   );
 
   if (!res.success) {

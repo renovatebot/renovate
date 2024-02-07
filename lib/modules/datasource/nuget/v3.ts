@@ -8,6 +8,7 @@ import { Http, HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
+import { api as versioning } from '../../versioning/nuget';
 import type { Release, ReleaseResult } from '../types';
 import { massageUrl, removeBuildMeta } from './common';
 import type {
@@ -22,13 +23,13 @@ const cacheNamespace = 'datasource-nuget';
 export async function getResourceUrl(
   http: Http,
   url: string,
-  resourceType = 'RegistrationsBaseUrl'
+  resourceType = 'RegistrationsBaseUrl',
 ): Promise<string | null> {
   // https://docs.microsoft.com/en-us/nuget/api/service-index
   const resultCacheKey = `${url}:${resourceType}`;
   const cachedResult = await packageCache.get<string>(
     cacheNamespace,
-    resultCacheKey
+    resultCacheKey,
   );
 
   // istanbul ignore if
@@ -40,7 +41,7 @@ export async function getResourceUrl(
     const responseCacheKey = url;
     servicesIndexRaw = await packageCache.get<ServicesIndexRaw>(
       cacheNamespace,
-      responseCacheKey
+      responseCacheKey,
     );
     // istanbul ignore else: currently not testable
     if (!servicesIndexRaw) {
@@ -49,7 +50,7 @@ export async function getResourceUrl(
         cacheNamespace,
         responseCacheKey,
         servicesIndexRaw,
-        3 * 24 * 60
+        3 * 24 * 60,
       );
     }
 
@@ -60,13 +61,23 @@ export async function getResourceUrl(
         version: t?.split('/')?.pop(),
       }))
       .filter(
-        ({ type, version }) => type === resourceType && semver.valid(version)
+        ({ type, version }) => type === resourceType && semver.valid(version),
       )
       .sort((x, y) =>
         x.version && y.version
           ? semver.compare(x.version, y.version)
-          : /* istanbul ignore next: hard to test */ 0
+          : /* istanbul ignore next: hard to test */ 0,
       );
+
+    if (services.length === 0) {
+      await packageCache.set(cacheNamespace, resultCacheKey, null, 60);
+      logger.debug(
+        { url, servicesIndexRaw },
+        `no ${resourceType} services found`,
+      );
+      return null;
+    }
+
     const { serviceId, version } = services.pop()!;
 
     // istanbul ignore if
@@ -78,7 +89,7 @@ export async function getResourceUrl(
     ) {
       logger.warn(
         { url, version },
-        `Nuget: Unknown version returned. Only v3 is supported`
+        `Nuget: Unknown version returned. Only v3 is supported`,
       );
     }
 
@@ -91,7 +102,7 @@ export async function getResourceUrl(
     }
     logger.debug(
       { err, url, servicesIndexRaw },
-      `nuget registry failure: can't get ${resourceType}`
+      `nuget registry failure: can't get ${resourceType}`,
     );
     return null;
   }
@@ -99,7 +110,7 @@ export async function getResourceUrl(
 
 async function getCatalogEntry(
   http: Http,
-  catalogPage: CatalogPage
+  catalogPage: CatalogPage,
 ): Promise<CatalogEntry[]> {
   let items = catalogPage.items;
   if (!items) {
@@ -110,20 +121,42 @@ async function getCatalogEntry(
   return items.map(({ catalogEntry }) => catalogEntry);
 }
 
+/**
+ * Compare two versions. Return:
+ * - `1` if `a > b` or `b` is invalid
+ * - `-1` if `a < b` or `a` is invalid
+ * - `0` if `a == b` or both `a` and `b` are invalid
+ */
+export function sortNugetVersions(a: string, b: string): number {
+  if (versioning.isValid(a)) {
+    if (versioning.isValid(b)) {
+      return versioning.sortVersions(a, b);
+    } else {
+      return 1;
+    }
+  } else if (versioning.isValid(b)) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
 export async function getReleases(
   http: Http,
   registryUrl: string,
   feedUrl: string,
-  pkgName: string
+  pkgName: string,
 ): Promise<ReleaseResult | null> {
   const baseUrl = feedUrl.replace(regEx(/\/*$/), '');
   const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
   const packageRegistration = await http.getJson<PackageRegistration>(url);
   const catalogPages = packageRegistration.body.items || [];
   const catalogPagesQueue = catalogPages.map(
-    (page) => (): Promise<CatalogEntry[]> => getCatalogEntry(http, page)
+    (page) => (): Promise<CatalogEntry[]> => getCatalogEntry(http, page),
   );
-  const catalogEntries = (await p.all(catalogPagesQueue)).flat();
+  const catalogEntries = (await p.all(catalogPagesQueue))
+    .flat()
+    .sort((a, b) => sortNugetVersions(a.version, b.version));
 
   let homepage: string | null = null;
   let latestStable: string | null = null;
@@ -133,7 +166,7 @@ export async function getReleases(
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
-      if (semver.valid(version) && !semver.prerelease(version)) {
+      if (versioning.isValid(version) && versioning.isStable(version)) {
         latestStable = removeBuildMeta(version);
         homepage = projectUrl ? massageUrl(projectUrl) : homepage;
       }
@@ -141,7 +174,7 @@ export async function getReleases(
         release.isDeprecated = true;
       }
       return release;
-    }
+    },
   );
 
   if (!releases.length) {
@@ -163,12 +196,12 @@ export async function getReleases(
     const packageBaseAddress = await getResourceUrl(
       http,
       registryUrl,
-      'PackageBaseAddress'
+      'PackageBaseAddress',
     );
     // istanbul ignore else: this is a required v3 api
     if (is.nonEmptyString(packageBaseAddress)) {
       const nuspecUrl = `${ensureTrailingSlash(
-        packageBaseAddress
+        packageBaseAddress,
       )}${pkgName.toLowerCase()}/${
         // TODO: types (#22198)
         latestStable
@@ -189,13 +222,13 @@ export async function getReleases(
     if (err instanceof HttpError && err.response?.statusCode === 404) {
       logger.debug(
         { registryUrl, pkgName, pkgVersion: latestStable },
-        `package manifest (.nuspec) not found`
+        `package manifest (.nuspec) not found`,
       );
       return dep;
     }
     logger.debug(
       { err, registryUrl, pkgName, pkgVersion: latestStable },
-      `Cannot obtain sourceUrl`
+      `Cannot obtain sourceUrl`,
     );
     return dep;
   }

@@ -77,7 +77,7 @@ describe('workers/global/index', () => {
       throw new Error('some-error');
     });
     await expect(
-      globalWorker.resolveGlobalExtends(['some-preset'])
+      globalWorker.resolveGlobalExtends(['some-preset']),
     ).rejects.toThrow(CONFIG_PRESETS_INVALID);
     expect(presets.resolveConfigPresets).toHaveBeenCalled();
     expect(parseConfigs).not.toHaveBeenCalled();
@@ -211,7 +211,7 @@ describe('workers/global/index', () => {
       expect(fs.writeFile).toHaveBeenCalledTimes(1);
       expect(fs.writeFile).toHaveBeenCalledWith(
         '/tmp/renovate-output.json',
-        '["myOrg/myRepo"]'
+        '["myOrg/myRepo"]',
       );
       expect(parseConfigs).toHaveBeenCalledTimes(1);
       expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);

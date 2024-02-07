@@ -9,10 +9,10 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
     config.semanticCommits = 'enabled';
     const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
       config,
-      fileName
+      fileName,
     );
     expect(commitMessageFactory.getCommitMessage()).toBe(
-      'chore(config): migrate config renovate.json'
+      'chore(config): migrate config renovate.json',
     );
   });
 
@@ -20,10 +20,10 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
     config.semanticCommits = 'enabled';
     const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
       config,
-      fileName
+      fileName,
     );
     expect(commitMessageFactory.getPrTitle()).toBe(
-      'chore(config): migrate renovate config'
+      'chore(config): migrate renovate config',
     );
   });
 
@@ -31,10 +31,10 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
     config.semanticCommits = 'disabled';
     const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
       config,
-      fileName
+      fileName,
     );
     expect(commitMessageFactory.getCommitMessage()).toBe(
-      'Migrate config renovate.json'
+      'Migrate config renovate.json',
     );
   });
 
@@ -42,7 +42,7 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
     config.semanticCommits = 'disabled';
     const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
       config,
-      fileName
+      fileName,
     );
     expect(commitMessageFactory.getPrTitle()).toBe('Migrate renovate config');
   });
@@ -52,7 +52,7 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
     config.commitMessage = '';
     const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
       config,
-      fileName
+      fileName,
     );
     expect(commitMessageFactory.getPrTitle()).toBe('Migrate renovate config');
   });

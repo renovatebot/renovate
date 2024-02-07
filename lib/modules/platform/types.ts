@@ -1,6 +1,6 @@
 import type { MergeStrategy } from '../../config/types';
-import type { BranchStatus, VulnerabilityAlert } from '../../types';
-import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
+import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
+import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
@@ -23,6 +23,10 @@ export interface PlatformResult {
   renovateUsername?: string;
   token?: string;
   gitAuthor?: string;
+  /*
+   * return these only if _additional_ rules/hosts are required
+   */
+  hostRules?: HostRule[];
 }
 
 export interface RepoResult {
@@ -73,7 +77,7 @@ export interface Pr {
   labels?: string[];
   number: number;
   reviewers?: string[];
-  sha?: string;
+  sha?: LongCommitSha;
   sourceRepo?: string;
   state: string;
   targetBranch?: string;
@@ -92,6 +96,7 @@ export interface Issue {
 }
 export type PlatformPrOptions = {
   autoApprove?: boolean;
+  automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
@@ -138,6 +143,7 @@ export interface FindPRConfig {
   state?: 'open' | 'closed' | '!open' | 'all';
   refreshCache?: boolean;
   targetBranch?: string | null;
+  includeOtherAuthors?: boolean;
 }
 export interface MergePRConfig {
   branchName?: string;
@@ -180,18 +186,18 @@ export interface Platform {
   getRawFile(
     fileName: string,
     repoName?: string,
-    branchOrTag?: string
+    branchOrTag?: string,
   ): Promise<string | null>;
   getJsonFile(
     fileName: string,
     repoName?: string,
-    branchOrTag?: string
+    branchOrTag?: string,
   ): Promise<any>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(
-    issueConfig: EnsureIssueConfig
+    issueConfig: EnsureIssueConfig,
   ): Promise<EnsureIssueResult | null>;
   massageMarkdown(prBody: string): string;
   updatePr(prConfig: UpdatePrConfig): Promise<void>;
@@ -200,18 +206,18 @@ export interface Platform {
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
   getRepos(config?: AutodiscoverConfig): Promise<string[]>;
-  getRepoForceRebase(): Promise<boolean>;
+  getBranchForceRebase?(branchName: string): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
     // TODO: can be undefined or null ? #22198
-    context: string | null | undefined
+    context: string | null | undefined,
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
     ensureCommentRemoval:
       | EnsureCommentRemovalConfigByTopic
-      | EnsureCommentRemovalConfigByContent
+      | EnsureCommentRemovalConfigByContent,
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   getPr(number: number): Promise<Pr | null>;
@@ -219,12 +225,13 @@ export interface Platform {
   refreshPr?(number: number): Promise<void>;
   getBranchStatus(
     branchName: string,
-    internalChecksAsSuccess: boolean
+    internalChecksAsSuccess: boolean,
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string, targetBranch?: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
-  commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
+  commitFiles?(config: CommitFilesConfig): Promise<LongCommitSha | null>;
+  expandGroupMembers?(reviewersOrAssignees: string[]): Promise<string[]>;
 }
 
 export interface PlatformScm {
@@ -232,11 +239,11 @@ export interface PlatformScm {
   isBranchModified(branchName: string): Promise<boolean>;
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
-  getBranchCommit(branchName: string): Promise<CommitSha | null>;
+  getBranchCommit(branchName: string): Promise<LongCommitSha | null>;
   deleteBranch(branchName: string): Promise<void>;
-  commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
+  commitAndPush(commitConfig: CommitFilesConfig): Promise<LongCommitSha | null>;
   getFileList(): Promise<string[]>;
-  checkoutBranch(branchName: string): Promise<CommitSha>;
+  checkoutBranch(branchName: string): Promise<LongCommitSha>;
   mergeToLocal(branchName: string): Promise<void>;
   mergeAndPush(branchName: string): Promise<void>;
 }

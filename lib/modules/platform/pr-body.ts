@@ -7,11 +7,11 @@ import { fromBase64 } from '../../util/string';
 import type { PrBodyStruct } from './types';
 
 export const prDebugDataRe = regEx(
-  /\n?<!--renovate-debug:(?<payload>.*?)-->\n?/
+  /\n?<!--renovate-debug:(?<payload>.*?)-->\n?/,
 );
 
 const renovateConfigHashRe = regEx(
-  /\n?<!--renovate-config-hash:(?<payload>.*?)-->\n?/
+  /\n?<!--renovate-config-hash:(?<payload>.*?)-->\n?/,
 );
 
 const prCheckboxRe = regEx(/- (?<checkbox>\[[\sx]]) <!-- rebase-check -->/);
@@ -54,7 +54,7 @@ export function getRenovateConfigHashPayload(body: string): string | undefined {
 }
 
 export function getPrBodyStruct(
-  input: string | undefined | null
+  input: string | undefined | null,
 ): PrBodyStruct {
   const body = input ?? '';
   const hash = hashBody(body);

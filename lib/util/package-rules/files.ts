@@ -6,7 +6,7 @@ import { Matcher } from './base';
 export class FileNamesMatcher extends Matcher {
   override matches(
     { packageFile, lockFiles }: PackageRuleInputConfig,
-    { matchFileNames }: PackageRule
+    { matchFileNames }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchFileNames)) {
       return null;
@@ -20,8 +20,8 @@ export class FileNamesMatcher extends Matcher {
         minimatch(matchFileName, { dot: true }).match(packageFile) ||
         (is.array(lockFiles) &&
           lockFiles.some((lockFile) =>
-            minimatch(matchFileName, { dot: true }).match(lockFile)
-          ))
+            minimatch(matchFileName, { dot: true }).match(lockFile),
+          )),
     );
   }
 }

@@ -2,7 +2,7 @@ import cacache from 'cacache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../logger';
-import { compress, decompress } from '../../compress';
+import { compressToBase64, decompressFromBase64 } from '../../compress';
 
 function getKey(namespace: string, key: string): string {
   return `${namespace}-${key}`;
@@ -17,7 +17,7 @@ async function rm(namespace: string, key: string): Promise<void> {
 
 export async function get<T = never>(
   namespace: string,
-  key: string
+  key: string,
 ): Promise<T | undefined> {
   if (!cacheFileName) {
     return undefined;
@@ -32,7 +32,7 @@ export async function get<T = never>(
         if (!cachedValue.compress) {
           return cachedValue.value;
         }
-        const res = await decompress(cachedValue.value);
+        const res = await decompressFromBase64(cachedValue.value);
         return JSON.parse(res);
       }
       await rm(namespace, key);
@@ -47,7 +47,7 @@ export async function set(
   namespace: string,
   key: string,
   value: unknown,
-  ttlMinutes = 5
+  ttlMinutes = 5,
 ): Promise<void> {
   if (!cacheFileName) {
     return;
@@ -58,9 +58,9 @@ export async function set(
     getKey(namespace, key),
     JSON.stringify({
       compress: true,
-      value: await compress(JSON.stringify(value)),
+      value: await compressToBase64(JSON.stringify(value)),
       expiry: DateTime.local().plus({ minutes: ttlMinutes }),
-    })
+    }),
   );
 }
 
@@ -97,7 +97,7 @@ export async function cleanup(): Promise<void> {
     }
     const durationMs = Math.round(Date.now() - startTime);
     logger.debug(
-      `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`
+      `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`,
     );
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error cleaning up expired file cache');

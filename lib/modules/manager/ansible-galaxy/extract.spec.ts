@@ -31,7 +31,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
     it('extracts dependencies from requirements.yml with a space at the end of line', () => {
       const yamlFile = codeBlock`collections:
       - name: https://github.com/lowlydba/lowlydba.sqlserver.git
-      type: git 
+      type: git
       version: 1.1.3`;
       const res = extractPackageFile(yamlFile, 'requirements.yml');
       expect(res?.deps).toHaveLength(1);
@@ -49,7 +49,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
       expect(res?.deps[0].currentValue).toBe('2.7.5');
       expect(res?.deps[0].registryUrls).toBeUndefined();
       expect(res?.deps[0].packageName).toBe(
-        'git@github.com:ansible-collections/community.docker'
+        'git@github.com:ansible-collections/community.docker',
       );
     });
 
@@ -66,7 +66,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
     it('check collection style requirements file', () => {
       const res = extractPackageFile(collections1, 'requirements.yml');
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(13);
+      expect(res?.deps).toHaveLength(14);
       expect(res?.deps.filter((value) => value.skipReason)).toHaveLength(6);
     });
 
@@ -79,7 +79,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
     it('check galaxy definition file', () => {
       const res = extractPackageFile(galaxy, 'galaxy.yml');
       expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(7);
+      expect(res?.deps).toHaveLength(10);
     });
   });
 

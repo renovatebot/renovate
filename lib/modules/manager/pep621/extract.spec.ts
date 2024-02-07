@@ -18,7 +18,7 @@ describe('modules/manager/pep621/extract', () => {
         [project]
         name =
       `,
-        'pyproject.toml'
+        'pyproject.toml',
       );
       expect(result).toBeNull();
     });
@@ -32,7 +32,7 @@ describe('modules/manager/pep621/extract', () => {
         },
       });
       const dependencies = result?.deps.filter(
-        (dep) => dep.depType === 'project.dependencies'
+        (dep) => dep.depType === 'project.dependencies',
       );
       expect(dependencies).toEqual([
         {
@@ -62,6 +62,7 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '==20.0.0',
+          currentVersion: '20.0.0',
         },
         {
           packageName: 'pyproject-hooks',
@@ -122,7 +123,7 @@ describe('modules/manager/pep621/extract', () => {
       ]);
 
       const optionalDependencies = result?.deps.filter(
-        (dep) => dep.depType === 'project.optional-dependencies'
+        (dep) => dep.depType === 'project.optional-dependencies',
       );
       expect(optionalDependencies).toEqual([
         {
@@ -142,7 +143,7 @@ describe('modules/manager/pep621/extract', () => {
       ]);
 
       const pdmDevDependencies = result?.deps.filter(
-        (dep) => dep.depType === 'tool.pdm.dev-dependencies'
+        (dep) => dep.depType === 'tool.pdm.dev-dependencies',
       );
       expect(pdmDevDependencies).toEqual([
         {
@@ -251,7 +252,7 @@ describe('modules/manager/pep621/extract', () => {
       verify_ssl = true
       name = "internal"
       `,
-        'pyproject.toml'
+        'pyproject.toml',
       );
 
       expect(result?.deps).toEqual([
@@ -265,6 +266,111 @@ describe('modules/manager/pep621/extract', () => {
             'https://pypi.org/pypi/',
             'https://private-site.org/pypi/simple',
           ],
+        },
+      ]);
+    });
+
+    it('should extract dependencies from hatch environments', function () {
+      const hatchPyProject = Fixtures.get('pyproject_with_hatch.toml');
+      const result = extractPackageFile(hatchPyProject, 'pyproject.toml');
+
+      expect(result?.deps).toEqual([
+        {
+          currentValue: '==2.30.0',
+          currentVersion: '2.30.0',
+          datasource: 'pypi',
+          depName: 'requests',
+          depType: 'project.dependencies',
+          packageName: 'requests',
+        },
+        {
+          datasource: 'pypi',
+          depName: 'hatchling',
+          depType: 'build-system.requires',
+          packageName: 'hatchling',
+          skipReason: 'unspecified-version',
+        },
+        {
+          currentValue: '==6.5',
+          currentVersion: '6.5',
+          datasource: 'pypi',
+          depName: 'coverage',
+          depType: 'tool.hatch.envs.default',
+          packageName: 'coverage',
+        },
+        {
+          datasource: 'pypi',
+          depName: 'pytest',
+          depType: 'tool.hatch.envs.default',
+          packageName: 'pytest',
+          skipReason: 'unspecified-version',
+        },
+        {
+          currentValue: '>=23.1.0',
+          datasource: 'pypi',
+          depName: 'black',
+          depType: 'tool.hatch.envs.lint',
+          packageName: 'black',
+        },
+        {
+          datasource: 'pypi',
+          depName: 'baz',
+          depType: 'tool.hatch.envs.experimental',
+          packageName: 'baz',
+          skipReason: 'unspecified-version',
+        },
+      ]);
+    });
+
+    it('should extract project version', () => {
+      const content = codeBlock`
+        [project]
+        name = "test"
+        version = "0.0.2"
+        dependencies = [ "requests==2.30.0" ]
+      `;
+
+      const res = extractPackageFile(content, 'pyproject.toml');
+      expect(res?.packageFileVersion).toBe('0.0.2');
+    });
+
+    it('should extract dependencies from build-system.requires', function () {
+      const content = codeBlock`
+        [build-system]
+        requires = ["hatchling==1.18.0", "setuptools==69.0.3"]
+        build-backend = "hatchling.build"
+
+        [project]
+        name = "test"
+        version = "0.0.2"
+        dependencies = [ "requests==2.30.0" ]
+      `;
+      const result = extractPackageFile(content, 'pyproject.toml');
+
+      expect(result?.deps).toEqual([
+        {
+          currentValue: '==2.30.0',
+          currentVersion: '2.30.0',
+          datasource: 'pypi',
+          depName: 'requests',
+          depType: 'project.dependencies',
+          packageName: 'requests',
+        },
+        {
+          currentValue: '==1.18.0',
+          currentVersion: '1.18.0',
+          datasource: 'pypi',
+          depName: 'hatchling',
+          depType: 'build-system.requires',
+          packageName: 'hatchling',
+        },
+        {
+          currentValue: '==69.0.3',
+          currentVersion: '69.0.3',
+          datasource: 'pypi',
+          depName: 'setuptools',
+          depType: 'build-system.requires',
+          packageName: 'setuptools',
         },
       ]);
     });

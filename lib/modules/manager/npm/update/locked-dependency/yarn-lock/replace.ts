@@ -6,7 +6,7 @@ export function replaceConstraintVersion(
   depName: string,
   constraint: string,
   newVersion: string,
-  newConstraint?: string
+  newConstraint?: string,
 ): string {
   if (lockFileContent.startsWith('__metadata:')) {
     // Yarn 2+
@@ -21,7 +21,7 @@ export function replaceConstraintVersion(
   if (!matchResult) {
     logger.debug(
       { depName, constraint, newVersion },
-      'Could not find constraint in lock file'
+      'Could not find constraint in lock file',
     );
     return lockFileContent;
   }
@@ -30,11 +30,11 @@ export function replaceConstraintVersion(
     const newDepNameConstraint = `${depName}@${newConstraint}`;
     constraintLine = constraintLine.replace(
       depNameConstraint,
-      newDepNameConstraint
+      newDepNameConstraint,
     );
   }
   return lockFileContent.replace(
     regEx(matchString),
-    `${constraintLine}  version "${newVersion}"\n$5`
+    `${constraintLine}  version "${newVersion}"\n$5`,
   );
 }

@@ -32,6 +32,17 @@ const staticGroups = {
       },
     ],
   },
+  allDigest: {
+    description: 'Group all `digest` updates together.',
+    packageRules: [
+      {
+        groupName: 'all digest updates',
+        groupSlug: 'all-digest',
+        matchPackagePatterns: ['*'],
+        matchUpdateTypes: ['digest'],
+      },
+    ],
+  },
   allNonMajor: {
     description: 'Group all `minor` and `patch` updates together.',
     packageRules: [
@@ -301,7 +312,11 @@ const staticGroups = {
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
-        excludePackageNames: ['calico/node', 'kindest/node'],
+        excludePackageNames: [
+          'calico/node',
+          'docker.io/calico/node',
+          'kindest/node',
+        ],
         matchDatasources: ['docker'],
         matchDepNames: ['node'],
         matchPackagePatterns: ['/node$'],
@@ -314,7 +329,7 @@ const staticGroups = {
       {
         groupName: 'PHPStan packages',
         matchDatasources: ['packagist'],
-        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-'],
+        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-', '/larastan'],
       },
     ],
   },
@@ -409,6 +424,7 @@ const staticGroups = {
       'group:phpstan',
       'group:polymer',
       'group:react',
+      'group:remark',
       'group:resilience4j',
       'group:rubyOnRails',
       'group:rubyOmniauth',
@@ -439,6 +455,16 @@ const staticGroups = {
       'group:symfony',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  remark: {
+    description: 'Group remark packages together.',
+    packageRules: [
+      {
+        groupName: 'remark',
+        matchDatasources: ['npm'],
+        matchSourceUrlPrefixes: ['https://github.com/remarkjs/'],
+      },
+    ],
   },
   resilience4j: {
     description: 'Group Java Resilience4j packages.',

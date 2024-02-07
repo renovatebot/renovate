@@ -6,7 +6,7 @@ export function getPrCache(branchName: string): PrCache | null {
   logger.debug(`getPrCache()`);
   const cache = getCache();
   const branch = cache.branches?.find(
-    (branch) => branchName === branch.branchName
+    (branch) => branchName === branch.branchName,
   );
 
   const prCache = branch?.prCache;
@@ -27,12 +27,12 @@ export function getPrCache(branchName: string): PrCache | null {
 export function setPrCache(
   branchName: string,
   bodyFingerprint: string,
-  prModified: boolean
+  prModified: boolean,
 ): void {
   logger.debug(`setPrCache()`);
   const cache = getCache();
   const branch = cache.branches?.find(
-    (branch) => branchName === branch.branchName
+    (branch) => branchName === branch.branchName,
   );
 
   if (!branch) {

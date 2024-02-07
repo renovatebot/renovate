@@ -37,14 +37,14 @@ const qKotlinSingleObjectVarAssignment = q.alt(
       // val dep: String = "foo:bar:" + Versions.baz
       qValueMatcher
         .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
-        .handler(handleAssignment)
+        .handler(handleAssignment),
     )
-    .handler(cleanupTempVars)
+    .handler(cleanupTempVars),
 );
 
 // object foo { ... }
 const qKotlinMultiObjectExpr = (
-  search: q.QueryBuilder<Ctx, parser.Node>
+  search: q.QueryBuilder<Ctx, parser.Node>,
 ): q.QueryBuilder<Ctx, parser.Node> =>
   q.alt(
     q.sym<Ctx>('object').sym(storeVarToken).tree({
@@ -56,13 +56,13 @@ const qKotlinMultiObjectExpr = (
       search,
       postHandler: reduceNestingDepth,
     }),
-    qKotlinSingleObjectVarAssignment
+    qKotlinSingleObjectVarAssignment,
   );
 
 export const qKotlinMultiObjectVarAssignment = qKotlinMultiObjectExpr(
   qKotlinMultiObjectExpr(
     qKotlinMultiObjectExpr(
-      qKotlinMultiObjectExpr(qKotlinSingleObjectVarAssignment)
-    )
-  )
+      qKotlinMultiObjectExpr(qKotlinSingleObjectVarAssignment),
+    ),
+  ),
 ).handler(cleanupTempVars);

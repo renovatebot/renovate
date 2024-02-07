@@ -15,7 +15,7 @@ describe('modules/datasource/helm/index', () => {
           datasource: HelmDatasource.id,
           packageName: undefined as never, // #22198
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -30,7 +30,7 @@ describe('modules/datasource/helm/index', () => {
           datasource: HelmDatasource.id,
           packageName: 'some_chart',
           registryUrls: [],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -44,7 +44,7 @@ describe('modules/datasource/helm/index', () => {
           datasource: HelmDatasource.id,
           packageName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -58,7 +58,7 @@ describe('modules/datasource/helm/index', () => {
           datasource: HelmDatasource.id,
           packageName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -72,7 +72,7 @@ describe('modules/datasource/helm/index', () => {
           datasource: HelmDatasource.id,
           packageName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -86,7 +86,7 @@ describe('modules/datasource/helm/index', () => {
           datasource: HelmDatasource.id,
           packageName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -100,7 +100,7 @@ describe('modules/datasource/helm/index', () => {
           datasource: HelmDatasource.id,
           packageName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).toBeNull();
     });
 

@@ -7,6 +7,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import type * as _git from '../../../util/git';
+import type { LongCommitSha } from '../../../util/git/types';
 import type { Platform } from '../types';
 
 jest.mock('timers/promises');
@@ -20,7 +21,7 @@ function sshLink(projectKey: string, repositorySlug: string): string {
 function httpLink(
   endpointStr: string,
   projectKey: string,
-  repositorySlug: string
+  repositorySlug: string,
 ): string {
   return `${endpointStr}scm/${projectKey.toLowerCase()}/${repositorySlug}.git`;
 }
@@ -31,7 +32,7 @@ function repoMock(
   repositorySlug: string,
   options: { cloneUrl: { https: boolean; ssh: boolean } } = {
     cloneUrl: { https: true, ssh: true },
-  }
+  },
 ) {
   const endpointStr = endpoint.toString();
   const links: {
@@ -92,7 +93,7 @@ function repoMock(
 function prMock(
   endpoint: URL | string,
   projectKey: string,
-  repositorySlug: string
+  repositorySlug: string,
 ) {
   const endpointStr = endpoint.toString();
   return {
@@ -193,7 +194,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
           .reply(200, repoMock(url, 'SOME', 'repo'))
           .get(
-            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+            `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
           )
           .reply(200, {
             displayId: 'master',
@@ -215,7 +216,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         git.branchExists.mockReturnValue(true);
         git.isBranchBehindBase.mockResolvedValue(false);
         git.getBranchCommit.mockReturnValue(
-          '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+          '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
         );
         const endpoint =
           scenarioName === 'endpoint with path'
@@ -241,7 +242,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         it('should throw if no username/password', () => {
           expect.assertions(1);
           expect(() =>
-            bitbucket.initPlatform({ endpoint: 'endpoint' })
+            bitbucket.initPlatform({ endpoint: 'endpoint' }),
           ).toThrow();
         });
 
@@ -251,7 +252,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               endpoint: 'https://stash.renovatebot.com',
               username: 'abc',
               password: '123',
-            })
+            }),
           ).toMatchSnapshot();
         });
       });
@@ -262,7 +263,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           httpMock
             .scope(urlHost)
             .get(
-              `${urlPath}/rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE&limit=100`
+              `${urlPath}/rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE&limit=100`,
             )
             .reply(200, {
               size: 1,
@@ -283,7 +284,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
             .reply(200, repoMock(url, 'SOME', 'repo'))
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
             )
             .reply(200, {
               displayId: 'master',
@@ -292,7 +293,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             await bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
-            })
+            }),
           ).toMatchSnapshot();
         });
 
@@ -303,7 +304,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
             .reply(200, repoMock(url, 'SOME', 'repo'))
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
             )
             .reply(200, {
               displayId: 'master',
@@ -312,7 +313,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             await bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
-            })
+            }),
           ).toEqual({
             defaultBranch: 'master',
             isFork: false,
@@ -330,7 +331,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
             .reply(200, responseMock)
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
             )
             .reply(200, {
               displayId: 'master',
@@ -341,7 +342,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             gitUrl: 'ssh',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
-            expect.objectContaining({ url: sshLink('SOME', 'repo') })
+            expect.objectContaining({ url: sshLink('SOME', 'repo') }),
           );
           expect(res).toEqual({
             defaultBranch: 'master',
@@ -361,7 +362,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
             .reply(200, responseMock)
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
             )
             .reply(200, {
               displayId: 'master',
@@ -375,7 +376,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({
               url: link,
-            })
+            }),
           );
           expect(res).toEqual({
             defaultBranch: 'master',
@@ -394,7 +395,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
             .reply(200, responseMock)
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
             )
             .reply(200, {
               displayId: 'master',
@@ -408,9 +409,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             expect.objectContaining({
               url: httpLink(url.toString(), 'SOME', 'repo').replace(
                 'https://',
-                `https://${username}:${password}@`
+                `https://${username}:${password}@`,
               ),
-            })
+            }),
           );
           expect(res).toEqual({
             defaultBranch: 'master',
@@ -429,7 +430,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
             .reply(200, responseMock)
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
             )
             .reply(200, {
               displayId: 'master',
@@ -439,7 +440,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             repository: 'SOME/repo',
           });
           expect(git.initRepo).toHaveBeenCalledWith(
-            expect.objectContaining({ url: sshLink('SOME', 'repo') })
+            expect.objectContaining({ url: sshLink('SOME', 'repo') }),
           );
           expect(res).toMatchSnapshot();
         });
@@ -454,7 +455,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
             .reply(200, responseMock)
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
             )
             .reply(200, {
               displayId: 'master',
@@ -467,9 +468,9 @@ describe('modules/platform/bitbucket-server/index', () => {
             expect.objectContaining({
               url: httpLink(url.toString(), 'SOME', 'repo').replace(
                 'https://',
-                `https://${username}:${password}@`
+                `https://${username}:${password}@`,
               ),
-            })
+            }),
           );
           expect(res).toMatchSnapshot();
         });
@@ -485,7 +486,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
             .reply(200, responseMock)
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
             )
             .reply(200, {
               displayId: 'master',
@@ -498,7 +499,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           expect(git.initRepo).toHaveBeenCalledWith(
             expect.objectContaining({
               url: link,
-            })
+            }),
           );
           expect(res).toMatchSnapshot();
         });
@@ -510,14 +511,14 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
             .reply(200, repoMock(url, 'SOME', 'repo'))
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
             )
             .reply(204);
           await expect(
             bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
-            })
+            }),
           ).rejects.toThrow(REPOSITORY_EMPTY);
         });
       });
@@ -528,12 +529,12 @@ describe('modules/platform/bitbucket-server/index', () => {
           httpMock
             .scope(urlHost)
             .get(
-              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`
+              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`,
             )
             .reply(200, {
               mergeConfig: null,
             });
-          const actual = await bitbucket.getRepoForceRebase();
+          const actual = await bitbucket.getBranchForceRebase!('main');
           expect(actual).toBeFalse();
         });
 
@@ -542,14 +543,14 @@ describe('modules/platform/bitbucket-server/index', () => {
           httpMock
             .scope(urlHost)
             .get(
-              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`
+              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`,
             )
             .reply(200, {
               mergeConfig: {
                 defaultStrategy: null,
               },
             });
-          const actual = await bitbucket.getRepoForceRebase();
+          const actual = await bitbucket.getBranchForceRebase!('main');
           expect(actual).toBeFalse();
         });
 
@@ -560,7 +561,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             httpMock
               .scope(urlHost)
               .get(
-                `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`
+                `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`,
               )
               .reply(200, {
                 mergeConfig: {
@@ -569,9 +570,9 @@ describe('modules/platform/bitbucket-server/index', () => {
                   },
                 },
               });
-            const actual = await bitbucket.getRepoForceRebase();
+            const actual = await bitbucket.getBranchForceRebase!('main');
             expect(actual).toBeTrue();
-          }
+          },
         );
 
         it.each(['no-ff', 'ff', 'rebase-no-ff', 'squash'])(
@@ -581,7 +582,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             httpMock
               .scope(urlHost)
               .get(
-                `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`
+                `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests`,
               )
               .reply(200, {
                 mergeConfig: {
@@ -590,9 +591,9 @@ describe('modules/platform/bitbucket-server/index', () => {
                   },
                 },
               });
-            const actual = await bitbucket.getRepoForceRebase();
+            const actual = await bitbucket.getBranchForceRebase!('main');
             expect(actual).toBeFalse();
-          }
+          },
         );
       });
 
@@ -607,12 +608,12 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .twice()
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
@@ -624,12 +625,12 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .twice()
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
@@ -639,7 +640,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         it('throws not-found 1', async () => {
           await initRepo();
           await expect(
-            bitbucket.addReviewers(null as any, ['name'])
+            bitbucket.addReviewers(null as any, ['name']),
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
         });
 
@@ -647,12 +648,12 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`,
             )
             .reply(404);
 
           await expect(bitbucket.addReviewers(4, ['name'])).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
+            REPOSITORY_NOT_FOUND,
           );
         });
 
@@ -660,16 +661,16 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(404);
 
           await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
+            REPOSITORY_NOT_FOUND,
           );
         });
 
@@ -677,15 +678,15 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(409);
           await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
-            REPOSITORY_CHANGED
+            REPOSITORY_CHANGED,
           );
         });
 
@@ -693,11 +694,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(409, {
               errors: [
@@ -720,7 +721,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             });
 
           await expect(
-            bitbucket.addReviewers(5, ['name'])
+            bitbucket.addReviewers(5, ['name']),
           ).rejects.toThrowErrorMatchingSnapshot();
         });
 
@@ -728,15 +729,15 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(405);
           await expect(
-            bitbucket.addReviewers(5, ['name'])
+            bitbucket.addReviewers(5, ['name']),
           ).rejects.toThrowErrorMatchingSnapshot();
         });
       });
@@ -752,7 +753,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           httpMock
             .scope(urlHost)
             .get(
-              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/pull-requests/3/activities?limit=100`
+              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/pull-requests/3/activities?limit=100`,
             )
             .reply(200);
           const res = await bitbucket.ensureComment({
@@ -767,7 +768,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`,
             )
             .reply(200, {
               isLastPage: false,
@@ -786,14 +787,14 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`,
             )
             .reply(200, {
               isLastPage: true,
               values: [{ action: 'OTHER' }],
             })
             .post(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments`,
             )
             .reply(200);
 
@@ -802,7 +803,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               topic: 'topic',
               content: 'content',
-            })
+            }),
           ).toBeTrue();
         });
 
@@ -810,7 +811,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`,
             )
             .reply(200, {
               isLastPage: false,
@@ -829,14 +830,14 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`,
             )
             .reply(200, {
               isLastPage: true,
               values: [{ action: 'OTHER' }],
             })
             .post(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments`,
             )
             .reply(200);
 
@@ -845,7 +846,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               topic: null,
               content: 'content',
-            })
+            }),
           ).toBeTrue();
         });
 
@@ -853,7 +854,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`,
             )
             .reply(200, {
               isLastPage: false,
@@ -872,20 +873,20 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`,
             )
             .reply(200, {
               isLastPage: true,
               values: [{ action: 'OTHER' }],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21`,
             )
             .reply(200, {
               version: 1,
             })
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21`,
             )
             .reply(200);
 
@@ -894,7 +895,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               topic: 'some-subject',
               content: 'some\ncontent',
-            })
+            }),
           ).toBeTrue();
         });
 
@@ -902,7 +903,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`,
             )
             .reply(200, {
               isLastPage: false,
@@ -921,14 +922,14 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`,
             )
             .reply(200, {
               isLastPage: true,
               values: [{ action: 'OTHER' }],
             })
             .post(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments`,
             )
             .reply(200);
 
@@ -937,7 +938,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               topic: null,
               content: 'some\ncontent',
-            })
+            }),
           ).toBeTrue();
         });
 
@@ -945,7 +946,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`,
             )
             .reply(200, {
               isLastPage: false,
@@ -964,7 +965,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`,
             )
             .reply(200, {
               isLastPage: true,
@@ -976,7 +977,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               topic: 'some-subject',
               content: 'blablabla',
-            })
+            }),
           ).toBeTrue();
         });
 
@@ -984,7 +985,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`,
             )
             .reply(200, {
               isLastPage: false,
@@ -1003,7 +1004,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1024,7 +1025,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           httpMock
             .scope(urlHost)
             .get(
-              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/pull-requests/5/activities?limit=100`
+              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/pull-requests/5/activities?limit=100`,
             )
             .reply(200, {
               isLastPage: false,
@@ -1043,7 +1044,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/pull-requests/5/activities?limit=100&start=1`
+              `${urlPath}/rest/api/1.0/projects/undefined/repos/undefined/pull-requests/5/activities?limit=100&start=1`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1054,7 +1055,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               type: 'by-topic',
               number: 5,
               topic: 'topic',
-            })
+            }),
           ).toResolve();
         });
 
@@ -1062,7 +1063,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`,
             )
             .reply(200, {
               isLastPage: false,
@@ -1081,20 +1082,20 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`,
             )
             .reply(200, {
               isLastPage: true,
               values: [{ action: 'OTHER' }],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21`,
             )
             .reply(200, {
               version: 1,
             })
             .delete(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21?version=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/21?version=1`,
             )
             .reply(200);
 
@@ -1103,7 +1104,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               type: 'by-topic',
               number: 5,
               topic: 'some-subject',
-            })
+            }),
           ).toResolve();
         });
 
@@ -1111,7 +1112,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`,
             )
             .reply(200, {
               isLastPage: false,
@@ -1130,20 +1131,20 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`,
             )
             .reply(200, {
               isLastPage: true,
               values: [{ action: 'OTHER' }],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/22`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/22`,
             )
             .reply(200, {
               version: 1,
             })
             .delete(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/22?version=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/22?version=1`,
             )
             .reply(200);
 
@@ -1152,7 +1153,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               type: 'by-content',
               number: 5,
               content: '!merge',
-            })
+            }),
           ).toResolve();
         });
 
@@ -1160,7 +1161,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100`,
             )
             .reply(200, {
               isLastPage: false,
@@ -1179,7 +1180,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1191,7 +1192,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               type: 'by-topic',
               number: 5,
               topic: 'topic',
-            })
+            }),
           ).toResolve();
         });
       });
@@ -1201,7 +1202,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1216,19 +1217,19 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
             )
             .reply(200, {
               isLastPage: true,
               values: [prMock(url, 'SOME', 'repo')],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
           expect(
-            await bitbucket.getBranchPr('userName1/pullRequest5')
+            await bitbucket.getBranchPr('userName1/pullRequest5'),
           ).toMatchSnapshot();
         });
 
@@ -1236,7 +1237,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1244,7 +1245,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             });
 
           expect(
-            await bitbucket.getBranchPr('userName1/pullRequest1')
+            await bitbucket.getBranchPr('userName1/pullRequest1'),
           ).toBeNull();
         });
 
@@ -1252,7 +1253,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1260,7 +1261,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             });
 
           expect(
-            await bitbucket.getBranchPr('userName1/pullRequest1')
+            await bitbucket.getBranchPr('userName1/pullRequest1'),
           ).toBeNull();
         });
       });
@@ -1270,7 +1271,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1282,7 +1283,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
               state: 'open',
-            })
+            }),
           ).toMatchSnapshot();
         });
 
@@ -1290,7 +1291,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1302,8 +1303,52 @@ describe('modules/platform/bitbucket-server/index', () => {
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
               state: 'closed',
-            })
+            }),
           ).toBeNull();
+        });
+
+        it('finds pr from other authors', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [prMock(url, 'SOME', 'repo')],
+            });
+          expect(
+            await bitbucket.findPr({
+              branchName: 'branch',
+              state: 'open',
+              includeOtherAuthors: true,
+            }),
+          ).toMatchObject({
+            number: 5,
+            sourceBranch: 'userName1/pullRequest5',
+            targetBranch: 'master',
+            title: 'title',
+            state: 'open',
+          });
+        });
+
+        it('returns null if no pr found - (includeOtherAuthors)', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
+
+          const pr = await bitbucket.findPr({
+            branchName: 'branch',
+            state: 'open',
+            includeOtherAuthors: true,
+          });
+          expect(pr).toBeNull();
         });
       });
 
@@ -1314,11 +1359,11 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
             .reply(200, prMock(url, 'SOME', 'repo'))
             .get(
-              `${urlPath}/rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=5&targetRepoId=5`
+              `${urlPath}/rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=5&targetRepoId=5`,
             )
             .reply(200, [{ name: 'jcitizen' }])
             .post(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
@@ -1340,11 +1385,11 @@ describe('modules/platform/bitbucket-server/index', () => {
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
             .reply(200, prMock(url, 'SOME', 'repo'))
             .get(
-              `${urlPath}/rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=5&targetRepoId=5`
+              `${urlPath}/rest/default-reviewers/1.0/projects/SOME/repos/repo/reviewers?sourceRefId=refs/heads/branch&targetRefId=refs/heads/master&sourceRepoId=5&targetRepoId=5`,
             )
             .reply(200, [{ name: 'jcitizen' }])
             .post(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
@@ -1372,7 +1417,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
@@ -1383,11 +1428,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .twice()
             .reply(200, prMock(url, 'SOME', 'repo'));
@@ -1403,7 +1448,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, {
               version: 0,
@@ -1423,11 +1468,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200);
 
@@ -1437,7 +1482,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               prTitle: 'title',
               prBody: 'body',
               targetBranch: 'new_base',
-            })
+            }),
           ).toResolve();
         });
 
@@ -1445,15 +1490,15 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, { state: 'OPEN', version: 42 })
             .post(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/decline?version=42`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/decline?version=42`,
             )
             .reply(200, { status: 'DECLINED' });
 
@@ -1463,7 +1508,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               prTitle: 'title',
               prBody: 'body',
               state: 'closed',
-            })
+            }),
           ).toResolve();
         });
 
@@ -1471,15 +1516,15 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, { state: 'DECLINED', version: 42 })
             .post(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/reopen?version=42`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/reopen?version=42`,
             )
             .reply(200, { status: 'OPEN' });
 
@@ -1489,7 +1534,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               prTitle: 'title',
               prBody: 'body',
               state: 'open',
-            })
+            }),
           ).toResolve();
         });
 
@@ -1500,7 +1545,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: null as any,
               prTitle: 'title',
               prBody: 'body',
-            })
+            }),
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
         });
 
@@ -1508,11 +1553,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`,
             )
             .reply(404);
           await expect(
-            bitbucket.updatePr({ number: 4, prTitle: 'title', prBody: 'body' })
+            bitbucket.updatePr({ number: 4, prTitle: 'title', prBody: 'body' }),
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
         });
 
@@ -1520,16 +1565,16 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(404);
 
           await expect(
-            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
         });
 
@@ -1537,11 +1582,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(409, {
               errors: [
@@ -1563,12 +1608,12 @@ describe('modules/platform/bitbucket-server/index', () => {
               ],
             })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
-              (body) => body.reviewers.length === 0
+              (body) => body.reviewers.length === 0,
             )
             .reply(200, prMock(url, 'SOME', 'repo'));
 
@@ -1578,7 +1623,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               prTitle: 'title',
               prBody: 'body',
               state: 'open',
-            })
+            }),
           ).toResolve();
         });
 
@@ -1586,16 +1631,16 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(409);
 
           await expect(
-            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
           ).rejects.toThrow(REPOSITORY_CHANGED);
         });
 
@@ -1603,16 +1648,16 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(405);
 
           await expect(
-            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' }),
           ).rejects.toThrowErrorMatchingSnapshot();
         });
       });
@@ -1622,11 +1667,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .post(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
             )
             .reply(200);
 
@@ -1634,7 +1679,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             await bitbucket.mergePr({
               branchName: 'branch',
               id: 5,
-            })
+            }),
           ).toBeTrue();
         });
 
@@ -1651,7 +1696,7 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`,
             )
             .reply(404);
 
@@ -1659,7 +1704,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             bitbucket.mergePr({
               branchName: 'branch',
               id: 4,
-            })
+            }),
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
         });
 
@@ -1667,11 +1712,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .post(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
             )
             .reply(404);
 
@@ -1679,7 +1724,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             bitbucket.mergePr({
               branchName: 'branch',
               id: 5,
-            })
+            }),
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
         });
 
@@ -1687,11 +1732,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .post(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
             )
             .reply(409);
 
@@ -1699,7 +1744,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             await bitbucket.mergePr({
               branchName: 'branch',
               id: 5,
-            })
+            }),
           ).toBeFalsy();
         });
 
@@ -1707,11 +1752,11 @@ describe('modules/platform/bitbucket-server/index', () => {
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
             .reply(200, prMock(url, 'SOME', 'repo'))
             .post(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`,
             )
             .reply(405);
 
@@ -1719,7 +1764,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             bitbucket.mergePr({
               branchName: 'branch',
               id: 5,
-            })
+            }),
           ).resolves.toBeFalse();
         });
       });
@@ -1728,8 +1773,8 @@ describe('modules/platform/bitbucket-server/index', () => {
         it('returns diff files', () => {
           expect(
             bitbucket.massageMarkdown(
-              '<details><summary>foo</summary>bar</details>text<details>'
-            )
+              '<details><summary>foo</summary>bar</details>text<details>',
+            ),
           ).toMatchSnapshot();
         });
 
@@ -1754,7 +1799,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200, {
               successful: 3,
@@ -1763,7 +1808,7 @@ Followed by some information.
             });
 
           expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
-            'green'
+            'green',
           );
         });
 
@@ -1771,7 +1816,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200, {
               successful: 3,
@@ -1780,12 +1825,12 @@ Followed by some information.
             });
 
           expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
-            'yellow'
+            'yellow',
           );
 
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200, {
               successful: 0,
@@ -1794,7 +1839,7 @@ Followed by some information.
             });
 
           expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
-            'yellow'
+            'yellow',
           );
         });
 
@@ -1802,7 +1847,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200, {
               successful: 1,
@@ -1811,17 +1856,17 @@ Followed by some information.
             });
 
           expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
-            'red'
+            'red',
           );
 
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .replyWithError('requst-failed');
 
           expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
-            'red'
+            'red',
           );
         });
 
@@ -1829,7 +1874,7 @@ Followed by some information.
           git.branchExists.mockReturnValue(false);
           await initRepo();
           await expect(
-            bitbucket.getBranchStatus('somebranch', true)
+            bitbucket.getBranchStatus('somebranch', true),
           ).rejects.toThrow(REPOSITORY_CHANGED);
         });
       });
@@ -1839,7 +1884,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1853,7 +1898,7 @@ Followed by some information.
             });
 
           expect(
-            await bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+            await bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
           ).toBe('green');
         });
 
@@ -1861,7 +1906,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1875,7 +1920,7 @@ Followed by some information.
             });
 
           expect(
-            await bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+            await bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
           ).toBe('yellow');
         });
 
@@ -1883,7 +1928,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1897,7 +1942,7 @@ Followed by some information.
             });
 
           expect(
-            await bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+            await bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
           ).toBe('red');
         });
 
@@ -1905,17 +1950,17 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
             )
             .replyWithError('requst-failed');
 
           expect(
-            await bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+            await bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
           ).toBeNull();
 
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
             )
             .reply(200, {
               isLastPage: true,
@@ -1923,7 +1968,7 @@ Followed by some information.
             });
 
           expect(
-            await bitbucket.getBranchStatusCheck('somebranch', 'context-2')
+            await bitbucket.getBranchStatusCheck('somebranch', 'context-2'),
           ).toBeNull();
         });
       });
@@ -1933,7 +1978,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
             )
             .twice()
             .reply(200, {
@@ -1941,11 +1986,11 @@ Followed by some information.
               values: [{ key: 'context-1', state: 'SUCCESSFUL' }],
             })
             .post(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200)
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200, {});
 
@@ -1955,7 +2000,7 @@ Followed by some information.
               context: 'context-2',
               description: null as any,
               state: 'green',
-            })
+            }),
           ).toResolve();
         });
 
@@ -1963,7 +2008,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
             )
             .twice()
             .reply(200, {
@@ -1971,11 +2016,11 @@ Followed by some information.
               values: [{ key: 'context-1', state: 'SUCCESSFUL' }],
             })
             .post(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200)
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200, {});
 
@@ -1985,7 +2030,7 @@ Followed by some information.
               context: 'context-2',
               description: null as any,
               state: 'red',
-            })
+            }),
           ).toResolve();
         });
 
@@ -1993,7 +2038,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
             )
             .twice()
             .reply(200, {
@@ -2001,11 +2046,11 @@ Followed by some information.
               values: [{ key: 'context-1', state: 'SUCCESSFUL' }],
             })
             .post(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200)
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200, {});
 
@@ -2015,7 +2060,7 @@ Followed by some information.
               context: 'context-2',
               description: null as any,
               state: 'red',
-            })
+            }),
           ).toResolve();
         });
 
@@ -2023,7 +2068,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
             )
             .twice()
             .reply(200, {
@@ -2031,11 +2076,11 @@ Followed by some information.
               values: [{ key: 'context-1', state: 'SUCCESSFUL' }],
             })
             .post(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200)
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/stats/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .reply(200, {});
 
@@ -2045,7 +2090,7 @@ Followed by some information.
               context: 'context-2',
               description: null as any,
               state: 'yellow',
-            })
+            }),
           ).toResolve();
         });
 
@@ -2053,14 +2098,14 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
             )
             .reply(200, {
               isLastPage: true,
               values: [{ key: 'context-1', state: 'SUCCESSFUL' }],
             })
             .post(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e`,
             )
             .replyWithError('requst-failed');
 
@@ -2070,7 +2115,7 @@ Followed by some information.
               context: 'context-2',
               description: null as any,
               state: 'green',
-            })
+            }),
           ).toResolve();
         });
 
@@ -2078,7 +2123,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`
+              `${urlPath}/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100`,
             )
             .reply(200, {
               isLastPage: true,
@@ -2091,7 +2136,7 @@ Followed by some information.
               context: 'context-1',
               description: null as any,
               state: 'green',
-            })
+            }),
           ).toResolve();
         });
       });
@@ -2102,7 +2147,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`,
             )
             .reply(200, {
               isLastPage: true,
@@ -2122,7 +2167,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json5?limit=20000`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json5?limit=20000`,
             )
             .reply(200, {
               isLastPage: true,
@@ -2137,7 +2182,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/DIFFERENT/repos/repo/browse/file.json?limit=20000`
+              `${urlPath}/rest/api/1.0/projects/DIFFERENT/repos/repo/browse/file.json?limit=20000`,
             )
             .reply(200, {
               isLastPage: true,
@@ -2145,7 +2190,7 @@ Followed by some information.
             });
           const res = await bitbucket.getJsonFile(
             'file.json',
-            'DIFFERENT/repo'
+            'DIFFERENT/repo',
           );
           expect(res).toEqual(data);
         });
@@ -2155,7 +2200,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000&at=dev`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000&at=dev`,
             )
             .reply(200, {
               isLastPage: true,
@@ -2164,7 +2209,7 @@ Followed by some information.
           const res = await bitbucket.getJsonFile(
             'file.json',
             'SOME/repo',
-            'dev'
+            'dev',
           );
           expect(res).toEqual(data);
         });
@@ -2173,7 +2218,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`,
             )
             .reply(200, {
               isLastPage: true,
@@ -2186,7 +2231,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`,
             )
             .reply(200, {
               isLastPage: false,
@@ -2199,7 +2244,7 @@ Followed by some information.
           const scope = await initRepo();
           scope
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`,
             )
             .replyWithError('some error');
           await expect(bitbucket.getJsonFile('file.json')).rejects.toThrow();

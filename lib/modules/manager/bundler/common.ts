@@ -19,7 +19,7 @@ export function extractRubyVersion(txt: string): string | null {
 }
 
 export async function getRubyConstraint(
-  updateArtifact: UpdateArtifact
+  updateArtifact: UpdateArtifact,
 ): Promise<string | null> {
   const { packageFileName, config, newPackageFileContent } = updateArtifact;
   const { constraints = {} } = config;
@@ -36,7 +36,7 @@ export async function getRubyConstraint(
     }
     const rubyVersionFile = getSiblingFileName(
       packageFileName,
-      '.ruby-version'
+      '.ruby-version',
     );
     const rubyVersionFileContent = await readLocalFile(rubyVersionFile, 'utf8');
     if (rubyVersionFileContent) {
@@ -52,7 +52,7 @@ export async function getRubyConstraint(
 
 export function getBundlerConstraint(
   updateArtifact: Pick<UpdateArtifact, 'config'>,
-  existingLockFileContent: string
+  existingLockFileContent: string,
 ): string | null {
   const { config } = updateArtifact;
   const { constraints = {} } = config;
@@ -63,7 +63,7 @@ export function getBundlerConstraint(
     return bundler;
   } else {
     const bundledWith = regEx(/\nBUNDLED WITH\n\s+(.*?)(\n|$)/).exec(
-      existingLockFileContent
+      existingLockFileContent,
     );
     if (bundledWith) {
       logger.debug('Using bundler version specified in lockfile');
@@ -74,7 +74,7 @@ export function getBundlerConstraint(
 }
 
 export async function getLockFilePath(
-  packageFilePath: string
+  packageFilePath: string,
 ): Promise<string> {
   const lockFilePath = (await localPathExists(`${packageFilePath}.lock`))
     ? `${packageFilePath}.lock`

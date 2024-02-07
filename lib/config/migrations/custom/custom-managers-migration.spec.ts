@@ -39,7 +39,7 @@ describe('config/migrations/custom/custom-managers-migration', () => {
             versioningTemplate: 'gradle',
           },
         ],
-      }
+      },
     );
   });
 });

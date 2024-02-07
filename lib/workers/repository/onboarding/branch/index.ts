@@ -7,7 +7,7 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
+import { type Pr, platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
 import { getBranchCommit, setGitAuthor } from '../../../../util/git';
@@ -24,9 +24,10 @@ import {
   isOnboardingBranchModified,
   setOnboardingCache,
 } from './onboarding-branch-cache';
+import { rebaseOnboardingBranch } from './rebase';
 
 export async function checkOnboardingBranch(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<RenovateConfig> {
   logger.debug('checkOnboarding()');
   logger.trace({ config });
@@ -51,10 +52,29 @@ export async function checkOnboardingBranch(
   // TODO #22198
   const branchList = [onboardingBranch!];
   if (onboardingPr) {
+    logger.debug('Onboarding PR already exists');
+
+    isModified = await isOnboardingBranchModified(config.onboardingBranch!);
+    // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
+    if (!isModified) {
+      const commit = await rebaseOnboardingBranch(
+        config,
+        onboardingPr.bodyStruct?.rawConfigHash,
+      );
+      if (commit) {
+        logger.info(
+          { branch: config.onboardingBranch, commit, onboarding: true },
+          'Branch updated',
+        );
+      }
+      // istanbul ignore if
+      if (platform.refreshPr) {
+        await platform.refreshPr(onboardingPr.number);
+      }
+    }
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
-    logger.debug('Onboarding PR already exists');
 
     if (
       isConfigHashPresent(onboardingPr) && // needed so that existing onboarding PRs are updated with config hash comment
@@ -62,21 +82,19 @@ export async function checkOnboardingBranch(
       !(config.onboardingRebaseCheckbox && OnboardingState.prUpdateRequested)
     ) {
       logger.debug(
-        'Skip processing since the onboarding branch is up to date and default branch has not changed'
+        'Skip processing since the onboarding branch is up to date and default branch has not changed',
       );
       OnboardingState.onboardingCacheValid = true;
       return { ...config, repoIsOnboarded, onboardingBranch, branchList };
     }
     OnboardingState.onboardingCacheValid = false;
-
-    isModified = await isOnboardingBranchModified(config.onboardingBranch!);
     if (isModified) {
       if (hasOnboardingBranchChanged(config.onboardingBranch!)) {
         invalidateExtractCache(config.baseBranch!);
       }
       isConflicted = await isOnboardingBranchConflicted(
         config.baseBranch!,
-        config.onboardingBranch!
+        config.onboardingBranch!,
       );
     }
   } else {
@@ -103,7 +121,7 @@ export async function checkOnboardingBranch(
     if (commit) {
       logger.info(
         { branch: onboardingBranch, commit, onboarding: true },
-        'Branch created'
+        'Branch created',
       );
     }
   }
@@ -118,7 +136,7 @@ export async function checkOnboardingBranch(
     getBranchCommit(config.defaultBranch!)!,
     getBranchCommit(onboardingBranch!)!,
     isConflicted,
-    isModified
+    isModified,
   );
 
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
@@ -150,7 +168,7 @@ function invalidateExtractCache(baseBranch: string): void {
 
 function isOnboardingCacheValid(
   defaultBranch: string,
-  onboardingBranch: string
+  onboardingBranch: string,
 ): boolean {
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;

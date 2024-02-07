@@ -12,7 +12,7 @@ import { setNodeCommitTopic } from './node';
  */
 export function extractOverrideDepsRec(
   parents: string[],
-  child: NpmManagerData
+  child: NpmManagerData,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   if (!child || is.emptyObject(child)) {

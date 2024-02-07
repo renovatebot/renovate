@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
 import * as mavenVersioning from '../../versioning/maven';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -23,7 +23,7 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
       dep.skipReason = 'invalid-version';
       logger.warn(
         { dep },
-        'Jenkins plugin dependency version is not a string and will be ignored'
+        'Jenkins plugin dependency version is not a string and will be ignored',
       );
     }
   } else {
@@ -52,12 +52,13 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
 
 function extractYaml(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   try {
-    const doc = load(content, { json: true }) as JenkinsPlugins;
+    // TODO: use schema (#9610)
+    const doc = parseSingleYaml<JenkinsPlugins>(content, { json: true });
     if (is.nonEmptyArray(doc?.plugins)) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {
@@ -75,7 +76,7 @@ function extractYaml(
 function extractText(content: string): PackageDependency[] {
   const deps: PackageDependency[] = [];
   const regex = regEx(
-    /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/
+    /^\s*(?<depName>[\d\w-]+):(?<currentValue>[^#\s]+)[#\s]*(?<comment>.*)$/,
   );
 
   for (const line of content.split(newlineRegex)) {
@@ -100,7 +101,7 @@ function extractText(content: string): PackageDependency[] {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`jenkins.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];

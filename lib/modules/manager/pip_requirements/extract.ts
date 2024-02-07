@@ -13,13 +13,13 @@ export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
 export const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 const packageGitRegex = regEx(
-  /(?<source>(?:git\+)(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?:(?<user>[^@]+)@)?(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(\.git)?(?:@(?<version>.*))))/
+  /(?<source>(?:git\+)(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?:(?<user>[^@]+)@)?(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(\.git)?(?:@(?<version>.*))))/,
 );
 
 const rangePattern: string = RANGE_PATTERN;
 const specifierPartPattern = `\\s*${rangePattern.replace(
   regEx(/\?<\w+>/g),
-  '?:'
+  '?:',
 )}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
 export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
@@ -41,7 +41,7 @@ export function cleanRegistryUrls(registryUrls: string[]): string[] {
           .replace(regEx(/}$/), '');
         const sub = process.env[envvar];
         return sub ?? match;
-      }
+      },
     );
   });
 }
@@ -52,10 +52,9 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   let registryUrls: string[] = [];
   const additionalRegistryUrls: string[] = [];
   content.split(newlineRegex).forEach((line) => {
-    if (line.startsWith('--index-url ')) {
-      registryUrls = [line.substring('--index-url '.length).split(' ')[0]];
-    }
-    if (line.startsWith('--extra-index-url ')) {
+    if (line.startsWith('-i ') || line.startsWith('--index-url ')) {
+      registryUrls = [line.split(' ')[1]];
+    } else if (line.startsWith('--extra-index-url ')) {
       const extraUrl = line
         .substring('--extra-index-url '.length)
         .split(' ')[0];

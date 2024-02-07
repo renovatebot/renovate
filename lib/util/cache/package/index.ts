@@ -2,6 +2,7 @@ import type { AllConfig } from '../../../config/types';
 import * as memCache from '../memory';
 import * as fileCache from './file';
 import * as redisCache from './redis';
+import { SqlitePackageCache } from './sqlite';
 import type { PackageCache } from './types';
 
 let cacheProxy: PackageCache | undefined;
@@ -12,7 +13,7 @@ function getGlobalKey(namespace: string, key: string): string {
 
 export async function get<T = any>(
   namespace: string,
-  key: string
+  key: string,
 ): Promise<T | undefined> {
   if (!cacheProxy) {
     return undefined;
@@ -38,7 +39,7 @@ export async function set(
   namespace: string,
   key: string,
   value: unknown,
-  minutes: number
+  minutes: number,
 ): Promise<void> {
   if (!cacheProxy) {
     return;
@@ -55,18 +56,27 @@ export async function set(
 
 export async function init(config: AllConfig): Promise<void> {
   if (config.redisUrl) {
-    await redisCache.init(config.redisUrl);
+    await redisCache.init(config.redisUrl, config.redisPrefix);
     cacheProxy = {
       get: redisCache.get,
       set: redisCache.set,
     };
-  } else if (config.cacheDir) {
+    return;
+  }
+
+  if (process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE) {
+    cacheProxy = await SqlitePackageCache.init(config.cacheDir!);
+    return;
+  }
+
+  if (config.cacheDir) {
     fileCache.init(config.cacheDir);
     cacheProxy = {
       get: fileCache.get,
       set: fileCache.set,
       cleanup: fileCache.cleanup,
     };
+    return;
   }
 }
 

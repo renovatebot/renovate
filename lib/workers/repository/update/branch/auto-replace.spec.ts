@@ -9,7 +9,7 @@ import { doAutoReplace } from './auto-replace';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
-  `../../../../modules/manager/html`
+  `../../../../modules/manager/html`,
 );
 
 jest.mock('../../../../util/fs');
@@ -39,7 +39,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(
         upgrade,
         'existing content',
-        reuseExistingBranch
+        reuseExistingBranch,
       );
       expect(res).toBeNull();
     });
@@ -120,7 +120,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(
         upgrade,
         srcAlreadyUpdated,
-        reuseExistingBranch
+        reuseExistingBranch,
       );
       expect(res).toEqual(srcAlreadyUpdated);
     });
@@ -155,7 +155,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(
         upgrade,
         'wrong source',
-        reuseExistingBranch
+        reuseExistingBranch,
       );
       expect(res).toBe('wrong source');
     });
@@ -175,7 +175,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString = script;
       const res = await doAutoReplace(upgrade, script, reuseExistingBranch);
       expect(res).toBe(
-        `<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js" integrity="sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" crossorigin="anonymous">`
+        `<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js" integrity="sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" crossorigin="anonymous">`,
       );
     });
 
@@ -197,7 +197,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
         '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       expect(res).toBe(
-        `FROM node:8.11.4-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS node`
+        `FROM node:8.11.4-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS node`,
       );
     });
 
@@ -233,7 +233,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
           "file: 'ci-include-docker-test-base.yml'\n" +
           "- project: 'pipeline-solutions/gitlab/fragments/docker-lint'\n" +
           'ref: 2-4-1\n' +
-          "file: 'ci-include-docker-lint-base.yml'"
+          "file: 'ci-include-docker-lint-base.yml'",
       );
     });
 
@@ -359,7 +359,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -381,7 +381,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -405,7 +405,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -428,7 +428,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -447,7 +447,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -470,7 +470,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -492,7 +492,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         gemfile
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -511,7 +511,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         build
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -532,7 +532,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         cargo
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -555,7 +555,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -573,7 +573,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         podfile
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -597,7 +597,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         json
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -620,7 +620,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         edn
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -643,7 +643,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -662,7 +662,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         dockerfile
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -684,7 +684,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
         dockerfile
           .replace(upgrade.depName, upgrade.newName)
           .replace(upgrade.currentValue, upgrade.newValue)
-          .replace(upgrade.currentDigest, upgrade.newDigest)
+          .replace(upgrade.currentDigest, upgrade.newDigest),
       );
     });
 
@@ -707,7 +707,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -726,7 +726,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -750,7 +750,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -768,7 +768,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         txt
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -794,7 +794,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         js
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -828,7 +828,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
           'xml2js': '0.2.0',
           'connect': '2.7.10'
         });
-      `
+      `,
       );
     });
 
@@ -869,7 +869,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         exs
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -897,7 +897,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         json
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -919,7 +919,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -942,7 +942,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         tf
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -965,7 +965,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         tf
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -986,7 +986,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         tf
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -1004,7 +1004,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         tf
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -1028,7 +1028,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
           FROM ubuntu:16.04
           FROM ubuntu:20.04
           FROM alpine:3.16
-        `
+        `,
       );
     });
 
@@ -1052,7 +1052,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
           FROM ubuntu:16.04
           FROM alpine:3.16
           FROM ubuntu:18.04
-        `
+        `,
       );
     });
 
@@ -1076,7 +1076,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
           FROM notUbuntu:18.04
           FROM alsoNotUbuntu:18.04
           FROM alpine:3.16
-        `
+        `,
       );
     });
 
@@ -1100,7 +1100,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         codeBlock`
           FROM alpine:3.16
-        `
+        `,
       );
     });
 
@@ -1124,7 +1124,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         codeBlock`
           FROM alpine:3.16@sha256:p0o9i8u7z6t5r4e3w2q1
-        `
+        `,
       );
     });
 
@@ -1169,7 +1169,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         codeBlock`
           FROM eclipse-temurin:11@sha256:p0o9i8u7z6t5r4e3w2q1
-        `
+        `,
       );
     });
 
@@ -1215,7 +1215,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       ];
       const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
       expect(res).toBe(
-        'image: "some.other.url.com/some-new-repo:3.16@sha256:p0o9i8u7z6t5r4e3w2q1"'
+        'image: "some.other.url.com/some-new-repo:3.16@sha256:p0o9i8u7z6t5r4e3w2q1"',
       );
     });
 
@@ -1243,7 +1243,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(
         upgrade,
         githubAction,
-        reuseExistingBranch
+        reuseExistingBranch,
       );
       expect(res).toBe(
         codeBlock`
@@ -1252,7 +1252,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
               runs-on: ubuntu-latest
               steps:
                 - uses: actions/checkout@v2.0.0
-        `
+        `,
       );
     });
 
@@ -1280,7 +1280,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(
         upgrade,
         githubAction,
-        reuseExistingBranch
+        reuseExistingBranch,
       );
       expect(res).toBe(
         codeBlock`
@@ -1289,7 +1289,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
               runs-on: ubuntu-latest
               steps:
                 - uses: actions/checkout@1cf887 # v2.0.0
-        `
+        `,
       );
     });
 
@@ -1319,7 +1319,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(
         upgrade,
         githubAction,
-        reuseExistingBranch
+        reuseExistingBranch,
       );
       expect(res).toBe(
         codeBlock`
@@ -1328,7 +1328,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
               runs-on: ubuntu-latest
               steps:
                 - uses: some-other-action/checkout@v2.0.0
-        `
+        `,
       );
     });
 
@@ -1357,7 +1357,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(
         upgrade,
         githubAction,
-        reuseExistingBranch
+        reuseExistingBranch,
       );
       expect(res).toBe(
         codeBlock`
@@ -1366,7 +1366,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
               runs-on: ubuntu-latest
               steps:
                 - uses: some-other-action/checkout@1cf887 # tag=v2.0.0
-        `
+        `,
       );
     });
   });

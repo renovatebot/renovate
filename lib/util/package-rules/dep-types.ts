@@ -5,7 +5,7 @@ import { Matcher } from './base';
 export class DepTypesMatcher extends Matcher {
   override matches(
     { depTypes, depType }: PackageRuleInputConfig,
-    { matchDepTypes }: PackageRule
+    { matchDepTypes }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchDepTypes)) {
       return null;

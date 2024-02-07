@@ -58,5 +58,5 @@ export const MavenTarget = z
         currentValue,
         depType,
         registryUrls,
-      }))
+      })),
   );

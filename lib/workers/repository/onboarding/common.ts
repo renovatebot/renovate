@@ -3,6 +3,10 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 
+export function getSemanticCommitPrTitle(config: RenovateConfig): string {
+  return `${config.semanticCommitType ?? 'chore'}: ${config.onboardingPrTitle}`;
+}
+
 export function defaultConfigFile(config: RenovateConfig): string {
   return configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!
@@ -15,11 +19,11 @@ export class OnboardingState {
 
   static get prUpdateRequested(): boolean {
     const updateRequested = !!memCache.get<boolean | undefined>(
-      OnboardingState.cacheKey
+      OnboardingState.cacheKey,
     );
     logger.trace(
       { value: updateRequested },
-      'Get OnboardingState.prUpdateRequested'
+      'Get OnboardingState.prUpdateRequested',
     );
     return updateRequested;
   }
@@ -31,11 +35,11 @@ export class OnboardingState {
 
   static get onboardingCacheValid(): boolean {
     const cacheValid = !!memCache.get<boolean | undefined>(
-      OnboardingState.skipKey
+      OnboardingState.skipKey,
     );
     logger.trace(
       { value: cacheValid },
-      'Get OnboardingState.onboardingCacheValid'
+      'Get OnboardingState.onboardingCacheValid',
     );
     return cacheValid;
   }

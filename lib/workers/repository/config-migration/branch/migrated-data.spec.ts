@@ -5,22 +5,22 @@ import { mockedFunction, scm } from '../../../../../test/util';
 import { migrateConfig } from '../../../../config/migration';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
+import { EditorConfig } from '../../../../util/json-writer';
 import { detectRepoFileConfig } from '../../init/merge';
 import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
 
 jest.mock('../../../../config/migration');
 jest.mock('../../../../util/git');
 jest.mock('../../../../util/fs');
+jest.mock('../../../../util/json-writer');
 jest.mock('../../init/merge');
 jest.mock('detect-indent');
 
-const rawNonMigrated = Fixtures.get('./renovate.json');
-const rawNonMigratedJson5 = Fixtures.get('./renovate.json5');
 const migratedData = Fixtures.getJson('./migrated-data.json');
 const migratedDataJson5 = Fixtures.getJson('./migrated-data.json5');
 const migratedConfigObj = Fixtures.getJson('./migrated.json');
 const formattedMigratedData = Fixtures.getJson(
-  './migrated-data-formatted.json'
+  './migrated-data-formatted.json',
 );
 
 describe('workers/repository/config-migration/branch/migrated-data', () => {
@@ -33,7 +33,6 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       });
       mockedFunction(detectRepoFileConfig).mockResolvedValue({
         configFileName: 'renovate.json',
-        configFileRaw: rawNonMigrated,
       });
       mockedFunction(migrateConfig).mockReturnValue({
         isMigrated: true,
@@ -51,14 +50,14 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
 
     it('Calls getAsync a first time to initialize the factory', async () => {
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
-        migratedData
+        migratedData,
       );
       expect(detectRepoFileConfig).toHaveBeenCalledTimes(1);
     });
 
     it('Calls getAsync a second time to get the saved data from before', async () => {
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
-        migratedData
+        migratedData,
       );
       expect(detectRepoFileConfig).toHaveBeenCalledTimes(0);
     });
@@ -78,7 +77,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     it('Resets the factory and gets a new value', async () => {
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
-        migratedData
+        migratedData,
       );
     });
 
@@ -100,11 +99,10 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     it('Migrate a JSON5 config file', async () => {
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json5',
-        configFileRaw: rawNonMigratedJson5,
       });
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
-        migratedDataJson5
+        migratedDataJson5,
       );
     });
 
@@ -115,7 +113,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       await expect(MigratedDataFactory.getAsync()).resolves.toBeNull();
       expect(logger.debug).toHaveBeenCalledWith(
         { err },
-        'MigratedDataFactory.getAsync() Error initializing renovate MigratedData'
+        'MigratedDataFactory.getAsync() Error initializing renovate MigratedData',
       );
     });
   });
@@ -129,7 +127,6 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       });
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json',
-        configFileRaw: rawNonMigrated,
       });
       mockedFunction(migrateConfig).mockReturnValueOnce({
         isMigrated: true,
@@ -147,7 +144,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       mockedFunction(readLocalFile).mockResolvedValueOnce(null);
       await MigratedDataFactory.getAsync();
       await expect(
-        MigratedDataFactory.applyPrettierFormatting(migratedData)
+        MigratedDataFactory.applyPrettierFormatting(migratedData),
       ).resolves.toEqual(unformatted);
     });
 
@@ -156,7 +153,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       mockedFunction(readLocalFile).mockRejectedValueOnce(null);
       await MigratedDataFactory.getAsync();
       await expect(
-        MigratedDataFactory.applyPrettierFormatting(migratedData)
+        MigratedDataFactory.applyPrettierFormatting(migratedData),
       ).resolves.toEqual(unformatted);
     });
 
@@ -165,7 +162,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       mockedFunction(readLocalFile).mockResolvedValueOnce('invalid json');
       await MigratedDataFactory.getAsync();
       await expect(
-        MigratedDataFactory.applyPrettierFormatting(migratedData)
+        MigratedDataFactory.applyPrettierFormatting(migratedData),
       ).resolves.toEqual(unformatted);
     });
 
@@ -174,7 +171,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       mockedFunction(scm.getFileList).mockResolvedValue(['.prettierrc']);
       await MigratedDataFactory.getAsync();
       await expect(
-        MigratedDataFactory.applyPrettierFormatting(migratedData)
+        MigratedDataFactory.applyPrettierFormatting(migratedData),
       ).resolves.toEqual(formatted);
     });
 
@@ -186,18 +183,47 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       mockedFunction(readLocalFile).mockResolvedValueOnce('{"prettier":{}}');
       await MigratedDataFactory.getAsync();
       await expect(
-        MigratedDataFactory.applyPrettierFormatting(migratedData)
+        MigratedDataFactory.applyPrettierFormatting(migratedData),
       ).resolves.toEqual(formatted);
     });
 
     it('formats with default 2 spaces', async () => {
-      mockedFunction(scm.getFileList).mockResolvedValue(['.prettierrc']);
+      mockedFunction(scm.getFileList).mockResolvedValue([
+        '.prettierrc',
+        '.editorconfig',
+      ]);
+      mockedFunction(EditorConfig.getCodeFormat).mockResolvedValueOnce({
+        maxLineLength: 80,
+      });
       await expect(
-        applyPrettierFormatting(migratedData.content, 'json', {
+        applyPrettierFormatting('.prettierrc', migratedData.content, 'json', {
           amount: 0,
           indent: '  ',
-        })
+        }),
       ).resolves.toEqual(formattedMigratedData.content);
+    });
+
+    it('formats with printWith=Infinity', async () => {
+      mockedFunction(scm.getFileList).mockResolvedValue([
+        '.prettierrc',
+        '.editorconfig',
+      ]);
+      mockedFunction(EditorConfig.getCodeFormat).mockResolvedValueOnce({
+        maxLineLength: 'off',
+      });
+      await expect(
+        applyPrettierFormatting(
+          '.prettierrc',
+          `{\n"extends":[":separateMajorReleases",":prImmediately",":renovatePrefix",":semanticPrefixFixDepsChoreOthers"]}`,
+          'json',
+          {
+            amount: 0,
+            indent: '  ',
+          },
+        ),
+      ).resolves.toBe(
+        `{\n  "extends": [":separateMajorReleases", ":prImmediately", ":renovatePrefix", ":semanticPrefixFixDepsChoreOthers"]\n}\n`,
+      );
     });
   });
 });

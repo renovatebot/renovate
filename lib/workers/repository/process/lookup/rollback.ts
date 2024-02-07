@@ -7,14 +7,14 @@ import type { RollbackConfig } from './types';
 export function getRollbackUpdate(
   config: RollbackConfig,
   versions: Release[],
-  version: VersioningApi
+  version: VersioningApi,
 ): LookupUpdate | null {
   const { packageFile, versioning, depName, currentValue } = config;
   // istanbul ignore if
   if (!('isLessThanRange' in version)) {
     logger.debug(
       { versioning },
-      'Current versioning does not support isLessThanRange()'
+      'Current versioning does not support isLessThanRange()',
     );
     return null;
   }
@@ -29,17 +29,17 @@ export function getRollbackUpdate(
   if (!lessThanVersions.length) {
     logger.debug(
       { packageFile, depName, currentValue },
-      'Missing version has nothing to roll back to'
+      'Missing version has nothing to roll back to',
     );
     return null;
   }
   logger.debug(
     { packageFile, depName, currentValue },
-    `Current version not found - rolling back`
+    `Current version not found - rolling back`,
   );
   logger.debug(
     { dependency: depName, versions },
-    'Versions found before rolling back'
+    'Versions found before rolling back',
   );
 
   lessThanVersions.sort((a, b) => version.sortVersions(a.version, b.version));

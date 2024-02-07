@@ -5,7 +5,7 @@ import * as packageLock from './package-lock';
 import * as yarnLock from './yarn-lock';
 
 export async function updateLockedDependency(
-  config: UpdateLockedConfig
+  config: UpdateLockedConfig,
 ): Promise<UpdateLockedResult> {
   const { currentVersion, newVersion, lockFile } = config;
   if (!(semver.isVersion(currentVersion) && semver.isVersion(newVersion))) {
@@ -19,6 +19,14 @@ export async function updateLockedDependency(
   if (lockFile.endsWith('yarn.lock')) {
     return yarnLock.updateLockedDependency(config);
   }
-  logger.debug(`Unsupported lock file: ${lockFile}`);
+  if (lockFile.endsWith('pnpm-lock.yaml')) {
+    logger.debug(
+      'updateLockedDependency(): pnpm is not supported yet. See https://github.com/renovatebot/renovate/issues/21438',
+    );
+  } else {
+    logger.debug(
+      `updateLockedDependency(): unsupported lock file: ${lockFile}`,
+    );
+  }
   return { status: 'update-failed' };
 }

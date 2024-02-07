@@ -17,7 +17,7 @@ describe('modules/manager/puppet/extract', () => {
           "mod 'puppetlabs/stdlib', '8.0.0'",
           "mod 'puppetlabs/apache', '6.5.1'",
           "mod 'puppetlabs/puppetdb', '7.9.0'",
-        ].join(EOL)
+        ].join(EOL),
       );
 
       expect(res).toMatchObject({
@@ -46,7 +46,7 @@ describe('modules/manager/puppet/extract', () => {
 
     it('extracts multiple modules from Puppetfile with multiple forges/registries', () => {
       const res = extractPackageFile(
-        Fixtures.get('Puppetfile.multiple_forges')
+        Fixtures.get('Puppetfile.multiple_forges'),
       );
 
       expect(res).toMatchObject({
@@ -124,7 +124,7 @@ describe('modules/manager/puppet/extract', () => {
 
     it('Use GithubTagsDatasource only if host is exactly github.com', () => {
       const res = extractPackageFile(
-        `mod 'apache', :git => 'https://github.com.example.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'`
+        `mod 'apache', :git => 'https://github.com.example.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'`,
       );
 
       expect(res).toEqual({
@@ -145,7 +145,7 @@ describe('modules/manager/puppet/extract', () => {
 
     it('Github url without https is skipped', () => {
       const res = extractPackageFile(
-        `mod 'apache', :git => 'http://github.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'`
+        `mod 'apache', :git => 'http://github.com/puppetlabs/puppetlabs-apache', :tag => '0.9.0'`,
       );
 
       expect(res).toMatchObject({
@@ -164,7 +164,7 @@ describe('modules/manager/puppet/extract', () => {
         [
           "mod 'stdlib',",
           "  :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git',",
-        ].join(EOL)
+        ].join(EOL),
       );
 
       expect(res).toEqual({
@@ -183,7 +183,7 @@ describe('modules/manager/puppet/extract', () => {
         [
           "mod 'stdlib', '0.1.0', 'i create a skip reason'",
           "  :git => 'git@github.com:puppetlabs/puppetlabs-stdlib.git',",
-        ].join(EOL)
+        ].join(EOL),
       );
 
       expect(res).toMatchObject({
