@@ -319,7 +319,7 @@ export async function getRawFile(
   branchOrTag?: string,
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
-  const isSameOrg = repo?.split('/')[0] === config.repositoryOwner;
+  const isSameOrg = repo?.split('/')?.[0] === config.repositoryOwner;
   const httpOptions: InternalHttpOptions = {
     // Only cache response if it's from the same org
     repoCache: isSameOrg,
