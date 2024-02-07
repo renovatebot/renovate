@@ -35,7 +35,7 @@ export async function updateArtifacts({
   if (!config.lockFiles) {
     logger.warn(
       { packageFileName: inputFileName },
-      'No lock files associated with a package file',
+      'pip-compile: No lock files associated with a package file',
     );
     return null;
   }

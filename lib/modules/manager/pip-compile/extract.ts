@@ -74,7 +74,7 @@ export async function extractAllPackageFiles(
     } catch (error) {
       logger.warn(
         { fileMatch, error },
-        'Failed to parse pip-compile command from header',
+        'pip-compile: Failed to extract and parse command in output file header',
       );
       continue;
     }
