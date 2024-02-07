@@ -57,9 +57,8 @@ export function extractPackageFile(
 }
 
 function generateMermaidFlowchart(
-  packageFiles: PackageFile[],
+  depsBetweenFiles: Array<{ sourceFile: string; outputFile: string }>,
   lockFileArgs: Map<string, PipCompileArgs>,
-  sourceLockFiles: Array<{ sourceFile: string; lockFile: string }>,
 ): string {
   const lockFiles = [];
   for (const [lockFile, pipCompileArgs] of lockFileArgs.entries()) {
@@ -70,16 +69,10 @@ function generateMermaidFlowchart(
       `  ${lockFile}[[${lockFile}${extraArgs ? '\n' + extraArgs : ''}]]`,
     );
   }
-
-  const edges = packageFiles.flatMap((packageFile) => {
-    return packageFile.lockFiles!.map((lockFile) => {
-      return `  ${packageFile.packageFile} --> ${lockFile}`;
-    });
+  const edges = depsBetweenFiles.map(({ sourceFile, outputFile }) => {
+    return `  ${sourceFile} --> ${outputFile}`;
   });
-  const lockEdges = sourceLockFiles.map(({ sourceFile, lockFile }) => {
-    return `  ${sourceFile} --> ${lockFile}`;
-  });
-  return `graph TD\n${lockFiles.join('\n')}\n${edges.join('\n')}\n${lockEdges.join('\n')}`;
+  return `graph TD\n${lockFiles.join('\n')}\n${edges.join('\n')}`;
 }
 
 export async function extractAllPackageFiles(
@@ -88,7 +81,10 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[] | null> {
   logger.trace('pip-compile.extractAllPackageFiles()');
   const lockFileArgs = new Map<string, PipCompileArgs>();
-  const sourceLockFiles = [];
+  const depsBetweenFiles = new Array<{
+    sourceFile: string;
+    outputFile: string;
+  }>();
   // for debugging only ^^^ (for now)
   const packageFiles = new Map<string, PackageFile>();
   for (const fileMatch of fileMatches) {
@@ -111,13 +107,16 @@ export async function extractAllPackageFiles(
     // TODO(not7cd): handle locked deps
     // const lockedDeps = extractRequirementsFile(content);
     for (const packageFile of pipCompileArgs.sourceFiles) {
+      depsBetweenFiles.push({
+        sourceFile: packageFile,
+        outputFile: fileMatch,
+      });
       if (fileMatches.includes(packageFile)) {
         // TODO(not7cd): do something about it
         logger.warn(
           { sourceFile: packageFile, lockFile: fileMatch },
           'pip-compile: lock file acts as source file for another lock file',
         );
-        sourceLockFiles.push({ sourceFile: packageFile, lockFile: fileMatch });
         continue;
       }
       if (packageFiles.has(packageFile)) {
@@ -154,11 +153,7 @@ export async function extractAllPackageFiles(
   }
   logger.debug(
     'pip-compile: dependency flowchart:\n' +
-      generateMermaidFlowchart(
-        Array.from(packageFiles.values()),
-        lockFileArgs,
-        sourceLockFiles,
-      ),
+      generateMermaidFlowchart(depsBetweenFiles, lockFileArgs),
   );
   return Array.from(packageFiles.values());
 }
