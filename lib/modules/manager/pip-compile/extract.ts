@@ -60,7 +60,7 @@ export function extractPackageFile(
   }
 }
 
-function generateMermaidFlowchart(
+function generateMermaidGraph(
   depsBetweenFiles: DependencyBetweenFiles[],
   lockFileArgs: Map<string, PipCompileArgs>,
 ): string {
@@ -162,8 +162,8 @@ export async function extractAllPackageFiles(
     return null;
   }
   logger.debug(
-    'pip-compile: dependency flowchart:\n' +
-      generateMermaidFlowchart(depsBetweenFiles, lockFileArgs),
+    'pip-compile: dependency graph:\n' +
+      generateMermaidGraph(depsBetweenFiles, lockFileArgs),
   );
   return Array.from(packageFiles.values());
 }
