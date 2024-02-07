@@ -40,7 +40,7 @@ export function getPythonConstraint(
   const { python } = constraints;
 
   if (python) {
-    logger.debug('Using python constraint from config');
+    logger.debug('pip-compile: Using python constraint from config');
     return python;
   }
 
@@ -52,7 +52,7 @@ export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
   const { pipTools } = constraints;
 
   if (is.string(pipTools)) {
-    logger.debug('Using pipTools constraint from config');
+    logger.debug('pip-compile: Using pipTools constraint from config');
     return pipTools;
   }
 
