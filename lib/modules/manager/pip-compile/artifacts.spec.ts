@@ -108,7 +108,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ).toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
       { packageFileName: 'requirements.in' },
-      'No lock files associated with a package file',
+      'pip-compile: No lock files associated with a package file',
     );
   });
 
