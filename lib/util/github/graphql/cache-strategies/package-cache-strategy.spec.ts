@@ -42,7 +42,7 @@ describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
     };
     const page = [newItem, item3, item2, item1];
 
-    const strategy = new GithubGraphqlPackageCacheStrategy('foo', 'bar');
+    const strategy = new GithubGraphqlPackageCacheStrategy('_test-namespace', 'bar');
     const isPaginationDone = await strategy.reconcile(page);
     const res = await strategy.finalize();
 

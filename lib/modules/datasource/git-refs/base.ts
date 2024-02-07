@@ -22,7 +22,7 @@ export abstract class GitDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${GitDatasource.id}`,
+    namespace: 'datasource-git',
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getRawRefs({

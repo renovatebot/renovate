@@ -10,7 +10,7 @@ export abstract class TerraformDatasource extends Datasource {
   static id = 'terraform';
 
   @cache({
-    namespace: `datasource-${TerraformDatasource.id}`,
+    namespace: 'datasource-terraform',
     key: (registryUrl: string) =>
       TerraformDatasource.getDiscoveryUrl(registryUrl),
     ttlMinutes: 1440,
