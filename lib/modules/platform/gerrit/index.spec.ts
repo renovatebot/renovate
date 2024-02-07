@@ -713,12 +713,6 @@ describe('modules/platform/gerrit/index', () => {
     });
   });
 
-  describe('getRepoForceRebase()', () => {
-    it('getRepoForceRebase()', async () => {
-      await expect(gerrit.getRepoForceRebase()).resolves.toBeFalse();
-    });
-  });
-
   describe('massageMarkdown()', () => {
     it('massageMarkdown()', () => {
       expect(gerrit.massageMarkdown('Pull Requests')).toBe('Change-Requests');

@@ -1,6 +1,6 @@
 import RE2 from 're2';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
-import { configRegexPredicate, regEx } from './regex';
+import { regEx } from './regex';
 
 describe('util/regex', () => {
   beforeEach(() => {
@@ -36,27 +36,5 @@ describe('util/regex', () => {
 
     const regex = await import('./regex');
     expect(regex.regEx('foo')).toBeInstanceOf(RegExp);
-  });
-
-  describe('configRegexPredicate', () => {
-    it('allows valid regex pattern', () => {
-      expect(configRegexPredicate('/hello/')).not.toBeNull();
-    });
-
-    it('invalidates invalid regex pattern', () => {
-      expect(configRegexPredicate('/^test\\d+$/m')).toBeNull();
-    });
-
-    it('allows the i flag in regex pattern', () => {
-      expect(configRegexPredicate('/^test\\d+$/i')).not.toBeNull();
-    });
-
-    it('allows negative regex pattern', () => {
-      expect(configRegexPredicate('!/^test\\d+$/i')).not.toBeNull();
-    });
-
-    it('does not allow non-regex input', () => {
-      expect(configRegexPredicate('hello')).toBeNull();
-    });
   });
 });

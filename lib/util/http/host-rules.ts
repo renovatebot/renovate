@@ -10,7 +10,7 @@ import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
-import { anyMatchRegexOrMinimatch } from '../string';
+import { anyMatchRegexOrMinimatch } from '../string-match';
 import { parseUrl } from '../url';
 import { dnsLookup } from './dns';
 import { keepAliveAgents } from './keep-alive';
