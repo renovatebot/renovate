@@ -319,6 +319,9 @@ describe('modules/manager/helmfile/extract', () => {
         - name: jenkins
           chart: jenkins/jenkins
           version: 3.3.0
+        - name: oci-url
+          version: 0.4.2
+          chart: oci://ghcr.io/example/oci-repo/url-example
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
@@ -334,10 +337,19 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/example',
+            registryUrls: ['ghcr.io/example/oci-repo'],
           },
           {
             currentValue: '3.3.0',
             depName: 'jenkins',
+            registryUrls: ['https://charts.jenkins.io'],
+          },
+          {
+            currentValue: '0.4.2',
+            depName: 'url-example',
+            datasource: 'docker',
+            packageName: 'ghcr.io/example/oci-repo/url-example',
+            registryUrls: ['ghcr.io/example/oci-repo'],
           },
         ],
       });
