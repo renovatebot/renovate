@@ -13,6 +13,8 @@ export interface PipCompileArgs {
   extra?: string[];
   extraIndexUrl?: string[];
   indexUrl?: string;
+  noEmitIndexUrl?: boolean;
+  emitIndexUrl?: boolean;
   outputFile?: string;
   sourceFiles: string[]; // positional arguments
 }

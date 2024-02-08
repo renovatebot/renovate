@@ -16,13 +16,17 @@ export function constructPipCompileCmd(
   outputFileName: string,
   strict: boolean = true,
 ): string {
-  const pipCompileArgs = extractHeaderCommand(content, outputFileName);
-  if (strict && pipCompileArgs.isCustomCommand) {
+  const headerArguments = extractHeaderCommand(content, outputFileName);
+  if (strict && headerArguments.isCustomCommand) {
     throw new Error(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
   }
-  return pipCompileArgs.argv.map(quote).join(' ');
+  // safeguard against index url leak if not explicitly set by an option
+  if (!headerArguments.noEmitIndexUrl && !headerArguments.emitIndexUrl) {
+    headerArguments.argv.splice(1, 0, '--no-emit-index-url');
+  }
+  return headerArguments.argv.map(quote).join(' ');
 }
 
 export async function updateArtifacts({

@@ -77,7 +77,8 @@ export const allowedPipOptions = [
   '-v',
   '--allow-unsafe',
   '--generate-hashes',
-  '--no-emit-index-url', // TODO: handle this!!!
+  '--no-emit-index-url',
+  '--emit-index-url',
   '--strip-extras',
   '--index-url',
   ...optionsWithArguments,
@@ -148,9 +149,21 @@ export function extractHeaderCommand(
       } else if (option === '--index-url') {
         result.indexUrl = value;
         // TODO: add to secrets? next PR
+      } else {
+        logger.warn(`pip-compile: option ${arg} not handled`);
       }
       continue;
     }
+    if (arg === '--no-emit-index-url') {
+      result.noEmitIndexUrl = true;
+      continue;
+    }
+    if (arg === '--emit-index-url') {
+      result.emitIndexUrl = true;
+      continue;
+    }
+
+    logger.warn(`pip-compile: option ${arg} not handled`);
   }
 
   logger.trace(
@@ -159,6 +172,9 @@ export function extractHeaderCommand(
     },
     'Parsed pip-compile command from header',
   );
+  if (result.noEmitIndexUrl && result.emitIndexUrl) {
+    throw new Error('Cannot use both --no-emit-index-url and --emit-index-url');
+  }
   if (result.sourceFiles.length === 0) {
     throw new Error(
       'No source files detected in command, pass at least one package file explicitly',
