@@ -97,6 +97,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          filter: blob:none # we don't need all blobs
 
       - name: Calculate matrix for `node_modules` prefetch
         uses: ./.github/actions/calculate-prefetch-matrix
@@ -549,11 +550,14 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
+          show-progress: false
+          filter: blob:none # we don't need all blobs, only the full tree
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -571,11 +575,13 @@ jobs:
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 
+      # TODO: move to semantic-release prepare
+      - name: Build
+        run: pnpm build
+
       - name: semantic-release
         run: |
-          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
           pnpm semantic-release --dry-run ${{env.DRY_RUN}}
-          git checkout -- .npmrc
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
