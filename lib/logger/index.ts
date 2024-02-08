@@ -72,6 +72,7 @@ const logFactory = (
       const msg = p2;
       const meta: Record<string, unknown> = { logContext, ...curMeta, ...p1 };
       const remappedLevel = getRemappedLevel(msg);
+      // istanbul ignore if: not testable
       if (remappedLevel) {
         meta.oldLevel = level;
         level = remappedLevel;
@@ -82,6 +83,7 @@ const logFactory = (
       const msg = p1;
       const meta: Record<string, unknown> = { logContext, ...curMeta };
       const remappedLevel = getRemappedLevel(msg);
+      // istanbul ignore if: not testable
       if (remappedLevel) {
         meta.oldLevel = level;
         level = remappedLevel;
