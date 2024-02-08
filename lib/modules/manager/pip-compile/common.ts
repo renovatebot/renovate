@@ -8,31 +8,6 @@ import { regEx } from '../../../util/regex';
 import type { UpdateArtifactsConfig } from '../types';
 import type { PipCompileArgs } from './types';
 
-export async function getExecOptions(
-  config: UpdateArtifactsConfig,
-  inputFileName: string,
-): Promise<ExecOptions> {
-  const constraint = getPythonConstraint(config);
-  const pipToolsConstraint = getPipToolsConstraint(config);
-  const execOptions: ExecOptions = {
-    cwdFile: inputFileName,
-    docker: {},
-    toolConstraints: [
-      {
-        toolName: 'python',
-        constraint,
-      },
-      {
-        toolName: 'pip-tools',
-        constraint: pipToolsConstraint,
-      },
-    ],
-    extraEnv: {
-      PIP_CACHE_DIR: await ensureCacheDir('pip'),
-    },
-  };
-  return execOptions;
-}
 export function getPythonConstraint(
   config: UpdateArtifactsConfig,
 ): string | undefined | null {
@@ -57,6 +32,31 @@ export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
   }
 
   return '';
+}
+export async function getExecOptions(
+  config: UpdateArtifactsConfig,
+  inputFileName: string,
+): Promise<ExecOptions> {
+  const constraint = getPythonConstraint(config);
+  const pipToolsConstraint = getPipToolsConstraint(config);
+  const execOptions: ExecOptions = {
+    cwdFile: inputFileName,
+    docker: {},
+    toolConstraints: [
+      {
+        toolName: 'python',
+        constraint,
+      },
+      {
+        toolName: 'pip-tools',
+        constraint: pipToolsConstraint,
+      },
+    ],
+    extraEnv: {
+      PIP_CACHE_DIR: await ensureCacheDir('pip'),
+    },
+  };
+  return execOptions;
 }
 
 export const constraintLineRegex = regEx(
