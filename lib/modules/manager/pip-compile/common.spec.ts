@@ -18,6 +18,7 @@ describe('modules/manager/pip-compile/common', () => {
       '--resolver=backtracking',
       '--resolver=legacy',
       '--output-file=reqs.txt',
+      '--extra-index-url=https://pypi.org/simple',
     ])('returns object on correct options', (argument: string) => {
       expect(
         extractHeaderCommand(
@@ -39,7 +40,7 @@ describe('modules/manager/pip-compile/common', () => {
       },
     );
 
-    it.each(['--foo', '-x', '--$(curl this)', '--bar=sus'])(
+    it.each(['--foo', '-x', '--$(curl this)', '--bar=sus', '--extra-large'])(
       'errors on unknown options',
       (argument: string) => {
         expect(() =>

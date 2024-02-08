@@ -189,30 +189,29 @@ export function extractHeaderCommand(
 }
 
 function throwForDisallowedOption(arg: string): void {
-  for (const disallowedPipOption of disallowedPipOptions) {
-    if (arg.startsWith(disallowedPipOption)) {
-      throw new Error(
-        `Option ${disallowedPipOption} not allowed for this manager`,
-      );
-    }
+  if (disallowedPipOptions.includes(arg)) {
+    throw new Error(`Option ${arg} not allowed for this manager`);
   }
 }
 
 function throwForNoEqualSignInOptionWithArgument(arg: string): void {
-  for (const option of optionsWithArguments) {
-    if (arg === option) {
-      throw new Error(
-        `Option ${option} must have equal sign '=' separating it's argument`,
-      );
-    }
+  // this won't match if there is `=` at the end of the string
+  if (optionsWithArguments.includes(arg)) {
+    throw new Error(
+      `Option ${arg} must have equal sign '=' separating it's argument`,
+    );
   }
 }
 
 function throwForUnknownOption(arg: string): void {
-  for (const allowedOption of allowedPipOptions) {
-    if (arg.startsWith(allowedOption)) {
+  if (arg.includes('=')) {
+    const [option] = arg.split('=');
+    if (allowedPipOptions.includes(option)) {
       return;
     }
+  }
+  if (allowedPipOptions.includes(arg)) {
+    return;
   }
   throw new Error(`Option ${arg} not supported (yet)`);
 }
