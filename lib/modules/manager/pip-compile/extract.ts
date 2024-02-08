@@ -42,9 +42,9 @@ export function extractPackageFile(
     case 'unknown':
       logger.warn(
         { packageFile },
-        `pip-compile: could not determine manager for source file`,
+        `pip-compile: could not determine manager for source file, fallback to pip_requirements`,
       );
-      return null;
+      return extractRequirementsFile(content);
     default:
       logger.warn(
         { packageFile, manager },
