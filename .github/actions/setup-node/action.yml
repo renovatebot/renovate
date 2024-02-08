@@ -29,7 +29,7 @@ runs:
         }}-${{
           inputs.node-version
         }}-${{
-          hashFiles('pnpm-lock.yaml')
+          hashFiles('pnpm-lock.yaml', 'package.json')
         }}' >> "$GITHUB_ENV"
 
     - name: Restore `node_modules`
@@ -52,13 +52,13 @@ runs:
       run: corepack enable
 
     - name: Setup Node
-      uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+      uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
       with:
         node-version: ${{ inputs.node-version }}
         cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
 
     - name: Install dependencies
-      uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4 # v2.9.0
+      uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
       if: env.CACHE_HIT != 'true'
       with:
         timeout_minutes: 10
