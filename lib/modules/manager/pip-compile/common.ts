@@ -95,7 +95,6 @@ export function extractHeaderCommand(
   content: string,
   fileName: string,
 ): PipCompileArgs {
-  const strict: boolean = true; // TODO(not7cd): add to function params
   const compileCommand = constraintLineRegex.exec(content);
   if (compileCommand?.groups === undefined) {
     throw new Error(`Failed to extract command from header in ${fileName}`);
@@ -133,9 +132,7 @@ export function extractHeaderCommand(
     }
     throwForDisallowedOption(arg);
     throwForNoEqualSignInOptionWithArgument(arg);
-    if (strict) {
-      throwForUnknownOption(arg);
-    }
+    throwForUnknownOption(arg);
 
     if (arg.includes('=')) {
       const [option, value] = arg.split('=');
