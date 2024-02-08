@@ -16,7 +16,8 @@ import type {
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
-import { getProblems, logger, setLogLevelRemap, setMeta } from '../../logger';
+import { getProblems, logger, setMeta } from '../../logger';
+import { setGlobalLogLevelRemaps } from '../../logger/remap';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
@@ -136,6 +137,7 @@ export async function start(): Promise<number> {
     await instrument('config', async () => {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
+      setGlobalLogLevelRemaps(config.logLevelRemap);
       if (config?.globalExtends) {
         // resolve global presets immediately
         config = mergeChildConfig(
@@ -193,7 +195,6 @@ export async function start(): Promise<number> {
           // host rules can change concurrency
           queue.clear();
           throttle.clear();
-          setLogLevelRemap(repoConfig.logLevelRemap);
 
           await repositoryWorker.renovateRepository(repoConfig);
           setMeta({});

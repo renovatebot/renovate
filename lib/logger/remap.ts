@@ -5,6 +5,9 @@ import {
 } from '../util/string-match';
 import type { LogLevelRemap } from './types';
 
+let globalRemaps: LogLevelRemap[] | undefined;
+let repositoryRemaps: LogLevelRemap[] | undefined;
+
 let matcherCache = new WeakMap<LogLevelRemap, StringMatchPredicate>();
 
 function match(remap: LogLevelRemap, input: string): boolean {
@@ -18,24 +21,48 @@ function match(remap: LogLevelRemap, input: string): boolean {
   return matchFn(input);
 }
 
-export function getRemappedLevel(
-  msg: string,
-  logLevelRemaps: LogLevelRemap[] | undefined,
-): LogLevelString | null {
-  if (!logLevelRemaps) {
-    return null;
+export function getRemappedLevel(msg: string): LogLevelString | null {
+  if (repositoryRemaps) {
+    for (const remap of repositoryRemaps) {
+      if (match(remap, msg)) {
+        return remap.newLogLevel;
+      }
+    }
   }
 
-  for (let idx = logLevelRemaps.length - 1; idx >= 0; idx -= 1) {
-    const logLevelRemap = logLevelRemaps[idx];
-    if (match(logLevelRemap, msg)) {
-      return logLevelRemap.newLogLevel;
+  if (globalRemaps) {
+    for (const remap of globalRemaps) {
+      if (match(remap, msg)) {
+        return remap.newLogLevel;
+      }
     }
   }
 
   return null;
 }
 
-export function resetRemapMatcherCache(): void {
+export function resetMatcherCache(): void {
+  matcherCache = new WeakMap();
+}
+
+export function setGlobalLogLevelRemaps(
+  remaps: LogLevelRemap[] | undefined,
+): void {
+  globalRemaps = remaps;
+}
+
+export function resetGlobalLogLevelRemaps(): void {
+  globalRemaps = undefined;
+  matcherCache = new WeakMap();
+}
+
+export function setRepositoryLogLevelRemaps(
+  remaps: LogLevelRemap[] | undefined,
+): void {
+  repositoryRemaps = remaps;
+}
+
+export function resetRepositoryLogLevelRemaps(): void {
+  repositoryRemaps = undefined;
   matcherCache = new WeakMap();
 }

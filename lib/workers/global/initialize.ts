@@ -11,6 +11,7 @@ import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { initMergeConfidence } from '../../util/merge-confidence';
 import { setMaxLimit } from './limits';
+import { resetGlobalLogLevelRemaps } from '../../logger/remap';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
@@ -93,4 +94,5 @@ export async function globalInitialize(
 
 export async function globalFinalize(config: RenovateConfig): Promise<void> {
   await packageCache.cleanup(config);
+  resetGlobalLogLevelRemaps();
 }

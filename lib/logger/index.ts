@@ -6,14 +6,12 @@ import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import { once, reset as onceReset } from './once';
 import { RenovateStream } from './pretty-stdout';
-import { getRemappedLevel, resetRemapMatcherCache } from './remap';
-import type { BunyanRecord, LogLevelRemap, Logger } from './types';
+import { getRemappedLevel } from './remap';
+import type { BunyanRecord, Logger } from './types';
 import { ProblemStream, validateLogLevel, withSanitizer } from './utils';
 
 let logContext: string = process.env.LOG_CONTEXT ?? nanoid();
 let curMeta: Record<string, unknown> = {};
-
-let logLevelRemap: LogLevelRemap[] | undefined;
 
 const problems = new ProblemStream();
 
@@ -73,20 +71,20 @@ const logFactory = (
       // meta and msg provided
       const msg = p2;
       const meta: Record<string, unknown> = { logContext, ...curMeta, ...p1 };
-      const newLevel = getRemappedLevel(msg, logLevelRemap);
-      if (newLevel) {
+      const remappedLevel = getRemappedLevel(msg);
+      if (remappedLevel) {
         meta.oldLevel = level;
-        level = newLevel;
+        level = remappedLevel;
       }
       bunyanLogger[level](meta, msg);
     } else if (is.string(p1)) {
       // only message provided
       const msg = p1;
       const meta: Record<string, unknown> = { logContext, ...curMeta };
-      const newLevel = getRemappedLevel(msg, logLevelRemap);
-      if (newLevel) {
+      const remappedLevel = getRemappedLevel(msg);
+      if (remappedLevel) {
         meta.oldLevel = level;
-        level = newLevel;
+        level = remappedLevel;
       }
       bunyanLogger[level](meta, msg);
     } else {
@@ -166,9 +164,4 @@ export function getProblems(): BunyanRecord[] {
 
 export function clearProblems(): void {
   return problems.clearProblems();
-}
-
-export function setLogLevelRemap(remaps: LogLevelRemap[] | undefined): void {
-  resetRemapMatcherCache();
-  logLevelRemap = remaps;
 }

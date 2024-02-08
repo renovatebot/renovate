@@ -9,7 +9,8 @@ import {
 } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
-import { logger, setLogLevelRemap, setMeta } from '../../logger';
+import { logger, setMeta } from '../../logger';
+import { resetRepositoryLogLevelRemaps } from '../../logger/remap';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
@@ -54,7 +55,6 @@ export async function renovateRepository(
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
     addSplit('init');
-    setLogLevelRemap(config.logLevelRemap);
     const performExtract =
       config.repoIsOnboarded! ||
       !OnboardingState.onboardingCacheValid ||
@@ -130,6 +130,7 @@ export async function renovateRepository(
   clearDnsCache();
   const cloned = isCloned();
   logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
+  resetRepositoryLogLevelRemaps();
   return repoResult;
 }
 
