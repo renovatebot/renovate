@@ -45,7 +45,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
 }
 
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
-  let configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';
+  const configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';
 
   if (env.RENOVATE_CONFIG_FILE && !(await fs.pathExists(configFile))) {
     logger.fatal(
