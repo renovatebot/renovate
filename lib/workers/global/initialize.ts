@@ -4,6 +4,7 @@ import upath from 'upath';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
+import { resetGlobalLogLevelRemaps } from '../../logger/remap';
 import { initPlatform } from '../../modules/platform';
 import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
@@ -11,7 +12,6 @@ import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { initMergeConfidence } from '../../util/merge-confidence';
 import { setMaxLimit } from './limits';
-import { resetGlobalLogLevelRemaps } from '../../logger/remap';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
