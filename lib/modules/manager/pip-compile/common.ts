@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
-import { quote, split } from 'shlex';
-import upath from 'upath';
+import { split } from 'shlex';
 import { logger } from '../../../logger';
 import type { ExecOptions } from '../../../util/exec/types';
 import { ensureCacheDir } from '../../../util/fs';
@@ -63,6 +62,13 @@ export const constraintLineRegex = regEx(
   /^(#.*?\r?\n)+# {4}(?<command>\S*)(?<arguments> .*?)?\r?\n/,
 );
 
+// TODO(not7cd): remove in next PR, in favor of extractHeaderCommand
+export const deprecatedAllowedPipArguments = [
+  '--allow-unsafe',
+  '--generate-hashes',
+  '--no-emit-index-url',
+  '--strip-extras',
+];
 export const disallowedPipOptions = [
   '--no-header', // header is required by this manager
 ];
@@ -81,7 +87,7 @@ export const allowedPipOptions = [
   '--emit-index-url',
   '--strip-extras',
   '--index-url',
-  // ...optionsWithArguments,
+  ...optionsWithArguments,
 ];
 
 // TODO(not7cd): test on all correct headers, even with CUSTOM_COMPILE_COMMAND
@@ -119,7 +125,6 @@ export function extractHeaderCommand(
     outputFile: '',
     sourceFiles: [],
   };
-  // const options: Record<string, string | string[] | boolean> = {};
   for (const arg of argv.slice(1)) {
     // TODO(not7cd): check for "--option -- argument" case
     if (!arg.startsWith('-')) {
@@ -180,27 +185,6 @@ export function extractHeaderCommand(
       'No source files detected in command, pass at least one package file explicitly',
     );
   }
-  if (result.outputFile) {
-    // TODO(not7cd): This file path can be relative like `reqs/main.txt`
-    const file = upath.parse(fileName).base;
-    if (result.outputFile !== file) {
-      // we don't trust the user-supplied output-file argument;
-      // TODO(not7cd): allow relative paths
-      logger.warn(
-        { outputFile: result.outputFile, actualPath: file },
-        'pip-compile was previously executed with an unexpected `--output-file` filename',
-      );
-      // TODO(not7cd): this shouldn't be changed in extract function
-      result.outputFile = file;
-      argv.forEach((item, i) => {
-        if (item.startsWith('--output-file=')) {
-          argv[i] = `--output-file=${quote(file)}`;
-        }
-      });
-    }
-  } else {
-    logger.debug(`pip-compile: implicit output file (${fileName})`);
-  }
   return result;
 }
 
@@ -211,7 +195,6 @@ function throwForDisallowedOption(arg: string): void {
 }
 
 function throwForNoEqualSignInOptionWithArgument(arg: string): void {
-  // this won't match if there is `=` at the end of the string
   if (optionsWithArguments.includes(arg)) {
     throw new Error(
       `Option ${arg} must have equal sign '=' separating it's argument`,
