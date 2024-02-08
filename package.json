@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "run-s clean 'generate:*' 'compile:*' create-json-schema",
+    "build:docker": "node tools/docker.mjs",
     "build:docs": "run-s 'release:prepare {@}' --",
     "clean": "rimraf dist tmp",
     "clean-cache": "node tools/clean-cache.mjs",
@@ -59,8 +60,7 @@
     "type-check": "run-s 'generate:*' 'tsc --noEmit {@}' --",
     "update-static-data": "run-s 'update-static-data:*'",
     "update-static-data:distro-info": "node tools/static-data/generate-distro-info.mjs",
-    "update-static-data:node-schedule": "node tools/static-data/generate-node-schedule.mjs",
-    "verify": "node tools/verify.mjs"
+    "update-static-data:node-schedule": "node tools/static-data/generate-node-schedule.mjs"
   },
   "repository": {
     "type": "git",

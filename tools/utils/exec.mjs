@@ -1,13 +1,13 @@
-import { execSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 
 const maxBuffer = 20 * 1024 * 1024;
 
 /**
  * Execute a command
  * @param {string} cmd
- * @returns {string}
+ * @param {string[]} args
  */
-export function exec(cmd) {
+export function exec(cmd, args = []) {
   // args from shelljs
-  return execSync(cmd, { maxBuffer, stdio: [0, 1, 2] }).toString('utf-8');
+  return spawnSync(cmd, args, { maxBuffer, encoding: 'utf8' });
 }
