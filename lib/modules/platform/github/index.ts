@@ -71,7 +71,6 @@ import {
   enableAutoMergeMutation,
   getIssuesQuery,
   repoInfoQuery,
-  vulnerabilityAlertsQuery,
 } from './graphql';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
@@ -1873,26 +1872,19 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     logger.debug('No vulnerability alerts enabled for repo');
     return [];
   }
-  let vulnerabilityAlerts: { node: VulnerabilityAlert }[] | undefined;
-
-  // TODO #22198
-  const gheSupportsStateFilter = semver.satisfies(
-    // semver not null safe, accepts null and undefined
-
-    platformConfig.gheVersion!,
-    '>=3.5',
-  );
-  const filterByState = !platformConfig.isGhe || gheSupportsStateFilter;
-  const query = vulnerabilityAlertsQuery(filterByState);
+  let vulnerabilityAlerts: VulnerabilityAlert[] | undefined;
 
   try {
-    vulnerabilityAlerts = await githubApi.queryRepoField<{
-      node: VulnerabilityAlert;
-    }>(query, 'vulnerabilityAlerts', {
-      variables: { owner: config.repositoryOwner, name: config.repositoryName },
-      paginate: false,
-      acceptHeader: 'application/vnd.github.vixen-preview+json',
-    });
+    vulnerabilityAlerts = (
+      await githubApi.getJson<VulnerabilityAlert[]>(
+        `/repos/${config.repositoryOwner}/${config.repositoryName}/dependabot/alerts?state=open`,
+        {
+          paginate: false,
+          headers: { accept: 'application/vnd.github+json' },
+          repoCache: true,
+        },
+      )
+    ).body;
   } catch (err) {
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
@@ -1905,12 +1897,12 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   let alerts: VulnerabilityAlert[] = [];
   try {
     if (vulnerabilityAlerts?.length) {
-      alerts = vulnerabilityAlerts.map((edge) => edge.node);
+      alerts = vulnerabilityAlerts;
       const shortAlerts: AggregatedVulnerabilities = {};
       if (alerts.length) {
         logger.trace({ alerts }, 'GitHub vulnerability details');
         for (const alert of alerts) {
-          if (alert.securityVulnerability === null) {
+          if (alert.security_vulnerability === null) {
             // As described in the documentation, there are cases in which
             // GitHub API responds with `"securityVulnerability": null`.
             // But it's may be faulty, so skip processing it here.
@@ -1918,9 +1910,9 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           }
           const {
             package: { name, ecosystem },
-            vulnerableVersionRange,
-            firstPatchedVersion,
-          } = alert.securityVulnerability;
+            vulnerable_version_range: vulnerableVersionRange,
+            first_patched_version: firstPatchedVersion,
+          } = alert.security_vulnerability;
           const patch = firstPatchedVersion?.identifier;
 
           const key = `${ecosystem.toLowerCase()}/${name}`;

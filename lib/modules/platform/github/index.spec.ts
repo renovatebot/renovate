@@ -3347,147 +3347,90 @@ describe('modules/platform/github/index', () => {
     });
 
     it('returns empty if error', async () => {
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/dependabot/alerts?state=open').reply(200, {});
+      await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
     });
 
     it('returns array if found', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              vulnerabilityAlerts: {
-                edges: [
-                  {
-                    node: {
-                      securityAdvisory: { severity: 'HIGH', references: [] },
-                      securityVulnerability: {
-                        package: {
-                          ecosystem: 'NPM',
-                          name: 'left-pad',
-                          range: '0.0.2',
-                        },
-                        vulnerableVersionRange: '0.0.2',
-                        firstPatchedVersion: { identifier: '0.0.3' },
-                      },
-                      vulnerableManifestFilename: 'foo',
-                      vulnerableManifestPath: 'bar',
-                    },
-                  },
-                ],
-              },
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/dependabot/alerts?state=open').reply(200, [
+        {
+          securityAdvisory: { severity: 'HIGH', references: [] },
+          securityVulnerability: {
+            package: {
+              ecosystem: 'NPM',
+              name: 'left-pad',
+              range: '0.0.2',
             },
+            vulnerableVersionRange: '0.0.2',
+            firstPatchedVersion: { identifier: '0.0.3' },
           },
-        });
+          vulnerableManifestFilename: 'foo',
+          vulnerableManifestPath: 'bar',
+        },
+      ]);
+      await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(1);
     });
 
-    it('returns array if found on GHE', async () => {
-      const gheApiHost = 'https://ghe.renovatebot.com';
-
-      httpMock
-        .scope(gheApiHost)
-        .head('/')
-        .reply(200, '', { 'x-github-enterprise-version': '3.0.15' })
-        .get('/user')
-        .reply(200, { login: 'renovate-bot' })
-        .get('/user/emails')
-        .reply(200, {});
-
-      httpMock
-        .scope(gheApiHost)
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              vulnerabilityAlerts: {
-                edges: [
-                  {
-                    node: {
-                      securityAdvisory: { severity: 'HIGH', references: [] },
-                      securityVulnerability: {
-                        package: {
-                          ecosystem: 'NPM',
-                          name: 'left-pad',
-                          range: '0.0.2',
-                        },
-                        vulnerableVersionRange: '0.0.2',
-                        firstPatchedVersion: { identifier: '0.0.3' },
-                      },
-                      vulnerableManifestFilename: 'foo',
-                      vulnerableManifestPath: 'bar',
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        });
-
-      await github.initPlatform({
-        endpoint: gheApiHost,
-        token: '123test',
-      });
-
-      const res = await github.getVulnerabilityAlerts();
-      expect(res).toHaveLength(1);
-    });
+    // what to do with this test, most function which do not separately deal with ghe appp do not such a test
 
     it('returns empty if disabled', async () => {
       // prettier-ignore
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, {data: {repository: {}}});
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/dependabot/alerts?state=open')
+        .reply(200, { data: { repository: {} } });
+      await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
     });
 
     it('handles network error', async () => {
       // prettier-ignore
-      httpMock.scope(githubApiHost).post('/graphql').replyWithError('unknown error');
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/dependabot/alerts?state=open')
+        .replyWithError('unknown error');
+      await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
     });
 
     it('calls logger.debug with only items that include securityVulnerability', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              vulnerabilityAlerts: {
-                edges: [
-                  {
-                    node: {
-                      securityAdvisory: { severity: 'HIGH', references: [] },
-                      securityVulnerability: {
-                        package: {
-                          ecosystem: 'NPM',
-                          name: 'left-pad',
-                        },
-                        vulnerableVersionRange: '0.0.2',
-                        firstPatchedVersion: { identifier: '0.0.3' },
-                      },
-                      vulnerableManifestFilename: 'foo',
-                      vulnerableManifestPath: 'bar',
-                    },
-                  },
-                  {
-                    node: {
-                      securityAdvisory: { severity: 'HIGH', references: [] },
-                      securityVulnerability: null,
-                      vulnerableManifestFilename: 'foo',
-                      vulnerableManifestPath: 'bar',
-                    },
-                  },
-                ],
-              },
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.get('/repos/some/repo/dependabot/alerts?state=open').reply(200, [
+        {
+          securityAdvisory: { severity: 'HIGH', references: [] },
+          securityVulnerability: {
+            package: {
+              ecosystem: 'NPM',
+              name: 'left-pad',
             },
+            vulnerableVersionRange: '0.0.2',
+            firstPatchedVersion: { identifier: '0.0.3' },
           },
-        });
+          vulnerableManifestFilename: 'foo',
+          vulnerableManifestPath: 'bar',
+        },
+
+        {
+          securityAdvisory: { severity: 'HIGH', references: [] },
+          securityVulnerability: null,
+          vulnerableManifestFilename: 'foo',
+          vulnerableManifestPath: 'bar',
+        },
+      ]);
+      await github.initRepo({ repository: 'some/repo' });
       await github.getVulnerabilityAlerts();
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { alerts: { 'npm/left-pad': { '0.0.2': '0.0.3' } } },
