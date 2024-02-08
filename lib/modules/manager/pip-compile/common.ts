@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import type { ExecOptions } from '../../../util/exec/types';
+import { ensureCacheDir } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifactsConfig } from '../types';
 
@@ -27,6 +29,32 @@ export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
 
   return '';
 }
+export async function getExecOptions(
+  config: UpdateArtifactsConfig,
+  inputFileName: string,
+): Promise<ExecOptions> {
+  const constraint = getPythonConstraint(config);
+  const pipToolsConstraint = getPipToolsConstraint(config);
+  const execOptions: ExecOptions = {
+    cwdFile: inputFileName,
+    docker: {},
+    toolConstraints: [
+      {
+        toolName: 'python',
+        constraint,
+      },
+      {
+        toolName: 'pip-tools',
+        constraint: pipToolsConstraint,
+      },
+    ],
+    extraEnv: {
+      PIP_CACHE_DIR: await ensureCacheDir('pip'),
+    },
+  };
+  return execOptions;
+}
+
 export const constraintLineRegex = regEx(
   /^(#.*?\r?\n)+# {4}pip-compile(?<arguments>.*?)\r?\n/,
 );
