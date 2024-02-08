@@ -39,11 +39,6 @@ export function constructPipCompileCmd(
           );
         }
         args.push(`--output-file=${file}`);
-      } else if (argument.startsWith('--resolver=')) {
-        const value = extractResolver(argument);
-        if (value) {
-          args.push(`--resolver=${value}`);
-        }
       } else if (argument.startsWith('--')) {
         logger.trace(
           { argument },
@@ -65,67 +60,66 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const outputFileName = inputFileName.replace(regEx(/(\.in)?$/), '.txt');
-  logger.debug(
-    `pipCompile.updateArtifacts(${inputFileName}->${outputFileName})`,
-  );
-  const existingOutput = await readLocalFile(outputFileName, 'utf8');
-  if (!existingOutput) {
-    logger.debug('No pip-compile output file found');
+  config.lockFiles = [outputFileName];
+  // TODO: remove above line and use config.lockFiles directly in the next PR
+  if (!config.lockFiles) {
+    logger.warn(
+      { packageFileName: inputFileName },
+      'pip-compile: No lock files associated with a package file',
+    );
     return null;
   }
-  try {
-    await writeLocalFile(inputFileName, newInputContent);
-    if (config.isLockFileMaintenance) {
-      await deleteLocalFile(outputFileName);
-    }
-    const cmd = constructPipCompileCmd(
-      existingOutput,
-      inputFileName,
-      outputFileName,
-    );
-    const execOptions = await getExecOptions(config, inputFileName);
-    logger.trace({ cmd }, 'pip-compile command');
-    await exec(cmd, execOptions);
-    const status = await getRepoStatus();
-    if (!status?.modified.includes(outputFileName)) {
+  logger.debug(
+    `pipCompile.updateArtifacts(${inputFileName}->${JSON.stringify(
+      config.lockFiles,
+    )})`,
+  );
+  const result: UpdateArtifactsResult[] = [];
+  for (const outputFileName of config.lockFiles) {
+    const existingOutput = await readLocalFile(outputFileName, 'utf8');
+    if (!existingOutput) {
+      logger.debug('pip-compile: No output file found');
       return null;
     }
-    logger.debug('Returning updated pip-compile result');
-    return [
-      {
+    try {
+      await writeLocalFile(inputFileName, newInputContent);
+      // TODO(not7cd): use --upgrade option instead deleting
+      if (config.isLockFileMaintenance) {
+        await deleteLocalFile(outputFileName);
+      }
+      const cmd = constructPipCompileCmd(
+        existingOutput,
+        inputFileName,
+        outputFileName,
+      );
+      const execOptions = await getExecOptions(config, inputFileName);
+      logger.trace({ cmd }, 'pip-compile command');
+      await exec(cmd, execOptions);
+      const status = await getRepoStatus();
+      if (!status?.modified.includes(outputFileName)) {
+        return null;
+      }
+      result.push({
         file: {
           type: 'addition',
           path: outputFileName,
           contents: await readLocalFile(outputFileName, 'utf8'),
         },
-      },
-    ];
-  } catch (err) {
-    // istanbul ignore if
-    if (err.message === TEMPORARY_ERROR) {
-      throw err;
-    }
-    logger.debug({ err }, 'Failed to pip-compile');
-    return [
-      {
+      });
+    } catch (err) {
+      // istanbul ignore if
+      if (err.message === TEMPORARY_ERROR) {
+        throw err;
+      }
+      logger.debug({ err }, 'pip-compile: Failed to run command');
+      result.push({
         artifactError: {
           lockFile: outputFileName,
           stderr: err.message,
         },
-      },
-    ];
+      });
+    }
   }
-}
-
-export function extractResolver(argument: string): string | null {
-  const value = argument.replace('--resolver=', '');
-  if (['backtracking', 'legacy'].includes(value)) {
-    return value;
-  }
-
-  logger.warn(
-    { argument },
-    'pip-compile was previously executed with an unexpected `--resolver` value',
-  );
-  return null;
+  logger.debug('pip-compile: Returning updated output file(s)');
+  return result;
 }
