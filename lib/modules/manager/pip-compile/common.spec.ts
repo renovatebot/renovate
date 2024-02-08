@@ -91,6 +91,17 @@ describe('modules/manager/pip-compile/common', () => {
       expect(() => extractHeaderCommand('Dd', 'reqs.txt')).toThrow(/extract/);
     });
 
+    it('throws on mutually exclusive options', () => {
+      expect(() =>
+        extractHeaderCommand(
+          getCommandInHeader(
+            `pip-compile --no-emit-index-url --emit-index-url reqs.in`,
+          ),
+          'reqs.txt',
+        ),
+      ).toThrow(/extract/);
+    });
+
     it('returned sourceFiles returns all source files', () => {
       const exampleSourceFiles = [
         'requirements.in',
