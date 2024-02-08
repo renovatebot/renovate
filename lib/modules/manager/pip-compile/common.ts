@@ -41,6 +41,7 @@ export async function getExecOptions(
   const execOptions: ExecOptions = {
     cwdFile: inputFileName,
     docker: {},
+    userConfiguredEnv: config.env,
     toolConstraints: [
       {
         toolName: 'python',

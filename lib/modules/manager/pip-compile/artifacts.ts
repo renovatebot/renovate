@@ -83,27 +83,7 @@ export async function updateArtifacts({
       inputFileName,
       outputFileName,
     );
-    
-    const constraint = getPythonConstraint(config);
-    const pipToolsConstraint = getPipToolsConstraint(config);
-    const execOptions: ExecOptions = {
-      cwdFile: inputFileName,
-      docker: {},
-      userConfiguredEnv: config.env,
-      toolConstraints: [
-        {
-          toolName: 'python',
-          constraint,
-        },
-        {
-          toolName: 'pip-tools',
-          constraint: pipToolsConstraint,
-        },
-      ],
-      extraEnv: {
-        PIP_CACHE_DIR: await ensureCacheDir('pip'),
-      },
-    };
+
     const execOptions = await getExecOptions(config, inputFileName);
     logger.trace({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);
