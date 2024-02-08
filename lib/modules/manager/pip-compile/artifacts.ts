@@ -3,10 +3,8 @@ import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
-  ensureCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -16,8 +14,7 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   allowedPipArguments,
   constraintLineRegex,
-  getPipToolsConstraint,
-  getPythonConstraint,
+  getExecOptions,
 } from './common';
 
 export function constructPipCompileCmd(
@@ -86,25 +83,7 @@ export async function updateArtifacts({
       inputFileName,
       outputFileName,
     );
-    const constraint = getPythonConstraint(config);
-    const pipToolsConstraint = getPipToolsConstraint(config);
-    const execOptions: ExecOptions = {
-      cwdFile: inputFileName,
-      docker: {},
-      toolConstraints: [
-        {
-          toolName: 'python',
-          constraint,
-        },
-        {
-          toolName: 'pip-tools',
-          constraint: pipToolsConstraint,
-        },
-      ],
-      extraEnv: {
-        PIP_CACHE_DIR: await ensureCacheDir('pip'),
-      },
-    };
+    const execOptions = await getExecOptions(config, inputFileName);
     logger.trace({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);
     const status = await getRepoStatus();
