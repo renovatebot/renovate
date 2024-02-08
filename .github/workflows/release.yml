@@ -18,8 +18,9 @@ on:
         required: false
 
 env:
+  NODE_VERSION: 18
   GIT_SHA: ${{ github.event.client_payload.sha }}
-  RENOVATE_VERSION: ${{ github.event.client_payload.version }}
+  VERSION: ${{ github.event.client_payload.version }}
   BUILDKIT_PROGRESS: plain
   BUILDX_NO_DEFAULT_LOAD: 1
   DOCKER_PLATFORMS: linux/amd64,linux/arm64
@@ -58,12 +59,12 @@ jobs:
         run: |
           if [[ "${{github.event_name}}" == "workflow_dispatch" ]]; then
             echo "GIT_SHA=${{ github.event.inputs.sha }}" >> "$GITHUB_ENV"
-            echo "RENOVATE_VERSION=${{ github.event.inputs.version }}" >> "$GITHUB_ENV"
+            echo "VERSION=${{ github.event.inputs.version }}" >> "$GITHUB_ENV"
           fi
           echo "OWNER=${OWNER,,}" >> ${GITHUB_ENV}
 
       - name: docker-config
-        uses: containerbase/internal-tools@a12a7d23492f0805ce2237f46c9b69d9c3ba5f01 # v3.0.54
+        uses: containerbase/internal-tools@e7bd2e8cedd99c9b24982865534cb7c9bf88620b # v3.0.55
         with:
           command: docker-config
 
@@ -72,6 +73,12 @@ jobs:
           ref: ${{ env.GIT_SHA }}
           show-progress: false
 
+      - name: Setup Node.js
+        uses: ./.github/actions/setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          os: ${{ runner.os }}
+
       - uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
 
       - name: Docker registry login
@@ -79,21 +86,17 @@ jobs:
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      - name: Build docker images ${{ env.RENOVATE_VERSION }}
-        uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
-        with:
-          timeout_minutes: 30
-          max_attempts: 3
-          command: docker buildx bake --set settings.platform=${{ env.DOCKER_PLATFORMS }} --file tools/docker/bake.hcl build
+      - name: Build docker images ${{ env.VERSION }}
+        run: pnpm build:docker build --platform=${{ env.DOCKER_PLATFORMS }} --version ${{ env.VERSION }} --tries 3
 
-      - name: Publish docker images ${{ env.RENOVATE_VERSION }}
+      - name: Publish docker images ${{ env.VERSION }}
         if: false
-        run: docker buildx bake --set settings.platform=${{ env.DOCKER_PLATFORMS }} --file tools/docker/bake.hcl push
+        run: pnpm build:docker push --platform=${{ env.DOCKER_PLATFORMS }} --version ${{ env.VERSION }}
 
       - name: Sign images
         if: false
         run: |
-          cosign sign --yes ghcr.io/${{ env.OWNER }}/${{ env.FILE }}:${{ env.RENOVATE_VERSION }}
-          cosign sign --yes ghcr.io/${{ env.OWNER }}/${{ env.FILE }}:${{ env.RENOVATE_VERSION }}-full
-          cosign sign --yes ${{ env.FILE }}/${{ env.FILE }}:${{ env.RENOVATE_VERSION }}
-          cosign sign --yes ${{ env.FILE }}/${{ env.FILE }}:${{ env.RENOVATE_VERSION }}-full
+          cosign sign --yes ghcr.io/${{ env.OWNER }}/${{ env.FILE }}:${{ env.VERSION }}
+          cosign sign --yes ghcr.io/${{ env.OWNER }}/${{ env.FILE }}:${{ env.VERSION }}-full
+          cosign sign --yes ${{ env.FILE }}/${{ env.FILE }}:${{ env.VERSION }}
+          cosign sign --yes ${{ env.FILE }}/${{ env.FILE }}:${{ env.VERSION }}-full

@@ -1,6 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
-import { extractAllPackageFiles, extractPackageFile } from './extract';
+import { extractAllPackageFiles, extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
 
