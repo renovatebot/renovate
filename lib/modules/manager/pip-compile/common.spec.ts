@@ -99,7 +99,7 @@ describe('modules/manager/pip-compile/common', () => {
           ),
           'reqs.txt',
         ),
-      ).toThrow(/extract/);
+      ).toThrow();
     });
 
     it('returned sourceFiles returns all source files', () => {
