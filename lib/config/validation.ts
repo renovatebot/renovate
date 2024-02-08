@@ -600,7 +600,7 @@ export async function validateConfig(
                 });
               }
             } else if (key === 'env') {
-              const allowedEnvVars = GlobalConfig.get('allowedEnv') ?? [];
+              const allowedEnvVars = GlobalConfig.get('allowedEnv')!;
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!is.string(envVarValue)) {
                   warnings.push({
