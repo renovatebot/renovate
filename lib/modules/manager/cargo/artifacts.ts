@@ -1,4 +1,5 @@
 import { quote } from 'shlex';
+import type { UserEnv } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
@@ -17,7 +18,7 @@ import { extractLockFileContentVersions } from './locked-version';
 async function cargoUpdate(
   manifestPath: string,
   isLockFileMaintenance: boolean,
-  userConfiguredEnv: Record<string, string>,
+  userConfiguredEnv: UserEnv,
   constraint: string | undefined,
 ): Promise<void> {
   let cmd = `cargo update --config net.git-fetch-with-cli=true --manifest-path ${quote(
@@ -41,7 +42,7 @@ async function cargoUpdate(
 async function cargoUpdatePrecise(
   manifestPath: string,
   updatedDeps: Upgrade[],
-  userConfiguredEnv: Record<string, string>,
+  userConfiguredEnv: UserEnv,
   constraint: string | undefined,
 ): Promise<void> {
   // First update all dependencies that have been bumped in `Cargo.toml`.
