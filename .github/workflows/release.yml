@@ -126,7 +126,11 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Build docker images ${{ env.RENOVATE_VERSION }}
-        run: docker buildx bake --set settings.platform=${{ env.DOCKER_PLATFORMS }} --file tools/docker/bake.hcl build
+        uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
+        with:
+          timeout_minutes: 30
+          max_attempts: 3
+          command: docker buildx bake --set settings.platform=${{ env.DOCKER_PLATFORMS }} --file tools/docker/bake.hcl build
 
       - name: Publish docker images ${{ env.RENOVATE_VERSION }}
         if: false
