@@ -12,8 +12,8 @@ import { getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
-  allowedPipArguments,
   constraintLineRegex,
+  deprecatedAllowedPipArguments,
   getExecOptions,
 } from './common';
 
@@ -27,7 +27,7 @@ export function constructPipCompileCmd(
   if (headers?.groups) {
     logger.debug(`Found pip-compile header: ${headers[0]}`);
     for (const argument of split(headers.groups.arguments)) {
-      if (allowedPipArguments.includes(argument)) {
+      if (deprecatedAllowedPipArguments.includes(argument)) {
         args.push(argument);
       } else if (argument.startsWith('--output-file=')) {
         const file = upath.parse(outputFileName).base;
