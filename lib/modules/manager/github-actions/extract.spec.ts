@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
@@ -385,6 +386,49 @@ describe('modules/manager/github-actions/extract', () => {
             'actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # v2.1.0',
         },
       ]);
+    });
+
+    it('extracts actions with fqdn', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - name: "test1"
+                uses: https://github.com/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1
+              - name: "test2"
+                uses: https://code.forgejo.org/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
+              - name: "test3"
+                uses: https://code.domain.test/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
+
+          `,
+        'sample.yml',
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentDigest: '56337c425554a6be30cdef71bf441f15be286854',
+            currentValue: 'v3.1.1',
+            replaceString:
+              'https://github.com/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1',
+            datasource: 'github-tags',
+            registryUrls: ['https://github.com/'],
+          },
+          {
+            currentDigest: '56337c425554a6be30cdef71bf441f15be286854',
+            currentValue: 'v3.1.1',
+            replaceString:
+              'https://code.forgejo.org/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1',
+            datasource: 'gitea-tags',
+            registryUrls: ['https://code.forgejo.org/'],
+          },
+          {
+            skipReason: 'unsupported-url',
+          },
+        ],
+      });
+
+      expect(res!.deps[2]).not.toHaveProperty('registryUrls');
     });
 
     it('extracts multiple action runners from yaml configuration file', () => {
