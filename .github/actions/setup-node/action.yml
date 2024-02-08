@@ -29,7 +29,7 @@ runs:
         }}-${{
           inputs.node-version
         }}-${{
-          hashFiles('pnpm-lock.yaml')
+          hashFiles('pnpm-lock.yaml', 'package.json')
         }}' >> "$GITHUB_ENV"
 
     - name: Restore `node_modules`

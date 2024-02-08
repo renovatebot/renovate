@@ -31,7 +31,7 @@ const adapter: GithubGraphqlDatasourceAdapter<
   TestAdapterInput,
   TestAdapterOutput
 > = {
-  key: 'test-adapter',
+  key: '_test-namespace',
   query: `
     items {
       pageInfo {

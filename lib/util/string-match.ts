@@ -2,21 +2,31 @@ import is from '@sindresorhus/is';
 import { minimatch } from './minimatch';
 import { regEx } from './regex';
 
+export type StringMatchPredicate = (s: string) => boolean;
+
 export function isDockerDigest(input: string): boolean {
   return /^sha256:[a-f0-9]{64}$/i.test(input);
 }
 
-export function matchRegexOrMinimatch(input: string, pattern: string): boolean {
+export function makeRegexOrMinimatchPredicate(
+  pattern: string,
+): StringMatchPredicate | null {
   if (pattern.length > 2 && pattern.startsWith('/') && pattern.endsWith('/')) {
     try {
       const regex = regEx(pattern.slice(1, -1));
-      return regex.test(input);
+      return (x: string): boolean => regex.test(x);
     } catch (err) {
-      return false;
+      return null;
     }
   }
 
-  return minimatch(pattern, { dot: true }).match(input);
+  const mm = minimatch(pattern, { dot: true });
+  return (x: string): boolean => mm.match(x);
+}
+
+export function matchRegexOrMinimatch(input: string, pattern: string): boolean {
+  const predicate = makeRegexOrMinimatchPredicate(pattern);
+  return predicate ? predicate(input) : false;
 }
 
 export function anyMatchRegexOrMinimatch(
@@ -51,11 +61,9 @@ function parseConfigRegex(input: string): RegExp | null {
   return null;
 }
 
-type ConfigRegexPredicate = (s: string) => boolean;
-
 export function configRegexPredicate(
   input: string,
-): ConfigRegexPredicate | null {
+): StringMatchPredicate | null {
   if (isConfigRegex(input)) {
     const configRegex = parseConfigRegex(input);
     if (configRegex) {

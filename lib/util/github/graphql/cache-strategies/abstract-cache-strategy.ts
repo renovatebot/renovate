@@ -1,5 +1,6 @@
 import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
+import type { PackageCacheNamespace } from '../../../cache/package/types';
 import type {
   GithubDatasourceItem,
   GithubGraphqlCacheRecord,
@@ -51,7 +52,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   ): Promise<void>;
 
   constructor(
-    protected readonly cacheNs: string,
+    protected readonly cacheNs: PackageCacheNamespace,
     protected readonly cacheKey: string,
   ) {}
 

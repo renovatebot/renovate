@@ -1,3 +1,5 @@
+import type { PackageCacheNamespace } from '../../cache/package/types';
+
 export interface GithubDatasourceItem {
   version: string;
   releaseTimestamp: string;
@@ -13,7 +15,7 @@ export interface GithubGraphqlDatasourceAdapter<
   /**
    * Used for creating datasource-unique cache key
    */
-  key: string;
+  key: PackageCacheNamespace;
 
   /**
    * Used to define datasource-unique GraphQL query

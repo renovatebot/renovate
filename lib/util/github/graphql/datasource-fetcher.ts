@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as memCache from '../../cache/memory';
 import * as packageCache from '../../cache/package';
+import type { PackageCacheNamespace } from '../../cache/package/types';
 import type {
   GithubGraphqlResponse,
   GithubHttp,
@@ -84,7 +85,7 @@ export class GithubGraphqlDatasourceFetcher<
     this.baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
   }
 
-  private getCacheNs(): string {
+  private getCacheNs(): PackageCacheNamespace {
     return this.datasourceAdapter.key;
   }
 
