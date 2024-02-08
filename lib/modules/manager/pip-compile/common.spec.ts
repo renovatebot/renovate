@@ -78,13 +78,17 @@ describe('modules/manager/pip-compile/common', () => {
       },
     );
 
-    it('error when no source files passed as arguments', () => {
+    it('throws when no source files passed as arguments', () => {
       expect(() =>
         extractHeaderCommand(
           getCommandInHeader(`pip-compile --extra=color`),
           'reqs.txt',
         ),
       ).toThrow(/source/);
+    });
+
+    it('throws on malformed header', () => {
+      expect(() => extractHeaderCommand('Dd', 'reqs.txt')).toThrow(/extract/);
     });
 
     it('returned sourceFiles returns all source files', () => {
@@ -116,5 +120,14 @@ describe('modules/manager/pip-compile/common', () => {
         expect(sourceFiles).toEqual(['reqs.in']);
       },
     );
+
+    it('detects custom command', () => {
+      expect(
+        extractHeaderCommand(
+          getCommandInHeader(`./pip-compile-wrapper reqs.in`),
+          'reqs.txt',
+        ),
+      ).toHaveProperty('isCustomCommand', true);
+    });
   });
 });
