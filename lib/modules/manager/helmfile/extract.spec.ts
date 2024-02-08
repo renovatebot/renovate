@@ -337,7 +337,6 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/example',
-            registryUrls: ['ghcr.io/example/oci-repo'],
           },
           {
             currentValue: '3.3.0',
@@ -349,7 +348,6 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'url-example',
             datasource: 'docker',
             packageName: 'ghcr.io/example/oci-repo/url-example',
-            registryUrls: ['ghcr.io/example/oci-repo'],
           },
         ],
       });

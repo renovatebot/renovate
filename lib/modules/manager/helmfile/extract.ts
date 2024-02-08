@@ -141,7 +141,6 @@ export async function extractPackageFile(
       if (isOciUrl(dep.chart)) {
         res.datasource = DockerDatasource.id;
         res.packageName = repoName + '/' + depName;
-        res.registryUrls = [repoName];
       } else if (repository?.oci) {
         res.datasource = DockerDatasource.id;
         res.packageName = registryAliases[repoName] + '/' + depName;
@@ -154,7 +153,10 @@ export async function extractPackageFile(
       }
 
       // Skip in case we cannot locate the registry
-      if (is.emptyArray(res.registryUrls)) {
+      if (
+        res.datasource !== DockerDatasource.id &&
+        is.emptyArray(res.registryUrls)
+      ) {
         res.skipReason = 'unknown-registry';
       }
 
