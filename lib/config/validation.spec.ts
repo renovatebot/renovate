@@ -216,12 +216,12 @@ describe('config/validation', () => {
     });
 
     it('catches invalid env vars', async () => {
-      GlobalConfig.set({ allowedEnv: ['SOME_VAR', 'SOME_OTHER_VAR'] });
+      GlobalConfig.set({ allowedEnv: ['SOME*'] });
       const config = {
         env: {
           randomKey: '',
           SOME_VAR: 'some_value',
-          SOME_OTHER_VAR: 10 as never,
+          SOME_OTHER_VAR: 10,
         },
         npm: {
           env: {
@@ -239,6 +239,7 @@ describe('config/validation', () => {
       };
       const { errors, warnings } = await configValidation.validateConfig(
         false,
+        // @ts-expect-error: testing invalid values in env object
         config,
       );
       expect(warnings).toMatchObject([
@@ -248,7 +249,7 @@ describe('config/validation', () => {
         },
         {
           message:
-            'Invalid enviroment variable name `randomKey` found in `env`. Allowed values are "SOME_VAR", "SOME_OTHER_VAR".',
+            'Invalid enviroment variable name `randomKey` found in `env`. Allowed values are "SOME*".',
         },
       ]);
       expect(errors).toMatchObject([

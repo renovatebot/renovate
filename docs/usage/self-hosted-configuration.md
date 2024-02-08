@@ -73,7 +73,8 @@ Examples:
 ```json
 {
   "env": {
-    "SOME_ENV_VARIABLE": "some_value"
+    "SOME_ENV_VARIABLE": "some_value",
+    "EXTRA_ENV_NAME": "value"
   }
 }
 ```
@@ -82,7 +83,7 @@ Or with custom `allowedEnv`:
 
 ```js title="config.js"
 module.exports = {
-  allowedEnv: ['SOME_ENV_VARIABLE'],
+  allowedEnv: ['SOME_ENV_*', 'EXTRA_ENV_NAME'],
 };
 ```
 
