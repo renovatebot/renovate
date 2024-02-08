@@ -64,6 +64,20 @@ describe('modules/manager/pip-compile/common', () => {
       },
     );
 
+    it.each(['--output-file', '--index-url'])(
+      'throws on duplicate options',
+      (argument: string) => {
+        expect(() =>
+          extractHeaderCommand(
+            getCommandInHeader(
+              `pip-compile ${argument}=xxx ${argument}=xxx reqs.in`,
+            ),
+            'reqs.txt',
+          ),
+        ).toThrow(/multiple/);
+      },
+    );
+
     it('error when no source files passed as arguments', () => {
       expect(() =>
         extractHeaderCommand(

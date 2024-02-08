@@ -150,8 +150,14 @@ export function extractHeaderCommand(
         result.constraintsFiles = result.constraintsFiles ?? [];
         result.constraintsFiles.push(value);
       } else if (option === '--output-file') {
+        if (result.outputFile) {
+          throw new Error('Cannot use multiple --output-file options');
+        }
         result.outputFile = value;
       } else if (option === '--index-url') {
+        if (result.indexUrl) {
+          throw new Error('Cannot use multiple --index-url options');
+        }
         result.indexUrl = value;
         // TODO: add to secrets? next PR
       } else {
