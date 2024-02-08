@@ -548,8 +548,8 @@ importers:
         specifier: 16.8.1
         version: 16.8.1
       husky:
-        specifier: 9.0.8
-        version: 9.0.8
+        specifier: 9.0.9
+        version: 9.0.9
       jest:
         specifier: 29.7.0
         version: 29.7.0(@types/node@18.19.14)(ts-node@10.9.2)
@@ -6663,8 +6663,8 @@ packages:
       ms: 2.1.3
     dev: false
 
-  /husky@9.0.8:
-    resolution: {integrity: sha512-/f3Oj+419kf2RkchD5GpFTPj8yAeMYuSs0vB+cgdi8pDxydI8zCFlK/kVQOCqAujahfW6fDBb7t/ZWxTfevOpA==}
+  /husky@9.0.9:
+    resolution: {integrity: sha512-eW92PRr1XPKDWd7/iM2JvAl9gEKK3TF69yvbllQtKSYBw+Wtoi+P38NqH1Z7++sSd80FBkFagBFJkoQvMhCnGw==}
     engines: {node: '>=18'}
     hasBin: true
     dev: true
