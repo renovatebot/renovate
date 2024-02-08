@@ -41,7 +41,7 @@ export function getRemappedLevel(msg: string): LogLevelString | null {
   return null;
 }
 
-export function resetMatcherCache(): void {
+function resetMatcherCache(): void {
   matcherCache = new WeakMap();
 }
 
@@ -53,7 +53,7 @@ export function setGlobalLogLevelRemaps(
 
 export function resetGlobalLogLevelRemaps(): void {
   globalRemaps = undefined;
-  matcherCache = new WeakMap();
+  resetMatcherCache();
 }
 
 export function setRepositoryLogLevelRemaps(
@@ -64,5 +64,5 @@ export function setRepositoryLogLevelRemaps(
 
 export function resetRepositoryLogLevelRemaps(): void {
   repositoryRemaps = undefined;
-  matcherCache = new WeakMap();
+  resetMatcherCache();
 }
