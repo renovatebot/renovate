@@ -167,11 +167,30 @@ describe('modules/manager/kustomize/extract', () => {
         currentValue: '29.6.0',
         registryUrls: [registryUrl],
         datasource: HelmDatasource.id,
+        depType: 'HelmChart',
       };
       const pkg = extractHelmChart({
         name: sample.depName,
         version: sample.currentValue,
         repo: registryUrl,
+      });
+      expect(pkg).toEqual(sample);
+    });
+
+    it('should correctly extract an OCI chart', () => {
+      const sample = {
+        depName: 'redis',
+        packageName: 'registry-1.docker.io/bitnamicharts/redis',
+        currentValue: '18.12.1',
+        registryUrls: ['https://registry-1.docker.io/bitnamicharts'],
+        datasource: DockerDatasource.id,
+        pinDigests: false,
+        depType: 'OCIChart',
+      };
+      const pkg = extractHelmChart({
+        name: sample.depName,
+        version: sample.currentValue,
+        repo: 'oci://registry-1.docker.io/bitnamicharts',
       });
       expect(pkg).toEqual(sample);
     });
@@ -447,7 +466,17 @@ describe('modules/manager/kustomize/extract', () => {
             depType: 'HelmChart',
             depName: 'minecraft',
             currentValue: '3.1.3',
+            datasource: 'helm',
             registryUrls: ['https://itzg.github.io/minecraft-server-charts'],
+          },
+          {
+            depType: 'OCIChart',
+            depName: 'redis',
+            currentValue: '18.12.1',
+            datasource: 'docker',
+            packageName: 'registry-1.docker.io/bitnamicharts/redis',
+            pinDigests: false,
+            registryUrls: ['https://registry-1.docker.io/bitnamicharts'],
           },
         ],
       });

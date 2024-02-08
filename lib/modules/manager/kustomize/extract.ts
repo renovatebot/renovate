@@ -8,6 +8,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { splitImageParts } from '../dockerfile/extract';
+import { isOCIRegistry } from '../helmv3/utils';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { HelmChart, Image, Kustomize } from './types';
 
@@ -143,13 +144,26 @@ export function extractHelmChart(
   if (!helmChart.name) {
     return null;
   }
-
-  return {
+  const res: PackageDependency = {
     depName: helmChart.name,
     currentValue: helmChart.version,
     registryUrls: [helmChart.repo],
     datasource: HelmDatasource.id,
+    depType: 'HelmChart',
   };
+
+  if (isOCIRegistry(helmChart.repo)) {
+    res.datasource = DockerDatasource.id;
+    const repoUrl = helmChart.repo.replace('oci://', '');
+    res.packageName = `${repoUrl}/${helmChart.name}`;
+    res.registryUrls = [`https://${repoUrl}`];
+    // https://github.com/helm/helm/issues/10312
+    // https://github.com/helm/helm/issues/10678
+    res.pinDigests = false;
+    res.depType = 'OCIChart';
+  }
+
+  return res;
 }
 
 export function parseKustomize(
@@ -238,10 +252,7 @@ export function extractPackageFile(
   for (const helmChart of coerceArray(pkg.helmCharts)) {
     const dep = extractHelmChart(helmChart);
     if (dep) {
-      deps.push({
-        ...dep,
-        depType: 'HelmChart',
-      });
+      deps.push(dep);
     }
   }
 
