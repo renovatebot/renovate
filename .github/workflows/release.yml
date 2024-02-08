@@ -34,8 +34,23 @@ permissions:
   id-token: write
 
 jobs:
+  mutex:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # pushes a branch
+
+    steps:
+      - name: Set up mutex
+        uses: ben-z/gh-action-mutex@v1.0-alpha-8
+        with:
+          branch: mutex-rel
+
   release-npm:
     runs-on: ubuntu-latest
+    needs:
+      - mutex
+
     steps:
       - name: Prepare env
         run: |
