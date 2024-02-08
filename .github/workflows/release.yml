@@ -34,8 +34,23 @@ permissions:
   id-token: write
 
 jobs:
+  mutex:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # pushes a branch
+
+    steps:
+      - name: Set up mutex
+        uses: ben-z/gh-action-mutex@v1.0-alpha-8
+        with:
+          branch: mutex-rel
+
   release-npm:
     runs-on: ubuntu-latest
+    needs:
+      - mutex
+
     steps:
       - name: Prepare env
         run: |
@@ -68,7 +83,7 @@ jobs:
           git config --global user.name  'Renovate Bot'
 
       - name: Installing dependencies
-        uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4 # v2.9.0
+        uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
         with:
           timeout_minutes: 10
           max_attempts: 3
@@ -126,7 +141,11 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Build docker images ${{ env.RENOVATE_VERSION }}
-        run: docker buildx bake --set settings.platform=${{ env.DOCKER_PLATFORMS }} --file tools/docker/bake.hcl build
+        uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
+        with:
+          timeout_minutes: 30
+          max_attempts: 3
+          command: docker buildx bake --set settings.platform=${{ env.DOCKER_PLATFORMS }} --file tools/docker/bake.hcl build
 
       - name: Publish docker images ${{ env.RENOVATE_VERSION }}
         if: false

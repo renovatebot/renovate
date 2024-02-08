@@ -3,10 +3,13 @@ import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { Decorator, decorate } from '../../decorator';
-import type { DecoratorCachedRecord } from './types';
+import type { DecoratorCachedRecord, PackageCacheNamespace } from './types';
 import * as packageCache from '.';
 
 type HashFunction<T extends any[] = any[]> = (...args: T) => string;
+type NamespaceFunction<T extends any[] = any[]> = (
+  ...args: T
+) => PackageCacheNamespace;
 type BooleanFunction<T extends any[] = any[]> = (...args: T) => boolean;
 
 /**
@@ -17,7 +20,7 @@ interface CacheParameters {
    * The cache namespace
    * Either a string or a hash function that generates a string
    */
-  namespace: string | HashFunction;
+  namespace: PackageCacheNamespace | NamespaceFunction;
 
   /**
    * The cache key
@@ -51,7 +54,7 @@ export function cache<T>({
       return callback();
     }
 
-    let finalNamespace: string | undefined;
+    let finalNamespace: PackageCacheNamespace | undefined;
     if (is.string(namespace)) {
       finalNamespace = namespace;
     } else if (is.function_(namespace)) {

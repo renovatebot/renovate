@@ -4,9 +4,6 @@ variable "OWNER" {
 variable "FILE" {
   default = "renovate"
 }
-variable "TAG" {
-  default = "latest"
-}
 variable "RENOVATE_VERSION" {
   default = "unknown"
 }
@@ -53,22 +50,15 @@ target "settings" {
     RENOVATE_VERSION    = "${RENOVATE_VERSION}"
     GITHUB_TOKEN        = "${GITHUB_TOKEN}"
   }
-  tags = [
-    "ghcr.io/${OWNER}/${FILE}",
-    "ghcr.io/${OWNER}/${FILE}:${TAG}",
-  ]
 }
 
 target "slim" {
   cache-from = [
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}",
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${TAG}",
+    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}",
   ]
   tags = [
-    "ghcr.io/${OWNER}/${FILE}",
-    "ghcr.io/${OWNER}/${FILE}:${TAG}",
-    "${FILE}/${FILE}",
-    "${FILE}/${FILE}:${TAG}",
+    "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}",
+    "${FILE}/${FILE}:${RENOVATE_VERSION}",
   ]
 }
 
@@ -77,14 +67,11 @@ target "full" {
     BASE_IMAGE_TYPE = "full"
   }
   cache-from = [
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${TAG}-full",
+    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}-full",
   ]
    tags = [
-    "ghcr.io/${OWNER}/${FILE}:full",
-    "ghcr.io/${OWNER}/${FILE}:${TAG}-full",
-    "${FILE}/${FILE}:full",
-    "${FILE}/${FILE}:${TAG}-full",
+    "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}-full",
+    "${FILE}/${FILE}:${RENOVATE_VERSION}-full",
   ]
 }
 
@@ -100,8 +87,7 @@ target "push-cache-slim" {
     "slim",
   ]
   tags = [
-    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-${TAG}",
-    "ghcr.io/${OWNER}/docker-build-cache:${FILE}",
+    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}",
   ]
 }
 
@@ -112,8 +98,7 @@ target "push-cache-full" {
     "full",
   ]
   tags = [
-    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-${TAG}-full",
-    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
+    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}-full",
   ]
 }
 
