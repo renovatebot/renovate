@@ -1,6 +1,7 @@
 import { ZodError, z } from 'zod';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { cache } from '../../../util/cache/package/decorator';
 import type { HttpError } from '../../../util/http';
 import { Result } from '../../../util/result';
 import { Datasource } from '../datasource';
@@ -88,6 +89,11 @@ export class CdnJsDatasource extends Datasource {
     return val;
   }
 
+  @cache({
+    namespace: `datasource-${CdnJsDatasource.id}-sri`,
+    key: ({ registryUrl, packageName }: DigestConfig, newValue: string) =>
+      `${registryUrl}:${packageName}:${newValue}}`,
+  })
   override async getDigest(
     { packageName, registryUrl }: DigestConfig,
     newValue: string,
