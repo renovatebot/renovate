@@ -3,6 +3,7 @@ import { logger } from '../lib/logger';
 import { generateDocs } from './docs';
 import { parseVersion } from './utils';
 import { bake } from './utils/docker';
+import { exec } from './utils/exec';
 
 process.on('unhandledRejection', (err) => {
   // Will print "unhandledRejection err is not defined"
@@ -29,6 +30,22 @@ void (async () => {
   await program.parseAsync();
   const opts = program.opts();
   logger.info(`Preparing v${opts.version} ...`);
+  build();
   await generateDocs();
   await bake('build', opts);
 })();
+
+function build(): void {
+  logger.info('Building ...');
+  const res = exec('pnpm', ['build']);
+
+  if (res.signal) {
+    logger.error(`Signal received: ${res.signal}`);
+    process.exit(-1);
+  } else if (res.status && res.status !== 0) {
+    logger.error(`Error occured:\n${res.stderr || res.stdout}`);
+    process.exit(res.status);
+  } else {
+    logger.debug(`Build succeeded:\n${res.stdout || res.stderr}`);
+  }
+}
