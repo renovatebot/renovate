@@ -1,4 +1,4 @@
-import { getPkgReleases } from '..';
+import { getDigest, getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
@@ -8,6 +8,9 @@ const baseUrl = 'https://api.cdnjs.com/';
 
 const pathFor = (s: string): string =>
   `/libraries/${s.split('/').shift()}?fields=homepage,repository,versions`;
+
+const pathForDigest = (s: string, version: string): string =>
+  `/libraries/${s.split('/').shift()}/${version}?fields=sri`;
 
 describe('modules/datasource/cdnjs/index', () => {
   describe('getReleases', () => {
@@ -104,6 +107,42 @@ describe('modules/datasource/cdnjs/index', () => {
         packageName: 'd3-force/d3-force.js',
       });
       expect(res).toMatchSnapshot();
+    });
+  });
+
+  describe('getDigest', () => {
+    it('returs null for no result', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathForDigest('foo/bar', '1.2.0'))
+        .reply(200, '{}');
+
+      const res = await getDigest(
+        {
+          datasource: CdnJsDatasource.id,
+          packageName: 'foo/bar',
+        },
+        '1.2.0',
+      );
+      expect(res).toBeNull();
+    });
+
+    it('returns digest', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathForDigest('bootstrap/js/bootstrap.min.js', '5.2.3'))
+        .reply(200, Fixtures.get('sri.json'));
+
+      const res = await getDigest(
+        {
+          datasource: CdnJsDatasource.id,
+          packageName: 'bootstrap/js/bootstrap.min.js',
+        },
+        '5.2.3',
+      );
+      expect(res).toBe(
+        'sha512-1/RvZTcCDEUjY/CypiMz+iqqtaoQfAITmNSJY17Myp4Ms5mdxPS5UV7iOfdZoxcGhzFbOm6sntTKJppjvuhg4g==',
+      );
     });
   });
 });
