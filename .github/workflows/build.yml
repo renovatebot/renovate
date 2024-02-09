@@ -467,7 +467,9 @@ jobs:
         run: pnpm build
 
       - name: Build docker
-        run: pnpm build:docker build --tries=3 --debug
+        run: pnpm build:docker build --tries=3
+        env:
+          LOG_LEVEL: debug
 
       - name: Pack
         run: pnpm test-e2e:pack

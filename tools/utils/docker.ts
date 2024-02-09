@@ -13,7 +13,6 @@ export async function bake(
     args?: string[];
     delay?: string;
     exitOnError?: boolean;
-    debug?: boolean;
   },
   tries: number = 0,
 ): Promise<void> {
@@ -55,7 +54,7 @@ export async function bake(
         process.exit(result.status);
       }
     }
-  } else if (opts.debug) {
-    logger.debug(`${target} succeeded:\n${result.stdout}`);
+  } else {
+    logger.debug(`${target} succeeded:\n${result.stdout || result.stderr}`);
   }
 }

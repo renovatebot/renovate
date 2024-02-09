@@ -62,7 +62,6 @@ target "settings" {
 target "slim" {
   cache-from = [
     "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}",
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}",
   ]
   tags = [
     "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}",
@@ -75,8 +74,7 @@ target "full" {
     BASE_IMAGE_TYPE = "full"
   }
   cache-from = [
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}",
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}-full",
+    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
   ]
    tags = [
     "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}-full",
@@ -97,7 +95,6 @@ target "push-cache-slim" {
   ]
   tags = [
     "ghcr.io/${OWNER}/docker-build-cache:${FILE}",
-    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}",
   ]
 }
 
@@ -109,7 +106,6 @@ target "push-cache-full" {
   ]
   tags = [
     "ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
-    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}-full",
   ]
 }
 

@@ -60,7 +60,7 @@ CMD ["renovate"]
 
 ARG RENOVATE_VERSION
 
-COPY --from=build --chown=root:root ./ /usr/local/renovate/
+COPY --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
 # Compabillity, so `config.js` can access renovate and deps
 RUN set -ex; \

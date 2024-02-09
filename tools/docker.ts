@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { logger } from '../lib/logger';
 import { parsePositiveInt, parseVersion } from './utils';
 import { bake } from './utils/docker';
 
@@ -15,9 +16,8 @@ program
     'delay between tries for docker build (eg. 5s, 10m, 1h)',
     '30s',
   )
-  .option('-d, --debug', 'output docker build')
   .action(async (opts) => {
-    console.log('Building docker images ...');
+    logger.info('Building docker images ...');
     await bake('build', opts, opts.tries - 1);
   });
 
@@ -27,7 +27,7 @@ program
   .option('--platform <type>', 'docker platforms to build')
   .option('--version <version>', 'version to use as tag', parseVersion)
   .action(async (opts) => {
-    console.log('Publishing docker images ...');
+    logger.info('Publishing docker images ...');
     await bake('push', opts);
   });
 
