@@ -5,7 +5,12 @@ import type { HttpError } from '../../../util/http';
 import { Result } from '../../../util/result';
 import { Datasource } from '../datasource';
 import { ReleasesConfig } from '../schema';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
 
 const Homepage = z.string().optional().catch(undefined);
 
@@ -81,6 +86,22 @@ export class CdnJsDatasource extends Datasource {
     }
 
     return val;
+  }
+
+  override async getDigest(
+    { packageName, registryUrl }: DigestConfig,
+    newValue: string,
+  ): Promise<string | null> {
+    const [library] = packageName.split('/');
+    const assetName = packageName.replace(`${library}/`, '');
+
+    const url = `${registryUrl}libraries/${library}/${newValue}?fields=sri`;
+
+    const sri = (
+      await this.http.getJson<Record<'sri', Record<string, string>>>(url)
+    ).body.sri;
+
+    return sri?.[assetName] ?? null;
   }
 
   override handleHttpErrors(err: HttpError): void {
