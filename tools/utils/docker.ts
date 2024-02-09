@@ -44,7 +44,6 @@ export async function bake(
     file,
     '--metadata-file',
     metadataFile,
-    '--load',
   ];
 
   if (opts.platform) {
