@@ -467,7 +467,7 @@ jobs:
         run: pnpm build
 
       - name: Build docker
-        run: pnpm build:docker build --platform=linux/amd64,linux/arm64 --tries=3 --debug
+        run: pnpm build:docker build --tries=3 --debug
 
       - name: Pack
         run: pnpm test-e2e:pack
@@ -561,6 +561,11 @@ jobs:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
           show-progress: false
           filter: blob:none # we don't need all blobs, only the full tree
+
+      - name: docker-config
+        uses: containerbase/internal-tools@e7bd2e8cedd99c9b24982865534cb7c9bf88620b # v3.0.55
+        with:
+          command: docker-config
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
