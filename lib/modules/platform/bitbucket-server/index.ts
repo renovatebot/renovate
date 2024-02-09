@@ -584,6 +584,15 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
+  await retry(updatePRAndAddReviewers, [prNo, reviewers], 3, [
+    REPOSITORY_CHANGED,
+  ]);
+}
+
+async function updatePRAndAddReviewers(
+  prNo: number,
+  reviewers: string[],
+): Promise<void> {
   try {
     const pr = await getPr(prNo);
     if (!pr) {
@@ -620,6 +629,33 @@ export async function addReviewers(
       throw new Error(REPOSITORY_CHANGED);
     } else {
       throw err;
+    }
+  }
+}
+
+async function retry<T extends (...arg0: any[]) => any>(
+  fn: T,
+  args: Parameters<T>,
+  maxTries: number,
+  retryErrorMessages: string[] = [],
+  retryCount = 0,
+): Promise<Awaited<ReturnType<T>>> {
+  try {
+    const result = await fn(...args);
+    return result;
+  } catch (e) {
+    if (
+      retryErrorMessages.length === 0 ||
+      retryErrorMessages.indexOf(e.message) !== -1
+    ) {
+      if (retryCount === maxTries - 1) {
+        logger.debug(`All ${maxTries} retry attempts exhausted`);
+        throw e;
+      }
+      return retry(fn, args, maxTries, retryErrorMessages, retryCount + 1);
+    } else {
+      logger.debug(`Error not marked for retry`);
+      throw e;
     }
   }
 }
