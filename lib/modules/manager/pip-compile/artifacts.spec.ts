@@ -329,4 +329,27 @@ describe('modules/manager/pip-compile/artifacts', () => {
       );
     });
   });
+
+  describe('extractResolver()', () => {
+    it.each([
+      ['--resolver=backtracking', 'backtracking'],
+      ['--resolver=legacy', 'legacy'],
+    ])(
+      'returns expected value for supported %s resolver',
+      (argument: string, expected: string) => {
+        expect(extractResolver(argument)).toBe(expected);
+      },
+    );
+
+    it.each(['--resolver=foo', '--resolver='])(
+      'returns null for unsupported %s resolver',
+      (argument: string) => {
+        expect(extractResolver(argument)).toBeNull();
+        expect(logger.warn).toHaveBeenCalledWith(
+          { argument },
+          'pip-compile was previously executed with an unexpected `--resolver` value',
+        );
+      },
+    );
+  });
 });
