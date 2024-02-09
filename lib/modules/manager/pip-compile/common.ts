@@ -54,7 +54,7 @@ export async function getExecOptions(
     ],
     extraEnv: {
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
-      ...extraEnv
+      ...extraEnv,
     },
   };
   return execOptions;

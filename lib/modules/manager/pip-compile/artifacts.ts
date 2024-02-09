@@ -152,7 +152,11 @@ export async function updateArtifacts({
       outputFileName,
       registryUrlVars.haveCredentials,
     );
-    const execOptions = await getExecOptions(config, inputFileName, registryUrlVars.environmentVars);
+    const execOptions = await getExecOptions(
+      config,
+      inputFileName,
+      registryUrlVars.environmentVars,
+    );
     logger.trace({ cmd }, 'pip-compile command');
     logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
     await exec(cmd, execOptions);
