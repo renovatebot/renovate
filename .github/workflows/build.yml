@@ -466,6 +466,11 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Build docker
+        run: pnpm build:docker build --tries=3
+        env:
+          LOG_LEVEL: debug
+
       - name: Pack
         run: pnpm test-e2e:pack
 
@@ -550,6 +555,7 @@ jobs:
       issues: write
       pull-requests: write
       id-token: write
+      packages: write
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -558,11 +564,23 @@ jobs:
           show-progress: false
           filter: blob:none # we don't need all blobs, only the full tree
 
+      - name: docker-config
+        uses: containerbase/internal-tools@e7bd2e8cedd99c9b24982865534cb7c9bf88620b # v3.0.55
+        with:
+          command: docker-config
+
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+
+      - uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
+
+      - name: Docker registry login
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Check dry run
         run: |
@@ -574,13 +592,9 @@ jobs:
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 
-      # TODO: move to semantic-release prepare
-      - name: Build
-        run: pnpm build
-
       - name: semantic-release
         run: |
           pnpm semantic-release --dry-run ${{env.DRY_RUN}}
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # TODO: use action token?
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

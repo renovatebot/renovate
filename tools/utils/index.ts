@@ -65,3 +65,35 @@ export function readFile(file: string): Promise<string> {
   }
   return Promise.resolve('');
 }
+
+/**
+ *
+ * @param  val
+ */
+export function parsePositiveInt(val: string | undefined): number {
+  if (!val) {
+    return 0;
+  }
+  const r = Number.parseInt(val, 10);
+  if (!Number.isFinite(r) || r < 0) {
+    throw new Error(`Invalid number: ${val}`);
+  }
+
+  return r;
+}
+
+/**
+ *
+ * @param val
+ */
+export function parseVersion(val: string | undefined): string | undefined {
+  if (!val) {
+    return val;
+  }
+
+  if (!/^\d+\.\d+\.\d+(?:-.+)?$/.test(val)) {
+    throw new Error(`Invalid version: ${val}`);
+  }
+
+  return val;
+}
