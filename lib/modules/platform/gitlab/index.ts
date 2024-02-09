@@ -808,12 +808,10 @@ export async function updatePr({
     body.target_branch = targetBranch;
   }
 
-  // Add new labels to the PR
   if (addLabels) {
     body.add_labels = addLabels;
   }
 
-  // Remove old labels from the PR
   if (removeLabels) {
     body.remove_labels = removeLabels;
   }
