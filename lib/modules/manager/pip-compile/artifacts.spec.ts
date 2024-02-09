@@ -382,12 +382,11 @@ describe('modules/manager/pip-compile/artifacts', () => {
       ).toThrow(/supported/);
     });
 
-    it('throws on custom command when strict', () => {
+    it('throws on custom command', () => {
       expect(() =>
         constructPipCompileCmd(
           Fixtures.get('requirementsCustomCommand.txt'),
           'subdir/requirements.txt',
-          true,
         ),
       ).toThrow(/custom/);
     });
