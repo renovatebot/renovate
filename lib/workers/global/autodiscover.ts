@@ -3,7 +3,7 @@ import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
 import { minimatchFilter } from '../../util/minimatch';
-import { configRegexPredicate, isConfigRegex } from '../../util/regex';
+import { configRegexPredicate, isConfigRegex } from '../../util/string-match';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {

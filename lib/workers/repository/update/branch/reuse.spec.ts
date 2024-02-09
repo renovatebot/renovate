@@ -162,9 +162,9 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(res.reuseExistingBranch).toBeFalse();
     });
 
-    it('returns false if getRepoForceRebase and stale', async () => {
+    it('returns false if getBranchForceRebase and stale', async () => {
       config.rebaseWhen = 'auto';
-      platform.getRepoForceRebase.mockResolvedValueOnce(true);
+      platform.getBranchForceRebase.mockResolvedValueOnce(true);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);

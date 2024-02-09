@@ -26,11 +26,10 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 env:
-  # Currently no way to detect automatically (#8153)
-  DEFAULT_BRANCH: main
+  DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
   NODE_VERSION: 18
   DRY_RUN: true
   SPARSE_CHECKOUT: |-
@@ -97,6 +96,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          filter: blob:none # we don't need all blobs
 
       - name: Calculate matrix for `node_modules` prefetch
         uses: ./.github/actions/calculate-prefetch-matrix
@@ -181,7 +181,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
+        uses: actions/cache/restore@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -200,7 +200,7 @@ jobs:
 
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
+        uses: actions/cache/save@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -224,7 +224,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
+        uses: actions/cache/restore@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -243,7 +243,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
+        uses: actions/cache/save@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -264,7 +264,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@455b6612a7b7a80f28be9e019b70abdd11696e4e # v14.0.0
+        uses: DavidAnson/markdownlint-cli2-action@510b996878fc0d1a46c8a04ec86b06dbfba09de7 # v15.0.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
@@ -328,7 +328,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache jest
-        uses: actions/cache@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
+        uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
         with:
           path: .cache/jest
           key: |
@@ -391,7 +391,7 @@ jobs:
           path: coverage
 
       - name: Codecov
-        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
+        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
         with:
           directory: coverage/lcov
 
@@ -466,6 +466,11 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Build docker
+        run: pnpm build:docker build --tries=3
+        env:
+          LOG_LEVEL: debug
+
       - name: Pack
         run: pnpm test-e2e:pack
 
@@ -511,7 +516,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Setup Node.js
-        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -544,22 +549,38 @@ jobs:
 
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     permissions:
       contents: write
       issues: write
       pull-requests: write
+      id-token: write
+      packages: write
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
+          show-progress: false
+          filter: blob:none # we don't need all blobs, only the full tree
+
+      - name: docker-config
+        uses: containerbase/internal-tools@e7bd2e8cedd99c9b24982865534cb7c9bf88620b # v3.0.55
+        with:
+          command: docker-config
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+
+      - uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
+
+      - name: Docker registry login
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Check dry run
         run: |
@@ -573,9 +594,8 @@ jobs:
 
       - name: semantic-release
         run: |
-          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
           pnpm semantic-release --dry-run ${{env.DRY_RUN}}
-          git checkout -- .npmrc
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # TODO: use action token?
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          LOG_LEVEL: debug

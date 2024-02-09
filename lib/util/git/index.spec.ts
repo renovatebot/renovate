@@ -1132,4 +1132,21 @@ describe('util/git/index', () => {
       expect(sha).toBe(git.getBranchCommit(defaultBranch));
     });
   });
+
+  describe('syncGit()', () => {
+    it('should clone a specified base branch', async () => {
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ baseBranches: ['develop'], localDir: tmpDir.path });
+      await git.initRepo({
+        url: origin.path,
+        defaultBranch: 'develop',
+      });
+      await git.syncGit();
+      const tmpGit = Git(tmpDir.path);
+      const branch = (
+        await tmpGit.raw(['rev-parse', '--abbrev-ref', 'HEAD'])
+      ).trim();
+      expect(branch).toBe('develop');
+    });
+  });
 });

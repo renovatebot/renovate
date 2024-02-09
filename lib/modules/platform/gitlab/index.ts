@@ -392,8 +392,14 @@ export async function initRepo({
   return repoConfig;
 }
 
-export function getRepoForceRebase(): Promise<boolean> {
-  return Promise.resolve(config?.mergeMethod !== 'merge');
+export function getBranchForceRebase(): Promise<boolean> {
+  const forceRebase = config?.mergeMethod !== 'merge';
+  if (forceRebase) {
+    logger.once.debug(
+      `mergeMethod is ${config.mergeMethod} so PRs will be kept up-to-date with base branch`,
+    );
+  }
+  return Promise.resolve(forceRebase);
 }
 
 type BranchState =
