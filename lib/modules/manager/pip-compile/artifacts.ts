@@ -66,7 +66,8 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const outputFileName = inputFileName.replace(regEx(/(\.in)?$/), '.txt');
   config.lockFiles = [outputFileName];
-  // TODO: remove above line and use config.lockFiles directly in the next PR
+  // TODO: remove above and below line and use config.lockFiles directly in the next PR
+  // istanbul ignore if
   if (!config.lockFiles) {
     logger.warn(
       { packageFileName: inputFileName },
