@@ -919,7 +919,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   });
 
   users.forEach((u) => {
-    let reviewer = u;
+    let reviewer = u.replace(requiredReviewerPrefix, '');
     if (validReviewers.indexOf(reviewer) == -1) {
       logger.warn(`${reviewer} is neither an Azure DevOps Team nor a user associated with a Team`);
     }
