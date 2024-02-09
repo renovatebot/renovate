@@ -1181,7 +1181,7 @@ describe('config/validation', () => {
     it('validates boolean type options', async () => {
       const config = {
         unicodeEmoji: false,
-        detectGlobalManagerConfig: 'invalid-type' as never,
+        detectGlobalManagerConfig: 'invalid-type',
       };
       const { warnings } = await configValidation.validateConfig(true, config);
       expect(warnings).toMatchObject([
@@ -1197,7 +1197,7 @@ describe('config/validation', () => {
     it('validates integer type options', async () => {
       const config = {
         prCommitsPerRunLimit: 2,
-        gitTimeout: 'invalid-type' as never,
+        gitTimeout: 'invalid-type',
       };
       const { warnings } = await configValidation.validateConfig(true, config);
       expect(warnings).toMatchObject([
@@ -1213,10 +1213,14 @@ describe('config/validation', () => {
     it('validates array type options', async () => {
       const config = {
         allowedPostUpgradeCommands: ['cmd'],
-        checkedBranches: 'invalid-type' as never,
+        checkedBranches: 'invalid-type',
         gitNoVerify: ['invalid'],
       };
-      const { warnings } = await configValidation.validateConfig(true, config);
+      const { warnings } = await configValidation.validateConfig(
+        true,
+        // @ts-expect-error: contains invalid values
+        config,
+      );
       expect(warnings).toMatchObject([
         {
           message:
@@ -1238,12 +1242,16 @@ describe('config/validation', () => {
           help: 'https://github.com/renovatebot/renovate/discussions',
           homepage: 'https://github.com/renovatebot/renovate',
         },
-        secrets: 'invalid-type' as never,
+        secrets: 'invalid-type',
         cacheTtlOverride: {
-          someField: false as never,
+          someField: false,
         },
       };
-      const { warnings } = await configValidation.validateConfig(true, config);
+      const { warnings } = await configValidation.validateConfig(
+        true,
+        // @ts-expect-error: contains invalid values
+        config,
+      );
       expect(warnings).toMatchObject([
         {
           message: 'Configuration option `secrets` should be a JSON object.',
