@@ -20,15 +20,14 @@ const program = new Command('pnpm release:prepare')
     'delay between tries for docker build (eg. 5s, 10m, 1h)',
     '30s',
   )
-  .option('--exit-on-error [boolean]', 'exit on docker error', (s) =>
+  .option('--exit-on-error <boolean>', 'exit on docker error', (s) =>
     s ? s !== 'false' : undefined,
-  )
-  .option('-d, --debug', 'output docker build');
+  );
 
 void (async () => {
   await program.parseAsync();
   const opts = program.opts();
   logger.info(`Preparing v${opts.version} ...`);
   await generateDocs();
-  await bake('build', opts, opts.tries);
+  await bake('build', opts);
 })();

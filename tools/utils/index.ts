@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { SemVer } from 'semver';
 import { logger } from '../../lib/logger';
 
 export const newFiles = new Set();
@@ -86,14 +87,10 @@ export function parsePositiveInt(val: string | undefined): number {
  *
  * @param val
  */
-export function parseVersion(val: string | undefined): string | undefined {
+export function parseVersion(val: string | undefined): SemVer | undefined {
   if (!val) {
-    return val;
+    return undefined;
   }
-
-  if (!/^\d+\.\d+\.\d+(?:-.+)?$/.test(val)) {
-    throw new Error(`Invalid version: ${val}`);
-  }
-
-  return val;
+  // can throw
+  return new SemVer(val);
 }

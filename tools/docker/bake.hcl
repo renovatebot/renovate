@@ -7,6 +7,12 @@ variable "FILE" {
 variable "RENOVATE_VERSION" {
   default = "unknown"
 }
+variable "RENOVATE_MAJOR_VERSION" {
+  default = ""
+}
+variable "RENOVATE_MAJOR_MINOR_VERSION" {
+  default = ""
+}
 
 variable "APT_HTTP_PROXY" {
   default = ""
@@ -64,8 +70,24 @@ target "slim" {
     "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}",
   ]
   tags = [
+    "ghcr.io/${OWNER}/${FILE}",
     "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}",
+    "${FILE}/${FILE}",
     "${FILE}/${FILE}:${RENOVATE_VERSION}",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_VERSION}": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}": "",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_VERSION}": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}": "",
+
+    // TODO: legacy, remove on next major
+    "ghcr.io/${OWNER}/${FILE}-slim",
+    "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}-slim",
+    "${FILE}/${FILE}-slim",
+    "${FILE}/${FILE}:${RENOVATE_VERSION}-slim",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_VERSION}-slim": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}-slim": "",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_VERSION}-slim": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}-slim": "",
   ]
 }
 
@@ -78,7 +100,13 @@ target "full" {
   ]
    tags = [
     "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}-full",
+    "ghcr.io/${OWNER}/${FILE}:full",
+    "${FILE}/${FILE}:full",
     "${FILE}/${FILE}:${RENOVATE_VERSION}-full",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_VERSION}-full": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}-full": "",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_VERSION}-full": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}-full": "",
   ]
 }
 

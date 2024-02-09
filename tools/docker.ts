@@ -18,7 +18,7 @@ program
   )
   .action(async (opts) => {
     logger.info('Building docker images ...');
-    await bake('build', opts, opts.tries - 1);
+    await bake('build', opts);
   });
 
 program
