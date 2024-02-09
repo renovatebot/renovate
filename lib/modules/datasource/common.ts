@@ -175,7 +175,9 @@ export function applyConstraintsFiltering<
         continue;
       }
 
-      const constraint = releaseConstraints[name];
+      const constraint = releaseConstraints[name]?.filter((releaseConstraint) =>
+        versioning.isValid(releaseConstraint),
+      );
       if (!is.nonEmptyArray(constraint)) {
         // A release with no constraints is OK
         continue;
