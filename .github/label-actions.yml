@@ -64,6 +64,13 @@
 
     If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
 
+    Add steps how to sufficiently enable logging.
+
+    Add steps how to save the log file during a CI run.
+
+    Add steps how to examine / post ndjson output (filetype is kind of exotic).
+    @viceice said we prefer plain JSON?
+
     </details>
 
 
