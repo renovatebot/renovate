@@ -26,11 +26,11 @@ void (async () => {
 
   if (meta?.['push-slim']?.['containerimage.digest']) {
     sign(
-      `ghcr.io/${process.env.OWNER}/${process.env.FILE}${meta['push-slim']['containerimage.digest']}`,
+      `ghcr.io/renovatebot/renovate${meta['push-slim']['containerimage.digest']}`,
       opts,
     );
     sign(
-      `${process.env.FILE}/${process.env.FILE}${meta['push-slim']['containerimage.digest']}`,
+      `renovate/renovate${meta['push-slim']['containerimage.digest']}`,
       opts,
     );
   } else {
@@ -39,11 +39,11 @@ void (async () => {
 
   if (meta?.['push-full']?.['containerimage.digest']) {
     sign(
-      `ghcr.io/${process.env.OWNER}/${process.env.FILE}@${meta['push-full']['containerimage.digest']}`,
+      `ghcr.io/renovatebot/renovate@${meta['push-full']['containerimage.digest']}`,
       opts,
     );
     sign(
-      `${process.env.FILE}/${process.env.FILE}@${meta['push-full']['containerimage.digest']}`,
+      `renovate/renovate@${meta['push-full']['containerimage.digest']}`,
       opts,
     );
   } else {
