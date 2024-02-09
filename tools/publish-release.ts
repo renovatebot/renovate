@@ -24,25 +24,29 @@ void (async () => {
   logger.info(`Publishing v${opts.version}...`);
   const meta = await bake('push', opts);
 
-  if (meta?.['build-slim']?.['containerimage.digest']) {
+  if (meta?.['push-slim']?.['containerimage.digest']) {
     sign(
-      `ghcr.io/${process.env.OWNER}/${process.env.FILE}${meta['build-slim']['containerimage.digest']}`,
+      `ghcr.io/${process.env.OWNER}/${process.env.FILE}${meta['push-slim']['containerimage.digest']}`,
       opts,
     );
     sign(
-      `${process.env.FILE}/${process.env.FILE}${meta['build-slim']['containerimage.digest']}`,
+      `${process.env.FILE}/${process.env.FILE}${meta['push-slim']['containerimage.digest']}`,
       opts,
     );
+  } else {
+    logger.warn('Skip signing, missing metadata for slim image');
   }
 
-  if (meta?.['build-full']?.['containerimage.digest']) {
+  if (meta?.['push-full']?.['containerimage.digest']) {
     sign(
-      `ghcr.io/${process.env.OWNER}/${process.env.FILE}@${meta['build-full']['containerimage.digest']}`,
+      `ghcr.io/${process.env.OWNER}/${process.env.FILE}@${meta['push-full']['containerimage.digest']}`,
       opts,
     );
     sign(
-      `${process.env.FILE}/${process.env.FILE}@${meta['build-full']['containerimage.digest']}`,
+      `${process.env.FILE}/${process.env.FILE}@${meta['push-full']['containerimage.digest']}`,
       opts,
     );
+  } else {
+    logger.warn('Skip signing, missing metadata for full image');
   }
 })();
