@@ -178,7 +178,7 @@
     "auth-header": "1.0.0",
     "aws4": "1.12.0",
     "azure-devops-node-api": "12.4.0",
-    "better-sqlite3": "9.3.0",
+    "better-sqlite3": "9.4.0",
     "bunyan": "1.8.15",
     "cacache": "18.0.2",
     "cacheable-lookup": "5.0.4",
