@@ -54,7 +54,6 @@ export function constructPipCompileCmd(
 export async function updateArtifacts({
   packageFileName: inputFileName,
   newPackageFileContent: newInputContent,
-  updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   if (!config.lockFiles) {
