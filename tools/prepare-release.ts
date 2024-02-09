@@ -14,6 +14,7 @@ const program = new Command('pnpm release:prepare')
   .description('Build docker images')
   .option('--platform <type>', 'docker platforms to build')
   .option('--version <version>', 'version to use as tag', parseVersion)
+  .option('--sha <type>', 'git sha')
   .option('--tries <tries>', 'number of tries for docker build', parseInt)
   .option(
     '--delay <delay>',
