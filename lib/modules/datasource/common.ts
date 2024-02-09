@@ -175,22 +175,42 @@ export function applyConstraintsFiltering<
         continue;
       }
 
-      const constraint = releaseConstraints[name]?.filter((releaseConstraint) =>
-        versioning.isValid(releaseConstraint),
-      );
+      const constraint = releaseConstraints[name];
       if (!is.nonEmptyArray(constraint)) {
         // A release with no constraints is OK
         continue;
       }
 
-      const satisfiesConstraints = constraint.some(
-        // If the constraint value is a subset of any release's constraints, then it's OK
-        // fallback to release's constraint match if subset is not supported by versioning
-        (releaseConstraint) =>
-          !releaseConstraint ||
-          (versioning.subset?.(configConstraint, releaseConstraint) ??
-            versioning.matches(configConstraint, releaseConstraint)),
-      );
+      let satisfiesConstraints = false;
+      for (const releaseConstraint of constraint) {
+        if (!releaseConstraint) {
+          satisfiesConstraints = true;
+          break;
+        }
+
+        // istanbul ignore if: defensive programming
+        if (!versioning.isValid(releaseConstraint)) {
+          logger.once.debug(
+            {
+              packageName: config.packageName,
+              versioning: versioningName,
+              constraint: releaseConstraint,
+            },
+            'Invalid release constraint',
+          );
+          continue;
+        }
+
+        if (versioning.subset?.(configConstraint, releaseConstraint)) {
+          satisfiesConstraints = true;
+          break;
+        }
+
+        if (versioning.matches(configConstraint, releaseConstraint)) {
+          satisfiesConstraints = true;
+          break;
+        }
+      }
 
       if (!satisfiesConstraints) {
         filteredReleases.push(release.version);
