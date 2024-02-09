@@ -3,10 +3,8 @@ import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
-  ensureCacheDir,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -20,10 +18,9 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 import {
-  allowedPipArguments,
   constraintLineRegex,
-  getPipToolsConstraint,
-  getPythonConstraint,
+  deprecatedAllowedPipArguments,
+  getExecOptions,
 } from './common';
 import type { GetRegistryUrlVarsResult } from './types';
 
@@ -96,7 +93,7 @@ export function constructPipCompileCmd(
       headerArguments.push('--no-emit-index-url');
     }
     for (const argument of headerArguments) {
-      if (allowedPipArguments.includes(argument)) {
+      if (deprecatedAllowedPipArguments.includes(argument)) {
         args.push(argument);
       } else if (argument.startsWith('--output-file=')) {
         const file = upath.parse(outputFileName).base;
@@ -155,28 +152,7 @@ export async function updateArtifacts({
       outputFileName,
       registryUrlVars.haveCredentials,
     );
-    const constraint = getPythonConstraint(config);
-    const pipToolsConstraint = getPipToolsConstraint(config);
-    const execOptions: ExecOptions = {
-      cwdFile: inputFileName,
-      docker: {},
-      toolConstraints: [
-        {
-          toolName: 'python',
-          constraint,
-        },
-        {
-          toolName: 'pip-tools',
-          constraint: pipToolsConstraint,
-        },
-      ],
-      extraEnv: {
-        PIP_CACHE_DIR: await ensureCacheDir('pip'),
-        // Using environment variables for these since pip-compile's --no-emit-index-url flag doesn't prevent
-        // index URLs passed as command line parameters from being included in the header comment
-        ...registryUrlVars.environmentVars,
-      },
-    };
+    const execOptions = await getExecOptions(config, inputFileName, registryUrlVars.environmentVars);
     logger.trace({ cmd }, 'pip-compile command');
     logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
     await exec(cmd, execOptions);

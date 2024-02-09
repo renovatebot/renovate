@@ -14,11 +14,12 @@
         ]
       }
     ],
+    "@semantic-release/npm",
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "run-s \"release:prepare -- {@}\" -- --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}",
-        "publishCmd": "run-s \"release:publish -- {@}\" -- --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}"
+        "prepareCmd": "pnpm release:prepare --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}",
+        "publishCmd": "pnpm release:publish --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}"
       }
     ]
   ],
