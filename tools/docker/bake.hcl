@@ -4,11 +4,14 @@ variable "OWNER" {
 variable "FILE" {
   default = "renovate"
 }
-variable "TAG" {
-  default = "latest"
-}
 variable "RENOVATE_VERSION" {
   default = "unknown"
+}
+variable "RENOVATE_MAJOR_VERSION" {
+  default = ""
+}
+variable "RENOVATE_MAJOR_MINOR_VERSION" {
+  default = ""
 }
 
 variable "APT_HTTP_PROXY" {
@@ -45,30 +48,46 @@ group "push" {
   ]
 }
 
+group "push-cache" {
+  targets = [
+    "push-cache-slim",
+    "push-cache-full",
+  ]
+}
+
 target "settings" {
-  context = "tools/docker"
+  dockerfile = "tools/docker/Dockerfile"
   args = {
     APT_HTTP_PROXY      = "${APT_HTTP_PROXY}"
     CONTAINERBASE_DEBUG = "${CONTAINERBASE_DEBUG}"
     RENOVATE_VERSION    = "${RENOVATE_VERSION}"
     GITHUB_TOKEN        = "${GITHUB_TOKEN}"
   }
-  tags = [
-    "ghcr.io/${OWNER}/${FILE}",
-    "ghcr.io/${OWNER}/${FILE}:${TAG}",
-  ]
 }
 
 target "slim" {
   cache-from = [
     "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}",
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${TAG}",
   ]
   tags = [
     "ghcr.io/${OWNER}/${FILE}",
-    "ghcr.io/${OWNER}/${FILE}:${TAG}",
+    "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}",
     "${FILE}/${FILE}",
-    "${FILE}/${FILE}:${TAG}",
+    "${FILE}/${FILE}:${RENOVATE_VERSION}",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_VERSION}": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}": "",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_VERSION}": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}": "",
+
+    // TODO: legacy, remove on next major
+    "ghcr.io/${OWNER}/${FILE}-slim",
+    "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}-slim",
+    "${FILE}/${FILE}-slim",
+    "${FILE}/${FILE}:${RENOVATE_VERSION}-slim",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_VERSION}-slim": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}-slim": "",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_VERSION}-slim": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}-slim": "",
   ]
 }
 
@@ -78,13 +97,16 @@ target "full" {
   }
   cache-from = [
     "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${TAG}-full",
   ]
    tags = [
+    "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}-full",
     "ghcr.io/${OWNER}/${FILE}:full",
-    "ghcr.io/${OWNER}/${FILE}:${TAG}-full",
     "${FILE}/${FILE}:full",
-    "${FILE}/${FILE}:${TAG}-full",
+    "${FILE}/${FILE}:${RENOVATE_VERSION}-full",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_VERSION}-full": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "ghcr.io/${OWNER}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}-full": "",
+    notequal("", RENOVATE_MAJOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_VERSION}-full": "",
+    notequal("", RENOVATE_MAJOR_MINOR_VERSION) ? "${FILE}/${FILE}:${RENOVATE_MAJOR_MINOR_VERSION}-full": "",
   ]
 }
 
@@ -100,7 +122,6 @@ target "push-cache-slim" {
     "slim",
   ]
   tags = [
-    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-${TAG}",
     "ghcr.io/${OWNER}/docker-build-cache:${FILE}",
   ]
 }
@@ -112,7 +133,6 @@ target "push-cache-full" {
     "full",
   ]
   tags = [
-    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-${TAG}-full",
     "ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
   ]
 }
@@ -123,7 +143,6 @@ target "build-slim" {
 
 target "build-full" {
   inherits = ["settings", "full"]
-
 }
 
 target "push-slim" {
