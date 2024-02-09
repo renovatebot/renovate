@@ -42,8 +42,15 @@ group "push" {
   ]
 }
 
+group "push-cache" {
+  targets = [
+    "push-cache-slim",
+    "push-cache-full",
+  ]
+}
+
 target "settings" {
-  context = "tools/docker"
+  dockerfile = "tools/docker/Dockerfile"
   args = {
     APT_HTTP_PROXY      = "${APT_HTTP_PROXY}"
     CONTAINERBASE_DEBUG = "${CONTAINERBASE_DEBUG}"
@@ -54,7 +61,7 @@ target "settings" {
 
 target "slim" {
   cache-from = [
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}",
+    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}",
   ]
   tags = [
     "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}",
@@ -67,7 +74,7 @@ target "full" {
     BASE_IMAGE_TYPE = "full"
   }
   cache-from = [
-    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}-full",
+    "type=registry,ref=ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
   ]
    tags = [
     "ghcr.io/${OWNER}/${FILE}:${RENOVATE_VERSION}-full",
@@ -87,7 +94,7 @@ target "push-cache-slim" {
     "slim",
   ]
   tags = [
-    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}",
+    "ghcr.io/${OWNER}/docker-build-cache:${FILE}",
   ]
 }
 
@@ -98,7 +105,7 @@ target "push-cache-full" {
     "full",
   ]
   tags = [
-    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-${RENOVATE_VERSION}-full",
+    "ghcr.io/${OWNER}/docker-build-cache:${FILE}-full",
   ]
 }
 
@@ -108,7 +115,6 @@ target "build-slim" {
 
 target "build-full" {
   inherits = ["settings", "full"]
-
 }
 
 target "push-slim" {
