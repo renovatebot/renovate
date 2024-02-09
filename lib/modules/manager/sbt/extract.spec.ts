@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile as extract } from '.';
+import { extractPackageFile as extract, extractProxyUrls } from './extract';
 
 const extractPackageFile = (content: string) => extract(content, 'build.sbt');
 
@@ -124,7 +124,7 @@ describe('modules/manager/sbt/extract', () => {
             datasource: 'sbt-package',
             depName: 'org.scalatest:scalatest',
             packageName: 'org.scalatest:scalatest',
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
           {
             currentValue: '1.0.11',
@@ -134,7 +134,6 @@ describe('modules/manager/sbt/extract', () => {
             groupName: 'sbtReleaseVersion',
             packageName: 'com.github.gseitz:sbt-release',
             registryUrls: [
-              'https://repo.maven.apache.org/maven2',
               'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
             ],
             variableName: 'sbtReleaseVersion',
@@ -297,7 +296,7 @@ describe('modules/manager/sbt/extract', () => {
       expect(extractPackageFile(content)).toMatchObject({
         deps: [
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             datasource: 'maven',
             depName: 'scala',
             packageName: 'org.scala-lang:scala-library',
@@ -305,14 +304,14 @@ describe('modules/manager/sbt/extract', () => {
             separateMinorPatch: true,
           },
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             depName: 'com.typesafe.scala-logging:scala-logging',
             packageName: 'com.typesafe.scala-logging:scala-logging_2.13',
             currentValue: '3.9.4',
             datasource: 'sbt-package',
           },
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             depName: 'ch.qos.logback:logback-classic',
             packageName: 'ch.qos.logback:logback-classic',
             currentValue: '1.2.10',
@@ -337,7 +336,7 @@ describe('modules/manager/sbt/extract', () => {
       expect(extractPackageFile(content)).toMatchObject({
         deps: [
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             datasource: 'maven',
             depName: 'scala',
             packageName: 'org.scala-lang:scala-library',
@@ -345,14 +344,14 @@ describe('modules/manager/sbt/extract', () => {
             separateMinorPatch: true,
           },
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             depName: 'com.typesafe.scala-logging:scala-logging',
             packageName: 'com.typesafe.scala-logging:scala-logging_2.13',
             currentValue: '3.9.4',
             datasource: 'sbt-package',
           },
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             depName: 'ch.qos.logback:logback-classic',
             packageName: 'ch.qos.logback:logback-classic',
             currentValue: '1.2.10',
@@ -436,6 +435,19 @@ describe('modules/manager/sbt/extract', () => {
           'project/build.properties',
         ),
       ).toBeNull();
+    });
+
+    it('extracts proxy repositories', () => {
+      expect(
+        extractProxyUrls(
+          codeBlock`
+          [repositories]
+          local
+          my-maven-repo: http://example.org/repo
+          my-ivy-repo: https://example.org/ivy-repo/, [organization]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext]
+        `,
+        ),
+      ).toBeArrayOfSize(2);
     });
   });
 });

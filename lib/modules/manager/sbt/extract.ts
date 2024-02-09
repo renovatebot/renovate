@@ -1,9 +1,11 @@
 import { lang, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
+import { readLocalFile } from '../../../util/fs';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { MavenDatasource } from '../../datasource/maven';
+import { MAVEN_REPO } from '../../datasource/maven/common';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
 import {
   SBT_PLUGINS_REPO,
@@ -13,7 +15,12 @@ import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import * as semverVersioning from '../../versioning/semver';
 import { REGISTRY_URLS } from '../gradle/parser/common';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
 import { normalizeScalaVersion } from './util';
 
 type Vars = Record<string, string>;
@@ -289,6 +296,24 @@ const query = q.tree<Ctx>({
   postHandler: registryUrlHandler,
 });
 
+export function extractProxyUrls(content: string): string[] {
+  const extractedProxyUrls: string[] = [];
+  logger.debug('Parsing proxy repository file');
+  content.split(newlineRegex).forEach((line) => {
+    const regex = new RegExp('https?');
+    if (line.match(regex)) {
+      const url = line.includes(',')
+        ? line.substring(line.indexOf(': ') + 1, line.indexOf(','))
+        : line.substring(line.indexOf(': ') + 1);
+      if (parseUrl(url)) {
+        extractedProxyUrls.push(url);
+      }
+    }
+  });
+
+  return extractedProxyUrls;
+}
+
 export function extractPackageFile(
   content: string,
   packageFile: string,
@@ -325,7 +350,7 @@ export function extractPackageFile(
     parsedResult = scala.query(content, query, {
       vars: {},
       deps: [],
-      registryUrls: [REGISTRY_URLS.mavenCentral],
+      registryUrls: [],
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, packageFile }, 'Sbt parsing error');
@@ -342,4 +367,40 @@ export function extractPackageFile(
   }
 
   return { deps, packageFileVersion };
+}
+
+export async function extractAllPackageFiles(
+  _config: ExtractConfig,
+  packageFiles: string[],
+): Promise<PackageFile[]> {
+  const packages: PackageFile[] = [];
+  const proxyUrls: string[] = [];
+
+  for (const packageFile of packageFiles) {
+    const content = await readLocalFile(packageFile, 'utf8');
+    if (!content) {
+      logger.debug({ packageFile }, 'packageFile has no content');
+      continue;
+    }
+    if (packageFile === 'repositories') {
+      const urls = extractProxyUrls(content);
+      proxyUrls.push(...urls);
+    } else {
+      const pkg = extractPackageFile(content, packageFile);
+      if (pkg) {
+        packages.push({ deps: pkg.deps, packageFile });
+      }
+    }
+  }
+  for (const pkg of packages) {
+    for (const dep of pkg.deps) {
+      if (proxyUrls.length > 0) {
+        logger.info('Found proxyUrls');
+        dep.registryUrls?.unshift(...proxyUrls);
+      } else {
+        dep.registryUrls?.unshift(MAVEN_REPO);
+      }
+    }
+  }
+  return packages;
 }
