@@ -466,6 +466,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Build docker
+        run: pnpm build:docker --platform=linux/amd64,linux/arm64 --tries=3 --debug
+
       - name: Pack
         run: pnpm test-e2e:pack
 
@@ -550,6 +553,7 @@ jobs:
       issues: write
       pull-requests: write
       id-token: write
+      packages: write
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -574,13 +578,9 @@ jobs:
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 
-      # TODO: move to semantic-release prepare
-      - name: Build
-        run: pnpm build
-
       - name: semantic-release
         run: |
           pnpm semantic-release --dry-run ${{env.DRY_RUN}}
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # TODO: use action token?
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
