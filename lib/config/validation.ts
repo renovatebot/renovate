@@ -35,7 +35,7 @@ const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
-let globalOptions: Set<string>;
+let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
 
@@ -152,16 +152,16 @@ export async function validateConfig(
       validateGlobalConfig(key, val, optionTypes[key], warnings, currentPath);
       continue;
     } else {
-      if (!globalOptions) {
-        globalOptions = new Set();
+      if (!optionGlobals) {
+        optionGlobals = new Set();
         for (const option of options) {
           if (option.globalOnly) {
-            globalOptions.add(option.name);
+            optionGlobals.add(option.name);
           }
         }
       }
 
-      if (globalOptions.has(key) && !isFalseGlobal(key, parentPath)) {
+      if (optionGlobals.has(key) && !isFalseGlobal(key, parentPath)) {
         warnings.push({
           topic: 'Configuration Error',
           message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
