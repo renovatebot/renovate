@@ -18,13 +18,7 @@ const Repository = z
   .optional()
   .catch(undefined);
 
-const Assets = z.array(
-  z.object({
-    version: z.string(),
-    files: z.string().array(),
-    sri: z.record(z.string()).optional(),
-  }),
-);
+const Versions = z.string().array();
 
 export class CdnJsDatasource extends Datasource {
   static readonly id = 'cdnjs';
@@ -43,33 +37,24 @@ export class CdnJsDatasource extends Datasource {
     const result = Result.parse(config, ReleasesConfig)
       .transform(({ packageName, registryUrl }) => {
         const [library] = packageName.split('/');
-        const assetName = packageName.replace(`${library}/`, '');
 
-        const url = `${registryUrl}libraries/${library}?fields=homepage,repository,assets`;
+        const url = `${registryUrl}libraries/${library}?fields=homepage,repository,versions`;
 
         const schema = z.object({
           homepage: Homepage,
           repository: Repository,
-          assets: Assets.transform((assets) =>
-            assets
-              .filter(({ files }) => files.includes(assetName))
-              .map(({ version, sri }) => {
-                const res: Release = { version };
-
-                const newDigest = sri?.[assetName];
-                if (newDigest) {
-                  res.newDigest = newDigest;
-                }
-
-                return res;
-              }),
+          versions: Versions.transform((versions) =>
+            versions.map((version) => {
+              const res: Release = { version };
+              return res;
+            }),
           ),
         });
 
         return this.http.getJsonSafe(url, schema);
       })
-      .transform(({ assets, homepage, repository }): ReleaseResult => {
-        const releases: Release[] = assets;
+      .transform(({ versions, homepage, repository }): ReleaseResult => {
+        const releases: Release[] = versions;
 
         const res: ReleaseResult = { releases };
 

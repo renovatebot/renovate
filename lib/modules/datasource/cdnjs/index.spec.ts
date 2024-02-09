@@ -7,7 +7,7 @@ import { CdnJsDatasource } from '.';
 const baseUrl = 'https://api.cdnjs.com/';
 
 const pathFor = (s: string): string =>
-  `/libraries/${s.split('/').shift()}?fields=homepage,repository,assets`;
+  `/libraries/${s.split('/').shift()}?fields=homepage,repository,versions`;
 
 describe('modules/datasource/cdnjs/index', () => {
   describe('getReleases', () => {
@@ -102,18 +102,6 @@ describe('modules/datasource/cdnjs/index', () => {
       const res = await getPkgReleases({
         datasource: CdnJsDatasource.id,
         packageName: 'd3-force/d3-force.js',
-      });
-      expect(res).toMatchSnapshot();
-    });
-
-    it('filters releases by asset presence', async () => {
-      httpMock
-        .scope(baseUrl)
-        .get(pathFor('bulma/only/0.7.5/style.css'))
-        .reply(200, Fixtures.get('bulma.json'));
-      const res = await getPkgReleases({
-        datasource: CdnJsDatasource.id,
-        packageName: 'bulma/only/0.7.5/style.css',
       });
       expect(res).toMatchSnapshot();
     });
