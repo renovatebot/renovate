@@ -549,7 +549,7 @@ jobs:
 
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     permissions:
       contents: write
       issues: write
