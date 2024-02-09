@@ -18,6 +18,7 @@ FROM slim-base as build
 WORKDIR /usr/local/renovate
 
 ENV CI=1 npm_config_modules_cache_max_age=0
+ENV RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
 
 COPY pnpm-lock.yaml ./
 
@@ -27,7 +28,6 @@ RUN pnpm fetch --prod
 COPY . ./
 
 # install
-ENV RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
 RUN set -ex; \
   pnpm install --prod --offline --ignore-scripts; \
   npm explore re2 -- npm run install; \
