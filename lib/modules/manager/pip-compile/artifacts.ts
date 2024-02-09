@@ -15,10 +15,9 @@ import { extractHeaderCommand, getExecOptions } from './common';
 export function constructPipCompileCmd(
   content: string,
   outputFileName: string,
-  strict: boolean = true,
 ): string {
   const headerArguments = extractHeaderCommand(content, outputFileName);
-  if (strict && headerArguments.isCustomCommand) {
+  if (headerArguments.isCustomCommand) {
     throw new Error(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
