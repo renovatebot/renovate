@@ -18,8 +18,8 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "pnpm release:prepare --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}",
-        "publishCmd": "pnpm release:publish --release=${nextRelease.version} --sha=${nextRelease.gitHead} --tag=${nextRelease.channel}"
+        "prepareCmd": "pnpm release:prepare --version=${nextRelease.version} --sha=${nextRelease.gitHead} --tries=3 --platform=linux/amd64,linux/arm64 --exit-on-error=false",
+        "publishCmd": "pnpm release:publish --version=${nextRelease.version} --sha=${nextRelease.gitHead} --platform=linux/amd64,linux/arm64 --exit-on-error=false"
       }
     ]
   ],
