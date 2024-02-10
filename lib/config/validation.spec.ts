@@ -215,7 +215,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
     });
 
-    it('catches invalid env vars', async () => {
+    it('catches invalid variable name in env config option', async () => {
       GlobalConfig.set({ allowedEnv: ['SOME*'] });
       const config = {
         env: {
@@ -223,19 +223,6 @@ describe('config/validation', () => {
           SOME_VAR: 'some_value',
           SOME_OTHER_VAR: 10,
         },
-        npm: {
-          env: {
-            SOME_VAR: 'some_value',
-          },
-        },
-        packageRules: [
-          {
-            matchManagers: ['regex'],
-            env: {
-              SOME_VAR: 'some_value',
-            },
-          },
-        ],
       };
       const { errors, warnings } = await configValidation.validateConfig(
         false,
@@ -252,6 +239,31 @@ describe('config/validation', () => {
             'Invalid enviroment variable name `randomKey` found in `env`. Allowed values are "SOME*".',
         },
       ]);
+      expect(warnings).toHaveLength(2);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('catches env config option if configured inside a parent', async () => {
+      GlobalConfig.set({ allowedEnv: ['SOME*'] });
+      const config = {
+        npm: {
+          env: {
+            SOME_VAR: 'some_value',
+          },
+        },
+        packageRules: [
+          {
+            matchManagers: ['regex'],
+            env: {
+              SOME_VAR: 'some_value',
+            },
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        false,
+        config,
+      );
       expect(errors).toMatchObject([
         {
           message:
@@ -264,7 +276,7 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
-      expect(warnings).toHaveLength(2);
+      expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
     });
 
