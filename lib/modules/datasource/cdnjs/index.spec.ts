@@ -2,6 +2,7 @@ import { getDigest, getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
+import { HttpError } from '../../../util/http';
 import { CdnJsDatasource } from '.';
 
 const baseUrl = 'https://api.cdnjs.com/';
@@ -125,6 +126,51 @@ describe('modules/datasource/cdnjs/index', () => {
         '1.2.0',
       );
       expect(res).toBeNull();
+    });
+
+    it('returs null for empty sri object', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathForDigest('foo/bar', '1.2.0'))
+        .reply(200, JSON.stringify({ sri: {} }));
+
+      const res = await getDigest(
+        {
+          datasource: CdnJsDatasource.id,
+          packageName: 'foo/bar',
+        },
+        '1.2.0',
+      );
+      expect(res).toBeNull();
+    });
+
+    it('returs null if file not found', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get(pathForDigest('foo/bar', '1.2.0'))
+        .reply(200, JSON.stringify({ sri: { string: 'hash' } }));
+
+      const res = await getDigest(
+        {
+          datasource: CdnJsDatasource.id,
+          packageName: 'foo/bar',
+        },
+        '1.2.0',
+      );
+      expect(res).toBeNull();
+    });
+
+    it('returns null for 404', async () => {
+      httpMock.scope(baseUrl).get(pathForDigest('foo/bar', '1.2.0')).reply(404);
+      await expect(
+        getDigest(
+          {
+            datasource: CdnJsDatasource.id,
+            packageName: 'foo/bar',
+          },
+          '1.2.0',
+        ),
+      ).rejects.toThrow(HttpError);
     });
 
     it('returns digest', async () => {

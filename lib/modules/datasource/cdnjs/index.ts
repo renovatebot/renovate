@@ -5,7 +5,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import type { HttpError } from '../../../util/http';
 import { Result } from '../../../util/result';
 import { Datasource } from '../datasource';
-import { ReleasesConfig } from '../schema';
+import { DigestsConfig, ReleasesConfig } from '../schema';
 import type {
   DigestConfig,
   GetReleasesConfig,
@@ -24,8 +24,12 @@ const Repository = z
   .optional()
   .catch(undefined);
 
-const Versions = z.string().array();
+const Versions = z
+  .string()
+  .transform((version): Release => ({ version }))
+  .array();
 
+const Sri = z.record(z.string());
 export class CdnJsDatasource extends Datasource {
   static readonly id = 'cdnjs';
 
@@ -49,12 +53,7 @@ export class CdnJsDatasource extends Datasource {
         const schema = z.object({
           homepage: Homepage,
           repository: Repository,
-          versions: Versions.transform((versions) =>
-            versions.map((version) => {
-              const res: Release = { version };
-              return res;
-            }),
-          ),
+          versions: Versions,
         });
 
         return this.http.getJsonSafe(url, schema);
@@ -95,19 +94,39 @@ export class CdnJsDatasource extends Datasource {
       `${registryUrl}:${packageName}:${newValue}}`,
   })
   override async getDigest(
-    { packageName, registryUrl }: DigestConfig,
+    config: DigestConfig,
     newValue: string,
   ): Promise<string | null> {
+    const { packageName } = config;
     const [library] = packageName.split('/');
     const assetName = packageName.replace(`${library}/`, '');
 
-    const url = `${registryUrl}libraries/${library}/${newValue}?fields=sri`;
+    const result = Result.parse(config, DigestsConfig)
+      .transform(({ registryUrl }) => {
+        const url = `${registryUrl}libraries/${library}/${newValue}?fields=sri`;
 
-    const sri = (
-      await this.http.getJson<Record<'sri', Record<string, string>>>(url)
-    ).body.sri;
+        const schema = z.object({
+          sri: Sri,
+        });
 
-    return sri?.[assetName] ?? null;
+        return this.http.getJsonSafe(url, schema);
+      })
+      .transform(({ sri }): string => {
+        return sri?.[assetName];
+      });
+
+    const { val = null, err } = await result.unwrap();
+
+    if (err instanceof ZodError) {
+      logger.debug({ err }, 'cdnjs: validation error');
+      return null;
+    }
+
+    if (err) {
+      this.handleGenericErrors(err);
+    }
+
+    return val;
   }
 
   override handleHttpErrors(err: HttpError): void {
