@@ -26,11 +26,11 @@ void (async () => {
 
   if (meta?.['push-slim']?.['containerimage.digest']) {
     sign(
-      `ghcr.io/renovatebot/renovate${meta['push-slim']['containerimage.digest']}`,
+      `ghcr.io/renovatebot/renovate@${meta['push-slim']['containerimage.digest']}`,
       opts,
     );
     sign(
-      `renovate/renovate${meta['push-slim']['containerimage.digest']}`,
+      `renovate/renovate@${meta['push-slim']['containerimage.digest']}`,
       opts,
     );
   } else {
