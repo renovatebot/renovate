@@ -1254,11 +1254,11 @@ This option allows users to specify explicit environment variables and their cor
 
 <!-- prettier-ignore -->
 !!! warning
-    The bot administrator must configure a list of allowed environment names in the  an [`allowedEnv`](./self-hosted-configuration.md#allowedEnv) config option, before users can use those allowed names in the `env` option.
+    The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedEnv) config option, before users can use those allowed names in the `env` option.
 
 Behavior:
 
-- This option only applies when Renovate executes package manager commands, within the `updateArtifacts()` function
+- This option only applies when Renovate runs package manager commands, within the `updateArtifacts()` function
 - Values set in the env configuration override corresponding environment variables, including those from `customEnvVariables` and `process.env`
 
 ```json title="Example renovate.json with env configuration"

@@ -17,7 +17,7 @@ const options: RenovateOptions[] = [
   {
     name: 'allowedEnv',
     description:
-      'List of environment variables names/patterns allowed in repo config env option.',
+      'List of allowed patterns for environment variable names in repository env config.',
     type: 'array',
     default: [],
     subType: 'string',
@@ -401,7 +401,7 @@ const options: RenovateOptions[] = [
   {
     name: 'env',
     description:
-      'Environment variables to use when executing package manager commands.',
+      'Environment variables that Renovate uses when executing package manager commands.',
     type: 'object',
     default: {},
   },
