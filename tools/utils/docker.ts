@@ -14,8 +14,8 @@ export type MetaDataItem = {
   'containerimage.digest'?: string;
 };
 export type MetaData = {
-  'build-slim': MetaDataItem;
-  'build-full': MetaDataItem;
+  'push-slim'?: MetaDataItem;
+  'push-full'?: MetaDataItem;
 };
 
 export async function bake(
