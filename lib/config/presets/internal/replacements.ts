@@ -220,7 +220,7 @@ export const presets: Record<string, Preset> = {
         replacementName: '@faker-js/faker',
         replacementVersion: '1.1.0',
       },
-    ]
+    ],
   },
   'fastify-to-scoped': {
     description: '`fastify` packages became scoped.',
