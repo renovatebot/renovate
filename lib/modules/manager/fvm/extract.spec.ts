@@ -24,8 +24,21 @@ describe('modules/manager/fvm/extract', () => {
     });
 
     it('returns a result', () => {
-      const res = extractPackageFile(
+      let res = extractPackageFile(
         '{"flutterSdkVersion": "2.10.1", "flavors": {}}',
+        packageFile,
+      );
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '2.10.1',
+          datasource: 'flutter-version',
+          depName: 'flutter',
+          packageName: 'flutter/flutter',
+        },
+      ]);
+
+      res = extractPackageFile(
+        '{"flutter": "2.10.1", "flavors": {}}',
         packageFile,
       );
       expect(res?.deps).toEqual([

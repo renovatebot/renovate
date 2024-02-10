@@ -4,7 +4,8 @@ import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import type { PackageDependency, PackageFileContent } from '../types';
 
 interface FvmConfig {
-  flutterSdkVersion: string;
+  flutterSdkVersion?: string;
+  flutter?: string;
 }
 
 export function extractPackageFile(
@@ -19,22 +20,26 @@ export function extractPackageFile(
     return null;
   }
 
-  if (!fvmConfig.flutterSdkVersion) {
-    logger.debug(
-      { contents: fvmConfig },
-      'FVM config does not have flutterSdkVersion specified',
-    );
-    return null;
-  } else if (!is.string(fvmConfig.flutterSdkVersion)) {
-    logger.debug({ contents: fvmConfig }, 'flutterSdkVersion must be a string');
-    return null;
+  for (const version of [fvmConfig.flutterSdkVersion, fvmConfig.flutter]) {
+    if (!version) {
+      continue;
+    } else if (!is.string(version)) {
+      logger.debug({ contents: fvmConfig }, 'flutterSdkVersion or flutter must be a string');
+      return null;
+    }
+
+    const dep: PackageDependency = {
+      depName: 'flutter',
+      currentValue: version,
+      datasource: FlutterVersionDatasource.id,
+      packageName: 'flutter/flutter',
+    };
+    return { deps: [dep] };
   }
 
-  const dep: PackageDependency = {
-    depName: 'flutter',
-    currentValue: fvmConfig.flutterSdkVersion,
-    datasource: FlutterVersionDatasource.id,
-    packageName: 'flutter/flutter',
-  };
-  return { deps: [dep] };
+  logger.debug(
+    { contents: fvmConfig },
+    'FVM config does not have flutterSdkVersion or flutter specified',
+  );
+  return null;
 }
