@@ -1,7 +1,6 @@
 *
 !tools/docker/bin
 !dist/
-!node_modules/
 !package.json
 !pnpm-lock.yaml
 !renovate-schema.json

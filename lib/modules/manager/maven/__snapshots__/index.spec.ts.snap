@@ -12,9 +12,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "parent",
         "fileReplacePosition": 185,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/nexus/xyz",
           "http://example.com/",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -26,9 +26,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "fileReplacePosition": 470,
         "groupName": "quuxVersion",
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
     ],
@@ -44,9 +44,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "parent",
         "fileReplacePosition": 186,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -56,9 +56,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 806,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -68,9 +68,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 954,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -80,9 +80,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "build",
         "fileReplacePosition": 1188,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -92,9 +92,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "build",
         "fileReplacePosition": 1386,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -104,9 +104,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 2131,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
         "skipReason": "name-placeholder",
       },
@@ -117,9 +117,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 2281,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
         "skipReason": "name-placeholder",
       },
@@ -130,9 +130,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 2574,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -142,9 +142,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 2714,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -154,9 +154,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 2872,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
       {
@@ -166,9 +166,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "compile",
         "fileReplacePosition": 3134,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
         "skipReason": "version-placeholder",
       },
@@ -179,9 +179,9 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
         "depType": "build",
         "fileReplacePosition": 3410,
         "registryUrls": [
-          "https://repo.maven.apache.org/maven2",
           "http://example.com/",
           "http://example.com/nexus/xyz",
+          "https://repo.maven.apache.org/maven2",
         ],
       },
     ],
