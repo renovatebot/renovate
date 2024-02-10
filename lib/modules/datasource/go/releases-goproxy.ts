@@ -235,13 +235,13 @@ export class GoProxyDatasource extends Datasource {
           release.newDigest = newDigest;
         }
 
-        const releaseTimestamp = DateTime.fromFormat(
+        const pseudoVersionReleaseTimestamp = DateTime.fromFormat(
           timestamp,
           'yyyyMMddHHmmss',
           { zone: 'UTC' },
         ).toISO({ suppressMilliseconds: true });
-        if (releaseTimestamp) {
-          release.releaseTimestamp = releaseTimestamp;
+        if (pseudoVersionReleaseTimestamp) {
+          release.releaseTimestamp = pseudoVersionReleaseTimestamp;
         }
       }
 
