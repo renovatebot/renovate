@@ -39,10 +39,10 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(2);
       expect(warnings).toMatchObject([
         {
-          message: `The "binarySource" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
         },
         {
-          message: `The "username" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
         },
       ]);
     });
@@ -979,7 +979,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchObject([
         {
           topic: 'Configuration Error',
-          message: `The "customEnvVariables" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+          message: `The "customEnvVariables" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
         },
       ]);
     });
@@ -1260,7 +1260,7 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            'Invalid `cacheTtlOverride.someField` configuration: value is not an integer.',
+            'Invalid `cacheTtlOverride.someField` configuration: value must be an integer.',
         },
       ]);
     });
@@ -1276,7 +1276,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchObject([
         {
           message:
-            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value is not a string.',
+            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value must be a string.',
           topic: 'Configuration Error',
         },
       ]);

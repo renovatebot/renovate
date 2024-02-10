@@ -164,7 +164,7 @@ export async function validateConfig(
       if (optionGlobals.has(key) && !isFalseGlobal(key, parentPath)) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
         });
         continue;
       }
@@ -886,7 +886,7 @@ function validateGlobalConfig(
           if (!is.number(subValue)) {
             warnings.push({
               topic: 'Configuration Error',
-              message: `Invalid \`${currentPath}.${subKey}\` configuration: value is not an integer.`,
+              message: `Invalid \`${currentPath}.${subKey}\` configuration: value must be an integer.`,
             });
           }
         }
@@ -895,7 +895,7 @@ function validateGlobalConfig(
         if (res !== true) {
           warnings.push({
             topic: 'Configuration Error',
-            message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string.`,
+            message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value must be a string.`,
           });
         }
       }
