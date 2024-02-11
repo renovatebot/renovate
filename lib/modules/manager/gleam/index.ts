@@ -1,4 +1,4 @@
-import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { HexDatasource } from '../../datasource/hex';
 import * as hexVersioning from '../../versioning/hex';
 
 export const displayName = 'gleam';
@@ -13,4 +13,4 @@ export const defaultConfig = {
 };
 
 export const supportsLockFileMaintenance = true;
-export const supportedDatasources = [GithubTagsDatasource.id];
+export const supportedDatasources = [HexDatasource.id];
