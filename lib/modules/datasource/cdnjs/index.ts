@@ -1,4 +1,4 @@
-import { ZodError, z } from 'zod';
+import { ZodError } from 'zod';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
@@ -12,24 +12,11 @@ import type {
   Release,
   ReleaseResult,
 } from '../types';
+import {
+  CdnjsAPISriResponseSchema,
+  CdnjsAPIVersionResponseSchema,
+} from './schema';
 
-const Homepage = z.string().optional().catch(undefined);
-
-const Repository = z
-  .object({
-    type: z.literal('git'),
-    url: z.string(),
-  })
-  .transform(({ url }) => url)
-  .optional()
-  .catch(undefined);
-
-const Versions = z
-  .string()
-  .transform((version): Release => ({ version }))
-  .array();
-
-const Sri = z.record(z.string());
 export class CdnJsDatasource extends Datasource {
   static readonly id = 'cdnjs';
 
@@ -50,13 +37,7 @@ export class CdnJsDatasource extends Datasource {
 
         const url = `${registryUrl}libraries/${library}?fields=homepage,repository,versions`;
 
-        const schema = z.object({
-          homepage: Homepage,
-          repository: Repository,
-          versions: Versions,
-        });
-
-        return this.http.getJsonSafe(url, schema);
+        return this.http.getJsonSafe(url, CdnjsAPIVersionResponseSchema);
       })
       .transform(({ versions, homepage, repository }): ReleaseResult => {
         const releases: Release[] = versions;
@@ -105,11 +86,7 @@ export class CdnJsDatasource extends Datasource {
       .transform(({ registryUrl }) => {
         const url = `${registryUrl}libraries/${library}/${newValue}?fields=sri`;
 
-        const schema = z.object({
-          sri: Sri,
-        });
-
-        return this.http.getJsonSafe(url, schema);
+        return this.http.getJsonSafe(url, CdnjsAPISriResponseSchema);
       })
       .transform(({ sri }): string => {
         return sri?.[assetName];
