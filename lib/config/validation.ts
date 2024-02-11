@@ -8,8 +8,12 @@ import type {
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types/host-rules';
-import { anyMatchRegexOrMinimatch } from '../util/package-rules/match';
-import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
+import { regEx } from '../util/regex';
+import {
+  anyMatchRegexOrMinimatch,
+  configRegexPredicate,
+  isConfigRegex,
+} from '../util/string-match';
 import * as template from '../util/template';
 import {
   hasValidSchedule,
@@ -20,6 +24,7 @@ import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import {
+  AllowedParents,
   type RenovateConfig,
   type RenovateOptions,
   type StatusCheckKey,
@@ -32,7 +37,7 @@ import * as managerValidator from './validation-helpers/managers';
 const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
-let optionParents: Record<string, RenovateOptions['parent']>;
+let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
@@ -117,8 +122,8 @@ export async function validateConfig(
   if (!optionParents) {
     optionParents = {};
     options.forEach((option) => {
-      if (option.parent) {
-        optionParents[option.name] = option.parent;
+      if (option.parents) {
+        optionParents[option.name] = option.parents;
       }
     });
   }
@@ -224,10 +229,12 @@ export async function validateConfig(
       if (
         !isPreset &&
         optionParents[key] &&
-        optionParents[key] !== parentName
+        !optionParents[key].includes(parentName as AllowedParents)
       ) {
         // TODO: types (#22198)
-        const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
+        const message = `${key} should only be configured within one of "${optionParents[
+          key
+        ]?.join(' or ')}" objects. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
           message,
@@ -364,6 +371,7 @@ export async function validateConfig(
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
+              'matchCurrentAge',
               'matchRepositories',
             ];
             if (key === 'packageRules') {
@@ -702,7 +710,7 @@ export async function validateConfig(
     }
 
     if (key === 'hostRules' && is.array(val)) {
-      const allowedHeaders = GlobalConfig.get('allowedHeaders');
+      const allowedHeaders = GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (!rule.headers) {
           continue;
@@ -714,7 +722,7 @@ export async function validateConfig(
               message: `Invalid hostRules headers value configuration: header must be a string.`,
             });
           }
-          if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
+          if (!anyMatchRegexOrMinimatch(header, allowedHeaders)) {
             errors.push({
               topic: 'Configuration Error',
               message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,

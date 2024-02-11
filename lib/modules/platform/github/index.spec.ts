@@ -820,11 +820,11 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  describe('getRepoForceRebase', () => {
+  describe('getBranchForceRebase', () => {
     it('should detect repoForceRebase', async () => {
       httpMock
         .scope(githubApiHost)
-        .get('/repos/undefined/branches/undefined/protection')
+        .get('/repos/undefined/branches/main/protection')
         .reply(200, {
           required_pull_request_reviews: {
             dismiss_stale_reviews: false,
@@ -847,35 +847,35 @@ describe('modules/platform/github/index', () => {
             teams: [],
           },
         });
-      const res = await github.getRepoForceRebase();
+      const res = await github.getBranchForceRebase('main');
       expect(res).toBeTrue();
     });
 
     it('should handle 404', async () => {
       httpMock
         .scope(githubApiHost)
-        .get('/repos/undefined/branches/undefined/protection')
+        .get('/repos/undefined/branches/dev/protection')
         .reply(404);
-      const res = await github.getRepoForceRebase();
+      const res = await github.getBranchForceRebase('dev');
       expect(res).toBeFalse();
     });
 
     it('should handle 403', async () => {
       httpMock
         .scope(githubApiHost)
-        .get('/repos/undefined/branches/undefined/protection')
+        .get('/repos/undefined/branches/main/protection')
         .reply(403);
-      const res = await github.getRepoForceRebase();
+      const res = await github.getBranchForceRebase('main');
       expect(res).toBeFalse();
     });
 
     it('should throw 401', async () => {
       httpMock
         .scope(githubApiHost)
-        .get('/repos/undefined/branches/undefined/protection')
+        .get('/repos/undefined/branches/main/protection')
         .reply(401);
       await expect(
-        github.getRepoForceRebase(),
+        github.getBranchForceRebase('main'),
       ).rejects.toThrowErrorMatchingSnapshot();
     });
   });
@@ -3336,6 +3336,16 @@ describe('modules/platform/github/index', () => {
   });
 
   describe('getVulnerabilityAlerts()', () => {
+    it('avoids fetching if repo has vulnerability alerts disabled', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo', {
+        hasVulnerabilityAlertsEnabled: false,
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res).toHaveLength(0);
+    });
+
     it('returns empty if error', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
       const res = await github.getVulnerabilityAlerts();
