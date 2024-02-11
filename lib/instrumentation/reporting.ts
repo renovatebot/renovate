@@ -16,6 +16,10 @@ export function addBranchStats(
   config: RenovateConfig,
   branchesInformation: Partial<BranchCache>[],
 ): void {
+  if (is.nullOrUndefined(config.reportType)) {
+    return;
+  }
+
   coerceRepo(config.repository!);
   result.repositories[config.repository!].branches = branchesInformation;
 }
@@ -24,6 +28,10 @@ export function addExtractionStats(
   config: RenovateConfig,
   extractResult: ExtractResult,
 ): void {
+  if (is.nullOrUndefined(config.reportType)) {
+    return;
+  }
+
   coerceRepo(config.repository!);
   result.repositories[config.repository!].packageFiles =
     extractResult.packageFiles;
