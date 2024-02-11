@@ -70,7 +70,7 @@ export class CdnJsDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${CdnJsDatasource.id}-sri`,
+    namespace: `datasource-${CdnJsDatasource.id}-digest`,
     key: ({ registryUrl, packageName }: DigestConfig, newValue: string) =>
       `${registryUrl}:${packageName}:${newValue}}`,
   })
