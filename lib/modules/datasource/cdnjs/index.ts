@@ -28,8 +28,10 @@ export class CdnJsDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://api.cdnjs.com/'];
 
-  override readonly caching = true;
-
+  @cache({
+    namespace: `datasource-${CdnJsDatasource.id}`,
+    key: ({ packageName }: GetReleasesConfig) => packageName.split('/')[0],
+  })
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const result = Result.parse(config, ReleasesConfig)
       .transform(({ packageName, registryUrl }) => {
