@@ -102,6 +102,7 @@ export async function init(
         return Math.min(retries * 100, 3000);
       },
     },
+    pingInterval: 10000,
   });
   await client.connect();
 }
