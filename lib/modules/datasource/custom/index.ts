@@ -1,6 +1,8 @@
 import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { logger } from '../../../logger';
+import { getParentDir, readLocalDirectory, statLocalFile } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { fetchers } from './formats';
@@ -32,9 +34,18 @@ export class CustomDatasource extends Datasource {
     let data: unknown;
     try {
       if (isLocalRegistry) {
-        data = await fetcher.readFile(
+        const localPath = ensureLocalPath(
           defaultRegistryUrlTemplate.replace('file://', ''),
         );
+        const localFileStat = await statLocalFile(localPath);
+        if (localFileStat === null || !localFileStat.isFile()) {
+          logger.debug({ localPath }, `Local file not found`);
+          const parentDirList = readLocalDirectory(getParentDir(localPath));
+          logger.debug({ parentDirList }, `Parent dir list`);
+          data = null;
+        } else {
+          data = await fetcher.readFile(localPath);
+        }
       } else {
         data = await fetcher.fetch(this.http, defaultRegistryUrlTemplate);
       }

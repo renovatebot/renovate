@@ -29,10 +29,7 @@ void (async () => {
       `ghcr.io/balihb/renovate@${meta['push-slim']['containerimage.digest']}`,
       opts,
     );
-    sign(
-      `balihb/renovate@${meta['push-slim']['containerimage.digest']}`,
-      opts,
-    );
+    sign(`balihb/renovate@${meta['push-slim']['containerimage.digest']}`, opts);
   } else {
     logger.warn('Skip signing, missing metadata for slim image');
   }
@@ -42,10 +39,7 @@ void (async () => {
       `ghcr.io/balihb/renovate@${meta['push-full']['containerimage.digest']}`,
       opts,
     );
-    sign(
-      `balihb/renovate@${meta['push-full']['containerimage.digest']}`,
-      opts,
-    );
+    sign(`balihb/renovate@${meta['push-full']['containerimage.digest']}`, opts);
   } else {
     logger.warn('Skip signing, missing metadata for full image');
   }
