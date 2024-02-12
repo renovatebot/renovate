@@ -12,6 +12,7 @@ export class GithubRunnersDatasource extends Datasource {
     ubuntu: [{ version: '22.04' }, { version: '20.04' }, { version: '18.04' }],
     macos: [
       { version: '13' },
+      { version: '13-large' },
       { version: '13-xlarge' },
       { version: '12' },
       { version: '12-large' },
