@@ -174,8 +174,8 @@ importers:
         specifier: 11.2.0
         version: 11.2.0
       git-url-parse:
-        specifier: 13.1.1
-        version: 13.1.1
+        specifier: 14.0.0
+        version: 14.0.0
       github-url-from-git:
         specifier: 1.5.0
         version: 1.5.0
@@ -6326,8 +6326,8 @@ packages:
       parse-url: 8.1.0
     dev: false
 
-  /git-url-parse@13.1.1:
-    resolution: {integrity: sha512-PCFJyeSSdtnbfhSNRw9Wk96dDCNx+sogTe4YNXeXSJxt7xz5hvXekuRn9JX7m+Mf4OscCu8h+mtAl3+h5Fo8lQ==}
+  /git-url-parse@14.0.0:
+    resolution: {integrity: sha512-NnLweV+2A4nCvn4U/m2AoYu0pPKlsmhK9cknG7IMwsjFY1S2jxM+mAhsDxyxfCIGfGaD+dozsyX4b6vkYc83yQ==}
     dependencies:
       git-up: 7.0.0
     dev: false
