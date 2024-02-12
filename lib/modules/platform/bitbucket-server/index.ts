@@ -638,26 +638,26 @@ async function retry<T extends (...arg0: any[]) => any>(
   args: Parameters<T>,
   maxTries: number,
   retryErrorMessages: string[] = [],
-  retryCount = 0,
 ): Promise<Awaited<ReturnType<T>>> {
-  try {
-    const result = await fn(...args);
-    return result;
-  } catch (e) {
-    if (
-      retryErrorMessages.length === 0 ||
-      retryErrorMessages.includes(e.message)
-    ) {
-      if (retryCount === maxTries - 1) {
-        logger.debug(`All ${maxTries} retry attempts exhausted`);
+  const maxAttempts = Math.max(maxTries, 1);
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await fn(...args);
+    } catch (e) {
+      lastError = e;
+      if (
+        retryErrorMessages.length !== 0 &&
+        !retryErrorMessages.includes(e.message)
+      ) {
+        logger.debug(`Error not marked for retry`);
         throw e;
       }
-      return retry(fn, args, maxTries, retryErrorMessages, retryCount + 1);
-    } else {
-      logger.debug(`Error not marked for retry`);
-      throw e;
     }
   }
+
+  logger.debug(`All ${maxAttempts} retry attempts exhausted`);
+  throw lastError;
 }
 
 export function deleteLabel(issueNo: number, label: string): Promise<void> {
