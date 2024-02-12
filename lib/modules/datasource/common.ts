@@ -188,7 +188,6 @@ export function applyConstraintsFiltering<
           break;
         }
 
-        // istanbul ignore if: defensive programming
         if (!versioning.isValid(releaseConstraint)) {
           logger.once.debug(
             {
@@ -198,7 +197,7 @@ export function applyConstraintsFiltering<
             },
             'Invalid release constraint',
           );
-          continue;
+          break;
         }
 
         if (versioning.subset?.(configConstraint, releaseConstraint)) {
