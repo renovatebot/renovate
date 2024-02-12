@@ -391,9 +391,10 @@ jobs:
           path: coverage
 
       - name: Codecov
-        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
+        uses: codecov/codecov-action@e0b68c6749509c5f83f984dd99a76a1c1a231044 # v4.0.1
         with:
           directory: coverage/lcov
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -549,7 +550,7 @@ jobs:
 
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     permissions:
       contents: write
       issues: write
@@ -565,7 +566,7 @@ jobs:
           filter: blob:none # we don't need all blobs, only the full tree
 
       - name: docker-config
-        uses: containerbase/internal-tools@e7bd2e8cedd99c9b24982865534cb7c9bf88620b # v3.0.55
+        uses: containerbase/internal-tools@2951ced35dd6127673e4e2cf937416460a317f3b # v3.0.57
         with:
           command: docker-config
 
@@ -598,3 +599,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # TODO: use action token?
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          LOG_LEVEL: debug

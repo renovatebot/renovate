@@ -3416,7 +3416,7 @@ For example we override it to `always` in the following cases where branch names
 You can select which behavior you want from Renovate:
 
 - `always`: Recreates all closed or blocking PRs
-- `auto`: The default option. Recreates only immortal PRs (default)
+- `auto`: The default option. Recreates only [immortal PRs](./key-concepts/pull-requests.md#immortal-prs) (default)
 - `never`: No PR is recreated, doesn't matter if it is immortal or not
 
 We recommend that you stick with the default setting for this option.
