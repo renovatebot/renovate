@@ -2134,6 +2134,7 @@ Supported lock files:
 - `Gemfile.lock`
 - `gradle.lockfile`
 - `jsonnetfile.lock.json`
+- `manifest.toml`
 - `package-lock.json`
 - `packages.lock.json`
 - `pdm.lock`
