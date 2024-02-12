@@ -233,7 +233,7 @@
     "p-throttle": "4.1.1",
     "parse-link-header": "2.0.0",
     "prettier": "3.2.5",
-    "redis": "4.6.12",
+    "redis": "4.6.13",
     "remark": "13.0.0",
     "remark-github": "10.1.0",
     "safe-stable-stringify": "2.4.3",
