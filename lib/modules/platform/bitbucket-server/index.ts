@@ -646,7 +646,7 @@ async function retry<T extends (...arg0: any[]) => any>(
   } catch (e) {
     if (
       retryErrorMessages.length === 0 ||
-      retryErrorMessages.indexOf(e.message) !== -1
+      retryErrorMessages.includes(e.message)
     ) {
       if (retryCount === maxTries - 1) {
         logger.debug(`All ${maxTries} retry attempts exhausted`);
