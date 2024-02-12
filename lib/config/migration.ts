@@ -150,6 +150,16 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         }
       }
     }
+    if (
+      is.nonEmptyObject(migratedConfig['pip-compile']) &&
+      is.nonEmptyArray(migratedConfig['pip-compile'].fileMatch)
+    ) {
+      migratedConfig['pip-compile'].fileMatch = migratedConfig[
+        'pip-compile'
+      ].fileMatch.map((fileMatch) => {
+        return fileMatch.replace(/\.in\$$/, '.txt$');
+      });
+    }
     if (is.nonEmptyArray(migratedConfig.matchManagers)) {
       if (migratedConfig.matchManagers.includes('gradle-lite')) {
         if (!migratedConfig.matchManagers.includes('gradle')) {
