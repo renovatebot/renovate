@@ -9,74 +9,15 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import * as pipRequirements from '../pip_requirements';
-import type {
-  PackageFileContent,
-  UpdateArtifact,
-  UpdateArtifactsResult,
-} from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   constraintLineRegex,
   deprecatedAllowedPipArguments,
   getExecOptions,
+  getRegistryUrlVarsFromPackageFile,
 } from './common';
-import type { GetRegistryUrlVarsResult } from './types';
-
-function buildRegistryUrl(url: string): URL {
-  const hostRule = hostRules.find({ url });
-  const ret = new URL(url);
-  if (!ret.username) {
-    ret.username = hostRule.username ?? '';
-    ret.password = hostRule.password ?? '';
-  }
-  return ret;
-}
-
-function getRegistryUrlVarFromUrls(
-  varName: keyof GetRegistryUrlVarsResult['environmentVars'],
-  urls: URL[],
-): GetRegistryUrlVarsResult {
-  let haveCredentials = false;
-  for (const url of urls) {
-    if (url.username) {
-      haveCredentials = true;
-    }
-  }
-  const registryUrlsString = urls.map((url) => url.href).join(' ');
-  const ret: GetRegistryUrlVarsResult = {
-    haveCredentials,
-    environmentVars: {},
-  };
-  if (registryUrlsString) {
-    ret.environmentVars[varName] = registryUrlsString;
-  }
-  return ret;
-}
-
-export function getRegistryUrlVarsFromPackageFile(
-  packageFile: PackageFileContent | null,
-): GetRegistryUrlVarsResult {
-  // There should only ever be one element in registryUrls, since pip_requirements gets them from --index-url
-  // flags in the input file, and that only makes sense once
-  const indexUrl = getRegistryUrlVarFromUrls(
-    'PIP_INDEX_URL',
-    packageFile?.registryUrls?.map(buildRegistryUrl) ?? [],
-  );
-  const extraIndexUrls = getRegistryUrlVarFromUrls(
-    'PIP_EXTRA_INDEX_URL',
-    packageFile?.additionalRegistryUrls?.map(buildRegistryUrl) ?? [],
-  );
-
-  return {
-    haveCredentials: indexUrl.haveCredentials || extraIndexUrls.haveCredentials,
-    environmentVars: {
-      ...indexUrl.environmentVars,
-      ...extraIndexUrls.environmentVars,
-    },
-  };
-}
 
 export function constructPipCompileCmd(
   content: string,

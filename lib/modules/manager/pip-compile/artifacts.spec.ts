@@ -2,14 +2,7 @@ import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import {
-  env,
-  fs,
-  git,
-  hostRules,
-  mocked,
-  partial,
-} from '../../../../test/util';
+import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -17,11 +10,7 @@ import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import {
-  constructPipCompileCmd,
-  extractResolver,
-  getRegistryUrlVarsFromPackageFile,
-} from './artifacts';
+import { constructPipCompileCmd, extractResolver } from './artifacts';
 import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);
@@ -366,77 +355,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
         { argument: '--output-file=/etc/shadow' },
         'pip-compile was previously executed with an unexpected `--output-file` filename',
       );
-    });
-  });
-
-  describe('getRegistryUrlFlagsFromPackageFile()', () => {
-    it('handles both registryUrls and additionalRegistryUrls', () => {
-      hostRules.find.mockReturnValue({});
-      expect(
-        getRegistryUrlVarsFromPackageFile({
-          deps: [],
-          registryUrls: ['https://example.com/pypi/simple'],
-          additionalRegistryUrls: ['https://example2.com/pypi/simple'],
-        }),
-      ).toEqual({
-        haveCredentials: false,
-        environmentVars: {
-          PIP_INDEX_URL: 'https://example.com/pypi/simple',
-          PIP_EXTRA_INDEX_URL: 'https://example2.com/pypi/simple',
-        },
-      });
-    });
-
-    it('handles multiple additionalRegistryUrls', () => {
-      hostRules.find.mockReturnValue({});
-      expect(
-        getRegistryUrlVarsFromPackageFile({
-          deps: [],
-          additionalRegistryUrls: [
-            'https://example.com/pypi/simple',
-            'https://example2.com/pypi/simple',
-          ],
-        }),
-      ).toEqual({
-        haveCredentials: false,
-        environmentVars: {
-          PIP_EXTRA_INDEX_URL:
-            'https://example.com/pypi/simple https://example2.com/pypi/simple',
-        },
-      });
-    });
-
-    it('uses extra index URLs with no auth', () => {
-      hostRules.find.mockReturnValue({});
-      expect(
-        getRegistryUrlVarsFromPackageFile({
-          deps: [],
-          registryUrls: ['https://example.com/pypi/simple'],
-        }),
-      ).toEqual({
-        haveCredentials: false,
-        environmentVars: {
-          PIP_INDEX_URL: 'https://example.com/pypi/simple',
-        },
-      });
-    });
-
-    it('uses auth from extra index URLs matching host rules', () => {
-      hostRules.find.mockReturnValue({
-        username: 'user',
-        password: 'password',
-      });
-      expect(
-        getRegistryUrlVarsFromPackageFile({
-          deps: [],
-          registryUrls: ['https://example.com/pypi/simple'],
-        }),
-      ).toEqual({
-        haveCredentials: true,
-        environmentVars: {
-          PIP_INDEX_URL: 'https://user:password@example.com/pypi/simple',
-        },
-      });
     });
   });
 
