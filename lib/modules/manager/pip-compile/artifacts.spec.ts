@@ -279,8 +279,20 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsNoHeaders.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          false,
         ),
       ).toBe('pip-compile requirements.in');
+    });
+
+    it('returns --no-emit-index-url when credentials are present in URLs', () => {
+      expect(
+        constructPipCompileCmd(
+          Fixtures.get('requirementsNoHeaders.txt'),
+          'subdir/requirements.in',
+          'subdir/requirements.txt',
+          true,
+        ),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
     it('returns extracted common arguments (like those featured in the README)', () => {
@@ -289,6 +301,20 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsWithHashes.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          false,
+        ),
+      ).toBe(
+        'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
+      );
+    });
+
+    it('returns --no-emit-index-url only once when its in the header and credentials are present in URLs', () => {
+      expect(
+        constructPipCompileCmd(
+          Fixtures.get('requirementsWithHashes.txt'),
+          'subdir/requirements.in',
+          'subdir/requirements.txt',
+          true,
         ),
       ).toBe(
         'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
@@ -301,6 +327,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsWithUnknownArguments.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          false,
         ),
       ).toBe('pip-compile --generate-hashes requirements.in');
       expect(logger.trace).toHaveBeenCalledWith(
@@ -319,6 +346,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsWithExploitingArguments.txt'),
           'subdir/requirements.in',
           'subdir/requirements.txt',
+          false,
         ),
       ).toBe(
         'pip-compile --generate-hashes --output-file=requirements.txt requirements.in',
