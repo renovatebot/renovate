@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - more-log-for-custom-datasource
+      - main
 
   pull_request:
     types:
