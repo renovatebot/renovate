@@ -11,7 +11,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "parent",
       "fileReplacePosition": 186,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -22,7 +21,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "compile",
       "fileReplacePosition": 905,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -33,7 +31,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "compile",
       "fileReplacePosition": 1093,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -44,7 +41,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "build",
       "fileReplacePosition": 1347,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -55,7 +51,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "build",
       "fileReplacePosition": 1545,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -66,7 +61,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "build",
       "fileReplacePosition": 2276,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -77,7 +71,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "compile",
       "fileReplacePosition": 2484,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -88,7 +81,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "compile",
       "fileReplacePosition": 2634,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -99,7 +91,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "compile",
       "fileReplacePosition": 2779,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -110,7 +101,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "compile",
       "fileReplacePosition": 2938,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -121,7 +111,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "test",
       "fileReplacePosition": 3086,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -132,7 +121,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "compile",
       "fileReplacePosition": 3252,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -143,7 +131,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "compile",
       "fileReplacePosition": 3410,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -154,7 +141,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "optional",
       "fileReplacePosition": 3555,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -164,7 +150,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depName": "org.example:relocation-artifact",
       "fileReplacePosition": 3787,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -175,7 +160,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "compile",
       "fileReplacePosition": 4119,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -186,7 +170,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "build",
       "fileReplacePosition": 4375,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },
@@ -197,7 +180,6 @@ exports[`modules/manager/maven/extract extractDependencies extract dependencies 
       "depType": "build",
       "fileReplacePosition": 4769,
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://maven.atlassian.com/content/repositories/atlassian-public/",
       ],
     },

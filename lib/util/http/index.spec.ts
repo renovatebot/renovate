@@ -76,13 +76,38 @@ describe('util/http/index', () => {
         },
       })
       .get('/')
-      .reply(200, '{ "test": true }');
-    expect(await http.getJson('http://renovate.com')).toEqual({
+      .reply(200, '{ "test": true }', { etag: 'abc123' });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
       authorization: false,
       body: {
         test: true,
       },
-      headers: {},
+      headers: {
+        etag: 'abc123',
+      },
+      statusCode: 200,
+    });
+
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(304, '', { etag: 'abc123' });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
+      authorization: false,
+      body: {
+        test: true,
+      },
+      headers: {
+        etag: 'abc123',
+      },
       statusCode: 200,
     });
   });

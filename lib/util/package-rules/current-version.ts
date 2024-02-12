@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
 import * as allVersioning from '../../modules/versioning';
-import { configRegexPredicate } from '../regex';
+import { configRegexPredicate } from '../string-match';
 import { Matcher } from './base';
 
 export class CurrentVersionMatcher extends Matcher {

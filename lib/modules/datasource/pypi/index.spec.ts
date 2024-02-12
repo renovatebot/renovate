@@ -14,6 +14,9 @@ const dataRequiresPythonResponse = Fixtures.get(
 const mixedHyphensResponse = Fixtures.get('versions-html-mixed-hyphens.html');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
+const withWhitespacesResponse = Fixtures.get(
+  'versions-html-with-whitespaces.html',
+);
 const hyphensResponse = Fixtures.get('versions-html-hyphens.html');
 
 const baseUrl = 'https://pypi.org/pypi';
@@ -422,6 +425,26 @@ describe('modules/datasource/pypi/index', () => {
         datasource,
         ...config,
         packageName: 'package.with.periods',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
+    });
+
+    it('process data from simple endpoint with extra whitespaces in html', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/package-with-whitespaces/')
+        .reply(200, withWhitespacesResponse);
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'package-with-whitespaces',
       });
       expect(res?.releases).toMatchObject([
         { version: '2.0.0' },

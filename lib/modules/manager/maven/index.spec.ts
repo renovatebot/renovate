@@ -40,9 +40,9 @@ describe('modules/manager/maven/index', () => {
         'simple.pom.xml',
       ]);
       const urls = [
-        'https://repo.maven.apache.org/maven2',
-        'https://maven.atlassian.com/content/repositories/atlassian-public/',
         'https://artifactory.company.com/artifactory/my-maven-repo',
+        'https://maven.atlassian.com/content/repositories/atlassian-public/',
+        'https://repo.maven.apache.org/maven2',
       ];
       for (const pkg of packages) {
         for (const dep of pkg.deps) {
@@ -316,10 +316,31 @@ describe('modules/manager/maven/index', () => {
       packages.forEach(({ deps }) => {
         deps.forEach(({ registryUrls }) => {
           const depUrls = new Set([...registryUrls!]);
-          expect(depUrls).toEqual(urls);
+          expect(depUrls).toStrictEqual(urls);
         });
       });
       expect(packages).toMatchSnapshot();
+    });
+
+    it('should include registryUrls in the correct order', async () => {
+      const profileSettingsContent = Fixtures.get('profile.settings.xml');
+      fs.readLocalFile
+        .mockResolvedValueOnce(pomContent)
+        .mockResolvedValueOnce(profileSettingsContent);
+      const packages = await extractAllPackageFiles({}, [
+        'simple.pom.xml',
+        'profile.settings.xml',
+      ]);
+      const urls = [
+        'https://repo.adobe.com/nexus/content/groups/public',
+        'https://maven.atlassian.com/content/repositories/atlassian-public/',
+        'https://repo.maven.apache.org/maven2',
+      ];
+      for (const pkg of packages) {
+        for (const dep of pkg.deps) {
+          expect(dep.registryUrls).toStrictEqual(urls);
+        }
+      }
     });
 
     it('should not touch content if new and old versions are equal', () => {

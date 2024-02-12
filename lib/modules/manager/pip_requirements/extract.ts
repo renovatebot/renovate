@@ -8,6 +8,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency, PackageFileContent } from '../types';
+import type { PipRequirementsManagerData } from './types';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -46,11 +47,15 @@ export function cleanRegistryUrls(registryUrls: string[]): string[] {
   });
 }
 
-export function extractPackageFile(content: string): PackageFileContent | null {
+export function extractPackageFile(
+  content: string,
+): PackageFileContent<PipRequirementsManagerData> | null {
   logger.trace('pip_requirements.extractPackageFile()');
 
   let registryUrls: string[] = [];
   const additionalRegistryUrls: string[] = [];
+  const additionalRequirementsFiles: string[] = [];
+  const additionalConstraintsFiles: string[] = [];
   content.split(newlineRegex).forEach((line) => {
     if (line.startsWith('-i ') || line.startsWith('--index-url ')) {
       registryUrls = [line.split(' ')[1]];
@@ -59,6 +64,10 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         .substring('--extra-index-url '.length)
         .split(' ')[0];
       additionalRegistryUrls.push(extraUrl);
+    } else if (line.startsWith('-r ')) {
+      additionalRequirementsFiles.push(line.split(' ')[1]);
+    } else if (line.startsWith('-c ')) {
+      additionalConstraintsFiles.push(line.split(' ')[1]);
     }
   });
 
@@ -131,6 +140,18 @@ export function extractPackageFile(content: string): PackageFileContent | null {
   }
   if (additionalRegistryUrls.length) {
     res.additionalRegistryUrls = cleanRegistryUrls(additionalRegistryUrls);
+  }
+  if (additionalRequirementsFiles.length) {
+    if (!res.managerData) {
+      res.managerData = {};
+    }
+    res.managerData.requirementsFiles = additionalRequirementsFiles;
+  }
+  if (additionalConstraintsFiles.length) {
+    if (!res.managerData) {
+      res.managerData = {};
+    }
+    res.managerData.constraintsFiles = additionalConstraintsFiles;
   }
   return res;
 }
