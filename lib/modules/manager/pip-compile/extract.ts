@@ -1,3 +1,4 @@
+import { Graph } from 'graph-data-structure';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
@@ -130,6 +131,24 @@ export async function extractAllPackageFiles(
         config,
       );
       if (packageFileContent) {
+        if (packageFileContent.managerData?.requirementsFiles) {
+          for (const file of packageFileContent.managerData.requirementsFiles) {
+            depsBetweenFiles.push({
+              sourceFile: file,
+              outputFile: packageFile,
+              type: 'requirement',
+            });
+          }
+        }
+        if (packageFileContent.managerData?.constraintsFiles) {
+          for (const file of packageFileContent.managerData.constraintsFiles) {
+            depsBetweenFiles.push({
+              sourceFile: file,
+              outputFile: packageFile,
+              type: 'requirement',
+            });
+          }
+        }
         packageFiles.set(packageFile, {
           ...packageFileContent,
           lockFiles: [fileMatch],
@@ -143,13 +162,28 @@ export async function extractAllPackageFiles(
       }
     }
   }
-  // TODO(not7cd): sort by requirement layering (-r -c within .in files)
   if (packageFiles.size === 0) {
     return null;
+  }
+  const result: PackageFile[] = [];
+  const graph: ReturnType<typeof Graph> = Graph();
+  depsBetweenFiles.forEach(({ sourceFile, outputFile }) => {
+    graph.addEdge(sourceFile, outputFile);
+  });
+  graph.topologicalSort().forEach((file) => {
+    if (packageFiles.has(file)) {
+      result.push(packageFiles.get(file)!);
+    }
+  });
+  // istanbul ignore if: should never happen
+  if (result.length !== packageFiles.size) {
+    throw new Error(
+      'pip-compile: topological sort failed to include all package files',
+    );
   }
   logger.debug(
     'pip-compile: dependency graph:\n' +
       generateMermaidGraph(depsBetweenFiles, lockFileArgs),
   );
-  return Array.from(packageFiles.values());
+  return result;
 }
