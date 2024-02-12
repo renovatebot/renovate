@@ -12,8 +12,8 @@ import { getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
-  allowedPipArguments,
   constraintLineRegex,
+  deprecatedAllowedPipArguments,
   getExecOptions,
 } from './common';
 
@@ -27,7 +27,7 @@ export function constructPipCompileCmd(
   if (headers?.groups) {
     logger.debug(`Found pip-compile header: ${headers[0]}`);
     for (const argument of split(headers.groups.arguments)) {
-      if (allowedPipArguments.includes(argument)) {
+      if (deprecatedAllowedPipArguments.includes(argument)) {
         args.push(argument);
       } else if (argument.startsWith('--output-file=')) {
         const file = upath.parse(outputFileName).base;
@@ -65,56 +65,69 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const outputFileName = inputFileName.replace(regEx(/(\.in)?$/), '.txt');
-  logger.debug(
-    `pipCompile.updateArtifacts(${inputFileName}->${outputFileName})`,
-  );
-  const existingOutput = await readLocalFile(outputFileName, 'utf8');
-  if (!existingOutput) {
-    logger.debug('No pip-compile output file found');
+  config.lockFiles = [outputFileName];
+  // TODO: remove above and below line and use config.lockFiles directly in the next PR
+  // istanbul ignore if
+  if (!config.lockFiles) {
+    logger.warn(
+      { packageFileName: inputFileName },
+      'pip-compile: No lock files associated with a package file',
+    );
     return null;
   }
-  try {
-    await writeLocalFile(inputFileName, newInputContent);
-    if (config.isLockFileMaintenance) {
-      await deleteLocalFile(outputFileName);
-    }
-    const cmd = constructPipCompileCmd(
-      existingOutput,
-      inputFileName,
-      outputFileName,
-    );
-    const execOptions = await getExecOptions(config, inputFileName);
-    logger.trace({ cmd }, 'pip-compile command');
-    await exec(cmd, execOptions);
-    const status = await getRepoStatus();
-    if (!status?.modified.includes(outputFileName)) {
+  logger.debug(
+    `pipCompile.updateArtifacts(${inputFileName}->${JSON.stringify(
+      config.lockFiles,
+    )})`,
+  );
+  const result: UpdateArtifactsResult[] = [];
+  for (const outputFileName of config.lockFiles) {
+    const existingOutput = await readLocalFile(outputFileName, 'utf8');
+    if (!existingOutput) {
+      logger.debug('pip-compile: No output file found');
       return null;
     }
-    logger.debug('Returning updated pip-compile result');
-    return [
-      {
+    try {
+      await writeLocalFile(inputFileName, newInputContent);
+      // TODO(not7cd): use --upgrade option instead deleting
+      if (config.isLockFileMaintenance) {
+        await deleteLocalFile(outputFileName);
+      }
+      const cmd = constructPipCompileCmd(
+        existingOutput,
+        inputFileName,
+        outputFileName,
+      );
+      const execOptions = await getExecOptions(config, inputFileName);
+      logger.trace({ cmd }, 'pip-compile command');
+      await exec(cmd, execOptions);
+      const status = await getRepoStatus();
+      if (!status?.modified.includes(outputFileName)) {
+        return null;
+      }
+      result.push({
         file: {
           type: 'addition',
           path: outputFileName,
           contents: await readLocalFile(outputFileName, 'utf8'),
         },
-      },
-    ];
-  } catch (err) {
-    // istanbul ignore if
-    if (err.message === TEMPORARY_ERROR) {
-      throw err;
-    }
-    logger.debug({ err }, 'Failed to pip-compile');
-    return [
-      {
+      });
+    } catch (err) {
+      // istanbul ignore if
+      if (err.message === TEMPORARY_ERROR) {
+        throw err;
+      }
+      logger.debug({ err }, 'pip-compile: Failed to run command');
+      result.push({
         artifactError: {
           lockFile: outputFileName,
           stderr: err.message,
         },
-      },
-    ];
+      });
+    }
   }
+  logger.debug('pip-compile: Returning updated output file(s)');
+  return result;
 }
 
 export function extractResolver(argument: string): string | null {

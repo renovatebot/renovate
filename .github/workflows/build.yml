@@ -391,9 +391,10 @@ jobs:
           path: coverage
 
       - name: Codecov
-        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
+        uses: codecov/codecov-action@e0b68c6749509c5f83f984dd99a76a1c1a231044 # v4.0.1
         with:
           directory: coverage/lcov
+          token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -465,6 +466,11 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Build docker
+        run: pnpm build:docker build --tries=3
+        env:
+          LOG_LEVEL: debug
 
       - name: Pack
         run: pnpm test-e2e:pack
@@ -544,12 +550,13 @@ jobs:
 
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     permissions:
       contents: write
       issues: write
       pull-requests: write
       id-token: write
+      packages: write
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -558,11 +565,23 @@ jobs:
           show-progress: false
           filter: blob:none # we don't need all blobs, only the full tree
 
+      - name: docker-config
+        uses: containerbase/internal-tools@2951ced35dd6127673e4e2cf937416460a317f3b # v3.0.57
+        with:
+          command: docker-config
+
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+
+      - uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
+
+      - name: Docker registry login
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Check dry run
         run: |
@@ -574,13 +593,10 @@ jobs:
             echo "DRY_RUN=false" >> "$GITHUB_ENV"
           fi
 
-      # TODO: move to semantic-release prepare
-      - name: Build
-        run: pnpm build
-
       - name: semantic-release
         run: |
           pnpm semantic-release --dry-run ${{env.DRY_RUN}}
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # TODO: use action token?
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          LOG_LEVEL: debug
