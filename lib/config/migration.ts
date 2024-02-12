@@ -157,7 +157,11 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       migratedConfig['pip-compile'].fileMatch = migratedConfig[
         'pip-compile'
       ].fileMatch.map((fileMatch) => {
-        return (fileMatch as string).replace(/\.in\$$/, '.txt$');
+        const match = fileMatch as string;
+        if (match.endsWith('.in')) {
+          return match.replace(/\.in$/, '.txt');
+        }
+        return match.replace(/\.in\$$/, '.txt$');
       });
     }
     if (is.nonEmptyArray(migratedConfig.matchManagers)) {
