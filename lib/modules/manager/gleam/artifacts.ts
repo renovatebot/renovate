@@ -49,7 +49,7 @@ export async function updateArtifacts(
       toolConstraints: [
         {
           toolName: 'gleam',
-          constraint: updateArtifact?.config?.constraints?.gleam,
+          constraint: config.constraints?.gleam,
         },
       ],
     };
