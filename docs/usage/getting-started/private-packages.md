@@ -461,6 +461,34 @@ verify_ssl = true
 name = "pypi"
 ```
 
+### pip-compile
+
+The pip-compile manager extracts `--index-url` and `--extra-index-url` directives from its input file.
+Renovate will match those URLs with credentials from matching `hostRules` blocks in its configuration and pass appropriate `PIP_INDEX_URL` or `PIP_EXTRA_INDEX_URL` environment variables `pip-compile` with those credentials while generating the output file.
+
+```title="requirements.in"
+--extra-index-url https://pypi.my.domain/simple
+
+private-package==1.2.3
+```
+
+```json
+{
+  "pip-compile": {
+    "fileMatch": ["requirements.in"]
+  },
+  "hostRules": [
+    {
+      "matchHost": "pypi.my.domain",
+      "username": "myuser",
+      "password": "mypassword"
+    }
+  ]
+}
+```
+
+Note: When credentials are passed to `pip-compile` this way Renovate will also pass the `--no-emit-index-url` flag to avoid leaking plain-text credentials to the output file.
+
 ### poetry
 
 For every Poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`, where `X` represents the normalized name of the source in `pyproject.toml`.
