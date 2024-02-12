@@ -1,19 +1,6 @@
-import assert from 'assert';
-import { parse as parseToml } from '../../../util/toml';
+import { HexDatasource } from '../../datasource/hex';
 import type { PackageDependency, PackageFileContent } from '../types';
-
-type GleamToml = {
-  name: string;
-  dependencies?: Record<string, string>;
-  ['dev-dependencies']?: Record<string, string>;
-};
-
-function parseGleamToml(gleamTomlString: string): GleamToml {
-  const toml = parseToml(gleamTomlString) as GleamToml;
-  assert(toml, 'invalid toml');
-  assert(typeof toml.name === 'string');
-  return toml;
-}
+import { GleamToml } from './schema';
 
 function toPackageDep({
   name,
@@ -22,34 +9,39 @@ function toPackageDep({
 }: {
   name: string;
   version: string;
-  dev: boolean;
+  dev?: boolean;
 }): PackageDependency {
   return {
     depName: name,
     depType: dev ? 'devDependencies' : 'dependencies',
-    datasource: 'hex',
+    datasource: HexDatasource.id,
     currentValue: version,
   };
 }
 
+function toPackageDeps({
+  deps,
+  dev,
+}: {
+  deps?: Record<string, string>;
+  dev?: boolean;
+}): PackageDependency[] {
+  return Object.entries(deps ?? {}).map(([name, version]) =>
+    toPackageDep({ name, version, dev }),
+  );
+}
+
 function extractGleamTomlDeps(gleamToml: GleamToml): PackageDependency[] {
   return [
-    ...Object.entries(gleamToml.dependencies ?? {}).map(([name, version]) =>
-      toPackageDep({ name, version, dev: false }),
-    ),
-    ...Object.entries(gleamToml['dev-dependencies'] ?? {}).map(
-      ([name, version]) => toPackageDep({ name, version, dev: false }),
-    ),
+    ...toPackageDeps({ deps: gleamToml.dependencies }),
+    ...toPackageDeps({
+      deps: gleamToml['dev-dependencies'],
+      dev: true,
+    }),
   ];
 }
 
-export function extractPackageFile(
-  content: string,
-  packageFile?: string,
-): PackageFileContent | null {
-  const deps: PackageDependency[] =
-    packageFile === 'gleam.toml'
-      ? extractGleamTomlDeps(parseGleamToml(content))
-      : [];
-  return { deps, lockFiles: ['manifest.toml'] };
+export function extractPackageFile(content: string): PackageFileContent | null {
+  const deps = extractGleamTomlDeps(GleamToml.parse(content));
+  return deps.length ? { deps } : null;
 }

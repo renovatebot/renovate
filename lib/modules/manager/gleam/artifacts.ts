@@ -5,6 +5,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   deleteLocalFile,
+  getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -23,16 +24,14 @@ export async function updateArtifacts(
     return null;
   }
 
-  // Find the first gleam dependency in order to handle mixed manager updates
-  const lockFileName = updatedDeps.find((dep) => dep.manager === 'gleam')
-    ?.lockFiles?.[0];
+  const lockFileName = getSiblingFileName(packageFileName, 'manifest.toml');
 
   if (!lockFileName) {
     logger.debug(`No ${lockFileName} found`);
     return null;
   }
 
-  const oldLockFileContent = await readLocalFile(lockFileName);
+  const oldLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!oldLockFileContent) {
     logger.debug(`No ${lockFileName} found`);
     return null;
@@ -56,11 +55,8 @@ export async function updateArtifacts(
     };
 
     await exec('gleam deps download', execOptions);
-    const newLockFileContent = await readLocalFile(lockFileName);
-    if (
-      !newLockFileContent ||
-      Buffer.compare(oldLockFileContent, newLockFileContent) === 0
-    ) {
+    const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
+    if (!newLockFileContent || oldLockFileContent === newLockFileContent) {
       return null;
     }
     return [
