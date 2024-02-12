@@ -219,5 +219,23 @@ describe('modules/manager/pip-compile/common', () => {
         },
       });
     });
+
+    it('handles invalid URLs', () => {
+      hostRules.find.mockReturnValue({});
+      expect(
+        getRegistryUrlVarsFromPackageFile({
+          deps: [],
+          additionalRegistryUrls: [
+            'https://example.com/pypi/simple',
+            'this is not a valid URL',
+          ],
+        }),
+      ).toEqual({
+        haveCredentials: false,
+        environmentVars: {
+          PIP_EXTRA_INDEX_URL: 'https://example.com/pypi/simple',
+        },
+      });
+    });
   });
 });

@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { split } from 'shlex';
 import { logger } from '../../../logger';
+import { isNotNullOrUndefined } from '../../../util/array';
 import type { ExecOptions } from '../../../util/exec/types';
 import { ensureCacheDir } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
@@ -221,23 +222,34 @@ function throwForUnknownOption(arg: string): void {
   throw new Error(`Option ${arg} not supported (yet)`);
 }
 
-function buildRegistryUrl(url: string): URL {
-  const hostRule = hostRules.find({ url });
-  const ret = new URL(url);
-  if (!ret.username) {
-    ret.username = hostRule.username ?? '';
-    ret.password = hostRule.password ?? '';
+function buildRegistryUrl(url: string): URL | null {
+  try {
+    const ret = new URL(url);
+    const hostRule = hostRules.find({ url });
+    if (!ret.username && !ret.password) {
+      ret.username = hostRule.username ?? '';
+      ret.password = hostRule.password ?? '';
+    }
+    return ret;
+  } catch {
+    return null;
   }
-  return ret;
 }
 
 function getRegistryUrlVarFromUrls(
   varName: keyof GetRegistryUrlVarsResult['environmentVars'],
   urls: URL[],
 ): GetRegistryUrlVarsResult {
+  if (!urls.length) {
+    return {
+      haveCredentials: false,
+      environmentVars: {},
+    };
+  }
+
   let haveCredentials = false;
   for (const url of urls) {
-    if (url.username) {
+    if (url.username || url.password) {
       haveCredentials = true;
     }
   }
@@ -259,11 +271,15 @@ export function getRegistryUrlVarsFromPackageFile(
   // flags in the input file, and that only makes sense once
   const indexUrl = getRegistryUrlVarFromUrls(
     'PIP_INDEX_URL',
-    packageFile?.registryUrls?.map(buildRegistryUrl) ?? [],
+    packageFile?.registryUrls
+      ?.map(buildRegistryUrl)
+      .filter(isNotNullOrUndefined) ?? [],
   );
   const extraIndexUrls = getRegistryUrlVarFromUrls(
     'PIP_EXTRA_INDEX_URL',
-    packageFile?.additionalRegistryUrls?.map(buildRegistryUrl) ?? [],
+    packageFile?.additionalRegistryUrls
+      ?.map(buildRegistryUrl)
+      .filter(isNotNullOrUndefined) ?? [],
   );
 
   return {
