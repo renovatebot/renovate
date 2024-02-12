@@ -35,6 +35,13 @@ For troubleshooting it's recommended to increase logging to `DEBUG` level by add
 If your Renovate logs are being processed by a log service before you access them, you may find it better to have Renovate output logs in JSON format instead so that they can be reliably parsed and filtered.
 This can be achieved by adding `LOG_FORMAT=json` to your environment variables before invoking Renovate.
 
+Add steps how to sufficiently enable logging.
+
+Add steps how to save the log file during a CI run.
+
+Add steps how to examine / post ndjson output (filetype is kind of exotic).
+@viceice said we prefer plain JSON?
+
 ## Log debug levels
 
 There are different severity levels for the log output.
