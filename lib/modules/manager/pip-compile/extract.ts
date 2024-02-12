@@ -5,7 +5,7 @@ import { extractPackageFile as extractRequirementsFile } from '../pip_requiremen
 // import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 // import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
-import { extractHeaderCommand } from './common';
+import { extractHeaderCommand, generateMermaidGraph } from './common';
 import type {
   DependencyBetweenFiles,
   PipCompileArgs,
@@ -58,24 +58,6 @@ export function extractPackageFile(
       );
       return null;
   }
-}
-
-function generateMermaidGraph(
-  depsBetweenFiles: DependencyBetweenFiles[],
-  lockFileArgs: Map<string, PipCompileArgs>,
-): string {
-  const lockFiles = [];
-  for (const lockFile of lockFileArgs.keys()) {
-    // TODO: add extra args to the lock file ${extraArgs ? '\n' + extraArgs : ''}
-    // const extraArgs = pipCompileArgs.extra
-    //   ?.map((v) => '--extra=' + v)
-    //   .join('\n');
-    lockFiles.push(`  ${lockFile}[[${lockFile}]]`);
-  }
-  const edges = depsBetweenFiles.map(({ sourceFile, outputFile, type }) => {
-    return `  ${sourceFile} -${type === 'constraint' ? '.' : ''}-> ${outputFile}`;
-  });
-  return `graph TD\n${lockFiles.join('\n')}\n${edges.join('\n')}`;
 }
 
 export async function extractAllPackageFiles(
