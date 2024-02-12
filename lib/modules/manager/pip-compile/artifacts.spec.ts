@@ -390,21 +390,5 @@ describe('modules/manager/pip-compile/artifacts', () => {
         ),
       ).toThrow(/custom/);
     });
-
-    // TODO(not7cd): check for explotiable commands
-    // it('skips exploitable subcommands and files', () => {
-    //   expect(
-    //     constructPipCompileCmd(
-    //       Fixtures.get('requirementsWithExploitingArguments.txt'),
-    //       'subdir/requirements.txt',
-    //     ),
-    //   ).toBe(
-    //     'pip-compile --generate-hashes --output-file=requirements.txt requirements.in',
-    //   );
-    //   expect(logger.warn).toHaveBeenCalledWith(
-    //     { argument: '--output-file=/etc/shadow' },
-    //     'pip-compile was previously executed with an unexpected `--output-file` filename',
-    //   );
-    // });
   });
 });
