@@ -14,7 +14,6 @@
         ]
       }
     ],
-    "@semantic-release/npm",
     [
       "@semantic-release/exec",
       {
@@ -92,7 +91,7 @@
   "tagFormat": "${version}",
   "branches": [
     {
-      "name": "main"
+      "name": "more-log-for-custom-datasource"
     }
   ]
 }
