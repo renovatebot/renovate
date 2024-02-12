@@ -668,6 +668,26 @@ describe('config/migration', () => {
     expect(migratedConfig).toMatchSnapshot();
   });
 
+  it('it migrates pip-compile', () => {
+    const config: RenovateConfig = {
+      'pip-compile': {
+        enabled: true,
+        fileMatch: [
+          '(^|/)requirements\\.in$',
+          '(^|/)requirements-fmt\\.in$',
+          '(^|/)requirements-lint\\.in$',
+          '.github/workflows/requirements.in',
+          '(^|/)debian_packages/private/third_party/requirements\\.in$',
+          '(^|/).*?requirements.*?\\.in$',
+        ],
+      },
+    };
+    const { isMigrated, migratedConfig } =
+      configMigration.migrateConfig(config);
+    expect(isMigrated).toBeTrue();
+    expect(migratedConfig).toMatchSnapshot();
+  });
+
   it('it migrates gradle-lite', () => {
     const config: RenovateConfig = {
       'gradle-lite': {
