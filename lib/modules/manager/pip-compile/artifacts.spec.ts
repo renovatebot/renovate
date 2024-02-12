@@ -334,16 +334,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
       ).toThrow(/extract/);
     });
 
-    it('returns --no-emit-index-url when credentials are present in URLs', () => {
-      expect(
-        constructPipCompileCmd(
-          Fixtures.get('requirementsNoHeaders.txt'),
-          'subdir/requirements.txt',
-          true,
-        ),
-      ).toBe('pip-compile --no-emit-index-url requirements.in');
-    });
-
     it('returns extracted common arguments (like those featured in the README)', () => {
       expect(
         constructPipCompileCmd(

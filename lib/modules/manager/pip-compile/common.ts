@@ -7,7 +7,11 @@ import { ensureCacheDir } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types';
-import type { GetRegistryUrlVarsResult, PipCompileArgs, DependencyBetweenFiles } from './types';
+import type {
+  DependencyBetweenFiles,
+  GetRegistryUrlVarsResult,
+  PipCompileArgs,
+} from './types';
 
 export function getPythonConstraint(
   config: UpdateArtifactsConfig,
@@ -193,7 +197,6 @@ function throwForDisallowedOption(arg: string): void {
     throw new Error(`Option ${arg} not allowed for this manager`);
   }
 }
-
 function throwForNoEqualSignInOptionWithArgument(arg: string): void {
   if (optionsWithArguments.includes(arg)) {
     throw new Error(
@@ -201,7 +204,6 @@ function throwForNoEqualSignInOptionWithArgument(arg: string): void {
     );
   }
 }
-
 function throwForUnknownOption(arg: string): void {
   if (arg.includes('=')) {
     const [option] = arg.split('=');
@@ -214,6 +216,7 @@ function throwForUnknownOption(arg: string): void {
   }
   throw new Error(`Option ${arg} not supported (yet)`);
 }
+
 export function generateMermaidGraph(
   depsBetweenFiles: DependencyBetweenFiles[],
   lockFileArgs: Map<string, PipCompileArgs>,
@@ -230,6 +233,7 @@ export function generateMermaidGraph(
     return `  ${sourceFile} -${type === 'constraint' ? '.' : ''}-> ${outputFile}`;
   });
   return `graph TD\n${lockFiles.join('\n')}\n${edges.join('\n')}`;
+}
 
 function buildRegistryUrl(url: string): URL | null {
   try {
