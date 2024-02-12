@@ -445,9 +445,14 @@ describe('modules/manager/sbt/extract', () => {
           local
           my-maven-repo: http://example.org/repo
           my-ivy-repo: https://example.org/ivy-repo/, [organization]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext]
+          maven-central
         `,
         ),
-      ).toBeArrayOfSize(2);
+      ).toStrictEqual([
+        'http://example.org/repo',
+        'https://example.org/ivy-repo/',
+        'https://repo1.maven.org/maven2',
+      ]);
     });
   });
 });

@@ -14,7 +14,6 @@ import {
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import * as semverVersioning from '../../versioning/semver';
-import { REGISTRY_URLS } from '../gradle/parser/common';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -42,6 +41,8 @@ interface Ctx {
   useScalaVersion?: boolean;
   variableName?: string;
 }
+
+const SBT_MVN_REPO = 'https://repo1.maven.org/maven2';
 
 const scala = lang.createLang('scala');
 
@@ -296,21 +297,27 @@ const query = q.tree<Ctx>({
   postHandler: registryUrlHandler,
 });
 
+function extractUrl(line: string): string {
+  if (line.includes(',')) {
+    return line.substring(line.indexOf(':') + 1, line.indexOf(','));
+  } else {
+    return line.substring(line.indexOf(':') + 1);
+  }
+}
+
 export function extractProxyUrls(content: string): string[] {
   const extractedProxyUrls: string[] = [];
   logger.debug('Parsing proxy repository file');
-  content.split(newlineRegex).forEach((line) => {
-    const regex = new RegExp('https?');
-    if (line.match(regex)) {
-      const url = line.includes(',')
-        ? line.substring(line.indexOf(': ') + 1, line.indexOf(','))
-        : line.substring(line.indexOf(': ') + 1);
+  for (const line of content.split(newlineRegex)) {
+    if (line.match(new RegExp('https?'))) {
+      const url = extractUrl(line);
       if (parseUrl(url)) {
-        extractedProxyUrls.push(url);
+        extractedProxyUrls.push(url.trim());
       }
+    } else if (line.trim() === 'maven-central') {
+      extractedProxyUrls.push(SBT_MVN_REPO);
     }
-  });
-
+  }
   return extractedProxyUrls;
 }
 
