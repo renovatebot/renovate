@@ -10,23 +10,30 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
+import * as pipRequirements from '../pip_requirements';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   constraintLineRegex,
   deprecatedAllowedPipArguments,
   getExecOptions,
+  getRegistryUrlVarsFromPackageFile,
 } from './common';
 
 export function constructPipCompileCmd(
   content: string,
   inputFileName: string,
   outputFileName: string,
+  haveCredentials: boolean,
 ): string {
   const headers = constraintLineRegex.exec(content);
   const args = ['pip-compile'];
-  if (headers?.groups) {
-    logger.debug(`Found pip-compile header: ${headers[0]}`);
-    for (const argument of split(headers.groups.arguments)) {
+  if (!!headers?.groups || haveCredentials) {
+    logger.debug(`Found pip-compile header: ${headers?.[0]}`);
+    const headerArguments = split(headers?.groups?.arguments ?? '');
+    if (haveCredentials && !headerArguments.includes('--no-emit-index-url')) {
+      headerArguments.push('--no-emit-index-url');
+    }
+    for (const argument of headerArguments) {
       if (deprecatedAllowedPipArguments.includes(argument)) {
         args.push(argument);
       } else if (argument.startsWith('--output-file=')) {
@@ -93,13 +100,21 @@ export async function updateArtifacts({
       if (config.isLockFileMaintenance) {
         await deleteLocalFile(outputFileName);
       }
+      const packageFile = pipRequirements.extractPackageFile(newInputContent);
+      const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
       const cmd = constructPipCompileCmd(
         existingOutput,
         inputFileName,
         outputFileName,
+        registryUrlVars.haveCredentials,
       );
-      const execOptions = await getExecOptions(config, inputFileName);
+      const execOptions = await getExecOptions(
+        config,
+        inputFileName,
+        registryUrlVars.environmentVars,
+      );
       logger.trace({ cmd }, 'pip-compile command');
+      logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
       await exec(cmd, execOptions);
       const status = await getRepoStatus();
       if (!status?.modified.includes(outputFileName)) {
