@@ -185,6 +185,14 @@ export function applyConstraintsFiltering<
       for (const releaseConstraint of constraint) {
         if (!releaseConstraint) {
           satisfiesConstraints = true;
+          logger.once.debug(
+            {
+              packageName: config.packageName,
+              versioning: versioningName,
+              constraint: releaseConstraint,
+            },
+            'Undefined release constraint',
+          );
           break;
         }
 
