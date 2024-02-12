@@ -142,10 +142,14 @@ export async function extractAllPackageFiles(
         continue;
       }
 
-      const deps = extractPackageFile(content, packageFile, config);
-      if (deps) {
+      const packageFileContent = extractPackageFile(
+        content,
+        packageFile,
+        config,
+      );
+      if (packageFileContent) {
         packageFiles.set(packageFile, {
-          ...deps,
+          ...packageFileContent,
           lockFiles: [fileMatch],
           packageFile,
         });
