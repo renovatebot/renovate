@@ -181,9 +181,6 @@ exports[`modules/manager/kustomize/extract extractPackageFile() parses helmChart
       "depType": "OCIChart",
       "packageName": "registry-1.docker.io/bitnamicharts/redis",
       "pinDigests": false,
-      "registryUrls": [
-        "https://registry-1.docker.io/bitnamicharts",
-      ],
     },
   ],
 }

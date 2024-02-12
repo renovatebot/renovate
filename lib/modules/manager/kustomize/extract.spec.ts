@@ -182,7 +182,6 @@ describe('modules/manager/kustomize/extract', () => {
         depName: 'redis',
         packageName: 'registry-1.docker.io/bitnamicharts/redis',
         currentValue: '18.12.1',
-        registryUrls: ['https://registry-1.docker.io/bitnamicharts'],
         datasource: DockerDatasource.id,
         pinDigests: false,
         depType: 'OCIChart',
@@ -476,7 +475,6 @@ describe('modules/manager/kustomize/extract', () => {
             datasource: 'docker',
             packageName: 'registry-1.docker.io/bitnamicharts/redis',
             pinDigests: false,
-            registryUrls: ['https://registry-1.docker.io/bitnamicharts'],
           },
         ],
       });

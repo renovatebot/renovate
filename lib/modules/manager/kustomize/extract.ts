@@ -144,26 +144,27 @@ export function extractHelmChart(
   if (!helmChart.name) {
     return null;
   }
-  const res: PackageDependency = {
+
+  if (isOCIRegistry(helmChart.repo)) {
+    return {
+      depName: helmChart.name,
+      currentValue: helmChart.version,
+      datasource: DockerDatasource.id,
+      packageName: `${helmChart.repo.replace('oci://', '')}/${helmChart.name}`,
+      // https://github.com/helm/helm/issues/10312
+      // https://github.com/helm/helm/issues/10678
+      pinDigests: false,
+      depType: 'OCIChart',
+    };
+  }
+
+  return {
     depName: helmChart.name,
     currentValue: helmChart.version,
     registryUrls: [helmChart.repo],
     datasource: HelmDatasource.id,
     depType: 'HelmChart',
   };
-
-  if (isOCIRegistry(helmChart.repo)) {
-    res.datasource = DockerDatasource.id;
-    const repoUrl = helmChart.repo.replace('oci://', '');
-    res.packageName = `${repoUrl}/${helmChart.name}`;
-    res.registryUrls = [`https://${repoUrl}`];
-    // https://github.com/helm/helm/issues/10312
-    // https://github.com/helm/helm/issues/10678
-    res.pinDigests = false;
-    res.depType = 'OCIChart';
-  }
-
-  return res;
 }
 
 export function parseKustomize(
