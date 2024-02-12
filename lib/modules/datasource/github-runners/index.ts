@@ -13,7 +13,7 @@ export class GithubRunnersDatasource extends Datasource {
     macos: [
       { version: '13' },
       { version: '13-l' },
-      { version: '13-xl' },
+      { version: '13-xlarge' },
       { version: '12' },
       { version: '12-large' },
       { version: '11' },
