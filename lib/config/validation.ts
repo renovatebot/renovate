@@ -710,10 +710,9 @@ export async function validateConfig(
     }
 
     if (key === 'hostRules' && is.array(val)) {
-      const allowedHeaders =
-        (isGlobalConfig
-          ? (config.allowedHeaders as string[])
-          : GlobalConfig.get('allowedHeaders', [])) ?? [];
+      const allowedHeaders = isGlobalConfig
+        ? (config.allowedHeaders as string[]) ?? []
+        : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (!rule.headers) {
           continue;
