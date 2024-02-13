@@ -100,7 +100,7 @@ export async function extractAllPackageFiles(
       });
     }
     // TODO(not7cd): handle locked deps
-    const lockedDeps = extractRequirementsFile(fileContent);
+    const lockedDeps = extractRequirementsFile(fileContent)!.deps;
     for (const packageFile of pipCompileArgs.sourceFiles) {
       depsBetweenFiles.push({
         sourceFile: packageFile,
@@ -135,11 +135,18 @@ export async function extractAllPackageFiles(
       );
       if (packageFileContent) {
         for (const dep of packageFileContent.deps) {
-          dep.lockedVersion = lockedDeps?.find(
+          const lockedVersion = lockedDeps?.find(
             (lockedDep) =>
               normalizeDepName(lockedDep.depName!) ===
               normalizeDepName(dep.depName!),
           )?.currentVersion;
+          if (lockedVersion) {
+            dep.lockedVersion = lockedVersion;
+          } else {
+            logger.warn(
+              `pip-compile: ${dep.depName} not found in lock file ${fileMatch}`,
+            );
+          }
         }
         packageFiles.set(packageFile, {
           ...packageFileContent,
