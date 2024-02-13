@@ -166,7 +166,6 @@ export interface IssueUpdateParams {
   body?: string;
   state?: IssueState;
   assignees?: string[];
-  update_at?: string;
 }
 
 export interface IssueUpdateLabelsParams {
