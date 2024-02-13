@@ -79,22 +79,6 @@ exports[`config/migration it migrates nested packageRules 1`] = `
 }
 `;
 
-exports[`config/migration it migrates pip-compile 1`] = `
-{
-  "pip-compile": {
-    "enabled": true,
-    "fileMatch": [
-      "(^|/)requirements\\.txt$",
-      "(^|/)requirements-fmt\\.txt$",
-      "(^|/)requirements-lint\\.txt$",
-      ".github/workflows/requirements.txt",
-      "(^|/)debian_packages/private/third_party/requirements\\.txt$",
-      "(^|/).*?requirements.*?\\.txt$",
-    ],
-  },
-}
-`;
-
 exports[`config/migration migrateConfig(config, parentConfig) does not migrate multi days 1`] = `
 {
   "schedule": "after 5:00pm on wednesday and thursday",

@@ -685,7 +685,19 @@ describe('config/migration', () => {
     const { isMigrated, migratedConfig } =
       configMigration.migrateConfig(config);
     expect(isMigrated).toBeTrue();
-    expect(migratedConfig).toMatchSnapshot();
+    expect(migratedConfig).toEqual({
+      'pip-compile': {
+        enabled: true,
+        fileMatch: [
+          '(^|/)requirements\\.txt$',
+          '(^|/)requirements-fmt\\.txt$',
+          '(^|/)requirements-lint\\.txt$',
+          '.github/workflows/requirements.txt',
+          '(^|/)debian_packages/private/third_party/requirements\\.txt$',
+          '(^|/).*?requirements.*?\\.txt$',
+        ],
+      },
+    });
   });
 
   it('it migrates gradle-lite', () => {
