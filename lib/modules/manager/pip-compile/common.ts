@@ -7,7 +7,11 @@ import { ensureCacheDir } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types';
-import type { GetRegistryUrlVarsResult, PipCompileArgs } from './types';
+import type {
+  DependencyBetweenFiles,
+  GetRegistryUrlVarsResult,
+  PipCompileArgs,
+} from './types';
 
 export function getPythonConstraint(
   config: UpdateArtifactsConfig,
@@ -66,13 +70,6 @@ export const constraintLineRegex = regEx(
   /^(#.*?\r?\n)+# {4}(?<command>\S*)(?<arguments> .*?)?\r?\n/,
 );
 
-// TODO(not7cd): remove in next PR, in favor of extractHeaderCommand
-export const deprecatedAllowedPipArguments = [
-  '--allow-unsafe',
-  '--generate-hashes',
-  '--no-emit-index-url',
-  '--strip-extras',
-];
 export const disallowedPipOptions = [
   '--no-header', // header is required by this manager
 ];
@@ -200,7 +197,6 @@ function throwForDisallowedOption(arg: string): void {
     throw new Error(`Option ${arg} not allowed for this manager`);
   }
 }
-
 function throwForNoEqualSignInOptionWithArgument(arg: string): void {
   if (optionsWithArguments.includes(arg)) {
     throw new Error(
@@ -208,7 +204,6 @@ function throwForNoEqualSignInOptionWithArgument(arg: string): void {
     );
   }
 }
-
 function throwForUnknownOption(arg: string): void {
   if (arg.includes('=')) {
     const [option] = arg.split('=');
@@ -220,6 +215,24 @@ function throwForUnknownOption(arg: string): void {
     return;
   }
   throw new Error(`Option ${arg} not supported (yet)`);
+}
+
+export function generateMermaidGraph(
+  depsBetweenFiles: DependencyBetweenFiles[],
+  lockFileArgs: Map<string, PipCompileArgs>,
+): string {
+  const lockFiles = [];
+  for (const lockFile of lockFileArgs.keys()) {
+    // TODO: add extra args to the lock file ${extraArgs ? '\n' + extraArgs : ''}
+    // const extraArgs = pipCompileArgs.extra
+    //   ?.map((v) => '--extra=' + v)
+    //   .join('\n');
+    lockFiles.push(`  ${lockFile}[[${lockFile}]]`);
+  }
+  const edges = depsBetweenFiles.map(({ sourceFile, outputFile, type }) => {
+    return `  ${sourceFile} -${type === 'constraint' ? '.' : ''}-> ${outputFile}`;
+  });
+  return `graph TD\n${lockFiles.join('\n')}\n${edges.join('\n')}`;
 }
 
 function buildRegistryUrl(url: string): URL | null {
