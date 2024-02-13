@@ -170,11 +170,21 @@ export async function extractAllPackageFiles(
   depsBetweenFiles.forEach(({ sourceFile, outputFile }) => {
     graph.addEdge(sourceFile, outputFile);
   });
-  graph.topologicalSort().forEach((file) => {
+  const sorted = graph.topologicalSort();
+  for (const file of sorted) {
     if (packageFiles.has(file)) {
-      result.push(packageFiles.get(file)!);
+      const packageFile = packageFiles.get(file)!;
+      const sortedLockFiles = [];
+      // TODO(not7cd): this needs better test case
+      for (const lockFile of packageFile.lockFiles!) {
+        if (sorted.includes(lockFile)) {
+          sortedLockFiles.push(lockFile);
+        }
+      }
+      packageFile.lockFiles = sortedLockFiles;
+      result.push(packageFile);
     }
-  });
+  }
   // istanbul ignore if: should never happen
   if (result.length !== packageFiles.size) {
     throw new Error(

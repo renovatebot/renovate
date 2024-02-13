@@ -138,7 +138,7 @@ describe('modules/manager/pip-compile/extract', () => {
     expect(packageFiles).toBeNull();
   });
 
-  it('support package file with multiple lock files', async () => {
+  it('return sorted package files', async () => {
     fs.readLocalFile.mockResolvedValueOnce(
       getSimpleRequirementsFile('pip-compile --output-file=4.txt 3.in', [
         'foo==1.0.1',
@@ -156,5 +156,9 @@ describe('modules/manager/pip-compile/extract', () => {
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles).toBeDefined();
     expect(packageFiles?.map((p) => p.packageFile)).toEqual(['1.in', '3.in']);
+    expect(packageFiles?.map((p) => p.lockFiles!.pop())).toEqual([
+      '2.txt',
+      '4.txt',
+    ]);
   });
 });
