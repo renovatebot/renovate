@@ -373,17 +373,12 @@ jobs:
             ./coverage/lcov
             ./coverage/json
 
-  coverage:
+  codecov:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: (success() || failure()) && github.event.pull_request.draft != true
     steps:
-      - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        with:
-          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
-
       - name: Download coverage reports
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
@@ -394,7 +389,19 @@ jobs:
         uses: codecov/codecov-action@e0b68c6749509c5f83f984dd99a76a1c1a231044 # v4.0.1
         with:
           directory: coverage/lcov
-          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          verbose: true
+
+  coverage-threshold:
+    needs: [test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: (success() || failure()) && github.event.pull_request.draft != true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -418,7 +425,7 @@ jobs:
 
   # Catch-all required check for test matrix and coverage
   test-success:
-    needs: [setup, test, coverage]
+    needs: [setup, test, codecov, coverage-threshold]
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
