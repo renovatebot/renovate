@@ -431,7 +431,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
         'cache-key': cacheKey,
         'runner-timeout-minutes': runnerTimeoutMinutes,
         'test-timeout-milliseconds': testTimeoutMilliseconds,
-        'upload-artifact-name': `coverage-${shards.sort().join('-')}`,
+        'upload-artifact-name': `coverage-${idx}`,
       });
     }
   }
