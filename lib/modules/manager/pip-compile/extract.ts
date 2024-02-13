@@ -5,7 +5,11 @@ import { extractPackageFile as extractRequirementsFile } from '../pip_requiremen
 // import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 // import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
-import { extractHeaderCommand, generateMermaidGraph } from './common';
+import {
+  extractHeaderCommand,
+  generateMermaidGraph,
+  normalizeDepName,
+} from './common';
 import type {
   DependencyBetweenFiles,
   PipCompileArgs,
@@ -96,7 +100,7 @@ export async function extractAllPackageFiles(
       });
     }
     // TODO(not7cd): handle locked deps
-    // const lockedDeps = extractRequirementsFile(content);
+    const lockedDeps = extractRequirementsFile(fileContent);
     for (const packageFile of pipCompileArgs.sourceFiles) {
       depsBetweenFiles.push({
         sourceFile: packageFile,
@@ -130,6 +134,13 @@ export async function extractAllPackageFiles(
         config,
       );
       if (packageFileContent) {
+        for (const dep of packageFileContent.deps) {
+          dep.lockedVersion = lockedDeps?.find(
+            (lockedDep) =>
+              normalizeDepName(lockedDep.depName!) ===
+              normalizeDepName(dep.depName!),
+          )?.currentVersion;
+        }
         packageFiles.set(packageFile, {
           ...packageFileContent,
           lockFiles: [fileMatch],
