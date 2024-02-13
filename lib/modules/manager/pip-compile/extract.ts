@@ -1,5 +1,7 @@
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 // TODO(not7cd): enable in the next PR, when this can be properly tested
 // import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
@@ -75,10 +77,10 @@ export async function extractAllPackageFiles(
       logger.debug(`pip-compile: no content found for fileMatch ${fileMatch}`);
       continue;
     }
+    // TODO(not7cd): rename to headerArguments
     let pipCompileArgs: PipCompileArgs;
     try {
       pipCompileArgs = extractHeaderCommand(fileContent, fileMatch);
-      lockFileArgs.set(fileMatch, pipCompileArgs);
     } catch (error) {
       logger.warn(
         { fileMatch, error },
@@ -86,6 +88,17 @@ export async function extractAllPackageFiles(
       );
       continue;
     }
+    const compileDir: string = pipCompileArgs.commandExecDir;
+    try {
+      ensureLocalPath(compileDir);
+    } catch (error) {
+      logger.warn(
+        { fileMatch, compileDir, error },
+        'pip-compile: Output file path outside of repository',
+      );
+      continue;
+    }
+    lockFileArgs.set(fileMatch, pipCompileArgs);
     for (const constraint in pipCompileArgs.constraintsFiles) {
       // TODO(not7cd): handle constraints
       /* istanbul ignore next */
@@ -97,7 +110,17 @@ export async function extractAllPackageFiles(
     }
     // TODO(not7cd): handle locked deps
     // const lockedDeps = extractRequirementsFile(content);
-    for (const packageFile of pipCompileArgs.sourceFiles) {
+    for (const relativeSourceFile of pipCompileArgs.sourceFiles) {
+      const packageFile = upath.join(compileDir, relativeSourceFile);
+      try {
+        ensureLocalPath(packageFile);
+      } catch (error) {
+        logger.warn(
+          { fileMatch, packageFile, error },
+          'pip-compile: Source file path outside of repository',
+        );
+        continue;
+      }
       depsBetweenFiles.push({
         sourceFile: packageFile,
         outputFile: fileMatch,
