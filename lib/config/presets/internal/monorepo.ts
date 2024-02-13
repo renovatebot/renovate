@@ -448,6 +448,7 @@ const repoGroups = {
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
   'sentry-rust': 'https://github.com/getsentry/sentry-rust',
   serde: 'https://github.com/serde-rs/serde',
+  'serenity-js': 'https://github.com/serenity-js/serenity-js',
   shedlock: 'https://github.com/lukas-krecan/ShedLock',
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',
