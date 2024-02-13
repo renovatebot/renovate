@@ -368,7 +368,6 @@ jobs:
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
         uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
-          overwrite: true
           name: ${{ matrix.upload-artifact-name }}
           path: |
             ./coverage/lcov
