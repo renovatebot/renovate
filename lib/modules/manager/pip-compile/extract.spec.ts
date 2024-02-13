@@ -132,9 +132,16 @@ describe('modules/manager/pip-compile/extract', () => {
       ),
     );
     fs.readLocalFile.mockResolvedValueOnce('!@#$');
-    fs.readLocalFile.mockResolvedValueOnce('');
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile('pip-compile --output-file=headerOnly.txt', []),
+    );
 
-    const lockFiles = ['empty.txt', 'noHeader.txt', 'badSource.txt'];
+    const lockFiles = [
+      'empty.txt',
+      'noHeader.txt',
+      'badSource.txt',
+      'headerOnly.txt',
+    ];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles).toBeNull();
   });

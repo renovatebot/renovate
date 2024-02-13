@@ -99,7 +99,14 @@ export async function extractAllPackageFiles(
         type: 'constraint',
       });
     }
-    const lockedDeps = extractRequirementsFile(fileContent)!.deps;
+    const lockedDeps = extractRequirementsFile(fileContent)?.deps;
+    if (!lockedDeps) {
+      logger.warn(
+        { fileMatch },
+        'pip-compile: Failed to extract dependencies from lock file',
+      );
+      continue;
+    }
     for (const packageFile of pipCompileArgs.sourceFiles) {
       depsBetweenFiles.push({
         sourceFile: packageFile,
