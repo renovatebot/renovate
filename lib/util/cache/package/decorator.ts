@@ -124,7 +124,7 @@ export function cache<T>({
 
     if (!is.undefined(newData)) {
       const newRecord: DecoratorCachedRecord = {
-        cachedAt: DateTime.local().toISO()!,
+        cachedAt: DateTime.local().toISO(),
         value: newData,
       };
       await packageCache.set(finalNamespace, finalKey, newRecord, hardTtl);
