@@ -37,7 +37,11 @@ function getDep(
   return dep;
 }
 
-function getGoDep(lineNumber: number, goVer: string): PackageDependency {
+function getGoDep(
+  lineNumber: number,
+  goVer: string,
+  versioning: string | undefined = undefined,
+): PackageDependency {
   return {
     managerData: {
       lineNumber,
@@ -46,7 +50,7 @@ function getGoDep(lineNumber: number, goVer: string): PackageDependency {
     depType: 'golang',
     currentValue: goVer,
     datasource: GolangVersionDatasource.id,
-    versioning: 'go-mod-directive',
+    versioning,
   };
 }
 
@@ -62,7 +66,14 @@ export function extractPackageFile(
       const line = lines[lineNumber];
       const goVer = line.startsWith('go ') ? line.replace('go ', '') : null;
       if (goVer && semver.validRange(goVer)) {
-        const dep = getGoDep(lineNumber, goVer);
+        const dep = getGoDep(lineNumber, goVer, 'go-mod-directive');
+        deps.push(dep);
+      }
+      const goToolVer = line.startsWith('toolchain go')
+        ? line.replace('toolchain go', '')
+        : null;
+      if (goToolVer && semver.valid(goToolVer)) {
+        const dep = getGoDep(lineNumber, goToolVer);
         deps.push(dep);
       }
       const replaceMatch = regEx(
