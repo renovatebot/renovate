@@ -1,5 +1,4 @@
 import { quote } from 'shlex';
-import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -29,22 +28,13 @@ export function constructPipCompileCmd(
     );
   }
   if (headerArguments.outputFile) {
-    // TODO(not7cd): This file path can be relative like `reqs/main.txt`
-    const file = upath.parse(outputFileName).base;
-    if (headerArguments.outputFile !== file) {
+    // TODO: allow for file relative paths (../foo.in, ./foo.in, etc.)
+    if (headerArguments.outputFile !== outputFileName) {
       // we don't trust the user-supplied output-file argument;
-      // TODO(not7cd): allow relative paths
       logger.warn(
-        { outputFile: headerArguments.outputFile, actualPath: file },
-        'pip-compile was previously executed with an unexpected `--output-file` filename',
+        { outputFile: headerArguments.outputFile, actualPath: outputFileName },
+        'pip-compile was previously executed with an unexpected `--output-file` filename, it must be relative to repository root',
       );
-      // TODO(not7cd): this shouldn't be changed in extract function
-      headerArguments.outputFile = file;
-      headerArguments.argv.forEach((item, i) => {
-        if (item.startsWith('--output-file=')) {
-          headerArguments.argv[i] = `--output-file=${quote(file)}`;
-        }
-      });
     }
   } else {
     logger.debug(`pip-compile: implicit output file (${outputFileName})`);
