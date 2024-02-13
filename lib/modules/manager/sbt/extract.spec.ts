@@ -1,6 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile as extract, extractProxyUrls } from './extract';
+import { fs } from '../../../../test/util';
+import {
+  extractPackageFile as extract,
+  extractAllPackageFiles,
+  extractProxyUrls,
+} from './extract';
+
+jest.mock('../../../util/fs');
 
 const extractPackageFile = (content: string) => extract(content, 'build.sbt');
 
@@ -133,9 +140,7 @@ describe('modules/manager/sbt/extract', () => {
             depType: 'plugin',
             groupName: 'sbtReleaseVersion',
             packageName: 'com.github.gseitz:sbt-release',
-            registryUrls: [
-              'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
-            ],
+            registryUrls: [],
             variableName: 'sbtReleaseVersion',
           },
         ],
@@ -453,6 +458,25 @@ describe('modules/manager/sbt/extract', () => {
         'https://example.org/ivy-repo/',
         'https://repo1.maven.org/maven2',
       ]);
+    });
+
+    it('should include default registryUrls if no repositories file is provided', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(sbt);
+      const packages = await extractAllPackageFiles({}, ['build.sbt']);
+      const pkg = packages[0];
+      pkg.deps
+        .filter((dep) => dep.depType === 'plugin')
+        .forEach(({ registryUrls }) => {
+          expect(registryUrls).toIncludeAllMembers([
+            'https://repo1.maven.org/maven2',
+            'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
+          ]);
+        });
+      pkg.deps
+        .filter((dep) => dep.depType !== 'plugin')
+        .forEach(({ registryUrls }) => {
+          expect(registryUrls).toInclude('https://repo1.maven.org/maven2');
+        });
     });
   });
 });

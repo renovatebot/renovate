@@ -257,7 +257,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
-        "https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases",
       ],
     },
     {
@@ -416,7 +415,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
-        "https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases",
       ],
     },
   ],
