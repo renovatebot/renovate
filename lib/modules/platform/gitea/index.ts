@@ -756,7 +756,6 @@ const platform: Platform = {
             body,
             title,
             state: shouldReOpen ? 'open' : (activeIssue.state as IssueState),
-            update_at: DateTime.now().toISO(),
           },
         );
 
