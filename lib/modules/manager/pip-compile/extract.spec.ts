@@ -1,5 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import { logger } from '../../../logger';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
@@ -158,5 +159,24 @@ describe('modules/manager/pip-compile/extract', () => {
       depName: 'FrIeNdLy-._.-bArD',
       lockedVersion: '1.0.1',
     });
+  });
+
+  it('warns if dependency has no locked version', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=requirements.txt requirements.in',
+        ['foo==1.0.1'],
+      ),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('foo>=1.0.0\nbar');
+
+    const lockFiles = ['requirements.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    const packageFile = packageFiles!.pop();
+    expect(packageFile!.deps).toHaveLength(2);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'pip-compile: `bar` not found in lock file `requirements.txt`',
+    );
   });
 });

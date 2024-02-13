@@ -99,7 +99,6 @@ export async function extractAllPackageFiles(
         type: 'constraint',
       });
     }
-    // TODO(not7cd): handle locked deps
     const lockedDeps = extractRequirementsFile(fileContent)!.deps;
     for (const packageFile of pipCompileArgs.sourceFiles) {
       depsBetweenFiles.push({
@@ -144,7 +143,7 @@ export async function extractAllPackageFiles(
             dep.lockedVersion = lockedVersion;
           } else {
             logger.warn(
-              `pip-compile: ${dep.depName} not found in lock file ${fileMatch}`,
+              `pip-compile: \`${dep.depName}\` not found in lock file \`${fileMatch}\``,
             );
           }
         }
