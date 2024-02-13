@@ -154,7 +154,7 @@ export function extractHelmChart(
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678
       pinDigests: false,
-      depType: 'OCIChart',
+      depType: 'HelmChart',
     };
   }
 

@@ -178,7 +178,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() parses helmChart
       "currentValue": "18.12.1",
       "datasource": "docker",
       "depName": "redis",
-      "depType": "OCIChart",
+      "depType": "HelmChart",
       "packageName": "registry-1.docker.io/bitnamicharts/redis",
       "pinDigests": false,
     },
