@@ -553,7 +553,8 @@ jobs:
       - test-e2e
       - test-success
       - build-docs
-      - coverage
+      - codecov
+      - coverage-threshold
 
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
