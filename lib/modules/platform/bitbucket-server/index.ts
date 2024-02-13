@@ -637,7 +637,7 @@ async function retry<T extends (...arg0: any[]) => any>(
   fn: T,
   args: Parameters<T>,
   maxTries: number,
-  retryErrorMessages: string[] = [],
+  retryErrorMessages: string[],
 ): Promise<Awaited<ReturnType<T>>> {
   const maxAttempts = Math.max(maxTries, 1);
   let lastError: Error | null = null;
