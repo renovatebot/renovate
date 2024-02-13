@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver, { ReleaseType } from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
@@ -78,7 +79,22 @@ export function bumpPackageVersion(
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 
-    const newPomVersion = semver.inc(currentValue, bumpVersion);
+    let newPomVersion;
+    const prerelease = semver.prerelease(currentValue);
+    if (isSnapshot(prerelease) || !prerelease) {
+      let releaseType = bumpVersion;
+      if (isSnapshot(prerelease) && !bumpVersion.startsWith('pre')) {
+        releaseType = ('pre' + bumpVersion) as ReleaseType;
+      }
+      newPomVersion = semver.inc(
+        currentValue,
+        releaseType,
+        prerelease?.join('.') ?? 'SNAPSHOT',
+        false,
+      );
+    } else {
+      newPomVersion = semver.inc(currentValue, bumpVersion);
+    }
     if (!newPomVersion) {
       throw new Error('semver inc failed');
     }
@@ -107,4 +123,11 @@ export function bumpPackageVersion(
     );
   }
   return { bumpedContent };
+}
+
+function isSnapshot(
+  prerelease: ReadonlyArray<string | number> | null,
+): boolean {
+  const lastPart = prerelease?.at(-1);
+  return is.string(lastPart) && lastPart.endsWith('SNAPSHOT');
 }

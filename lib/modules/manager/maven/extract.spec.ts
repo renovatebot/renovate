@@ -4,6 +4,7 @@ import { extractPackage, extractRegistries } from './extract';
 
 const minimumContent = Fixtures.get(`minimum.pom.xml`);
 const simpleContent = Fixtures.get(`simple.pom.xml`);
+const minimumSnapshotContent = Fixtures.get(`minimum_snapshot.pom.xml`);
 
 const mirrorSettingsContent = Fixtures.get(`mirror.settings.xml`);
 const profileSettingsContent = Fixtures.get(`profile.settings.xml`);
@@ -138,6 +139,17 @@ describe('modules/manager/maven/extract', () => {
         mavenProps: {},
         packageFile: 'some-file',
         packageFileVersion: '1',
+      });
+    });
+
+    it('tries minimum snapshot manifests', () => {
+      const res = extractPackage(minimumSnapshotContent, 'some-file');
+      expect(res).toEqual({
+        datasource: 'maven',
+        deps: [],
+        mavenProps: {},
+        packageFile: 'some-file',
+        packageFileVersion: '0.0.1-SNAPSHOT',
       });
     });
   });
