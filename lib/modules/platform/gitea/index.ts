@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import semver from 'semver';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -756,7 +755,6 @@ const platform: Platform = {
             body,
             title,
             state: shouldReOpen ? 'open' : (activeIssue.state as IssueState),
-            update_at: DateTime.now().toISO(),
           },
         );
 

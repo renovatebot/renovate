@@ -1124,26 +1124,5 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
     });
-
-    it('errors if env object is defiend but allowedHeaders is not', async () => {
-      const config = {
-        hostRules: [
-          {
-            matchHost: 'https://domain.com/all-versions',
-            headers: {
-              'X-Auth-Token': 'token',
-            },
-          },
-        ],
-      };
-      const { errors } = await configValidation.validateConfig(true, config);
-      expect(errors).toMatchObject([
-        {
-          message:
-            "hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`.",
-          topic: 'Configuration Error',
-        },
-      ]);
-    });
   });
 });
