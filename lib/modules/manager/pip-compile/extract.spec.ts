@@ -137,4 +137,26 @@ describe('modules/manager/pip-compile/extract', () => {
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles).toBeNull();
   });
+
+  it('adds lockedVersion to deps in package file', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=requirements.txt requirements.in',
+        ['friendly-bard==1.0.1'],
+      ),
+    );
+    // also check if normalized name is used
+    fs.readLocalFile.mockResolvedValueOnce('FrIeNdLy-._.-bArD>=1.0.0');
+
+    const lockFiles = ['requirements.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    const packageFile = packageFiles!.pop();
+    expect(packageFile!.deps).toHaveLength(1);
+    expect(packageFile!.deps.pop()).toMatchObject({
+      currentValue: '>=1.0.0',
+      depName: 'FrIeNdLy-._.-bArD',
+      lockedVersion: '1.0.1',
+    });
+  });
 });
