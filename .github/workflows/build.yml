@@ -69,7 +69,7 @@ jobs:
       - name: Calculate `os-matrix` output
         id: os-matrix
         env:
-          OS_ALL: '["ubuntu-latest", "macos-latest", "windows-latest"]'
+          OS_ALL: '["ubuntu-latest", "macos-14", "windows-latest"]'
           OS_LINUX_ONLY: '["ubuntu-latest"]'
         run: |
           echo 'os-matrix=${{
