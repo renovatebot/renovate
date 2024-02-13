@@ -606,7 +606,7 @@ export async function validateConfig(
             } else if (key === 'env') {
               const allowedEnvVars = isGlobalConfig
                 ? (config.allowedEnv as string[]) ?? []
-                : GlobalConfig.get('allowedEnv', [])!;
+                : GlobalConfig.get('allowedEnv', []);
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!is.string(envVarValue)) {
                   errors.push({
