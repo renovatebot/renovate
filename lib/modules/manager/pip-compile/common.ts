@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { split } from 'shlex';
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import type { ExecOptions } from '../../../util/exec/types';
@@ -40,13 +41,13 @@ export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
 }
 export async function getExecOptions(
   config: UpdateArtifactsConfig,
-  inputFileName: string,
+  cwd: string,
   extraEnv: Record<string, string>,
 ): Promise<ExecOptions> {
   const constraint = getPythonConstraint(config);
   const pipToolsConstraint = getPipToolsConstraint(config);
   const execOptions: ExecOptions = {
-    cwdFile: inputFileName,
+    cwd,
     docker: {},
     toolConstraints: [
       {
@@ -91,6 +92,22 @@ export const allowedPipOptions = [
   ...optionsWithArguments,
 ];
 
+// source: https://stackoverflow.com/questions/1916218/find-the-longest-common-starting-substring-in-a-set-of-strings
+function sharedSuffix(array: string[]): string {
+  const A = array
+      .concat()
+      .sort()
+      .map((s: string) => s.split('').reverse().join('')),
+    a1 = A[0],
+    a2 = A[A.length - 1],
+    L = a1.length;
+  let i = 0;
+  while (i < L && a1.charAt(i) === a2.charAt(i)) {
+    i++;
+  }
+  return a1.substring(0, i).split('').reverse().join('');
+}
+
 // TODO(not7cd): test on all correct headers, even with CUSTOM_COMPILE_COMMAND
 export function extractHeaderCommand(
   content: string,
@@ -106,21 +123,18 @@ export function extractHeaderCommand(
   const command = compileCommand.groups.command;
   const argv = [command];
   const isCustomCommand = command !== 'pip-compile';
-  if (isCustomCommand) {
-    logger.debug(
-      `pip-compile: custom command ${command} detected (${fileName})`,
-    );
-  }
   if (compileCommand.groups.arguments) {
     argv.push(...split(compileCommand.groups.arguments));
   }
   logger.debug(
-    `pip-compile: extracted command from header: ${JSON.stringify(argv)}`,
+    { fileName, argv, isCustomCommand },
+    `pip-compile: extracted command from header`,
   );
 
   const result: PipCompileArgs = {
     argv,
     command,
+    commandExecDir: '.',
     isCustomCommand,
     outputFile: '',
     sourceFiles: [],
@@ -173,6 +187,29 @@ export function extractHeaderCommand(
     }
 
     logger.warn(`pip-compile: option ${arg} not handled`);
+  }
+
+  if (result.outputFile) {
+    const sharedSuffixResult = sharedSuffix([fileName, result.outputFile]);
+    result.commandExecDir = upath.normalize(
+      upath.joinSafe(
+        fileName.slice(0, -sharedSuffixResult.length),
+        result.outputFile.slice(0, -sharedSuffixResult.length),
+      ),
+    );
+  } else {
+    // implicit output file is in the same directory where command was executed
+    result.commandExecDir = upath.normalize(upath.dirname(fileName));
+  }
+  if (result.commandExecDir !== '.') {
+    logger.debug(
+      {
+        commandExecDir: result.commandExecDir,
+        outputFile: result.outputFile,
+        fileName,
+      },
+      `pip-compile: command was not executed in repository root`,
+    );
   }
 
   logger.trace(

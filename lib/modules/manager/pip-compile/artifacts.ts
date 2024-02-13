@@ -7,6 +7,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
 import { getRepoStatus } from '../../../util/git';
 import * as pipRequirements from '../pip_requirements';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -16,28 +17,28 @@ import {
   getRegistryUrlVarsFromPackageFile,
 } from './common';
 
+interface PipCompileCmd {
+  cwd: string;
+  cmd: string;
+}
+
 export function constructPipCompileCmd(
   content: string,
   outputFileName: string,
   haveCredentials: boolean,
-): string {
+): PipCompileCmd {
   const headerArguments = extractHeaderCommand(content, outputFileName);
   if (headerArguments.isCustomCommand) {
     throw new Error(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
   }
-  if (headerArguments.outputFile) {
-    // TODO: allow for file relative paths (../foo.in, ./foo.in, etc.)
-    if (headerArguments.outputFile !== outputFileName) {
-      // we don't trust the user-supplied output-file argument;
-      logger.warn(
-        { outputFile: headerArguments.outputFile, actualPath: outputFileName },
-        'pip-compile was previously executed with an unexpected `--output-file` filename, it must be relative to repository root',
-      );
-    }
-  } else {
-    logger.debug(`pip-compile: implicit output file (${outputFileName})`);
+  const compileDir: string = headerArguments.commandExecDir;
+  // should never happen as we already checked for this in extractAllPackageFiles
+  ensureLocalPath(compileDir);
+
+  if (!headerArguments.outputFile) {
+    logger.debug({ outputFileName }, `pip-compile: implicit output file`);
   }
   // safeguard against index url leak if not explicitly set by an option
   if (
@@ -46,7 +47,7 @@ export function constructPipCompileCmd(
   ) {
     headerArguments.argv.splice(1, 0, '--no-emit-index-url');
   }
-  return headerArguments.argv.map(quote).join(' ');
+  return { cwd: compileDir, cmd: headerArguments.argv.map(quote).join(' ') };
 }
 
 export async function updateArtifacts({
@@ -81,17 +82,17 @@ export async function updateArtifacts({
       }
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
       const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
-      const cmd = constructPipCompileCmd(
+      const { cwd, cmd } = constructPipCompileCmd(
         existingOutput,
         outputFileName,
         registryUrlVars.haveCredentials,
       );
       const execOptions = await getExecOptions(
         config,
-        inputFileName,
+        cwd,
         registryUrlVars.environmentVars,
       );
-      logger.trace({ cmd }, 'pip-compile command');
+      logger.trace({ cwd, cmd }, 'pip-compile command');
       logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
       await exec(cmd, execOptions);
       const status = await getRepoStatus();
