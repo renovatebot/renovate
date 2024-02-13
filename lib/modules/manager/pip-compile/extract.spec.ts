@@ -134,7 +134,10 @@ describe('modules/manager/pip-compile/extract', () => {
     fs.readLocalFile.mockResolvedValueOnce('!@#$'); // malformed.in
     fs.readLocalFile.mockResolvedValueOnce(''); // empty.in
     fs.readLocalFile.mockResolvedValueOnce(
-      getSimpleRequirementsFile('pip-compile --output-file=headerOnly.txt', []),
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=headerOnly.txt reqs.in',
+        [],
+      ),
     );
 
     const lockFiles = [
