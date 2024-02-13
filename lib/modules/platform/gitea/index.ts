@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { DateTime } from 'luxon';
 import semver from 'semver';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
