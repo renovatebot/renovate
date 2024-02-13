@@ -131,7 +131,8 @@ describe('modules/manager/pip-compile/extract', () => {
         ['foo==1.0.1'],
       ),
     );
-    fs.readLocalFile.mockResolvedValueOnce('!@#$');
+    fs.readLocalFile.mockResolvedValueOnce('!@#$'); // malformed.in
+    fs.readLocalFile.mockResolvedValueOnce(''); // empty.in
     fs.readLocalFile.mockResolvedValueOnce(
       getSimpleRequirementsFile('pip-compile --output-file=headerOnly.txt', []),
     );
