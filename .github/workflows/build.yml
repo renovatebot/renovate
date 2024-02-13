@@ -409,6 +409,12 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
+      - name: Download coverage reports
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: coverage
+          path: coverage
+
       - name: Merge coverage reports
         run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
 
