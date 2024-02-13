@@ -383,8 +383,8 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
   };
 
   if (process.env.ALL_PLATFORMS === 'true') {
-    shardGrouping['windows-latest'] = scheduleItems(shardKeys, 8);
-    shardGrouping['macos-latest'] = scheduleItems(shardKeys, 8);
+    shardGrouping['windows-latest'] = scheduleItems(shardKeys, 10);
+    shardGrouping['macos-latest'] = scheduleItems(shardKeys, 5);
   }
 
   const shardGroups: ShardGroup[] = [];
