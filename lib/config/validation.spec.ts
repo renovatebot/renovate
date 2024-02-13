@@ -1075,5 +1075,32 @@ describe('config/validation', () => {
         },
       ]);
     });
+
+    it('errors if allowedHeaders is emoty or not defined', async () => {
+      GlobalConfig.set({});
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'https://domain.com/all-versions',
+            headers: {
+              'X-Auth-Token': 'token',
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        false,
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            "hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`.",
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
   });
 });
