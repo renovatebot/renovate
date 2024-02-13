@@ -137,4 +137,24 @@ describe('modules/manager/pip-compile/extract', () => {
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles).toBeNull();
   });
+
+  it('support package file with multiple lock files', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile('pip-compile --output-file=4.txt 3.in', [
+        'foo==1.0.1',
+      ]),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('-r 2.txt\nfoo');
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile('pip-compile --output-file=2.txt 1.in', [
+        'foo==1.0.1',
+      ]),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('foo');
+
+    const lockFiles = ['4.txt', '2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    expect(packageFiles?.map((p) => p.packageFile)).toEqual(['1.in', '3.in']);
+  });
 });
