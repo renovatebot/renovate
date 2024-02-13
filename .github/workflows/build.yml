@@ -390,6 +390,7 @@ jobs:
         with:
           pattern: coverage-*
           path: coverage
+          merge-multiple: true
 
       - run: find ./coverage
 
@@ -406,7 +407,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Merge coverage reports
-        run: pnpm nyc merge ./coverage/**/json ./coverage/nyc/coverage.json
+        run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
 
       - name: Report coverage
         run: pnpm nyc report -t ./coverage/nyc --skip-full -r text -r text-summary
