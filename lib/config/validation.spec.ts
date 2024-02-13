@@ -1076,7 +1076,7 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('errors if allowedHeaders is emoty or not defined', async () => {
+    it('errors if allowedHeaders is empty or not defined', async () => {
       GlobalConfig.set({});
 
       const config = {
@@ -1101,6 +1101,28 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+    });
+  });
+
+  describe('validateConfig() -> globaOnly options', () => {
+    it('validates hostRules.headers', async () => {
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'https://domain.com/all-versions',
+            headers: {
+              'X-Auth-Token': 'token',
+            },
+          },
+        ],
+        allowedHeaders: ['X-Auth-Token'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        true,
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
     });
   });
 });
