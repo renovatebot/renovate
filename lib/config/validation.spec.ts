@@ -1125,7 +1125,7 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('errors if env object is defiend but allowedHeaders is not', async () => {
+    it('errors if hostRules.headers is defined but allowedHeaders is not', async () => {
       const config = {
         hostRules: [
           {
