@@ -215,71 +215,6 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
     });
 
-    it('catches invalid variable name in env config option', async () => {
-      GlobalConfig.set({ allowedEnv: ['SOME*'] });
-      const config = {
-        env: {
-          randomKey: '',
-          SOME_VAR: 'some_value',
-          SOME_OTHER_VAR: 10,
-        },
-      };
-      const { errors, warnings } = await configValidation.validateConfig(
-        false,
-        // @ts-expect-error: testing invalid values in env object
-        config,
-      );
-      expect(warnings).toMatchObject([
-        {
-          message:
-            'Enviroment variable inside `env.SOME_OTHER_VAR` must be a string.',
-        },
-        {
-          message:
-            'Invalid enviroment variable name `randomKey` found in `env`. Allowed values are "SOME*".',
-        },
-      ]);
-      expect(warnings).toHaveLength(2);
-      expect(errors).toHaveLength(0);
-    });
-
-    it('catches env config option if configured inside a parent', async () => {
-      GlobalConfig.set({ allowedEnv: ['SOME*'] });
-      const config = {
-        npm: {
-          env: {
-            SOME_VAR: 'some_value',
-          },
-        },
-        packageRules: [
-          {
-            matchManagers: ['regex'],
-            env: {
-              SOME_VAR: 'some_value',
-            },
-          },
-        ],
-      };
-      const { errors, warnings } = await configValidation.validateConfig(
-        false,
-        config,
-      );
-      expect(errors).toMatchObject([
-        {
-          message:
-            'The "env" object can only be configured at the top level of a config but was found inside "npm"',
-          topic: 'Configuration Error',
-        },
-        {
-          message:
-            'The "env" object can only be configured at the top level of a config but was found inside "packageRules[0]"',
-          topic: 'Configuration Error',
-        },
-      ]);
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
-    });
-
     it('catches invalid customDatasources record type', async () => {
       const config = {
         customDatasources: {
@@ -1139,6 +1074,104 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
+    });
+
+    it('catches invalid variable name in env config option', async () => {
+      GlobalConfig.set({ allowedEnv: ['SOME*'] });
+      const config = {
+        env: {
+          randomKey: '',
+          SOME_VAR: 'some_value',
+          SOME_OTHER_VAR: 10,
+        },
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        false,
+        // @ts-expect-error: testing invalid values in env object
+        config,
+      );
+      expect(errors).toMatchObject([
+        {
+          message:
+            "Env variable name `randomKey` is not allowed by this bot's `allowedEnv`.",
+        },
+        {
+          message:
+            'Invalid env variable value: `env.SOME_OTHER_VAR` must be a string.',
+        },
+      ]);
+      expect(errors).toHaveLength(2);
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('catches env config option if configured inside a parent', async () => {
+      GlobalConfig.set({ allowedEnv: ['SOME*'] });
+      const config = {
+        npm: {
+          env: {
+            SOME_VAR: 'some_value',
+          },
+        },
+        packageRules: [
+          {
+            matchManagers: ['regex'],
+            env: {
+              SOME_VAR: 'some_value',
+            },
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        false,
+        config,
+      );
+      expect(errors).toMatchObject([
+        {
+          message:
+            'The "env" object can only be configured at the top level of a config but was found inside "npm"',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'The "env" object can only be configured at the top level of a config but was found inside "packageRules[0]"',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(2);
+    });
+
+    describe('validateConfig() -> globaOnly options', () => {
+      it('validates env', async () => {
+        const config = {
+          env: {
+            SOME_VAR: 'SOME_VALUE',
+          },
+          allowedEnv: ['SOME*'],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          true,
+          config,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(0);
+      });
+
+      it('errors if env object is defined but allowedEnv is empty or undefined', async () => {
+        const config = {
+          env: {
+            SOME_VAR: 'SOME_VALUE',
+          },
+        };
+        const { errors } = await configValidation.validateConfig(true, config);
+        expect(errors).toMatchObject([
+          {
+            message:
+              "Env variable name `SOME_VAR` is not allowed by this bot's `allowedEnv`.",
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
     });
   });
 });

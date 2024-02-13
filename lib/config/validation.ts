@@ -604,18 +604,20 @@ export async function validateConfig(
                 });
               }
             } else if (key === 'env') {
-              const allowedEnvVars = GlobalConfig.get('allowedEnv')!;
+              const allowedEnvVars = isGlobalConfig
+                ? (config.allowedEnv as string[]) ?? []
+                : GlobalConfig.get('allowedEnv', [])!;
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!is.string(envVarValue)) {
-                  warnings.push({
+                  errors.push({
                     topic: 'Configuration Error',
-                    message: `Enviroment variable inside \`${currentPath}.${envVarName}\` must be a string.`,
+                    message: `Invalid env variable value: \`${currentPath}.${envVarName}\` must be a string.`,
                   });
                 }
                 if (!anyMatchRegexOrMinimatch(envVarName, allowedEnvVars)) {
-                  warnings.push({
+                  errors.push({
                     topic: 'Configuration Error',
-                    message: `Invalid enviroment variable name \`${envVarName}\` found in \`${currentPath}\`. Allowed values are ${allowedEnvVars?.map((str) => `"${str}"`).join(', ')}.`,
+                    message: `Env variable name \`${envVarName}\` is not allowed by this bot's \`allowedEnv\`.`,
                   });
                 }
               }
