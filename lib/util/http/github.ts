@@ -211,7 +211,7 @@ function getGraphqlPageSize(
     if (now > expiry) {
       const newPageSize = Math.min(oldPageSize * 2, MAX_GRAPHQL_PAGE_SIZE);
       if (newPageSize < MAX_GRAPHQL_PAGE_SIZE) {
-        const timestamp = now.toISO()!;
+        const timestamp = now.toISO();
 
         logger.debug(
           { fieldName, oldPageSize, newPageSize, timestamp },
@@ -242,7 +242,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   const oldPageSize = getGraphqlPageSize(fieldName);
   if (newPageSize !== oldPageSize) {
     const now = DateTime.local();
-    const pageLastResizedAt = now.toISO()!;
+    const pageLastResizedAt = now.toISO();
     logger.debug(
       { fieldName, oldPageSize, newPageSize, timestamp: pageLastResizedAt },
       'GraphQL page size: shrinking',

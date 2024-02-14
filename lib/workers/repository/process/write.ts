@@ -58,8 +58,8 @@ export async function syncBranchState(
   baseBranch: string,
 ): Promise<BranchCache> {
   logger.debug('syncBranchState()');
-  const branchSha = await scm.getBranchCommit(branchName)!;
-  const baseBranchSha = await scm.getBranchCommit(baseBranch)!;
+  const branchSha = await scm.getBranchCommit(branchName);
+  const baseBranchSha = await scm.getBranchCommit(baseBranch);
 
   const cache = getCache();
   cache.branches ??= [];
