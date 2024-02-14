@@ -451,7 +451,7 @@ export async function lookupUpdates(
             isPinDigest: true,
             updateType: 'pinDigest',
             // TODO #22198
-            newValue: config.currentValue!,
+            newValue: compareValue,
           });
         }
       }
