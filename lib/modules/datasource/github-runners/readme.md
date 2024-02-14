@@ -5,9 +5,20 @@ Examples: `windows-2022` / `ubuntu-22.04` / `macos-13`
 
 ## Maintenance
 
+### Adding a new version
+
 New runner versions must be added to the datasource with a pull request.
-Unstable runners are tagged as `[beta]` in the readme of the [`runner-images` repository](https://github.com/actions/runner-images) and should have the `isStable:false` property.
-Deprecated runners are tagged as `[deprecated]` in the readme and should have the `isDeprecated:true` property.
+
+#### Unstable runners
+
+Unstable runners are tagged as `[beta]` in [the `runner-images` repository's readme](https://github.com/actions/runner-images) and should get the `isStable:false` property in our code.
+
+#### Promoting a version to stable
+
+Once a runner version becomes stable, the `[beta]` tag is removed and the suffix `latest` is added to its YAML label.
+We then remove the `isStable:false` property in our code.
+
+### Deprecating a version
+
+Deprecated runners are tagged as `[deprecated]` in [the `runner-images` repository's readme](https://github.com/actions/runner-images) and we should give it the `isDeprecated:true` property.
 If a runner is very old, the readme may drop it completely, but we should still give it the `isDeprecated:true` property.
-Once a runner version becomes stable, the `[beta]` tag is removed and the suffix `latest` is added to its YAML label and the `isStable:false` should be removed.
-Once a runner version becomes deprecated, the `isDeprecated:true` property should be added.
