@@ -101,6 +101,17 @@ const staticGroups = {
     ],
     matchPackagePrefixes: ['fusion-plugin-', 'fusion-react', '^usion-apollo'],
   },
+  githubArtifactActions: {
+    description: 'Group `download-artifact` and `upload-artifact` together.',
+    packageRules: [
+      {
+        groupName: 'GitHub Artifact Actions',
+        matchManagers: ['github-actions'],
+        matchPackageNames: ['actions/download-artifact', 'actions/upload-artifact'],
+        matchUpdateTypes: ['major'],
+      },
+    ],
+  },
   glimmer: {
     description: 'Group Glimmer.js packages together.',
     packageRules: [
@@ -409,6 +420,7 @@ const staticGroups = {
       'group:codemirror',
       'group:fortawesome',
       'group:fusionjs',
+      'group:githubArtifactActions',
       'group:glimmer',
       'group:goOpenapi',
       'group:hibernateCore',
