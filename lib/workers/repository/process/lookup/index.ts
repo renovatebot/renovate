@@ -450,8 +450,7 @@ export async function lookupUpdates(
           res.updates.push({
             isPinDigest: true,
             updateType: 'pinDigest',
-            // TODO #22198
-            newValue: config.currentValue!,
+            newValue: compareValue,
           });
         }
       }
