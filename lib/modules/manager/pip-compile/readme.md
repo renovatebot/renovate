@@ -45,6 +45,9 @@ Because `pip-compile` will update source files with their associated manager you
 {
   "pip_requirements": {
     "enabled": false
+  },
+  "pip_setup": {
+    "enabled": false
   }
 }
 ```
