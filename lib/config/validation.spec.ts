@@ -1076,6 +1076,33 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('errors if allowedHeaders is empty or not defined', async () => {
+      GlobalConfig.set({});
+
+      const config = {
+        hostRules: [
+          {
+            matchHost: 'https://domain.com/all-versions',
+            headers: {
+              'X-Auth-Token': 'token',
+            },
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        false,
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
+        {
+          message:
+            "hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`.",
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
     it('catches invalid variable name in env config option', async () => {
       GlobalConfig.set({ allowedEnv: ['SOME*'] });
       const config = {
@@ -1142,6 +1169,47 @@ describe('config/validation', () => {
     });
 
     describe('validateConfig() -> globaOnly options', () => {
+      it('validates hostRules.headers', async () => {
+        const config = {
+          hostRules: [
+            {
+              matchHost: 'https://domain.com/all-versions',
+              headers: {
+                'X-Auth-Token': 'token',
+              },
+            },
+          ],
+          allowedHeaders: ['X-Auth-Token'],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          true,
+          config,
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(0);
+      });
+
+      it('errors if hostRules.headers is defined but allowedHeaders is not', async () => {
+        const config = {
+          hostRules: [
+            {
+              matchHost: 'https://domain.com/all-versions',
+              headers: {
+                'X-Auth-Token': 'token',
+              },
+            },
+          ],
+        };
+        const { errors } = await configValidation.validateConfig(true, config);
+        expect(errors).toMatchObject([
+          {
+            message:
+              "hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`.",
+            topic: 'Configuration Error',
+          },
+        ]);
+      });
+
       it('validates env', async () => {
         const config = {
           env: {
@@ -1172,76 +1240,6 @@ describe('config/validation', () => {
           },
         ]);
       });
-
-      it('errors if allowedHeaders is empty or not defined', async () => {
-        GlobalConfig.set({});
-
-        const config = {
-          hostRules: [
-            {
-              matchHost: 'https://domain.com/all-versions',
-              headers: {
-                'X-Auth-Token': 'token',
-              },
-            },
-          ],
-        };
-        const { warnings, errors } = await configValidation.validateConfig(
-          false,
-          config,
-        );
-        expect(warnings).toHaveLength(0);
-        expect(errors).toMatchObject([
-          {
-            message:
-              "hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`.",
-            topic: 'Configuration Error',
-          },
-        ]);
-      });
-    });
-  });
-
-  describe('validateConfig() -> globaOnly options', () => {
-    it('validates hostRules.headers', async () => {
-      const config = {
-        hostRules: [
-          {
-            matchHost: 'https://domain.com/all-versions',
-            headers: {
-              'X-Auth-Token': 'token',
-            },
-          },
-        ],
-        allowedHeaders: ['X-Auth-Token'],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        true,
-        config,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
-    });
-
-    it('errors if hostRules.headers is defined but allowedHeaders is not', async () => {
-      const config = {
-        hostRules: [
-          {
-            matchHost: 'https://domain.com/all-versions',
-            headers: {
-              'X-Auth-Token': 'token',
-            },
-          },
-        ],
-      };
-      const { errors } = await configValidation.validateConfig(true, config);
-      expect(errors).toMatchObject([
-        {
-          message:
-            "hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`.",
-          topic: 'Configuration Error',
-        },
-      ]);
     });
   });
 });
