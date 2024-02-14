@@ -102,7 +102,7 @@ const staticGroups = {
     matchPackagePrefixes: ['fusion-plugin-', 'fusion-react', '^usion-apollo'],
   },
   githubArtifactActions: {
-    description: 'Group `download-artifact` and `upload-artifact` together.',
+    description: 'Group `download-artifact` and `upload-artifact` major updates together.',
     packageRules: [
       {
         groupName: 'GitHub Artifact Actions',
