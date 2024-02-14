@@ -1,7 +1,6 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
-import { ensureLocalPath } from '../../../util/fs/util';
+import { isValidLocalPath, readLocalFile } from '../../../util/fs';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 // TODO(not7cd): enable in the next PR, when this can be properly tested
 // import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
@@ -89,11 +88,9 @@ export async function extractAllPackageFiles(
       continue;
     }
     const compileDir: string = pipCompileArgs.commandExecDir;
-    try {
-      ensureLocalPath(compileDir);
-    } catch (error) {
+    if (!isValidLocalPath(compileDir)) {
       logger.warn(
-        { fileMatch, compileDir, error },
+        { fileMatch, compileDir },
         'pip-compile: Output file path outside of repository',
       );
       continue;
@@ -112,11 +109,9 @@ export async function extractAllPackageFiles(
     // const lockedDeps = extractRequirementsFile(content);
     for (const relativeSourceFile of pipCompileArgs.sourceFiles) {
       const packageFile = upath.join(compileDir, relativeSourceFile);
-      try {
-        ensureLocalPath(packageFile);
-      } catch (error) {
+      if (!isValidLocalPath(packageFile)) {
         logger.warn(
-          { fileMatch, packageFile, error },
+          { fileMatch, packageFile },
           'pip-compile: Source file path outside of repository',
         );
         continue;
