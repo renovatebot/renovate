@@ -394,7 +394,8 @@ jobs:
           verbose: true
 
   coverage-threshold:
-    needs: [test]
+    needs:
+      - test
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: (success() || failure()) && github.event.pull_request.draft != true
@@ -434,7 +435,11 @@ jobs:
 
   # Catch-all required check for test matrix and coverage
   test-success:
-    needs: [setup, test, codecov, coverage-threshold]
+    needs: 
+      - setup
+      - test
+      - codecov
+      - coverage-threshold
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
