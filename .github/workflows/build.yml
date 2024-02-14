@@ -435,7 +435,7 @@ jobs:
 
   # Catch-all required check for test matrix and coverage
   test-success:
-    needs: 
+    needs:
       - setup
       - test
       - codecov
