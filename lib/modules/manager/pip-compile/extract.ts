@@ -1,6 +1,6 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
-import { isValidLocalPath, readLocalFile } from '../../../util/fs';
+import { readLocalFile } from '../../../util/fs';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 // TODO(not7cd): enable in the next PR, when this can be properly tested
 // import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
@@ -12,6 +12,7 @@ import type {
   PipCompileArgs,
   SupportedManagers,
 } from './types';
+import { inferCommandExecDir } from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
@@ -78,25 +79,26 @@ export async function extractAllPackageFiles(
     }
     // TODO(not7cd): rename to headerArguments
     let pipCompileArgs: PipCompileArgs;
+
     try {
       pipCompileArgs = extractHeaderCommand(fileContent, fileMatch);
     } catch (error) {
-      console.log('error', error);
       logger.warn(
-        { fileMatch, error },
+        { fileMatch, error: error.message },
         'pip-compile: Failed to extract and parse command in output file header',
       );
       continue;
     }
-    const compileDir: string = pipCompileArgs.commandExecDir;
-    console.log(compileDir, 'compileDir', fileMatch, 'fileMatch');
-    // if (compileDir !== '.' && !isValidLocalPath(compileDir)) {
-    //   logger.warn(
-    //     { fileMatch, compileDir },
-    //     'pip-compile: Output file path outside of repository',
-    //   );
-    //   continue;
-    // }
+    let compileDir: string;
+    try {
+      compileDir = inferCommandExecDir(fileMatch, pipCompileArgs.outputFile);
+    } catch (error) {
+      logger.warn(
+        { fileMatch, error: error.message },
+        'pip-compile: Failed to infer command execution directory',
+      );
+      continue;
+    }
     lockFileArgs.set(fileMatch, pipCompileArgs);
     for (const constraint in pipCompileArgs.constraintsFiles) {
       // TODO(not7cd): handle constraints
@@ -113,15 +115,13 @@ export async function extractAllPackageFiles(
       const packageFile = upath.normalizeTrim(
         upath.join(compileDir, relativeSourceFile),
       );
-      // Unable to check for that. Let it error out
-      // if (!isValidLocalPath(packageFile)) {
-      //   console.log('NOT VALID packageFile', packageFile);
-      //   logger.warn(
-      //     { fileMatch, packageFile },
-      //     'pip-compile: Source file path outside of repository',
-      //   );
-      //   continue;
-      // }
+      if (packageFile.startsWith('..')) {
+        logger.warn(
+          { fileMatch, packageFile },
+          'pip-compile: Source file path outside of repository',
+        );
+        continue;
+      }
       depsBetweenFiles.push({
         sourceFile: packageFile,
         outputFile: fileMatch,
