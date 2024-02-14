@@ -27,13 +27,22 @@ describe('modules/manager/pip-compile/extract', () => {
       expect(packageFile?.deps[0]).toHaveProperty('depName', 'attrs');
     });
 
+    it('returns object for setup.py', () => {
+      const packageFile = extractPackageFile(
+        Fixtures.get('setup.py'),
+        'lib/setup.py',
+        {},
+      );
+      expect(packageFile).toHaveProperty('deps');
+      expect(packageFile?.deps).toMatchSnapshot();
+    });
+
     it.each([
       'random.py',
       'app.cfg',
       'already_locked.txt',
       // TODO(not7cd)
       'pyproject.toml',
-      'setup.py',
       'setup.cfg',
     ])('returns null on not supported package files', (file: string) => {
       expect(extractPackageFile('some content', file, {})).toBeNull();
