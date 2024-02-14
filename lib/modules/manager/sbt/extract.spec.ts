@@ -4,7 +4,6 @@ import { fs } from '../../../../test/util';
 import {
   extractPackageFile as extract,
   extractAllPackageFiles,
-  extractProxyUrls,
 } from './extract';
 
 jest.mock('../../../util/fs');
@@ -441,42 +440,69 @@ describe('modules/manager/sbt/extract', () => {
         ),
       ).toBeNull();
     });
+  });
 
-    it('extracts proxy repositories', () => {
-      expect(
-        extractProxyUrls(
-          codeBlock`
-          [repositories]
-          local
-          my-maven-repo: http://example.org/repo
-          my-ivy-repo: https://example.org/ivy-repo/, [organization]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext]
-          maven-central
-        `,
-        ),
-      ).toStrictEqual([
-        'http://example.org/repo',
-        'https://example.org/ivy-repo/',
-        'https://repo1.maven.org/maven2',
+  describe('extractAllPackageFiles()', () => {
+    it('extracts proxy repositories', async () => {
+      const repositoryContent = codeBlock`
+      [repositories]
+      local
+      my-maven-repo: http://example.org/repo
+      my-ivy-repo: https://example.org/ivy-repo/, [organization]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext]
+      maven-central
+    `;
+      fs.readLocalFile
+        .mockResolvedValueOnce(repositoryContent)
+        .mockResolvedValueOnce(sbtDependencyFile);
+      const packages = await extractAllPackageFiles({}, [
+        'repositories',
+        'build.sbt',
       ]);
+      for (const pkg of packages) {
+        for (const dep of pkg.deps) {
+          expect(dep.registryUrls).toStrictEqual([
+            'http://example.org/repo',
+            'https://example.org/ivy-repo/',
+            'https://repo1.maven.org/maven2',
+          ]);
+        }
+      }
     });
 
     it('should include default registryUrls if no repositories file is provided', async () => {
       fs.readLocalFile.mockResolvedValueOnce(sbt);
       const packages = await extractAllPackageFiles({}, ['build.sbt']);
-      const pkg = packages[0];
-      pkg.deps
-        .filter((dep) => dep.depType === 'plugin')
-        .forEach(({ registryUrls }) => {
-          expect(registryUrls).toIncludeAllMembers([
-            'https://repo1.maven.org/maven2',
+      for (const pkg of packages) {
+        for (const dep of pkg.deps.filter((d) => d.depType === 'plugin')) {
+          expect(dep.registryUrls).toStrictEqual([
             'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
+            'https://repo1.maven.org/maven2',
+            'https://example.com/repos/1/',
+            'https://example.com/repos/2/',
+            'https://example.com/repos/3/',
+            'https://example.com/repos/4/',
+            'https://example.com/repos/5/',
           ]);
-        });
-      pkg.deps
-        .filter((dep) => dep.depType !== 'plugin')
-        .forEach(({ registryUrls }) => {
-          expect(registryUrls).toInclude('https://repo1.maven.org/maven2');
-        });
+        }
+      }
+      for (const pkg of packages) {
+        for (const dep of pkg.deps.filter((d) => d.depType !== 'plugin')) {
+          expect(dep.registryUrls).toStrictEqual([
+            'https://repo1.maven.org/maven2',
+            'https://example.com/repos/1/',
+            'https://example.com/repos/2/',
+            'https://example.com/repos/3/',
+            'https://example.com/repos/4/',
+            'https://example.com/repos/5/',
+          ]);
+        }
+      }
+    });
+
+    it('should return empty packagefiles is no content is provided', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('');
+      const packages = await extractAllPackageFiles({}, ['build.sbt']);
+      expect(packages).toBeEmpty();
     });
   });
 });
