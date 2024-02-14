@@ -418,7 +418,6 @@ jobs:
           path: coverage
           merge-multiple: true
 
-
       - name: Merge coverage reports
         run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
 
