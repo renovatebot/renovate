@@ -98,7 +98,7 @@ export async function extractAllPackageFiles(
     }
     const lockedDeps = extractRequirementsFile(fileContent)?.deps;
     if (!lockedDeps) {
-      logger.warn(
+      logger.debug(
         { fileMatch },
         'pip-compile: Failed to extract dependencies from lock file',
       );
