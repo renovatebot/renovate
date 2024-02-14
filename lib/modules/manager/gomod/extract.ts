@@ -50,7 +50,7 @@ function getGoDep(
     depType: 'golang',
     currentValue: goVer,
     datasource: GolangVersionDatasource.id,
-    ...(versioning && {versioning}),
+    ...(versioning && { versioning }),
   };
 }
 
