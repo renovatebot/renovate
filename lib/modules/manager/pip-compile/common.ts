@@ -198,6 +198,9 @@ export function extractHeaderCommand(
         result.outputFile.slice(0, -sharedSuffixResult.length),
       ),
     );
+    result.commandExecDir = result.commandExecDir.endsWith('/')
+      ? result.commandExecDir.slice(0, -1)
+      : result.commandExecDir;
   } else {
     // implicit output file is in the same directory where command was executed
     result.commandExecDir = upath.normalize(upath.dirname(fileName));
