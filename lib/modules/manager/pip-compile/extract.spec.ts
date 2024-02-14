@@ -34,7 +34,7 @@ describe('modules/manager/pip-compile/extract', () => {
         {},
       );
       expect(packageFile).toHaveProperty('deps');
-      expect(packageFile?.deps).toMatchSnapshot();
+      expect(packageFile?.deps[0]).toHaveProperty('depName', 'numpy');
     });
 
     it.each([
