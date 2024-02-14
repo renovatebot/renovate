@@ -9,17 +9,26 @@ export class GithubRunnersDatasource extends Datasource {
    * Only add stable runners to the datasource. See datasource readme for details.
    */
   private static readonly releases: Record<string, Release[] | undefined> = {
-    ubuntu: [{ version: '22.04' }, { version: '20.04' }, { version: '18.04' }],
+    ubuntu: [
+      { version: '22.04' },
+      { version: '20.04' },
+      { version: '18.04', isDeprecated: true },
+      { version: '16.04', isDeprecated: true },
+    ],
     macos: [
       { version: '13' },
       { version: '13-large' },
       { version: '13-xlarge' },
       { version: '12' },
       { version: '12-large' },
-      { version: '11' },
-      { version: '10.15' },
+      { version: '11', isDeprecated: true },
+      { version: '10.15', isDeprecated: true },
     ],
-    windows: [{ version: '2022' }, { version: '2019' }],
+    windows: [
+      { version: '2022' },
+      { version: '2019' },
+      { version: '2016', isDeprecated: true },
+    ],
   };
 
   public static isValidRunner(
