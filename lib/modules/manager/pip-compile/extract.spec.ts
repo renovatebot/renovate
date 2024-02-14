@@ -3,6 +3,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { logger } from '../../../logger';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
@@ -133,21 +134,31 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   it('return null for malformed files', async () => {
+    // empty.txt
     fs.readLocalFile.mockResolvedValueOnce('');
+    // noHeader.txt
     fs.readLocalFile.mockResolvedValueOnce(
       Fixtures.get('requirementsNoHeaders.txt'),
     );
+    // badSource.txt
     fs.readLocalFile.mockResolvedValueOnce(
       getSimpleRequirementsFile(
-        'pip-compile --output-file=foo.txt malformed.in empty.in',
+        'pip-compile --output-file=badSource.txt malformed.in empty.in',
         ['foo==1.0.1'],
       ),
     );
+    // malformed.in
     fs.readLocalFile.mockResolvedValueOnce('!@#$');
+    // empty.in
     fs.readLocalFile.mockResolvedValueOnce('');
 
-    const lockFiles = ['empty.txt', 'noHeader.txt', 'badSource.txt'];
-    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    const packageFiles = await extractAllPackageFiles({}, [
+      'empty.txt',
+      'noHeader.txt',
+      'badSource.txt',
+    ]);
     expect(packageFiles).toBeNull();
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(5);
+    expect(logger.warn).toHaveBeenCalledTimes(2); // malformed.in, noHeader.txt
   });
 });

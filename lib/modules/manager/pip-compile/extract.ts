@@ -160,8 +160,7 @@ export async function extractAllPackageFiles(
         });
       } else {
         logger.warn(
-          { packageFile },
-          'pip-compile: failed to find dependencies in source file',
+          `pip-compile: failed to find dependencies in source file ${packageFile}`,
         );
       }
     }
