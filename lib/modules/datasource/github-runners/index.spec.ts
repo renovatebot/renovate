@@ -11,6 +11,7 @@ describe('modules/datasource/github-runners/index', () => {
 
       expect(res).toMatchObject({
         releases: [
+          { version: '16.04', isDeprecated: true },
           { version: '18.04', isDeprecated: true },
           { version: '20.04' },
           { version: '22.04' },
