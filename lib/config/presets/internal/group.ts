@@ -107,7 +107,10 @@ const staticGroups = {
       {
         groupName: 'GitHub Artifact Actions',
         matchManagers: ['github-actions'],
-        matchPackageNames: ['actions/download-artifact', 'actions/upload-artifact'],
+        matchPackageNames: [
+          'actions/download-artifact',
+          'actions/upload-artifact',
+        ],
         matchUpdateTypes: ['major'],
       },
     ],
