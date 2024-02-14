@@ -1167,79 +1167,79 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
     });
+  });
 
-    describe('validateConfig() -> globaOnly options', () => {
-      it('validates hostRules.headers', async () => {
-        const config = {
-          hostRules: [
-            {
-              matchHost: 'https://domain.com/all-versions',
-              headers: {
-                'X-Auth-Token': 'token',
-              },
-            },
-          ],
-          allowedHeaders: ['X-Auth-Token'],
-        };
-        const { warnings, errors } = await configValidation.validateConfig(
-          true,
-          config,
-        );
-        expect(warnings).toHaveLength(0);
-        expect(errors).toHaveLength(0);
-      });
-
-      it('errors if hostRules.headers is defined but allowedHeaders is not', async () => {
-        const config = {
-          hostRules: [
-            {
-              matchHost: 'https://domain.com/all-versions',
-              headers: {
-                'X-Auth-Token': 'token',
-              },
-            },
-          ],
-        };
-        const { errors } = await configValidation.validateConfig(true, config);
-        expect(errors).toMatchObject([
+  describe('validateConfig() -> globaOnly options', () => {
+    it('validates hostRules.headers', async () => {
+      const config = {
+        hostRules: [
           {
-            message:
-              "hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`.",
-            topic: 'Configuration Error',
+            matchHost: 'https://domain.com/all-versions',
+            headers: {
+              'X-Auth-Token': 'token',
+            },
           },
-        ]);
-      });
+        ],
+        allowedHeaders: ['X-Auth-Token'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        true,
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
 
-      it('validates env', async () => {
-        const config = {
-          env: {
-            SOME_VAR: 'SOME_VALUE',
-          },
-          allowedEnv: ['SOME*'],
-        };
-        const { warnings, errors } = await configValidation.validateConfig(
-          true,
-          config,
-        );
-        expect(warnings).toHaveLength(0);
-        expect(errors).toHaveLength(0);
-      });
-
-      it('errors if env object is defined but allowedEnv is empty or undefined', async () => {
-        const config = {
-          env: {
-            SOME_VAR: 'SOME_VALUE',
-          },
-        };
-        const { errors } = await configValidation.validateConfig(true, config);
-        expect(errors).toMatchObject([
+    it('errors if hostRules.headers is defined but allowedHeaders is not', async () => {
+      const config = {
+        hostRules: [
           {
-            message:
-              "Env variable name `SOME_VAR` is not allowed by this bot's `allowedEnv`.",
-            topic: 'Configuration Error',
+            matchHost: 'https://domain.com/all-versions',
+            headers: {
+              'X-Auth-Token': 'token',
+            },
           },
-        ]);
-      });
+        ],
+      };
+      const { errors } = await configValidation.validateConfig(true, config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            "hostRules header `X-Auth-Token` is not allowed by this bot's `allowedHeaders`.",
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
+    it('validates env', async () => {
+      const config = {
+        env: {
+          SOME_VAR: 'SOME_VALUE',
+        },
+        allowedEnv: ['SOME*'],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        true,
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('errors if env object is defined but allowedEnv is empty or undefined', async () => {
+      const config = {
+        env: {
+          SOME_VAR: 'SOME_VALUE',
+        },
+      };
+      const { errors } = await configValidation.validateConfig(true, config);
+      expect(errors).toMatchObject([
+        {
+          message:
+            "Env variable name `SOME_VAR` is not allowed by this bot's `allowedEnv`.",
+          topic: 'Configuration Error',
+        },
+      ]);
     });
   });
 });
