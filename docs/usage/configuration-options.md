@@ -1258,7 +1258,7 @@ This option allows users to specify explicit environment variables and their cor
 
 Behavior:
 
-- This option only applies when Renovate runs package manager commands, within the `updateArtifacts()` function
+- This option only applies when Renovate runs package manager commands (e.g. `npm install`), within the `updateArtifacts()` function
 - Values set in the env configuration override corresponding environment variables, including those from `customEnvVariables` and `process.env`
 
 ```json title="Example renovate.json with env configuration"

@@ -65,12 +65,12 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowedEnv
 
-Users can set allowed environment variable names through `allowedEnv`.
+Bot administrators can allow users to configure custom environment variables within repo config.
 Only the environment variables on the list will be accepted in the [`env`](./configuration-options.md#env) configuration.
 
 Examples:
 
-```json
+```json title="renovate.json"
 {
   "env": {
     "SOME_ENV_VARIABLE": "some_value",
@@ -79,7 +79,7 @@ Examples:
 }
 ```
 
-Or with custom `allowedEnv`:
+The above would require `allowedEnv` to be configured similar to the following:
 
 ```js title="config.js"
 module.exports = {
