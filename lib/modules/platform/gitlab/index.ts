@@ -650,20 +650,18 @@ async function tryPrAutomerge(
         await ignoreApprovals(pr);
       }
 
+      // https://docs.gitlab.com/ee/api/merge_requests.html#merge-status
+      const desiredDetailedMergeStatus = ['mergeable', 'ci_still_running', 'not_approved'];
+      const desiredPipelineStatus = [
+        'failed',  // don't lose time if pipeline failed
+        'running'  // pipeline is running, no need to wait for it
+      ];
       let desiredStatus = 'can_be_merged';
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
       const retryTimes = parseInteger(
         process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
         5,
       );
-
-      if (semver.gte(defaults.version, '15.6.0')) {
-        logger.trace(
-          { version: defaults.version },
-          'In GitLab 15.6 merge_status, using detailed_merge_status to check the merge request status',
-        );
-        desiredStatus = 'mergeable';
-      }
 
       const mergeDelay = parseInteger(
         process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY,
@@ -675,32 +673,51 @@ async function tryPrAutomerge(
         const { body } = await gitlabApi.getJson<{
           merge_status: string;
           detailed_merge_status?: string;
-          pipeline: string;
+          pipeline: Record<string, string>;
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
+        // detailed_merge_status is available with Gitlab >=15.6.0
+        let detailed_merge_status_check: boolean = (
+          body.hasOwnProperty("detailed_merge_status") &&
+          desiredDetailedMergeStatus.includes(<string>body.detailed_merge_status)
+        );
+        // merge_status is deprecated with Gitlab >= 15.6
+        let deprecated_merge_status_check: boolean = (
+          body.hasOwnProperty("detailed_merge_status") &&
+          body.merge_status === desiredStatus
+        );
+
         // Only continue if the merge request can be merged and has a pipeline.
         if (
-          ((desiredStatus === 'mergeable' &&
-            body.detailed_merge_status === desiredStatus) ||
-            (desiredStatus === 'can_be_merged' &&
-              body.merge_status === desiredStatus)) &&
-          body.pipeline !== null
-        ) {
+          (detailed_merge_status_check || deprecated_merge_status_check) &&
+          body.pipeline !== null &&
+          desiredPipelineStatus.includes(body.pipeline.status)) {
           break;
         }
+        logger.debug(`PR not yet in mergeable state. Retrying ${attempt}`);
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
 
-      await gitlabApi.putJson(
-        `projects/${config.repository}/merge_requests/${pr}/merge`,
-        {
-          body: {
-            should_remove_source_branch: true,
-            merge_when_pipeline_succeeds: true,
-          },
-        },
-      );
+      // Even if Gitlab returns a "merge-able" merge request status, enabling auto-merge sometimes
+      // returns a 405 Method Not Allowed. It seems to be a timing issue within Gitlab.
+      for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
+        try {
+          await gitlabApi.putJson(
+            `projects/${config.repository}/merge_requests/${pr}/merge`,
+            {
+              body: {
+                should_remove_source_branch: true,
+                merge_when_pipeline_succeeds: true,
+              },
+            },
+          );
+          break;
+        } catch (err) {
+          logger.debug({err}, `Automerge on PR creation failed. Retrying ${attempt}`);
+        }
+        await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
+      }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Automerge on PR creation failed');
     }
