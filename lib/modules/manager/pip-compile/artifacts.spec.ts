@@ -378,16 +378,15 @@ describe('modules/manager/pip-compile/artifacts', () => {
     // TODO(not7cd): remove when relative pahts are supported
     it('change --output-file if differs', () => {
       expect(
-        constructPipCompileCmd(
-          getCommandInHeader(
-            'pip-compile --output-file=hey.txt requirements.in',
-          ),
-          'subdir/requirements.txt',
-          false,
-        ).cmd,
-      ).toBe(
-        'pip-compile --no-emit-index-url --output-file=requirements.txt requirements.in',
-      );
+        () =>
+          constructPipCompileCmd(
+            getCommandInHeader(
+              'pip-compile --output-file=hey.txt requirements.in',
+            ),
+            'subdir/requirements.txt',
+            false,
+          ).cmd,
+      ).toThrow(/mismatch/);
     });
 
     it('throws on unknown arguments', () => {

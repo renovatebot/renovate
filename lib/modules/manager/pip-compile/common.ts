@@ -191,6 +191,11 @@ export function extractHeaderCommand(
   }
 
   if (result.outputFile) {
+    if (upath.basename(result.outputFile) !== upath.basename(fileName)) {
+      throw new Error(
+        `Output file name mismatch: ${fileName} vs ${result.outputFile}`,
+      );
+    }
     const sharedSuffixResult = sharedSuffix([fileName, result.outputFile]);
     result.commandExecDir = upath.normalize(
       upath.joinSafe(

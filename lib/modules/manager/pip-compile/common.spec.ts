@@ -132,7 +132,7 @@ describe('modules/manager/pip-compile/common', () => {
       'returned sourceFiles must not contain options',
       (argument: string) => {
         const sourceFiles = extractHeaderCommand(
-          getCommandInHeader(`pip-compile ${argument}=dd reqs.in`),
+          getCommandInHeader(`pip-compile ${argument}=reqs.txt reqs.in`),
           'reqs.txt',
         ).sourceFiles;
         expect(sourceFiles).not.toContainEqual(argument);
