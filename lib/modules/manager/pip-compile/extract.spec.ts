@@ -29,12 +29,12 @@ describe('modules/manager/pip-compile/extract', () => {
 
     it('returns object for setup.py', () => {
       const packageFile = extractPackageFile(
-        Fixtures.get('setup.py'),
+        Fixtures.get('setup.py', '../pip_setup'),
         'lib/setup.py',
         {},
       );
       expect(packageFile).toHaveProperty('deps');
-      expect(packageFile?.deps[0]).toHaveProperty('depName', 'numpy');
+      expect(packageFile?.deps[0]).toHaveProperty('depName', 'celery');
     });
 
     it.each([
