@@ -5,6 +5,7 @@ import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import type { ExecOptions } from '../../../util/exec/types';
 import { ensureCacheDir } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types';
@@ -47,7 +48,7 @@ export async function getExecOptions(
   const constraint = getPythonConstraint(config);
   const pipToolsConstraint = getPipToolsConstraint(config);
   const execOptions: ExecOptions = {
-    cwd,
+    cwd: ensureLocalPath(cwd),
     docker: {},
     toolConstraints: [
       {
