@@ -94,6 +94,18 @@ function getDeprecationMessage(option: string): string | undefined {
   return deprecatedOptions[option];
 }
 
+function isGlobalOption(key: string): boolean {
+  if (!optionGlobals) {
+    optionGlobals = new Set();
+    for (const option of options) {
+      if (option.globalOnly) {
+        optionGlobals.add(option.name);
+      }
+    }
+  }
+  return optionGlobals.has(key);
+}
+
 export function getParentName(parentPath: string | undefined): string {
   return parentPath
     ? parentPath
@@ -148,20 +160,11 @@ export async function validateConfig(
       });
     }
 
-    if (isGlobalConfig) {
+    if (isGlobalConfig && isGlobalOption(key)) {
       validateGlobalConfig(key, val, optionTypes[key], warnings, currentPath);
       continue;
     } else {
-      if (!optionGlobals) {
-        optionGlobals = new Set();
-        for (const option of options) {
-          if (option.globalOnly) {
-            optionGlobals.add(option.name);
-          }
-        }
-      }
-
-      if (optionGlobals.has(key) && !isFalseGlobal(key, parentPath)) {
+      if (isGlobalOption(key) && !isFalseGlobal(key, parentPath)) {
         warnings.push({
           topic: 'Configuration Error',
           message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
