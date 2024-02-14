@@ -40,8 +40,6 @@ export class CustomDatasource extends Datasource {
         const localFileStat = await statLocalFile(localPath);
         if (localFileStat === null || !localFileStat.isFile()) {
           logger.debug({ localPath }, `Local file not found`);
-          const parentDirList = readLocalDirectory(getParentDir(localPath));
-          logger.debug({ parentDirList }, `Parent dir list`);
           data = null;
         } else {
           data = await fetcher.readFile(localPath);
