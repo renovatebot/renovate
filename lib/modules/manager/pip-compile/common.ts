@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { re } from 'github-url-from-git';
 import { split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger';
@@ -95,22 +94,6 @@ export const allowedPipOptions = [
   ...optionsWithArguments,
 ];
 
-// source: https://stackoverflow.com/questions/1916218/find-the-longest-common-starting-substring-in-a-set-of-strings
-function sharedSuffix(array: string[]): string {
-  const A = array
-      .concat()
-      .sort()
-      .map((s: string) => s.split('/').reverse()),
-    a1 = A[0],
-    a2 = A[A.length - 1],
-    L = a1.length;
-  let i = 0;
-  while (i < L && a1[i] === a2[i]) {
-    i++;
-  }
-  return a1.slice(0, i).reverse().join('/');
-}
-
 // TODO(not7cd): test on all correct headers, even with CUSTOM_COMPILE_COMMAND
 export function extractHeaderCommand(
   content: string,
@@ -194,6 +177,7 @@ export function extractHeaderCommand(
     logger.warn(`pip-compile: option ${arg} not handled`);
   }
 
+  // TODO: remove
   result.commandExecDir = inferCommandExecDir(fileName, result.outputFile);
 
   logger.trace(
