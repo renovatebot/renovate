@@ -161,4 +161,63 @@ describe('modules/manager/pip-compile/extract', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(5);
     expect(logger.warn).toHaveBeenCalledTimes(2); // malformed.in, noHeader.txt
   });
+
+  it('return null for bad paths', async () => {
+    // outside.txt
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=../../outside.txt reqs.in',
+        ['foo==1.0.1'],
+      ),
+    );
+    // badSource.txt
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=badSource.txt ../outside.in',
+        ['foo==1.0.1'],
+      ),
+    );
+
+    const packageFiles = await extractAllPackageFiles({}, [
+      'outside.txt',
+      'badSource.txt',
+    ]);
+    expect(packageFiles).toBeNull();
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+  });
+
+  it('return for valid paths', async () => {
+    // reqs.txt
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile('pip-compile --output-file=reqs.txt reqs.in', [
+        'foo==1.0.1',
+      ]),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('foo>=1.0.0');
+    // abolute/reqs.txt
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=./abolute/reqs.txt ./absolute/reqs.in',
+        ['foo==1.0.1'],
+      ),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('foo>=1.0.0');
+    // relative/reqs.txt
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=relative/reqs.txt ../outside.in',
+        ['foo==1.0.1'],
+      ),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('foo>=1.0.0');
+    const packageFiles = await extractAllPackageFiles({}, [
+      'reqs.txt',
+      'abolute/reqs.txt',
+      'relative/reqs.txt',
+    ]);
+    expect(packageFiles).toBeNull();
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(6);
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+  });
 });

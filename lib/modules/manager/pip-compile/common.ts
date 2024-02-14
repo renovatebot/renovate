@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { re } from 'github-url-from-git';
 import { split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger';
@@ -14,6 +15,7 @@ import type {
   GetRegistryUrlVarsResult,
   PipCompileArgs,
 } from './types';
+import { inferCommandExecDir } from './utils';
 
 export function getPythonConstraint(
   config: UpdateArtifactsConfig,
@@ -98,15 +100,15 @@ function sharedSuffix(array: string[]): string {
   const A = array
       .concat()
       .sort()
-      .map((s: string) => s.split('').reverse().join('')),
+      .map((s: string) => s.split('/').reverse()),
     a1 = A[0],
     a2 = A[A.length - 1],
     L = a1.length;
   let i = 0;
-  while (i < L && a1.charAt(i) === a2.charAt(i)) {
+  while (i < L && a1[i] === a2[i]) {
     i++;
   }
-  return a1.substring(0, i).split('').reverse().join('');
+  return a1.slice(0, i).reverse().join('/');
 }
 
 // TODO(not7cd): test on all correct headers, even with CUSTOM_COMPILE_COMMAND
@@ -166,7 +168,7 @@ export function extractHeaderCommand(
         if (result.outputFile) {
           throw new Error('Cannot use multiple --output-file options');
         }
-        result.outputFile = value;
+        result.outputFile = upath.normalize(value);
       } else if (option === '--index-url') {
         if (result.indexUrl) {
           throw new Error('Cannot use multiple --index-url options');
@@ -190,36 +192,7 @@ export function extractHeaderCommand(
     logger.warn(`pip-compile: option ${arg} not handled`);
   }
 
-  if (result.outputFile) {
-    if (upath.basename(result.outputFile) !== upath.basename(fileName)) {
-      throw new Error(
-        `Output file name mismatch: ${fileName} vs ${result.outputFile}`,
-      );
-    }
-    const sharedSuffixResult = sharedSuffix([fileName, result.outputFile]);
-    result.commandExecDir = upath.normalize(
-      upath.joinSafe(
-        fileName.slice(0, -sharedSuffixResult.length),
-        result.outputFile.slice(0, -sharedSuffixResult.length),
-      ),
-    );
-    result.commandExecDir = result.commandExecDir.endsWith('/')
-      ? result.commandExecDir.slice(0, -1)
-      : result.commandExecDir;
-  } else {
-    // implicit output file is in the same directory where command was executed
-    result.commandExecDir = upath.normalize(upath.dirname(fileName));
-  }
-  if (result.commandExecDir !== '.') {
-    logger.debug(
-      {
-        commandExecDir: result.commandExecDir,
-        outputFile: result.outputFile,
-        fileName,
-      },
-      `pip-compile: command was not executed in repository root`,
-    );
-  }
+  result.commandExecDir = inferCommandExecDir(fileName, result.outputFile);
 
   logger.trace(
     {

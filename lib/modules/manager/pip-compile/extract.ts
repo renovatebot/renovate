@@ -88,13 +88,14 @@ export async function extractAllPackageFiles(
       continue;
     }
     const compileDir: string = pipCompileArgs.commandExecDir;
-    if (!isValidLocalPath(compileDir)) {
-      logger.warn(
-        { fileMatch, compileDir },
-        'pip-compile: Output file path outside of repository',
-      );
-      continue;
-    }
+    console.log(compileDir, 'compileDir', fileMatch, 'fileMatch');
+    // if (compileDir !== '.' && !isValidLocalPath(compileDir)) {
+    //   logger.warn(
+    //     { fileMatch, compileDir },
+    //     'pip-compile: Output file path outside of repository',
+    //   );
+    //   continue;
+    // }
     lockFileArgs.set(fileMatch, pipCompileArgs);
     for (const constraint in pipCompileArgs.constraintsFiles) {
       // TODO(not7cd): handle constraints
