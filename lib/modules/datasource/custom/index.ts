@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { logger } from '../../../logger';
-import { getParentDir, readLocalDirectory, statLocalFile } from '../../../util/fs';
+import { statLocalFile } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
