@@ -3,7 +3,7 @@ import { GithubRunnersDatasource } from '.';
 
 describe('modules/datasource/github-runners/index', () => {
   describe('getReleases', () => {
-    it('returns releases for ubuntu', async () => {
+    it('returns releases for Ubuntu', async () => {
       const res = await getPkgReleases({
         datasource: GithubRunnersDatasource.id,
         packageName: 'ubuntu',
@@ -19,7 +19,7 @@ describe('modules/datasource/github-runners/index', () => {
       });
     });
 
-    it('returns releases for macos', async () => {
+    it('returns releases for macOS', async () => {
       const res = await getPkgReleases({
         datasource: GithubRunnersDatasource.id,
         packageName: 'macos',
@@ -42,7 +42,7 @@ describe('modules/datasource/github-runners/index', () => {
       });
     });
 
-    it('returns releases for windows', async () => {
+    it('returns releases for Windows', async () => {
       const res = await getPkgReleases({
         datasource: GithubRunnersDatasource.id,
         packageName: 'windows',
