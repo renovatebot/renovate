@@ -375,8 +375,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       ).toBe('pip-compile --emit-index-url requirements.in');
     });
 
-    // TODO(not7cd): remove when relative pahts are supported
-    it('change --output-file if differs', () => {
+    it('throw if --output-file basename differs from path', () => {
       expect(
         () =>
           constructPipCompileCmd(
