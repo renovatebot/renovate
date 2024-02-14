@@ -373,17 +373,12 @@ jobs:
             ./coverage/lcov
             ./coverage/json
 
-  coverage:
+  codecov:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: (success() || failure()) && github.event.pull_request.draft != true
     steps:
-      - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        with:
-          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
-
       - name: Download coverage reports
         uses: actions/download-artifact@eaceaf801fd36c7dee90939fad912460b18a1ffe # v4.1.2
         with:
@@ -392,16 +387,37 @@ jobs:
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@e0b68c6749509c5f83f984dd99a76a1c1a231044 # v4.0.1
+        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
         with:
           directory: coverage/lcov
-          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: true
+          verbose: true
+
+  coverage-threshold:
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: (success() || failure()) && github.event.pull_request.draft != true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          filter: blob:none # we don't need all blobs
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@eaceaf801fd36c7dee90939fad912460b18a1ffe # v4.1.2
+        with:
+          pattern: coverage-*
+          path: coverage
+          merge-multiple: true
 
       - name: Merge coverage reports
         run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
@@ -419,7 +435,11 @@ jobs:
 
   # Catch-all required check for test matrix and coverage
   test-success:
-    needs: [setup, test, coverage]
+    needs:
+      - setup
+      - test
+      - codecov
+      - coverage-threshold
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -437,17 +457,30 @@ jobs:
           needs.test.result == 'skipped'
         run: exit 1
 
-      - name: Fail for failed or cancelled coverage
+      - name: Fail for failed or cancelled codecov
         if: |
-          needs.coverage.result == 'failure' ||
-          needs.coverage.result == 'cancelled'
+          needs.codecov.result == 'failure' ||
+          needs.codecov.result == 'cancelled'
         run: exit 1
 
-      - name: Fail for skipped coverage when PR is ready for review
+      - name: Fail for skipped codecov when PR is ready for review
         if: |
           github.event_name == 'pull_request' &&
           github.event.pull_request.draft != true &&
-          needs.coverage.result == 'skipped'
+          needs.codecov.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled coverage-threshold
+        if: |
+          needs.coverage-threshold.result == 'failure' ||
+          needs.coverage-threshold.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped coverage-threshold when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.coverage-threshold.result == 'skipped'
         run: exit 1
 
   build:
@@ -547,7 +580,8 @@ jobs:
       - test-e2e
       - test-success
       - build-docs
-      - coverage
+      - codecov
+      - coverage-threshold
 
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
