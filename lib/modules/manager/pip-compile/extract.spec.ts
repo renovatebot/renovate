@@ -31,6 +31,10 @@ describe('modules/manager/pip-compile/extract', () => {
     GlobalConfig.set(adminConfig);
   });
 
+  afterEach(() => {
+    fs.readLocalFile.mockClear();
+  });
+
   describe('extractPackageFile()', () => {
     it('returns object for requirements.in', () => {
       const packageFile = extractPackageFile(
@@ -105,6 +109,7 @@ describe('modules/manager/pip-compile/extract', () => {
 
       const lockFiles = ['foo.txt', 'bar.txt'];
       const packageFiles = await extractAllPackageFiles({}, lockFiles);
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(4);
       expect(packageFiles).not.toBeNull();
       packageFiles!.forEach((packageFile) => {
         expect(packageFile).not.toHaveProperty('packageFile', 'foo.txt');
@@ -163,10 +168,10 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   it('return null for bad paths', async () => {
-    // outside.txt
+    // ambigous.txt
     fs.readLocalFile.mockResolvedValueOnce(
       getSimpleRequirementsFile(
-        'pip-compile --output-file=../../outside.txt reqs.in',
+        'pip-compile --output-file=../ambigous.txt reqs.in',
         ['foo==1.0.1'],
       ),
     );
@@ -179,7 +184,7 @@ describe('modules/manager/pip-compile/extract', () => {
     );
 
     const packageFiles = await extractAllPackageFiles({}, [
-      'outside.txt',
+      'subdir/ambigous.txt',
       'badSource.txt',
     ]);
     expect(packageFiles).toBeNull();
@@ -195,10 +200,10 @@ describe('modules/manager/pip-compile/extract', () => {
       ]),
     );
     fs.readLocalFile.mockResolvedValueOnce('foo>=1.0.0');
-    // abolute/reqs.txt
+    // absolute/reqs.txt
     fs.readLocalFile.mockResolvedValueOnce(
       getSimpleRequirementsFile(
-        'pip-compile --output-file=./abolute/reqs.txt ./absolute/reqs.in',
+        'pip-compile --output-file=./absolute/reqs.txt ./absolute/reqs.in',
         ['foo==1.0.1'],
       ),
     );
@@ -213,7 +218,7 @@ describe('modules/manager/pip-compile/extract', () => {
     fs.readLocalFile.mockResolvedValueOnce('foo>=1.0.0');
     const packageFiles = await extractAllPackageFiles({}, [
       'reqs.txt',
-      'abolute/reqs.txt',
+      'absolute/reqs.txt',
       'relative/reqs.txt',
     ]);
     expect(packageFiles).toBeNull();

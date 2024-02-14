@@ -118,7 +118,9 @@ export function extractHeaderCommand(
 ): PipCompileArgs {
   const compileCommand = constraintLineRegex.exec(content);
   if (compileCommand?.groups === undefined) {
-    throw new Error(`Failed to extract command from header in ${fileName}`);
+    throw new Error(
+      `Failed to extract command from header in ${fileName} ${content}`,
+    );
   }
   logger.trace(
     `pip-compile: found header in ${fileName}: \n${compileCommand[0]}`,

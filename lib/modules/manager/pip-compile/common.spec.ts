@@ -152,8 +152,9 @@ describe('modules/manager/pip-compile/common', () => {
     it.each([
       { path: 'reqs.txt', arg: 'reqs.txt', result: '.' },
       { path: 'subdir/reqs.txt', arg: 'subdir/reqs.txt', result: '.' },
+      { path: 'subdir/reqs.txt', arg: './subdir/reqs.txt', result: '.' },
       { path: 'subdir/reqs.txt', arg: 'reqs.txt', result: 'subdir' },
-      // { path: '../reqs.txt', arg: '../reqs.txt', result: '.' },
+      { path: 'subdir/reqs.txt', arg: './reqs.txt', result: 'subdir' },
     ])(
       'infer exec directory (cwd) from output file path and header command',
       ({ path, arg, result }) => {

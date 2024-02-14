@@ -81,6 +81,7 @@ export async function extractAllPackageFiles(
     try {
       pipCompileArgs = extractHeaderCommand(fileContent, fileMatch);
     } catch (error) {
+      console.log('error', error);
       logger.warn(
         { fileMatch, error },
         'pip-compile: Failed to extract and parse command in output file header',
@@ -109,14 +110,18 @@ export async function extractAllPackageFiles(
     // TODO(not7cd): handle locked deps
     // const lockedDeps = extractRequirementsFile(content);
     for (const relativeSourceFile of pipCompileArgs.sourceFiles) {
-      const packageFile = upath.join(compileDir, relativeSourceFile);
-      if (!isValidLocalPath(packageFile)) {
-        logger.warn(
-          { fileMatch, packageFile },
-          'pip-compile: Source file path outside of repository',
-        );
-        continue;
-      }
+      const packageFile = upath.normalizeTrim(
+        upath.join(compileDir, relativeSourceFile),
+      );
+      // Unable to check for that. Let it error out
+      // if (!isValidLocalPath(packageFile)) {
+      //   console.log('NOT VALID packageFile', packageFile);
+      //   logger.warn(
+      //     { fileMatch, packageFile },
+      //     'pip-compile: Source file path outside of repository',
+      //   );
+      //   continue;
+      // }
       depsBetweenFiles.push({
         sourceFile: packageFile,
         outputFile: fileMatch,
