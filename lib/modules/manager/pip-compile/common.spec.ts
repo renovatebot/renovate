@@ -148,6 +148,23 @@ describe('modules/manager/pip-compile/common', () => {
         ),
       ).toHaveProperty('isCustomCommand', true);
     });
+
+    it.each([
+      { path: 'reqs.txt', arg: 'reqs.txt', result: '.' },
+      { path: 'subdir/reqs.txt', arg: 'subdir/reqs.txt', result: '.' },
+      { path: 'subdir/reqs.txt', arg: 'reqs.txt', result: 'subdir' },
+      // { path: '../reqs.txt', arg: '../reqs.txt', result: '.' },
+    ])(
+      'infer exec directory (cwd) from output file path and header command',
+      ({ path, arg, result }) => {
+        expect(
+          extractHeaderCommand(
+            getCommandInHeader(`pip-compile --output-file=${arg} reqs.in`),
+            path,
+          ).commandExecDir,
+        ).toEqual(result);
+      },
+    );
   });
 
   describe('getRegistryUrlFlagsFromPackageFile()', () => {
