@@ -1,8 +1,18 @@
+import { join } from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
+import type { RepoGlobalConfig } from '../../../config/types';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
+
+const adminConfig: RepoGlobalConfig = {
+  // `join` fixes Windows CI
+  localDir: join('/tmp/github/some/repo'),
+  cacheDir: join('/tmp/renovate/cache'),
+  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+};
 
 function getSimpleRequirementsFile(command: string, deps: string[] = []) {
   return `#
@@ -16,6 +26,10 @@ ${deps.join('\n')}`;
 }
 
 describe('modules/manager/pip-compile/extract', () => {
+  beforeEach(() => {
+    GlobalConfig.set(adminConfig);
+  });
+
   describe('extractPackageFile()', () => {
     it('returns object for requirements.in', () => {
       const packageFile = extractPackageFile(
@@ -69,7 +83,6 @@ describe('modules/manager/pip-compile/extract', () => {
         'requirements3.txt',
       ];
       const packageFiles = await extractAllPackageFiles({}, lockFiles);
-      expect(packageFiles).toBeDefined();
       expect(packageFiles).not.toBeNull();
       expect(packageFiles!.pop()).toHaveProperty('lockFiles', lockFiles);
     });
@@ -91,7 +104,7 @@ describe('modules/manager/pip-compile/extract', () => {
 
       const lockFiles = ['foo.txt', 'bar.txt'];
       const packageFiles = await extractAllPackageFiles({}, lockFiles);
-      expect(packageFiles).toBeDefined();
+      expect(packageFiles).not.toBeNull();
       packageFiles!.forEach((packageFile) => {
         expect(packageFile).not.toHaveProperty('packageFile', 'foo.txt');
       });
@@ -109,7 +122,7 @@ describe('modules/manager/pip-compile/extract', () => {
 
       const lockFiles = ['requirements.txt'];
       const packageFiles = await extractAllPackageFiles({}, lockFiles);
-      expect(packageFiles).toBeDefined();
+      expect(packageFiles).not.toBeNull();
       packageFiles!.forEach((packageFile) => {
         expect(packageFile).not.toHaveProperty(
           'packageFile',
