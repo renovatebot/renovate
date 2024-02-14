@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
-// TODO(not7cd): enable in the next PR, when this can be properly tested
+// TODO: enable when this can be properly tested
 // import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
 import { extractHeaderCommand, generateMermaidGraph } from './common';
@@ -36,7 +36,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.trace('pip-compile.extractPackageFile()');
   const manager = matchManager(packageFile);
-  // TODO(not7cd): extract based on manager: pep621, setuptools, identify other missing source types
+  // TODO: extract based on manager: pep621, setuptools cfg
   switch (manager) {
     case 'pip_setup':
       return extractSetupPyFile(content, packageFile, _config);
