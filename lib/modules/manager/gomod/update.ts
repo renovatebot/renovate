@@ -48,7 +48,7 @@ export function updateDependency({
 
     if (depType === 'golang') {
       updateLineExp = regEx(
-        /(?<depPart>(toolchain )??go)(?<divider>\s*)([^\s]+|[\w]+)/,
+        /(?<depPart>(?:toolchain )?go)(?<divider>\s*)([^\s]+|[\w]+)/,
       );
     }
     if (depType === 'replace') {

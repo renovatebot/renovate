@@ -68,6 +68,7 @@ export function extractPackageFile(
       if (goVer && semver.validRange(goVer)) {
         const dep = getGoDep(lineNumber, goVer, 'go-mod-directive');
         deps.push(dep);
+        continue;
       }
       const goToolVer = line.startsWith('toolchain go')
         ? line.replace('toolchain go', '')
@@ -75,6 +76,7 @@ export function extractPackageFile(
       if (goToolVer && semver.valid(goToolVer)) {
         const dep = getGoDep(lineNumber, goToolVer);
         deps.push(dep);
+        continue;
       }
       const replaceMatch = regEx(
         /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/,
