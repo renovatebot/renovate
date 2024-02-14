@@ -93,10 +93,7 @@ export async function extractAllPackageFiles(
     try {
       compileDir = inferCommandExecDir(fileMatch, pipCompileArgs.outputFile);
     } catch (error) {
-      logger.warn(
-        { fileMatch, error: error.message },
-        'pip-compile: Failed to infer command execution directory',
-      );
+      logger.warn({ fileMatch }, `pip-compile: ${error.message}`);
       continue;
     }
     lockFileArgs.set(fileMatch, pipCompileArgs);
