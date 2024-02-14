@@ -340,7 +340,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsWithHashes.txt'),
           'subdir/requirements.txt',
           false,
-        ),
+        ).cmd,
       ).toBe(
         'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
       );
@@ -352,7 +352,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           Fixtures.get('requirementsWithHashes.txt'),
           'subdir/requirements.txt',
           true,
-        ),
+        ).cmd,
       ).toBe(
         'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
       );
@@ -360,7 +360,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
     it('safeguard against index url leak if not explicitly set by an option', () => {
       expect(
-        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt', false),
+        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt', false)
+          .cmd,
       ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
@@ -370,7 +371,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           getCommandInHeader('pip-compile --emit-index-url requirements.in'),
           'subdir/requirements.txt',
           false,
-        ),
+        ).cmd,
       ).toBe('pip-compile --emit-index-url requirements.in');
     });
 
@@ -383,7 +384,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           ),
           'subdir/requirements.txt',
           false,
-        ),
+        ).cmd,
       ).toBe(
         'pip-compile --no-emit-index-url --output-file=requirements.txt requirements.in',
       );
