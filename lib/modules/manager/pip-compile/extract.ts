@@ -5,16 +5,13 @@ import { extractPackageFile as extractRequirementsFile } from '../pip_requiremen
 // import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 // import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
-import {
-  extractHeaderCommand,
-  generateMermaidGraph,
-  normalizeDepName,
-} from './common';
+import { extractHeaderCommand, generateMermaidGraph } from './common';
 import type {
   DependencyBetweenFiles,
   PipCompileArgs,
   SupportedManagers,
 } from './types';
+import { normalizeDepName } from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
