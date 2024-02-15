@@ -5,6 +5,7 @@ import {
   extractHeaderCommand,
   getRegistryUrlVarsFromPackageFile,
 } from './common';
+import { inferCommandExecDir } from './utils';
 
 jest.mock('../../../util/host-rules', () => mockDeep());
 
@@ -158,12 +159,7 @@ describe('modules/manager/pip-compile/common', () => {
     ])(
       'infer exec directory (cwd) from output file path and header command',
       ({ path, arg, result }) => {
-        expect(
-          extractHeaderCommand(
-            getCommandInHeader(`pip-compile --output-file=${arg} reqs.in`),
-            path,
-          ).commandExecDir,
-        ).toEqual(result);
+        expect(inferCommandExecDir(path, arg)).toEqual(result);
       },
     );
   });
