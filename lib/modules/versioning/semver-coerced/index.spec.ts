@@ -259,6 +259,14 @@ describe('modules/versioning/semver-coerced/index', () => {
           newVersion: '1.1.0',
         }),
       ).toBe('1.1.0');
+      expect(
+        semverCoerced.getNewValue({
+          currentValue: '1.0.0',
+          rangeStrategy: 'auto',
+          currentVersion: 'v1.0.0',
+          newVersion: 'v1.1.0',
+        }),
+      ).toBe('1.1.0');
     });
   });
 
