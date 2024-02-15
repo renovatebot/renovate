@@ -230,6 +230,7 @@ describe('modules/manager/pip-compile/extract', () => {
       '2.txt',
       '4.txt',
     ]);
+  });
 
   it('adds lockedVersion to deps in package file', async () => {
     fs.readLocalFile.mockResolvedValueOnce(
