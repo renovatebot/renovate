@@ -95,7 +95,7 @@ export async function extractAllPackageFiles(
       );
       continue;
     }
-    
+
     for (const packageFile of compileArgs.sourceFiles) {
       depsBetweenFiles.push({
         sourceFile: packageFile,
