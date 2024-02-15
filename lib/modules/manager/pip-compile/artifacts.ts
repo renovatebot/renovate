@@ -76,7 +76,7 @@ export async function updateArtifacts({
       config.lockFiles,
     )})`,
   );
-  // workaround for Renovate not passing all relevant lock files to updateArtifacts
+  // workaround for Renovate not passing all relevant lock files to updateArtifacts, see: #27319
   const inferedLockfile = upath.changeExt(inputFileName, '.txt');
   const lockFiles = [...config.lockFiles, inferedLockfile];
   const result: UpdateArtifactsResult[] = [];
