@@ -230,7 +230,7 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         },
       ]);
-      const res = await getUpdatedPackageFiles(config);
+      await getUpdatedPackageFiles(config);
       expect(composer.updateArtifacts).toBeCalledWith(
         expect.objectContaining({
           config: expect.objectContaining({
