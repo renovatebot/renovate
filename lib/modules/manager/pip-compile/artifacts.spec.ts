@@ -94,7 +94,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
-      { cmd: 'pip-compile --no-emit-index-url requirements.in' },
+      { cmd: 'pip-compile requirements.in' },
     ]);
   });
 
@@ -139,7 +139,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchObject([
-      { cmd: 'pip-compile --no-emit-index-url requirements.in' },
+      { cmd: 'pip-compile requirements.in' },
     ]);
   });
 
@@ -179,6 +179,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
+          '-e PIP_NO_INPUT ' +
+          '-e PIP_KEYRING_PROVIDER ' +
+          '-e PYTHON_KEYRING_BACKEND ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar ' +
@@ -187,7 +190,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '&& ' +
           'install-tool pip-tools 6.13.0 ' +
           '&& ' +
-          'pip-compile --no-emit-index-url requirements.in' +
+          'pip-compile requirements.in' +
           '"',
       },
     ]);
@@ -223,7 +226,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       { cmd: 'install-tool python 3.10.2' },
       { cmd: 'install-tool pip-tools 6.13.0' },
       {
-        cmd: 'pip-compile --no-emit-index-url requirements.in',
+        cmd: 'pip-compile requirements.in',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -268,7 +271,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchObject([
-      { cmd: 'pip-compile --no-emit-index-url requirements.in' },
+      { cmd: 'pip-compile requirements.in' },
     ]);
   });
 
@@ -309,6 +312,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
+          '-e PIP_NO_INPUT ' +
+          '-e PIP_KEYRING_PROVIDER ' +
+          '-e PYTHON_KEYRING_BACKEND ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar ' +
@@ -317,19 +323,29 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '&& ' +
           'install-tool pip-tools 6.13.0 ' +
           '&& ' +
-          'pip-compile --no-emit-index-url requirements.in' +
+          'pip-compile requirements.in' +
           '"',
       },
     ]);
   });
 
   describe('constructPipCompileCmd()', () => {
+    const ORIGINAL_ENV = process.env;
+
+    beforeEach(() => {
+      jest.resetModules();
+      process.env = { ...ORIGINAL_ENV };
+    });
+
+    afterAll(() => {
+      process.env = ORIGINAL_ENV;
+    });
+
     it('throws for garbage', () => {
       expect(() =>
         constructPipCompileCmd(
           Fixtures.get('requirementsNoHeaders.txt'),
           'subdir/requirements.txt',
-          false,
         ),
       ).toThrow(/extract/);
     });
@@ -339,37 +355,88 @@ describe('modules/manager/pip-compile/artifacts', () => {
         constructPipCompileCmd(
           Fixtures.get('requirementsWithHashes.txt'),
           'subdir/requirements.txt',
-          false,
         ),
       ).toBe(
         'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
       );
     });
 
-    it('returns --no-emit-index-url only once when its in the header and credentials are present in URLs', () => {
+    it('returns --no-emit-index-url when credentials are found in PIP_INDEX_URL', () => {
+      process.env.PIP_INDEX_URL = 'https://user:pass@example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt'),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url when credentials are found in PIP_EXTRA_INDEX_URL', () => {
+      process.env.PIP_EXTRA_INDEX_URL =
+        'https://user:pass@example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt'),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url when only a username is found in PIP_INDEX_URL', () => {
+      process.env.PIP_INDEX_URL = 'https://user@example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt'),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url when only a username is found in PIP_EXTRA_INDEX_URL', () => {
+      process.env.PIP_EXTRA_INDEX_URL = 'https://user@example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt'),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url when only a password is found in PIP_INDEX_URL', () => {
+      process.env.PIP_INDEX_URL = 'https://:pass@example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt'),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url when only a password is found in PIP_EXTRA_INDEX_URL', () => {
+      process.env.PIP_EXTRA_INDEX_URL = 'https://:pass@example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt'),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url when PIP_INDEX_URL is invalid', () => {
+      process.env.PIP_INDEX_URL = 'invalid-url';
+      expect(
+        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt'),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url PIP_EXTRA_INDEX_URL is invalid', () => {
+      process.env.PIP_EXTRA_INDEX_URL = 'invalid-url';
+      expect(
+        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt'),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url only once when its in the header and credentials are present in the environment', () => {
+      process.env.PIP_EXTRA_INDEX_URL =
+        'https://user:pass@example.com/pypi/simple';
       expect(
         constructPipCompileCmd(
           Fixtures.get('requirementsWithHashes.txt'),
           'subdir/requirements.txt',
-          true,
         ),
       ).toBe(
         'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
       );
     });
 
-    it('safeguard against index url leak if not explicitly set by an option', () => {
-      expect(
-        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt', false),
-      ).toBe('pip-compile --no-emit-index-url requirements.in');
-    });
-
     it('allow explicit --emit-index-url', () => {
+      process.env.PIP_INDEX_URL = 'https://user:pass@example.com/pypi/simple';
       expect(
         constructPipCompileCmd(
           getCommandInHeader('pip-compile --emit-index-url requirements.in'),
           'subdir/requirements.txt',
-          false,
         ),
       ).toBe('pip-compile --emit-index-url requirements.in');
     });
@@ -382,11 +449,8 @@ describe('modules/manager/pip-compile/artifacts', () => {
             'pip-compile --output-file=hey.txt requirements.in',
           ),
           'subdir/requirements.txt',
-          false,
         ),
-      ).toBe(
-        'pip-compile --no-emit-index-url --output-file=requirements.txt requirements.in',
-      );
+      ).toBe('pip-compile --output-file=requirements.txt requirements.in');
     });
 
     it('throws on unknown arguments', () => {
@@ -394,7 +458,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
         constructPipCompileCmd(
           Fixtures.get('requirementsWithUnknownArguments.txt'),
           'subdir/requirements.txt',
-          false,
         ),
       ).toThrow(/supported/);
     });
@@ -404,7 +467,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
         constructPipCompileCmd(
           Fixtures.get('requirementsCustomCommand.txt'),
           'subdir/requirements.txt',
-          false,
         ),
       ).toThrow(/custom/);
     });
