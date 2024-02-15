@@ -81,9 +81,10 @@ export function bumpPackageVersion(
 
     let newPomVersion;
     const prerelease = semver.prerelease(currentValue);
-    if (isSnapshot(prerelease) || !prerelease) {
+    let snapshot = false;
+    if (!prerelease || (snapshot = isSnapshot(prerelease))) {
       let releaseType = bumpVersion;
-      if (isSnapshot(prerelease) && !bumpVersion.startsWith('pre')) {
+      if (snapshot && !bumpVersion.startsWith('pre')) {
         releaseType = ('pre' + bumpVersion) as ReleaseType;
       }
       newPomVersion = semver.inc(
@@ -125,9 +126,7 @@ export function bumpPackageVersion(
   return { bumpedContent };
 }
 
-function isSnapshot(
-  prerelease: ReadonlyArray<string | number> | null,
-): boolean {
-  const lastPart = prerelease?.at(-1);
+function isSnapshot(prerelease: ReadonlyArray<string | number>): boolean {
+  const lastPart = prerelease.at(-1);
   return is.string(lastPart) && lastPart.endsWith('SNAPSHOT');
 }
