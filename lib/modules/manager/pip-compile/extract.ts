@@ -75,10 +75,10 @@ export async function extractAllPackageFiles(
       logger.debug(`pip-compile: no content found for fileMatch ${fileMatch}`);
       continue;
     }
-    let pipCompileArgs: PipCompileArgs;
+    let compileArgs: PipCompileArgs;
     try {
-      pipCompileArgs = extractHeaderCommand(fileContent, fileMatch);
-      lockFileArgs.set(fileMatch, pipCompileArgs);
+      compileArgs = extractHeaderCommand(fileContent, fileMatch);
+      lockFileArgs.set(fileMatch, compileArgs);
     } catch (error) {
       logger.warn(
         { fileMatch, error },
@@ -86,7 +86,7 @@ export async function extractAllPackageFiles(
       );
       continue;
     }
-    for (const constraint in pipCompileArgs.constraintsFiles) {
+    for (const constraint in compileArgs.constraintsFiles) {
       // TODO(not7cd): handle constraints
       /* istanbul ignore next */
       depsBetweenFiles.push({
@@ -97,7 +97,7 @@ export async function extractAllPackageFiles(
     }
     // TODO(not7cd): handle locked deps
     // const lockedDeps = extractRequirementsFile(content);
-    for (const packageFile of pipCompileArgs.sourceFiles) {
+    for (const packageFile of compileArgs.sourceFiles) {
       depsBetweenFiles.push({
         sourceFile: packageFile,
         outputFile: fileMatch,
