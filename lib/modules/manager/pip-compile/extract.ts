@@ -72,14 +72,11 @@ export async function extractAllPackageFiles(
     let compileArgs: PipCompileArgs;
     try {
       compileArgs = extractHeaderCommand(fileContent, fileMatch);
-      lockFileArgs.set(fileMatch, compileArgs);
     } catch (error) {
-      logger.warn(
-        { fileMatch, error },
-        'pip-compile: Failed to extract and parse command in output file header',
-      );
+      logger.warn({ fileMatch }, `pip-compile: ${error.message}`);
       continue;
     }
+    lockFileArgs.set(fileMatch, compileArgs);
     for (const constraint in compileArgs.constraintsFiles) {
       // TODO(not7cd): handle constraints
       /* istanbul ignore next */
