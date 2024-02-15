@@ -66,13 +66,6 @@ export const constraintLineRegex = regEx(
   /^(#.*?\r?\n)+# {4}(?<command>\S*)(?<arguments> .*?)?\r?\n/,
 );
 
-// TODO(not7cd): remove in next PR, in favor of extractHeaderCommand
-export const deprecatedAllowedPipArguments = [
-  '--allow-unsafe',
-  '--generate-hashes',
-  '--no-emit-index-url',
-  '--strip-extras',
-];
 export const disallowedPipOptions = [
   '--no-header', // header is required by this manager
 ];
@@ -200,7 +193,6 @@ function throwForDisallowedOption(arg: string): void {
     throw new Error(`Option ${arg} not allowed for this manager`);
   }
 }
-
 function throwForNoEqualSignInOptionWithArgument(arg: string): void {
   if (optionsWithArguments.includes(arg)) {
     throw new Error(
@@ -208,7 +200,6 @@ function throwForNoEqualSignInOptionWithArgument(arg: string): void {
     );
   }
 }
-
 function throwForUnknownOption(arg: string): void {
   if (arg.includes('=')) {
     const [option] = arg.split('=');
