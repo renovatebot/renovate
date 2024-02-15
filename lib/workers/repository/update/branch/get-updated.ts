@@ -400,13 +400,14 @@ export async function getUpdatedPackageFiles(
 function patchConfigForArtifactsUpdate(
   config: BranchConfig,
   manager: string,
-  packageFile: string,
+  packageFileName: string,
 ): BranchConfig {
   const updatedConfig = { ...config };
-  if (updatedConfig.packageFiles?.[manager]) {
-    const packageFiles: PackageFile[] = updatedConfig.packageFiles?.[manager];
-    const _packageFile: PackageFile | undefined = packageFiles.find(
-      (p) => p.packageFile === packageFile,
+  if (is.nonEmptyArray(updatedConfig.packageFiles?.[manager])) {
+    const managerPackageFiles: PackageFile[] =
+      updatedConfig.packageFiles?.[manager];
+    const _packageFile: PackageFile | undefined = managerPackageFiles.find(
+      (p) => p.packageFile === packageFileName,
     );
     if (_packageFile) {
       updatedConfig.lockFiles = _packageFile.lockFiles;
