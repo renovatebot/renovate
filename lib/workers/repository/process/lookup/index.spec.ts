@@ -2941,7 +2941,7 @@ describe('workers/repository/process/lookup/index', () => {
         const lookupUpdates = (await lookup.lookupUpdates(config)).updates;
 
         expect(getMergeConfidenceSpy).toHaveBeenCalledTimes(0);
-        expect(lookupUpdates).not.toEqual([
+        expect(lookupUpdates).not.toMatchObject([
           {
             mergeConfidenceLevel: expect.anything(),
           },
@@ -2963,7 +2963,7 @@ describe('workers/repository/process/lookup/index', () => {
 
         const lookupUpdates = (await lookup.lookupUpdates(config)).updates;
 
-        expect(lookupUpdates).not.toEqual([
+        expect(lookupUpdates).not.toMatchObject([
           {
             mergeConfidenceLevel: expect.anything(),
           },
