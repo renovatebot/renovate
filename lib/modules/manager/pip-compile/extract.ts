@@ -109,7 +109,7 @@ export async function extractAllPackageFiles(
       );
       continue;
     }
-    
+
     for (const relativeSourceFile of compileArgs.sourceFiles) {
       const packageFile = upath.normalizeTrim(
         upath.join(compileDir, relativeSourceFile),
