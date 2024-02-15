@@ -76,8 +76,11 @@ export async function updateArtifacts({
       config.lockFiles,
     )})`,
   );
+  // workaround for Renovate not passing all relevant lock files to updateArtifacts
+  const inferedLockfile = upath.changeExt(inputFileName, '.txt');
+  const lockFiles = [...config.lockFiles, inferedLockfile];
   const result: UpdateArtifactsResult[] = [];
-  for (const outputFileName of config.lockFiles) {
+  for (const outputFileName of lockFiles) {
     const existingOutput = await readLocalFile(outputFileName, 'utf8');
     if (!existingOutput) {
       logger.debug('pip-compile: No output file found');
