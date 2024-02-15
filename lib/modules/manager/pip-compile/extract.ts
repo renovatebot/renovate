@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
 import { normalizeDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
@@ -12,7 +13,6 @@ import type {
   SupportedManagers,
 } from './types';
 import { generateMermaidGraph, inferCommandExecDir } from './utils';
-import { ensureLocalPath } from '../../../util/fs/util';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
