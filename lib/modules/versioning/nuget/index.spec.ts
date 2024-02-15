@@ -15,18 +15,24 @@ describe('modules/versioning/nuget/index', () => {
 
   describe('isStable()', () => {
     it.each`
-      input                        | expected
-      ${'9.0.3'}                   | ${true}
-      ${'1.2019.3.22'}             | ${true}
-      ${'3.0.0-beta'}              | ${false}
-      ${'2.0.2-pre20191018090318'} | ${false}
-      ${'1.0.0+c30d7625'}          | ${true}
-      ${'2.3.4-beta+1990ef74'}     | ${false}
-      ${'[1.2.3]'}                 | ${true}
-      ${'[1.2.3-beta]'}            | ${false}
-      ${'*'}                       | ${false}
-      ${'1.0.*'}                   | ${false}
-      ${'1.0.*-*'}                 | ${false}
+      input                          | expected
+      ${'9.0.3'}                     | ${true}
+      ${'1.2019.3.22'}               | ${true}
+      ${'3.0.0-beta'}                | ${false}
+      ${'2.0.2-pre20191018090318'}   | ${false}
+      ${'1.0.0+c30d7625'}            | ${true}
+      ${'2.3.4-beta+1990ef74'}       | ${false}
+      ${'[1.2.3]'}                   | ${true}
+      ${'[1.2.3-beta]'}              | ${false}
+      ${'*'}                         | ${false}
+      ${'1.0.*'}                     | ${false}
+      ${'1.0.*-*'}                   | ${false}
+      ${'1.0.0+Metadata'}            | ${true}
+      ${'1.0.0'}                     | ${true}
+      ${'1.0.0-Beta'}                | ${false}
+      ${'1.0.0-Beta+Meta'}           | ${false}
+      ${'1.0.0-RC.X+Meta'}           | ${false}
+      ${'1.0.0-RC.X.35.A.3455+Meta'} | ${false}
     `('isStable("$input") === $expected', ({ input, expected }) => {
       expect(nuget.isStable(input)).toBe(expected);
     });
@@ -34,62 +40,73 @@ describe('modules/versioning/nuget/index', () => {
 
   describe('isValid()', () => {
     it.each`
-      input                        | expected
-      ${'9.0.3'}                   | ${true}
-      ${'1.2019.3.22'}             | ${true}
-      ${'3.0.0-beta'}              | ${true}
-      ${'2.0.2-pre20191018090318'} | ${true}
-      ${'1.0.0+c30d7625'}          | ${true}
-      ${'2.3.4-beta+1990ef74'}     | ${true}
-      ${'17.04'}                   | ${true}
-      ${'3.0.0.beta'}              | ${false}
-      ${'5.1.2-+'}                 | ${false}
-      ${'1--'}                     | ${true}
-      ${'1.0.0+*'}                 | ${false}
-      ${'1.0.**'}                  | ${false}
-      ${'1.*.0'}                   | ${false}
-      ${'1.0.*-*bla'}              | ${false}
-      ${'1.0.*-*bla+*'}            | ${false}
-      ${'**'}                      | ${false}
-      ${'1.0.0-preview.*+blabla'}  | ${false}
-      ${'1.0.*--'}                 | ${false}
-      ${'1.0.*-alpha*+'}           | ${false}
-      ${'1.0.*-'}                  | ${false}
-      ${null}                      | ${false}
-      ${''}                        | ${false}
-      ${'1.0.0-preview.*'}         | ${true}
-      ${'1.0.*-bla*'}              | ${true}
-      ${'1.0.*-*'}                 | ${true}
-      ${'1.0.*-preview.1.*'}       | ${true}
-      ${'1.0.*-preview.1*'}        | ${true}
-      ${'1.0.0--'}                 | ${true}
-      ${'1.0.0-bla*'}              | ${true}
-      ${'1.0.*--*'}                | ${true}
-      ${'1.0.0--*'}                | ${true}
-      ${'1.0.0+*'}                 | ${false}
-      ${'1.0.**'}                  | ${false}
-      ${'1.*.0'}                   | ${false}
-      ${'1.0.*-*bla'}              | ${false}
-      ${'1.0.*-*bla+*'}            | ${false}
-      ${'**'}                      | ${false}
-      ${'1.0.0-preview.*+blabla'}  | ${false}
-      ${'1.0.*--'}                 | ${false}
-      ${'1.0.*-alpha*+'}           | ${false}
-      ${'1.0.*-'}                  | ${false}
-      ${'1.0.0-preview.*'}         | ${true}
-      ${'1.0.*-bla*'}              | ${true}
-      ${'1.0.*-*'}                 | ${true}
-      ${'1.0.*-preview.1.*'}       | ${true}
-      ${'1.0.*-preview.1*'}        | ${true}
-      ${'1.0.0--'}                 | ${true}
-      ${'1.0.0-bla*'}              | ${true}
-      ${'1.0.*--*'}                | ${true}
-      ${'1.0.0--*'}                | ${true}
-      ${'1.0.0.*-*'}               | ${true}
-      ${'1.0.*-*'}                 | ${true}
-      ${'1.*-*'}                   | ${true}
-      ${'*-rc.*'}                  | ${true}
-      ${'*-*'}                     | ${true}
+      input                                | expected
+      ${'2'}                               | ${true}
+      ${'2.0'}                             | ${true}
+      ${'2.0.0'}                           | ${true}
+      ${'2.0.0.0'}                         | ${true}
+      ${'9.0.3'}                           | ${true}
+      ${'1.2019.3.22'}                     | ${true}
+      ${'3.0.0-beta'}                      | ${true}
+      ${'2.0.2-pre20191018090318'}         | ${true}
+      ${'1.0.0+c30d7625'}                  | ${true}
+      ${'2.3.4-beta+1990ef74'}             | ${true}
+      ${'17.04'}                           | ${true}
+      ${'3.0.0.beta'}                      | ${false}
+      ${'5.1.2-+'}                         | ${false}
+      ${'1--'}                             | ${true}
+      ${'1.0.0+*'}                         | ${false}
+      ${'1.0.**'}                          | ${false}
+      ${'1.*.0'}                           | ${false}
+      ${'1.0.*-*bla'}                      | ${false}
+      ${'1.0.*-*bla+*'}                    | ${false}
+      ${'**'}                              | ${false}
+      ${'1.0.0-preview.*+blabla'}          | ${false}
+      ${'1.0.*--'}                         | ${false}
+      ${'1.0.*-alpha*+'}                   | ${false}
+      ${'1.0.*-'}                          | ${false}
+      ${null}                              | ${false}
+      ${''}                                | ${false}
+      ${'1.0.0-preview.*'}                 | ${true}
+      ${'1.0.*-bla*'}                      | ${true}
+      ${'1.0.*-*'}                         | ${true}
+      ${'1.0.*-preview.1.*'}               | ${true}
+      ${'1.0.*-preview.1*'}                | ${true}
+      ${'1.0.0--'}                         | ${true}
+      ${'1.0.0-bla*'}                      | ${true}
+      ${'1.0.*--*'}                        | ${true}
+      ${'1.0.0--*'}                        | ${true}
+      ${'1.0.0+*'}                         | ${false}
+      ${'1.0.**'}                          | ${false}
+      ${'1.*.0'}                           | ${false}
+      ${'1.0.*-*bla'}                      | ${false}
+      ${'1.0.*-*bla+*'}                    | ${false}
+      ${'**'}                              | ${false}
+      ${'1.0.0-preview.*+blabla'}          | ${false}
+      ${'1.0.*--'}                         | ${false}
+      ${'1.0.*-alpha*+'}                   | ${false}
+      ${'1.0.*-'}                          | ${false}
+      ${'1.0.0-preview.*'}                 | ${true}
+      ${'1.0.*-bla*'}                      | ${true}
+      ${'1.0.*-*'}                         | ${true}
+      ${'1.0.*-preview.1.*'}               | ${true}
+      ${'1.0.*-preview.1*'}                | ${true}
+      ${'1.0.0--'}                         | ${true}
+      ${'1.0.0-bla*'}                      | ${true}
+      ${'1.0.*--*'}                        | ${true}
+      ${'1.0.0--*'}                        | ${true}
+      ${'1.0.0.*-*'}                       | ${true}
+      ${'1.0.*-*'}                         | ${true}
+      ${'1.*-*'}                           | ${true}
+      ${'*-rc.*'}                          | ${true}
+      ${'*-*'}                             | ${true}
+      ${'1.0.0-Beta'}                      | ${true}
+      ${'1.0.0-Beta.2'}                    | ${true}
+      ${'1.0.0+MetaOnly'}                  | ${true}
+      ${'1.0.0'}                           | ${true}
+      ${'1.0.0-Beta+Meta'}                 | ${true}
+      ${'1.0.0-RC.X+MetaAA'}               | ${true}
+      ${'1.0.0-RC.X.35.A.3455+Meta-A-B-C'} | ${true}
     `('isValid("$input") === $expected', ({ input, expected }) => {
       expect(nuget.isValid(input)).toBe(expected);
       expect(nuget.isCompatible(input)).toBe(expected);
@@ -271,6 +288,11 @@ describe('modules/versioning/nuget/index', () => {
       ${'1.0.0+AA'}                 | ${'1.0.0-beta+aa'}            | ${false}
       ${'1.0.0-BETA+AA'}            | ${'1.0.0-beta'}               | ${true}
       ${'1.0.0-BETA.X.y.5.77.0+AA'} | ${'1.0.0-beta.x.y.5.79.0+aa'} | ${false}
+      ${'1.2.3.4-RC+99'}            | ${'1.2.3.4-RC+99'}            | ${true}
+      ${'1.2.3'}                    | ${'1.2.3'}                    | ${true}
+      ${'1.2.3-Pre.2'}              | ${'1.2.3-Pre.2'}              | ${true}
+      ${'1.2.3+99'}                 | ${'1.2.3+99'}                 | ${true}
+      ${'1.2-Pre'}                  | ${'1.2.0-Pre'}                | ${true}
     `('equals($a, $b) === $expected', ({ a, b, expected }) => {
       expect(nuget.equals(a, b)).toBe(expected);
     });
@@ -375,6 +397,10 @@ describe('modules/versioning/nuget/index', () => {
       ${['0.1.0', '1.0.0', '1.2.0', '2.0.0']}                                     | ${'1.*'}            | ${'1.2.0'}
       ${['0.1.0', '2.0.0', '2.5.0', '3.3.0']}                                     | ${'*'}              | ${'3.3.0'}
       ${['0.1.0-alpha', '1.0.0-alpha01', '1.0.0-alpha02', '2.0.0-beta', '2.0.1']} | ${'1.0.0-alpha*'}   | ${'1.0.0-alpha02'}
+      ${['1.0.0', '2.0.0']}                                                       | ${'[2.0.0, )'}      | ${'2.0.0'}
+      ${['1.0.0']}                                                                | ${'[2.0.0, )'}      | ${null}
+      ${['1.0.1-beta.1', '1.0.1']}                                                | ${'1.0.0-*'}        | ${'1.0.1-beta.1'}
+      ${['1.0.1-beta.1', '1.0.1']}                                                | ${'1.0.0'}          | ${'1.0.1'}
     `(
       'getSatisfyingVersion($versions, $range) === $expected',
       ({ versions, range, expected }) => {
