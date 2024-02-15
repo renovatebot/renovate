@@ -12,6 +12,7 @@ import type {
   SupportedManagers,
 } from './types';
 import { generateMermaidGraph, inferCommandExecDir } from './utils';
+import { ensureLocalPath } from '../../../util/fs/util';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
@@ -114,7 +115,9 @@ export async function extractAllPackageFiles(
       const packageFile = upath.normalizeTrim(
         upath.join(compileDir, relativeSourceFile),
       );
-      if (packageFile.startsWith('..')) {
+      try {
+        ensureLocalPath(packageFile);
+      } catch (error) {
         logger.warn(
           { fileMatch, packageFile },
           'pip-compile: Source file path outside of repository',
