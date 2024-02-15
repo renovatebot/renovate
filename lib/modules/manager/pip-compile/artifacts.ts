@@ -10,7 +10,7 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import * as pipRequirements from '../pip_requirements';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 import {
   extractHeaderCommand,
   getExecOptions,
@@ -21,7 +21,7 @@ export function constructPipCompileCmd(
   content: string,
   outputFileName: string,
   haveCredentials: boolean,
-  additionalArgs: string[] = [],
+  upgradePackages: Upgrade[] = [],
 ): string {
   const compileArgs = extractHeaderCommand(content, outputFileName);
   if (compileArgs.isCustomCommand) {
@@ -57,8 +57,10 @@ export function constructPipCompileCmd(
   ) {
     compileArgs.argv.splice(1, 0, '--no-emit-index-url');
   }
-  for (const arg of additionalArgs) {
-    compileArgs.argv.push(arg);
+  for (const dep of upgradePackages) {
+    compileArgs.argv.push(
+      `--upgrade-package=${dep.depName}==${dep.newVersion}`,
+    );
   }
   return compileArgs.argv.map(quote).join(' ');
 }
@@ -94,21 +96,14 @@ export async function updateArtifacts({
       if (config.isLockFileMaintenance) {
         await deleteLocalFile(outputFileName);
       }
-      const additionalArgs: string[] = [];
-      updatedDeps.forEach((dep) => {
-        if (dep.isLockfileUpdate) {
-          additionalArgs.push(
-            `--upgrade-package=${dep.depName}==${dep.newVersion}`,
-          );
-        }
-      });
+      const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
       const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
       const cmd = constructPipCompileCmd(
         existingOutput,
         outputFileName,
         registryUrlVars.haveCredentials,
-        additionalArgs,
+        upgradePackages,
       );
       const execOptions = await getExecOptions(
         config,
