@@ -1796,18 +1796,6 @@ You can configure a different maximum value in seconds using `maxRetryAfter`:
 }
 ```
 
-### milestone
-
-If set to an existing and `open` milestone, the milestone will be added to the PR.
-
-For example:
-
-```json
-{
-  "milestone": "vNext"
-}
-```
-
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
@@ -2170,6 +2158,18 @@ Depending on its running schedule, Renovate may run a few times within that time
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
+
+## milestone
+
+If set to an existing and `open` milestone, the milestone will be added to the PR.
+
+For example:
+
+```json
+{
+  "milestone": "vNext"
+}
+```
 
 ## minimumReleaseAge
 
