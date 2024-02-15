@@ -361,6 +361,10 @@ export async function getUpdatedPackageFiles(
             const packageFileContents =
               updatedFileContents[packageFile] ||
               (await getFile(packageFile, config.baseBranch));
+            // workaround, see #27319
+            if (config.packageFiles?.[packageFile]?.lockFiles) {
+              config.lockFiles = config.packageFiles![packageFile].lockFiles;
+            }
             const results = await updateArtifacts({
               packageFileName: packageFile,
               updatedDeps: [],
