@@ -1,6 +1,7 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { normalizeDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
@@ -100,8 +101,15 @@ export async function extractAllPackageFiles(
         type: 'constraint',
       });
     }
-    // TODO(not7cd): handle locked deps
-    // const lockedDeps = extractRequirementsFile(content);
+    const lockedDeps = extractRequirementsFile(fileContent)?.deps;
+    if (!lockedDeps) {
+      logger.debug(
+        { fileMatch },
+        'pip-compile: Failed to extract dependencies from lock file',
+      );
+      continue;
+    }
+    
     for (const relativeSourceFile of compileArgs.sourceFiles) {
       const packageFile = upath.normalizeTrim(
         upath.join(compileDir, relativeSourceFile),
@@ -145,6 +153,21 @@ export async function extractAllPackageFiles(
         config,
       );
       if (packageFileContent) {
+        for (const dep of packageFileContent.deps) {
+          const lockedVersion = lockedDeps?.find(
+            (lockedDep) =>
+              normalizeDepName(lockedDep.depName!) ===
+              normalizeDepName(dep.depName!),
+          )?.currentVersion;
+          if (lockedVersion) {
+            dep.lockedVersion = lockedVersion;
+          } else {
+            logger.warn(
+              { depName: dep.depName, lockFile: fileMatch },
+              'pip-compile: dependency not found in lock file',
+            );
+          }
+        }
         packageFiles.set(packageFile, {
           ...packageFileContent,
           lockFiles: [fileMatch],
