@@ -2,17 +2,15 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
-// TODO(not7cd): enable in the next PR, when this can be properly tested
-// import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
-// import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
+import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
-import { extractHeaderCommand, generateMermaidGraph } from './common';
+import { extractHeaderCommand } from './common';
 import type {
   DependencyBetweenFiles,
   PipCompileArgs,
   SupportedManagers,
 } from './types';
-import { inferCommandExecDir } from './utils';
+import { generateMermaidGraph, inferCommandExecDir } from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
@@ -38,13 +36,9 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.trace('pip-compile.extractPackageFile()');
   const manager = matchManager(packageFile);
-  // TODO(not7cd): extract based on manager: pep621, setuptools, identify other missing source types
   switch (manager) {
-    // TODO(not7cd): enable in the next PR, when this can be properly tested
-    // case 'pip_setup':
-    //   return extractSetupPyFile(content, _packageFile, _config);
-    // case 'setup-cfg':
-    //   return await extractSetupCfgFile(content);
+    case 'pip_setup':
+      return extractSetupPyFile(content, packageFile, _config);
     case 'pip_requirements':
       return extractRequirementsFile(content);
     case 'unknown':
@@ -78,10 +72,10 @@ export async function extractAllPackageFiles(
       continue;
     }
     // TODO(not7cd): rename to headerArguments
-    let pipCompileArgs: PipCompileArgs;
+    let compileArgs: PipCompileArgs;
 
     try {
-      pipCompileArgs = extractHeaderCommand(fileContent, fileMatch);
+      compileArgs = extractHeaderCommand(fileContent, fileMatch);
     } catch (error) {
       logger.warn(
         { fileMatch, error: error.message },
@@ -91,13 +85,13 @@ export async function extractAllPackageFiles(
     }
     let compileDir: string;
     try {
-      compileDir = inferCommandExecDir(fileMatch, pipCompileArgs.outputFile);
+      compileDir = inferCommandExecDir(fileMatch, compileArgs.outputFile);
     } catch (error) {
       logger.warn({ fileMatch }, `pip-compile: ${error.message}`);
       continue;
     }
-    lockFileArgs.set(fileMatch, pipCompileArgs);
-    for (const constraint in pipCompileArgs.constraintsFiles) {
+    lockFileArgs.set(fileMatch, compileArgs);
+    for (const constraint in compileArgs.constraintsFiles) {
       // TODO(not7cd): handle constraints
       /* istanbul ignore next */
       depsBetweenFiles.push({
@@ -108,7 +102,7 @@ export async function extractAllPackageFiles(
     }
     // TODO(not7cd): handle locked deps
     // const lockedDeps = extractRequirementsFile(content);
-    for (const relativeSourceFile of pipCompileArgs.sourceFiles) {
+    for (const relativeSourceFile of compileArgs.sourceFiles) {
       const packageFile = upath.normalizeTrim(
         upath.join(compileDir, relativeSourceFile),
       );

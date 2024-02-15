@@ -254,6 +254,7 @@ const repoGroups = {
     'https://github.com/dotnet/extensions',
     'https://github.com/dotnet/maui',
     'https://github.com/dotnet/runtime',
+    'https://github.com/dotnet/scaffolding',
     'https://github.com/dotnet/sdk',
   ],
   'dotnet-azure-ad-identitymodel-extensions':
@@ -448,6 +449,7 @@ const repoGroups = {
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
   'sentry-rust': 'https://github.com/getsentry/sentry-rust',
   serde: 'https://github.com/serde-rs/serde',
+  'serenity-js': 'https://github.com/serenity-js/serenity-js',
   shedlock: 'https://github.com/lukas-krecan/ShedLock',
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',

@@ -19,10 +19,10 @@ import type { PipCompileArgs } from './types';
 import { inferCommandExecDir } from './utils';
 
 export function constructPipCompileCmd(
-  headerArguments: PipCompileArgs,
+  compileArgs: PipCompileArgs,
   haveCredentials: boolean,
 ): string {
-  if (headerArguments.isCustomCommand) {
+  if (compileArgs.isCustomCommand) {
     throw new Error(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
@@ -31,17 +31,17 @@ export function constructPipCompileCmd(
   // should never happen as we already checked for this in extractAllPackageFiles
   // ensureLocalPath(compileDir);
 
-  if (!headerArguments.outputFile) {
+  if (!compileArgs.outputFile) {
     logger.debug(`pip-compile: implicit output file`);
   }
   // safeguard against index url leak if not explicitly set by an option
   if (
-    (!headerArguments.noEmitIndexUrl && !headerArguments.emitIndexUrl) ||
-    (!headerArguments.noEmitIndexUrl && haveCredentials)
+    (!compileArgs.noEmitIndexUrl && !compileArgs.emitIndexUrl) ||
+    (!compileArgs.noEmitIndexUrl && haveCredentials)
   ) {
-    headerArguments.argv.splice(1, 0, '--no-emit-index-url');
+    compileArgs.argv.splice(1, 0, '--no-emit-index-url');
   }
-  return headerArguments.argv.map(quote).join(' ');
+  return compileArgs.argv.map(quote).join(' ');
 }
 
 export async function updateArtifacts({
