@@ -2,16 +2,15 @@ import { Graph } from 'graph-data-structure';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
-// TODO(not7cd): enable in the next PR, when this can be properly tested
-// import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
-// import { extractPackageFile as extractSetupCfgFile } from '../setup-cfg';
+import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
-import { extractHeaderCommand, generateMermaidGraph } from './common';
+import { extractHeaderCommand } from './common';
 import type {
   DependencyBetweenFiles,
   PipCompileArgs,
   SupportedManagers,
 } from './types';
+import { generateMermaidGraph } from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
@@ -37,13 +36,9 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   logger.trace('pip-compile.extractPackageFile()');
   const manager = matchManager(packageFile);
-  // TODO(not7cd): extract based on manager: pep621, setuptools, identify other missing source types
   switch (manager) {
-    // TODO(not7cd): enable in the next PR, when this can be properly tested
-    // case 'pip_setup':
-    //   return extractSetupPyFile(content, _packageFile, _config);
-    // case 'setup-cfg':
-    //   return await extractSetupCfgFile(content);
+    case 'pip_setup':
+      return extractSetupPyFile(content, packageFile, _config);
     case 'pip_requirements':
       return extractRequirementsFile(content);
     case 'unknown':
@@ -76,18 +71,15 @@ export async function extractAllPackageFiles(
       logger.debug(`pip-compile: no content found for fileMatch ${fileMatch}`);
       continue;
     }
-    let pipCompileArgs: PipCompileArgs;
+    let compileArgs: PipCompileArgs;
     try {
-      pipCompileArgs = extractHeaderCommand(fileContent, fileMatch);
-      lockFileArgs.set(fileMatch, pipCompileArgs);
+      compileArgs = extractHeaderCommand(fileContent, fileMatch);
     } catch (error) {
-      logger.warn(
-        { fileMatch, error },
-        'pip-compile: Failed to extract and parse command in output file header',
-      );
+      logger.warn({ fileMatch }, `pip-compile: ${error.message}`);
       continue;
     }
-    for (const constraint in pipCompileArgs.constraintsFiles) {
+    lockFileArgs.set(fileMatch, compileArgs);
+    for (const constraint in compileArgs.constraintsFiles) {
       depsBetweenFiles.push({
         sourceFile: constraint,
         outputFile: fileMatch,
@@ -96,7 +88,7 @@ export async function extractAllPackageFiles(
     }
     // TODO(not7cd): handle locked deps
     // const lockedDeps = extractRequirementsFile(content);
-    for (const packageFile of pipCompileArgs.sourceFiles) {
+    for (const packageFile of compileArgs.sourceFiles) {
       depsBetweenFiles.push({
         sourceFile: packageFile,
         outputFile: fileMatch,

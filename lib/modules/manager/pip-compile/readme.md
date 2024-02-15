@@ -24,7 +24,8 @@ If Renovate matches a `pip-compile` output file it will extract original command
 - Use default header generation, don't use `--no-header` option.
 - Pass all source files explicitly.
 
-In turn `pip-compile` manager will find all source files and parse them as package files. Currently only `*.in` files associated with `pip_requirements` manager are handled.
+In turn `pip-compile` manager will find all source files and parse them as package files.
+Currently only `*.in` files associated with `pip_requirements` manager and `setup.py` files associated with `pip_setup` manager are handled.
 
 Example header:
 
@@ -44,6 +45,9 @@ Because `pip-compile` will update source files with their associated manager you
 ```json
 {
   "pip_requirements": {
+    "enabled": false
+  },
+  "pip_setup": {
     "enabled": false
   }
 }
