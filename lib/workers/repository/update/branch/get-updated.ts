@@ -378,7 +378,7 @@ function processUpdateArtifactResults(
   results: UpdateArtifactsResult[] | null,
   updatedArtifacts: FileChange[],
   artifactErrors: ArtifactError[],
-) {
+): void {
   if (is.nonEmptyArray(results)) {
     for (const res of results) {
       const { file, artifactError } = res;
