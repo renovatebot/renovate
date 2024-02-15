@@ -16,6 +16,7 @@ import {
   getExecOptions,
   getRegistryUrlVarsFromPackageFile,
 } from './common';
+import { extractAllPackageFiles } from '.';
 
 export function constructPipCompileCmd(
   content: string,
@@ -77,8 +78,19 @@ export async function updateArtifacts({
     )})`,
   );
   // workaround for Renovate not passing all relevant lock files to updateArtifacts, see: #27319
-  const inferedLockfile = upath.changeExt(inputFileName, '.txt');
-  const lockFiles = [...config.lockFiles, inferedLockfile];
+  let lockFiles: string[];
+  if (config.isLockFileMaintenance) {
+    lockFiles = config.lockFiles;
+  } else {
+    const packageFiles = await extractAllPackageFiles(config, config.lockFiles);
+    if (!packageFiles) {
+      return null;
+    }
+    lockFiles =
+      packageFiles.find((file) => file.packageFile === inputFileName)!
+        .lockFiles ?? [];
+  }
+  // end workaround
   const result: UpdateArtifactsResult[] = [];
   for (const outputFileName of lockFiles) {
     const existingOutput = await readLocalFile(outputFileName, 'utf8');
