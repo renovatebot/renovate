@@ -1,5 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import { logger } from '../../../logger';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
@@ -139,11 +140,64 @@ describe('modules/manager/pip-compile/extract', () => {
         ['foo==1.0.1'],
       ),
     );
-    fs.readLocalFile.mockResolvedValueOnce('!@#$');
-    fs.readLocalFile.mockResolvedValueOnce('');
+    fs.readLocalFile.mockResolvedValueOnce('!@#$'); // malformed.in
+    fs.readLocalFile.mockResolvedValueOnce(''); // empty.in
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=headerOnly.txt reqs.in',
+        [],
+      ),
+    );
 
-    const lockFiles = ['empty.txt', 'noHeader.txt', 'badSource.txt'];
+    const lockFiles = [
+      'empty.txt',
+      'noHeader.txt',
+      'badSource.txt',
+      'headerOnly.txt',
+    ];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles).toBeNull();
+  });
+
+  it('adds lockedVersion to deps in package file', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=requirements.txt requirements.in',
+        ['friendly-bard==1.0.1'],
+      ),
+    );
+    // also check if normalized name is used
+    fs.readLocalFile.mockResolvedValueOnce('FrIeNdLy-._.-bArD>=1.0.0');
+
+    const lockFiles = ['requirements.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    const packageFile = packageFiles!.pop();
+    expect(packageFile!.deps).toHaveLength(1);
+    expect(packageFile!.deps.pop()).toMatchObject({
+      currentValue: '>=1.0.0',
+      depName: 'FrIeNdLy-._.-bArD',
+      lockedVersion: '1.0.1',
+    });
+  });
+
+  it('warns if dependency has no locked version', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=requirements.txt requirements.in',
+        ['foo==1.0.1'],
+      ),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('foo>=1.0.0\nbar');
+
+    const lockFiles = ['requirements.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    const packageFile = packageFiles!.pop();
+    expect(packageFile!.deps).toHaveLength(2);
+    expect(logger.warn).toHaveBeenCalledWith(
+      { depName: 'bar', lockFile: 'requirements.txt' },
+      'pip-compile: dependency not found in lock file',
+    );
   });
 });
