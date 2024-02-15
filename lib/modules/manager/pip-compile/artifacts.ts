@@ -21,6 +21,7 @@ export function constructPipCompileCmd(
   content: string,
   outputFileName: string,
   haveCredentials: boolean,
+  additionalArgs: string[] = [],
 ): string {
   const compileArgs = extractHeaderCommand(content, outputFileName);
   if (compileArgs.isCustomCommand) {
@@ -56,12 +57,16 @@ export function constructPipCompileCmd(
   ) {
     compileArgs.argv.splice(1, 0, '--no-emit-index-url');
   }
+  for (const arg of additionalArgs) {
+    compileArgs.argv.push(arg);
+  }
   return compileArgs.argv.map(quote).join(' ');
 }
 
 export async function updateArtifacts({
   packageFileName: inputFileName,
   newPackageFileContent: newInputContent,
+  updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   if (!config.lockFiles) {
@@ -89,12 +94,21 @@ export async function updateArtifacts({
       if (config.isLockFileMaintenance) {
         await deleteLocalFile(outputFileName);
       }
+      const additionalArgs: string[] = [];
+      updatedDeps.forEach((dep) => {
+        if (dep.isLockfileUpdate) {
+          additionalArgs.push(
+            `--upgrade-package=${dep.depName}==${dep.newVersion}`,
+          );
+        }
+      });
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
       const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
       const cmd = constructPipCompileCmd(
         existingOutput,
         outputFileName,
         registryUrlVars.haveCredentials,
+        additionalArgs,
       );
       const execOptions = await getExecOptions(
         config,
