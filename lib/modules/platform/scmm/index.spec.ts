@@ -1,5 +1,4 @@
-import { mocked } from '../../../../test/util';
-import * as _git from '../../../util/git';
+import { git, mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
 import type { Pr } from '../types';
 import * as _util from '../util';
@@ -25,16 +24,14 @@ import {
   updatePr,
 } from './index';
 
+jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
 const hostRules: jest.Mocked<typeof _hostRules> = mocked(_hostRules);
-
-jest.mock('../../../util/git');
-const git: jest.Mocked<typeof _git> = mocked(_git);
 
 jest.mock('../util');
 const util: jest.Mocked<typeof _util> = mocked(_util);
 
-const endpoint = 'http://localhost:1337/scm/api/v2';
+const endpoint = 'https://localhost:8080/scm/api/v2';
 const token = 'TEST_TOKEN';
 
 const user: User = {
@@ -56,7 +53,7 @@ const repo: Repo = {
   healthCheckRunning: false,
   _links: {
     protocol: [
-      { name: 'http', href: 'http://localhost:8080/scm/default/repo' },
+      { name: 'http', href: 'https://localhost:8080/scm/default/repo' },
     ],
   },
 };
@@ -126,9 +123,6 @@ describe('modules/platform/scmm/index', () => {
         .mockResolvedValueOnce(expectedDefaultBranch);
 
       hostRules.find.mockReturnValueOnce({ username: user.username });
-      git.initRepo.mockImplementationOnce(() => {
-        return Promise.resolve();
-      });
       util.repoFingerprint.mockReturnValueOnce(expectedFingerprint);
 
       expect(
@@ -140,7 +134,7 @@ describe('modules/platform/scmm/index', () => {
       });
 
       expect(git.initRepo).toHaveBeenCalledWith({
-        url: `http://${user.username}@localhost:8080/scm/default/repo`,
+        url: `https://${user.username}@localhost:8080/scm/default/repo`,
         repository,
         defaultBranch: expectedDefaultBranch,
       });
