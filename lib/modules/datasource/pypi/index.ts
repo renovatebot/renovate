@@ -75,7 +75,6 @@ export class PypiDatasource extends Datasource {
     return dependency;
   }
 
-  // TODO: consolidate with normalizeDepName (#27242)
   private static normalizeName(input: string): string {
     return input.toLowerCase().replace(regEx(/_/g), '-');
   }
