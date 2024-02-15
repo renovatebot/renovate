@@ -181,7 +181,7 @@ describe('modules/manager/pip-compile/extract', () => {
     ];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles).toBeNull();
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(5);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(6);
     expect(logger.warn).toHaveBeenCalledTimes(2); // malformed.in, noHeader.txt
   });
 
