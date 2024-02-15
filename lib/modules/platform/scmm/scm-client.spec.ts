@@ -163,7 +163,7 @@ describe('modules/platform/scmm/scm-client', () => {
   });
 
   describe(scmClient.getAllRepoPrs, () => {
-    it('should return all repo prs', async () => {
+    it('should return all repo PRs', async () => {
       httpMock
         .scope(endpoint)
         .get(
@@ -200,7 +200,7 @@ describe('modules/platform/scmm/scm-client', () => {
   });
 
   describe(scmClient.getRepoPr, () => {
-    it('should return the repo pr', async () => {
+    it('should return the repo PR', async () => {
       httpMock
         .scope(endpoint)
         .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
@@ -229,7 +229,7 @@ describe('modules/platform/scmm/scm-client', () => {
   });
 
   describe(scmClient.createPr, () => {
-    it('should create pr for a repo', async () => {
+    it('should create PR for a repo', async () => {
       const expectedCreateParams: PullRequestCreateParams = {
         source: 'feature/test',
         target: 'develop',
@@ -284,7 +284,7 @@ describe('modules/platform/scmm/scm-client', () => {
   });
 
   describe(scmClient.updatePr, () => {
-    it('should update pr for a repo', async () => {
+    it('should update PR for a repo', async () => {
       const expectedUpdateParams: PullRequestUpdateParams = {
         title: 'Test Title',
         description: 'PR description',

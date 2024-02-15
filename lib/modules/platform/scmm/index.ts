@@ -46,7 +46,7 @@ export async function initPlatform({
   }
 
   if (!token) {
-    throw new Error('SCM-Manager api token not configured');
+    throw new Error('SCM-Manager API token not configured');
   }
 
   scmmClient = new ScmClient(endpoint, token);
@@ -191,9 +191,9 @@ export async function createPr({
   });
 
   logger.info(
-    `Pr Created with title '${createdPr.title}' from source '${createdPr.source}' to target '${createdPr.target}'`,
+    `PR created with title '${createdPr.title}' from source '${createdPr.source}' to target '${createdPr.target}'`,
   );
-  logger.debug(`Pr Created ${JSON.stringify(createdPr)}`);
+  logger.debug(`PR created ${JSON.stringify(createdPr)}`);
 
   return mapPrFromScmToRenovate(createdPr);
 }
@@ -212,7 +212,7 @@ export async function updatePr({
     status: mapPrState(state),
   });
 
-  logger.info(`Updated Pr #${number} with title ${prTitle}`);
+  logger.info(`Updated PR #${number} with title ${prTitle}`);
 }
 
 export function mergePr(config: MergePRConfig): Promise<boolean> {

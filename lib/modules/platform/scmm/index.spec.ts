@@ -103,15 +103,15 @@ describe('modules/platform/scmm/index', () => {
   });
 
   describe(initPlatform, () => {
-    it('should throw error, because endpoint is not configured', async () => {
+    it('should throw error, when endpoint is not configured', async () => {
       await expect(initPlatform({ token })).rejects.toThrow(
         'SCM-Manager endpoint not configured',
       );
     });
 
-    it('should throw error, because token is not configured', async () => {
+    it('should throw error, when token is not configured', async () => {
       await expect(initPlatform({ endpoint })).rejects.toThrow(
-        'SCM-Manager api token not configured',
+        'SCM-Manager API token not configured',
       );
     });
 
@@ -173,7 +173,7 @@ describe('modules/platform/scmm/index', () => {
   });
 
   describe(getPrList, () => {
-    it('should return empty array, because no pr could be found', async () => {
+    it('should return empty array, because no PR could be found', async () => {
       jest
         .spyOn(ScmClient.prototype, 'getAllRepoPrs')
         .mockRejectedValue(new Error());
@@ -181,7 +181,7 @@ describe('modules/platform/scmm/index', () => {
       expect(await getPrList()).toIncludeAllMembers([]);
     });
 
-    it('should return all prs of a repo', async () => {
+    it('should return all PRs of a repo', async () => {
       const expectedResult: Pr[] = [
         {
           sourceBranch: pullRequest.source,
@@ -284,7 +284,7 @@ describe('modules/platform/scmm/index', () => {
   });
 
   describe(getPr, () => {
-    it('should return null, because pr was not found', async () => {
+    it('should return null, because PR was not found', async () => {
       jest
         .spyOn(ScmClient.prototype, 'getAllRepoPrs')
         .mockResolvedValueOnce([]);
@@ -326,7 +326,7 @@ describe('modules/platform/scmm/index', () => {
       [false, 'OPEN', false],
       [true, 'DRAFT', true],
     ])(
-      'it should create the pr with isDraft %p and state %p',
+      'it should create the PR with isDraft %p and state %p',
       async (
         draftPR: boolean | undefined,
         expectedState: string,
@@ -388,7 +388,7 @@ describe('modules/platform/scmm/index', () => {
       [undefined, undefined, 'prBody', 'prBody'],
       ['open', 'OPEN', undefined, undefined],
     ])(
-      'it should update the pr with state %p and prBody %p',
+      'it should update the PR with state %p and prBody %p',
       async (
         actualState: string | undefined,
         expectedState: string | undefined,

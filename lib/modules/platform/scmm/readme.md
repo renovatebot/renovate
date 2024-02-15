@@ -1,13 +1,13 @@
 # SCM-Manager
 
-Renovate supports [SCM-Manager](https://scm-manager.org).
+Renovate supports the [SCM-Manager](https://scm-manager.org) platform.
 
 ## Authentication
 
-First, create an API Key for your technical Renovate user in SCM-Manager.
-The technical user should be configured properly with name and email address.
-Then let Renovate use your API Key by setting the `RENOVATE_TOKEN` environment variable with your key.
+1. Create an API Key for your technical Renovate user in SCM-Manager.
+2. The technical user _must_ have the correct name and email address.
+3. Put the API key in the `RENOVATE_TOKEN` environment variable, so that Renovate can use it.
 
-You must set `platform=scmm` in your Renovate config file.
+You must set the [`platform`](https://docs.renovatebot.com/self-hosted-configuration/#platform) to `scmm` in your your Renovate config file.
 
 The technical user needs at least the permissions to read your repository read and create pull request. This can be achieved by granting the permission role "OWNER" to your technical Renovate user.

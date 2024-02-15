@@ -2,7 +2,7 @@ import { mapPrFromScmToRenovate } from './mapper';
 import type { PullRequest as SCMPullRequest } from './types';
 
 describe('modules/platform/scmm/mapper', () => {
-  it('should correctly map the scm type of a pr to the renovate pr type', () => {
+  it('should correctly map the scm type of a PR to the Renovate PR type', () => {
     const scmPr: SCMPullRequest = {
       source: 'feat/new',
       target: 'develop',

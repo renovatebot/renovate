@@ -13,7 +13,7 @@ describe('modules/platform/scmm/utils', () => {
       ['rebase', 'REBASE'],
       ['squash', 'SQUASH'],
     ])(
-      'map merge strategy %p on pr merge method %p',
+      'map merge strategy %p on PR merge method %p',
       (strategy: string | undefined, method: string | null) => {
         expect(getMergeMethod(strategy as MergeStrategy)).toEqual(method);
       },
@@ -89,11 +89,11 @@ describe('modules/platform/scmm/utils', () => {
       (gitUrl: string | undefined) => {
         expect(() =>
           getRepoUrl(repo, gitUrl as GitUrlOption, username, password),
-        ).toThrow('MISSING_PROTOCOL_LINKS');
+        ).toThrow('Missing protocol links.');
       },
     );
 
-    it('should throw error because of missing ssh link', () => {
+    it('should throw error because of missing SSH link', () => {
       expect(() =>
         getRepoUrl(
           {
@@ -122,7 +122,7 @@ describe('modules/platform/scmm/utils', () => {
     });
 
     it.each([['endpoint'], ['default'], [undefined]])(
-      'should throw error because of missing http link, for option %p',
+      'should throw error because of missing HTTP link, for option %p',
       (gitUrl: string | undefined) => {
         expect(() =>
           getRepoUrl(
@@ -139,7 +139,7 @@ describe('modules/platform/scmm/utils', () => {
     );
 
     it.each([['endpoint'], ['default'], [undefined]])(
-      'should throw error because of malformed http link, with option %p',
+      'should throw error because of malformed HTTP link, with option %p',
       (gitUrl: string | undefined) => {
         expect(() =>
           getRepoUrl(
