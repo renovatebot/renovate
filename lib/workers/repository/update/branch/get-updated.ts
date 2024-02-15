@@ -6,7 +6,6 @@ import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
   PackageDependency,
-  PackageFile,
   UpdateArtifactsResult,
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
