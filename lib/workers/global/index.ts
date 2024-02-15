@@ -137,7 +137,6 @@ export async function start(): Promise<number> {
     await instrument('config', async () => {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
-      setGlobalLogLevelRemaps(config.logLevelRemap);
       if (config?.globalExtends) {
         // resolve global presets immediately
         config = mergeChildConfig(
@@ -160,6 +159,8 @@ export async function start(): Promise<number> {
 
       // validate secrets. Will throw and abort if invalid
       validateConfigSecrets(config);
+
+      setGlobalLogLevelRemaps(config.logLevelRemap);
     });
 
     // autodiscover repositories (needs to come after platform initialization)
