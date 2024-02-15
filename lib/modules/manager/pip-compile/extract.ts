@@ -3,12 +3,13 @@ import { readLocalFile } from '../../../util/fs';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
-import { extractHeaderCommand, generateMermaidGraph } from './common';
+import { extractHeaderCommand } from './common';
 import type {
   DependencyBetweenFiles,
   PipCompileArgs,
   SupportedManagers,
 } from './types';
+import { generateMermaidGraph } from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
