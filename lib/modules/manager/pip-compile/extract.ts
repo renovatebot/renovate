@@ -9,7 +9,7 @@ import type {
   PipCompileArgs,
   SupportedManagers,
 } from './types';
-import { normalizeDepName, generateMermaidGraph } from './utils';
+import { generateMermaidGraph, normalizeDepName } from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {

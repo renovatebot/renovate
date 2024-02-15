@@ -196,7 +196,8 @@ describe('modules/manager/pip-compile/extract', () => {
     const packageFile = packageFiles!.pop();
     expect(packageFile!.deps).toHaveLength(2);
     expect(logger.warn).toHaveBeenCalledWith(
-      'pip-compile: `bar` not found in lock file `requirements.txt`',
+      { depName: 'bar', lockFile: 'requirements.txt' },
+      'pip-compile: dependency not found in lock file',
     );
   });
 });
