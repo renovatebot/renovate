@@ -8,7 +8,7 @@ import { ensureTrailingSlash } from '../../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { isGitHubRepo } from './common';
+import { isGitHubRepo, normalizeDepName } from './common';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
 
 export class PypiDatasource extends Datasource {
@@ -75,12 +75,9 @@ export class PypiDatasource extends Datasource {
     return dependency;
   }
 
+  // TODO: consolidate with normalizeDepName (#27242)
   private static normalizeName(input: string): string {
     return input.toLowerCase().replace(regEx(/_/g), '-');
-  }
-
-  private static normalizeNameForUrlLookup(input: string): string {
-    return input.toLowerCase().replace(regEx(/(_|\.|-)+/g), '-');
   }
 
   private async getDependency(
@@ -89,7 +86,7 @@ export class PypiDatasource extends Datasource {
   ): Promise<ReleaseResult | null> {
     const lookupUrl = url.resolve(
       hostUrl,
-      `${PypiDatasource.normalizeNameForUrlLookup(packageName)}/json`,
+      `${normalizeDepName(packageName)}/json`,
     );
     const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
@@ -227,9 +224,7 @@ export class PypiDatasource extends Datasource {
   ): Promise<ReleaseResult | null> {
     const lookupUrl = url.resolve(
       hostUrl,
-      ensureTrailingSlash(
-        PypiDatasource.normalizeNameForUrlLookup(packageName),
-      ),
+      ensureTrailingSlash(normalizeDepName(packageName)),
     );
     const dependency: ReleaseResult = { releases: [] };
     const response = await this.http.get(lookupUrl);

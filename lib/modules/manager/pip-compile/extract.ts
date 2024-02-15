@@ -1,5 +1,6 @@
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { normalizeDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
@@ -9,7 +10,7 @@ import type {
   PipCompileArgs,
   SupportedManagers,
 } from './types';
-import { generateMermaidGraph, normalizeDepName } from './utils';
+import { generateMermaidGraph } from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
