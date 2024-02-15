@@ -2,25 +2,25 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 
 export function inferCommandExecDir(
-  fileName: string,
-  outputFile: string | undefined,
+  outputFilePath: string,
+  outputFileArg: string | undefined,
 ): string {
-  if (!outputFile) {
+  if (!outputFileArg) {
     // implicit output file is in the same directory where command was executed
-    return upath.normalize(upath.dirname(fileName));
+    return upath.normalize(upath.dirname(outputFilePath));
   }
-  if (upath.normalize(outputFile).startsWith('..')) {
+  if (upath.normalize(outputFileArg).startsWith('..')) {
     throw new Error(
-      `Cannot infer command execution directory from path ${outputFile}`,
+      `Cannot infer command execution directory from path ${outputFileArg}`,
     );
   }
-  if (upath.basename(outputFile) !== upath.basename(fileName)) {
+  if (upath.basename(outputFileArg) !== upath.basename(outputFilePath)) {
     throw new Error(
-      `Output file name mismatch: ${upath.basename(outputFile)} vs ${upath.basename(fileName)}`,
+      `Output file name mismatch: ${upath.basename(outputFileArg)} vs ${upath.basename(outputFilePath)}`,
     );
   }
-  const outputFileDir = upath.normalize(upath.dirname(outputFile));
-  let commandExecDir = upath.normalize(upath.dirname(fileName));
+  const outputFileDir = upath.normalize(upath.dirname(outputFileArg));
+  let commandExecDir = upath.normalize(upath.dirname(outputFilePath));
 
   for (const dir of outputFileDir.split('/').reverse()) {
     if (commandExecDir.endsWith(dir)) {
@@ -35,8 +35,8 @@ export function inferCommandExecDir(
     logger.debug(
       {
         commandExecDir,
-        outputFile,
-        fileName,
+        outputFileArg,
+        outputFilePath,
       },
       `pip-compile: command was not executed in repository root`,
     );
