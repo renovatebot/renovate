@@ -6,6 +6,8 @@ import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
   PackageDependency,
+  PackageFile,
+  UpdateArtifactsResult,
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
 import type { FileAddition, FileChange } from '../../../../util/git/types';
@@ -299,16 +301,11 @@ export async function getUpdatedPackageFiles(
             newPackageFileContent: packageFile.contents!.toString(),
             config,
           });
-          if (is.nonEmptyArray(results)) {
-            for (const res of results) {
-              const { file, artifactError } = res;
-              if (file) {
-                updatedArtifacts.push(file);
-              } else if (artifactError) {
-                artifactErrors.push(artifactError);
-              }
-            }
-          }
+          processUpdateArtifactResults(
+            results,
+            updatedArtifacts,
+            artifactErrors,
+          );
         }
       }
     }
@@ -334,18 +331,11 @@ export async function getUpdatedPackageFiles(
             newPackageFileContent: packageFile.contents!.toString(),
             config,
           });
-          if (is.nonEmptyArray(results)) {
-            updatedPackageFiles.push(packageFile);
-            for (const res of results) {
-              const { file, artifactError } = res;
-              // istanbul ignore else
-              if (file) {
-                updatedArtifacts.push(file);
-              } else if (artifactError) {
-                artifactErrors.push(artifactError);
-              }
-            }
-          }
+          processUpdateArtifactResults(
+            results,
+            updatedArtifacts,
+            artifactErrors,
+          );
         }
       }
     }
@@ -367,16 +357,11 @@ export async function getUpdatedPackageFiles(
               newPackageFileContent: packageFileContents!,
               config,
             });
-            if (is.nonEmptyArray(results)) {
-              for (const res of results) {
-                const { file, artifactError } = res;
-                if (file) {
-                  updatedArtifacts.push(file);
-                } else if (artifactError) {
-                  artifactErrors.push(artifactError);
-                }
-              }
-            }
+            processUpdateArtifactResults(
+              results,
+              updatedArtifacts,
+              artifactErrors,
+            );
           }
         }
       }
@@ -388,4 +373,21 @@ export async function getUpdatedPackageFiles(
     updatedArtifacts,
     artifactErrors,
   };
+}
+
+function processUpdateArtifactResults(
+  results: UpdateArtifactsResult[] | null,
+  updatedArtifacts: FileChange[],
+  artifactErrors: ArtifactError[],
+) {
+  if (is.nonEmptyArray(results)) {
+    for (const res of results) {
+      const { file, artifactError } = res;
+      if (file) {
+        updatedArtifacts.push(file);
+      } else if (artifactError) {
+        artifactErrors.push(artifactError);
+      }
+    }
+  }
 }
