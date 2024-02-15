@@ -220,7 +220,7 @@ describe('modules/manager/pip-compile/extract', () => {
     // relative/reqs.txt
     fs.readLocalFile.mockResolvedValueOnce(
       getSimpleRequirementsFile(
-        'pip-compile --output-file=relative/reqs.txt ../outside.in',
+        'pip-compile --output-file=reqs.txt ../outside.in',
         ['foo==1.0.1'],
       ),
     );
@@ -230,8 +230,11 @@ describe('modules/manager/pip-compile/extract', () => {
       'absolute/reqs.txt',
       'relative/reqs.txt',
     ]);
-    expect(packageFiles).toBeNull();
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(6);
+    expect(packageFiles?.map((p) => p.packageFile)).toEqual([
+      'reqs.in',
+      'absolute/reqs.in',
+      'outside.in',
+    ]);
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 });
