@@ -2174,6 +2174,8 @@ Depending on its running schedule, Renovate may run a few times within that time
 
 This option allows you to remap log levels for specific messages.
 
+Be careful with remapping `warn` or `error` messages to lower log levels, as it may hide important information.
+
 ```json
 {
   "logLevelRemap": [
