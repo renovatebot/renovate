@@ -11,6 +11,7 @@ import type { StatusResult } from '../../../util/git/types';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { constructPipCompileCmd } from './artifacts';
+import { extractHeaderCommand } from './common';
 import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);
@@ -327,8 +328,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
     it('throws for garbage', () => {
       expect(() =>
         constructPipCompileCmd(
-          Fixtures.get('requirementsNoHeaders.txt'),
-          'subdir/requirements.txt',
+          extractHeaderCommand(
+            Fixtures.get('requirementsNoHeaders.txt'),
+            'subdir/requirements.txt',
+          ),
           false,
         ),
       ).toThrow(/extract/);
@@ -337,10 +340,12 @@ describe('modules/manager/pip-compile/artifacts', () => {
     it('returns extracted common arguments (like those featured in the README)', () => {
       expect(
         constructPipCompileCmd(
-          Fixtures.get('requirementsWithHashes.txt'),
-          'subdir/requirements.txt',
+          extractHeaderCommand(
+            Fixtures.get('requirementsWithHashes.txt'),
+            'subdir/requirements.txt',
+          ),
           false,
-        ).cmd,
+        ),
       ).toBe(
         'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
       );
@@ -349,10 +354,12 @@ describe('modules/manager/pip-compile/artifacts', () => {
     it('returns --no-emit-index-url only once when its in the header and credentials are present in URLs', () => {
       expect(
         constructPipCompileCmd(
-          Fixtures.get('requirementsWithHashes.txt'),
-          'subdir/requirements.txt',
+          extractHeaderCommand(
+            Fixtures.get('requirementsWithHashes.txt'),
+            'subdir/requirements.txt',
+          ),
           true,
-        ).cmd,
+        ),
       ).toBe(
         'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
       );
@@ -360,39 +367,46 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
     it('safeguard against index url leak if not explicitly set by an option', () => {
       expect(
-        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt', false)
-          .cmd,
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+          false,
+        ),
       ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
     it('allow explicit --emit-index-url', () => {
       expect(
         constructPipCompileCmd(
-          getCommandInHeader('pip-compile --emit-index-url requirements.in'),
-          'subdir/requirements.txt',
+          extractHeaderCommand(
+            getCommandInHeader('pip-compile --emit-index-url requirements.in'),
+            'subdir/requirements.txt',
+          ),
           false,
-        ).cmd,
+        ),
       ).toBe('pip-compile --emit-index-url requirements.in');
     });
 
     it('throw if --output-file basename differs from path', () => {
-      expect(
-        () =>
-          constructPipCompileCmd(
+      expect(() =>
+        constructPipCompileCmd(
+          extractHeaderCommand(
             getCommandInHeader(
               'pip-compile --output-file=hey.txt requirements.in',
             ),
             'subdir/requirements.txt',
-            false,
-          ).cmd,
+          ),
+          false,
+        ),
       ).toThrow(/mismatch/);
     });
 
     it('throws on unknown arguments', () => {
       expect(() =>
         constructPipCompileCmd(
-          Fixtures.get('requirementsWithUnknownArguments.txt'),
-          'subdir/requirements.txt',
+          extractHeaderCommand(
+            Fixtures.get('requirementsWithUnknownArguments.txt'),
+            'subdir/requirements.txt',
+          ),
           false,
         ),
       ).toThrow(/supported/);
@@ -401,8 +415,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
     it('throws on custom command', () => {
       expect(() =>
         constructPipCompileCmd(
-          Fixtures.get('requirementsCustomCommand.txt'),
-          'subdir/requirements.txt',
+          extractHeaderCommand(
+            Fixtures.get('requirementsCustomCommand.txt'),
+            'subdir/requirements.txt',
+          ),
           false,
         ),
       ).toThrow(/custom/);

@@ -15,14 +15,13 @@ import {
   getExecOptions,
   getRegistryUrlVarsFromPackageFile,
 } from './common';
+import type { PipCompileArgs } from './types';
 import { inferCommandExecDir } from './utils';
 
 export function constructPipCompileCmd(
-  content: string,
-  outputFileName: string,
+  headerArguments: PipCompileArgs,
   haveCredentials: boolean,
 ): string {
-  const headerArguments = extractHeaderCommand(content, outputFileName);
   if (headerArguments.isCustomCommand) {
     throw new Error(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
@@ -33,7 +32,7 @@ export function constructPipCompileCmd(
   // ensureLocalPath(compileDir);
 
   if (!headerArguments.outputFile) {
-    logger.debug({ outputFileName }, `pip-compile: implicit output file`);
+    logger.debug(`pip-compile: implicit output file`);
   }
   // safeguard against index url leak if not explicitly set by an option
   if (
@@ -86,8 +85,7 @@ export async function updateArtifacts({
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
       const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
       const cmd = constructPipCompileCmd(
-        existingOutput,
-        outputFileName,
+        headerArguments,
         registryUrlVars.haveCredentials,
       );
       const execOptions = await getExecOptions(
