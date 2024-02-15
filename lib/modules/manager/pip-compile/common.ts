@@ -14,7 +14,6 @@ import type {
   GetRegistryUrlVarsResult,
   PipCompileArgs,
 } from './types';
-import { inferCommandExecDir } from './utils';
 
 export function getPythonConstraint(
   config: UpdateArtifactsConfig,
@@ -122,7 +121,6 @@ export function extractHeaderCommand(
   const result: PipCompileArgs = {
     argv,
     command,
-    commandExecDir: '.',
     isCustomCommand,
     outputFile: '',
     sourceFiles: [],
@@ -176,10 +174,6 @@ export function extractHeaderCommand(
 
     logger.warn(`pip-compile: option ${arg} not handled`);
   }
-
-  // TODO: remove
-  result.commandExecDir = inferCommandExecDir(fileName, result.outputFile);
-
   logger.trace(
     {
       ...result,

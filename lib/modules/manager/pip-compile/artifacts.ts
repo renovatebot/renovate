@@ -7,7 +7,6 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import { ensureLocalPath } from '../../../util/fs/util';
 import { getRepoStatus } from '../../../util/git';
 import * as pipRequirements from '../pip_requirements';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -16,26 +15,22 @@ import {
   getExecOptions,
   getRegistryUrlVarsFromPackageFile,
 } from './common';
-
-interface PipCompileCmd {
-  cwd: string;
-  cmd: string;
-}
+import { inferCommandExecDir } from './utils';
 
 export function constructPipCompileCmd(
   content: string,
   outputFileName: string,
   haveCredentials: boolean,
-): PipCompileCmd {
+): string {
   const headerArguments = extractHeaderCommand(content, outputFileName);
   if (headerArguments.isCustomCommand) {
     throw new Error(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
   }
-  const compileDir: string = headerArguments.commandExecDir;
+  // const compileDir: string = headerArguments.commandExecDir;
   // should never happen as we already checked for this in extractAllPackageFiles
-  ensureLocalPath(compileDir);
+  // ensureLocalPath(compileDir);
 
   if (!headerArguments.outputFile) {
     logger.debug({ outputFileName }, `pip-compile: implicit output file`);
@@ -47,7 +42,7 @@ export function constructPipCompileCmd(
   ) {
     headerArguments.argv.splice(1, 0, '--no-emit-index-url');
   }
-  return { cwd: compileDir, cmd: headerArguments.argv.map(quote).join(' ') };
+  return headerArguments.argv.map(quote).join(' ');
 }
 
 export async function updateArtifacts({
@@ -80,9 +75,17 @@ export async function updateArtifacts({
       if (config.isLockFileMaintenance) {
         await deleteLocalFile(outputFileName);
       }
+      const headerArguments = extractHeaderCommand(
+        existingOutput,
+        outputFileName,
+      );
+      const cwd = inferCommandExecDir(
+        outputFileName,
+        headerArguments.outputFile,
+      );
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
       const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
-      const { cwd, cmd } = constructPipCompileCmd(
+      const cmd = constructPipCompileCmd(
         existingOutput,
         outputFileName,
         registryUrlVars.haveCredentials,

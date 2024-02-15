@@ -16,7 +16,6 @@ export type SupportedManagers =
 export interface PipCompileArgs {
   argv: string[]; // all arguments as a list
   command: string;
-  commandExecDir: string;
   isCustomCommand: boolean;
   constraintsFiles?: string[];
   extra?: string[];
