@@ -3,12 +3,12 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:1.23.4@sha256:a949c81cfa579e2682ef7bd595b3bbfad636fb4da664993979713b81b19fa523 AS slim-base
+FROM ghcr.io/renovatebot/base-image:1.23.7@sha256:552b4c6174579146c5e5986a9a29704961086a3369b6a35a237266db4ddf66d0 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:1.23.4-full@sha256:f79ef732e27a86d7879379c7ec4eb7a8a80dcf533b3e5e19945c5a06bd4d5d37 AS full-base
+FROM ghcr.io/renovatebot/base-image:1.23.7-full@sha256:3144ae091c57605925648d98b1a4ada2d45cd43ed3b9f30ba4e3d005125cc322 AS full-base
 
 # --------------------------------------
 # build image

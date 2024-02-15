@@ -1,4 +1,12 @@
-import { allowedPipOptions, extractHeaderCommand } from './common';
+import { mockDeep } from 'jest-mock-extended';
+import { hostRules } from '../../../../test/util';
+import {
+  allowedPipOptions,
+  extractHeaderCommand,
+  getRegistryUrlVarsFromPackageFile,
+} from './common';
+
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 function getCommandInHeader(command: string) {
   return `#
@@ -139,6 +147,95 @@ describe('modules/manager/pip-compile/common', () => {
           'reqs.txt',
         ),
       ).toHaveProperty('isCustomCommand', true);
+    });
+  });
+
+  describe('getRegistryUrlFlagsFromPackageFile()', () => {
+    it('handles both registryUrls and additionalRegistryUrls', () => {
+      hostRules.find.mockReturnValue({});
+      expect(
+        getRegistryUrlVarsFromPackageFile({
+          deps: [],
+          registryUrls: ['https://example.com/pypi/simple'],
+          additionalRegistryUrls: ['https://example2.com/pypi/simple'],
+        }),
+      ).toEqual({
+        haveCredentials: false,
+        environmentVars: {
+          PIP_INDEX_URL: 'https://example.com/pypi/simple',
+          PIP_EXTRA_INDEX_URL: 'https://example2.com/pypi/simple',
+        },
+      });
+    });
+
+    it('handles multiple additionalRegistryUrls', () => {
+      hostRules.find.mockReturnValue({});
+      expect(
+        getRegistryUrlVarsFromPackageFile({
+          deps: [],
+          additionalRegistryUrls: [
+            'https://example.com/pypi/simple',
+            'https://example2.com/pypi/simple',
+          ],
+        }),
+      ).toEqual({
+        haveCredentials: false,
+        environmentVars: {
+          PIP_EXTRA_INDEX_URL:
+            'https://example.com/pypi/simple https://example2.com/pypi/simple',
+        },
+      });
+    });
+
+    it('uses extra index URLs with no auth', () => {
+      hostRules.find.mockReturnValue({});
+      expect(
+        getRegistryUrlVarsFromPackageFile({
+          deps: [],
+          registryUrls: ['https://example.com/pypi/simple'],
+        }),
+      ).toEqual({
+        haveCredentials: false,
+        environmentVars: {
+          PIP_INDEX_URL: 'https://example.com/pypi/simple',
+        },
+      });
+    });
+
+    it('uses auth from extra index URLs matching host rules', () => {
+      hostRules.find.mockReturnValue({
+        username: 'user',
+        password: 'password',
+      });
+      expect(
+        getRegistryUrlVarsFromPackageFile({
+          deps: [],
+          registryUrls: ['https://example.com/pypi/simple'],
+        }),
+      ).toEqual({
+        haveCredentials: true,
+        environmentVars: {
+          PIP_INDEX_URL: 'https://user:password@example.com/pypi/simple',
+        },
+      });
+    });
+
+    it('handles invalid URLs', () => {
+      hostRules.find.mockReturnValue({});
+      expect(
+        getRegistryUrlVarsFromPackageFile({
+          deps: [],
+          additionalRegistryUrls: [
+            'https://example.com/pypi/simple',
+            'this is not a valid URL',
+          ],
+        }),
+      ).toEqual({
+        haveCredentials: false,
+        environmentVars: {
+          PIP_EXTRA_INDEX_URL: 'https://example.com/pypi/simple',
+        },
+      });
     });
   });
 });
