@@ -335,6 +335,9 @@ export async function getUpdatedPackageFiles(
             updatedArtifacts,
             artifactErrors,
           );
+          if (is.nonEmptyArray(results)) {
+            updatedPackageFiles.push(packageFile);
+          }
         }
       }
     }
@@ -382,6 +385,7 @@ function processUpdateArtifactResults(
   if (is.nonEmptyArray(results)) {
     for (const res of results) {
       const { file, artifactError } = res;
+      // istanbul ignore else
       if (file) {
         updatedArtifacts.push(file);
       } else if (artifactError) {
