@@ -147,7 +147,8 @@ export async function extractAllPackageFiles(
             dep.lockedVersion = lockedVersion;
           } else {
             logger.warn(
-              `pip-compile: \`${dep.depName}\` not found in lock file \`${fileMatch}\``,
+              { depName: dep.depName, lockFile: fileMatch },
+              `pip-compile: dependency not found in lock file`,
             );
           }
         }
