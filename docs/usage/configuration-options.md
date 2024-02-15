@@ -1804,7 +1804,7 @@ For log level remapping, `newLogLevel` will set for the particular log message:
 {
   "logLevelRemap": [
     {
-      "matchMessage": "/error/",
+      "matchMessage": "/Error executing maven wrapper update command/",
       "newLogLevel": "warn"
     }
   ]
@@ -2178,11 +2178,11 @@ This option allows you to remap log levels for specific messages.
 {
   "logLevelRemap": [
     {
-      "matchMessage": "*branch*",
+      "matchMessage": "/^pip-compile:/",
       "newLogLevel": "info"
     },
     {
-      "matchMessage": "/PR|pull request/",
+      "matchMessage": "Package lookup error",
       "newLogLevel": "warn"
     }
   ]
@@ -2630,7 +2630,7 @@ For log level remapping, use this field to match against the particular log mess
 {
   "logLevelRemap": [
     {
-      "matchMessage": "*error*",
+      "matchMessage": "Manager explicitly enabled*",
       "newLogLevel": "warn"
     }
   ]
