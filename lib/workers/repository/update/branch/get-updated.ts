@@ -6,6 +6,7 @@ import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
   PackageDependency,
+  PackageFile,
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
 import type { FileAddition, FileChange } from '../../../../util/git/types';
@@ -361,15 +362,16 @@ export async function getUpdatedPackageFiles(
             const packageFileContents =
               updatedFileContents[packageFile] ||
               (await getFile(packageFile, config.baseBranch));
-            // workaround, see #27319
-            if (config.packageFiles?.[packageFile]?.lockFiles) {
-              config.lockFiles = config.packageFiles![packageFile].lockFiles;
-            }
+
             const results = await updateArtifacts({
               packageFileName: packageFile,
               updatedDeps: [],
               newPackageFileContent: packageFileContents!,
-              config,
+              config: patchConfigForArtifactsUpdate(
+                config,
+                manager,
+                packageFile,
+              ),
             });
             if (is.nonEmptyArray(results)) {
               for (const res of results) {
@@ -392,4 +394,23 @@ export async function getUpdatedPackageFiles(
     updatedArtifacts,
     artifactErrors,
   };
+}
+
+// workaround, see #27319
+function patchConfigForArtifactsUpdate(
+  config: BranchConfig,
+  manager: string,
+  packageFile: string,
+): BranchConfig {
+  const updatedConfig = { ...config };
+  if (updatedConfig.packageFiles?.[manager]) {
+    const packageFiles: PackageFile[] = updatedConfig.packageFiles?.[manager];
+    const _packageFile: PackageFile | undefined = packageFiles.find(
+      (p) => p.packageFile === packageFile,
+    );
+    if (_packageFile) {
+      updatedConfig.lockFiles = _packageFile.lockFiles;
+    }
+  }
+  return updatedConfig;
 }
