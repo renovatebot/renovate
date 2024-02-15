@@ -386,20 +386,6 @@ describe('modules/manager/pip-compile/artifacts', () => {
       ).toBe('pip-compile --emit-index-url requirements.in');
     });
 
-    it('throw if --output-file basename differs from path', () => {
-      expect(() =>
-        constructPipCompileCmd(
-          extractHeaderCommand(
-            getCommandInHeader(
-              'pip-compile --output-file=hey.txt requirements.in',
-            ),
-            'subdir/requirements.txt',
-          ),
-          false,
-        ),
-      ).toThrow(/mismatch/);
-    });
-
     it('throws on unknown arguments', () => {
       expect(() =>
         constructPipCompileCmd(

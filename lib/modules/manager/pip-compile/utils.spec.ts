@@ -19,5 +19,11 @@ describe('modules/manager/pip-compile/utils', () => {
         expect(inferCommandExecDir(fileName, outputFile)).toEqual(result);
       },
     );
+
+    it('throw if --output-file basename differs from path', () => {
+      expect(() =>
+        inferCommandExecDir('subdir/requirements.txt', 'hey.txt'),
+      ).toThrow(/mismatch/);
+    });
   });
 });
