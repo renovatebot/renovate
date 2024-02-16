@@ -69,10 +69,10 @@ async function fetchDepUpdates(
     dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
-      const { val: updateResult, err } = await withLookupStats(depConfig.datasource, () =>
-        Result.wrap(
-          lookupUpdates(depConfig as LookupUpdateConfig),
-        ).unwrap(),
+      const { val: updateResult, err } = await withLookupStats(
+        depConfig.datasource,
+        () =>
+          Result.wrap(lookupUpdates(depConfig as LookupUpdateConfig)).unwrap(),
       );
 
       if (updateResult) {
@@ -114,11 +114,10 @@ async function fetchManagerPackagerFileUpdates(
   }
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
-    (dep) => async (): Promise<PackageDependency> =>
-      {
-        const updates = await fetchDepUpdates(packageFileConfig, dep);
-        return updates.unwrapOrThrow();
-      },
+    (dep) => async (): Promise<PackageDependency> => {
+      const updates = await fetchDepUpdates(packageFileConfig, dep);
+      return updates.unwrapOrThrow();
+    },
   );
   logger.trace(
     { manager, packageFile, queueLength: queue.length },
