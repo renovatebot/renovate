@@ -220,7 +220,7 @@ export async function start(): Promise<number> {
     }
   } finally {
     await globalFinalize(config!);
-    const logLevel = process.env.LOG_LEVEL || 'info';
+    const logLevel = process.env.LOG_LEVEL ?? 'info';
     if (logLevel === 'info') {
       logger.info(
         `Renovate was run at log level "${logLevel}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
