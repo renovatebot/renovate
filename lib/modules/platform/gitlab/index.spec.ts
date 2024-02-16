@@ -1743,6 +1743,11 @@ describe('modules/platform/gitlab/index', () => {
   }
 
   describe('createPr(branchName, title, body)', () => {
+    beforeEach(() => {
+      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '2';
+      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '100';
+    });
+
     it('returns the PR', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
@@ -1837,11 +1842,8 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
-        .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200)
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
       expect(
         await gitlab.createPr({
           sourceBranch: 'some-branch',
@@ -1861,11 +1863,7 @@ describe('modules/platform/gitlab/index', () => {
         title: 'some title',
       });
 
-      expect(timers.setTimeout.mock.calls).toMatchObject([
-        [250],
-        [1000],
-        [2250],
-      ]);
+      expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400]]);
     });
 
     it('should parse merge_status attribute if detailed_merge_status is not set (on < 15.6)', async () => {
@@ -1892,7 +1890,6 @@ describe('modules/platform/gitlab/index', () => {
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
       process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
-      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '100';
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -1948,7 +1945,6 @@ describe('modules/platform/gitlab/index', () => {
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
       process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
-      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '100';
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -2003,7 +1999,6 @@ describe('modules/platform/gitlab/index', () => {
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
       process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
-      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '100';
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -2066,8 +2061,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, reply_body)
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
-      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '100';
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -2179,7 +2172,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200);
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '2';
       expect(
         await gitlab.createPr({
           sourceBranch: 'some-branch',
@@ -2239,7 +2231,6 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50005',
         )
         .reply(200);
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '2';
       expect(
         await gitlab.createPr({
           sourceBranch: 'some-branch',
@@ -2308,7 +2299,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200)
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .reply(200);
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '2';
       expect(
         await gitlab.createPr({
           sourceBranch: 'some-branch',
@@ -2358,7 +2348,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [
           { name: 'renovateIgnoreApprovals', approvals_required: 0 },
         ]);
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '2';
       expect(
         await gitlab.createPr({
           sourceBranch: 'some-branch',
@@ -2410,7 +2399,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, [])
         .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
         .replyWithError('Unknown');
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '2';
       expect(
         await gitlab.createPr({
           sourceBranch: 'some-branch',
