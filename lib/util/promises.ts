@@ -10,7 +10,7 @@ function isExternalHostError(err: any): err is ExternalHostError {
   return err instanceof ExternalHostError;
 }
 
-function handleError(err: any): never {
+export function handleError(err: any): never {
   if (!(err instanceof AggregateError)) {
     throw err;
   }
