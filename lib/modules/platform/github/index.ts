@@ -1385,7 +1385,7 @@ async function addMilestone(
 ): Promise<void> {
   logger.debug(`Adding milestone '${milestoneTitle}' to #${issueNo}`);
   // first, find the milestone id
-  const milestones = await getMilestones(issueNo);
+  const milestones = await getMilestones();
   const milestone = milestones.find((m) => m.title === milestoneTitle);
   if (!milestone) {
     logger.warn(
@@ -1403,11 +1403,8 @@ async function addMilestone(
   });
 }
 
-async function getMilestones(
-  issueNo: number,
-  state = 'open',
-): Promise<Milestone[]> {
-  logger.debug(`Getting ${state} milestones for #${issueNo}`);
+async function getMilestones(state = 'open'): Promise<Milestone[]> {
+  logger.debug(`Getting all ${state} milestones.`);
   const url = `repos/${
     config.parentRepo ?? config.repository
   }/milestones?state=${state}&per_page=100`;
@@ -1420,12 +1417,9 @@ async function getMilestones(
     logger.debug(`Found ${milestones.length} ${state} milestones`);
     return milestones;
   } catch (err) /* istanbul ignore next */ {
-    if (err.statusCode === 404) {
-      logger.debug(`404 response when retrieving ${state} milestones`);
-      throw new ExternalHostError(err, 'github');
-    }
-    throw err;
+    logger.warn({ err, state }, 'Failed to load milestones');
   }
+  return [];
 }
 
 export async function addAssignees(
