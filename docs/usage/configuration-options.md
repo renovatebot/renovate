@@ -2629,9 +2629,9 @@ For the full list of available managers, see the [Supported Managers](modules/ma
 For log level remapping, use this field to match against the particular log messages.
 You can match based on any of the following:
 
- - an exact match string (e.g. `This is the string`)
- - a minimatch pattern (e.g. `This*`)
- - a regex pattern (e.g. `/^This/`)
+- an exact match string (e.g. `This is the string`)
+- a minimatch pattern (e.g. `This*`)
+- a regex pattern (e.g. `/^This/`)
 
 ```json
 {
