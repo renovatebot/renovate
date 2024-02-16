@@ -2944,11 +2944,12 @@ describe('modules/platform/github/index', () => {
           milestone: 'vNext',
         });
         expect(pr?.number).toBe(123);
-        expect(logger.logger.warn).toHaveBeenCalledWith({
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          {
             err: expect.any(Error),
-            state: "open",
+            state: 'open',
           },
-          "Failed to load milestones",
+          'Failed to load milestones',
         );
       });
     });
