@@ -263,7 +263,7 @@ export class Vulnerabilities {
     const versionsCleaned: Record<string, string> = {};
     for (const rule of packageRules) {
       const version = rule.allowedVersions as string;
-      versionsCleaned[version] = version.replace(regEx(/[=> ]+/g), '');
+      versionsCleaned[version] = version.replace(regEx(/[(),=> ]+/g), '');
     }
     packageRules.sort((a, b) =>
       versioningApi.sortVersions(
@@ -417,10 +417,22 @@ export class Vulnerabilities {
       this.isVersionGtOrEq(version, depVersion, versioningApi),
     );
     if (lastAffected) {
-      return `> ${lastAffected}`;
+      return this.getLastAffectedByEcosystem(lastAffected, ecosystem);
     }
 
     return null;
+  }
+
+  private getLastAffectedByEcosystem(
+    lastAffected: string,
+    ecosystem: Ecosystem,
+  ): string {
+    if (ecosystem === 'Maven') {
+      return `(${lastAffected},)`;
+    }
+
+    // crates.io, Go, Hex, npm, RubyGems, PyPI
+    return `> ${lastAffected}`;
   }
 
   private isVersionGt(
