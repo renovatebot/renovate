@@ -2,13 +2,15 @@
 
 ## Authentication
 
-First, [create a classic Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic) for the bot account, select `repo` scope.
-Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.
+First, create a
+[fine-grained](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
+or [classic](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic)
+PAT ([Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#about-personal-access-tokens)) for the bot account, select `repo` scope.
 
 Let Renovate use your PAT by doing _one_ of the following:
 
 - Set your PAT as a `token` in your `config.js` file
-- Set your PAT as an environment variable `RENOVATE_TOKEN`
+- Set your PAT as an environment variable `RENOVATE_TOKEN` (generally via `${{ secrets.RENOVATE_TOKEN }}`)
 - Set your PAT when you run Renovate in the CLI with `--token=`
 
 Remember to set `platform=github` somewhere in your Renovate config file.
@@ -24,6 +26,26 @@ You can choose where you want to set `endpoint`:
 !!! tip "Labels and forking mode"
     If you're self-hosting Renovate on GitHub.com with GitHub Actions in forking mode, and want Renovate to apply labels then you must give the PAT `triage` level rights on `issues`.
     The `triage` level allows the PAT to apply/dismiss existing labels.
+
+## Running using a Fine-grained Token
+
+### Permissions
+
+These are the permissions required for a Fine-grained token:
+
+| Permission          | Access           | Level                          |
+| ------------------- | ---------------- | ------------------------------ |
+| `Members`           | `Read-only`      | _Organization_                 |
+| `Commit statuses`   | `Read and write` | _Repository_ or _Organization_ |
+| `Contents`          | `Read and write` | _Repository_ or _Organization_ |
+| `Dependabot alerts` | `Read-only`      | _Repository_ or _Organization_ |
+| `Issues`            | `Read and write` | _Repository_ or _Organization_ |
+| `Pull requests`     | `Read and write` | _Repository_ or _Organization_ |
+| `Workflows`         | `Read and write` | _Repository_ or _Organization_ |
+
+<!-- prettier-ignore -->
+!!! tip "Use a bot role account"
+    You should create a bot role account instead of using a human's github account.
 
 ## Running as a GitHub App
 
