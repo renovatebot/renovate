@@ -25,13 +25,13 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (rangeStrategy === 'bump') {
-    if (npm.matches(newVersion, '>=1.20.0')) {
+    if (npm.matches(newVersion, '>=1.20.0') && currentValue.split('.').length > 2) {
       return newVersion;
     }
     return shorten(newVersion);
   }
   if (rangeStrategy === 'replace' && !matches(currentValue, newVersion)) {
-    if (npm.matches(newVersion, '>=1.20.0')) {
+    if (npm.matches(newVersion, '>=1.20.0') && currentValue.split('.').length > 2) {
       return newVersion;
     }
     return shorten(newVersion);
