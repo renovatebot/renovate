@@ -2162,6 +2162,7 @@ Add to this object if you wish to define rules that apply only to major updates.
 ## milestone
 
 If set to an existing and `open` milestone, the milestone will be added to the PR.
+This will only be done once on PR creation.
 
 For example:
 
