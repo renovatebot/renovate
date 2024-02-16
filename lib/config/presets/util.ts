@@ -23,7 +23,8 @@ export async function fetchPreset({
   // TODO: fix me, can be undefiend #22198
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const endpoint = ensureTrailingSlash(_endpoint!);
-  const [fileName, presetName, subPresetName] = filePreset.split('/');
+  const [fileName] = filePreset.split('/', 1);
+  const presetName = filePreset.substring(fileName.length + 1);
   const pathPrefix = presetPath ? `${presetPath}/` : '';
   const buildFilePath = (name: string): string => `${pathPrefix}${name}`;
   let jsonContent: any;
@@ -70,21 +71,35 @@ export async function fetchPreset({
   if (!jsonContent) {
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
-  if (presetName) {
-    const preset = jsonContent[presetName];
-    if (!preset) {
-      throw new Error(PRESET_NOT_FOUND);
-    }
-    if (subPresetName) {
-      const subPreset = preset[subPresetName];
-      if (!subPreset) {
-        throw new Error(PRESET_NOT_FOUND);
-      }
-      return subPreset;
-    }
+
+  return extractSubPreset(jsonContent, presetName);
+}
+
+export function extractSubPreset(
+  jsonContent: any,
+  presetName: string | undefined,
+): Preset {
+  if (!presetName) {
+    return jsonContent;
+  }
+
+  const [splitPresetName, subPresetName] = presetName.split('/', 2);
+  const preset = jsonContent[splitPresetName];
+
+  if (!preset) {
+    throw new Error(PRESET_NOT_FOUND);
+  }
+
+  if (!subPresetName) {
     return preset;
   }
-  return jsonContent;
+
+  const subPreset = preset[subPresetName];
+  if (!subPreset) {
+    throw new Error(PRESET_NOT_FOUND);
+  }
+
+  return subPreset;
 }
 
 export function parsePreset(content: string, fileName: string): Preset {

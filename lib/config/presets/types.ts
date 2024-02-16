@@ -6,7 +6,7 @@ export type Preset = RenovateConfig & Record<string, unknown>;
 export type PresetConfig = {
   repo: string;
   presetPath?: string | undefined;
-  presetName?: string;
+  presetName?: string | undefined;
   tag?: string | undefined;
 };
 
@@ -20,7 +20,7 @@ export interface ParsedPreset {
   presetSource: string;
   repo: string;
   presetPath?: string | undefined;
-  presetName: string;
+  presetName?: string | undefined;
   tag?: string | undefined;
   params?: string[] | undefined;
 }

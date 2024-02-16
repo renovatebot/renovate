@@ -232,6 +232,16 @@ Parameters are supported similar to other methods:
 }
 ```
 
+URL fragment part specifies the preset name if the file contains multiple presets:
+
+```json
+{
+  "extends": [
+    "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain#presetName"
+  ]
+}
+```
+
 ## Contributing to presets
 
 Have you configured a rule that could help others?

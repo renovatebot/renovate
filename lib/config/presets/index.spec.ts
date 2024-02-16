@@ -945,7 +945,7 @@ describe('config/presets/index', () => {
       ).toEqual({
         repo: 'https://my.server/gitea/renovate-config/raw/branch/main/default.json',
         params: undefined,
-        presetName: 'default',
+        presetName: undefined,
         presetPath: undefined,
         presetSource: 'http',
       });
@@ -959,7 +959,7 @@ describe('config/presets/index', () => {
       ).toEqual({
         repo: 'http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain',
         params: undefined,
-        presetName: 'default',
+        presetName: undefined,
         presetPath: undefined,
         presetSource: 'http',
       });
@@ -973,7 +973,21 @@ describe('config/presets/index', () => {
       ).toEqual({
         repo: 'https://my.server/gitea/renovate-config/raw/branch/main/default.json',
         params: ['param1'],
-        presetName: 'default',
+        presetName: undefined,
+        presetPath: undefined,
+        presetSource: 'http',
+      });
+    });
+
+    it('parses HTTPS URLs with fragments/preset names', () => {
+      expect(
+        presets.parsePreset(
+          'https://my.server/gitea/renovate-config/raw/branch/main/default.json#presetName',
+        ),
+      ).toEqual({
+        repo: 'https://my.server/gitea/renovate-config/raw/branch/main/default.json',
+        params: undefined,
+        presetName: 'presetName',
         presetPath: undefined,
         presetSource: 'http',
       });

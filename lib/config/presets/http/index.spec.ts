@@ -25,6 +25,17 @@ describe('config/presets/http/index', () => {
       expect(await http.getPreset({ repo })).toEqual({ foo: 'bar' });
     });
 
+    it('should return subpreset', async () => {
+      httpMock
+        .scope(host)
+        .get(filePath)
+        .reply(200, { sub: { foo: 'bar' } });
+
+      expect(await http.getPreset({ repo, presetName: 'sub' })).toEqual({
+        foo: 'bar',
+      });
+    });
+
     it('throws if fails to parse', async () => {
       httpMock.scope(host).get(filePath).reply(200, 'not json');
 
