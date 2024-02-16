@@ -651,12 +651,16 @@ async function tryPrAutomerge(
       }
 
       // https://docs.gitlab.com/ee/api/merge_requests.html#merge-status
-      const desiredDetailedMergeStatus = ['mergeable', 'ci_still_running', 'not_approved'];
-      const desiredPipelineStatus = [
-        'failed',  // don't lose time if pipeline failed
-        'running'  // pipeline is running, no need to wait for it
+      const desiredDetailedMergeStatus = [
+        'mergeable',
+        'ci_still_running',
+        'not_approved',
       ];
-      let desiredStatus = 'can_be_merged';
+      const desiredPipelineStatus = [
+        'failed', // don't lose time if pipeline failed
+        'running', // pipeline is running, no need to wait for it
+      ];
+      const desiredStatus = 'can_be_merged';
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
       const retryTimes = parseInteger(
         process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
@@ -678,21 +682,25 @@ async function tryPrAutomerge(
           memCache: false,
         });
         // detailed_merge_status is available with Gitlab >=15.6.0
-        let detailed_merge_status_check: boolean = (
-          body.hasOwnProperty("detailed_merge_status") &&
-          desiredDetailedMergeStatus.includes(<string>body.detailed_merge_status)
+        const use_detailed_merge_status = Object.prototype.hasOwnProperty.call(
+          body,
+          'detailed_merge_status',
         );
+        const detailed_merge_status_check: boolean =
+          use_detailed_merge_status &&
+          desiredDetailedMergeStatus.includes(
+            body.detailed_merge_status as string,
+          );
         // merge_status is deprecated with Gitlab >= 15.6
-        let deprecated_merge_status_check: boolean = (
-          body.hasOwnProperty("detailed_merge_status") &&
-          body.merge_status === desiredStatus
-        );
+        const deprecated_merge_status_check: boolean =
+          !use_detailed_merge_status && body.merge_status === desiredStatus;
 
         // Only continue if the merge request can be merged and has a pipeline.
         if (
           (detailed_merge_status_check || deprecated_merge_status_check) &&
           body.pipeline !== null &&
-          desiredPipelineStatus.includes(body.pipeline.status)) {
+          desiredPipelineStatus.includes(body.pipeline.status)
+        ) {
           break;
         }
         logger.debug(`PR not yet in mergeable state. Retrying ${attempt}`);
@@ -714,7 +722,10 @@ async function tryPrAutomerge(
           );
           break;
         } catch (err) {
-          logger.debug({err}, `Automerge on PR creation failed. Retrying ${attempt}`);
+          logger.debug(
+            { err },
+            `Automerge on PR creation failed. Retrying ${attempt}`,
+          );
         }
         await setTimeout(mergeDelay * attempt ** 2); // exponential backoff
       }
