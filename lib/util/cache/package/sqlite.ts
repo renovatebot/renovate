@@ -6,6 +6,7 @@ import { exists } from 'fs-extra';
 import * as upath from 'upath';
 import { logger } from '../../../logger';
 import { ensureDir } from '../../fs';
+import type { PackageCacheNamespace } from './types';
 
 const brotliCompress = promisify(zlib.brotliCompress);
 const brotliDecompress = promisify(zlib.brotliDecompress);
@@ -103,7 +104,7 @@ export class SqlitePackageCache {
   }
 
   async set(
-    namespace: string,
+    namespace: PackageCacheNamespace,
     key: string,
     value: unknown,
     ttlMinutes = 5,
@@ -115,7 +116,7 @@ export class SqlitePackageCache {
   }
 
   async get<T = unknown>(
-    namespace: string,
+    namespace: PackageCacheNamespace,
     key: string,
   ): Promise<T | undefined> {
     const data = this.getStatement.get({ namespace, key }) as

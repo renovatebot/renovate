@@ -8,8 +8,12 @@ import type {
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types/host-rules';
-import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
-import { anyMatchRegexOrMinimatch } from '../util/string';
+import { regEx } from '../util/regex';
+import {
+  anyMatchRegexOrMinimatch,
+  configRegexPredicate,
+  isConfigRegex,
+} from '../util/string-match';
 import * as template from '../util/template';
 import {
   hasValidSchedule,
@@ -706,7 +710,9 @@ export async function validateConfig(
     }
 
     if (key === 'hostRules' && is.array(val)) {
-      const allowedHeaders = GlobalConfig.get('allowedHeaders', []);
+      const allowedHeaders = isGlobalConfig
+        ? (config.allowedHeaders as string[]) ?? []
+        : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (!rule.headers) {
           continue;

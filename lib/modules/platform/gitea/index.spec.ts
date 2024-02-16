@@ -2368,12 +2368,6 @@ describe('modules/platform/gitea/index', () => {
     });
   });
 
-  describe('getRepoForceRebase', () => {
-    it('should return false - unsupported by platform', async () => {
-      expect(await gitea.getRepoForceRebase()).toBe(false);
-    });
-  });
-
   describe('ensureComment', () => {
     it('should add comment with topic if not found', async () => {
       const scope = httpMock

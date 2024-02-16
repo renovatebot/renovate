@@ -24,7 +24,8 @@ export async function shouldReuseExistingBranch(
   if (
     config.rebaseWhen === 'behind-base-branch' ||
     (config.rebaseWhen === 'auto' &&
-      (config.automerge === true || (await platform.getRepoForceRebase())))
+      (config.automerge === true ||
+        (await platform.getBranchForceRebase?.(config.baseBranch))))
   ) {
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
       logger.debug(`Branch is behind base branch and needs rebasing`);

@@ -494,11 +494,6 @@ Set this to `"never"` to leave the titles untouched, allowing uppercase characte
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
-<!-- prettier-ignore -->
-!!! note
-    Renovate _always_ appends a `:` after the `commitMessagePrefix`.
-    For example, if you set `commitMessagePrefix` to `chore`, Renovate turns it into `chore:`.
-
 ## commitMessageSuffix
 
 This is used to add a suffix to commit messages.
@@ -3416,7 +3411,7 @@ For example we override it to `always` in the following cases where branch names
 You can select which behavior you want from Renovate:
 
 - `always`: Recreates all closed or blocking PRs
-- `auto`: The default option. Recreates only immortal PRs (default)
+- `auto`: The default option. Recreates only [immortal PRs](./key-concepts/pull-requests.md#immortal-prs) (default)
 - `never`: No PR is recreated, doesn't matter if it is immortal or not
 
 We recommend that you stick with the default setting for this option.
