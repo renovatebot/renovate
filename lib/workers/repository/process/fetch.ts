@@ -15,6 +15,7 @@ import type { LookupStats } from '../../../util/cache/memory/types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import * as p from '../../../util/promises';
+import { Result } from '../../../util/result';
 import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
@@ -70,7 +71,9 @@ async function fetchDepUpdates(
     if (depConfig.datasource) {
       try {
         const updateResult = await withLookupStats(depConfig.datasource, () =>
-          lookupUpdates(depConfig as LookupUpdateConfig),
+          Result.wrap(
+            lookupUpdates(depConfig as LookupUpdateConfig),
+          ).unwrapOrThrow(),
         );
         Object.assign(dep, updateResult);
       } catch (err) {
