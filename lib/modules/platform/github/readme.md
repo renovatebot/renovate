@@ -10,7 +10,7 @@ PAT ([Personal Access Token](https://docs.github.com/en/authentication/keeping-y
 Let Renovate use your PAT by doing _one_ of the following:
 
 - Set your PAT as a `token` in your `config.js` file
-- Set your PAT as an environment variable `RENOVATE_TOKEN` (generally via `${{ secrets.RENOVATE_TOKEN }}`)
+- Set your PAT as an environment variable `RENOVATE_TOKEN`
 - Set your PAT when you run Renovate in the CLI with `--token=`
 
 Remember to set `platform=github` somewhere in your Renovate config file.
@@ -45,7 +45,8 @@ These are the permissions required for a Fine-grained token:
 
 <!-- prettier-ignore -->
 !!! tip "Use a bot role account"
-    You should create a bot role account instead of using a human's github account.
+    Consider creating a GitHub App to use instead of using your own GitHub user account.
+
 
 ## Running as a GitHub App
 
