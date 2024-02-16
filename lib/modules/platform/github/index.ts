@@ -75,6 +75,7 @@ import {
 } from './graphql';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
+import type { Milestone } from './schema';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -86,7 +87,6 @@ import type {
   GhRestPr,
   GhRestRepo,
   LocalRepoConfig,
-  Milestone,
   PlatformConfig,
 } from './types';
 import { getAppDetails, getUserDetails, getUserEmail } from './user';
@@ -1742,10 +1742,10 @@ export async function createPr({
   const { number, node_id } = result;
 
   await addLabels(number, labels);
-  await tryPrAutomerge(number, node_id, platformOptions);
   if (milestone) {
     await addMilestone(number, milestone);
   }
+  await tryPrAutomerge(number, node_id, platformOptions);
 
   cachePr(result);
   return result;
