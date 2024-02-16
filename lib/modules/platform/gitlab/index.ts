@@ -677,22 +677,24 @@ async function tryPrAutomerge(
         const { body } = await gitlabApi.getJson<{
           merge_status: string;
           detailed_merge_status?: string;
-          pipeline: Record<string, string>;
+          pipeline: {
+            status: string;
+          };
         }>(`projects/${config.repository}/merge_requests/${pr}`, {
           memCache: false,
         });
         // detailed_merge_status is available with Gitlab >=15.6.0
-        const use_detailed_merge_status = Object.prototype.hasOwnProperty.call(
+        const use_detailed_merge_status = Object.hasOwn(
           body,
           'detailed_merge_status',
         );
-        const detailed_merge_status_check: boolean =
+        const detailed_merge_status_check =
           use_detailed_merge_status &&
           desiredDetailedMergeStatus.includes(
             body.detailed_merge_status as string,
           );
         // merge_status is deprecated with Gitlab >= 15.6
-        const deprecated_merge_status_check: boolean =
+        const deprecated_merge_status_check =
           !use_detailed_merge_status && body.merge_status === desiredStatus;
 
         // Only continue if the merge request can be merged and has a pipeline.
