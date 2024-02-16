@@ -79,10 +79,10 @@ export function bumpPackageVersion(
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 
-    let newPomVersion;
+    let newPomVersion: string | null = null;
     const prerelease = semver.prerelease(currentValue);
-    let snapshot = false;
-    if (!prerelease || (snapshot = isSnapshot(prerelease))) {
+    const snapshot = prerelease ? isSnapshot(prerelease) : false;
+    if (!prerelease || snapshot) {
       let releaseType = bumpVersion;
       if (snapshot && !bumpVersion.startsWith('pre')) {
         releaseType = ('pre' + bumpVersion) as ReleaseType;
