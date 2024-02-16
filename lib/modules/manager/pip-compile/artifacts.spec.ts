@@ -272,6 +272,33 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ]);
   });
 
+  it('uses --upgrade-package only for isLockfileUpdate', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['requirements.txt'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.in',
+        updatedDeps: [
+          { depName: 'foo', newVersion: '1.0.2', isLockfileUpdate: true },
+          { depName: 'bar', newVersion: '2.0.0' },
+        ] satisfies Upgrade[],
+        newPackageFileContent: '{}',
+        config: { ...lockMaintenanceConfig, lockFiles: ['requirements.txt'] },
+      }),
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pip-compile --no-emit-index-url requirements.in --upgrade-package=foo==1.0.2',
+      },
+    ]);
+  });
+
   it('uses pip-compile version from config', async () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
     GlobalConfig.set(dockerAdminConfig);
