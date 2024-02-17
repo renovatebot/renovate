@@ -88,6 +88,7 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
       delete config.excludePackagePatterns;
       delete config.excludePackagePrefixes;
       delete config.matchDepTypes;
+      delete config.matchNewValue;
       delete config.matchCurrentValue;
       delete config.matchCurrentVersion;
       delete config.matchCurrentAge;

@@ -129,6 +129,35 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
     });
 
+    it('catches invalid matchNewValue', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            matchNewValue: '/^2/',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['bar'],
+            matchNewValue: '^1',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['quack'],
+            matchNewValue: '<1.0.0',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['foo'],
+            matchNewValue: '/^2/i',
+            enabled: true,
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig(false, config);
+      expect(errors).toHaveLength(2);
+    });
+
     it('catches invalid matchCurrentVersion regex', async () => {
       const config = {
         packageRules: [

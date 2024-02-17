@@ -1359,6 +1359,17 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchNewValue',
+    description:
+      'A regex to match against the raw `newValue` string of a dependency. Valid only within a `packageRules` object.',
+    type: 'string',
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchSourceUrlPrefixes',
     description:
       'A list of source URL prefixes to match against, commonly used to group monorepos or packages from the same organization.',

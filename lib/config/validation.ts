@@ -272,6 +272,15 @@ export async function validateConfig(
           topic: 'Configuration Error',
           message: `Invalid regExp for ${currentPath}: \`${val}\``,
         });
+      } else if (
+        key === 'matchNewValue' &&
+        is.string(val) &&
+        !configRegexPredicate(val)
+      ) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid regExp for ${currentPath}: \`${val}\``,
+        });
       } else if (key === 'timezone' && val !== null) {
         const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {
