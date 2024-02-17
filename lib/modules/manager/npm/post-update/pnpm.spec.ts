@@ -2,7 +2,7 @@ import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
 import { env, fs, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import type { PostUpdateConfig } from '../../types';
+import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeToolConstraint } from './node-version';
 import * as pnpmHelper from './pnpm';
 
@@ -15,6 +15,7 @@ process.env.CONTAINERBASE = 'true';
 
 describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
+  const upgrades: Upgrade[] = [{}];
 
   beforeEach(() => {
     config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
@@ -29,7 +30,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
-    const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      config,
+      upgrades,
+    );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
@@ -40,7 +46,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     fs.readLocalFile.mockImplementation(() => {
       throw new Error('not found');
     });
-    const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      config,
+      upgrades,
+    );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
@@ -50,7 +61,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   it('finds pnpm globally', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
-    const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      config,
+      upgrades,
+    );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
@@ -96,6 +112,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       'some-dir',
       {},
       { ...config, postUpdateOptions },
+      upgrades,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -240,6 +257,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       'some-dir',
       {},
       { ...config, constraints: { pnpm: '6.0.0' } },
+      upgrades,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -274,6 +292,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       'some-dir',
       {},
       { ...config, constraints: { pnpm: '6.0.0' } },
+      upgrades,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');

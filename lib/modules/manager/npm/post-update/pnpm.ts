@@ -76,10 +76,7 @@ export async function generateLockFile(
     }
     logger.trace({ args }, 'pnpm command options');
 
-    if (
-      upgrades.length === 0 ||
-      !upgrades.every((upgrade) => upgrade.isLockfileUpdate)
-    ) {
+    if (!upgrades.every((upgrade) => upgrade.isLockfileUpdate)) {
       // This command updates the lock file based on package.json
       commands.push(`pnpm install ${args}`);
     }
