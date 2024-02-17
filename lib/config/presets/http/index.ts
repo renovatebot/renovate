@@ -5,9 +5,7 @@ import { parseUrl } from '../../../util/url';
 import type { Preset, PresetConfig } from '../types';
 import { PRESET_DEP_NOT_FOUND, parsePreset } from '../util';
 
-const id = 'http';
-
-const http = new Http(id);
+const http = new Http('preset');
 
 export async function getPreset({
   repo: url,
