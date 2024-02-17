@@ -54,6 +54,12 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
     neo4j: 'https://neo4j.com/release-notes/',
     'whitesource/renovate': 'https://github.com/whitesource/renovate-on-prem',
   },
+  maven: {
+    logback:
+      'https://logback.qos.ch/news.html',
+    slf4j:
+      'https://www.slf4j.org/news.html',
+  },
 };
 
 // Use this object to define manual source URLs for packages
