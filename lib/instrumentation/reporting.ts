@@ -92,6 +92,10 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
   }
 }
 
+export function getReport(): Report {
+  return structuredClone(result)
+}
+
 function coerceRepo(repository: string): void {
   if (!is.undefined(result.repositories[repository])) {
     return;
