@@ -28,7 +28,14 @@ export const isVersion = (input: string): boolean => !!valid(input);
 
 export { isVersion as isValid, getSatisfyingVersion };
 
-function getNewValue({ newVersion }: NewValueConfig): string {
+function getNewValue({
+  currentValue,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string {
+  if (currentVersion === `v${currentValue}`) {
+    return newVersion.replace(/^v/, '');
+  }
   return newVersion;
 }
 
