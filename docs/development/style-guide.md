@@ -10,6 +10,11 @@ This document describes the correct style for user-facing text in the:
 
 Set your spell checker to the correct language.
 
+Guidelines:
+
+- Use `ize` instead of `ise` in words like customize and analyze
+- Drop the British `u` in words like behavior
+
 ## One sentence per line
 
 In Markdown files, use one sentence per line.

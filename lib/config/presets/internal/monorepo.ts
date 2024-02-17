@@ -62,6 +62,7 @@ const repoGroups = {
   'azure azure-sdk-for-net': 'https://github.com/Azure/azure-sdk-for-net',
   'azure azure-storage-net': 'https://github.com/Azure/azure-storage-net',
   babel: 'https://github.com/babel/babel',
+  backstage: 'https://github.com/backstage/backstage',
   baset: 'https://github.com/igmat/baset',
   brave: 'https://github.com/openzipkin/brave',
   'bugsnag-js': 'https://github.com/bugsnag/bugsnag-js',
@@ -253,6 +254,7 @@ const repoGroups = {
     'https://github.com/dotnet/extensions',
     'https://github.com/dotnet/maui',
     'https://github.com/dotnet/runtime',
+    'https://github.com/dotnet/scaffolding',
     'https://github.com/dotnet/sdk',
   ],
   'dotnet-azure-ad-identitymodel-extensions':
@@ -272,6 +274,8 @@ const repoGroups = {
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
   expo: 'https://github.com/expo/expo',
+  'fabric-chaincode-node':
+    'https://github.com/hyperledger/fabric-chaincode-node',
   'fabric8-kubernetes-client': 'https://github.com/fabric8io/kubernetes-client',
   feathers: 'https://github.com/feathersjs/feathers',
   feign: 'https://github.com/OpenFeign/feign',
@@ -324,6 +328,7 @@ const repoGroups = {
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
+  kroki: 'https://github.com/yuzutech/kroki',
   lamar: 'https://github.com/JasperFx/lamar',
   lerna: 'https://github.com/lerna/lerna',
   lexical: 'https://github.com/facebook/lexical',
@@ -383,6 +388,7 @@ const repoGroups = {
     'https://github.com/nuxt/nuxt',
   ],
   okhttp: 'https://github.com/square/okhttp',
+  opencost: 'https://github.com/opencost/opencost',
   openiddict: 'https://github.com/openiddict/openiddict-core',
   'opentelemetry-dotnet':
     'https://github.com/open-telemetry/opentelemetry-dotnet',
@@ -443,6 +449,7 @@ const repoGroups = {
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
   'sentry-rust': 'https://github.com/getsentry/sentry-rust',
   serde: 'https://github.com/serde-rs/serde',
+  'serenity-js': 'https://github.com/serenity-js/serenity-js',
   shedlock: 'https://github.com/lukas-krecan/ShedLock',
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',

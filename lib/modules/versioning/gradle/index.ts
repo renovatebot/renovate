@@ -1,5 +1,6 @@
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
+import mavenVersion from '../maven';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
   TokenType,
@@ -217,7 +218,7 @@ function getNewValue({
     }
   }
 
-  return null;
+  return mavenVersion.getNewValue({ currentValue, rangeStrategy, newVersion });
 }
 
 export const api: VersioningApi = {

@@ -488,7 +488,7 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
-  describe('getRepoForceRebase', () => {
+  describe('getBranchForceRebase', () => {
     it('should return false', async () => {
       await initRepo(
         {
@@ -500,7 +500,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'merge',
         },
       );
-      expect(await gitlab.getRepoForceRebase()).toBeFalse();
+      expect(await gitlab.getBranchForceRebase!('master')).toBeFalse();
     });
 
     it('should return true', async () => {
@@ -514,7 +514,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'ff',
         },
       );
-      expect(await gitlab.getRepoForceRebase()).toBeTrue();
+      expect(await gitlab.getBranchForceRebase!('master')).toBeTrue();
     });
   });
 

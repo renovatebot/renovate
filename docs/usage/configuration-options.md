@@ -412,6 +412,7 @@ This is an advanced field, and it's recommend you seek a config review before ap
 
 Currently, this config option only works with these managers:
 
+- `cargo`
 - `helmv3`
 - `npm`
 - `nuget`
@@ -492,11 +493,6 @@ Set this to `"never"` to leave the titles untouched, allowing uppercase characte
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
-
-<!-- prettier-ignore -->
-!!! note
-    Renovate _always_ appends a `:` after the `commitMessagePrefix`.
-    For example, if you set `commitMessagePrefix` to `chore`, Renovate turns it into `chore:`.
 
 ## commitMessageSuffix
 
@@ -1800,10 +1796,25 @@ You can configure a different maximum value in seconds using `maxRetryAfter`:
 }
 ```
 
+### newLogLevel
+
+For log level remapping, `newLogLevel` will set for the particular log message:
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/Error executing maven wrapper update command/",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
-It uses `QuickLRU` with a `maxSize` of `1000`.
+It uses [`lru-cache`](https://github.com/isaacs/node-lru-cache) with the `max` option set to `1000`.
 
 ### enableHttp2
 
@@ -2159,6 +2170,27 @@ To enable `lockFileMaintenance` add this to your configuration:
 To reduce "noise" in the repository, Renovate performs `lockFileMaintenance` `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
 Depending on its running schedule, Renovate may run a few times within that time window - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
 
+## logLevelRemap
+
+This option allows you to remap log levels for specific messages.
+
+Be careful with remapping `warn` or `error` messages to lower log levels, as it may hide important information.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/^pip-compile:/",
+      "newLogLevel": "info"
+    },
+    {
+      "matchMessage": "Package lookup error",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
+
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
@@ -2396,6 +2428,32 @@ Use the syntax `!/ /` like the following:
 }
 ```
 
+### matchCurrentAge
+
+Use this field if you want to match packages based on the age of the _current_ (existing, in-repo) version.
+
+For example, if you want to group updates for dependencies where the existing version is more than 2 years old:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchCurrentAge": "> 2 years",
+      "groupName": "old dependencies"
+    }
+  ]
+}
+```
+
+The `matchCurrentAge` string must start with one of `>`, `>=`, `<` or `<=`.
+
+Only _one_ date part is supported, so you _cannot_ do `> 1 year 1 month`.
+Instead you should do `> 13 months`.
+
+<!-- prettier-ignore -->
+!!! note
+    We recommend you only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
+
 ### matchDepTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
@@ -2565,6 +2623,26 @@ Use this field to restrict rules to a particular package manager. e.g.
 ```
 
 For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
+
+### matchMessage
+
+For log level remapping, use this field to match against the particular log messages.
+You can match based on any of the following:
+
+- an exact match string (e.g. `This is the string`)
+- a minimatch pattern (e.g. `This*`)
+- a regex pattern (e.g. `/^This/`)
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "Manager explicitly enabled*",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
 
 ### matchDatasources
 
@@ -3389,7 +3467,7 @@ For example we override it to `always` in the following cases where branch names
 You can select which behavior you want from Renovate:
 
 - `always`: Recreates all closed or blocking PRs
-- `auto`: The default option. Recreates only immortal PRs (default)
+- `auto`: The default option. Recreates only [immortal PRs](./key-concepts/pull-requests.md#immortal-prs) (default)
 - `never`: No PR is recreated, doesn't matter if it is immortal or not
 
 We recommend that you stick with the default setting for this option.

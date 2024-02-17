@@ -343,7 +343,7 @@ describe('modules/datasource/go/releases-goproxy', () => {
           200,
           codeBlock`
             v1.0.0 2018-08-13T15:31:12Z
-            v1.0.1
+            v1.0.1   \n
             v1.28.1-20230721020619-4464c06fa399.4
           `,
         )
@@ -360,12 +360,18 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       expect(res).toEqual({
         releases: [
-          { releaseTimestamp: '2018-08-13T15:31:12Z', version: 'v1.0.0' },
-          { releaseTimestamp: '2019-10-16T16:15:28Z', version: 'v1.0.1' },
           {
-            newDigest: '4464c06fa399',
-            releaseTimestamp: '20230721020619',
+            version: 'v1.0.0',
+            releaseTimestamp: '2018-08-13T15:31:12Z',
+          },
+          {
+            version: 'v1.0.1',
+            releaseTimestamp: '2019-10-16T16:15:28Z',
+          },
+          {
             version: 'v1.28.1-20230721020619-4464c06fa399.4',
+            releaseTimestamp: '2023-07-21T02:06:19Z',
+            newDigest: '4464c06fa399',
           },
         ],
         sourceUrl: 'https://github.com/google/btree',

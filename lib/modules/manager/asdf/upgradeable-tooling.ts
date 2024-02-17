@@ -391,6 +391,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'apache/maven',
     },
   },
+  mimirtool: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-mimirtool',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'grafana/mimir',
+      extractVersion: '^mimir-(?<version>\\S+)',
+    },
+  },
   nim: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-nim',
     config: {
@@ -411,6 +419,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'ocaml/ocaml',
+    },
+  },
+  opentofu: {
+    asdfPluginUrl: 'https://github.com/virtualroot/asdf-opentofu',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'opentofu/opentofu',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   perl: {

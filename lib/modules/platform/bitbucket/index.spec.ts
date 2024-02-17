@@ -225,13 +225,6 @@ describe('modules/platform/bitbucket/index', () => {
     });
   });
 
-  describe('getRepoForceRebase()', () => {
-    it('always return false, since bitbucket does not support force rebase', async () => {
-      const actual = await bitbucket.getRepoForceRebase();
-      expect(actual).toBeFalse();
-    });
-  });
-
   describe('getBranchPr()', () => {
     it('bitbucket finds PR for branch', async () => {
       const scope = await initRepoMock();

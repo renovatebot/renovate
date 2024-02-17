@@ -142,7 +142,7 @@ export async function extractPackageFile(
   if (is.nonEmptyString(pipfile.packages?.pipenv)) {
     extractedConstraints.pipenv = pipfile.packages.pipenv;
   } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
-    extractedConstraints.pipenv = pipfile['dev-packages']!.pipenv;
+    extractedConstraints.pipenv = pipfile['dev-packages'].pipenv;
   }
 
   const lockFileName = `${packageFile}.lock`;
