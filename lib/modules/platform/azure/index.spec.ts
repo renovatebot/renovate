@@ -214,12 +214,6 @@ describe('modules/platform/azure/index', () => {
     });
   });
 
-  describe('getRepoForceRebase', () => {
-    it('should return false', async () => {
-      expect(await azure.getRepoForceRebase()).toBeFalse();
-    });
-  });
-
   describe('findPr(branchName, prTitle, state, targetBranch)', () => {
     it('returns pr if found it open', async () => {
       azureApi.gitApi.mockImplementationOnce(
