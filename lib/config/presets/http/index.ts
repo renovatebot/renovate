@@ -3,7 +3,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { Http } from '../../../util/http';
 import { parseUrl } from '../../../util/url';
 import type { Preset, PresetConfig } from '../types';
-import { PRESET_DEP_NOT_FOUND, extractSubPreset, parsePreset } from '../util';
+import { PRESET_DEP_NOT_FOUND, parsePreset } from '../util';
 
 const id = 'http';
 
@@ -11,7 +11,6 @@ const http = new Http(id);
 
 export async function getPreset({
   repo: url,
-  presetName,
 }: PresetConfig): Promise<Preset | null | undefined> {
   const parsedUrl = parseUrl(url);
   let response;
@@ -33,7 +32,5 @@ export async function getPreset({
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
 
-  const parsed = parsePreset(response.body, parsedUrl.pathname);
-
-  return extractSubPreset(parsed, presetName);
+  return parsePreset(response.body, parsedUrl.pathname);
 }

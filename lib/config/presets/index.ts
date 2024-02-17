@@ -109,7 +109,7 @@ export function parsePreset(input: string): ParsedPreset {
   let presetSource: string | undefined;
   let presetPath: string | undefined;
   let repo: string;
-  let presetName: string | undefined;
+  let presetName: string;
   let tag: string | undefined;
   let params: string[] | undefined;
   if (str.startsWith('http://') || str.startsWith('https://')) {
@@ -143,13 +143,7 @@ export function parsePreset(input: string): ParsedPreset {
     str = str.slice(0, str.indexOf('('));
   }
   if (presetSource === 'http') {
-    [repo] = str.split('#', 1);
-    if (repo === str) {
-      presetName = undefined;
-    } else {
-      presetName = str.substring(repo.length + 1);
-    }
-    return { presetSource, repo, presetName, params };
+    return { presetSource, repo: str, presetName: 'default', params };
   }
   const presetsPackages = [
     'compatibility',
