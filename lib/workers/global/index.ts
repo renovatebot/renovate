@@ -17,6 +17,7 @@ import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { getProblems, logger, setMeta } from '../../logger';
+import { setGlobalLogLevelRemaps } from '../../logger/remap';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
@@ -158,6 +159,8 @@ export async function start(): Promise<number> {
 
       // validate secrets. Will throw and abort if invalid
       validateConfigSecrets(config);
+
+      setGlobalLogLevelRemaps(config.logLevelRemap);
     });
 
     // autodiscover repositories (needs to come after platform initialization)
@@ -220,7 +223,12 @@ export async function start(): Promise<number> {
     }
   } finally {
     await globalFinalize(config!);
-    logger.debug(`Renovate exiting`);
+    const logLevel = process.env.LOG_LEVEL ?? 'info';
+    if (logLevel === 'info') {
+      logger.info(
+        `Renovate was run at log level "${logLevel}". Set LOG_LEVEL=debug in environment variables to see extended debug logs.`,
+      );
+    }
   }
   const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
   if (loggerErrors.length) {
