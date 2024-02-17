@@ -75,7 +75,6 @@ import {
 } from './graphql';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
-import type { Milestone } from './schema';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -1379,47 +1378,44 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   }
 }
 
-async function addMilestone(
+async function tryAddMilestone(
   issueNo: number,
-  milestoneTitle: string,
+  milestoneNo: number | undefined,
 ): Promise<void> {
-  logger.debug(`Adding milestone '${milestoneTitle}' to #${issueNo}`);
-  // first, find the milestone id
-  const milestones = await getMilestones();
-  const milestone = milestones.find((m) => m.title === milestoneTitle);
-  if (!milestone) {
-    logger.warn(
-      `Milestone '${milestoneTitle}' did not exists. Adding of milestone skipped.`,
-    );
-    return;
+  if (milestoneNo) {
+    await addMilestone(issueNo, milestoneNo);
   }
-
-  // then, add the milestone id to the PR
-  const repository = config.parentRepo ?? config.repository;
-  await githubApi.patchJson(`repos/${repository}/issues/${issueNo}`, {
-    body: {
-      milestone: milestone.number,
-    },
-  });
 }
 
-async function getMilestones(state = 'open'): Promise<Milestone[]> {
-  logger.debug(`Getting all ${state} milestones.`);
-  const url = `repos/${
-    config.parentRepo ?? config.repository
-  }/milestones?state=${state}&per_page=100`;
+async function addMilestone(
+  issueNo: number,
+  milestoneNo: number,
+): Promise<void> {
+  logger.debug(
+    {
+      milestone: milestoneNo,
+      pr: issueNo,
+    },
+    'Adding milestone to PR',
+  );
+  const repository = config.parentRepo ?? config.repository;
   try {
-    const milestones = (
-      await githubApi.getJson<Milestone[]>(url, {
-        paginate: true,
-      })
-    ).body;
-    logger.debug(`Found ${milestones.length} ${state} milestones`);
-    return milestones;
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err, state }, 'Failed to load milestones');
+    await githubApi.patchJson(`repos/${repository}/issues/${issueNo}`, {
+      body: {
+        milestone: milestoneNo,
+      },
+    });
+  } catch (err) {
+    const actualError = err.response?.body || err;
+    logger.warn(
+      {
+        milestone: milestoneNo,
+        pr: issueNo,
+        err: actualError,
+      },
+      'Unable to add milestone to PR',
+    );
   }
-  return [];
 }
 
 export async function addAssignees(
@@ -1742,9 +1738,7 @@ export async function createPr({
   const { number, node_id } = result;
 
   await addLabels(number, labels);
-  if (milestone) {
-    await addMilestone(number, milestone);
-  }
+  await tryAddMilestone(number, milestone);
   await tryPrAutomerge(number, node_id, platformOptions);
 
   cachePr(result);

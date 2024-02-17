@@ -2867,17 +2867,6 @@ describe('modules/platform/github/index', () => {
             head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
           });
         scope
-          .get('/repos/some/repo/milestones?state=open&per_page=100')
-          .reply(200, [
-            {
-              id: 12345,
-              number: 1,
-              title: 'vNext',
-              description: 'my milestone',
-              state: 'open',
-            },
-          ]);
-        scope
           .patch('/repos/some/repo/issues/123', (body) => body.milestone === 1)
           .reply(200, {});
         await github.initRepo({ repository: 'some/repo' });
@@ -2886,38 +2875,9 @@ describe('modules/platform/github/index', () => {
           sourceBranch: 'renovate/someDep-v2',
           prTitle: 'bump someDep to v2',
           prBody: 'many informations about someDep',
-          milestone: 'vNext',
+          milestone: 1,
         });
         expect(pr?.number).toBe(123);
-      });
-
-      it('should not set the milestone on the PR and log a warning if the milestone was not found', async () => {
-        const scope = httpMock.scope(githubApiHost);
-        initRepoMock(scope, 'some/repo');
-        scope
-          .post(
-            '/repos/some/repo/pulls',
-            (body) => body.title === 'bump someDep to v2',
-          )
-          .reply(200, {
-            number: 123,
-            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
-          });
-        scope
-          .get('/repos/some/repo/milestones?state=open&per_page=100')
-          .reply(200, []);
-        await github.initRepo({ repository: 'some/repo' });
-        const pr = await github.createPr({
-          targetBranch: 'main',
-          sourceBranch: 'renovate/someDep-v2',
-          prTitle: 'bump someDep to v2',
-          prBody: 'many informations about someDep',
-          milestone: 'vNext',
-        });
-        expect(pr?.number).toBe(123);
-        expect(logger.logger.warn).toHaveBeenCalledWith(
-          "Milestone 'vNext' did not exists. Adding of milestone skipped.",
-        );
       });
 
       it('should log a warning but not throw on error', async () => {
@@ -2933,23 +2893,48 @@ describe('modules/platform/github/index', () => {
             head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
           });
         scope
-          .get('/repos/some/repo/milestones?state=open&per_page=100')
-          .reply(500);
+          .patch('/repos/some/repo/issues/123', (body) => body.milestone === 1)
+          .reply(422, {
+            message: 'Validation Failed',
+            errors: [
+              {
+                value: 1,
+                resource: 'Issue',
+                field: 'milestone',
+                code: 'invalid',
+              },
+            ],
+            documentation_url:
+              'https://docs.github.com/rest/issues/issues#update-an-issue',
+          });
         await github.initRepo({ repository: 'some/repo' });
         const pr = await github.createPr({
           targetBranch: 'main',
           sourceBranch: 'renovate/someDep-v2',
           prTitle: 'bump someDep to v2',
           prBody: 'many informations about someDep',
-          milestone: 'vNext',
+          milestone: 1,
         });
         expect(pr?.number).toBe(123);
         expect(logger.logger.warn).toHaveBeenCalledWith(
           {
-            err: expect.any(Error),
-            state: 'open',
+            err: {
+              message: 'Validation Failed',
+              errors: [
+                {
+                  value: 1,
+                  resource: 'Issue',
+                  field: 'milestone',
+                  code: 'invalid',
+                },
+              ],
+              documentation_url:
+                'https://docs.github.com/rest/issues/issues#update-an-issue',
+            },
+            milestone: 1,
+            pr: 123,
           },
-          'Failed to load milestones',
+          'Unable to add milestone to PR',
         );
       });
     });
