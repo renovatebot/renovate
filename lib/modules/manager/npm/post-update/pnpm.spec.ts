@@ -27,6 +27,13 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     });
   });
 
+  it('does nothing when no upgrades', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    await pnpmHelper.generateLockFile('some-dir', {}, config);
+    expect(execSnapshots).toMatchObject([]);
+  });
+
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
