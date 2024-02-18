@@ -15,7 +15,7 @@ Example regex patterns:
 - `/^abc/` is a regex pattern matching any string starting with lower-case `abc`.
 - `^abc/i` is a regex pattern matching any string starting with `abc` in lower or upper case, or a mix.
 
-If you want to test your patterns interactively online, we recommend [regex101.com](https://regex101.com/).
+If you want to test your patterns interactively online, we recommend [regex101.com](https://regex101.com/?flavor=javascript&flags=ginst).
 
 ## Glob matching
 
