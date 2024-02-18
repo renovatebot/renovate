@@ -16,6 +16,7 @@ Example regex patterns:
 - `^abc/i` is a regex pattern matching any string starting with `abc` in lower or upper case, or a mix.
 
 If you want to test your patterns interactively online, we recommend [regex101.com](https://regex101.com/?flavor=javascript&flags=ginst).
+Be aware that backslashes (`\`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`. You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
 
 ## Glob matching
 
