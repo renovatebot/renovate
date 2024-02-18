@@ -47,7 +47,6 @@ These are the permissions required for a Fine-grained token:
 !!! tip "Use a bot role account"
     Consider creating a GitHub App to use instead of using your own GitHub user account.
 
-
 ## Running as a GitHub App
 
 Instead of a bot account with a Personal Access Token you can run `renovate` as a self-hosted [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps).
