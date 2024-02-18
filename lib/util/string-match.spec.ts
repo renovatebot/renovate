@@ -32,16 +32,26 @@ describe('util/string-match', () => {
       expect(anyMatchRegexOrMinimatch('test', ['test', '!/test3/'])).toBeTrue();
     });
 
-    it('returns true if matching every negative patterns', () => {
+    it('returns true if matching every negative pattern (regex)', () => {
       expect(
         anyMatchRegexOrMinimatch('test', ['test', '!/test3/', '!/test4/']),
       ).toBeTrue();
     });
 
-    it('returns false if not matching every negative patterns', () => {
+    it('returns false if not matching every negative pattern (regex)', () => {
       expect(
         anyMatchRegexOrMinimatch('test', ['!/test3/', '!/test/']),
       ).toBeFalse();
+    });
+
+    it('returns true if matching every negative pattern (glob)', () => {
+      expect(
+        anyMatchRegexOrMinimatch('test', ['test', '!test3', '!test4']),
+      ).toBeTrue();
+    });
+
+    it('returns false if not matching every negative pattern (glob)', () => {
+      expect(anyMatchRegexOrMinimatch('test', ['!test3', '!te*'])).toBeFalse();
     });
   });
 
