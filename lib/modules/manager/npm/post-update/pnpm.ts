@@ -76,14 +76,14 @@ export async function generateLockFile(
     }
     logger.trace({ args }, 'pnpm command options');
 
-    if (!upgrades.every((upgrade) => upgrade.isLockfileUpdate)) {
+    const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
+
+    if (lockUpdates.length !== upgrades.length) {
       // This command updates the lock file based on package.json
       commands.push(`pnpm install ${args}`);
     }
 
     // rangeStrategy = update-lockfile
-    const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
-
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (pnpm)');
       commands.push(
