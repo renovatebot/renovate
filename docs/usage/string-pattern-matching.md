@@ -35,15 +35,15 @@ Examples:
 
 Renovate has a specific approach to negative matching strings.
 
-"Positive" matches are regular matching expressions in glob or regex which don't start with `!`.
-"Negative" matches are expressions starting with `!` (e.g. `!/^a/`).
+"Positive" matches are patterns (in glob or regex) which don't start with `!`.
+"Negative" matches are patterns starting with `!` (e.g. `!/^a/` or `!b*`).
 
 For an array of patterns to match, the following must be true:
 
 - If any positive matches are included, at least one must match.
 - If any negative matches are included, none must match.
 
-For example, `["/^abc/", "!/^abcd/", "!/abce/"]` would match "abc" and "abcf" but not "abcd", "abce", or "abcdef".
+For example, `["/^abc/", "!/^abcd/", "!/abce/"]` would match "abc" and "abcf" but not "foo", "abcd", "abce", or "abcdef".
 
 ## Usage in Renovate configuration options
 
