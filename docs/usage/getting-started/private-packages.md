@@ -382,14 +382,20 @@ For example, the Renovate configuration:
 
 will update `.yarnrc.yml` as following:
 
+If no registry currently set
+
 ```yaml
 npmRegistries:
   //npm.pkg.github.com/:
     npmAuthToken: <Decrypted PAT Token>
-  //npm.pkg.github.com:
-    # this will not be overwritten and may conflict
-  https://npm.pkg.github.com/:
-    # this will not be overwritten and may conflict
+```
+
+If current registry key has protocol set:
+
+```yaml
+npmRegistries:
+  https://npm.pkg.github.com:
+    npmAuthToken: <Decrypted PAT Token>
 ```
 
 ### maven
@@ -454,6 +460,34 @@ url = "https://$USERNAME:${PASSWORD}@mypypi.example.com/simple"
 verify_ssl = true
 name = "pypi"
 ```
+
+### pip-compile
+
+The pip-compile manager extracts `--index-url` and `--extra-index-url` directives from its input file.
+Renovate will match those URLs with credentials from matching `hostRules` blocks in its configuration and pass appropriate `PIP_INDEX_URL` or `PIP_EXTRA_INDEX_URL` environment variables `pip-compile` with those credentials while generating the output file.
+
+```title="requirements.in"
+--extra-index-url https://pypi.my.domain/simple
+
+private-package==1.2.3
+```
+
+```json
+{
+  "pip-compile": {
+    "fileMatch": ["requirements.in"]
+  },
+  "hostRules": [
+    {
+      "matchHost": "pypi.my.domain",
+      "username": "myuser",
+      "password": "mypassword"
+    }
+  ]
+}
+```
+
+Note: When credentials are passed to `pip-compile` this way Renovate will also pass the `--no-emit-index-url` flag to avoid leaking plain-text credentials to the output file.
 
 ### poetry
 

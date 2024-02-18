@@ -247,10 +247,6 @@ export async function initRepo({
   return repoConfig;
 }
 
-export function getRepoForceRebase(): Promise<boolean> {
-  return Promise.resolve(config.repoForceRebase === true);
-}
-
 export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
   if (!config.prList) {
@@ -764,8 +760,10 @@ export async function mergePr({
   logger.trace(
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
-    }) with lastMergeSourceCommit ${// TODO: types (#22198)
-    pr.lastMergeSourceCommit?.commitId} using mergeStrategy ${mergeStrategy} (${
+    }) with lastMergeSourceCommit ${
+      // TODO: types (#22198)
+      pr.lastMergeSourceCommit?.commitId
+    } using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]
     })`,
   );

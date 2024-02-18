@@ -107,6 +107,15 @@ describe('modules/versioning/generic', () => {
         }),
       ).toBe('3.2.1');
 
+      expect(
+        api.getNewValue({
+          currentValue: '1.2.3',
+          rangeStrategy: 'auto',
+          currentVersion: 'v1.2.3',
+          newVersion: 'v3.2.1',
+        }),
+      ).toBe('3.2.1');
+
       expect(api.getNewValue(partial<NewValueConfig>({}))).toBeNull();
     });
 
