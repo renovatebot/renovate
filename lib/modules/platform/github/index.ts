@@ -1382,15 +1382,10 @@ async function tryAddMilestone(
   issueNo: number,
   milestoneNo: number | undefined,
 ): Promise<void> {
-  if (milestoneNo) {
-    await addMilestone(issueNo, milestoneNo);
+  if (!milestoneNo) {
+    return;
   }
-}
 
-async function addMilestone(
-  issueNo: number,
-  milestoneNo: number,
-): Promise<void> {
   logger.debug(
     {
       milestone: milestoneNo,
