@@ -28,7 +28,7 @@ $ npx --yes --package renovate -- renovate-config-validator
 By default, the validator program fails with a non-zero exit code if there are any validation warnings or errors.
 You can pass the `--strict` flag to make it fail if a scanned config needs migration:
 
-```console
+```console title="Strict mode validation"
 $ npx --yes --package renovate -- renovate-config-validator --strict
  INFO: Validating renovate.json
  WARN: Config migration necessary
