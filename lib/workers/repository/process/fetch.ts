@@ -36,7 +36,7 @@ async function withLookupStats<T>(
 
 type LookupResult = Result<PackageDependency, Error>;
 type LookupTaskResult = {
-  packageFile: string;
+  packageFileName: string;
   manager: string;
   result: LookupResult;
 };
@@ -130,7 +130,7 @@ function createLookupTasks(
 
           return packageFile.deps.map((dep) => {
             const lookupTask = async (): Promise<LookupTaskResult> => ({
-              packageFile: packageFile.packageFile,
+              packageFileName: packageFile.packageFile,
               manager: managerConfig.manager,
               result: await lookup(packageFileConfig, dep),
             });
@@ -153,12 +153,12 @@ export async function fetchUpdates(
 
   const collectedDeps: Record<string, Record<string, PackageDependency[]>> = {};
   const collectedErrors: Error[] = [];
-  for (const { packageFile, manager, result } of fetchResults) {
+  for (const { packageFileName, manager, result } of fetchResults) {
     const { val: dep, err } = result.unwrap();
     if (dep) {
       collectedDeps[manager] ??= {};
-      collectedDeps[manager][packageFile] ??= [];
-      collectedDeps[manager][packageFile].push(dep);
+      collectedDeps[manager][packageFileName] ??= [];
+      collectedDeps[manager][packageFileName].push(dep);
     } else {
       collectedErrors.push(err);
     }
