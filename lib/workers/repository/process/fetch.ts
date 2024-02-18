@@ -2,7 +2,7 @@
 import is from '@sindresorhus/is';
 import AggregateError from 'aggregate-error';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { ManagerConfig, RenovateConfig } from '../../../config/types';
+import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { getDefaultVersioning } from '../../../modules/datasource/common';
@@ -34,18 +34,18 @@ async function withLookupStats<T>(
   return result;
 }
 
-type FetchResult = Result<PackageDependency, Error>;
-type FetchTaskResult = {
+type LookupResult = Result<PackageDependency, Error>;
+type LookupTaskResult = {
   packageFile: string;
   manager: string;
-  result: FetchResult;
+  result: LookupResult;
 };
-type FetchTask = () => Promise<FetchTaskResult>;
+type LookupTask = () => Promise<LookupTaskResult>;
 
-async function fetchDepUpdates(
+async function lookup(
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency,
-): Promise<FetchResult> {
+): Promise<LookupResult> {
   const dep = clone(indep);
   dep.updates = [];
   if (is.string(dep.depName)) {
@@ -108,50 +108,46 @@ async function fetchDepUpdates(
   return Result.ok(dep);
 }
 
-function fetchManagerPackageFileUpdates(
+function createLookupTasks(
   config: RenovateConfig,
-  managerConfig: ManagerConfig,
-  pFile: PackageFile,
-): FetchTask[] {
-  const packageFileConfig = mergeChildConfig(managerConfig, pFile);
-  if (pFile.extractedConstraints) {
-    packageFileConfig.constraints = {
-      ...pFile.extractedConstraints,
-      ...config.constraints,
-    };
-  }
+  managerPackageFiles: Record<string, PackageFile[]>,
+): LookupTask[] {
+  return Object.entries(managerPackageFiles)
+    .map(([manager, packageFiles]): LookupTask[] => {
+      const managerConfig = getManagerConfig(config, manager);
+      return packageFiles
+        .map((packageFile): LookupTask[] => {
+          const packageFileConfig = mergeChildConfig(
+            managerConfig,
+            packageFile,
+          );
+          if (packageFile.extractedConstraints) {
+            packageFileConfig.constraints = {
+              ...packageFile.extractedConstraints,
+              ...config.constraints,
+            };
+          }
 
-  const tasks: FetchTask[] = pFile.deps.map((dep) => async () => ({
-    packageFile: pFile.packageFile,
-    manager: managerConfig.manager,
-    result: await fetchDepUpdates(packageFileConfig, dep),
-  }));
+          return packageFile.deps.map((dep) => {
+            const lookupTask = async (): Promise<LookupTaskResult> => ({
+              packageFile: packageFile.packageFile,
+              manager: managerConfig.manager,
+              result: await lookup(packageFileConfig, dep),
+            });
 
-  return tasks;
-}
-
-function fetchManagerUpdates(
-  config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>,
-  manager: string,
-): FetchTask[] {
-  const managerConfig = getManagerConfig(config, manager);
-  const managerPackageFiles = packageFiles[manager];
-  return managerPackageFiles
-    .map((pFile) =>
-      fetchManagerPackageFileUpdates(config, managerConfig, pFile),
-    )
+            return lookupTask;
+          });
+        })
+        .flat();
+    })
     .flat();
 }
 
 export async function fetchUpdates(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>,
+  managerPackageFiles: Record<string, PackageFile[]>,
 ): Promise<void> {
-  const managers = Object.keys(packageFiles);
-  const allTasks = managers
-    .map((manager) => fetchManagerUpdates(config, packageFiles, manager))
-    .flat();
+  const allTasks = createLookupTasks(config, managerPackageFiles);
 
   const fetchResults = await p.all(allTasks, { concurrency: 25 });
 
@@ -173,16 +169,16 @@ export async function fetchUpdates(
     p.handleError(aggregateError);
   }
 
-  for (const manager of managers) {
-    for (const pFile of packageFiles[manager]) {
-      const deps = collectedDeps[manager]?.[pFile.packageFile];
+  for (const [manager, packageFiles] of Object.entries(managerPackageFiles)) {
+    for (const packageFile of packageFiles) {
+      const deps = collectedDeps[manager]?.[packageFile.packageFile];
       if (deps) {
-        pFile.deps = deps;
+        packageFile.deps = deps;
       }
     }
   }
 
-  PackageFiles.add(config.baseBranch!, { ...packageFiles });
+  PackageFiles.add(config.baseBranch!, { ...managerPackageFiles });
   logger.debug(
     { baseBranch: config.baseBranch },
     'Package releases lookups complete',
