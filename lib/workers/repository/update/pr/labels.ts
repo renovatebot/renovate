@@ -66,15 +66,17 @@ export function shouldUpdateLabels(
     return false;
   }
 
-  // If the labels in the PR have been modified by the user, they should not be updated.
-  if (areLabelsModified(prInitialLabels, prCurrentLabels ?? [])) {
-    return false;
-  }
-
-  // If the 'labels are unchanged, they should not be updated.
+  // If the labels are unchanged, they should not be updated
   if (dequal((configuredLabels ?? []).sort(), prInitialLabels.sort())) {
     return false;
   }
 
+  // If the labels in the PR have been modified by the user, they should not be updated
+  if (areLabelsModified(prInitialLabels, prCurrentLabels ?? [])) {
+    logger.debug('Labels have been modified by user - skipping labels update.');
+    return false;
+  }
+
+  logger.debug('Labels have been changed in repo config- upading labels.');
   return true;
 }
