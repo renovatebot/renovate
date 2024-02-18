@@ -89,9 +89,9 @@ module.exports = {
 
 `allowedEnv` values can be either:
 
- - An exact match string (e.g. `EXTRA_ENV_NAME`), or
- - A minimatch pattern (e.g. `SOME_ENV_*`), or
- - A regex expression (e.g. `/_ENV$/`).
+- An exact match string (e.g. `EXTRA_ENV_NAME`), or
+- A minimatch pattern (e.g. `SOME_ENV_*`), or
+- A regex expression (e.g. `/_ENV$/`).
 
 ## allowedHeaders
 
