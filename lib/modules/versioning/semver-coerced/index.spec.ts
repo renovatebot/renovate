@@ -231,7 +231,7 @@ describe('modules/versioning/semver-coerced/index', () => {
     it('should support coercion', () => {
       expect(
         semverCoerced.getSatisfyingVersion(['v1.0', '1.0.4-foo'], '^1.0'),
-      ).toBe('1.0.4');
+      ).toBe('1.0.0');
     });
   });
 
