@@ -3360,18 +3360,19 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope.get('/repos/some/repo/dependabot/alerts?state=open').reply(200, [
         {
-          securityAdvisory: { severity: 'HIGH', references: [] },
-          securityVulnerability: {
+          security_advisory: { severity: 'high', references: [] },
+          security_vulnerability: {
             package: {
-              ecosystem: 'NPM',
+              ecosystem: 'npm',
               name: 'left-pad',
-              range: '0.0.2',
+              scope: 'runtime',
             },
-            vulnerableVersionRange: '0.0.2',
-            firstPatchedVersion: { identifier: '0.0.3' },
+            vulnerable_version_range: '0.0.2',
+            first_patched_version: { identifier: '0.0.3' },
           },
-          vulnerableManifestFilename: 'foo',
-          vulnerableManifestPath: 'bar',
+          dependency: {
+            manifest_path: 'bar/foo',
+          },
         },
       ]);
       await github.initRepo({ repository: 'some/repo' });
@@ -3410,24 +3411,27 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope.get('/repos/some/repo/dependabot/alerts?state=open').reply(200, [
         {
-          securityAdvisory: { severity: 'HIGH', references: [] },
-          securityVulnerability: {
+          security_advisory: { severity: 'high', references: [] },
+          security_vulnerability: {
             package: {
-              ecosystem: 'NPM',
+              ecosystem: 'npm',
               name: 'left-pad',
+              scope: 'runtime',
             },
-            vulnerableVersionRange: '0.0.2',
-            firstPatchedVersion: { identifier: '0.0.3' },
+            vulnerable_version_range: '0.0.2',
+            first_patched_version: { identifier: '0.0.3' },
           },
-          vulnerableManifestFilename: 'foo',
-          vulnerableManifestPath: 'bar',
+          dependency: {
+            manifest_path: 'bar/foo',
+          },
         },
 
         {
-          securityAdvisory: { severity: 'HIGH', references: [] },
-          securityVulnerability: null,
-          vulnerableManifestFilename: 'foo',
-          vulnerableManifestPath: 'bar',
+          security_advisory: { severity: 'high', references: [] },
+          security_vulnerability: null,
+          dependency: {
+            manifest_path: 'bar/foo',
+          },
         },
       ]);
       await github.initRepo({ repository: 'some/repo' });
