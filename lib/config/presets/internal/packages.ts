@@ -144,4 +144,9 @@ export const presets: Record<string, Preset> = {
     description: 'All unit test packages.',
     extends: ['packages:jsUnitTest', 'packages:phpUnitTest'],
   },
+  vite: {
+    description: 'All Vite related packages',
+    matchDatasources: ['npm'],
+    matchPackagePatterns: ['^vite$', 'vite-plugin', '@vitejs'],
+  },
 };
