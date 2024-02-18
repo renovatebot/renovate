@@ -1817,6 +1817,21 @@ You can configure a different maximum value in seconds using `maxRetryAfter`:
 }
 ```
 
+### newLogLevel
+
+For log level remapping, `newLogLevel` will set for the particular log message:
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/Error executing maven wrapper update command/",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
@@ -2175,6 +2190,27 @@ To enable `lockFileMaintenance` add this to your configuration:
 
 To reduce "noise" in the repository, Renovate performs `lockFileMaintenance` `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
 Depending on its running schedule, Renovate may run a few times within that time window - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
+
+## logLevelRemap
+
+This option allows you to remap log levels for specific messages.
+
+Be careful with remapping `warn` or `error` messages to lower log levels, as it may hide important information.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/^pip-compile:/",
+      "newLogLevel": "info"
+    },
+    {
+      "matchMessage": "Package lookup error",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
 
 ## major
 
@@ -2608,6 +2644,26 @@ Use this field to restrict rules to a particular package manager. e.g.
 ```
 
 For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
+
+### matchMessage
+
+For log level remapping, use this field to match against the particular log messages.
+You can match based on any of the following:
+
+- an exact match string (e.g. `This is the string`)
+- a minimatch pattern (e.g. `This*`)
+- a regex pattern (e.g. `/^This/`)
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "Manager explicitly enabled*",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
 
 ### matchDatasources
 
