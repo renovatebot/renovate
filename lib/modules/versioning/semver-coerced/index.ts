@@ -71,7 +71,9 @@ function getSatisfyingVersion(
   range: string,
 ): string | null {
   const coercedVersions = versions
-    .map((version) => semver.coerce(version)?.version)
+    .map((version) =>
+      semver.valid(version) ? version : semver.coerce(version)?.version,
+    )
     .filter(is.string);
 
   return semver.maxSatisfying(coercedVersions, range);

@@ -14,7 +14,7 @@ function match(remap: LogLevelRemap, input: string): boolean {
   const { matchMessage: pattern } = remap;
   let matchFn = matcherCache.get(remap);
   if (!matchFn) {
-    matchFn = makeRegexOrMinimatchPredicate(pattern) ?? (() => false);
+    matchFn = makeRegexOrMinimatchPredicate(pattern);
     matcherCache.set(remap, matchFn);
   }
 
