@@ -10,14 +10,10 @@ export function isDockerDigest(input: string): boolean {
 
 export function makeRegexOrMinimatchPredicate(
   pattern: string,
-): StringMatchPredicate | null {
-  if (pattern.length > 2 && pattern.startsWith('/') && pattern.endsWith('/')) {
-    try {
-      const regex = regEx(pattern.slice(1, -1));
-      return (x: string): boolean => regex.test(x);
-    } catch (err) {
-      return null;
-    }
+): StringMatchPredicate {
+  const regExPredicate = configRegexPredicate(pattern);
+  if (regExPredicate) {
+    return regExPredicate;
   }
 
   const mm = minimatch(pattern, { dot: true });
@@ -26,14 +22,40 @@ export function makeRegexOrMinimatchPredicate(
 
 export function matchRegexOrMinimatch(input: string, pattern: string): boolean {
   const predicate = makeRegexOrMinimatchPredicate(pattern);
-  return predicate ? predicate(input) : false;
+  return predicate(input);
 }
 
 export function anyMatchRegexOrMinimatch(
   input: string,
   patterns: string[],
-): boolean | null {
-  return patterns.some((pattern) => matchRegexOrMinimatch(input, pattern));
+): boolean {
+  if (!patterns.length) {
+    return false;
+  }
+
+  // Return false if there are positive patterns and none match
+  const positivePatterns = patterns.filter(
+    (pattern) => !pattern.startsWith('!'),
+  );
+  if (
+    positivePatterns.length &&
+    !positivePatterns.some((pattern) => matchRegexOrMinimatch(input, pattern))
+  ) {
+    return false;
+  }
+
+  // Every negative pattern must be true to return true
+  const negativePatterns = patterns.filter((pattern) =>
+    pattern.startsWith('!'),
+  );
+  if (
+    negativePatterns.length &&
+    !negativePatterns.every((pattern) => matchRegexOrMinimatch(input, pattern))
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export const UUIDRegex = regEx(
