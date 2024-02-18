@@ -10,7 +10,7 @@ import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { isUUID } from '../../../util/string';
+import { UUIDRegex } from '../../../util/string-match';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -701,7 +701,11 @@ export async function addReviewers(
   const body = {
     title,
     reviewers: reviewers.map((username: string) => {
-      const key = isUUID(username) ? 'uuid' : 'username';
+      const isUUID =
+        username.startsWith('{') &&
+        username.endsWith('}') &&
+        UUIDRegex.test(username.slice(1, -1));
+      const key = isUUID ? 'uuid' : 'username';
       return {
         [key]: username,
       };
