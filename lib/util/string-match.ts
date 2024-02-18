@@ -10,14 +10,10 @@ export function isDockerDigest(input: string): boolean {
 
 export function makeRegexOrMinimatchPredicate(
   pattern: string,
-): StringMatchPredicate | null {
-  if (pattern.length > 2 && pattern.startsWith('/') && pattern.endsWith('/')) {
-    try {
-      const regex = regEx(pattern.slice(1, -1));
-      return (x: string): boolean => regex.test(x);
-    } catch (err) {
-      return null;
-    }
+): StringMatchPredicate {
+  const regExPredicate = configRegexPredicate(pattern);
+  if (regExPredicate) {
+    return regExPredicate;
   }
 
   const mm = minimatch(pattern, { dot: true });
