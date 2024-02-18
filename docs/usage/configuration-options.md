@@ -2587,7 +2587,7 @@ Use this field to restrict rules to a particular repository. e.g.
 }
 ```
 
-This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchBaseBranches
 
@@ -2640,22 +2640,8 @@ For the full list of available managers, see the [Supported Managers](modules/ma
 ### matchMessage
 
 For log level remapping, use this field to match against the particular log messages.
-You can match based on any of the following:
 
-- an exact match string (e.g. `This is the string`)
-- a minimatch pattern (e.g. `This*`)
-- a regex pattern (e.g. `/^This/`)
-
-```json
-{
-  "logLevelRemap": [
-    {
-      "matchMessage": "Manager explicitly enabled*",
-      "newLogLevel": "warn"
-    }
-  ]
-}
-```
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchDatasources
 

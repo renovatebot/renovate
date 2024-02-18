@@ -12,7 +12,7 @@ import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { getBranchList } from '../../../util/git';
 import { addSplit } from '../../../util/split';
-import { configRegexPredicate } from '../../../util/string-match';
+import { getRegexPredicate } from '../../../util/string-match';
 import type { BranchConfig } from '../../types';
 import { readDashboardBody } from '../dependency-dashboard';
 import { ExtractResult, extract, lookup, update } from './extract-update';
@@ -93,7 +93,7 @@ function unfoldBaseBranches(
 
   const allBranches = getBranchList();
   for (const baseBranch of baseBranches) {
-    const isAllowedPred = configRegexPredicate(baseBranch);
+    const isAllowedPred = getRegexPredicate(baseBranch);
     if (isAllowedPred) {
       const matchingBranches = allBranches.filter(isAllowedPred);
       logger.debug(
