@@ -8,7 +8,7 @@ export function isDockerDigest(input: string): boolean {
   return /^sha256:[a-f0-9]{64}$/i.test(input);
 }
 
-export function makeRegexOrMinimatchPredicate(
+export function makeRegexOrGlobPredicate(
   pattern: string,
 ): StringMatchPredicate | null {
   if (pattern.length > 2 && pattern.startsWith('/') && pattern.endsWith('/')) {
@@ -24,16 +24,16 @@ export function makeRegexOrMinimatchPredicate(
   return (x: string): boolean => mm.match(x);
 }
 
-export function matchRegexOrMinimatch(input: string, pattern: string): boolean {
-  const predicate = makeRegexOrMinimatchPredicate(pattern);
+export function matchRegexOrGlob(input: string, pattern: string): boolean {
+  const predicate = makeRegexOrGlobPredicate(pattern);
   return predicate ? predicate(input) : false;
 }
 
-export function anyMatchRegexOrMinimatch(
+export function anyMatchRegexOrGlob(
   input: string,
   patterns: string[],
 ): boolean | null {
-  return patterns.some((pattern) => matchRegexOrMinimatch(input, pattern));
+  return patterns.some((pattern) => matchRegexOrGlob(input, pattern));
 }
 
 export const UUIDRegex = regEx(

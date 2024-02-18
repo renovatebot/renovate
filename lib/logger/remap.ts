@@ -1,7 +1,7 @@
 import type { LogLevelString } from 'bunyan';
 import {
   StringMatchPredicate,
-  makeRegexOrMinimatchPredicate,
+  makeRegexOrGlobPredicate,
 } from '../util/string-match';
 import type { LogLevelRemap } from './types';
 
@@ -14,7 +14,7 @@ function match(remap: LogLevelRemap, input: string): boolean {
   const { matchMessage: pattern } = remap;
   let matchFn = matcherCache.get(remap);
   if (!matchFn) {
-    matchFn = makeRegexOrMinimatchPredicate(pattern) ?? (() => false);
+    matchFn = makeRegexOrGlobPredicate(pattern) ?? (() => false);
     matcherCache.set(remap, matchFn);
   }
 
