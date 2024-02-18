@@ -10,7 +10,7 @@ import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types/host-rules';
 import { regEx } from '../util/regex';
 import {
-  anyMatchRegexOrMinimatch,
+  anyMatchRegexOrGlob,
   configRegexPredicate,
   isConfigRegex,
 } from '../util/string-match';
@@ -724,7 +724,7 @@ export async function validateConfig(
               message: `Invalid hostRules headers value configuration: header must be a string.`,
             });
           }
-          if (!anyMatchRegexOrMinimatch(header, allowedHeaders)) {
+          if (!anyMatchRegexOrGlob(header, allowedHeaders)) {
             errors.push({
               topic: 'Configuration Error',
               message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,
