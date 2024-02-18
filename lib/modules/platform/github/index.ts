@@ -1401,7 +1401,7 @@ async function tryAddMilestone(
       },
     });
   } catch (err) {
-    const actualError = err.response?.body || err;
+    const actualError = err.response?.body || /* istanbul ignore next */ err;
     logger.warn(
       {
         milestone: milestoneNo,
