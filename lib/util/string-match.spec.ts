@@ -31,6 +31,18 @@ describe('util/string-match', () => {
     it('returns true if matching positive and negative patterns', () => {
       expect(anyMatchRegexOrMinimatch('test', ['test', '!/test3/'])).toBeTrue();
     });
+
+    it('returns true if matching every negative patterns', () => {
+      expect(
+        anyMatchRegexOrMinimatch('test', ['test', '!/test3/', '!/test4/']),
+      ).toBeTrue();
+    });
+
+    it('returns false if not matching every negative patterns', () => {
+      expect(
+        anyMatchRegexOrMinimatch('test', ['!/test3/', '!/test/']),
+      ).toBeFalse();
+    });
   });
 
   describe('configRegexPredicate', () => {
