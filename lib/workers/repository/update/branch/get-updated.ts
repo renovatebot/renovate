@@ -8,7 +8,6 @@ import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
-  Upgrade,
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
 import type { FileAddition, FileChange } from '../../../../util/git/types';
