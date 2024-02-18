@@ -92,6 +92,35 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     ]);
   });
 
+  it('performs lock file updates and install when lock file updates mixed with regular updates', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
+      {
+        groupName: 'some-group',
+        packageName: 'some-dep',
+        newVersion: '1.1.0',
+        isLockfileUpdate: true,
+      },
+      {
+        groupName: 'some-group',
+        packageName: 'some-other-dep',
+        newVersion: '1.1.0',
+        isLockfileUpdate: false,
+      },
+    ]);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+      {
+        cmd: 'pnpm update --no-save some-dep@1.1.0 --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
