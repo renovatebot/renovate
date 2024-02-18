@@ -129,11 +129,15 @@ function createLookupTasks(
           }
 
           return packageFile.deps.map((dep) => {
-            const lookupTask = async (): Promise<LookupTaskResult> => ({
-              packageFileName: packageFile.packageFile,
-              manager: managerConfig.manager,
-              result: await lookup(packageFileConfig, dep),
-            });
+            const lookupTask: LookupTask =
+              async (): Promise<LookupTaskResult> => {
+                const result = await lookup(packageFileConfig, dep);
+                return {
+                  packageFileName: packageFile.packageFile,
+                  manager: managerConfig.manager,
+                  result,
+                };
+              };
 
             return lookupTask;
           });
