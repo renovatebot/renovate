@@ -442,7 +442,6 @@ const staticGroups = {
       'group:springWebflow',
       'group:springWs',
       'group:symfony',
-      'group:vite',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
