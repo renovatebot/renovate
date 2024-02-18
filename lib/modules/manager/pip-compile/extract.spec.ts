@@ -159,6 +159,79 @@ describe('modules/manager/pip-compile/extract', () => {
     expect(packageFiles).toBeNull();
   });
 
+  it('return sorted package files', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile('pip-compile --output-file=4.txt 3.in', [
+        'foo==1.0.1',
+      ]),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('-r 2.txt\nfoo');
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile('pip-compile --output-file=2.txt 1.in', [
+        'foo==1.0.1',
+      ]),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('foo');
+
+    const lockFiles = ['4.txt', '2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    expect(packageFiles?.map((p) => p.packageFile)).toEqual(['1.in', '3.in']);
+    expect(packageFiles?.map((p) => p.lockFiles!.pop())).toEqual([
+      '2.txt',
+      '4.txt',
+    ]);
+  });
+
+  it('return sorted package files with constraint in file', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile('pip-compile --output-file=4.txt 3.in', [
+        'foo==1.0.1',
+      ]),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('-c 2.txt\nfoo');
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile('pip-compile --output-file=2.txt 1.in', [
+        'foo==1.0.1',
+      ]),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('foo');
+
+    const lockFiles = ['4.txt', '2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    expect(packageFiles?.map((p) => p.packageFile)).toEqual(['1.in', '3.in']);
+    expect(packageFiles?.map((p) => p.lockFiles!.pop())).toEqual([
+      '2.txt',
+      '4.txt',
+    ]);
+  });
+
+  it('return sorted package files with constraint in command', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --constraint=2.txt --output-file=4.txt 3.in',
+        ['foo==1.0.1'],
+      ),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('foo');
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile('pip-compile --output-file=2.txt 1.in', [
+        'foo==1.0.1',
+      ]),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('foo');
+
+    const lockFiles = ['4.txt', '2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    expect(packageFiles?.map((p) => p.packageFile)).toEqual(['1.in', '3.in']);
+    expect(packageFiles?.map((p) => p.lockFiles!.pop())).toEqual([
+      '2.txt',
+      '4.txt',
+    ]);
+  });
+
   it('adds lockedVersion to deps in package file', async () => {
     fs.readLocalFile.mockResolvedValueOnce(
       getSimpleRequirementsFile(
