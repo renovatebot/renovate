@@ -6,6 +6,7 @@ import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
   PackageDependency,
+  UpdateArtifact,
   UpdateArtifactsResult,
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
@@ -291,21 +292,14 @@ export async function getUpdatedPackageFiles(
     const managers = packageFileManagers[packageFile.path];
     if (is.nonEmptySet(managers)) {
       for (const manager of managers) {
-        const updateArtifacts = get(manager, 'updateArtifacts');
-        if (updateArtifacts) {
-          const results = await updateArtifacts({
-            packageFileName: packageFile.path,
-            updatedDeps,
-            // TODO #22198
-            newPackageFileContent: packageFile.contents!.toString(),
-            config,
-          });
-          processUpdateArtifactResults(
-            results,
-            updatedArtifacts,
-            artifactErrors,
-          );
-        }
+        const results = await managerUpdateArtifacts(manager, {
+          packageFileName: packageFile.path,
+          updatedDeps,
+          // TODO #22198
+          newPackageFileContent: packageFile.contents!.toString(),
+          config,
+        });
+        processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
       }
     }
   }
@@ -321,13 +315,33 @@ export async function getUpdatedPackageFiles(
     const managers = packageFileManagers[packageFile.path];
     if (is.nonEmptySet(managers)) {
       for (const manager of managers) {
-        const updateArtifacts = get(manager, 'updateArtifacts');
-        if (updateArtifacts) {
-          const results = await updateArtifacts({
-            packageFileName: packageFile.path,
-            updatedDeps,
-            // TODO #22198
-            newPackageFileContent: packageFile.contents!.toString(),
+        const results = await managerUpdateArtifacts(manager, {
+          packageFileName: packageFile.path,
+          updatedDeps,
+          // TODO #22198
+          newPackageFileContent: packageFile.contents!.toString(),
+          config,
+        });
+        processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
+        if (is.nonEmptyArray(results)) {
+          updatedPackageFiles.push(packageFile);
+        }
+      }
+    }
+  }
+  if (!reuseExistingBranch) {
+    // Only perform lock file maintenance if it's a fresh commit
+    for (const packageFileName of lockFileMaintenanceFiles) {
+      const managers = packageFileManagers[packageFileName];
+      if (is.nonEmptySet(managers)) {
+        for (const manager of managers) {
+          const contents =
+            updatedFileContents[packageFileName] ||
+            (await getFile(packageFileName, config.baseBranch));
+          const results = await managerUpdateArtifacts(manager, {
+            packageFileName,
+            updatedDeps: [],
+            newPackageFileContent: contents!,
             config,
           });
           processUpdateArtifactResults(
@@ -335,36 +349,6 @@ export async function getUpdatedPackageFiles(
             updatedArtifacts,
             artifactErrors,
           );
-          if (is.nonEmptyArray(results)) {
-            updatedPackageFiles.push(packageFile);
-          }
-        }
-      }
-    }
-  }
-  if (!reuseExistingBranch) {
-    // Only perform lock file maintenance if it's a fresh commit
-    for (const packageFile of lockFileMaintenanceFiles) {
-      const managers = packageFileManagers[packageFile];
-      if (is.nonEmptySet(managers)) {
-        for (const manager of managers) {
-          const updateArtifacts = get(manager, 'updateArtifacts');
-          if (updateArtifacts) {
-            const packageFileContents =
-              updatedFileContents[packageFile] ||
-              (await getFile(packageFile, config.baseBranch));
-            const results = await updateArtifacts({
-              packageFileName: packageFile,
-              updatedDeps: [],
-              newPackageFileContent: packageFileContents!,
-              config,
-            });
-            processUpdateArtifactResults(
-              results,
-              updatedArtifacts,
-              artifactErrors,
-            );
-          }
         }
       }
     }
@@ -375,6 +359,17 @@ export async function getUpdatedPackageFiles(
     updatedArtifacts,
     artifactErrors,
   };
+}
+
+async function managerUpdateArtifacts(
+  manager: string,
+  updateArtifact: UpdateArtifact,
+): Promise<UpdateArtifactsResult[] | null> {
+  const updateArtifacts = get(manager, 'updateArtifacts');
+  if (updateArtifacts) {
+    return await updateArtifacts(updateArtifact);
+  }
+  return null;
 }
 
 function processUpdateArtifactResults(
