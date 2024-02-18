@@ -66,7 +66,7 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 ## allowedEnv
 
 Bot administrators can allow users to configure custom environment variables within repo config.
-Only the environment variables on the list will be accepted in the [`env`](./configuration-options.md#env) configuration.
+Only environment variables matching the list will be accepted in the [`env`](./configuration-options.md#env) configuration.
 
 Examples:
 
@@ -86,6 +86,12 @@ module.exports = {
   allowedEnv: ['SOME_ENV_*', 'EXTRA_ENV_NAME'],
 };
 ```
+
+`allowedEnv` values can be either:
+
+ - An exact match string (e.g. `EXTRA_ENV_NAME`), or
+ - A minimatch pattern (e.g. `SOME_ENV_*`), or
+ - A regex expression (e.g. `/_ENV$/`).
 
 ## allowedHeaders
 

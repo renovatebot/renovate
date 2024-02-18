@@ -1245,7 +1245,8 @@ For more information on how to use secrets for private packages, read [Private p
 
 ## env
 
-This option allows users to specify explicit environment variables and their corresponding values.
+This option allows users to specify explicit environment variables values.
+It is valid only as a top-level configuration option and not, for example, within `packageRules`.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -1254,7 +1255,7 @@ This option allows users to specify explicit environment variables and their cor
 Behavior:
 
 - This option only applies when Renovate runs package manager commands (e.g. `npm install`), within the `updateArtifacts()` function
-- Values set in the env configuration override corresponding environment variables, including those from `customEnvVariables` and `process.env`
+- Values set in the `env` configuration override corresponding environment variables, including those from `customEnvVariables` and `process.env`
 
 ```json title="Example renovate.json with env configuration"
 {
