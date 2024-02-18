@@ -299,10 +299,9 @@ export function getRegistryRepository(
     dockerRepository = `${trimTrailingSlash(path)}/${dockerRepository}`;
   }
 
-  registryHost = registryHost.replace(
-    'https://docker.io',
-    'https://index.docker.io',
-  );
+  registryHost = registryHost
+    .replace('https://docker.io', 'https://index.docker.io')
+    .replace('https://registry-1.docker.io', 'https://index.docker.io');
 
   const opts = hostRules.find({
     hostType: dockerDatasourceId,

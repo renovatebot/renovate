@@ -406,13 +406,26 @@ Instead, set the old `branchPrefix` value as `branchPrefixOld` to allow Renovate
 ## branchTopic
 
 This field is combined with `branchPrefix` and `additionalBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually.
-This is an advance field and it's recommend you seek a config review before applying it.
+This is an advanced field, and it's recommend you seek a config review before applying it.
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, `nuget`, `maven`, `pep621`, `poetry` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
-Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
-Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
+Currently, this config option only works with these managers:
+
+- `cargo`
+- `helmv3`
+- `npm`
+- `nuget`
+- `maven`
+- `ocb`
+- `pep621`
+- `poetry`
+- `sbt`
+
+Raise a feature request if you want to use this config option with other package managers.
+
+Use `bumpVersion` if you want Renovate to update the `version` field in your package file when it updates the dependencies in that file.
+This can be handy when you have automated your package's release, as you you don't need extra steps after the Renovate upgrade, you can just release a new version.
 
 Configure this value to `"prerelease"`, `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited package file.
 e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
@@ -480,11 +493,6 @@ Set this to `"never"` to leave the titles untouched, allowing uppercase characte
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
-
-<!-- prettier-ignore -->
-!!! note
-    Renovate _always_ appends a `:` after the `commitMessagePrefix`.
-    For example, if you set `commitMessagePrefix` to `chore`, Renovate turns it into `chore:`.
 
 ## commitMessageSuffix
 
@@ -1788,14 +1796,53 @@ You can configure a different maximum value in seconds using `maxRetryAfter`:
 }
 ```
 
+### newLogLevel
+
+For log level remapping, `newLogLevel` will set for the particular log message:
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/Error executing maven wrapper update command/",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
-It uses `QuickLRU` with a `maxSize` of `1000`.
+It uses [`lru-cache`](https://github.com/isaacs/node-lru-cache) with the `max` option set to `1000`.
 
 ### enableHttp2
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
+
+### headers
+
+You can provide a `headers` object that includes fields to be forwarded to the HTTP request headers.
+By default, all headers starting with "X-" are allowed.
+
+A bot administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedHeaders) to configure more permitted headers.
+
+`headers` value(s) configured in the bot admin `hostRules` (for example in a `config.js` file) are _not_ validated, so it may contain any header regardless of `allowedHeaders`.
+
+For example:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://domain.com/all-versions",
+      "headers": {
+        "X-custom-header": "secret"
+      }
+    }
+  ]
+}
+```
 
 ### hostType
 
@@ -2123,6 +2170,27 @@ To enable `lockFileMaintenance` add this to your configuration:
 To reduce "noise" in the repository, Renovate performs `lockFileMaintenance` `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
 Depending on its running schedule, Renovate may run a few times within that time window - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
 
+## logLevelRemap
+
+This option allows you to remap log levels for specific messages.
+
+Be careful with remapping `warn` or `error` messages to lower log levels, as it may hide important information.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/^pip-compile:/",
+      "newLogLevel": "info"
+    },
+    {
+      "matchMessage": "Package lookup error",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
+
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
@@ -2360,6 +2428,32 @@ Use the syntax `!/ /` like the following:
 }
 ```
 
+### matchCurrentAge
+
+Use this field if you want to match packages based on the age of the _current_ (existing, in-repo) version.
+
+For example, if you want to group updates for dependencies where the existing version is more than 2 years old:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchCurrentAge": "> 2 years",
+      "groupName": "old dependencies"
+    }
+  ]
+}
+```
+
+The `matchCurrentAge` string must start with one of `>`, `>=`, `<` or `<=`.
+
+Only _one_ date part is supported, so you _cannot_ do `> 1 year 1 month`.
+Instead you should do `> 13 months`.
+
+<!-- prettier-ignore -->
+!!! note
+    We recommend you only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
+
 ### matchDepTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
@@ -2480,7 +2574,7 @@ Use this field to restrict rules to a particular repository. e.g.
 }
 ```
 
-This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchBaseBranches
 
@@ -2529,6 +2623,12 @@ Use this field to restrict rules to a particular package manager. e.g.
 ```
 
 For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
+
+### matchMessage
+
+For log level remapping, use this field to match against the particular log messages.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchDatasources
 
@@ -3353,7 +3453,7 @@ For example we override it to `always` in the following cases where branch names
 You can select which behavior you want from Renovate:
 
 - `always`: Recreates all closed or blocking PRs
-- `auto`: The default option. Recreates only immortal PRs (default)
+- `auto`: The default option. Recreates only [immortal PRs](./key-concepts/pull-requests.md#immortal-prs) (default)
 - `never`: No PR is recreated, doesn't matter if it is immortal or not
 
 We recommend that you stick with the default setting for this option.

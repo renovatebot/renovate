@@ -126,7 +126,8 @@ export async function getConstraintFromLockFile(
     if (!lockfileContent) {
       return null;
     }
-    const pnpmLock = parseSingleYaml(lockfileContent) as PnpmLockFile;
+    // TODO: use schema (#9610)
+    const pnpmLock = parseSingleYaml<PnpmLockFile>(lockfileContent);
     if (!is.number(pnpmLock?.lockfileVersion)) {
       return null;
     }

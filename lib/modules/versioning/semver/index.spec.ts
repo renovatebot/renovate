@@ -29,8 +29,9 @@ describe('modules/versioning/semver/index', () => {
   });
 
   it.each`
-    currentValue | rangeStrategy | currentVersion | newVersion | expected
-    ${'=1.0.0'}  | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'} | ${'1.1.0'}
+    currentValue | rangeStrategy | currentVersion | newVersion  | expected
+    ${'=1.0.0'}  | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'}  | ${'1.1.0'}
+    ${'1.0.0'}   | ${'auto'}     | ${'v1.0.0'}    | ${'v2.0.0'} | ${'2.0.0'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {

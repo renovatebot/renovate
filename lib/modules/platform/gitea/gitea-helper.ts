@@ -19,7 +19,6 @@ import type {
   PR,
   PRCreateParams,
   PRMergeParams,
-  PRSearchParams,
   PRUpdateParams,
   PrReviewersParams,
   Repo,
@@ -28,10 +27,9 @@ import type {
   RepoSearchResults,
   User,
 } from './types';
+import { API_PATH } from './utils';
 
-const giteaHttp = new GiteaHttp();
-
-const API_PATH = '/api/v1';
+export const giteaHttp = new GiteaHttp();
 
 const urlEscape = (raw: string): string => encodeURIComponent(raw);
 const commitStatusStates: CommitStatusType[] = [
@@ -179,21 +177,6 @@ export async function requestPrReviewers(
     ...options,
     body: params,
   });
-}
-
-export async function searchPRs(
-  repoPath: string,
-  params: PRSearchParams,
-  options?: GiteaHttpOptions,
-): Promise<PR[]> {
-  const query = getQueryString(params);
-  const url = `${API_PATH}/repos/${repoPath}/pulls?${query}`;
-  const res = await giteaHttp.getJson<PR[]>(url, {
-    ...options,
-    paginate: true,
-  });
-
-  return res.body;
 }
 
 export async function createIssue(

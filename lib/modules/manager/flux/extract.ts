@@ -52,7 +52,8 @@ function readManifest(
   };
   let resources: FluxResource[];
   try {
-    resources = parseYaml(content, null, { json: true }) as FluxResource[];
+    // TODO: use schema (#9610)
+    resources = parseYaml(content, null, { json: true });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Flux manifest');
     return null;

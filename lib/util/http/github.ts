@@ -139,8 +139,8 @@ function handleGotError(
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     } else if (
-      err.body?.errors?.find(
-        (e: any) => e.message?.startsWith('A pull request already exists'),
+      err.body?.errors?.find((e: any) =>
+        e.message?.startsWith('A pull request already exists'),
       )
     ) {
       return err;
@@ -211,7 +211,7 @@ function getGraphqlPageSize(
     if (now > expiry) {
       const newPageSize = Math.min(oldPageSize * 2, MAX_GRAPHQL_PAGE_SIZE);
       if (newPageSize < MAX_GRAPHQL_PAGE_SIZE) {
-        const timestamp = now.toISO()!;
+        const timestamp = now.toISO();
 
         logger.debug(
           { fieldName, oldPageSize, newPageSize, timestamp },
@@ -242,7 +242,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   const oldPageSize = getGraphqlPageSize(fieldName);
   if (newPageSize !== oldPageSize) {
     const now = DateTime.local();
-    const pageLastResizedAt = now.toISO()!;
+    const pageLastResizedAt = now.toISO();
     logger.debug(
       { fieldName, oldPageSize, newPageSize, timestamp: pageLastResizedAt },
       'GraphQL page size: shrinking',
@@ -338,7 +338,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
-                { ...opts, paginate: false },
+                { ...opts, paginate: false, repoCache: false },
                 okToRetry,
               );
             },

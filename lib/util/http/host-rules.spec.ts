@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../config/global';
 import { bootstrap } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
@@ -540,6 +541,23 @@ describe('util/http/host-rules', () => {
       hostType: 'gitea-tags',
       password: 'password',
       username: undefined,
+    });
+  });
+
+  it('should remove forbidden headers from request', () => {
+    GlobalConfig.set({ allowedHeaders: ['X-*'] });
+    const hostRule = {
+      matchHost: 'https://domain.com/all-versions',
+      headers: {
+        'X-Auth-Token': 'token',
+        unallowedHeader: 'token',
+      },
+    };
+
+    expect(applyHostRule(url, {}, hostRule)).toEqual({
+      headers: {
+        'X-Auth-Token': 'token',
+      },
     });
   });
 });

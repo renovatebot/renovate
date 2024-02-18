@@ -13,7 +13,7 @@ Let Renovate use your PAT by doing _one_ of the following:
 
 Remember to set `platform=github` somewhere in your Renovate config file.
 
-If you use GitHub Enterprise Server then `endpoint` must point to `https://github.enterprise.com/api/v3/`.
+If you use GitHub Enterprise Server then `endpoint` must point to `https://github-enterprise.example.com/api/v3/`.
 You can choose where you want to set `endpoint`:
 
 - In your `config.js` file
@@ -65,7 +65,7 @@ Any tokens that do not start with `ghs_` (for example tokens from GitHub Enterpr
 
 <!-- prettier-ignore -->
 !!! tip "Third-party tools to regenerate installation tokens"
-    If you're self-hosting Renovate within a GitHub Actions workflow, then you can use the [`jnwng/github-app-installation-token-action`](https://github.com/jnwng/github-app-installation-token-action) or [`tibdex/github-app-token`](https://github.com/tibdex/github-app-token) actions.
+    If you're self-hosting Renovate within a GitHub Actions workflow, then you can use the [`actions/create-github-app-token`](https://github.com/actions/create-github-app-token) action.
     If you use Node.js/CLI, then you can use the [`github-app-installation-token`](https://github.com/gagoar/github-app-installation-token) package.
     If you use Docker, then you can use the [`mshekow/github-app-installation-token`](https://github.com/MShekow/github-app-installation-token) image.
 
@@ -96,7 +96,8 @@ When Renovate runs against repositories on `github.com`, and the environment var
 - `rubygems.pkg.github.com`
 
 <!-- prettier-ignore -->
-!!! warning Users have reported that this feature is not working correctly, so it has been reverted to experimental mode.
+!!! warning
+    We reverted the Package Registry Credentials feature to experimental mode, because users reported it's not working correctly with app tokens.
 
 ## Features awaiting implementation
 
