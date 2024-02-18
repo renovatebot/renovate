@@ -22,7 +22,7 @@ export function makeRegexOrMinimatchPredicate(
 
 export function matchRegexOrMinimatch(input: string, pattern: string): boolean {
   const predicate = makeRegexOrMinimatchPredicate(pattern);
-  return predicate ? predicate(input) : false;
+  return predicate(input);
 }
 
 export function anyMatchRegexOrMinimatch(
