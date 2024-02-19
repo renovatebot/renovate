@@ -15,12 +15,6 @@ export function getCurrentVersion(
   if (!is.string(currentValue)) {
     return null;
   }
-  if (versioning.isVersion(currentValue)) {
-    return currentValue;
-  }
-  if (versioning.isSingleVersion(currentValue)) {
-    return currentValue.replace(regEx(/=/g), '').trim();
-  }
   logger.trace(`currentValue ${currentValue} is range`);
   let useVersions = allVersions.filter((v) =>
     versioning.matches(v, currentValue),
@@ -41,5 +35,20 @@ export function getCurrentVersion(
     return versioning.minSatisfyingVersion(useVersions, currentValue);
   }
   // Use the highest version in the current range
-  return versioning.getSatisfyingVersion(useVersions, currentValue);
+  const satisfyingVersion = versioning.getSatisfyingVersion(
+    useVersions,
+    currentValue,
+  );
+  if (satisfyingVersion) {
+    return satisfyingVersion;
+  }
+
+  if (versioning.isVersion(currentValue)) {
+    return currentValue;
+  }
+  if (versioning.isSingleVersion(currentValue)) {
+    return currentValue.replace(regEx(/=/g), '').trim();
+  }
+
+  return null;
 }
