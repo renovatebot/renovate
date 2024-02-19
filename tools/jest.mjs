@@ -20,7 +20,7 @@ if (semver.satisfies(version, '^18.19.1 || ^20.11.1 || >=21.6.2')) {
   args.push('--security-revert=CVE-2023-46809');
 }
 
-args.push('node_modules/jest/bin/jest.js', ' --logHeapUsage');
+args.push('node_modules/jest/bin/jest.js', '--logHeapUsage');
 
 // add other args after `node tools/jest.mjs`
 args.push(...argv.slice(2));
