@@ -79,13 +79,19 @@ async function lookup(
     return Result.ok(dep);
   }
 
+  logger.trace({ depName }, 'Dependency lookup start');
   const start = Date.now();
 
   const result = await Result.wrap(
     lookupUpdates(depConfig as LookupUpdateConfig),
   )
-    .transform((upd): PackageDependency => Object.assign(dep, upd))
+    .transform((updateResult): PackageDependency => {
+      logger.trace({ depName, updateResult }, 'Dependency lookup success');
+      return Object.assign(dep, updateResult);
+    })
     .catch((err) => {
+      logger.trace({ err, depName }, 'Dependency lookup error');
+
       if (
         packageFileConfig.repoIsOnboarded === true ||
         !(err instanceof ExternalHostError)
@@ -150,6 +156,11 @@ export async function fetchUpdates(
   config: RenovateConfig,
   managerPackageFiles: Record<string, PackageFile[]>,
 ): Promise<void> {
+  logger.debug(
+    { baseBranch: config.baseBranch },
+    'Starting package releases lookups',
+  );
+
   const allTasks = createLookupTasks(config, managerPackageFiles);
 
   const fetchResults = await p.all(allTasks, { concurrency: 25 });
