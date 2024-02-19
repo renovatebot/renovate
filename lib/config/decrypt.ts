@@ -7,8 +7,64 @@ import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import { ensureTrailingSlash } from '../util/url';
 import { GlobalConfig } from './global';
-import { DecryptedObject } from './schema';
+import {
+  DecryptedObject,
+  type EcJwkPriv,
+  EncodedEcJwkPriv,
+  EncryptedConfigString,
+} from './schema';
 import type { RenovateConfig } from './types';
+
+const dec = new TextDecoder();
+
+export async function tryDecryptEc(
+  privateKey: EcJwkPriv,
+  encryptedStr: string,
+): Promise<string | null> {
+  try {
+    const privKey = await crypto.subtle.importKey(
+      'jwk',
+      privateKey,
+      { name: 'ECDH', namedCurve: privateKey.crv },
+      false,
+      ['deriveKey'],
+    );
+
+    const parsed = await EncryptedConfigString.safeParseAsync(encryptedStr);
+
+    if (!parsed.success) {
+      const error = new Error('config-validation');
+      error.validationError = `Could not parse encrypted config.`;
+      throw error;
+    }
+
+    const pubKey = await crypto.subtle.importKey(
+      'jwk',
+      parsed.data.k,
+      { name: 'ECDH', namedCurve: parsed.data.k.crv },
+      false,
+      [],
+    );
+
+    const pw = await crypto.subtle.deriveKey(
+      { name: 'ECDH', public: pubKey },
+      privKey,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['decrypt'],
+    );
+    const buff = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: parsed.data.i },
+      pw,
+      parsed.data.m,
+    );
+    return dec.decode(buff);
+  } catch (err) {
+    logger.debug({ err }, 'Could not decrypt using openpgp');
+  }
+
+  return null;
+}
 
 export async function tryDecryptPgp(
   privateKey: string,
@@ -90,75 +146,16 @@ export async function tryDecrypt(
   repository: string,
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
-  if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
+  const pk = await EncodedEcJwkPriv.safeParseAsync(privateKey);
+  if (pk.success) {
+    const decryptedObjStr = await tryDecryptEc(pk.data, encryptedStr);
+    if (decryptedObjStr) {
+      decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
+    }
+  } else if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
     const decryptedObjStr = await tryDecryptPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
-      try {
-        const decryptedObj = DecryptedObject.safeParse(decryptedObjStr);
-        // istanbul ignore if
-        if (!decryptedObj.success) {
-          const error = new Error('config-validation');
-          error.validationError = `Could not parse decrypted config.`;
-          throw error;
-        }
-
-        const { o: org, r: repo, v: value } = decryptedObj.data;
-        if (is.nonEmptyString(value)) {
-          if (is.nonEmptyString(org)) {
-            const orgPrefixes = org
-              .split(',')
-              .map((o) => o.trim())
-              .map((o) => o.toUpperCase())
-              .map((o) => ensureTrailingSlash(o));
-            if (is.nonEmptyString(repo)) {
-              const scopedRepos = orgPrefixes.map((orgPrefix) =>
-                `${orgPrefix}${repo}`.toUpperCase(),
-              );
-              if (scopedRepos.some((r) => r === repository.toUpperCase())) {
-                decryptedStr = value;
-              } else {
-                logger.debug(
-                  { scopedRepos },
-                  'Secret is scoped to a different repository',
-                );
-                const error = new Error('config-validation');
-                error.validationError = `Encrypted secret is scoped to a different repository: "${scopedRepos.join(
-                  ',',
-                )}".`;
-                throw error;
-              }
-            } else {
-              if (
-                orgPrefixes.some((orgPrefix) =>
-                  repository.toUpperCase().startsWith(orgPrefix),
-                )
-              ) {
-                decryptedStr = value;
-              } else {
-                logger.debug(
-                  { orgPrefixes },
-                  'Secret is scoped to a different org',
-                );
-                const error = new Error('config-validation');
-                error.validationError = `Encrypted secret is scoped to a different org: "${orgPrefixes.join(
-                  ',',
-                )}".`;
-                throw error;
-              }
-            }
-          } else {
-            const error = new Error('config-validation');
-            error.validationError = `Encrypted value in config is missing a scope.`;
-            throw error;
-          }
-        } else {
-          const error = new Error('config-validation');
-          error.validationError = `Encrypted value in config is missing a value.`;
-          throw error;
-        }
-      } catch (err) {
-        logger.warn({ err }, 'Could not parse decrypted string');
-      }
+      decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
     }
   } else {
     decryptedStr = tryDecryptPublicKeyDefault(privateKey, encryptedStr);
@@ -167,6 +164,79 @@ export async function tryDecrypt(
     }
   }
   return decryptedStr;
+}
+
+function validateDecryptedValue(
+  decryptedObjStr: string,
+  repository: string,
+): string | null {
+  try {
+    const decryptedObj = DecryptedObject.safeParse(decryptedObjStr);
+    // istanbul ignore if
+    if (!decryptedObj.success) {
+      const error = new Error('config-validation');
+      error.validationError = `Could not parse decrypted config.`;
+      throw error;
+    }
+
+    const { o: org, r: repo, v: value } = decryptedObj.data;
+    if (is.nonEmptyString(value)) {
+      if (is.nonEmptyString(org)) {
+        const orgPrefixes = org
+          .split(',')
+          .map((o) => o.trim())
+          .map((o) => o.toUpperCase())
+          .map((o) => ensureTrailingSlash(o));
+        if (is.nonEmptyString(repo)) {
+          const scopedRepos = orgPrefixes.map((orgPrefix) =>
+            `${orgPrefix}${repo}`.toUpperCase(),
+          );
+          if (scopedRepos.some((r) => r === repository.toUpperCase())) {
+            return value;
+          } else {
+            logger.debug(
+              { scopedRepos },
+              'Secret is scoped to a different repository',
+            );
+            const error = new Error('config-validation');
+            error.validationError = `Encrypted secret is scoped to a different repository: "${scopedRepos.join(
+              ',',
+            )}".`;
+            throw error;
+          }
+        } else {
+          if (
+            orgPrefixes.some((orgPrefix) =>
+              repository.toUpperCase().startsWith(orgPrefix),
+            )
+          ) {
+            return value;
+          } else {
+            logger.debug(
+              { orgPrefixes },
+              'Secret is scoped to a different org',
+            );
+            const error = new Error('config-validation');
+            error.validationError = `Encrypted secret is scoped to a different org: "${orgPrefixes.join(
+              ',',
+            )}".`;
+            throw error;
+          }
+        }
+      } else {
+        const error = new Error('config-validation');
+        error.validationError = `Encrypted value in config is missing a scope.`;
+        throw error;
+      }
+    } else {
+      const error = new Error('config-validation');
+      error.validationError = `Encrypted value in config is missing a value.`;
+      throw error;
+    }
+  } catch (err) {
+    logger.warn({ err }, 'Could not parse decrypted string');
+  }
+  return null;
 }
 
 export async function decryptConfig(

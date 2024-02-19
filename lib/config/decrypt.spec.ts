@@ -1,11 +1,18 @@
 import { Fixtures } from '../../test/fixtures';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
-import { decryptConfig } from './decrypt';
+import { Json } from '../util/schema-utils';
+import { toBase64 } from '../util/string';
+import { decryptConfig, tryDecryptEc } from './decrypt';
 import { GlobalConfig } from './global';
+import { EcJwkPriv } from './schema';
 import type { RenovateConfig } from './types';
 
 const privateKey = Fixtures.get('private.pem');
 const privateKeyPgp = Fixtures.get('private-pgp.pem');
+// renovate private key
+const privateEc = Fixtures.get('private-ec.json');
+const renovatePrivKey = Json.pipe(EcJwkPriv).parse(privateEc);
+
 const repository = 'abc/def';
 
 describe('config/decrypt', () => {
@@ -207,6 +214,98 @@ describe('config/decrypt', () => {
       await expect(decryptConfig(config, 'abc/defg')).rejects.toThrow(
         CONFIG_VALIDATION,
       );
+    });
+
+    it('handles EC/AES-GCM encryption', async () => {
+      GlobalConfig.set({ privateKey: toBase64(privateEc) });
+      config.encrypted = {
+        token:
+          'eyJrIjp7Imt0eSI6IkVDIiwieCI6IlM0TFhnVUJHMUNlSXVUU1ZiZEg3MHZpSjV6dUxaRFNydFJ2ZUhVTHBBYnBMTXAwQ0tyeVozWm5RN1lKQjh3N2MiLCJ5IjoiZVpQNFZzT1hXZGxRYkNWYWxSakVWNEFzTFBxYmpKdW1mR1dfTzlZbG9HM2dqbzd5enJfUXQtbXl2SG5LdkZheiIsImNydiI6IlAtMzg0In0sImkiOiJNRDVMb2hUMmh2VS9SYXA3IiwibSI6IkptMERpUmNtbEFEU2JjeVdnWmJlUXl4QkdUbU55aVlkV2NDa0tyVnhQZStTdEdMMlBwWT0ifQ==',
+      };
+
+      const res = await decryptConfig(config, 'some/def');
+      expect(res.encrypted).toBeUndefined();
+      expect(res.token).toBe('123');
+      await expect(decryptConfig(config, 'abc/defg')).rejects.toThrow(
+        CONFIG_VALIDATION,
+      );
+    });
+  });
+
+  describe('tryDecryptEc', () => {
+    it('decrypts', async () => {
+      // generate a new key pair in browser for each encryption
+      const browserPivKey = await crypto.subtle.importKey(
+        'jwk',
+        {
+          kty: 'EC',
+          x: 'S4LXgUBG1CeIuTSVbdH70viJ5zuLZDSrtRveHULpAbpLMp0CKryZ3ZnQ7YJB8w7c',
+          y: 'eZP4VsOXWdlQbCValRjEV4AsLPqbjJumfGW_O9YloG3gjo7yzr_Qt-myvHnKvFaz',
+          crv: 'P-384',
+          d: 'xFcT0_QhJJ_OIsjEO2jdlipRyxxydg2LbYcoGNJEdDnW7_okBMjssQ0Q3ikUq4cB',
+        },
+        { name: 'ECDH', namedCurve: 'P-384' },
+        false,
+        ['deriveKey'],
+      );
+      const { d, ...publicEc } = { ...renovatePrivKey };
+
+      // import renovate public key
+      const svrPubKey = await crypto.subtle.importKey(
+        'jwk',
+        publicEc,
+        { name: 'ECDH', namedCurve: 'P-384' },
+        false,
+        [],
+      );
+
+      // derive shared secret from our private key and renovate public key
+      const pw = await crypto.subtle.deriveKey(
+        { name: 'ECDH', public: svrPubKey },
+        browserPivKey,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt'],
+      );
+
+      // always use a new IV
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+
+      // encrypt the message
+      const message = await crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv },
+        pw,
+        new TextEncoder().encode('{"o":"some","v":"123"}'), // Use TextEncoder for utf-8 support
+      );
+
+      // prepare the encrypted object
+      const encrypted = {
+        // send our public key to renovate
+        k: {
+          kty: 'EC',
+          x: 'S4LXgUBG1CeIuTSVbdH70viJ5zuLZDSrtRveHULpAbpLMp0CKryZ3ZnQ7YJB8w7c',
+          y: 'eZP4VsOXWdlQbCValRjEV4AsLPqbjJumfGW_O9YloG3gjo7yzr_Qt-myvHnKvFaz',
+          crv: 'P-384',
+        },
+        // send the IV
+        i: Buffer.from(iv).toString('base64'),
+        // send the encrypted message
+        m: Buffer.from(message).toString('base64'),
+      };
+
+      // encode the encrypted object for easier transport
+      const encCfg = toBase64(JSON.stringify(encrypted));
+
+      // print to update test case above
+      // console.error('encCfg', encCfg);
+
+      // decrypt the message with renovate private key
+      const res = await tryDecryptEc(renovatePrivKey, encCfg);
+      expect(res).toBe('{"o":"some","v":"123"}');
+    });
+
+    it('throws for invalid config', async () => {
+      await expect(tryDecryptEc(renovatePrivKey, '')).resolves.toBeNull();
     });
   });
 });

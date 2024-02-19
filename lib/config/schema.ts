@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Json } from '../util/schema-utils';
+import { Base64, Json } from '../util/schema-utils';
 
 export const DecryptedObject = Json.pipe(
   z.object({
@@ -8,3 +8,35 @@ export const DecryptedObject = Json.pipe(
     v: z.string().optional(),
   }),
 );
+
+/**
+ * EC JSON Web Key (public key)
+ * https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#json_web_key
+ */
+export const EcJwkPub = z.object({
+  kty: z.literal('EC'),
+  crv: z.enum(['P-256', 'P-384', 'P-521']),
+  x: z.string(),
+  y: z.string(),
+});
+
+/**
+ * EC JSON Web Key (private key)
+ * https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#json_web_key
+ */
+export const EcJwkPriv = EcJwkPub.extend({
+  d: z.string(),
+});
+
+export type EcJwkPriv = z.infer<typeof EcJwkPriv>;
+
+export const EncodedEcJwkPriv = Base64.pipe(Json.pipe(EcJwkPriv));
+
+export const EncryptedConfig = z.object({
+  k: EcJwkPub,
+  i: z.string().transform((v) => new Uint8Array(Buffer.from(v, 'base64'))),
+  m: z.string().transform((v) => new Uint8Array(Buffer.from(v, 'base64'))),
+});
+export type EncryptedConfig = z.infer<typeof EncryptedConfig>;
+
+export const EncryptedConfigString = Base64.pipe(Json.pipe(EncryptedConfig));
