@@ -27,7 +27,9 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       ) as RenovateConfig;
     case '.cjs':
     case '.js': {
-      const tmpConfig = await import(file);
+      const tmpConfig = await import(
+        upath.isAbsolute(file) ? file : `${process.cwd()}/${file}`
+      );
       let config = tmpConfig.default
         ? tmpConfig.default
         : /* istanbul ignore next: hard to test */ tmpConfig;
@@ -43,10 +45,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
 }
 
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
-  let configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';
-  if (!upath.isAbsolute(configFile)) {
-    configFile = `${process.cwd()}/${configFile}`;
-  }
+  const configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';
 
   if (env.RENOVATE_CONFIG_FILE && !(await fs.pathExists(configFile))) {
     logger.fatal(
