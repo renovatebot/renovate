@@ -75,17 +75,9 @@ export async function extractAllPackageFiles(
       continue;
     }
     let compileArgs: PipCompileArgs;
-    try {
-      compileArgs = extractHeaderCommand(fileContent, fileMatch);
-    } catch (error) {
-      logger.warn(
-        { fileMatch, error: error.message },
-        'pip-compile: Failed to extract and parse command in output file header',
-      );
-      continue;
-    }
     let compileDir: string;
     try {
+      compileArgs = extractHeaderCommand(fileContent, fileMatch);
       compileDir = inferCommandExecDir(fileMatch, compileArgs.outputFile);
     } catch (error) {
       logger.warn({ fileMatch }, `pip-compile: ${error.message}`);
