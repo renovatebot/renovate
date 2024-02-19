@@ -2,7 +2,6 @@ import JSON5 from 'json5';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
 import { z } from 'zod';
-import { fromBase64 } from './string';
 import { parse as parseToml } from './toml';
 import { parseSingleYaml, parseYaml } from './yaml';
 
@@ -253,16 +252,3 @@ export const Toml = z.string().transform((str, ctx) => {
     return z.NEVER;
   }
 });
-
-/**
- * decode a base64 string
- */
-export const Base64 = z.string().transform((str, ctx): string => {
-  try {
-    return fromBase64(str);
-  } catch (e) {
-    ctx.addIssue({ code: 'custom', message: 'Invalid Base64' });
-    return z.NEVER;
-  }
-});
-type Base64 = z.infer<typeof Base64>;

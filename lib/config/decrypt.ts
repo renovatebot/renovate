@@ -15,8 +15,6 @@ import {
 } from './schema';
 import type { RenovateConfig } from './types';
 
-const dec = new TextDecoder();
-
 export async function tryDecryptEcdhAesGcm(
   privateKey: EcJwkPriv,
   encryptedStr: string,
@@ -58,7 +56,7 @@ export async function tryDecryptEcdhAesGcm(
       pw,
       parsed.data.m,
     );
-    return dec.decode(buff);
+    return Buffer.from(buff).toString();
   } catch (err) {
     logger.debug({ err }, 'Could not decrypt using openpgp');
   }

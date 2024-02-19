@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { Base64, Json } from '../util/schema-utils';
+import { Json } from '../util/schema-utils';
+import { fromBase64 } from '../util/string';
 
 export const DecryptedObject = Json.pipe(
   z.object({
@@ -29,6 +30,8 @@ export const EcJwkPriv = EcJwkPub.extend({
 });
 
 export type EcJwkPriv = z.infer<typeof EcJwkPriv>;
+
+const Base64 = z.string().transform((v) => fromBase64(v));
 
 export const EncodedEcJwkPriv = Base64.pipe(Json.pipe(EcJwkPriv));
 

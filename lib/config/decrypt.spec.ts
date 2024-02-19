@@ -272,7 +272,9 @@ describe('config/decrypt', () => {
       const message = await crypto.subtle.encrypt(
         { name: 'AES-GCM', iv },
         pw,
-        new TextEncoder().encode('{"o":"some","v":"123"}'), // Use TextEncoder for utf-8 support
+        // Use TextEncoder instead of Buffer in browser
+        Buffer.from('{"o":"some","v":"123"}'),
+        // new TextEncoder().encode('{"o":"some","v":"123"}'),
       );
 
       // prepare the encrypted object
