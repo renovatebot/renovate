@@ -335,7 +335,7 @@ export async function ensurePr(
     {
       debugData: updatePrDebugData(
         config.baseBranch,
-        prepareLabels(config).sort(), // include labels in debug data, sort them just to be safe
+        prepareLabels(config), // include labels in debug data
         existingPr?.bodyStruct?.debugData,
       ),
     },

@@ -10,7 +10,8 @@ export function prepareLabels(config: RenovateConfig): string[] {
   return [...new Set([...labels, ...addLabels])]
     .filter(is.nonEmptyStringAndNotWhitespace)
     .map((label) => template.compile(label, config))
-    .filter(is.nonEmptyStringAndNotWhitespace);
+    .filter(is.nonEmptyStringAndNotWhitespace)
+    .sort();
 }
 
 /**
@@ -77,6 +78,6 @@ export function shouldUpdateLabels(
     return false;
   }
 
-  logger.debug('Labels have been changed in repo config- upading labels.');
+  logger.debug('Labels have been changed in repo config- updating labels.');
   return true;
 }
