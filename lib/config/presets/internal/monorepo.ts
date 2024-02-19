@@ -254,6 +254,7 @@ const repoGroups = {
     'https://github.com/dotnet/extensions',
     'https://github.com/dotnet/maui',
     'https://github.com/dotnet/runtime',
+    'https://github.com/dotnet/scaffolding',
     'https://github.com/dotnet/sdk',
   ],
   'dotnet-azure-ad-identitymodel-extensions':
@@ -312,7 +313,11 @@ const repoGroups = {
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
   istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
-  jackson: 'https://github.com/FasterXML/jackson',
+  jackson: [
+    'https://github.com/FasterXML/jackson',
+    'https://github.com/FasterXML/jackson-dataformats-binary',
+    'https://github.com/FasterXML/jackson-dataformats-text',
+  ],
   jasmine: 'https://github.com/jasmine/jasmine',
   javahamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   javascriptengineswitcher:
@@ -487,6 +492,8 @@ const repoGroups = {
   'trust-dns': 'https://github.com/bluejekyll/trust-dns',
   tsoa: 'https://github.com/lukeautry/tsoa',
   turbo: 'https://github.com/vercel/turbo',
+  'typed-signalr':
+    'https://github.com/nenoNaninu/TypedSignalR.Client.TypeScript',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
