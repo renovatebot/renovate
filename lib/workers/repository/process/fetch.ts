@@ -2,7 +2,7 @@
 import is from '@sindresorhus/is';
 import AggregateError from 'aggregate-error';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { RenovateConfig } from '../../../config/types';
+import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { getDefaultVersioning } from '../../../modules/datasource/common';
@@ -43,24 +43,29 @@ type LookupTaskResult = {
 type LookupTask = () => Promise<LookupTaskResult>;
 
 async function lookup(
-  packageFileConfig: RenovateConfig & PackageFile,
+  packageFileConfig: ManagerConfig & PackageFile,
   indep: PackageDependency,
 ): Promise<LookupResult> {
   const dep = clone(indep);
   dep.updates = [];
+
   if (is.string(dep.depName)) {
     dep.depName = dep.depName.trim();
   }
+
   dep.packageName ??= dep.depName;
   if (!is.nonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
   }
+
   if (dep.isInternal && !packageFileConfig.updateInternalDeps) {
     dep.skipReason = 'internal-package';
   }
+
   if (dep.skipReason) {
     return Result.ok(dep);
   }
+
   const { depName } = dep;
   // TODO: fix types
   let depConfig = mergeChildConfig(packageFileConfig, dep);
@@ -105,6 +110,7 @@ async function lookup(
     }
     dep.updates ??= [];
   }
+
   return Result.ok(dep);
 }
 
