@@ -117,39 +117,35 @@ function createLookupTasks(
   config: RenovateConfig,
   managerPackageFiles: Record<string, PackageFile[]>,
 ): LookupTask[] {
-  return Object.entries(managerPackageFiles)
-    .map(([manager, packageFiles]): LookupTask[] => {
-      const managerConfig = getManagerConfig(config, manager);
-      return packageFiles
-        .map((packageFile): LookupTask[] => {
-          const packageFileConfig = mergeChildConfig(
-            managerConfig,
-            packageFile,
-          );
-          if (packageFile.extractedConstraints) {
-            packageFileConfig.constraints = {
-              ...packageFile.extractedConstraints,
-              ...config.constraints,
-            };
-          }
+  const lookupTasks: LookupTask[] = [];
 
-          return packageFile.deps.map((dep) => {
-            const lookupTask: LookupTask =
-              async (): Promise<LookupTaskResult> => {
-                const result = await lookup(packageFileConfig, dep);
-                return {
-                  packageFileName: packageFile.packageFile,
-                  manager: managerConfig.manager,
-                  result,
-                };
-              };
+  for (const [manager, packageFiles] of Object.entries(managerPackageFiles)) {
+    const managerConfig = getManagerConfig(config, manager);
 
-            return lookupTask;
-          });
-        })
-        .flat();
-    })
-    .flat();
+    for (const packageFile of packageFiles) {
+      const packageFileConfig = mergeChildConfig(managerConfig, packageFile);
+      if (packageFile.extractedConstraints) {
+        packageFileConfig.constraints = {
+          ...packageFile.extractedConstraints,
+          ...config.constraints,
+        };
+      }
+
+      for (const dep of packageFile.deps) {
+        const lookupTask: LookupTask = async () => {
+          const result = await lookup(packageFileConfig, dep);
+          return {
+            packageFileName: packageFile.packageFile,
+            manager: managerConfig.manager,
+            result,
+          };
+        };
+        lookupTasks.push(lookupTask);
+      }
+    }
+  }
+
+  return lookupTasks;
 }
 
 export async function fetchUpdates(
