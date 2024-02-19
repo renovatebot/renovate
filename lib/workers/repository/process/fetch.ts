@@ -156,28 +156,36 @@ export async function fetchUpdates(
 
   const fetchResults = await p.all(allTasks, { concurrency: 25 });
 
-  const collectedDeps: Record<string, Record<string, PackageDependency[]>> = {};
-  const collectedErrors: Error[] = [];
+  const errors: Error[] = [];
+
+  type Manager = string;
+  type PackageFileName = string;
+  type PackageFileDeps = Record<PackageFileName, PackageDependency[]>;
+  type ManagerPackageFileDeps = Record<Manager, PackageFileDeps>;
+  const deps: ManagerPackageFileDeps = {};
+
+  // Separate good results from errors
   for (const { packageFileName, manager, result } of fetchResults) {
     const { val: dep, err } = result.unwrap();
     if (dep) {
-      collectedDeps[manager] ??= {};
-      collectedDeps[manager][packageFileName] ??= [];
-      collectedDeps[manager][packageFileName].push(dep);
+      deps[manager] ??= {};
+      deps[manager][packageFileName] ??= [];
+      deps[manager][packageFileName].push(dep);
     } else {
-      collectedErrors.push(err);
+      errors.push(err);
     }
   }
 
-  if (collectedErrors.length) {
-    p.handleMultipleErrors(collectedErrors);
+  if (errors.length) {
+    p.handleMultipleErrors(errors);
   }
 
+  // Assign fetched deps back to packageFiles
   for (const [manager, packageFiles] of Object.entries(managerPackageFiles)) {
     for (const packageFile of packageFiles) {
-      const deps = collectedDeps[manager]?.[packageFile.packageFile];
-      if (deps) {
-        packageFile.deps = deps;
+      const packageFileDeps = deps[manager]?.[packageFile.packageFile];
+      if (packageFileDeps) {
+        packageFile.deps = packageFileDeps;
       }
     }
   }
