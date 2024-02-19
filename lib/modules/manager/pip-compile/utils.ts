@@ -1,6 +1,6 @@
-import upath from 'upath';
 import { logger } from '../../../logger';
 import { Graph } from 'graph-data-structure';
+import upath from 'upath';
 import type { PackageFile } from '../types';
 import type { DependencyBetweenFiles, PipCompileArgs } from './types';
 
