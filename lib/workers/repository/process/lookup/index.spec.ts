@@ -916,8 +916,10 @@ describe('workers/repository/process/lookup/index', () => {
       config.isVulnerabilityAlert = true;
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toMatchInlineSnapshot(`
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+      expect(updates).toMatchInlineSnapshot(`
         [
           {
             "bucket": "non-major",
@@ -932,8 +934,8 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ]
       `);
-      expect(res.updates[0].newValue).toBeUndefined();
-      expect(res.updates[0].updateType).toBe('minor');
+      expect(updates[0].newValue).toBeUndefined();
+      expect(updates[0].updateType).toBe('minor');
     });
 
     it('widens minor ranged versions if configured', async () => {
