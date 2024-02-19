@@ -14,7 +14,7 @@ export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {
     return regExPredicate;
   }
 
-  const mm = minimatch(pattern, { dot: true });
+  const mm = minimatch(pattern, { dot: true, nocase: true });
   return (x: string): boolean => mm.match(x);
 }
 

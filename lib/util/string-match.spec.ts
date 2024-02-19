@@ -30,6 +30,10 @@ describe('util/string-match', () => {
       expect(matchRegexOrGlobList('test', ['test', '!/test3/'])).toBeTrue();
     });
 
+    it('returns true case insensitive for glob', () => {
+      expect(matchRegexOrGlobList('TEST', ['t*'])).toBeTrue();
+    });
+
     it('returns true if matching every negative pattern (regex)', () => {
       expect(
         matchRegexOrGlobList('test', ['test', '!/test3/', '!/test4/']),

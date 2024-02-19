@@ -1,4 +1,3 @@
-import { Graph } from 'graph-data-structure';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
@@ -13,7 +12,11 @@ import type {
   PipCompileArgs,
   SupportedManagers,
 } from './types';
-import { generateMermaidGraph, inferCommandExecDir } from './utils';
+import {
+  generateMermaidGraph,
+  inferCommandExecDir,
+  sortPackageFiles,
+} from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
@@ -193,32 +196,10 @@ export async function extractAllPackageFiles(
   if (packageFiles.size === 0) {
     return null;
   }
-  const result: PackageFile[] = [];
-  const graph: ReturnType<typeof Graph> = Graph();
-  depsBetweenFiles.forEach(({ sourceFile, outputFile }) => {
-    graph.addEdge(sourceFile, outputFile);
-  });
-  const sorted = graph.topologicalSort();
-  for (const file of sorted) {
-    if (packageFiles.has(file)) {
-      const packageFile = packageFiles.get(file)!;
-      const sortedLockFiles = [];
-      // TODO(not7cd): this needs better test case
-      for (const lockFile of packageFile.lockFiles!) {
-        if (sorted.includes(lockFile)) {
-          sortedLockFiles.push(lockFile);
-        }
-      }
-      packageFile.lockFiles = sortedLockFiles;
-      result.push(packageFile);
-    }
-  }
-  // istanbul ignore if: should never happen
-  if (result.length !== packageFiles.size) {
-    throw new Error(
-      'pip-compile: topological sort failed to include all package files',
-    );
-  }
+  const result: PackageFile[] = sortPackageFiles(
+    depsBetweenFiles,
+    packageFiles,
+  );
   logger.debug(
     'pip-compile: dependency graph:\n' +
       generateMermaidGraph(depsBetweenFiles, lockFileArgs),
