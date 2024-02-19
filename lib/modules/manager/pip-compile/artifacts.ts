@@ -71,14 +71,8 @@ export async function updateArtifacts({
       if (config.isLockFileMaintenance) {
         await deleteLocalFile(outputFileName);
       }
-      const compileArgs = extractHeaderCommand(
-        existingOutput,
-        outputFileName,
-      );
-      const cwd = inferCommandExecDir(
-        outputFileName,
-        compileArgs.outputFile,
-      );
+      const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
+      const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
       const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
       const cmd = constructPipCompileCmd(

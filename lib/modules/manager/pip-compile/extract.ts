@@ -1,5 +1,5 @@
-import upath from 'upath';
 import { Graph } from 'graph-data-structure';
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
