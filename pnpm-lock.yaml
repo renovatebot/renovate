@@ -569,8 +569,8 @@ importers:
         specifier: 0.12.1
         version: 0.12.1
       memfs:
-        specifier: 4.6.1
-        version: 4.6.1(tslib@2.6.2)
+        specifier: 4.7.6
+        version: 4.7.6
       nock:
         specifier: 13.5.1
         version: 13.5.1
@@ -4419,10 +4419,6 @@ packages:
     resolution: {integrity: sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==}
     dev: true
 
-  /arg@5.0.2:
-    resolution: {integrity: sha512-PYjyFOLKQ9y57JvQ6QLo8dAgNqswh8M1RMJYdQduT6xbWSgK36P/Z/v+p888pM69jMMfS8Xd8F6I1kQ/I9HUGg==}
-    dev: true
-
   /argparse@1.0.10:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
     dependencies:
@@ -6721,11 +6717,6 @@ packages:
     hasBin: true
     dev: true
 
-  /hyperdyperid@1.2.0:
-    resolution: {integrity: sha512-Y93lCzHYgGWdrJ66yIktxiaGULYc6oGiABxhcO5AufBeOyoIdZF7bIfLaOrbM0iGIOXQQgxxRrFEnb+Y6w1n4A==}
-    engines: {node: '>=10.18'}
-    dev: true
-
   /iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
@@ -7689,26 +7680,6 @@ packages:
       backslash: 0.2.0
     dev: false
 
-  /json-joy@11.28.1(tslib@2.6.2):
-    resolution: {integrity: sha512-mYboJ4t/DVX5YP5wQm0XSiHgm0lAgQey39RKEg0/2O45WoZtsb1ibJPyNMsF+talhMD/cqjNe2jGFJh0ZRVa1Q==}
-    engines: {node: '>=10.0'}
-    hasBin: true
-    peerDependencies:
-      quill-delta: ^5
-      rxjs: '7'
-      tslib: '2'
-    peerDependenciesMeta:
-      quill-delta:
-        optional: true
-      rxjs:
-        optional: true
-    dependencies:
-      arg: 5.0.2
-      hyperdyperid: 1.2.0
-      thingies: 1.16.0(tslib@2.6.2)
-      tslib: 2.6.2
-    dev: true
-
   /json-parse-better-errors@1.0.2:
     resolution: {integrity: sha512-mrqyZKfX5EhL7hvqcV6WG1yYjnjeuYDzDhhcAAUrq8Po85NBQBJP+ZDUT75qZQ98IkUoBqdkExkukOU7Ts2wrw==}
     dev: true
@@ -8143,18 +8114,11 @@ packages:
     resolution: {integrity: sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==}
     dev: true
 
-  /memfs@4.6.1(tslib@2.6.2):
-    resolution: {integrity: sha512-EBR9cb0t/PJjPI7fVx2m9V7iQH8joEgIsrfWW+qam304dK/FvpcTqKdKu3sbcbMmCZMbMwPi76PREoFaGR0Bmw==}
+  /memfs@4.7.6:
+    resolution: {integrity: sha512-PMxcVnZYdSFYZIzsbhd8XLvxrHaIarhyyfDQHThUwhAYAPDfDTvKhEjWbzPyGFr9CPvJJl+VUetfcnVVF9Wckg==}
     engines: {node: '>= 4.0.0'}
-    peerDependencies:
-      tslib: '2'
     dependencies:
-      json-joy: 11.28.1(tslib@2.6.2)
-      thingies: 1.16.0(tslib@2.6.2)
       tslib: 2.6.2
-    transitivePeerDependencies:
-      - quill-delta
-      - rxjs
     dev: true
 
   /memorystream@0.3.1:
@@ -10175,15 +10139,6 @@ packages:
 
   /text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
-    dev: true
-
-  /thingies@1.16.0(tslib@2.6.2):
-    resolution: {integrity: sha512-J23AVs11hSQxuJxvfQyMIaS9z1QpDxOCvMkL3ZxZl8/jmkgmnNGWrlyNxVz6Jbh0U6DuGmHqq6f7zUROfg/ncg==}
-    engines: {node: '>=10.18'}
-    peerDependencies:
-      tslib: ^2
-    dependencies:
-      tslib: 2.6.2
     dev: true
 
   /through2-concurrent@2.0.0:
