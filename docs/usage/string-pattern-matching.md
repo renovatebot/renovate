@@ -8,16 +8,25 @@ Users can choose to use regex patterns by starting the pattern string with `/` o
 Regex patterns are evaluated with case sensitivity unless the `i` flag is specified.
 
 Renovate uses the [`re2`](https://github.com/google/re2) library for regex matching, which is not entirely the same syntax/support as the full regex specification.
-For a full list of re2 syntax, see [the re2 syntax wiki page](https://github.com/google/re2/wiki/Syntax).
+For a full list of `re2` syntax, see [the `re2` syntax wiki page](https://github.com/google/re2/wiki/Syntax).
 
-Example regex patterns:
+### Example regex patterns
 
-- `/^abc/` is a regex pattern matching any string starting with lower-case `abc`.
-- `/^abc/i` is a regex pattern matching any string starting with `abc` in lower or upper case, or a mix.
-- `!/^a/` is a regex pattern matching any string no starting with `a` in lower case.
+| Pattern   | Regex pattern explanation                                               |
+| --------- | ----------------------------------------------------------------------- |
+| `/^abc/`  | matches any string starting with lower-case `abc`                       |
+| `/^abc/i` | matches any string starting with `abc` in lower or upper case, or a mix |
+| `!/^a/`   | matches any string not starting with `a` in lower case                  |
+
+### Use regex101 to test your patterns
 
 If you want to test your patterns interactively online, we recommend [regex101.com](https://regex101.com/?flavor=javascript&flags=ginst).
-Be aware that backslashes (`\`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`. You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
+You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
+
+<!-- prettier-ignore -->
+!!! warning "Escape the backslashes from regex101"
+    Before you copy/paste the regex from regex101 into your Renovate config, you must escape the backslashes (`\`) first.
+    For example: `\n\s` --> `\\n\\s`.
 
 ## Glob matching
 
@@ -28,7 +37,7 @@ Glob patterns are evaluated with case _insensitivity_ and this is not configurab
 
 Examples:
 
-- `abc123` matches `abc123` exactly, or `AbC123`.
+- `abc123` matches `abc123` exactly, or `AbC123`
 - `abc*` matches `abc`, `abc123`, `ABCabc`, etc.
 
 ## Negative matching
@@ -40,10 +49,10 @@ Renovate has a specific approach to negative matching strings.
 
 For an array of patterns to match, the following must be true:
 
-- If any positive matches are included, at least one must match.
-- If any negative matches are included, none must match.
+- If any positive matches are included, at least one must match
+- If any negative matches are included, none must match
 
-For example, `["/^abc/", "!/^abcd/", "!/abce/"]` would match "abc" and "abcf" but not "foo", "abcd", "abce", or "abcdef".
+For example, `["/^abc/", "!/^abcd/", "!/abce/"]` would match "abc" and "abcf" but _not_ "foo", "abcd", "abce", or "abcdef".
 
 ## Usage in Renovate configuration options
 
