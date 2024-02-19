@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { Graph } from 'graph-data-structure';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
@@ -73,9 +74,7 @@ export async function extractAllPackageFiles(
       logger.debug(`pip-compile: no content found for fileMatch ${fileMatch}`);
       continue;
     }
-    // TODO(not7cd): rename to headerArguments
     let compileArgs: PipCompileArgs;
-
     try {
       compileArgs = extractHeaderCommand(fileContent, fileMatch);
     } catch (error) {
@@ -94,8 +93,6 @@ export async function extractAllPackageFiles(
     }
     lockFileArgs.set(fileMatch, compileArgs);
     for (const constraint in compileArgs.constraintsFiles) {
-      // TODO(not7cd): handle constraints
-      /* istanbul ignore next */
       depsBetweenFiles.push({
         sourceFile: constraint,
         outputFile: fileMatch,
@@ -156,6 +153,24 @@ export async function extractAllPackageFiles(
         config,
       );
       if (packageFileContent) {
+        if (packageFileContent.managerData?.requirementsFiles) {
+          for (const file of packageFileContent.managerData.requirementsFiles) {
+            depsBetweenFiles.push({
+              sourceFile: file,
+              outputFile: packageFile,
+              type: 'requirement',
+            });
+          }
+        }
+        if (packageFileContent.managerData?.constraintsFiles) {
+          for (const file of packageFileContent.managerData.constraintsFiles) {
+            depsBetweenFiles.push({
+              sourceFile: file,
+              outputFile: packageFile,
+              type: 'requirement',
+            });
+          }
+        }
         for (const dep of packageFileContent.deps) {
           const lockedVersion = lockedDeps?.find(
             (lockedDep) =>
@@ -184,13 +199,38 @@ export async function extractAllPackageFiles(
       }
     }
   }
-  // TODO(not7cd): sort by requirement layering (-r -c within .in files)
   if (packageFiles.size === 0) {
     return null;
+  }
+  const result: PackageFile[] = [];
+  const graph: ReturnType<typeof Graph> = Graph();
+  depsBetweenFiles.forEach(({ sourceFile, outputFile }) => {
+    graph.addEdge(sourceFile, outputFile);
+  });
+  const sorted = graph.topologicalSort();
+  for (const file of sorted) {
+    if (packageFiles.has(file)) {
+      const packageFile = packageFiles.get(file)!;
+      const sortedLockFiles = [];
+      // TODO(not7cd): this needs better test case
+      for (const lockFile of packageFile.lockFiles!) {
+        if (sorted.includes(lockFile)) {
+          sortedLockFiles.push(lockFile);
+        }
+      }
+      packageFile.lockFiles = sortedLockFiles;
+      result.push(packageFile);
+    }
+  }
+  // istanbul ignore if: should never happen
+  if (result.length !== packageFiles.size) {
+    throw new Error(
+      'pip-compile: topological sort failed to include all package files',
+    );
   }
   logger.debug(
     'pip-compile: dependency graph:\n' +
       generateMermaidGraph(depsBetweenFiles, lockFileArgs),
   );
-  return Array.from(packageFiles.values());
+  return result;
 }
