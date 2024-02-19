@@ -297,7 +297,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'pip-compile --no-emit-index-url requirements.in --upgrade-package=foo==1.0.2',
+        cmd: 'pip-compile requirements.in --upgrade-package=foo==1.0.2',
       },
     ]);
   });
@@ -505,14 +505,13 @@ describe('modules/manager/pip-compile/artifacts', () => {
             'pip-compile --output-file=requirements.txt requirements.in',
           ),
           'subdir/requirements.txt',
-          false,
           [
             { depName: 'foo', newVersion: '1.0.2' },
             { depName: 'bar', newVersion: '2.0.0' },
           ] satisfies Upgrade[],
         ),
       ).toBe(
-        'pip-compile --no-emit-index-url --output-file=requirements.txt requirements.in --upgrade-package=foo==1.0.2 --upgrade-package=bar==2.0.0',
+        'pip-compile --output-file=requirements.txt requirements.in --upgrade-package=foo==1.0.2 --upgrade-package=bar==2.0.0',
       );
     });
   });
