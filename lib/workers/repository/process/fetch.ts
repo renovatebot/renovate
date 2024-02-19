@@ -176,7 +176,6 @@ export async function fetchUpdates(
 
   if (collectedErrors.length) {
     p.handleMultipleErrors(collectedErrors);
-    throw new AggregateError(collectedErrors);
   }
 
   for (const [manager, packageFiles] of Object.entries(managerPackageFiles)) {
