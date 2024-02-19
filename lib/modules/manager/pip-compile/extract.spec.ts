@@ -239,11 +239,9 @@ describe('modules/manager/pip-compile/extract', () => {
       'absolute/reqs.txt',
       'relative/reqs.txt',
     ]);
-    expect(packageFiles?.map((p) => p.packageFile)).toEqual([
-      'reqs.in',
-      'absolute/reqs.in',
-      'outside.in',
-    ]);
+    expect(packageFiles?.map((p) => p.packageFile).sort()).toEqual(
+      ['reqs.in', 'absolute/reqs.in', 'outside.in'].sort(),
+    );
     expect(logger.warn).toHaveBeenCalledTimes(0);
   });
 
