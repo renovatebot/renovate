@@ -47,7 +47,7 @@ describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
       'bar',
     );
     const isPaginationDone = await strategy.reconcile(page);
-    const res = await strategy.finalize();
+    const res = await strategy.finalizeAndReturn();
 
     expect(res).toEqual([item1, item2, item3, newItem]);
     expect(isPaginationDone).toBe(true);
