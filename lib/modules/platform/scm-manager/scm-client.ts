@@ -135,8 +135,8 @@ export default class ScmClient extends Http<ScmmHttpOptions> {
       /* istanbul ignore next: Just to please the compiler, location would never be undefined */
       createPrResponse.headers.location ?? '',
       {
-        scmmContentType: CONTENT_TYPES.PULLREQUEST
-      }
+        scmmContentType: CONTENT_TYPES.PULLREQUEST,
+      },
     );
 
     return getCreatedPrResponse.body;

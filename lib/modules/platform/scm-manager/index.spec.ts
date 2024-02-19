@@ -1,5 +1,5 @@
 import { git, mocked } from '../../../../test/util';
-import * as _hostRules from '../../../util/host-rules';
+import * as hostRules from '../../../util/host-rules';
 import type { Pr } from '../types';
 import * as _util from '../util';
 import { mapPrFromScmToRenovate } from './mapper';
@@ -41,9 +41,6 @@ import {
 } from './index';
 
 jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
-const hostRules: jest.Mocked<typeof _hostRules> = mocked(_hostRules);
-
 jest.mock('../util');
 const util: jest.Mocked<typeof _util> = mocked(_util);
 
@@ -99,6 +96,7 @@ const renovatePr: Pr = mapPrFromScmToRenovate(pullRequest);
 describe('modules/platform/scm-manager/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    hostRules.add({ token, username: user.username });
     invalidatePrCache();
   });
 
@@ -138,7 +136,6 @@ describe('modules/platform/scm-manager/index', () => {
         .spyOn(ScmClient.prototype, 'getDefaultBranch')
         .mockResolvedValueOnce(expectedDefaultBranch);
 
-      hostRules.find.mockReturnValueOnce({ username: user.username });
       util.repoFingerprint.mockReturnValueOnce(expectedFingerprint);
 
       expect(
