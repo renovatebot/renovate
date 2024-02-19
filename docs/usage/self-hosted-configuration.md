@@ -87,11 +87,8 @@ module.exports = {
 };
 ```
 
-`allowedEnv` values can be either:
-
-- An exact match string (e.g. `EXTRA_ENV_NAME`), or
-- A minimatch pattern (e.g. `SOME_ENV_*`), or
-- A regex expression (e.g. `/_ENV$/`).
+`allowedEnv` values can be exact match header names, glob patterns, or regex patterns.
+For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](https://docs.renovatebot.com/string-pattern-matching/).
 
 ## allowedHeaders
 
