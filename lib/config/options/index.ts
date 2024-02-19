@@ -2846,7 +2846,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'milestone',
-    description: `The number of a milestone. If set, the milestone will be set on the PR.`,
+    description: `The number of a milestone. If set, the milestone will be set when Renovate creates the PR.`,
     type: 'integer',
     default: null,
     supportedPlatforms: ['github'],
