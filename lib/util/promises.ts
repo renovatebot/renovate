@@ -10,7 +10,7 @@ function isExternalHostError(err: any): err is ExternalHostError {
   return err instanceof ExternalHostError;
 }
 
-export function handleMultipleErrors(errors: Error[]): void {
+export function handleMultipleErrors(errors: Error[]): never {
   const hostError = errors.find(isExternalHostError);
   if (hostError) {
     throw hostError;
@@ -23,6 +23,8 @@ export function handleMultipleErrors(errors: Error[]): void {
     const [error] = errors;
     throw error;
   }
+
+  throw new AggregateError(errors);
 }
 
 function handleError(err: any): never {
@@ -31,9 +33,7 @@ function handleError(err: any): never {
   }
 
   logger.debug({ err }, 'Aggregate error is thrown');
-  const errors = [...err];
-  handleMultipleErrors(errors);
-  throw err;
+  handleMultipleErrors([...err]);
 }
 
 export async function all<T>(
