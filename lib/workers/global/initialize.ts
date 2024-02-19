@@ -4,6 +4,7 @@ import upath from 'upath';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
+import { resetGlobalLogLevelRemaps } from '../../logger/remap';
 import { initPlatform } from '../../modules/platform';
 import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
@@ -93,4 +94,5 @@ export async function globalInitialize(
 
 export async function globalFinalize(config: RenovateConfig): Promise<void> {
   await packageCache.cleanup(config);
+  resetGlobalLogLevelRemaps();
 }

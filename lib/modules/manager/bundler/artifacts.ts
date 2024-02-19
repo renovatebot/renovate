@@ -143,7 +143,7 @@ export async function updateArtifacts(
         if (hostRule.resolvedHost?.includes('-')) {
           // TODO: fix me, hostrules can missing all auth
           const creds = getAuthenticationHeaderValue(hostRule);
-          authCommands.push(`${hostRule.resolvedHost} ${creds}`);
+          authCommands.push(`${quote(hostRule.resolvedHost)} ${quote(creds)}`);
         }
         return authCommands;
       },

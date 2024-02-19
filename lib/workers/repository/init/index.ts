@@ -2,6 +2,7 @@ import { GlobalConfig } from '../../../config/global';
 import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { setRepositoryLogLevelRemaps } from '../../../logger/remap';
 import { platform } from '../../../modules/platform';
 import { clone } from '../../../util/clone';
 import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
@@ -50,6 +51,7 @@ export async function initRepo(
   config = await initApis(config);
   await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
+  setRepositoryLogLevelRemaps(config.logLevelRemap);
   checkIfConfigured(config);
   warnOnUnsupportedOptions(config);
   config = applySecretsToConfig(config);

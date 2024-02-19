@@ -10,7 +10,7 @@ import type {
   PipCompileArgs,
   SupportedManagers,
 } from './types';
-import { generateMermaidGraph } from './utils';
+import { generateMermaidGraph, sortPackageFiles } from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
@@ -80,8 +80,6 @@ export async function extractAllPackageFiles(
     }
     lockFileArgs.set(fileMatch, compileArgs);
     for (const constraint in compileArgs.constraintsFiles) {
-      // TODO(not7cd): handle constraints
-      /* istanbul ignore next */
       depsBetweenFiles.push({
         sourceFile: constraint,
         outputFile: fileMatch,
@@ -130,6 +128,24 @@ export async function extractAllPackageFiles(
         config,
       );
       if (packageFileContent) {
+        if (packageFileContent.managerData?.requirementsFiles) {
+          for (const file of packageFileContent.managerData.requirementsFiles) {
+            depsBetweenFiles.push({
+              sourceFile: file,
+              outputFile: packageFile,
+              type: 'requirement',
+            });
+          }
+        }
+        if (packageFileContent.managerData?.constraintsFiles) {
+          for (const file of packageFileContent.managerData.constraintsFiles) {
+            depsBetweenFiles.push({
+              sourceFile: file,
+              outputFile: packageFile,
+              type: 'requirement',
+            });
+          }
+        }
         for (const dep of packageFileContent.deps) {
           const lockedVersion = lockedDeps?.find(
             (lockedDep) =>
@@ -158,13 +174,16 @@ export async function extractAllPackageFiles(
       }
     }
   }
-  // TODO(not7cd): sort by requirement layering (-r -c within .in files)
   if (packageFiles.size === 0) {
     return null;
   }
+  const result: PackageFile[] = sortPackageFiles(
+    depsBetweenFiles,
+    packageFiles,
+  );
   logger.debug(
     'pip-compile: dependency graph:\n' +
       generateMermaidGraph(depsBetweenFiles, lockFileArgs),
   );
-  return Array.from(packageFiles.values());
+  return result;
 }

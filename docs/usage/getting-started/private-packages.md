@@ -83,7 +83,7 @@ Other credential terms are not supported yet.
 }
 ```
 
-Renovate applies theses `hostRules` to every HTTP(s) request which is sent, so they are largely independent of any platform or datasource logic.
+Renovate applies these `hostRules` to every HTTP(s) request which is sent, so they are largely independent of any platform or datasource logic.
 With `hostRules` in place, private package lookups should all work.
 
 ### GitHub (and Enterprise) repo scoped credentials

@@ -9,7 +9,7 @@ import { logger } from '../../../logger';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
+import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import { constructPipCompileCmd } from './artifacts';
 import { updateArtifacts } from '.';
 
@@ -275,6 +275,33 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ]);
   });
 
+  it('uses --upgrade-package only for isLockfileUpdate', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['requirements.txt'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.in',
+        updatedDeps: [
+          { depName: 'foo', newVersion: '1.0.2', isLockfileUpdate: true },
+          { depName: 'bar', newVersion: '2.0.0' },
+        ] satisfies Upgrade[],
+        newPackageFileContent: '{}',
+        config: { ...lockMaintenanceConfig, lockFiles: ['requirements.txt'] },
+      }),
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pip-compile --no-emit-index-url requirements.in --upgrade-package=foo==1.0.2',
+      },
+    ]);
+  });
+
   it('uses pip-compile version from config', async () => {
     fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
     GlobalConfig.set(dockerAdminConfig);
@@ -469,6 +496,24 @@ describe('modules/manager/pip-compile/artifacts', () => {
           'subdir/requirements.txt',
         ),
       ).toThrow(/custom/);
+    });
+
+    it('add --upgrade-package to command if Upgrade[] passed', () => {
+      expect(
+        constructPipCompileCmd(
+          getCommandInHeader(
+            'pip-compile --output-file=requirements.txt requirements.in',
+          ),
+          'subdir/requirements.txt',
+          false,
+          [
+            { depName: 'foo', newVersion: '1.0.2' },
+            { depName: 'bar', newVersion: '2.0.0' },
+          ] satisfies Upgrade[],
+        ),
+      ).toBe(
+        'pip-compile --no-emit-index-url --output-file=requirements.txt requirements.in --upgrade-package=foo==1.0.2 --upgrade-package=bar==2.0.0',
+      );
     });
   });
 });
