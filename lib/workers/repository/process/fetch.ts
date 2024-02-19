@@ -18,7 +18,7 @@ import * as p from '../../../util/promises';
 import { Result } from '../../../util/result';
 import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
-import type { LookupUpdateConfig } from './lookup/types';
+import type { LookupUpdateConfig, UpdateResult } from './lookup/types';
 
 type LookupResult = Result<PackageDependency, Error>;
 type LookupTaskResult = {
@@ -93,7 +93,7 @@ async function lookup(
     .onError((err) => {
       logger.trace({ err, depName }, 'Dependency lookup error');
     })
-    .catch((err) => {
+    .catch((err): Result<UpdateResult, Error> => {
       if (
         packageFileConfig.repoIsOnboarded === true ||
         !(err instanceof ExternalHostError)
@@ -102,12 +102,12 @@ async function lookup(
       }
 
       const cause = err.err;
-      dep.warnings ??= [];
-      dep.warnings.push({
-        topic: 'Lookup Error',
-        message: `${depName}: ${cause.message}`,
+      return Result.ok({
+        updates: [],
+        warnings: [
+          { topic: 'Lookup Error', message: `${depName}: ${cause.message}` },
+        ],
       });
-      return Result.ok(dep);
     })
     .transform((upd): PackageDependency => Object.assign(dep, upd));
 
