@@ -2197,8 +2197,8 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 ## milestone
 
-If set to the number of an existing milestone, the milestone will be added to the PR.
-This will only be done once on PR creation.
+If set to the number of an existing milestone, Renovate will add that milestone to its PR.
+Renovate will only add a milestone when it _creates_ the PR.
 
 For example:
 
