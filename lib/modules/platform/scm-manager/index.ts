@@ -32,7 +32,7 @@ interface SCMMRepoConfig {
   defaultBranch: string;
 }
 
-export const id = 'scmm';
+export const id = 'scm-manager';
 
 let config: SCMMRepoConfig = {} as any;
 let scmmClient: ScmClient;

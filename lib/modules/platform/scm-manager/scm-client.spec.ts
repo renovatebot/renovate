@@ -8,7 +8,7 @@ import type {
   User,
 } from './types';
 
-describe('modules/platform/scmm/scm-client', () => {
+describe('modules/platform/scm-manager/scm-client', () => {
   const endpoint = 'http://localhost:8080/scm/api/v2';
   const token = 'validApiToken';
 

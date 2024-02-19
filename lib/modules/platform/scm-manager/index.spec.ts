@@ -96,7 +96,7 @@ const pullRequest: PullRequest = {
 
 const renovatePr: Pr = mapPrFromScmToRenovate(pullRequest);
 
-describe('modules/platform/scmm/index', () => {
+describe('modules/platform/scm-manager/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     invalidatePrCache();

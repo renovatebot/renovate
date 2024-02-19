@@ -42,7 +42,7 @@ export default class ScmClient extends Http<ScmmHttpOptions> {
   private readonly endpoint: string;
 
   constructor(endpoint: string, token: string) {
-    super('scmm', { throwHttpErrors: true, token });
+    super('scm-manager', { throwHttpErrors: true, token });
     this.endpoint = endpoint;
   }
 
@@ -134,6 +134,9 @@ export default class ScmClient extends Http<ScmmHttpOptions> {
     const getCreatedPrResponse = await this.getJson<PullRequest>(
       /* istanbul ignore next: Just to please the compiler, location would never be undefined */
       createPrResponse.headers.location ?? '',
+      {
+        scmmContentType: CONTENT_TYPES.PULLREQUEST
+      }
     );
 
     return getCreatedPrResponse.body;

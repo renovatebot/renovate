@@ -3,7 +3,7 @@ import type { GitUrlOption, Pr } from '../types';
 import type { PrFilterByState, Repo } from './types';
 import { getMergeMethod, getRepoUrl, matchPrState, smartLinks } from './utils';
 
-describe('modules/platform/scmm/utils', () => {
+describe('modules/platform/scm-manager/utils', () => {
   describe(getMergeMethod, () => {
     it.each([
       [undefined, null],

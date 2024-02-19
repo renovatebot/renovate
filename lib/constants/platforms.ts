@@ -8,7 +8,7 @@ export type PlatformId =
   | 'github'
   | 'gitlab'
   | 'local'
-  | 'scmm';
+  | 'scm-manager';
 
 export const GITEA_API_USING_HOST_TYPES = [
   'gitea',

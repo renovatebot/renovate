@@ -26,7 +26,7 @@ const resolvers = {
   github,
   gitlab,
   local: null,
-  scmm: null,
+  'scm-manager': null,
 } satisfies Record<PlatformId, Resolver | null>;
 
 export function getPreset({
