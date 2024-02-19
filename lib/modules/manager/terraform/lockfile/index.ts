@@ -177,6 +177,18 @@ export async function updateArtifacts({
         if (!updateLock) {
           continue;
         }
+        if (dep.isLockfileUpdate) {
+          const versioning = getVersioning(dep.versioning);
+          const satisfyingVersion = versioning.getSatisfyingVersion(
+            [dep.newVersion!],
+            updateLock.constraints,
+          );
+
+          // skip lockfile update if new version does not satisfy constraints
+          if (!satisfyingVersion) {
+            continue;
+          }
+        }
         const newConstraint = getNewConstraint(dep, updateLock.constraints);
         const update: ProviderLockUpdate = {
           // TODO #22198
