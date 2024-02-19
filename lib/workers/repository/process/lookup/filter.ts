@@ -6,7 +6,7 @@ import type { VersioningApi } from '../../../../modules/versioning';
 import * as npmVersioning from '../../../../modules/versioning/npm';
 import * as pep440 from '../../../../modules/versioning/pep440';
 import * as poetryVersioning from '../../../../modules/versioning/poetry';
-import { configRegexPredicate } from '../../../../util/string-match';
+import { getRegexPredicate } from '../../../../util/string-match';
 import type { FilterConfig } from './types';
 
 export function filterVersions(
@@ -62,7 +62,7 @@ export function filterVersions(
   }
 
   if (allowedVersions) {
-    const isAllowedPred = configRegexPredicate(allowedVersions);
+    const isAllowedPred = getRegexPredicate(allowedVersions);
     if (isAllowedPred) {
       filteredVersions = filteredVersions.filter(({ version }) =>
         isAllowedPred(version),
