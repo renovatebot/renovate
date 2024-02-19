@@ -3,7 +3,7 @@ import { Fixtures } from '../../test/fixtures';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { Json } from '../util/schema-utils';
 import { toBase64 } from '../util/string';
-import { decryptConfig, tryDecryptEc } from './decrypt';
+import { decryptConfig, tryDecryptEcdhAesGcm } from './decrypt';
 import { GlobalConfig } from './global';
 import { EcJwkPriv } from './schema';
 import type { RenovateConfig } from './types';
@@ -236,25 +236,21 @@ describe('config/decrypt', () => {
   describe('tryDecryptEc', () => {
     it('decrypts', async () => {
       // generate a new key pair in browser for each encryption
-      const browserPivKey = await crypto.subtle.importKey(
-        'jwk',
-        {
-          kty: 'EC',
-          x: 'S4LXgUBG1CeIuTSVbdH70viJ5zuLZDSrtRveHULpAbpLMp0CKryZ3ZnQ7YJB8w7c',
-          y: 'eZP4VsOXWdlQbCValRjEV4AsLPqbjJumfGW_O9YloG3gjo7yzr_Qt-myvHnKvFaz',
-          crv: 'P-384',
-          d: 'xFcT0_QhJJ_OIsjEO2jdlipRyxxydg2LbYcoGNJEdDnW7_okBMjssQ0Q3ikUq4cB',
-        },
+      // private key will be thrown away after encryption,
+      // so only renovate can decrypt with private key
+      const browserKeyPair = await crypto.subtle.generateKey(
         { name: 'ECDH', namedCurve: 'P-384' },
         false,
         ['deriveKey'],
       );
-      const { d, ...publicEc } = { ...renovatePrivKey };
+
+      // `d` is the private key, `x` and `y` are the public key
+      const { d, ...renovatrePublicKey } = { ...renovatePrivKey };
 
       // import renovate public key
       const svrPubKey = await crypto.subtle.importKey(
         'jwk',
-        publicEc,
+        renovatrePublicKey,
         { name: 'ECDH', namedCurve: 'P-384' },
         false,
         [],
@@ -263,13 +259,13 @@ describe('config/decrypt', () => {
       // derive shared secret from our private key and renovate public key
       const pw = await crypto.subtle.deriveKey(
         { name: 'ECDH', public: svrPubKey },
-        browserPivKey,
+        browserKeyPair.privateKey,
         { name: 'AES-GCM', length: 256 },
         false,
         ['encrypt'],
       );
 
-      // always use a new IV
+      // always use a new IV, should always be 12 bytes
       const iv = crypto.getRandomValues(new Uint8Array(12));
 
       // encrypt the message
@@ -281,13 +277,8 @@ describe('config/decrypt', () => {
 
       // prepare the encrypted object
       const encrypted = {
-        // send our public key to renovate
-        k: {
-          kty: 'EC',
-          x: 'S4LXgUBG1CeIuTSVbdH70viJ5zuLZDSrtRveHULpAbpLMp0CKryZ3ZnQ7YJB8w7c',
-          y: 'eZP4VsOXWdlQbCValRjEV4AsLPqbjJumfGW_O9YloG3gjo7yzr_Qt-myvHnKvFaz',
-          crv: 'P-384',
-        },
+        // send our public key
+        k: await crypto.subtle.exportKey('jwk', browserKeyPair.publicKey),
         // send the IV
         i: Buffer.from(iv).toString('base64'),
         // send the encrypted message
@@ -301,12 +292,14 @@ describe('config/decrypt', () => {
       // console.error('encCfg', encCfg);
 
       // decrypt the message with renovate private key
-      const res = await tryDecryptEc(renovatePrivKey, encCfg);
+      const res = await tryDecryptEcdhAesGcm(renovatePrivKey, encCfg);
       expect(res).toBe('{"o":"some","v":"123"}');
     });
 
     it('throws for invalid config', async () => {
-      await expect(tryDecryptEc(renovatePrivKey, '')).resolves.toBeNull();
+      await expect(
+        tryDecryptEcdhAesGcm(renovatePrivKey, ''),
+      ).resolves.toBeNull();
     });
   });
 });

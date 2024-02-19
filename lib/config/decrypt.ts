@@ -17,7 +17,7 @@ import type { RenovateConfig } from './types';
 
 const dec = new TextDecoder();
 
-export async function tryDecryptEc(
+export async function tryDecryptEcdhAesGcm(
   privateKey: EcJwkPriv,
   encryptedStr: string,
 ): Promise<string | null> {
@@ -148,7 +148,7 @@ export async function tryDecrypt(
   let decryptedStr: string | null = null;
   const pk = await EncodedEcJwkPriv.safeParseAsync(privateKey);
   if (pk.success) {
-    const decryptedObjStr = await tryDecryptEc(pk.data, encryptedStr);
+    const decryptedObjStr = await tryDecryptEcdhAesGcm(pk.data, encryptedStr);
     if (decryptedObjStr) {
       decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
     }
