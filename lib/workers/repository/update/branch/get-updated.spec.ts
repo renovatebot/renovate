@@ -209,6 +209,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       config.upgrades.push({
         manager: 'composer',
         updateType: 'lockFileMaintenance',
+        packageFile: 'composer.json',
         branchName: 'some-branch',
       } satisfies BranchUpgradeConfig);
       config.lockFiles = ['different.lock'];
@@ -231,10 +232,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         },
       ]);
       await getUpdatedPackageFiles(config);
-      expect(composer.updateArtifacts).toBeCalledWith(
+      expect(composer.updateArtifacts).toHaveBeenCalledWith(
         expect.objectContaining({
           config: expect.objectContaining({
-            lockFiles: ['different.lock'],
+            lockFiles: ['composer.lock'],
           }),
         }),
       );
