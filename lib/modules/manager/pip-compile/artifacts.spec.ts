@@ -440,10 +440,12 @@ describe('modules/manager/pip-compile/artifacts', () => {
     it('add --upgrade-package to command if Upgrade[] passed', () => {
       expect(
         constructPipCompileCmd(
-          getCommandInHeader(
-            'pip-compile --output-file=requirements.txt requirements.in',
+          extractHeaderCommand(
+            getCommandInHeader(
+              'pip-compile --output-file=requirements.txt requirements.in',
+            ),
+            'subdir/requirements.txt',
           ),
-          'subdir/requirements.txt',
           false,
           [
             { depName: 'foo', newVersion: '1.0.2' },
