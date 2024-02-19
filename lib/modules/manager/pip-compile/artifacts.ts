@@ -27,9 +27,6 @@ export function constructPipCompileCmd(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
   }
-  // const compileDir: string = headerArguments.commandExecDir;
-  // should never happen as we already checked for this in extractAllPackageFiles
-  // ensureLocalPath(compileDir);
 
   if (!compileArgs.outputFile) {
     logger.debug(`pip-compile: implicit output file`);
@@ -74,18 +71,18 @@ export async function updateArtifacts({
       if (config.isLockFileMaintenance) {
         await deleteLocalFile(outputFileName);
       }
-      const headerArguments = extractHeaderCommand(
+      const compileArgs = extractHeaderCommand(
         existingOutput,
         outputFileName,
       );
       const cwd = inferCommandExecDir(
         outputFileName,
-        headerArguments.outputFile,
+        compileArgs.outputFile,
       );
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
       const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
       const cmd = constructPipCompileCmd(
-        headerArguments,
+        compileArgs,
         registryUrlVars.haveCredentials,
       );
       const execOptions = await getExecOptions(
