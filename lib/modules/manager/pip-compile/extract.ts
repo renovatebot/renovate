@@ -66,7 +66,6 @@ export async function extractAllPackageFiles(
   logger.trace('pip-compile.extractAllPackageFiles()');
   const lockFileArgs = new Map<string, PipCompileArgs>();
   const depsBetweenFiles: DependencyBetweenFiles[] = [];
-  // for debugging only ^^^ (for now)
   const packageFiles = new Map<string, PackageFile>();
   for (const fileMatch of fileMatches) {
     const fileContent = await readLocalFile(fileMatch, 'utf8');
