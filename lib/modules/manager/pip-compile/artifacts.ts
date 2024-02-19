@@ -9,7 +9,7 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import * as pipRequirements from '../pip_requirements';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 import {
   extractHeaderCommand,
   getExecOptions,
@@ -21,6 +21,7 @@ import { inferCommandExecDir } from './utils';
 export function constructPipCompileCmd(
   compileArgs: PipCompileArgs,
   haveCredentials: boolean,
+  upgradePackages: Upgrade[] = [],
 ): string {
   if (compileArgs.isCustomCommand) {
     throw new Error(
@@ -38,12 +39,18 @@ export function constructPipCompileCmd(
   ) {
     compileArgs.argv.splice(1, 0, '--no-emit-index-url');
   }
+  for (const dep of upgradePackages) {
+    compileArgs.argv.push(
+      `--upgrade-package=${quote(dep.depName + '==' + dep.newVersion)}`,
+    );
+  }
   return compileArgs.argv.map(quote).join(' ');
 }
 
 export async function updateArtifacts({
   packageFileName: inputFileName,
   newPackageFileContent: newInputContent,
+  updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   if (!config.lockFiles) {
@@ -73,11 +80,13 @@ export async function updateArtifacts({
       }
       const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
       const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
+      const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
       const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
       const cmd = constructPipCompileCmd(
         compileArgs,
         registryUrlVars.haveCredentials,
+        upgradePackages,
       );
       const execOptions = await getExecOptions(
         config,
