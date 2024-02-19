@@ -35,6 +35,10 @@ async function lookup(
   const dep = clone(indep);
   dep.updates = [];
 
+  if (dep.skipReason) {
+    return Result.ok(dep);
+  }
+
   if (is.string(dep.depName)) {
     dep.depName = dep.depName.trim();
   }
@@ -42,13 +46,11 @@ async function lookup(
   dep.packageName ??= dep.depName;
   if (!is.nonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
+    return Result.ok(dep);
   }
 
   if (dep.isInternal && !packageFileConfig.updateInternalDeps) {
     dep.skipReason = 'internal-package';
-  }
-
-  if (dep.skipReason) {
     return Result.ok(dep);
   }
 
@@ -85,13 +87,13 @@ async function lookup(
   const result = await Result.wrap(
     lookupUpdates(depConfig as LookupUpdateConfig),
   )
-    .transform((updateResult): PackageDependency => {
-      logger.trace({ depName, updateResult }, 'Dependency lookup success');
-      return Object.assign(dep, updateResult);
+    .onValue((dep) => {
+      logger.trace({ dep }, 'Dependency lookup success');
+    })
+    .onError((err) => {
+      logger.trace({ err, depName }, 'Dependency lookup error');
     })
     .catch((err) => {
-      logger.trace({ err, depName }, 'Dependency lookup error');
-
       if (
         packageFileConfig.repoIsOnboarded === true ||
         !(err instanceof ExternalHostError)
@@ -103,11 +105,11 @@ async function lookup(
       dep.warnings ??= [];
       dep.warnings.push({
         topic: 'Lookup Error',
-        // TODO: types (#22198)
-        message: `${depName!}: ${cause.message}`,
+        message: `${depName}: ${cause.message}`,
       });
       return Result.ok(dep);
-    });
+    })
+    .transform((upd): PackageDependency => Object.assign(dep, upd));
 
   const duration = Date.now() - start;
   const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
