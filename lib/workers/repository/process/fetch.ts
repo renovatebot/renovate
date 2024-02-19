@@ -1,6 +1,5 @@
 // TODO #22198
 import is from '@sindresorhus/is';
-import AggregateError from 'aggregate-error';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
