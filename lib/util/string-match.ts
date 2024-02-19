@@ -8,24 +8,22 @@ export function isDockerDigest(input: string): boolean {
   return /^sha256:[a-f0-9]{64}$/i.test(input);
 }
 
-export function makeRegexOrMinimatchPredicate(
-  pattern: string,
-): StringMatchPredicate {
-  const regExPredicate = configRegexPredicate(pattern);
+export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {
+  const regExPredicate = getRegexPredicate(pattern);
   if (regExPredicate) {
     return regExPredicate;
   }
 
-  const mm = minimatch(pattern, { dot: true });
+  const mm = minimatch(pattern, { dot: true, nocase: true });
   return (x: string): boolean => mm.match(x);
 }
 
-export function matchRegexOrMinimatch(input: string, pattern: string): boolean {
-  const predicate = makeRegexOrMinimatchPredicate(pattern);
+export function matchRegexOrGlob(input: string, pattern: string): boolean {
+  const predicate = getRegexOrGlobPredicate(pattern);
   return predicate(input);
 }
 
-export function anyMatchRegexOrMinimatch(
+export function matchRegexOrGlobList(
   input: string,
   patterns: string[],
 ): boolean {
@@ -39,7 +37,7 @@ export function anyMatchRegexOrMinimatch(
   );
   if (
     positivePatterns.length &&
-    !positivePatterns.some((pattern) => matchRegexOrMinimatch(input, pattern))
+    !positivePatterns.some((pattern) => matchRegexOrGlob(input, pattern))
   ) {
     return false;
   }
@@ -50,7 +48,7 @@ export function anyMatchRegexOrMinimatch(
   );
   if (
     negativePatterns.length &&
-    !negativePatterns.every((pattern) => matchRegexOrMinimatch(input, pattern))
+    !negativePatterns.every((pattern) => matchRegexOrGlob(input, pattern))
   ) {
     return false;
   }
@@ -65,13 +63,13 @@ export const UUIDRegex = regEx(
 const configValStart = regEx(/^!?\//);
 const configValEnd = regEx(/\/i?$/);
 
-export function isConfigRegex(input: unknown): input is string {
+export function isRegexMatch(input: unknown): input is string {
   return (
     is.string(input) && configValStart.test(input) && configValEnd.test(input)
   );
 }
 
-function parseConfigRegex(input: string): RegExp | null {
+function parseRegexMatch(input: string): RegExp | null {
   try {
     const regexString = input
       .replace(configValStart, '')
@@ -83,11 +81,9 @@ function parseConfigRegex(input: string): RegExp | null {
   return null;
 }
 
-export function configRegexPredicate(
-  input: string,
-): StringMatchPredicate | null {
-  if (isConfigRegex(input)) {
-    const configRegex = parseConfigRegex(input);
+export function getRegexPredicate(input: string): StringMatchPredicate | null {
+  if (isRegexMatch(input)) {
+    const configRegex = parseRegexMatch(input);
     if (configRegex) {
       const isPositive = !input.startsWith('!');
       return (x: string): boolean => {
