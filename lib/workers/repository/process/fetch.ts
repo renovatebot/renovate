@@ -20,19 +20,6 @@ import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
-async function withLookupStats<T>(
-  datasource: string,
-  callback: () => Promise<T>,
-): Promise<T> {
-  const start = Date.now();
-  const result = await callback();
-  const duration = Date.now() - start;
-  const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
-  lookups.push({ datasource, duration });
-  memCache.set('lookup-stats', lookups);
-  return result;
-}
-
 type LookupResult = Result<PackageDependency, Error>;
 type LookupTaskResult = {
   packageFileName: string;
@@ -73,44 +60,55 @@ async function lookup(
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = applyPackageRules(depConfig);
   depConfig.packageName ??= depConfig.depName;
+
   if (depConfig.ignoreDeps!.includes(depName!)) {
     // TODO: fix types (#22198)
     logger.debug(`Dependency: ${depName!}, is ignored`);
     dep.skipReason = 'ignored';
-  } else if (depConfig.enabled === false) {
-    logger.debug(`Dependency: ${depName!}, is disabled`);
-    dep.skipReason = 'disabled';
-  } else {
-    if (depConfig.datasource) {
-      const { val: updateResult, err } = await withLookupStats(
-        depConfig.datasource,
-        () =>
-          Result.wrap(lookupUpdates(depConfig as LookupUpdateConfig)).unwrap(),
-      );
-
-      if (updateResult) {
-        Object.assign(dep, updateResult);
-      } else {
-        if (
-          packageFileConfig.repoIsOnboarded === true ||
-          !(err instanceof ExternalHostError)
-        ) {
-          return Result.err(err);
-        }
-
-        const cause = err.err;
-        dep.warnings ??= [];
-        dep.warnings.push({
-          topic: 'Lookup Error',
-          // TODO: types (#22198)
-          message: `${depName!}: ${cause.message}`,
-        });
-      }
-    }
-    dep.updates ??= [];
+    return Result.ok(dep);
   }
 
-  return Result.ok(dep);
+  if (depConfig.enabled === false) {
+    logger.debug(`Dependency: ${depName!}, is disabled`);
+    dep.skipReason = 'disabled';
+    return Result.ok(dep);
+  }
+
+  if (!depConfig.datasource) {
+    dep.updates ??= [];
+    return Result.ok(dep);
+  }
+
+  const start = Date.now();
+
+  const result = await Result.wrap(
+    lookupUpdates(depConfig as LookupUpdateConfig),
+  )
+    .transform((upd): PackageDependency => Object.assign(dep, upd))
+    .catch((err) => {
+      if (
+        packageFileConfig.repoIsOnboarded === true ||
+        !(err instanceof ExternalHostError)
+      ) {
+        return Result.err(err);
+      }
+
+      const cause = err.err;
+      dep.warnings ??= [];
+      dep.warnings.push({
+        topic: 'Lookup Error',
+        // TODO: types (#22198)
+        message: `${depName!}: ${cause.message}`,
+      });
+      return Result.ok(dep);
+    });
+
+  const duration = Date.now() - start;
+  const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
+  lookups.push({ datasource: depConfig.datasource, duration });
+  memCache.set('lookup-stats', lookups);
+
+  return result;
 }
 
 function createLookupTasks(
