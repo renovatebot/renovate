@@ -1,4 +1,4 @@
-import Graph from 'graph-data-structure';
+import { Graph } from 'graph-data-structure';
 import type { PackageFile } from '../types';
 import type { DependencyBetweenFiles, PipCompileArgs } from './types';
 
