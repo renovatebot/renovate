@@ -2247,8 +2247,10 @@ describe('workers/repository/process/lookup/index', () => {
         .scope('https://registry.npmjs.org')
         .get('/webpack')
         .reply(200, webpackJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toHaveLength(16);
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+      expect(updates).toHaveLength(16);
     });
 
     it('does not jump  major unstable', async () => {
