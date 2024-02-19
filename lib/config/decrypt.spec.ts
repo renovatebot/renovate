@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { Fixtures } from '../../test/fixtures';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
 import { Json } from '../util/schema-utils';
