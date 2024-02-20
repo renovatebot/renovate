@@ -742,6 +742,17 @@ const staticGroups = {
       },
     ],
   },
+  storybook: {
+    description: 'Group Storybook packages together.',
+    packageRules: [
+      {
+        groupName: 'storybook packages',
+        groupSlug: 'storybook',
+        matchDatasources: ['npm'],
+        matchPackagePatterns: ['^storybook$', '^@storybook/'],
+      }
+    ],
+  },
   symfony: {
     description: 'Group PHP Symfony packages together.',
     packageRules: [
