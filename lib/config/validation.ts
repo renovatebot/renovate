@@ -614,7 +614,7 @@ export async function validateConfig(
                     message: `Invalid env variable value: \`${currentPath}.${envVarName}\` must be a string.`,
                   });
                 }
-                if (!anyMatchRegexOrMinimatch(envVarName, allowedEnvVars)) {
+                if (!matchRegexOrGlobList(envVarName, allowedEnvVars)) {
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Env variable name \`${envVarName}\` is not allowed by this bot's \`allowedEnv\`.`,
