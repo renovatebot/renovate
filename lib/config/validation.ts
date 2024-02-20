@@ -382,6 +382,7 @@ export async function validateConfig(
               'matchConfidence',
               'matchCurrentAge',
               'matchRepositories',
+              'matchNewValue',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
