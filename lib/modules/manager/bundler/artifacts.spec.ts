@@ -967,6 +967,28 @@ describe('modules/manager/bundler/artifacts', () => {
         expect(res).toMatchObject([{ file: { path: 'Gemfile.lock' } }]);
         expect(execSnapshots).toMatchObject([{ cmd: 'bundler lock' }]);
       });
+
+      it('updates the Gemfile.lock when bundler upgraded', async () => {
+        fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
+        const execSnapshots = mockExecSequence([{ stdout: '', stderr: '' }]);
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: ['Gemfile.lock'],
+          }),
+        );
+
+        const res = await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [{ depName: 'bundler', updateType: 'patch' }],
+          newPackageFileContent: '{}',
+          config,
+        });
+
+        expect(res).toMatchObject([{ file: { path: 'Gemfile.lock' } }]);
+        expect(execSnapshots).toMatchObject([
+          { cmd: 'bundler lock --update --bundler' },
+        ]);
+      });
     });
   });
 });
