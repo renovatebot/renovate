@@ -132,7 +132,7 @@ Simplified code:
 
 ```ts
 function foo(str: string): boolean {
-  if (!condetion(str)) {
+  if (!condition(str)) {
     return false;
   }
 

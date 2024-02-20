@@ -633,7 +633,7 @@ Renovate supports two options:
 More advanced filtering options may come in future.
 
 There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
-This feature is limited to the folllowing datasources:
+This feature is limited to the following datasources:
 
 - `jenkins-plugins`
 - `npm`
@@ -979,7 +979,7 @@ It is not needed if either:
 {
   customDatasources: {
     foo: {
-      defaultRegistryUrlTemplate: 'https://exmaple.foo.bar/v1/{{ packageName }}',
+      defaultRegistryUrlTemplate: 'https://example.foo.bar/v1/{{ packageName }}',
     },
   },
 }
@@ -2574,7 +2574,7 @@ Use this field to restrict rules to a particular repository. e.g.
 }
 ```
 
-This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchBaseBranches
 
@@ -2627,22 +2627,8 @@ For the full list of available managers, see the [Supported Managers](modules/ma
 ### matchMessage
 
 For log level remapping, use this field to match against the particular log messages.
-You can match based on any of the following:
 
-- an exact match string (e.g. `This is the string`)
-- a minimatch pattern (e.g. `This*`)
-- a regex pattern (e.g. `/^This/`)
-
-```json
-{
-  "logLevelRemap": [
-    {
-      "matchMessage": "Manager explicitly enabled*",
-      "newLogLevel": "warn"
-    }
-  ]
-}
-```
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchDatasources
 

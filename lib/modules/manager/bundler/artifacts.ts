@@ -121,6 +121,13 @@ export async function updateArtifacts(
           commands.push(cmd);
         }
       }
+
+      const rubyUpgraded = updatedDeps
+        .map((dep) => dep.depName)
+        .includes('ruby');
+      if (rubyUpgraded) {
+        commands.push('bundler lock');
+      }
     }
 
     const bundlerHostRules = findAllAuthenticatable({
@@ -143,7 +150,7 @@ export async function updateArtifacts(
         if (hostRule.resolvedHost?.includes('-')) {
           // TODO: fix me, hostrules can missing all auth
           const creds = getAuthenticationHeaderValue(hostRule);
-          authCommands.push(`${hostRule.resolvedHost} ${creds}`);
+          authCommands.push(`${quote(hostRule.resolvedHost)} ${quote(creds)}`);
         }
         return authCommands;
       },

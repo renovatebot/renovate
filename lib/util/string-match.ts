@@ -8,32 +8,52 @@ export function isDockerDigest(input: string): boolean {
   return /^sha256:[a-f0-9]{64}$/i.test(input);
 }
 
-export function makeRegexOrMinimatchPredicate(
-  pattern: string,
-): StringMatchPredicate | null {
-  if (pattern.length > 2 && pattern.startsWith('/') && pattern.endsWith('/')) {
-    try {
-      const regex = regEx(pattern.slice(1, -1));
-      return (x: string): boolean => regex.test(x);
-    } catch (err) {
-      return null;
-    }
+export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {
+  const regExPredicate = getRegexPredicate(pattern);
+  if (regExPredicate) {
+    return regExPredicate;
   }
 
-  const mm = minimatch(pattern, { dot: true });
+  const mm = minimatch(pattern, { dot: true, nocase: true });
   return (x: string): boolean => mm.match(x);
 }
 
-export function matchRegexOrMinimatch(input: string, pattern: string): boolean {
-  const predicate = makeRegexOrMinimatchPredicate(pattern);
-  return predicate ? predicate(input) : false;
+export function matchRegexOrGlob(input: string, pattern: string): boolean {
+  const predicate = getRegexOrGlobPredicate(pattern);
+  return predicate(input);
 }
 
-export function anyMatchRegexOrMinimatch(
+export function matchRegexOrGlobList(
   input: string,
   patterns: string[],
-): boolean | null {
-  return patterns.some((pattern) => matchRegexOrMinimatch(input, pattern));
+): boolean {
+  if (!patterns.length) {
+    return false;
+  }
+
+  // Return false if there are positive patterns and none match
+  const positivePatterns = patterns.filter(
+    (pattern) => !pattern.startsWith('!'),
+  );
+  if (
+    positivePatterns.length &&
+    !positivePatterns.some((pattern) => matchRegexOrGlob(input, pattern))
+  ) {
+    return false;
+  }
+
+  // Every negative pattern must be true to return true
+  const negativePatterns = patterns.filter((pattern) =>
+    pattern.startsWith('!'),
+  );
+  if (
+    negativePatterns.length &&
+    !negativePatterns.every((pattern) => matchRegexOrGlob(input, pattern))
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export const UUIDRegex = regEx(
@@ -43,13 +63,13 @@ export const UUIDRegex = regEx(
 const configValStart = regEx(/^!?\//);
 const configValEnd = regEx(/\/i?$/);
 
-export function isConfigRegex(input: unknown): input is string {
+export function isRegexMatch(input: unknown): input is string {
   return (
     is.string(input) && configValStart.test(input) && configValEnd.test(input)
   );
 }
 
-function parseConfigRegex(input: string): RegExp | null {
+function parseRegexMatch(input: string): RegExp | null {
   try {
     const regexString = input
       .replace(configValStart, '')
@@ -61,11 +81,9 @@ function parseConfigRegex(input: string): RegExp | null {
   return null;
 }
 
-export function configRegexPredicate(
-  input: string,
-): StringMatchPredicate | null {
-  if (isConfigRegex(input)) {
-    const configRegex = parseConfigRegex(input);
+export function getRegexPredicate(input: string): StringMatchPredicate | null {
+  if (isRegexMatch(input)) {
+    const configRegex = parseRegexMatch(input);
     if (configRegex) {
       const isPositive = !input.startsWith('!');
       return (x: string): boolean => {
