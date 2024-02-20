@@ -633,7 +633,7 @@ Renovate supports two options:
 More advanced filtering options may come in future.
 
 There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
-This feature is limited to the folllowing datasources:
+This feature is limited to the following datasources:
 
 - `jenkins-plugins`
 - `npm`
@@ -979,7 +979,7 @@ It is not needed if either:
 {
   customDatasources: {
     foo: {
-      defaultRegistryUrlTemplate: 'https://exmaple.foo.bar/v1/{{ packageName }}',
+      defaultRegistryUrlTemplate: 'https://example.foo.bar/v1/{{ packageName }}',
     },
   },
 }
