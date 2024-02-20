@@ -177,7 +177,6 @@ export async function flattenUpdates(
                 config.vulnerabilityAlerts,
               );
               delete updateConfig.vulnerabilityAlerts;
-
               updateConfig.isVulnerabilityAlert = true;
               updateConfig.isRemediation = true;
               updateConfig.lockFile = lockFile;
