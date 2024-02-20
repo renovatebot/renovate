@@ -275,7 +275,7 @@ export async function validateConfig(
       } else if (
         key === 'matchNewValue' &&
         is.string(val) &&
-        !configRegexPredicate(val)
+        !getRegexPredicate(val)
       ) {
         errors.push({
           topic: 'Configuration Error',
