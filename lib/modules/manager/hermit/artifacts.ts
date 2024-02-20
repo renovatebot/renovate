@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -210,7 +211,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
   };
 
   const packagesToInstall = toInstall.join(' ');
-  const fromPackages = from.join(' ');
+  const fromPackages = from.map(quote).join(' ');
 
   const execCommands = `./hermit install ${packagesToInstall}`;
   logger.debug(

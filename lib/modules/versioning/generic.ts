@@ -129,7 +129,14 @@ export abstract class GenericVersioningApi<
     return result ?? null;
   }
 
-  getNewValue({ newVersion }: NewValueConfig): string | null {
+  getNewValue({
+    currentValue,
+    currentVersion,
+    newVersion,
+  }: NewValueConfig): string | null {
+    if (currentVersion === `v${currentValue}`) {
+      return newVersion.replace(/^v/, '');
+    }
     return newVersion ?? null;
   }
 
