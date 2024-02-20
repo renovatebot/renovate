@@ -28,18 +28,17 @@ import { Result } from '../../../../util/result';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
-const fixtureRoot = '../../../../config/npm';
 const qJson = {
-  ...Fixtures.getJson('01.json', fixtureRoot),
+  ...Fixtures.getJson('01.json'),
   latestVersion: '1.4.1',
 };
 
-const helmetJson = Fixtures.get('02.json', fixtureRoot);
-const coffeelintJson = Fixtures.get('coffeelint.json', fixtureRoot);
-const nextJson = Fixtures.get('next.json', fixtureRoot);
-const typescriptJson = Fixtures.get('typescript.json', fixtureRoot);
-const vueJson = Fixtures.get('vue.json', fixtureRoot);
-const webpackJson = Fixtures.get('webpack.json', fixtureRoot);
+const helmetJson = Fixtures.get('02.json');
+const coffeelintJson = Fixtures.get('coffeelint.json');
+const nextJson = Fixtures.get('next.json');
+const typescriptJson = Fixtures.get('typescript.json');
+const vueJson = Fixtures.get('vue.json');
+const webpackJson = Fixtures.get('webpack.json');
 
 let config: LookupUpdateConfig;
 
