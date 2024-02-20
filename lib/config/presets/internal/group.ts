@@ -468,6 +468,7 @@ const staticGroups = {
       'group:springStatemachine',
       'group:springWebflow',
       'group:springWs',
+      'group:storybook',
       'group:symfony',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
