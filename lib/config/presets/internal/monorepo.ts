@@ -473,6 +473,7 @@ const repoGroups = {
     'https://github.com/System-IO-Abstractions/System.IO.Abstractions/',
   tamagui: 'https://github.com/tamagui/tamagui',
   'tanstack-query': 'https://github.com/TanStack/query',
+  'tanstack-router': 'https://github.com/TanStack/router',
   tauri: 'https://github.com/tauri-apps/tauri',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
