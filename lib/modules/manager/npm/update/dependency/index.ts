@@ -275,7 +275,7 @@ function overrideDepPosition(
   let overrideDep: OverrideDependency = overrideBlock;
   for (const parent of parents) {
     if (overrideDep) {
-      overrideDep = overrideDep[parent]! as Record<string, RecursiveOverride>;
+      overrideDep = overrideDep[parent] as Record<string, RecursiveOverride>;
     }
   }
   const overrideDepName = depName === lastParent ? '.' : depName;

@@ -11,7 +11,7 @@ jobs:
     runs-on:
       ubuntu-22.04
   test3:
-    runs-on: "macos-12-xl"
+    runs-on: "macos-12-large"
   test4:
     runs-on: 'macos-latest'
   test5:
@@ -454,8 +454,8 @@ describe('modules/manager/github-actions/extract', () => {
         },
         {
           depName: 'macos',
-          currentValue: '12-xl',
-          replaceString: 'macos-12-xl',
+          currentValue: '12-large',
+          replaceString: 'macos-12-large',
           depType: 'github-runner',
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',

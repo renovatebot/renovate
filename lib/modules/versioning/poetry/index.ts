@@ -64,7 +64,19 @@ function isLessThanRange(version: string, range: string): boolean {
 }
 
 export function isValid(input: string): boolean {
-  return npm.isValid(poetry2npm(input));
+  if (!input) {
+    return false;
+  }
+
+  try {
+    return npm.isValid(poetry2npm(input, true));
+  } catch (err) {
+    logger.once.debug(
+      { version: input },
+      'Poetry version or range is not supported by current implementation',
+    );
+    return false;
+  }
 }
 
 function isStable(version: string): boolean {

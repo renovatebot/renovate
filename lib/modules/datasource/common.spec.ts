@@ -218,8 +218,8 @@ describe('modules/datasource/common', () => {
       const releaseResult = {
         releases: [
           { version: '1.0.0' },
-          { version: '2.0.0', constraints: {} as never },
-          { version: '3.0.0', constraints: { baz: ['^0.9.0'] } },
+          { version: '2.0.0', constraints: { baz: [undefined] } as never },
+          { version: '3.0.0', constraints: { baz: ['^0.9.0', 'invalid'] } },
         ],
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
