@@ -921,9 +921,11 @@ async function getUserIds(users: string[]): Promise<User[]> {
   for (const u of users) {
     const reviewer = u.replace(requiredReviewerPrefix, '');
     if (!validReviewers.has(reviewer)) {
-      logger.once.info(`${reviewer} is neither an Azure DevOps Team nor a user associated with a Team`);
+      logger.once.info(
+        `${reviewer} is neither an Azure DevOps Team nor a user associated with a Team`,
+      );
     }
-  };
+  }
 
   return ids;
 }
