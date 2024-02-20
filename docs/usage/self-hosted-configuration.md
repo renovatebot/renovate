@@ -88,7 +88,7 @@ module.exports = {
 ```
 
 `allowedEnv` values can be exact match header names, glob patterns, or regex patterns.
-For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](https://docs.renovatebot.com/string-pattern-matching/).
+For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](./string-pattern-matching.md).
 
 ## allowedHeaders
 
