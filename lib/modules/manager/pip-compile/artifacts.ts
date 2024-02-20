@@ -109,10 +109,7 @@ export async function updateArtifacts({
       const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
       const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
-      const cmd = constructPipCompileCmd(
-        compileArgs,
-        upgradePackages,
-      );
+      const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
       const execOptions = await getExecOptions(
         config,
         cwd,

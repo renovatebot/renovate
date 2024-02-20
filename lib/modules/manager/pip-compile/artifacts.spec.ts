@@ -396,7 +396,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
     it('returns --no-emit-index-url when credentials are found in PIP_INDEX_URL', () => {
       process.env.PIP_INDEX_URL = 'https://user:pass@example.com/pypi/simple';
       expect(
-        constructPipCompileCmd(extractHeaderCommand(simpleHeader, 'subdir/requirements.txt')),
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
       ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
@@ -404,49 +406,63 @@ describe('modules/manager/pip-compile/artifacts', () => {
       process.env.PIP_EXTRA_INDEX_URL =
         'https://user:pass@example.com/pypi/simple';
       expect(
-        constructPipCompileCmd(extractHeaderCommand(simpleHeader, 'subdir/requirements.txt')),
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
       ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
     it('returns --no-emit-index-url when only a username is found in PIP_INDEX_URL', () => {
       process.env.PIP_INDEX_URL = 'https://user@example.com/pypi/simple';
       expect(
-        constructPipCompileCmd(extractHeaderCommand(simpleHeader, 'subdir/requirements.txt')),
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
       ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
     it('returns --no-emit-index-url when only a username is found in PIP_EXTRA_INDEX_URL', () => {
       process.env.PIP_EXTRA_INDEX_URL = 'https://user@example.com/pypi/simple';
       expect(
-        constructPipCompileCmd(extractHeaderCommand(simpleHeader, 'subdir/requirements.txt')),
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
       ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
     it('returns --no-emit-index-url when only a password is found in PIP_INDEX_URL', () => {
       process.env.PIP_INDEX_URL = 'https://:pass@example.com/pypi/simple';
       expect(
-        constructPipCompileCmd(extractHeaderCommand(simpleHeader, 'subdir/requirements.txt')),
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
       ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
     it('returns --no-emit-index-url when only a password is found in PIP_EXTRA_INDEX_URL', () => {
       process.env.PIP_EXTRA_INDEX_URL = 'https://:pass@example.com/pypi/simple';
       expect(
-        constructPipCompileCmd(extractHeaderCommand(simpleHeader, 'subdir/requirements.txt')),
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
       ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
     it('returns --no-emit-index-url when PIP_INDEX_URL is invalid', () => {
       process.env.PIP_INDEX_URL = 'invalid-url';
       expect(
-        constructPipCompileCmd(extractHeaderCommand(simpleHeader, 'subdir/requirements.txt')),
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
       ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
     it('returns --no-emit-index-url PIP_EXTRA_INDEX_URL is invalid', () => {
       process.env.PIP_EXTRA_INDEX_URL = 'invalid-url';
       expect(
-        constructPipCompileCmd(extractHeaderCommand(simpleHeader, 'subdir/requirements.txt')),
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
       ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
