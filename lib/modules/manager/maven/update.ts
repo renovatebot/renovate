@@ -81,16 +81,17 @@ export function bumpPackageVersion(
 
     let newPomVersion: string | null = null;
     const prerelease = semver.prerelease(currentValue);
-    const snapshot = prerelease ? isSnapshot(prerelease) : false;
-    if (!prerelease || snapshot) {
+    if (!prerelease) {
+      newPomVersion = semver.inc(currentValue, bumpVersion, 'SNAPSHOT', false);
+    } else if (isSnapshot(prerelease)) {
       let releaseType = bumpVersion;
-      if (snapshot && !bumpVersion.startsWith('pre')) {
+      if (!bumpVersion.startsWith('pre')) {
         releaseType = ('pre' + bumpVersion) as ReleaseType;
       }
       newPomVersion = semver.inc(
         currentValue,
         releaseType,
-        prerelease?.join('.') ?? 'SNAPSHOT',
+        prerelease.join('.'),
         false,
       );
     } else {
