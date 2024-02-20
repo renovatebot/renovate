@@ -1530,7 +1530,7 @@ describe('modules/platform/azure/index', () => {
       );
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'required:def']);
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
-      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.once.info).toHaveBeenCalledTimes(1);
     });
 
     it('addReviewers all valid', async () => {
@@ -1556,7 +1556,7 @@ describe('modules/platform/azure/index', () => {
       );
       await azure.addReviewers(123, ['required:jyc']);
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
-      expect(logger.warn).toHaveBeenCalledTimes(0);
+      expect(logger.once.info).toHaveBeenCalledTimes(0);
     });
   });
 
