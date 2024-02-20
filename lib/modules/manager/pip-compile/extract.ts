@@ -1,5 +1,7 @@
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
 import { normalizeDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
@@ -10,7 +12,11 @@ import type {
   PipCompileArgs,
   SupportedManagers,
 } from './types';
-import { generateMermaidGraph, sortPackageFiles } from './utils';
+import {
+  generateMermaidGraph,
+  inferCommandExecDir,
+  sortPackageFiles,
+} from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
@@ -63,7 +69,6 @@ export async function extractAllPackageFiles(
   logger.trace('pip-compile.extractAllPackageFiles()');
   const lockFileArgs = new Map<string, PipCompileArgs>();
   const depsBetweenFiles: DependencyBetweenFiles[] = [];
-  // for debugging only ^^^ (for now)
   const packageFiles = new Map<string, PackageFile>();
   for (const fileMatch of fileMatches) {
     const fileContent = await readLocalFile(fileMatch, 'utf8');
@@ -72,8 +77,10 @@ export async function extractAllPackageFiles(
       continue;
     }
     let compileArgs: PipCompileArgs;
+    let compileDir: string;
     try {
       compileArgs = extractHeaderCommand(fileContent, fileMatch);
+      compileDir = inferCommandExecDir(fileMatch, compileArgs.outputFile);
     } catch (error) {
       logger.warn({ fileMatch }, `pip-compile: ${error.message}`);
       continue;
@@ -95,7 +102,19 @@ export async function extractAllPackageFiles(
       continue;
     }
 
-    for (const packageFile of compileArgs.sourceFiles) {
+    for (const relativeSourceFile of compileArgs.sourceFiles) {
+      const packageFile = upath.normalizeTrim(
+        upath.join(compileDir, relativeSourceFile),
+      );
+      try {
+        ensureLocalPath(packageFile);
+      } catch (error) {
+        logger.warn(
+          { fileMatch, packageFile },
+          'pip-compile: Source file path outside of repository',
+        );
+        continue;
+      }
       depsBetweenFiles.push({
         sourceFile: packageFile,
         outputFile: fileMatch,
