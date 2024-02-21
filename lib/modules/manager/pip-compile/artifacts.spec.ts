@@ -358,15 +358,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
   });
 
   describe('constructPipCompileCmd()', () => {
-    const ORIGINAL_ENV = process.env;
-
-    beforeEach(() => {
-      jest.resetModules();
-      process.env = { ...ORIGINAL_ENV };
-    });
-
-    afterAll(() => {
-      process.env = ORIGINAL_ENV;
+    afterEach(() => {
+      delete process.env.PIP_INDEX_URL;
+      delete process.env.PIP_EXTRA_INDEX_URL;
     });
 
     it('throws for garbage', () => {

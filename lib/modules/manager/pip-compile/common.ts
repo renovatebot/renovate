@@ -252,9 +252,14 @@ export function getRegistryCredVarsFromPackageFile(
     urls.map(cleanUrl).filter(isNotNullOrUndefined),
   );
 
-  const ret = [...uniqueHosts]
-    .map(getRegistryCredEnvVars)
-    .reduce((allCreds, current) => Object.assign(allCreds, current), {});
+  let allCreds: ExtraEnv<string> = {};
+  for (const [index, host] of [...uniqueHosts].entries()) {
+    const hostCreds = getRegistryCredEnvVars(host, index);
+    allCreds = {
+      ...allCreds,
+      ...hostCreds,
+    };
+  }
 
-  return ret;
+  return allCreds;
 }
