@@ -248,7 +248,7 @@ describe('config/decrypt', () => {
       const { d, ...renovatePublicKey } = { ...renovatePrivateKey };
 
       // import Renovate's public key
-      const svrPubKey = await crypto.subtle.importKey(
+      const importedRenovatePublicKey = await crypto.subtle.importKey(
         'jwk',
         renovatePublicKey,
         { name: 'ECDH', namedCurve: 'P-384' },
@@ -258,7 +258,7 @@ describe('config/decrypt', () => {
 
       // derive shared secret from our private key and Renovate's public key
       const pw = await crypto.subtle.deriveKey(
-        { name: 'ECDH', public: svrPubKey },
+        { name: 'ECDH', public: importedRenovatePublicKey },
         browserKeyPair.privateKey,
         { name: 'AES-GCM', length: 256 },
         false,
