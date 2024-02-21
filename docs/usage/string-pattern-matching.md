@@ -15,7 +15,7 @@ A valid regex pattern:
 ### Regex is case sensitive by default
 
 By default, regex patterns are evaluated as case sensitive.
-To ignore case sensitivity you must set the `i` flag.
+To ignore case sensitivity you must set the `i` flag, see the regex patterns table for an example.
 
 ### Renovate uses re2 syntax
 
