@@ -1,4 +1,3 @@
-import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
@@ -39,15 +38,16 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(2);
       expect(warnings).toMatchObject([
         {
-          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "binarySource" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
         },
         {
-          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "username" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
         },
       ]);
     });
 
-    it('only warns for actual globals in repo config', async () => {
+    // false globals are the options which have names same to the another globalOnly option
+    it('does warn for false globals in repo config', async () => {
       const config = {
         hostRules: [
           {
@@ -967,19 +967,38 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(1);
     });
 
-    // adding this test explicitly because we used to validate the customEnvVariables inside repo config previously
-    it('warns if customEnvVariables are found in repo config', async () => {
+    it('validates valid customEnvVariables objects', async () => {
+      const config = {
+        customEnvVariables: {
+          example1: 'abc',
+          example2: 'https://www.example2.com/example',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        true,
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('errors on invalid customEnvVariables objects', async () => {
       const config = {
         customEnvVariables: {
           example1: 'abc',
           example2: 123,
         },
       };
-      const { warnings } = await configValidation.validateConfig(false, config);
-      expect(warnings).toMatchObject([
+      const { warnings, errors } = await configValidation.validateConfig(
+        true,
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toMatchObject([
         {
+          message:
+            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value is not a string',
           topic: 'Configuration Error',
-          message: `The "customEnvVariables" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
         },
       ]);
     });
@@ -1125,246 +1144,6 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
         },
       ]);
-    });
-  });
-
-  describe('validate globalOptions()', () => {
-    describe('validates string type options', () => {
-      it('binarySource', async () => {
-        const config = {
-          binarySource: 'invalid' as never,
-        };
-        const { warnings } = await configValidation.validateConfig(
-          true,
-          config,
-        );
-        expect(warnings).toEqual([
-          {
-            message:
-              'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
-            topic: 'Configuration Error',
-          },
-        ]);
-      });
-
-      it('baseDir', async () => {
-        const config = {
-          baseDir: false as never,
-        };
-        const { warnings } = await configValidation.validateConfig(
-          true,
-          config,
-        );
-        expect(warnings).toEqual([
-          {
-            message: 'Configuration option `baseDir` should be a string.',
-            topic: 'Configuration Error',
-          },
-        ]);
-      });
-
-      it('requireConfig', async () => {
-        const config = {
-          requireConfig: 'invalid' as never,
-        };
-        const { warnings } = await configValidation.validateConfig(
-          true,
-          config,
-        );
-        expect(warnings).toEqual([
-          {
-            message:
-              'Invalid value `invalid` for `requireConfig`. The allowed values are required, optional, ignored.',
-            topic: 'Configuration Error',
-          },
-        ]);
-      });
-
-      it('dryRun', async () => {
-        const config = {
-          dryRun: 'invalid' as never,
-        };
-        const { warnings } = await configValidation.validateConfig(
-          true,
-          config,
-        );
-        expect(warnings).toEqual([
-          {
-            message:
-              'Invalid value `invalid` for `dryRun`. The allowed values are extract, lookup, full.',
-            topic: 'Configuration Error',
-          },
-        ]);
-      });
-
-      it('repositoryCache', async () => {
-        const config = {
-          repositoryCache: 'invalid' as never,
-        };
-        const { warnings } = await configValidation.validateConfig(
-          true,
-          config,
-        );
-        expect(warnings).toEqual([
-          {
-            message:
-              'Invalid value `invalid` for `repositoryCache`. The allowed values are enabled, disabled, reset.',
-            topic: 'Configuration Error',
-          },
-        ]);
-      });
-
-      it('onboardingConfigFileName', async () => {
-        const config = {
-          onboardingConfigFileName: 'invalid' as never,
-        };
-        const { warnings } = await configValidation.validateConfig(
-          true,
-          config,
-        );
-        expect(warnings).toEqual([
-          {
-            message: `Invalid value \`invalid\` for \`onboardingConfigFileName\`. The allowed values are ${configFileNames.join(', ')}.`,
-            topic: 'Configuration Error',
-          },
-        ]);
-      });
-
-      it('gitUrl', async () => {
-        const config = {
-          gitUrl: 'invalid' as never,
-        };
-        const { warnings } = await configValidation.validateConfig(
-          true,
-          config,
-        );
-        expect(warnings).toEqual([
-          {
-            message:
-              'Invalid value `invalid` for `gitUrl`. The allowed values are default, ssh, endpoint.',
-            topic: 'Configuration Error',
-          },
-        ]);
-      });
-    });
-
-    it('validates boolean type options', async () => {
-      const config = {
-        unicodeEmoji: false,
-        detectGlobalManagerConfig: 'invalid-type',
-      };
-      const { warnings } = await configValidation.validateConfig(true, config);
-      expect(warnings).toMatchObject([
-        {
-          message: `Configuration option \`detectGlobalManagerConfig\` should be a boolean. Found: ${JSON.stringify(
-            'invalid-type',
-          )} (string).`,
-          topic: 'Configuration Error',
-        },
-      ]);
-    });
-
-    it('validates integer type options', async () => {
-      const config = {
-        prCommitsPerRunLimit: 2,
-        gitTimeout: 'invalid-type',
-      };
-      const { warnings } = await configValidation.validateConfig(true, config);
-      expect(warnings).toMatchObject([
-        {
-          message: `Configuration option \`gitTimeout\` should be an integer. Found: ${JSON.stringify(
-            'invalid-type',
-          )} (string).`,
-          topic: 'Configuration Error',
-        },
-      ]);
-    });
-
-    it('validates array type options', async () => {
-      const config = {
-        allowedPostUpgradeCommands: ['cmd'],
-        checkedBranches: 'invalid-type',
-        gitNoVerify: ['invalid'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        true,
-        // @ts-expect-error: contains invalid values
-        config,
-      );
-      expect(warnings).toMatchObject([
-        {
-          message:
-            'Configuration option `checkedBranches` should be a list (Array).',
-          topic: 'Configuration Error',
-        },
-        {
-          message:
-            'Invalid value for `gitNoVerify`. The allowed values are commit, push.',
-          topic: 'Configuration Error',
-        },
-      ]);
-    });
-
-    it('validates object type options', async () => {
-      const config = {
-        productLinks: {
-          documentation: 'https://docs.renovatebot.com/',
-          help: 'https://github.com/renovatebot/renovate/discussions',
-          homepage: 'https://github.com/renovatebot/renovate',
-        },
-        secrets: 'invalid-type',
-        cacheTtlOverride: {
-          someField: false,
-        },
-      };
-      const { warnings } = await configValidation.validateConfig(
-        true,
-        // @ts-expect-error: contains invalid values
-        config,
-      );
-      expect(warnings).toMatchObject([
-        {
-          message: 'Configuration option `secrets` should be a JSON object.',
-          topic: 'Configuration Error',
-        },
-        {
-          topic: 'Configuration Error',
-          message:
-            'Invalid `cacheTtlOverride.someField` configuration: value must be an integer.',
-        },
-      ]);
-    });
-
-    it('warns on invalid customEnvVariables objects', async () => {
-      const config = {
-        customEnvVariables: {
-          example1: 'abc',
-          example2: 123,
-        },
-      };
-      const { warnings } = await configValidation.validateConfig(true, config);
-      expect(warnings).toMatchObject([
-        {
-          message:
-            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value must be a string.',
-          topic: 'Configuration Error',
-        },
-      ]);
-    });
-
-    it('validates valid customEnvVariables objects', async () => {
-      const config = {
-        customEnvVariables: {
-          example1: 'abc',
-          example2: 'https://www.example2.com/example',
-        },
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        true,
-        config,
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
     });
   });
 });
