@@ -2200,8 +2200,6 @@ Add to this object if you wish to define rules that apply only to major updates.
 If set to the number of an existing [GitHub milestone](https://docs.github.com/en/issues/using-labels-and-milestones-to-track-work/about-milestones), Renovate will add that milestone to its PR.
 Renovate will only add a milestone when it _creates_ the PR.
 
-For example:
-
 ```json title="Example Renovate config"
 {
   "milestone": 12
