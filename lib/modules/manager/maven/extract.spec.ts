@@ -1,16 +1,23 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackage, extractRegistries } from './extract';
+import { fs } from '../../../../test/util';
+import {
+  extractAllPackageFiles,
+  extractPackage,
+  extractRegistries,
+  resolveParents,
+} from './extract';
 
-const minimumContent = Fixtures.get(`minimum.pom.xml`);
-const simpleContent = Fixtures.get(`simple.pom.xml`);
+jest.mock('../../../util/fs');
 
-const mirrorSettingsContent = Fixtures.get(`mirror.settings.xml`);
-const profileSettingsContent = Fixtures.get(`profile.settings.xml`);
-const complexSettingsContent = Fixtures.get(`complex.settings.xml`);
+const simpleContent = Fixtures.get('simple.pom.xml');
+const mirrorSettingsContent = Fixtures.get('mirror.settings.xml');
+const parentPomContent = Fixtures.get('parent.pom.xml');
+const childPomContent = Fixtures.get('child.pom.xml');
+const profileSettingsContent = Fixtures.get('profile.settings.xml');
 
 describe('modules/manager/maven/extract', () => {
-  describe('extractDependencies', () => {
+  describe('extractPackage', () => {
     it('returns null for invalid XML', () => {
       expect(extractPackage('', 'some-file')).toBeNull();
       expect(extractPackage('invalid xml content', 'some-file')).toBeNull();
@@ -20,118 +27,214 @@ describe('modules/manager/maven/extract', () => {
 
     it('extract dependencies from any XML position', () => {
       const res = extractPackage(simpleContent, 'some-file');
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
+        datasource: 'maven',
         deps: [
           {
+            datasource: 'maven',
             depName: 'org.example:parent',
             currentValue: '42',
             depType: 'parent',
+            fileReplacePosition: 186,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.example:foo',
             currentValue: '0.0.1',
             depType: 'compile',
+            fileReplacePosition: 905,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.example:bar',
             currentValue: '1.0.0',
             depType: 'compile',
+            fileReplacePosition: 1093,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.apache.maven.plugins:maven-release-plugin',
             currentValue: '2.4.2',
             depType: 'build',
+            fileReplacePosition: 1347,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.apache.maven.scm:maven-scm-provider-gitexe',
             currentValue: '1.8.1',
             depType: 'build',
+            fileReplacePosition: 1545,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.example:extension-artefact',
             currentValue: '1.0',
             depType: 'build',
+            fileReplacePosition: 2276,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.example:${artifact-id-placeholder}',
             currentValue: '0.0.1',
             depType: 'compile',
+            fileReplacePosition: 2484,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: '${group-id-placeholder}:baz',
             currentValue: '0.0.1',
             depType: 'compile',
+            fileReplacePosition: 2634,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: '${quuxGroup}:${quuxId}',
             currentValue: '${quuxVersion}',
             depType: 'compile',
+            fileReplacePosition: 2779,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: '${quuxGroup}:${quuxId}-test',
             currentValue: '${quuxVersion}',
             depType: 'compile',
+            fileReplacePosition: 2938,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.example:quuz',
             currentValue: '1.2.3',
             depType: 'test',
+            fileReplacePosition: 3086,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.example:quuuz',
             currentValue: "it's not a version",
             depType: 'compile',
+            fileReplacePosition: 3252,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.example:hard-range',
             currentValue: '[1.0.0]',
             depType: 'compile',
+            fileReplacePosition: 3410,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.example:optional',
             currentValue: '1.0.0',
             depType: 'optional',
+            fileReplacePosition: 3555,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.example:relocation-artifact',
             currentValue: '1.0',
+            fileReplacePosition: 3787,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.example:profile-artifact',
             currentValue: '${profile-placeholder}',
             depType: 'compile',
+            fileReplacePosition: 4119,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.example:profile-build-artefact',
             currentValue: '2.17',
             depType: 'build',
+            fileReplacePosition: 4375,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
           {
+            datasource: 'maven',
             depName: 'org.apache.maven.plugins:maven-checkstyle-plugin',
             currentValue: '2.17',
             depType: 'build',
+            fileReplacePosition: 4769,
+            registryUrls: [
+              'https://maven.atlassian.com/content/repositories/atlassian-public/',
+            ],
           },
         ],
         mavenProps: {
           quuxGroup: {
+            fileReplacePosition: 631,
             packageFile: 'some-file',
             val: 'org.example',
           },
           quuxId: {
+            fileReplacePosition: 667,
             packageFile: 'some-file',
             val: 'quux',
           },
           quuxVersion: {
+            fileReplacePosition: 698,
             packageFile: 'some-file',
             val: '1.2.3.4',
           },
         },
         packageFile: 'some-file',
+        packageFileVersion: '0.0.1',
+        parent: '../pom.xml',
       });
     });
 
     it('tries minimum manifests', () => {
-      const res = extractPackage(minimumContent, 'some-file');
+      const res = extractPackage(Fixtures.get('minimum.pom.xml'), 'some-file');
       expect(res).toEqual({
         datasource: 'maven',
         deps: [],
@@ -139,6 +242,56 @@ describe('modules/manager/maven/extract', () => {
         packageFile: 'some-file',
         packageFileVersion: '1',
       });
+    });
+  });
+
+  describe('resolveParents', () => {
+    it('should apply props recursively', () => {
+      const packages = extractPackage(
+        Fixtures.get('recursive_props.pom.xml'),
+        'some-file',
+      );
+      const [{ deps }] = resolveParents([packages!]);
+      expect(deps).toMatchObject([
+        {
+          depName: 'com.sksamuel.scapegoat:scalac-scapegoat-plugin_2.13.7',
+          currentValue: '1.4.11',
+        },
+      ]);
+    });
+
+    it('should apply props multiple times', () => {
+      const packages = extractPackage(
+        Fixtures.get('multiple_usages_props.pom.xml'),
+        'some-file',
+      );
+      const [{ deps }] = resolveParents([packages!]);
+      expect(deps).toMatchObject([
+        {
+          depName: 'org.apache.lucene:lucene-core-1.2.3.1.2.3',
+          currentValue: '1.2.3',
+        },
+      ]);
+    });
+
+    it('should detect props infinitely recursing props', () => {
+      const packages = extractPackage(
+        Fixtures.get('infinite_recursive_props.pom.xml'),
+        'some-file',
+      );
+      const [{ deps }] = resolveParents([packages!]);
+      expect(deps).toMatchObject([
+        {
+          depName: 'org.apache.lucene:lucene-core',
+          currentValue: '${foo}',
+          skipReason: 'recursive-placeholder',
+        },
+        {
+          depName: 'org.apache.lucene:lucene-core-${var1}',
+          currentValue: '1.2',
+          skipReason: 'recursive-placeholder',
+        },
+      ]);
     });
   });
 
@@ -165,7 +318,7 @@ describe('modules/manager/maven/extract', () => {
     });
 
     it('extract registries from a complex profile settings file', () => {
-      const res = extractRegistries(complexSettingsContent);
+      const res = extractRegistries(Fixtures.get('complex.settings.xml'));
       expect(res).toStrictEqual([
         'https://artifactory.company.com/artifactory/my-maven-repo',
         'https://repo.adobe.com/nexus/content/groups/public',
@@ -175,7 +328,7 @@ describe('modules/manager/maven/extract', () => {
       ]);
     });
 
-    it('extract registries from a settings file that uses updated schema', () => {
+    it('extract registries from a settings file that uses a newer schema', () => {
       const settingsUpdatedContent = codeBlock`
         <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd">
@@ -190,11 +343,430 @@ describe('modules/manager/maven/extract', () => {
           <profiles/>
           <activeProfiles/>
         </settings>
-        `;
+      `;
       const res = extractRegistries(settingsUpdatedContent);
       expect(res).toStrictEqual([
         'https://proxy-repo.com/artifactory/apache-maven',
       ]);
+    });
+  });
+
+  describe('extractAllPackageFiles', () => {
+    it('should return empty if package has no content', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('');
+      const res = await extractAllPackageFiles({}, ['random.pom.xml']);
+      expect(res).toBeEmptyArray();
+    });
+
+    it('should return empty for packages with invalid content', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('invalid content');
+      const res = await extractAllPackageFiles({}, ['random.pom.xml']);
+      expect(res).toBeEmptyArray();
+    });
+
+    it('should return packages with urls from a settings file', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(mirrorSettingsContent)
+        .mockResolvedValueOnce(simpleContent);
+      const res = await extractAllPackageFiles({}, [
+        'mirror.settings.xml',
+        'simple.pom.xml',
+      ]);
+
+      const urls = [
+        'https://artifactory.company.com/artifactory/my-maven-repo',
+        'https://maven.atlassian.com/content/repositories/atlassian-public/',
+        'https://repo.maven.apache.org/maven2',
+      ];
+      for (const packageFile of res) {
+        for (const dep of packageFile.deps) {
+          expect(dep.registryUrls).toStrictEqual(urls);
+        }
+      }
+    });
+
+    it('should include registryUrls from parent pom files', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(parentPomContent)
+        .mockResolvedValueOnce(childPomContent);
+      const res = await extractAllPackageFiles({}, [
+        'parent.pom.xml',
+        'child.pom.xml',
+      ]);
+
+      const unorderedUrls = new Set([
+        'https://repo.maven.apache.org/maven2',
+        'http://example.com/',
+        'http://example.com/nexus/xyz',
+      ]);
+      for (const packageFile of res) {
+        for (const dep of packageFile.deps) {
+          const depUrls = new Set([...dep.registryUrls!]);
+          expect(depUrls).toStrictEqual(unorderedUrls);
+        }
+      }
+      expect(res).toMatchObject([
+        {
+          datasource: 'maven',
+          deps: [
+            {
+              currentValue: '42',
+              datasource: 'maven',
+              depName: 'org.example:child',
+              depType: 'parent',
+              fileReplacePosition: 185,
+              registryUrls: [
+                'http://example.com/nexus/xyz',
+                'http://example.com/',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+            {
+              currentValue: '1.2.3.4',
+              datasource: 'maven',
+              depName: 'org.example:quux',
+              depType: 'compile',
+              editFile: 'parent.pom.xml',
+              fileReplacePosition: 470,
+              groupName: 'quuxVersion',
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+          ],
+          packageFile: 'parent.pom.xml',
+        },
+        {
+          datasource: 'maven',
+          deps: [
+            {
+              currentValue: '42',
+              datasource: 'maven',
+              depName: 'org.example:parent',
+              depType: 'parent',
+              fileReplacePosition: 186,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+            {
+              currentValue: '0.0.1',
+              datasource: 'maven',
+              depName: 'org.example:foo',
+              depType: 'compile',
+              fileReplacePosition: 806,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+            {
+              currentValue: '1.0.0',
+              datasource: 'maven',
+              depName: 'org.example:bar',
+              depType: 'compile',
+              fileReplacePosition: 954,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+            {
+              currentValue: '2.4.2',
+              datasource: 'maven',
+              depName: 'org.apache.maven.plugins:maven-release-plugin',
+              depType: 'build',
+              fileReplacePosition: 1188,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+            {
+              currentValue: '1.8.1',
+              datasource: 'maven',
+              depName: 'org.apache.maven.scm:maven-scm-provider-gitexe',
+              depType: 'build',
+              fileReplacePosition: 1386,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+            {
+              currentValue: '0.0.1',
+              datasource: 'maven',
+              depName: 'org.example:${artifact-id-placeholder}',
+              depType: 'compile',
+              fileReplacePosition: 2131,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+              skipReason: 'name-placeholder',
+            },
+            {
+              currentValue: '0.0.1',
+              datasource: 'maven',
+              depName: '${group-id-placeholder}:baz',
+              depType: 'compile',
+              fileReplacePosition: 2281,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+              skipReason: 'name-placeholder',
+            },
+            {
+              currentValue: '1.2.3',
+              datasource: 'maven',
+              depName: 'org.example:quuz',
+              depType: 'compile',
+              fileReplacePosition: 2574,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+            {
+              currentValue: "it's not a version",
+              datasource: 'maven',
+              depName: 'org.example:quuuz',
+              depType: 'compile',
+              fileReplacePosition: 2714,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+            {
+              currentValue: '[1.0.0]',
+              datasource: 'maven',
+              depName: 'org.example:hard-range',
+              depType: 'compile',
+              fileReplacePosition: 2872,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+            {
+              currentValue: '${profile-placeholder}',
+              datasource: 'maven',
+              depName: 'org.example:profile-artifact',
+              depType: 'compile',
+              fileReplacePosition: 3134,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+              skipReason: 'version-placeholder',
+            },
+            {
+              currentValue: '2.17',
+              datasource: 'maven',
+              depName: 'org.apache.maven.plugins:maven-checkstyle-plugin',
+              depType: 'build',
+              fileReplacePosition: 3410,
+              registryUrls: [
+                'http://example.com/',
+                'http://example.com/nexus/xyz',
+                'https://repo.maven.apache.org/maven2',
+              ],
+            },
+          ],
+          packageFile: 'child.pom.xml',
+          packageFileVersion: '0.0.1',
+        },
+      ]);
+    });
+
+    it('should include registryUrls in the correct order', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce(simpleContent)
+        .mockResolvedValueOnce(profileSettingsContent);
+      const res = await extractAllPackageFiles({}, [
+        'simple.pom.xml',
+        'profile.settings.xml',
+      ]);
+
+      const urls = [
+        'https://repo.adobe.com/nexus/content/groups/public',
+        'https://maven.atlassian.com/content/repositories/atlassian-public/',
+        'https://repo.maven.apache.org/maven2',
+      ];
+      for (const packageFile of res) {
+        for (const dep of packageFile.deps) {
+          expect(dep.registryUrls).toStrictEqual(urls);
+        }
+      }
+    });
+
+    it('should return package files info', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(simpleContent);
+      const res = await extractAllPackageFiles({}, ['random.pom.xml']);
+
+      expect(res).toMatchObject([
+        {
+          deps: [
+            { depName: 'org.example:parent', currentValue: '42' },
+            { depName: 'org.example:foo', currentValue: '0.0.1' },
+            { depName: 'org.example:bar', currentValue: '1.0.0' },
+            {
+              depName: 'org.apache.maven.plugins:maven-release-plugin',
+              currentValue: '2.4.2',
+            },
+            {
+              depName: 'org.apache.maven.scm:maven-scm-provider-gitexe',
+              currentValue: '1.8.1',
+            },
+            {
+              depName: 'org.example:extension-artefact',
+              currentValue: '1.0',
+            },
+            {
+              depName: 'org.example:${artifact-id-placeholder}',
+              skipReason: 'name-placeholder',
+            },
+            {
+              depName: '${group-id-placeholder}:baz',
+              skipReason: 'name-placeholder',
+            },
+            {
+              depName: 'org.example:quux',
+              currentValue: '1.2.3.4',
+              groupName: 'quuxVersion',
+            },
+            {
+              depName: 'org.example:quux-test',
+              currentValue: '1.2.3.4',
+              groupName: 'quuxVersion',
+            },
+            {
+              depName: 'org.example:quuz',
+              currentValue: '1.2.3',
+            },
+            {
+              depName: 'org.example:quuuz',
+              currentValue: "it's not a version",
+            },
+            { depName: 'org.example:hard-range', currentValue: '[1.0.0]' },
+            {
+              depName: 'org.example:optional',
+              currentValue: '1.0.0',
+            },
+            {
+              depName: 'org.example:relocation-artifact',
+              currentValue: '1.0',
+            },
+            {
+              depName: 'org.example:profile-artifact',
+              currentValue: '${profile-placeholder}',
+              skipReason: 'version-placeholder',
+            },
+            {
+              depName: 'org.example:profile-build-artefact',
+              currentValue: '2.17',
+            },
+            {
+              depName: 'org.apache.maven.plugins:maven-checkstyle-plugin',
+              currentValue: '2.17',
+            },
+          ],
+          packageFile: 'random.pom.xml',
+        },
+      ]);
+    });
+
+    describe('root pom handling', () => {
+      it('should skip root pom.xml', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>root</artifactId>
+            <version>1.0.0</version>
+          </project>
+        `);
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          <project>
+            <parent>
+              <groupId>org.example</groupId>
+              <artifactId>root</artifactId>
+              <version>1.0.0</version>
+            </parent>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>child</artifactId>
+          </project>
+        `);
+        const res = await extractAllPackageFiles({}, [
+          'pom.xml',
+          'foo.bar/pom.xml',
+        ]);
+        expect(res).toMatchObject([
+          { packageFile: 'pom.xml', deps: [] },
+          {
+            packageFile: 'foo.bar/pom.xml',
+            deps: [{ depName: 'org.example:root', depType: 'parent-root' }],
+          },
+        ]);
+      });
+
+      it('handles cross-referencing', async () => {
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>foo</artifactId>
+            <version>1.0.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.example</groupId>
+                <artifactId>bar</artifactId>
+                <version>1.0.0</version>
+              </dependency>
+            </dependencies>
+          </project>
+        `);
+        fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+          <project>
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>org.example</groupId>
+            <artifactId>bar</artifactId>
+            <version>1.0.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.example</groupId>
+                <artifactId>foo</artifactId>
+                <version>1.0.0</version>
+              </dependency>
+            </dependencies>
+          </project>
+        `);
+        const res = await extractAllPackageFiles({}, ['foo.xml', 'bar.xml']);
+        expect(res).toMatchObject([
+          { packageFile: 'foo.xml', deps: [{ depName: 'org.example:bar' }] },
+          { packageFile: 'bar.xml', deps: [{ depName: 'org.example:foo' }] },
+        ]);
+        const [foo, bar] = res;
+        expect(foo.deps[0].skipReason).toBeUndefined();
+        expect(bar.deps[0].skipReason).toBeUndefined();
+      });
     });
   });
 });

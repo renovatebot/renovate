@@ -214,12 +214,23 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // istanbul ignore else: no cache tests
     if (!resPromise) {
       if (httpOptions.repoCache) {
-        const cachedEtag = getCache().httpCache?.[url]?.etag;
-        if (cachedEtag) {
-          logger.debug(`Using cached etag for ${url}`);
+        const responseCache = getCache().httpCache?.[url];
+        // Prefer If-Modified-Since over If-None-Match
+        if (responseCache?.['lastModified']) {
+          logger.debug(
+            `http cache: trying cached Last-Modified "${responseCache?.['lastModified']}" for ${url}`,
+          );
           options.headers = {
             ...options.headers,
-            'If-None-Match': cachedEtag,
+            'If-Modified-Since': responseCache['lastModified'],
+          };
+        } else if (responseCache?.etag) {
+          logger.debug(
+            `http cache: trying cached etag "${responseCache.etag}" for ${url}`,
+          );
+          options.headers = {
+            ...options.headers,
+            'If-None-Match': responseCache.etag,
           };
         }
       }
@@ -259,19 +270,23 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       if (httpOptions.repoCache) {
         const cache = getCache();
         cache.httpCache ??= {};
-        if (resCopy.statusCode === 200 && resCopy.headers?.etag) {
+        if (
+          resCopy.statusCode === 200 &&
+          (resCopy.headers?.etag ?? resCopy.headers['last-modified'])
+        ) {
           logger.debug(
-            `Saving response to cache: ${url} with etag ${resCopy.headers.etag}`,
+            `http cache: saving ${url} (etag=${resCopy.headers.etag}, lastModified=${resCopy.headers['last-modified']})`,
           );
           cache.httpCache[url] = {
             etag: resCopy.headers.etag,
             httpResponse: copyResponse(res, deepCopyNeeded),
+            lastModified: resCopy.headers['last-modified'],
             timeStamp: new Date().toISOString(),
           };
         }
         if (resCopy.statusCode === 304 && cache.httpCache[url]?.httpResponse) {
           logger.debug(
-            `Using cached response: ${url} with etag ${resCopy.headers.etag} from ${cache.httpCache[url].timeStamp}`,
+            `http cache: Using cached response: ${url} from ${cache.httpCache[url].timeStamp}`,
           );
           const cacheCopy = copyResponse(
             cache.httpCache[url].httpResponse,
