@@ -12,7 +12,7 @@ const privateKey = Fixtures.get('private.pem');
 const privateKeyPgp = Fixtures.get('private-pgp.pem');
 // renovate private key
 const privateEc = Fixtures.get('private-ec.json');
-const renovatePrivKey = Json.pipe(EcJwkPriv).parse(privateEc);
+const renovatePrivateKey = Json.pipe(EcJwkPriv).parse(privateEc);
 
 const repository = 'abc/def';
 
@@ -235,9 +235,9 @@ describe('config/decrypt', () => {
 
   describe('tryDecryptEc', () => {
     it('decrypts', async () => {
-      // generate a new key pair in browser for each encryption
-      // private key will be thrown away after encryption,
-      // so only renovate can decrypt with private key
+      // Generate a new key pair in the browser for each encryption,
+      // this private key will be thrown away after encryption,
+      // so that only Renovate can decrypt with the private key.
       const browserKeyPair = await crypto.subtle.generateKey(
         { name: 'ECDH', namedCurve: 'P-384' },
         false,
@@ -245,18 +245,18 @@ describe('config/decrypt', () => {
       );
 
       // `d` is the private key, `x` and `y` are the public key
-      const { d, ...renovatrePublicKey } = { ...renovatePrivKey };
+      const { d, ...renovatePublicKey } = { ...renovatePrivateKey };
 
-      // import renovate public key
+      // import Renovate's public key
       const svrPubKey = await crypto.subtle.importKey(
         'jwk',
-        renovatrePublicKey,
+        renovatePublicKey,
         { name: 'ECDH', namedCurve: 'P-384' },
         false,
         [],
       );
 
-      // derive shared secret from our private key and renovate public key
+      // derive shared secret from our private key and Renovate's public key
       const pw = await crypto.subtle.deriveKey(
         { name: 'ECDH', public: svrPubKey },
         browserKeyPair.privateKey,
@@ -294,13 +294,13 @@ describe('config/decrypt', () => {
       // console.error('encCfg', encCfg);
 
       // decrypt the message with renovate private key
-      const res = await tryDecryptEcdhAesGcm(renovatePrivKey, encCfg);
+      const res = await tryDecryptEcdhAesGcm(renovatePrivateKey, encCfg);
       expect(res).toBe('{"o":"some","v":"123"}');
     });
 
     it('throws for invalid config', async () => {
       await expect(
-        tryDecryptEcdhAesGcm(renovatePrivKey, ''),
+        tryDecryptEcdhAesGcm(renovatePrivateKey, ''),
       ).resolves.toBeNull();
     });
   });
