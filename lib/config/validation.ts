@@ -165,7 +165,13 @@ export async function validateConfig(
     }
 
     if (isGlobalConfig && isGlobalOption(key)) {
-      validateGlobalConfig(key, val, optionTypes[key], warnings, currentPath);
+      await validateGlobalConfig(
+        key,
+        val,
+        optionTypes[key],
+        warnings,
+        currentPath,
+      );
       continue;
     } else {
       if (isGlobalOption(key) && !isFalseGlobal(key, parentPath)) {
@@ -787,13 +793,13 @@ function validateRegexManagerFields(
 /**
  * Basic validation for global config options
  */
-function validateGlobalConfig(
+async function validateGlobalConfig(
   key: string,
   val: unknown,
   type: string,
   warnings: ValidationMessage[],
   currentPath: string | undefined,
-): void {
+): Promise<void> {
   if (type === 'string') {
     if (is.string(val)) {
       if (
@@ -890,7 +896,14 @@ function validateGlobalConfig(
     }
   } else if (type === 'object') {
     if (is.plainObject(val)) {
-      if (key === 'cacheTtlOverride') {
+      if (key === 'onboardingConfig') {
+        const subValidation = await validateConfig(false, val);
+        for (const warning of subValidation.warnings.concat(
+          subValidation.errors,
+        )) {
+          warnings.push(warning);
+        }
+      } else if (key === 'cacheTtlOverride') {
         for (const [subKey, subValue] of Object.entries(val)) {
           if (!is.number(subValue)) {
             warnings.push({

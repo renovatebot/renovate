@@ -1230,6 +1230,31 @@ describe('config/validation', () => {
         ]);
       });
 
+      it('onboardingConfig', async () => {
+        const config = {
+          onboardingConfig: {
+            extends: ['config:recommended'],
+            binarySource: 'global', // should not allow globalOnly options inside onboardingConfig
+            fileMatch: ['somefile'], // invalid at top level
+          },
+        };
+        const { warnings } = await configValidation.validateConfig(
+          true,
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            message:
+              '"fileMatch" may not be defined at the top level of a config and must instead be within a manager block',
+            topic: 'Config error',
+          },
+          {
+            topic: 'Configuration Error',
+            message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          },
+        ]);
+      });
+
       it('gitUrl', async () => {
         const config = {
           gitUrl: 'invalid' as never,
