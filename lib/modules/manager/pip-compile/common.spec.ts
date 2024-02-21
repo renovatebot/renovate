@@ -5,6 +5,7 @@ import {
   extractHeaderCommand,
   getRegistryUrlVarsFromPackageFile,
 } from './common';
+import { inferCommandExecDir } from './utils';
 
 jest.mock('../../../util/host-rules', () => mockDeep());
 
@@ -132,7 +133,7 @@ describe('modules/manager/pip-compile/common', () => {
       'returned sourceFiles must not contain options',
       (argument: string) => {
         const sourceFiles = extractHeaderCommand(
-          getCommandInHeader(`pip-compile ${argument}=dd reqs.in`),
+          getCommandInHeader(`pip-compile ${argument}=reqs.txt reqs.in`),
           'reqs.txt',
         ).sourceFiles;
         expect(sourceFiles).not.toContainEqual(argument);
@@ -148,6 +149,19 @@ describe('modules/manager/pip-compile/common', () => {
         ),
       ).toHaveProperty('isCustomCommand', true);
     });
+
+    it.each([
+      { path: 'reqs.txt', arg: 'reqs.txt', result: '.' },
+      { path: 'subdir/reqs.txt', arg: 'subdir/reqs.txt', result: '.' },
+      { path: 'subdir/reqs.txt', arg: './subdir/reqs.txt', result: '.' },
+      { path: 'subdir/reqs.txt', arg: 'reqs.txt', result: 'subdir' },
+      { path: 'subdir/reqs.txt', arg: './reqs.txt', result: 'subdir' },
+    ])(
+      'infer exec directory (cwd) from output file path and header command',
+      ({ path, arg, result }) => {
+        expect(inferCommandExecDir(path, arg)).toEqual(result);
+      },
+    );
   });
 
   describe('getRegistryUrlFlagsFromPackageFile()', () => {

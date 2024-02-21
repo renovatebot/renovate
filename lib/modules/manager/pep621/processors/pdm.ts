@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
@@ -139,7 +140,7 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
         const [group, name] = dep.depName!.split('/');
         addPackageToCMDRecord(
           packagesByCMD,
-          `${pdmUpdateCMD} -G ${group}`,
+          `${pdmUpdateCMD} -G ${quote(group)}`,
           name,
         );
         break;
@@ -148,7 +149,7 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
         const [group, name] = dep.depName!.split('/');
         addPackageToCMDRecord(
           packagesByCMD,
-          `${pdmUpdateCMD} -dG ${group}`,
+          `${pdmUpdateCMD} -dG ${quote(group)}`,
           name,
         );
         break;
@@ -160,7 +161,7 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
   }
 
   for (const commandPrefix in packagesByCMD) {
-    const packageList = packagesByCMD[commandPrefix].join(' ');
+    const packageList = packagesByCMD[commandPrefix].map(quote).join(' ');
     const cmd = `${commandPrefix} ${packageList}`;
     cmds.push(cmd);
   }

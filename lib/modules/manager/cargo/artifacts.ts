@@ -53,8 +53,8 @@ async function cargoUpdatePrecise(
     cmds.push(
       `cargo update --config net.git-fetch-with-cli=true` +
         ` --manifest-path ${quote(manifestPath)}` +
-        ` --package ${dep.packageName!}@${dep.lockedVersion}` +
-        ` --precise ${dep.newVersion}`,
+        ` --package ${quote(`${dep.packageName}@${dep.lockedVersion}`)}` +
+        ` --precise ${quote(dep.newVersion!)}`,
     );
   }
 

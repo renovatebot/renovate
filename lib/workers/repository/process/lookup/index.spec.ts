@@ -28,18 +28,17 @@ import { Result } from '../../../../util/result';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
-const fixtureRoot = '../../../../config/npm';
 const qJson = {
-  ...Fixtures.getJson('01.json', fixtureRoot),
+  ...Fixtures.getJson('01.json'),
   latestVersion: '1.4.1',
 };
 
-const helmetJson = Fixtures.get('02.json', fixtureRoot);
-const coffeelintJson = Fixtures.get('coffeelint.json', fixtureRoot);
-const nextJson = Fixtures.get('next.json', fixtureRoot);
-const typescriptJson = Fixtures.get('typescript.json', fixtureRoot);
-const vueJson = Fixtures.get('vue.json', fixtureRoot);
-const webpackJson = Fixtures.get('webpack.json', fixtureRoot);
+const helmetJson = Fixtures.get('02.json');
+const coffeelintJson = Fixtures.get('coffeelint.json');
+const nextJson = Fixtures.get('next.json');
+const typescriptJson = Fixtures.get('typescript.json');
+const vueJson = Fixtures.get('vue.json');
+const webpackJson = Fixtures.get('webpack.json');
 
 let config: LookupUpdateConfig;
 
@@ -129,9 +128,24 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '0.9.7', updateType: 'rollback' },
-        { newValue: '1.4.1', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'rollback',
+          newMajor: 0,
+          newValue: '0.9.7',
+          newVersion: '0.9.7',
+          registryUrl: undefined,
+          updateType: 'rollback',
+        },
+        {
+          bucket: 'major',
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -146,8 +160,15 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '^0.9.7', updateType: 'rollback' },
+      expect(updates).toEqual([
+        {
+          bucket: 'rollback',
+          newMajor: 0,
+          newValue: '^0.9.7',
+          newVersion: '0.9.7',
+          registryUrl: undefined,
+          updateType: 'rollback',
+        },
       ]);
     });
 
@@ -162,10 +183,34 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '0.4.4', updateType: 'pin' },
-        { newValue: '^0.9.0', updateType: 'minor' },
-        { newValue: '^1.0.0', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 0,
+          newValue: '0.4.4',
+          newVersion: '0.4.4',
+          updateType: 'pin',
+        },
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 0,
+          newMinor: 9,
+          newValue: '^0.9.0',
+          newVersion: '0.9.7',
+          releaseTimestamp: '2013-09-04T17:07:22.948Z',
+          updateType: 'minor',
+        },
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '^1.0.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -182,10 +227,38 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { isLockfileUpdate: true, newValue: '^0.4.0', updateType: 'patch' },
-        { newValue: '^0.9.0', updateType: 'minor' },
-        { newValue: '^1.0.0', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'patch',
+          isLockfileUpdate: true,
+          isRange: true,
+          newMajor: 0,
+          newMinor: 4,
+          newValue: '^0.4.0',
+          newVersion: '0.4.4',
+          releaseTimestamp: '2011-06-10T17:20:04.719Z',
+          updateType: 'patch',
+        },
+        {
+          bucket: 'minor',
+          isRange: true,
+          newMajor: 0,
+          newMinor: 9,
+          newValue: '^0.9.0',
+          newVersion: '0.9.7',
+          releaseTimestamp: '2013-09-04T17:07:22.948Z',
+          updateType: 'minor',
+        },
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '^1.0.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -305,10 +378,34 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '0.4.4', updateType: 'pin' },
-        { newValue: '^0.9.0', updateType: 'minor' },
-        { newValue: '^1.0.0', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 0,
+          newValue: '0.4.4',
+          newVersion: '0.4.4',
+          updateType: 'pin',
+        },
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 0,
+          newMinor: 9,
+          newValue: '^0.9.0',
+          newVersion: '0.9.7',
+          releaseTimestamp: '2013-09-04T17:07:22.948Z',
+          updateType: 'minor',
+        },
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '^1.0.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -530,9 +627,25 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '0.9.7', updateType: 'patch' },
-        { newValue: '1.4.1', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'patch',
+          newMajor: 0,
+          newMinor: 9,
+          newValue: '0.9.7',
+          newVersion: '0.9.7',
+          releaseTimestamp: '2013-09-04T17:07:22.948Z',
+          updateType: 'patch',
+        },
+        {
+          bucket: 'major',
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -591,9 +704,24 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '0.4.4', updateType: 'pin' },
-        { newValue: '^1.0.0', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 0,
+          newValue: '0.4.4',
+          newVersion: '0.4.4',
+          updateType: 'pin',
+        },
+        {
+          bucket: 'latest',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '^1.0.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -609,8 +737,16 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '1.4.1', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'latest',
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -649,36 +785,59 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '0.4.4', updateType: 'pin' },
-        { newValue: '~0.9.0', updateType: 'minor' },
-        { newValue: '~1.4.0', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 0,
+          newValue: '0.4.4',
+          newVersion: '0.4.4',
+          updateType: 'pin',
+        },
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 0,
+          newMinor: 9,
+          newValue: '~0.9.0',
+          newVersion: '0.9.7',
+          releaseTimestamp: '2013-09-04T17:07:22.948Z',
+          updateType: 'minor',
+        },
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~1.4.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
-    it.each`
-      strategy | expectedUpdates
-      ${'pin'} | ${[{ newValue: '0.4.0', updateType: 'pin' }]}
-    `(
-      'supports for x-range-all for replaceStrategy = $strategy (with lockfile) abcd',
-      async ({ strategy, expectedUpdates }) => {
-        config.currentValue = '*';
-        config.rangeStrategy = strategy;
-        config.lockedVersion = '0.4.0';
-        config.packageName = 'q';
-        config.datasource = NpmDatasource.id;
-        httpMock
-          .scope('https://registry.npmjs.org')
-          .get('/q')
-          .reply(200, qJson);
+    it('supports for x-range-all for replaceStrategy = pin (with lockfile) abcd', async () => {
+      config.currentValue = '*';
+      config.rangeStrategy = 'pin';
+      config.lockedVersion = '0.4.0';
+      config.packageName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
 
-        const { updates } = await Result.wrap(
-          lookup.lookupUpdates(config),
-        ).unwrapOrThrow();
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
 
-        expect(updates).toMatchObject(expectedUpdates);
-      },
-    );
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 0,
+          newValue: '0.4.0',
+          newVersion: '0.4.0',
+          updateType: 'pin',
+        },
+      ]);
+    });
 
     it.each`
       strategy
@@ -779,9 +938,24 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '0.9.7', updateType: 'pin' },
-        { newValue: '~1.4.0', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 0,
+          newValue: '0.9.7',
+          newVersion: '0.9.7',
+          updateType: 'pin',
+        },
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~1.4.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -796,9 +970,24 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '1.0.1', updateType: 'pin' },
-        { newValue: '~1.4.0', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 1,
+          newValue: '1.0.1',
+          newVersion: '1.0.1',
+          updateType: 'pin',
+        },
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~1.4.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -949,8 +1138,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '~1.3.0 || ~1.4.0', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~1.3.0 || ~1.4.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -965,8 +1163,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '~1.4.0', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~1.4.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -984,8 +1191,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '^2.0.0 || ^3.0.0', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 3,
+          newMinor: 8,
+          newValue: '^2.0.0 || ^3.0.0',
+          newVersion: '3.8.1',
+          releaseTimestamp: '2017-10-17T15:22:36.646Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1003,8 +1219,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '^3.0.0', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 3,
+          newMinor: 8,
+          newValue: '^3.0.0',
+          newVersion: '3.8.1',
+          releaseTimestamp: '2017-10-17T15:22:36.646Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1019,7 +1244,15 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([{ newValue: '1.4.1', updateType: 'pin' }]);
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 1,
+          newValue: '1.4.1',
+          newVersion: '1.4.1',
+          updateType: 'pin',
+        },
+      ]);
     });
 
     it('uses the locked version for pinning', async () => {
@@ -1034,7 +1267,15 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([{ newValue: '1.0.0', updateType: 'pin' }]);
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 1,
+          newValue: '1.0.0',
+          newVersion: '1.0.0',
+          updateType: 'pin',
+        },
+      ]);
     });
 
     it('ignores minor ranged versions when not pinning', async () => {
@@ -1077,9 +1318,24 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '1.3.0', updateType: 'pin' },
-        { newValue: '~1.4.0', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 1,
+          newValue: '1.3.0',
+          newVersion: '1.3.0',
+          updateType: 'pin',
+        },
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~1.4.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -1094,9 +1350,24 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '1.3.0', updateType: 'pin' },
-        { newValue: '1.4.x', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 1,
+          newValue: '1.3.0',
+          newVersion: '1.3.0',
+          updateType: 'pin',
+        },
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '1.4.x',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -1111,8 +1382,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '~1.4.0', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~1.4.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -1127,7 +1407,18 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([{ newValue: '1.x', updateType: 'major' }]);
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '1.x',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
+      ]);
     });
 
     it('upgrades .x minor ranges without pinning', async () => {
@@ -1141,8 +1432,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '1.4.x', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '1.4.x',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -1157,8 +1457,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '1.2.x - 1.4.x', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '1.2.x - 1.4.x',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -1173,7 +1482,18 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([{ newValue: '1', updateType: 'major' }]);
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
+      ]);
     });
 
     it('upgrades shorthand minor ranges without pinning', async () => {
@@ -1187,7 +1507,18 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([{ newValue: '1.4', updateType: 'minor' }]);
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '1.4',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
+      ]);
     });
 
     it('upgrades multiple tilde ranges without pinning', async () => {
@@ -1201,9 +1532,27 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '~0.9.0', updateType: 'minor' },
-        { newValue: '~1.4.0', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 0,
+          newMinor: 9,
+          newValue: '~0.9.0',
+          newVersion: '0.9.7',
+          releaseTimestamp: '2013-09-04T17:07:22.948Z',
+          updateType: 'minor',
+        },
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~1.4.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1218,9 +1567,27 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '^0.9.0', updateType: 'minor' },
-        { newValue: '^1.0.0', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 0,
+          newMinor: 9,
+          newValue: '^0.9.0',
+          newVersion: '0.9.7',
+          releaseTimestamp: '2013-09-04T17:07:22.948Z',
+          updateType: 'minor',
+        },
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '^1.0.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1273,9 +1640,15 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
+      expect(updates).toEqual([
         {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 3,
+          newMinor: 8,
           newValue: '^1.0.0 || ^2.0.0 || ^3.0.0',
+          newVersion: '3.8.1',
+          releaseTimestamp: '2017-10-17T15:22:36.646Z',
           updateType: 'major',
         },
       ]);
@@ -1295,8 +1668,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '1.x - 3.x', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 3,
+          newMinor: 8,
+          newValue: '1.x - 3.x',
+          newVersion: '3.8.1',
+          releaseTimestamp: '2017-10-17T15:22:36.646Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1314,8 +1696,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '1.x || 2.x || 3.x', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 3,
+          newMinor: 8,
+          newValue: '1.x || 2.x || 3.x',
+          newVersion: '3.8.1',
+          releaseTimestamp: '2017-10-17T15:22:36.646Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1333,8 +1724,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '1 || 2 || 3', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 3,
+          newMinor: 8,
+          newValue: '1 || 2 || 3',
+          newVersion: '3.8.1',
+          releaseTimestamp: '2017-10-17T15:22:36.646Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1349,8 +1749,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '~1.2.0 || ~1.3.0 || ~1.4.0', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~1.2.0 || ~1.3.0 || ~1.4.0',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -1379,9 +1788,27 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '<= 0.9.7', updateType: 'minor' },
-        { newValue: '<= 1.4.1', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 0,
+          newMinor: 9,
+          newValue: '<= 0.9.7',
+          newVersion: '0.9.7',
+          releaseTimestamp: '2013-09-04T17:07:22.948Z',
+          updateType: 'minor',
+        },
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '<= 1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1396,9 +1823,27 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '< 0.9.8', updateType: 'minor' },
-        { newValue: '< 1.4.2', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 0,
+          newMinor: 9,
+          newValue: '< 0.9.8',
+          newVersion: '0.9.7',
+          releaseTimestamp: '2013-09-04T17:07:22.948Z',
+          updateType: 'minor',
+        },
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '< 1.4.2',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1413,7 +1858,18 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([{ newValue: '< 2', updateType: 'major' }]);
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '< 2',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
+      ]);
     });
 
     it('upgrades less than equal minor ranges', async () => {
@@ -1427,8 +1883,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '<= 1.4', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '<= 1.4',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -1443,8 +1908,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '=1.4.1', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '=1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -1460,8 +1934,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '<= 2', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 2,
+          newMinor: 0,
+          newValue: '<= 2',
+          newVersion: '2.0.3',
+          releaseTimestamp: '2015-01-31T08:11:47.852Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1635,8 +2118,16 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '2.0.3', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          newMajor: 2,
+          newMinor: 0,
+          newValue: '2.0.3',
+          newVersion: '2.0.3',
+          releaseTimestamp: '2015-01-31T08:11:47.852Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1672,8 +2163,15 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '2.0.0', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'major',
+          newMajor: 2,
+          newMinor: 0,
+          newValue: '2.0.0',
+          newVersion: '2.0.0',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -1694,8 +2192,15 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '20.3.1', updateType: 'patch' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 20,
+          newMinor: 3,
+          newValue: '20.3.1',
+          newVersion: '20.3.1',
+          updateType: 'patch',
+        },
       ]);
     });
 
@@ -2156,8 +2661,17 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '^0.0.35', updateType: 'patch' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isRange: true,
+          newMajor: 0,
+          newMinor: 0,
+          newValue: '^0.0.35',
+          newVersion: '0.0.35',
+          releaseTimestamp: '2017-04-27T16:59:06.479Z',
+          updateType: 'patch',
+        },
       ]);
     });
 
@@ -2295,8 +2809,18 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '^1.4.1', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isBump: true,
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '^1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -2312,9 +2836,28 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '~1.0.1', updateType: 'patch' },
-        { newValue: '~1.4.1', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'patch',
+          isBump: true,
+          isRange: true,
+          newMajor: 1,
+          newMinor: 0,
+          newValue: '~1.0.1',
+          newVersion: '1.0.1',
+          releaseTimestamp: '2014-03-11T18:47:17.560Z',
+          updateType: 'patch',
+        },
+        {
+          bucket: 'minor',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -2330,9 +2873,28 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '~1.0.1', updateType: 'patch' },
-        { newValue: '~1.4.1', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'patch',
+          isBump: true,
+          isRange: true,
+          newMajor: 1,
+          newMinor: 0,
+          newValue: '~1.0.1',
+          newVersion: '1.0.1',
+          releaseTimestamp: '2014-03-11T18:47:17.560Z',
+          updateType: 'patch',
+        },
+        {
+          bucket: 'minor',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -2347,8 +2909,18 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '>=1.4.1', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          isBump: true,
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '>=1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -2364,8 +2936,18 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '>=1.4.1', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          bucket: 'latest',
+          isBump: true,
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '>=1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -2423,8 +3005,16 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '1.4.1', updateType: 'minor' },
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '1.4.1',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'minor',
+        },
       ]);
     });
 
@@ -2507,9 +3097,24 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
-        { newValue: '==0.9.4', updateType: 'pin' },
-        { newValue: '~=1.4', updateType: 'major' },
+      expect(updates).toEqual([
+        {
+          isPin: true,
+          newMajor: 0,
+          newValue: '==0.9.4',
+          newVersion: '0.9.4',
+          updateType: 'pin',
+        },
+        {
+          bucket: 'major',
+          isRange: true,
+          newMajor: 1,
+          newMinor: 4,
+          newValue: '~=1.4',
+          newVersion: '1.4.1',
+          releaseTimestamp: '2015-05-17T04:25:07.299Z',
+          updateType: 'major',
+        },
       ]);
     });
 
@@ -2880,19 +3485,30 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(res).toMatchObject({
+      expect(res).toEqual({
+        currentVersion: '18.10.0',
+        fixedVersion: '18.10.0',
+        isSingleVersion: true,
+        registryUrl: 'https://index.docker.io',
+        sourceUrl: 'https://github.com/nodejs/node',
         updates: [
           {
-            newValue: '18.19.0-alpine',
+            bucket: 'non-major',
             newDigest: 'bbb222',
+            newMajor: 18,
+            newMinor: 19,
+            newValue: '18.19.0-alpine',
+            newVersion: '18.19.0',
             updateType: 'minor',
           },
           {
-            newValue: '18.10.0-alpine',
             newDigest: 'ccc333',
+            newValue: '18.10.0-alpine',
             updateType: 'digest',
           },
         ],
+        versioning: 'node',
+        warnings: [],
       });
     });
 
@@ -2914,8 +3530,12 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(res).toMatchObject({
+      expect(res).toEqual({
+        registryUrl: 'https://index.docker.io',
+        sourceUrl: 'https://github.com/nodejs/node',
         updates: [],
+        versioning: 'node',
+        warnings: [],
       });
     });
 
@@ -2938,8 +3558,23 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(res).toMatchObject({
-        updates: [{ newValue: 'bookworm-slim', updateType: 'major' }],
+      expect(res).toEqual({
+        currentVersion: 'bullseye',
+        fixedVersion: 'bullseye',
+        isSingleVersion: true,
+        registryUrl: 'https://index.docker.io',
+        updates: [
+          {
+            bucket: 'major',
+            newMajor: 12,
+            newMinor: null,
+            newValue: 'bookworm-slim',
+            newVersion: 'bookworm',
+            updateType: 'major',
+          },
+        ],
+        versioning: 'debian',
+        warnings: [],
       });
     });
 
@@ -3002,8 +3637,12 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(res).toMatchObject({
+      expect(res).toEqual({
+        registryUrl: 'https://index.docker.io',
         skipReason: 'invalid-value',
+        updates: [],
+        versioning: 'composer',
+        warnings: [],
       });
     });
 
@@ -3255,12 +3894,14 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
+      expect(updates).toEqual([
         {
-          updateType: 'major',
+          bucket: 'major',
           newMajor: 18,
+          newMinor: 0,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+          updateType: 'major',
         },
       ]);
     });
@@ -3393,17 +4034,20 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
+      expect(updates).toEqual([
         {
-          updateType: 'major',
+          bucket: 'major',
           newMajor: 18,
+          newMinor: 0,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+          updateType: 'major',
         },
         {
-          updateType: 'replacement',
           newName: 'eclipse-temurin',
           newValue: '17.0.0',
+          newVersion: undefined,
+          updateType: 'replacement',
         },
       ]);
     });
@@ -3434,24 +4078,28 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
+      expect(updates).toEqual([
         {
-          updateType: 'major',
+          bucket: 'major',
+          newDigest: 'sha256:abcdef1234567890',
           newMajor: 18,
+          newMinor: 0,
           newValue: '18.0.0',
           newVersion: '18.0.0',
-          newDigest: 'sha256:abcdef1234567890',
+          updateType: 'major',
         },
         {
-          updateType: 'replacement',
+          newDigest: 'sha256:0123456789abcdef',
           newName: 'eclipse-temurin',
           newValue: '17.0.0',
-          newDigest: 'sha256:0123456789abcdef',
+          newVersion: undefined,
+          updateType: 'replacement',
         },
         {
           isPinDigest: true,
           newDigest: 'sha256:pin0987654321',
           newValue: '17.0.0',
+          newVersion: undefined,
           updateType: 'pinDigest',
         },
       ]);
@@ -3534,17 +4182,19 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
+      expect(updates).toEqual([
         {
-          updateType: 'major',
+          bucket: 'major',
           newMajor: 18,
+          newMinor: 0,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+          updateType: 'major',
         },
         {
-          updateType: 'replacement',
           newName: 'new.registry.io/library/openjdk',
           newValue: '17.0.0',
+          updateType: 'replacement',
         },
       ]);
     });
@@ -3570,17 +4220,19 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
+      expect(updates).toEqual([
         {
-          updateType: 'major',
+          bucket: 'major',
           newMajor: 18,
+          newMinor: 0,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+          updateType: 'major',
         },
         {
-          updateType: 'replacement',
           newName: 'new.registry.io/library/openjdk',
           newValue: '18.0.0',
+          updateType: 'replacement',
         },
       ]);
     });
@@ -3606,17 +4258,19 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
-      expect(updates).toMatchObject([
+      expect(updates).toEqual([
         {
-          updateType: 'major',
+          bucket: 'major',
           newMajor: 18,
+          newMinor: 0,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+          updateType: 'major',
         },
         {
-          updateType: 'replacement',
           newName: 'eclipse-temurin',
           newValue: '17.0.0',
+          updateType: 'replacement',
         },
       ]);
     });
@@ -3720,9 +4374,16 @@ describe('workers/repository/process/lookup/index', () => {
           lookup.lookupUpdates(config),
         ).unwrapOrThrow();
 
-        expect(updates).toMatchObject([
+        expect(updates).toEqual([
           {
-            mergeConfidenceLevel: `high`,
+            bucket: 'non-major',
+            mergeConfidenceLevel: 'high',
+            newMajor: 3,
+            newMinor: 8,
+            newValue: '3.8.1',
+            newVersion: '3.8.1',
+            releaseTimestamp: '2017-10-17T15:22:36.646Z',
+            updateType: 'minor',
           },
         ]);
       });
@@ -3741,9 +4402,15 @@ describe('workers/repository/process/lookup/index', () => {
         ).unwrapOrThrow();
 
         expect(getMergeConfidenceSpy).toHaveBeenCalledTimes(0);
-        expect(updates).not.toMatchObject([
+        expect(updates).toEqual([
           {
-            mergeConfidenceLevel: expect.anything(),
+            bucket: 'non-major',
+            newMajor: 3,
+            newMinor: 8,
+            newValue: '3.8.1',
+            newVersion: '3.8.1',
+            releaseTimestamp: '2017-10-17T15:22:36.646Z',
+            updateType: 'minor',
           },
         ]);
       });
@@ -3765,11 +4432,7 @@ describe('workers/repository/process/lookup/index', () => {
           lookup.lookupUpdates(config),
         ).unwrapOrThrow();
 
-        expect(updates).not.toMatchObject([
-          {
-            mergeConfidenceLevel: expect.anything(),
-          },
-        ]);
+        expect(updates).toBeEmptyArray();
       });
     });
   });
