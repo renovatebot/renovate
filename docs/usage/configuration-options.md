@@ -2202,7 +2202,7 @@ Renovate will only add a milestone when it _creates_ the PR.
 
 For example:
 
-```json
+```json title="Example Renovate config"
 {
   "milestone": 12
 }
