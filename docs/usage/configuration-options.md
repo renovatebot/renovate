@@ -2195,6 +2195,17 @@ Be careful with remapping `warn` or `error` messages to lower log levels, as it 
 
 Add to this object if you wish to define rules that apply only to major updates.
 
+## milestone
+
+If set to the number of an existing [GitHub milestone](https://docs.github.com/en/issues/using-labels-and-milestones-to-track-work/about-milestones), Renovate will add that milestone to its PR.
+Renovate will only add a milestone when it _creates_ the PR.
+
+```json title="Example Renovate config"
+{
+  "milestone": 12
+}
+```
+
 ## minimumReleaseAge
 
 This feature used to be called `stabilityDays`.

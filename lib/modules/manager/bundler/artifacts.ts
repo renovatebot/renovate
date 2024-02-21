@@ -96,6 +96,13 @@ export async function updateArtifacts(
     if (config.isLockFileMaintenance) {
       commands.push('bundler lock --update');
     } else {
+      const bundlerUpgraded = updatedDeps
+        .map((dep) => dep.depName)
+        .includes('bundler');
+      if (bundlerUpgraded) {
+        commands.push('bundler lock --update --bundler');
+      }
+
       const updateTypes = {
         patch: '--patch --strict ',
         minor: '--minor --strict ',
@@ -106,7 +113,7 @@ export async function updateArtifacts(
           .filter((dep) => (dep.updateType ?? 'major') === updateType)
           .map((dep) => dep.depName)
           .filter(is.string)
-          .filter((dep) => dep !== 'ruby');
+          .filter((dep) => dep !== 'ruby' && dep !== 'bundler');
         let additionalArgs = '';
         if (config.postUpdateOptions?.includes('bundlerConservative')) {
           additionalArgs = '--conservative ';

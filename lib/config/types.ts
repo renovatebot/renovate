@@ -90,6 +90,7 @@ export interface RenovateSharedConfig {
   unicodeEmoji?: boolean;
   gitIgnoredAuthors?: string[];
   platformCommit?: boolean;
+  milestone?: number;
 }
 
 // Config options used only within the global worker
