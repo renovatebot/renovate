@@ -119,6 +119,17 @@ function getNewValue({
     );
     return currentValue;
   }
+  // Keep new range precision the same as current
+  if (
+    (currentValue.startsWith('~') || currentValue.startsWith('^')) &&
+    rangeStrategy === 'replace' &&
+    newCargo.split('.').length > currentValue.split('.').length
+  ) {
+    newCargo = newCargo
+      .split('.')
+      .slice(0, currentValue.split('.').length)
+      .join('.');
+  }
   // Try to reverse any caret we added
   if (newCargo.startsWith('^') && !currentValue.startsWith('^')) {
     const withoutCaret = newCargo.substring(1);

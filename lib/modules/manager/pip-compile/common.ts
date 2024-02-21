@@ -1,17 +1,15 @@
 import is from '@sindresorhus/is';
 import { split } from 'shlex';
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import type { ExecOptions } from '../../../util/exec/types';
 import { ensureCacheDir } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types';
-import type {
-  DependencyBetweenFiles,
-  GetRegistryUrlVarsResult,
-  PipCompileArgs,
-} from './types';
+import type { GetRegistryUrlVarsResult, PipCompileArgs } from './types';
 
 export function getPythonConstraint(
   config: UpdateArtifactsConfig,
@@ -40,13 +38,13 @@ export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
 }
 export async function getExecOptions(
   config: UpdateArtifactsConfig,
-  inputFileName: string,
+  cwd: string,
   extraEnv: Record<string, string>,
 ): Promise<ExecOptions> {
   const constraint = getPythonConstraint(config);
   const pipToolsConstraint = getPipToolsConstraint(config);
   const execOptions: ExecOptions = {
-    cwdFile: inputFileName,
+    cwd: ensureLocalPath(cwd),
     docker: {},
     toolConstraints: [
       {
@@ -98,7 +96,9 @@ export function extractHeaderCommand(
 ): PipCompileArgs {
   const compileCommand = constraintLineRegex.exec(content);
   if (compileCommand?.groups === undefined) {
-    throw new Error(`Failed to extract command from header in ${fileName}`);
+    throw new Error(
+      `Failed to extract command from header in ${fileName} ${content}`,
+    );
   }
   logger.trace(
     `pip-compile: found header in ${fileName}: \n${compileCommand[0]}`,
@@ -106,16 +106,12 @@ export function extractHeaderCommand(
   const command = compileCommand.groups.command;
   const argv = [command];
   const isCustomCommand = command !== 'pip-compile';
-  if (isCustomCommand) {
-    logger.debug(
-      `pip-compile: custom command ${command} detected (${fileName})`,
-    );
-  }
   if (compileCommand.groups.arguments) {
     argv.push(...split(compileCommand.groups.arguments));
   }
   logger.debug(
-    `pip-compile: extracted command from header: ${JSON.stringify(argv)}`,
+    { fileName, argv, isCustomCommand },
+    `pip-compile: extracted command from header`,
   );
 
   const result: PipCompileArgs = {
@@ -151,7 +147,7 @@ export function extractHeaderCommand(
         if (result.outputFile) {
           throw new Error('Cannot use multiple --output-file options');
         }
-        result.outputFile = value;
+        result.outputFile = upath.normalize(value);
       } else if (option === '--index-url') {
         if (result.indexUrl) {
           throw new Error('Cannot use multiple --index-url options');
@@ -174,7 +170,6 @@ export function extractHeaderCommand(
 
     logger.warn(`pip-compile: option ${arg} not handled`);
   }
-
   logger.trace(
     {
       ...result,
@@ -215,24 +210,6 @@ function throwForUnknownOption(arg: string): void {
     return;
   }
   throw new Error(`Option ${arg} not supported (yet)`);
-}
-
-export function generateMermaidGraph(
-  depsBetweenFiles: DependencyBetweenFiles[],
-  lockFileArgs: Map<string, PipCompileArgs>,
-): string {
-  const lockFiles = [];
-  for (const lockFile of lockFileArgs.keys()) {
-    // TODO: add extra args to the lock file ${extraArgs ? '\n' + extraArgs : ''}
-    // const extraArgs = pipCompileArgs.extra
-    //   ?.map((v) => '--extra=' + v)
-    //   .join('\n');
-    lockFiles.push(`  ${lockFile}[[${lockFile}]]`);
-  }
-  const edges = depsBetweenFiles.map(({ sourceFile, outputFile, type }) => {
-    return `  ${sourceFile} -${type === 'constraint' ? '.' : ''}-> ${outputFile}`;
-  });
-  return `graph TD\n${lockFiles.join('\n')}\n${edges.join('\n')}`;
 }
 
 function buildRegistryUrl(url: string): URL | null {
