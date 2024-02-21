@@ -19,7 +19,6 @@ import {
   hasValidSchedule,
   hasValidTimezone,
 } from '../workers/repository/update/branch/schedule';
-import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
@@ -98,18 +97,6 @@ function getDeprecationMessage(option: string): string | undefined {
   return deprecatedOptions[option];
 }
 
-function isGlobalOption(key: string): boolean {
-  if (!optionGlobals) {
-    optionGlobals = new Set();
-    for (const option of options) {
-      if (option.globalOnly) {
-        optionGlobals.add(option.name);
-      }
-    }
-  }
-  return optionGlobals.has(key);
-}
-
 export function getParentName(parentPath: string | undefined): string {
   return parentPath
     ? parentPath
@@ -140,6 +127,7 @@ export async function validateConfig(
       }
     });
   }
+
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
@@ -163,15 +151,20 @@ export async function validateConfig(
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
     }
+    if (!isGlobalConfig) {
+      if (!optionGlobals) {
+        optionGlobals = new Set<string>();
+        for (const option of options) {
+          if (option.globalOnly) {
+            optionGlobals.add(option.name);
+          }
+        }
+      }
 
-    if (isGlobalConfig && isGlobalOption(key)) {
-      validateGlobalConfig(key, val, optionTypes[key], warnings, currentPath);
-      continue;
-    } else {
-      if (isGlobalOption(key) && !isFalseGlobal(key, parentPath)) {
+      if (optionGlobals.has(key) && !isFalseGlobal(key, parentPath)) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
         });
         continue;
       }
@@ -675,6 +668,22 @@ export async function validateConfig(
                   }
                 }
               }
+            } else if (
+              [
+                'customEnvVariables',
+                'migratePresets',
+                'productLinks',
+                'secrets',
+                'customizeDashboard',
+              ].includes(key)
+            ) {
+              const res = validatePlainObject(val);
+              if (res !== true) {
+                errors.push({
+                  topic: 'Configuration Error',
+                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
+                });
+              }
             } else {
               const ignoredObjects = options
                 .filter((option) => option.freeChoice)
@@ -779,139 +788,6 @@ function validateRegexManagerFields(
       errors.push({
         topic: 'Configuration Error',
         message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
-      });
-    }
-  }
-}
-
-/**
- * Basic validation for global config options
- */
-function validateGlobalConfig(
-  key: string,
-  val: unknown,
-  type: string,
-  warnings: ValidationMessage[],
-  currentPath: string | undefined,
-): void {
-  if (type === 'string') {
-    if (is.string(val)) {
-      if (
-        key === 'onboardingConfigFileName' &&
-        !configFileNames.includes(val)
-      ) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${configFileNames.join(', ')}.`,
-        });
-      } else if (
-        key === 'repositoryCache' &&
-        !['enabled', 'disabled', 'reset'].includes(val)
-      ) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['enabled', 'disabled', 'reset'].join(', ')}.`,
-        });
-      } else if (
-        key === 'dryRun' &&
-        !['extract', 'lookup', 'full'].includes(val)
-      ) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['extract', 'lookup', 'full'].join(', ')}.`,
-        });
-      } else if (
-        key === 'binarySource' &&
-        !['docker', 'global', 'install', 'hermit'].includes(val)
-      ) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}.`,
-        });
-      } else if (
-        key === 'requireConfig' &&
-        !['required', 'optional', 'ignored'].includes(val)
-      ) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['required', 'optional', 'ignored'].join(', ')}.`,
-        });
-      } else if (
-        key === 'gitUrl' &&
-        !['default', 'ssh', 'endpoint'].includes(val)
-      ) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
-        });
-      }
-    } else {
-      warnings.push({
-        topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a string.`,
-      });
-    }
-  } else if (type === 'integer') {
-    if (!is.number(val)) {
-      warnings.push({
-        topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-          val,
-        )} (${typeof val}).`,
-      });
-    }
-  } else if (type === 'boolean') {
-    if (val !== true && val !== false) {
-      warnings.push({
-        topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a boolean. Found: ${JSON.stringify(
-          val,
-        )} (${typeof val}).`,
-      });
-    }
-  } else if (type === 'array') {
-    if (is.array(val)) {
-      if (key === 'gitNoVerify') {
-        const allowedValues = ['commit', 'push'];
-        for (const value of val as string[]) {
-          if (!allowedValues.includes(value)) {
-            warnings.push({
-              topic: 'Configuration Error',
-              message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
-            });
-          }
-        }
-      }
-    } else {
-      warnings.push({
-        topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a list (Array).`,
-      });
-    }
-  } else if (type === 'object') {
-    if (is.plainObject(val)) {
-      if (key === 'cacheTtlOverride') {
-        for (const [subKey, subValue] of Object.entries(val)) {
-          if (!is.number(subValue)) {
-            warnings.push({
-              topic: 'Configuration Error',
-              message: `Invalid \`${currentPath}.${subKey}\` configuration: value must be an integer.`,
-            });
-          }
-        }
-      } else {
-        const res = validatePlainObject(val);
-        if (res !== true) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value must be a string.`,
-          });
-        }
-      }
-    } else {
-      warnings.push({
-        topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a JSON object.`,
       });
     }
   }
