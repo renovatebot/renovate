@@ -78,6 +78,6 @@ For example, the pattern `["/^abc/", "!/^abcd/", "!/abce/"]`:
 
 ## Usage in Renovate configuration options
 
-Renovate has matured its approach to string pattern matching over time, but this means that existing configurations may have a mix of approaches and not be entirely consistent with each other.
+Renovate has evolved its approach to string pattern matching over time, but this means that existing configurations may have a mix of approaches and not be entirely consistent with each other.
 
-The configuration options which support this "regex or glob" syntax have it noted in their documentation with a link to this page for more details.
+The configuration options that support "regex or glob" syntax mention this in their documentation, and also link to this page.
