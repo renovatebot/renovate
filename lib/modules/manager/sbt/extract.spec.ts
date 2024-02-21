@@ -458,15 +458,67 @@ describe('modules/manager/sbt/extract', () => {
         'repositories',
         'build.sbt',
       ]);
-      for (const pkg of packages) {
-        for (const dep of pkg.deps) {
-          expect(dep.registryUrls).toStrictEqual([
-            'http://example.org/repo',
-            'https://example.org/ivy-repo/',
-            'https://repo1.maven.org/maven2',
-          ]);
-        }
-      }
+      const expected_packages = [
+        {
+          deps: [
+            {
+              packageName: 'org.scala-lang:scala-library',
+              currentValue: '2.13.0-RC5',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+            {
+              packageName: 'com.example:foo_2.13.0-RC5',
+              currentValue: '0.7.1',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+            {
+              packageName: 'com.abc:abc',
+              currentValue: '1.2.3',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+            {
+              packageName: 'com.abc:abc-a',
+              currentValue: '1.2.3',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+            {
+              packageName: 'com.abc:abc-b',
+              currentValue: '1.2.3',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+            {
+              packageName: 'com.abc:abc-c',
+              currentValue: '1.2.3',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+          ],
+        },
+      ];
+      expect(packages).toMatchObject(expected_packages);
     });
 
     it('should include default registryUrls if no repositories file is provided', async () => {

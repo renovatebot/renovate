@@ -49,6 +49,8 @@ const sbtVersionRegex = regEx(
   'sbt\\.version *= *(?<version>\\d+\\.\\d+\\.\\d+)',
 );
 
+const sbtProxyUrlRegex = regEx(/https?:.[a-z0-9/][^,]+/);
+
 const scalaVersionMatch = q
   .sym<Ctx>('scalaVersion')
   .op(':=')
@@ -293,21 +295,21 @@ const query = q.tree<Ctx>({
   postHandler: registryUrlHandler,
 });
 
-function extractUrl(line: string): string {
-  if (line.includes(',')) {
-    return line.substring(line.indexOf(':') + 1, line.indexOf(','));
-  } else {
-    return line.substring(line.indexOf(':') + 1);
-  }
+function extractUrl(line: string): string | undefined {
+  const urlMatch = line.match(sbtProxyUrlRegex);
+  return urlMatch?.[0];
 }
 
-export function extractProxyUrls(content: string): string[] {
+export function extractProxyUrls(
+  content: string,
+  packageFile: string,
+): string[] {
   const extractedProxyUrls: string[] = [];
-  logger.debug('Parsing proxy repository file');
+  logger.debug(`Parsing proxy repository file ${packageFile}`);
   for (const line of content.split(newlineRegex)) {
-    if (line.match(new RegExp('https?'))) {
+    if (line.match(regEx('https?'))) {
       const url = extractUrl(line);
-      if (parseUrl(url)) {
+      if (url && parseUrl(url)) {
         extractedProxyUrls.push(url.trim());
       }
     } else if (line.trim() === 'maven-central') {
@@ -386,7 +388,7 @@ export async function extractAllPackageFiles(
       continue;
     }
     if (packageFile === 'repositories') {
-      const urls = extractProxyUrls(content);
+      const urls = extractProxyUrls(content, packageFile);
       proxyUrls.push(...urls);
     } else {
       const pkg = extractPackageFile(content, packageFile);
