@@ -947,7 +947,7 @@ describe('modules/manager/bundler/artifacts', () => {
         ]);
       });
 
-      it('updates the Gemfile.lock when upgrading bundler', async () => {
+      it('updates the Gemfile.lock when upgrading ruby', async () => {
         // See https://github.com/renovatebot/renovate/issues/15114
         fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
         const execSnapshots = mockExecSequence([{ stdout: '', stderr: '' }]);
