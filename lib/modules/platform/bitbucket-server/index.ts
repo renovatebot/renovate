@@ -633,7 +633,7 @@ async function updatePRAndAddReviewers(
   }
 }
 
-async function retry<T extends (...arg0: any[]) => any>(
+async function retry<T extends (...arg0: any[]) => Promise<any>>(
   fn: T,
   args: Parameters<T>,
   maxTries: number,
