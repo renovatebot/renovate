@@ -897,6 +897,13 @@ async function validateGlobalConfig(
         )) {
           warnings.push(warning);
         }
+      } else if (key === 'force') {
+        const subValidation = await validateConfig(true, val);
+        for (const warning of subValidation.warnings.concat(
+          subValidation.errors,
+        )) {
+          warnings.push(warning);
+        }
       } else if (key === 'cacheTtlOverride') {
         for (const [subKey, subValue] of Object.entries(val)) {
           if (!is.number(subValue)) {
@@ -911,7 +918,7 @@ async function validateGlobalConfig(
         if (res !== true) {
           warnings.push({
             topic: 'Configuration Error',
-            message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value must be a string.`,
+            message: `Invalid \`${currentPath}.${res}\` configuration: value must be a string.`,
           });
         }
       }
