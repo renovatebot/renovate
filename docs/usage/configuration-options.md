@@ -237,7 +237,7 @@ To configure this option refer to [`schedule`](#schedule) as the syntax is the s
 
 <!-- prettier-ignore -->
 !!! warning
-    When `platformAutomerge` is enabled, the schedule specified in `automergeSchedule` will not be followed.
+    When `platformAutomerge` is enabled, Renovate enqueues the platform PR automerge at time of creation, so the schedule specified in `automergeSchedule` cannot be followed.
     As a workaround, set `platformAutomerge: false`, configure `schedule` to control PR creation, and enforce successful pipelines before merging on your platform.
 
 ## automergeStrategy
