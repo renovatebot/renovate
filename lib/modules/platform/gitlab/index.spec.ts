@@ -52,6 +52,7 @@ describe('modules/platform/gitlab/index', () => {
     delete process.env.GITLAB_IGNORE_REPO_URL;
     delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY;
     delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
+    delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
   });
 
   async function initFakePlatform(version: string) {
@@ -487,7 +488,7 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
-  describe('getRepoForceRebase', () => {
+  describe('getBranchForceRebase', () => {
     it('should return false', async () => {
       await initRepo(
         {
@@ -499,7 +500,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'merge',
         },
       );
-      expect(await gitlab.getRepoForceRebase()).toBeFalse();
+      expect(await gitlab.getBranchForceRebase!('master')).toBeFalse();
     });
 
     it('should return true', async () => {
@@ -513,7 +514,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'ff',
         },
       );
-      expect(await gitlab.getRepoForceRebase()).toBeTrue();
+      expect(await gitlab.getBranchForceRebase!('master')).toBeTrue();
     });
   });
 
@@ -1678,6 +1679,49 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(res).toBeDefined();
     });
+
+    it('finds pr from other authors', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?source_branch=branch&state=opened',
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch',
+            title: 'branch a pr',
+            state: 'opened',
+          },
+        ]);
+      expect(
+        await gitlab.findPr({
+          branchName: 'branch',
+          state: 'open',
+          includeOtherAuthors: true,
+        }),
+      ).toMatchObject({
+        number: 1,
+        sourceBranch: 'branch',
+        state: 'open',
+        title: 'branch a pr',
+      });
+    });
+
+    it('returns null if no pr found - (includeOtherAuthors)', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?source_branch=branch&state=opened',
+        )
+        .reply(200, []);
+      const pr = await gitlab.findPr({
+        branchName: 'branch',
+        state: 'open',
+        includeOtherAuthors: true,
+      });
+      expect(pr).toBeNull();
+    });
   });
 
   async function initPlatform(gitlabVersion: string) {
@@ -1822,6 +1866,45 @@ describe('modules/platform/gitlab/index', () => {
         [1000],
         [2250],
       ]);
+    });
+
+    it('should parse detailed_merge_status attribute on >= 15.6', async () => {
+      await initPlatform('15.6.0-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200);
+      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '100';
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        platformOptions: {
+          usePlatformAutomerge: true,
+        },
+      });
+      expect(pr).toEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+      expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400], [900]]);
     });
 
     it('raises with squash enabled when repository squash option is default_on', async () => {

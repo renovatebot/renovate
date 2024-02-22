@@ -3,7 +3,7 @@
 exports[`modules/manager/helmv3/artifacts alias name is picked, when repository is as alias and dependency defined 1`] = `
 [
   {
-    "cmd": "helm repo add repo1 https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --username basicUser --password secret",
+    "cmd": "helm repo add repo1 https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update --username basicUser --password secret",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -52,7 +52,7 @@ exports[`modules/manager/helmv3/artifacts alias name is picked, when repository 
 exports[`modules/manager/helmv3/artifacts do not add registryAliases to repository list 1`] = `
 [
   {
-    "cmd": "helm repo add jetstack https://charts.jetstack.io",
+    "cmd": "helm repo add jetstack https://charts.jetstack.io --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -74,7 +74,7 @@ exports[`modules/manager/helmv3/artifacts do not add registryAliases to reposito
     },
   },
   {
-    "cmd": "helm repo add nginx https://kubernetes.github.io/ingress-nginx",
+    "cmd": "helm repo add nginx https://kubernetes.github.io/ingress-nginx --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -145,7 +145,7 @@ exports[`modules/manager/helmv3/artifacts log into private registries and reposi
     },
   },
   {
-    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --username basicUser --password secret",
+    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update --username basicUser --password secret",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -216,7 +216,7 @@ exports[`modules/manager/helmv3/artifacts log into private registries and reposi
     },
   },
   {
-    "cmd": "helm repo add stable the_stable_url",
+    "cmd": "helm repo add stable the_stable_url --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -238,7 +238,7 @@ exports[`modules/manager/helmv3/artifacts log into private registries and reposi
     },
   },
   {
-    "cmd": "helm repo add repo1 https://the_repo1_url --username basicUser --password secret",
+    "cmd": "helm repo add repo1 https://the_repo1_url --force-update --username basicUser --password secret",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -260,7 +260,7 @@ exports[`modules/manager/helmv3/artifacts log into private registries and reposi
     },
   },
   {
-    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -309,7 +309,7 @@ exports[`modules/manager/helmv3/artifacts log into private registries and reposi
 exports[`modules/manager/helmv3/artifacts returns null if unchanged 1`] = `
 [
   {
-    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -358,7 +358,7 @@ exports[`modules/manager/helmv3/artifacts returns null if unchanged 1`] = `
 exports[`modules/manager/helmv3/artifacts returns updated Chart.lock 1`] = `
 [
   {
-    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -407,7 +407,7 @@ exports[`modules/manager/helmv3/artifacts returns updated Chart.lock 1`] = `
 exports[`modules/manager/helmv3/artifacts returns updated Chart.lock for lockfile maintenance 1`] = `
 [
   {
-    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -468,7 +468,7 @@ exports[`modules/manager/helmv3/artifacts returns updated Chart.lock with docker
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable && helm dependency update ''"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update && helm dependency update ''"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -496,7 +496,7 @@ exports[`modules/manager/helmv3/artifacts returns updated Chart.lock with docker
 exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases 1`] = `
 [
   {
-    "cmd": "helm repo add stable the_stable_url",
+    "cmd": "helm repo add stable 'the stable_url' --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -518,7 +518,7 @@ exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases
     },
   },
   {
-    "cmd": "helm repo add repo1 the_repo1_url",
+    "cmd": "helm repo add repo1 the_repo1_url --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -540,7 +540,7 @@ exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases
     },
   },
   {
-    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable",
+    "cmd": "helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -601,7 +601,7 @@ exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases
     },
   },
   {
-    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add stable the_stable_url && helm repo add repo1 the_repo1_url && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable && helm dependency update ''"",
+    "cmd": "docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e HELM_EXPERIMENTAL_OCI -e HELM_REGISTRY_CONFIG -e HELM_REPOSITORY_CONFIG -e HELM_REPOSITORY_CACHE -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" ghcr.io/containerbase/sidecar bash -l -c "install-tool helm v3.7.2 && helm repo add stable the_stable_url --force-update && helm repo add repo1 the_repo1_url --force-update && helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update && helm dependency update ''"",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

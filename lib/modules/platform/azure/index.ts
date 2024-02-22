@@ -52,6 +52,7 @@ import {
   getRenovatePRFormat,
   getRepoByName,
   getStorageExtraCloneOpts,
+  mapMergeStrategy,
   max4000Chars,
 } from './util';
 
@@ -244,10 +245,6 @@ export async function initRepo({
     repoFingerprint: repoFingerprint(repo.id!, defaults.endpoint),
   };
   return repoConfig;
-}
-
-export function getRepoForceRebase(): Promise<boolean> {
-  return Promise.resolve(config.repoForceRebase === true);
 }
 
 export async function getPrList(): Promise<AzurePr[]> {
@@ -491,7 +488,10 @@ export async function createPr({
     config.repoId,
   );
   if (platformOptions?.usePlatformAutomerge) {
-    const mergeStrategy = await getMergeStrategy(pr.targetRefName!);
+    const mergeStrategy =
+      platformOptions.automergeStrategy === 'auto'
+        ? await getMergeStrategy(pr.targetRefName!)
+        : mapMergeStrategy(platformOptions.automergeStrategy);
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
@@ -736,13 +736,17 @@ export async function setBranchStatus({
 export async function mergePr({
   branchName,
   id: pullRequestId,
+  strategy,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${pullRequestId}, ${branchName!})`);
   const azureApiGit = await azureApi.gitApi();
 
   let pr = await azureApiGit.getPullRequestById(pullRequestId, config.project);
 
-  const mergeStrategy = await getMergeStrategy(pr.targetRefName!);
+  const mergeStrategy =
+    strategy === 'auto'
+      ? await getMergeStrategy(pr.targetRefName!)
+      : mapMergeStrategy(strategy);
   const objToUpdate: GitPullRequest = {
     status: PullRequestStatus.Completed,
     lastMergeSourceCommit: pr.lastMergeSourceCommit,
@@ -756,8 +760,10 @@ export async function mergePr({
   logger.trace(
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
-    }) with lastMergeSourceCommit ${// TODO: types (#22198)
-    pr.lastMergeSourceCommit?.commitId} using mergeStrategy ${mergeStrategy} (${
+    }) with lastMergeSourceCommit ${
+      // TODO: types (#22198)
+      pr.lastMergeSourceCommit?.commitId
+    } using mergeStrategy ${mergeStrategy} (${
       GitPullRequestMergeStrategy[mergeStrategy]
     })`,
   );

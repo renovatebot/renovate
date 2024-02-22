@@ -81,6 +81,9 @@ function extractFromSection(
       } else {
         dep.datasource = PypiDatasource.id;
       }
+      if (!skipReason && currentValue?.startsWith('==')) {
+        dep.currentVersion = currentValue.replace(regEx(/^==\s*/), '');
+      }
       if (nestedVersion) {
         // TODO #22198
         dep.managerData!.nestedVersion = nestedVersion;
@@ -139,7 +142,7 @@ export async function extractPackageFile(
   if (is.nonEmptyString(pipfile.packages?.pipenv)) {
     extractedConstraints.pipenv = pipfile.packages.pipenv;
   } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
-    extractedConstraints.pipenv = pipfile['dev-packages']!.pipenv;
+    extractedConstraints.pipenv = pipfile['dev-packages'].pipenv;
   }
 
   const lockFileName = `${packageFile}.lock`;

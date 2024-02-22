@@ -290,7 +290,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
       },
       {
         cmd: "helm dependency update ''",
@@ -343,7 +343,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
@@ -411,7 +411,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
@@ -486,7 +486,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
@@ -546,7 +546,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+        cmd: 'helm repo add repo-test https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable --force-update',
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
@@ -593,7 +593,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         config: {
           ...config,
           updateType: 'lockFileMaintenance',
-          registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
+          registryAliases: { stable: 'the stable_url', repo1: 'the_repo1_url' },
         },
       }),
     ).toMatchObject([

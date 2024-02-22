@@ -8,7 +8,7 @@ import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { type AsyncResult, Result } from '../../../util/result';
-import { isDockerDigest } from '../../../util/string';
+import { isDockerDigest } from '../../../util/string-match';
 import {
   ensurePathPrefix,
   joinUrlParts,
@@ -176,7 +176,7 @@ export class DockerDatasource extends Datasource {
     ) => `${registryHost}:${dockerRepository}@${configDigest}`,
     ttlMinutes: 1440 * 28,
   })
-  public async getImageConfig(
+  async getImageConfig(
     registryHost: string,
     dockerRepository: string,
     configDigest: string,
@@ -221,7 +221,7 @@ export class DockerDatasource extends Datasource {
     ) => `${registryHost}:${dockerRepository}@${configDigest}`,
     ttlMinutes: 1440 * 28,
   })
-  public async getHelmConfig(
+  async getHelmConfig(
     registryHost: string,
     dockerRepository: string,
     configDigest: string,
@@ -336,7 +336,7 @@ export class DockerDatasource extends Datasource {
     ) => `${registryHost}:${dockerRepository}@${currentDigest}`,
     ttlMinutes: 1440 * 28,
   })
-  public async getImageArchitecture(
+  async getImageArchitecture(
     registryHost: string,
     dockerRepository: string,
     currentDigest: string,
@@ -434,7 +434,7 @@ export class DockerDatasource extends Datasource {
       `${registryHost}:${dockerRepository}:${tag}`,
     ttlMinutes: 24 * 60,
   })
-  public async getLabels(
+  async getLabels(
     registryHost: string,
     dockerRepository: string,
     tag: string,
@@ -687,7 +687,7 @@ export class DockerDatasource extends Datasource {
     key: (registryHost: string, dockerRepository: string) =>
       `${registryHost}:${dockerRepository}`,
   })
-  public async getTags(
+  async getTags(
     registryHost: string,
     dockerRepository: string,
   ): Promise<string[] | null> {
@@ -913,6 +913,10 @@ export class DockerDatasource extends Datasource {
     return digest;
   }
 
+  @cache({
+    namespace: 'datasource-docker-hub-tags',
+    key: (dockerRepository: string) => `${dockerRepository}`,
+  })
   async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
     const result: Release[] = [];
     let url: null | string =

@@ -76,13 +76,86 @@ describe('util/http/index', () => {
         },
       })
       .get('/')
-      .reply(200, '{ "test": true }');
-    expect(await http.getJson('http://renovate.com')).toEqual({
+      .reply(200, '{ "test": true }', { etag: 'abc123' });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
       authorization: false,
       body: {
         test: true,
       },
-      headers: {},
+      headers: {
+        etag: 'abc123',
+      },
+      statusCode: 200,
+    });
+
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(304, '', { etag: 'abc123' });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
+      authorization: false,
+      body: {
+        test: true,
+      },
+      headers: {
+        etag: 'abc123',
+      },
+      statusCode: 200,
+    });
+  });
+
+  it('uses last-modified header for caching', async () => {
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(200, '{ "test": true }', {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
+      authorization: false,
+      body: {
+        test: true,
+      },
+      headers: {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      },
+      statusCode: 200,
+    });
+
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(304, '', {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
+      authorization: false,
+      body: {
+        test: true,
+      },
+      headers: {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      },
       statusCode: 200,
     });
   });

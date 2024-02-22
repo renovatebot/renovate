@@ -6,6 +6,8 @@ import * as _composer from '../../../../modules/manager/composer';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules';
 import * as _helmv3 from '../../../../modules/manager/helmv3';
 import * as _npm from '../../../../modules/manager/npm';
+import * as _pep621 from '../../../../modules/manager/pep621';
+import * as _poetry from '../../../../modules/manager/poetry';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -17,6 +19,8 @@ const helmv3 = mocked(_helmv3);
 const npm = mocked(_npm);
 const batectWrapper = mocked(_batectWrapper);
 const autoReplace = mocked(_autoReplace);
+const pep621 = mocked(_pep621);
+const poetry = mocked(_poetry);
 
 jest.mock('../../../../modules/manager/bundler');
 jest.mock('../../../../modules/manager/composer');
@@ -24,6 +28,8 @@ jest.mock('../../../../modules/manager/helmv3');
 jest.mock('../../../../modules/manager/npm');
 jest.mock('../../../../modules/manager/git-submodules');
 jest.mock('../../../../modules/manager/batect-wrapper');
+jest.mock('../../../../modules/manager/pep621');
+jest.mock('../../../../modules/manager/poetry');
 jest.mock('../../../../util/git');
 jest.mock('./auto-replace');
 
@@ -530,6 +536,26 @@ describe('workers/repository/update/branch/get-updated', () => {
           { path: 'index.html', contents: 'my-new-dep:1.0.0' },
         ],
       });
+    });
+
+    it('handles package files updated by multiple managers', async () => {
+      config.upgrades.push({
+        packageFile: 'pyproject.toml',
+        manager: 'poetry',
+        branchName: '',
+      });
+      config.upgrades.push({
+        packageFile: 'pyproject.toml',
+        manager: 'pep621',
+        branchName: '',
+      });
+      autoReplace.doAutoReplace.mockResolvedValueOnce('my-new-dep:1.0.0');
+      autoReplace.doAutoReplace.mockResolvedValueOnce('my-new-dep:1.0.0');
+
+      await getUpdatedPackageFiles(config);
+
+      expect(pep621.updateArtifacts).toHaveBeenCalledOnce();
+      expect(poetry.updateArtifacts).toHaveBeenCalledOnce();
     });
 
     describe('when some artifacts have changed and others have not', () => {

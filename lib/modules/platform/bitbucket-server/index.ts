@@ -228,9 +228,9 @@ export async function initRepo({
   }
 }
 
-export async function getRepoForceRebase(): Promise<boolean> {
-  logger.debug(`getRepoForceRebase()`);
-
+export async function getBranchForceRebase(
+  _branchName: string,
+): Promise<boolean> {
   // https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp342
   const res = await bitbucketServerHttp.getJson<{
     mergeConfig: { defaultStrategy: { id: string } };
@@ -324,8 +324,34 @@ export async function findPr({
   prTitle,
   state = 'all',
   refreshCache,
+  includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
+
+  if (includeOtherAuthors) {
+    // PR might have been created by anyone, so don't use the cached Renovate PR list
+    const searchParams: Record<string, string> = {
+      state: 'OPEN',
+    };
+    searchParams['direction'] = 'outgoing';
+    searchParams['at'] = `refs/heads/${branchName}`;
+
+    const query = getQueryString(searchParams);
+    const prs = await utils.accumulateValues(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
+      'get',
+      {},
+      1, // only fetch the latest pr
+    );
+
+    if (!prs.length) {
+      logger.debug(`No PR found for branch ${branchName}`);
+      return null;
+    }
+
+    return utils.prInfo(prs[0]);
+  }
+
   const prList = await getPrList(refreshCache);
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
   if (pr) {

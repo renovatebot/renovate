@@ -51,7 +51,7 @@ function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
   if (datasource && name && currentVersion && newVersion) {
     return [datasource, name, currentVersion, newVersion];
   }
-  logger.debug(
+  logger.trace(
     {
       datasource,
       packageName,

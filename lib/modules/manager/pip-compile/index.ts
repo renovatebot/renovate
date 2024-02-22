@@ -1,12 +1,11 @@
 import type { Category } from '../../../constants';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 
-export { extractPackageFile } from '../pip_requirements/extract';
+export { extractAllPackageFiles, extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 
 export const supportsLockFileMaintenance = true;
-
-export const supportedDatasources = [PypiDatasource.id];
 
 export const defaultConfig = {
   fileMatch: [],
@@ -18,3 +17,5 @@ export const defaultConfig = {
 };
 
 export const categories: Category[] = ['python'];
+
+export const supportedDatasources = [PypiDatasource.id, GitTagsDatasource.id];

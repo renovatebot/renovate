@@ -8,6 +8,10 @@ import { regEx } from '../regex';
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
 
+handlebars.registerHelper('encodeBase64', (str: string) =>
+  Buffer.from(str ?? '').toString('base64'),
+);
+
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2),
 );
@@ -18,9 +22,8 @@ handlebars.registerHelper('replace', (find, replace, context) =>
 
 handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
 
-handlebars.registerHelper(
-  'containsString',
-  (str, subStr) => str?.includes(subStr),
+handlebars.registerHelper('containsString', (str, subStr) =>
+  str?.includes(subStr),
 );
 
 handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
