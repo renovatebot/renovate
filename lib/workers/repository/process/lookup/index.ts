@@ -233,6 +233,14 @@ export async function lookupUpdates(
       ) {
         rangeStrategy = 'bump';
       }
+      // unconstrained deps with lockedVersion
+      if (
+        config.isVulnerabilityAlert &&
+        !config.currentValue &&
+        config.lockedVersion
+      ) {
+        rangeStrategy = 'update-lockfile';
+      }
       const nonDeprecatedVersions = dependency.releases
         .filter((release) => !release.isDeprecated)
         .map((release) => release.version);
