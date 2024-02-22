@@ -1185,6 +1185,27 @@ describe('config/validation', () => {
         ]);
       });
 
+      it('force', async () => {
+        const config = {
+          force: {
+            extends: ['config:recommended'],
+            binarySource: 'global',
+            fileMatch: ['somefile'], // invalid at top level
+          },
+        };
+        const { warnings } = await configValidation.validateConfig(
+          true,
+          config,
+        );
+        expect(warnings).toEqual([
+          {
+            message:
+              '"fileMatch" may not be defined at the top level of a config and must instead be within a manager block',
+            topic: 'Config error',
+          },
+        ]);
+      });
+
       it('gitUrl', async () => {
         const config = {
           gitUrl: 'invalid' as never,
@@ -1301,7 +1322,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchObject([
         {
           message:
-            'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value must be a string.',
+            'Invalid `customEnvVariables.example2` configuration: value must be a string.',
           topic: 'Configuration Error',
         },
       ]);
