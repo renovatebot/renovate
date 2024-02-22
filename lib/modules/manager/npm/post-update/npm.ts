@@ -115,6 +115,7 @@ export async function generateLockFile(
     };
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
+      userConfiguredEnv: config.env,
       extraEnv,
       toolConstraints: [
         await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),

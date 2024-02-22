@@ -9,6 +9,7 @@ import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags';
+import { MavenDatasource } from '../../../../modules/datasource/maven';
 import { NpmDatasource } from '../../../../modules/datasource/npm';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist';
 import { PypiDatasource } from '../../../../modules/datasource/pypi';
@@ -16,6 +17,7 @@ import { id as composerVersioningId } from '../../../../modules/versioning/compo
 import { id as debianVersioningId } from '../../../../modules/versioning/debian';
 import { id as dockerVersioningId } from '../../../../modules/versioning/docker';
 import { id as gitVersioningId } from '../../../../modules/versioning/git';
+import { id as mavenVersioningId } from '../../../../modules/versioning/maven';
 import { id as nodeVersioningId } from '../../../../modules/versioning/node';
 import { id as npmVersioningId } from '../../../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440';
@@ -57,6 +59,8 @@ describe('workers/repository/process/lookup/index', () => {
     DockerDatasource.prototype,
     'getReleases',
   );
+
+  const getMavenReleases = jest.spyOn(MavenDatasource.prototype, 'getReleases');
 
   const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
 
@@ -1096,6 +1100,35 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: 'minor',
         },
       ]);
+    });
+
+    it('handles unconstrainedValue values with rangeStrategy !== update-lockfile and isVulnerabilityAlert', async () => {
+      config.lockedVersion = '1.2.1';
+      config.rangeStrategy = 'bump';
+      config.packageName = 'q';
+      config.isVulnerabilityAlert = true;
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+      expect(updates).toMatchInlineSnapshot(`
+        [
+          {
+            "bucket": "non-major",
+            "isLockfileUpdate": true,
+            "isRange": true,
+            "newMajor": 1,
+            "newMinor": 3,
+            "newValue": undefined,
+            "newVersion": "1.3.0",
+            "releaseTimestamp": "2015-04-26T16:42:11.311Z",
+            "updateType": "minor",
+          },
+        ]
+      `);
+      expect(updates[0].newValue).toBeUndefined();
+      expect(updates[0].updateType).toBe('minor');
     });
 
     it('widens minor ranged versions if configured', async () => {
@@ -3479,6 +3512,42 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
         versioning: 'node',
+        warnings: [],
+      });
+    });
+
+    it('applies versionCompatibility for maven', async () => {
+      config.currentValue = '12.4.2.jre8';
+      config.packageName = 'com.microsoft.sqlserver:mssql-jdbc';
+      config.versioning = mavenVersioningId;
+      config.versionCompatibility =
+        '^(?<version>.*)(?<compatibility>\\.jre.*)$';
+      config.datasource = MavenDatasource.id;
+      getMavenReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '12.4.2.jre8' },
+          { version: '12.5.0.jre11' },
+          { version: '12.6.1.jre8' },
+          { version: '12.6.1.jre11' },
+          { version: '12.6.2.jre11' },
+        ],
+      });
+
+      const res = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(res).toMatchObject({
+        currentVersion: '12.4.2',
+        updates: [
+          {
+            bucket: 'non-major',
+            newValue: '12.6.1.jre8',
+            newVersion: '12.6.1',
+            updateType: 'minor',
+          },
+        ],
+        versioning: 'maven',
         warnings: [],
       });
     });

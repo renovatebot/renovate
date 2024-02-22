@@ -447,6 +447,7 @@ const repoGroups = {
   'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
   sanity: 'https://github.com/sanity-io/sanity',
   scaffdog: 'https://github.com/scaffdog/scaffdog',
+  secretlint: 'https://github.com/secretlint/secretlint',
   'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',

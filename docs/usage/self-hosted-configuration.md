@@ -63,6 +63,33 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowScripts
 
+## allowedEnv
+
+Bot administrators can allow users to configure custom environment variables within repo config.
+Only environment variables matching the list will be accepted in the [`env`](./configuration-options.md#env) configuration.
+
+Examples:
+
+```json title="renovate.json"
+{
+  "env": {
+    "SOME_ENV_VARIABLE": "some_value",
+    "EXTRA_ENV_NAME": "value"
+  }
+}
+```
+
+The above would require `allowedEnv` to be configured similar to the following:
+
+```js title="config.js"
+module.exports = {
+  allowedEnv: ['SOME_ENV_*', 'EXTRA_ENV_NAME'],
+};
+```
+
+`allowedEnv` values can be exact match header names, glob patterns, or regex patterns.
+For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](./string-pattern-matching.md).
+
 ## allowedHeaders
 
 `allowedHeaders` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
