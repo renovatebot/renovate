@@ -684,14 +684,11 @@ async function tryPrAutomerge(
           memCache: false,
         });
         // detailed_merge_status is available with Gitlab >=15.6.0
-        const use_detailed_merge_status = Object.hasOwn(
-          body,
-          'detailed_merge_status',
-        );
+        const use_detailed_merge_status = !!body.detailed_merge_status;
         const detailed_merge_status_check =
           use_detailed_merge_status &&
           desiredDetailedMergeStatus.includes(
-            body.detailed_merge_status as string,
+            body.detailed_merge_status!,
           );
         // merge_status is deprecated with Gitlab >= 15.6
         const deprecated_merge_status_check =
