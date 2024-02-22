@@ -3868,6 +3868,19 @@ This feature _can_ be used in combination with `extractVersion` although that's 
 When combined, `extractVersion` is applied to datasource results first, and then `versionCompatibility`.
 `extractVersion` should be used when the raw version string returned by the `datasource` contains extra details (such as a `v` prefix) when compared to the value/version used within the repository.
 
+During the lookup phase, Renovate evaluates the `versionCompatibility` regex against the `currentValue` string.
+If there is a match, the version part is stored internally temporarily as `compareValue` and the compatibility part stored as `currentCompatibility`.
+Storing `currentCompatibility` allows Renovate to reuse this value later to filter for new versions with the same compatibility.
+Renovate applies this compatibility check to datasource lookup results by passing both the `versionCompatibility` and `currentCompatibility` strings to a filter.
+
+For a new version to be allowed, it must:
+
+- Satisfy the `versionCompatibility` regex, and
+- Have the same `compatibility` part as the `currentValue`
+
+At this point, Renovate's core lookup logic is comparing versions to versions, and ignoring compatibility strings like `-jre8`.
+Finally, once updates are decided, Renovate restores the compatibility part to the `newValue` result.
+
 ## versioning
 
 Usually, each language or package manager has a specific type of "versioning":
