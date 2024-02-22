@@ -687,9 +687,7 @@ async function tryPrAutomerge(
         const use_detailed_merge_status = !!body.detailed_merge_status;
         const detailed_merge_status_check =
           use_detailed_merge_status &&
-          desiredDetailedMergeStatus.includes(
-            body.detailed_merge_status!,
-          );
+          desiredDetailedMergeStatus.includes(body.detailed_merge_status!);
         // merge_status is deprecated with Gitlab >= 15.6
         const deprecated_merge_status_check =
           !use_detailed_merge_status && body.merge_status === desiredStatus;
