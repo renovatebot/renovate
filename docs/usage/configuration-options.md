@@ -1243,6 +1243,28 @@ This way the secret can be used in both the `org1` and `org2` organizations.
 
 For more information on how to use secrets for private packages, read [Private package support](./getting-started/private-packages.md).
 
+## env
+
+This option allows users to specify explicit environment variables values.
+It is valid only as a top-level configuration option and not, for example, within `packageRules`.
+
+<!-- prettier-ignore -->
+!!! warning
+    The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedEnv) config option, before users can use those allowed names in the `env` option.
+
+Behavior:
+
+- This option only applies when Renovate runs package manager commands (e.g. `npm install`), within the `updateArtifacts()` function
+- Values set in the `env` configuration override corresponding environment variables, including those from `customEnvVariables` and `process.env`
+
+```json title="Example renovate.json with env configuration"
+{
+  "env": {
+    "SOME_ENV_VARIABLE": "SOME_STRING_VALUE"
+  }
+}
+```
+
 ## excludeCommitPaths
 
 Be careful you know what you're doing with this option.
