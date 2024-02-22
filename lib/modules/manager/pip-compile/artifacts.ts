@@ -13,14 +13,40 @@ import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 import {
   extractHeaderCommand,
   getExecOptions,
-  getRegistryUrlVarsFromPackageFile,
+  getRegistryCredVarsFromPackageFile,
 } from './common';
 import type { PipCompileArgs } from './types';
 import { inferCommandExecDir } from './utils';
 
+function haveCredentialsInPipEnvironmentVariables(): boolean {
+  if (process.env.PIP_INDEX_URL) {
+    try {
+      const indexUrl = new URL(process.env.PIP_INDEX_URL);
+      if (!!indexUrl.username || !!indexUrl.password) {
+        return true;
+      }
+    } catch {
+      // Assume that an invalid URL contains credentials, just in case
+      return true;
+    }
+  }
+
+  try {
+    if (process.env.PIP_EXTRA_INDEX_URL) {
+      return process.env.PIP_EXTRA_INDEX_URL.split(' ')
+        .map((urlString) => new URL(urlString))
+        .some((url) => !!url.username || !!url.password);
+    }
+  } catch {
+    // Assume that an invalid URL contains credentials, just in case
+    return true;
+  }
+
+  return false;
+}
+
 export function constructPipCompileCmd(
   compileArgs: PipCompileArgs,
-  haveCredentials: boolean,
   upgradePackages: Upgrade[] = [],
 ): string {
   if (compileArgs.isCustomCommand) {
@@ -34,8 +60,9 @@ export function constructPipCompileCmd(
   }
   // safeguard against index url leak if not explicitly set by an option
   if (
-    (!compileArgs.noEmitIndexUrl && !compileArgs.emitIndexUrl) ||
-    (!compileArgs.noEmitIndexUrl && haveCredentials)
+    !compileArgs.noEmitIndexUrl &&
+    !compileArgs.emitIndexUrl &&
+    haveCredentialsInPipEnvironmentVariables()
   ) {
     compileArgs.argv.splice(1, 0, '--no-emit-index-url');
   }
@@ -82,16 +109,11 @@ export async function updateArtifacts({
       const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
       const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
-      const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
-      const cmd = constructPipCompileCmd(
-        compileArgs,
-        registryUrlVars.haveCredentials,
-        upgradePackages,
-      );
+      const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
       const execOptions = await getExecOptions(
         config,
         cwd,
-        registryUrlVars.environmentVars,
+        getRegistryCredVarsFromPackageFile(packageFile),
       );
       logger.trace({ cwd, cmd }, 'pip-compile command');
       logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
