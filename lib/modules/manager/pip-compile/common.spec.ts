@@ -3,7 +3,7 @@ import { hostRules } from '../../../../test/util';
 import {
   allowedPipOptions,
   extractHeaderCommand,
-  getRegistryUrlVarsFromPackageFile,
+  getRegistryCredVarsFromPackageFile,
 } from './common';
 import { inferCommandExecDir } from './utils';
 
@@ -164,28 +164,43 @@ describe('modules/manager/pip-compile/common', () => {
     );
   });
 
-  describe('getRegistryUrlFlagsFromPackageFile()', () => {
+  describe('getCredentialVarsFromPackageFile()', () => {
     it('handles both registryUrls and additionalRegistryUrls', () => {
-      hostRules.find.mockReturnValue({});
+      hostRules.find.mockReturnValueOnce({
+        username: 'user1',
+        password: 'password1',
+      });
+      hostRules.find.mockReturnValueOnce({
+        username: 'user2',
+        password: 'password2',
+      });
       expect(
-        getRegistryUrlVarsFromPackageFile({
+        getRegistryCredVarsFromPackageFile({
           deps: [],
           registryUrls: ['https://example.com/pypi/simple'],
           additionalRegistryUrls: ['https://example2.com/pypi/simple'],
         }),
       ).toEqual({
-        haveCredentials: false,
-        environmentVars: {
-          PIP_INDEX_URL: 'https://example.com/pypi/simple',
-          PIP_EXTRA_INDEX_URL: 'https://example2.com/pypi/simple',
-        },
+        KEYRING_SERVICE_NAME_0: 'example.com',
+        KEYRING_SERVICE_USERNAME_0: 'user1',
+        KEYRING_SERVICE_PASSWORD_0: 'password1',
+        KEYRING_SERVICE_NAME_1: 'example2.com',
+        KEYRING_SERVICE_USERNAME_1: 'user2',
+        KEYRING_SERVICE_PASSWORD_1: 'password2',
       });
     });
 
     it('handles multiple additionalRegistryUrls', () => {
-      hostRules.find.mockReturnValue({});
+      hostRules.find.mockReturnValueOnce({
+        username: 'user1',
+        password: 'password1',
+      });
+      hostRules.find.mockReturnValueOnce({
+        username: 'user2',
+        password: 'password2',
+      });
       expect(
-        getRegistryUrlVarsFromPackageFile({
+        getRegistryCredVarsFromPackageFile({
           deps: [],
           additionalRegistryUrls: [
             'https://example.com/pypi/simple',
@@ -193,63 +208,57 @@ describe('modules/manager/pip-compile/common', () => {
           ],
         }),
       ).toEqual({
-        haveCredentials: false,
-        environmentVars: {
-          PIP_EXTRA_INDEX_URL:
-            'https://example.com/pypi/simple https://example2.com/pypi/simple',
-        },
+        KEYRING_SERVICE_NAME_0: 'example.com',
+        KEYRING_SERVICE_USERNAME_0: 'user1',
+        KEYRING_SERVICE_PASSWORD_0: 'password1',
+        KEYRING_SERVICE_NAME_1: 'example2.com',
+        KEYRING_SERVICE_USERNAME_1: 'user2',
+        KEYRING_SERVICE_PASSWORD_1: 'password2',
       });
     });
 
-    it('uses extra index URLs with no auth', () => {
-      hostRules.find.mockReturnValue({});
-      expect(
-        getRegistryUrlVarsFromPackageFile({
-          deps: [],
-          registryUrls: ['https://example.com/pypi/simple'],
-        }),
-      ).toEqual({
-        haveCredentials: false,
-        environmentVars: {
-          PIP_INDEX_URL: 'https://example.com/pypi/simple',
-        },
-      });
-    });
-
-    it('uses auth from extra index URLs matching host rules', () => {
+    it('handles hosts with only a username', () => {
       hostRules.find.mockReturnValue({
         username: 'user',
+      });
+      expect(
+        getRegistryCredVarsFromPackageFile({
+          deps: [],
+          additionalRegistryUrls: ['https://example.com/pypi/simple'],
+        }),
+      ).toEqual({
+        KEYRING_SERVICE_NAME_0: 'example.com',
+        KEYRING_SERVICE_USERNAME_0: 'user',
+        KEYRING_SERVICE_PASSWORD_0: '',
+      });
+    });
+
+    it('handles hosts with only a password', () => {
+      hostRules.find.mockReturnValue({
         password: 'password',
       });
       expect(
-        getRegistryUrlVarsFromPackageFile({
+        getRegistryCredVarsFromPackageFile({
           deps: [],
-          registryUrls: ['https://example.com/pypi/simple'],
+          additionalRegistryUrls: ['https://example.com/pypi/simple'],
         }),
       ).toEqual({
-        haveCredentials: true,
-        environmentVars: {
-          PIP_INDEX_URL: 'https://user:password@example.com/pypi/simple',
-        },
+        KEYRING_SERVICE_NAME_0: 'example.com',
+        KEYRING_SERVICE_USERNAME_0: '',
+        KEYRING_SERVICE_PASSWORD_0: 'password',
       });
     });
 
     it('handles invalid URLs', () => {
-      hostRules.find.mockReturnValue({});
-      expect(
-        getRegistryUrlVarsFromPackageFile({
-          deps: [],
-          additionalRegistryUrls: [
-            'https://example.com/pypi/simple',
-            'this is not a valid URL',
-          ],
-        }),
-      ).toEqual({
-        haveCredentials: false,
-        environmentVars: {
-          PIP_EXTRA_INDEX_URL: 'https://example.com/pypi/simple',
-        },
+      hostRules.find.mockReturnValue({
+        password: 'password',
       });
+      expect(
+        getRegistryCredVarsFromPackageFile({
+          deps: [],
+          additionalRegistryUrls: ['invalid-url'],
+        }),
+      ).toEqual({});
     });
   });
 });

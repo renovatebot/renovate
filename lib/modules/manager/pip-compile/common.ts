@@ -3,13 +3,13 @@ import { split } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { ExecOptions, ExtraEnv } from '../../../util/exec/types';
 import { ensureCacheDir } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import type { PackageFileContent, UpdateArtifactsConfig } from '../types';
-import type { GetRegistryUrlVarsResult, PipCompileArgs } from './types';
+import type { PipCompileArgs } from './types';
 
 export function getPythonConstraint(
   config: UpdateArtifactsConfig,
@@ -39,7 +39,7 @@ export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
 export async function getExecOptions(
   config: UpdateArtifactsConfig,
   cwd: string,
-  extraEnv: Record<string, string>,
+  extraEnv: ExtraEnv<string>,
 ): Promise<ExecOptions> {
   const constraint = getPythonConstraint(config);
   const pipToolsConstraint = getPipToolsConstraint(config);
@@ -58,6 +58,9 @@ export async function getExecOptions(
     ],
     extraEnv: {
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
+      PIP_NO_INPUT: 'true', // ensure pip doesn't block forever waiting for credentials on stdin
+      PIP_KEYRING_PROVIDER: 'import',
+      PYTHON_KEYRING_BACKEND: 'keyrings.envvars.keyring.EnvvarsKeyring',
       ...extraEnv,
     },
   };
@@ -212,71 +215,51 @@ function throwForUnknownOption(arg: string): void {
   throw new Error(`Option ${arg} not supported (yet)`);
 }
 
-function buildRegistryUrl(url: string): URL | null {
+function getRegistryCredEnvVars(
+  url: URL,
+  index: number,
+): Record<string, string> {
+  const hostRule = hostRules.find({ url: url.href });
+  logger.debug(hostRule, `Found host rule for url ${url.href}`);
+  const ret: Record<string, string> = {};
+  if (!!hostRule.username || !!hostRule.password) {
+    ret[`KEYRING_SERVICE_NAME_${index}`] = url.hostname;
+    ret[`KEYRING_SERVICE_USERNAME_${index}`] = hostRule.username ?? '';
+    ret[`KEYRING_SERVICE_PASSWORD_${index}`] = hostRule.password ?? '';
+  }
+  return ret;
+}
+
+function cleanUrl(url: string): URL | null {
   try {
-    const ret = new URL(url);
-    const hostRule = hostRules.find({ url });
-    if (!ret.username && !ret.password) {
-      ret.username = hostRule.username ?? '';
-      ret.password = hostRule.password ?? '';
-    }
-    return ret;
+    // Strip everything but protocol, host, and port
+    const urlObj = new URL(url);
+    return new URL(urlObj.origin);
   } catch {
     return null;
   }
 }
 
-function getRegistryUrlVarFromUrls(
-  varName: keyof GetRegistryUrlVarsResult['environmentVars'],
-  urls: URL[],
-): GetRegistryUrlVarsResult {
-  if (!urls.length) {
-    return {
-      haveCredentials: false,
-      environmentVars: {},
+export function getRegistryCredVarsFromPackageFile(
+  packageFile: PackageFileContent | null,
+): ExtraEnv<string> {
+  const urls = [
+    ...(packageFile?.registryUrls ?? []),
+    ...(packageFile?.additionalRegistryUrls ?? []),
+  ];
+
+  const uniqueHosts = new Set<URL>(
+    urls.map(cleanUrl).filter(isNotNullOrUndefined),
+  );
+
+  let allCreds: ExtraEnv<string> = {};
+  for (const [index, host] of [...uniqueHosts].entries()) {
+    const hostCreds = getRegistryCredEnvVars(host, index);
+    allCreds = {
+      ...allCreds,
+      ...hostCreds,
     };
   }
 
-  let haveCredentials = false;
-  for (const url of urls) {
-    if (url.username || url.password) {
-      haveCredentials = true;
-    }
-  }
-  const registryUrlsString = urls.map((url) => url.href).join(' ');
-  const ret: GetRegistryUrlVarsResult = {
-    haveCredentials,
-    environmentVars: {},
-  };
-  if (registryUrlsString) {
-    ret.environmentVars[varName] = registryUrlsString;
-  }
-  return ret;
-}
-
-export function getRegistryUrlVarsFromPackageFile(
-  packageFile: PackageFileContent | null,
-): GetRegistryUrlVarsResult {
-  // There should only ever be one element in registryUrls, since pip_requirements gets them from --index-url
-  // flags in the input file, and that only makes sense once
-  const indexUrl = getRegistryUrlVarFromUrls(
-    'PIP_INDEX_URL',
-    packageFile?.registryUrls
-      ?.map(buildRegistryUrl)
-      .filter(isNotNullOrUndefined) ?? [],
-  );
-  const extraIndexUrls = getRegistryUrlVarFromUrls(
-    'PIP_EXTRA_INDEX_URL',
-    packageFile?.additionalRegistryUrls
-      ?.map(buildRegistryUrl)
-      .filter(isNotNullOrUndefined) ?? [],
-  );
-
-  return {
-    haveCredentials: indexUrl.haveCredentials || extraIndexUrls.haveCredentials,
-    environmentVars: {
-      ...indexUrl.environmentVars,
-      ...extraIndexUrls.environmentVars,
-    },
-  };
+  return allCreds;
 }
