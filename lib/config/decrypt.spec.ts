@@ -10,7 +10,7 @@ import type { RenovateConfig } from './types';
 
 const privateKey = Fixtures.get('private.pem');
 const privateKeyPgp = Fixtures.get('private-pgp.pem');
-// renovate private key
+// Renovate private key
 const privateEc = Fixtures.get('private-ec.json');
 const renovatePrivateKey = Json.pipe(EcJwkPriv).parse(privateEc);
 
@@ -265,7 +265,7 @@ describe('config/decrypt', () => {
         ['encrypt'],
       );
 
-      // always use a new IV, should always be 12 bytes
+      // always use a new initialization vector (IV), should always be 12 bytes
       const iv = crypto.getRandomValues(new Uint8Array(12));
 
       // encrypt the message
@@ -293,7 +293,7 @@ describe('config/decrypt', () => {
       // print to update test case above
       // console.error('encCfg', encCfg);
 
-      // decrypt the message with renovate private key
+      // decrypt the message with Renovate's private key
       const res = await tryDecryptEcdhAesGcm(renovatePrivateKey, encCfg);
       expect(res).toBe('{"o":"some","v":"123"}');
     });

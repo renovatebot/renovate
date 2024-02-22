@@ -58,7 +58,7 @@ export async function tryDecryptEcdhAesGcm(
     );
     return Buffer.from(buff).toString();
   } catch (err) {
-    logger.debug({ err }, 'Could not decrypt using ECDH/AES-GCM');
+    logger.debug({ err }, 'Could not decrypt using ECDH/AES-GCM.');
   }
 
   return null;
