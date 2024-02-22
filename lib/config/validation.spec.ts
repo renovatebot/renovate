@@ -1191,6 +1191,9 @@ describe('config/validation', () => {
             extends: ['config:recommended'],
             binarySource: 'global',
             fileMatch: ['somefile'], // invalid at top level
+            constraints: {
+              python: '2.7',
+            },
           },
         };
         const { warnings } = await configValidation.validateConfig(
