@@ -402,9 +402,9 @@ export async function extractAllPackageFiles(
       if (proxyUrls.length > 0) {
         dep.registryUrls!.unshift(...proxyUrls);
       } else if (dep.depType === 'plugin') {
-        dep.registryUrls?.unshift(SBT_PLUGINS_REPO, SBT_MVN_REPO);
+        dep.registryUrls!.unshift(SBT_PLUGINS_REPO, SBT_MVN_REPO);
       } else {
-        dep.registryUrls?.unshift(SBT_MVN_REPO);
+        dep.registryUrls!.unshift(SBT_MVN_REPO);
       }
     }
   }
