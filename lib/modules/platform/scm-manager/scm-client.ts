@@ -19,7 +19,7 @@ import type {
 } from './types';
 
 const URLS = {
-  ME: '/me',
+  ME: 'me',
   ALL_REPOS: 'repositories?pageSize=1000000',
   REPO: (repoPath: string) => `repositories/${repoPath}`,
   PULLREQUESTS: (repoPath: string) => `pull-requests/${repoPath}`,

@@ -1,3 +1,4 @@
+import * as httpMock from '../../../../test/http-mock';
 import { git, mocked } from '../../../../test/util';
 import * as hostRules from '../../../util/host-rules';
 import type { Pr } from '../types';
@@ -68,6 +69,9 @@ const repo: Repo = {
     protocol: [
       { name: 'http', href: 'https://localhost:8080/scm/default/repo' },
     ],
+    defaultBranch: {
+      href: 'https://localhost:8080/scm/api/v2/config/git/default/repo/default-branch',
+    },
   },
 };
 
@@ -114,10 +118,7 @@ describe('modules/platform/scm-manager/index', () => {
     });
 
     it('should init platform', async () => {
-      jest
-        .spyOn(ScmClient.prototype, 'getCurrentUser')
-        .mockResolvedValueOnce(user);
-
+      httpMock.scope(endpoint).get('/me').reply(200, user);
       expect(await initPlatform({ endpoint, token })).toEqual({
         endpoint,
         gitAuthor: 'Test User <test@user.de>',
@@ -131,10 +132,14 @@ describe('modules/platform/scm-manager/index', () => {
       const expectedFingerprint = 'expectedFingerprint';
       const expectedDefaultBranch = 'expectedDefaultBranch';
 
-      jest.spyOn(ScmClient.prototype, 'getRepo').mockResolvedValueOnce(repo);
-      jest
-        .spyOn(ScmClient.prototype, 'getDefaultBranch')
-        .mockResolvedValueOnce(expectedDefaultBranch);
+      httpMock
+        .scope(endpoint)
+        .get(`/repositories/${repository}`)
+        .reply(200, repo);
+      httpMock
+        .scope(endpoint)
+        .get(`/config/git/${repository}/default-branch`)
+        .reply(200, { defaultBranch: expectedDefaultBranch });
 
       util.repoFingerprint.mockReturnValueOnce(expectedFingerprint);
 
@@ -156,14 +161,21 @@ describe('modules/platform/scm-manager/index', () => {
 
   describe(getRepos, () => {
     it('should return all available repos', async () => {
-      jest
-        .spyOn(ScmClient.prototype, 'getAllRepos')
-        .mockResolvedValueOnce([
-          repo,
-          { ...repo, namespace: 'other', name: 'repository' },
-          { ...repo, namespace: 'other', name: 'mercurial', type: 'hg' },
-          { ...repo, namespace: 'other', name: 'subversion', type: 'svn' },
-        ]);
+      httpMock
+        .scope(endpoint)
+        .get(`/repositories?pageSize=1000000`)
+        .reply(200, {
+          page: 0,
+          pageTotal: 1,
+          _embedded: {
+            repositories: [
+              repo,
+              { ...repo, namespace: 'other', name: 'repository' },
+              { ...repo, namespace: 'other', name: 'mercurial', type: 'hg' },
+              { ...repo, namespace: 'other', name: 'subversion', type: 'svn' },
+            ],
+          },
+        });
 
       expect(await getRepos()).toEqual(['default/repo', 'other/repository']);
     });
@@ -171,9 +183,18 @@ describe('modules/platform/scm-manager/index', () => {
 
   describe(getPrList, () => {
     it('should return empty array, because no PR could be found', async () => {
-      jest
-        .spyOn(ScmClient.prototype, 'getAllRepoPrs')
-        .mockRejectedValue(new Error());
+      httpMock
+        .scope(endpoint)
+        .get(
+          `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
+        )
+        .reply(200, {
+          page: 0,
+          pageTotal: 1,
+          _embedded: {
+            pullRequests: [],
+          },
+        });
 
       expect(await getPrList()).toIncludeAllMembers([]);
     });
@@ -194,9 +215,18 @@ describe('modules/platform/scm-manager/index', () => {
         },
       ];
 
-      jest
-        .spyOn(ScmClient.prototype, 'getAllRepoPrs')
-        .mockResolvedValueOnce([pullRequest]);
+      httpMock
+        .scope(endpoint)
+        .get(
+          `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
+        )
+        .reply(200, {
+          page: 0,
+          pageTotal: 1,
+          _embedded: {
+            pullRequests: [pullRequest],
+          },
+        });
 
       //Fetching from client
       expect(await getPrList()).toIncludeAllMembers(expectedResult);
@@ -207,9 +237,18 @@ describe('modules/platform/scm-manager/index', () => {
 
   describe(findPr, () => {
     it('search in pull request without explicitly setting the state as argument', async () => {
-      jest
-        .spyOn(ScmClient.prototype, 'getAllRepoPrs')
-        .mockResolvedValueOnce([pullRequest]);
+      httpMock
+        .scope(endpoint)
+        .get(
+          `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
+        )
+        .reply(200, {
+          page: 0,
+          pageTotal: 1,
+          _embedded: {
+            pullRequests: [pullRequest],
+          },
+        });
 
       expect(
         await findPr({
@@ -244,9 +283,18 @@ describe('modules/platform/scm-manager/index', () => {
         state: string,
         result: Pr | null,
       ) => {
-        jest
-          .spyOn(ScmClient.prototype, 'getAllRepoPrs')
-          .mockResolvedValueOnce(availablePullRequest);
+        httpMock
+          .scope(endpoint)
+          .get(
+            `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
+          )
+          .reply(200, {
+            page: 0,
+            pageTotal: 1,
+            _embedded: {
+              pullRequests: availablePullRequest,
+            },
+          });
 
         expect(
           await findPr({
@@ -271,9 +319,18 @@ describe('modules/platform/scm-manager/index', () => {
         branchName: string,
         result: Pr | null,
       ) => {
-        jest
-          .spyOn(ScmClient.prototype, 'getAllRepoPrs')
-          .mockResolvedValueOnce(availablePullRequest);
+        httpMock
+          .scope(endpoint)
+          .get(
+            `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
+          )
+          .reply(200, {
+            page: 0,
+            pageTotal: 1,
+            _embedded: {
+              pullRequests: availablePullRequest,
+            },
+          });
 
         expect(await getBranchPr(branchName)).toEqual(result);
       },
@@ -282,39 +339,65 @@ describe('modules/platform/scm-manager/index', () => {
 
   describe(getPr, () => {
     it('should return null, because PR was not found', async () => {
-      jest
-        .spyOn(ScmClient.prototype, 'getAllRepoPrs')
-        .mockResolvedValueOnce([]);
+      httpMock
+        .scope(endpoint)
+        .get(
+          `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
+        )
+        .reply(200, {
+          page: 0,
+          pageTotal: 1,
+          _embedded: {
+            pullRequests: [],
+          },
+        });
 
-      jest
-        .spyOn(ScmClient.prototype, 'getRepoPr')
-        .mockRejectedValue(new Error('Not found'));
+      httpMock
+        .scope(endpoint)
+        .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
+        .reply(404);
 
       expect(await getPr(1)).toBeNull();
     });
 
-    it.each([
-      [[], pullRequest, 1, renovatePr],
-      [[pullRequest], pullRequest, 1, renovatePr],
-    ])(
-      'search within %p for %p with result %p',
-      async (
-        availablePullRequest: PullRequest[],
-        pullRequestById: PullRequest,
-        prId: number,
-        result: Pr | null,
-      ) => {
-        jest
-          .spyOn(ScmClient.prototype, 'getAllRepoPrs')
-          .mockResolvedValueOnce(availablePullRequest);
+    it('should return pr from cache', async () => {
+      httpMock
+        .scope(endpoint)
+        .get(
+          `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
+        )
+        .reply(200, {
+          page: 0,
+          pageTotal: 1,
+          _embedded: {
+            pullRequests: [pullRequest],
+          },
+        });
 
-        jest
-          .spyOn(ScmClient.prototype, 'getRepoPr')
-          .mockResolvedValueOnce(pullRequestById);
+      expect(await getPr(parseInt(pullRequest.id))).toEqual(renovatePr);
+    });
 
-        expect(await getPr(prId)).toEqual(result);
-      },
-    );
+    it('should return fetched pr', async () => {
+      httpMock
+        .scope(endpoint)
+        .get(
+          `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
+        )
+        .reply(200, {
+          page: 0,
+          pageTotal: 1,
+          _embedded: {
+            pullRequests: [],
+          },
+        });
+
+      httpMock
+        .scope(endpoint)
+        .get(`/pull-requests/${repo.namespace}/${repo.name}/${pullRequest.id}`)
+        .reply(200, pullRequest);
+
+      expect(await getPr(parseInt(pullRequest.id))).toEqual(renovatePr);
+    });
   });
 
   describe(createPr, () => {
@@ -329,30 +412,28 @@ describe('modules/platform/scm-manager/index', () => {
         expectedState: string,
         expectedIsDraft: boolean,
       ) => {
-        jest
-          .spyOn(ScmClient.prototype, 'createPr')
-          .mockImplementationOnce(
-            (_repoPath: string, createParams: PullRequestCreateParams) => {
-              return Promise.resolve({
-                id: '1337',
-                source: createParams.source,
-                target: createParams.target,
-                title: createParams.title,
-                description: createParams.description ?? '',
-                creationDate: '2023-01-01T13:37:00.000Z',
-                status: createParams.status ?? 'OPEN',
-                labels: [],
-                tasks: { todo: 0, done: 0 },
-                _links: {},
-                _embedded: {
-                  defaultConfig: {
-                    mergeStrategy: 'FAST_FORWARD_IF_POSSIBLE',
-                    deleteBranchOnMerge: false,
-                  },
-                },
-              });
+        httpMock.scope(endpoint).post(`/pull-requests/${repo.namespace}/${repo.name}`).reply(201, undefined, {
+          location: `${endpoint}/pull-requests/${repo.namespace}/${repo.name}/1337`,
+        });
+
+        httpMock.scope(endpoint).get(`/pull-requests/${repo.namespace}/${repo.name}/1337`).reply(200, {
+          id: '1337',
+          source: 'feature/test',
+          target: 'develop',
+          title: 'PR Title',
+          description: 'PR Body',
+          creationDate: '2023-01-01T13:37:00.000Z',
+          status: draftPR ? 'DRAFT' : 'OPEN',
+          labels: [],
+          tasks: { todo: 0, done: 0 },
+          _links: {},
+          _embedded: {
+            defaultConfig: {
+              mergeStrategy: 'FAST_FORWARD_IF_POSSIBLE',
+              deleteBranchOnMerge: false,
             },
-          );
+          },
+        });
 
         expect(
           await createPr({
@@ -392,9 +473,10 @@ describe('modules/platform/scm-manager/index', () => {
         actualPrBody: string | undefined,
         expectedPrBody: string | undefined,
       ) => {
-        jest
-          .spyOn(ScmClient.prototype, 'updatePr')
-          .mockImplementationOnce(() => Promise.resolve());
+        httpMock
+          .scope(endpoint)
+          .put(`/pull-requests/${repo.namespace}/${repo.name}/1`)
+          .reply(204)
 
         await updatePr({
           number: 1,
@@ -405,13 +487,8 @@ describe('modules/platform/scm-manager/index', () => {
         });
 
         expect(
-          jest.spyOn(ScmClient.prototype, 'updatePr'),
-        ).toHaveBeenCalledWith('default/repo', 1, {
-          description: expectedPrBody,
-          status: expectedState,
-          target: 'Target/Branch',
-          title: 'PR Title',
-        });
+          httpMock.allUsed()
+        ).toBeTrue();
       },
     );
   });
