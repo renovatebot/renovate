@@ -10,8 +10,9 @@ export const urls = [
 export const supportsRanges = false;
 
 class Unity3dVersioningApi extends GenericVersioningApi {
-  private static readonly parsingRegex = regEx(/^(?<Major>\d+)\.(?<Minor>\d+)\.(?<Patch>\d+)(?<ReleaseStream>\w)(?<Build>\d+)/gm);
-  private static readonly suffixRegex = regEx(/\([a-f0-9]+\)$/);
+  private static readonly parsingRegex = regEx(
+    /^(?<Major>\d+)\.(?<Minor>\d+)\.(?<Patch>\d+)(?<ReleaseStream>\w)(?<Build>\d+)/gm,
+  );
 
   private static readonly ReleaseStreamType = new Map([
     ['Alpha', 'a'],
@@ -44,12 +45,10 @@ class Unity3dVersioningApi extends GenericVersioningApi {
       Unity3dVersioningApi.ReleaseStreamTypeKeyOrder.indexOf(ReleaseStream),
       parseInt(Build),
     ];
-    const stable = Unity3dVersioningApi.stableVersions.includes(ReleaseStream);
+    const isStable =
+      Unity3dVersioningApi.stableVersions.includes(ReleaseStream);
 
-    Unity3dVersioningApi.suffixRegex.lastIndex = 0;
-    const match = version.match(Unity3dVersioningApi.suffixRegex);
-    const suffix = match ? match[0] : '';
-    return { release, prerelease: stable ? undefined : Build, suffix };
+    return { release, prerelease: isStable ? undefined : Build };
   }
 }
 
