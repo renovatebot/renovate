@@ -2852,6 +2852,92 @@ describe('modules/platform/github/index', () => {
         ]);
       });
     });
+
+    describe('milestone', () => {
+      it('should set the milestone on the PR', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            (body) => body.title === 'bump someDep to v2',
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        scope
+          .patch('/repos/some/repo/issues/123', (body) => body.milestone === 1)
+          .reply(200, {});
+        await github.initRepo({ repository: 'some/repo' });
+        const pr = await github.createPr({
+          targetBranch: 'main',
+          sourceBranch: 'renovate/someDep-v2',
+          prTitle: 'bump someDep to v2',
+          prBody: 'many informations about someDep',
+          milestone: 1,
+        });
+        expect(pr?.number).toBe(123);
+      });
+
+      it('should log a warning but not throw on error', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            (body) => body.title === 'bump someDep to v2',
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        scope
+          .patch('/repos/some/repo/issues/123', (body) => body.milestone === 1)
+          .reply(422, {
+            message: 'Validation Failed',
+            errors: [
+              {
+                value: 1,
+                resource: 'Issue',
+                field: 'milestone',
+                code: 'invalid',
+              },
+            ],
+            documentation_url:
+              'https://docs.github.com/rest/issues/issues#update-an-issue',
+          });
+        await github.initRepo({ repository: 'some/repo' });
+        const pr = await github.createPr({
+          targetBranch: 'main',
+          sourceBranch: 'renovate/someDep-v2',
+          prTitle: 'bump someDep to v2',
+          prBody: 'many informations about someDep',
+          milestone: 1,
+        });
+        expect(pr?.number).toBe(123);
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          {
+            err: {
+              message: 'Validation Failed',
+              errors: [
+                {
+                  value: 1,
+                  resource: 'Issue',
+                  field: 'milestone',
+                  code: 'invalid',
+                },
+              ],
+              documentation_url:
+                'https://docs.github.com/rest/issues/issues#update-an-issue',
+            },
+            milestone: 1,
+            pr: 123,
+          },
+          'Unable to add milestone to PR',
+        );
+      });
+    });
   });
 
   describe('getPr(prNo)', () => {

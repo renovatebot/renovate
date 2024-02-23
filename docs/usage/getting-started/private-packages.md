@@ -83,7 +83,7 @@ Other credential terms are not supported yet.
 }
 ```
 
-Renovate applies theses `hostRules` to every HTTP(s) request which is sent, so they are largely independent of any platform or datasource logic.
+Renovate applies these `hostRules` to every HTTP(s) request which is sent, so they are largely independent of any platform or datasource logic.
 With `hostRules` in place, private package lookups should all work.
 
 ### GitHub (and Enterprise) repo scoped credentials
@@ -460,6 +460,35 @@ url = "https://$USERNAME:${PASSWORD}@mypypi.example.com/simple"
 verify_ssl = true
 name = "pypi"
 ```
+
+### pip-compile
+
+The pip-compile manager extracts `--index-url` and `--extra-index-url` directives from its input file.
+Renovate will match those URLs with credentials from matching `hostRules` blocks in its configuration and pass them to `pip-compile` via environment variables.
+
+```title="requirements.in"
+--extra-index-url https://pypi.my.domain/simple
+
+private-package==1.2.3
+```
+
+```json
+{
+  "pip-compile": {
+    "fileMatch": ["requirements.in"]
+  },
+  "hostRules": [
+    {
+      "matchHost": "pypi.my.domain",
+      "username": "myuser",
+      "password": "mypassword"
+    }
+  ]
+}
+```
+
+Renovate relies on `pip`'s integration with the python [keyring](https://pypi.org/project/keyring/) package along with the [keyrigs.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
+If you are self-hosting Renovate and are not running in a Containerbase environment or using the Docker sidecar container you will need to install those two packages.
 
 ### poetry
 

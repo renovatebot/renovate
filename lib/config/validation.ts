@@ -10,9 +10,9 @@ import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types/host-rules';
 import { regEx } from '../util/regex';
 import {
-  anyMatchRegexOrMinimatch,
-  configRegexPredicate,
-  isConfigRegex,
+  getRegexPredicate,
+  isRegexMatch,
+  matchRegexOrGlobList,
 } from '../util/string-match';
 import * as template from '../util/template';
 import {
@@ -42,7 +42,7 @@ let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
 
-const topLevelObjects = managerList;
+const topLevelObjects = [...managerList, 'env'];
 
 const ignoredNodes = [
   '$schema',
@@ -255,9 +255,9 @@ export async function validateConfig(
         }
       } else if (
         ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
-        isConfigRegex(val)
+        isRegexMatch(val)
       ) {
-        if (!configRegexPredicate(val)) {
+        if (!getRegexPredicate(val)) {
           errors.push({
             topic: 'Configuration Error',
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
@@ -266,7 +266,7 @@ export async function validateConfig(
       } else if (
         key === 'matchCurrentValue' &&
         is.string(val) &&
-        !configRegexPredicate(val)
+        !getRegexPredicate(val)
       ) {
         errors.push({
           topic: 'Configuration Error',
@@ -552,8 +552,8 @@ export async function validateConfig(
             if (key === 'baseBranches') {
               for (const baseBranch of val as string[]) {
                 if (
-                  isConfigRegex(baseBranch) &&
-                  !configRegexPredicate(baseBranch)
+                  isRegexMatch(baseBranch) &&
+                  !getRegexPredicate(baseBranch)
                 ) {
                   errors.push({
                     topic: 'Configuration Error',
@@ -602,6 +602,24 @@ export async function validateConfig(
                   topic: 'Configuration Error',
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
+              }
+            } else if (key === 'env') {
+              const allowedEnvVars = isGlobalConfig
+                ? (config.allowedEnv as string[]) ?? []
+                : GlobalConfig.get('allowedEnv', []);
+              for (const [envVarName, envVarValue] of Object.entries(val)) {
+                if (!is.string(envVarValue)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid env variable value: \`${currentPath}.${envVarName}\` must be a string.`,
+                  });
+                }
+                if (!matchRegexOrGlobList(envVarName, allowedEnvVars)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Env variable name \`${envVarName}\` is not allowed by this bot's \`allowedEnv\`.`,
+                  });
+                }
               }
             } else if (key === 'statusCheckNames') {
               for (const [statusCheckKey, statusCheckValue] of Object.entries(
@@ -710,7 +728,9 @@ export async function validateConfig(
     }
 
     if (key === 'hostRules' && is.array(val)) {
-      const allowedHeaders = GlobalConfig.get('allowedHeaders', []);
+      const allowedHeaders = isGlobalConfig
+        ? (config.allowedHeaders as string[]) ?? []
+        : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (!rule.headers) {
           continue;
@@ -722,7 +742,7 @@ export async function validateConfig(
               message: `Invalid hostRules headers value configuration: header must be a string.`,
             });
           }
-          if (!anyMatchRegexOrMinimatch(header, allowedHeaders)) {
+          if (!matchRegexOrGlobList(header, allowedHeaders)) {
             errors.push({
               topic: 'Configuration Error',
               message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,

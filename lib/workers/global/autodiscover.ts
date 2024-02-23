@@ -3,7 +3,7 @@ import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
 import { minimatchFilter } from '../../util/minimatch';
-import { configRegexPredicate, isConfigRegex } from '../../util/string-match';
+import { getRegexPredicate, isRegexMatch } from '../../util/string-match';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {
@@ -100,8 +100,8 @@ export function applyFilters(repos: string[], filters: string[]): string[] {
 
   for (const filter of filters) {
     let res: string[];
-    if (isConfigRegex(filter)) {
-      const autodiscoveryPred = configRegexPredicate(filter);
+    if (isRegexMatch(filter)) {
+      const autodiscoveryPred = getRegexPredicate(filter);
       if (!autodiscoveryPred) {
         throw new Error(`Failed to parse regex pattern "${filter}"`);
       }
