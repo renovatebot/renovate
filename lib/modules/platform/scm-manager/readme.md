@@ -16,6 +16,6 @@ Additionally, the Review Plugin needs to be installed.
 Otherwise, the pull request API will not be available.
 Plugins can be installed under Administration -> Plugins -> Available.
 
-Renovate supports SCM-Manager major version 2.x and 3.x.
-The 2.x is supported since 2.48.0.
-The 3.x is supported since 3.0.0.
+Renovate supports SCM-Manager major version `2.x` and `3.x`.
+The minimum version for the `2.x` range is `2.48.0`.
+The minimum version for the `3.x` range is `3.0.0`.
