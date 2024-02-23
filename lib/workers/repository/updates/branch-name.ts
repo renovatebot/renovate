@@ -42,6 +42,7 @@ function cleanBranchName(
     .replace(regEx(/[[\]?:\\^~]/g), '-') // massage out all these characters: [ ] ? : \ ^ ~
     .replace(regEx(/(^|\/)-+/g), '$1') // leading dashes
     .replace(regEx(/-+(\/|$)/g), '$1') // trailing dashes
+    .replace(regEx(/\./g), '_') // dots
     .replace(RE_MULTIPLE_DASH, '-'); // chained dashes
 }
 
