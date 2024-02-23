@@ -143,7 +143,7 @@ export function parsePreset(input: string): ParsedPreset {
     str = str.slice(0, str.indexOf('('));
   }
   if (presetSource === 'http') {
-    return { presetSource, repo: str, presetName: 'default', params };
+    return { presetSource, repo: str, presetName: '', params };
   }
   const presetsPackages = [
     'compatibility',
