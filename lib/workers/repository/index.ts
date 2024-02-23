@@ -11,6 +11,7 @@ import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { addExtractionStats } from '../../instrumentation/reporting';
 import { logger, setMeta } from '../../logger';
+import { resetRepositoryLogLevelRemaps } from '../../logger/remap';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
@@ -134,6 +135,7 @@ export async function renovateRepository(
   clearDnsCache();
   const cloned = isCloned();
   logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
+  resetRepositoryLogLevelRemaps();
   return repoResult;
 }
 

@@ -18,3 +18,9 @@ export interface PipCompileArgs {
   outputFile?: string;
   sourceFiles: string[]; // positional arguments
 }
+
+export interface DependencyBetweenFiles {
+  sourceFile: string;
+  outputFile: string;
+  type: 'requirement' | 'constraint';
+}

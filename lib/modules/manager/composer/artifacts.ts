@@ -150,6 +150,7 @@ export async function updateArtifacts({
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
+      userConfiguredEnv: config.env,
       extraEnv: {
         COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),
         COMPOSER_AUTH: getAuthJson(),
@@ -181,7 +182,9 @@ export async function updateArtifacts({
           'update ' +
           updatedDeps
             .map((dep) =>
-              dep.newVersion ? `${dep.depName}:${dep.newVersion}` : dep.depName,
+              dep.newVersion
+                ? quote(`${dep.depName}:${dep.newVersion}`)
+                : quote(dep.depName!),
             )
             .filter(is.string)
             .map((dep) => quote(dep))

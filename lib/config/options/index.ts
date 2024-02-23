@@ -15,6 +15,15 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'allowedEnv',
+    description:
+      'List of allowed patterns for environment variable names in repository env config.',
+    type: 'array',
+    default: [],
+    subType: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'detectGlobalManagerConfig',
     description:
       'If `true`, Renovate tries to detect global manager configuration from the file system.',
@@ -408,6 +417,13 @@ const options: RenovateOptions[] = [
     default: {},
   },
   {
+    name: 'env',
+    description:
+      'Environment variables that Renovate uses when executing package manager commands.',
+    type: 'object',
+    default: {},
+  },
+  {
     name: 'customDatasources',
     description: 'Defines custom datasources for usage by managers.',
     type: 'object',
@@ -436,7 +452,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:9.33.7',
+    default: 'ghcr.io/containerbase/sidecar:10.1.4',
     globalOnly: true,
   },
   {
@@ -2835,6 +2851,39 @@ const options: RenovateOptions[] = [
     parents: ['hostRules'],
     cli: false,
     env: false,
+  },
+  {
+    name: 'logLevelRemap',
+    description: 'Remap log levels to different levels.',
+    type: 'array',
+    subType: 'object',
+    stage: 'repository',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchMessage',
+    description: 'Regex/minimatch expression to match against log message.',
+    type: 'string',
+    parents: ['logLevelRemap'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'newLogLevel',
+    description: 'New log level to use if matchMessage matches.',
+    type: 'string',
+    allowedValues: ['trace', 'debug', 'info', 'warn', 'error', 'fatal'],
+    parents: ['logLevelRemap'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'milestone',
+    description: `The number of a milestone. If set, the milestone will be set when Renovate creates the PR.`,
+    type: 'integer',
+    default: null,
+    supportedPlatforms: ['github'],
   },
 ];
 

@@ -1,5 +1,4 @@
-import { quote, split } from 'shlex';
-import upath from 'upath';
+import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -9,65 +8,78 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import { regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import * as pipRequirements from '../pip_requirements';
+import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 import {
-  constraintLineRegex,
-  deprecatedAllowedPipArguments,
+  extractHeaderCommand,
   getExecOptions,
+  getRegistryCredVarsFromPackageFile,
 } from './common';
+import type { PipCompileArgs } from './types';
+import { inferCommandExecDir } from './utils';
 
-export function constructPipCompileCmd(
-  content: string,
-  inputFileName: string,
-  outputFileName: string,
-): string {
-  const headers = constraintLineRegex.exec(content);
-  const args = ['pip-compile'];
-  if (headers?.groups) {
-    logger.debug(`Found pip-compile header: ${headers[0]}`);
-    for (const argument of split(headers.groups.arguments)) {
-      if (deprecatedAllowedPipArguments.includes(argument)) {
-        args.push(argument);
-      } else if (argument.startsWith('--output-file=')) {
-        const file = upath.parse(outputFileName).base;
-        if (argument !== `--output-file=${file}`) {
-          // we don't trust the user-supplied output-file argument; use our value here
-          logger.warn(
-            { argument },
-            'pip-compile was previously executed with an unexpected `--output-file` filename',
-          );
-        }
-        args.push(`--output-file=${file}`);
-      } else if (argument.startsWith('--resolver=')) {
-        const value = extractResolver(argument);
-        if (value) {
-          args.push(`--resolver=${value}`);
-        }
-      } else if (argument.startsWith('--')) {
-        logger.trace(
-          { argument },
-          'pip-compile argument is not (yet) supported',
-        );
-      } else {
-        // ignore position argument (.in file)
+function haveCredentialsInPipEnvironmentVariables(): boolean {
+  if (process.env.PIP_INDEX_URL) {
+    try {
+      const indexUrl = new URL(process.env.PIP_INDEX_URL);
+      if (!!indexUrl.username || !!indexUrl.password) {
+        return true;
       }
+    } catch {
+      // Assume that an invalid URL contains credentials, just in case
+      return true;
     }
   }
-  args.push(upath.parse(inputFileName).base);
 
-  return args.map((argument) => quote(argument)).join(' ');
+  try {
+    if (process.env.PIP_EXTRA_INDEX_URL) {
+      return process.env.PIP_EXTRA_INDEX_URL.split(' ')
+        .map((urlString) => new URL(urlString))
+        .some((url) => !!url.username || !!url.password);
+    }
+  } catch {
+    // Assume that an invalid URL contains credentials, just in case
+    return true;
+  }
+
+  return false;
+}
+
+export function constructPipCompileCmd(
+  compileArgs: PipCompileArgs,
+  upgradePackages: Upgrade[] = [],
+): string {
+  if (compileArgs.isCustomCommand) {
+    throw new Error(
+      'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
+    );
+  }
+
+  if (!compileArgs.outputFile) {
+    logger.debug(`pip-compile: implicit output file`);
+  }
+  // safeguard against index url leak if not explicitly set by an option
+  if (
+    !compileArgs.noEmitIndexUrl &&
+    !compileArgs.emitIndexUrl &&
+    haveCredentialsInPipEnvironmentVariables()
+  ) {
+    compileArgs.argv.splice(1, 0, '--no-emit-index-url');
+  }
+  for (const dep of upgradePackages) {
+    compileArgs.argv.push(
+      `--upgrade-package=${quote(dep.depName + '==' + dep.newVersion)}`,
+    );
+  }
+  return compileArgs.argv.map(quote).join(' ');
 }
 
 export async function updateArtifacts({
   packageFileName: inputFileName,
   newPackageFileContent: newInputContent,
+  updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  const outputFileName = inputFileName.replace(regEx(/(\.in)?$/), '.txt');
-  config.lockFiles = [outputFileName];
-  // TODO: remove above and below line and use config.lockFiles directly in the next PR
-  // istanbul ignore if
   if (!config.lockFiles) {
     logger.warn(
       { packageFileName: inputFileName },
@@ -93,13 +105,18 @@ export async function updateArtifacts({
       if (config.isLockFileMaintenance) {
         await deleteLocalFile(outputFileName);
       }
-      const cmd = constructPipCompileCmd(
-        existingOutput,
-        inputFileName,
-        outputFileName,
+      const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
+      const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
+      const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
+      const packageFile = pipRequirements.extractPackageFile(newInputContent);
+      const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
+      const execOptions = await getExecOptions(
+        config,
+        cwd,
+        getRegistryCredVarsFromPackageFile(packageFile),
       );
-      const execOptions = await getExecOptions(config, inputFileName);
-      logger.trace({ cmd }, 'pip-compile command');
+      logger.trace({ cwd, cmd }, 'pip-compile command');
+      logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
       await exec(cmd, execOptions);
       const status = await getRepoStatus();
       if (!status?.modified.includes(outputFileName)) {
@@ -128,17 +145,4 @@ export async function updateArtifacts({
   }
   logger.debug('pip-compile: Returning updated output file(s)');
   return result;
-}
-
-export function extractResolver(argument: string): string | null {
-  const value = argument.replace('--resolver=', '');
-  if (['backtracking', 'legacy'].includes(value)) {
-    return value;
-  }
-
-  logger.warn(
-    { argument },
-    'pip-compile was previously executed with an unexpected `--resolver` value',
-  );
-  return null;
 }

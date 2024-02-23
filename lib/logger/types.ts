@@ -1,5 +1,5 @@
 import type { Stream } from 'node:stream';
-import type { LogLevel } from 'bunyan';
+import type { LogLevel, LogLevelString } from 'bunyan';
 
 export interface LogError {
   level: LogLevel;
@@ -40,3 +40,8 @@ export type BunyanStream = (NodeJS.WritableStream | Stream) & {
     cb: (err?: Error | null) => void,
   ) => void;
 };
+
+export interface LogLevelRemap {
+  matchMessage: string;
+  newLogLevel: LogLevelString;
+}

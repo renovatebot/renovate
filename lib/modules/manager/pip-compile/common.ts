@@ -1,10 +1,14 @@
 import is from '@sindresorhus/is';
 import { split } from 'shlex';
+import upath from 'upath';
 import { logger } from '../../../logger';
-import type { ExecOptions } from '../../../util/exec/types';
+import { isNotNullOrUndefined } from '../../../util/array';
+import type { ExecOptions, ExtraEnv } from '../../../util/exec/types';
 import { ensureCacheDir } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
+import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
-import type { UpdateArtifactsConfig } from '../types';
+import type { PackageFileContent, UpdateArtifactsConfig } from '../types';
 import type { PipCompileArgs } from './types';
 
 export function getPythonConstraint(
@@ -34,13 +38,15 @@ export function getPipToolsConstraint(config: UpdateArtifactsConfig): string {
 }
 export async function getExecOptions(
   config: UpdateArtifactsConfig,
-  inputFileName: string,
+  cwd: string,
+  extraEnv: ExtraEnv<string>,
 ): Promise<ExecOptions> {
   const constraint = getPythonConstraint(config);
   const pipToolsConstraint = getPipToolsConstraint(config);
   const execOptions: ExecOptions = {
-    cwdFile: inputFileName,
+    cwd: ensureLocalPath(cwd),
     docker: {},
+    userConfiguredEnv: config.env,
     toolConstraints: [
       {
         toolName: 'python',
@@ -53,6 +59,10 @@ export async function getExecOptions(
     ],
     extraEnv: {
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
+      PIP_NO_INPUT: 'true', // ensure pip doesn't block forever waiting for credentials on stdin
+      PIP_KEYRING_PROVIDER: 'import',
+      PYTHON_KEYRING_BACKEND: 'keyrings.envvars.keyring.EnvvarsKeyring',
+      ...extraEnv,
     },
   };
   return execOptions;
@@ -62,13 +72,6 @@ export const constraintLineRegex = regEx(
   /^(#.*?\r?\n)+# {4}(?<command>\S*)(?<arguments> .*?)?\r?\n/,
 );
 
-// TODO(not7cd): remove in next PR, in favor of extractHeaderCommand
-export const deprecatedAllowedPipArguments = [
-  '--allow-unsafe',
-  '--generate-hashes',
-  '--no-emit-index-url',
-  '--strip-extras',
-];
 export const disallowedPipOptions = [
   '--no-header', // header is required by this manager
 ];
@@ -97,7 +100,9 @@ export function extractHeaderCommand(
 ): PipCompileArgs {
   const compileCommand = constraintLineRegex.exec(content);
   if (compileCommand?.groups === undefined) {
-    throw new Error(`Failed to extract command from header in ${fileName}`);
+    throw new Error(
+      `Failed to extract command from header in ${fileName} ${content}`,
+    );
   }
   logger.trace(
     `pip-compile: found header in ${fileName}: \n${compileCommand[0]}`,
@@ -105,16 +110,12 @@ export function extractHeaderCommand(
   const command = compileCommand.groups.command;
   const argv = [command];
   const isCustomCommand = command !== 'pip-compile';
-  if (isCustomCommand) {
-    logger.debug(
-      `pip-compile: custom command ${command} detected (${fileName})`,
-    );
-  }
   if (compileCommand.groups.arguments) {
     argv.push(...split(compileCommand.groups.arguments));
   }
   logger.debug(
-    `pip-compile: extracted command from header: ${JSON.stringify(argv)}`,
+    { fileName, argv, isCustomCommand },
+    `pip-compile: extracted command from header`,
   );
 
   const result: PipCompileArgs = {
@@ -150,7 +151,7 @@ export function extractHeaderCommand(
         if (result.outputFile) {
           throw new Error('Cannot use multiple --output-file options');
         }
-        result.outputFile = value;
+        result.outputFile = upath.normalize(value);
       } else if (option === '--index-url') {
         if (result.indexUrl) {
           throw new Error('Cannot use multiple --index-url options');
@@ -173,7 +174,6 @@ export function extractHeaderCommand(
 
     logger.warn(`pip-compile: option ${arg} not handled`);
   }
-
   logger.trace(
     {
       ...result,
@@ -196,7 +196,6 @@ function throwForDisallowedOption(arg: string): void {
     throw new Error(`Option ${arg} not allowed for this manager`);
   }
 }
-
 function throwForNoEqualSignInOptionWithArgument(arg: string): void {
   if (optionsWithArguments.includes(arg)) {
     throw new Error(
@@ -204,7 +203,6 @@ function throwForNoEqualSignInOptionWithArgument(arg: string): void {
     );
   }
 }
-
 function throwForUnknownOption(arg: string): void {
   if (arg.includes('=')) {
     const [option] = arg.split('=');
@@ -216,4 +214,53 @@ function throwForUnknownOption(arg: string): void {
     return;
   }
   throw new Error(`Option ${arg} not supported (yet)`);
+}
+
+function getRegistryCredEnvVars(
+  url: URL,
+  index: number,
+): Record<string, string> {
+  const hostRule = hostRules.find({ url: url.href });
+  logger.debug(hostRule, `Found host rule for url ${url.href}`);
+  const ret: Record<string, string> = {};
+  if (!!hostRule.username || !!hostRule.password) {
+    ret[`KEYRING_SERVICE_NAME_${index}`] = url.hostname;
+    ret[`KEYRING_SERVICE_USERNAME_${index}`] = hostRule.username ?? '';
+    ret[`KEYRING_SERVICE_PASSWORD_${index}`] = hostRule.password ?? '';
+  }
+  return ret;
+}
+
+function cleanUrl(url: string): URL | null {
+  try {
+    // Strip everything but protocol, host, and port
+    const urlObj = new URL(url);
+    return new URL(urlObj.origin);
+  } catch {
+    return null;
+  }
+}
+
+export function getRegistryCredVarsFromPackageFile(
+  packageFile: PackageFileContent | null,
+): ExtraEnv<string> {
+  const urls = [
+    ...(packageFile?.registryUrls ?? []),
+    ...(packageFile?.additionalRegistryUrls ?? []),
+  ];
+
+  const uniqueHosts = new Set<URL>(
+    urls.map(cleanUrl).filter(isNotNullOrUndefined),
+  );
+
+  let allCreds: ExtraEnv<string> = {};
+  for (const [index, host] of [...uniqueHosts].entries()) {
+    const hostCreds = getRegistryCredEnvVars(host, index);
+    allCreds = {
+      ...allCreds,
+      ...hostCreds,
+    };
+  }
+
+  return allCreds;
 }

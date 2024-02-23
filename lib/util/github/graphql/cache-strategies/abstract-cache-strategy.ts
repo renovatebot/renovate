@@ -30,7 +30,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    * Set of all versions which were reconciled
    * during the current cache access cycle.
    */
-  private readonly reconciledVersions = new Set<string>();
+  private reconciledVersions: Set<string> | undefined;
 
   /**
    * These fields will be persisted.
@@ -126,6 +126,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
       }
 
       cachedItems[version] = item;
+      this.reconciledVersions ??= new Set();
       this.reconciledVersions.add(version);
     }
 
@@ -137,17 +138,22 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    * Handle removed items for packages that are not stabilized
    * and return the list of all items.
    */
-  async finalize(): Promise<GithubItem[]> {
+  async finalizeAndReturn(): Promise<GithubItem[]> {
     const cachedItems = await this.getItems();
-    const resultItems: Record<string, GithubItem> = {};
+    let resultItems: Record<string, GithubItem>;
 
     let hasDeletedItems = false;
-    for (const [version, item] of Object.entries(cachedItems)) {
-      if (this.isStabilized(item) || this.reconciledVersions.has(version)) {
-        resultItems[version] = item;
-      } else {
-        hasDeletedItems = true;
+    if (this.reconciledVersions) {
+      resultItems = {};
+      for (const [version, item] of Object.entries(cachedItems)) {
+        if (this.reconciledVersions.has(version) || this.isStabilized(item)) {
+          resultItems[version] = item;
+        } else {
+          hasDeletedItems = true;
+        }
       }
+    } else {
+      resultItems = cachedItems;
     }
 
     if (this.hasNovelty || hasDeletedItems) {
