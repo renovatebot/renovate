@@ -14,21 +14,15 @@ class Unity3dVersioningApi extends GenericVersioningApi {
     /^(?<Major>\d+)\.(?<Minor>\d+)\.(?<Patch>\d+)(?<ReleaseStream>\w)(?<Build>\d+)/,
   );
 
-  private static readonly ReleaseStreamType = new Map([
-    ['Alpha', 'a'],
-    ['Beta', 'b'],
-    ['Patch', 'p'],
-    ['Experimental', 'x'],
-    ['Stable', 'f'],
-    ['Stable (China)', 'c'],
-  ]);
-  private static readonly stableVersions = [
-    Unity3dVersioningApi.ReleaseStreamType.get('Stable'),
-    Unity3dVersioningApi.ReleaseStreamType.get('Stable (China)'),
+  private static readonly ReleaseStreamType = [
+    'a', // Alpha
+    'b', // Beta
+    'p', // Patch
+    'x', // Experimental
+    'f', // Stable
+    'c', // Stable (China)
   ];
-  private static readonly ReleaseStreamTypeKeyOrder = Array.from(
-    Unity3dVersioningApi.ReleaseStreamType.values(),
-  );
+  private static readonly stableVersions = ['f', 'c'];
 
   protected _parse(version: string): GenericVersion | null {
     const matches = Unity3dVersioningApi.parsingRegex.exec(version);
@@ -41,7 +35,7 @@ class Unity3dVersioningApi extends GenericVersioningApi {
       parseInt(Major),
       parseInt(Minor),
       parseInt(Patch),
-      Unity3dVersioningApi.ReleaseStreamTypeKeyOrder.indexOf(ReleaseStream),
+      Unity3dVersioningApi.ReleaseStreamType.indexOf(ReleaseStream),
       parseInt(Build),
     ];
     const isStable =
