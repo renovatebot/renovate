@@ -235,6 +235,11 @@ Use the `automergeSchedule` option to define times of week or month during which
 The default value for `automergeSchedule` is "at any time", which functions the same as setting a `null` schedule.
 To configure this option refer to [`schedule`](#schedule) as the syntax is the same.
 
+<!-- prettier-ignore -->
+!!! warning
+    When `platformAutomerge` is enabled, Renovate enqueues the platform PR automerge at time of creation, so the schedule specified in `automergeSchedule` cannot be followed.
+    If it's essential that automerging only happens within the specific `automergeSchedule` time window, then you need to set `platformAutomerge` to `false` and instead rely on Renovate's automerge instead of the platform one.
+
 ## automergeStrategy
 
 The automerge strategy defaults to `auto`, so Renovate decides how to merge pull requests as best it can.
