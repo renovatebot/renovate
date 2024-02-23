@@ -1,14 +1,14 @@
-import { writeFileSync } from 'fs';
 import { PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../config/types';
 import { logger } from '../logger';
 import type { BranchCache } from '../util/cache/repository/types';
+import { writeSystemFile } from '../util/fs';
 import { getS3Client, parseS3Url } from '../util/s3';
 import type { ExtractResult } from '../workers/repository/process/extract-update';
 import type { Report } from './types';
 
-const result: Report = {
+const report: Report = {
   repositories: {},
 };
 
@@ -21,7 +21,7 @@ export function addBranchStats(
   }
 
   coerceRepo(config.repository!);
-  result.repositories[config.repository!].branches = branchesInformation;
+  report.repositories[config.repository!].branches = branchesInformation;
 }
 
 export function addExtractionStats(
@@ -33,7 +33,7 @@ export function addExtractionStats(
   }
 
   coerceRepo(config.repository!);
-  result.repositories[config.repository!].packageFiles =
+  report.repositories[config.repository!].packageFiles =
     extractResult.packageFiles;
 }
 
@@ -44,7 +44,7 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
     }
 
     if (config.reportType === 'logging') {
-      logger.info({ result }, 'Printing report');
+      logger.info({ report }, 'Printing report');
       return;
     }
 
@@ -57,7 +57,7 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
         return;
       }
 
-      writeFileSync(path, JSON.stringify(result));
+      await writeSystemFile(path, JSON.stringify(report));
       logger.debug({ path }, 'Writing report');
       return;
     }
@@ -81,11 +81,13 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
       const s3Params: PutObjectCommandInput = {
         Bucket: s3Url.Bucket,
         Key: s3Url.Key,
-        Body: JSON.stringify(result),
+        Body: JSON.stringify(report),
         ContentType: 'application/json',
       };
 
-      await getS3Client().send(new PutObjectCommand(s3Params));
+      const client = getS3Client();
+      const command = new PutObjectCommand(s3Params);
+      await client.send(command);
     }
   } catch (err) {
     logger.warn({ err }, 'Reporting.exportStats() - failure');
@@ -93,15 +95,15 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
 }
 
 export function getReport(): Report {
-  return structuredClone(result)
+  return structuredClone(report);
 }
 
 function coerceRepo(repository: string): void {
-  if (!is.undefined(result.repositories[repository])) {
+  if (!is.undefined(report.repositories[repository])) {
     return;
   }
 
-  result.repositories[repository] = {
+  report.repositories[repository] = {
     branches: [],
     packageFiles: {},
   };
