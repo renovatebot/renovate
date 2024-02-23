@@ -155,7 +155,7 @@ describe('modules/versioning/generic', () => {
     it('sortVersions', () => {
       expect(api.sortVersions('1.2.3', '1.2.3')).toBe(0);
       expect(api.sortVersions('1.2.3', '3.2.1')).toBe(-2);
-      expect(api.sortVersions('3.2.1', '1.2.3')).toBe(1);
+      expect(api.sortVersions('3.2.1', '1.2.3')).toBe(2);
     });
 
     it('isLessThanRange', () => {
