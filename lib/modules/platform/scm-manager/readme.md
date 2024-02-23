@@ -10,7 +10,7 @@ Renovate supports the [SCM-Manager](https://scm-manager.org) platform.
 
 You must set the [`platform` config option](https://docs.renovatebot.com/self-hosted-configuration/#platform) to `scm-manager` in your Renovate config file.
 
-The technical user needs the permissions to read and write your repository.
+The technical user must have permission to read and write to your repository.
 This can be achieved by granting the permission role "OWNER" to your technical Renovate user.
 Additionally, the Review Plugin needs to be installed.
 Otherwise, the pull request API will not be available.
