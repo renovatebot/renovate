@@ -141,6 +141,25 @@ describe('instrumentation/reporting', () => {
     });
   });
 
+  it('handle failed parsing of S3 url', async () => {
+    s3.parseS3Url.mockReturnValue(null);
+
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 's3',
+      reportPath: 'aPath',
+    };
+
+    addBranchStats(config, branchInformation);
+    addExtractionStats(config, { branchList: [], branches: [], packageFiles });
+
+    await exportStats(config);
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      { reportPath: config.reportPath },
+      'Failed to parse s3 URL',
+    );
+  });
+
   it('catch exception', async () => {
     const config: RenovateConfig = {
       repository: 'myOrg/myRepo',

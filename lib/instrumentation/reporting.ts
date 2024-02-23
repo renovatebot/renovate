@@ -49,27 +49,14 @@ export async function exportStats(config: RenovateConfig): Promise<void> {
     }
 
     if (config.reportType === 'file') {
-      const path = config.reportPath;
-      if (!is.nonEmptyString(path)) {
-        logger.warn(
-          'No reportPath has been provided while using reportType `file`',
-        );
-        return;
-      }
-
+      const path = config.reportPath!;
       await writeSystemFile(path, JSON.stringify(report));
       logger.debug({ path }, 'Writing report');
       return;
     }
 
     if (config.reportType === 's3') {
-      if (is.nullOrUndefined(config.reportPath)) {
-        logger.warn(
-          'No reportPath has been provided while using reportType `s3`',
-        );
-        return;
-      }
-      const s3Url = parseS3Url(config.reportPath);
+      const s3Url = parseS3Url(config.reportPath!);
       if (is.nullOrUndefined(s3Url)) {
         logger.warn(
           { reportPath: config.reportPath },
