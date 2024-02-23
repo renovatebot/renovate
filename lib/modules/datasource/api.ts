@@ -59,6 +59,7 @@ import { SbtPluginDatasource } from './sbt-plugin';
 import { TerraformModuleDatasource } from './terraform-module';
 import { TerraformProviderDatasource } from './terraform-provider';
 import type { DatasourceApi } from './types';
+import { Unity3dDatasource } from './unity3d';
 
 const api = new Map<string, DatasourceApi>();
 export default api;
@@ -126,3 +127,4 @@ api.set(SbtPackageDatasource.id, new SbtPackageDatasource());
 api.set(SbtPluginDatasource.id, new SbtPluginDatasource());
 api.set(TerraformModuleDatasource.id, new TerraformModuleDatasource());
 api.set(TerraformProviderDatasource.id, new TerraformProviderDatasource());
+api.set(Unity3dDatasource.id, new Unity3dDatasource());
