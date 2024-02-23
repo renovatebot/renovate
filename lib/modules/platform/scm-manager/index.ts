@@ -156,7 +156,7 @@ export async function getPr(number: number): Promise<Pr | null> {
     logger.info(`Returning PR from API, ${JSON.stringify(result)}`);
     return mapPrFromScmToRenovate(result);
   } catch (error) {
-    logger.info(`Not found PR with id ${number}`);
+    logger.info(`Can not find a PR with id ${number}`);
     return null;
   }
 }
