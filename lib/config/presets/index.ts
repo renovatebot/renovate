@@ -112,9 +112,7 @@ export function parsePreset(input: string): ParsedPreset {
   let presetName: string;
   let tag: string | undefined;
   let params: string[] | undefined;
-  if (str.startsWith('http://') || str.startsWith('https://')) {
-    presetSource = 'http';
-  } else if (str.startsWith('github>')) {
+  if (str.startsWith('github>')) {
     presetSource = 'github';
     str = str.substring('github>'.length);
   } else if (str.startsWith('gitlab>')) {
@@ -126,6 +124,8 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);
+  } else if (str.startsWith('http://') || str.startsWith('https://')) {
+    presetSource = 'http';
   } else if (
     !str.startsWith('@') &&
     !str.startsWith(':') &&
