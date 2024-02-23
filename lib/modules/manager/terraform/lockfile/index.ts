@@ -184,8 +184,10 @@ export async function updateArtifacts({
             updateLock.constraints,
           );
 
-          // skip lockfile update if new version does not satisfy constraints
           if (!satisfyingVersion) {
+            logger.debug(
+              `Skipping. Lockfile update with "${newVersion}" does not statisfy constraints "${updateLock.constraints}" for "${packageName}"`,
+            );
             continue;
           }
         }
