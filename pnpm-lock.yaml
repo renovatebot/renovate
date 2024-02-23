@@ -527,8 +527,8 @@ importers:
         specifier: 2.29.1
         version: 2.29.1(@typescript-eslint/parser@6.21.0)(eslint-import-resolver-typescript@3.6.1)(eslint@8.56.0)
       eslint-plugin-jest:
-        specifier: 27.8.0
-        version: 27.8.0(@typescript-eslint/eslint-plugin@6.21.0)(eslint@8.56.0)(jest@29.7.0)(typescript@5.3.3)
+        specifier: 27.9.0
+        version: 27.9.0(@typescript-eslint/eslint-plugin@6.21.0)(eslint@8.56.0)(jest@29.7.0)(typescript@5.3.3)
       eslint-plugin-jest-formatting:
         specifier: 3.1.0
         version: 3.1.0(eslint@8.56.0)
@@ -5774,8 +5774,8 @@ packages:
       eslint: 8.56.0
     dev: true
 
-  /eslint-plugin-jest@27.8.0(@typescript-eslint/eslint-plugin@6.21.0)(eslint@8.56.0)(jest@29.7.0)(typescript@5.3.3):
-    resolution: {integrity: sha512-347hVFiu4ZKMYl5xFp0X81gLNwBdno0dl0CMpUMjwuAux9X/M2a7z+ab2VHmPL6XCT87q8nv1vaVzhIO4TE/hw==}
+  /eslint-plugin-jest@27.9.0(@typescript-eslint/eslint-plugin@6.21.0)(eslint@8.56.0)(jest@29.7.0)(typescript@5.3.3):
+    resolution: {integrity: sha512-QIT7FH7fNmd9n4se7FFKHbsLKGQiw885Ds6Y/sxKgCZ6natwCsXdgPOADnYVxN2QrRweF0FZWbJ6S7Rsn7llug==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     peerDependencies:
       '@typescript-eslint/eslint-plugin': ^5.0.0 || ^6.0.0 || ^7.0.0
@@ -9816,6 +9816,7 @@ packages:
   /socks@2.7.3:
     resolution: {integrity: sha512-vfuYK48HXCTFD03G/1/zkIls3Ebr2YNa4qU9gHDZdblHLiqhJrJGkY3+0Nx0JpN9qBhJbVObc1CNciT1bIZJxw==}
     engines: {node: '>= 10.0.0', npm: '>= 3.0.0'}
+    deprecated: please use 2.7.4 or 2.8.1 to fix package-lock issue
     requiresBuild: true
     dependencies:
       ip-address: 9.0.5
