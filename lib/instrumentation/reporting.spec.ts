@@ -1,6 +1,7 @@
 import type { S3Client } from '@aws-sdk/client-s3';
 import { mockDeep } from 'jest-mock-extended';
-import { fs, logger, s3 } from '../../test/util';
+import { s3 } from '../../test/s3';
+import { fs, logger } from '../../test/util';
 import type { RenovateConfig } from '../config/types';
 import type { PackageFile } from '../modules/manager/types';
 import type { BranchCache } from '../util/cache/repository/types';

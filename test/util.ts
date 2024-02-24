@@ -11,7 +11,6 @@ import * as _fs from '../lib/util/fs';
 import * as _git from '../lib/util/git';
 import * as _hostRules from '../lib/util/host-rules';
 import { regEx } from '../lib/util/regex';
-import * as _s3 from '../lib/util/s3';
 
 /**
  * Simple wrapper for getting mocked version of a module
@@ -44,7 +43,6 @@ export function partial(obj: unknown = {}): unknown {
 
 export const fs = jest.mocked(_fs);
 export const git = jest.mocked(_git);
-export const s3 = jest.mocked(_s3);
 
 // TODO: fix types, jest / typescript is using wrong overload (#22198)
 export const platform = jest.mocked(partial<Required<Platform>>(_platform));
