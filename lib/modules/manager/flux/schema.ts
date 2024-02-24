@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const KubernetesResource = z.object({
   apiVersion: z.string(),
+  kind: z.string(),
   metadata: z.object({
     name: z.string(),
     // For Flux, the namespace property is optional, but matching HelmReleases to HelmRepositories would be
