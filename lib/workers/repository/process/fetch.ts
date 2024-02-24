@@ -79,7 +79,6 @@ async function lookup(
   }
 
   if (!depConfig.datasource) {
-    dep.updates ??= [];
     return Result.ok(dep);
   }
 
