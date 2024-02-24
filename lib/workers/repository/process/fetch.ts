@@ -21,11 +21,13 @@ import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig, UpdateResult } from './lookup/types';
 
 type LookupResult = Result<PackageDependency, Error>;
-type LookupTaskResult = {
+
+interface LookupTaskResult {
   packageFileName: string;
   manager: string;
   result: LookupResult;
-};
+}
+
 type LookupTask = () => Promise<LookupTaskResult>;
 
 async function lookup(
