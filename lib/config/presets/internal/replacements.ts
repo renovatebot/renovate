@@ -13,6 +13,7 @@ export const presets: Record<string, Preset> = {
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
       'replacements:containerbase',
+      'replacements:cpx-to-maintenance-fork',
       'replacements:cucumber-to-scoped',
       'replacements:fakerjs-to-scoped',
       'replacements:fastify-to-scoped',
@@ -168,6 +169,17 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         matchPackageNames: ['ghcr.io/renovatebot/renovate'],
         matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+      },
+    ],
+  },
+  'cpx-to-maintenance-fork': {
+    description: 'Maintenance fork of `cpx`',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['cpx'],
+        replacementName: 'cpx2',
+        replacementVersion: '2.0.0',
       },
     ],
   },

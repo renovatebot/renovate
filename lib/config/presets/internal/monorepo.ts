@@ -248,6 +248,7 @@ const repoGroups = {
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
   'dnd-kit': 'https://github.com/clauderic/dnd-kit',
   docusaurus: 'https://github.com/facebook/docusaurus',
+  'dot-swashbuckle': 'https://github.com/Havunen/DotSwashbuckle',
   dotnet: [
     'https://github.com/dotnet/aspnetcore',
     'https://github.com/dotnet/efcore',
@@ -447,6 +448,7 @@ const repoGroups = {
   'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
   sanity: 'https://github.com/sanity-io/sanity',
   scaffdog: 'https://github.com/scaffdog/scaffdog',
+  secretlint: 'https://github.com/secretlint/secretlint',
   'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',

@@ -42,7 +42,7 @@ let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
 
-const topLevelObjects = managerList;
+const topLevelObjects = [...managerList, 'env'];
 
 const ignoredNodes = [
   '$schema',
@@ -602,6 +602,24 @@ export async function validateConfig(
                   topic: 'Configuration Error',
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
+              }
+            } else if (key === 'env') {
+              const allowedEnvVars = isGlobalConfig
+                ? (config.allowedEnv as string[]) ?? []
+                : GlobalConfig.get('allowedEnv', []);
+              for (const [envVarName, envVarValue] of Object.entries(val)) {
+                if (!is.string(envVarValue)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid env variable value: \`${currentPath}.${envVarName}\` must be a string.`,
+                  });
+                }
+                if (!matchRegexOrGlobList(envVarName, allowedEnvVars)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Env variable name \`${envVarName}\` is not allowed by this bot's \`allowedEnv\`.`,
+                  });
+                }
               }
             } else if (key === 'statusCheckNames') {
               for (const [statusCheckKey, statusCheckValue] of Object.entries(

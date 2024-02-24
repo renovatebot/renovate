@@ -19,6 +19,7 @@ import { removedPresets } from './common';
 import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
+import * as http from './http';
 import * as internal from './internal';
 import * as local from './local';
 import * as npm from './npm';
@@ -39,6 +40,7 @@ const presetSources: Record<string, PresetApi> = {
   gitea,
   local,
   internal,
+  http,
 };
 
 const presetCacheNamespace = 'preset';
@@ -122,6 +124,8 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);
+  } else if (str.startsWith('http://') || str.startsWith('https://')) {
+    presetSource = 'http';
   } else if (
     !str.startsWith('@') &&
     !str.startsWith(':') &&
@@ -137,6 +141,9 @@ export function parsePreset(input: string): ParsedPreset {
       .split(',')
       .map((elem) => elem.trim());
     str = str.slice(0, str.indexOf('('));
+  }
+  if (presetSource === 'http') {
+    return { presetSource, repo: str, presetName: '', params };
   }
   const presetsPackages = [
     'compatibility',
