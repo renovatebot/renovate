@@ -12,4 +12,4 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: 'Dependency Review'
-        uses: actions/dependency-review-action@c74b580d73376b7750d3d2a50bfb8adc2c937507 # v3.1.5
+        uses: actions/dependency-review-action@be8bc500ee15e96754d2a6f2d34be14e945a46f3 # v4.1.2

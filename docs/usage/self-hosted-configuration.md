@@ -63,6 +63,33 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowScripts
 
+## allowedEnv
+
+Bot administrators can allow users to configure custom environment variables within repo config.
+Only environment variables matching the list will be accepted in the [`env`](./configuration-options.md#env) configuration.
+
+Examples:
+
+```json title="renovate.json"
+{
+  "env": {
+    "SOME_ENV_VARIABLE": "some_value",
+    "EXTRA_ENV_NAME": "value"
+  }
+}
+```
+
+The above would require `allowedEnv` to be configured similar to the following:
+
+```js title="config.js"
+module.exports = {
+  allowedEnv: ['SOME_ENV_*', 'EXTRA_ENV_NAME'],
+};
+```
+
+`allowedEnv` values can be exact match header names, glob patterns, or regex patterns.
+For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](./string-pattern-matching.md).
+
 ## allowedHeaders
 
 `allowedHeaders` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
@@ -70,6 +97,7 @@ By default, all headers starting with "X-" are allowed.
 If needed, you can allow additional headers with the `allowedHeaders` option.
 Any set `allowedHeaders` overrides the default "X-" allowed headers, so you should include them in your config if you wish for them to remain allowed.
 The `allowedHeaders` config option takes an array of minimatch-compatible globs or re2-compatible regex strings.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 Examples:
 
@@ -414,7 +442,7 @@ You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar 
 
 For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `docker run` command that limits the amount of memory Renovate's sidecar Docker container can use to 4 gigabytes.
 
-Read the [Docker Docs, configure runtime resource contraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
+Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
 
 ## dockerSidecarImage
 
@@ -430,7 +458,7 @@ You would put this in your configuration file:
 }
 ```
 
-Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/containerbase/sidecar` instead of `docker.io/containerbase/sidecar`.
+Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/your_company/sidecar` instead of `ghcr.io/containerbase/sidecar`.
 
 ## dockerUser
 

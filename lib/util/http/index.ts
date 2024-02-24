@@ -7,6 +7,7 @@ import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
+import { getCache } from '../cache/repository';
 import { clone } from '../clone';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
@@ -163,6 +164,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       httpOptions,
     );
 
+    logger.trace(`HTTP request: ${options.method.toUpperCase()} ${url}`);
+
     const etagCache =
       httpOptions.etagCache && options.method === 'get'
         ? httpOptions.etagCache
@@ -210,6 +213,27 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     // istanbul ignore else: no cache tests
     if (!resPromise) {
+      if (httpOptions.repoCache) {
+        const responseCache = getCache().httpCache?.[url];
+        // Prefer If-Modified-Since over If-None-Match
+        if (responseCache?.['lastModified']) {
+          logger.debug(
+            `http cache: trying cached Last-Modified "${responseCache?.['lastModified']}" for ${url}`,
+          );
+          options.headers = {
+            ...options.headers,
+            'If-Modified-Since': responseCache['lastModified'],
+          };
+        } else if (responseCache?.etag) {
+          logger.debug(
+            `http cache: trying cached etag "${responseCache.etag}" for ${url}`,
+          );
+          options.headers = {
+            ...options.headers,
+            'If-None-Match': responseCache.etag,
+          };
+        }
+      }
       const startTime = Date.now();
       const httpTask: GotTask<T> = () => {
         const queueDuration = Date.now() - startTime;
@@ -243,6 +267,35 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
+      if (httpOptions.repoCache) {
+        const cache = getCache();
+        cache.httpCache ??= {};
+        if (
+          resCopy.statusCode === 200 &&
+          (resCopy.headers?.etag ?? resCopy.headers['last-modified'])
+        ) {
+          logger.debug(
+            `http cache: saving ${url} (etag=${resCopy.headers.etag}, lastModified=${resCopy.headers['last-modified']})`,
+          );
+          cache.httpCache[url] = {
+            etag: resCopy.headers.etag,
+            httpResponse: copyResponse(res, deepCopyNeeded),
+            lastModified: resCopy.headers['last-modified'],
+            timeStamp: new Date().toISOString(),
+          };
+        }
+        if (resCopy.statusCode === 304 && cache.httpCache[url]?.httpResponse) {
+          logger.debug(
+            `http cache: Using cached response: ${url} from ${cache.httpCache[url].timeStamp}`,
+          );
+          const cacheCopy = copyResponse(
+            cache.httpCache[url].httpResponse,
+            deepCopyNeeded,
+          );
+          cacheCopy.authorization = !!options?.headers?.authorization;
+          return cacheCopy as HttpResponse<T>;
+        }
+      }
       return resCopy;
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;

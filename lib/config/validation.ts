@@ -8,8 +8,12 @@ import type {
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types/host-rules';
-import { anyMatchRegexOrMinimatch } from '../util/package-rules/match';
-import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
+import { regEx } from '../util/regex';
+import {
+  getRegexPredicate,
+  isRegexMatch,
+  matchRegexOrGlobList,
+} from '../util/string-match';
 import * as template from '../util/template';
 import {
   hasValidSchedule,
@@ -20,6 +24,7 @@ import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import {
+  AllowedParents,
   type RenovateConfig,
   type RenovateOptions,
   type StatusCheckKey,
@@ -32,12 +37,12 @@ import * as managerValidator from './validation-helpers/managers';
 const options = getOptions();
 
 let optionTypes: Record<string, RenovateOptions['type']>;
-let optionParents: Record<string, RenovateOptions['parent']>;
+let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
 
 const managerList = getManagerList();
 
-const topLevelObjects = managerList;
+const topLevelObjects = [...managerList, 'env'];
 
 const ignoredNodes = [
   '$schema',
@@ -117,8 +122,8 @@ export async function validateConfig(
   if (!optionParents) {
     optionParents = {};
     options.forEach((option) => {
-      if (option.parent) {
-        optionParents[option.name] = option.parent;
+      if (option.parents) {
+        optionParents[option.name] = option.parents;
       }
     });
   }
@@ -224,10 +229,12 @@ export async function validateConfig(
       if (
         !isPreset &&
         optionParents[key] &&
-        optionParents[key] !== parentName
+        !optionParents[key].includes(parentName as AllowedParents)
       ) {
         // TODO: types (#22198)
-        const message = `${key} should only be configured within a "${optionParents[key]}" object. Was found in ${parentName}`;
+        const message = `${key} should only be configured within one of "${optionParents[
+          key
+        ]?.join(' or ')}" objects. Was found in ${parentName}`;
         warnings.push({
           topic: `${parentPath ? `${parentPath}.` : ''}${key}`,
           message,
@@ -248,9 +255,9 @@ export async function validateConfig(
         }
       } else if (
         ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
-        isConfigRegex(val)
+        isRegexMatch(val)
       ) {
-        if (!configRegexPredicate(val)) {
+        if (!getRegexPredicate(val)) {
           errors.push({
             topic: 'Configuration Error',
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
@@ -259,7 +266,7 @@ export async function validateConfig(
       } else if (
         key === 'matchCurrentValue' &&
         is.string(val) &&
-        !configRegexPredicate(val)
+        !getRegexPredicate(val)
       ) {
         errors.push({
           topic: 'Configuration Error',
@@ -364,6 +371,7 @@ export async function validateConfig(
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
+              'matchCurrentAge',
               'matchRepositories',
             ];
             if (key === 'packageRules') {
@@ -544,8 +552,8 @@ export async function validateConfig(
             if (key === 'baseBranches') {
               for (const baseBranch of val as string[]) {
                 if (
-                  isConfigRegex(baseBranch) &&
-                  !configRegexPredicate(baseBranch)
+                  isRegexMatch(baseBranch) &&
+                  !getRegexPredicate(baseBranch)
                 ) {
                   errors.push({
                     topic: 'Configuration Error',
@@ -594,6 +602,24 @@ export async function validateConfig(
                   topic: 'Configuration Error',
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
+              }
+            } else if (key === 'env') {
+              const allowedEnvVars = isGlobalConfig
+                ? (config.allowedEnv as string[]) ?? []
+                : GlobalConfig.get('allowedEnv', []);
+              for (const [envVarName, envVarValue] of Object.entries(val)) {
+                if (!is.string(envVarValue)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid env variable value: \`${currentPath}.${envVarName}\` must be a string.`,
+                  });
+                }
+                if (!matchRegexOrGlobList(envVarName, allowedEnvVars)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Env variable name \`${envVarName}\` is not allowed by this bot's \`allowedEnv\`.`,
+                  });
+                }
               }
             } else if (key === 'statusCheckNames') {
               for (const [statusCheckKey, statusCheckValue] of Object.entries(
@@ -702,7 +728,9 @@ export async function validateConfig(
     }
 
     if (key === 'hostRules' && is.array(val)) {
-      const allowedHeaders = GlobalConfig.get('allowedHeaders');
+      const allowedHeaders = isGlobalConfig
+        ? (config.allowedHeaders as string[]) ?? []
+        : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (!rule.headers) {
           continue;
@@ -714,7 +742,7 @@ export async function validateConfig(
               message: `Invalid hostRules headers value configuration: header must be a string.`,
             });
           }
-          if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
+          if (!matchRegexOrGlobList(header, allowedHeaders)) {
             errors.push({
               topic: 'Configuration Error',
               message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,

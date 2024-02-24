@@ -122,6 +122,7 @@ export const presets: Record<string, Preset> = {
         matchPackagePatterns: [
           '^azul/zulu-openjdk',
           '^bellsoft/liberica-openj(dk|re)-',
+          '^cimg/openjdk',
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',

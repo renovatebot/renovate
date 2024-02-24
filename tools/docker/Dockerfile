@@ -1,15 +1,45 @@
-ARG RENOVATE_VERSION
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:1.14.3@sha256:cccd5d5198983fc2999aa012f0c78f16dbabdbe02422b6e32d608c6274097ec7 AS slim-base
+FROM ghcr.io/renovatebot/base-image:1.24.9@sha256:89401dc8f92309db16a3f6da93b1686571816388aad2d5a3f897bf0e5774fa64 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:1.14.3-full@sha256:e8dcbd5a2e3dde70a51a828fe7a0cd0c9815b010da573448ff52a7da40f18726 AS full-base
+FROM ghcr.io/renovatebot/base-image:1.24.9-full@sha256:f4a9b73042243b0be2a7a5cda8d8385a2f47a720c0eab816c35883efa1c07bda AS full-base
+
+# --------------------------------------
+# build image
+# --------------------------------------
+FROM slim-base as build
+
+WORKDIR /usr/local/renovate
+
+ENV CI=1 npm_config_modules_cache_max_age=0
+ENV RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
+
+COPY pnpm-lock.yaml ./
+
+# only fetch deps from lockfile https://pnpm.io/cli/fetch
+RUN pnpm fetch --prod
+
+COPY . ./
+
+# install
+RUN set -ex; \
+  pnpm install --prod --offline --ignore-scripts; \
+  npm explore re2 -- npm run install; \
+  true
+
+# test
+COPY tools/docker/bin/ /usr/local/bin/
+RUN set -ex; \
+  renovate --version; \
+  renovate-config-validator; \
+  node -e "new require('re2')('.*').exec('test')"; \
+  true
 
 # --------------------------------------
 # final image
@@ -21,19 +51,24 @@ LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate" 
   org.opencontainers.image.url="https://renovatebot.com" \
   org.opencontainers.image.licenses="AGPL-3.0-only"
 
-
 WORKDIR /usr/src/app
 
 ENV RENOVATE_X_IGNORE_NODE_WARN=true
 
-COPY bin/ /usr/local/bin/
+COPY tools/docker/bin/ /usr/local/bin/
 CMD ["renovate"]
 
 ARG RENOVATE_VERSION
-RUN install-tool renovate
+
+COPY --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
 # Compabillity, so `config.js` can access renovate and deps
-RUN ln -sf /opt/containerbase/tools/renovate/${RENOVATE_VERSION}/node_modules ./node_modules;
+RUN set -ex; \
+  mkdir /opt/containerbase/tools/renovate; \
+  echo "${RENOVATE_VERSION}" > /opt/containerbase/versions/renovate; \
+  ln -sf /usr/local/renovate /opt/containerbase/tools/renovate/${RENOVATE_VERSION}; \
+  ln -sf /usr/local/renovate/node_modules ./node_modules; \
+  true
 
 RUN set -ex; \
   renovate --version; \
