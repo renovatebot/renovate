@@ -2037,6 +2037,60 @@ describe('workers/repository/update/branch/index', () => {
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
+    it('continues when rebaseWhen=never and keepUpdatedLabel', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          state: 'open',
+          title: '',
+          labels: ['keep-updated'],
+        }),
+      );
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          rebaseWhen: 'never',
+          keepUpdatedLabel: 'keep-updated',
+        }),
+      ).toMatchObject({ result: 'done' });
+      expect(commit.commitFilesToBranch).toHaveBeenCalled();
+    });
+
+    it('returns when rebaseWhen=never and keepUpdatedLabel does not match', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          state: 'open',
+          title: '',
+          labels: ['keep-updated'],
+        }),
+      );
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          rebaseWhen: 'never',
+          keepUpdatedLabel: 'keep-not-updated',
+        }),
+      ).toMatchObject({ result: 'no-work' });
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+    });
+
     it('continues when rebaseWhen=never but checked', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
