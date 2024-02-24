@@ -2,7 +2,7 @@ import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
 import { env, fs, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import type { PostUpdateConfig } from '../../types';
+import type { PostUpdateConfig, Upgrade } from '../../types';
 import { getNodeToolConstraint } from './node-version';
 import * as pnpmHelper from './pnpm';
 
@@ -15,6 +15,7 @@ process.env.CONTAINERBASE = 'true';
 
 describe('modules/manager/npm/post-update/pnpm', () => {
   let config: PostUpdateConfig;
+  const upgrades: Upgrade[] = [{}];
 
   beforeEach(() => {
     config = partial<PostUpdateConfig>({ constraints: { pnpm: '^2.0.0' } });
@@ -26,10 +27,22 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     });
   });
 
+  it('does nothing when no upgrades', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    await pnpmHelper.generateLockFile('some-dir', {}, config);
+    expect(execSnapshots).toMatchObject([]);
+  });
+
   it('generates lock files', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
-    const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      config,
+      upgrades,
+    );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
@@ -40,7 +53,12 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     fs.readLocalFile.mockImplementation(() => {
       throw new Error('not found');
     });
-    const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      config,
+      upgrades,
+    );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeTrue();
     expect(res.lockFile).toBeUndefined();
@@ -50,10 +68,64 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   it('finds pnpm globally', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
-    const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      config,
+      upgrades,
+    );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('performs lock file updates', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
+      {
+        packageName: 'some-other-dep',
+        newVersion: '1.1.0',
+        isLockfileUpdate: true,
+      },
+    ]);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm update --no-save some-dep@1.0.1 some-other-dep@1.1.0 --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
+  });
+
+  it('performs lock file updates and install when lock file updates mixed with regular updates', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const res = await pnpmHelper.generateLockFile('some-folder', {}, config, [
+      {
+        groupName: 'some-group',
+        packageName: 'some-dep',
+        newVersion: '1.1.0',
+        isLockfileUpdate: true,
+      },
+      {
+        groupName: 'some-group',
+        packageName: 'some-other-dep',
+        newVersion: '1.1.0',
+        isLockfileUpdate: false,
+      },
+    ]);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+      {
+        cmd: 'pnpm update --no-save some-dep@1.1.0 --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+    ]);
   });
 
   it('performs lock file maintenance', async () => {
@@ -76,6 +148,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       'some-dir',
       {},
       { ...config, postUpdateOptions },
+      upgrades,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -220,6 +293,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       'some-dir',
       {},
       { ...config, constraints: { pnpm: '6.0.0' } },
+      upgrades,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
@@ -254,6 +328,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       'some-dir',
       {},
       { ...config, constraints: { pnpm: '6.0.0' } },
+      upgrades,
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');

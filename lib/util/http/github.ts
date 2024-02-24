@@ -135,6 +135,8 @@ function handleGotError(
       message.includes('Review cannot be requested from pull request author')
     ) {
       return err;
+    } else if (err.body?.errors?.find((e: any) => e.field === 'milestone')) {
+      return err;
     } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
