@@ -1585,6 +1585,7 @@ describe('modules/platform/github/index', () => {
             number: 1,
             title: 'title-1',
             body: 'body-1',
+            state: 'open',
             labels: [
               {
                 name: 'label-1',
@@ -1605,6 +1606,7 @@ describe('modules/platform/github/index', () => {
         number: 1,
         title: 'title-1b',
         body: 'body-1b',
+        state: 'open',
         labels: [
           {
             name: 'label-1',

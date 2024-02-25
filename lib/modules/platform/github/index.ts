@@ -74,6 +74,7 @@ import {
 } from './graphql';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
+import { IssuesSchema } from './schema';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -1176,19 +1177,19 @@ export async function setBranchStatus({
 
 /* istanbul ignore next */
 async function getIssues(): Promise<Issue[]> {
-  const result: Issue[] = (
-    await githubApi.getJson<Issue[]>(
-      `repos/${config.parentRepo ?? config.repository}/issues?creator=${
-        config.renovateUsername
-      }&state=all`,
-      { repoCache: true, paginate: true },
+  const issuesUrl = `repos/${config.parentRepo ?? config.repository}/issues?creator=${
+    config.renovateUsername
+  }&state=all`;
+  const result = (
+    await githubApi.getJson(
+      issuesUrl,
+      {
+        repoCache: true,
+        paginate: true,
+      },
+      IssuesSchema,
     )
-  ).body.map((issue) => ({
-    number: issue.number,
-    state: issue.state?.toLowerCase(),
-    title: issue.title,
-    body: issue.body,
-  }));
+  ).body;
 
   logger.debug(`Retrieved ${result.length} issues`);
   return result;
