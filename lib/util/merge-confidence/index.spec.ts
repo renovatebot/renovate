@@ -350,10 +350,10 @@ describe('util/merge-confidence/index', () => {
       it('uses a custom base url containing path', async () => {
         const renovateApi = 'https://domain.com/proxy/renovate-api';
         process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL = renovateApi;
-
         httpMock.scope(renovateApi).get(`/api/mc/availability`).reply(200);
 
         await expect(initMergeConfidence()).toResolve();
+
         expect(logger.trace).toHaveBeenCalledWith(
           expect.anything(),
           'using merge confidence API base found in environment variables',
