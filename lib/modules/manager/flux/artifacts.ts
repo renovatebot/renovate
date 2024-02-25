@@ -10,6 +10,7 @@ import type { FluxManagerData } from './types';
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
+  config,
 }: UpdateArtifact<FluxManagerData>): Promise<UpdateArtifactsResult[] | null> {
   const systemDep = updatedDeps[0];
   if (!isSystemManifest(packageFileName) || !systemDep?.newVersion) {
@@ -25,6 +26,7 @@ export async function updateArtifacts({
     const cmd = `flux install ${args.join(' ')} > ${quote(packageFileName)}`;
     const execOptions: ExecOptions = {
       docker: {},
+      userConfiguredEnv: config.env,
       toolConstraints: [
         {
           toolName: 'flux',

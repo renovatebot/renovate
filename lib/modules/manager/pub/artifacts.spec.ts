@@ -292,4 +292,70 @@ describe('modules/manager/pub/artifacts', () => {
       ).toEqual([{ artifactError: { lockFile, stderr } }]);
     });
   });
+
+  it('uses flutter constraint from pubspec.yaml', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    const flutterVersion = '3.19.0';
+    const newPackageFileContent = codeBlock`
+      environment:
+        sdk: ">=3.0.0 <4.0.0"
+        flutter: ${flutterVersion}
+      dependencies:
+        flutter:
+          sdk: flutter
+    `;
+    fs.getSiblingFileName.mockReturnValueOnce(lockFile);
+    fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
+    fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
+    expect(
+      await pub.updateArtifacts({
+        ...updateArtifact,
+        newPackageFileContent,
+      }),
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: lockFile,
+          contents: newLockFileContent,
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: `install-tool flutter ${flutterVersion}` },
+      { cmd: `flutter pub upgrade ${depNamesWithSpace}` },
+    ]);
+  });
+
+  it('uses dart constraint from pubspec.yaml', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    const dartVersion = '3.3.0';
+    const newPackageFileContent = codeBlock`
+      environment:
+        sdk: ${dartVersion}
+    `;
+    fs.getSiblingFileName.mockReturnValueOnce(lockFile);
+    fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
+    fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
+    expect(
+      await pub.updateArtifacts({
+        ...updateArtifact,
+        newPackageFileContent,
+      }),
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: lockFile,
+          contents: newLockFileContent,
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: `install-tool dart ${dartVersion}` },
+      { cmd: `dart pub upgrade ${depNamesWithSpace}` },
+    ]);
+  });
 });

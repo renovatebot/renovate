@@ -1384,6 +1384,41 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   }
 }
 
+async function tryAddMilestone(
+  issueNo: number,
+  milestoneNo: number | undefined,
+): Promise<void> {
+  if (!milestoneNo) {
+    return;
+  }
+
+  logger.debug(
+    {
+      milestone: milestoneNo,
+      pr: issueNo,
+    },
+    'Adding milestone to PR',
+  );
+  const repository = config.parentRepo ?? config.repository;
+  try {
+    await githubApi.patchJson(`repos/${repository}/issues/${issueNo}`, {
+      body: {
+        milestone: milestoneNo,
+      },
+    });
+  } catch (err) {
+    const actualError = err.response?.body || /* istanbul ignore next */ err;
+    logger.warn(
+      {
+        milestone: milestoneNo,
+        pr: issueNo,
+        err: actualError,
+      },
+      'Unable to add milestone to PR',
+    );
+  }
+}
+
 export async function addAssignees(
   issueNo: number,
   assignees: string[],
@@ -1664,6 +1699,7 @@ export async function createPr({
   labels,
   draftPR = false,
   platformOptions,
+  milestone,
 }: CreatePRConfig): Promise<GhPr | null> {
   const body = sanitize(rawBody);
   const base = targetBranch;
@@ -1703,6 +1739,7 @@ export async function createPr({
   const { number, node_id } = result;
 
   await addLabels(number, labels);
+  await tryAddMilestone(number, milestone);
   await tryPrAutomerge(number, node_id, platformOptions);
 
   cachePr(result);

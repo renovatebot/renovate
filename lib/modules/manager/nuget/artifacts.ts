@@ -57,6 +57,7 @@ async function runDotnetRestore(
 
   const execOptions: ExecOptions = {
     docker: {},
+    userConfiguredEnv: config.env,
     extraEnv: {
       NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
       MSBUILDDISABLENODEREUSE: '1',

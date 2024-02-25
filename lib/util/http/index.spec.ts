@@ -112,6 +112,54 @@ describe('util/http/index', () => {
     });
   });
 
+  it('uses last-modified header for caching', async () => {
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(200, '{ "test": true }', {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
+      authorization: false,
+      body: {
+        test: true,
+      },
+      headers: {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      },
+      statusCode: 200,
+    });
+
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(304, '', {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
+      authorization: false,
+      body: {
+        test: true,
+      },
+      headers: {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      },
+      statusCode: 200,
+    });
+  });
+
   it('postJson', async () => {
     httpMock.scope(baseUrl).post('/').reply(200, {});
     expect(

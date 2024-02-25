@@ -2,6 +2,7 @@ import type { ReleaseType } from 'semver';
 import type {
   MatchStringsStrategy,
   UpdateType,
+  UserEnv,
   ValidationMessage,
 } from '../../config/types';
 import type { Category } from '../../constants';
@@ -38,6 +39,7 @@ export interface UpdateArtifactsConfig {
   newMajor?: number;
   registryAliases?: Record<string, string>;
   lockFiles?: string[];
+  env?: UserEnv;
 }
 
 export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
