@@ -327,6 +327,31 @@ Use this option if you need such downloads to be stored outside of Renovate's re
 
 This configuration will be applied after all other environment variables so you can use it to override defaults.
 
+<!-- prettier-ignore -->
+!!! warning
+    Do not configure any secret values directly into `customEnvVariables` because they may be logged to stdout.
+    Instead, configure them into `secrets` first so that they will be redacted in logs.
+
+If configuring secrets in to `customEnvVariables`, take this approach:
+
+```js
+{
+  secrets: {
+    SECRET_TOKEN: process.env.SECRET_TOKEN,
+  },
+  customEnvVariables: {
+    SECRET_TOKEN: '{{ secrets.SECRET_TOKEN }}',
+  },
+}
+```
+
+The above configuration approach will mean the values are redacted in logs like in the following example:
+
+```
+         "secrets": {"SECRET_TOKEN": "***********"},
+         "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
+```
+
 ## detectGlobalManagerConfig
 
 The purpose of this config option is to allow you (as a bot admin) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
