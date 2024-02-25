@@ -77,12 +77,13 @@ export class BaseGoDatasource {
   private static async goGetDatasource(
     goModule: string,
   ): Promise<DataSource | null> {
-    const pkgUrl = `https://${goModule}?go-get=1`;
+    const goModuleUrl = goModule.replace(/\.git\/v2$/, '');
+    const pkgUrl = `https://${goModuleUrl}?go-get=1`;
     // GitHub Enterprise only returns a go-import meta
     const res = (await BaseGoDatasource.http.get(pkgUrl)).body;
     return (
-      BaseGoDatasource.goSourceHeader(res, goModule) ??
-      BaseGoDatasource.goImportHeader(res, goModule)
+      BaseGoDatasource.goSourceHeader(res, goModuleUrl) ??
+      BaseGoDatasource.goImportHeader(res, goModuleUrl)
     );
   }
 
