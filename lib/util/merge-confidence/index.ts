@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import upath from 'upath';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
 import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';
@@ -8,7 +7,7 @@ import * as packageCache from '../cache/package';
 import { parseJson } from '../common';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
-import { ensureTrailingSlash } from '../url';
+import { ensureTrailingSlash, joinUrlParts } from '../url';
 import { MERGE_CONFIDENCE } from './common';
 import type { MergeConfidence } from './types';
 
@@ -166,7 +165,7 @@ async function queryApi(
   }
 
   const escapedPackageName = packageName.replace('/', '%2f');
-  const url = joinPaths(
+  const url = joinUrlParts(
     apiBaseUrl,
     'api/mc/json',
     datasource,
@@ -226,7 +225,7 @@ export async function initMergeConfidence(): Promise<void> {
     return;
   }
 
-  const url = joinPaths(apiBaseUrl, 'api/mc/availability');
+  const url = joinUrlParts(apiBaseUrl, 'api/mc/availability');
   try {
     await http.get(url);
   } catch (err) {
@@ -295,8 +294,4 @@ function apiErrorHandler(err: any): void {
   }
 
   logger.warn({ err }, 'error fetching merge confidence data');
-}
-
-function joinPaths(...paths: string[]): string {
-  return upath.posix.join(...paths);
 }
