@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import upath from 'upath';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
 import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';
@@ -7,6 +8,7 @@ import * as packageCache from '../cache/package';
 import { parseJson } from '../common';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
+import { ensureTrailingSlash } from '../url';
 import { MERGE_CONFIDENCE } from './common';
 import type { MergeConfidence } from './types';
 
@@ -164,7 +166,7 @@ async function queryApi(
   }
 
   const escapedPackageName = packageName.replace('/', '%2f');
-  const url = `${apiBaseUrl}api/mc/json/${datasource}/${escapedPackageName}/${currentVersion}/${newVersion}`;
+  const url = joinPaths(apiBaseUrl, 'api/mc/json', datasource, escapedPackageName, currentVersion, newVersion);
   const cacheKey = `${token}:${url}`;
   const cachedResult = await packageCache.get(hostType, cacheKey);
 
@@ -217,7 +219,7 @@ export async function initMergeConfidence(): Promise<void> {
     return;
   }
 
-  const url = `${apiBaseUrl}api/mc/availability`;
+  const url = joinPaths(apiBaseUrl, 'api/mc/availability');
   try {
     await http.get(url);
   } catch (err) {
@@ -246,7 +248,7 @@ function getApiBaseUrl(): string {
       { baseUrl: parsedBaseUrl },
       'using merge confidence API base found in environment variables',
     );
-    return parsedBaseUrl;
+    return ensureTrailingSlash(parsedBaseUrl);
   } catch (err) {
     logger.warn(
       { err, baseFromEnv },
@@ -286,4 +288,8 @@ function apiErrorHandler(err: any): void {
   }
 
   logger.warn({ err }, 'error fetching merge confidence data');
+}
+
+function joinPaths(...paths: string[]): string {
+  return upath.posix.join(...paths);
 }
