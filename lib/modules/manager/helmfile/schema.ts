@@ -16,7 +16,7 @@ export const HelmRelease = z.object({
     .or(z.number())
     .optional()
     .nullable()
-    .transform((version) => (version ? String(version) : null)),
+    .transform((version) => (version ? version.toString() : null)),
   strategicMergePatches: z.unknown().optional(),
   jsonPatches: z.unknown().optional(),
   transformers: z.unknown().optional(),
