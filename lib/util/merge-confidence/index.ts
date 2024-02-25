@@ -166,7 +166,14 @@ async function queryApi(
   }
 
   const escapedPackageName = packageName.replace('/', '%2f');
-  const url = joinPaths(apiBaseUrl, 'api/mc/json', datasource, escapedPackageName, currentVersion, newVersion);
+  const url = joinPaths(
+    apiBaseUrl,
+    'api/mc/json',
+    datasource,
+    escapedPackageName,
+    currentVersion,
+    newVersion,
+  );
   const cacheKey = `${token}:${url}`;
   const cachedResult = await packageCache.get(hostType, cacheKey);
 
