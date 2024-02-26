@@ -82,8 +82,8 @@ export class BaseGoDatasource {
     // GitHub Enterprise only returns a go-import meta
     const res = (await BaseGoDatasource.http.get(pkgUrl)).body;
     return (
-      BaseGoDatasource.goSourceHeader(res, goModuleUrl) ??
-      BaseGoDatasource.goImportHeader(res, goModuleUrl)
+      BaseGoDatasource.goSourceHeader(res, goModule) ??
+      BaseGoDatasource.goImportHeader(res, goModule)
     );
   }
 
