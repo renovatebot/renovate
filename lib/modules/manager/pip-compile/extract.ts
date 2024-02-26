@@ -218,7 +218,7 @@ export async function extractAllPackageFiles(
 function extendWithIndirectDeps(
   packageFileContent: PackageFileContent,
   lockedDeps: PackageDependency[],
-) {
+): void {
   for (const lockedDep of lockedDeps) {
     if (
       !packageFileContent.deps.find(
