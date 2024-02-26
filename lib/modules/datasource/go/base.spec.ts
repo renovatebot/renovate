@@ -347,6 +347,19 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      it('returns null for invalid azure devops source', async () => {
+        httpMock
+          .scope('https://dev.azure.com')
+          .get('/foo/bar.git?go-get=1')
+          .reply(200);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'dev.azure.com/foo/bar.git',
+        );
+
+        expect(res).toBeNull();
+      });
+
       it('handles uncommon imports', async () => {
         const meta =
           '<meta name="go-import" content="example.com/uncommon git ssh://git.example.com/uncommon">';
