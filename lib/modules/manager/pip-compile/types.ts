@@ -1,11 +1,3 @@
-export interface GetRegistryUrlVarsResult {
-  haveCredentials: boolean;
-  environmentVars: {
-    PIP_INDEX_URL?: string;
-    PIP_EXTRA_INDEX_URL?: string;
-  };
-}
-
 // managers supported by pip-tools Python package
 export type SupportedManagers =
   | 'pip_requirements'

@@ -36,7 +36,7 @@ async function withLookupStats<T>(
 async function fetchDepUpdates(
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency,
-): Promise<PackageDependency> {
+): Promise<Result<PackageDependency, Error>> {
   const dep = clone(indep);
   dep.updates = [];
   if (is.string(dep.depName)) {
@@ -50,7 +50,7 @@ async function fetchDepUpdates(
     dep.skipReason = 'internal-package';
   }
   if (dep.skipReason) {
-    return dep;
+    return Result.ok(dep);
   }
   const { depName } = dep;
   // TODO: fix types
@@ -69,19 +69,20 @@ async function fetchDepUpdates(
     dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
-      try {
-        const updateResult = await withLookupStats(depConfig.datasource, () =>
-          Result.wrap(
-            lookupUpdates(depConfig as LookupUpdateConfig),
-          ).unwrapOrThrow(),
-        );
+      const { val: updateResult, err } = await withLookupStats(
+        depConfig.datasource,
+        () =>
+          Result.wrap(lookupUpdates(depConfig as LookupUpdateConfig)).unwrap(),
+      );
+
+      if (updateResult) {
         Object.assign(dep, updateResult);
-      } catch (err) {
+      } else {
         if (
           packageFileConfig.repoIsOnboarded === true ||
           !(err instanceof ExternalHostError)
         ) {
-          throw err;
+          return Result.err(err);
         }
 
         const cause = err.err;
@@ -95,7 +96,7 @@ async function fetchDepUpdates(
     }
     dep.updates ??= [];
   }
-  return dep;
+  return Result.ok(dep);
 }
 
 async function fetchManagerPackagerFileUpdates(
@@ -113,8 +114,10 @@ async function fetchManagerPackagerFileUpdates(
   }
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
-    (dep) => (): Promise<PackageDependency> =>
-      fetchDepUpdates(packageFileConfig, dep),
+    (dep) => async (): Promise<PackageDependency> => {
+      const updates = await fetchDepUpdates(packageFileConfig, dep);
+      return updates.unwrapOrThrow();
+    },
   );
   logger.trace(
     { manager, packageFile, queueLength: queue.length },

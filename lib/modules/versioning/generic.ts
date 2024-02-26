@@ -50,7 +50,9 @@ export abstract class GenericVersioningApi<
       is.nonEmptyString(left.prerelease) &&
       is.nonEmptyString(right.prerelease)
     ) {
-      const pre = left.prerelease.localeCompare(right.prerelease);
+      const pre = left.prerelease.localeCompare(right.prerelease, undefined, {
+        numeric: true,
+      });
 
       if (pre !== 0) {
         return pre;

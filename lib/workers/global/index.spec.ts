@@ -159,6 +159,7 @@ describe('workers/global/index', () => {
   });
 
   it('exits with zero when warnings are logged', async () => {
+    delete process.env.LOG_LEVEL;
     parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
       cacheDir: '/tmp/cache',

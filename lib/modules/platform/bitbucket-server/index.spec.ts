@@ -674,16 +674,57 @@ describe('modules/platform/bitbucket-server/index', () => {
           );
         });
 
-        it('throws repository-changed', async () => {
+        it('does not throws repository-changed after 1 try', async () => {
           const scope = await initRepo();
           scope
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
+            .thrice()
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
+            .reply(409)
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'));
+          await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
+        });
+
+        it('does not throws repository-changed after 2 tries', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .times(4)
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .twice()
+            .reply(409)
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'));
+          await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
+        });
+
+        it('throws repository-changed after 3 tries', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .thrice()
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .thrice()
             .reply(409);
           await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
             REPOSITORY_CHANGED,
