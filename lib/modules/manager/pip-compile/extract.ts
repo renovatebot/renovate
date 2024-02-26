@@ -5,7 +5,12 @@ import { ensureLocalPath } from '../../../util/fs/util';
 import { normalizeDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
-import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
 import { extractHeaderCommand } from './common';
 import type {
   DependencyBetweenFiles,
@@ -180,6 +185,17 @@ export async function extractAllPackageFiles(
             );
           }
         }
+        for (const lockedDep of lockedDeps) {
+          if (
+            !packageFileContent.deps.find(
+              (dep) =>
+                normalizeDepName(lockedDep.depName!) ===
+                normalizeDepName(dep.depName!),
+            )
+          ) {
+            packageFileContent.deps.push(indirectDep(lockedDep));
+          }
+        }
         packageFiles.set(packageFile, {
           ...packageFileContent,
           lockFiles: [fileMatch],
@@ -204,5 +220,17 @@ export async function extractAllPackageFiles(
     'pip-compile: dependency graph:\n' +
       generateMermaidGraph(depsBetweenFiles, lockFileArgs),
   );
+  return result;
+}
+
+function indirectDep(dep: PackageDependency): PackageDependency {
+  const result = {
+    ...dep,
+    lockedVersion: dep.currentVersion,
+    depType: 'indirect',
+    enabled: false,
+  };
+  delete result.currentValue;
+  delete result.currentVersion;
   return result;
 }
