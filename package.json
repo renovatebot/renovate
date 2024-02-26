@@ -224,7 +224,7 @@
     "ms": "2.1.3",
     "nanoid": "3.3.7",
     "node-html-parser": "6.1.12",
-    "openpgp": "5.11.0",
+    "openpgp": "5.11.1",
     "p-all": "3.0.0",
     "p-map": "4.0.0",
     "p-queue": "6.6.2",
