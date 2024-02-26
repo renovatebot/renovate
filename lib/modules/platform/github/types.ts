@@ -91,7 +91,7 @@ export interface LocalRepoConfig {
   repositoryName: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
-  repoForceRebase?: boolean;
+  branchForceRebase?: Record<string, boolean>;
   parentRepo: string | null;
   forkOrg?: string;
   forkToken?: string;

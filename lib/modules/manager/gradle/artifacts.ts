@@ -181,6 +181,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
       docker: {},
+      userConfiguredEnv: config.env,
       extraEnv,
       toolConstraints: [
         {

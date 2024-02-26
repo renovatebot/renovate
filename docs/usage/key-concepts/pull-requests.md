@@ -45,7 +45,7 @@ This document explains why we have immortal PRs, and how you can fix them.
 
 ### Why we have immortal PRs
 
-First off, we don't have immortal PRs for some philosphical reason like: "don't ignore this update, it's good for you!".
+First off, we don't have immortal PRs for some philosophical reason like: "don't ignore this update, it's good for you!".
 We have no good way to ignore some PRs after they're closed.
 
 #### Branch name and PR title are cache keys
