@@ -137,7 +137,9 @@ export async function extractAllPackageFiles(
         logger.debug(
           `pip-compile: ${packageFile} used in multiple output files`,
         );
-        packageFiles.get(packageFile)!.lockFiles!.push(fileMatch);
+        const packageFileContent = packageFiles.get(packageFile)!;
+        packageFileContent.lockFiles!.push(fileMatch);
+        extendWithIndirectDeps(packageFileContent, lockedDeps);
         continue;
       }
       const content = await readLocalFile(packageFile, 'utf8');
@@ -185,17 +187,7 @@ export async function extractAllPackageFiles(
             );
           }
         }
-        for (const lockedDep of lockedDeps) {
-          if (
-            !packageFileContent.deps.find(
-              (dep) =>
-                normalizeDepName(lockedDep.depName!) ===
-                normalizeDepName(dep.depName!),
-            )
-          ) {
-            packageFileContent.deps.push(indirectDep(lockedDep));
-          }
-        }
+        extendWithIndirectDeps(packageFileContent, lockedDeps);
         packageFiles.set(packageFile, {
           ...packageFileContent,
           lockFiles: [fileMatch],
@@ -223,6 +215,22 @@ export async function extractAllPackageFiles(
   return result;
 }
 
+function extendWithIndirectDeps(
+  packageFileContent: PackageFileContent,
+  lockedDeps: PackageDependency[],
+) {
+  for (const lockedDep of lockedDeps) {
+    if (
+      !packageFileContent.deps.find(
+        (dep) =>
+          normalizeDepName(lockedDep.depName!) ===
+          normalizeDepName(dep.depName!),
+      )
+    ) {
+      packageFileContent.deps.push(indirectDep(lockedDep));
+    }
+  }
+}
 function indirectDep(dep: PackageDependency): PackageDependency {
   const result = {
     ...dep,
