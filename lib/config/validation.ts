@@ -285,6 +285,15 @@ export async function validateConfig(
           topic: 'Configuration Error',
           message: `Invalid regExp for ${currentPath}: \`${val}\``,
         });
+      } else if (
+        key === 'matchNewValue' &&
+        is.string(val) &&
+        !getRegexPredicate(val)
+      ) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid regExp for ${currentPath}: \`${val}\``,
+        });
       } else if (key === 'timezone' && val !== null) {
         const [validTimezone, errorMessage] = hasValidTimezone(val as string);
         if (!validTimezone) {
@@ -386,6 +395,7 @@ export async function validateConfig(
               'matchConfidence',
               'matchCurrentAge',
               'matchRepositories',
+              'matchNewValue',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {

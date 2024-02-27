@@ -359,6 +359,7 @@ export interface PackageRule
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
   excludeRepositories?: string[];
+  matchNewValue?: string;
   matchCurrentValue?: string;
   matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
@@ -498,6 +499,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depTypes?: string[];
   depName?: string;
   packageName?: string | null;
+  newValue?: string | null;
   currentValue?: string | null;
   currentVersion?: string;
   lockedVersion?: string;
