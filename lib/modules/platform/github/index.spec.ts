@@ -1629,11 +1629,13 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'open',
             title: 'title-2',
+            body: '',
           },
           {
             number: 1,
             state: 'open',
             title: 'title-1',
+            body: '',
           },
         ]);
       const res = await github.findIssue('title-3');
@@ -1649,11 +1651,13 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'open',
             title: 'title-2',
+            body: '',
           },
           {
             number: 1,
             state: 'open',
             title: 'title-1',
+            body: '',
           },
         ]);
       const res = await github.findIssue('title-2');
@@ -1689,11 +1693,13 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'open',
             title: 'title-2',
+            body: '',
           },
           {
             number: 1,
             state: 'open',
             title: 'title-1',
+            body: '',
           },
         ])
         .get('/repos/some/repo/issues/1')
@@ -1716,11 +1722,13 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'open',
             title: 'title-2',
+            body: '',
           },
           {
             number: 1,
             state: 'closed',
             title: 'title-1',
+            body: '',
           },
         ]);
       const once = true;
@@ -1743,11 +1751,13 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'open',
             title: 'title-2',
+            body: '',
           },
           {
             number: 1,
             state: 'closed',
             title: 'title-1',
+            body: '',
           },
         ])
         .get('/repos/some/repo/issues/1')
@@ -1789,16 +1799,19 @@ describe('modules/platform/github/index', () => {
             number: 3,
             state: 'open',
             title: 'title-1',
+            body: '',
           },
           {
             number: 2,
             state: 'open',
             title: 'title-2',
+            body: '',
           },
           {
             number: 1,
             state: 'closed',
             title: 'title-1',
+            body: '',
           },
         ])
         .get('/repos/some/repo/issues/3')
@@ -1823,11 +1836,13 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'open',
             title: 'title-2',
+            body: '',
           },
           {
             number: 1,
             state: 'open',
             title: 'title-1',
+            body: '',
           },
         ])
         .get('/repos/some/repo/issues/2')
@@ -1853,11 +1868,13 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'open',
             title: 'title-2',
+            body: '',
           },
           {
             number: 1,
             state: 'open',
             title: 'title-1',
+            body: '',
           },
         ])
         .get('/repos/some/repo/issues/2')
@@ -1884,11 +1901,13 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'open',
             title: 'title-2',
+            body: '',
           },
           {
             number: 1,
             state: 'open',
             title: 'title-1',
+            body: '',
           },
         ])
         .get('/repos/some/repo/issues/2')
@@ -1911,11 +1930,13 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'open',
             title: 'title-1',
+            body: '',
           },
           {
             number: 1,
             state: 'open',
             title: 'title-1',
+            body: '',
           },
         ])
         .patch('/repos/some/repo/issues/1')
@@ -1940,6 +1961,7 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'closed',
             title: 'title-2',
+            body: '',
           },
         ])
         .get('/repos/some/repo/issues/2')
@@ -1966,6 +1988,7 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'open',
             title: 'title-2',
+            body: '',
           },
         ])
         .get('/repos/some/repo/issues/2')
@@ -1990,11 +2013,13 @@ describe('modules/platform/github/index', () => {
             number: 2,
             state: 'open',
             title: 'title-2',
+            body: '',
           },
           {
             number: 1,
             state: 'open',
             title: 'title-1',
+            body: '',
           },
         ])
         .patch('/repos/undefined/issues/2')
