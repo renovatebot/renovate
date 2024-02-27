@@ -2,37 +2,35 @@ import { z } from 'zod';
 
 export const BicepResourceVersionIndex = z
   .object({
-    Resources: z.record(
+    resources: z.record(
       z.string(),
       z.object({
-        RelativePath: z.string(),
-        Index: z.number(),
+        $ref: z.string(),
       }),
     ),
-    Functions: z.record(
+    resourceFunctions: z.record(
       z.string(),
       z.record(
         z.string(),
         z.array(
           z.object({
-            RelativePath: z.string(),
-            Index: z.number(),
+            $ref: z.string(),
           }),
         ),
       ),
     ),
   })
-  .transform(({ Resources, Functions }) => {
+  .transform(({ resources, resourceFunctions }) => {
     const releaseMap = new Map<string, string[]>();
 
-    for (const resourceReference of Object.keys(Resources)) {
+    for (const resourceReference of Object.keys(resources)) {
       const [type, version] = resourceReference.toLowerCase().split('@', 2);
       const versions = releaseMap.get(type) ?? [];
       versions.push(version);
       releaseMap.set(type, versions);
     }
 
-    for (const [type, versionMap] of Object.entries(Functions)) {
+    for (const [type, versionMap] of Object.entries(resourceFunctions)) {
       const versions = Object.keys(versionMap);
       releaseMap.set(type, versions);
     }
