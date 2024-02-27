@@ -1,9 +1,11 @@
+import { join } from 'path';
 import { cache } from '../../../util/cache/package/decorator';
 import { id as versioning } from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
 import type { PythonRelease } from './types';
+import { joinUrlParts } from '../../../util/url';
 
 export class PythonVersionDatasource extends Datasource {
   static readonly id = datasource;
@@ -39,7 +41,9 @@ export class PythonVersionDatasource extends Datasource {
       releases: [],
     };
     try {
-      const resp = (await this.http.getJson<PythonRelease[]>(registryUrl)).body;
+      const resp = (
+        await this.http.getJson<PythonRelease[]>(joinUrlParts(registryUrl, '/'))
+      ).body;
       for (const release of resp) {
         const version = release.name.replace('Python', '').trim();
         result.releases.push({
