@@ -135,12 +135,244 @@ describe('modules/manager/hermit/artifacts', () => {
       ]);
     });
 
-    it('should fail on error getting link content', async () => {
+    it('should uninstall old package for name replacement', async () => {
+      lstatsMock.mockResolvedValue(true);
+
+      readlinkMock.mockResolvedValue('hermit');
+      GlobalConfig.set({ localDir: '' });
+
+      const execSnapshots = mockExecAll();
+      getRepoStatusMock.mockResolvedValue(
+        partial<StatusResult>({
+          not_added: [],
+          deleted: [],
+          modified: ['bin/java', 'bin/javac', 'bin/jar'],
+          renamed: [
+            {
+              from: 'bin/.openjdk-17.0.3',
+              to: 'bin/.openjdk-17.0.4.1_1',
+            },
+          ],
+          created: [],
+        }),
+      );
+
+      const res = await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              depName: 'openjdk',
+              newName: 'openjre',
+              currentVersion: '17.0.3',
+              newValue: '17.0.4.1_1',
+              updateType: 'replacement',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        }),
+      );
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: './hermit uninstall openjdk' },
+        { cmd: './hermit install openjre-17.0.4.1_1' },
+      ]);
+
+      expect(res).toStrictEqual([
+        {
+          file: {
+            path: 'bin/.openjdk-17.0.3',
+            type: 'deletion',
+          },
+        },
+        {
+          file: {
+            contents: 'hermit',
+            isSymlink: true,
+            isExecutable: undefined,
+            path: 'bin/.openjdk-17.0.4.1_1',
+            type: 'addition',
+          },
+        },
+        {
+          file: {
+            path: 'bin/java',
+            type: 'deletion',
+          },
+        },
+        {
+          file: {
+            contents: 'hermit',
+            isSymlink: true,
+            isExecutable: undefined,
+            path: 'bin/java',
+            type: 'addition',
+          },
+        },
+        {
+          file: {
+            path: 'bin/javac',
+            type: 'deletion',
+          },
+        },
+        {
+          file: {
+            contents: 'hermit',
+            isSymlink: true,
+            isExecutable: undefined,
+            path: 'bin/javac',
+            type: 'addition',
+          },
+        },
+        {
+          file: {
+            path: 'bin/jar',
+            type: 'deletion',
+          },
+        },
+        {
+          file: {
+            contents: 'hermit',
+            isSymlink: true,
+            isExecutable: undefined,
+            path: 'bin/jar',
+            type: 'addition',
+          },
+        },
+      ]);
+    });
+
+    it('should not uninstall package for version only replcaement', async () => {
+      lstatsMock.mockResolvedValue(true);
+
+      readlinkMock.mockResolvedValue('hermit');
+      GlobalConfig.set({ localDir: '' });
+
+      const execSnapshots = mockExecAll();
+      getRepoStatusMock.mockResolvedValue(
+        partial<StatusResult>({
+          not_added: [],
+          deleted: [],
+          modified: ['bin/go'],
+          renamed: [
+            {
+              from: 'bin/.go-1.19',
+              to: 'bin/.go-1.18',
+            },
+          ],
+          created: [],
+        }),
+      );
+
+      const res = await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              depName: 'go',
+              newName: 'go',
+              currentVersion: '1.19',
+              newValue: '1.18',
+              updateType: 'replacement',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        }),
+      );
+
+      expect(execSnapshots).toMatchObject([
+        { cmd: './hermit install go-1.18' },
+      ]);
+
+      expect(res).toStrictEqual([
+        {
+          file: {
+            path: 'bin/.go-1.19',
+            type: 'deletion',
+          },
+        },
+        {
+          file: {
+            contents: 'hermit',
+            isSymlink: true,
+            isExecutable: undefined,
+            path: 'bin/.go-1.18',
+            type: 'addition',
+          },
+        },
+        {
+          file: {
+            path: 'bin/go',
+            type: 'deletion',
+          },
+        },
+        {
+          file: {
+            contents: 'hermit',
+            isSymlink: true,
+            isExecutable: undefined,
+            path: 'bin/go',
+            type: 'addition',
+          },
+        },
+      ]);
+    });
+
+    it('should fail if uninstallation fails', async () => {
       lstatsMock.mockResolvedValue(true);
 
       readlinkMock.mockResolvedValue(null);
       GlobalConfig.set({ localDir: '' });
 
+      mockExecAll(
+        new ExecError('', {
+          stdout: '',
+          stderr: 'error executing hermit uninstall',
+          cmd: '',
+          options: {
+            encoding: 'utf-8',
+          },
+        }),
+      );
+
+      getRepoStatusMock.mockResolvedValue(
+        partial<StatusResult>({
+          not_added: [],
+          deleted: [],
+          modified: [],
+          created: [],
+          renamed: [],
+        }),
+      );
+
+      const res = await updateArtifacts(
+        partial<UpdateArtifact>({
+          updatedDeps: [
+            {
+              depName: 'openjdk',
+              newName: 'openjre',
+              currentVersion: '17.0.3',
+              newValue: '17.0.4.1_1',
+              updateType: 'replacement',
+            },
+          ],
+          packageFileName: 'go/bin/hermit',
+        }),
+      );
+
+      expect(res).toEqual([
+        {
+          artifactError: {
+            lockFile: 'from: openjdk-17.0.3, to: openjdk',
+            stderr: 'error executing hermit uninstall',
+          },
+        },
+      ]);
+    });
+
+    it('should fail on error getting link content', async () => {
+      lstatsMock.mockResolvedValue(true);
+
+      readlinkMock.mockResolvedValue(null);
+      GlobalConfig.set({ localDir: '' });
       mockExecAll();
 
       getRepoStatusMock.mockResolvedValue(
