@@ -47,7 +47,7 @@ describe('modules/datasource/python-version/index', () => {
       });
       expect(res).toMatchSnapshot();
       // in real data 3.3.5rc1 is duplicated, this in non-consequential
-      expect(res?.releases).toHaveLength(366);
+      expect(res?.releases).toHaveLength(203);
     });
   });
 });

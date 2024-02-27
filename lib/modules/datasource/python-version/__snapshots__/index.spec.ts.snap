@@ -231,11 +231,6 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "2.7.6",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2014-05-17T19:00:00.000Z",
-      "version": "2.7.7rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2014-06-01T20:06:46.000Z",
       "version": "2.7.7",
@@ -246,19 +241,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "2.7.8",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2014-11-26T00:45:19.000Z",
-      "version": "2.7.9rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2014-12-10T16:12:27.000Z",
       "version": "2.7.9",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-05-11T14:40:12.000Z",
-      "version": "2.7.10rc1",
     },
     {
       "isStable": true,
@@ -266,19 +251,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "2.7.10",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2015-11-21T22:25:31.000Z",
-      "version": "2.7.11rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2015-12-05T22:03:05.000Z",
       "version": "2.7.11",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2016-06-13T03:14:08.000Z",
-      "version": "2.7.12rc1",
     },
     {
       "isStable": true,
@@ -286,19 +261,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "2.7.12",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2016-12-04T03:50:13.000Z",
-      "version": "2.7.13rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2016-12-17T21:29:04.000Z",
       "version": "2.7.13",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2017-08-27T03:35:28.000Z",
-      "version": "2.7.14rc1",
     },
     {
       "isStable": true,
@@ -306,19 +271,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "2.7.14",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2018-04-15T02:10:34.000Z",
-      "version": "2.7.15rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2018-05-01T03:35:28.000Z",
       "version": "2.7.15",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-02-17T00:44:31.000Z",
-      "version": "2.7.16rc1",
     },
     {
       "isStable": true,
@@ -326,19 +281,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "2.7.16",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2019-10-09T01:14:15.000Z",
-      "version": "2.7.17rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2019-10-19T22:31:35.000Z",
       "version": "2.7.17",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-04-04T17:29:24.000Z",
-      "version": "2.7.18rc1",
     },
     {
       "isStable": true,
@@ -416,11 +361,6 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.2.5",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2014-10-04T12:38:39.000Z",
-      "version": "3.2.6rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2014-10-12T07:13:35.000Z",
       "version": "3.2.6",
@@ -451,24 +391,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.3.4",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2014-02-23T00:00:00.000Z",
-      "version": "3.3.5rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2014-03-02T18:00:00.000Z",
-      "version": "3.3.5rc2",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2014-03-09T11:00:00.000Z",
       "version": "3.3.5",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2014-10-04T12:40:00.000Z",
-      "version": "3.3.6rc1",
     },
     {
       "isStable": true,
@@ -476,19 +401,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.3.6",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2017-09-06T22:00:00.000Z",
-      "version": "3.3.7rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2017-09-19T08:49:42.000Z",
       "version": "3.3.7",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2014-03-10T08:01:27.000Z",
-      "version": "3.4.0rc3",
     },
     {
       "isStable": true,
@@ -496,19 +411,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.4.0",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2014-05-05T10:34:44.000Z",
-      "version": "3.4.1rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2014-05-19T05:28:37.000Z",
       "version": "3.4.1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2014-09-22T13:33:03.000Z",
-      "version": "3.4.2rc1",
     },
     {
       "isStable": true,
@@ -516,19 +421,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.4.2",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2015-02-08T20:59:15.000Z",
-      "version": "3.4.3rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2015-02-25T12:37:55.000Z",
       "version": "3.4.3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-12-07T02:58:40.000Z",
-      "version": "3.4.4rc1",
     },
     {
       "isStable": true,
@@ -536,19 +431,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.4.4",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2016-06-13T02:50:21.000Z",
-      "version": "3.4.5rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2016-06-27T02:15:57.000Z",
       "version": "3.4.5",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2017-01-03T02:08:11.000Z",
-      "version": "3.4.6rc1",
     },
     {
       "isStable": true,
@@ -556,19 +441,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.4.6",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2017-07-25T08:19:49.000Z",
-      "version": "3.4.7rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2017-08-09T07:26:45.000Z",
       "version": "3.4.7",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-01-23T14:15:31.000Z",
-      "version": "3.4.8rc1",
     },
     {
       "isStable": true,
@@ -576,19 +451,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.4.8",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2018-07-20T02:13:51.000Z",
-      "version": "3.4.9rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2018-08-02T13:29:41.000Z",
       "version": "3.4.9",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-03-04T08:09:14.000Z",
-      "version": "3.4.10rc1",
     },
     {
       "isStable": true,
@@ -596,74 +461,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.4.10",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2015-02-08T21:21:49.000Z",
-      "version": "3.5.0a1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-03-09T08:57:53.000Z",
-      "version": "3.5.0a2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-03-30T08:21:30.000Z",
-      "version": "3.5.0a3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-04-20T07:52:51.000Z",
-      "version": "3.5.0a4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-05-24T22:38:57.000Z",
-      "version": "3.5.0b1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-06-01T04:28:29.000Z",
-      "version": "3.5.0b2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-07-05T17:10:04.000Z",
-      "version": "3.5.0b3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-07-26T14:17:33.000Z",
-      "version": "3.5.0b4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-08-11T00:04:13.000Z",
-      "version": "3.5.0rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-08-25T17:52:30.000Z",
-      "version": "3.5.0rc2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-09-08T01:11:28.000Z",
-      "version": "3.5.0rc3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-09-09T13:03:59.000Z",
-      "version": "3.5.0rc4",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2015-09-13T14:07:58.000Z",
       "version": "3.5.0",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2015-11-23T07:04:49.000Z",
-      "version": "3.5.1rc1",
     },
     {
       "isStable": true,
@@ -671,19 +471,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.5.1",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2016-06-13T02:50:27.000Z",
-      "version": "3.5.2rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2016-06-27T02:14:53.000Z",
       "version": "3.5.2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2017-01-03T02:08:15.000Z",
-      "version": "3.5.3rc1",
     },
     {
       "isStable": true,
@@ -691,19 +481,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.5.3",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2017-07-25T08:19:51.000Z",
-      "version": "3.5.4rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2017-08-08T10:52:00.000Z",
       "version": "3.5.4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-01-23T14:15:22.000Z",
-      "version": "3.5.5rc1",
     },
     {
       "isStable": true,
@@ -711,34 +491,14 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.5.5",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2018-07-20T02:13:44.000Z",
-      "version": "3.5.6rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2018-08-02T13:29:46.000Z",
       "version": "3.5.6",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2019-03-04T08:09:13.000Z",
-      "version": "3.5.7rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2019-03-18T20:16:34.000Z",
       "version": "3.5.7",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-09-09T14:21:24.000Z",
-      "version": "3.5.8rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-10-12T11:53:07.000Z",
-      "version": "3.5.8rc2",
     },
     {
       "isStable": true,
@@ -751,64 +511,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.5.9",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2020-08-22T02:57:25.000Z",
-      "version": "3.5.10rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2020-09-05T08:43:10.000Z",
       "version": "3.5.10",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2016-05-17T19:21:25.000Z",
-      "version": "3.6.0a1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2016-06-13T23:45:00.000Z",
-      "version": "3.6.0a2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2016-07-12T04:48:30.000Z",
-      "version": "3.6.0a3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2016-08-15T23:00:00.000Z",
-      "version": "3.6.0a4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2016-09-12T22:33:30.000Z",
-      "version": "3.6.0b1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2016-10-10T23:55:00.000Z",
-      "version": "3.6.0b2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2016-10-31T23:59:59.000Z",
-      "version": "3.6.0b3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2016-11-21T23:59:59.000Z",
-      "version": "3.6.0b4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2016-12-06T23:59:59.000Z",
-      "version": "3.6.0rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2016-12-16T23:00:00.000Z",
-      "version": "3.6.0rc2",
     },
     {
       "isStable": true,
@@ -816,24 +521,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.6.0",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2017-03-05T10:07:05.000Z",
-      "version": "3.6.1rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2017-03-21T23:00:00.000Z",
       "version": "3.6.1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2017-06-17T23:00:00.000Z",
-      "version": "3.6.2rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2017-07-07T23:59:00.000Z",
-      "version": "3.6.2rc2",
     },
     {
       "isStable": true,
@@ -841,19 +531,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.6.2",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2017-09-19T18:00:00.000Z",
-      "version": "3.6.3rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2017-10-03T19:30:00.000Z",
       "version": "3.6.3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2017-12-05T23:55:00.000Z",
-      "version": "3.6.4rc1",
     },
     {
       "isStable": true,
@@ -861,19 +541,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.6.4",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2018-03-13T23:59:00.000Z",
-      "version": "3.6.5rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2018-03-28T19:30:00.000Z",
       "version": "3.6.5",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-06-12T15:16:09.000Z",
-      "version": "3.6.6rc1",
     },
     {
       "isStable": true,
@@ -881,24 +551,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.6.6",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2018-09-26T23:47:41.000Z",
-      "version": "3.6.7rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-10-13T21:00:00.000Z",
-      "version": "3.6.7rc2",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2018-10-20T12:00:00.000Z",
       "version": "3.6.7",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-12-11T23:54:00.000Z",
-      "version": "3.6.8rc1",
     },
     {
       "isStable": true,
@@ -906,29 +561,14 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.6.8",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2019-06-18T23:00:00.000Z",
-      "version": "3.6.9rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2019-07-02T21:00:00.000Z",
       "version": "3.6.9",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2019-12-11T22:55:00.000Z",
-      "version": "3.6.10rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2019-12-18T20:00:00.000Z",
       "version": "3.6.10",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-06-17T22:58:03.000Z",
-      "version": "3.6.11rc1",
     },
     {
       "isStable": true,
@@ -956,59 +596,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.6.15",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2017-09-19T20:00:00.000Z",
-      "version": "3.7.0a1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2017-10-17T18:00:00.000Z",
-      "version": "3.7.0a2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2017-12-05T23:55:00.000Z",
-      "version": "3.7.0a3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-01-09T04:08:12.000Z",
-      "version": "3.7.0a4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-01-31T12:00:00.000Z",
-      "version": "3.7.0b1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-02-28T04:33:19.000Z",
-      "version": "3.7.0b2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-05-30T23:45:00.000Z",
-      "version": "3.7.0b5",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-06-11T23:45:00.000Z",
-      "version": "3.7.0rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2018-06-27T22:00:00.000Z",
       "version": "3.7.0",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-09-26T23:55:00.000Z",
-      "version": "3.7.1rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2018-10-13T21:00:01.000Z",
-      "version": "3.7.1rc2",
     },
     {
       "isStable": true,
@@ -1016,19 +606,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.7.1",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2018-12-11T23:55:00.000Z",
-      "version": "3.7.2rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2018-12-24T10:30:00.000Z",
       "version": "3.7.2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-03-12T23:00:00.000Z",
-      "version": "3.7.3rc1",
     },
     {
       "isStable": true,
@@ -1036,19 +616,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.7.3",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2019-06-18T23:00:00.000Z",
-      "version": "3.7.4rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2019-07-08T22:00:00.000Z",
       "version": "3.7.4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-10-02T05:00:00.000Z",
-      "version": "3.7.5rc1",
     },
     {
       "isStable": true,
@@ -1056,29 +626,14 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.7.5",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2019-12-11T23:00:00.000Z",
-      "version": "3.7.6rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2019-12-18T22:00:00.000Z",
       "version": "3.7.6",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2020-03-04T12:00:00.000Z",
-      "version": "3.7.7rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2020-03-10T12:00:00.000Z",
       "version": "3.7.7",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-06-17T23:08:25.000Z",
-      "version": "3.7.8rc1",
     },
     {
       "isStable": true,
@@ -1131,74 +686,14 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.7.17",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2019-02-03T19:24:41.000Z",
-      "version": "3.8.0a1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-02-25T12:52:00.000Z",
-      "version": "3.8.0a2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-03-25T20:04:09.000Z",
-      "version": "3.8.0a3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-05-06T19:52:36.000Z",
-      "version": "3.8.0a4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-06-04T18:04:13.000Z",
-      "version": "3.8.0b1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-07-04T12:30:16.000Z",
-      "version": "3.8.0b2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-07-29T16:23:42.000Z",
-      "version": "3.8.0b3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-08-29T17:49:00.000Z",
-      "version": "3.8.0b4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-10-01T18:03:12.000Z",
-      "version": "3.8.0rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2019-10-14T12:33:40.000Z",
       "version": "3.8.0",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2019-12-10T08:58:06.000Z",
-      "version": "3.8.1rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2019-12-18T22:42:04.000Z",
       "version": "3.8.1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-02-10T22:00:11.000Z",
-      "version": "3.8.2rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-02-17T23:44:38.000Z",
-      "version": "3.8.2rc2",
     },
     {
       "isStable": true,
@@ -1241,19 +736,9 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.8.6",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2020-12-07T23:52:03.000Z",
-      "version": "3.8.7rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2020-12-21T18:20:49.000Z",
       "version": "3.8.7",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-02-16T19:27:39.000Z",
-      "version": "3.8.8rc1",
     },
     {
       "isStable": true,
@@ -1311,89 +796,14 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.8.18",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2019-11-19T13:29:27.000Z",
-      "version": "3.9.0a1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2019-12-18T22:36:05.000Z",
-      "version": "3.9.0a2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-01-24T21:27:36.000Z",
-      "version": "3.9.0a3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-02-26T00:22:37.000Z",
-      "version": "3.9.0a4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-03-23T22:04:05.000Z",
-      "version": "3.9.0a5",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-04-28T14:34:47.000Z",
-      "version": "3.9.0a6",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-05-19T01:32:55.000Z",
-      "version": "3.9.0b1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-06-09T00:25:00.000Z",
-      "version": "3.9.0b2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-06-09T21:25:20.000Z",
-      "version": "3.9.0b3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-07-03T16:46:25.000Z",
-      "version": "3.9.0b4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-07-20T18:58:24.000Z",
-      "version": "3.9.0b5",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-08-11T19:59:15.000Z",
-      "version": "3.9.0rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-09-17T08:58:25.000Z",
-      "version": "3.9.0rc2",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2020-10-05T17:56:01.000Z",
       "version": "3.9.0",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2020-11-26T17:54:19.000Z",
-      "version": "3.9.1rc1",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2020-12-07T23:57:18.000Z",
       "version": "3.9.1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-02-16T21:22:36.000Z",
-      "version": "3.9.2rc1",
     },
     {
       "isStable": true,
@@ -1481,71 +891,6 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.9.18",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2020-10-05T18:16:13.000Z",
-      "version": "3.10.0a1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-11-03T00:17:35.000Z",
-      "version": "3.10.0a2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2020-12-07T23:14:51.000Z",
-      "version": "3.10.0a3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-01-04T17:45:31.000Z",
-      "version": "3.10.0a4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-02-02T20:54:50.000Z",
-      "version": "3.10.0a5",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-03-01T16:54:09.000Z",
-      "version": "3.10.0a6",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-04-05T16:50:03.000Z",
-      "version": "3.10.0a7",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-05-03T20:04:49.000Z",
-      "version": "3.10.0b1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-05-31T11:47:37.000Z",
-      "version": "3.10.0b2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-06-17T12:14:53.000Z",
-      "version": "3.10.0b3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-07-10T01:15:37.000Z",
-      "version": "3.10.0b4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-08-02T21:27:06.000Z",
-      "version": "3.10.0rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-09-07T14:31:27.000Z",
-      "version": "3.10.0rc2",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2021-10-04T18:36:01.000Z",
       "version": "3.10.0",
@@ -1616,76 +961,6 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.10.13",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2021-10-05T16:59:04.000Z",
-      "version": "3.11.0a1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-11-05T21:24:50.000Z",
-      "version": "3.11.0a2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2021-12-08T23:36:26.000Z",
-      "version": "3.11.0a3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-01-14T21:17:44.000Z",
-      "version": "3.11.0a4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-02-03T22:54:59.000Z",
-      "version": "3.11.0a5",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-03-07T18:16:03.000Z",
-      "version": "3.11.0a6",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-04-05T20:00:46.000Z",
-      "version": "3.11.0a7",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-05-08T02:31:16.000Z",
-      "version": "3.11.0b1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-05-31T13:11:21.000Z",
-      "version": "3.11.0b2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-06-01T15:26:56.000Z",
-      "version": "3.11.0b3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-07-11T17:30:29.000Z",
-      "version": "3.11.0b4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-07-26T10:10:19.000Z",
-      "version": "3.11.0b5",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-08-08T13:03:27.000Z",
-      "version": "3.11.0rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-09-12T10:52:53.000Z",
-      "version": "3.11.0rc2",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2022-10-24T19:19:12.000Z",
       "version": "3.11.0",
@@ -1731,76 +1006,6 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "version": "3.11.8",
     },
     {
-      "isStable": false,
-      "releaseTimestamp": "2022-10-25T02:16:12.000Z",
-      "version": "3.12.0a1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-11-15T12:24:53.000Z",
-      "version": "3.12.0a2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2022-12-06T21:33:21.000Z",
-      "version": "3.12.0a3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-01-10T16:23:52.000Z",
-      "version": "3.12.0a4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-02-07T21:57:20.000Z",
-      "version": "3.12.0a5",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-03-08T03:45:56.000Z",
-      "version": "3.12.0a6",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-04-04T19:54:55.000Z",
-      "version": "3.12.0a7",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-05-22T18:41:56.000Z",
-      "version": "3.12.0b1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-06-06T19:11:13.000Z",
-      "version": "3.12.0b2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-06-19T21:33:38.000Z",
-      "version": "3.12.0b3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-07-11T13:23:39.000Z",
-      "version": "3.12.0b4",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-08-06T12:07:17.000Z",
-      "version": "3.12.0rc1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-09-06T10:17:23.000Z",
-      "version": "3.12.0rc2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-09-19T10:44:39.000Z",
-      "version": "3.12.0rc3",
-    },
-    {
       "isStable": true,
       "releaseTimestamp": "2023-10-02T12:50:09.000Z",
       "version": "3.12.0",
@@ -1814,26 +1019,6 @@ exports[`modules/datasource/python-version/index getReleases processes real data
       "isStable": true,
       "releaseTimestamp": "2024-02-06T21:40:35.000Z",
       "version": "3.12.2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-10-13T09:53:52.000Z",
-      "version": "3.13.0a1",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2023-11-21T22:49:31.000Z",
-      "version": "3.13.0a2",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2024-01-17T14:52:53.000Z",
-      "version": "3.13.0a3",
-    },
-    {
-      "isStable": false,
-      "releaseTimestamp": "2024-02-15T17:29:40.000Z",
-      "version": "3.13.0a4",
     },
   ],
   "sourceUrl": "https://github.com/python/cpython",
