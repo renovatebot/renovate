@@ -262,7 +262,7 @@ describe('modules/datasource/go/base', () => {
         hostRules.hostType.mockReturnValue('gitlab');
         httpMock
           .scope('https://my.custom.domain')
-          .get('/golang/subgroup/myrepo.git/v2?go-get=1')
+          .get('/golang/subgroup/myrepo?go-get=1')
           .reply(200, Fixtures.get('go-get-gitlab-ee-private-subgroup.html'));
 
         const res = await BaseGoDatasource.getDatasource(

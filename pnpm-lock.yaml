@@ -252,8 +252,8 @@ importers:
         specifier: 6.1.12
         version: 6.1.12
       openpgp:
-        specifier: 5.11.0
-        version: 5.11.0
+        specifier: 5.11.1
+        version: 5.11.1
       p-all:
         specifier: 3.0.0
         version: 3.0.0
@@ -338,8 +338,8 @@ importers:
         version: 1.20.9
     devDependencies:
       '@hyrious/marshal':
-        specifier: 0.3.2
-        version: 0.3.2
+        specifier: 0.3.3
+        version: 0.3.3
       '@jest/environment':
         specifier: 29.7.0
         version: 29.7.0
@@ -1994,8 +1994,8 @@ packages:
     resolution: {integrity: sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==}
     dev: true
 
-  /@hyrious/marshal@0.3.2:
-    resolution: {integrity: sha512-KhxiVDZ7Nisv/gShWHQjl7CsY9lUdGpHGdvafgS0RUIRssbYDJ9Y3jz/h5TQ1DnWmdTuANCEDRdoGK7XAFCzkQ==}
+  /@hyrious/marshal@0.3.3:
+    resolution: {integrity: sha512-Sprz5CmX+V5MEbgOfXB0iqJS2i703RsV2cXSKC3++Y+4EeUvZPJlv0tgvoBRNT7mvb6aUu7UeOzfiowXlAOmew==}
     engines: {node: ^14.18.0 || >=16.0.0}
     dev: true
 
@@ -8779,8 +8779,8 @@ packages:
       mimic-fn: 4.0.0
     dev: true
 
-  /openpgp@5.11.0:
-    resolution: {integrity: sha512-hytHsxIPtRhuh6uAmoBUThHSwHSX3imLu7x4453T+xkVqIw49rl22MRD4KQIAQdCDoVdouejzYgcuLmMA/2OAA==}
+  /openpgp@5.11.1:
+    resolution: {integrity: sha512-TynUBPuaSI7dN0gP+A38CjNRLxkOkkptefNanalDQ71BFAKKm+dLbksymSW5bUrB7RcAneMySL/Y+r/TbLpOnQ==}
     engines: {node: '>= 8.0.0'}
     dependencies:
       asn1.js: 5.4.1
@@ -10769,6 +10769,7 @@ packages:
 
   /wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+    requiresBuild: true
 
   /write-file-atomic@3.0.3:
     resolution: {integrity: sha512-AvHcyZ5JnSfq3ioSyjrBkH9yW4m7Ayk8/9My/DD9onKeu/94fwrMocemO2QAJFAlnnDN+ZDS+ZjAR5ua1/PV/Q==}
