@@ -49,7 +49,7 @@ export class PythonVersionDatasource extends Datasource {
         result.releases.push({
           version,
           releaseTimestamp: release.release_date,
-          isStable: !release.pre_release,
+          isStable: !release.pre_release!,
         });
       }
     } catch (err) {

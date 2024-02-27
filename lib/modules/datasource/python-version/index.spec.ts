@@ -46,7 +46,8 @@ describe('modules/datasource/python-version/index', () => {
         packageName: 'python',
       });
       expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(367);
+      // in real data 3.3.5rc1 is duplicated, this in non-consequential
+      expect(res?.releases).toHaveLength(366);
     });
   });
 });
