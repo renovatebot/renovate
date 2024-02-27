@@ -16,6 +16,7 @@ You can "activate" the manager by specifying a `fileMatch` pattern such as:
   }
 }
 ```
+
 `pip-compile` reads the output files to extract the arguments passed to the original command, as such the `fileMatch` must be configured for `*.txt` files and not `*.in`.
 
 ### Assumption of header with a command
