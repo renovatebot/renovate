@@ -3489,6 +3489,27 @@ describe('workers/repository/process/lookup/index', () => {
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
 
+      expect(getDockerDigest.mock.calls).toEqual([
+        [
+          {
+            currentDigest: 'aaa111',
+            currentValue: '18.10.0-alpine',
+            packageName: 'node',
+            registryUrl: 'https://index.docker.io',
+          },
+          '18.19.0-alpine',
+        ],
+        [
+          {
+            currentDigest: 'aaa111',
+            currentValue: '18.10.0-alpine',
+            packageName: 'node',
+            registryUrl: 'https://index.docker.io',
+          },
+          '18.10.0-alpine',
+        ],
+      ]);
+
       expect(res).toEqual({
         currentVersion: '18.10.0',
         fixedVersion: '18.10.0',
