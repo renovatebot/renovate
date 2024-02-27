@@ -380,7 +380,7 @@ function patchConfigForArtifactsUpdate(
       (p) => p.packageFile === packageFileName,
     );
     if (packageFile) {
-      updatedConfig.lockFiles = packageFile.lockFiles;
+      updatedConfig.lockFiles ??= packageFile.lockFiles;
     }
   }
   return updatedConfig;
