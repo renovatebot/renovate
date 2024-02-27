@@ -40,7 +40,6 @@ export class PythonVersionDatasource extends Datasource {
     };
     try {
       const response = await this.http.getJson(registryUrl, PythonRelease);
-      console.log('response', response);
       result.releases.push(
         ...response.body.filter((release) => release.isStable),
       );

@@ -30,7 +30,6 @@ export const PythonRelease = z
   })
   .transform(
     ({ name, release_date: releaseTimestamp, pre_release }): Release => {
-      console.log('name', name);
       const version = name!.replace('Python', '').trim();
       const isStable = pre_release === false;
       return { version, releaseTimestamp, isStable };
