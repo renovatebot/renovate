@@ -1592,6 +1592,11 @@ describe('modules/platform/github/index', () => {
               },
             ],
           },
+          {
+            number: 2,
+            title: 'title-1',
+            body: 'body-1',
+          },
         ]);
 
       const res = await github.getIssue(1);

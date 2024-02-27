@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { LooseArray } from '../../../util/schema-utils';
 
 export const IssueSchema = z.object({
   number: z.number(),
@@ -7,4 +8,4 @@ export const IssueSchema = z.object({
   body: z.string(),
 });
 
-export const IssuesSchema = z.array(IssueSchema);
+export const IssuesSchema = LooseArray(IssueSchema);
