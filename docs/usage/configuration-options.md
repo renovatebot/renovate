@@ -2995,7 +2995,6 @@ Managers which do not support replacement:
 - `git-submodules`
 - `gomod`
 - `gradle`
-- `hermit`
 - `homebrew`
 - `maven`
 - `regex`
