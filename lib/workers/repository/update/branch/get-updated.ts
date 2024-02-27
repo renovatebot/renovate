@@ -6,6 +6,7 @@ import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
   PackageDependency,
+  PackageFile,
   UpdateArtifact,
   UpdateArtifactsResult,
 } from '../../../../modules/manager/types';
@@ -342,7 +343,11 @@ export async function getUpdatedPackageFiles(
             packageFileName,
             updatedDeps: [],
             newPackageFileContent: contents!,
-            config,
+            config: patchConfigForArtifactsUpdate(
+              config,
+              manager,
+              packageFileName,
+            ),
           });
           processUpdateArtifactResults(
             results,
@@ -359,6 +364,26 @@ export async function getUpdatedPackageFiles(
     updatedArtifacts,
     artifactErrors,
   };
+}
+
+// workaround, see #27319
+function patchConfigForArtifactsUpdate(
+  config: BranchConfig,
+  manager: string,
+  packageFileName: string,
+): BranchConfig {
+  const updatedConfig = { ...config };
+  if (is.nonEmptyArray(updatedConfig.packageFiles?.[manager])) {
+    const managerPackageFiles: PackageFile[] =
+      updatedConfig.packageFiles?.[manager];
+    const packageFile = managerPackageFiles.find(
+      (p) => p.packageFile === packageFileName,
+    );
+    if (packageFile) {
+      updatedConfig.lockFiles ??= packageFile.lockFiles;
+    }
+  }
+  return updatedConfig;
 }
 
 async function managerUpdateArtifacts(
