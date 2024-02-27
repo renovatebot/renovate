@@ -2,23 +2,8 @@ import { z } from 'zod';
 
 export const BicepResourceVersionIndex = z
   .object({
-    resources: z.record(
-      z.string(),
-      z.object({
-        $ref: z.string(),
-      }),
-    ),
-    resourceFunctions: z.record(
-      z.string(),
-      z.record(
-        z.string(),
-        z.array(
-          z.object({
-            $ref: z.string(),
-          }),
-        ),
-      ),
-    ),
+    resources: z.record(z.string(), z.unknown()),
+    resourceFunctions: z.record(z.string(), z.record(z.string(), z.unknown())),
   })
   .transform(({ resources, resourceFunctions }) => {
     const releaseMap = new Map<string, string[]>();
