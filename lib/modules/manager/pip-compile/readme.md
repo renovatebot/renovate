@@ -27,8 +27,14 @@ Because of that `pip-compile` manager poses restrictions on how this file is gen
 - Use default header generation, don't use `--no-header` option.
 - Pass all source files explicitly.
 
-In turn `pip-compile` manager will find all source files and parse them as package files.
-Currently only `*.txt` files associated with `pip_requirements` manager and `setup.py` files associated with `pip_setup` manager are handled.
+In turn `pip-compile` manager will find all source files and parse them as package files using their respective managers.
+
+The following files are currently supported:
+
+| Source filename  |            Manager |
+| ---------------: | ------------------ |
+|       `setup.py` |        `pip_setup` |
+|           `*.in` | `pip_requirements` |
 
 Example header:
 
