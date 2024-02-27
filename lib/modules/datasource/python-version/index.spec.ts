@@ -7,7 +7,7 @@ import { datasource, defaultRegistryUrl } from './common';
 describe('modules/datasource/python-version/index', () => {
   describe('getReleases', () => {
     it('throws for 500', async () => {
-      httpMock.scope(defaultRegistryUrl).get('/').reply(500);
+      httpMock.scope(defaultRegistryUrl).get('').reply(500);
       await expect(
         getPkgReleases({
           datasource,
@@ -17,7 +17,7 @@ describe('modules/datasource/python-version/index', () => {
     });
 
     it('returns null for error', async () => {
-      httpMock.scope(defaultRegistryUrl).get('/').replyWithError('error');
+      httpMock.scope(defaultRegistryUrl).get('').replyWithError('error');
       expect(
         await getPkgReleases({
           datasource,
@@ -27,7 +27,7 @@ describe('modules/datasource/python-version/index', () => {
     });
 
     it('returns null for empty 200 OK', async () => {
-      httpMock.scope(defaultRegistryUrl).get('/').reply(200, []);
+      httpMock.scope(defaultRegistryUrl).get('').reply(200, []);
       expect(
         await getPkgReleases({
           datasource,
@@ -36,18 +36,35 @@ describe('modules/datasource/python-version/index', () => {
       ).toBeNull();
     });
 
-    it('processes real data', async () => {
-      httpMock
-        .scope(defaultRegistryUrl)
-        .get('/')
-        .reply(200, Fixtures.get('release.json'));
-      const res = await getPkgReleases({
-        datasource,
-        packageName: 'python',
+    describe('processes real data', () => {
+      beforeEach(() => {
+        httpMock
+          .scope(defaultRegistryUrl)
+          .get('')
+          .reply(200, Fixtures.get('release.json'));
       });
-      expect(res).toMatchSnapshot();
-      // in real data 3.3.5rc1 is duplicated, this in non-consequential
-      expect(res?.releases).toHaveLength(203);
+
+      it('returns the correct data', async () => {
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'python',
+        });
+        expect(res?.releases[0]).toEqual({
+          isStable: true,
+          releaseTimestamp: '2001-06-22T00:00:00.000Z',
+          version: '2.0.1',
+        });
+      });
+
+      it('returns no unstable versions', async () => {
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'python',
+        });
+        res?.releases.forEach((release) => {
+          expect(release.isStable).toBeTrue();
+        });
+      });
     });
   });
 });

@@ -1,10 +1,9 @@
 import { cache } from '../../../util/cache/package/decorator';
-import { joinUrlParts } from '../../../util/url';
 import { id as versioning } from '../../versioning/python';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
-import type { PythonRelease } from './types';
+import { PythonRelease } from './schema';
 
 export class PythonVersionDatasource extends Datasource {
   static readonly id = datasource;
@@ -40,20 +39,11 @@ export class PythonVersionDatasource extends Datasource {
       releases: [],
     };
     try {
-      const resp = (
-        await this.http.getJson<PythonRelease[]>(joinUrlParts(registryUrl, '/'))
-      ).body;
-      for (const release of resp) {
-        const version = release.name.replace('Python', '').trim();
-        if (!release.is_published || release.pre_release) {
-          continue;
-        }
-        result.releases.push({
-          version,
-          releaseTimestamp: release.release_date,
-          isStable: !release.pre_release!,
-        });
-      }
+      const response = await this.http.getJson(registryUrl, PythonRelease);
+      console.log('response', response);
+      result.releases.push(
+        ...response.body.filter((release) => release.isStable),
+      );
     } catch (err) {
       this.handleGenericErrors(err);
     }
