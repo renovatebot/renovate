@@ -2815,6 +2815,8 @@ Use the syntax `!/ /` like this:
 }
 ```
 
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### matchPackageNames
 
 Use this field if you want to have one or more exact name matches in your package rule.
