@@ -49,7 +49,7 @@ const sbtVersionRegex = regEx(
   'sbt\\.version *= *(?<version>\\d+\\.\\d+\\.\\d+)',
 );
 
-const sbtProxyUrlRegex = regEx(/https?:.[a-z0-9/][^,]+/);
+const sbtProxyUrlRegex = regEx(/^\s*(?<repoName>\S+):\s+(?<proxy>https?:\/\/[\w./-]+)/);
 
 const scalaVersionMatch = q
   .sym<Ctx>('scalaVersion')
@@ -307,11 +307,9 @@ export function extractProxyUrls(
   const extractedProxyUrls: string[] = [];
   logger.debug(`Parsing proxy repository file ${packageFile}`);
   for (const line of content.split(newlineRegex)) {
-    if (line.match(regEx('https?'))) {
-      const url = extractUrl(line);
-      if (url && parseUrl(url)) {
-        extractedProxyUrls.push(url.trim());
-      }
+    const extraction = sbtProxyUrlRegex.exec(line)
+    if (extraction?.groups?.proxy) {
+        extractedProxyUrls.push(extraction.groups.proxy);
     } else if (line.trim() === 'maven-central') {
       extractedProxyUrls.push(SBT_MVN_REPO);
     }
