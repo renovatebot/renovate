@@ -95,9 +95,6 @@ services:
       context: .
       dockerfile: Dockerfile.local
 
-  build-context:
-    build: ./debugapp
-
 networks:
   frontend:
   backend:
