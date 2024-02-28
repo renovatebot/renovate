@@ -17,7 +17,7 @@ import { hooks } from './hooks';
 import { applyHostRule, findMatchingRule } from './host-rules';
 import { getQueue } from './queue';
 import { getRetryAfter, wrapWithRetry } from './retry-after';
-import { getThrottle } from './throttle';
+import { Throttle, getThrottle } from './throttle';
 import type {
   GotJSONOptions,
   GotOptions,
@@ -150,6 +150,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     });
   }
 
+  protected getThrottle(url: string): Throttle | null {
+    return getThrottle(url, Http.defaultMaxRequestsPerSecond);
+  }
+
   protected async request<T>(
     requestUrl: string | URL,
     httpOptions: InternalHttpOptions & HttpRequestOptions<T>,
@@ -248,7 +252,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         });
       };
 
-      const throttle = getThrottle(url, Http.defaultMaxRequestsPerSecond);
+      const throttle = this.getThrottle(url);
       const throttledTask: GotTask<T> = throttle
         ? () => throttle.add<HttpResponse<T>>(httpTask)
         : httpTask;
