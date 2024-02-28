@@ -1,6 +1,7 @@
 import { cache } from '../../../util/cache/package/decorator';
 import { id as versioning } from '../../versioning/python';
 import { Datasource } from '../datasource';
+import { GithubReleasesDatasource } from '../github-releases';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
 import { PythonRelease } from './schema';
@@ -10,6 +11,8 @@ export class PythonVersionDatasource extends Datasource {
 
   constructor() {
     super(datasource);
+    PythonVersionDatasource.pythonPrebuildDatasource =
+      new GithubReleasesDatasource();
   }
 
   override readonly customRegistrySupport = false;
@@ -19,6 +22,8 @@ export class PythonVersionDatasource extends Datasource {
   override readonly defaultVersioning = versioning;
 
   override readonly caching = true;
+
+  static pythonPrebuildDatasource: GithubReleasesDatasource;
 
   @cache({
     namespace: `datasource-${datasource}`,
@@ -32,6 +37,13 @@ export class PythonVersionDatasource extends Datasource {
     if (!registryUrl) {
       return null;
     }
+    const pythonPrebuildReleases =
+      await PythonVersionDatasource.pythonPrebuildDatasource.getReleases({
+        packageName: 'containerbase/python-prebuild',
+      });
+    const pythonPrebuildVersions = pythonPrebuildReleases?.releases.map(
+      (release) => release.version,
+    );
     const result: ReleaseResult = {
       homepage: 'https://python.org',
       sourceUrl: 'https://github.com/python/cpython',
@@ -41,7 +53,11 @@ export class PythonVersionDatasource extends Datasource {
     try {
       const response = await this.http.getJson(registryUrl, PythonRelease);
       result.releases.push(
-        ...response.body.filter((release) => release.isStable),
+        ...response.body
+          .filter((release) => release.isStable)
+          .filter(
+            (release) => !pythonPrebuildVersions?.includes(release.version),
+          ),
       );
     } catch (err) {
       this.handleGenericErrors(err);
