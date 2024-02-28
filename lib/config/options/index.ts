@@ -1757,6 +1757,7 @@ const options: RenovateOptions[] = [
     description:
       'Label to request Renovate bot always rebase to keep branch updated.',
     type: 'string',
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'rollbackPrs',
