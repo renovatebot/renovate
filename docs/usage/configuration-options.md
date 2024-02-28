@@ -2821,6 +2821,40 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 
 ### matchDepPatterns
 
+### matchNewValue
+
+This option is matched against the `newValue` field of a dependency.
+
+`matchNewValue` supports Regular Expressions which must begin and end with `/`.
+For example, the following enforces that only `1.*` versions will be used:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchNewValue": "/^1\\./"
+    }
+  ]
+}
+```
+
+This field also supports a special negated regex syntax to ignore certain versions.
+Use the syntax `!/ /` like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchNewValue": "!/^0\\./"
+    }
+  ]
+}
+```
+
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### matchPackageNames
 
 Use this field if you want to have one or more exact name matches in your package rule.
