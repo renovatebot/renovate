@@ -25,7 +25,7 @@ async function shouldKeepUpdated(
     config.baseBranch,
   );
 
-  if (branchPr && !!branchPr.labels?.includes(keepUpdatedLabel)) {
+  if (branchPr?.labels?.includes(keepUpdatedLabel)) {
     return true;
   }
 
