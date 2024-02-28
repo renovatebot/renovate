@@ -219,14 +219,28 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
 
 export function getConcurrentRequestsLimit(url: string): number | null {
   const { concurrentRequestLimit } = hostRules.find({ url });
-  return is.number(concurrentRequestLimit) && concurrentRequestLimit > 0
-    ? concurrentRequestLimit
-    : null;
+
+  if (!is.number(concurrentRequestLimit)) {
+    return 5;
+  }
+
+  if (concurrentRequestLimit > 0) {
+    return concurrentRequestLimit;
+  }
+
+  return null;
 }
 
 export function getThrottleIntervalMs(url: string): number | null {
   const { maxRequestsPerSecond } = hostRules.find({ url });
-  return is.number(maxRequestsPerSecond) && maxRequestsPerSecond > 0
-    ? Math.ceil(1000 / maxRequestsPerSecond)
-    : null;
+
+  if (!is.number(maxRequestsPerSecond)) {
+    return Math.ceil(1000 / 5); // 5 requests per second
+  }
+
+  if (maxRequestsPerSecond > 0) {
+    return Math.ceil(1000 / maxRequestsPerSecond);
+  }
+
+  return null;
 }
