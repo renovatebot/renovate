@@ -274,6 +274,7 @@ export class BaseGoDatasource {
         };
       }
       case 'azure': {
+        /* istanbul ignore next: can never happen, makes lint happy */
         return {
           datasource: GitTagsDatasource.id,
           packageName: goImportURL.replace(regEx(/\.git$/), ''),
