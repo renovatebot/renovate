@@ -69,12 +69,12 @@ import { remoteBranchExists } from './branch';
 import { coerceRestPr, githubApi } from './common';
 import {
   enableAutoMergeMutation,
-  getIssuesQuery,
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
+import { IssuesSchema } from './schema';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -1181,23 +1181,22 @@ export async function setBranchStatus({
 
 /* istanbul ignore next */
 async function getIssues(): Promise<Issue[]> {
-  const result = await githubApi.queryRepoField<Issue>(
-    getIssuesQuery,
-    'issues',
-    {
-      variables: {
-        owner: config.repositoryOwner,
-        name: config.repositoryName,
-        user: config.renovateUsername,
+  const issuesUrl = `repos/${config.parentRepo ?? config.repository}/issues?creator=${
+    config.renovateUsername
+  }&state=all`;
+  const result = (
+    await githubApi.getJson(
+      issuesUrl,
+      {
+        repoCache: true,
+        paginate: true,
       },
-    },
-  );
+      IssuesSchema,
+    )
+  ).body;
 
   logger.debug(`Retrieved ${result.length} issues`);
-  return result.map((issue) => ({
-    ...issue,
-    state: issue.state?.toLowerCase(),
-  }));
+  return result;
 }
 
 export async function getIssueList(): Promise<Issue[]> {
@@ -1219,6 +1218,14 @@ export async function getIssue(
   // istanbul ignore if
   if (config.hasIssuesEnabled === false) {
     return null;
+  }
+  if (useCache) {
+    const issueList = await getIssueList();
+    const issue = issueList.find((i) => i.number === number);
+    if (issue) {
+      logger.debug(`Returning issue from cache`);
+      return issue;
+    }
   }
   try {
     const issueBody = (
