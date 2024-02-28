@@ -1,6 +1,8 @@
+import { satisfies } from '@renovatebot/pep440';
 import { cache } from '../../../util/cache/package/decorator';
 import { id as versioning } from '../../versioning/python';
 import { Datasource } from '../datasource';
+import { EndoflifeDatePackagesource } from '../endoflife-date';
 import { GithubReleasesDatasource } from '../github-releases';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
@@ -13,6 +15,8 @@ export class PythonVersionDatasource extends Datasource {
     super(datasource);
     PythonVersionDatasource.pythonPrebuildDatasource =
       new GithubReleasesDatasource();
+    PythonVersionDatasource.pythonEolDatasource =
+      new EndoflifeDatePackagesource();
   }
 
   override readonly customRegistrySupport = false;
@@ -24,6 +28,8 @@ export class PythonVersionDatasource extends Datasource {
   override readonly caching = true;
 
   static pythonPrebuildDatasource: GithubReleasesDatasource;
+
+  static pythonEolDatasource: EndoflifeDatePackagesource;
 
   @cache({
     namespace: `datasource-${datasource}`,
@@ -44,6 +50,10 @@ export class PythonVersionDatasource extends Datasource {
     const pythonPrebuildVersions = pythonPrebuildReleases?.releases.map(
       (release) => release.version,
     );
+    const pythonEolVersions =
+      await PythonVersionDatasource.pythonEolDatasource.getReleases({
+        packageName: 'python',
+      });
     const result: ReleaseResult = {
       homepage: 'https://python.org',
       sourceUrl: 'https://github.com/python/cpython',
@@ -61,6 +71,11 @@ export class PythonVersionDatasource extends Datasource {
       );
     } catch (err) {
       this.handleGenericErrors(err);
+    }
+    for (const release of result.releases) {
+      release.isDeprecated = pythonEolVersions?.releases.find((cycle) =>
+        satisfies(release.version, '==' + cycle.version),
+      )?.isDeprecated;
     }
 
     return result.releases.length ? result : null;
