@@ -15,16 +15,18 @@ async function shouldKeepUpdated(
   baseBranch: string,
   branchName: string,
 ): Promise<boolean> {
+  const keepUpdatedLabel = config.keepUpdatedLabel;
+  if (!keepUpdatedLabel) {
+    return false;
+  }
+
   const branchPr = await platform.getBranchPr(
     config.branchName,
     config.baseBranch,
   );
 
-  if (branchPr) {
-    const keepUpdatedLabel = config.keepUpdatedLabel;
-    if (keepUpdatedLabel && !!branchPr.labels?.includes(keepUpdatedLabel)) {
-      return true;
-    }
+  if (branchPr && !!branchPr.labels?.includes(keepUpdatedLabel)) {
+    return true;
   }
 
   return false;
