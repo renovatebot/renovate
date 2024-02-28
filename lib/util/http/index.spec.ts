@@ -519,7 +519,7 @@ describe('util/http/index', () => {
     const delta = 100;
 
     beforeEach(() => {
-      jest.useFakeTimers({ advanceTimers: 1 });
+      jest.useFakeTimers({ advanceTimers: true });
     });
 
     afterEach(() => {
@@ -528,7 +528,6 @@ describe('util/http/index', () => {
 
     it('works without throttling', async () => {
       httpMock.scope(baseUrl).get('/foo').times(10).reply(200, 'bar');
-      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: -1 });
 
       const t1 = Date.now();
       await Promise.all([
@@ -550,36 +549,35 @@ describe('util/http/index', () => {
 
     it('limits request rate by host', async () => {
       httpMock.scope(baseUrl).get('/foo').times(4).reply(200, 'bar');
-      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 0.25 });
-      const advanceTimer = () => jest.advanceTimersByTime(4000);
+      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 3 });
 
       const t1 = Date.now();
       await Promise.all([
-        http.get('http://renovate.com/foo').then(advanceTimer),
-        http.get('http://renovate.com/foo').then(advanceTimer),
-        http.get('http://renovate.com/foo').then(advanceTimer),
-        http.get('http://renovate.com/foo').then(advanceTimer),
-      ]);
-      const t2 = Date.now();
-
-      expect(t2 - t1).toBeWithin(16000, 16000 + delta);
-    });
-
-    it('defaults to 5 requests per second', async () => {
-      httpMock.scope(baseUrl).get('/foo').times(5).reply(200, 'bar');
-      const advanceTimer = () => jest.advanceTimersByTime(200);
-
-      const t1 = Date.now();
-      await Promise.all([
-        http.get('http://renovate.com/foo').then(advanceTimer),
-        http.get('http://renovate.com/foo').then(advanceTimer),
-        http.get('http://renovate.com/foo').then(advanceTimer),
-        http.get('http://renovate.com/foo').then(advanceTimer),
-        http.get('http://renovate.com/foo').then(advanceTimer),
+        http.get('http://renovate.com/foo'),
+        http.get('http://renovate.com/foo'),
+        http.get('http://renovate.com/foo'),
+        http.get('http://renovate.com/foo'),
       ]);
       const t2 = Date.now();
 
       expect(t2 - t1).toBeWithin(1000, 1000 + delta);
+    });
+
+    it('defaults to 5 requests per second', async () => {
+      Http.setDefaultLimits();
+      httpMock.scope(baseUrl).get('/foo').times(5).reply(200, 'bar');
+
+      const t1 = Date.now();
+      await Promise.all([
+        http.get('http://renovate.com/foo'),
+        http.get('http://renovate.com/foo'),
+        http.get('http://renovate.com/foo'),
+        http.get('http://renovate.com/foo'),
+        http.get('http://renovate.com/foo'),
+      ]);
+      const t2 = Date.now();
+
+      expect(t2 - t1).toBeWithin(800, 800 + delta);
     });
   });
 
