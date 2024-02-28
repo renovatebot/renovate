@@ -10,14 +10,4 @@ describe('util/compress', () => {
     const decompressed = await decompressFromBase64(compressed);
     expect(decompressed).toBe(input);
   });
-
-  it('compresses objects', async () => {
-    const input = { foo: 'bar' };
-
-    const compressed = await compressToBase64(input);
-    expect(compressed).toBe('CwaAeyJmb28iOiJiYXIifQM=');
-
-    const decompressed = await decompressFromBase64(compressed);
-    expect(JSON.parse(decompressed)).toEqual(input);
-  });
 });

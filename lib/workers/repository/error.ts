@@ -95,7 +95,7 @@ export default async function handleError(
   }
   if (err.message === REPOSITORY_FORKED) {
     logger.info(
-      'Repository is a fork and not manually configured - skipping - did you want to run with flag --include-forks?',
+      'Repository is a fork and not manually configured - skipping - did you want to run with --fork-processing=enabled?',
     );
     return err.message;
   }

@@ -840,10 +840,6 @@ const platform: Platform = {
     }
   },
 
-  getRepoForceRebase(): Promise<boolean> {
-    return Promise.resolve(false);
-  },
-
   async ensureComment({
     number: issue,
     topic,
@@ -979,7 +975,6 @@ export const {
   getPr,
   massageMarkdown,
   getPrList,
-  getRepoForceRebase,
   getRepos,
   initPlatform,
   initRepo,

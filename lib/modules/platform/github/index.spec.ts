@@ -820,11 +820,11 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  describe('getRepoForceRebase', () => {
+  describe('getBranchForceRebase', () => {
     it('should detect repoForceRebase', async () => {
       httpMock
         .scope(githubApiHost)
-        .get('/repos/undefined/branches/undefined/protection')
+        .get('/repos/undefined/branches/main/protection')
         .reply(200, {
           required_pull_request_reviews: {
             dismiss_stale_reviews: false,
@@ -847,35 +847,35 @@ describe('modules/platform/github/index', () => {
             teams: [],
           },
         });
-      const res = await github.getRepoForceRebase();
+      const res = await github.getBranchForceRebase('main');
       expect(res).toBeTrue();
     });
 
     it('should handle 404', async () => {
       httpMock
         .scope(githubApiHost)
-        .get('/repos/undefined/branches/undefined/protection')
+        .get('/repos/undefined/branches/dev/protection')
         .reply(404);
-      const res = await github.getRepoForceRebase();
+      const res = await github.getBranchForceRebase('dev');
       expect(res).toBeFalse();
     });
 
     it('should handle 403', async () => {
       httpMock
         .scope(githubApiHost)
-        .get('/repos/undefined/branches/undefined/protection')
+        .get('/repos/undefined/branches/main/protection')
         .reply(403);
-      const res = await github.getRepoForceRebase();
+      const res = await github.getBranchForceRebase('main');
       expect(res).toBeFalse();
     });
 
     it('should throw 401', async () => {
       httpMock
         .scope(githubApiHost)
-        .get('/repos/undefined/branches/undefined/protection')
+        .get('/repos/undefined/branches/main/protection')
         .reply(401);
       await expect(
-        github.getRepoForceRebase(),
+        github.getBranchForceRebase('main'),
       ).rejects.toThrowErrorMatchingSnapshot();
     });
   });
@@ -1573,36 +1573,76 @@ describe('modules/platform/github/index', () => {
     });
   });
 
+  describe('getIssue()', () => {
+    it('defaults to use cache', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'test/repo');
+      await github.initRepo({ repository: 'test/repo' });
+      scope
+        .get('/repos/test/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 1,
+            title: 'title-1',
+            body: 'body-1',
+            state: 'open',
+            labels: [
+              {
+                name: 'label-1',
+              },
+            ],
+          },
+          {
+            number: 2,
+            title: 'title-1',
+            body: 'body-1',
+          },
+        ]);
+
+      const res = await github.getIssue(1);
+      expect(res).not.toBeNull();
+    });
+
+    it('cache breaks', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'test/repo');
+      await github.initRepo({ repository: 'test/repo' });
+      scope.get('/repos/test/repo/issues/1').reply(200, {
+        number: 1,
+        title: 'title-1b',
+        body: 'body-1b',
+        state: 'open',
+        labels: [
+          {
+            name: 'label-1',
+          },
+        ],
+      });
+
+      const res = await github.getIssue(1, false);
+      expect(res?.body).toBe('body-1b');
+    });
+  });
+
   describe('findIssue()', () => {
     it('returns null if no issue', async () => {
       httpMock
         .scope(githubApiHost)
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                  {
-                    number: 1,
-                    state: 'open',
-                    title: 'title-1',
-                  },
-                ],
-              },
-            },
+        .get('/repos/undefined/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: '',
           },
-        });
+          {
+            number: 1,
+            state: 'open',
+            title: 'title-1',
+            body: '',
+          },
+        ]);
       const res = await github.findIssue('title-3');
       expect(res).toBeNull();
     });
@@ -1610,34 +1650,21 @@ describe('modules/platform/github/index', () => {
     it('finds issue', async () => {
       httpMock
         .scope(githubApiHost)
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                  {
-                    number: 1,
-                    state: 'open',
-                    title: 'title-1',
-                  },
-                ],
-              },
-            },
+        .get('/repos/undefined/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: '',
           },
-        })
-        .get('/repos/undefined/issues/2')
-        .reply(200, { body: 'new-content' });
+          {
+            number: 1,
+            state: 'open',
+            title: 'title-1',
+            body: '',
+          },
+        ]);
       const res = await github.findIssue('title-2');
       expect(res).not.toBeNull();
     });
@@ -1649,32 +1676,8 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                  {
-                    number: 1,
-                    state: 'open',
-                    title: 'title-1',
-                  },
-                ],
-              },
-            },
-          },
-        })
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [])
         .post('/repos/some/repo/issues')
         .reply(200);
       const res = await github.ensureIssue({
@@ -1689,32 +1692,21 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                  {
-                    number: 1,
-                    state: 'closed',
-                    title: 'title-1',
-                  },
-                ],
-              },
-            },
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: '',
           },
-        })
+          {
+            number: 1,
+            state: 'open',
+            title: 'title-1',
+            body: '',
+          },
+        ])
         .get('/repos/some/repo/issues/1')
         .reply(404);
       const res = await github.ensureIssue({
@@ -1728,31 +1720,22 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
-      scope.post('/graphql').reply(200, {
-        data: {
-          repository: {
-            issues: {
-              pageInfo: {
-                startCursor: null,
-                hasNextPage: false,
-                endCursor: null,
-              },
-              nodes: [
-                {
-                  number: 2,
-                  state: 'open',
-                  title: 'title-2',
-                },
-                {
-                  number: 1,
-                  state: 'closed',
-                  title: 'title-1',
-                },
-              ],
-            },
+      scope
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: '',
           },
-        },
-      });
+          {
+            number: 1,
+            state: 'closed',
+            title: 'title-1',
+            body: '',
+          },
+        ]);
       const once = true;
       const res = await github.ensureIssue({
         title: 'title-1',
@@ -1762,26 +1745,44 @@ describe('modules/platform/github/index', () => {
       expect(res).toBeNull();
     });
 
+    it('reopens issue', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: '',
+          },
+          {
+            number: 1,
+            state: 'closed',
+            title: 'title-1',
+            body: '',
+          },
+        ])
+        .get('/repos/some/repo/issues/1')
+        .reply(200)
+        .patch('/repos/some/repo/issues/1')
+        .reply(200);
+      const res = await github.ensureIssue({
+        title: 'title-1',
+        body: 'new-content',
+      });
+      expect(res).not.toBeNull();
+    });
+
     it('creates issue with labels', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [],
-              },
-            },
-          },
-        })
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [])
         .post('/repos/some/repo/issues')
         .reply(200);
       const res = await github.ensureIssue({
@@ -1797,37 +1798,27 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 3,
-                    state: 'open',
-                    title: 'title-1',
-                  },
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                  {
-                    number: 1,
-                    state: 'closed',
-                    title: 'title-1',
-                  },
-                ],
-              },
-            },
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 3,
+            state: 'open',
+            title: 'title-1',
+            body: '',
           },
-        })
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: '',
+          },
+          {
+            number: 1,
+            state: 'closed',
+            title: 'title-1',
+            body: '',
+          },
+        ])
         .get('/repos/some/repo/issues/3')
         .reply(404);
       const once = true;
@@ -1844,32 +1835,21 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                  {
-                    number: 1,
-                    state: 'open',
-                    title: 'title-1',
-                  },
-                ],
-              },
-            },
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: '',
           },
-        })
+          {
+            number: 1,
+            state: 'open',
+            title: 'title-1',
+            body: '',
+          },
+        ])
         .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'new-content' })
         .patch('/repos/some/repo/issues/2')
@@ -1887,32 +1867,21 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                  {
-                    number: 1,
-                    state: 'open',
-                    title: 'title-1',
-                  },
-                ],
-              },
-            },
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: '',
           },
-        })
+          {
+            number: 1,
+            state: 'open',
+            title: 'title-1',
+            body: '',
+          },
+        ])
         .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'new-content' })
         .patch('/repos/some/repo/issues/2')
@@ -1931,32 +1900,21 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                  {
-                    number: 1,
-                    state: 'open',
-                    title: 'title-1',
-                  },
-                ],
-              },
-            },
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: '',
           },
-        })
+          {
+            number: 1,
+            state: 'open',
+            title: 'title-1',
+            body: '',
+          },
+        ])
         .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'newer-content' });
       const res = await github.ensureIssue({
@@ -1971,32 +1929,21 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-1',
-                  },
-                  {
-                    number: 1,
-                    state: 'open',
-                    title: 'title-1',
-                  },
-                ],
-              },
-            },
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-1',
+            body: '',
           },
-        })
+          {
+            number: 1,
+            state: 'open',
+            title: 'title-1',
+            body: '',
+          },
+        ])
         .patch('/repos/some/repo/issues/1')
         .reply(200)
         .get('/repos/some/repo/issues/2')
@@ -2013,27 +1960,15 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'close',
-                    title: 'title-2',
-                  },
-                ],
-              },
-            },
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'closed',
+            title: 'title-2',
+            body: '',
           },
-        })
+        ])
         .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'new-content' })
         .post('/repos/some/repo/issues')
@@ -2052,27 +1987,15 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       await github.initRepo({ repository: 'some/repo' });
       scope
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                ],
-              },
-            },
+        .get('/repos/some/repo/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: '',
           },
-        })
+        ])
         .get('/repos/some/repo/issues/2')
         .reply(200, { body: 'new-content' });
       const res = await github.ensureIssue({
@@ -2089,32 +2012,21 @@ describe('modules/platform/github/index', () => {
     it('closes issue', async () => {
       httpMock
         .scope(githubApiHost)
-        .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              issues: {
-                pageInfo: {
-                  startCursor: null,
-                  hasNextPage: false,
-                  endCursor: null,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'open',
-                    title: 'title-2',
-                  },
-                  {
-                    number: 1,
-                    state: 'open',
-                    title: 'title-1',
-                  },
-                ],
-              },
-            },
+        .get('/repos/undefined/issues?creator=undefined&state=all')
+        .reply(200, [
+          {
+            number: 2,
+            state: 'open',
+            title: 'title-2',
+            body: '',
           },
-        })
+          {
+            number: 1,
+            state: 'open',
+            title: 'title-1',
+            body: '',
+          },
+        ])
         .patch('/repos/undefined/issues/2')
         .reply(200);
       await expect(github.ensureIssueClosing('title-2')).toResolve();
@@ -2850,6 +2762,92 @@ describe('modules/platform/github/index', () => {
           restAddLabels,
           graphqlAutomerge,
         ]);
+      });
+    });
+
+    describe('milestone', () => {
+      it('should set the milestone on the PR', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            (body) => body.title === 'bump someDep to v2',
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        scope
+          .patch('/repos/some/repo/issues/123', (body) => body.milestone === 1)
+          .reply(200, {});
+        await github.initRepo({ repository: 'some/repo' });
+        const pr = await github.createPr({
+          targetBranch: 'main',
+          sourceBranch: 'renovate/someDep-v2',
+          prTitle: 'bump someDep to v2',
+          prBody: 'many informations about someDep',
+          milestone: 1,
+        });
+        expect(pr?.number).toBe(123);
+      });
+
+      it('should log a warning but not throw on error', async () => {
+        const scope = httpMock.scope(githubApiHost);
+        initRepoMock(scope, 'some/repo');
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            (body) => body.title === 'bump someDep to v2',
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        scope
+          .patch('/repos/some/repo/issues/123', (body) => body.milestone === 1)
+          .reply(422, {
+            message: 'Validation Failed',
+            errors: [
+              {
+                value: 1,
+                resource: 'Issue',
+                field: 'milestone',
+                code: 'invalid',
+              },
+            ],
+            documentation_url:
+              'https://docs.github.com/rest/issues/issues#update-an-issue',
+          });
+        await github.initRepo({ repository: 'some/repo' });
+        const pr = await github.createPr({
+          targetBranch: 'main',
+          sourceBranch: 'renovate/someDep-v2',
+          prTitle: 'bump someDep to v2',
+          prBody: 'many informations about someDep',
+          milestone: 1,
+        });
+        expect(pr?.number).toBe(123);
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          {
+            err: {
+              message: 'Validation Failed',
+              errors: [
+                {
+                  value: 1,
+                  resource: 'Issue',
+                  field: 'milestone',
+                  code: 'invalid',
+                },
+              ],
+              documentation_url:
+                'https://docs.github.com/rest/issues/issues#update-an-issue',
+            },
+            milestone: 1,
+            pr: 123,
+          },
+          'Unable to add milestone to PR',
+        );
       });
     });
   });

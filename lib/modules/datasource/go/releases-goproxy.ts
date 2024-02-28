@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import moo from 'moo';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { filterMap } from '../../../util/filter-map';
 import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -18,8 +19,11 @@ const parsedGoproxy: Record<string, GoproxyItem[]> = {};
 
 const modRegex = regEx(/^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\d+))?$/);
 
-const pversionRegexp = regEx(
-  /v\d+\.\d+\.\d+-(?:"\w+\.)?(?:0\.)?(?<releaseTimestamp>\d{14})-(?<digest>[a-f0-9]{12})/,
+/**
+ * @see https://go.dev/ref/mod#pseudo-versions
+ */
+const pseudoVersionRegex = regEx(
+  /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?(?<timestamp>\d{14})-(?<digest>[a-f0-9]{12})/i,
 );
 
 export class GoProxyDatasource extends Datasource {
@@ -211,29 +215,38 @@ export class GoProxyDatasource extends Datasource {
   async listVersions(baseUrl: string, packageName: string): Promise<Release[]> {
     const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/list`;
     const { body } = await this.http.get(url);
-    return body
-      .split(newlineRegex)
-      .filter(is.nonEmptyStringAndNotWhitespace)
-      .map((str) => {
-        let version: string | undefined;
-        let newDigest: string | undefined;
-        let releaseTimestamp: string | undefined;
-        [version, releaseTimestamp] = str.split(regEx(/\s+/));
+    return filterMap(body.split(newlineRegex), (str) => {
+      if (!is.nonEmptyStringAndNotWhitespace(str)) {
+        return null;
+      }
 
-        if (!DateTime.fromISO(releaseTimestamp).isValid) {
-          version = str;
-          releaseTimestamp = undefined;
-        }
-        const digestMatch = pversionRegexp.exec(version);
+      const [version, releaseTimestamp] = str.trim().split(regEx(/\s+/));
+      const release: Release = { version };
 
-        if (!releaseTimestamp && digestMatch?.groups?.releaseTimestamp) {
-          releaseTimestamp = digestMatch.groups.releaseTimestamp;
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
+      }
+
+      const pseudoVersionMatch = version.match(pseudoVersionRegex)?.groups;
+      if (pseudoVersionMatch) {
+        const { digest: newDigest, timestamp } = pseudoVersionMatch;
+
+        if (newDigest) {
+          release.newDigest = newDigest;
         }
-        if (digestMatch?.groups?.digest) {
-          newDigest = digestMatch.groups.digest;
+
+        const pseudoVersionReleaseTimestamp = DateTime.fromFormat(
+          timestamp,
+          'yyyyMMddHHmmss',
+          { zone: 'UTC' },
+        ).toISO({ suppressMilliseconds: true });
+        if (pseudoVersionReleaseTimestamp) {
+          release.releaseTimestamp = pseudoVersionReleaseTimestamp;
         }
-        return { version, newDigest, releaseTimestamp };
-      });
+      }
+
+      return release;
+    });
   }
 
   async versionInfo(

@@ -13,7 +13,9 @@ export const presets: Record<string, Preset> = {
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
       'replacements:containerbase',
+      'replacements:cpx-to-maintenance-fork',
       'replacements:cucumber-to-scoped',
+      'replacements:fakerjs-to-scoped',
       'replacements:fastify-to-scoped',
       'replacements:hapi-to-scoped',
       'replacements:jade-to-pug',
@@ -24,6 +26,7 @@ export const presets: Record<string, Preset> = {
       'replacements:now-to-vercel',
       'replacements:npm-run-all-to-maintenance-fork',
       'replacements:parcel-css-to-lightningcss',
+      'replacements:passport-saml',
       'replacements:react-query-devtools-to-scoped',
       'replacements:react-query-to-scoped',
       'replacements:react-scripts-ts-to-react-scripts',
@@ -169,6 +172,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'cpx-to-maintenance-fork': {
+    description: 'Maintenance fork of `cpx`',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['cpx'],
+        replacementName: 'cpx2',
+        replacementVersion: '2.0.0',
+      },
+    ],
+  },
   'cucumber-to-scoped': {
     description: '`cucumber` became scoped.',
     packageRules: [
@@ -177,6 +191,46 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['cucumber'],
         replacementName: '@cucumber/cucumber',
         replacementVersion: '7.0.0',
+      },
+    ],
+  },
+  'fakerjs-to-scoped': {
+    description: '`fakerjs` packages became scoped.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '5.5.3',
+      },
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '4.1.0',
+      },
+      {
+        matchCurrentVersion: '>=3.0.0 <4.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '3.1.0',
+      },
+      {
+        matchCurrentVersion: '>=2.0.0 <3.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '2.1.5',
+      },
+      {
+        matchCurrentVersion: '<2.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '1.1.0',
       },
     ],
   },
@@ -637,6 +691,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['@parcel/css'],
         replacementName: 'lightningcss',
         replacementVersion: '1.14.0',
+      },
+    ],
+  },
+  'passport-saml': {
+    description: '`passport-saml` was renamed to `@node-saml/passport-saml`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['passport-saml'],
+        replacementName: '@node-saml/passport-saml',
+        replacementVersion: '4.0.4',
       },
     ],
   },

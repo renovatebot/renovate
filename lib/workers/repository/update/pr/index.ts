@@ -255,11 +255,7 @@ export async function ensurePr(
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
     // TODO: types (#22198)
-    const upgradeKey = `${upgrade.depType!}-${upgrade.depName!}-${
-      upgrade.manager
-    }-${
-      upgrade.currentVersion ?? upgrade.currentValue!
-    }-${upgrade.newVersion!}`;
+    const upgradeKey = `${upgrade.depType!}-${upgrade.depName!}-${upgrade.manager}-${upgrade.currentVersion ?? ''}-${upgrade.currentValue ?? ''}-${upgrade.newVersion ?? ''}-${upgrade.newValue ?? ''}`;
     if (processedUpgrades.includes(upgradeKey)) {
       continue;
     }
@@ -496,6 +492,7 @@ export async function ensurePr(
           labels: prepareLabels(config),
           platformOptions: getPlatformPrOptions(config),
           draftPR: !!config.draftPR,
+          milestone: config.milestone,
         });
 
         incLimitedValue('PullRequests');

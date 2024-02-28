@@ -235,6 +235,11 @@ Use the `automergeSchedule` option to define times of week or month during which
 The default value for `automergeSchedule` is "at any time", which functions the same as setting a `null` schedule.
 To configure this option refer to [`schedule`](#schedule) as the syntax is the same.
 
+<!-- prettier-ignore -->
+!!! warning
+    When `platformAutomerge` is enabled, Renovate enqueues the platform PR automerge at time of creation, so the schedule specified in `automergeSchedule` cannot be followed.
+    If it's essential that automerging only happens within the specific `automergeSchedule` time window, then you need to set `platformAutomerge` to `false` and instead rely on Renovate's automerge instead of the platform one.
+
 ## automergeStrategy
 
 The automerge strategy defaults to `auto`, so Renovate decides how to merge pull requests as best it can.
@@ -412,6 +417,7 @@ This is an advanced field, and it's recommend you seek a config review before ap
 
 Currently, this config option only works with these managers:
 
+- `cargo`
 - `helmv3`
 - `npm`
 - `nuget`
@@ -492,11 +498,6 @@ Set this to `"never"` to leave the titles untouched, allowing uppercase characte
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
-
-<!-- prettier-ignore -->
-!!! note
-    Renovate _always_ appends a `:` after the `commitMessagePrefix`.
-    For example, if you set `commitMessagePrefix` to `chore`, Renovate turns it into `chore:`.
 
 ## commitMessageSuffix
 
@@ -637,7 +638,7 @@ Renovate supports two options:
 More advanced filtering options may come in future.
 
 There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
-This feature is limited to the folllowing datasources:
+This feature is limited to the following datasources:
 
 - `jenkins-plugins`
 - `npm`
@@ -983,7 +984,7 @@ It is not needed if either:
 {
   customDatasources: {
     foo: {
-      defaultRegistryUrlTemplate: 'https://exmaple.foo.bar/v1/{{ packageName }}',
+      defaultRegistryUrlTemplate: 'https://example.foo.bar/v1/{{ packageName }}',
     },
   },
 }
@@ -1246,6 +1247,28 @@ But you may encrypt a secret with more than one organization, for example: `org1
 This way the secret can be used in both the `org1` and `org2` organizations.
 
 For more information on how to use secrets for private packages, read [Private package support](./getting-started/private-packages.md).
+
+## env
+
+This option allows users to specify explicit environment variables values.
+It is valid only as a top-level configuration option and not, for example, within `packageRules`.
+
+<!-- prettier-ignore -->
+!!! warning
+    The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedEnv) config option, before users can use those allowed names in the `env` option.
+
+Behavior:
+
+- This option only applies when Renovate runs package manager commands (e.g. `npm install`), within the `updateArtifacts()` function
+- Values set in the `env` configuration override corresponding environment variables, including those from `customEnvVariables` and `process.env`
+
+```json title="Example renovate.json with env configuration"
+{
+  "env": {
+    "SOME_ENV_VARIABLE": "SOME_STRING_VALUE"
+  }
+}
+```
 
 ## excludeCommitPaths
 
@@ -1800,10 +1823,25 @@ You can configure a different maximum value in seconds using `maxRetryAfter`:
 }
 ```
 
+### newLogLevel
+
+For log level remapping, `newLogLevel` will set for the particular log message:
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/Error executing maven wrapper update command/",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
-It uses `QuickLRU` with a `maxSize` of `1000`.
+It uses [`lru-cache`](https://github.com/isaacs/node-lru-cache) with the `max` option set to `1000`.
 
 ### enableHttp2
 
@@ -2159,9 +2197,41 @@ To enable `lockFileMaintenance` add this to your configuration:
 To reduce "noise" in the repository, Renovate performs `lockFileMaintenance` `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
 Depending on its running schedule, Renovate may run a few times within that time window - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
 
+## logLevelRemap
+
+This option allows you to remap log levels for specific messages.
+
+Be careful with remapping `warn` or `error` messages to lower log levels, as it may hide important information.
+
+```json
+{
+  "logLevelRemap": [
+    {
+      "matchMessage": "/^pip-compile:/",
+      "newLogLevel": "info"
+    },
+    {
+      "matchMessage": "Package lookup error",
+      "newLogLevel": "warn"
+    }
+  ]
+}
+```
+
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
+
+## milestone
+
+If set to the number of an existing [GitHub milestone](https://docs.github.com/en/issues/using-labels-and-milestones-to-track-work/about-milestones), Renovate will add that milestone to its PR.
+Renovate will only add a milestone when it _creates_ the PR.
+
+```json title="Example Renovate config"
+{
+  "milestone": 12
+}
+```
 
 ## minimumReleaseAge
 
@@ -2396,6 +2466,32 @@ Use the syntax `!/ /` like the following:
 }
 ```
 
+### matchCurrentAge
+
+Use this field if you want to match packages based on the age of the _current_ (existing, in-repo) version.
+
+For example, if you want to group updates for dependencies where the existing version is more than 2 years old:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchCurrentAge": "> 2 years",
+      "groupName": "old dependencies"
+    }
+  ]
+}
+```
+
+The `matchCurrentAge` string must start with one of `>`, `>=`, `<` or `<=`.
+
+Only _one_ date part is supported, so you _cannot_ do `> 1 year 1 month`.
+Instead you should do `> 13 months`.
+
+<!-- prettier-ignore -->
+!!! note
+    We recommend you only use the words hour(s), day(s), week(s), month(s) and year(s) in your time ranges.
+
 ### matchDepTypes
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
@@ -2516,7 +2612,7 @@ Use this field to restrict rules to a particular repository. e.g.
 }
 ```
 
-This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchBaseBranches
 
@@ -2565,6 +2661,12 @@ Use this field to restrict rules to a particular package manager. e.g.
 ```
 
 For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
+
+### matchMessage
+
+For log level remapping, use this field to match against the particular log messages.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchDatasources
 
@@ -2718,6 +2820,40 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 ### matchDepNames
 
 ### matchDepPatterns
+
+### matchNewValue
+
+This option is matched against the `newValue` field of a dependency.
+
+`matchNewValue` supports Regular Expressions which must begin and end with `/`.
+For example, the following enforces that only `1.*` versions will be used:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchNewValue": "/^1\\./"
+    }
+  ]
+}
+```
+
+This field also supports a special negated regex syntax to ignore certain versions.
+Use the syntax `!/ /` like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["io.github.resilience4j"],
+      "matchNewValue": "!/^0\\./"
+    }
+  ]
+}
+```
+
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchPackageNames
 
@@ -2893,7 +3029,6 @@ Managers which do not support replacement:
 - `git-submodules`
 - `gomod`
 - `gradle`
-- `hermit`
 - `homebrew`
 - `maven`
 - `regex`
@@ -3327,7 +3462,7 @@ Behavior:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, and update nothing otherwise
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `npm`, `yarn`, `terraform` and `poetry` so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `cargo`, `composer`, `npm`, `yarn`, `pnpm`, `terraform` and `poetry` so far
 - `in-range-only` = Update the lock file when in-range updates are available, ignore package file updates
 
 Renovate's `"auto"` strategy works like this for npm:
@@ -3389,7 +3524,7 @@ For example we override it to `always` in the following cases where branch names
 You can select which behavior you want from Renovate:
 
 - `always`: Recreates all closed or blocking PRs
-- `auto`: The default option. Recreates only immortal PRs (default)
+- `auto`: The default option. Recreates only [immortal PRs](./key-concepts/pull-requests.md#immortal-prs) (default)
 - `never`: No PR is recreated, doesn't matter if it is immortal or not
 
 We recommend that you stick with the default setting for this option.
@@ -3770,6 +3905,19 @@ This feature is most useful when the `currentValue` is a version and not a range
 This feature _can_ be used in combination with `extractVersion` although that's likely only a rare edge case.
 When combined, `extractVersion` is applied to datasource results first, and then `versionCompatibility`.
 `extractVersion` should be used when the raw version string returned by the `datasource` contains extra details (such as a `v` prefix) when compared to the value/version used within the repository.
+
+During the lookup phase, Renovate evaluates the `versionCompatibility` regex against the `currentValue` string.
+If there is a match, the version part is stored internally temporarily as `compareValue` and the compatibility part stored as `currentCompatibility`.
+Storing `currentCompatibility` allows Renovate to reuse this value later to filter for new versions with the same compatibility.
+Renovate applies this compatibility check to datasource lookup results by passing both the `versionCompatibility` and `currentCompatibility` strings to a filter.
+
+For a new version to be allowed, it must:
+
+- Satisfy the `versionCompatibility` regex, and
+- Have the same `compatibility` part as the `currentValue`
+
+At this point, Renovate's core lookup logic is comparing versions to versions, and ignoring compatibility strings like `-jre8`.
+Finally, once updates are decided, Renovate restores the compatibility part to the `newValue` result.
 
 ## versioning
 
