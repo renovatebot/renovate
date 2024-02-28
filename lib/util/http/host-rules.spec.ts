@@ -3,7 +3,12 @@ import { bootstrap } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
 import { dnsLookup } from './dns';
-import { applyHostRule, findMatchingRule } from './host-rules';
+import {
+  applyHostRule,
+  findMatchingRule,
+  getConcurrentRequestsLimit,
+  getThrottleIntervalMs,
+} from './host-rules';
 import type { GotOptions } from './types';
 
 const url = 'https://github.com';
@@ -558,6 +563,50 @@ describe('util/http/host-rules', () => {
       headers: {
         'X-Auth-Token': 'token',
       },
+    });
+  });
+
+  describe('getConcurrentRequestsLimit', () => {
+    it('returns default value for undefined rule', () => {
+      expect(getConcurrentRequestsLimit('https://example.com', 42)).toBe(42);
+    });
+
+    it('returns null for -1', () => {
+      hostRules.add({
+        matchHost: 'https://example.com',
+        concurrentRequestLimit: -1,
+      });
+      expect(getConcurrentRequestsLimit('https://example.com', 42)).toBeNull();
+    });
+
+    it('returns positive limit', () => {
+      hostRules.add({
+        matchHost: 'https://example.com',
+        concurrentRequestLimit: 143,
+      });
+      expect(getConcurrentRequestsLimit('https://example.com', 42)).toBe(143);
+    });
+  });
+
+  describe('getThrottleIntervalMs', () => {
+    it('returns default value for undefined rule', () => {
+      expect(getThrottleIntervalMs('https://example.com', 42)).toBe(24); // 1000 / 42
+    });
+
+    it('returns null for -1', () => {
+      hostRules.add({
+        matchHost: 'https://example.com',
+        maxRequestsPerSecond: -1,
+      });
+      expect(getThrottleIntervalMs('https://example.com', 42)).toBeNull();
+    });
+
+    it('returns positive limit', () => {
+      hostRules.add({
+        matchHost: 'https://example.com',
+        maxRequestsPerSecond: 143,
+      });
+      expect(getThrottleIntervalMs('https://example.com', 42)).toBe(7); // 1000 / 143
     });
   });
 });

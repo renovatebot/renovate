@@ -231,7 +231,6 @@ export function getConcurrentRequestsLimit(
     return concurrentRequestLimit;
   }
 
-  // -1 for reset
   return null;
 }
 
@@ -249,6 +248,5 @@ export function getThrottleIntervalMs(
     return Math.ceil(1000 / maxRequestsPerSecond);
   }
 
-  // -1 for reset
   return null;
 }
