@@ -108,8 +108,8 @@ importers:
         specifier: 12.4.0
         version: 12.4.0
       better-sqlite3:
-        specifier: 9.4.1
-        version: 9.4.1
+        specifier: 9.4.3
+        version: 9.4.3
       bunyan:
         specifier: 1.8.15
         version: 1.8.15
@@ -602,8 +602,8 @@ importers:
         specifier: 10.9.2
         version: 10.9.2(@swc/core@1.4.2)(@types/node@18.19.17)(typescript@5.3.3)
       type-fest:
-        specifier: 4.10.2
-        version: 4.10.2
+        specifier: 4.10.3
+        version: 4.10.3
       typescript:
         specifier: 5.3.3
         version: 5.3.3
@@ -4647,8 +4647,8 @@ packages:
   /before-after-hook@2.2.3:
     resolution: {integrity: sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==}
 
-  /better-sqlite3@9.4.1:
-    resolution: {integrity: sha512-QpqiQeMI4WkE+dQ68zTMX5OzlPGc7lXIDP1iKUt4Omt9PdaVgzKYxHIJRIzt1E+RUBQoFmkip/IbvzyrxehAIg==}
+  /better-sqlite3@9.4.3:
+    resolution: {integrity: sha512-ud0bTmD9O3uWJGuXDltyj3R47Nz0OHX8iqPOT5PMspGqlu/qQFn+5S2eFBUCrySpavTjFXbi4EgrfVvPAHlImw==}
     requiresBuild: true
     dependencies:
       bindings: 1.5.0
@@ -8986,7 +8986,7 @@ packages:
     dependencies:
       '@babel/code-frame': 7.23.5
       index-to-position: 0.1.2
-      type-fest: 4.10.2
+      type-fest: 4.10.3
     dev: true
 
   /parse-link-header@2.0.0:
@@ -9268,7 +9268,7 @@ packages:
     dependencies:
       find-up-simple: 1.0.0
       read-pkg: 9.0.1
-      type-fest: 4.10.2
+      type-fest: 4.10.3
     dev: true
 
   /read-pkg-up@7.0.1:
@@ -9297,7 +9297,7 @@ packages:
       '@types/normalize-package-data': 2.4.4
       normalize-package-data: 6.0.0
       parse-json: 8.1.0
-      type-fest: 4.10.2
+      type-fest: 4.10.3
       unicorn-magic: 0.1.0
     dev: true
 
@@ -10410,8 +10410,8 @@ packages:
     engines: {node: '>=14.16'}
     dev: true
 
-  /type-fest@4.10.2:
-    resolution: {integrity: sha512-anpAG63wSpdEbLwOqH8L84urkL6PiVIov3EMmgIhhThevh9aiMQov+6Btx0wldNcvm4wV+e2/Rt1QdDwKHFbHw==}
+  /type-fest@4.10.3:
+    resolution: {integrity: sha512-JLXyjizi072smKGGcZiAJDCNweT8J+AuRxmPZ1aG7TERg4ijx9REl8CNhbr36RV4qXqL1gO1FF9HL8OkVmmrsA==}
     engines: {node: '>=16'}
     dev: true
 
