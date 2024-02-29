@@ -3227,6 +3227,19 @@ describe('modules/platform/github/index', () => {
     const mockScope = async (repoOpts: any = {}): Promise<httpMock.Scope> => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo', repoOpts);
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .reply(200, [
+          {
+            number: 1234,
+            base: { sha: '1234' },
+            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            state: 'open',
+            title: 'Some PR',
+          },
+        ]);
       scope.get('/repos/some/repo/pulls/123').reply(200, getPrResp);
       await github.initRepo({ repository: 'some/repo' });
       return scope;
@@ -3236,6 +3249,11 @@ describe('modules/platform/github/index', () => {
       method: 'POST',
       url: 'https://api.github.com/graphql',
       graphql: { query: { repository: {} } },
+    };
+
+    const restGetPrList = {
+      method: 'GET',
+      url: 'https://api.github.com/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
     };
 
     const restGetPr = {
@@ -3276,6 +3294,7 @@ describe('modules/platform/github/index', () => {
 
       expect(httpMock.getTrace()).toMatchObject([
         graphqlGetRepo,
+        restGetPrList,
         restGetPr,
         graphqlAutomerge,
       ]);
