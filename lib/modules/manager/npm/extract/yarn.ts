@@ -21,6 +21,9 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
       if (key === '__metadata') {
         // yarn 2
         lockfileVersion = parseInt(val.cacheKey, 10);
+        logger.once.debug(
+          `yarn.lock ${filePath} has __metadata.cacheKey=${lockfileVersion}`,
+        );
       } else {
         for (const entry of key.split(', ')) {
           try {
@@ -39,8 +42,18 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
         }
       }
     }
+    const isYarn1 = !('__metadata' in parsed);
+    if (isYarn1) {
+      logger.once.debug(
+        `yarn.lock ${filePath} is has no __metadata so is yarn 1`,
+      );
+    } else {
+      logger.once.debug(
+        `yarn.lock ${filePath} is has __metadata so is yarn 2+`,
+      );
+    }
     return {
-      isYarn1: !('__metadata' in parsed),
+      isYarn1,
       lockfileVersion,
       lockedVersions,
     };
