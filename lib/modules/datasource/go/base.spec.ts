@@ -240,6 +240,29 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      it('supports GitLab EE deps in private subgroup with api/ as part of packageName and api/v4 as part of endpoint', async () => {
+        GlobalConfig.set({ endpoint: 'https://my.custom.domain/api/v4' });
+
+        hostRules.hostType.mockReturnValue('gitlab');
+        httpMock
+          .scope('https://my.custom.domain')
+          .get('/group/subgroup-api/myrepo?go-get=1')
+          .reply(
+            200,
+            Fixtures.get('go-get-gitlab-ee-private-subgroup-api.html'),
+          );
+
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/group/subgroup-api/myrepo',
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'group/subgroup-api/myrepo',
+          registryUrl: 'https://my.custom.domain/',
+        });
+      });
+
       it('supports GitLab EE deps in subgroup with version', async () => {
         hostRules.hostType.mockReturnValue('gitlab');
         httpMock

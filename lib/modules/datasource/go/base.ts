@@ -184,7 +184,7 @@ export class BaseGoDatasource {
         endpoint,
       );
 
-      if (endpointPrefix) {
+      if (endpointPrefix && endpointPrefix[1] !== 'api/') {
         packageName = packageName.replace(endpointPrefix[1], '');
       }
 
