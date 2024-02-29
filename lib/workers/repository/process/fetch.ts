@@ -166,7 +166,7 @@ export async function fetchUpdates(
 
   const allTasks = createLookupTasks(config, managerPackageFiles);
 
-  const fetchResults = await p.all(allTasks, { concurrency: 25 });
+  const fetchResults = await p.all(allTasks, { concurrency: Infinity });
 
   const errors: Error[] = [];
 
