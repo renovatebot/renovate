@@ -379,8 +379,12 @@ function patchConfigForArtifactsUpdate(
     const packageFile = managerPackageFiles.find(
       (p) => p.packageFile === packageFileName,
     );
-    if (packageFile) {
-      updatedConfig.lockFiles ??= packageFile.lockFiles;
+    if (
+      packageFile &&
+      is.nonEmptyArray(updatedConfig.lockFiles) &&
+      is.nonEmptyArray(packageFile.lockFiles)
+    ) {
+      updatedConfig.lockFiles = packageFile.lockFiles;
     }
   }
   return updatedConfig;
