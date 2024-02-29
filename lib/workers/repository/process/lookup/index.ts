@@ -22,6 +22,7 @@ import { ExternalHostError } from '../../../../types/errors/external-host-error'
 import { assignKeys } from '../../../../util/assign-keys';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
+import { Result } from '../../../../util/result';
 import { getBucket } from './bucket';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
@@ -36,7 +37,7 @@ import {
 
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig,
-): Promise<UpdateResult> {
+): Promise<Result<UpdateResult, Error>> {
   let config: LookupUpdateConfig = { ...inconfig };
   config.versioning ??= getDefaultVersioning(config.datasource);
 
@@ -61,14 +62,14 @@ export async function lookupUpdates(
     );
     if (config.currentValue && !is.string(config.currentValue)) {
       res.skipReason = 'invalid-value';
-      return res;
+      return Result.ok(res);
     }
     if (
       !isGetPkgReleasesConfig(config) ||
       !getDatasourceFor(config.datasource)
     ) {
       res.skipReason = 'invalid-config';
-      return res;
+      return Result.ok(res);
     }
     let compareValue = config.currentValue;
     if (
@@ -109,7 +110,7 @@ export async function lookupUpdates(
         versioning.isSingleVersion(compareValue!)
       ) {
         res.skipReason = 'is-pinned';
-        return res;
+        return Result.ok(res);
       }
 
       const { val: releaseResult, err: lookupError } = await getRawPkgReleases(
@@ -137,7 +138,7 @@ export async function lookupUpdates(
         );
         // TODO: return warnings in own field
         res.warnings.push(warning);
-        return res;
+        return Result.ok(res);
       }
 
       dependency = releaseResult;
@@ -163,7 +164,6 @@ export async function lookupUpdates(
       let allVersions = dependency.releases.filter((release) =>
         versioning.isVersion(release.version),
       );
-
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
@@ -175,7 +175,7 @@ export async function lookupUpdates(
           message,
         );
         if (!config.currentDigest) {
-          return res;
+          return Result.ok(res);
         }
       }
       // Reapply package rules in case we missed something from sourceUrl
@@ -187,7 +187,7 @@ export async function lookupUpdates(
             topic: config.packageName,
             message: `Can't find version with tag ${config.followTag} for ${config.datasource} package ${config.packageName}`,
           });
-          return res;
+          return Result.ok(res);
         }
         allVersions = allVersions.filter(
           (v) =>
@@ -219,7 +219,7 @@ export async function lookupUpdates(
               config.datasource
             } package ${config.packageName}`,
           });
-          return res;
+          return Result.ok(res);
         }
         res.updates.push(rollback);
       }
@@ -232,6 +232,14 @@ export async function lookupUpdates(
         !config.lockedVersion
       ) {
         rangeStrategy = 'bump';
+      }
+      // unconstrained deps with lockedVersion
+      if (
+        config.isVulnerabilityAlert &&
+        !config.currentValue &&
+        config.lockedVersion
+      ) {
+        rangeStrategy = 'update-lockfile';
       }
       const nonDeprecatedVersions = dependency.releases
         .filter((release) => !release.isDeprecated)
@@ -258,11 +266,32 @@ export async function lookupUpdates(
           latestVersion!,
           allVersions.map((v) => v.version),
         )!;
-      // istanbul ignore if
-      if (!currentVersion! && config.lockedVersion) {
-        return res;
+
+      if (!currentVersion) {
+        if (!config.lockedVersion) {
+          res.skipReason = 'invalid-value';
+        }
+        return Result.ok(res);
       }
+
       res.currentVersion = currentVersion!;
+      const currentVersionTimestamp = allVersions.find(
+        (v) =>
+          versioning.isValid(v.version) &&
+          versioning.equals(v.version, currentVersion),
+      )?.releaseTimestamp;
+
+      if (
+        is.nonEmptyString(currentVersionTimestamp) &&
+        config.packageRules?.some((rules) =>
+          is.nonEmptyString(rules.matchCurrentAge),
+        )
+      ) {
+        res.currentVersionTimestamp = currentVersionTimestamp;
+        // Reapply package rules to check matches for matchCurrentAge
+        config = applyPackageRules({ ...config, currentVersionTimestamp });
+      }
+
       if (
         compareValue &&
         currentVersion &&
@@ -290,7 +319,7 @@ export async function lookupUpdates(
       // istanbul ignore if
       if (!versioning.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
-        return res;
+        return Result.ok(res);
       }
       // Filter latest, unstable, etc
       // TODO #22198
@@ -342,7 +371,7 @@ export async function lookupUpdates(
           );
         // istanbul ignore next
         if (!release) {
-          return res;
+          return Result.ok(res);
         }
         const newVersion = release.version;
         const update = await generateUpdate(
@@ -413,6 +442,24 @@ export async function lookupUpdates(
     } else if (compareValue && versioning.isSingleVersion(compareValue)) {
       res.fixedVersion = compareValue.replace(regEx(/^=+/), '');
     }
+
+    // massage versionCompatibility
+    if (
+      is.string(config.currentValue) &&
+      is.string(compareValue) &&
+      is.string(config.versionCompatibility)
+    ) {
+      for (const update of res.updates) {
+        logger.debug({ update });
+        if (is.string(config.currentValue) && is.string(update.newValue)) {
+          update.newValue = config.currentValue.replace(
+            compareValue,
+            update.newValue,
+          );
+        }
+      }
+    }
+
     // Add digests if necessary
     if (supportsDigests(config.datasource)) {
       if (config.currentDigest) {
@@ -420,7 +467,7 @@ export async function lookupUpdates(
           // digest update
           res.updates.push({
             updateType: 'digest',
-            newValue: compareValue,
+            newValue: config.currentValue,
           });
         }
       } else if (config.pinDigests) {
@@ -430,8 +477,7 @@ export async function lookupUpdates(
           res.updates.push({
             isPinDigest: true,
             updateType: 'pinDigest',
-            // TODO #22198
-            newValue: config.currentValue!,
+            newValue: config.currentValue,
           });
         }
       }
@@ -445,23 +491,6 @@ export async function lookupUpdates(
       }
       if (res.registryUrl) {
         config.registryUrls = [res.registryUrl];
-      }
-
-      // massage versionCompatibility
-      if (
-        is.string(config.currentValue) &&
-        is.string(compareValue) &&
-        is.string(config.versionCompatibility)
-      ) {
-        for (const update of res.updates) {
-          logger.debug({ update });
-          if (is.string(config.currentValue) && is.string(update.newValue)) {
-            update.newValue = config.currentValue.replace(
-              compareValue,
-              update.newValue,
-            );
-          }
-        }
       }
 
       // update digest for all
@@ -508,6 +537,7 @@ export async function lookupUpdates(
         }
       }
     }
+
     if (res.updates.length) {
       delete res.skipReason;
     }
@@ -543,9 +573,14 @@ export async function lookupUpdates(
       );
     }
   } catch (err) /* istanbul ignore next */ {
-    if (err instanceof ExternalHostError || err.message === CONFIG_VALIDATION) {
-      throw err;
+    if (err instanceof ExternalHostError) {
+      return Result.err(err);
     }
+
+    if (err instanceof Error && err.message === CONFIG_VALIDATION) {
+      return Result.err(err);
+    }
+
     logger.error(
       {
         currentDigest: config.currentDigest,
@@ -567,5 +602,5 @@ export async function lookupUpdates(
     );
     res.skipReason = 'internal-error';
   }
-  return res;
+  return Result.ok(res);
 }

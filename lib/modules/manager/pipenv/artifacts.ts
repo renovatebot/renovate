@@ -140,10 +140,12 @@ export async function updateArtifacts({
     const extraEnv: Opt<ExtraEnv> = {
       PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
+      WORKON_HOME: await ensureCacheDir('virtualenvs'),
     };
     const execOptions: ExecOptions = {
       cwdFile: pipfileName,
       docker: {},
+      userConfiguredEnv: config.env,
       toolConstraints: [
         {
           toolName: 'python',

@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import moo from 'moo';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import { filterMap } from '../../../util/filter-map';
 import { HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -17,6 +18,13 @@ import type { GoproxyItem, VersionInfo } from './types';
 const parsedGoproxy: Record<string, GoproxyItem[]> = {};
 
 const modRegex = regEx(/^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\d+))?$/);
+
+/**
+ * @see https://go.dev/ref/mod#pseudo-versions
+ */
+const pseudoVersionRegex = regEx(
+  /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?(?<timestamp>\d{14})-(?<digest>[a-f0-9]{12})/i,
+);
 
 export class GoProxyDatasource extends Datasource {
   static readonly id = 'go-proxy';
@@ -207,15 +215,38 @@ export class GoProxyDatasource extends Datasource {
   async listVersions(baseUrl: string, packageName: string): Promise<Release[]> {
     const url = `${baseUrl}/${this.encodeCase(packageName)}/@v/list`;
     const { body } = await this.http.get(url);
-    return body
-      .split(newlineRegex)
-      .filter(is.nonEmptyStringAndNotWhitespace)
-      .map((str) => {
-        const [version, releaseTimestamp] = str.split(regEx(/\s+/));
-        return DateTime.fromISO(releaseTimestamp).isValid
-          ? { version, releaseTimestamp }
-          : { version };
-      });
+    return filterMap(body.split(newlineRegex), (str) => {
+      if (!is.nonEmptyStringAndNotWhitespace(str)) {
+        return null;
+      }
+
+      const [version, releaseTimestamp] = str.trim().split(regEx(/\s+/));
+      const release: Release = { version };
+
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
+      }
+
+      const pseudoVersionMatch = version.match(pseudoVersionRegex)?.groups;
+      if (pseudoVersionMatch) {
+        const { digest: newDigest, timestamp } = pseudoVersionMatch;
+
+        if (newDigest) {
+          release.newDigest = newDigest;
+        }
+
+        const pseudoVersionReleaseTimestamp = DateTime.fromFormat(
+          timestamp,
+          'yyyyMMddHHmmss',
+          { zone: 'UTC' },
+        ).toISO({ suppressMilliseconds: true });
+        if (pseudoVersionReleaseTimestamp) {
+          release.releaseTimestamp = pseudoVersionReleaseTimestamp;
+        }
+      }
+
+      return release;
+    });
   }
 
   async versionInfo(
@@ -246,7 +277,7 @@ export class GoProxyDatasource extends Datasource {
       const res = await this.http.getJson<VersionInfo>(url);
       return res.body.Version;
     } catch (err) {
-      logger.debug({ err }, 'Failed to get latest version');
+      logger.trace({ err }, 'Failed to get latest version');
       return null;
     }
   }
@@ -272,10 +303,10 @@ export class GoProxyDatasource extends Datasource {
       try {
         const res = await this.listVersions(baseUrl, pkg);
         const releases = await p.map(res, async (versionInfo) => {
-          const { version, releaseTimestamp } = versionInfo;
+          const { version, newDigest, releaseTimestamp } = versionInfo;
 
           if (releaseTimestamp) {
-            return { version, releaseTimestamp };
+            return { version, newDigest, releaseTimestamp };
           }
 
           try {

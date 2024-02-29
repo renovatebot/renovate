@@ -305,8 +305,9 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: semeruJreMatches.version,
         };
       }
-      const temurinJdkMatches = version.match(/^temurin-(?<version>\d\S+)/)
-        ?.groups;
+      const temurinJdkMatches = version.match(
+        /^temurin-(?<version>\d\S+)/,
+      )?.groups;
       if (temurinJdkMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -314,8 +315,9 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
           currentValue: temurinJdkMatches.version,
         };
       }
-      const temurinJreMatches = version.match(/^temurin-jre-(?<version>\d\S+)/)
-        ?.groups;
+      const temurinJreMatches = version.match(
+        /^temurin-jre-(?<version>\d\S+)/,
+      )?.groups;
       if (temurinJreMatches) {
         return {
           datasource: JavaVersionDatasource.id,
@@ -340,6 +342,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'casey/just',
+    },
+  },
+  kind: {
+    asdfPluginUrl: 'https://github.com/johnlayton/asdf-kind',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'kubernetes-sigs/kind',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   kotlin: {
@@ -374,6 +384,21 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  maven: {
+    asdfPluginUrl: 'https://github.com/halcyon/asdf-maven',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'apache/maven',
+    },
+  },
+  mimirtool: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-mimirtool',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'grafana/mimir',
+      extractVersion: '^mimir-(?<version>\\S+)',
+    },
+  },
   nim: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-nim',
     config: {
@@ -394,6 +419,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'ocaml/ocaml',
+    },
+  },
+  opentofu: {
+    asdfPluginUrl: 'https://github.com/virtualroot/asdf-opentofu',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'opentofu/opentofu',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   perl: {
@@ -582,6 +615,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  yq: {
+    asdfPluginUrl: 'https://github.com/sudermanjr/asdf-yq',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'mikefarah/yq',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   zig: {
     asdfPluginUrl: 'https://github.com/cheetah/asdf-zig',
     config: {
@@ -618,6 +659,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
       packageName: 'google/yamlfmt',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  tuist: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-tuist',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'tuist/tuist',
     },
   },
   typos: {

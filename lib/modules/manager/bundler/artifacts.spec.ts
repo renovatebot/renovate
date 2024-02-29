@@ -881,6 +881,114 @@ describe('modules/manager/bundler/artifacts', () => {
           { cmd: 'bundler lock --update foo bar' },
         ]);
       });
+
+      it('handles failure of strict updating for version solving', async () => {
+        const execError = new ExecError('Exec error', {
+          cmd: '',
+          stdout: '',
+          stderr: 'version solving has failed',
+          options: { encoding: 'utf8' },
+        });
+        fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
+        const execSnapshots = mockExecSequence([
+          execError,
+          { stdout: '', stderr: '' },
+        ]);
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: ['Gemfile.lock'],
+          }),
+        );
+
+        const res = await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [{ depName: 'foo', updateType: 'minor' }],
+          newPackageFileContent: '{}',
+          config,
+        });
+
+        expect(res).toMatchObject([{ file: { path: 'Gemfile.lock' } }]);
+        expect(execSnapshots).toMatchObject([
+          { cmd: 'bundler lock --minor --strict --update foo' },
+          { cmd: 'bundler lock --minor --conservative --update foo' },
+        ]);
+      });
+
+      it('handles failure of strict updating for missing gem', async () => {
+        // See https://github.com/rubygems/rubygems/issues/7369
+        const execError = new ExecError('Exec error', {
+          cmd: '',
+          stdout: '',
+          stderr: "Could not find gems matching 'foo ",
+          options: { encoding: 'utf8' },
+        });
+        fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
+        const execSnapshots = mockExecSequence([
+          execError,
+          { stdout: '', stderr: '' },
+        ]);
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: ['Gemfile.lock'],
+          }),
+        );
+
+        const res = await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [{ depName: 'foo', updateType: 'minor' }],
+          newPackageFileContent: '{}',
+          config,
+        });
+
+        expect(res).toMatchObject([{ file: { path: 'Gemfile.lock' } }]);
+        expect(execSnapshots).toMatchObject([
+          { cmd: 'bundler lock --minor --strict --update foo' },
+          { cmd: 'bundler lock --minor --conservative --update foo' },
+        ]);
+      });
+
+      it('updates the Gemfile.lock when upgrading ruby', async () => {
+        // See https://github.com/renovatebot/renovate/issues/15114
+        fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
+        const execSnapshots = mockExecSequence([{ stdout: '', stderr: '' }]);
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: ['Gemfile.lock'],
+          }),
+        );
+
+        const res = await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [{ depName: 'ruby', updateType: 'patch' }],
+          newPackageFileContent: '{}',
+          config,
+        });
+
+        expect(res).toMatchObject([{ file: { path: 'Gemfile.lock' } }]);
+        expect(execSnapshots).toMatchObject([{ cmd: 'bundler lock' }]);
+      });
+
+      it('updates the Gemfile.lock when upgrading bundler', async () => {
+        fs.readLocalFile.mockResolvedValue('Current Gemfile.lock');
+        const execSnapshots = mockExecSequence([{ stdout: '', stderr: '' }]);
+        git.getRepoStatus.mockResolvedValueOnce(
+          partial<StatusResult>({
+            modified: ['Gemfile.lock'],
+          }),
+        );
+
+        const res = await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [{ depName: 'bundler', updateType: 'patch' }],
+          newPackageFileContent: '{}',
+          config,
+        });
+
+        expect(res).toMatchObject([{ file: { path: 'Gemfile.lock' } }]);
+        expect(execSnapshots).toMatchObject([
+          { cmd: 'bundler lock --update --bundler' },
+        ]);
+      });
     });
   });
 });

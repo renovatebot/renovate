@@ -70,6 +70,10 @@ export function pep508ToPackageDependency(
     dep.skipReason = 'unspecified-version';
   } else {
     dep.currentValue = parsed.currentValue;
+
+    if (parsed.currentValue.startsWith('==')) {
+      dep.currentVersion = parsed.currentValue.replace(regEx(/^==\s*/), '');
+    }
   }
   return dep;
 }

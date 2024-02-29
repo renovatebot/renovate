@@ -48,6 +48,8 @@ If set to any string, Renovate will use this as the `user-agent` it sends with H
 
 The order method for autodiscover server side repository search.
 
+> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
+
 Allowed values:
 
 - `asc`
@@ -62,6 +64,8 @@ Default value: `asc`.
     For the Forgejo and Gitea platform only.
 
 The sort method for autodiscover server side repository search.
+
+> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
 Allowed values:
 
@@ -95,7 +99,7 @@ If set, Renovate will terminate the whole process group of a terminated child pr
 
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
-If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergable before trying to automerge.
+If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
 The formula for the delay between attempts is `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY * attempt * attempt` milliseconds.
 
 Default value: `5` (attempts results in max. 13.75 seconds timeout).
@@ -163,3 +167,8 @@ If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 clie
 > Whether to force path style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
 
 Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
+
+## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
+
+If set, Renovate will use SQLite as the backend for the package cache.
+Don't combine with `redisUrl`, Redis would be preferred over SQlite.
