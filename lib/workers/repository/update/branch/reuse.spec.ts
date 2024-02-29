@@ -191,7 +191,7 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(res.reuseExistingBranch).toBeTrue();
     });
 
-    it('returns true if rebaseWhen=never, keepUpdatedLabel and stale', async () => {
+    it('returns false if rebaseWhen=never, keepUpdatedLabel and stale', async () => {
       config.rebaseWhen = 'never';
       config.keepUpdatedLabel = 'keep-updated';
       platform.getBranchPr.mockResolvedValueOnce(pr);
@@ -201,7 +201,7 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(res.reuseExistingBranch).toBeFalse();
     });
 
-    it('returns true if rebaseWhen=conflicted, keepUpdatedLabel and modified', async () => {
+    it('returns false if rebaseWhen=conflicted, keepUpdatedLabel and modified', async () => {
       config.rebaseWhen = 'never';
       config.keepUpdatedLabel = 'keep-updated';
       platform.getBranchPr.mockResolvedValue(pr);
@@ -211,6 +211,16 @@ describe('workers/repository/update/branch/reuse', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBeFalse();
       expect(res.isModified).toBeUndefined();
+    });
+
+    it('returns true if rebaseWhen=never, miss-match keepUpdatedLabel and stale', async () => {
+      config.rebaseWhen = 'never';
+      config.keepUpdatedLabel = 'keep-not-updated';
+      platform.getBranchPr.mockResolvedValueOnce(pr);
+      scm.branchExists.mockResolvedValueOnce(true);
+      scm.isBranchBehindBase.mockResolvedValueOnce(true);
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBeTrue();
     });
   });
 });
