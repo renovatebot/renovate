@@ -387,7 +387,6 @@ function patchConfigForArtifactsUpdate(
       updatedConfig.lockFiles = packageFile.lockFiles;
     }
   }
-  console.log('patchConfigForArtifactsUpdate', updatedConfig);
   return updatedConfig;
 }
 
