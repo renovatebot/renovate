@@ -235,7 +235,7 @@ describe('workers/repository/update/branch/get-updated', () => {
       expect(composer.updateArtifacts).toHaveBeenCalledWith(
         expect.objectContaining({
           config: expect.objectContaining({
-            lockFiles: ['composer.lock'],
+            lockFiles: ['different.lock'],
           }),
         }),
       );
