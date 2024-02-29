@@ -360,6 +360,22 @@ describe('modules/datasource/go/base', () => {
         expect(res).toBeNull();
       });
 
+      it('handles go-import with azure devops source', async () => {
+        const meta =
+          '<meta name="go-import" content="org.visualstudio.com/my-project/_git/my-repo.git git https://org.visualstudio.com/my-project/_git/my-repo.git" />';
+        httpMock
+          .scope('https://org.visualstudio.com')
+          .get('/my-project/_git/my-repo.git?go-get=1')
+          .reply(200, meta);
+        const res = await BaseGoDatasource.getDatasource(
+          'org.visualstudio.com/my-project/_git/my-repo.git',
+        );
+        expect(res).toEqual({
+          datasource: GitTagsDatasource.id,
+          packageName: 'https://org.visualstudio.com/my-project/_git/my-repo',
+        });
+      });
+
       it('handles uncommon imports', async () => {
         const meta =
           '<meta name="go-import" content="example.com/uncommon git ssh://git.example.com/uncommon">';
