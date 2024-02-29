@@ -347,19 +347,6 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
-      it('returns null for invalid azure devops source', async () => {
-        httpMock
-          .scope('https://dev.azure.com')
-          .get('/foo/bar.git?go-get=1')
-          .reply(200);
-
-        const res = await BaseGoDatasource.getDatasource(
-          'dev.azure.com/foo/bar.git',
-        );
-
-        expect(res).toBeNull();
-      });
-
       it('handles go-import with azure devops source', async () => {
         const meta =
           '<meta name="go-import" content="org.visualstudio.com/my-project/_git/my-repo.git git https://org.visualstudio.com/my-project/_git/my-repo.git" />';
@@ -374,6 +361,19 @@ describe('modules/datasource/go/base', () => {
           datasource: GitTagsDatasource.id,
           packageName: 'https://org.visualstudio.com/my-project/_git/my-repo',
         });
+      });
+
+      it('returns null for invalid azure devops source', async () => {
+        httpMock
+          .scope('https://dev.azure.com')
+          .get('/foo/bar.git?go-get=1')
+          .reply(200);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'dev.azure.com/foo/bar.git',
+        );
+
+        expect(res).toBeNull();
       });
 
       it('handles uncommon imports', async () => {
