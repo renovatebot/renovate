@@ -1457,6 +1457,7 @@ describe('modules/datasource/docker/index', () => {
           packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
         }),
       ).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://123456789.dkr.ecr.us-east-1.amazonaws.com',
         releases: [],
       });
@@ -1509,6 +1510,7 @@ describe('modules/datasource/docker/index', () => {
           packageName: 'public.ecr.aws/amazonlinux/amazonlinux',
         }),
       ).toEqual({
+        lookupName: 'amazonlinux/amazonlinux',
         registryUrl: 'https://public.ecr.aws',
         releases: [],
       });
@@ -1567,6 +1569,7 @@ describe('modules/datasource/docker/index', () => {
             packageName: 'ecr-proxy.company.com/node',
           }),
         ).toEqual({
+          lookupName: 'node',
           registryUrl: 'https://ecr-proxy.company.com',
           releases: [],
           sourceUrl: 'https://github.com/renovatebot/renovate',
@@ -2026,6 +2029,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2081,6 +2085,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2144,6 +2149,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
         sourceUrl: 'https://github.com/renovatebot/renovate',
@@ -2171,6 +2177,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2195,6 +2202,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2216,6 +2224,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2266,6 +2275,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2320,6 +2330,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2350,6 +2361,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2404,6 +2416,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2463,6 +2476,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'ghcr.io/visualon/drone-git',
       });
       expect(res).toEqual({
+        lookupName: 'visualon/drone-git',
         registryUrl: 'https://ghcr.io',
         sourceUrl: 'https://github.com/visualon/drone-git',
         releases: [{ version: '1.0.0' }],

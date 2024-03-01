@@ -59,6 +59,7 @@ export interface UpdateResult {
   sourceUrl?: string | null;
   currentVersion?: string;
   isSingleVersion?: boolean;
+  lookupName?: string;
   skipReason?: SkipReason;
   registryUrl?: string;
   fixedVersion?: string;
