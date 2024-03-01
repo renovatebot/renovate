@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
@@ -65,6 +66,9 @@ export class GoDatasource extends Datasource {
     value?: string | null,
   ): Promise<string | null> {
     if (parseGoproxy().some(({ url }) => url === 'off')) {
+      logger.debug(
+        `Skip digest fetch for ${packageName} with GOPROXY containing "off"`,
+      );
       return null;
     }
 
