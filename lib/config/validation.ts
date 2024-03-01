@@ -828,139 +828,141 @@ async function validateGlobalConfig(
   warnings: ValidationMessage[],
   currentPath: string | undefined,
 ): Promise<void> {
-  if (type === 'string') {
-    if (is.string(val)) {
-      if (
-        key === 'onboardingConfigFileName' &&
-        !configFileNames.includes(val)
-      ) {
+  if (val !== null) {
+    if (type === 'string') {
+      if (is.string(val)) {
+        if (
+          key === 'onboardingConfigFileName' &&
+          !configFileNames.includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${configFileNames.join(', ')}.`,
+          });
+        } else if (
+          key === 'repositoryCache' &&
+          !['enabled', 'disabled', 'reset'].includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['enabled', 'disabled', 'reset'].join(', ')}.`,
+          });
+        } else if (
+          key === 'dryRun' &&
+          !['extract', 'lookup', 'full'].includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['extract', 'lookup', 'full'].join(', ')}.`,
+          });
+        } else if (
+          key === 'binarySource' &&
+          !['docker', 'global', 'install', 'hermit'].includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}.`,
+          });
+        } else if (
+          key === 'requireConfig' &&
+          !['required', 'optional', 'ignored'].includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['required', 'optional', 'ignored'].join(', ')}.`,
+          });
+        } else if (
+          key === 'gitUrl' &&
+          !['default', 'ssh', 'endpoint'].includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
+          });
+        }
+      } else {
         warnings.push({
           topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${configFileNames.join(', ')}.`,
-        });
-      } else if (
-        key === 'repositoryCache' &&
-        !['enabled', 'disabled', 'reset'].includes(val)
-      ) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['enabled', 'disabled', 'reset'].join(', ')}.`,
-        });
-      } else if (
-        key === 'dryRun' &&
-        !['extract', 'lookup', 'full'].includes(val)
-      ) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['extract', 'lookup', 'full'].join(', ')}.`,
-        });
-      } else if (
-        key === 'binarySource' &&
-        !['docker', 'global', 'install', 'hermit'].includes(val)
-      ) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}.`,
-        });
-      } else if (
-        key === 'requireConfig' &&
-        !['required', 'optional', 'ignored'].includes(val)
-      ) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['required', 'optional', 'ignored'].join(', ')}.`,
-        });
-      } else if (
-        key === 'gitUrl' &&
-        !['default', 'ssh', 'endpoint'].includes(val)
-      ) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
+          message: `Configuration option \`${currentPath}\` should be a string.`,
         });
       }
-    } else {
-      warnings.push({
-        topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a string.`,
-      });
-    }
-  } else if (type === 'integer') {
-    if (!is.number(val)) {
-      warnings.push({
-        topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-          val,
-        )} (${typeof val}).`,
-      });
-    }
-  } else if (type === 'boolean') {
-    if (val !== true && val !== false) {
-      warnings.push({
-        topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a boolean. Found: ${JSON.stringify(
-          val,
-        )} (${typeof val}).`,
-      });
-    }
-  } else if (type === 'array') {
-    if (is.array(val)) {
-      if (key === 'gitNoVerify') {
-        const allowedValues = ['commit', 'push'];
-        for (const value of val as string[]) {
-          if (!allowedValues.includes(value)) {
-            warnings.push({
-              topic: 'Configuration Error',
-              message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
-            });
+    } else if (type === 'integer') {
+      if (!is.number(val)) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
+            val,
+          )} (${typeof val}).`,
+        });
+      }
+    } else if (type === 'boolean') {
+      if (val !== true && val !== false) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Configuration option \`${currentPath}\` should be a boolean. Found: ${JSON.stringify(
+            val,
+          )} (${typeof val}).`,
+        });
+      }
+    } else if (type === 'array') {
+      if (is.array(val)) {
+        if (key === 'gitNoVerify') {
+          const allowedValues = ['commit', 'push'];
+          for (const value of val as string[]) {
+            if (!allowedValues.includes(value)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
+              });
+            }
           }
         }
+      } else {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Configuration option \`${currentPath}\` should be a list (Array).`,
+        });
       }
-    } else {
-      warnings.push({
-        topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a list (Array).`,
-      });
-    }
-  } else if (type === 'object') {
-    if (is.plainObject(val)) {
-      if (key === 'onboardingConfig') {
-        const subValidation = await validateConfig(false, val);
-        for (const warning of subValidation.warnings.concat(
-          subValidation.errors,
-        )) {
-          warnings.push(warning);
-        }
-      } else if (key === 'force') {
-        const subValidation = await validateConfig(true, val);
-        for (const warning of subValidation.warnings.concat(
-          subValidation.errors,
-        )) {
-          warnings.push(warning);
-        }
-      } else if (key === 'cacheTtlOverride') {
-        for (const [subKey, subValue] of Object.entries(val)) {
-          if (!is.number(subValue)) {
+    } else if (type === 'object') {
+      if (is.plainObject(val)) {
+        if (key === 'onboardingConfig') {
+          const subValidation = await validateConfig(false, val);
+          for (const warning of subValidation.warnings.concat(
+            subValidation.errors,
+          )) {
+            warnings.push(warning);
+          }
+        } else if (key === 'force') {
+          const subValidation = await validateConfig(true, val);
+          for (const warning of subValidation.warnings.concat(
+            subValidation.errors,
+          )) {
+            warnings.push(warning);
+          }
+        } else if (key === 'cacheTtlOverride') {
+          for (const [subKey, subValue] of Object.entries(val)) {
+            if (!is.number(subValue)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid \`${currentPath}.${subKey}\` configuration: value must be an integer.`,
+              });
+            }
+          }
+        } else {
+          const res = validatePlainObject(val);
+          if (res !== true) {
             warnings.push({
               topic: 'Configuration Error',
-              message: `Invalid \`${currentPath}.${subKey}\` configuration: value must be an integer.`,
+              message: `Invalid \`${currentPath}.${res}\` configuration: value must be a string.`,
             });
           }
         }
       } else {
-        const res = validatePlainObject(val);
-        if (res !== true) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid \`${currentPath}.${res}\` configuration: value must be a string.`,
-          });
-        }
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Configuration option \`${currentPath}\` should be a JSON object.`,
+        });
       }
-    } else {
-      warnings.push({
-        topic: 'Configuration Error',
-        message: `Configuration option \`${currentPath}\` should be a JSON object.`,
-      });
     }
   }
 }

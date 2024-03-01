@@ -1,4 +1,5 @@
 import upath from 'upath';
+import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
 import { Lazy } from '../../../../util/lazy';
 import { PackageJson, PackageJsonSchema } from '../schema';
@@ -30,10 +31,18 @@ export function getPackageManagerVersion(
   pkg: PackageJsonSchema,
 ): string | null {
   if (pkg.packageManager?.name === name) {
-    return pkg.packageManager.version;
+    const version = pkg.packageManager.version;
+    logger.debug(
+      `Found ${name} constraint in package.json packageManager: ${version}`,
+    );
+    return version;
   }
   if (pkg.engines?.[name]) {
-    return pkg.engines[name];
+    const version = pkg.engines[name];
+    logger.debug(
+      `Found ${name} constraint in package.json engines: ${version}`,
+    );
+    return version;
   }
   return null;
 }
