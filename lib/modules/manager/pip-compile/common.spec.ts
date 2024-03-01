@@ -23,6 +23,7 @@ describe('modules/manager/pip-compile/common', () => {
   describe('extractHeaderCommand()', () => {
     it.each([
       '-v',
+      '--all-extras',
       '--generate-hashes',
       '--resolver=backtracking',
       '--resolver=legacy',
