@@ -13,6 +13,7 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
 import { GoDirectDatasource } from './releases-direct';
 import { GoProxyDatasource } from './releases-goproxy';
+import { parseGoproxy } from './goproxy-parser';
 
 export class GoDatasource extends Datasource {
   static readonly id = 'go';
@@ -63,6 +64,10 @@ export class GoDatasource extends Datasource {
     { packageName }: DigestConfig,
     value?: string | null,
   ): Promise<string | null> {
+    if (parseGoproxy().some(({ url }) => url === 'off')) {
+      return null;
+    }
+
     const source = await BaseGoDatasource.getDatasource(packageName);
     if (!source) {
       return null;
