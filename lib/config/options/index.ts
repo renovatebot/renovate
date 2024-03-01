@@ -1753,6 +1753,13 @@ const options: RenovateOptions[] = [
   },
   // PR Behaviour
   {
+    name: 'keepUpdatedLabel',
+    description:
+      'Label to request Renovate bot always rebase to keep branch updated.',
+    type: 'string',
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
+  },
+  {
     name: 'rollbackPrs',
     description:
       'Create PRs to roll back versions if the current version is not found in the registry.',
