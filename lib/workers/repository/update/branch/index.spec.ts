@@ -921,7 +921,7 @@ describe('workers/repository/update/branch/index', () => {
       automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({ labels: ['keep-not-updated']}),
+        pr: partial<Pr>({ labels: ['keep-not-updated'] }),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
