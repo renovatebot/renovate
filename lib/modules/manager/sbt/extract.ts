@@ -394,6 +394,7 @@ export async function extractAllPackageFiles(
   }
   for (const pkg of packages) {
     for (const dep of pkg.deps) {
+      dep.registryUrls ??= [];
       if (proxyUrls.length > 0) {
         dep.registryUrls!.unshift(...proxyUrls);
       } else if (dep.depType === 'plugin') {
