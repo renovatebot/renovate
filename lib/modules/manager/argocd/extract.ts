@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
+import { regEx } from '../../../util/regex';
 import { trimTrailingSlash } from '../../../util/url';
 import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
@@ -17,6 +18,8 @@ import {
   type ApplicationSpec,
 } from './schema';
 import { fileTestRegex } from './util';
+
+const kustomizeImageRe = regEx(/(.+)=(.+):(.+)/);
 
 export function extractPackageFile(
   content: string,
@@ -47,7 +50,7 @@ export function extractPackageFile(
   return deps.length ? { deps } : null;
 }
 
-function processSource(source: ApplicationSource): PackageDependency | null {
+function processSource(source: ApplicationSource): PackageDependency[] {
   // a chart variable is defined this is helm declaration
   if (source.chart) {
     // assume OCI helm chart if repoURL doesn't contain explicit protocol
@@ -58,26 +61,41 @@ function processSource(source: ApplicationSource): PackageDependency | null {
       let registryURL = source.repoURL.replace('oci://', '');
       registryURL = trimTrailingSlash(registryURL);
 
-      return {
-        depName: `${registryURL}/${source.chart}`,
-        currentValue: source.targetRevision,
-        datasource: DockerDatasource.id,
-      };
+      return [
+        {
+          depName: `${registryURL}/${source.chart}`,
+          currentValue: source.targetRevision,
+          datasource: DockerDatasource.id,
+        },
+      ];
     }
 
-    return {
-      depName: source.chart,
-      registryUrls: [source.repoURL],
-      currentValue: source.targetRevision,
-      datasource: HelmDatasource.id,
-    };
+    return [
+      {
+        depName: source.chart,
+        registryUrls: [source.repoURL],
+        currentValue: source.targetRevision,
+        datasource: HelmDatasource.id,
+      },
+    ];
   }
 
-  return {
-    depName: source.repoURL,
-    currentValue: source.targetRevision,
-    datasource: GitTagsDatasource.id,
-  };
+  let dependencies: PackageDependency[] = [
+    {
+      depName: source.repoURL,
+      currentValue: source.targetRevision,
+      datasource: GitTagsDatasource.id,
+    },
+  ];
+
+  // Git repo is pointing to a Kustomize resources
+  if (source.kustomize?.images) {
+    dependencies = dependencies.concat(
+      source.kustomize.images.map(processKustomizeImage).filter(is.truthy),
+    );
+  }
+
+  return dependencies;
 }
 
 function processAppSpec(
@@ -88,15 +106,32 @@ function processAppSpec(
       ? definition.spec
       : definition.spec.template.spec;
 
-  const deps: (PackageDependency | null)[] = [];
+  let deps: PackageDependency[] = [];
 
   if (is.nonEmptyObject(spec.source)) {
-    deps.push(processSource(spec.source));
+    deps = processSource(spec.source);
   }
 
   for (const source of coerceArray(spec.sources)) {
-    deps.push(processSource(source));
+    deps = deps.concat(processSource(source));
   }
 
-  return deps.filter(is.truthy);
+  return deps;
+}
+
+function processKustomizeImage(image: string): PackageDependency | null {
+  if (!kustomizeImageRe.test(image)) {
+    return null;
+  }
+
+  const parts = kustomizeImageRe.exec(image);
+  if (parts?.length !== 4) {
+    return null;
+  }
+
+  return {
+    depName: parts[2],
+    currentValue: parts[3],
+    datasource: DockerDatasource.id,
+  };
 }

@@ -165,6 +165,16 @@ spec:
             depName: 'somechart',
             registryUrls: ['https://foo.io/repo'],
           },
+          {
+            currentValue: 'v1.2.3',
+            datasource: 'git-tags',
+            depName: 'https://git.example.com/foo/bar.git',
+          },
+          {
+            currentValue: 'v2.3.4',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io/someContainer',
+          },
         ],
       });
     });

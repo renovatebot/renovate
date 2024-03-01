@@ -129,3 +129,14 @@ spec:
         valueFiles:
           - $foo/values.yaml
 
+---
+# application with kustomize image overrides
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    repoURL: https://git.example.com/foo/bar.git
+    targetRevision: v1.2.3
+    kustomize:
+      images:
+        - someImage=somecontainer.registry.io/someContainer:v2.3.4

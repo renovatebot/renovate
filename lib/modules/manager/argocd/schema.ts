@@ -5,10 +5,14 @@ export const KubernetesResource = z.object({
   apiVersion: z.string(),
 });
 
+export const ApplicationKustomize = z.object({
+  images: LooseArray(z.string()).optional(),
+});
 export const ApplicationSource = z.object({
   chart: z.string().optional(),
   repoURL: z.string(),
   targetRevision: z.string(),
+  kustomize: ApplicationKustomize.optional(),
 });
 export type ApplicationSource = z.infer<typeof ApplicationSource>;
 
