@@ -1,5 +1,4 @@
 import { quote } from 'shlex';
-import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -10,51 +9,67 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import * as pipRequirements from '../pip_requirements';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
 import {
   extractHeaderCommand,
   getExecOptions,
-  getRegistryUrlVarsFromPackageFile,
+  getRegistryCredVarsFromPackageFile,
 } from './common';
+import type { PipCompileArgs } from './types';
+import { inferCommandExecDir } from './utils';
+
+function haveCredentialsInPipEnvironmentVariables(): boolean {
+  if (process.env.PIP_INDEX_URL) {
+    try {
+      const indexUrl = new URL(process.env.PIP_INDEX_URL);
+      if (!!indexUrl.username || !!indexUrl.password) {
+        return true;
+      }
+    } catch {
+      // Assume that an invalid URL contains credentials, just in case
+      return true;
+    }
+  }
+
+  try {
+    if (process.env.PIP_EXTRA_INDEX_URL) {
+      return process.env.PIP_EXTRA_INDEX_URL.split(' ')
+        .map((urlString) => new URL(urlString))
+        .some((url) => !!url.username || !!url.password);
+    }
+  } catch {
+    // Assume that an invalid URL contains credentials, just in case
+    return true;
+  }
+
+  return false;
+}
 
 export function constructPipCompileCmd(
-  content: string,
-  outputFileName: string,
-  haveCredentials: boolean,
+  compileArgs: PipCompileArgs,
+  upgradePackages: Upgrade[] = [],
 ): string {
-  const compileArgs = extractHeaderCommand(content, outputFileName);
   if (compileArgs.isCustomCommand) {
     throw new Error(
       'Detected custom command, header modified or set by CUSTOM_COMPILE_COMMAND',
     );
   }
-  if (compileArgs.outputFile) {
-    // TODO(not7cd): This file path can be relative like `reqs/main.txt`
-    const file = upath.parse(outputFileName).base;
-    if (compileArgs.outputFile !== file) {
-      // we don't trust the user-supplied output-file argument;
-      // TODO(not7cd): allow relative paths
-      logger.warn(
-        { outputFile: compileArgs.outputFile, actualPath: file },
-        'pip-compile was previously executed with an unexpected `--output-file` filename',
-      );
-      // TODO(not7cd): this shouldn't be changed in extract function
-      compileArgs.outputFile = file;
-      compileArgs.argv.forEach((item, i) => {
-        if (item.startsWith('--output-file=')) {
-          compileArgs.argv[i] = `--output-file=${quote(file)}`;
-        }
-      });
-    }
-  } else {
-    logger.debug(`pip-compile: implicit output file (${outputFileName})`);
+
+  if (!compileArgs.outputFile) {
+    logger.debug(`pip-compile: implicit output file`);
   }
   // safeguard against index url leak if not explicitly set by an option
   if (
-    (!compileArgs.noEmitIndexUrl && !compileArgs.emitIndexUrl) ||
-    (!compileArgs.noEmitIndexUrl && haveCredentials)
+    !compileArgs.noEmitIndexUrl &&
+    !compileArgs.emitIndexUrl &&
+    haveCredentialsInPipEnvironmentVariables()
   ) {
     compileArgs.argv.splice(1, 0, '--no-emit-index-url');
+  }
+  for (const dep of upgradePackages) {
+    compileArgs.argv.push(
+      `--upgrade-package=${quote(dep.depName + '==' + dep.newVersion)}`,
+    );
   }
   return compileArgs.argv.map(quote).join(' ');
 }
@@ -62,6 +77,7 @@ export function constructPipCompileCmd(
 export async function updateArtifacts({
   packageFileName: inputFileName,
   newPackageFileContent: newInputContent,
+  updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   if (!config.lockFiles) {
@@ -89,19 +105,17 @@ export async function updateArtifacts({
       if (config.isLockFileMaintenance) {
         await deleteLocalFile(outputFileName);
       }
+      const compileArgs = extractHeaderCommand(existingOutput, outputFileName);
+      const cwd = inferCommandExecDir(outputFileName, compileArgs.outputFile);
+      const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
       const packageFile = pipRequirements.extractPackageFile(newInputContent);
-      const registryUrlVars = getRegistryUrlVarsFromPackageFile(packageFile);
-      const cmd = constructPipCompileCmd(
-        existingOutput,
-        outputFileName,
-        registryUrlVars.haveCredentials,
-      );
+      const cmd = constructPipCompileCmd(compileArgs, upgradePackages);
       const execOptions = await getExecOptions(
         config,
-        inputFileName,
-        registryUrlVars.environmentVars,
+        cwd,
+        getRegistryCredVarsFromPackageFile(packageFile),
       );
-      logger.trace({ cmd }, 'pip-compile command');
+      logger.trace({ cwd, cmd }, 'pip-compile command');
       logger.trace({ env: execOptions.extraEnv }, 'pip-compile extra env vars');
       await exec(cmd, execOptions);
       const status = await getRepoStatus();

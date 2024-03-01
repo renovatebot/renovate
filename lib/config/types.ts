@@ -90,6 +90,7 @@ export interface RenovateSharedConfig {
   unicodeEmoji?: boolean;
   gitIgnoredAuthors?: string[];
   platformCommit?: boolean;
+  milestone?: number;
 }
 
 // Config options used only within the global worker
@@ -153,6 +154,7 @@ export interface RepoGlobalConfig {
   platform?: PlatformId;
   endpoint?: string;
   includeMirrors?: boolean;
+  allowedEnv?: string[];
 }
 
 export interface LegacyAdminConfig {
@@ -201,6 +203,7 @@ export const allowedStatusCheckStrings = [
   'artifactError',
 ] as const;
 export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
+export type UserEnv = Record<string, string>;
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -276,7 +279,7 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
-
+  env?: UserEnv;
   logLevelRemap?: LogLevelRemap[];
 }
 
@@ -356,6 +359,7 @@ export interface PackageRule
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
   excludeRepositories?: string[];
+  matchNewValue?: string;
   matchCurrentValue?: string;
   matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
@@ -495,6 +499,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depTypes?: string[];
   depName?: string;
   packageName?: string | null;
+  newValue?: string | null;
   currentValue?: string | null;
   currentVersion?: string;
   lockedVersion?: string;

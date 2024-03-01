@@ -233,6 +233,14 @@ export async function lookupUpdates(
       ) {
         rangeStrategy = 'bump';
       }
+      // unconstrained deps with lockedVersion
+      if (
+        config.isVulnerabilityAlert &&
+        !config.currentValue &&
+        config.lockedVersion
+      ) {
+        rangeStrategy = 'update-lockfile';
+      }
       const nonDeprecatedVersions = dependency.releases
         .filter((release) => !release.isDeprecated)
         .map((release) => release.version);
@@ -434,6 +442,24 @@ export async function lookupUpdates(
     } else if (compareValue && versioning.isSingleVersion(compareValue)) {
       res.fixedVersion = compareValue.replace(regEx(/^=+/), '');
     }
+
+    // massage versionCompatibility
+    if (
+      is.string(config.currentValue) &&
+      is.string(compareValue) &&
+      is.string(config.versionCompatibility)
+    ) {
+      for (const update of res.updates) {
+        logger.debug({ update });
+        if (is.string(config.currentValue) && is.string(update.newValue)) {
+          update.newValue = config.currentValue.replace(
+            compareValue,
+            update.newValue,
+          );
+        }
+      }
+    }
+
     // Add digests if necessary
     if (supportsDigests(config.datasource)) {
       if (config.currentDigest) {
@@ -441,7 +467,7 @@ export async function lookupUpdates(
           // digest update
           res.updates.push({
             updateType: 'digest',
-            newValue: compareValue,
+            newValue: config.currentValue,
           });
         }
       } else if (config.pinDigests) {
@@ -451,7 +477,7 @@ export async function lookupUpdates(
           res.updates.push({
             isPinDigest: true,
             updateType: 'pinDigest',
-            newValue: compareValue,
+            newValue: config.currentValue,
           });
         }
       }
@@ -465,23 +491,6 @@ export async function lookupUpdates(
       }
       if (res.registryUrl) {
         config.registryUrls = [res.registryUrl];
-      }
-
-      // massage versionCompatibility
-      if (
-        is.string(config.currentValue) &&
-        is.string(compareValue) &&
-        is.string(config.versionCompatibility)
-      ) {
-        for (const update of res.updates) {
-          logger.debug({ update });
-          if (is.string(config.currentValue) && is.string(update.newValue)) {
-            update.newValue = config.currentValue.replace(
-              compareValue,
-              update.newValue,
-            );
-          }
-        }
       }
 
       // update digest for all
@@ -528,6 +537,7 @@ export async function lookupUpdates(
         }
       }
     }
+
     if (res.updates.length) {
       delete res.skipReason;
     }

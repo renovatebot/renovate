@@ -83,7 +83,7 @@ Other credential terms are not supported yet.
 }
 ```
 
-Renovate applies theses `hostRules` to every HTTP(s) request which is sent, so they are largely independent of any platform or datasource logic.
+Renovate applies these `hostRules` to every HTTP(s) request which is sent, so they are largely independent of any platform or datasource logic.
 With `hostRules` in place, private package lookups should all work.
 
 ### GitHub (and Enterprise) repo scoped credentials
@@ -464,7 +464,7 @@ name = "pypi"
 ### pip-compile
 
 The pip-compile manager extracts `--index-url` and `--extra-index-url` directives from its input file.
-Renovate will match those URLs with credentials from matching `hostRules` blocks in its configuration and pass appropriate `PIP_INDEX_URL` or `PIP_EXTRA_INDEX_URL` environment variables `pip-compile` with those credentials while generating the output file.
+Renovate will match those URLs with credentials from matching `hostRules` blocks in its configuration and pass them to `pip-compile` via environment variables.
 
 ```title="requirements.in"
 --extra-index-url https://pypi.my.domain/simple
@@ -487,7 +487,8 @@ private-package==1.2.3
 }
 ```
 
-Note: When credentials are passed to `pip-compile` this way Renovate will also pass the `--no-emit-index-url` flag to avoid leaking plain-text credentials to the output file.
+Renovate relies on `pip`'s integration with the python [keyring](https://pypi.org/project/keyring/) package along with the [keyrigs.envvars](https://pypi.org/project/keyrings.envvars/) backend for this.
+If you are self-hosting Renovate and are not running in a Containerbase environment or using the Docker sidecar container you will need to install those two packages.
 
 ### poetry
 

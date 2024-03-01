@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -176,6 +177,8 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
 
   const toInstall = [];
   const from = [];
+  // storing the old package for replacement
+  const toUninstall = [];
 
   for (const pkg of update.updatedDeps) {
     if (!pkg.depName || !pkg.currentVersion || !pkg.newValue) {
@@ -196,21 +199,51 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
     }
 
     const depName = pkg.depName;
+    const newName = pkg.newName;
     const currentVersion = pkg.currentVersion;
     const newValue = pkg.newValue;
     const fromPackage = getHermitPackage(depName, currentVersion);
-    const toPackage = getHermitPackage(depName, newValue);
+    // newName will be available for replacement
+    const toPackage = getHermitPackage(newName ?? depName, newValue);
     toInstall.push(toPackage);
     from.push(fromPackage);
+    // skips uninstall for version only replacement
+    if (pkg.updateType === 'replacement' && newName !== depName) {
+      toUninstall.push(depName);
+    }
   }
 
   const execOptions: ExecOptions = {
     docker: {},
+    userConfiguredEnv: update?.config?.env,
     cwdFile: update.packageFileName,
   };
 
+  const fromPackages = from.map(quote).join(' ');
+
+  // when a name replacement happens, need to uninstall the old package
+  if (toUninstall.length > 0) {
+    const packagesToUninstall = toUninstall.join(' ');
+    const uninstallCommands = `./hermit uninstall ${packagesToUninstall}`;
+
+    try {
+      const result = await exec(uninstallCommands, execOptions);
+      logger.trace(
+        { stdout: result.stdout },
+        `hermit uninstall command stdout`,
+      );
+    } catch (e) {
+      logger.warn({ err: e }, `error uninstall hermit package for replacement`);
+      throw new UpdateHermitError(
+        fromPackages,
+        packagesToUninstall,
+        e.stderr,
+        e.stdout,
+      );
+    }
+  }
+
   const packagesToInstall = toInstall.join(' ');
-  const fromPackages = from.join(' ');
 
   const execCommands = `./hermit install ${packagesToInstall}`;
   logger.debug(

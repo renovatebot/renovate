@@ -1,6 +1,7 @@
-import { Graph } from 'graph-data-structure';
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
 import { normalizeDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
@@ -11,7 +12,11 @@ import type {
   PipCompileArgs,
   SupportedManagers,
 } from './types';
-import { generateMermaidGraph } from './utils';
+import {
+  generateMermaidGraph,
+  inferCommandExecDir,
+  sortPackageFiles,
+} from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
@@ -64,7 +69,6 @@ export async function extractAllPackageFiles(
   logger.trace('pip-compile.extractAllPackageFiles()');
   const lockFileArgs = new Map<string, PipCompileArgs>();
   const depsBetweenFiles: DependencyBetweenFiles[] = [];
-  // for debugging only ^^^ (for now)
   const packageFiles = new Map<string, PackageFile>();
   for (const fileMatch of fileMatches) {
     const fileContent = await readLocalFile(fileMatch, 'utf8');
@@ -73,8 +77,10 @@ export async function extractAllPackageFiles(
       continue;
     }
     let compileArgs: PipCompileArgs;
+    let compileDir: string;
     try {
       compileArgs = extractHeaderCommand(fileContent, fileMatch);
+      compileDir = inferCommandExecDir(fileMatch, compileArgs.outputFile);
     } catch (error) {
       logger.warn({ fileMatch }, `pip-compile: ${error.message}`);
       continue;
@@ -96,7 +102,19 @@ export async function extractAllPackageFiles(
       continue;
     }
 
-    for (const packageFile of compileArgs.sourceFiles) {
+    for (const relativeSourceFile of compileArgs.sourceFiles) {
+      const packageFile = upath.normalizeTrim(
+        upath.join(compileDir, relativeSourceFile),
+      );
+      try {
+        ensureLocalPath(packageFile);
+      } catch (error) {
+        logger.warn(
+          { fileMatch, packageFile },
+          'pip-compile: Source file path outside of repository',
+        );
+        continue;
+      }
       depsBetweenFiles.push({
         sourceFile: packageFile,
         outputFile: fileMatch,
@@ -178,32 +196,10 @@ export async function extractAllPackageFiles(
   if (packageFiles.size === 0) {
     return null;
   }
-  const result: PackageFile[] = [];
-  const graph: ReturnType<typeof Graph> = Graph();
-  depsBetweenFiles.forEach(({ sourceFile, outputFile }) => {
-    graph.addEdge(sourceFile, outputFile);
-  });
-  const sorted = graph.topologicalSort();
-  for (const file of sorted) {
-    if (packageFiles.has(file)) {
-      const packageFile = packageFiles.get(file)!;
-      const sortedLockFiles = [];
-      // TODO(not7cd): this needs better test case
-      for (const lockFile of packageFile.lockFiles!) {
-        if (sorted.includes(lockFile)) {
-          sortedLockFiles.push(lockFile);
-        }
-      }
-      packageFile.lockFiles = sortedLockFiles;
-      result.push(packageFile);
-    }
-  }
-  // istanbul ignore if: should never happen
-  if (result.length !== packageFiles.size) {
-    throw new Error(
-      'pip-compile: topological sort failed to include all package files',
-    );
-  }
+  const result: PackageFile[] = sortPackageFiles(
+    depsBetweenFiles,
+    packageFiles,
+  );
   logger.debug(
     'pip-compile: dependency graph:\n' +
       generateMermaidGraph(depsBetweenFiles, lockFileArgs),

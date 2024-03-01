@@ -19,11 +19,10 @@ import type {
   PackageFileContent,
 } from '../types';
 import { isSystemManifest, systemManifestHeaderRegex } from './common';
+import { FluxResource, type HelmRepository } from './schema';
 import type {
   FluxManagerData,
   FluxManifest,
-  FluxResource,
-  HelmRepository,
   ResourceFluxManifest,
   SystemFluxManifest,
 } from './types';
@@ -45,61 +44,21 @@ function readManifest(
     };
   }
 
-  const manifest: FluxManifest = {
-    kind: 'resource',
-    file: packageFile,
-    resources: [],
-  };
-  let resources: FluxResource[];
   try {
-    // TODO: use schema (#9610)
-    resources = parseYaml(content, null, { json: true });
+    const manifest: FluxManifest = {
+      kind: 'resource',
+      file: packageFile,
+      resources: parseYaml(content, null, {
+        json: true,
+        customSchema: FluxResource,
+        failureBehaviour: 'filter',
+      }),
+    };
+    return manifest;
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Flux manifest');
     return null;
   }
-
-  // It's possible there are other non-Flux HelmRelease/HelmRepository CRs out there, so we filter based on apiVersion.
-  for (const resource of resources) {
-    switch (resource?.kind) {
-      case 'HelmRelease':
-        if (
-          resource.apiVersion?.startsWith('helm.toolkit.fluxcd.io/') &&
-          resource.spec?.chart?.spec?.chart
-        ) {
-          manifest.resources.push(resource);
-        }
-        break;
-      case 'HelmRepository':
-        if (
-          resource.apiVersion?.startsWith('source.toolkit.fluxcd.io/') &&
-          resource.metadata?.name &&
-          resource.metadata.namespace &&
-          resource.spec?.url
-        ) {
-          manifest.resources.push(resource);
-        }
-        break;
-      case 'GitRepository':
-        if (
-          resource.apiVersion?.startsWith('source.toolkit.fluxcd.io/') &&
-          resource.spec?.url
-        ) {
-          manifest.resources.push(resource);
-        }
-        break;
-      case 'OCIRepository':
-        if (
-          resource.apiVersion?.startsWith('source.toolkit.fluxcd.io/') &&
-          resource.spec?.url
-        ) {
-          manifest.resources.push(resource);
-        }
-        break;
-    }
-  }
-
-  return manifest;
 }
 
 const githubUrlRegex = regEx(
