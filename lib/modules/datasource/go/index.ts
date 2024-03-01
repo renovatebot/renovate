@@ -11,9 +11,9 @@ import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
+import { parseGoproxy } from './goproxy-parser';
 import { GoDirectDatasource } from './releases-direct';
 import { GoProxyDatasource } from './releases-goproxy';
-import { parseGoproxy } from './goproxy-parser';
 
 export class GoDatasource extends Datasource {
   static readonly id = 'go';
