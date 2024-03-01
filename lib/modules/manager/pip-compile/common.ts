@@ -84,6 +84,7 @@ export const optionsWithArguments = [
 ];
 export const allowedPipOptions = [
   '-v',
+  '--all-extras',
   '--allow-unsafe',
   '--generate-hashes',
   '--no-emit-index-url',
@@ -169,6 +170,10 @@ export function extractHeaderCommand(
     }
     if (arg === '--emit-index-url') {
       result.emitIndexUrl = true;
+      continue;
+    }
+    if (arg === '--all-extras') {
+      result.allExtras = true;
       continue;
     }
 
