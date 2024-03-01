@@ -6,6 +6,9 @@ import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
   PackageDependency,
+  PackageFile,
+  UpdateArtifact,
+  UpdateArtifactsResult,
 } from '../../../../modules/manager/types';
 import { getFile } from '../../../../util/git';
 import type { FileAddition, FileChange } from '../../../../util/git/types';
@@ -290,26 +293,14 @@ export async function getUpdatedPackageFiles(
     const managers = packageFileManagers[packageFile.path];
     if (is.nonEmptySet(managers)) {
       for (const manager of managers) {
-        const updateArtifacts = get(manager, 'updateArtifacts');
-        if (updateArtifacts) {
-          const results = await updateArtifacts({
-            packageFileName: packageFile.path,
-            updatedDeps,
-            // TODO #22198
-            newPackageFileContent: packageFile.contents!.toString(),
-            config,
-          });
-          if (is.nonEmptyArray(results)) {
-            for (const res of results) {
-              const { file, artifactError } = res;
-              if (file) {
-                updatedArtifacts.push(file);
-              } else if (artifactError) {
-                artifactErrors.push(artifactError);
-              }
-            }
-          }
-        }
+        const results = await managerUpdateArtifacts(manager, {
+          packageFileName: packageFile.path,
+          updatedDeps,
+          // TODO #22198
+          newPackageFileContent: packageFile.contents!.toString(),
+          config,
+        });
+        processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
       }
     }
   }
@@ -325,59 +316,44 @@ export async function getUpdatedPackageFiles(
     const managers = packageFileManagers[packageFile.path];
     if (is.nonEmptySet(managers)) {
       for (const manager of managers) {
-        const updateArtifacts = get(manager, 'updateArtifacts');
-        if (updateArtifacts) {
-          const results = await updateArtifacts({
-            packageFileName: packageFile.path,
-            updatedDeps,
-            // TODO #22198
-            newPackageFileContent: packageFile.contents!.toString(),
-            config,
-          });
-          if (is.nonEmptyArray(results)) {
-            updatedPackageFiles.push(packageFile);
-            for (const res of results) {
-              const { file, artifactError } = res;
-              // istanbul ignore else
-              if (file) {
-                updatedArtifacts.push(file);
-              } else if (artifactError) {
-                artifactErrors.push(artifactError);
-              }
-            }
-          }
+        const results = await managerUpdateArtifacts(manager, {
+          packageFileName: packageFile.path,
+          updatedDeps,
+          // TODO #22198
+          newPackageFileContent: packageFile.contents!.toString(),
+          config,
+        });
+        processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
+        if (is.nonEmptyArray(results)) {
+          updatedPackageFiles.push(packageFile);
         }
       }
     }
   }
   if (!reuseExistingBranch) {
     // Only perform lock file maintenance if it's a fresh commit
-    for (const packageFile of lockFileMaintenanceFiles) {
-      const managers = packageFileManagers[packageFile];
+    for (const packageFileName of lockFileMaintenanceFiles) {
+      const managers = packageFileManagers[packageFileName];
       if (is.nonEmptySet(managers)) {
         for (const manager of managers) {
-          const updateArtifacts = get(manager, 'updateArtifacts');
-          if (updateArtifacts) {
-            const packageFileContents =
-              updatedFileContents[packageFile] ||
-              (await getFile(packageFile, config.baseBranch));
-            const results = await updateArtifacts({
-              packageFileName: packageFile,
-              updatedDeps: [],
-              newPackageFileContent: packageFileContents!,
+          const contents =
+            updatedFileContents[packageFileName] ||
+            (await getFile(packageFileName, config.baseBranch));
+          const results = await managerUpdateArtifacts(manager, {
+            packageFileName,
+            updatedDeps: [],
+            newPackageFileContent: contents!,
+            config: patchConfigForArtifactsUpdate(
               config,
-            });
-            if (is.nonEmptyArray(results)) {
-              for (const res of results) {
-                const { file, artifactError } = res;
-                if (file) {
-                  updatedArtifacts.push(file);
-                } else if (artifactError) {
-                  artifactErrors.push(artifactError);
-                }
-              }
-            }
-          }
+              manager,
+              packageFileName,
+            ),
+          });
+          processUpdateArtifactResults(
+            results,
+            updatedArtifacts,
+            artifactErrors,
+          );
         }
       }
     }
@@ -388,4 +364,57 @@ export async function getUpdatedPackageFiles(
     updatedArtifacts,
     artifactErrors,
   };
+}
+
+// workaround, see #27319
+function patchConfigForArtifactsUpdate(
+  config: BranchConfig,
+  manager: string,
+  packageFileName: string,
+): BranchConfig {
+  const updatedConfig = { ...config };
+  if (is.nonEmptyArray(updatedConfig.packageFiles?.[manager])) {
+    const managerPackageFiles: PackageFile[] =
+      updatedConfig.packageFiles?.[manager];
+    const packageFile = managerPackageFiles.find(
+      (p) => p.packageFile === packageFileName,
+    );
+    if (
+      packageFile &&
+      is.nonEmptyArray(updatedConfig.lockFiles) &&
+      is.nonEmptyArray(packageFile.lockFiles)
+    ) {
+      updatedConfig.lockFiles = packageFile.lockFiles;
+    }
+  }
+  return updatedConfig;
+}
+
+async function managerUpdateArtifacts(
+  manager: string,
+  updateArtifact: UpdateArtifact,
+): Promise<UpdateArtifactsResult[] | null> {
+  const updateArtifacts = get(manager, 'updateArtifacts');
+  if (updateArtifacts) {
+    return await updateArtifacts(updateArtifact);
+  }
+  return null;
+}
+
+function processUpdateArtifactResults(
+  results: UpdateArtifactsResult[] | null,
+  updatedArtifacts: FileChange[],
+  artifactErrors: ArtifactError[],
+): void {
+  if (is.nonEmptyArray(results)) {
+    for (const res of results) {
+      const { file, artifactError } = res;
+      // istanbul ignore else
+      if (file) {
+        updatedArtifacts.push(file);
+      } else if (artifactError) {
+        artifactErrors.push(artifactError);
+      }
+    }
+  }
 }
