@@ -114,6 +114,12 @@ spec:
             depName: 'somecontainer.registry.io/someContainer',
           },
           {
+            currentDigest:
+              'sha256:8be5de38826b494a8ad1565b8d1eb49183d736d0277a89191bd1100d78479a42',
+            datasource: 'docker',
+            depName: 'othercontainer.registry.io/other/container',
+          },
+          {
             currentValue: '1.2.0',
             datasource: 'docker',
             depName: 'somecontainer.registry.io/some/image',

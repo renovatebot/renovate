@@ -7,6 +7,7 @@ import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
+import { splitImageParts } from '../dockerfile/extract';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -19,7 +20,7 @@ import {
 } from './schema';
 import { fileTestRegex } from './util';
 
-const kustomizeImageRe = regEx(/(.+)=(.+):(.+)/);
+const kustomizeImageRe = regEx(/(.+)=(.+)/);
 
 export function extractPackageFile(
   content: string,
@@ -125,13 +126,12 @@ function processKustomizeImage(image: string): PackageDependency | null {
   }
 
   const parts = kustomizeImageRe.exec(image);
-  if (parts?.length !== 4) {
+  if (parts?.length !== 3) {
     return null;
   }
 
   return {
-    depName: parts[2],
-    currentValue: parts[3],
+    ...splitImageParts(parts[2]),
     datasource: DockerDatasource.id,
   };
 }
