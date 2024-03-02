@@ -8,6 +8,7 @@ import {
   PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
   REPOSITORY_FORKED,
+  REPOSITORY_FORK_MISSING,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
@@ -563,7 +564,7 @@ describe('modules/platform/github/index', () => {
           forkToken: 'true',
           forkCreation: false,
         }),
-      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
+      ).rejects.toThrow(REPOSITORY_FORK_MISSING);
     });
 
     it('throws if the repo is a fork', async () => {
