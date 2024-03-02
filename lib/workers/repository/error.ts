@@ -21,6 +21,7 @@ import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
+  REPOSITORY_FORK_MISSING,
   REPOSITORY_FORK_MODE_FORKED,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
@@ -108,6 +109,10 @@ export default async function handleError(
   }
   if (err.message === REPOSITORY_CANNOT_FORK) {
     logger.info('Cannot fork repository - skipping');
+    return err.message;
+  }
+  if (err.message === REPOSITORY_FORK_MISSING) {
+    logger.info('Cannot find fork required for fork mode - skipping');
     return err.message;
   }
   if (err.message === REPOSITORY_NO_PACKAGE_FILES) {

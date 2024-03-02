@@ -546,8 +546,24 @@ describe('modules/platform/github/index', () => {
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
+        forkCreation: true,
       });
       expect(config).toMatchSnapshot();
+    });
+
+    it('should throw if fork needed but forkCreation=false', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, 'some/repo', false);
+      scope.get('/user').reply(200, {
+        login: 'forked',
+      });
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+          forkCreation: false,
+        }),
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
 
     it('throws if the repo is a fork', async () => {
@@ -559,6 +575,7 @@ describe('modules/platform/github/index', () => {
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkCreation: true,
         }),
       ).rejects.toThrow(REPOSITORY_FORKED);
     });
@@ -573,6 +590,7 @@ describe('modules/platform/github/index', () => {
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkCreation: true,
         }),
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -585,6 +603,7 @@ describe('modules/platform/github/index', () => {
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkCreation: true,
         }),
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -597,6 +616,7 @@ describe('modules/platform/github/index', () => {
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkCreation: true,
         }),
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
     });
@@ -613,6 +633,7 @@ describe('modules/platform/github/index', () => {
         github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkCreation: true,
           forkOrg: 'forked',
         }),
       ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
@@ -625,6 +646,7 @@ describe('modules/platform/github/index', () => {
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
+        forkCreation: true,
         forkOrg: 'forked',
       });
       expect(config).toMatchSnapshot();
@@ -642,6 +664,7 @@ describe('modules/platform/github/index', () => {
       const config = await github.initRepo({
         repository: 'some/repo',
         forkToken: 'true',
+        forkCreation: true,
       });
       expect(config).toMatchSnapshot();
     });
@@ -2568,6 +2591,7 @@ describe('modules/platform/github/index', () => {
         await github.initRepo({
           repository: 'some/repo',
           forkToken: 'true',
+          forkCreation: true,
         });
       });
 
