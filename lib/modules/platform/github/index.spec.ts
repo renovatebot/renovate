@@ -7,6 +7,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_CANNOT_FORK,
+  REPOSITORY_FORKED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
@@ -483,6 +484,7 @@ describe('modules/platform/github/index', () => {
     forkExisted: boolean,
     forkResult = 200,
     forkDefaultBranch = 'master',
+    isFork = false,
   ): void {
     scope
       // repo info
@@ -490,7 +492,7 @@ describe('modules/platform/github/index', () => {
       .reply(200, {
         data: {
           repository: {
-            isFork: false,
+            isFork,
             isArchived: false,
             nameWithOwner: repository,
             hasIssuesEnabled: true,
@@ -505,10 +507,10 @@ describe('modules/platform/github/index', () => {
             },
           },
         },
-      })
-      // getForks
-      .get(`/repos/${repository}/forks?per_page=100`)
-      .reply(
+      });
+
+    if (!isFork) {
+      scope.get(`/repos/${repository}/forks?per_page=100`).reply(
         forkResult,
         forkExisted
           ? [
@@ -520,6 +522,7 @@ describe('modules/platform/github/index', () => {
             ]
           : [],
       );
+    }
   }
 
   describe('initRepo', () => {
@@ -545,6 +548,19 @@ describe('modules/platform/github/index', () => {
         forkToken: 'true',
       });
       expect(config).toMatchSnapshot();
+    });
+
+    it('throws if the repo is a fork', async () => {
+      const repo = 'some/repo';
+      const branch = 'master';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false, 200, branch, true);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        }),
+      ).rejects.toThrow(REPOSITORY_FORKED);
     });
 
     it('throws when cannot fork due to username error', async () => {

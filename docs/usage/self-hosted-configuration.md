@@ -577,6 +577,10 @@ If this value is configured then Renovate:
 
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
+<!-- prettier-ignore -->
+!!! note
+    Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
+
 ## gitNoVerify
 
 Controls when Renovate passes the `--no-verify` flag to `git`.

@@ -21,6 +21,7 @@ import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
+  REPOSITORY_FORK_MODE_FORKED,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_CONFIG,
@@ -91,6 +92,12 @@ export default async function handleError(
   if (err.message === REPOSITORY_NOT_FOUND) {
     delete config.branchList;
     logger.error('Repository is not found');
+    return err.message;
+  }
+  if (err.message === REPOSITORY_FORK_MODE_FORKED) {
+    logger.info(
+      'Repository is a fork and cannot be processed when Renovate is running in fork mode itself',
+    );
     return err.message;
   }
   if (err.message === REPOSITORY_FORKED) {
