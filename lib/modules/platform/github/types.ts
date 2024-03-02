@@ -115,6 +115,9 @@ export type BranchProtection = any;
 export interface GhRepo {
   id: string;
   isFork: boolean;
+  parent?: {
+    nameWithOwner: string;
+  };
   isArchived: boolean;
   nameWithOwner: string;
   autoMergeAllowed: boolean;
