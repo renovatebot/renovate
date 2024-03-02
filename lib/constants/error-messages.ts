@@ -28,6 +28,7 @@ export const REPOSITORY_CLOSED_ONBOARDING = 'disabled-closed-onboarding';
 export const REPOSITORY_DISABLED_BY_CONFIG = 'disabled-by-config';
 export const REPOSITORY_NO_CONFIG = 'disabled-no-config';
 export const REPOSITORY_EMPTY = 'empty';
+export const REPOSITORY_FORK_MISSING = 'fork-missing';
 export const REPOSITORY_FORK_MODE_FORKED = 'fork-mode-forked';
 export const REPOSITORY_FORKED = 'fork';
 export const REPOSITORY_MIRRORED = 'mirror';

@@ -95,6 +95,7 @@ export interface LocalRepoConfig {
   parentRepo: string | null;
   forkOrg?: string;
   forkToken?: string;
+  forkCreation?: boolean;
   prList: GhPr[] | null;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
