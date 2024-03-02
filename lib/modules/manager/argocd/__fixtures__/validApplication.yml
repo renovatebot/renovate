@@ -30,12 +30,16 @@ spec:
     repoURL: gs://helm-charts-internal
     targetRevision: 0.0.2
 ---
+# application with kustomize image overrides
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 spec:
   source:
     repoURL: https://git.example.com/foo/bar.git
     targetRevision: v1.2.0
+    kustomize:
+      images:
+        - someImage=somecontainer.registry.io/someContainer:v2.3.4
 ---
 # malformed application as the source section is missing
 apiVersion: argoproj.io/v1alpha1
@@ -128,15 +132,3 @@ spec:
       helm:
         valueFiles:
           - $foo/values.yaml
-
----
-# application with kustomize image overrides
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-spec:
-  source:
-    repoURL: https://git.example.com/foo/bar.git
-    targetRevision: v1.2.3
-    kustomize:
-      images:
-        - someImage=somecontainer.registry.io/someContainer:v2.3.4
