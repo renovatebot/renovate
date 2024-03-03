@@ -3,7 +3,7 @@ import * as memCache from '../memory';
 import * as fileCache from './file';
 import * as redisCache from './redis';
 import { SqlitePackageCache } from './sqlite';
-import type { PackageCache } from './types';
+import type { PackageCache, PackageCacheNamespace } from './types';
 
 let cacheProxy: PackageCache | undefined;
 
@@ -12,7 +12,7 @@ function getGlobalKey(namespace: string, key: string): string {
 }
 
 export async function get<T = any>(
-  namespace: string,
+  namespace: PackageCacheNamespace,
   key: string,
 ): Promise<T | undefined> {
   if (!cacheProxy) {
@@ -36,7 +36,7 @@ export async function get<T = any>(
 }
 
 export async function set(
-  namespace: string,
+  namespace: PackageCacheNamespace,
   key: string,
   value: unknown,
   minutes: number,

@@ -8,7 +8,7 @@ import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { type AsyncResult, Result } from '../../../util/result';
-import { isDockerDigest } from '../../../util/string';
+import { isDockerDigest } from '../../../util/string-match';
 import {
   ensurePathPrefix,
   joinUrlParts,
@@ -1006,6 +1006,10 @@ export class DockerDatasource extends Datasource {
       registryUrl: registryHost,
       releases,
     };
+    if (dockerRepository !== packageName) {
+      // This will be reused later if a getDigest() call is made
+      ret.lookupName = dockerRepository;
+    }
 
     const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
