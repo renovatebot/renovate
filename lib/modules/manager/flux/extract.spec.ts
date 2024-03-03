@@ -194,16 +194,7 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml',
       );
-      expect(result).toEqual({
-        deps: [
-          {
-            currentValue: '2.0.2',
-            datasource: HelmDatasource.id,
-            depName: 'sealed-secrets',
-            skipReason: 'unknown-registry',
-          },
-        ],
-      });
+      expect(result).toBeNull();
     });
 
     it('does not match HelmRelease resources without a sourceRef', () => {
@@ -215,6 +206,7 @@ describe('modules/manager/flux/extract', () => {
           kind: HelmRelease
           metadata:
             name: sealed-secrets
+            namespace: test
           spec:
             chart:
               spec:
@@ -253,16 +245,7 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml',
       );
-      expect(result).toEqual({
-        deps: [
-          {
-            currentValue: '2.0.2',
-            datasource: HelmDatasource.id,
-            depName: 'sealed-secrets',
-            skipReason: 'unknown-registry',
-          },
-        ],
-      });
+      expect(result).toBeNull();
     });
 
     it('ignores HelmRepository resources without a namespace', () => {

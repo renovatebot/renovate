@@ -50,7 +50,9 @@ export abstract class GenericVersioningApi<
       is.nonEmptyString(left.prerelease) &&
       is.nonEmptyString(right.prerelease)
     ) {
-      const pre = left.prerelease.localeCompare(right.prerelease);
+      const pre = left.prerelease.localeCompare(right.prerelease, undefined, {
+        numeric: true,
+      });
 
       if (pre !== 0) {
         return pre;
@@ -129,7 +131,14 @@ export abstract class GenericVersioningApi<
     return result ?? null;
   }
 
-  getNewValue({ newVersion }: NewValueConfig): string | null {
+  getNewValue({
+    currentValue,
+    currentVersion,
+    newVersion,
+  }: NewValueConfig): string | null {
+    if (currentVersion === `v${currentValue}`) {
+      return newVersion.replace(/^v/, '');
+    }
     return newVersion ?? null;
   }
 
