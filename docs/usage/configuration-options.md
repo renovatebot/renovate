@@ -2131,7 +2131,10 @@ Renovate does _not_ remove the label from the PR after it finishes rebasing.
 This is different from the `rebaseLabel` option, where Renovate _removes_ the label from the PR after rebasing.
 
 `keepUpdatedLabel` can be useful when you have approved certain PRs and want Renovate to keep the PRs up-to-date until you're ready to merge them.
-The setting `keepUpdatedLabel` is best used together with `rebaseWhen` set to the values of `never` or `conflicted` that limit rebasing. ???
+The setting `keepUpdatedLabel` is best used in this scenario:
+
+- By default, you configure `rebaseWhen` to `never` or `conflicted` to reduce rebasing
+- Sometimes, you want Renovate to keep specific PRs up-to-date with their base branch (equivalent to `rebaseWhen=behind-base-branch`)
 
 ## labels
 
