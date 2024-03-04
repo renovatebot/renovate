@@ -2125,12 +2125,13 @@ We recommend that you use the `strict` mode, and enable the `dependencyDashboard
 
 ## keepUpdatedLabel
 
-On supported platforms it is possible to add a label to a PR to recreate/rebase it when the branch falls 1 or more commits behind its base branch.
+On supported platforms you may add a label to a PR so that Renovate recreates/rebases the PR when the branch falls behind the base branch.
 Adding the `keepUpdatedLabel` label to a PR makes Renovate behave as if `rebaseWhen` were set to `behind-base-branch`, but only for the given PR.
-The label is not removed from the PR after the rebase is complete, unlike what happens with `rebaseLabel`.
+Renovate does _not_ remove the label from the PR after it finishes rebasing.
+This is different from the `rebaseLabel` option, where Renovate _removes_ the label from the PR after rebasing.
 
-This can be useful when you have approved certain PRs and want to keep them updated until they are ready to be merged.
-The setting `keepUpdatedLabel` is best used in conjunction with `rebaseWhen` set to the values of `never` or `conflicted` that limit rebasing.
+`keepUpdatedLabel` can be useful when you have approved certain PRs and want Renovate to keep the PRs up-to-date until you're ready to merge them.
+The setting `keepUpdatedLabel` is best used together with `rebaseWhen` set to the values of `never` or `conflicted` that limit rebasing. ???
 
 ## labels
 
