@@ -111,7 +111,7 @@ export async function getConfig(
         config = migratedConfig;
       }
 
-      const { warnings, errors } = await validateConfig(migratedConfig);
+      const { warnings, errors } = await validateConfig(true, migratedConfig);
 
       if (warnings.length) {
         logger.warn(
