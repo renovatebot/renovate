@@ -30,8 +30,8 @@ importers:
         specifier: 4.2.0
         version: 4.2.0
       '@cdktf/hcl2json':
-        specifier: 0.20.3
-        version: 0.20.3
+        specifier: 0.20.4
+        version: 0.20.4
       '@opentelemetry/api':
         specifier: 1.7.0
         version: 1.7.0
@@ -1907,8 +1907,8 @@ packages:
     engines: {node: '>= 10'}
     dev: false
 
-  /@cdktf/hcl2json@0.20.3:
-    resolution: {integrity: sha512-GCq/GrVRXI0nR5gQM0LW7pxEA/tZav0dGQZGowHif/vXsMlOZjTh/F1ISVmDUCkNHV7pgbFmy6tDg7RtsiavXw==}
+  /@cdktf/hcl2json@0.20.4:
+    resolution: {integrity: sha512-j9rQckF5lm8+9NB6kXqUc/YFKbo5SzZVp96xa2uYe3+1cmjum4SsA3P4M1du6Vuw6GRUh6mtYY6e3JQbZVQ05g==}
     dependencies:
       fs-extra: 11.2.0
     dev: false
@@ -10767,6 +10767,7 @@ packages:
 
   /wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+    requiresBuild: true
 
   /write-file-atomic@3.0.3:
     resolution: {integrity: sha512-AvHcyZ5JnSfq3ioSyjrBkH9yW4m7Ayk8/9My/DD9onKeu/94fwrMocemO2QAJFAlnnDN+ZDS+ZjAR5ua1/PV/Q==}
