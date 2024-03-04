@@ -80,10 +80,8 @@ export function bumpPackageVersion(
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 
     let newPomVersion: string | null = null;
-    const prerelease = semver.prerelease(currentValue);
-    if (!prerelease) {
-      newPomVersion = semver.inc(currentValue, bumpVersion, 'SNAPSHOT', false);
-    } else if (isSnapshot(prerelease)) {
+    const currentPrereleaseValue = semver.prerelease(currentValue);
+    if (isSnapshot(currentPrereleaseValue)) {
       let releaseType = bumpVersion;
       if (!bumpVersion.startsWith('pre')) {
         releaseType = ('pre' + bumpVersion) as ReleaseType;
@@ -91,9 +89,11 @@ export function bumpPackageVersion(
       newPomVersion = semver.inc(
         currentValue,
         releaseType,
-        prerelease.join('.'),
+        currentPrereleaseValue?.join('.'),
         false,
       );
+    } else if (!currentPrereleaseValue) {
+      newPomVersion = semver.inc(currentValue, bumpVersion, 'SNAPSHOT', false);
     } else {
       newPomVersion = semver.inc(currentValue, bumpVersion);
     }
@@ -127,7 +127,9 @@ export function bumpPackageVersion(
   return { bumpedContent };
 }
 
-function isSnapshot(prerelease: ReadonlyArray<string | number>): boolean {
-  const lastPart = prerelease.at(-1);
+function isSnapshot(
+  prerelease: ReadonlyArray<string | number> | null,
+): boolean {
+  const lastPart = prerelease?.at(-1);
   return is.string(lastPart) && lastPart.endsWith('SNAPSHOT');
 }
