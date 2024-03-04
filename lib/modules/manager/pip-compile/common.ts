@@ -160,7 +160,7 @@ export function extractHeaderCommand(
         result.indexUrl = value;
         // TODO: add to secrets? next PR
       } else {
-        logger.warn(`pip-compile: option ${arg} not handled`);
+        logger.debug({ option }, `pip-compile: option not handled`);
       }
       continue;
     }
@@ -177,7 +177,7 @@ export function extractHeaderCommand(
       continue;
     }
 
-    logger.warn(`pip-compile: option ${arg} not handled`);
+    logger.debug({ option: arg }, `pip-compile: option not handled`);
   }
   logger.trace(
     {
