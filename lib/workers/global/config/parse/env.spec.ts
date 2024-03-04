@@ -286,7 +286,7 @@ describe('workers/global/config/parse/env', () => {
         expect(processExit).toHaveBeenCalledWith(1);
       });
 
-      it('migrates', async () => {
+      it('migrates RENOVATE_CONFIG', async () => {
         const envParam: NodeJS.ProcessEnv = {
           RENOVATE_CONFIG: '{"automerge":"any","token":"foo"}',
         };
@@ -295,7 +295,7 @@ describe('workers/global/config/parse/env', () => {
         expect(config.automerge).toBeTrue();
       });
 
-      it('warns if config is invalid', async () => {
+      it('warns if config in RENOVATE_CONFIG is invalid', async () => {
         const envParam: NodeJS.ProcessEnv = {
           RENOVATE_CONFIG: '{"enabled":"invalid-value","prTitle":"something"}',
         };
