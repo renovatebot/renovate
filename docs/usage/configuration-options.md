@@ -3688,8 +3688,10 @@ If this setting is true then you would get one PR for webpack@v2 and one for web
 
 Enable this for dependencies when it is important to split updates into separate PRs per minor release stream (e.g. `python`).
 
-For example, if you are on python@v3.9.0 currently then default behavior is a PR for upgrading to the latest version such as `python@v3.12.x` and not for `python@v3.10.x`.
-If this setting is true then you would get separate PRs for each minor stream, such as `python@3.9.x`, `python@v3.10.x`, `python@v3.11.x`, etc
+For example, if you are on `python@v3.9.0` currently, then by default Renovate creates a PR to upgrade you to the latest version such as `python@v3.12.x`.
+By default, Renovate skips versions in between, like `python@v3.10.x`.
+
+But if you set `separateMultipleMinor=true` then you get separate PRs for each minor stream, like `python@3.9.x`, `python@v3.10.x` and `python@v3.11.x`, etc.
 
 ## statusCheckNames
 

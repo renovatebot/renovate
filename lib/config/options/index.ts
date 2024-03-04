@@ -1516,7 +1516,7 @@ const options: RenovateOptions[] = [
   {
     name: 'separateMultipleMinor',
     description:
-      'If set to `true`, PRs will be raised separately for each available `minor` stream.',
+      'If set to `true`, Renovate creates separate PRs for each `minor` stream.',
     stage: 'package',
     type: 'boolean',
     default: false,
