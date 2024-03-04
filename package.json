@@ -278,7 +278,7 @@
     "@types/common-tags": "1.8.4",
     "@types/conventional-commits-detector": "1.0.2",
     "@types/diff": "5.0.9",
-    "@types/eslint": "8.56.3",
+    "@types/eslint": "8.56.5",
     "@types/fs-extra": "11.0.4",
     "@types/git-url-parse": "9.0.3",
     "@types/github-url-from-git": "1.5.3",
@@ -295,7 +295,7 @@
     "@types/mdast": "3.0.15",
     "@types/moo": "0.5.9",
     "@types/nock": "10.0.3",
-    "@types/node": "18.19.17",
+    "@types/node": "18.19.21",
     "@types/parse-link-header": "2.0.3",
     "@types/prettier": "2.7.3",
     "@types/semver": "7.5.6",
@@ -314,7 +314,7 @@
     "conventional-changelog-conventionalcommits": "7.0.2",
     "diff": "5.2.0",
     "emojibase-data": "15.3.0",
-    "eslint": "8.56.0",
+    "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-formatter-gha": "1.4.3",
     "eslint-import-resolver-typescript": "3.6.1",
@@ -348,7 +348,7 @@
     "typescript": "5.3.3",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@8.15.3",
+  "packageManager": "pnpm@8.15.4",
   "files": [
     "dist",
     "renovate-schema.json"

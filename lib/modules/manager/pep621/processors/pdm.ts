@@ -5,6 +5,7 @@ import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { Result } from '../../../../util/result';
 import { PypiDatasource } from '../../../datasource/pypi';
 import type {
   PackageDependency,
@@ -12,7 +13,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
-import type { PyProject } from '../schema';
+import { PdmLockfileSchema, type PyProject } from '../schema';
 import { depTypes, parseDependencyGroupRecord } from '../utils';
 import type { PyProjectProcessor } from './types';
 
@@ -51,6 +52,37 @@ export class PdmProcessor implements PyProjectProcessor {
     }
 
     return deps;
+  }
+
+  async extractLockedVersions(
+    project: PyProject,
+    deps: PackageDependency[],
+    packageFile: string,
+  ): Promise<PackageDependency[]> {
+    if (
+      is.nullOrUndefined(project.tool?.pdm) &&
+      project['build-system']?.['build-backend'] !== 'pdm.backend'
+    ) {
+      return Promise.resolve(deps);
+    }
+
+    const lockFileName = getSiblingFileName(packageFile, 'pdm.lock');
+    const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+    if (lockFileContent) {
+      const lockFileMapping = Result.parse(
+        lockFileContent,
+        PdmLockfileSchema.transform(({ lock }) => lock),
+      ).unwrapOrElse({});
+
+      for (const dep of deps) {
+        const packageName = dep.packageName;
+        if (packageName && packageName in lockFileMapping) {
+          dep.lockedVersion = lockFileMapping[packageName];
+        }
+      }
+    }
+
+    return Promise.resolve(deps);
   }
 
   async updateArtifacts(

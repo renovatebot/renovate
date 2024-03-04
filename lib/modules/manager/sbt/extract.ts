@@ -334,6 +334,7 @@ export function extractPackageFile(
         currentValue: sbtVersion,
         replaceString: matchString,
         extractVersion: '^v(?<version>\\S+)',
+        registryUrls: [],
       };
 
       return {
