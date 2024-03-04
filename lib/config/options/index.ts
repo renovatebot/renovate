@@ -1766,7 +1766,7 @@ const options: RenovateOptions[] = [
   {
     name: 'keepUpdatedLabel',
     description:
-      'Label to request Renovate bot always rebase to keep branch updated.',
+      'If set, users can add this label to PRs to request they be kept updated with the base branch.',
     type: 'string',
     supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
