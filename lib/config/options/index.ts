@@ -2426,7 +2426,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'maxRequestsPerSecond',
-    description: 'Limit requests rate per host. Set to `-1` for no limit. Default value is 5 requests per second.',
+    description:
+      'Limit requests rate per host. Set to `-1` for no limit. Default value is 5 requests per second.',
     type: 'integer',
     stage: 'repository',
     parents: ['hostRules'],
