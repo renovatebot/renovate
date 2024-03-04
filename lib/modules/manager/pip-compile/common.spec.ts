@@ -1,4 +1,13 @@
-import { allowedPipOptions, extractHeaderCommand } from './common';
+import { mockDeep } from 'jest-mock-extended';
+import { hostRules } from '../../../../test/util';
+import {
+  allowedPipOptions,
+  extractHeaderCommand,
+  getRegistryCredVarsFromPackageFile,
+} from './common';
+import { inferCommandExecDir } from './utils';
+
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 function getCommandInHeader(command: string) {
   return `#
@@ -14,6 +23,7 @@ describe('modules/manager/pip-compile/common', () => {
   describe('extractHeaderCommand()', () => {
     it.each([
       '-v',
+      '--all-extras',
       '--generate-hashes',
       '--resolver=backtracking',
       '--resolver=legacy',
@@ -124,7 +134,7 @@ describe('modules/manager/pip-compile/common', () => {
       'returned sourceFiles must not contain options',
       (argument: string) => {
         const sourceFiles = extractHeaderCommand(
-          getCommandInHeader(`pip-compile ${argument}=dd reqs.in`),
+          getCommandInHeader(`pip-compile ${argument}=reqs.txt reqs.in`),
           'reqs.txt',
         ).sourceFiles;
         expect(sourceFiles).not.toContainEqual(argument);
@@ -139,6 +149,117 @@ describe('modules/manager/pip-compile/common', () => {
           'reqs.txt',
         ),
       ).toHaveProperty('isCustomCommand', true);
+    });
+
+    it.each([
+      { path: 'reqs.txt', arg: 'reqs.txt', result: '.' },
+      { path: 'subdir/reqs.txt', arg: 'subdir/reqs.txt', result: '.' },
+      { path: 'subdir/reqs.txt', arg: './subdir/reqs.txt', result: '.' },
+      { path: 'subdir/reqs.txt', arg: 'reqs.txt', result: 'subdir' },
+      { path: 'subdir/reqs.txt', arg: './reqs.txt', result: 'subdir' },
+    ])(
+      'infer exec directory (cwd) from output file path and header command',
+      ({ path, arg, result }) => {
+        expect(inferCommandExecDir(path, arg)).toEqual(result);
+      },
+    );
+  });
+
+  describe('getCredentialVarsFromPackageFile()', () => {
+    it('handles both registryUrls and additionalRegistryUrls', () => {
+      hostRules.find.mockReturnValueOnce({
+        username: 'user1',
+        password: 'password1',
+      });
+      hostRules.find.mockReturnValueOnce({
+        username: 'user2',
+        password: 'password2',
+      });
+      expect(
+        getRegistryCredVarsFromPackageFile({
+          deps: [],
+          registryUrls: ['https://example.com/pypi/simple'],
+          additionalRegistryUrls: ['https://example2.com/pypi/simple'],
+        }),
+      ).toEqual({
+        KEYRING_SERVICE_NAME_0: 'example.com',
+        KEYRING_SERVICE_USERNAME_0: 'user1',
+        KEYRING_SERVICE_PASSWORD_0: 'password1',
+        KEYRING_SERVICE_NAME_1: 'example2.com',
+        KEYRING_SERVICE_USERNAME_1: 'user2',
+        KEYRING_SERVICE_PASSWORD_1: 'password2',
+      });
+    });
+
+    it('handles multiple additionalRegistryUrls', () => {
+      hostRules.find.mockReturnValueOnce({
+        username: 'user1',
+        password: 'password1',
+      });
+      hostRules.find.mockReturnValueOnce({
+        username: 'user2',
+        password: 'password2',
+      });
+      expect(
+        getRegistryCredVarsFromPackageFile({
+          deps: [],
+          additionalRegistryUrls: [
+            'https://example.com/pypi/simple',
+            'https://example2.com/pypi/simple',
+          ],
+        }),
+      ).toEqual({
+        KEYRING_SERVICE_NAME_0: 'example.com',
+        KEYRING_SERVICE_USERNAME_0: 'user1',
+        KEYRING_SERVICE_PASSWORD_0: 'password1',
+        KEYRING_SERVICE_NAME_1: 'example2.com',
+        KEYRING_SERVICE_USERNAME_1: 'user2',
+        KEYRING_SERVICE_PASSWORD_1: 'password2',
+      });
+    });
+
+    it('handles hosts with only a username', () => {
+      hostRules.find.mockReturnValue({
+        username: 'user',
+      });
+      expect(
+        getRegistryCredVarsFromPackageFile({
+          deps: [],
+          additionalRegistryUrls: ['https://example.com/pypi/simple'],
+        }),
+      ).toEqual({
+        KEYRING_SERVICE_NAME_0: 'example.com',
+        KEYRING_SERVICE_USERNAME_0: 'user',
+        KEYRING_SERVICE_PASSWORD_0: '',
+      });
+    });
+
+    it('handles hosts with only a password', () => {
+      hostRules.find.mockReturnValue({
+        password: 'password',
+      });
+      expect(
+        getRegistryCredVarsFromPackageFile({
+          deps: [],
+          additionalRegistryUrls: ['https://example.com/pypi/simple'],
+        }),
+      ).toEqual({
+        KEYRING_SERVICE_NAME_0: 'example.com',
+        KEYRING_SERVICE_USERNAME_0: '',
+        KEYRING_SERVICE_PASSWORD_0: 'password',
+      });
+    });
+
+    it('handles invalid URLs', () => {
+      hostRules.find.mockReturnValue({
+        password: 'password',
+      });
+      expect(
+        getRegistryCredVarsFromPackageFile({
+          deps: [],
+          additionalRegistryUrls: ['invalid-url'],
+        }),
+      ).toEqual({});
     });
   });
 });

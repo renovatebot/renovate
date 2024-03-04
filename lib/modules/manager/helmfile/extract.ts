@@ -24,6 +24,10 @@ function isLocalPath(possiblePath: string): boolean {
   );
 }
 
+function isOciUrl(possibleUrl: string): boolean {
+  return possibleUrl.startsWith('oci://');
+}
+
 export async function extractPackageFile(
   content: string,
   packageFile: string,
@@ -100,7 +104,11 @@ export async function extractPackageFile(
         dep.version = String(dep.version);
       }
 
-      if (dep.chart.includes('/')) {
+      if (isOciUrl(dep.chart)) {
+        const v = dep.chart.substring(6).split('/');
+        depName = v.pop()!;
+        repoName = v.join('/');
+      } else if (dep.chart.includes('/')) {
         const v = dep.chart.split('/');
         repoName = v.shift()!;
         depName = v.join('/');
@@ -130,7 +138,10 @@ export async function extractPackageFile(
       const repository = doc.repositories?.find(
         (repo) => repo.name === repoName,
       );
-      if (repository?.oci) {
+      if (isOciUrl(dep.chart)) {
+        res.datasource = DockerDatasource.id;
+        res.packageName = repoName + '/' + depName;
+      } else if (repository?.oci) {
         res.datasource = DockerDatasource.id;
         res.packageName = registryAliases[repoName] + '/' + depName;
       }
@@ -142,7 +153,10 @@ export async function extractPackageFile(
       }
 
       // Skip in case we cannot locate the registry
-      if (is.emptyArray(res.registryUrls)) {
+      if (
+        res.datasource !== DockerDatasource.id &&
+        is.emptyArray(res.registryUrls)
+      ) {
         res.skipReason = 'unknown-registry';
       }
 

@@ -16,6 +16,8 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
+  REPOSITORY_FORK_MISSING,
+  REPOSITORY_FORK_MODE_FORKED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
@@ -433,6 +435,7 @@ export async function createFork(
 export async function initRepo({
   endpoint,
   repository,
+  forkCreation,
   forkOrg,
   forkToken,
   renovateUsername,
@@ -512,6 +515,10 @@ export async function initRepo({
     }
     // istanbul ignore if
     if (!repo.defaultBranchRef?.name) {
+      logger.debug(
+        { res },
+        'No default branch returned - treating repo as empty',
+      );
       throw new Error(REPOSITORY_EMPTY);
     }
     if (
@@ -566,6 +573,9 @@ export async function initRepo({
     if (err.message.startsWith('Repository access blocked')) {
       throw new Error(REPOSITORY_BLOCKED);
     }
+    if (err.message === REPOSITORY_FORK_MODE_FORKED) {
+      throw err;
+    }
     if (err.message === REPOSITORY_FORKED) {
       throw err;
     }
@@ -584,6 +594,15 @@ export async function initRepo({
 
   if (forkToken) {
     logger.debug('Bot is in fork mode');
+    if (repo.isFork) {
+      logger.debug(
+        `Forked repos cannot be processed when running with a forkToken, so this repo will be skipped`,
+      );
+      logger.debug(
+        `Parent repo for this forked repo is ${repo.parent?.nameWithOwner}`,
+      );
+      throw new Error(REPOSITORY_FORKED);
+    }
     config.forkOrg = forkOrg;
     config.forkToken = forkToken;
     // save parent name then delete
@@ -665,10 +684,13 @@ export async function initRepo({
         }
         throw new ExternalHostError(err);
       }
-    } else {
+    } else if (forkCreation) {
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
       config.repository = forkedRepo.full_name;
+    } else {
+      logger.debug('Forked repo is not found and forkCreation is disabled');
+      throw new Error(REPOSITORY_FORK_MISSING);
     }
   }
 
@@ -1378,6 +1400,41 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   }
 }
 
+async function tryAddMilestone(
+  issueNo: number,
+  milestoneNo: number | undefined,
+): Promise<void> {
+  if (!milestoneNo) {
+    return;
+  }
+
+  logger.debug(
+    {
+      milestone: milestoneNo,
+      pr: issueNo,
+    },
+    'Adding milestone to PR',
+  );
+  const repository = config.parentRepo ?? config.repository;
+  try {
+    await githubApi.patchJson(`repos/${repository}/issues/${issueNo}`, {
+      body: {
+        milestone: milestoneNo,
+      },
+    });
+  } catch (err) {
+    const actualError = err.response?.body || /* istanbul ignore next */ err;
+    logger.warn(
+      {
+        milestone: milestoneNo,
+        pr: issueNo,
+        err: actualError,
+      },
+      'Unable to add milestone to PR',
+    );
+  }
+}
+
 export async function addAssignees(
   issueNo: number,
   assignees: string[],
@@ -1658,6 +1715,7 @@ export async function createPr({
   labels,
   draftPR = false,
   platformOptions,
+  milestone,
 }: CreatePRConfig): Promise<GhPr | null> {
   const body = sanitize(rawBody);
   const base = targetBranch;
@@ -1697,6 +1755,7 @@ export async function createPr({
   const { number, node_id } = result;
 
   await addLabels(number, labels);
+  await tryAddMilestone(number, milestone);
   await tryPrAutomerge(number, node_id, platformOptions);
 
   cachePr(result);
