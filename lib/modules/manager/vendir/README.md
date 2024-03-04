@@ -1,4 +1,4 @@
-The [vendir](https://carvel.dev/vendir/) manager only updates dependencies of the `helmChart` type.
+The [vendir](https://carvel.dev/vendir/) manager can only update `helmChart`-type dependencies.
 
 ```yaml
 # fetch Helm chart contents (optional; v0.11.0+)
