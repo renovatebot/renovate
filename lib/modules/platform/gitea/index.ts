@@ -320,7 +320,7 @@ const platform: Platform = {
     logger.debug('Auto-discovering Gitea repositories');
     try {
       if (config?.topics) {
-        logger.debug('Auto-discovering Gitea repositories by topics');
+        logger.debug({ topics: config.topics }, 'Auto-discovering by topics');
         const repos = await map(config.topics, fetchRepositories);
         return deduplicateArray(repos.flat());
       } else if (config?.namespaces) {
