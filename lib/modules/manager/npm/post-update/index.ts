@@ -49,15 +49,14 @@ export function determineLockFileDirs(
   const pnpmShrinkwrapDirs: (string | undefined)[] = [];
 
   for (const upgrade of config.upgrades) {
-    if (upgrade.updateType === 'lockFileMaintenance' || upgrade.isRemediation) {
+    if (
+      upgrade.updateType === 'lockFileMaintenance' ||
+      upgrade.isRemediation === true ||
+      upgrade.isLockfileUpdate === true
+    ) {
       yarnLockDirs.push(upgrade.managerData?.yarnLock);
       npmLockDirs.push(upgrade.managerData?.npmLock);
       pnpmShrinkwrapDirs.push(upgrade.managerData?.pnpmShrinkwrap);
-      continue;
-    }
-    if (upgrade.isLockfileUpdate) {
-      yarnLockDirs.push(upgrade.managerData?.yarnLock);
-      npmLockDirs.push(upgrade.managerData?.npmLock);
     }
   }
 
@@ -390,9 +389,9 @@ export async function updateYarnBinary(
       return existingYarnrcYmlContent;
     }
 
-    const oldYarnPath = (parseSingleYaml(yarnrcYml) as YarnRcYmlFile)?.yarnPath;
-    const newYarnPath = (parseSingleYaml(newYarnrcYml) as YarnRcYmlFile)
-      ?.yarnPath;
+    // TODO: use schema (#9610)
+    const oldYarnPath = parseSingleYaml<YarnRcYmlFile>(yarnrcYml)?.yarnPath;
+    const newYarnPath = parseSingleYaml<YarnRcYmlFile>(newYarnrcYml)?.yarnPath;
     if (
       !is.nonEmptyStringAndNotWhitespace(oldYarnPath) ||
       !is.nonEmptyStringAndNotWhitespace(newYarnPath)
@@ -563,19 +562,24 @@ export async function getAdditionalFiles(
     await updateNpmrcContent(lockFileDir, npmrcContent, additionalNpmrcContent);
     let yarnRcYmlFilename: string | undefined;
     let existingYarnrcYmlContent: string | undefined | null;
-    // istanbul ignore if: needs test
     if (additionalYarnRcYml) {
       yarnRcYmlFilename = getSiblingFileName(yarnLock, '.yarnrc.yml');
       existingYarnrcYmlContent = await readLocalFile(yarnRcYmlFilename, 'utf8');
       if (existingYarnrcYmlContent) {
         try {
-          const existingYarnrRcYml = parseSingleYaml(
+          // TODO: use schema (#9610)
+          const existingYarnrRcYml = parseSingleYaml<Record<string, unknown>>(
             existingYarnrcYmlContent,
-          ) as Record<string, unknown>;
+          );
+
           const updatedYarnYrcYml = deepmerge(
             existingYarnrRcYml,
-            additionalYarnRcYml,
+            yarn.fuzzyMatchAdditionalYarnrcYml(
+              additionalYarnRcYml,
+              existingYarnrRcYml,
+            ),
           );
+
           await writeLocalFile(yarnRcYmlFilename, dump(updatedYarnYrcYml));
           logger.debug('Added authentication to .yarnrc.yml');
         } catch (err) {

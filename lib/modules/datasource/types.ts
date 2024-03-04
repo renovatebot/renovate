@@ -27,6 +27,7 @@ export interface GetReleasesConfig {
   datasource?: string;
   packageName: string;
   registryUrl?: string;
+  currentValue?: string;
 }
 
 export interface GetPkgReleasesConfig {
@@ -37,6 +38,7 @@ export interface GetPkgReleasesConfig {
   additionalRegistryUrls?: string[];
   datasource: string;
   packageName: string;
+  currentValue?: string;
   versioning?: string;
   extractVersion?: string;
   versionCompatibility?: string;
@@ -63,6 +65,7 @@ export interface Release {
   registryUrl?: string;
   sourceUrl?: string | undefined;
   sourceDirectory?: string;
+  currentAge?: string;
 }
 
 export interface ReleaseResult {
@@ -80,6 +83,7 @@ export interface ReleaseResult {
   registryUrl?: string;
   replacementName?: string;
   replacementVersion?: string;
+  lookupName?: string;
 }
 
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';

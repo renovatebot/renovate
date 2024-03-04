@@ -56,4 +56,17 @@ describe('util/package-rules/package-names', () => {
       expect(result).toBeFalse();
     });
   });
+
+  it('should excludePackageName', () => {
+    const result = packageNameMatcher.excludes(
+      {
+        depName: 'abc',
+        packageName: 'def',
+      },
+      {
+        excludePackageNames: ['def'],
+      },
+    );
+    expect(result).toBeTrue();
+  });
 });

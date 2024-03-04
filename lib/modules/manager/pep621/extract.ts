@@ -13,11 +13,11 @@ import {
   parsePyProject,
 } from './utils';
 
-export function extractPackageFile(
+export async function extractPackageFile(
   content: string,
   packageFile: string,
   _config?: ExtractConfig,
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   logger.trace(`pep621.extractPackageFile(${packageFile})`);
 
   const deps: PackageDependency[] = [];
@@ -26,6 +26,8 @@ export function extractPackageFile(
   if (is.nullOrUndefined(def)) {
     return null;
   }
+
+  const packageFileVersion = def.project?.version;
   const pythonConstraint = def.project?.['requires-python'];
   const extractedConstraints = is.nonEmptyString(pythonConstraint)
     ? { extractedConstraints: { python: pythonConstraint } }
@@ -41,14 +43,25 @@ export function extractPackageFile(
       def.project?.['optional-dependencies'],
     ),
   );
+  deps.push(
+    ...parseDependencyList(
+      depTypes.buildSystemRequires,
+      def['build-system']?.requires,
+    ),
+  );
 
   // process specific tool sets
   let processedDeps = deps;
   for (const processor of processors) {
     processedDeps = processor.process(def, processedDeps);
+    processedDeps = await processor.extractLockedVersions(
+      def,
+      processedDeps,
+      packageFile,
+    );
   }
 
   return processedDeps.length
-    ? { ...extractedConstraints, deps: processedDeps }
+    ? { ...extractedConstraints, deps: processedDeps, packageFileVersion }
     : null;
 }

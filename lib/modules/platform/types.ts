@@ -41,6 +41,7 @@ export interface RepoParams {
   repository: string;
   endpoint?: string;
   gitUrl?: GitUrlOption;
+  forkCreation?: boolean;
   forkOrg?: string;
   forkToken?: string;
   forkProcessing?: 'enabled' | 'disabled';
@@ -96,6 +97,7 @@ export interface Issue {
 }
 export type PlatformPrOptions = {
   autoApprove?: boolean;
+  automergeStrategy?: MergeStrategy;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
@@ -111,6 +113,7 @@ export interface CreatePRConfig {
   labels?: string[] | null;
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
+  milestone?: number;
 }
 export interface UpdatePrConfig {
   number: number;
@@ -142,6 +145,7 @@ export interface FindPRConfig {
   state?: 'open' | 'closed' | '!open' | 'all';
   refreshCache?: boolean;
   targetBranch?: string | null;
+  includeOtherAuthors?: boolean;
 }
 export interface MergePRConfig {
   branchName?: string;
@@ -204,7 +208,7 @@ export interface Platform {
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
   getRepos(config?: AutodiscoverConfig): Promise<string[]>;
-  getRepoForceRebase(): Promise<boolean>;
+  getBranchForceRebase?(branchName: string): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(

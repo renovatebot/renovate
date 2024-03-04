@@ -19,6 +19,14 @@ export async function updateLockedDependency(
   if (lockFile.endsWith('yarn.lock')) {
     return yarnLock.updateLockedDependency(config);
   }
-  logger.debug(`Unsupported lock file: ${lockFile}`);
+  if (lockFile.endsWith('pnpm-lock.yaml')) {
+    logger.debug(
+      'Cannot patch pnpm lock file directly - falling back to using pnpm',
+    );
+    return { status: 'unsupported' };
+  }
+
+  logger.debug(`updateLockedDependency(): unsupported lock file: ${lockFile}`);
+
   return { status: 'update-failed' };
 }

@@ -15,6 +15,7 @@ export const depTypes = {
   dependencies: 'project.dependencies',
   optionalDependencies: 'project.optional-dependencies',
   pdmDevDependencies: 'tool.pdm.dev-dependencies',
+  buildSystemRequires: 'build-system.requires',
 };
 
 export function parsePEP508(
@@ -69,6 +70,10 @@ export function pep508ToPackageDependency(
     dep.skipReason = 'unspecified-version';
   } else {
     dep.currentValue = parsed.currentValue;
+
+    if (parsed.currentValue.startsWith('==')) {
+      dep.currentVersion = parsed.currentValue.replace(regEx(/^==\s*/), '');
+    }
   }
   return dep;
 }

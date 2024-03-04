@@ -1,8 +1,10 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { PypiDatasource } from '../../datasource/pypi';
 import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
@@ -169,6 +171,107 @@ describe('modules/manager/poetry/extract', () => {
       });
     });
 
+    it('parses git dependencies long commit hashes on http urls', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "https://github.com/tiangolo/fastapi.git", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+        dep = "^2.0"
+      `;
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toMatchObject([
+        {
+          depType: 'dependencies',
+          depName: 'fastapi',
+          datasource: GitRefsDatasource.id,
+          currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          packageName: 'https://github.com/tiangolo/fastapi.git',
+        },
+        {
+          depType: 'dependencies',
+          depName: 'dep',
+          datasource: PypiDatasource.id,
+          currentValue: '^2.0',
+        },
+      ]);
+    });
+
+    it('parses git dependencies short commit hashes on http urls', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "https://github.com/tiangolo/fastapi.git", rev="6f5aa81"}
+        dep = "^2.0"
+      `;
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toMatchObject([
+        {
+          depType: 'dependencies',
+          depName: 'fastapi',
+          datasource: GitRefsDatasource.id,
+          currentDigest: '6f5aa81',
+          replaceString: '6f5aa81',
+          packageName: 'https://github.com/tiangolo/fastapi.git',
+        },
+        {
+          depType: 'dependencies',
+          depName: 'dep',
+          datasource: PypiDatasource.id,
+          currentValue: '^2.0',
+        },
+      ]);
+    });
+
+    it('parses git dependencies long commit hashes on ssh urls', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "git@github.com:tiangolo/fastapi.git", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+        dep = "^2.0"
+      `;
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toMatchObject([
+        {
+          depType: 'dependencies',
+          depName: 'fastapi',
+          datasource: GitRefsDatasource.id,
+          currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          packageName: 'git@github.com:tiangolo/fastapi.git',
+        },
+        {
+          depType: 'dependencies',
+          depName: 'dep',
+          datasource: PypiDatasource.id,
+          currentValue: '^2.0',
+        },
+      ]);
+    });
+
+    it('parses git dependencies long commit hashes on http urls with branch marker', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "https://github.com/tiangolo/fastapi.git", branch="develop", rev="6f5aa81c076d22e38afbe7d602db6730e28bc3cc"}
+        dep = "^2.0"
+      `;
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toMatchObject([
+        {
+          depType: 'dependencies',
+          depName: 'fastapi',
+          datasource: GitRefsDatasource.id,
+          currentValue: 'develop',
+          currentDigest: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          replaceString: '6f5aa81c076d22e38afbe7d602db6730e28bc3cc',
+          packageName: 'https://github.com/tiangolo/fastapi.git',
+        },
+        {
+          depType: 'dependencies',
+          depName: 'dep',
+          datasource: PypiDatasource.id,
+          currentValue: '^2.0',
+        },
+      ]);
+    });
+
     it('parses github dependencies tags on ssh urls', async () => {
       const content = codeBlock`
         [tool.poetry.dependencies]
@@ -199,6 +302,29 @@ describe('modules/manager/poetry/extract', () => {
       expect(res).toHaveLength(2);
     });
 
+    it('parses git dependencies with tags that are not on GitHub', async () => {
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        aws-sam = {git = "https://gitlab.com/gitlab-examples/aws-sam.git", tag="1.2.3"}
+        platform-tools = {git = "https://some.company.com/platform-tools", tag="1.2.3"}
+      `;
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toMatchObject([
+        {
+          datasource: 'gitlab-tags',
+          depName: 'aws-sam',
+          packageName: 'gitlab-examples/aws-sam',
+          currentValue: '1.2.3',
+        },
+        {
+          datasource: 'git-tags',
+          depName: 'platform-tools',
+          packageName: 'https://some.company.com/platform-tools',
+          currentValue: '1.2.3',
+        },
+      ]);
+    });
+
     it('skips git dependencies', async () => {
       const content = codeBlock`
         [tool.poetry.dependencies]
@@ -222,18 +348,6 @@ describe('modules/manager/poetry/extract', () => {
       expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('git-dependency');
       expect(res).toHaveLength(2);
-    });
-
-    it('skips git dependencies on tags that are not in github', async () => {
-      const content = codeBlock`
-        [tool.poetry.dependencies]
-        aws-sam = {git = "https://gitlab.com/gitlab-examples/aws-sam.git", tag="1.2.3"}
-      `;
-      const res = (await extractPackageFile(content, filename))!.deps;
-      expect(res[0].depName).toBe('aws-sam');
-      expect(res[0].currentValue).toBe('1.2.3');
-      expect(res[0].skipReason).toBe('git-dependency');
-      expect(res).toHaveLength(1);
     });
 
     it('skips path dependencies', async () => {

@@ -534,7 +534,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .reply(200, {
               mergeConfig: null,
             });
-          const actual = await bitbucket.getRepoForceRebase();
+          const actual = await bitbucket.getBranchForceRebase!('main');
           expect(actual).toBeFalse();
         });
 
@@ -550,7 +550,7 @@ describe('modules/platform/bitbucket-server/index', () => {
                 defaultStrategy: null,
               },
             });
-          const actual = await bitbucket.getRepoForceRebase();
+          const actual = await bitbucket.getBranchForceRebase!('main');
           expect(actual).toBeFalse();
         });
 
@@ -570,7 +570,7 @@ describe('modules/platform/bitbucket-server/index', () => {
                   },
                 },
               });
-            const actual = await bitbucket.getRepoForceRebase();
+            const actual = await bitbucket.getBranchForceRebase!('main');
             expect(actual).toBeTrue();
           },
         );
@@ -591,7 +591,7 @@ describe('modules/platform/bitbucket-server/index', () => {
                   },
                 },
               });
-            const actual = await bitbucket.getRepoForceRebase();
+            const actual = await bitbucket.getBranchForceRebase!('main');
             expect(actual).toBeFalse();
           },
         );
@@ -674,16 +674,57 @@ describe('modules/platform/bitbucket-server/index', () => {
           );
         });
 
-        it('throws repository-changed', async () => {
+        it('does not throws repository-changed after 1 try', async () => {
           const scope = await initRepo();
           scope
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
+            .thrice()
             .reply(200, prMock(url, 'SOME', 'repo'))
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
             )
+            .reply(409)
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'));
+          await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
+        });
+
+        it('does not throws repository-changed after 2 tries', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .times(4)
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .twice()
+            .reply(409)
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'));
+          await expect(bitbucket.addReviewers(5, ['name'])).toResolve();
+        });
+
+        it('throws repository-changed after 3 tries', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .thrice()
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+            )
+            .thrice()
             .reply(409);
           await expect(bitbucket.addReviewers(5, ['name'])).rejects.toThrow(
             REPOSITORY_CHANGED,
@@ -1305,6 +1346,50 @@ describe('modules/platform/bitbucket-server/index', () => {
               state: 'closed',
             }),
           ).toBeNull();
+        });
+
+        it('finds pr from other authors', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [prMock(url, 'SOME', 'repo')],
+            });
+          expect(
+            await bitbucket.findPr({
+              branchName: 'branch',
+              state: 'open',
+              includeOtherAuthors: true,
+            }),
+          ).toMatchObject({
+            number: 5,
+            sourceBranch: 'userName1/pullRequest5',
+            targetBranch: 'master',
+            title: 'title',
+            state: 'open',
+          });
+        });
+
+        it('returns null if no pr found - (includeOtherAuthors)', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=OPEN&direction=outgoing&at=refs/heads/branch&limit=1`,
+            )
+            .reply(200, {
+              isLastPage: true,
+              values: [],
+            });
+
+          const pr = await bitbucket.findPr({
+            branchName: 'branch',
+            state: 'open',
+            includeOtherAuthors: true,
+          });
+          expect(pr).toBeNull();
         });
       });
 

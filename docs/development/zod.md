@@ -8,7 +8,7 @@
     - [Inferred types](#inferred-types)
     - [Specify only necessary fields](#specify-only-necessary-fields)
     - [Use `Json`, `Yaml` and `Toml` for string parsing](#use-json-yaml-and-toml-for-string-parsing)
-    - [Use `.transform()` method to process parsed data](#use-transform-method-to-process-validated-data)
+    - [Use `.transform()` method to process validated data](#use-transform-method-to-process-validated-data)
       - [Rename and move fields at the top level transform](#rename-and-move-fields-at-the-top-level-transform)
     - [Stick to permissive behavior when possible](#stick-to-permissive-behavior-when-possible)
       - [Use `.catch()` to force default values](#use-catch-to-force-default-values)
@@ -19,14 +19,13 @@
 # Zod schema guideline
 
 We decided that Renovate should use [Zod](https://github.com/colinhacks/zod) for schema validation.
-This means that any new manager or datasource should use Zod as well.
+So any new manager or datasource should use Zod as well.
 This document explains _how_ and _why_ you should use Zod features.
 
-When writing schema validation you're aiming for a balance between strictness of explicit contracts between separately developed systems, and the permissiveness of Renovate.
+When writing schema validation you want a balance between strictness of explicit contracts between separately developed systems, and the permissiveness of Renovate.
 We want Renovate to be only as strict as it _needs_ to be.
 
-Renovate should _not_ assume a field is always present.
-Such assumptions may lead to run-time errors when a field turns out to be missing.
+Renovate should _not_ assume a field is always present, because that assumption may lead to run-time errors when a field turns out to be missing.
 For example: if Renovate assumes an _optional_ field from a public registry will always be used, it may run into trouble when a self-hosted implementation does not use this field.
 
 ## When and where to use Zod
@@ -127,7 +126,7 @@ const volume = width * height * length;
 You may need to perform extra steps like `JSON.parse()` before you can validate the data structure.
 Use the helpers in `schema-utils.ts` for this purpose.
 
-The **wrong** to parse from string:
+The **wrong** way to parse from string:
 
 ```ts
 const ApiResults = z.array(
@@ -181,7 +180,7 @@ const { width, height, length } = Box.parse(input);
 const volume = width * height * length;
 ```
 
-Instead, use the idiomatic `.tranform()` method:
+Instead, use the idiomatic `.transform()` method:
 
 ```ts
 const BoxVolume = z
@@ -239,7 +238,7 @@ Zod schemas are strict, which means that if some field is wrong, or missing data
 Because Renovate uses Zod, it would then abort processing, even if we want Renovate to continue processing!
 
 Remember: we want to make sure the incoming data is good enough for Renovate to work.
-We do _not_ need to validate the data corresponds to any official specification.
+We do _not_ need to validate that the data matches to any official specification.
 
 Here are some techniques to make Zod more permissive about the input data.
 
@@ -257,8 +256,8 @@ const box = Box.parse({ width: 20, height: null });
 
 #### Use `LooseArray` and `LooseRecord` to filter out incorrect values from collections
 
-Suppose you want to parse a list of package releases, with elements that may or may not contain `version` field.
-In case of missing `version` field, you want to filter out such elements.
+Suppose you want to parse a list of package releases, with elements that may (or may not) contain a `version` field.
+If the `version` field is missing, you want to filter out such elements.
 If you only use methods from the `zod` library, you would need to write something like this:
 
 ```ts
@@ -323,7 +322,7 @@ const config = await Result.wrap(readLocalFile('config.json'))
 
 ### Combining with `Http` class
 
-`Http` class supports schema validation for the JSON results of methods like `.getJson()`, `.postJson()`, etc.
+The `Http` class supports schema validation for the JSON results of methods like `.getJson()`, `.postJson()`, etc.
 Under the hood, `.parseAsync()` method is used (**important consequence**: in case of invalid data, it will throw).
 
 Provide schema in the last argument of the method:

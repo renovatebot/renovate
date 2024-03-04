@@ -30,6 +30,13 @@ describe('modules/manager/terragrunt/extract', () => {
             depType: 'terragrunt',
           },
           {},
+          {
+            currentValue: '1.0.0',
+            datasource: 'terraform-module',
+            depName: 'abc/helloworld/aws',
+            depType: 'terragrunt',
+            registryUrls: ['https://registry.domain.com'],
+          },
         ],
       });
     });

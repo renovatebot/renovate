@@ -13,7 +13,6 @@ export interface Config {
   has_issues: boolean;
   mergeMethod: string;
   owner: string;
-  prList: Pr[];
   repository: string;
   ignorePrAuthor: boolean;
   is_private: boolean;
@@ -91,6 +90,7 @@ export interface PrResponse {
   };
   reviewers: Account[];
   created_on: string;
+  updated_on: string;
 }
 
 export interface Account {
@@ -104,4 +104,10 @@ export interface EffectiveReviewer {
   type: string;
   reviewer_type: string;
   user: Account;
+}
+
+export interface BitbucketPrCacheData {
+  items: Record<number, Pr>;
+  updated_on: string | null;
+  author: string | null;
 }

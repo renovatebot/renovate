@@ -9,6 +9,7 @@ import {
   initConfig,
   initMergeConfidence,
   isActiveConfidenceLevel,
+  parseSupportedDatasourceString,
   resetConfig,
   satisfiesConfidenceLevel,
 } from '.';
@@ -296,8 +297,11 @@ describe('util/merge-confidence/index', () => {
     });
 
     describe('initMergeConfidence()', () => {
-      it('using default base url if none is set', async () => {
+      beforeEach(() => {
         resetConfig();
+      });
+
+      it('using default base url if none is set', async () => {
         delete process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL;
         httpMock
           .scope(defaultApiBaseUrl)
@@ -309,12 +313,22 @@ describe('util/merge-confidence/index', () => {
           'using default merge confidence API base URL',
         );
         expect(logger.debug).toHaveBeenCalledWith(
+          {
+            supportedDatasources: [
+              'go',
+              'maven',
+              'npm',
+              'nuget',
+              'packagist',
+              'pypi',
+              'rubygems',
+            ],
+          },
           'merge confidence API - successfully authenticated',
         );
       });
 
       it('warns and then resolves if base url is invalid', async () => {
-        resetConfig();
         process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL =
           'invalid-url.com';
         httpMock
@@ -328,12 +342,29 @@ describe('util/merge-confidence/index', () => {
           'invalid merge confidence API base URL found in environment variables - using default value instead',
         );
         expect(logger.debug).toHaveBeenCalledWith(
+          expect.anything(),
+          'merge confidence API - successfully authenticated',
+        );
+      });
+
+      it('uses a custom base url containing path', async () => {
+        const renovateApi = 'https://domain.com/proxy/renovate-api';
+        process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL = renovateApi;
+        httpMock.scope(renovateApi).get(`/api/mc/availability`).reply(200);
+
+        await expect(initMergeConfidence()).toResolve();
+
+        expect(logger.trace).toHaveBeenCalledWith(
+          expect.anything(),
+          'using merge confidence API base found in environment variables',
+        );
+        expect(logger.debug).toHaveBeenCalledWith(
+          expect.anything(),
           'merge confidence API - successfully authenticated',
         );
       });
 
       it('resolves if no token', async () => {
-        resetConfig();
         hostRules.clear();
 
         await expect(initMergeConfidence()).toResolve();
@@ -347,6 +378,7 @@ describe('util/merge-confidence/index', () => {
 
         await expect(initMergeConfidence()).toResolve();
         expect(logger.debug).toHaveBeenCalledWith(
+          expect.anything(),
           'merge confidence API - successfully authenticated',
         );
       });
@@ -387,6 +419,57 @@ describe('util/merge-confidence/index', () => {
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
           'merge confidence API request failed - aborting run',
+        );
+      });
+
+      describe('parseSupportedDatasourceList()', () => {
+        type ParseSupportedDatasourceTestCase = {
+          name: string;
+          datasourceListString: string | undefined;
+          expected: string[] | undefined;
+        };
+
+        afterEach(() => {
+          delete process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES;
+        });
+
+        it.each([
+          {
+            name: 'it should do nothing when the input is undefined',
+            datasourceListString: undefined,
+            expected: undefined,
+          },
+          {
+            name: 'it should successfully parse the given datasource list',
+            datasourceListString: `["go","npm"]`,
+            expected: ['go', 'npm'],
+          },
+          {
+            name: 'it should gracefully handle invalid json',
+            datasourceListString: `{`,
+            expected: undefined,
+          },
+          {
+            name: 'it should discard non-array JSON input',
+            datasourceListString: `{}`,
+            expected: undefined,
+          },
+          {
+            name: 'it should discard non-string array JSON input',
+            datasourceListString: `[1,2]`,
+            expected: undefined,
+          },
+        ])(
+          `$name`,
+          ({
+            datasourceListString,
+            expected,
+          }: ParseSupportedDatasourceTestCase) => {
+            process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES =
+              datasourceListString;
+
+            expect(parseSupportedDatasourceString()).toStrictEqual(expected);
+          },
         );
       });
     });

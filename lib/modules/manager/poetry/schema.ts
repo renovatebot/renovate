@@ -5,8 +5,11 @@ import { regEx } from '../../../util/regex';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
 import { uniq } from '../../../util/uniq';
 import { GitRefsDatasource } from '../../datasource/git-refs';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../datasource/pypi';
+import * as gitVersioning from '../../versioning/git';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import { dependencyPattern } from '../pip_requirements/extract';
@@ -35,38 +38,49 @@ const PoetryGitDependency = z
     git: z.string(),
     tag: z.string().optional().catch(undefined),
     version: z.string().optional().catch(undefined),
+    branch: z.string().optional().catch(undefined),
+    rev: z.string().optional().catch(undefined),
   })
-  .transform(({ git, tag, version }): PackageDependency => {
-    if (!tag) {
-      const res: PackageDependency = {
-        datasource: GitRefsDatasource.id,
-        packageName: git,
-        skipReason: 'git-dependency',
-      };
-
-      if (version) {
-        res.currentValue = version;
+  .transform(({ git, tag, version, branch, rev }): PackageDependency => {
+    if (tag) {
+      const { source, owner, name } = parseGitUrl(git);
+      const repo = `${owner}/${name}`;
+      if (source === 'github.com') {
+        return {
+          datasource: GithubTagsDatasource.id,
+          currentValue: tag,
+          packageName: repo,
+        };
+      } else if (source === 'gitlab.com') {
+        return {
+          datasource: GitlabTagsDatasource.id,
+          currentValue: tag,
+          packageName: repo,
+        };
+      } else {
+        return {
+          datasource: GitTagsDatasource.id,
+          currentValue: tag,
+          packageName: git,
+        };
       }
-
-      return res;
     }
 
-    const parsedUrl = parseGitUrl(git);
-    if (parsedUrl.source !== 'github.com') {
+    if (rev) {
       return {
         datasource: GitRefsDatasource.id,
-        currentValue: tag,
+        currentValue: branch,
+        currentDigest: rev,
+        replaceString: rev,
         packageName: git,
-        skipReason: 'git-dependency',
       };
     }
 
-    const { owner, name } = parsedUrl;
-    const repo = `${owner}/${name}`;
     return {
-      datasource: GithubTagsDatasource.id,
-      currentValue: tag,
-      packageName: repo,
+      datasource: GitRefsDatasource.id,
+      currentValue: version,
+      packageName: git,
+      skipReason: 'git-dependency',
     };
   });
 
@@ -111,6 +125,11 @@ export const PoetryDependencies = LooseRecord(
   z.string(),
   PoetryDependency.transform((dep) => {
     if (dep.skipReason) {
+      return dep;
+    }
+
+    if (dep.datasource === GitRefsDatasource.id && dep.currentDigest) {
+      dep.versioning = gitVersioning.id;
       return dep;
     }
 
@@ -245,6 +264,7 @@ export const PoetrySources = LooseArray(PoetrySource, {
 
 export const PoetrySectionSchema = z
   .object({
+    version: z.string().optional().catch(undefined),
     dependencies: withDepType(PoetryDependencies, 'dependencies').optional(),
     'dev-dependencies': withDepType(
       PoetryDependencies,
@@ -256,6 +276,7 @@ export const PoetrySectionSchema = z
   })
   .transform(
     ({
+      version,
       dependencies = [],
       'dev-dependencies': devDependencies = [],
       extras: extraDependencies = [],
@@ -269,7 +290,7 @@ export const PoetrySectionSchema = z
         ...groupDependencies,
       ];
 
-      const res: PackageFileContent = { deps };
+      const res: PackageFileContent = { deps, packageFileVersion: version };
 
       if (sourceUrls.length) {
         for (const dep of res.deps) {

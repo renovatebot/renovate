@@ -3,9 +3,13 @@ query($owner: String!, $name: String!) {
   repository(owner: $owner, name: $name) {
     id
     isFork
+    parent {
+      nameWithOwner
+    }
     isArchived
     nameWithOwner
     hasIssuesEnabled
+    hasVulnerabilityAlertsEnabled
     autoMergeAllowed
     mergeCommitAllowed
     rebaseMergeAllowed

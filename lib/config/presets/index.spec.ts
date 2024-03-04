@@ -936,6 +936,48 @@ describe('config/presets/index', () => {
         presetSource: 'npm',
       });
     });
+
+    it('parses HTTPS URLs', () => {
+      expect(
+        presets.parsePreset(
+          'https://my.server/gitea/renovate-config/raw/branch/main/default.json',
+        ),
+      ).toEqual({
+        repo: 'https://my.server/gitea/renovate-config/raw/branch/main/default.json',
+        params: undefined,
+        presetName: '',
+        presetPath: undefined,
+        presetSource: 'http',
+      });
+    });
+
+    it('parses HTTP URLs', () => {
+      expect(
+        presets.parsePreset(
+          'http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain',
+        ),
+      ).toEqual({
+        repo: 'http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain',
+        params: undefined,
+        presetName: '',
+        presetPath: undefined,
+        presetSource: 'http',
+      });
+    });
+
+    it('parses HTTPS URLs with parameters', () => {
+      expect(
+        presets.parsePreset(
+          'https://my.server/gitea/renovate-config/raw/branch/main/default.json(param1)',
+        ),
+      ).toEqual({
+        repo: 'https://my.server/gitea/renovate-config/raw/branch/main/default.json',
+        params: ['param1'],
+        presetName: '',
+        presetPath: undefined,
+        presetSource: 'http',
+      });
+    });
   });
 
   describe('getPreset', () => {

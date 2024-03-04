@@ -245,5 +245,11 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       const res = await updateLockedDependency(config);
       expect(res.status).toBe('update-failed');
     });
+
+    it('rejects in-range remediation if pnpm', async () => {
+      config.lockFile = 'pnpm-lock.yaml';
+      const res = await updateLockedDependency(config);
+      expect(res.status).toBe('unsupported');
+    });
   });
 });
