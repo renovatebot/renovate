@@ -92,10 +92,10 @@ export function bumpPackageVersion(
         currentPrereleaseValue?.join('.'),
         false,
       );
-    } else if (!currentPrereleaseValue) {
-      newPomVersion = semver.inc(currentValue, bumpVersion, 'SNAPSHOT', false);
-    } else {
+    } else if (currentPrereleaseValue) {
       newPomVersion = semver.inc(currentValue, bumpVersion);
+    } else {
+      newPomVersion = semver.inc(currentValue, bumpVersion, 'SNAPSHOT', false);
     }
     if (!newPomVersion) {
       throw new Error('semver inc failed');
