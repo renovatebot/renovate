@@ -324,7 +324,10 @@ const platform: Platform = {
         const repos = await map(config.topics, fetchRepositories);
         return deduplicateArray(repos.flat());
       } else if (config?.namespaces) {
-        logger.debug({ namespaces: config.namespaces }, 'Auto-discovering by organization');
+        logger.debug(
+          { namespaces: config.namespaces },
+          'Auto-discovering by organization',
+        );
         const repos = await map(
           config.namespaces,
           async (organization: string) => {
