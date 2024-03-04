@@ -2398,17 +2398,17 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'concurrentRequestLimit',
-    description: 'Limit concurrent requests per host.',
+    description:
+      'Limit concurrent requests per host. Set to `-1` for no limit. Default value is 5 concurrent requests.',
     type: 'integer',
     stage: 'repository',
     parents: ['hostRules'],
-    default: null,
     cli: false,
     env: false,
   },
   {
     name: 'maxRequestsPerSecond',
-    description: 'Limit requests rate per host.',
+    description: 'Limit requests rate per host. Set to `-1` for no limit. Default value is 5 requests per second.',
     type: 'integer',
     stage: 'repository',
     parents: ['hostRules'],
