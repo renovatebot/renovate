@@ -661,6 +661,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  tuist: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-tuist',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'tuist/tuist',
+    },
+  },
   typos: {
     asdfPluginUrl: 'https://github.com/aschiavon91/asdf-typos',
     config: {

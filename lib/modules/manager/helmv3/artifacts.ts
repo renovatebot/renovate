@@ -70,14 +70,14 @@ async function helmCommands(
   // add helm repos if an alias or credentials for the url are defined
   classicRepositories.forEach((value) => {
     const { username, password } = value.hostRule;
-    const parameters = [`${value.repository}`, `--force-update`];
+    const parameters = [`${quote(value.repository)}`, `--force-update`];
     const isPrivateRepo = username && password;
     if (isPrivateRepo) {
       parameters.push(`--username ${quote(username)}`);
       parameters.push(`--password ${quote(password)}`);
     }
 
-    cmd.push(`helm repo add ${value.name} ${parameters.join(' ')}`);
+    cmd.push(`helm repo add ${quote(value.name)} ${parameters.join(' ')}`);
   });
 
   cmd.push(`helm dependency update ${quote(getParentDir(manifestPath))}`);
@@ -142,6 +142,7 @@ export async function updateArtifacts({
 
     const execOptions: ExecOptions = {
       docker: {},
+      userConfiguredEnv: config.env,
       extraEnv: generateHelmEnvs(),
       toolConstraints: [helmToolConstraint],
     };

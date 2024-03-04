@@ -193,5 +193,20 @@ describe('modules/datasource/go/index', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
+
+    describe('GOPROXY', () => {
+      afterEach(() => {
+        delete process.env.GOPROXY;
+      });
+
+      it('returns null when GOPROXY contains off', async () => {
+        process.env.GOPROXY = 'https://proxy.golang.org,off';
+        const res = await datasource.getDigest(
+          { packageName: 'golang.org/x/text' },
+          'v1.2.3',
+        );
+        expect(res).toBeNull();
+      });
+    });
   });
 });

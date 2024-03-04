@@ -81,3 +81,6 @@ debugapp:
   build:
     context: .
     dockerfile: Dockerfile.local
+
+build-context:
+    build: ./debugapp

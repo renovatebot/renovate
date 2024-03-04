@@ -4,6 +4,7 @@ import { getPkgReleases } from '../../../../../modules/datasource';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
 import * as packageCache from '../../../../../util/cache/package';
+import type { PackageCacheNamespace } from '../../../../../util/cache/package/types';
 import { memoize } from '../../../../../util/memoize';
 import { regEx } from '../../../../../util/regex';
 import { parseUrl, trimSlashes } from '../../../../../util/url';
@@ -19,7 +20,7 @@ import type {
 } from './types';
 
 export abstract class ChangeLogSource {
-  private readonly cacheNamespace: string;
+  private readonly cacheNamespace: PackageCacheNamespace;
 
   constructor(
     private readonly platform: ChangeLogPlatform,

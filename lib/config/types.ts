@@ -1,5 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
+import type { LogLevelRemap } from '../logger/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
@@ -57,6 +58,7 @@ export interface RenovateSharedConfig {
   ignorePaths?: string[];
   ignoreTests?: boolean;
   internalChecksAsSuccess?: boolean;
+  keepUpdatedLabel?: string;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
@@ -89,6 +91,7 @@ export interface RenovateSharedConfig {
   unicodeEmoji?: boolean;
   gitIgnoredAuthors?: string[];
   platformCommit?: boolean;
+  milestone?: number;
 }
 
 // Config options used only within the global worker
@@ -152,6 +155,7 @@ export interface RepoGlobalConfig {
   platform?: PlatformId;
   endpoint?: string;
   includeMirrors?: boolean;
+  allowedEnv?: string[];
 }
 
 export interface LegacyAdminConfig {
@@ -200,6 +204,7 @@ export const allowedStatusCheckStrings = [
   'artifactError',
 ] as const;
 export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
+export type UserEnv = Record<string, string>;
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -275,6 +280,8 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  env?: UserEnv;
+  logLevelRemap?: LogLevelRemap[];
 }
 
 const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
@@ -353,6 +360,7 @@ export interface PackageRule
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
   excludeRepositories?: string[];
+  matchNewValue?: string;
   matchCurrentValue?: string;
   matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
@@ -374,7 +382,8 @@ export type AllowedParents =
   | 'customDatasources'
   | 'hostRules'
   | 'postUpgradeTasks'
-  | 'packageRules';
+  | 'packageRules'
+  | 'logLevelRemap';
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
@@ -491,6 +500,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depTypes?: string[];
   depName?: string;
   packageName?: string | null;
+  newValue?: string | null;
   currentValue?: string | null;
   currentVersion?: string;
   lockedVersion?: string;
