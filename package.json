@@ -334,7 +334,7 @@
     "jest-snapshot": "29.7.0",
     "markdownlint-cli2": "0.12.1",
     "memfs": "4.7.7",
-    "nock": "13.5.3",
+    "nock": "13.5.4",
     "npm-run-all2": "6.1.2",
     "nyc": "15.1.0",
     "pretty-format": "29.7.0",
