@@ -571,10 +571,10 @@ describe('util/http/host-rules', () => {
       expect(getConcurrentRequestsLimit('https://example.com', 42)).toBe(42);
     });
 
-    it('returns null for -1', () => {
+    it('returns null for 0', () => {
       hostRules.add({
         matchHost: 'https://example.com',
-        concurrentRequestLimit: -1,
+        concurrentRequestLimit: 0,
       });
       expect(getConcurrentRequestsLimit('https://example.com', 42)).toBeNull();
     });
@@ -593,10 +593,10 @@ describe('util/http/host-rules', () => {
       expect(getThrottleIntervalMs('https://example.com', 42)).toBe(24); // 1000 / 42
     });
 
-    it('returns null for -1', () => {
+    it('returns null for 0', () => {
       hostRules.add({
         matchHost: 'https://example.com',
-        maxRequestsPerSecond: -1,
+        maxRequestsPerSecond: 0,
       });
       expect(getThrottleIntervalMs('https://example.com', 42)).toBeNull();
     });
