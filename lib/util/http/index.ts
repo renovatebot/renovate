@@ -126,6 +126,14 @@ async function gotTask<T>(
 }
 
 export class Http<Opts extends HttpOptions = HttpOptions> {
+  private static defaultConcurrentRequestLimit: number | null = null;
+  private static defaultMaxRequestsPerSecond: number | null = null;
+
+  static setDefaultLimits(): void {
+    Http.defaultConcurrentRequestLimit = 5;
+    Http.defaultMaxRequestsPerSecond = 5;
+  }
+
   private options?: GotOptions;
 
   constructor(
@@ -143,7 +151,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   }
 
   protected getThrottle(url: string): Throttle | null {
-    return getThrottle(url);
+    return getThrottle(url, Http.defaultMaxRequestsPerSecond);
   }
 
   protected async request<T>(
@@ -249,7 +257,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         ? () => throttle.add<HttpResponse<T>>(httpTask)
         : httpTask;
 
-      const queue = getQueue(url);
+      const queue = getQueue(url, Http.defaultConcurrentRequestLimit);
       const queuedTask: GotTask<T> = queue
         ? () => queue.add<HttpResponse<T>>(throttledTask)
         : throttledTask;

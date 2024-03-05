@@ -21,6 +21,8 @@ import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
+  REPOSITORY_FORK_MISSING,
+  REPOSITORY_FORK_MODE_FORKED,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_CONFIG,
@@ -93,6 +95,12 @@ export default async function handleError(
     logger.error('Repository is not found');
     return err.message;
   }
+  if (err.message === REPOSITORY_FORK_MODE_FORKED) {
+    logger.info(
+      'Repository is a fork and cannot be processed when Renovate is running in fork mode itself',
+    );
+    return err.message;
+  }
   if (err.message === REPOSITORY_FORKED) {
     logger.info(
       'Repository is a fork and not manually configured - skipping - did you want to run with --fork-processing=enabled?',
@@ -101,6 +109,10 @@ export default async function handleError(
   }
   if (err.message === REPOSITORY_CANNOT_FORK) {
     logger.info('Cannot fork repository - skipping');
+    return err.message;
+  }
+  if (err.message === REPOSITORY_FORK_MISSING) {
+    logger.info('Cannot find fork required for fork mode - skipping');
     return err.message;
   }
   if (err.message === REPOSITORY_NO_PACKAGE_FILES) {
