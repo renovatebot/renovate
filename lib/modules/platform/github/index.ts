@@ -44,7 +44,6 @@ import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { coerceString, fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
-import { normalizeDepName } from '../../datasource/pypi/common';
 import type {
   AggregatedVulnerabilities,
   AutodiscoverConfig,
@@ -65,6 +64,7 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import { repoFingerprint } from '../util';
+import { normalizeNamePerEcosystem } from '../utils/github-alerts';
 import { smartTruncate } from '../utils/pr-body';
 import { remoteBranchExists } from './branch';
 import { coerceRestPr, githubApi } from './common';
@@ -2082,11 +2082,4 @@ export async function commitFiles(
   await git.resetToCommit(commitResult.parentCommitSha);
   const commitSha = await git.fetchBranch(branchName);
   return commitSha;
-}
-function normalizeNamePerEcosystem(name: string, ecosystem: string): string {
-  if (ecosystem.toLowerCase() === 'pip') {
-    return normalizeDepName(name);
-  } else {
-    return name;
-  }
 }
