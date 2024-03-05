@@ -36,7 +36,7 @@ class Unity3dVersioningApi extends GenericVersioningApi {
       parseInt(Minor),
       parseInt(Patch),
       Unity3dVersioningApi.ReleaseStreamType.indexOf(ReleaseStream),
-      parseInt(Build),
+      parseInt(Build, 10),
     ];
     const isStable =
       Unity3dVersioningApi.stableVersions.includes(ReleaseStream);
