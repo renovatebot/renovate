@@ -2417,9 +2417,9 @@ const options: RenovateOptions[] = [
   {
     name: 'concurrentRequestLimit',
     description:
-      'Limit concurrent requests per host. Set to `-1` for no limit. Default value is 5 concurrent requests.',
+      'Limit concurrent requests per host. Set to `-1` for no limit. Default value is 10 concurrent requests.',
     type: 'integer',
-    default: 5,
+    default: 10,
     stage: 'repository',
     parents: ['hostRules'],
     cli: false,
