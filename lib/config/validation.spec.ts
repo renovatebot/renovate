@@ -129,6 +129,35 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
     });
 
+    it('catches invalid matchNewValue', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            matchNewValue: '/^2/',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['bar'],
+            matchNewValue: '^1',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['quack'],
+            matchNewValue: '<1.0.0',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['foo'],
+            matchNewValue: '/^2/i',
+            enabled: true,
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig(false, config);
+      expect(errors).toHaveLength(2);
+    });
+
     it('catches invalid matchCurrentVersion regex', async () => {
       const config = {
         packageRules: [
@@ -1222,6 +1251,39 @@ describe('config/validation', () => {
         },
       ]);
     });
+
+    it('validates options with different type but defaultValue=null', async () => {
+      const config = {
+        minimumReleaseAge: null,
+        groupName: null,
+        groupSlug: null,
+        dependencyDashboardLabels: null,
+        defaultRegistryUrls: null,
+        registryUrls: null,
+        hostRules: [
+          {
+            artifactAuth: null,
+            concurrentRequestLimit: null,
+            httpsCertificate: null,
+            httpsPrivateKey: null,
+            httpsCertificateAuthority: null,
+          },
+        ],
+        encrypted: null,
+        milestone: null,
+        branchConcurrentLimit: null,
+        hashedBranchLength: null,
+        assigneesSampleSize: null,
+        reviewersSampleSize: null,
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        false,
+        // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
   });
 
   describe('validate globalOptions()', () => {
@@ -1506,6 +1568,26 @@ describe('config/validation', () => {
       };
       const { warnings, errors } = await configValidation.validateConfig(
         true,
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('validates options with different type but defaultValue=null', async () => {
+      const config = {
+        onboardingCommitMessage: null,
+        dryRun: null,
+        logContext: null,
+        endpoint: null,
+        skipInstalls: null,
+        autodiscoverFilter: null,
+        autodiscoverNamespaces: null,
+        autodiscoverTopics: null,
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        true,
+        // @ts-expect-error: contains invalid values
         config,
       );
       expect(warnings).toHaveLength(0);

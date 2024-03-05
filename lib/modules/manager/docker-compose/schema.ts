@@ -3,10 +3,13 @@ import { z } from 'zod';
 const DockerComposeService = z.object({
   image: z.string().optional(),
   build: z
-    .object({
-      context: z.string().optional(),
-      dockerfile: z.string().optional(),
-    })
+    .union([
+      z.string(),
+      z.object({
+        context: z.string().optional(),
+        dockerfile: z.string().optional(),
+      }),
+    ])
     .optional(),
 });
 

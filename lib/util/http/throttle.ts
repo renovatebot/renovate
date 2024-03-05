@@ -22,7 +22,10 @@ export class Throttle {
   }
 }
 
-export function getThrottle(url: string): Throttle | null {
+export function getThrottle(
+  url: string,
+  defaultMaxRequestsPerSecond: number | null,
+): Throttle | null {
   const host = parseUrl(url)?.host;
   if (!host) {
     // should never happen
@@ -33,7 +36,10 @@ export function getThrottle(url: string): Throttle | null {
   let throttle = hostThrottles.get(host);
   if (throttle === undefined) {
     throttle = null; // null represents "no throttle", as opposed to undefined
-    const throttleOptions = getThrottleIntervalMs(url);
+    const throttleOptions = getThrottleIntervalMs(
+      url,
+      defaultMaxRequestsPerSecond,
+    );
     if (throttleOptions) {
       const intervalMs = throttleOptions;
       logger.debug(`Using throttle ${intervalMs} intervalMs for host ${host}`);

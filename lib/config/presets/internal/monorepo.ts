@@ -244,6 +244,7 @@ const repoGroups = {
     'https://github.com/DataTables/Dist-DataTables-StateRestore-jQueryUI',
   ],
   'date-io': 'https://github.com/dmtrKovalenko/date-io',
+  'deck-gl': 'https://github.com/visgl/deck.gl',
   deno: 'https://github.com/denoland/deno',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
   'dnd-kit': 'https://github.com/clauderic/dnd-kit',
