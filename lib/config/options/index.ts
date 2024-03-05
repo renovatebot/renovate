@@ -434,7 +434,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.2.1',
+    default: 'ghcr.io/containerbase/sidecar:10.2.3',
     globalOnly: true,
   },
   {
@@ -529,6 +529,17 @@ const options: RenovateOptions[] = [
     default: false,
     supportedPlatforms: ['gitlab'],
     globalOnly: true,
+  },
+  {
+    name: 'forkCreation',
+    description:
+      'Whether to create forks as needed at runtime when running in "fork mode".',
+    stage: 'repository',
+    type: 'boolean',
+    globalOnly: true,
+    supportedPlatforms: ['github'],
+    experimental: true,
+    default: true,
   },
   {
     name: 'forkToken',
@@ -1755,7 +1766,7 @@ const options: RenovateOptions[] = [
   {
     name: 'keepUpdatedLabel',
     description:
-      'Label to request Renovate bot always rebase to keep branch updated.',
+      'If set, users can add this label to PRs to request they be kept updated with the base branch.',
     type: 'string',
     supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
@@ -2405,21 +2416,21 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'concurrentRequestLimit',
-    description: 'Limit concurrent requests per host.',
+    description: 'Limit concurrent requests per host. Set to 0 for no limit.',
     type: 'integer',
+    default: 5,
     stage: 'repository',
     parents: ['hostRules'],
-    default: null,
     cli: false,
     env: false,
   },
   {
     name: 'maxRequestsPerSecond',
-    description: 'Limit requests rate per host.',
+    description: 'Limit requests rate per host. Set to 0 for no limit.',
     type: 'integer',
+    default: 5,
     stage: 'repository',
     parents: ['hostRules'],
-    default: 0,
     cli: false,
     env: false,
   },

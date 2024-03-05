@@ -12,15 +12,15 @@ describe('util/http/queue', () => {
   });
 
   it('returns null for invalid URL', () => {
-    expect(getQueue('$#@!')).toBeNull();
+    expect(getQueue('$#@!', null)).toBeNull();
   });
 
   it('returns queue for valid url', () => {
-    const q1a = getQueue('https://example.com');
-    const q1b = getQueue('https://example.com');
+    const q1a = getQueue('https://example.com', null);
+    const q1b = getQueue('https://example.com', null);
 
-    const q2a = getQueue('https://example.com:8080');
-    const q2b = getQueue('https://example.com:8080');
+    const q2a = getQueue('https://example.com:8080', null);
+    const q2b = getQueue('https://example.com:8080', null);
 
     expect(q1a).not.toBeNull();
     expect(q1a).toBe(q1b);

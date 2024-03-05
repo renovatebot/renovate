@@ -5,7 +5,10 @@ import { getConcurrentRequestsLimit } from './host-rules';
 
 const hostQueues = new Map<string, PQueue | null>();
 
-export function getQueue(url: string): PQueue | null {
+export function getQueue(
+  url: string,
+  defaultConcurrentRequestLimit: number | null,
+): PQueue | null {
   const host = parseUrl(url)?.host;
   if (!host) {
     // should never happen
@@ -16,7 +19,10 @@ export function getQueue(url: string): PQueue | null {
   let queue = hostQueues.get(host);
   if (queue === undefined) {
     queue = null; // null represents "no queue", as opposed to undefined
-    const concurrency = getConcurrentRequestsLimit(url);
+    const concurrency = getConcurrentRequestsLimit(
+      url,
+      defaultConcurrentRequestLimit,
+    );
     if (concurrency) {
       logger.debug(`Using queue: host=${host}, concurrency=${concurrency}`);
       queue = new PQueue({ concurrency });
