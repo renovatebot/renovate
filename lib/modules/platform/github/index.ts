@@ -91,7 +91,7 @@ import type {
   PlatformConfig,
 } from './types';
 import { getAppDetails, getUserDetails, getUserEmail } from './user';
-import { normalizeDepName } from '../../datasource/pypi/common';
+import { normalizeNamePerEcosystem } from '../utils/github-alerts';
 
 export const id = 'github';
 
@@ -1975,9 +1975,11 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
             firstPatchedVersion,
           } = alert.securityVulnerability;
           const patch = firstPatchedVersion?.identifier;
+
           const normalizedName = normalizeNamePerEcosystem(name, ecosystem);
           alert.securityVulnerability.package.name = normalizedName;
           const key = `${ecosystem.toLowerCase()}/${normalizedName}`;
+
           const range = vulnerableVersionRange;
           const elem = shortAlerts[key] || {};
           elem[range] = coerceToNull(patch);
@@ -2050,11 +2052,4 @@ export async function commitFiles(
   await git.resetToCommit(commitResult.parentCommitSha);
   const commitSha = await git.fetchBranch(branchName);
   return commitSha;
-}
-function normalizeNamePerEcosystem(name: string, ecosystem: string): string {
-  if (ecosystem.toLowerCase() === 'pip') {
-    return normalizeDepName(name);
-  } else {
-    return name;
-  }
 }
