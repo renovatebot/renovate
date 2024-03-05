@@ -9,6 +9,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { PipRequirementsManagerData } from './types';
+import { normalizeDepName } from '../../datasource/pypi/common';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -121,7 +122,8 @@ export function extractPackageFile(
       const currentValue = currVal?.trim();
       dep = {
         ...dep,
-        depName,
+        depName: normalizeDepName(depName),
+        packageName: depName,
         currentValue,
         datasource: PypiDatasource.id,
       };

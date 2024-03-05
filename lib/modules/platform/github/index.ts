@@ -44,6 +44,7 @@ import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { coerceString, fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
+import { normalizeDepName } from '../../datasource/pypi/common';
 import type {
   AggregatedVulnerabilities,
   AutodiscoverConfig,
@@ -2007,7 +2008,9 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         } = alert.security_vulnerability;
         const patch = firstPatchedVersion?.identifier;
 
-        const key = `${ecosystem.toLowerCase()}/${name}`;
+        const normalizedName = normalizeNamePerEcosystem(name, ecosystem);
+        alert.security_vulnerability.package.name = normalizedName;
+        const key = `${ecosystem.toLowerCase()}/${normalizedName}`;
         const range = vulnerableVersionRange;
         const elem = shortAlerts[key] || {};
         elem[range] = coerceToNull(patch);
@@ -2079,4 +2082,11 @@ export async function commitFiles(
   await git.resetToCommit(commitResult.parentCommitSha);
   const commitSha = await git.fetchBranch(branchName);
   return commitSha;
+}
+function normalizeNamePerEcosystem(name: string, ecosystem: string): string {
+  if (ecosystem.toLowerCase() === 'pip') {
+    return normalizeDepName(name);
+  } else {
+    return name;
+  }
 }
