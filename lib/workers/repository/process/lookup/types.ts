@@ -48,6 +48,7 @@ export interface LookupUpdateConfig
   replacementNameTemplate?: string;
   replacementVersion?: string;
   extractVersion?: string;
+  lookupRegistryUrl?: string;
 }
 
 export interface UpdateResult {

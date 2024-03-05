@@ -492,7 +492,7 @@ export async function lookupUpdates(
         }
       }
       if (res.registryUrl) {
-        config.registryUrls = [res.registryUrl];
+        config.lookupRegistryUrl = res.registryUrl;
       }
 
       // update digest for all

@@ -400,12 +400,18 @@ function getDigestConfig(
 ): DigestConfig {
   const { currentValue, currentDigest } = config;
   const packageName = config.replacementName ?? config.packageName;
-  const [registryUrl] = resolveRegistryUrls(
-    datasource,
-    config.defaultRegistryUrls,
-    config.registryUrls,
-    config.additionalRegistryUrls,
-  );
+  let registryUrl: string;
+  // if regsitryUrl from package lookup is present use it
+  if (config.lookupRegistryUrl) {
+    registryUrl = config.lookupRegistryUrl;
+  } else {
+    [registryUrl] = resolveRegistryUrls(
+      datasource,
+      config.defaultRegistryUrls,
+      config.registryUrls,
+      config.additionalRegistryUrls,
+    );
+  }
   return { packageName, registryUrl, currentValue, currentDigest };
 }
 

@@ -7,6 +7,7 @@ import type { ModuleApi } from '../../types';
 export interface GetDigestInputConfig {
   datasource: string;
   packageName: string;
+  lookupRegistryUrl?: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
   additionalRegistryUrls?: string[];
