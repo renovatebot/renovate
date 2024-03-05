@@ -11,7 +11,7 @@ export const supportsRanges = false;
 
 class Unity3dVersioningApi extends GenericVersioningApi {
   private static readonly parsingRegex = regEx(
-    /^(?<Major>\d+)\.(?<Minor>\d+)\.(?<Patch>\d+)(?<ReleaseStream>\w)(?<Build>\d+)/,
+    /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<releaseStream>\w)(?<build>\d+)/,
   );
 
   private static readonly ReleaseStreamType = [
