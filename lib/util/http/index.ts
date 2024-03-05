@@ -130,7 +130,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   private static defaultMaxRequestsPerSecond: number | null = null;
 
   static setDefaultLimits(): void {
-    Http.defaultConcurrentRequestLimit = 10;
+    Http.defaultConcurrentRequestLimit = 5;
     Http.defaultMaxRequestsPerSecond = 5;
   }
 
