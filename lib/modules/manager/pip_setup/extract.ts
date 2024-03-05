@@ -7,6 +7,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
+import { normalizeDepName } from '../../datasource/pypi/common';
 
 interface ManagerData {
   lineNumber: number;
@@ -44,7 +45,8 @@ function depStringHandler(
   const { depName, currentValue } = match!.groups!;
 
   const dep: PackageDependency<ManagerData> = {
-    depName,
+    depName: normalizeDepName(depName),
+    packageName: depName,
     currentValue,
     managerData: {
       lineNumber: token.line - 1,
