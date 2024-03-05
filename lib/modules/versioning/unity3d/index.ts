@@ -29,19 +29,19 @@ class Unity3dVersioningApi extends GenericVersioningApi {
     if (!matches?.groups) {
       return null;
     }
-    const { Major, Minor, Patch, ReleaseStream, Build } = matches.groups;
+    const { major, minor, patch, releaseStream, build } = matches.groups;
 
     const release = [
-      parseInt(Major, 10),
-      parseInt(Minor, 10),
-      parseInt(Patch, 10),
-      Unity3dVersioningApi.ReleaseStreamType.indexOf(ReleaseStream),
-      parseInt(Build, 10),
+      parseInt(major, 10),
+      parseInt(minor, 10),
+      parseInt(patch, 10),
+      Unity3dVersioningApi.ReleaseStreamType.indexOf(releaseStream),
+      parseInt(build, 10),
     ];
     const isStable =
-      Unity3dVersioningApi.stableVersions.includes(ReleaseStream);
+      Unity3dVersioningApi.stableVersions.includes(releaseStream);
 
-    return { release, prerelease: isStable ? undefined : Build };
+    return { release, prerelease: isStable ? undefined : build };
   }
 }
 
