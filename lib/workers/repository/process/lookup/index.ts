@@ -500,7 +500,8 @@ export async function lookupUpdates(
         if (config.pinDigests === true || config.currentDigest) {
           const getDigestConfig: GetDigestInputConfig = {
             ...config,
-            packageName: res.lookupName ?? config.packageName,
+            registryUrl: update.registryUrl ?? res.registryUrl,
+            lookupName: res.lookupName,
           };
           // TODO #22198
           update.newDigest ??=
