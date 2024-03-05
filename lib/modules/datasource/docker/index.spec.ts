@@ -1236,8 +1236,6 @@ describe('modules/datasource/docker/index', () => {
 
       expect(res).toBe(newDigest);
     });
-
-    it('prefers lookupName', async () => {});
   });
 
   describe('getReleases', () => {
