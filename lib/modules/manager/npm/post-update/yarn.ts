@@ -146,6 +146,7 @@ export async function generateLockFile(
       upgrades,
     );
     const minYarnVersion =
+      yarnCompatibility &&
       semver.validRange(yarnCompatibility) &&
       semver.minVersion(yarnCompatibility);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
