@@ -90,6 +90,41 @@ export function isYarnUpdate(upgrade: Upgrade): boolean {
   return upgrade.depType === 'packageManager' && upgrade.depName === 'yarn';
 }
 
+async function determineYarnConstraint(
+  lockFileDir: string,
+  config: Partial<PostUpdateConfig<NpmManagerData>>,
+  upgrades: Upgrade[],
+): Promise<string | undefined> {
+  const yarnUpdate = upgrades.find(isYarnUpdate);
+  if (yarnUpdate?.newValue) {
+    logger.debug('Using yarn update newValue as constraint');
+    return yarnUpdate.newValue;
+  }
+  if (config.constraints?.yarn) {
+    logger.debug('Using yarn constraint from config');
+    return config.constraints.yarn;
+  }
+  const lazyPgkJson = lazyLoadPackageJson(lockFileDir);
+  const packageManagerVersion = getPackageManagerVersion(
+    'yarn',
+    await lazyPgkJson.getValue(),
+  );
+  if (packageManagerVersion) {
+    logger.debug('Using yarn constraint from package.json>packageManager');
+    return packageManagerVersion;
+  }
+  const lockFileName = upath.join(lockFileDir, 'yarn.lock');
+  const lockConstraint = getYarnVersionFromLock(
+    await getYarnLock(lockFileName),
+  );
+  if (lockConstraint) {
+    logger.debug('Using yarn constraint from yarn.lock');
+    return lockConstraint;
+  }
+  logger.debug('No yarn constraint found');
+  return undefined;
+}
+
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
@@ -105,10 +140,11 @@ export async function generateLockFile(
       await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPgkJson),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
-    const yarnCompatibility =
-      (yarnUpdate ? yarnUpdate.newValue : config.constraints?.yarn) ??
-      getPackageManagerVersion('yarn', await lazyPgkJson.getValue()) ??
-      getYarnVersionFromLock(await getYarnLock(lockFileName));
+    const yarnCompatibility = await determineYarnConstraint(
+      lockFileDir,
+      config,
+      upgrades,
+    );
     const minYarnVersion =
       semver.validRange(yarnCompatibility) &&
       semver.minVersion(yarnCompatibility);
