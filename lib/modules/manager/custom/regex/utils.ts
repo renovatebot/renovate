@@ -85,9 +85,9 @@ export function createDependency(
 export function regexMatchAll(
   regex: RegExp,
   content: string,
-): RegExpMatchArray[] {
-  const matches: RegExpMatchArray[] = [];
-  let matchResult: RegExpMatchArray | null;
+): RegExpExecArray[] {
+  const matches: RegExpExecArray[] = [];
+  let matchResult: RegExpExecArray | null;
   let iterations = 0;
   const maxIterations = 10000;
   do {

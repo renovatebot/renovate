@@ -60,9 +60,9 @@ export function handleCombination(
   let replaceString;
 
   if (valueMatch && digestMatch) {
-    const replaceStart = Math.min(valueMatch.index!, digestMatch.index!);
-    const valueEnd = valueMatch.index! + valueMatch[0].length;
-    const digestEnd = digestMatch.index! + digestMatch[0].length;
+    const replaceStart = Math.min(valueMatch.index, digestMatch.index);
+    const valueEnd = valueMatch.index + valueMatch[0].length;
+    const digestEnd = digestMatch.index + digestMatch[0].length;
     const replaceEnd = Math.max(valueEnd, digestEnd);
 
     replaceString = content.substring(replaceStart, replaceEnd);
