@@ -62,7 +62,7 @@ Also read the [`timezone` config option docs](../configuration-options.md#timezo
 
 ### Scheduling syntax
 
-After you've set your local timezone, you can define "days of the week" or "hours of the day" in which Renovate is allowed to make changes.
+After you have set your local timezone, you can define "days of the week" or "hours of the day" in which Renovate is allowed to make changes.
 
 ```title="Examples of the kind of schedules you can create"
 every weekend

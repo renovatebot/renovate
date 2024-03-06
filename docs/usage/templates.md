@@ -117,6 +117,6 @@ This is for security reasons.
 
 `HOME is {{env.HOME}}`
 
-If you're self-hosting Renovate, you can expose more variables with the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option.
+If you are self-hosting Renovate, you can expose more variables with the [`customEnvVariables`](./self-hosted-configuration.md#customenvvariables) config option.
 
 You can also use the [`exposeAllEnv`](./self-hosted-configuration.md#exposeallenv) config option to allow all environment variables in templates, but make sure to consider the security implications of giving the scripts unrestricted access to all variables.

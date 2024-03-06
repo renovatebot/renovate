@@ -26,7 +26,7 @@ If set to any integer, Renovate will use this integer instead of the default npm
 ## `RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK`
 
 If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
-Skipping the check will speed things up, but may result in versions being returned which don't properly exist on the server.
+Skipping the check will speed things up, but may result in versions being returned which do not properly exist on the server.
 
 ## `RENOVATE_PAGINATE_ALL`
 
@@ -99,7 +99,7 @@ If set, Renovate will terminate the whole process group of a terminated child pr
 
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
-If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
+If set to a positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
 The formula for the delay between attempts is `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY * attempt * attempt` milliseconds.
 
 Default value: `5` (attempts results in max. 13.75 seconds timeout).
@@ -108,7 +108,7 @@ Default value: `5` (attempts results in max. 13.75 seconds timeout).
 
 Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
 
-Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
+Can be useful for slow-running, self-hosted GitLab instances that do not react fast enough for the default delay to help.
 
 Default value: `1000` (milliseconds).
 

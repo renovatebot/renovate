@@ -10,7 +10,7 @@ description: Frequently Asked Questions for Renovate Configuration
 Renovate will:
 
 - Look for configuration options in a configuration file (e.g. `renovate.json`) and in each `package.json` file
-- Find and process all package files (e.g. `package.json`, `composer.json`, `Dockerfile`, etc) in each repository
+- Find and process all package files (e.g. `package.json`, `composer.json`, `Dockerfile`, etc.) in each repository
 - Use separate branches/PR for each dependency
 - Use separate branches for each _major_ version of each dependency
 - Pin devDependencies to a single version, rather than use ranges
@@ -26,13 +26,13 @@ The Renovate team only fixes bugs in an older version if:
 - the Mend Renovate App needs to stay on that older major version for a short time, or
 - some critical bug needs to be fixed and the new major is blocked
 
-If you're using the Mend Renovate App, you don't need to do anything, as the Renovate maintainers update it regularly.
-If you're self hosting Renovate, use the latest release if possible.
+If you are using the Mend Renovate App, you do not need to do anything, as the Renovate maintainers update it regularly.
+If you are self-hosting Renovate, use the latest release if possible.
 
 ## When is the Mend Renovate App updated with new Renovate versions?
 
 The Renovate maintainers manually update the app.
-The maintainers don't follow any release schedule or release cadence.
+The maintainers do not follow any release schedule or release cadence.
 This means the Mend Renovate App can lag a few hours to a week behind the open source version.
 Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
 
@@ -60,14 +60,14 @@ When you create a new repository with Git, Git creates a base branch for you.
 The default branch name that Git uses is `master` (this will be changed to `main` later).
 
 The Git-hosting ecosystem decided to use `main` instead of `master`.
-When you create a new repository on say GitHub or GitLab, you'll get a `main` branch as your base branch.
+When you create a new repository on say GitHub or GitLab, you will get a `main` branch as your base branch.
 
 We replaced `master` with `main` in our documentation where possible.
 
 A branch name has no special meaning within the Git program, it's only a name.
 The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
 
-## What if I need to .. ?
+## What if I need to ... ?
 
 ### Troubleshoot Renovate
 
@@ -75,7 +75,7 @@ If you have problems with Renovate, or want to know where Renovate keeps the log
 
 ### Tell Renovate to ask for approval before creating a Pull Request
 
-By default, Renovate creates a pull request right away whenever there's an update.
+By default, Renovate creates a pull request right away whenever there is an update.
 But maybe you want Renovate to ask for your approval _before_ it creates a pull request.
 Use the "Dependency Dashboard approval" workflow to get updates for certain packages - or certain types of updates - only after you give approval via the Dependency Dashboard.
 
@@ -106,7 +106,7 @@ The basic idea is that you create a new `packageRules` entry and describe what k
 ```
 
 You may even configure Renovate bot to ask for approval for _all_ updates.
-The `dependencyDashboardApproval` config option is outside of a `packageRules` array, and so applies to all updates:
+The `dependencyDashboardApproval` config option is outside a `packageRules` array, and so applies to all updates:
 
 ```json
 {
@@ -121,7 +121,7 @@ Read our documentation on the [dependencyDashboardApproval](./configuration-opti
 Say your repository's default branch is `main` but you want Renovate to use the `next` branch as its PR target.
 You can configure the PR target branch via the `baseBranches` option.
 
-Add this line to the `renovate.json` file that's in the _default_ branch (`main` in this example).
+Add this line to the `renovate.json` file that is in the _default_ branch (`main` in this example).
 
 ```json
 {
@@ -155,7 +155,7 @@ Set configuration option `separateMajorMinor` to `false`.
 
 Set configuration option `rangeStrategy` to `"replace"`.
 
-### Keep lock files (including sub-dependencies) up-to-date, even when `package.json` hasn't changed
+### Keep lock files (including sub-dependencies) up-to-date, even when `package.json` has not changed
 
 By default, if you enable lock-file maintenance, Renovate will update the lockfile `["before 4am on monday"]`.
 If you want to update the lock file more often, set the `schedule` field inside the `lockFileMaintenance` object.
@@ -181,9 +181,9 @@ Set the configuration option `labels` to an array of labels to use.
 ### Apply a rule, but only to package `abc`?
 
 1. Add a `packageRules` array to your configuration
-2. Create one object inside this array
-3. Set field `matchPackageNames` to value `["abc"]`
-4. Add the configuration option to the same object
+1. Create one object inside this array
+1. Set field `matchPackageNames` to value `["abc"]`
+1. Add the configuration option to the same object
 
 e.g.
 
@@ -243,9 +243,9 @@ Nest it inside a `patch` or `minor` object if you only want to automerge certain
 
 By default, Renovate separates major and minor releases.
 Patch releases are treated as "minor".
-Here's an example:
+Here is an example:
 
-Say you're using version `0.8.0` of the `foo` package.
+Say you are using version `0.8.0` of the `foo` package.
 The `foo` maintainers release the following versions:
 
 - `0.8.1` (patch)
@@ -265,7 +265,7 @@ To learn more read the section below.
 
 #### Overriding the default behavior for major/minor releases
 
-You can see in the example above that Renovate won't normally create a PR for the `foo` patch release.
+You can see in the example above that Renovate does not normally create a PR for the `foo` patch release.
 
 You can tell Renovate to create a separate PR for the patch release by setting `separateMinorPatch` to `true`.
 
@@ -275,8 +275,8 @@ In both cases, Renovate will open 3 PRs:
 - Update dependency `foo` to `0.9.0` (minor)
 - Update dependency `foo` to `1.0.0` (major)
 
-Usually you don't want more PRs though.
-It can be nice to get patch PRs when you're using automerge:
+Usually you do not want more PRs though.
+It can be nice to get patch PRs when you are using automerge:
 
 - Get daily patch updates which are automerged once tests pass
 - Get weekly updates for minor and major updates

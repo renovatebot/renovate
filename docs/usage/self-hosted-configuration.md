@@ -159,7 +159,7 @@ If you use an environment variable or the CLI to set the value for `autodiscover
 Commas will be used as delimiter for a new filter.
 
 ```
-# DO NOT use commas inside the filter if your are using env or cli variables to configure it.
+# DO NOT use commas inside the filter if you are using env or cli variables to configure it.
 RENOVATE_AUTODISCOVER_FILTER="/MyOrg/{my-repo,foo-repo}"
 
 
@@ -190,7 +190,7 @@ All text inside the start and end `/` will be treated as a regular expression.
 ```
 
 You can negate the regex by putting an `!` in front.
-Only use a single negation and don't mix with other filters because all filters are combined with `or`.
+Only use a single negation and do not mix with other filters because all filters are combined with `or`.
 If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
@@ -215,8 +215,8 @@ For example:
 
 ## autodiscoverTopics
 
-Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
-topics. Set this variable to a list of strings, all of which will be topics for the autodiscovered repositories.
+Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those topics.
+Set this variable to a list of strings, all of which will be topics for the auto-discovered repositories.
 
 For example:
 
@@ -228,7 +228,7 @@ For example:
 
 ## baseDir
 
-By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
+By default, Renovate uses a temporary directory like `/tmp/renovate` to store its data.
 You can override this default with the `baseDir` option.
 
 For example:
@@ -269,7 +269,7 @@ For this to work, `docker` needs to be installed and the Docker socket available
 
 ## cacheDir
 
-By default Renovate stores cache data in a temporary directory like `/tmp/renovate/cache`.
+By default, Renovate stores cache data in a temporary directory like `/tmp/renovate/cache`.
 Use the `cacheDir` option to override this default.
 
 The `baseDir` and `cacheDir` option may point to different directories.
@@ -321,11 +321,11 @@ Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/
 
 This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
 
-Use this option if you need such downloads to be stored outside of Renovate's regular cache directory (`cacheDir`).
+Use this option if you need such downloads to be stored outside Renovate's regular cache directory (`cacheDir`).
 
 ## customEnvVariables
 
-This configuration will be applied after all other environment variables so you can use it to override defaults.
+This configuration will be applied after all other environment variables, so you can use it to override defaults.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -356,9 +356,9 @@ The above configuration approach will mean the values are redacted in logs like 
 
 The purpose of this config option is to allow you (as a bot admin) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
 
-This config option is disabled by default because it may prove surprising or undesirable for some users who don't expect Renovate to go into their home directory and import registry or credential information.
+This config option is disabled by default because it may prove surprising or undesirable for some users who do not expect Renovate to go into their home directory and import registry or credential information.
 
-Currently this config option is supported for the `npm` manager only - specifically the `~/.npmrc` file.
+Currently, this config option is supported for the `npm` manager only - specifically the `~/.npmrc` file.
 If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set to `true`.
 
 ## detectHostRulesFromEnv
@@ -376,7 +376,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 
 <!-- prettier-ignore -->
 !!! note
-    You can't use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
+    You can not use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
     In addition, platform host rules will only be picked up when `matchHost` is supplied.
 
 ### npmjs registry token example
@@ -471,7 +471,7 @@ Read the [Docker Docs, configure runtime resource constraints](https://docs.dock
 
 ## dockerSidecarImage
 
-By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
+By default, Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.
 You can use the `dockerSidecarImage` option to override this default.
 
 Say you want to pull a custom image from `ghcr.io/your_company/sidecar`.
@@ -501,7 +501,7 @@ Set this to `1001:1002` to use UID 1001 and GID 1002.
 
 If you use `binarySource=docker|install` read the section below.
 
-If you need to change the Docker user please make sure to use the root (`0`) group, otherwise you'll get in trouble with missing file and directory permissions.
+If you need to change the Docker user please make sure to use the root (`0`) group, otherwise you will get in trouble with missing file and directory permissions.
 Like this:
 
 ```
@@ -526,7 +526,7 @@ Information provided mainly in debug log level.
 ## executionTimeout
 
 Default execution timeout in minutes for child processes Renovate creates.
-If this option is not set, Renovate will fallback to 15 minutes.
+If this option is not set, Renovate defaults to 15 minutes.
 
 ## exposeAllEnv
 
@@ -567,9 +567,9 @@ This configuration option lets you choose an organization you want repositories 
 It must be set to a GitHub Organization name and not a GitHub user account.
 When set, "allow edits by maintainers" will be false for PRs because GitHub does not allow this setting for organizations.
 
-This can be used if you're migrating from user-based forks to organization-based forks.
+This can be used if you are migrating from user-based forks to organization-based forks.
 
-If you've set a `forkOrg` then Renovate will:
+If you have set a `forkOrg` then Renovate will:
 
 1. Check if a fork exists in the preferred organization before checking it exists in the fork user's account
 1. If no fork exists: it will be created in the `forkOrg`, not the user account
@@ -601,16 +601,16 @@ Replace the newlines with `\n` before adding the resulting single-line value to 
 
 <!-- prettier-ignore -->
 !!! note
-    The private key can't be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
+    The private key can not be protected with a passphrase if running in a headless environment. Renovate will not be able to handle entering the passphrase.
 
 It will be loaded _lazily_.
 Before the first commit in a repository, Renovate will:
 
-1. Run `gpg import` (if you haven't before)
+1. Run `gpg import` (if you have not before)
 1. Run `git config user.signingkey` and `git config commit.gpgsign true`
 
 The `git` commands are run locally in the cloned repo instead of globally.
-This reduces the chance of unintended consequences with global Git configs on shared systems.
+This reduces the chance of unintended consequences of global Git configs on shared systems.
 
 ## gitTimeout
 
@@ -631,7 +631,7 @@ Possible values:
 
 By default, Renovate logs and displays a warning when the `GITHUB_COM_TOKEN` is not set.
 By setting `githubTokenWarn` to `false`, Renovate suppresses these warnings on Pull Requests, etc.
-Disabling the warning is helpful for self-hosted environments that can't access the `github.com` domain, because the warning is useless in these environments.
+Disabling the warning is helpful for self-hosted environments that can not access the `github.com` domain, because the warning is useless in these environments.
 
 ## globalExtends
 
@@ -642,7 +642,7 @@ Use the `extends` field instead of this if, for example, you need the ability fo
 
 <!-- prettier-ignore -->
 !!! warning
-    `globalExtends` presets can't be private.
+    `globalExtends` presets can not be private.
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
 
@@ -681,13 +681,13 @@ In the above example any reference to the `@company` preset will be replaced wit
 
 <!-- prettier-ignore -->
 !!! tip
-    Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
+    Combine `migratePresets` with `configMigration` if you would like your config migrated by PR.
 
 ## onboarding
 
 Only set this to `false` if all three statements are true:
 
-- You've configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
+- You have configured Renovate entirely on the bot side (e.g. empty `renovate.json` in repositories)
 - You want to run Renovate on every repository the bot has access to
 - You want to skip all onboarding PRs
 
@@ -697,8 +697,8 @@ Only set this to `false` if all three statements are true:
 !!! note
     This setting is independent of `branchPrefix`.
 
-For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar.
-If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
+For example, if you configure `branchPrefix` to be `renovate-` then you would still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar.
+If you have an existing Renovate installation, and you change `onboardingBranch` then it's possible that you will get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
 ## onboardingCommitMessage
 
@@ -718,7 +718,7 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 
 ## onboardingPrTitle
 
-If you have an existing Renovate installation and you change the `onboardingPrTitle`: then you may get onboarding PRs _again_ for repositories with closed non-merged onboarding PRs.
+If you have an existing Renovate installation, and you change the `onboardingPrTitle`: then you may get onboarding PRs _again_ for repositories with closed non-merged onboarding PRs.
 This is similar to what happens when you change the `onboardingBranch` config option.
 
 ## onboardingRebaseCheckbox
@@ -773,7 +773,7 @@ TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachet
 
 <!-- prettier-ignore -->
 !!! warning
-     Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
+     Doing so improves efficiency because shared presets do not need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
      You should only enable this when all repositories are trusted, such as a corporate environment.
 
 ## privateKey
@@ -781,7 +781,7 @@ TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachet
 This private key is used to decrypt config files.
 
 The corresponding public key can be used to create encrypted values for config files.
-If you want a UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
+If you want a UI to encrypt values you can put the public key in a webpage similar to <https://app.renovatebot.com/encrypt>.
 
 To create the key pair with GPG use the following commands:
 
@@ -852,7 +852,7 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 !!! note
     You could use public key encryption with earlier versions of Renovate.
     We deprecated this approach and removed the documentation for it.
-    If you're _still_ using public key encryption then we recommend that you use private keys instead.
+    If you are _still_ using public key encryption then we recommend that you use private keys instead.
 
 ## privateKeyOld
 
@@ -890,7 +890,7 @@ For non encrypted connections,
 
 Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 
-For TLS/SSL-enabled connections, use rediss prefix
+For TLS/SSL-enabled connections, use the rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
@@ -932,12 +932,12 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 <!-- prettier-ignore -->
 !!! tip
-    If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
+    If you are storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
     For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
 
 <!-- prettier-ignore -->
 !!! note
-    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
+    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the latter remotely, define [Redis URL](#redisurl).
 
 ## requireConfig
 
@@ -952,11 +952,11 @@ You can choose any of these settings:
 This feature is closely related to the `onboarding` config option.
 The combinations of `requireConfig` and `onboarding` are:
 
-|                          | `onboarding=true`                                                                                                                                       | `onboarding=false`                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `requireConfig=required` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, then the repository is skipped.   | Repository is skipped unless a config file is added manually. |
-| `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
-| `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                     | Repository is processed, any config file is ignored.          |
+|                          | `onboarding=true`                                                                                                                                        | `onboarding=false`                                            |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `requireConfig=required` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed, and there's no config file, the repository is skipped.        | Repository is skipped unless a config file is added manually. |
+| `requireConfig=optional` | An onboarding PR will be created if no config file exists. If the onboarding PR is closed, and there's no config file, the repository will be processed. | Repository is processed regardless of config file presence.   |
+| `requireConfig=ignored`  | No onboarding PR will be created and repo will be processed while ignoring any config file present.                                                      | Repository is processed, any config file is ignored.          |
 
 ## secrets
 
@@ -1004,7 +1004,7 @@ Secret names must start with an upper or lower case character and can have only 
 ## skipInstalls
 
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
-If this is set to false, then a full install of modules will be done.
+If this is set to `false`, then a full installation of modules will be done.
 This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
@@ -1026,7 +1026,7 @@ You may need to set a `username` if you:
 - use the Bitbucket platform, or
 - use a self-hosted GitHub App with CLI (required)
 
-If you're using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
+If you are using a Personal Access Token (PAT) to authenticate then you should not set a `username`.
 
 ## writeDiscoveredRepos
 

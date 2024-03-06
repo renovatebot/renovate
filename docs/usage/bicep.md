@@ -11,8 +11,8 @@ Upgrading `module` versions is not supported.
 ## How it works
 
 1. Renovate searches for `.bicep` files.
-2. Renovate parses the files for `resource` types and API versions.
-3. Renovate looks up the latest version in the [Azure/bicep-types-az](https://github.com/Azure/bicep-types-az) repository.
+1. Renovate parses the files for `resource` types and API versions.
+1. Renovate looks up the latest version in the [Azure/bicep-types-az](https://github.com/Azure/bicep-types-az) repository.
 
 ## Known issues
 

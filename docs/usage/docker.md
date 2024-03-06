@@ -15,7 +15,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 ## How It Works
 
-1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
+1. Renovate searches in each repository for any files matching the configured `fileMatch` pattern(s) for each manager
 1. Matching files are parsed, Renovate checks if the file(s) has any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
 1. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
 
@@ -24,12 +24,12 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 By default, Renovate preserves the precision level specified in the Docker images.
 For example, if the existing image is pinned at `myimage:1.1` then Renovate only proposes upgrades to `myimage:1.2` or `myimage:1.3`.
 This means that you will not get upgrades to a more specific versions like `myimage:1.2.0` or `myimage:1.3.0`.
-Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, but it's a feature we'd like to work on one day.
+Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, but it's a feature we would like to work on one day.
 
 ## Version compatibility
 
 Although suffixes in SemVer indicate pre-releases (e.g. `v1.2.0-alpha.2`), in Docker they typically indicate compatibility, e.g. `1.2.0-alpine`.
-By default Renovate assumes suffixes indicate compatibility, for this reason Renovate will not _change_ any suffixes.
+By default, Renovate assumes suffixes indicate compatibility, for this reason Renovate will not _change_ any suffixes.
 Renovate will update `1.2.0-alpine` to `1.2.1-alpine` but never updates to `1.2.1` or `1.2.1-stretch` as that would change the suffix.
 
 If this behavior does not suit a particular package you have, Renovate allows you to customize the `versioning` scheme it uses.
@@ -64,7 +64,7 @@ Another example is the official `python` image, which follows `pep440` versionin
 }
 ```
 
-If traditional versioning doesn't work, try Renovate's built-in `loose` `versioning`.
+If traditional versioning does not work, try Renovate's built-in `loose` `versioning`.
 Renovate will perform a best-effort sort of the versions, regardless of whether they have letters or digits.
 
 If both the traditional versioning, and the `loose` versioning do not give the results you want, try the `regex` `versioning`.
@@ -81,9 +81,9 @@ For example, if you set a version like `2.0.1`, you and your colleagues always g
 
 Docker's tags are not immutable versions, even if tags _look_ like a version.
 You probably expect `myimage:1` and `myimage:1.2` to change over time, but you might incorrectly assume that `myimage:1.2.0` never changes.
-Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
+Although it probably _should not_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
-By replacing Docker tags with Docker digests as the image's primary identifier you'll get immutable builds.
+By replacing Docker tags with Docker digests as the primary identifier of the image you will get immutable builds.
 Working with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e` is hard.
 Luckily Renovate can update the digests for you.
 
@@ -258,7 +258,7 @@ Renovate can authenticate with AWS ECR using AWS access key id & secret as the u
 ##### Using Application Default Credentials / Workload Identity (Self-Hosted only)
 
 Just configure [ADC](https://cloud.google.com/docs/authentication/provide-credentials-adc) /
-[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) as normal and _don't_
+[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) as normal and _do not_
 provide a username, password or token. Renovate will automatically retrieve the credentials using the
 google-auth-library.
 
@@ -369,7 +369,7 @@ Assume you are running GitLab CI in the Google Cloud, and you are storing your D
 Access to the GCR uses Bearer token based authentication.
 This token can be obtained by running `gcloud auth print-access-token`, which requires the Google Cloud SDK to be installed.
 
-The token expires after 60 minutes so you cannot store it in a variable for subsequent builds (like you can with `RENOVATE_TOKEN`).
+The token expires after 60 minutes, so you cannot store it in a variable for subsequent builds (like you can with `RENOVATE_TOKEN`).
 
 When running Renovate in this context the Google access token must be retrieved and injected into the `hostRules` configuration just before Renovate is started.
 
