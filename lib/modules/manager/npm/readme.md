@@ -10,9 +10,11 @@ The following `depTypes` are currently supported by the npm manager :
 
 ## Corepack support
 
-The Renovate full image installs Yarn v1 by support.
-This means that Yarn 2+ are supported "out of the box" only through the traditional approach of configuring a `yarnPath` in `.yarnrc.yml`.
-We will change the Renovate image to default pnpm and Yarn to be Corepack-based once Node.js defaults to having Corepack enabled.
+The Renovate full image installs Yarn v1 by default.
+This means that Yarn 2+ is supported "out of the box" only through the traditional approach of configuring a `yarnPath` in `.yarnrc.yml`.
+
+The Renovate image will use the Corepack-based versions of pnpm and Yarn, in future.
+We will make this change once Node.js enables Corepack by default.
 
 ## Use of packageManager URLs
 
