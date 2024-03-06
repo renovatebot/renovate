@@ -42,6 +42,11 @@ describe('modules/manager/pub/extract', () => {
         dependencies:
           meta: 'something'
           foo: 1.0.0
+          transmogrify:
+            hosted:
+              name: transmogrify
+              url: https://some-package-server.com
+            version: ^1.4.0
           bar:
             hosted: 'some-url'
             version: 1.1.0
@@ -68,6 +73,14 @@ describe('modules/manager/pub/extract', () => {
             depType: dependenciesDepType,
             datasource: dartDatasource,
             skipReason,
+          },
+          {
+            currentValue: '^1.4.0',
+            depName: 'transmogrify',
+            depType: dependenciesDepType,
+            datasource: dartDatasource,
+            skipReason,
+            registryUrls: ['https://some-package-server.com'],
           },
           {
             currentValue: '1.1.0',
