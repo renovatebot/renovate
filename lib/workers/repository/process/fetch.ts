@@ -28,7 +28,7 @@ interface LookupTaskResult {
   result: LookupResult;
 }
 
-type LookupTask = () => Promise<LookupTaskResult>;
+type LookupTask = Promise<LookupTaskResult>;
 
 async function lookup(
   packageFileConfig: ManagerConfig & PackageFile,
@@ -139,15 +139,13 @@ function createLookupTasks(
       }
 
       for (const dep of packageFile.deps) {
-        const lookupTask: LookupTask = async () => {
-          const result = await lookup(packageFileConfig, dep);
-          return {
+        lookupTasks.push(
+          lookup(packageFileConfig, dep).then((result) => ({
             packageFileName: packageFile.packageFile,
             manager: managerConfig.manager,
             result,
-          };
-        };
-        lookupTasks.push(lookupTask);
+          })),
+        );
       }
     }
   }
@@ -166,7 +164,7 @@ export async function fetchUpdates(
 
   const allTasks = createLookupTasks(config, managerPackageFiles);
 
-  const fetchResults = await p.all(allTasks, { concurrency: Infinity });
+  const fetchResults = await Promise.all(allTasks);
 
   const errors: Error[] = [];
 
