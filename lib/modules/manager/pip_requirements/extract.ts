@@ -7,9 +7,9 @@ import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
+import { normalizeDepName } from '../../datasource/pypi/common';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { PipRequirementsManagerData } from './types';
-import { normalizeDepName } from '../../datasource/pypi/common';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
@@ -122,8 +122,8 @@ export function extractPackageFile(
       const currentValue = currVal?.trim();
       dep = {
         ...dep,
-        depName: normalizeDepName(depName),
-        packageName: depName,
+        depName,
+        packageName: normalizeDepName(depName),
         currentValue,
         datasource: PypiDatasource.id,
       };

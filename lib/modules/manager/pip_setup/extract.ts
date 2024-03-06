@@ -2,12 +2,12 @@ import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { lang, lexer, parser, query as q } from 'good-enough-parser';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
+import { normalizeDepName } from '../../datasource/pypi/common';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { normalizeDepName } from '../../datasource/pypi/common';
 
 interface ManagerData {
   lineNumber: number;
@@ -45,8 +45,8 @@ function depStringHandler(
   const { depName, currentValue } = match!.groups!;
 
   const dep: PackageDependency<ManagerData> = {
-    depName: normalizeDepName(depName),
-    packageName: depName,
+    depName,
+    packageName: normalizeDepName(depName),
     currentValue,
     managerData: {
       lineNumber: token.line - 1,
