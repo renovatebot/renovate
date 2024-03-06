@@ -79,7 +79,6 @@ describe('modules/manager/pub/extract', () => {
             depName: 'transmogrify',
             depType: dependenciesDepType,
             datasource: dartDatasource,
-            skipReason,
             registryUrls: ['https://some-package-server.com'],
           },
           {

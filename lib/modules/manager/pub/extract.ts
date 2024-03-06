@@ -59,7 +59,7 @@ function extractFromSection(
       depType: sectionKey,
       currentValue,
       datasource: DartDatasource.id,
-      registryUrls,
+      ...(registryUrls && { registryUrls }),
       skipReason,
     });
   }
