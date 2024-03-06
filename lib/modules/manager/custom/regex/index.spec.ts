@@ -403,7 +403,7 @@ describe('modules/manager/custom/regex/index', () => {
   });
 
   it('extracts with combination startegy: handles version and digest in separate matchStrings', async () => {
-    const config = {
+    const config: CustomExtractConfig = {
       matchStringsStrategy: 'combination',
       matchStrings: [
         'IMAGE: "(?<depName>[^"]+)"',
