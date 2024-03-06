@@ -31,10 +31,19 @@ function extractFromSection(
 
     let currentValue = sectionContent[depName];
     let skipReason: SkipReason | undefined;
+    let registryUrls: string[] | undefined;
 
     if (!is.string(currentValue)) {
       const version = currentValue.version;
       const path = currentValue.path;
+      const hosted = currentValue.hosted;
+
+      if (is.string(hosted)) {
+        registryUrls = [hosted];
+      } else if (is.string(hosted?.url)) {
+        registryUrls = [hosted.url];
+      }
+
       if (version) {
         currentValue = version;
       } else if (path) {
@@ -50,6 +59,7 @@ function extractFromSection(
       depType: sectionKey,
       currentValue,
       datasource: DartDatasource.id,
+      ...(registryUrls && { registryUrls }),
       skipReason,
     });
   }
