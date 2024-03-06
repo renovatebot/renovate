@@ -409,6 +409,48 @@ describe('modules/manager/npm/post-update/yarn', () => {
     expect(res.lockFile).toBe('package-lock-contents');
   });
 
+  it('supports URL for corepack', async () => {
+    process.env.CONTAINERBASE = 'true';
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+    Fixtures.mock(
+      {
+        'package.json':
+          '{ "packageManager": "yarn@https://nexus-proxy.repo.local.renovatebot.com/nexus/content/groups/npm-all/@yarnpkg/cli-dist/-/cli-dist-3.7.0.tgz#sha224.a06723957ae0292e21f598a45" }',
+        'yarn.lock': 'package-lock-contents',
+      },
+      'some-dir',
+    );
+    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+      releases: [{ version: '0.10.0' }],
+    });
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = partial<PostUpdateConfig<NpmManagerData>>({
+      managerData: { hasPackageManager: true },
+    });
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool yarn-slim 0.10.0', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts',
+        options: {
+          cwd: 'some-dir',
+          env: {
+            CI: 'true',
+          },
+        },
+      },
+    ]);
+    expect(res.lockFile).toBe('package-lock-contents');
+  });
+
   it('falls back to Yarn v1 for undefined constraint', async () => {
     process.env.CONTAINERBASE = 'true';
     GlobalConfig.set({

@@ -110,8 +110,15 @@ async function determineYarnConstraint(
     await lazyPgkJson.getValue(),
   );
   if (packageManagerVersion) {
-    logger.debug('Using yarn constraint from package.json>packageManager');
-    return packageManagerVersion;
+    if (semver.valid(packageManagerVersion)) {
+      logger.debug('Using yarn constraint from package.json>packageManager');
+      return packageManagerVersion;
+    }
+    logger.debug(
+      { packageManagerVersion },
+      'Found yarn in package.json>packageManager but it is not a simple version. Assuming ^3.0.0',
+    );
+    return '^3.0.0';
   }
   const lockFileName = upath.join(lockFileDir, 'yarn.lock');
   const lockConstraint = getYarnVersionFromLock(
