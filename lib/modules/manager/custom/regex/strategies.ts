@@ -57,18 +57,12 @@ export function handleCombination(
       digestMatch: addition.digestMatch ?? base.digestMatch,
     }));
 
-  let replaceString;
-
-  if (valueMatch && digestMatch) {
-    const replaceStart = Math.min(valueMatch.index, digestMatch.index);
-    const valueEnd = valueMatch.index + valueMatch[0].length;
-    const digestEnd = digestMatch.index + digestMatch[0].length;
-    const replaceEnd = Math.max(valueEnd, digestEnd);
-
-    replaceString = content.substring(replaceStart, replaceEnd);
-  } else {
-    replaceString = valueMatch?.[0] ?? digestMatch?.[0];
-  }
+  const replaceMatches = [valueMatch, digestMatch].filter(is.truthy);
+  const replaceStart = Math.min(...replaceMatches.map((match) => match.index));
+  const replaceEnd = Math.max(
+    ...replaceMatches.map((match) => match.index + match[0].length),
+  );
+  const replaceString = content.substring(replaceStart, replaceEnd);
 
   return [createDependency({ groups, replaceString }, config)]
     .filter(is.truthy)
