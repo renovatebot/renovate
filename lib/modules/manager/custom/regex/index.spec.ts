@@ -402,6 +402,35 @@ describe('modules/manager/custom/regex/index', () => {
     });
   });
 
+  it('extracts with combination startegy: handles version and digest in separate matchStrings', async () => {
+    const config = {
+      matchStringsStrategy: 'combination',
+      matchStrings: [
+        'IMAGE: "(?<depName>[^"]+)"',
+        'VERSION: "(?<currentValue>[^"]+)"',
+        'DIGEST: "(?<currentDigest>[^"]+)"',
+      ],
+      depNameTemplate: 'image',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      'IMAGE: "image"\n  VERSION: "1.0"\n  DIGEST: "sha256:1234567890abcdef"\n',
+      'image.yml',
+      config,
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'image',
+          datasource: 'docker',
+          currentValue: '1.0',
+          currentDigest: 'sha256:1234567890abcdef',
+          replaceString: 'VERSION: "1.0"\n  DIGEST: "sha256:1234567890abcdef"',
+        },
+      ],
+    });
+  });
+
   it('extracts with combination strategy and templates', async () => {
     const config: CustomExtractConfig = {
       matchStringsStrategy: 'combination',

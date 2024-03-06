@@ -5,7 +5,6 @@ import type { RecursionParameter, RegexManagerConfig } from './types';
 import {
   createDependency,
   isValidDependency,
-  mergeExtractionTemplate,
   mergeGroups,
   regexMatchAll,
 } from './utils';
@@ -46,16 +45,32 @@ export function handleCombination(
     return [];
   }
 
-  const extraction = matches
+  const { groups, valueMatch, digestMatch } = matches
     .map((match) => ({
       groups: match.groups ?? /* istanbul ignore next: can this happen? */ {},
-      replaceString:
-        match?.groups?.currentValue ?? match?.groups?.currentDigest
-          ? match[0]
-          : undefined,
+      valueMatch: match?.groups?.currentValue ? match : undefined,
+      digestMatch: match?.groups?.currentDigest ? match : undefined,
     }))
-    .reduce((base, addition) => mergeExtractionTemplate(base, addition));
-  return [createDependency(extraction, config)]
+    .reduce((base, addition) => ({
+      groups: mergeGroups(base.groups, addition.groups),
+      valueMatch: addition.valueMatch ?? base.valueMatch,
+      digestMatch: addition.digestMatch ?? base.digestMatch,
+    }));
+
+  let replaceString;
+
+  if (valueMatch && digestMatch) {
+    const replaceStart = Math.min(valueMatch.index!, digestMatch.index!);
+    const valueEnd = valueMatch.index! + valueMatch[0].length;
+    const digestEnd = digestMatch.index! + digestMatch[0].length;
+    const replaceEnd = Math.max(valueEnd, digestEnd);
+
+    replaceString = content.substring(replaceStart, replaceEnd);
+  } else {
+    replaceString = valueMatch?.[0] ?? digestMatch?.[0];
+  }
+
+  return [createDependency({ groups, replaceString }, config)]
     .filter(is.truthy)
     .filter(isValidDependency);
 }

@@ -110,16 +110,6 @@ export function mergeGroups(
   return { ...mergedGroup, ...secondGroup };
 }
 
-export function mergeExtractionTemplate(
-  base: ExtractionTemplate,
-  addition: ExtractionTemplate,
-): ExtractionTemplate {
-  return {
-    groups: mergeGroups(base.groups, addition.groups),
-    replaceString: addition.replaceString ?? base.replaceString,
-  };
-}
-
 export function isValidDependency({
   depName,
   currentValue,
