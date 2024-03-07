@@ -13,6 +13,7 @@ export interface GetDigestInputConfig {
   currentValue?: string;
   currentDigest?: string;
   replacementName?: string;
+  replacementVersion?: string;
 }
 
 export interface DigestConfig {
@@ -20,6 +21,9 @@ export interface DigestConfig {
   registryUrl?: string;
   currentValue?: string;
   currentDigest?: string;
+  packageNameCurrent?: string;
+  valueReplacement?: string;
+  updateType?: string;
 }
 
 export interface GetReleasesConfig {

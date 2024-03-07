@@ -397,28 +397,40 @@ export function supportsDigests(datasource: string | undefined): boolean {
 function getDigestConfig(
   datasource: DatasourceApi,
   config: GetDigestInputConfig,
+  updateType?: string,
 ): DigestConfig {
   const { currentValue, currentDigest } = config;
   const packageName = config.replacementName ?? config.packageName;
+  const packageNameCurrent = config.packageName;
+  const valueReplacement = config.replacementVersion ?? config.currentValue;
   const [registryUrl] = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,
     config.registryUrls,
     config.additionalRegistryUrls,
   );
-  return { packageName, registryUrl, currentValue, currentDigest };
+  return {
+    packageName,
+    packageNameCurrent,
+    valueReplacement,
+    updateType,
+    registryUrl,
+    currentValue,
+    currentDigest,
+  };
 }
 
 export function getDigest(
   config: GetDigestInputConfig,
   value?: string,
+  updateType?: string,
 ): Promise<string | null> {
   const datasource = getDatasourceFor(config.datasource);
   // istanbul ignore if: need test
   if (!datasource || !('getDigest' in datasource)) {
     return Promise.resolve(null);
   }
-  const digestConfig = getDigestConfig(datasource, config);
+  const digestConfig = getDigestConfig(datasource, config, updateType);
   return datasource.getDigest!(digestConfig, value);
 }
 

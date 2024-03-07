@@ -506,7 +506,11 @@ export async function lookupUpdates(
           update.newDigest ??=
             dependency?.releases.find((r) => r.version === update.newValue)
               ?.newDigest ??
-            (await getDigest(getDigestConfig, update.newValue))!;
+            (await getDigest(
+              getDigestConfig,
+              update.newValue,
+              update.updateType,
+            ))!;
 
           // If the digest could not be determined, report this as otherwise the
           // update will be omitted later on without notice.

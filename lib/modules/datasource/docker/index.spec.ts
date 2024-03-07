@@ -123,6 +123,37 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBe('some-digest');
     });
 
+    it('returns digest using replacementName and version', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/new-dep:pull"',
+        })
+        .head('/library/new-dep/manifests/1.0.0')
+        .reply(200, {}, { 'docker-content-digest': 'some-digest' });
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/new-dep:pull',
+        )
+        .reply(200, { token: 'some-token' });
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+          replacementName: 'new-dep',
+          replacementVersion: '1.0.0',
+        },
+        '2.0.0',
+        'replacement',
+      );
+      expect(res).toBe('some-digest');
+    });
+
     it('falls back to body for digest', async () => {
       httpMock
         .scope(baseUrl)

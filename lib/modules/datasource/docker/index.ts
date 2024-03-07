@@ -788,18 +788,31 @@ export class DockerDatasource extends Datasource {
     },
   })
   override async getDigest(
-    { registryUrl, packageName, currentDigest }: DigestConfig,
+    {
+      packageName,
+      packageNameCurrent,
+      valueReplacement,
+      updateType,
+      registryUrl,
+      currentDigest,
+    }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
+    const useValue = updateType === 'replacement' ? valueReplacement : newValue;
+    const usePackageName =
+      updateType === 'replacement'
+        ? packageName
+        : packageNameCurrent ?? packageName;
+
     const { registryHost, dockerRepository } = getRegistryRepository(
-      packageName,
+      usePackageName,
       registryUrl!,
     );
     logger.debug(
       // TODO: types (#22198)
-      `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`,
+      `getDigest(${registryHost}, ${dockerRepository}, ${useValue})`,
     );
-    const newTag = newValue ?? 'latest';
+    const newTag = useValue ?? 'latest';
     let digest: string | null = null;
     try {
       let architecture: string | null | undefined = null;
@@ -878,7 +891,7 @@ export class DockerDatasource extends Datasource {
       if (
         !manifestResponse &&
         !dockerRepository.includes('/') &&
-        !packageName.includes('/')
+        !usePackageName.includes('/')
       ) {
         logger.debug(
           `Retrying Digest for ${registryHost}/${dockerRepository} using library/ prefix`,
@@ -886,10 +899,10 @@ export class DockerDatasource extends Datasource {
         return this.getDigest(
           {
             registryUrl,
-            packageName: 'library/' + packageName,
+            packageName: 'library/' + usePackageName,
             currentDigest,
           },
-          newValue,
+          useValue,
         );
       }
 
@@ -904,7 +917,7 @@ export class DockerDatasource extends Datasource {
       logger.debug(
         {
           err,
-          packageName,
+          usePackageName,
           newTag,
         },
         'Unknown Error looking up docker image digest',
@@ -1007,7 +1020,7 @@ export class DockerDatasource extends Datasource {
       releases,
     };
     if (dockerRepository !== packageName) {
-      // This will be reused later if a getDigest() call is made
+      // This will be reused later if a getDigest() call
       ret.lookupName = dockerRepository;
     }
 
