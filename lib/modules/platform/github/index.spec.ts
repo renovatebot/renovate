@@ -1049,6 +1049,30 @@ describe('modules/platform/github/index', () => {
       ]);
     });
 
+    it('supports ETag', async () => {
+      const scope = httpMock.scope(githubApiHost);
+
+      // Initial fetch
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.get(pagePath(1)).reply(200, [pr3, pr2, pr1]);
+      await github.getPrList();
+
+      // Sync fetch
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.get(pagePath(1, 20)).reply(200, [pr3], { etag: '123' });
+      const res1 = await github.getPrList();
+
+      // Cached fetch
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope.get(pagePath(1, 20)).reply(304);
+      const res2 = await github.getPrList();
+
+      expect(res1).toEqual(res2);
+    });
+
     describe('Body compaction', () => {
       type PrCache = ApiPageCache<GhRestPr>;
 

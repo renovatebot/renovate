@@ -65,10 +65,14 @@ export async function getPrCache(
     while (needNextPageFetch && needNextPageSync) {
       const opts: GithubHttpOptions = { paginate: false };
       if (pageIdx === 1) {
-        opts.repoCache = true;
         if (isInitial) {
           // Speed up initial fetch
           opts.paginate = true;
+        } else {
+          const etag = prApiCache.getEtag();
+          if (etag) {
+            opts.headers = { 'If-None-Match': etag };
+          }
         }
       }
 
@@ -76,12 +80,21 @@ export async function getPrCache(
       const urlPath = `repos/${repo}/pulls?per_page=${perPage}&state=all&sort=updated&direction=desc&page=${pageIdx}`;
 
       const res = await http.getJson<GhRestPr[]>(urlPath, opts);
+      if (res.statusCode === 304) {
+        logger.debug({ urlPath }, 'getPrList 304');
+        break;
+      }
+
       apiQuotaAffected = true;
       requestsTotal += 1;
 
       const {
-        headers: { link: linkHeader },
+        headers: { link: linkHeader, etag },
       } = res;
+
+      if (!isInitial && pageIdx === 1) {
+        prApiCache.setEtag(etag);
+      }
 
       let { body: page } = res;
 

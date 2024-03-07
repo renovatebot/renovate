@@ -14,6 +14,14 @@ export class ApiCache<T extends ApiPageItem> {
     return this.cache.items[number] ?? null;
   }
 
+  getEtag(): string | undefined {
+    return this.cache.etag;
+  }
+
+  setEtag(etag: string | undefined): void {
+    this.cache.etag = etag;
+  }
+
   /**
    * It intentionally doesn't alter `lastModified` cache field.
    *
