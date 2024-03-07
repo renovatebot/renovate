@@ -555,6 +555,12 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
+## forkCreation
+
+This configuration lets you disable the runtime forking of repositories when running in "fork mode".
+
+Usually you will need to keep this as the default `true`, and only set to `false` if you have some out of band process to handle the creation of forks.
+
 ## forkOrg
 
 This configuration option lets you choose an organization you want repositories forked into when "fork mode" is enabled.
@@ -576,6 +582,10 @@ If this value is configured then Renovate:
 - keep this fork's default branch up-to-date with the target
 
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
+
+<!-- prettier-ignore -->
+!!! note
+    Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
 ## gitNoVerify
 
