@@ -1740,7 +1740,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'new-title',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'new-title',
         body: 'new-content',
@@ -1855,7 +1861,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'new-title',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'new-title',
         body: 'new-content',
@@ -1961,7 +1973,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .patch('/repos/some/repo/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'newer-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-3',
         reuseTitle: 'title-2',
@@ -2014,7 +2032,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .patch('/repos/some/repo/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'newer-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-3',
         reuseTitle: 'title-2',
@@ -2157,7 +2181,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-2',
         body: 'new-content',
