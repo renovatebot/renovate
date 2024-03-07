@@ -165,6 +165,12 @@ spec:
             depName: 'somechart',
             registryUrls: ['https://foo.io/repo'],
           },
+          {
+            currentValue: '3.2.1',
+            datasource: 'helm',
+            depName: 'somechart',
+            registryUrls: ['https://git.example.com/foo/bar.git'],
+          },
         ],
       });
     });
