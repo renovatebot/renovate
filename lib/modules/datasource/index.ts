@@ -399,17 +399,21 @@ function getDigestConfig(
   config: GetDigestInputConfig,
   updateType?: string,
 ): DigestConfig {
-  const { currentValue, currentDigest } = config;
+  const { lookupName, currentValue, currentDigest } = config;
   const packageName = config.replacementName ?? config.packageName;
   const packageNameCurrent = config.packageName;
   const valueReplacement = config.replacementVersion ?? config.currentValue;
-  const [registryUrl] = resolveRegistryUrls(
-    datasource,
-    config.defaultRegistryUrls,
-    config.registryUrls,
-    config.additionalRegistryUrls,
-  );
+  // Prefer registryUrl from getReleases() lookup if it has been passed
+  const registryUrl =
+    config.registryUrl ??
+    resolveRegistryUrls(
+      datasource,
+      config.defaultRegistryUrls,
+      config.registryUrls,
+      config.additionalRegistryUrls,
+    )[0];
   return {
+    lookupName,
     packageName,
     packageNameCurrent,
     valueReplacement,

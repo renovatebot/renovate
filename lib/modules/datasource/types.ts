@@ -9,6 +9,8 @@ export interface GetDigestInputConfig {
   packageName: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
+  registryUrl?: string;
+  lookupName?: string;
   additionalRegistryUrls?: string[];
   currentValue?: string;
   currentDigest?: string;
@@ -18,6 +20,7 @@ export interface GetDigestInputConfig {
 
 export interface DigestConfig {
   packageName: string;
+  lookupName?: string;
   registryUrl?: string;
   currentValue?: string;
   currentDigest?: string;
