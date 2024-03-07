@@ -1632,11 +1632,15 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'open',
                     title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                   {
                     number: 1,
                     state: 'open',
                     title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                 ],
               },
@@ -1665,11 +1669,15 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'open',
                     title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                   {
                     number: 1,
                     state: 'open',
                     title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                 ],
               },
@@ -1677,9 +1685,21 @@ describe('modules/platform/github/index', () => {
           },
         })
         .get('/repos/undefined/issues/2')
-        .reply(200, { body: 'new-content' });
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.findIssue('title-2');
-      expect(res).not.toBeNull();
+      expect(res).toEqual({
+        number: 2,
+        state: 'open',
+        title: 'title-2',
+        body: 'new-content',
+        lastModified: '2023-01-01T00:00:00Z',
+      });
     });
   });
 
@@ -1704,11 +1724,15 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'open',
                     title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                   {
                     number: 1,
                     state: 'open',
                     title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                 ],
               },
@@ -1744,11 +1768,15 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'open',
                     title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                   {
                     number: 1,
                     state: 'closed',
                     title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                 ],
               },
@@ -1782,11 +1810,15 @@ describe('modules/platform/github/index', () => {
                   number: 2,
                   state: 'open',
                   title: 'title-2',
+                  body: 'body-2',
+                  updatedAt: '2022-01-01T00:00:00Z',
                 },
                 {
                   number: 1,
                   state: 'closed',
                   title: 'title-1',
+                  body: 'body-1',
+                  updatedAt: '2021-01-01T00:00:00Z',
                 },
               ],
             },
@@ -1852,16 +1884,22 @@ describe('modules/platform/github/index', () => {
                     number: 3,
                     state: 'open',
                     title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                   {
                     number: 2,
                     state: 'open',
                     title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                   {
                     number: 1,
                     state: 'closed',
                     title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                 ],
               },
@@ -1899,11 +1937,15 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'open',
                     title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                   {
                     number: 1,
                     state: 'open',
                     title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                 ],
               },
@@ -1911,7 +1953,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .get('/repos/some/repo/issues/2')
-        .reply(200, { body: 'new-content' })
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        })
         .patch('/repos/some/repo/issues/2')
         .reply(200);
       const res = await github.ensureIssue({
@@ -1942,11 +1990,15 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'open',
                     title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                   {
                     number: 1,
                     state: 'open',
                     title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                 ],
               },
@@ -1954,7 +2006,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .get('/repos/some/repo/issues/2')
-        .reply(200, { body: 'new-content' })
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        })
         .patch('/repos/some/repo/issues/2')
         .reply(200);
       const res = await github.ensureIssue({
@@ -1986,11 +2044,15 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'open',
                     title: 'title-2',
+                    body: 'newer-content',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                   {
                     number: 1,
                     state: 'open',
                     title: 'title-1',
+                    body: 'new-content',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                 ],
               },
@@ -2026,21 +2088,31 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'open',
                     title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                   {
                     number: 1,
                     state: 'open',
                     title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                 ],
               },
             },
           },
         })
-        .patch('/repos/some/repo/issues/1')
-        .reply(200)
         .get('/repos/some/repo/issues/2')
-        .reply(200, { body: 'newer-content' });
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-1',
+          body: 'newer-content',
+          updated_at: '2021-01-01T00:00:00Z',
+        })
+        .patch('/repos/some/repo/issues/1')
+        .reply(200);
       const res = await github.ensureIssue({
         title: 'title-1',
         body: 'newer-content',
@@ -2068,6 +2140,8 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'close',
                     title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                 ],
               },
@@ -2075,7 +2149,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .get('/repos/some/repo/issues/2')
-        .reply(200, { body: 'new-content' })
+        .reply(200, {
+          number: 2,
+          state: 'closed',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        })
         .post('/repos/some/repo/issues')
         .reply(200);
       const res = await github.ensureIssue({
@@ -2107,6 +2187,8 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'open',
                     title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                 ],
               },
@@ -2114,7 +2196,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .get('/repos/some/repo/issues/2')
-        .reply(200, { body: 'new-content' });
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-2',
         body: 'new-content',
@@ -2144,11 +2232,15 @@ describe('modules/platform/github/index', () => {
                     number: 2,
                     state: 'open',
                     title: 'title-2',
+                    body: 'body-2',
+                    updatedAt: '2022-01-01T00:00:00Z',
                   },
                   {
                     number: 1,
                     state: 'open',
                     title: 'title-1',
+                    body: 'body-1',
+                    updatedAt: '2021-01-01T00:00:00Z',
                   },
                 ],
               },
