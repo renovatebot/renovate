@@ -12,15 +12,15 @@ describe('util/http/throttle', () => {
   });
 
   it('returns null for invalid URL', () => {
-    expect(getThrottle('$#@!', null)).toBeNull();
+    expect(getThrottle('$#@!')).toBeNull();
   });
 
   it('returns throttle for valid url', () => {
-    const t1a = getThrottle('https://example.com', null);
-    const t1b = getThrottle('https://example.com', null);
+    const t1a = getThrottle('https://example.com');
+    const t1b = getThrottle('https://example.com');
 
-    const t2a = getThrottle('https://example.com:8080', null);
-    const t2b = getThrottle('https://example.com:8080', null);
+    const t2a = getThrottle('https://example.com:8080');
+    const t2b = getThrottle('https://example.com:8080');
 
     expect(t1a).not.toBeNull();
     expect(t1a).toBe(t1b);
