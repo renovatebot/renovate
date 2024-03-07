@@ -144,7 +144,13 @@ export interface RepoCacheData {
     gitea?: {
       pullRequestsCache?: GiteaPrCacheData;
     };
-    github?: Record<string, unknown>;
+    github?: {
+      /**
+       * To avoid circular dependency problem, we use `unknown` type here.
+       */
+      pullRequestsCache?: unknown;
+      graphqlPageCache?: unknown;
+    };
     bitbucket?: {
       pullRequestsCache?: BitbucketPrCacheData;
     };
