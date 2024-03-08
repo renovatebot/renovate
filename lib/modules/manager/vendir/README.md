@@ -1,6 +1,6 @@
 The [vendir](https://carvel.dev/vendir/) manager can only update `helmChart`-type dependencies.
 
-```yaml
+```yaml title="Example helmChart"
 # fetch Helm chart contents (optional; v0.11.0+)
 helmChart:
   # chart name (required)
