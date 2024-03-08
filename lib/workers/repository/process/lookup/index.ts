@@ -62,6 +62,12 @@ export async function lookupUpdates(
       'lookupUpdates',
     );
     if (config.currentValue && !is.string(config.currentValue)) {
+      // If currentValue is not a string, then it's invalid
+      if (config.currentValue) {
+        logger.debug(
+          `Invalid currentValue for ${config.packageName}: ${JSON.stringify(config.currentValue)} (${typeof config.currentValue})`,
+        );
+      }
       res.skipReason = 'invalid-value';
       return Result.ok(res);
     }
@@ -271,6 +277,9 @@ export async function lookupUpdates(
 
       if (!currentVersion) {
         if (!config.lockedVersion) {
+          logger.debug(
+            `No currentVersion or lockedVersion found for ${config.packageName}`,
+          );
           res.skipReason = 'invalid-value';
         }
         return Result.ok(res);
@@ -425,6 +434,9 @@ export async function lookupUpdates(
       );
 
       if (!config.pinDigests && !config.currentDigest) {
+        logger.debug(
+          `Skipping ${config.packageName} because no currentDigest or pinDigests`,
+        );
         res.skipReason = 'invalid-value';
       } else {
         delete res.skipReason;
