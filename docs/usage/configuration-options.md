@@ -2123,6 +2123,19 @@ Currently this applies to the `minimumReleaseAge` check only.
 The `flexible` mode can result in "flapping" of Pull Requests, for example: a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `minimumReleaseAge`.
 We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you can see suppressed PRs.
 
+## keepUpdatedLabel
+
+On supported platforms you may add a label to a PR so that Renovate recreates/rebases the PR when the branch falls behind the base branch.
+Adding the `keepUpdatedLabel` label to a PR makes Renovate behave as if `rebaseWhen` were set to `behind-base-branch`, but only for the given PR.
+Renovate does _not_ remove the label from the PR after it finishes rebasing.
+This is different from the `rebaseLabel` option, where Renovate _removes_ the label from the PR after rebasing.
+
+`keepUpdatedLabel` can be useful when you have approved certain PRs and want Renovate to keep the PRs up-to-date until you're ready to merge them.
+The setting `keepUpdatedLabel` is best used in this scenario:
+
+- By default, you configure `rebaseWhen` to `never` or `conflicted` to reduce rebasing
+- Sometimes, you want Renovate to keep specific PRs up-to-date with their base branch (equivalent to `rebaseWhen=behind-base-branch`)
+
 ## labels
 
 By default, Renovate won't add any labels to PRs.

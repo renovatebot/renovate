@@ -16,6 +16,8 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
+  REPOSITORY_FORK_MISSING,
+  REPOSITORY_FORK_MODE_FORKED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
@@ -433,6 +435,7 @@ export async function createFork(
 export async function initRepo({
   endpoint,
   repository,
+  forkCreation,
   forkOrg,
   forkToken,
   renovateUsername,
@@ -570,6 +573,9 @@ export async function initRepo({
     if (err.message.startsWith('Repository access blocked')) {
       throw new Error(REPOSITORY_BLOCKED);
     }
+    if (err.message === REPOSITORY_FORK_MODE_FORKED) {
+      throw err;
+    }
     if (err.message === REPOSITORY_FORKED) {
       throw err;
     }
@@ -588,6 +594,15 @@ export async function initRepo({
 
   if (forkToken) {
     logger.debug('Bot is in fork mode');
+    if (repo.isFork) {
+      logger.debug(
+        `Forked repos cannot be processed when running with a forkToken, so this repo will be skipped`,
+      );
+      logger.debug(
+        `Parent repo for this forked repo is ${repo.parent?.nameWithOwner}`,
+      );
+      throw new Error(REPOSITORY_FORKED);
+    }
     config.forkOrg = forkOrg;
     config.forkToken = forkToken;
     // save parent name then delete
@@ -669,10 +684,13 @@ export async function initRepo({
         }
         throw new ExternalHostError(err);
       }
-    } else {
+    } else if (forkCreation) {
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
       config.repository = forkedRepo.full_name;
+    } else {
+      logger.debug('Forked repo is not found and forkCreation is disabled');
+      throw new Error(REPOSITORY_FORK_MISSING);
     }
   }
 
