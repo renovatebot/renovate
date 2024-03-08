@@ -46,6 +46,8 @@ describe('modules/manager/npm/post-update/yarn', () => {
 
   beforeEach(() => {
     delete process.env.BUILDPACK;
+    delete process.env.HTTP_PROXY;
+    delete process.env.HTTPS_PROXY;
     Fixtures.reset();
     GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
     removeDockerContainer.mockResolvedValue();
@@ -145,6 +147,38 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+  });
+
+  it('sets http proxy', async () => {
+    process.env.HTTP_PROXY = 'http://proxy';
+    process.env.HTTPS_PROXY = 'http://proxy';
+    GlobalConfig.set({
+      localDir: '.',
+      allowScripts: true,
+      cacheDir: '/tmp/cache',
+    });
+    Fixtures.mock(
+      {
+        'yarn.lock': 'package-lock-contents',
+      },
+      'some-dir',
+    );
+    const execSnapshots = mockExecAll({
+      stdout: '3.0.0',
+      stderr: '',
+    });
+    const config = {
+      constraints: {
+        yarn: '3.0.0',
+      },
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(fixSnapshots(execSnapshots)).toMatchObject([
+      { cmd: 'yarn config set --home httpProxy http://proxy' },
+      { cmd: 'yarn config set --home httpsProxy http://proxy' },
+      {},
+    ]);
   });
 
   it('does not use global cache if zero install is detected', async () => {
