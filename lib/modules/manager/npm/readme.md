@@ -8,13 +8,13 @@ The following `depTypes` are currently supported by the npm manager :
 - `volta` : Renovate will update any `node`, `npm`, `pnpm` and `yarn` version specified under `volta`.
 - `packageManager`
 
-## Yarn
+### Yarn
 
-### Version Selection / Installation
+#### Version Selection / Installation
 
 If Renovate detects a `packageManager` setting for Yarn in `package.json` then it will use Corepack to install Yarn.
 
-### HTTP Proxy Support
+#### HTTP Proxy Support
 
 Yarn itself does not natively recognize/support the `HTTP_PROXY` and `HTTPS_PROXY` environment variables.
 If Renovate detects Yarn 2+, and one or both of those variables are present, then it will run commands like `yarn config set --home httpProxy http://proxy` prior to executing `yarn install`.
