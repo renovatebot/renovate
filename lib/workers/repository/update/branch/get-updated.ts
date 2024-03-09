@@ -6,6 +6,7 @@ import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
   PackageDependency,
+  PackageFile,
   UpdateArtifact,
   UpdateArtifactsResult,
 } from '../../../../modules/manager/types';
@@ -287,6 +288,10 @@ export async function getUpdatedPackageFiles(
   }));
   const updatedArtifacts: FileChange[] = [];
   const artifactErrors: ArtifactError[] = [];
+  // istanbul ignore if
+  if (is.nonEmptyArray(updatedPackageFiles)) {
+    logger.debug('updateArtifacts for updatedPackageFiles');
+  }
   for (const packageFile of updatedPackageFiles) {
     const updatedDeps = packageFileUpdatedDeps[packageFile.path];
     const managers = packageFileManagers[packageFile.path];
@@ -310,6 +315,10 @@ export async function getUpdatedPackageFiles(
     path: name,
     contents: nonUpdatedFileContents[name],
   }));
+  // istanbul ignore if
+  if (is.nonEmptyArray(nonUpdatedPackageFiles)) {
+    logger.debug('updateArtifacts for nonUpdatedPackageFiles');
+  }
   for (const packageFile of nonUpdatedPackageFiles) {
     const updatedDeps = packageFileUpdatedDeps[packageFile.path];
     const managers = packageFileManagers[packageFile.path];
@@ -331,6 +340,10 @@ export async function getUpdatedPackageFiles(
   }
   if (!reuseExistingBranch) {
     // Only perform lock file maintenance if it's a fresh commit
+    // istanbul ignore if
+    if (is.nonEmptyArray(lockFileMaintenanceFiles)) {
+      logger.debug('updateArtifacts for lockFileMaintenanceFiles');
+    }
     for (const packageFileName of lockFileMaintenanceFiles) {
       const managers = packageFileManagers[packageFileName];
       if (is.nonEmptySet(managers)) {
@@ -342,7 +355,11 @@ export async function getUpdatedPackageFiles(
             packageFileName,
             updatedDeps: [],
             newPackageFileContent: contents!,
-            config,
+            config: patchConfigForArtifactsUpdate(
+              config,
+              manager,
+              packageFileName,
+            ),
           });
           processUpdateArtifactResults(
             results,
@@ -359,6 +376,30 @@ export async function getUpdatedPackageFiles(
     updatedArtifacts,
     artifactErrors,
   };
+}
+
+// workaround, see #27319
+function patchConfigForArtifactsUpdate(
+  config: BranchConfig,
+  manager: string,
+  packageFileName: string,
+): BranchConfig {
+  const updatedConfig = { ...config };
+  if (is.nonEmptyArray(updatedConfig.packageFiles?.[manager])) {
+    const managerPackageFiles: PackageFile[] =
+      updatedConfig.packageFiles?.[manager];
+    const packageFile = managerPackageFiles.find(
+      (p) => p.packageFile === packageFileName,
+    );
+    if (
+      packageFile &&
+      is.nonEmptyArray(updatedConfig.lockFiles) &&
+      is.nonEmptyArray(packageFile.lockFiles)
+    ) {
+      updatedConfig.lockFiles = packageFile.lockFiles;
+    }
+  }
+  return updatedConfig;
 }
 
 async function managerUpdateArtifacts(

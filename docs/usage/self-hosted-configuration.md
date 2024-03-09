@@ -327,6 +327,31 @@ Use this option if you need such downloads to be stored outside of Renovate's re
 
 This configuration will be applied after all other environment variables so you can use it to override defaults.
 
+<!-- prettier-ignore -->
+!!! warning
+    Do not configure any secret values directly into `customEnvVariables` because they may be logged to stdout.
+    Instead, configure them into `secrets` first so that they will be redacted in logs.
+
+If configuring secrets in to `customEnvVariables`, take this approach:
+
+```js
+{
+  secrets: {
+    SECRET_TOKEN: process.env.SECRET_TOKEN,
+  },
+  customEnvVariables: {
+    SECRET_TOKEN: '{{ secrets.SECRET_TOKEN }}',
+  },
+}
+```
+
+The above configuration approach will mean the values are redacted in logs like in the following example:
+
+```
+         "secrets": {"SECRET_TOKEN": "***********"},
+         "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
+```
+
 ## detectGlobalManagerConfig
 
 The purpose of this config option is to allow you (as a bot admin) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
@@ -530,6 +555,12 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
+## forkCreation
+
+This configuration lets you disable the runtime forking of repositories when running in "fork mode".
+
+Usually you will need to keep this as the default `true`, and only set to `false` if you have some out of band process to handle the creation of forks.
+
 ## forkOrg
 
 This configuration option lets you choose an organization you want repositories forked into when "fork mode" is enabled.
@@ -551,6 +582,10 @@ If this value is configured then Renovate:
 - keep this fork's default branch up-to-date with the target
 
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
+
+<!-- prettier-ignore -->
+!!! note
+    Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
 ## gitNoVerify
 

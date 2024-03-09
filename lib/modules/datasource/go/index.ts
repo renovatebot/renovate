@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
@@ -11,6 +12,7 @@ import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
+import { parseGoproxy } from './goproxy-parser';
 import { GoDirectDatasource } from './releases-direct';
 import { GoProxyDatasource } from './releases-goproxy';
 
@@ -63,6 +65,13 @@ export class GoDatasource extends Datasource {
     { packageName }: DigestConfig,
     value?: string | null,
   ): Promise<string | null> {
+    if (parseGoproxy().some(({ url }) => url === 'off')) {
+      logger.debug(
+        `Skip digest fetch for ${packageName} with GOPROXY containing "off"`,
+      );
+      return null;
+    }
+
     const source = await BaseGoDatasource.getDatasource(packageName);
     if (!source) {
       return null;

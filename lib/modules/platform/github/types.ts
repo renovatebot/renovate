@@ -95,6 +95,7 @@ export interface LocalRepoConfig {
   parentRepo: string | null;
   forkOrg?: string;
   forkToken?: string;
+  forkCreation?: boolean;
   prList: GhPr[] | null;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
@@ -115,6 +116,9 @@ export type BranchProtection = any;
 export interface GhRepo {
   id: string;
   isFork: boolean;
+  parent?: {
+    nameWithOwner: string;
+  };
   isArchived: boolean;
   nameWithOwner: string;
   autoMergeAllowed: boolean;
