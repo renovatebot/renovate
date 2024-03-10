@@ -334,8 +334,8 @@ importers:
         version: 3.22.4
     optionalDependencies:
       re2:
-        specifier: 1.20.9
-        version: 1.20.9
+        specifier: 1.20.10
+        version: 1.20.10
     devDependencies:
       '@hyrious/marshal':
         specifier: 0.3.3
@@ -9237,8 +9237,8 @@ packages:
       minimist: 1.2.8
       strip-json-comments: 2.0.1
 
-  /re2@1.20.9:
-    resolution: {integrity: sha512-ZYcPTFr5ha2xq3WQjBDTF9CWPSDK1z28MLh5UFRxc//7X8BNQ3A7yR7ITnP0jO346661ertdKVFqw1qoL3FMEQ==}
+  /re2@1.20.10:
+    resolution: {integrity: sha512-/5JjSPXobSDaKFL6rD5Gb4qD4CVBITQb7NAxfQ/NA7o0HER3SJAPV3lPO2kvzw0/PN1pVJNVATEUk4y9j7oIIA==}
     requiresBuild: true
     dependencies:
       install-artifact-from-github: 1.3.5
