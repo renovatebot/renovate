@@ -148,13 +148,6 @@ export interface RepoCacheData {
        */
       pullRequestsCache?: unknown;
       graphqlPageCache?: unknown;
-    };
-    github?: {
-      /**
-       * To avoid circular dependency problem, we use `unknown` type here.
-       */
-      pullRequestsCache?: unknown;
-      graphqlPageCache?: unknown;
       issuesCache?: Record<number, unknown>;
     };
     bitbucket?: {

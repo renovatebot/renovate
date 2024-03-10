@@ -153,11 +153,3 @@ export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
   lastModified?: string;
 }
-
-export interface GithubIssue {
-  body: string;
-  number: number;
-  state: string;
-  title: string;
-  lastModified: string;
-}
