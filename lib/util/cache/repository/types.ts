@@ -4,8 +4,6 @@ import type {
   UpdateType,
 } from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
-import type { BitbucketPrCacheData } from '../../../modules/platform/bitbucket/types';
-import type { GiteaPrCacheData } from '../../../modules/platform/gitea/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { PrBlockedBy } from '../../../workers/types';
 import type { HttpResponse } from '../../http/types';
@@ -142,7 +140,14 @@ export interface RepoCacheData {
   lastPlatformAutomergeFailure?: string;
   platform?: {
     gitea?: {
-      pullRequestsCache?: GiteaPrCacheData;
+      pullRequestsCache?: unknown;
+    };
+    github?: {
+      /**
+       * To avoid circular dependency problem, we use `unknown` type here.
+       */
+      pullRequestsCache?: unknown;
+      graphqlPageCache?: unknown;
     };
     github?: {
       /**
@@ -153,7 +158,7 @@ export interface RepoCacheData {
       issuesCache?: Record<number, unknown>;
     };
     bitbucket?: {
-      pullRequestsCache?: BitbucketPrCacheData;
+      pullRequestsCache?: unknown;
     };
   };
   prComments?: Record<number, Record<string, string>>;
