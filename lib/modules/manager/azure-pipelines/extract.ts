@@ -43,7 +43,6 @@ export function extractRepository(
       // extract the project name if the repository from which the pipline is referencing templates contains the Azure DevOps project name
       if (repository.name.includes('/')) {
         const [projectName, repoName] = repository.name.split('/');
-        depName = `${projectName}/${repository.name}`;
         repositoryUrl = joinUrlParts(
           endpoint,
           encodeURIComponent(projectName),
