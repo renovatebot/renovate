@@ -133,7 +133,6 @@ spec:
       helm:
         valueFiles:
           - $foo/values.yaml
-
 ---
 {{- if .Values.enabled }}
 apiVersion: argoproj.io/v1alpha1
