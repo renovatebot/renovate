@@ -121,8 +121,10 @@ function processAppSpec(
   return deps;
 }
 
-function processKustomizeImage(image: string): PackageDependency | null {
-  const parts = kustomizeImageRe.exec(image);
+function processKustomizeImage(
+  kustomizeImage: string,
+): PackageDependency | null {
+  const parts = kustomizeImageRe.exec(kustomizeImage);
   if (!parts?.groups?.image) {
     return null;
   }
