@@ -10,7 +10,10 @@ import type { PackageDependency, PackageFileContent } from '../types';
 import type { PipFile } from './types';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
-const packageRegex = regEx(/^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i);
+export const packagePattern = '[A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9]';
+export const extrasPattern = '(?:\\s*\\[[^\\]]+\\])*';
+const packageRegex = regEx(`^(${packagePattern})(${extrasPattern})$`, 'i');
+
 const rangePattern: string = RANGE_PATTERN;
 
 const specifierPartPattern = `\\s*${rangePattern.replace(
@@ -30,7 +33,9 @@ function extractFromSection(
 
   const deps = Object.entries(pipfileSection)
     .map((x) => {
-      const [depName, requirements] = x;
+      const [packageNameString, requirements] = x;
+      let depName = packageNameString;
+
       let currentValue: string | undefined;
       let nestedVersion = false;
       let skipReason: SkipReason | undefined;
@@ -52,10 +57,12 @@ function extractFromSection(
         skipReason = 'unspecified-version';
       }
       if (!skipReason) {
-        const packageMatches = packageRegex.exec(depName);
-        if (!packageMatches) {
+        const packageMatches = packageRegex.exec(packageNameString);
+        if (packageMatches) {
+          depName = packageMatches[1];
+        } else {
           logger.debug(
-            `Skipping dependency with malformed package name "${depName}".`,
+            `Skipping dependency with malformed package name "${packageNameString}".`,
           );
           skipReason = 'invalid-name';
         }

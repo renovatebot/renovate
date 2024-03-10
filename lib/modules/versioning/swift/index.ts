@@ -62,6 +62,10 @@ function isLessThanRange(version: string, range: string): boolean {
 }
 
 function matches(version: string, range: string): boolean {
+  // Check if both are an exact version
+  if (valid(range) && version === range) {
+    return true;
+  }
   const semverRange = toSemverRange(range);
   return semverRange ? satisfies(version, semverRange) : false;
 }
