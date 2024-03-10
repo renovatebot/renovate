@@ -63,7 +63,7 @@ export function extractRepository(
         );
       } else {
         logger.debug(
-          "Renovate cannot update Azure pipelines in 'git' repositories when neither the current repository nor the target repository contains the Azure DevOps project name.",
+          'Renovate cannot update Azure pipelines in git repositories when neither the current repository nor the target repository contains the Azure DevOps project name.',
         );
       }
     }
