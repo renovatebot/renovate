@@ -82,7 +82,7 @@ function processSource(source: ApplicationSource): PackageDependency[] {
     ];
   }
 
-  let dependencies: PackageDependency[] = [
+  const dependencies: PackageDependency[] = [
     {
       depName: source.repoURL,
       currentValue: source.targetRevision,
@@ -92,8 +92,8 @@ function processSource(source: ApplicationSource): PackageDependency[] {
 
   // Git repo is pointing to a Kustomize resources
   if (source.kustomize?.images) {
-    dependencies = dependencies.concat(
-      source.kustomize.images.map(processKustomizeImage).filter(is.truthy),
+    dependencies.push(
+      ...source.kustomize.images.map(processKustomizeImage).filter(is.truthy),
     );
   }
 
@@ -108,14 +108,14 @@ function processAppSpec(
       ? definition.spec
       : definition.spec.template.spec;
 
-  let deps: PackageDependency[] = [];
+  const deps: PackageDependency[] = [];
 
   if (is.nonEmptyObject(spec.source)) {
-    deps = processSource(spec.source);
+    deps.push(...processSource(spec.source));
   }
 
   for (const source of coerceArray(spec.sources)) {
-    deps = deps.concat(processSource(source));
+    deps.push(...processSource(source));
   }
 
   return deps;
