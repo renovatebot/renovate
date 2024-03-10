@@ -38,10 +38,8 @@ export const GithubIssue = z.union([GithubGraphqlIssue, GithubRestIssue]);
 type CacheData = Record<number, GithubIssue>;
 
 export class GithubIssueCache {
-  private static toReconcile: GithubIssue[] | null = null;
-
   private static reset(cacheData: CacheData): void {
-    this.toReconcile = null;
+    this.issuesToReconcile = null;
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.github ??= {};
@@ -56,9 +54,7 @@ export class GithubIssueCache {
       return undefined;
     }
 
-    if (this.toReconcile) {
-      cacheData = this.doReconcile(cacheData, this.toReconcile);
-    }
+    cacheData = this.reconcile(cacheData);
 
     return cacheData;
   }
@@ -69,7 +65,7 @@ export class GithubIssueCache {
       return null;
     }
 
-    return Object.values(cacheData).sort(
+    const sortedResult = Object.values(cacheData).sort(
       ({ lastModified: a }, { lastModified: b }) => {
         const x = DateTime.fromISO(a);
         const y = DateTime.fromISO(b);
@@ -85,6 +81,8 @@ export class GithubIssueCache {
         return 0;
       },
     );
+
+    return sortedResult;
   }
 
   static setIssues(issues: GithubIssue[]): void {
@@ -102,20 +100,32 @@ export class GithubIssueCache {
     }
   }
 
-  static reconcileIssues(issues: GithubIssue[]): void {
-    this.toReconcile = issues;
+  private static issuesToReconcile: GithubIssue[] | null = null;
+
+  /**
+   * At the moment of repo initialization, repository cache is not available.
+   * What we can do is to store issues for later reconciliation.
+   */
+  static addIssuesToReconcile(issues: GithubIssue[]): void {
+    this.issuesToReconcile = issues;
   }
 
-  private static doReconcile(
-    cacheData: CacheData,
-    issues: GithubIssue[],
-  ): CacheData {
+  private static reconcile(cacheData: CacheData): CacheData {
+    if (!this.issuesToReconcile) {
+      return cacheData;
+    }
+
     let isReconciled = false;
 
-    for (const issue of issues) {
+    for (const issue of this.issuesToReconcile) {
       const cachedIssue = cacheData[issue.number];
 
-      if (cachedIssue.lastModified === issue.lastModified) {
+      // If we reached the the item which is already in the cache,
+      // it means sync is done.
+      if (
+        cachedIssue.number === issue.number &&
+        cachedIssue.lastModified === issue.lastModified
+      ) {
         isReconciled = true;
         break;
       }
@@ -123,7 +133,9 @@ export class GithubIssueCache {
       cacheData[issue.number] = issue;
     }
 
-    if (issues.length === Object.keys(cacheData).length) {
+    // If we've just iterated over all the items in the cache,
+    // it means sync is also done.
+    if (this.issuesToReconcile.length >= Object.keys(cacheData).length) {
       isReconciled = true;
     }
 

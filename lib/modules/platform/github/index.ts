@@ -558,7 +558,7 @@ export async function initRepo({
     config.hasVulnerabilityAlertsEnabled = repo.hasVulnerabilityAlertsEnabled;
 
     const recentIssues = Issue.array().parse(res?.data.repository.issues.nodes);
-    GithubIssueCache.reconcileIssues(recentIssues);
+    GithubIssueCache.addIssuesToReconcile(recentIssues);
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
@@ -1231,10 +1231,7 @@ export async function getIssueList(): Promise<Issue[]> {
   return issueList;
 }
 
-export async function getIssue(
-  number: number,
-  useCache = true,
-): Promise<Issue | null> {
+export async function getIssue(number: number): Promise<Issue | null> {
   // istanbul ignore if
   if (config.hasIssuesEnabled === false) {
     return null;
@@ -1243,9 +1240,10 @@ export async function getIssue(
     const repo = config.parentRepo ?? config.repository;
     const { body: issue } = await githubApi.getJson(
       `repos/${repo}/issues/${number}`,
-      { memCache: useCache, repoCache: true },
+      { repoCache: true },
       Issue,
     );
+    GithubIssueCache.addIssue(issue);
     return issue;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, number }, 'Error getting issue');
@@ -1267,12 +1265,13 @@ export async function findIssue(title: string): Promise<Issue | null> {
 
 async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
-  await githubApi.patchJson(
-    `repos/${config.parentRepo ?? config.repository}/issues/${issueNumber}`,
-    {
-      body: { state: 'closed' },
-    },
+  const repo = config.parentRepo ?? config.repository;
+  const { body: closedIssue } = await githubApi.patchJson(
+    `repos/${repo}/issues/${issueNumber}`,
+    { body: { state: 'closed' } },
+    Issue,
   );
+  GithubIssueCache.addIssue(closedIssue);
 }
 
 export async function ensureIssue({
@@ -1319,17 +1318,18 @@ export async function ensureIssue({
           await closeIssue(i.number);
         }
       }
+
       const repo = config.parentRepo ?? config.repository;
-      const {
-        body: { body: issueBody },
-      } = await githubApi.getJson(
+      const { body: serverIssue } = await githubApi.getJson(
         `repos/${repo}/issues/${issue.number}`,
         { repoCache: true },
         Issue,
       );
+      GithubIssueCache.addIssue(serverIssue);
+
       if (
         issue.title === title &&
-        issueBody === body &&
+        serverIssue.body === body &&
         issue.state === 'open'
       ) {
         logger.debug('Issue is open and up to date - nothing to do');
@@ -1341,15 +1341,14 @@ export async function ensureIssue({
         if (labels) {
           data.labels = labels;
         }
+        const repo = config.parentRepo ?? config.repository;
         const { body: updatedIssue } = await githubApi.patchJson(
-          `repos/${config.parentRepo ?? config.repository}/issues/${
-            issue.number
-          }`,
+          `repos/${repo}/issues/${issue.number}`,
           { body: data },
           Issue,
         );
-        logger.debug('Issue updated');
         GithubIssueCache.addIssue(updatedIssue);
+        logger.debug('Issue updated');
         return 'updated';
       }
     }
@@ -1411,13 +1410,14 @@ async function tryAddMilestone(
     },
     'Adding milestone to PR',
   );
-  const repository = config.parentRepo ?? config.repository;
   try {
-    await githubApi.patchJson(`repos/${repository}/issues/${issueNo}`, {
-      body: {
-        milestone: milestoneNo,
-      },
-    });
+    const repo = config.parentRepo ?? config.repository;
+    const { body: updatedIssue } = await githubApi.patchJson(
+      `repos/${repo}/issues/${issueNo}`,
+      { body: { milestone: milestoneNo } },
+      Issue,
+    );
+    GithubIssueCache.addIssue(updatedIssue);
   } catch (err) {
     const actualError = err.response?.body || /* istanbul ignore next */ err;
     logger.warn(
@@ -1437,11 +1437,12 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo ?? config.repository;
-  await githubApi.postJson(`repos/${repository}/issues/${issueNo}/assignees`, {
-    body: {
-      assignees,
-    },
-  });
+  const { body: updatedIssue } = await githubApi.postJson(
+    `repos/${repository}/issues/${issueNo}/assignees`,
+    { body: { assignees } },
+    Issue,
+  );
+  GithubIssueCache.addIssue(updatedIssue);
 }
 
 export async function addReviewers(
