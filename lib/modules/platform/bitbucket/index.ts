@@ -10,8 +10,9 @@ import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { UUIDRegex } from '../../../util/string-match';
+import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match';
 import type {
+  AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -113,10 +114,10 @@ export async function initPlatform({
 }
 
 // Get all repositories that the user has access to
-export async function getRepos(): Promise<string[]> {
+export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
-    const repos = (
+    let repos = (
       await bitbucketHttp.getJson<PagedResult<RepoInfoBody>>(
         `/2.0/repositories/?role=contributor`,
         {
@@ -124,6 +125,19 @@ export async function getRepos(): Promise<string[]> {
         },
       )
     ).body.values;
+
+    // if autodiscoverProjects is configured
+    // filter the repos list
+    if (config?.projects?.length) {
+      logger.debug(
+        { autodiscoverProjects: config?.projects },
+        'Applying autodiscoverProjects filter',
+      );
+      repos = repos.filter((repo) =>
+        matchRegexOrGlobList(repo.project.name, config.projects!),
+      );
+    }
+
     return repos.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);

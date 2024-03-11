@@ -100,6 +100,7 @@ export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string[] | string;
   autodiscoverNamespaces?: string[];
+  autodiscoverProjects?: string[];
   autodiscoverTopics?: string[];
   baseDir?: string;
   cacheDir?: string;
