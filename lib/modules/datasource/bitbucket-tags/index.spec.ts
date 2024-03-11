@@ -62,7 +62,14 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       httpMock
         .scope('https://api.bitbucket.org')
         .get('/2.0/repositories/some/dep2')
-        .reply(200, { mainbranch: { name: 'master' } });
+        .reply(200, {
+          owner: { username: 'some' },
+          mainbranch: { name: 'master' },
+          has_issues: true,
+          uuid: '123',
+          full_name: 'some/repo',
+          is_private: false,
+        });
       httpMock
         .scope('https://api.bitbucket.org')
         .get('/2.0/repositories/some/dep2/commits/master')
@@ -87,7 +94,14 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       httpMock
         .scope('https://api.bitbucket.org')
         .get('/2.0/repositories/some/dep2')
-        .reply(200, { mainbranch: { name: 'master' } });
+        .reply(200, {
+          owner: { username: 'some' },
+          mainbranch: { name: 'master' },
+          has_issues: true,
+          uuid: '123',
+          full_name: 'some/repo',
+          is_private: false,
+        });
       httpMock
         .scope('https://api.bitbucket.org')
         .get('/2.0/repositories/some/dep2/commits/master')
