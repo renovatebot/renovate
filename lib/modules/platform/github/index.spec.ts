@@ -3035,7 +3035,13 @@ describe('modules/platform/github/index', () => {
           });
         scope
           .patch('/repos/some/repo/issues/123', (body) => body.milestone === 1)
-          .reply(200, {});
+          .reply(200, {
+            number: 123,
+            state: 'open',
+            title: 'bump someDep to v2',
+            body: 'many informations about someDep',
+            updated_at: '2023-01-01T00:00:00Z',
+          });
         await github.initRepo({ repository: 'some/repo' });
         const pr = await github.createPr({
           targetBranch: 'main',
