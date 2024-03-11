@@ -221,3 +221,10 @@ Add a label `auto:retry-latest` to any Discussion where the user should retry th
 </details>
 
 Apply the `self-hosted` label when an issue is applicable only to users who self-administer their own bot.
+
+## Automated label report
+
+There is a GitHub Action to automate the labeling process of issues, the job runs once in a week and checks for issues without the proper labels.
+
+If it finds any issues missing labels, it creates a new issue with the missing labels and details the issues found so any collaborator can label them accordingly.
+
