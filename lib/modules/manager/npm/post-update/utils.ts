@@ -1,3 +1,4 @@
+import semver from 'semver';
 import upath from 'upath';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
@@ -35,7 +36,10 @@ export function getPackageManagerVersion(
     logger.debug(
       `Found ${name} constraint in package.json packageManager: ${version}`,
     );
-    return version;
+    if (semver.valid(version)) {
+      return version;
+    }
+    return null;
   }
   if (pkg.engines?.[name]) {
     const version = pkg.engines[name];
