@@ -2127,14 +2127,6 @@ describe('modules/platform/github/index', () => {
             },
           },
         })
-        .get('/repos/some/repo/issues/2')
-        .reply(200, {
-          number: 2,
-          state: 'open',
-          title: 'title-1',
-          body: 'newer-content',
-          updated_at: '2021-01-01T00:00:00Z',
-        })
         .patch('/repos/some/repo/issues/1')
         .reply(200);
       const res = await github.ensureIssue({
@@ -2278,7 +2270,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .patch('/repos/undefined/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'closed',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       await expect(github.ensureIssueClosing('title-2')).toResolve();
     });
   });
@@ -2297,7 +2295,13 @@ describe('modules/platform/github/index', () => {
     it('should add the given assignees to the issue', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.post('/repos/some/repo/issues/42/assignees').reply(200);
+      scope.post('/repos/some/repo/issues/42/assignees').reply(200, {
+        number: 42,
+        state: 'open',
+        title: 'title-42',
+        body: 'body-42',
+        updated_at: '2023-01-01T00:00:00Z',
+      });
       await github.initRepo({ repository: 'some/repo' });
       await expect(
         github.addAssignees(42, ['someuser', 'someotheruser']),

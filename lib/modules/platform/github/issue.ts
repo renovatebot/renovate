@@ -39,7 +39,7 @@ type CacheData = Record<number, GithubIssue>;
 
 export class GithubIssueCache {
   private static reset(cacheData: CacheData): void {
-    this.issuesToReconcile = null;
+    delete this.issuesToReconcile;
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.github ??= {};
@@ -88,13 +88,13 @@ export class GithubIssueCache {
     }
   }
 
-  private static issuesToReconcile: GithubIssue[] | null = null;
+  private static issuesToReconcile: GithubIssue[] | undefined;
 
   /**
    * At the moment of repo initialization, repository cache is not available.
    * What we can do is to store issues for later reconciliation.
    */
-  static addIssuesToReconcile(issues: GithubIssue[]): void {
+  static addIssuesToReconcile(issues: GithubIssue[] | undefined): void {
     this.issuesToReconcile = issues;
   }
 
