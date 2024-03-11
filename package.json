@@ -253,7 +253,7 @@
     "zod": "3.22.4"
   },
   "optionalDependencies": {
-    "re2": "1.20.9"
+    "re2": "1.20.10"
   },
   "devDependencies": {
     "@hyrious/marshal": "0.3.3",
@@ -344,7 +344,7 @@
     "tmp-promise": "3.0.3",
     "ts-jest": "29.1.2",
     "ts-node": "10.9.2",
-    "type-fest": "4.10.3",
+    "type-fest": "4.12.0",
     "typescript": "5.3.3",
     "unified": "9.2.2"
   },
