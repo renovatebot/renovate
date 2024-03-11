@@ -22,6 +22,7 @@ export const presets: Record<string, Preset> = {
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
       'replacements:k8s-registry-move',
+      'replacements:mem-rename',
       'replacements:middie-to-scoped',
       'replacements:now-to-vercel',
       'replacements:npm-run-all-to-maintenance-fork',
@@ -645,6 +646,17 @@ export const presets: Record<string, Preset> = {
         matchPackagePatterns: ['^k8s\\.gcr\\.io/.+$'],
         replacementNameTemplate:
           "{{{replace 'k8s\\.gcr\\.io/' 'registry.k8s.io/' packageName}}}",
+      },
+    ],
+  },
+  'mem-rename': {
+    description: '`mem` was renamed to `memoize`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['mem'],
+        replacementName: 'memoize',
+        replacementVersion: '10.0.0',
       },
     ],
   },
