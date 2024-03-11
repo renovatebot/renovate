@@ -42,11 +42,10 @@ import type {
   PagedResult,
   PrResponse,
   RepoBranchingModel,
-  RepoInfo,
-  RepoInfoBody,
 } from './types';
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
+import { RepoInfo, RepositoryNames } from './schema';
 
 export const id = 'bitbucket';
 
@@ -116,15 +115,12 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
-    const repos = (
-      await bitbucketHttp.getJson<PagedResult<RepoInfoBody>>(
-        `/2.0/repositories/?role=contributor`,
-        {
-          paginate: true,
-        },
-      )
-    ).body.values;
-    return repos.map((repo) => repo.full_name);
+    const { body: repoNames } = await bitbucketHttp.getJson(
+      `/2.0/repositories/?role=contributor`,
+      { paginate: true },
+      RepositoryNames,
+    );
+    return repoNames;
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
@@ -183,13 +179,11 @@ export async function initRepo({
   let info: RepoInfo;
   let mainBranch: string;
   try {
-    info = utils.repoInfoTransformer(
-      (
-        await bitbucketHttp.getJson<RepoInfoBody>(
-          `/2.0/repositories/${repository}`,
-        )
-      ).body,
+    const { body: repoInfo } = await bitbucketHttp.getJson(
+      `/2.0/repositories/${repository}`,
+      RepoInfo,
     );
+    info = repoInfo;
 
     mainBranch = info.mainbranch;
 
