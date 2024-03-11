@@ -602,8 +602,8 @@ importers:
         specifier: 10.9.2
         version: 10.9.2(@swc/core@1.4.2)(@types/node@18.19.21)(typescript@5.3.3)
       type-fest:
-        specifier: 4.10.3
-        version: 4.10.3
+        specifier: 4.11.0
+        version: 4.11.0
       typescript:
         specifier: 5.3.3
         version: 5.3.3
@@ -8986,7 +8986,7 @@ packages:
     dependencies:
       '@babel/code-frame': 7.23.5
       index-to-position: 0.1.2
-      type-fest: 4.10.3
+      type-fest: 4.11.0
     dev: true
 
   /parse-link-header@2.0.0:
@@ -9268,7 +9268,7 @@ packages:
     dependencies:
       find-up-simple: 1.0.0
       read-pkg: 9.0.1
-      type-fest: 4.10.3
+      type-fest: 4.11.0
     dev: true
 
   /read-pkg-up@7.0.1:
@@ -9297,7 +9297,7 @@ packages:
       '@types/normalize-package-data': 2.4.4
       normalize-package-data: 6.0.0
       parse-json: 8.1.0
-      type-fest: 4.10.3
+      type-fest: 4.11.0
       unicorn-magic: 0.1.0
     dev: true
 
@@ -10408,8 +10408,8 @@ packages:
     engines: {node: '>=14.16'}
     dev: true
 
-  /type-fest@4.10.3:
-    resolution: {integrity: sha512-JLXyjizi072smKGGcZiAJDCNweT8J+AuRxmPZ1aG7TERg4ijx9REl8CNhbr36RV4qXqL1gO1FF9HL8OkVmmrsA==}
+  /type-fest@4.11.0:
+    resolution: {integrity: sha512-DPsoHKtnCUqqoB5Y4OPyat7ObSLz1XOkhHTmz+gOkz2p1xs+BBneTvHWriTwc313eozfBWh8b45EpaV3ZrrPPQ==}
     engines: {node: '>=16'}
     dev: true
 
