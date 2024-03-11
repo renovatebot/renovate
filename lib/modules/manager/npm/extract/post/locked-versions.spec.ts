@@ -104,7 +104,7 @@ describe('modules/manager/npm/extract/post/locked-versions', () => {
       await getLockedVersions(packageFiles);
       expect(packageFiles).toEqual([
         {
-          extractedConstraints: { yarn: '>=4.0.0' },
+          extractedConstraints: { yarn: '^2.0.0' },
           deps: [
             {
               currentValue: '1.0.0',

@@ -73,6 +73,5 @@ describe('modules/manager/npm/extract/yarn', () => {
     expect(getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 3 })).toBe(
       '^2.0.0',
     );
-    expect(getYarnVersionFromLock({})).toBe('>=4.0.0');
   });
 });

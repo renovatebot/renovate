@@ -104,24 +104,20 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
   if (isYarn1) {
     return '^1.22.18';
   }
-  if (!lockfileVersion) {
-    logger.debug(
-      `Could not determine yarn version from lock file - defaulting to latest`,
-    );
-    return `>=4.0.0`;
+  if (lockfileVersion && lockfileVersion >= 12) {
+    // This will probably be v5
+    return '>=4.0.0';
   }
-  if (lockfileVersion >= 12) {
-    logger.debug(`Unknown yarn lockfileVersion ${lockfileVersion}`);
-    return `>=4.0.0`;
+  if (lockfileVersion && lockfileVersion >= 10) {
+    return '^4.0.0';
   }
-  if (lockfileVersion >= 10) {
-    return `^4.0.0`;
-  }
-  if (lockfileVersion >= 8) {
+  if (lockfileVersion && lockfileVersion >= 8) {
+    // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
     return '^3.0.0';
-  }
-  if (lockfileVersion >= 6) {
+  } else if (lockfileVersion && lockfileVersion >= 6) {
+    // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
     return '^2.2.0';
   }
+
   return '^2.0.0';
 }
