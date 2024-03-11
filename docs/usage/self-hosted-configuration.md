@@ -216,6 +216,7 @@ For example:
 ## autodiscoverProjects
 
 You can use this option to filter the list of autodiscovered repositories by project names.
+This feature is useful for users who want Renovate to only work on repositories within specific projects or exclude certain repositories from being processed.
 
 ```json title="Example for Bitbucket"
 {
