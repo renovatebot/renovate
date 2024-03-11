@@ -41,4 +41,5 @@ jobs:
     runs-on: ${{ env.RUNNER }}
 ```
 
-The `github-action` manager also supports `ratchet` comments, like `# ratchet:actions/checkout@v2.1.0`. Please refer to the [ratchet documentation](https://github.com/sethvargo/ratchet/blob/main/README.md) for more information.
+The `github-action` manager also supports `ratchet` comments, like `# ratchet:actions/checkout@v2.1.0`.
+Please read the [ratchet documentation](https://github.com/sethvargo/ratchet/blob/main/README.md) for more information.
