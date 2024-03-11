@@ -66,20 +66,8 @@ export class GithubIssueCache {
     }
 
     const sortedResult = Object.values(cacheData).sort(
-      ({ lastModified: a }, { lastModified: b }) => {
-        const x = DateTime.fromISO(a);
-        const y = DateTime.fromISO(b);
-
-        if (x > y) {
-          return -1;
-        }
-
-        if (x < y) {
-          return 1;
-        }
-
-        return 0;
-      },
+      ({ lastModified: a }, { lastModified: b }) =>
+        DateTime.fromISO(b).toMillis() - DateTime.fromISO(a).toMillis(),
     );
 
     return sortedResult;
@@ -93,7 +81,7 @@ export class GithubIssueCache {
     this.reset(cacheData);
   }
 
-  static addIssue(issue: GithubIssue): void {
+  static updateIssue(issue: GithubIssue): void {
     const cacheData = this.data;
     if (cacheData) {
       cacheData[issue.number] = issue;
@@ -123,6 +111,7 @@ export class GithubIssueCache {
       // If we reached the the item which is already in the cache,
       // it means sync is done.
       if (
+        cachedIssue &&
         cachedIssue.number === issue.number &&
         cachedIssue.lastModified === issue.lastModified
       ) {

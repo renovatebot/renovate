@@ -1243,7 +1243,7 @@ export async function getIssue(number: number): Promise<Issue | null> {
       { repoCache: true },
       Issue,
     );
-    GithubIssueCache.addIssue(issue);
+    GithubIssueCache.updateIssue(issue);
     return issue;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, number }, 'Error getting issue');
@@ -1271,7 +1271,7 @@ async function closeIssue(issueNumber: number): Promise<void> {
     { body: { state: 'closed' } },
     Issue,
   );
-  GithubIssueCache.addIssue(closedIssue);
+  GithubIssueCache.updateIssue(closedIssue);
 }
 
 export async function ensureIssue({
@@ -1325,7 +1325,7 @@ export async function ensureIssue({
         { repoCache: true },
         Issue,
       );
-      GithubIssueCache.addIssue(serverIssue);
+      GithubIssueCache.updateIssue(serverIssue);
 
       if (
         issue.title === title &&
@@ -1347,7 +1347,7 @@ export async function ensureIssue({
           { body: data },
           Issue,
         );
-        GithubIssueCache.addIssue(updatedIssue);
+        GithubIssueCache.updateIssue(updatedIssue);
         logger.debug('Issue updated');
         return 'updated';
       }
@@ -1365,7 +1365,7 @@ export async function ensureIssue({
     );
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
-    GithubIssueCache.addIssue(createdIssue);
+    GithubIssueCache.updateIssue(createdIssue);
     return 'created';
   } catch (err) /* istanbul ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
@@ -1417,7 +1417,7 @@ async function tryAddMilestone(
       { body: { milestone: milestoneNo } },
       Issue,
     );
-    GithubIssueCache.addIssue(updatedIssue);
+    GithubIssueCache.updateIssue(updatedIssue);
   } catch (err) {
     const actualError = err.response?.body || /* istanbul ignore next */ err;
     logger.warn(
@@ -1442,7 +1442,7 @@ export async function addAssignees(
     { body: { assignees } },
     Issue,
   );
-  GithubIssueCache.addIssue(updatedIssue);
+  GithubIssueCache.updateIssue(updatedIssue);
 }
 
 export async function addReviewers(
