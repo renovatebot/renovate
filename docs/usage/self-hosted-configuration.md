@@ -217,16 +217,14 @@ For example:
 
 You can use this option to filter the list of autodiscovered repositories by project names.
 
-For example:
-
-```json
+```json title="Example for Bitbucket"
 {
   "platform": "bitbucket",
   "autodiscoverProjects": ["a-group", "!another-group/some-subgroup"]
 }
 ```
 
-The `autodiscoverProjects` config option takes an array of minimatch-compatible globs or re2-compatible regex strings.
+The `autodiscoverProjects` config option takes an array of minimatch-compatible globs or RE2-compatible regex strings.
 For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ## autodiscoverTopics
