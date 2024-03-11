@@ -29,7 +29,6 @@ COPY . ./
 # install
 RUN set -ex; \
   pnpm install --prod --offline --ignore-scripts; \
-  # npm explore re2 -- npm run install; \
   true
 
 # test
