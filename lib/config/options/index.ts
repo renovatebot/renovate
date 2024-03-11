@@ -885,7 +885,7 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['gitlab'],
   },
   {
-    name: 'autodiscoverNamespaces',
+    name: 'autodiscoverProjects',
     description:
       'Filter the list of autodiscovered repositories by project names.',
     stage: 'global',
