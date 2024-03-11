@@ -41,14 +41,9 @@ jobs:
     runs-on: ${{ env.RUNNER }}
 ```
 
-<<<<<<< HEAD
-The `github-action` manager also supports `ratchet` comments, like `# ratchet:actions/checkout@v2.1.0`.
-Please read the [ratchet documentation](https://github.com/sethvargo/ratchet/blob/main/README.md) for more information.
-=======
 The `github-action` manager understands `ratchet` comments, like `# ratchet:actions/checkout@v2.1.0`.
 This means that Renovate will:
 
 - update the version of a _pinned_ Ratchet version if needed
 - not delete Ratchet comments after parsing them
 - keep `# ratchet:exclude` comments
->>>>>>> 8bc27d16a (docs: clarify github-actions manager behavior)
