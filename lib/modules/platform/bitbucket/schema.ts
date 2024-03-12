@@ -23,7 +23,7 @@ export const PagedSourceResultsSchema = PagedSchema.extend({
 
 export const RepoInfo = z
   .object({
-    parent: z.unknown().optional(),
+    parent: z.unknown().optional().catch(undefined),
     owner: z.object({
       username: z.string(),
     }),
