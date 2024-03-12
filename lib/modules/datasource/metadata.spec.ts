@@ -512,13 +512,12 @@ describe('modules/datasource/metadata', () => {
     const dep = partial<ReleaseResult>({});
 
     const datasource = PypiDatasource.id;
-    const packageName = 'django';
+    const packageName = 'uwsgi';
 
     addMetaData(dep, datasource, packageName);
     expect(dep).toEqual({
       changelogUrl:
-        'https://github.com/django/django/tree/master/docs/releases',
-      sourceUrl: 'https://github.com/django/django',
+        'https://uwsgi-docs.readthedocs.io/en/latest/#release-notes',
     });
   });
 
