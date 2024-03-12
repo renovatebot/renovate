@@ -27,12 +27,12 @@ describe('modules/datasource/metadata', () => {
     };
 
     const datasource = PypiDatasource.id;
-    const packageName = 'uwsgi';
+    const packageName = 'pycountry';
 
     addMetaData(dep, datasource, packageName);
     expect(dep).toMatchSnapshot({
       changelogUrl:
-        'https://uwsgi-docs.readthedocs.io/en/latest/#release-notes',
+        'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
     });
   });
 
@@ -512,12 +512,13 @@ describe('modules/datasource/metadata', () => {
     const dep = partial<ReleaseResult>({});
 
     const datasource = PypiDatasource.id;
-    const packageName = 'uwsgi';
+    const packageName = 'pycountry';
 
     addMetaData(dep, datasource, packageName);
     expect(dep).toEqual({
       changelogUrl:
-        'https://uwsgi-docs.readthedocs.io/en/latest/#release-notes',
+        'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
+      sourceUrl: 'https://github.com/flyingcircusio/pycountry',
     });
   });
 
