@@ -653,7 +653,7 @@ export const presets: Record<string, Preset> = {
     description: '`mem` was renamed to `memoize`.',
     packageRules: [
       {
-        matchCurrentVersion: '>=10.0.0',
+        matchCurrentVersion: '^10.0.0',
         matchDatasources: ['npm'],
         matchPackageNames: ['mem'],
         replacementName: 'memoize',
