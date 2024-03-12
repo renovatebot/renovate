@@ -207,6 +207,11 @@ describe('modules/platform/bitbucket-server/index', () => {
         return scope;
       }
 
+      const endpoint =
+        scenarioName === 'endpoint with path'
+          ? 'https://stash.renovatebot.com/vcs/'
+          : 'https://stash.renovatebot.com';
+
       beforeEach(async () => {
         // reset module
         jest.resetModules();
@@ -218,14 +223,16 @@ describe('modules/platform/bitbucket-server/index', () => {
         git.getBranchCommit.mockReturnValue(
           '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
         );
-        const endpoint =
-          scenarioName === 'endpoint with path'
-            ? 'https://stash.renovatebot.com/vcs/'
-            : 'https://stash.renovatebot.com';
         hostRules.find.mockReturnValue({
           username,
           password,
         });
+        httpMock
+          .scope(urlHost)
+          .get(`${urlPath}/rest/api/1.0/application-properties`)
+          .reply(200, {
+            buildNumber: '8019000', // Bitbucket Server 8.19
+          });
         await bitbucket.initPlatform({
           endpoint,
           username,
@@ -234,19 +241,25 @@ describe('modules/platform/bitbucket-server/index', () => {
       });
 
       describe('initPlatform()', () => {
-        it('should throw if no endpoint', () => {
+        it('should throw if no endpoint', async () => {
           expect.assertions(1);
-          expect(() => bitbucket.initPlatform({})).toThrow();
+          expect(bitbucket.initPlatform({})).rejects.toThrow();
         });
 
-        it('should throw if no username/password', () => {
+        it('should throw if no username/password', async () => {
           expect.assertions(1);
-          expect(() =>
-            bitbucket.initPlatform({ endpoint: 'endpoint' }),
-          ).toThrow();
+          expect(
+            bitbucket.initPlatform({ endpoint: 'endpoint' })
+          ).rejects.toThrow();
         });
 
         it('should init', async () => {
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get(`/rest/api/1.0/application-properties`)
+            .reply(200, {
+              buildNumber: '8019000', // Bitbucket Server 8.19
+            });
           expect(
             await bitbucket.initPlatform({
               endpoint: 'https://stash.renovatebot.com',
@@ -278,7 +291,7 @@ describe('modules/platform/bitbucket-server/index', () => {
 
       describe('initRepo()', () => {
         it('works', async () => {
-          expect.assertions(1);
+          expect.assertions(2);
           httpMock
             .scope(urlHost)
             .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
@@ -295,6 +308,9 @@ describe('modules/platform/bitbucket-server/index', () => {
               repository: 'SOME/repo',
             }),
           ).toMatchSnapshot();
+          expect(git.initRepo).toHaveBeenCalledWith(
+            expect.objectContaining({ fullClone: false }),
+          );
         });
 
         it('no git url', async () => {
@@ -520,6 +536,72 @@ describe('modules/platform/bitbucket-server/index', () => {
               repository: 'SOME/repo',
             }),
           ).rejects.toThrow(REPOSITORY_EMPTY);
+        });
+
+        it('fullClone due to outdated Bitbucket Server', async () => {
+          expect.assertions(1);
+
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, {
+              buildNumber: '503000', // Bitbucket Server 5.3
+            });
+          await bitbucket.initPlatform({
+            endpoint,
+            username,
+            password,
+          });
+
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
+            .reply(200, repoMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
+            )
+            .reply(200, {
+              displayId: 'master',
+            });
+          await bitbucket.initRepo({
+            endpoint: 'https://stash.renovatebot.com/vcs/',
+            repository: 'SOME/repo',
+          })
+          expect(git.initRepo).toHaveBeenCalledWith(
+            expect.objectContaining({ fullClone: true }),
+          );
+        });
+
+        it('fallback to fullClone on failure of determine Bitbucket Server version', async () => {
+          expect.assertions(1);
+
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(500, {});
+          await bitbucket.initPlatform({
+            endpoint,
+            username,
+            password,
+          });
+
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
+            .reply(200, repoMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`,
+            )
+            .reply(200, {
+              displayId: 'master',
+            });
+          await bitbucket.initRepo({
+            endpoint: 'https://stash.renovatebot.com/vcs/',
+            repository: 'SOME/repo',
+          })
+          expect(git.initRepo).toHaveBeenCalledWith(
+            expect.objectContaining({ fullClone: false }),
+          );
         });
       });
 

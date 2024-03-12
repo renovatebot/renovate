@@ -22,6 +22,10 @@ export interface BbsPr extends Pr {
 
 export type BbsRestPrState = 'DECLINED' | 'OPEN' | 'MERGED';
 
+export interface BbsRestApplicationProperties {
+  buildNumber: string;
+}
+
 export interface BbsRestBranchRef {
   displayId: string;
   id: string;

@@ -42,6 +42,7 @@ import { smartTruncate } from '../utils/pr-body';
 import type {
   BbsConfig,
   BbsPr,
+  BbsRestApplicationProperties,
   BbsRestBranch,
   BbsRestPr,
   BbsRestRepo,
@@ -72,6 +73,8 @@ const defaults: {
   hostType: 'bitbucket-server',
 };
 
+let fullClone: boolean = true;
+
 /* istanbul ignore next */
 function updatePrVersion(pr: number, version: number): number {
   const res = Math.max(config.prVersions.get(pr) ?? 0, version);
@@ -79,7 +82,7 @@ function updatePrVersion(pr: number, version: number): number {
   return res;
 }
 
-export function initPlatform({
+export async function initPlatform({
   endpoint,
   username,
   password,
@@ -95,6 +98,18 @@ export function initPlatform({
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
+
+  try {
+    const { buildNumber } = (
+      await bitbucketServerHttp.getJson<BbsRestApplicationProperties>(
+        `./rest/api/1.0/application-properties`,
+      )
+    ).body;
+    fullClone = parseInt(buildNumber) < 7_007_000; // Bitbucket Server 7.7 added support for blobless clone
+  } catch (err) {
+    logger.debug({ err }, 'Unknown error determine blobless clone capability of Bitbucket Server');
+  }
+
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
@@ -204,7 +219,7 @@ export async function initRepo({
       ...config,
       url,
       cloneSubmodules,
-      fullClone: true,
+      fullClone
     });
 
     config.mergeMethod = 'merge';

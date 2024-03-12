@@ -421,6 +421,9 @@ export async function syncGit(): Promise<void> {
         logger.debug('Performing blobless clone');
         opts.push('--filter=blob:none');
       }
+      if (config.defaultBranch) {
+        opts.push('-b', config.defaultBranch);
+      }
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           // TODO: types (#22198)
