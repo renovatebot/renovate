@@ -1,0 +1,7 @@
+{
+  "name": "dtrace-provider",
+  "description": "Emtpy dummy package to override optional bunyan deps",
+  "version": "0.0.0",
+  "private": true,
+  "type": "commonjs"
+}

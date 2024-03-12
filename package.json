@@ -189,6 +189,7 @@
     "deepmerge": "4.3.1",
     "dequal": "2.0.3",
     "detect-indent": "6.1.0",
+    "dtrace-provider": "file:packages/dtrace-provider",
     "editorconfig": "2.0.0",
     "email-addresses": "5.0.0",
     "emoji-regex": "10.3.0",
@@ -220,6 +221,7 @@
     "markdown-it": "13.0.2",
     "markdown-table": "2.0.0",
     "minimatch": "9.0.3",
+    "moment": "file:packages/moment",
     "moo": "0.5.2",
     "ms": "2.1.3",
     "nanoid": "3.3.7",
@@ -353,7 +355,14 @@
     "dist",
     "renovate-schema.json"
   ],
+  "overrides": {
+    "dtrace-provider": "$dtrace-provider",
+    "moment": "$moment"
+  },
   "pnpm":{
-    "neverBuiltDependencies": ["dtrace-provider"]
+    "overrides": {
+      "dtrace-provider": "$dtrace-provider",
+      "moment": "$moment"
+    }
   }
 }
