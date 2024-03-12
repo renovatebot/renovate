@@ -1,14 +1,14 @@
-import type { RenovateConfig } from '../../../config/types';
-import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
-import { mergeChildConfig } from '../../../config';
-import * as template from '../../../util/template';
 import is from '@sindresorhus/is';
+import { mergeChildConfig } from '../../../config';
 import { parseFileConfig } from '../../../config/parse';
+import type { RenovateConfig } from '../../../config/types';
 import {
   CONFIG_INHERIT_NOT_FOUND,
   CONFIG_INHERIT_PARSE_ERROR,
 } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
+import { platform } from '../../../modules/platform';
+import * as template from '../../../util/template';
 
 export async function mergeInheritedConfig(
   config: RenovateConfig,
