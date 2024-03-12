@@ -1,14 +1,22 @@
+import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
+import { normalizeDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
-import { extractHeaderCommand, generateMermaidGraph } from './common';
+import { extractHeaderCommand } from './common';
 import type {
   DependencyBetweenFiles,
   PipCompileArgs,
   SupportedManagers,
 } from './types';
+import {
+  generateMermaidGraph,
+  inferCommandExecDir,
+  sortPackageFiles,
+} from './utils';
 
 function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
@@ -61,7 +69,6 @@ export async function extractAllPackageFiles(
   logger.trace('pip-compile.extractAllPackageFiles()');
   const lockFileArgs = new Map<string, PipCompileArgs>();
   const depsBetweenFiles: DependencyBetweenFiles[] = [];
-  // for debugging only ^^^ (for now)
   const packageFiles = new Map<string, PackageFile>();
   for (const fileMatch of fileMatches) {
     const fileContent = await readLocalFile(fileMatch, 'utf8');
@@ -70,25 +77,44 @@ export async function extractAllPackageFiles(
       continue;
     }
     let compileArgs: PipCompileArgs;
+    let compileDir: string;
     try {
       compileArgs = extractHeaderCommand(fileContent, fileMatch);
+      compileDir = inferCommandExecDir(fileMatch, compileArgs.outputFile);
     } catch (error) {
       logger.warn({ fileMatch }, `pip-compile: ${error.message}`);
       continue;
     }
     lockFileArgs.set(fileMatch, compileArgs);
     for (const constraint in compileArgs.constraintsFiles) {
-      // TODO(not7cd): handle constraints
-      /* istanbul ignore next */
       depsBetweenFiles.push({
         sourceFile: constraint,
         outputFile: fileMatch,
         type: 'constraint',
       });
     }
-    // TODO(not7cd): handle locked deps
-    // const lockedDeps = extractRequirementsFile(content);
-    for (const packageFile of compileArgs.sourceFiles) {
+    const lockedDeps = extractRequirementsFile(fileContent)?.deps;
+    if (!lockedDeps) {
+      logger.debug(
+        { fileMatch },
+        'pip-compile: Failed to extract dependencies from lock file',
+      );
+      continue;
+    }
+
+    for (const relativeSourceFile of compileArgs.sourceFiles) {
+      const packageFile = upath.normalizeTrim(
+        upath.join(compileDir, relativeSourceFile),
+      );
+      try {
+        ensureLocalPath(packageFile);
+      } catch (error) {
+        logger.warn(
+          { fileMatch, packageFile },
+          'pip-compile: Source file path outside of repository',
+        );
+        continue;
+      }
       depsBetweenFiles.push({
         sourceFile: packageFile,
         outputFile: fileMatch,
@@ -121,6 +147,39 @@ export async function extractAllPackageFiles(
         config,
       );
       if (packageFileContent) {
+        if (packageFileContent.managerData?.requirementsFiles) {
+          for (const file of packageFileContent.managerData.requirementsFiles) {
+            depsBetweenFiles.push({
+              sourceFile: file,
+              outputFile: packageFile,
+              type: 'requirement',
+            });
+          }
+        }
+        if (packageFileContent.managerData?.constraintsFiles) {
+          for (const file of packageFileContent.managerData.constraintsFiles) {
+            depsBetweenFiles.push({
+              sourceFile: file,
+              outputFile: packageFile,
+              type: 'requirement',
+            });
+          }
+        }
+        for (const dep of packageFileContent.deps) {
+          const lockedVersion = lockedDeps?.find(
+            (lockedDep) =>
+              normalizeDepName(lockedDep.depName!) ===
+              normalizeDepName(dep.depName!),
+          )?.currentVersion;
+          if (lockedVersion) {
+            dep.lockedVersion = lockedVersion;
+          } else {
+            logger.warn(
+              { depName: dep.depName, lockFile: fileMatch },
+              'pip-compile: dependency not found in lock file',
+            );
+          }
+        }
         packageFiles.set(packageFile, {
           ...packageFileContent,
           lockFiles: [fileMatch],
@@ -134,13 +193,16 @@ export async function extractAllPackageFiles(
       }
     }
   }
-  // TODO(not7cd): sort by requirement layering (-r -c within .in files)
   if (packageFiles.size === 0) {
     return null;
   }
+  const result: PackageFile[] = sortPackageFiles(
+    depsBetweenFiles,
+    packageFiles,
+  );
   logger.debug(
     'pip-compile: dependency graph:\n' +
       generateMermaidGraph(depsBetweenFiles, lockFileArgs),
   );
-  return Array.from(packageFiles.values());
+  return result;
 }

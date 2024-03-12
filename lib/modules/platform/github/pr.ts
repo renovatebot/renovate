@@ -12,7 +12,6 @@ function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
   repoCache.platform ??= {};
   repoCache.platform.github ??= {};
-  delete repoCache.platform.github.prCache;
   repoCache.platform.github.pullRequestsCache ??= { items: {} };
   const prApiCache = new ApiCache<GhPr>(
     repoCache.platform.github.pullRequestsCache as ApiPageCache<GhPr>,

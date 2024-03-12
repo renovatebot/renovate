@@ -9,8 +9,9 @@ import { logger } from '../../../logger';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
+import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import { constructPipCompileCmd } from './artifacts';
+import { extractHeaderCommand } from './common';
 import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);
@@ -94,7 +95,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
-      { cmd: 'pip-compile --no-emit-index-url requirements.in' },
+      { cmd: 'pip-compile requirements.in' },
     ]);
   });
 
@@ -139,7 +140,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchObject([
-      { cmd: 'pip-compile --no-emit-index-url requirements.in' },
+      { cmd: 'pip-compile requirements.in' },
     ]);
   });
 
@@ -179,6 +180,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
+          '-e PIP_NO_INPUT ' +
+          '-e PIP_KEYRING_PROVIDER ' +
+          '-e PYTHON_KEYRING_BACKEND ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar ' +
@@ -187,7 +191,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '&& ' +
           'install-tool pip-tools 6.13.0 ' +
           '&& ' +
-          'pip-compile --no-emit-index-url requirements.in' +
+          'pip-compile requirements.in' +
           '"',
       },
     ]);
@@ -223,7 +227,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
       { cmd: 'install-tool python 3.10.2' },
       { cmd: 'install-tool pip-tools 6.13.0' },
       {
-        cmd: 'pip-compile --no-emit-index-url requirements.in',
+        cmd: 'pip-compile requirements.in',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -268,7 +272,34 @@ describe('modules/manager/pip-compile/artifacts', () => {
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchObject([
-      { cmd: 'pip-compile --no-emit-index-url requirements.in' },
+      { cmd: 'pip-compile requirements.in' },
+    ]);
+  });
+
+  it('uses --upgrade-package only for isLockfileUpdate', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['requirements.txt'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.in',
+        updatedDeps: [
+          { depName: 'foo', newVersion: '1.0.2', isLockfileUpdate: true },
+          { depName: 'bar', newVersion: '2.0.0' },
+        ] satisfies Upgrade[],
+        newPackageFileContent: '{}',
+        config: { ...lockMaintenanceConfig, lockFiles: ['requirements.txt'] },
+      }),
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pip-compile requirements.in --upgrade-package=foo==1.0.2',
+      },
     ]);
   });
 
@@ -309,6 +340,9 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e PIP_CACHE_DIR ' +
+          '-e PIP_NO_INPUT ' +
+          '-e PIP_KEYRING_PROVIDER ' +
+          '-e PYTHON_KEYRING_BACKEND ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'ghcr.io/containerbase/sidecar ' +
@@ -317,19 +351,25 @@ describe('modules/manager/pip-compile/artifacts', () => {
           '&& ' +
           'install-tool pip-tools 6.13.0 ' +
           '&& ' +
-          'pip-compile --no-emit-index-url requirements.in' +
+          'pip-compile requirements.in' +
           '"',
       },
     ]);
   });
 
   describe('constructPipCompileCmd()', () => {
+    afterEach(() => {
+      delete process.env.PIP_INDEX_URL;
+      delete process.env.PIP_EXTRA_INDEX_URL;
+    });
+
     it('throws for garbage', () => {
       expect(() =>
         constructPipCompileCmd(
-          Fixtures.get('requirementsNoHeaders.txt'),
-          'subdir/requirements.txt',
-          false,
+          extractHeaderCommand(
+            Fixtures.get('requirementsNoHeaders.txt'),
+            'subdir/requirements.txt',
+          ),
         ),
       ).toThrow(/extract/);
     });
@@ -337,64 +377,123 @@ describe('modules/manager/pip-compile/artifacts', () => {
     it('returns extracted common arguments (like those featured in the README)', () => {
       expect(
         constructPipCompileCmd(
-          Fixtures.get('requirementsWithHashes.txt'),
-          'subdir/requirements.txt',
-          false,
+          extractHeaderCommand(
+            Fixtures.get('requirementsWithHashes.txt'),
+            'subdir/requirements.txt',
+          ),
         ),
       ).toBe(
         'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
       );
     });
 
-    it('returns --no-emit-index-url only once when its in the header and credentials are present in URLs', () => {
+    it('returns --no-emit-index-url when credentials are found in PIP_INDEX_URL', () => {
+      process.env.PIP_INDEX_URL = 'https://user:pass@example.com/pypi/simple';
       expect(
         constructPipCompileCmd(
-          Fixtures.get('requirementsWithHashes.txt'),
-          'subdir/requirements.txt',
-          true,
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
         ),
-      ).toBe(
-        'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
-      );
-    });
-
-    it('safeguard against index url leak if not explicitly set by an option', () => {
-      expect(
-        constructPipCompileCmd(simpleHeader, 'subdir/requirements.txt', false),
       ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
-    it('allow explicit --emit-index-url', () => {
+    it('returns --no-emit-index-url when credentials are found in PIP_EXTRA_INDEX_URL', () => {
+      process.env.PIP_EXTRA_INDEX_URL =
+        'https://user:pass@example.com/pypi/simple';
       expect(
         constructPipCompileCmd(
-          getCommandInHeader('pip-compile --emit-index-url requirements.in'),
-          'subdir/requirements.txt',
-          false,
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
         ),
-      ).toBe('pip-compile --emit-index-url requirements.in');
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
     });
 
-    // TODO(not7cd): remove when relative pahts are supported
-    it('change --output-file if differs', () => {
+    it('returns --no-emit-index-url when only a username is found in PIP_INDEX_URL', () => {
+      process.env.PIP_INDEX_URL = 'https://user@example.com/pypi/simple';
       expect(
         constructPipCompileCmd(
-          getCommandInHeader(
-            'pip-compile --output-file=hey.txt requirements.in',
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url when only a username is found in PIP_EXTRA_INDEX_URL', () => {
+      process.env.PIP_EXTRA_INDEX_URL = 'https://user@example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url when only a password is found in PIP_INDEX_URL', () => {
+      process.env.PIP_INDEX_URL = 'https://:pass@example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url when only a password is found in PIP_EXTRA_INDEX_URL', () => {
+      process.env.PIP_EXTRA_INDEX_URL = 'https://:pass@example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url when PIP_INDEX_URL is invalid', () => {
+      process.env.PIP_INDEX_URL = 'invalid-url';
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url PIP_EXTRA_INDEX_URL is invalid', () => {
+      process.env.PIP_EXTRA_INDEX_URL = 'invalid-url';
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(simpleHeader, 'subdir/requirements.txt'),
+        ),
+      ).toBe('pip-compile --no-emit-index-url requirements.in');
+    });
+
+    it('returns --no-emit-index-url only once when its in the header and credentials are present in the environment', () => {
+      process.env.PIP_EXTRA_INDEX_URL =
+        'https://user:pass@example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(
+            Fixtures.get('requirementsWithHashes.txt'),
+            'subdir/requirements.txt',
           ),
-          'subdir/requirements.txt',
-          false,
         ),
       ).toBe(
-        'pip-compile --no-emit-index-url --output-file=requirements.txt requirements.in',
+        'pip-compile --allow-unsafe --generate-hashes --no-emit-index-url --strip-extras --resolver=backtracking --output-file=requirements.txt requirements.in',
       );
+    });
+
+    it('allow explicit --emit-index-url', () => {
+      process.env.PIP_INDEX_URL = 'https://user:pass@example.com/pypi/simple';
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(
+            getCommandInHeader('pip-compile --emit-index-url requirements.in'),
+            'subdir/requirements.txt',
+          ),
+        ),
+      ).toBe('pip-compile --emit-index-url requirements.in');
     });
 
     it('throws on unknown arguments', () => {
       expect(() =>
         constructPipCompileCmd(
-          Fixtures.get('requirementsWithUnknownArguments.txt'),
-          'subdir/requirements.txt',
-          false,
+          extractHeaderCommand(
+            Fixtures.get('requirementsWithUnknownArguments.txt'),
+            'subdir/requirements.txt',
+          ),
         ),
       ).toThrow(/supported/);
     });
@@ -402,11 +501,31 @@ describe('modules/manager/pip-compile/artifacts', () => {
     it('throws on custom command', () => {
       expect(() =>
         constructPipCompileCmd(
-          Fixtures.get('requirementsCustomCommand.txt'),
-          'subdir/requirements.txt',
-          false,
+          extractHeaderCommand(
+            Fixtures.get('requirementsCustomCommand.txt'),
+            'subdir/requirements.txt',
+          ),
         ),
       ).toThrow(/custom/);
+    });
+
+    it('add --upgrade-package to command if Upgrade[] passed', () => {
+      expect(
+        constructPipCompileCmd(
+          extractHeaderCommand(
+            getCommandInHeader(
+              'pip-compile --output-file=requirements.txt requirements.in',
+            ),
+            'subdir/requirements.txt',
+          ),
+          [
+            { depName: 'foo', newVersion: '1.0.2' },
+            { depName: 'bar', newVersion: '2.0.0' },
+          ] satisfies Upgrade[],
+        ),
+      ).toBe(
+        'pip-compile --output-file=requirements.txt requirements.in --upgrade-package=foo==1.0.2 --upgrade-package=bar==2.0.0',
+      );
     });
   });
 });
