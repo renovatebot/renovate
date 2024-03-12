@@ -229,6 +229,11 @@ export interface RenovateConfig
 
   hostRules?: HostRule[];
 
+  inheritConfig?: boolean;
+  inheritConfigFileName?: string;
+  inheritConfigRepoName?: string;
+  inheritConfigStrict?: boolean;
+
   ignorePresets?: string[];
   forkProcessing?: 'auto' | 'enabled' | 'disabled';
   isFork?: boolean;
