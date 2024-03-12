@@ -25,25 +25,35 @@ export const RepoInfo = z
   .object({
     parent: z.unknown().optional().catch(undefined),
     owner: z.object({
-      username: z.string(),
+      username: z.string().optional(),
     }),
     mainbranch: z.object({
       name: z.string(),
     }),
     has_issues: z.boolean(),
     uuid: z.string(),
-    full_name: z.string(),
+    full_name: z
+      .string()
+      .regex(
+        /^[^/]+\/[^/]+$/,
+        'Expected repository full_name to be in the format "owner/repo"',
+      ),
     is_private: z.boolean(),
   })
-  .transform((repoInfoBody) => ({
-    isFork: !!repoInfoBody.parent,
-    owner: repoInfoBody.owner.username,
-    mainbranch: repoInfoBody.mainbranch.name,
-    mergeMethod: 'merge',
-    has_issues: repoInfoBody.has_issues,
-    uuid: repoInfoBody.uuid,
-    is_private: repoInfoBody.is_private,
-  }));
+  .transform((repoInfoBody) => {
+    const isFork = !!repoInfoBody.parent;
+    const [owner] = repoInfoBody.full_name.split('/');
+
+    return {
+      isFork,
+      owner,
+      mainbranch: repoInfoBody.mainbranch.name,
+      mergeMethod: 'merge',
+      has_issues: repoInfoBody.has_issues,
+      uuid: repoInfoBody.uuid,
+      is_private: repoInfoBody.is_private,
+    };
+  });
 export type RepoInfo = z.infer<typeof RepoInfo>;
 
 export const RepositoryNames = z
