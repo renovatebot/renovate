@@ -5,8 +5,8 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  dtrace-provider: file:packages/dtrace-provider
-  moment: file:packages/moment
+  dtrace-provider: ./packages/dtrace-provider
+  moment: ./packages/moment
 
 importers:
 
@@ -151,8 +151,8 @@ importers:
         specifier: 6.1.0
         version: 6.1.0
       dtrace-provider:
-        specifier: file:/home/kriese/src/renovate/packages/dtrace-provider
-        version: file:packages/dtrace-provider
+        specifier: ./packages/dtrace-provider
+        version: link:packages/dtrace-provider
       editorconfig:
         specifier: 2.0.0
         version: 2.0.0
@@ -247,8 +247,8 @@ importers:
         specifier: 9.0.3
         version: 9.0.3
       moment:
-        specifier: file:/home/kriese/src/renovate/packages/moment
-        version: file:packages/moment
+        specifier: ./packages/moment
+        version: link:packages/moment
       moo:
         specifier: 0.5.2
         version: 0.5.2
@@ -4773,8 +4773,8 @@ packages:
     engines: {'0': node >=0.10.0}
     hasBin: true
     optionalDependencies:
-      dtrace-provider: file:packages/dtrace-provider
-      moment: file:packages/moment
+      dtrace-provider: link:packages/dtrace-provider
+      moment: link:packages/moment
       mv: 2.1.1
       safe-json-stringify: 1.2.0
     dev: false
@@ -10895,16 +10895,6 @@ packages:
 
   /zwitch@1.0.5:
     resolution: {integrity: sha512-V50KMwwzqJV0NpZIZFwfOD5/lyny3WlSzRiXgA0G7VUnRlqttta1L6UQIHzd6EuBY/cHGfwTIck7w1yH6Q5zUw==}
-    dev: false
-
-  file:packages/dtrace-provider:
-    resolution: {directory: packages/dtrace-provider, type: directory}
-    name: dtrace-provider
-    dev: false
-
-  file:packages/moment:
-    resolution: {directory: packages/moment, type: directory}
-    name: moment
     dev: false
 
   file:tools/eslint:
