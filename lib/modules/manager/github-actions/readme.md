@@ -1,7 +1,10 @@
 The `github-actions` manager extracts dependencies from GitHub Actions workflow and workflow template files.
 It can also be used for Gitea and Forgejo Actions workflows as such are compatible with GitHub Actions workflows.
 
-If you like to use digest pinning but want to follow the action version tag, you can use the following sample:
+If you like to use digest pinning but want to follow the action version tag, you can use the sample below.
+The version tag can be in the format `(prefix-)(v)1.0.0`, where `prefix` and `v` are optional and `1.0.0` is the version number.
+
+````yaml
 
 ```yaml
 name: build
@@ -13,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
-```
+````
 
 Renovate will update the commit SHA but follow the GitHub tag you specified.
 Renovate can update digests that use SHA1 and SHA256 algorithms.
