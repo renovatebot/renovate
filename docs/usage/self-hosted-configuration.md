@@ -662,11 +662,17 @@ If the file exists but cannot be parsed, then a config warning issue will be rai
 
 Inherited config can include all valid repo config and additionally the following config options:
 
-- `requireConfig`
+- `bbUseDevelopmentBranch`
 - `onboarding`
-- Any other global option starting with `onboarding`, such as `onboardingBranch`
-
-// TODO: confirm if there are any others config options useful/applicable
+- `onboardingBranch`
+- `onboardingCommitMessage`
+- `onboardingConfig`
+- `onboardingConfigFileName`
+- `onboardingNoDeps`
+- `onboardingPrTitle`
+- `onboardingRebaseCheckbox`
+- `optimizeForDisabled`
+- `requireConfig`
 
 This means that orgs can change/control default behavior for whether configs are required and how repositories are onboarded.
 
@@ -676,8 +682,7 @@ A smart/dynamic approach will be added in future so that it can be enabled selec
 ## inheritConfigFileName
 
 Change this setting if you wish for Renovate to look for a different file name within the `inheritConfigRepoName` repository.
-
-// TODO: check if nested works
+Nested files are supported, e.g. `"some-dir/config.json"`;
 
 ## inheritConfigRepoName
 
