@@ -128,13 +128,14 @@ export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
 
     // if autodiscoverProjects is configured
     // filter the repos list
-    if (config.projects?.length) {
+    const autodiscoverProjects = config.projects;
+    if (is.nonEmptyArray(autodiscoverProjects)) {
       logger.debug(
-        { autodiscoverProjects: config?.projects },
+        { autodiscoverProjects: config.projects },
         'Applying autodiscoverProjects filter',
       );
       repos = repos.filter((repo) =>
-        matchRegexOrGlobList(repo.project.name, config.projects!),
+        matchRegexOrGlobList(repo.project.name, autodiscoverProjects),
       );
     }
 
