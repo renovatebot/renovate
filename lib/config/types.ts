@@ -396,6 +396,8 @@ export interface RenovateOptionBase {
    */
   globalOnly?: boolean;
 
+  inheritConfigSupport?: boolean;
+
   allowedValues?: string[];
 
   allowString?: boolean;

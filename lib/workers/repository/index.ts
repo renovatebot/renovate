@@ -42,6 +42,7 @@ export async function renovateRepository(
   let config = GlobalConfig.set(
     applySecretsToConfig(repoConfig, undefined, false),
   );
+  logger.warn('GlobalConfig.set()');
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion: pkg.version }, 'Repository started');

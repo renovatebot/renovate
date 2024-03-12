@@ -53,6 +53,26 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('catches global options in inherit config', async () => {
+      const config = {
+        binarySource: 'something',
+        username: 'user',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'inherit',
+        config,
+      );
+      expect(warnings).toHaveLength(2);
+      expect(warnings).toMatchObject([
+        {
+          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+        },
+        {
+          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+        },
+      ]);
+    });
+
     it('only warns for actual globals in repo config', async () => {
       const config = {
         hostRules: [
@@ -65,6 +85,17 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('does not warn for valid inheritConfig', async () => {
+      const config = {
+        onboarding: false,
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'inherit',
         config,
       );
       expect(warnings).toHaveLength(0);

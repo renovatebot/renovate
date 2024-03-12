@@ -122,6 +122,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'renovate/configure',
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -131,6 +132,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: null,
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -140,6 +142,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'renovate.json',
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -148,6 +151,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'onboardingPrTitle',
@@ -156,6 +160,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'Configure Renovate',
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -491,6 +496,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'onboardingConfig',
@@ -499,6 +505,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: { $schema: 'https://docs.renovatebot.com/renovate-schema.json' },
     globalOnly: true,
+    inheritConfigSupport: true,
     mergeable: true,
   },
   {
@@ -608,6 +615,7 @@ const options: RenovateOptions[] = [
     default: 'required',
     allowedValues: ['required', 'optional', 'ignored'],
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'optimizeForDisabled',
@@ -1926,6 +1934,7 @@ const options: RenovateOptions[] = [
     default: false,
     supportedPlatforms: ['bitbucket'],
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   // Automatic merging
   {

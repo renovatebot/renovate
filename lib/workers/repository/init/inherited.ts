@@ -2,9 +2,11 @@ import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../config';
 import { parseFileConfig } from '../../../config/parse';
 import type { RenovateConfig } from '../../../config/types';
+import { validateConfig } from '../../../config/validation';
 import {
   CONFIG_INHERIT_NOT_FOUND,
   CONFIG_INHERIT_PARSE_ERROR,
+  CONFIG_VALIDATION,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
@@ -72,7 +74,21 @@ export async function mergeInheritedConfig(
     logger.debug({ parseResult }, 'Error parsing inherited config');
     throw new Error(CONFIG_INHERIT_PARSE_ERROR);
   }
-  // TODO: Validate inherited config
-  logger.debug({ config: parseResult.parsedContents }, `Inherited config`);
-  return mergeChildConfig(config, parseResult.parsedContents as RenovateConfig);
+  const inheritedConfig = parseResult.parsedContents as RenovateConfig;
+  logger.debug({ config: inheritedConfig }, `Inherited config`);
+  const res = await validateConfig('inherit', inheritedConfig);
+  if (res.errors.length) {
+    logger.warn(
+      { errors: res.errors },
+      'Found errors in inherited configuration',
+    );
+    throw new Error(CONFIG_VALIDATION);
+  }
+  if (res.warnings.length) {
+    logger.warn(
+      { warnings: res.warnings },
+      'Found warnings in inherited configuration',
+    );
+  }
+  return mergeChildConfig(config, inheritedConfig);
 }
