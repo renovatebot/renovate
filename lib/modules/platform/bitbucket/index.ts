@@ -114,7 +114,7 @@ export async function initPlatform({
 }
 
 // Get all repositories that the user has access to
-export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
+export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
     let repos = (
@@ -128,7 +128,7 @@ export async function getRepos(config?: AutodiscoverConfig): Promise<string[]> {
 
     // if autodiscoverProjects is configured
     // filter the repos list
-    if (config?.projects?.length) {
+    if (config.projects?.length) {
       logger.debug(
         { autodiscoverProjects: config?.projects },
         'Applying autodiscoverProjects filter',

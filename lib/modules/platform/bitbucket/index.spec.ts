@@ -133,7 +133,7 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [{ full_name: 'foo/bar' }, { full_name: 'some/repo' }],
         });
-      const res = await bitbucket.getRepos();
+      const res = await bitbucket.getRepos({});
       expect(res).toEqual(['foo/bar', 'some/repo']);
     });
 
