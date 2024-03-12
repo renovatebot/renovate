@@ -652,6 +652,34 @@ By default, Renovate does not autodiscover repositories that are mirrors.
 
 Change this setting to `true` to include repositories that are mirrors as Renovate targets.
 
+## inheritConfig
+
+When this option is enabled, Renovate will look for a file `org-inherited-config.json5` in the `<orgName>/renovate-config` repo before processing a repository, and read this in as config.
+If the repository is in a nested org/group on a supported platform such as GitLab, such as `topGroup/nestedGroup/projectName` then Renovate will look in `topGroup/nestedGroup/renovate-config`.
+
+If `inheritConfig` is `true` but the inherited config file does not exist then Renovate will proceed without warning.
+If the file exists but cannot be parsed, then a config warning issue will be raised and the job aborted.
+
+Inherited config can include all valid repo config and additionally the following config options:
+
+- `requireConfig`
+- `onboarding`
+- Any other global option starting with `onboarding`, such as `onboardingBranch`
+
+// TODO: confirm if there are any others config options useful/applicable
+
+This means that orgs can change/control default behavior for whether configs are required and how repositories are onboarded.
+
+This setting is not enabled in the Mend Renovate App because each 404 from the GitHub API would count as a used API call, which would add millions of wasted API calls per week.
+A smart/dynamic approach will be added in future so that it can be enabled selectively per-org.
+
+## inheritConfigStrict
+
+By default Renovate will silently (debug log message only) ignore cases where `inheritConfig=true` but no inherited config is found.
+If `inheritConfigStrict=true` then Renovate will instead abort the run and raise a config error if the inherited config is not found.
+
+Set this to true only if every org has an inherited config file and you want to make sure Renovate never runs without it.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
