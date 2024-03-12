@@ -673,6 +673,17 @@ This means that orgs can change/control default behavior for whether configs are
 This setting is not enabled in the Mend Renovate App because each 404 from the GitHub API would count as a used API call, which would add millions of wasted API calls per week.
 A smart/dynamic approach will be added in future so that it can be enabled selectively per-org.
 
+## inheritConfigFileName
+
+Change this setting if you wish for Renovate to look for a different file name within the `inheritConfigRepoName` repository.
+
+// TODO: check if nested works
+
+## inheritConfigRepoName
+
+Change this setting if you wish for Renovate to look in an alternative repository for the inherited config.
+The repository always needs to be on the same platform/endpoint, and Renovate's token needs permission to access it.
+
 ## inheritConfigStrict
 
 By default Renovate will silently (debug log message only) ignore cases where `inheritConfig=true` but no inherited config is found.
