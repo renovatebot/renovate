@@ -671,7 +671,6 @@ Inherited config can include all valid repo config and additionally the followin
 - `onboardingNoDeps`
 - `onboardingPrTitle`
 - `onboardingRebaseCheckbox`
-- `optimizeForDisabled`
 - `requireConfig`
 
 This means that orgs can change/control default behavior for whether configs are required and how repositories are onboarded.
