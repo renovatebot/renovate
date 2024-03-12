@@ -2,6 +2,7 @@ import type { IncomingHttpHeaders } from 'node:http';
 import type {
   OptionsOfBufferResponseBody,
   OptionsOfJSONResponseBody,
+  ParseJsonFunction,
 } from 'got';
 
 export type GotContextOptions = {
@@ -45,6 +46,7 @@ export interface GraphqlOptions {
   limit?: number;
   cursor?: string | null;
   acceptHeader?: string;
+  token?: string;
 }
 
 export interface HttpOptions {
@@ -63,6 +65,7 @@ export interface HttpOptions {
 
   token?: string;
   memCache?: boolean;
+  repoCache?: boolean;
 }
 
 export interface EtagCache<T = any> {
@@ -78,6 +81,8 @@ export interface InternalHttpOptions extends HttpOptions {
   json?: HttpOptions['body'];
   responseType?: 'json' | 'buffer';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
+  parseJson?: ParseJsonFunction;
+  repoCache?: boolean;
 }
 
 export interface HttpHeaders extends IncomingHttpHeaders {
@@ -90,3 +95,6 @@ export interface HttpResponse<T = string> {
   headers: HttpHeaders;
   authorization?: boolean;
 }
+
+export type Task<T> = () => Promise<T>;
+export type GotTask<T> = Task<HttpResponse<T>>;

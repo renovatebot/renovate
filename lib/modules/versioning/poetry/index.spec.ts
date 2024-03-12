@@ -37,7 +37,7 @@ describe('modules/versioning/poetry/index', () => {
       expect(versioning.getMajor(version)).toBe(major);
       expect(versioning.getMinor(version)).toBe(minor);
       expect(versioning.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   it.each`
@@ -83,6 +83,8 @@ describe('modules/versioning/poetry/index', () => {
 
   it.each`
     version                                          | expected
+    ${null}                                          | ${false}
+    ${undefined}                                     | ${false}
     ${'17.04.00'}                                    | ${true}
     ${'17.b4.0'}                                     | ${false}
     ${'1.2.3'}                                       | ${true}
@@ -101,6 +103,7 @@ describe('modules/versioning/poetry/index', () => {
     ${'renovatebot/renovate'}                        | ${false}
     ${'renovatebot/renovate#master'}                 | ${false}
     ${'https://github.com/renovatebot/renovate.git'} | ${false}
+    ${'>=2.6, !=3.0.*, !=3.1.*, !=3.2.*, <4'}        | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(!!versioning.isValid(version)).toBe(expected);
   });
@@ -135,7 +138,7 @@ describe('modules/versioning/poetry/index', () => {
     'matches("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(versioning.matches(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -146,7 +149,7 @@ describe('modules/versioning/poetry/index', () => {
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(versioning.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -162,7 +165,7 @@ describe('modules/versioning/poetry/index', () => {
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(versioning.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -175,7 +178,7 @@ describe('modules/versioning/poetry/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(versioning.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
   it.each`
@@ -238,7 +241,7 @@ describe('modules/versioning/poetry/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 
   it.each`

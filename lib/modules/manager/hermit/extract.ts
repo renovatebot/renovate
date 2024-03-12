@@ -15,7 +15,7 @@ const pkgReferenceRegex = regEx(`(?<packageName>.*?)-(?<version>[0-9]{1}.*)`);
  */
 export async function extractPackageFile(
   _content: string,
-  packageFile: string
+  packageFile: string,
 ): Promise<PackageFileContent | null> {
   logger.trace(`hermit.extractPackageFile(${packageFile})`);
   const dependencies = [] as PackageDependency[];
@@ -46,7 +46,7 @@ export async function extractPackageFile(
  * listHermitPackages will fetch all installed packages from the bin folder
  */
 async function listHermitPackages(
-  packageFile: string
+  packageFile: string,
 ): Promise<HermitListItem[] | null> {
   logger.trace('hermit.listHermitPackages()');
   const hermitFolder = upath.dirname(packageFile);
@@ -58,7 +58,7 @@ async function listHermitPackages(
   } catch (err) {
     logger.debug(
       { hermitFolder, err, packageFile },
-      'error listing hermit package references'
+      'error listing hermit package references',
     );
     return null;
   }
@@ -90,7 +90,7 @@ async function listHermitPackages(
     if (!groups) {
       logger.debug(
         { fileName },
-        'invalid hermit package reference file name found'
+        'invalid hermit package reference file name found',
       );
       continue;
     }

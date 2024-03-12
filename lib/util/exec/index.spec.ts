@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { exec as cpExec, envMock } from '../../../test/exec-util';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
@@ -11,11 +12,10 @@ import { exec } from '.';
 const getHermitEnvsMock = mockedFunction(getHermitEnvs);
 
 jest.mock('./hermit', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  ...(jest.requireActual('./hermit') as any),
+  ...jest.requireActual<typeof import('./hermit')>('./hermit'),
   getHermitEnvs: jest.fn(),
 }));
-jest.mock('../../modules/datasource');
+jest.mock('../../modules/datasource', () => mockDeep());
 
 interface TestInput {
   processEnv: Record<string, string>;
@@ -46,9 +46,7 @@ describe('util/exec/index', () => {
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
-    jest.resetAllMocks();
     jest.restoreAllMocks();
-    jest.resetModules();
     processEnvOrig = process.env;
     GlobalConfig.reset();
   });
@@ -882,7 +880,7 @@ describe('util/exec/index', () => {
 
     const removeDockerContainerSpy = jest.spyOn(
       dockerModule,
-      'removeDockerContainer'
+      'removeDockerContainer',
     );
 
     const promise = exec('foobar', {});
@@ -904,7 +902,7 @@ describe('util/exec/index', () => {
     let calledOnce = false;
     const removeDockerContainerSpy = jest.spyOn(
       dockerModule,
-      'removeDockerContainer'
+      'removeDockerContainer',
     );
     removeDockerContainerSpy.mockImplementation((): Promise<void> => {
       if (!calledOnce) {
@@ -918,8 +916,8 @@ describe('util/exec/index', () => {
     const promise = exec('foobar', { docker });
     await expect(promise).rejects.toThrow(
       new Error(
-        'Error: "removeDockerContainer failed" - Original Error: "some error occurred"'
-      )
+        'Error: "removeDockerContainer failed" - Original Error: "some error occurred"',
+      ),
     );
     expect(removeDockerContainerSpy).toHaveBeenCalledTimes(2);
   });
@@ -935,7 +933,7 @@ describe('util/exec/index', () => {
     });
     const removeDockerContainerSpy = jest.spyOn(
       dockerModule,
-      'removeDockerContainer'
+      'removeDockerContainer',
     );
     const promise = exec('foobar', {});
     await expect(promise).rejects.toThrow(TEMPORARY_ERROR);

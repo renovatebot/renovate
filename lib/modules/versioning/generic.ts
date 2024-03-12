@@ -16,7 +16,7 @@ export interface VersionComparator {
 }
 
 export abstract class GenericVersioningApi<
-  T extends GenericVersion = GenericVersion
+  T extends GenericVersion = GenericVersion,
 > implements VersioningApi
 {
   private _getSection(version: string, index: number): number | null {
@@ -50,7 +50,9 @@ export abstract class GenericVersioningApi<
       is.nonEmptyString(left.prerelease) &&
       is.nonEmptyString(right.prerelease)
     ) {
-      const pre = left.prerelease.localeCompare(right.prerelease);
+      const pre = left.prerelease.localeCompare(right.prerelease, undefined, {
+        numeric: true,
+      });
 
       if (pre !== 0) {
         return pre;
@@ -129,9 +131,15 @@ export abstract class GenericVersioningApi<
     return result ?? null;
   }
 
-  getNewValue(newValueConfig: NewValueConfig): string {
-    const { newVersion } = newValueConfig || {};
-    return newVersion;
+  getNewValue({
+    currentValue,
+    currentVersion,
+    newVersion,
+  }: NewValueConfig): string | null {
+    if (currentVersion === `v${currentValue}`) {
+      return newVersion.replace(/^v/, '');
+    }
+    return newVersion ?? null;
   }
 
   sortVersions(version: string, other: string): number {

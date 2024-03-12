@@ -38,7 +38,7 @@ describe('util/http/index', () => {
   it('returns 429 error', async () => {
     httpMock.scope(baseUrl).get('/test').reply(429);
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
-      'Response code 429 (Too Many Requests)'
+      'Response code 429 (Too Many Requests)',
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
@@ -47,7 +47,7 @@ describe('util/http/index', () => {
     httpMock.scope(baseUrl).get('/test').reply(404);
     hostRules.add({ abortOnError: true });
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
-      EXTERNAL_HOST_ERROR
+      EXTERNAL_HOST_ERROR,
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
@@ -55,7 +55,7 @@ describe('util/http/index', () => {
   it('disables hosts', async () => {
     hostRules.add({ matchHost: 'renovate.com', enabled: false });
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
-      HOST_DISABLED
+      HOST_DISABLED,
     );
   });
 
@@ -63,7 +63,7 @@ describe('util/http/index', () => {
     httpMock.scope(baseUrl).get('/test').reply(404);
     hostRules.add({ abortOnError: true, abortIgnoreStatusCodes: [404] });
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
-      'Response code 404 (Not Found)'
+      'Response code 404 (Not Found)',
     );
     expect(httpMock.allUsed()).toBeTrue();
   });
@@ -76,13 +76,86 @@ describe('util/http/index', () => {
         },
       })
       .get('/')
-      .reply(200, '{ "test": true }');
-    expect(await http.getJson('http://renovate.com')).toEqual({
+      .reply(200, '{ "test": true }', { etag: 'abc123' });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
       authorization: false,
       body: {
         test: true,
       },
-      headers: {},
+      headers: {
+        etag: 'abc123',
+      },
+      statusCode: 200,
+    });
+
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(304, '', { etag: 'abc123' });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
+      authorization: false,
+      body: {
+        test: true,
+      },
+      headers: {
+        etag: 'abc123',
+      },
+      statusCode: 200,
+    });
+  });
+
+  it('uses last-modified header for caching', async () => {
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(200, '{ "test": true }', {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
+      authorization: false,
+      body: {
+        test: true,
+      },
+      headers: {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      },
+      statusCode: 200,
+    });
+
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(304, '', {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      });
+    expect(
+      await http.getJson('http://renovate.com', { repoCache: true }),
+    ).toEqual({
+      authorization: false,
+      body: {
+        test: true,
+      },
+      headers: {
+        'last-modified': 'Sun, 18 Feb 2024 18:00:05 GMT',
+      },
       statusCode: 200,
     });
   });
@@ -90,7 +163,7 @@ describe('util/http/index', () => {
   it('postJson', async () => {
     httpMock.scope(baseUrl).post('/').reply(200, {});
     expect(
-      await http.postJson('http://renovate.com', { body: {}, baseUrl })
+      await http.postJson('http://renovate.com', { body: {}, baseUrl }),
     ).toEqual({
       authorization: false,
       body: {},
@@ -105,7 +178,7 @@ describe('util/http/index', () => {
   it('putJson', async () => {
     httpMock.scope(baseUrl).put('/').reply(200, {});
     expect(
-      await http.putJson('http://renovate.com', { body: {}, baseUrl })
+      await http.putJson('http://renovate.com', { body: {}, baseUrl }),
     ).toEqual({
       authorization: false,
       body: {},
@@ -120,7 +193,7 @@ describe('util/http/index', () => {
   it('patchJson', async () => {
     httpMock.scope(baseUrl).patch('/').reply(200, {});
     expect(
-      await http.patchJson('http://renovate.com', { body: {}, baseUrl })
+      await http.patchJson('http://renovate.com', { body: {}, baseUrl }),
     ).toEqual({
       authorization: false,
       body: {},
@@ -135,7 +208,7 @@ describe('util/http/index', () => {
   it('deleteJson', async () => {
     httpMock.scope(baseUrl).delete('/').reply(200, {});
     expect(
-      await http.deleteJson('http://renovate.com', { body: {}, baseUrl })
+      await http.deleteJson('http://renovate.com', { body: {}, baseUrl }),
     ).toEqual({
       authorization: false,
       body: {},
@@ -189,32 +262,8 @@ describe('util/http/index', () => {
     hostRules.add({ matchHost: 'renovate.com', enabled: false });
 
     expect(() => http.stream('http://renovate.com/test')).toThrow(
-      HOST_DISABLED
+      HOST_DISABLED,
     );
-  });
-
-  it('retries', async () => {
-    const NODE_ENV = process.env.NODE_ENV;
-    try {
-      delete process.env.NODE_ENV;
-      httpMock
-        .scope(baseUrl)
-        .head('/')
-        .reply(500)
-        .head('/')
-        .reply(200, undefined, { 'x-some-header': 'abc' });
-      expect(await http.head('http://renovate.com')).toEqual({
-        authorization: false,
-        body: '',
-        headers: {
-          'x-some-header': 'abc',
-        },
-        statusCode: 200,
-      });
-      expect(httpMock.allUsed()).toBeTrue();
-    } finally {
-      process.env.NODE_ENV = NODE_ENV;
-    }
   });
 
   it('limits concurrency by host', async () => {
@@ -314,13 +363,44 @@ describe('util/http/index', () => {
     expect(res?.body.toString('utf-8')).toBe('test');
   });
 
+  describe('retry', () => {
+    let NODE_ENV: string | undefined;
+
+    beforeAll(() => {
+      NODE_ENV = process.env.NODE_ENV;
+      delete process.env.NODE_ENV;
+      http = new Http('dummy');
+    });
+
+    afterAll(() => {
+      process.env.NODE_ENV = NODE_ENV;
+    });
+
+    it('works', async () => {
+      httpMock
+        .scope(baseUrl)
+        .head('/')
+        .reply(500)
+        .head('/')
+        .reply(200, undefined, { 'x-some-header': 'abc' });
+      expect(await http.head('http://renovate.com')).toEqual({
+        authorization: false,
+        body: '',
+        headers: {
+          'x-some-header': 'abc',
+        },
+        statusCode: 200,
+      });
+      expect(httpMock.allUsed()).toBeTrue();
+    });
+  });
+
   describe('Schema support', () => {
     const SomeSchema = z
       .object({ x: z.number(), y: z.number() })
       .transform(({ x, y }) => `${x} + ${y} = ${x + y}`);
 
     beforeEach(() => {
-      jest.resetAllMocks();
       memCache.init();
     });
 
@@ -342,7 +422,7 @@ describe('util/http/index', () => {
         const { body }: HttpResponse<string> = await http.getJson(
           'http://renovate.com',
           { headers: { accept: 'application/json' } },
-          SomeSchema
+          SomeSchema,
         );
 
         expect(body).toBe('2 + 2 = 4');
@@ -360,7 +440,7 @@ describe('util/http/index', () => {
           .reply(200, JSON.stringify({ foo: 'bar' }));
 
         await expect(
-          http.getJson('http://renovate.com', SomeSchema)
+          http.getJson('http://renovate.com', SomeSchema),
         ).rejects.toThrow(z.ZodError);
       });
     });
@@ -415,7 +495,7 @@ describe('util/http/index', () => {
 
         const { body }: HttpResponse<string> = await http.postJson(
           'http://renovate.com',
-          SomeSchema
+          SomeSchema,
         );
 
         expect(body).toBe('2 + 2 = 4');
@@ -429,7 +509,7 @@ describe('util/http/index', () => {
           .reply(200, JSON.stringify({ foo: 'bar' }));
 
         await expect(
-          http.postJson('http://renovate.com', SomeSchema)
+          http.postJson('http://renovate.com', SomeSchema),
         ).rejects.toThrow(z.ZodError);
       });
     });
@@ -510,7 +590,7 @@ describe('util/http/index', () => {
             data,
           },
         },
-        FooBar
+        FooBar,
       );
 
       expect(res.statusCode).toBe(304);

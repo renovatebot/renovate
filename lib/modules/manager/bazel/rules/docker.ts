@@ -3,7 +3,7 @@ import { DockerDatasource } from '../../../datasource/docker';
 import { id as dockerVersioning } from '../../../versioning/docker';
 import type { PackageDependency } from '../../types';
 
-export const dockerRules = ['container_pull'] as const;
+export const dockerRules = ['container_pull', '_container_pull'] as const;
 
 export const DockerTarget = z
   .object({
@@ -33,5 +33,5 @@ export const DockerTarget = z
         currentDigest: digest,
         registryUrls: [registry],
       },
-    ]
+    ],
   );

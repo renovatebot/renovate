@@ -6,109 +6,136 @@ exports[`modules/datasource/helm/index getReleases returns list of versions for 
   "registryUrl": "https://example-repository.com",
   "releases": [
     {
+      "newDigest": "aa09c62be843190cc85736ba59d6411579d83ba30e9305e6b2420ea013bb5979",
       "version": "1.0.0",
     },
     {
+      "newDigest": "01da3c15cdec999b5afd73ee9186c62859c35a716688359c425fc04100a22144",
       "releaseTimestamp": "2019-02-14T15:25:43.743Z",
       "version": "1.1.0",
     },
     {
+      "newDigest": "23a11f42860d9165f0d816216237f3bd0498893034ef89f8a4a9bea3610d9440",
       "releaseTimestamp": "2019-02-14T16:55:51.519Z",
       "version": "1.1.1",
     },
     {
+      "newDigest": "6ebb8fe1688cba9b5a1457e0a4d2f0817239c480b4437d1ad438b42bedafb6ce",
       "releaseTimestamp": "2019-02-15T23:56:28.304Z",
       "version": "1.1.2",
     },
     {
+      "newDigest": "e587be5680edebbef2456ff8b5c1ccc066dbec42f6d530592a0b019e0df3ca3a",
       "releaseTimestamp": "2019-02-22T16:28:27.398Z",
       "version": "1.1.3",
     },
     {
+      "newDigest": "6f525332a530cd76f25dfa509d4f10dd5742ed760e870d3db641d057df84c277",
       "releaseTimestamp": "2019-02-24T04:55:38.454Z",
       "version": "1.1.4",
     },
     {
+      "newDigest": "9458188fa8598710b73a5dfb7a1f5bca8e1582a22fb48b912541ab2950155a1c",
       "releaseTimestamp": "2019-03-21T15:25:53.910Z",
       "version": "1.1.5",
     },
     {
+      "newDigest": "0dadee414d80ace6fe8abf466fc7d61180a6f9a494125c414470618045d891e7",
       "releaseTimestamp": "2019-03-22T14:26:18.094Z",
       "version": "2.0.0",
     },
     {
+      "newDigest": "e70ed72282c8f10e37ed2c186f7eb4a8baed8de07a0106b78e5170e20430fd12",
       "releaseTimestamp": "2019-04-06T13:26:04.916Z",
       "version": "2.0.1",
     },
     {
+      "newDigest": "1d9fbec1224e1aa5636dd71bb6981afd31b91fb151fd436762e8948d9b2618a9",
       "releaseTimestamp": "2019-04-08T13:26:12.863Z",
       "version": "2.0.2",
     },
     {
+      "newDigest": "2fd8e0e8a7cfe58ccd37c44279ff6acff975c0bcdf499d80a436cb66b68f9f75",
       "releaseTimestamp": "2019-04-23T14:57:59.089Z",
       "version": "2.1.0",
     },
     {
+      "newDigest": "699d014803339626be22408acd03e196026ed371a98814c54abd5e72300a8f2c",
       "releaseTimestamp": "2019-04-23T19:56:09.380Z",
       "version": "2.2.0",
     },
     {
+      "newDigest": "12699763b9eb0e2d4e478447da90d563021e54229ccb51dcba55d989c05272c7",
       "releaseTimestamp": "2019-04-27T01:56:41.147Z",
       "version": "2.2.1",
     },
     {
+      "newDigest": "0c7fa331637ecc35cd697f2d9fa4ec1f36e9f89696fe19582fb5f571a6c62b2c",
       "releaseTimestamp": "2019-04-29T20:56:20.987Z",
       "version": "2.2.2",
     },
     {
+      "newDigest": "2d1a3e63421af8d898895fc53b84a6a3aa37172a0a76361f78dbe4f4dc19742f",
       "releaseTimestamp": "2019-05-01T14:27:55.475Z",
       "version": "2.2.3",
     },
     {
+      "newDigest": "598c9ffe847830bcd661c990f8e5355f17486c8cd43723f01b25473c7f76ac87",
       "releaseTimestamp": "2019-05-01T19:56:23.829Z",
       "version": "2.2.4",
     },
     {
+      "newDigest": "d1ce5b399ac81b69eda85a9c5d80162d00577c0346f7121b7191054c7b679b35",
       "releaseTimestamp": "2019-05-06T20:56:39.732Z",
       "version": "2.2.5",
     },
     {
+      "newDigest": "64e464330965ab7a9265f0b31eaa42307ad3aa29752ee0876222e1737b525e13",
       "releaseTimestamp": "2019-05-06T21:28:21.342Z",
       "version": "2.3.0",
     },
     {
+      "newDigest": "b4575a5c0bc7973e5b4a12e55563649799a525a90d90c43d4fc88ce3a49f9fee",
       "releaseTimestamp": "2019-05-08T19:26:25.925Z",
       "version": "2.3.1",
     },
     {
+      "newDigest": "10c3112683f0c14e8888b7d1e2e1711c1f64527fcbaf1ba8de27dfe60805bf40",
       "releaseTimestamp": "2019-05-09T17:29:35.612Z",
       "version": "2.4.0",
     },
     {
+      "newDigest": "56848d5e13ea2f511fb79fd03a9a61cf4ed72eaeabe7377a7dbd89bc4ac7ad73",
       "releaseTimestamp": "2019-05-15T07:56:25.942Z",
       "version": "2.4.1",
     },
     {
+      "newDigest": "a450b5215116728a208062d18973f06df56e72f588475d54bffd58ec7969bcc7",
       "releaseTimestamp": "2019-05-16T21:56:48.001Z",
       "version": "2.5.0",
     },
     {
+      "newDigest": "03f60a9a1bf88b64948bfdf45fd6d923c636fb129249f1d60f7459aeebfe1146",
       "releaseTimestamp": "2019-05-20T23:56:32.309Z",
       "version": "2.5.1",
     },
     {
+      "newDigest": "b83dc819502aed7b180021900483fab6745de022393ad6a24023024aeac832f3",
       "releaseTimestamp": "2019-05-24T10:56:37.781Z",
       "version": "2.6.0",
     },
     {
+      "newDigest": "8d708cb991f3b577f311d8bb5420a834ce12f4aee103e9bceddca045e714773d",
       "releaseTimestamp": "2019-05-27T23:28:25.443Z",
       "version": "2.6.1",
     },
     {
+      "newDigest": "ba549d35ca7827573343fe1613dcad31f258bfcc2959f6005220bfb300030a21",
       "releaseTimestamp": "2019-05-31T18:57:01.540Z",
       "version": "2.6.2",
     },
     {
+      "newDigest": "880002d74accfc9dab1debcc78c134fb4989e73ff84b137ce7aa92bf4d726297",
       "releaseTimestamp": "2019-06-02T08:56:36.119Z",
       "version": "2.7.0",
     },

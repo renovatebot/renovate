@@ -12,7 +12,7 @@ import { rebaseMigrationBranch } from './rebase';
 
 export async function checkConfigMigrationBranch(
   config: RenovateConfig,
-  migratedConfigData: MigratedData | null
+  migratedConfigData: MigratedData | null,
 ): Promise<string | null> {
   logger.debug('checkConfigMigrationBranch()');
   if (!migratedConfigData) {
@@ -21,18 +21,22 @@ export async function checkConfigMigrationBranch(
   }
   const configMigrationBranch = getMigrationBranchName(config);
 
-  const branchPr = await migrationPrExists(configMigrationBranch); // handles open/autoClosed PRs
+  const branchPr = await migrationPrExists(
+    configMigrationBranch,
+    config.baseBranch,
+  ); // handles open/autoClosed PRs
 
   if (!branchPr) {
     const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
       config,
-      migratedConfigData.filename
+      migratedConfigData.filename,
     );
     const prTitle = commitMessageFactory.getPrTitle();
     const closedPrConfig: FindPRConfig = {
       branchName: configMigrationBranch,
       prTitle,
       state: 'closed',
+      targetBranch: config.baseBranch,
     };
 
     // handles closed PR
@@ -42,7 +46,7 @@ export async function checkConfigMigrationBranch(
     if (closedPr) {
       logger.debug(
         { prTitle: closedPr.title },
-        'Closed PR already exists. Skipping branch.'
+        'Closed PR already exists. Skipping branch.',
       );
       await handlePr(config, closedPr);
       return null;
@@ -54,7 +58,8 @@ export async function checkConfigMigrationBranch(
     await rebaseMigrationBranch(config, migratedConfigData);
     if (platform.refreshPr) {
       const configMigrationPr = await platform.getBranchPr(
-        configMigrationBranch
+        configMigrationBranch,
+        config.baseBranch,
       );
       if (configMigrationPr) {
         await platform.refreshPr(configMigrationPr.number);
@@ -71,8 +76,11 @@ export async function checkConfigMigrationBranch(
   return configMigrationBranch;
 }
 
-export async function migrationPrExists(branchName: string): Promise<boolean> {
-  return !!(await platform.getBranchPr(branchName));
+export async function migrationPrExists(
+  branchName: string,
+  targetBranch?: string,
+): Promise<boolean> {
+  return !!(await platform.getBranchPr(branchName, targetBranch));
 }
 
 async function handlePr(config: RenovateConfig, pr: Pr): Promise<void> {
@@ -82,7 +90,7 @@ async function handlePr(config: RenovateConfig, pr: Pr): Promise<void> {
   ) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`
+        `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`,
       );
     } else {
       const content =

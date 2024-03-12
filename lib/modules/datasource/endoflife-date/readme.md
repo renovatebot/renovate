@@ -1,6 +1,6 @@
 [endoflife.date](https://endoflife.date) provides version and end-of-life information for different packages.
 
-To find the appropriate "package" name for the software you're trying to update, use the endoflife.date "All packages" API endpoint.
+To find the right "package" name for the software you're trying to update, use the endoflife.date "All packages" API endpoint.
 You can find it in [the endoflife.date API documentation](https://endoflife.date/docs/api).
 
 By default, this datasource uses `loose` versioning.
@@ -20,8 +20,9 @@ Given the above `.tfvars` file, you put this in your `renovate.json`:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "description": "Update Kubernetes version for Amazon EKS in tfvars files",
       "fileMatch": [".+\\.tfvars$"],
       "matchStrings": [

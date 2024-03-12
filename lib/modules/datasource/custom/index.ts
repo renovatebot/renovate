@@ -3,8 +3,9 @@ import jsonata from 'jsonata';
 import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { fetchers } from './formats';
 import { ReleaseResultZodSchema } from './schema';
-import { massageCustomDatasourceConfig } from './utils';
+import { getCustomConfig } from './utils';
 
 export class CustomDatasource extends Datasource {
   static readonly id = 'custom';
@@ -16,39 +17,31 @@ export class CustomDatasource extends Datasource {
   }
 
   async getReleases(
-    getReleasesConfig: GetReleasesConfig
+    getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
-    const customDatasourceName = getReleasesConfig.datasource?.replace(
-      'custom.',
-      ''
-    );
-
-    if (!is.nonEmptyString(customDatasourceName)) {
-      logger.debug(
-        `No datasource has been supplied while looking up ${getReleasesConfig.packageName}`
-      );
-      return null;
-    }
-
-    const config = massageCustomDatasourceConfig(
-      customDatasourceName,
-      getReleasesConfig
-    );
+    const config = getCustomConfig(getReleasesConfig);
     if (is.nullOrUndefined(config)) {
       return null;
     }
 
-    const { defaultRegistryUrlTemplate, transformTemplates } = config;
-    // TODO add here other format options than JSON
-    let response: unknown;
+    const { defaultRegistryUrlTemplate, transformTemplates, format } = config;
+
+    const fetcher = fetchers[format];
+    const isLocalRegistry = defaultRegistryUrlTemplate.startsWith('file://');
+
+    let data: unknown;
     try {
-      response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
+      if (isLocalRegistry) {
+        data = await fetcher.readFile(
+          defaultRegistryUrlTemplate.replace('file://', ''),
+        );
+      } else {
+        data = await fetcher.fetch(this.http, defaultRegistryUrlTemplate);
+      }
     } catch (e) {
       this.handleHttpErrors(e);
       return null;
     }
-
-    let data = response;
 
     for (const transformTemplate of transformTemplates) {
       const expression = jsonata(transformTemplate);

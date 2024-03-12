@@ -4,7 +4,7 @@
 
 Renovate administrators can configure Renovate to either "autodiscover" installed repositories, or configure a fixed list of repository names to operate on.
 
-If the administrator has configured a fixed list of repositories then the only way to "install" Renovate on an additional repository is for it to be manually added for the next run or restart.
+If the administrator has configured a fixed list of repositories then the only way to "install" Renovate on a extra repository is for it to be manually added for the next run or restart.
 
 Otherwise, the process for adding new repositories to a Renovate installation can vary:
 
@@ -60,7 +60,7 @@ Once you have enabled Renovate on a repository, you will get a "Configure Renova
 ### No risk onboarding
 
 Conveniently, Renovate will not make any changes to your repository or raise any further Pull Requests until after you _merge_ the onboarding Pull Request.
-If there is anything about the Pull Request that you don't like or understand, take your time to read the [documentation](https://docs.renovatebot.com) or ask questions on the [discussions forum on GitHub](https://github.com/renovatebot/renovate/discussions) and merge the PR only once you're satisfied with the result.
+If there is anything about the Pull Request that you don't like or understand, take your time to read the [documentation](../index.md) or ask questions on the [discussions forum on GitHub](https://github.com/renovatebot/renovate/discussions) and merge the PR only once you're satisfied with the result.
 
 You can edit your Renovate configuration **within the `renovate/configure` branch** and Renovate will keep updating the description in the PR to match, so you can work on the config until you're satisfied with the results.
 

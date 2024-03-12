@@ -12,7 +12,6 @@ describe('modules/datasource/github-tags/index', () => {
   const github = new GithubTagsDatasource();
 
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.spyOn(hostRules, 'hosts').mockReturnValue([]);
     jest.spyOn(hostRules, 'find').mockReturnValue({
       token: 'some-token',
@@ -163,12 +162,14 @@ describe('modules/datasource/github-tags/index', () => {
             version: 'v1.0.0',
             releaseTimestamp: '2021-01-01T00:00:00.000Z',
             isStable: true,
+            newDigest: '123',
           },
           {
             gitRef: 'v2.0.0',
             version: 'v2.0.0',
             releaseTimestamp: '2022-01-01T00:00:00.000Z',
             isStable: false,
+            newDigest: 'abc',
           },
         ],
 

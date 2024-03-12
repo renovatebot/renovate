@@ -77,7 +77,6 @@ describe('workers/repository/update/pr/index', () => {
     };
 
     beforeEach(() => {
-      jest.resetAllMocks();
       GlobalConfig.reset();
       prBody.getPrBody.mockReturnValue(body);
     });
@@ -93,7 +92,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(limits.incLimitedValue).toHaveBeenCalledWith('PullRequests');
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: pr.number, prTitle },
-          'PR created'
+          'PR created',
         );
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
@@ -102,7 +101,7 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
-        config.fetchReleaseNotes = 'pr';
+        config.fetchChangeLogs = 'pr';
 
         const res = await ensurePr(config);
 
@@ -250,7 +249,7 @@ describe('workers/repository/update/pr/index', () => {
 
           expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'Error' });
           expect(logger.logger.warn).toHaveBeenCalledWith(
-            'A pull requests already exists'
+            'A pull requests already exists',
           );
           expect(prCache.setPrCache).not.toHaveBeenCalled();
         });
@@ -281,7 +280,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: changedPr.number, prTitle },
-          `PR updated`
+          `PR updated`,
         );
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
@@ -301,7 +300,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalled();
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: changedPr.number, prTitle },
-          `PR updated`
+          `PR updated`,
         );
       });
 
@@ -315,7 +314,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalled();
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: pr.number, prTitle },
-          `PR updated`
+          `PR updated`,
         );
         expect(logger.logger.debug).toHaveBeenCalledWith(
           {
@@ -323,7 +322,7 @@ describe('workers/repository/update/pr/index', () => {
             oldBaseBranch: 'base',
             newBaseBranch: 'new_base',
           },
-          'PR base branch has changed'
+          'PR base branch has changed',
         );
         expect(res).toEqual({
           type: 'with-pr',
@@ -349,14 +348,14 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'Pull Request #123 does not need updating'
+          'Pull Request #123 does not need updating',
         );
       });
     });
 
     describe('dry-run', () => {
       beforeEach(() => {
-        GlobalConfig.set({ dryRun: true });
+        GlobalConfig.set({ dryRun: 'full' });
       });
 
       it('dry-runs PR creation', async () => {
@@ -371,7 +370,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(logger.logger.info).toHaveBeenCalledWith(
-          `DRY-RUN: Would create PR: ${prTitle}`
+          `DRY-RUN: Would create PR: ${prTitle}`,
         );
       });
 
@@ -385,7 +384,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(logger.logger.info).toHaveBeenCalledWith(
-          `DRY-RUN: Would update PR #${pr.number}`
+          `DRY-RUN: Would update PR #${pr.number}`,
         );
       });
 
@@ -601,7 +600,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(logger.logger.error).toHaveBeenCalledWith(
           { err },
-          'Failed to ensure PR: ' + prTitle
+          'Failed to ensure PR: ' + prTitle,
         );
       });
 
@@ -622,7 +621,7 @@ describe('workers/repository/update/pr/index', () => {
             automerge: true,
             automergeType: 'pr',
             assignAutomerge: false,
-          })
+          }),
         ).rejects.toThrow(err);
       });
 
@@ -650,9 +649,9 @@ describe('workers/repository/update/pr/index', () => {
               automerge: true,
               automergeType: 'pr',
               assignAutomerge: false,
-            })
+            }),
           ).rejects.toThrow(err);
-        }
+        },
       );
     });
 
@@ -686,6 +685,7 @@ describe('workers/repository/update/pr/index', () => {
             type: 'github',
             repository: 'some/repo',
             baseUrl: 'https://github.com',
+            apiBaseUrl: 'https://api.github.com/',
             sourceUrl: 'https://github.com/some/repo',
           },
           versions: [
@@ -798,6 +798,54 @@ describe('workers/repository/update/pr/index', () => {
           ],
         });
       });
+
+      // compares currentVersion and currentValue separately to
+      // prevent removal false duplicates
+      it('stricter de-deuplication of changelogs', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+        const upgrade = {
+          ...dummyUpgrade,
+          currentValue:
+            '1.21.5-alpine3.18@sha256:d8b99943fb0587b79658af03d4d4e8b57769b21dcf08a8401352a9f2a7228754',
+          newValue:
+            '1.21.6-alpine3.18@sha256:3354c3a94c3cf67cb37eb93a8e9474220b61a196b13c26f1c01715c301b22a69',
+          currentVersion: '1.21.5-alpine3.18',
+          newVersion: '1.21.6-alpine3.18',
+          logJSON: undefined,
+          sourceUrl: 'https://github.com/foo/bar',
+          hasReleaseNotes: true,
+        };
+        delete upgrade.logJSON;
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            upgrade,
+            {
+              ...upgrade,
+              currentValue:
+                '1.21.5-alpine3.19@sha256:d8b99943fb0587b79658af03d4d4e8b57769b21dcf08a8401352a9f2a7228754',
+              newValue:
+                '1.21.6-alpine3.19@sha256:3354c3a94c3cf67cb37eb93a8e9474220b61a196b13c26f1c01715c301b22a69',
+              currentVersion: '1.21.5-alpine3.19',
+              newVersion: '1.21.6-alpine3.19',
+            },
+            // adding this object for coverage
+            {
+              ...upgrade,
+              currentValue: undefined,
+              newValue:
+                '1.21.6-alpine3.19@sha256:3354c3a94c3cf67cb37eb93a8e9474220b61a196b13c26f1c01715c301b22a69',
+              currentVersion: '1.21.5-alpine3.19',
+              newVersion: undefined,
+            },
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig.upgrades).toHaveLength(3);
+      });
     });
 
     describe('prCache', () => {
@@ -816,7 +864,7 @@ describe('workers/repository/update/pr/index', () => {
           pr: existingPr,
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'Pull Request #123 does not need updating'
+          'Pull Request #123 does not need updating',
         );
         expect(prCache.setPrCache).toHaveBeenCalledTimes(1);
       });
@@ -834,15 +882,15 @@ describe('workers/repository/update/pr/index', () => {
           pr: existingPr,
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'Pull Request #123 does not need updating'
+          'Pull Request #123 does not need updating',
         );
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'PR cache matches but it has been edited in the past 24hrs, so processing PR'
+          'PR cache matches but it has been edited in the past 24hrs, so processing PR',
         );
         expect(prCache.setPrCache).toHaveBeenCalledWith(
           sourceBranch,
           cachedPr.bodyFingerprint,
-          false
+          false,
         );
       });
 
@@ -859,7 +907,7 @@ describe('workers/repository/update/pr/index', () => {
           pr: existingPr,
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'PR fingerprints mismatch, processing PR'
+          'PR fingerprints mismatch, processing PR',
         );
         expect(prCache.setPrCache).toHaveBeenCalledTimes(1);
       });
@@ -871,19 +919,19 @@ describe('workers/repository/update/pr/index', () => {
           bodyFingerprint: fingerprint(
             generatePrBodyFingerprintConfig({
               ...config,
-              fetchReleaseNotes: 'pr',
-            })
+              fetchChangeLogs: 'pr',
+            }),
           ),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        const res = await ensurePr({ ...config, fetchReleaseNotes: 'pr' });
+        const res = await ensurePr({ ...config, fetchChangeLogs: 'pr' });
         expect(res).toEqual({
           type: 'with-pr',
           pr: existingPr,
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'PR cache matches and no PR changes in last 24hrs, so skipping PR body check'
+          'PR cache matches and no PR changes in last 24hrs, so skipping PR body check',
         );
         expect(embedChangelogs).toHaveBeenCalledTimes(0);
       });
@@ -904,13 +952,13 @@ describe('workers/repository/update/pr/index', () => {
           bodyFingerprint: fingerprint(
             generatePrBodyFingerprintConfig({
               ...config,
-              fetchReleaseNotes: 'pr',
-            })
+              fetchChangeLogs: 'pr',
+            }),
           ),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        const res = await ensurePr({ ...config, fetchReleaseNotes: 'pr' });
+        const res = await ensurePr({ ...config, fetchChangeLogs: 'pr' });
         expect(res).toEqual({
           type: 'with-pr',
           pr: {
@@ -923,10 +971,10 @@ describe('workers/repository/update/pr/index', () => {
           },
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'PR rebase requested, so skipping cache check'
+          'PR rebase requested, so skipping cache check',
         );
         expect(logger.logger.debug).not.toHaveBeenCalledWith(
-          `Pull Request #${number} does not need updating`
+          `Pull Request #${number} does not need updating`,
         );
         expect(embedChangelogs).toHaveBeenCalledTimes(1);
       });
@@ -945,7 +993,7 @@ describe('workers/repository/update/pr/index', () => {
         prCache.getPrCache.mockReturnValueOnce(null);
         await ensurePr(config);
         expect(logger.logger.debug).not.toHaveBeenCalledWith(
-          'PR cache not found'
+          'PR cache not found',
         );
       });
     });

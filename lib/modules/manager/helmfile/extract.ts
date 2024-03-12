@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type {
@@ -9,7 +9,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { Doc } from './types';
+import type { Doc } from './schema';
 import {
   kustomizationsKeysUsed,
   localChartHasKustomizationsYaml,
@@ -18,49 +18,60 @@ import {
 const isValidChartName = (name: string | undefined): boolean =>
   !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
 
-function extractYaml(content: string): string {
-  // regex remove go templated ({{ . }}) values
-  return content
-    .replace(regEx(/{{`.+?`}}/gs), '')
-    .replace(regEx(/{{.+?}}/g), '');
-}
-
 function isLocalPath(possiblePath: string): boolean {
   return ['./', '../', '/'].some((localPrefix) =>
-    possiblePath.startsWith(localPrefix)
+    possiblePath.startsWith(localPrefix),
   );
+}
+
+function isOciUrl(possibleUrl: string): boolean {
+  return possibleUrl.startsWith('oci://');
 }
 
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): Promise<PackageFileContent | null> {
   const deps: PackageDependency[] = [];
   let docs: Doc[];
-  const registryAliases: Record<string, string> = {};
+  let registryAliases: Record<string, string> = {};
   // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
   let needKustomize = false;
   try {
-    docs = loadAll(extractYaml(content), null, { json: true }) as Doc[];
+    // TODO: use schema (#9610)
+    docs = parseYaml(content, null, {
+      removeTemplates: true,
+      json: true,
+    });
   } catch (err) {
     logger.debug(
       { err, packageFile },
-      'Failed to parse helmfile helmfile.yaml'
+      'Failed to parse helmfile helmfile.yaml',
     );
     return null;
   }
   for (const doc of docs) {
-    if (!(doc && is.array(doc.releases))) {
+    if (!doc) {
       continue;
     }
 
+    // Always check for repositories in the current document and override the existing ones if any (as YAML does)
     if (doc.repositories) {
+      registryAliases = {};
       for (let i = 0; i < doc.repositories.length; i += 1) {
         registryAliases[doc.repositories[i].name] = doc.repositories[i].url;
       }
+      logger.debug(
+        { registryAliases, packageFile },
+        `repositories discovered.`,
+      );
     }
-    logger.debug({ registryAliases }, 'repositories discovered.');
+
+    // Skip extraction if the document contains no releases
+    if (!is.array(doc.releases)) {
+      continue;
+    }
 
     for (const dep of doc.releases) {
       let depName = dep.chart;
@@ -93,7 +104,11 @@ export async function extractPackageFile(
         dep.version = String(dep.version);
       }
 
-      if (dep.chart.includes('/')) {
+      if (isOciUrl(dep.chart)) {
+        const v = dep.chart.substring(6).split('/');
+        depName = v.pop()!;
+        repoName = v.join('/');
+      } else if (dep.chart.includes('/')) {
         const v = dep.chart.split('/');
         repoName = v.shift()!;
         depName = v.join('/');
@@ -121,9 +136,12 @@ export async function extractPackageFile(
       }
       // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
       const repository = doc.repositories?.find(
-        (repo) => repo.name === repoName
+        (repo) => repo.name === repoName,
       );
-      if (repository?.oci) {
+      if (isOciUrl(dep.chart)) {
+        res.datasource = DockerDatasource.id;
+        res.packageName = repoName + '/' + depName;
+      } else if (repository?.oci) {
         res.datasource = DockerDatasource.id;
         res.packageName = registryAliases[repoName] + '/' + depName;
       }
@@ -135,7 +153,10 @@ export async function extractPackageFile(
       }
 
       // Skip in case we cannot locate the registry
-      if (is.emptyArray(res.registryUrls)) {
+      if (
+        res.datasource !== DockerDatasource.id &&
+        is.emptyArray(res.registryUrls)
+      ) {
         res.skipReason = 'unknown-registry';
       }
 

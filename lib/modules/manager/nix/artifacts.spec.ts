@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import type { StatusResult } from 'simple-git';
 import { join } from 'upath';
 import {
@@ -16,7 +17,7 @@ import { updateArtifacts } from '.';
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -52,7 +53,6 @@ describe('modules/manager/nix/artifacts', () => {
   const hostRules = mocked(_hostRules);
 
   beforeEach(() => {
-    jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',
@@ -82,7 +82,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: [''],
-      })
+      }),
     );
 
     const res = await updateArtifacts({
@@ -102,7 +102,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -131,10 +131,40 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
     hostRules.find.mockReturnValueOnce({ token: 'token' });
+
+    const res = await updateArtifacts({
+      packageFileName: 'flake.nix',
+      updatedDeps: [{ depName: 'nixpkgs' }],
+      newPackageFileContent: 'some new content',
+      config: { ...config, constraints: { python: '3.7' } },
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          contents: 'new flake.lock',
+          path: 'flake.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: updateInputTokenCmd }]);
+  });
+
+  it('trims "x-access-token:" prefix from GitHub token', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['flake.lock'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
+    hostRules.find.mockReturnValueOnce({ token: 'x-access-token:token' });
 
     const res = await updateArtifacts({
       packageFileName: 'flake.nix',
@@ -161,7 +191,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -206,7 +236,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -259,7 +289,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
@@ -288,7 +318,7 @@ describe('modules/manager/nix/artifacts', () => {
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
         modified: ['flake.lock'],
-      })
+      }),
     );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
 

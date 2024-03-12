@@ -20,40 +20,73 @@ export function getDatasourceFor(datasource: string): DatasourceApi | null {
 }
 
 export function getDefaultVersioning(
-  datasourceName: string | undefined
+  datasourceName: string | undefined,
 ): string {
   if (!datasourceName) {
     return defaultVersioning.id;
   }
+
   const datasource = getDatasourceFor(datasourceName);
-  // istanbul ignore if: wrong regex manager config?
+
   if (!datasource) {
     logger.warn({ datasourceName }, 'Missing datasource!');
+    return defaultVersioning.id;
   }
-  return datasource?.defaultVersioning ?? defaultVersioning.id;
+
+  if (!datasource.defaultVersioning) {
+    return defaultVersioning.id;
+  }
+
+  return datasource.defaultVersioning;
 }
 
 export function isGetPkgReleasesConfig(
-  input: unknown
+  input: unknown,
 ): input is GetPkgReleasesConfig {
   return (
     is.nonEmptyStringAndNotWhitespace(
-      (input as GetPkgReleasesConfig).datasource
+      (input as GetPkgReleasesConfig).datasource,
     ) &&
     is.nonEmptyStringAndNotWhitespace(
-      (input as GetPkgReleasesConfig).packageName
+      (input as GetPkgReleasesConfig).packageName,
     )
   );
 }
 
-export function applyExtractVersion<
-  Config extends Pick<GetPkgReleasesConfig, 'extractVersion'>
->(config: Config, releaseResult: ReleaseResult): ReleaseResult {
-  if (!config.extractVersion) {
+export function applyVersionCompatibility(
+  releaseResult: ReleaseResult,
+  versionCompatibility: string | undefined,
+  currentCompatibility: string | undefined,
+): ReleaseResult {
+  if (!versionCompatibility) {
     return releaseResult;
   }
 
-  const extractVersionRegEx = regEx(config.extractVersion);
+  const versionCompatibilityRegEx = regEx(versionCompatibility);
+  releaseResult.releases = filterMap(releaseResult.releases, (release) => {
+    const regexResult = versionCompatibilityRegEx.exec(release.version);
+    if (!regexResult?.groups?.version) {
+      return null;
+    }
+    if (regexResult?.groups?.compatibility !== currentCompatibility) {
+      return null;
+    }
+    release.version = regexResult.groups.version;
+    return release;
+  });
+
+  return releaseResult;
+}
+
+export function applyExtractVersion(
+  releaseResult: ReleaseResult,
+  extractVersion: string | undefined,
+): ReleaseResult {
+  if (!extractVersion) {
+    return releaseResult;
+  }
+
+  const extractVersionRegEx = regEx(extractVersion);
   releaseResult.releases = filterMap(releaseResult.releases, (release) => {
     const version = extractVersionRegEx.exec(release.version)?.groups?.version;
     if (!version) {
@@ -68,28 +101,28 @@ export function applyExtractVersion<
 }
 
 export function filterValidVersions<
-  Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>
->(config: Config, releaseResult: ReleaseResult): ReleaseResult {
+  Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>,
+>(releaseResult: ReleaseResult, config: Config): ReleaseResult {
   const versioningName =
     config.versioning ?? getDefaultVersioning(config.datasource);
   const versioning = allVersioning.get(versioningName);
 
   releaseResult.releases = filterMap(releaseResult.releases, (release) =>
-    versioning.isVersion(release.version) ? release : null
+    versioning.isVersion(release.version) ? release : null,
   );
 
   return releaseResult;
 }
 
 export function sortAndRemoveDuplicates<
-  Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>
->(config: Config, releaseResult: ReleaseResult): ReleaseResult {
+  Config extends Pick<GetPkgReleasesConfig, 'versioning' | 'datasource'>,
+>(releaseResult: ReleaseResult, config: Config): ReleaseResult {
   const versioningName =
     config.versioning ?? getDefaultVersioning(config.datasource);
   const versioning = allVersioning.get(versioningName);
 
   releaseResult.releases = releaseResult.releases.sort((a, b) =>
-    versioning.sortVersions(a.version, b.version)
+    versioning.sortVersions(a.version, b.version),
   );
 
   // Once releases are sorted, deduplication is straightforward and efficient
@@ -113,8 +146,8 @@ export function applyConstraintsFiltering<
     | 'datasource'
     | 'constraints'
     | 'packageName'
-  >
->(config: Config, releaseResult: ReleaseResult): ReleaseResult {
+  >,
+>(releaseResult: ReleaseResult, config: Config): ReleaseResult {
   if (config?.constraintsFiltering !== 'strict') {
     for (const release of releaseResult.releases) {
       delete release.constraints;
@@ -133,13 +166,11 @@ export function applyConstraintsFiltering<
     const releaseConstraints = release.constraints;
     delete release.constraints;
 
-    // istanbul ignore if
     if (!configConstraints || !releaseConstraints) {
       return release;
     }
 
     for (const [name, configConstraint] of Object.entries(configConstraints)) {
-      // istanbul ignore if
       if (!versioning.isValid(configConstraint)) {
         continue;
       }
@@ -150,14 +181,43 @@ export function applyConstraintsFiltering<
         continue;
       }
 
-      const satisfiesConstraints = constraint.some(
-        // If the constraint value is a subset of any release's constraints, then it's OK
-        // fallback to release's constraint match if subset is not supported by versioning
-        (releaseConstraint) =>
-          !releaseConstraint ||
-          (versioning.subset?.(configConstraint, releaseConstraint) ??
-            versioning.matches(configConstraint, releaseConstraint))
-      );
+      let satisfiesConstraints = false;
+      for (const releaseConstraint of constraint) {
+        if (!releaseConstraint) {
+          satisfiesConstraints = true;
+          logger.once.debug(
+            {
+              packageName: config.packageName,
+              versioning: versioningName,
+              constraint: releaseConstraint,
+            },
+            'Undefined release constraint',
+          );
+          break;
+        }
+
+        if (!versioning.isValid(releaseConstraint)) {
+          logger.once.debug(
+            {
+              packageName: config.packageName,
+              versioning: versioningName,
+              constraint: releaseConstraint,
+            },
+            'Invalid release constraint',
+          );
+          break;
+        }
+
+        if (versioning.subset?.(configConstraint, releaseConstraint)) {
+          satisfiesConstraints = true;
+          break;
+        }
+
+        if (versioning.matches(configConstraint, releaseConstraint)) {
+          satisfiesConstraints = true;
+          break;
+        }
+      }
 
       if (!satisfiesConstraints) {
         filteredReleases.push(release.version);
@@ -173,7 +233,7 @@ export function applyConstraintsFiltering<
     const packageName = config.packageName;
     const releases = filteredReleases.join(', ');
     logger.debug(
-      `Filtered ${count} releases for ${packageName} due to constraintsFiltering=strict: ${releases}`
+      `Filtered ${count} releases for ${packageName} due to constraintsFiltering=strict: ${releases}`,
     );
   }
 

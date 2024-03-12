@@ -1,7 +1,9 @@
 import JSON5 from 'json5';
 import { DateTime } from 'luxon';
-import type { JsonValue } from 'type-fest';
+import type { JsonArray, JsonValue } from 'type-fest';
 import { z } from 'zod';
+import { parse as parseToml } from './toml';
+import { parseSingleYaml, parseYaml } from './yaml';
 
 interface ErrorContext<T> {
   error: z.ZodError;
@@ -24,7 +26,7 @@ interface LooseOpts<T> {
  */
 export function LooseArray<Schema extends z.ZodTypeAny>(
   Elem: Schema,
-  { onError }: LooseOpts<unknown[]> = {}
+  { onError }: LooseOpts<unknown[]> = {},
 ): z.ZodEffects<z.ZodArray<z.ZodAny, 'many'>, z.TypeOf<Schema>[], any[]> {
   if (!onError) {
     // Avoid error-related computations inside the loop
@@ -70,7 +72,7 @@ export function LooseArray<Schema extends z.ZodTypeAny>(
 
 type LooseRecordResult<
   KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny
+  ValueSchema extends z.ZodTypeAny,
 > = z.ZodEffects<
   z.ZodRecord<z.ZodString, z.ZodAny>,
   Record<z.TypeOf<KeySchema>, z.TypeOf<ValueSchema>>,
@@ -79,7 +81,7 @@ type LooseRecordResult<
 
 type LooseRecordOpts<
   KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny
+  ValueSchema extends z.ZodTypeAny,
 > = LooseOpts<Record<z.TypeOf<KeySchema> | z.TypeOf<ValueSchema>, unknown>>;
 
 /**
@@ -94,34 +96,34 @@ type LooseRecordOpts<
  * @returns Schema for record
  */
 export function LooseRecord<ValueSchema extends z.ZodTypeAny>(
-  Value: ValueSchema
+  Value: ValueSchema,
 ): LooseRecordResult<z.ZodString, ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny
+  ValueSchema extends z.ZodTypeAny,
 >(
   Key: KeySchema,
-  Value: ValueSchema
+  Value: ValueSchema,
 ): LooseRecordResult<KeySchema, ValueSchema>;
 export function LooseRecord<ValueSchema extends z.ZodTypeAny>(
   Value: ValueSchema,
-  { onError }: LooseRecordOpts<z.ZodString, ValueSchema>
+  { onError }: LooseRecordOpts<z.ZodString, ValueSchema>,
 ): LooseRecordResult<z.ZodString, ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny
+  ValueSchema extends z.ZodTypeAny,
 >(
   Key: KeySchema,
   Value: ValueSchema,
-  { onError }: LooseRecordOpts<KeySchema, ValueSchema>
+  { onError }: LooseRecordOpts<KeySchema, ValueSchema>,
 ): LooseRecordResult<KeySchema, ValueSchema>;
 export function LooseRecord<
   KeySchema extends z.ZodTypeAny,
-  ValueSchema extends z.ZodTypeAny
+  ValueSchema extends z.ZodTypeAny,
 >(
   arg1: ValueSchema | KeySchema,
   arg2?: ValueSchema | LooseOpts<Record<string, unknown>>,
-  arg3?: LooseRecordOpts<KeySchema, ValueSchema>
+  arg3?: LooseRecordOpts<KeySchema, ValueSchema>,
 ): LooseRecordResult<KeySchema, ValueSchema> {
   let Key: z.ZodSchema = z.any();
   let Value: ValueSchema;
@@ -224,11 +226,29 @@ export const UtcDate = z
     return date;
   });
 
-export const Url = z.string().transform((str, ctx): URL => {
+export const Yaml = z.string().transform((str, ctx): JsonValue => {
   try {
-    return new URL(str);
+    return parseSingleYaml(str, { json: true }) as JsonValue;
   } catch (e) {
-    ctx.addIssue({ code: 'custom', message: 'Invalid URL' });
+    ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
+    return z.NEVER;
+  }
+});
+
+export const MultidocYaml = z.string().transform((str, ctx): JsonArray => {
+  try {
+    return parseYaml(str, null, { json: true }) as JsonArray;
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
+    return z.NEVER;
+  }
+});
+
+export const Toml = z.string().transform((str, ctx) => {
+  try {
+    return parseToml(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid TOML' });
     return z.NEVER;
   }
 });

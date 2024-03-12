@@ -13,7 +13,7 @@ describe('modules/platform/comment', () => {
 
   beforeEach(() => {
     repoCache = {};
-    jest.resetAllMocks();
+
     cache.getCache.mockReturnValue(repoCache);
   });
 

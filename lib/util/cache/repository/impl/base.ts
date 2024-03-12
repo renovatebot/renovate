@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import { compress, decompress } from '../../../compress';
+import { compressToBase64, decompressFromBase64 } from '../../../compress';
 import { hash } from '../../../hash';
 import { safeStringify } from '../../../stringify';
 import { CACHE_REVISION } from '../common';
@@ -15,7 +15,7 @@ export abstract class RepoCacheBase implements RepoCache {
 
   protected constructor(
     protected readonly repository: string,
-    protected readonly fingerprint: string
+    protected readonly fingerprint: string,
   ) {}
 
   protected abstract read(): Promise<string | null>;
@@ -41,21 +41,20 @@ export abstract class RepoCacheBase implements RepoCache {
       logger.debug('Repository cache fingerprint is invalid');
       return;
     }
-    const jsonStr = await decompress(oldCache.payload);
+    const jsonStr = await decompressFromBase64(oldCache.payload);
     this.data = RepoCacheBase.parseData(jsonStr);
     this.oldHash = oldCache.hash;
   }
 
   async load(): Promise<void> {
     try {
-      const rawOldCache = await this.read();
-      if (!is.string(rawOldCache)) {
+      const oldCache = await this.read();
+      if (!is.string(oldCache)) {
         logger.debug(
-          `RepoCacheBase.load() - expecting data of type 'string' received '${typeof rawOldCache}' instead - skipping`
+          `RepoCacheBase.load() - expecting data of type 'string' received '${typeof oldCache}' instead - skipping`,
         );
         return;
       }
-      const oldCache = JSON.parse(rawOldCache) as unknown;
 
       const cacheV13 = RepoCacheV13.safeParse(oldCache);
       if (cacheV13.success) {
@@ -65,7 +64,7 @@ export abstract class RepoCacheBase implements RepoCache {
       }
 
       logger.debug('Repository cache is invalid');
-    } catch (err) {
+    } catch (err) /* istanbul ignore next: not easily testable */ {
       logger.debug({ err }, 'Error reading repository cache');
     }
   }
@@ -81,7 +80,7 @@ export abstract class RepoCacheBase implements RepoCache {
     const repository = this.repository;
     const fingerprint = this.fingerprint;
 
-    const payload = await compress(jsonStr);
+    const payload = await compressToBase64(jsonStr);
 
     await this.write({
       revision,

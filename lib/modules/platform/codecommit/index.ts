@@ -4,8 +4,6 @@ import {
   ListRepositoriesOutput,
   PullRequestStatusEnum,
 } from '@aws-sdk/client-codecommit';
-import JSON5 from 'json5';
-
 import {
   PLATFORM_BAD_CREDENTIALS,
   REPOSITORY_EMPTY,
@@ -13,6 +11,8 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
+import { coerceArray } from '../../../util/array';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -163,7 +163,7 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
     return fetchedPrs;
   }
 
-  const prIds = listPrsResponse.pullRequestIds ?? [];
+  const prIds = coerceArray(listPrsResponse.pullRequestIds);
 
   for (const prId of prIds) {
     const prRes = await client.getPr(prId);
@@ -204,12 +204,12 @@ export async function findPr({
     const prs = await getPrList();
     const refsHeadBranchName = getNewBranchName(branchName);
     prsFiltered = prs.filter(
-      (item) => item.sourceBranch === refsHeadBranchName
+      (item) => item.sourceBranch === refsHeadBranchName,
     );
 
     if (prTitle) {
       prsFiltered = prsFiltered.filter(
-        (item) => item.title.toUpperCase() === prTitle.toUpperCase()
+        (item) => item.title.toUpperCase() === prTitle.toUpperCase(),
       );
     }
 
@@ -233,7 +233,7 @@ export async function findPr({
 }
 
 export async function getBranchPr(
-  branchName: string
+  branchName: string,
 ): Promise<CodeCommitPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
@@ -244,7 +244,7 @@ export async function getBranchPr(
 }
 
 export async function getPr(
-  pullRequestId: number
+  pullRequestId: number,
 ): Promise<CodeCommitPr | null> {
   logger.debug(`getPr(${pullRequestId})`);
   const prRes = await client.getPr(`${pullRequestId}`);
@@ -272,7 +272,6 @@ export async function getPr(
     title: prInfo.title!,
     targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
     destinationCommit: prInfo.pullRequestTargets![0].destinationCommit!,
-    sha: prInfo.revisionId,
     body: prInfo.description!,
   };
 }
@@ -291,7 +290,7 @@ export async function getRepos(): Promise<string[]> {
 
   const res: string[] = [];
 
-  const repoNames = reposRes?.repositories ?? [];
+  const repoNames = coerceArray(reposRes?.repositories);
 
   for (const repo of repoNames) {
     if (repo.repositoryName) {
@@ -307,11 +306,11 @@ export function massageMarkdown(input: string): string {
   return input
     .replace(
       'you tick the rebase/retry checkbox',
-      'rename PR to start with "rebase!"'
+      'rename PR to start with "rebase!"',
     )
     .replace(
       'checking the rebase/retry box above',
-      'renaming the PR to start with "rebase!"'
+      'renaming the PR to start with "rebase!"',
     )
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
@@ -319,39 +318,34 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(
       regEx(/(?<hiddenComment><!--renovate-(?:debug|config-hash):.*?-->)/g),
-      '[//]: # ($<hiddenComment>)'
+      '[//]: # ($<hiddenComment>)',
     );
 }
 
 export async function getJsonFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
-): Promise<any | null> {
+  branchOrTag?: string,
+): Promise<any> {
   const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return raw ? JSON5.parse(raw) : null;
+  return parseJson(raw, fileName);
 }
 
 export async function getRawFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
+  branchOrTag?: string,
 ): Promise<string | null> {
   const fileRes = await client.getFile(
     repoName ?? config.repository,
     fileName,
-    branchOrTag
+    branchOrTag,
   );
   if (!fileRes?.fileContent) {
     return null;
   }
   const buf = Buffer.from(fileRes.fileContent);
   return buf.toString();
-}
-
-/* istanbul ignore next */
-export function getRepoForceRebase(): Promise<boolean> {
-  return Promise.resolve(false);
 }
 
 const AMAZON_MAX_BODY_LENGTH = 10239;
@@ -369,7 +363,7 @@ export async function createPr({
     sanitize(description),
     sourceBranch,
     targetBranch,
-    config.repository
+    config.repository,
   );
 
   if (
@@ -414,7 +408,7 @@ export async function updatePr({
   if (body && cachedPr?.body !== body) {
     await client.updatePrDescription(
       `${prNo}`,
-      smartTruncate(sanitize(body), AMAZON_MAX_BODY_LENGTH)
+      smartTruncate(sanitize(body), AMAZON_MAX_BODY_LENGTH),
     );
   }
 
@@ -516,15 +510,15 @@ export async function mergePr({
 
 export async function addReviewers(
   prNo: number,
-  reviewers: string[]
+  reviewers: string[],
 ): Promise<void> {
   const numberOfApprovers = reviewers.length;
   const approvalRuleContents = `{"Version":"2018-11-08","Statements": [{"Type": "Approvers","NumberOfApprovalsNeeded":${numberOfApprovers},"ApprovalPoolMembers": ${JSON.stringify(
-    reviewers
+    reviewers,
   )}}]}`;
   const res = await client.createPrApprovalRule(
     `${prNo}`,
-    approvalRuleContents
+    approvalRuleContents,
   );
   if (res) {
     const approvalRule = res.approvalRule;
@@ -574,7 +568,7 @@ export function deleteLabel(prNumber: number, label: string): Promise<void> {
 export function getBranchStatus(branchName: string): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   logger.debug(
-    'returning branch status yellow, because getBranchStatus isnt supported on aws yet'
+    'returning branch status yellow, because getBranchStatus isnt supported on aws yet',
   );
   return Promise.resolve('yellow');
 }
@@ -582,11 +576,11 @@ export function getBranchStatus(branchName: string): Promise<BranchStatus> {
 /* istanbul ignore next */
 export function getBranchStatusCheck(
   branchName: string,
-  context: string
+  context: string,
 ): Promise<BranchStatus | null> {
   logger.debug(`getBranchStatusCheck(${branchName}, context=${context})`);
   logger.debug(
-    'returning null, because getBranchStatusCheck is not supported on aws yet'
+    'returning null, because getBranchStatusCheck is not supported on aws yet',
   );
   return Promise.resolve(null);
 }
@@ -631,7 +625,7 @@ export async function ensureComment({
     }
     const firstCommentContent = commentObj.comments[0].content;
     if (
-      (topic && firstCommentContent?.startsWith(header)) ||
+      (topic && firstCommentContent?.startsWith(header)) === true ||
       (!topic && firstCommentContent === body)
     ) {
       commentId = commentObj.comments[0].commentId;
@@ -653,23 +647,23 @@ export async function ensureComment({
       config.repository,
       body,
       thisPr[0].destinationCommit,
-      thisPr[0].sourceCommit
+      thisPr[0].sourceCommit,
     );
     logger.info(
       { repository: config.repository, prNo: number, topic },
-      'Comment added'
+      'Comment added',
     );
   } else if (commentNeedsUpdating && commentId) {
     await client.updateComment(commentId, body);
 
     logger.debug(
       { repository: config.repository, prNo: number, topic },
-      'Comment updated'
+      'Comment updated',
     );
   } else {
     logger.debug(
       { repository: config.repository, prNo: number, topic },
-      'Comment is already update-to-date'
+      'Comment is already update-to-date',
     );
   }
 
@@ -677,7 +671,7 @@ export async function ensureComment({
 }
 
 export async function ensureCommentRemoval(
-  removeConfig: EnsureCommentRemovalConfig
+  removeConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
   const { number: prNo } = removeConfig;
   const key =
@@ -703,7 +697,7 @@ export async function ensureCommentRemoval(
   for (const commentObj of prCommentsResponse.commentsForPullRequestData) {
     if (!commentObj?.comments) {
       logger.debug(
-        'comments object not found under commentsForPullRequestData'
+        'comments object not found under commentsForPullRequestData',
       );
       continue;
     }
@@ -711,7 +705,8 @@ export async function ensureCommentRemoval(
     for (const comment of commentObj.comments) {
       if (
         (removeConfig.type === 'by-topic' &&
-          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ||
+          comment.content?.startsWith(`### ${removeConfig.topic}\n\n`)) ===
+          true ||
         (removeConfig.type === 'by-content' &&
           removeConfig.content === comment.content?.trim())
       ) {

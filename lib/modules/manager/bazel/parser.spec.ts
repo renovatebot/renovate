@@ -7,6 +7,8 @@ describe('modules/manager/bazel/parser', () => {
     const input = codeBlock`
       go_repository(name = "foo")
       maybe(go_repository, name = "bar", deps = ["baz", "qux"])
+      _go_repository(name = "quux")
+      maybe(_go_repository, name = "corge", deps = ["grault", "garply"])
     `;
 
     const res = parse(input);
@@ -39,10 +41,40 @@ describe('modules/manager/bazel/parser', () => {
           },
         },
       },
+      {
+        type: 'record',
+        value: '_go_repository(name = "quux")',
+        offset: 86,
+        children: {
+          rule: { type: 'string', value: '_go_repository', offset: 86 },
+          name: { type: 'string', value: 'quux', offset: 109 },
+        },
+      },
+      {
+        type: 'record',
+        value:
+          'maybe(_go_repository, name = "corge", deps = ["grault", "garply"])',
+        offset: 116,
+        children: {
+          rule: { type: 'string', value: '_go_repository', offset: 122 },
+          name: { type: 'string', value: 'corge', offset: 146 },
+          deps: {
+            type: 'array',
+            value: '["grault", "garply"]',
+            offset: 161,
+            children: [
+              { type: 'string', value: 'grault', offset: 163 },
+              { type: 'string', value: 'garply', offset: 173 },
+            ],
+          },
+        },
+      },
     ]);
     expect(res?.map(extract)).toMatchObject([
       { rule: 'go_repository', name: 'foo' },
       { rule: 'go_repository', name: 'bar', deps: ['baz', 'qux'] },
+      { rule: '_go_repository', name: 'quux' },
+      { rule: '_go_repository', name: 'corge', deps: ['grault', 'garply'] },
     ]);
   });
 

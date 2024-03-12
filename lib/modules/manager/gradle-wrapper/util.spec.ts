@@ -49,7 +49,7 @@ describe('modules/manager/gradle-wrapper/util', () => {
 
   describe('extractGradleVersion()', () => {
     it('works for undefined', () => {
-      // TODO #7154
+      // TODO #22198
       expect(extractGradleVersion(undefined as never)).toBeNull();
     });
   });
@@ -73,7 +73,7 @@ describe('modules/manager/gradle-wrapper/util', () => {
         partial<Stats>({
           isFile: () => true,
           mode: 0o550,
-        })
+        }),
       );
       expect(await prepareGradleCommand('./gradlew')).toBe('./gradlew');
     });
@@ -82,7 +82,7 @@ describe('modules/manager/gradle-wrapper/util', () => {
       fs.statLocalFile.mockResolvedValue(
         partial<Stats>({
           isFile: () => false,
-        })
+        }),
       );
       expect(await prepareGradleCommand('./gradlew')).toBeNull();
     });

@@ -4,7 +4,7 @@ import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 describe('modules/versioning/regex/index', () => {
   describe('regex versioning', () => {
     const regex = get(
-      'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(?:-(?<compatibility>.*))?$'
+      'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(?:-(?<compatibility>.*))?$',
     );
 
     it('requires a valid configuration to be initialized', () => {
@@ -77,7 +77,7 @@ describe('modules/versioning/regex/index', () => {
       ({ version, range, expected }) => {
         const res = regex.isCompatible(version, range);
         expect(!!res).toBe(expected);
-      }
+      },
     );
 
     it.each`
@@ -143,7 +143,7 @@ describe('modules/versioning/regex/index', () => {
         expect(regex.getMajor(version)).toBe(major);
         expect(regex.getMinor(version)).toBe(minor);
         expect(regex.getPatch(version)).toBe(patch);
-      }
+      },
     );
 
     it.each`
@@ -247,7 +247,7 @@ describe('modules/versioning/regex/index', () => {
       'isLessThanRange($version, $range) === $expected',
       ({ version, range, expected }) => {
         expect(regex.isLessThanRange?.(version, range)).toBe(expected);
-      }
+      },
     );
 
     it.each`
@@ -261,7 +261,7 @@ describe('modules/versioning/regex/index', () => {
       'getSatisfyingVersion($versions, "$range") === $expected',
       ({ versions, range, expected }) => {
         expect(regex.getSatisfyingVersion(versions, range)).toBe(expected);
-      }
+      },
     );
 
     it.each`
@@ -275,7 +275,7 @@ describe('modules/versioning/regex/index', () => {
       'minSatisfyingVersion($versions, "$range") === "$expected"',
       ({ versions, range, expected }) => {
         expect(regex.minSatisfyingVersion(versions, range)).toBe(expected);
-      }
+      },
     );
 
     describe('.getNewValue', () => {
@@ -286,7 +286,7 @@ describe('modules/versioning/regex/index', () => {
             rangeStrategy: null as never,
             currentVersion: null as never,
             newVersion: '1.2.3',
-          })
+          }),
         ).toBe('1.2.3');
       });
     });
@@ -295,8 +295,8 @@ describe('modules/versioning/regex/index', () => {
       it('sorts versions in an ascending order', () => {
         expect(
           ['1.2.3a1', '2.0.1', '1.3.4', '1.2.3'].sort(
-            regex.sortVersions.bind(regex)
-          )
+            regex.sortVersions.bind(regex),
+          ),
         ).toEqual(['1.2.3a1', '1.2.3', '1.3.4', '2.0.1']);
       });
     });
@@ -347,14 +347,20 @@ describe('modules/versioning/regex/index', () => {
       'matches("$version", "$range") === $expected',
       ({ version, range, expected }) => {
         expect(regex.matches(version, range)).toBe(expected);
-      }
+      },
     );
   });
 
   describe('Supported 4th number as build and 5th as revision', () => {
     const re = get(
-      'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.+)(?<build>\\d+)-r(?<revision>\\d+))?$'
+      'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.+)(?<build>\\d+)-r(?<revision>\\d+))?$',
     );
+
+    const versions = [
+      '12.7.0-debian-10-r69',
+      '12.7.0-debian-10-r100',
+      '12.7.0-debian-10-r101',
+    ];
 
     it.each`
       version                    | expected
@@ -372,7 +378,7 @@ describe('modules/versioning/regex/index', () => {
       ({ version, range, expected }) => {
         const res = re.isCompatible(version, range);
         expect(!!res).toBe(expected);
-      }
+      },
     );
 
     it.each`
@@ -385,13 +391,31 @@ describe('modules/versioning/regex/index', () => {
 
     it.each`
       version                  | range                     | expected
-      ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-10-r69'} | ${true}
-      ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-10-r68'} | ${true}
+      ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-9-r69'}  | ${true}
+      ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-10-r68'} | ${false}
     `(
       'matches("$version", "$range") === $expected',
       ({ version, range, expected }) => {
         expect(re.matches(version, range)).toBe(expected);
-      }
+      },
     );
+
+    it('getSatisfyingVersion', () => {
+      expect(re.getSatisfyingVersion(versions, '12.7.0-debian-10-r100')).toBe(
+        '12.7.0-debian-10-r100',
+      );
+      expect(
+        re.getSatisfyingVersion(versions, '12.7.0-debian-12-r100'),
+      ).toBeNull();
+    });
+
+    it('minSatisfyingVersion', () => {
+      expect(re.minSatisfyingVersion(versions, '12.7.0-debian-10-r100')).toBe(
+        '12.7.0-debian-10-r100',
+      );
+      expect(
+        re.minSatisfyingVersion(versions, '12.7.0-debian-12-r100'),
+      ).toBeNull();
+    });
   });
 });

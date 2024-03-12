@@ -1,3 +1,4 @@
+import { coerceArray } from '../../../util/array';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PuppetfileModule } from './types';
 
@@ -30,11 +31,11 @@ export class Puppetfile {
   }
 
   public getModulesOfForge(
-    forgeUrl: string | null | undefined
+    forgeUrl: string | null | undefined,
   ): PuppetfileModule[] {
     const modules = this.forgeModules.get(forgeUrl ?? null);
 
-    return modules ?? [];
+    return coerceArray(modules);
   }
 }
 
@@ -89,7 +90,7 @@ export function parsePuppetfile(content: string): Puppetfile {
 
 function fillPuppetfileModule(
   currentPuppetfileModule: PuppetfileModule,
-  value: string
+  value: string,
 ): void {
   // "positional" module values
   if (currentPuppetfileModule.name === undefined) {

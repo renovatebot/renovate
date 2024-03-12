@@ -67,7 +67,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM node@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -89,7 +89,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM node:8.9.0@sha256:eb85fc5b1198f5e1ec025ea07586bdbbf397e7d82df66c90d7511f533517e063\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -111,7 +111,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM node:8.9.0-alpine as base\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -131,7 +131,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         '# some comment\n# another\n\nFROM node\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -151,7 +151,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM registry2.something.info/node:8\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -171,7 +171,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM registry2.something.info/node:8-alpine\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -191,7 +191,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM registry2.something.info:5005/node:8\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -211,7 +211,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM registry2.something.info:5005/node\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -264,7 +264,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM registry2.something.info/someaccount/node:8\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -284,7 +284,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM    registry.allmine.info:5005/node:8.7.0\n\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -304,7 +304,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nFROM python:3.6-slim\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -339,7 +339,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nFROM frontend\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -359,7 +359,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM scratch\nCOPY --from=gcr.io/k8s-skaffold/skaffold:v0.11.0 /usr/bin/skaffold /usr/bin/skaffold\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -379,7 +379,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=frontend /usr/bin/node /usr/bin/node\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -399,7 +399,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM node:6.12.3 as frontend\n\n# comment\nENV foo=bar\nCOPY --from=0 /usr/bin/node /usr/bin/node\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -419,7 +419,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM node:8.15.1-alpine as skippedfrom\nFROM golang:1.7.3 as builder\n\n# comment\nWORKDIR /go/src/github.com/alexellis/href-counter/\nRUN go get -d -v golang.org/x/net/html  \nCOPY app.go    .\nRUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .\n\nFROM alpine:latest  \nRUN apk --no-cache add ca-certificates\nWORKDIR /root/\nCOPY --from=builder /go/src/github.com/alexellis/href-counter/app .\nCMD ["./app"]\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -691,7 +691,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'FROM alpine:3.5\n\nRUN something \\',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -727,7 +727,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'ARG img_base\nFROM $img_base\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -745,7 +745,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'ARG patch1=""\nARG patch2=\nFROM nginx:1.20${patch1}$patch2\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -765,7 +765,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'ARG\tVARIANT="1.60.0-bullseye" \nFROM\trust:${VARIANT}\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -785,7 +785,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'ARG IMAGE_VERSION=${IMAGE_VERSION:-ubuntu:xenial}\nfrom ${IMAGE_VERSION} as base\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -806,7 +806,7 @@ describe('modules/manager/dockerfile/extract', () => {
         'ARG sha_digest=sha256:ab37242e81cbc031b2600eef4440fe87055a05c14b40686df85078cc5086c98f\n' +
           '      FROM gcr.io/distroless/java17@$sha_digest',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -828,7 +828,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'ARG base=nginx:1.19\nFROM $base as stage1\nARG base=nginx:1.20\nFROM --platform=amd64 $base as stage2\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -858,7 +858,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'ARG CUDA=9.2\nARG LINUX_VERSION ubuntu16.04\nFROM nvidia/cuda:${CUDA}-devel-${LINUX_VERSION}\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -878,7 +878,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'ARG img="scratch"\nFROM $img as base\n',
         '',
-        {}
+        {},
       );
       expect(res).toBeNull();
     });
@@ -928,7 +928,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         '# dummy\n# escape = `\n\nFROM\\\nnginx:1.20',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -947,6 +947,16 @@ describe('modules/manager/dockerfile/extract', () => {
     it('handles an alternative escape character', () => {
       const res = extractPackageFile(d4, '', {})?.deps;
       expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '1',
+          datasource: 'docker',
+          depName: 'docker/dockerfile',
+          depType: 'syntax',
+          replaceString: 'docker/dockerfile:1',
+        },
         {
           autoReplaceStringTemplate:
             ' ARG `\n' +
@@ -1008,7 +1018,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'ARG REF_NAME=${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}\nfrom ${REF_NAME}',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -1029,7 +1039,7 @@ describe('modules/manager/dockerfile/extract', () => {
       const res = extractPackageFile(
         'ARG IMAGE_TAG=14.04\r\n#something unrelated\r\nFROM ubuntu:$IMAGE_TAG@sha256:abc\r\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -1057,7 +1067,7 @@ describe('modules/manager/dockerfile/extract', () => {
           'ARG DUMMY_PREFIX=\n' +
           'FROM ${DUMMY_PREFIX}${NODE_IMAGE_HOST}${NODE_IMAGE_NAME}:${NODE_IMAGE_TAG}${NODE_IMAGE_HASH} as yarn\n',
         '',
-        {}
+        {},
       )?.deps;
       expect(res).toEqual([
         {
@@ -1086,7 +1096,7 @@ describe('modules/manager/dockerfile/extract', () => {
     const res = extractPackageFile(
       'FROM quay.io/myName/myPackage:0.6.2\n',
       '',
-      {}
+      {},
     );
     expect(res).toEqual({
       deps: [
@@ -1113,7 +1123,7 @@ describe('modules/manager/dockerfile/extract', () => {
           'quay.io': 'my-quay-mirror.registry.com',
           'index.docker.io': 'my-docker-mirror.registry.com',
         },
-      }
+      },
     );
     expect(res).toEqual({
       deps: [
@@ -1140,7 +1150,7 @@ describe('modules/manager/dockerfile/extract', () => {
           'quay.io': 'my-quay-mirror.registry.com',
           'index.docker.io': 'my-docker-mirror.registry.com',
         },
-      }
+      },
     );
     expect(res).toEqual({
       deps: [
@@ -1153,6 +1163,60 @@ describe('modules/manager/dockerfile/extract', () => {
           depName: 'myName/myPackage',
           depType: 'final',
           replaceString: 'myName/myPackage:0.6.2',
+        },
+      ],
+    });
+  });
+
+  it('handles # syntax statements', () => {
+    const res = extractPackageFile(
+      '# syntax=docker/dockerfile:1.1.7\n' + 'FROM alpine:3.13.5\n',
+      '',
+      {},
+    );
+    expect(res).toEqual({
+      deps: [
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '1.1.7',
+          datasource: 'docker',
+          depName: 'docker/dockerfile',
+          depType: 'syntax',
+          replaceString: 'docker/dockerfile:1.1.7',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '3.13.5',
+          datasource: 'docker',
+          depName: 'alpine',
+          depType: 'final',
+          replaceString: 'alpine:3.13.5',
+        },
+      ],
+    });
+  });
+
+  it('ignores # syntax statements after first line', () => {
+    const res = extractPackageFile(
+      'FROM alpine:3.13.5\n' + '# syntax=docker/dockerfile:1.1.7\n',
+      '',
+      {},
+    );
+    expect(res).toEqual({
+      deps: [
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '3.13.5',
+          datasource: 'docker',
+          depName: 'alpine',
+          depType: 'final',
+          replaceString: 'alpine:3.13.5',
         },
       ],
     });
@@ -1200,7 +1264,7 @@ describe('modules/manager/dockerfile/extract', () => {
       });
 
       const res4 = getDep(
-        '${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}'
+        '${REF_NAME:-"gcr.io/distroless/static-debian11:nonroot@sha256:abc"}',
       );
       expect(res4).toEqual({
         autoReplaceStringTemplate:
@@ -1213,7 +1277,7 @@ describe('modules/manager/dockerfile/extract', () => {
       });
 
       const res5 = getDep(
-        '${REF_NAME:+-gcr.io/distroless/static-debian11:nonroot@sha256:abc}'
+        '${REF_NAME:+-gcr.io/distroless/static-debian11:nonroot@sha256:abc}',
       );
       expect(res5).toEqual({
         autoReplaceStringTemplate:
@@ -1307,7 +1371,7 @@ describe('modules/manager/dockerfile/extract', () => {
           ...dep,
           replaceString: imageName,
         });
-      }
+      },
     );
   });
 

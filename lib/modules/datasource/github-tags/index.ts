@@ -29,7 +29,7 @@ export class GithubTagsDatasource extends Datasource {
 
   async getCommit(
     registryUrl: string | undefined,
-    githubRepo: string
+    githubRepo: string,
   ): Promise<string | null> {
     const apiBaseUrl = getApiBaseUrl(registryUrl);
     let digest: string | null = null;
@@ -40,7 +40,7 @@ export class GithubTagsDatasource extends Datasource {
     } catch (err) {
       logger.debug(
         { githubRepo, err, registryUrl },
-        'Error getting latest commit from GitHub repo'
+        'Error getting latest commit from GitHub repo',
       );
     }
     return digest;
@@ -55,7 +55,7 @@ export class GithubTagsDatasource extends Datasource {
    */
   override getDigest(
     { packageName: repo, registryUrl }: Partial<DigestConfig>,
-    newValue?: string
+    newValue?: string,
   ): Promise<string | null> {
     return newValue
       ? findCommitOfTag(registryUrl, repo!, newValue, this.http)
@@ -63,17 +63,18 @@ export class GithubTagsDatasource extends Datasource {
   }
 
   override async getReleases(
-    config: GetReleasesConfig
+    config: GetReleasesConfig,
   ): Promise<ReleaseResult> {
     const { registryUrl, packageName: repo } = config;
     const sourceUrl = getSourceUrl(repo, registryUrl);
     const tagsResult = await queryTags(config, this.http);
     const releases: Release[] = tagsResult.map(
-      ({ version, releaseTimestamp, gitRef }) => ({
+      ({ version, releaseTimestamp, gitRef, hash }) => ({
+        newDigest: hash,
         version,
         releaseTimestamp,
         gitRef,
-      })
+      }),
     );
 
     try {

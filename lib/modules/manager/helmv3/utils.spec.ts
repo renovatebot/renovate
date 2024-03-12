@@ -41,7 +41,7 @@ describe('modules/manager/helmv3/utils', () => {
     });
 
     it('return repository parameter if repository is null', () => {
-      // TODO #7154
+      // TODO #22198
       const repository = resolveAlias(null as never, {
         anotherRepository: 'https://charts.helm.sh/stable',
       });
@@ -49,7 +49,7 @@ describe('modules/manager/helmv3/utils', () => {
     });
 
     it('return repository parameter if repository is undefined', () => {
-      // TODO #7154
+      // TODO #22198
       const repository = resolveAlias(undefined as never, {
         anotherRepository: 'https://charts.helm.sh/stable',
       });
@@ -59,13 +59,13 @@ describe('modules/manager/helmv3/utils', () => {
 
   describe('.isAlias()', () => {
     it('return false if repository is null', () => {
-      // TODO #7154
+      // TODO #22198
       const repository = isAlias(null as never);
       expect(repository).toBeFalse();
     });
 
     it('return false if repository is undefined', () => {
-      // TODO #7154
+      // TODO #22198
       const repository = isAlias(undefined as never);
       expect(repository).toBeFalse();
     });

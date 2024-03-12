@@ -30,7 +30,7 @@ function currentFragment(ctx: Ctx): NestedFragment {
 function extractTreeValue(
   source: string,
   tree: parser.Tree,
-  offset: number
+  offset: number,
 ): string {
   if (tree.type === 'wrapped-tree') {
     const { endsWith } = tree;
@@ -133,7 +133,7 @@ const kwParams = q
               return ctx;
             }),
             0,
-            3
+            3,
           )
           .tree({
             type: 'wrapped-tree',
@@ -147,7 +147,7 @@ const kwParams = q
                     ...ctx,
                     subRecordKey,
                   }))
-                  .op('=')
+                  .op('='),
               )
               .str((ctx, { value: subRecordValue, offset }) => {
                 const argIndex = ctx.argIndex ?? 0;
@@ -174,7 +174,7 @@ const kwParams = q
                 callFrag.value = extractTreeValue(
                   ctx.source,
                   tree,
-                  callFrag.offset
+                  callFrag.offset,
                 );
 
                 const parentRecord = currentFragment(ctx);
@@ -188,7 +188,7 @@ const kwParams = q
               }
               return ctx;
             },
-          })
+          }),
       ),
       postHandler: (ctx, tree) => {
         const parentRecord = currentFragment(ctx);
@@ -205,7 +205,7 @@ const kwParams = q
         }
         return ctx;
       },
-    })
+    }),
   )
   .handler((ctx) => {
     delete ctx.recordKey;
@@ -220,7 +220,7 @@ const kwParams = q
  * @param search something to match inside parens
  */
 function ruleCall(
-  search: q.QueryBuilder<Ctx, parser.Node>
+  search: q.QueryBuilder<Ctx, parser.Node>,
 ): q.QueryBuilder<Ctx, parser.Node> {
   return q.tree({
     type: 'wrapped-tree',
@@ -261,18 +261,18 @@ function ruleNameHandler(ctx: Ctx, { value, offset }: lexer.Token): Ctx {
 /**
  * Matches regular rules:
  * - `git_repository(...)`
- * - `go_repository(...)`
+ * - `_go_repository(...)`
  */
 const regularRule = q
   .sym<Ctx>(supportedRulesRegex, (ctx, token) =>
-    ruleNameHandler(recordStartHandler(ctx, token), token)
+    ruleNameHandler(recordStartHandler(ctx, token), token),
   )
   .join(ruleCall(kwParams));
 
 /**
  * Matches "maybe"-form rules:
  * - `maybe(git_repository, ...)`
- * - `maybe(go_repository, ...)`
+ * - `maybe(_go_repository, ...)`
  */
 const maybeRule = q
   .sym<Ctx>('maybe', recordStartHandler)
@@ -280,9 +280,9 @@ const maybeRule = q
     ruleCall(
       q.alt(
         q.begin<Ctx>().sym(supportedRulesRegex, ruleNameHandler).op(','),
-        kwParams
-      )
-    )
+        kwParams,
+      ),
+    ),
   );
 
 const rule = q.alt<Ctx>(maybeRule, regularRule);
@@ -302,7 +302,7 @@ const starlark = lang.createLang('starlark');
 
 export function parse(
   input: string,
-  packageFile?: string
+  packageFile?: string,
 ): RecordFragment[] | null {
   const cacheKey = getCacheKey(input);
 

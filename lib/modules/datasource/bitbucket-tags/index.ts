@@ -1,4 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
+import type { PackageCacheNamespace } from '../../../util/cache/package/types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import { ensureTrailingSlash } from '../../../util/url';
 import type { PagedResult, RepoInfoBody } from '../../platform/bitbucket/types';
@@ -7,9 +8,9 @@ import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import type { BitbucketCommit, BitbucketTag } from './types';
 
 export class BitbucketTagsDatasource extends Datasource {
-  bitbucketHttp = new BitbucketHttp(BitbucketTagsDatasource.id);
-
   static readonly id = 'bitbucket-tags';
+
+  bitbucketHttp = new BitbucketHttp(BitbucketTagsDatasource.id);
 
   static readonly customRegistrySupport = true;
 
@@ -17,7 +18,7 @@ export class BitbucketTagsDatasource extends Datasource {
 
   static readonly defaultRegistryUrls = ['https://bitbucket.org'];
 
-  static readonly cacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
+  static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
 
   constructor() {
     super(BitbucketTagsDatasource.id);
@@ -31,10 +32,10 @@ export class BitbucketTagsDatasource extends Datasource {
   static getCacheKey(
     registryUrl: string | undefined,
     repo: string,
-    type: string
+    type: string,
   ): string {
     return `${BitbucketTagsDatasource.getRegistryURL(
-      registryUrl
+      registryUrl,
     )}:${repo}:${type}`;
   }
 
@@ -83,7 +84,7 @@ export class BitbucketTagsDatasource extends Datasource {
   async getTagCommit(
     _registryUrl: string | undefined,
     repo: string,
-    tag: string
+    tag: string,
   ): Promise<string | null> {
     const url = `/2.0/repositories/${repo}/refs/tags/${tag}`;
 
@@ -102,7 +103,7 @@ export class BitbucketTagsDatasource extends Datasource {
   async getMainBranch(repo: string): Promise<string> {
     return (
       await this.bitbucketHttp.getJson<RepoInfoBody>(
-        `/2.0/repositories/${repo}`
+        `/2.0/repositories/${repo}`,
       )
     ).body.mainbranch.name;
   }
@@ -116,7 +117,7 @@ export class BitbucketTagsDatasource extends Datasource {
   })
   override async getDigest(
     { packageName: repo, registryUrl }: DigestConfig,
-    newValue?: string
+    newValue?: string,
   ): Promise<string | null> {
     if (newValue?.length) {
       return this.getTagCommit(registryUrl, repo, newValue);

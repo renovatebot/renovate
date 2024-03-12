@@ -17,7 +17,6 @@ describe('workers/repository/extract/index', () => {
     const fileList = ['README', 'package.json', 'tasks/ansible.yaml'];
 
     beforeEach(() => {
-      jest.resetAllMocks();
       scm.getFileList.mockResolvedValue(fileList);
       config = getConfig();
     });
@@ -26,6 +25,7 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
+      delete config.customManagers; // for coverage
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('ansible');
     });
@@ -36,14 +36,19 @@ describe('workers/repository/extract/index', () => {
         partial<PackageFile<Record<string, any>>>({}),
       ]);
       const res = await extractAllDependencies(config);
-      expect(res).toMatchObject({ packageFiles: { npm: [{}] } });
+      expect(res).toMatchObject({
+        packageFiles: { npm: [{}] },
+      });
     });
 
     it('warns if no packages found for a enabled manager', async () => {
-      config.enabledManagers = ['npm'];
+      config.enabledManagers = ['npm', 'custom.regex'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([]);
       expect((await extractAllDependencies(config)).packageFiles).toEqual({});
-      expect(logger.debug).toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        { manager: 'custom.regex' },
+        `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`,
+      );
     });
 
     it('warns if packageFiles is null', async () => {
@@ -56,7 +61,9 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([
         partial<PackageFile<Record<string, any>>>({}),
       ]);
-      config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
+      config.customManagers = [
+        { customType: 'regex', fileMatch: ['README'], matchStrings: [''] },
+      ];
       const res = await extractAllDependencies(config);
       expect(Object.keys(res.packageFiles)).toContain('regex');
     });

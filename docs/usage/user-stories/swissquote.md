@@ -22,7 +22,7 @@ Depending on third-party software is a sword of Damocles; you never know when a 
 
 <figure markdown>
   ![XKCD 2347](../assets/images/swissquote_xkcd.png){ loading=lazy }
-  <figcaption><a href=https://xkcd.com/2347/ target=_blank>XKCD comic 2347</a> is always relevant when talking about dependencies.</figcaption>
+  <figcaption><a href=https://xkcd.com/2347/>XKCD comic 2347</a> is always relevant when talking about dependencies.</figcaption>
 </figure>
 
 Each software dependency is a risk.
@@ -176,8 +176,8 @@ Some features and options we enjoy:
 - [Integration with GitHub’s Dependabot alerts](../configuration-options.md#vulnerabilityalerts) to raise the priority and send security remediation PRs as soon as possible
 - Each rule can be customized either globally [or specified per package](../configuration-options.md#packagerules)
 - Works with your [private package registry](../getting-started/private-packages.md)
-- Supports more than 70 [languages and package managers](https://docs.renovatebot.com/modules/manager/#supported-managers): Maven, Docker, npm, Docker Compose, Python
-- If you are using dependencies in a custom way, [there is a special regexManager](../configuration-options.md#regexmanagers) that allows you to transform patterns into dependencies
+- Supports more than 70 [languages and package managers](../modules/manager/index.md#supported-managers): Maven, Docker, npm, Docker Compose, Python
+- If you are using dependencies in a custom way, [there is a `customManagers` option](../configuration-options.md#custommanagers) that allows you to transform patterns into dependencies
 
 There is an [on-premise option](https://www.mend.io/free-developer-tools/renovate/on-premises/), but you can also use [the Mend Renovate App](https://github.com/marketplace/renovate).
 On our side, we’re not using the on-premise but rather a custom scheduler using the open source Docker image.

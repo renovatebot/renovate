@@ -5,18 +5,20 @@ import { ensureTrailingSlash } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { ServiceDiscoveryResult } from './types';
 
+const terraformId = 'terraform';
+
 // TODO: extract to a separate directory structure (#10532)
 export abstract class TerraformDatasource extends Datasource {
-  static id = 'terraform';
+  static id = terraformId;
 
   @cache({
-    namespace: `datasource-${TerraformDatasource.id}`,
+    namespace: `datasource-${terraformId}`,
     key: (registryUrl: string) =>
       TerraformDatasource.getDiscoveryUrl(registryUrl),
     ttlMinutes: 1440,
   })
   async getTerraformServiceDiscoveryResult(
-    registryUrl: string
+    registryUrl: string,
   ): Promise<ServiceDiscoveryResult> {
     const discoveryURL = TerraformDatasource.getDiscoveryUrl(registryUrl);
     const serviceDiscovery = (

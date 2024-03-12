@@ -87,7 +87,14 @@ export function normalizeDate(input: any): string | null {
     //   2. Format of `input` is very exotic
     //      (from `DateTime.fromISO()` perspective)
     //
-    const luxonDate = DateTime.fromISO(input, { zone: 'UTC' });
+
+    let luxonDate = DateTime.fromISO(input, { zone: 'UTC' });
+    if (luxonDate.isValid) {
+      return luxonDate.toISO();
+    }
+    luxonDate = DateTime.fromFormat(input, 'yyyyMMddHHmmss', {
+      zone: 'UTC',
+    });
     if (luxonDate.isValid) {
       return luxonDate.toISO();
     }
@@ -116,7 +123,7 @@ function massageTimestamps(dep: ReleaseResult): void {
 export function addMetaData(
   dep: ReleaseResult,
   datasource: string,
-  packageName: string
+  packageName: string,
 ): void {
   massageTimestamps(dep);
 
@@ -205,7 +212,7 @@ export function addMetaData(
  */
 export function shouldDeleteHomepage(
   sourceUrl: string | null | undefined,
-  homepage: string | undefined
+  homepage: string | undefined,
 ): boolean {
   if (is.nullOrUndefined(sourceUrl) || is.undefined(homepage)) {
     return false;

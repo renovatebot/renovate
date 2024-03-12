@@ -1,4 +1,6 @@
+import { partial } from '../../../test/util';
 import { GenericVersion, GenericVersioningApi } from './generic';
+import type { NewValueConfig } from './types';
 
 describe('modules/versioning/generic', () => {
   const optionalFunctions = [
@@ -30,19 +32,18 @@ describe('modules/versioning/generic', () => {
 
   describe('GenericVersioningApi', () => {
     class DummyScheme extends GenericVersioningApi {
-      protected override _compare(_version: string, _other: string): number {
-        return _version ? _version.localeCompare(_other) : 0;
-      }
-
       protected _parse(_version: string): GenericVersion | null {
         const matchGroups = _version.match(
-          /^(?<major>\d)\.(?<minor>\d)\.(?<patch>\d)$/
+          /^(?<major>\d)\.(?<minor>\d)\.(?<patch>\d)(?:-(?<prerelease>.+))?$/,
         )?.groups;
         if (!matchGroups) {
           return null;
         }
-        const { major, minor, patch } = matchGroups;
-        return { release: [major, minor, patch].map((n) => parseInt(n, 10)) };
+        const { major, minor, patch, prerelease } = matchGroups;
+        return {
+          release: [major, minor, patch].map((n) => parseInt(n, 10)),
+          prerelease,
+        };
       }
     }
 
@@ -51,11 +52,11 @@ describe('modules/versioning/generic', () => {
     it('Scheme keys', () => {
       const schemeKeys = getAllPropertyNames(api)
         .filter(
-          (val) => !optionalFunctions.includes(val) && !val.startsWith('_')
+          (val) => !optionalFunctions.includes(val) && !val.startsWith('_'),
         )
         .filter(
           (val) =>
-            !['minSatisfyingVersion', 'getSatisfyingVersion'].includes(val)
+            !['minSatisfyingVersion', 'getSatisfyingVersion'].includes(val),
         )
         .sort();
       expect(schemeKeys).toEqual([
@@ -102,8 +103,19 @@ describe('modules/versioning/generic', () => {
           rangeStrategy: 'auto',
           currentVersion: '1.2.3',
           newVersion: '3.2.1',
-        })
+        }),
       ).toBe('3.2.1');
+
+      expect(
+        api.getNewValue({
+          currentValue: '1.2.3',
+          rangeStrategy: 'auto',
+          currentVersion: 'v1.2.3',
+          newVersion: 'v3.2.1',
+        }),
+      ).toBe('3.2.1');
+
+      expect(api.getNewValue(partial<NewValueConfig>({}))).toBeNull();
     });
 
     it('isCompatible', () => {
@@ -113,6 +125,7 @@ describe('modules/versioning/generic', () => {
     it('isGreaterThan', () => {
       expect(api.isGreaterThan('1.2.3', '3.2.1')).toBe(false);
       expect(api.isGreaterThan('3.2.1', '1.2.3')).toBe(true);
+      expect(api.isGreaterThan('1.2.3-a10', '1.2.3-a1')).toBe(true);
     });
 
     it('isSingleVersion', () => {
@@ -125,6 +138,7 @@ describe('modules/versioning/generic', () => {
 
     it('isValid', () => {
       expect(api.isValid('1.2.3')).toBe(true);
+      expect(api.isValid('1.2.3-a1')).toBe(true);
       expect(api.isValid('invalid')).toBe(false);
     });
 
@@ -140,8 +154,8 @@ describe('modules/versioning/generic', () => {
 
     it('sortVersions', () => {
       expect(api.sortVersions('1.2.3', '1.2.3')).toBe(0);
-      expect(api.sortVersions('1.2.3', '3.2.1')).toBe(-1);
-      expect(api.sortVersions('3.2.1', '1.2.3')).toBe(1);
+      expect(api.sortVersions('1.2.3', '3.2.1')).toBe(-2);
+      expect(api.sortVersions('3.2.1', '1.2.3')).toBe(2);
     });
 
     it('isLessThanRange', () => {
@@ -152,20 +166,20 @@ describe('modules/versioning/generic', () => {
     it('minSatisfyingVersion', () => {
       expect(api.minSatisfyingVersion(['1.2.3'], '1.2.3')).toBe('1.2.3');
       expect(
-        api.minSatisfyingVersion(['1.1.1', '2.2.2', '3.3.3'], '2.2.2')
+        api.minSatisfyingVersion(['1.1.1', '2.2.2', '3.3.3'], '2.2.2'),
       ).toBe('2.2.2');
       expect(
-        api.minSatisfyingVersion(['1.1.1', '2.2.2', '3.3.3'], '1.2.3')
+        api.minSatisfyingVersion(['1.1.1', '2.2.2', '3.3.3'], '1.2.3'),
       ).toBeNull();
     });
 
     it('getSatisfyingVersion', () => {
       expect(api.getSatisfyingVersion(['1.2.3'], '1.2.3')).toBe('1.2.3');
       expect(
-        api.getSatisfyingVersion(['1.1.1', '2.2.2', '3.3.3'], '2.2.2')
+        api.getSatisfyingVersion(['1.1.1', '2.2.2', '3.3.3'], '2.2.2'),
       ).toBe('2.2.2');
       expect(
-        api.getSatisfyingVersion(['1.1.1', '2.2.2', '3.3.3'], '1.2.3')
+        api.getSatisfyingVersion(['1.1.1', '2.2.2', '3.3.3'], '1.2.3'),
       ).toBeNull();
     });
   });

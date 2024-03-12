@@ -22,7 +22,6 @@ const jenkinsPluginsVersions: JenkinsPluginsVersionsResponse = {
       '1.0.0': {
         version: '1.0.0',
         url: 'https://download.example.com',
-        buildDate: 'Jan 01, 2020',
       },
       '2.0.0': {
         version: '2.0.0',
@@ -32,7 +31,8 @@ const jenkinsPluginsVersions: JenkinsPluginsVersionsResponse = {
       '3.0.0': {
         version: '3.0.0',
         url: 'https://download.example.com',
-        buildDate: 'Jan 03, 2020',
+        releaseTimestamp: '2020-05-13T00:11:40.00Z',
+        requiredCore: '2.164.3',
       },
     },
   },
@@ -83,7 +83,6 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         releases: [
           {
             downloadUrl: 'https://download.example.com',
-            releaseTimestamp: '2020-01-01T00:00:00.000Z',
             version: '1.0.0',
           },
           {
@@ -93,7 +92,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
           },
           {
             downloadUrl: 'https://download.example.com',
-            releaseTimestamp: '2020-01-03T00:00:00.000Z',
+            releaseTimestamp: '2020-05-13T00:11:40.000Z',
             version: '3.0.0',
           },
         ],
@@ -126,6 +125,47 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         .reply(200, {});
 
       expect(await getPkgReleases(params)).toBeNull();
+    });
+
+    it('returns package releases from a custom registry', async () => {
+      httpMock
+        .scope('https://custom.registry.renovatebot.com')
+        .get('/current/update-center.actual.json')
+        .reply(200, jenkinsPluginsInfo);
+
+      httpMock
+        .scope('https://custom.registry.renovatebot.com')
+        .get('/current/plugin-versions.json')
+        .reply(200, jenkinsPluginsVersions);
+
+      const res = await getPkgReleases({
+        versioning: versioning.id,
+        datasource: JenkinsPluginsDatasource.id,
+        packageName: 'foobar',
+        registryUrls: ['https://custom.registry.renovatebot.com'],
+        constraints: { jenkins: '2.164.0' },
+      });
+
+      expect(res).toEqual({
+        registryUrl: 'https://custom.registry.renovatebot.com',
+        releases: [
+          {
+            downloadUrl: 'https://download.example.com',
+            version: '1.0.0',
+          },
+          {
+            downloadUrl: 'https://download.example.com',
+            releaseTimestamp: '2020-01-02T00:00:00.000Z',
+            version: '2.0.0',
+          },
+          {
+            downloadUrl: 'https://download.example.com',
+            releaseTimestamp: '2020-05-13T00:11:40.000Z',
+            version: '3.0.0',
+          },
+        ],
+        sourceUrl: 'https://source-url.example.com',
+      });
     });
   });
 });

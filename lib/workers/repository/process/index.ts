@@ -1,4 +1,4 @@
-// TODO #7154
+// TODO #22198
 import { mergeChildConfig } from '../../../config';
 import { GlobalConfig } from '../../../config/global';
 import { resolveConfigPresets } from '../../../config/presets';
@@ -11,8 +11,8 @@ import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { getBranchList } from '../../../util/git';
-import { configRegexPredicate } from '../../../util/regex';
 import { addSplit } from '../../../util/split';
+import { getRegexPredicate } from '../../../util/string-match';
 import type { BranchConfig } from '../../types';
 import { readDashboardBody } from '../dependency-dashboard';
 import { ExtractResult, extract, lookup, update } from './extract-update';
@@ -20,7 +20,7 @@ import type { WriteUpdateResult } from './write';
 
 async function getBaseBranchConfig(
   baseBranch: string,
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<RenovateConfig> {
   logger.debug(`baseBranch: ${baseBranch}`);
 
@@ -32,31 +32,31 @@ async function getBaseBranchConfig(
   ) {
     logger.debug(
       { baseBranch },
-      `Merging config from base branch because useBaseBranchConfig=merge`
+      `Merging config from base branch because useBaseBranchConfig=merge`,
     );
 
     // Retrieve config file name autodetected for this repo
     const cache = getCache();
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const configFileName = cache.configFileName!;
 
     try {
       baseBranchConfig = await platform.getJsonFile(
         configFileName,
         config.repository,
-        baseBranch
+        baseBranch,
       );
       logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
     } catch (err) {
       logger.error(
         { configFileName, baseBranch },
-        `Error fetching config file from base branch - possible config name mismatch between branches?`
+        `Error fetching config file from base branch - possible config name mismatch between branches?`,
       );
 
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'config';
       error.validationError = 'Error fetching config file';
-      error.validationMessage = `Error fetching config file ${configFileName} from branch ${baseBranch}`;
+      error.validationMessage = `Error fetching config file \`${configFileName}\` from branch \`${baseBranch}\``;
       throw error;
     }
 
@@ -67,7 +67,7 @@ async function getBaseBranchConfig(
     if (config.printConfig) {
       logger.info(
         { config: baseBranchConfig },
-        'Base branch config after merge'
+        'Base branch config after merge',
       );
     }
 
@@ -87,17 +87,17 @@ async function getBaseBranchConfig(
 
 function unfoldBaseBranches(
   defaultBranch: string,
-  baseBranches: string[]
+  baseBranches: string[],
 ): string[] {
   const unfoldedList: string[] = [];
 
   const allBranches = getBranchList();
   for (const baseBranch of baseBranches) {
-    const isAllowedPred = configRegexPredicate(baseBranch);
+    const isAllowedPred = getRegexPredicate(baseBranch);
     if (isAllowedPred) {
       const matchingBranches = allBranches.filter(isAllowedPred);
       logger.debug(
-        `baseBranches regex "${baseBranch}" matches [${matchingBranches.join()}]`
+        `baseBranches regex "${baseBranch}" matches [${matchingBranches.join()}]`,
       );
       unfoldedList.push(...matchingBranches);
     } else if (baseBranch === '$default') {
@@ -112,7 +112,7 @@ function unfoldBaseBranches(
 }
 
 export async function extractDependencies(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<ExtractResult> {
   await readDashboardBody(config);
   let res: ExtractResult = {
@@ -123,7 +123,7 @@ export async function extractDependencies(
   if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
     config.baseBranches = unfoldBaseBranches(
       config.defaultBranch!,
-      config.baseBranches
+      config.baseBranches,
     );
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
@@ -166,7 +166,7 @@ export async function extractDependencies(
 
 export function updateRepo(
   config: RenovateConfig,
-  branches: BranchConfig[]
+  branches: BranchConfig[],
 ): Promise<WriteUpdateResult | undefined> {
   logger.debug('processRepo()');
 

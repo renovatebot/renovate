@@ -4,14 +4,14 @@ import { MavenDatasource } from '../../datasource/maven';
 import type { PackageDependency, PackageFileContent } from '../types';
 
 const dependsOnRegex = regEx(
-  /@file\s*:\s*DependsOn\s*\(\s*(?<replaceString>"(?<groupId>.+):(?<artifactId>.+):(?<version>.+)")\s*\)/g
+  /@file\s*:\s*DependsOn\s*\(\s*(?<replaceString>"(?<groupId>.+):(?<artifactId>.+):(?<version>.+)")\s*\)/g,
 );
 const repositoryRegex = regEx(
-  /@file\s*:\s*Repository\s*\(\s*"(?<repositoryName>.+)"\s*\)/g
+  /@file\s*:\s*Repository\s*\(\s*"(?<repositoryName>.+)"\s*\)/g,
 );
 
 export function extractPackageFile(
-  fileContent: string
+  fileContent: string,
 ): PackageFileContent | null {
   const registryUrls: string[] = [...fileContent.matchAll(repositoryRegex)]
     .map((match) => match.groups?.repositoryName)

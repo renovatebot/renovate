@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { SemVer } from 'semver';
 import { logger } from '../../lib/logger';
 
 export const newFiles = new Set();
@@ -34,7 +35,7 @@ export function findModules(dirname: string): string[] {
 export function camelCase(input: string): string {
   return input
     .replace(/(?:^\w|[A-Z]|\b\w)/g, (char, index) =>
-      index === 0 ? char.toLowerCase() : char.toUpperCase()
+      index === 0 ? char.toLowerCase() : char.toUpperCase(),
     )
     .replace(/-/g, '');
 }
@@ -64,4 +65,32 @@ export function readFile(file: string): Promise<string> {
     return fs.readFile(file, 'utf8');
   }
   return Promise.resolve('');
+}
+
+/**
+ *
+ * @param  val
+ */
+export function parsePositiveInt(val: string | undefined): number {
+  if (!val) {
+    return 0;
+  }
+  const r = Number.parseInt(val, 10);
+  if (!Number.isFinite(r) || r < 0) {
+    throw new Error(`Invalid number: ${val}`);
+  }
+
+  return r;
+}
+
+/**
+ *
+ * @param val
+ */
+export function parseVersion(val: string | undefined): SemVer | undefined {
+  if (!val) {
+    return undefined;
+  }
+  // can throw
+  return new SemVer(val);
 }

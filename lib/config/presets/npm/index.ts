@@ -28,11 +28,11 @@ export async function getPreset({
     const registryUrl = resolveRegistryUrl(pkg);
     logger.once.warn(
       { registryUrl, pkg },
-      'Using npm packages for Renovate presets is now deprecated. Please migrate to repository-based presets instead.'
+      'Using npm packages for Renovate presets is now deprecated. Please migrate to repository-based presets instead.',
     );
     const packageUrl = resolvePackageUrl(registryUrl, pkg);
     const body = (await http.getJson<NpmResponse>(packageUrl)).body;
-    // TODO: check null #7154
+    // TODO: check null #22198
     dep = body.versions![body['dist-tags']!.latest];
   } catch (err) {
     throw new Error(PRESET_DEP_NOT_FOUND);
@@ -45,7 +45,7 @@ export async function getPreset({
     const presetNames = Object.keys(dep['renovate-config']);
     logger.debug(
       { presetNames, presetName },
-      'Preset not found within renovate-config'
+      'Preset not found within renovate-config',
     );
     throw new Error(PRESET_NOT_FOUND);
   }

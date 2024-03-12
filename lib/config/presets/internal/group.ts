@@ -32,6 +32,17 @@ const staticGroups = {
       },
     ],
   },
+  allDigest: {
+    description: 'Group all `digest` updates together.',
+    packageRules: [
+      {
+        groupName: 'all digest updates',
+        groupSlug: 'all-digest',
+        matchPackagePatterns: ['*'],
+        matchUpdateTypes: ['digest'],
+      },
+    ],
+  },
   allNonMajor: {
     description: 'Group all `minor` and `patch` updates together.',
     packageRules: [
@@ -89,6 +100,21 @@ const staticGroups = {
       'fusion-tokens',
     ],
     matchPackagePrefixes: ['fusion-plugin-', 'fusion-react', '^usion-apollo'],
+  },
+  githubArtifactActions: {
+    description:
+      'Group `download-artifact` and `upload-artifact` major updates together.',
+    packageRules: [
+      {
+        groupName: 'GitHub Artifact Actions',
+        matchManagers: ['github-actions'],
+        matchPackageNames: [
+          'actions/download-artifact',
+          'actions/upload-artifact',
+        ],
+        matchUpdateTypes: ['major'],
+      },
+    ],
   },
   glimmer: {
     description: 'Group Glimmer.js packages together.',
@@ -301,7 +327,11 @@ const staticGroups = {
     packageRules: [
       {
         commitMessageTopic: 'Node.js',
-        excludePackageNames: ['calico/node', 'kindest/node'],
+        excludePackageNames: [
+          'calico/node',
+          'docker.io/calico/node',
+          'kindest/node',
+        ],
         matchDatasources: ['docker'],
         matchDepNames: ['node'],
         matchPackagePatterns: ['/node$'],
@@ -314,7 +344,7 @@ const staticGroups = {
       {
         groupName: 'PHPStan packages',
         matchDatasources: ['packagist'],
-        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-'],
+        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-', '/larastan'],
       },
     ],
   },
@@ -336,6 +366,46 @@ const staticGroups = {
       },
     ],
   },
+  pulumi: {
+    description: 'Group Pulumi packages together.',
+    packageRules: [
+      {
+        description: 'Group Pulumi Node.JS packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-node',
+        matchDatasources: ['npm'],
+        matchPackagePrefixes: ['@pulumi/'],
+      },
+      {
+        description: 'Group Pulumi Python packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-python',
+        matchDatasources: ['pypi'],
+        matchPackagePrefixes: ['pulumi-'],
+      },
+      {
+        description: 'Group Pulumi Go packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-go',
+        matchDatasources: ['go'],
+        matchPackagePrefixes: ['github.com/pulumi/'],
+      },
+      {
+        description: 'Group Pulumi Java packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-java',
+        matchDatasources: ['maven'],
+        matchPackagePrefixes: ['com.pulumi'],
+      },
+      {
+        description: 'Group Pulumi .NET packages together.',
+        groupName: 'Pulumi',
+        groupSlug: 'pulumi-dotnet',
+        matchDatasources: ['nuget'],
+        matchPackagePrefixes: ['Pulumi'],
+      },
+    ],
+  },
   react: {
     description: 'Group React and corresponding `@types` packages together.',
     packageRules: [
@@ -354,6 +424,7 @@ const staticGroups = {
       'group:codemirror',
       'group:fortawesome',
       'group:fusionjs',
+      'group:githubArtifactActions',
       'group:glimmer',
       'group:goOpenapi',
       'group:hibernateCore',
@@ -369,6 +440,7 @@ const staticGroups = {
       'group:phpstan',
       'group:polymer',
       'group:react',
+      'group:remark',
       'group:resilience4j',
       'group:rubyOnRails',
       'group:rubyOmniauth',
@@ -399,6 +471,16 @@ const staticGroups = {
       'group:symfony',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  remark: {
+    description: 'Group remark packages together.',
+    packageRules: [
+      {
+        groupName: 'remark',
+        matchDatasources: ['npm'],
+        matchSourceUrlPrefixes: ['https://github.com/remarkjs/'],
+      },
+    ],
   },
   resilience4j: {
     description: 'Group Java Resilience4j packages.',
@@ -705,6 +787,15 @@ const staticGroups = {
         extends: 'packages:unitTest',
         groupName: 'unit test packages',
         matchUpdateTypes: ['minor', 'patch'],
+      },
+    ],
+  },
+  vite: {
+    description: 'Group all Vite related packages together.',
+    packageRules: [
+      {
+        extends: 'packages:vite',
+        groupName: 'Vite packages',
       },
     ],
   },

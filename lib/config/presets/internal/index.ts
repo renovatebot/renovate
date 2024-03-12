@@ -12,6 +12,7 @@ import * as previewPreset from './preview';
 import * as regexManagersPreset from './regex-managers';
 import * as replacements from './replacements';
 import * as schedulePreset from './schedule';
+import * as securityPreset from './security';
 import * as workaroundsPreset from './workarounds';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
@@ -30,6 +31,7 @@ export const groups: Record<string, Record<string, Preset>> = {
   regexManagers: regexManagersPreset.presets,
   replacements: replacements.presets,
   schedule: schedulePreset.presets,
+  security: securityPreset.presets,
   workarounds: workaroundsPreset.presets,
 };
 

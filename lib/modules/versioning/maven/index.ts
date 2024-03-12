@@ -1,4 +1,5 @@
 import type { RangeStrategy } from '../../../types/versioning';
+import { coerceString } from '../../../util/string';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
   EXCLUDING_POINT,
@@ -130,7 +131,7 @@ const isStable = (version: string): boolean => {
 // istanbul ignore next
 const getSatisfyingVersion = (
   versions: string[],
-  range: string
+  range: string,
 ): string | null =>
   versions.reduce((result: string | null, version) => {
     if (matches(version, range)) {
@@ -152,7 +153,10 @@ function getNewValue({
   if (isVersion(currentValue) || rangeStrategy === 'pin') {
     return newVersion;
   }
-  return autoExtendMavenRange(currentValue, newVersion) ?? currentValue;
+  return coerceString(
+    autoExtendMavenRange(currentValue, newVersion),
+    currentValue,
+  );
 }
 
 export { isValid };

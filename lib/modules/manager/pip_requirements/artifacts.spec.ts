@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../test/exec-util';
 import { fs, mocked } from '../../../../test/util';
@@ -11,7 +12,7 @@ const datasource = mocked(_datasource);
 
 jest.mock('../../../util/exec/common');
 jest.mock('../../../util/fs');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -22,7 +23,9 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
-const config: UpdateArtifactsConfig = { constraints: { python: '3.10.2' } };
+const config: UpdateArtifactsConfig = {
+  constraints: { python: '3.10.2', hashin: '0.17.0' },
+};
 
 /*
  * Sample package file content that exhibits dependencies with and without
@@ -41,8 +44,6 @@ botocore==1.27.46 \
 
 describe('modules/manager/pip_requirements/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     GlobalConfig.set(adminConfig);
   });
 
@@ -53,7 +54,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -65,7 +66,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'eventlet' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -78,7 +79,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }, { depName: 'boto3-stubs' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -102,7 +103,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }, { depName: 'boto3-stubs' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -138,7 +139,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         ],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -168,7 +169,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         artifactError: {
@@ -206,7 +207,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -232,7 +233,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +
-          'install-tool hashin 0.1.7 ' +
+          'install-tool hashin 0.17.0 ' +
           '&& ' +
           'hashin atomicwrites==1.4.0 -r requirements.txt' +
           '"',
@@ -255,7 +256,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
         updatedDeps: [{ depName: 'atomicwrites' }],
         newPackageFileContent,
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -267,7 +268,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.10.2' },
-      { cmd: 'install-tool hashin 0.1.7' },
+      { cmd: 'install-tool hashin 0.17.0' },
       {
         cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
         options: { cwd: '/tmp/github/some/repo' },

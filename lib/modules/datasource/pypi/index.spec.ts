@@ -9,11 +9,14 @@ const res2 = Fixtures.get('azure-cli-monitor-updated.json');
 const htmlResponse = Fixtures.get('versions-html.html');
 const badResponse = Fixtures.get('versions-html-badfile.html');
 const dataRequiresPythonResponse = Fixtures.get(
-  'versions-html-data-requires-python.html'
+  'versions-html-data-requires-python.html',
 );
 const mixedHyphensResponse = Fixtures.get('versions-html-mixed-hyphens.html');
 const mixedCaseResponse = Fixtures.get('versions-html-mixed-case.html');
 const withPeriodsResponse = Fixtures.get('versions-html-with-periods.html');
+const withWhitespacesResponse = Fixtures.get(
+  'versions-html-with-whitespaces.html',
+);
 const hyphensResponse = Fixtures.get('versions-html-hyphens.html');
 
 const baseUrl = 'https://pypi.org/pypi';
@@ -26,7 +29,6 @@ describe('modules/datasource/pypi/index', () => {
     beforeEach(() => {
       process.env = { ...OLD_ENV };
       delete process.env.PIP_INDEX_URL;
-      jest.resetAllMocks();
     });
 
     afterEach(() => {
@@ -39,7 +41,7 @@ describe('modules/datasource/pypi/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'something',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -50,7 +52,7 @@ describe('modules/datasource/pypi/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'something',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -60,7 +62,7 @@ describe('modules/datasource/pypi/index', () => {
         await getPkgReleases({
           datasource,
           packageName: 'azure-cli-monitor',
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -77,7 +79,7 @@ describe('modules/datasource/pypi/index', () => {
           ...config,
           datasource,
           packageName: 'azure-cli-monitor',
-        })
+        }),
       ).toMatchObject({
         registryUrl: 'https://custom.pypi.net/foo',
         releases: expect.toBeArrayOfSize(22),
@@ -150,7 +152,7 @@ describe('modules/datasource/pypi/index', () => {
             datasource,
             packageName: 'something',
           })
-        )?.homepage
+        )?.homepage,
       ).toBe('https://microsoft.com');
     });
 
@@ -272,7 +274,7 @@ describe('modules/datasource/pypi/index', () => {
           constraints: { python: '2.7' },
           packageName: 'doit',
           constraintsFiltering: 'strict',
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -290,7 +292,7 @@ describe('modules/datasource/pypi/index', () => {
           ...config,
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -308,7 +310,7 @@ describe('modules/datasource/pypi/index', () => {
           ...config,
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -367,7 +369,7 @@ describe('modules/datasource/pypi/index', () => {
           ...config,
           constraints: { python: '2.7' },
           packageName: 'image-collector',
-        })
+        }),
       ).toMatchSnapshot();
     });
 
@@ -431,6 +433,26 @@ describe('modules/datasource/pypi/index', () => {
       ]);
     });
 
+    it('process data from simple endpoint with extra whitespaces in html', async () => {
+      httpMock
+        .scope('https://some.registry.org/simple/')
+        .get('/package-with-whitespaces/')
+        .reply(200, withWhitespacesResponse);
+      const config = {
+        registryUrls: ['https://some.registry.org/simple/'],
+      };
+      const res = await getPkgReleases({
+        datasource,
+        ...config,
+        packageName: 'package-with-whitespaces',
+      });
+      expect(res?.releases).toMatchObject([
+        { version: '2.0.0' },
+        { version: '2.0.1' },
+        { version: '2.0.2' },
+      ]);
+    });
+
     it('returns null for empty response', async () => {
       httpMock
         .scope('https://some.registry.org/simple/')
@@ -445,7 +467,7 @@ describe('modules/datasource/pypi/index', () => {
           ...config,
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -463,7 +485,7 @@ describe('modules/datasource/pypi/index', () => {
           ...config,
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -481,7 +503,7 @@ describe('modules/datasource/pypi/index', () => {
           ...config,
           constraints: { python: '2.7' },
           packageName: 'dj-database-url',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -520,7 +542,7 @@ describe('modules/datasource/pypi/index', () => {
           ...config,
           packageName: 'dj-database-url',
           constraintsFiltering: 'strict',
-        })
+        }),
       ).toMatchSnapshot();
     });
   });
@@ -536,7 +558,7 @@ describe('modules/datasource/pypi/index', () => {
         ...config,
         constraints: { python: '2.7' },
         packageName: 'azure-cli-monitor',
-      })
+      }),
     ).toMatchSnapshot();
   });
 });

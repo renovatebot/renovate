@@ -6,6 +6,7 @@ import type {
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { PrBlockedBy } from '../../../workers/types';
+import type { HttpResponse } from '../../http/types';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
@@ -40,6 +41,11 @@ export interface OnboardingBranchCache {
   isModified: boolean;
   configFileName?: string;
   configFileParsed?: string;
+}
+
+export interface ReconfigureBranchCache {
+  reconfigureBranchSha: string;
+  isConfigValid: boolean;
 }
 
 export interface PrCache {
@@ -117,18 +123,39 @@ export interface BranchCache {
   result?: string;
 }
 
+export interface HttpCache {
+  etag?: string;
+  httpResponse: HttpResponse<unknown>;
+  lastModified?: string;
+  timeStamp: string;
+}
+
 export interface RepoCacheData {
   configFileName?: string;
+  httpCache?: Record<string, HttpCache>;
   semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
   lastPlatformAutomergeFailure?: string;
   platform?: {
-    github?: Record<string, unknown>;
+    gitea?: {
+      pullRequestsCache?: unknown;
+    };
+    github?: {
+      /**
+       * To avoid circular dependency problem, we use `unknown` type here.
+       */
+      pullRequestsCache?: unknown;
+      graphqlPageCache?: unknown;
+    };
+    bitbucket?: {
+      pullRequestsCache?: unknown;
+    };
   };
   prComments?: Record<number, Record<string, string>>;
   onboardingBranchCache?: OnboardingBranchCache;
+  reconfigureBranchCache?: ReconfigureBranchCache;
 }
 
 export interface RepoCache {

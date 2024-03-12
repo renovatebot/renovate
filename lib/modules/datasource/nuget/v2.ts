@@ -13,14 +13,14 @@ function getPkgProp(pkgInfo: XmlElement, propName: string): string | undefined {
 export async function getReleases(
   http: Http,
   feedUrl: string,
-  pkgName: string
+  pkgName: string,
 ): Promise<ReleaseResult | null> {
   const dep: ReleaseResult = {
     releases: [],
   };
   let pkgUrlList: string | null = `${feedUrl.replace(
     regEx(/\/+$/),
-    ''
+    '',
   )}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl,Published`;
   while (pkgUrlList !== null) {
     // typescript issue
@@ -33,14 +33,14 @@ export async function getReleases(
       const version = getPkgProp(pkgInfo, 'Version');
       const releaseTimestamp = getPkgProp(pkgInfo, 'Published');
       dep.releases.push({
-        // TODO: types (#7154)
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        // TODO: types (#22198)
         version: removeBuildMeta(`${version}`),
         releaseTimestamp,
       });
       try {
         const pkgIsLatestVersion = getPkgProp(pkgInfo, 'IsLatestVersion');
         if (pkgIsLatestVersion === 'true') {
+          dep['tags'] = { latest: removeBuildMeta(`${version}`) };
           const projectUrl = getPkgProp(pkgInfo, 'ProjectUrl');
           if (projectUrl) {
             dep.sourceUrl = massageUrl(projectUrl);
@@ -49,7 +49,7 @@ export async function getReleases(
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, pkgName, feedUrl },
-          `nuget registry failure: can't parse pkg info for project url`
+          `nuget registry failure: can't parse pkg info for project url`,
         );
       }
     }

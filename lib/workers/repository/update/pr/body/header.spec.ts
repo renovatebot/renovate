@@ -6,10 +6,6 @@ jest.mock('../../../../../util/template');
 const template = mocked(_template);
 
 describe('workers/repository/update/pr/body/header', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('renders empty header', () => {
     expect(
       getPrHeader({
@@ -17,7 +13,7 @@ describe('workers/repository/update/pr/body/header', () => {
         baseBranch: 'base',
         branchName: 'branch',
         upgrades: [],
-      })
+      }),
     ).toBe('');
   });
 
@@ -30,7 +26,7 @@ describe('workers/repository/update/pr/body/header', () => {
         baseBranch: 'base',
         upgrades: [],
         prHeader: 'HEADER',
-      })
+      }),
     ).toMatchInlineSnapshot(`
       "HEADER
 

@@ -10,10 +10,6 @@ describe('workers/repository/update/pr/body/config-description', () => {
       upgrades: [],
     };
 
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('renders stopUpdating=true', () => {
       const res = getPrConfigDescription({
         ...config,
@@ -21,7 +17,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
       });
 
       expect(res).toContain(
-        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`
+        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`,
       );
     });
 
@@ -32,7 +28,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
       });
 
       expect(res).toContain(
-        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`
+        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`,
       );
     });
 
@@ -107,7 +103,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
         automergedPreviously: true,
       });
       expect(res).toContain(
-        `**Automerge**: Disabled because a matching PR was automerged previously.`
+        `**Automerge**: Disabled because a matching PR was automerged previously.`,
       );
     });
   });

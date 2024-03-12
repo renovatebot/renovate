@@ -21,7 +21,7 @@ describe('modules/manager/hermit/default-config', () => {
       ${'nested/module/other'}      | ${false}
     `('minimatches("$path") === $expected', ({ path, expected }) => {
       expect(miniMatches(path, defaultConfig.excludeCommitPaths)).toBe(
-        expected
+        expected,
       );
     });
   });

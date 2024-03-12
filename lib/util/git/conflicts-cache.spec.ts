@@ -20,7 +20,7 @@ describe('util/git/conflicts-cache', () => {
   describe('getCachedConflictResult', () => {
     it('returns null if cache is not populated', () => {
       expect(
-        getCachedConflictResult('foo', 'sha', 'bar', 'base_sha')
+        getCachedConflictResult('foo', 'sha', 'bar', 'base_sha'),
       ).toBeNull();
     });
 
@@ -35,7 +35,7 @@ describe('util/git/conflicts-cache', () => {
         }),
       ];
       expect(
-        getCachedConflictResult('not_foo', 'sha', 'bar', 'base_sha')
+        getCachedConflictResult('not_foo', 'sha', 'bar', 'base_sha'),
       ).toBeNull();
     });
 
@@ -50,7 +50,7 @@ describe('util/git/conflicts-cache', () => {
         }),
       ];
       expect(
-        getCachedConflictResult('foo', 'sha', 'bar', 'not_base_sha')
+        getCachedConflictResult('foo', 'sha', 'bar', 'not_base_sha'),
       ).toBeNull();
     });
 
@@ -65,7 +65,7 @@ describe('util/git/conflicts-cache', () => {
         }),
       ];
       expect(
-        getCachedConflictResult('foo', 'not_sha', 'bar', 'base_sha')
+        getCachedConflictResult('foo', 'not_sha', 'bar', 'base_sha'),
       ).toBeNull();
     });
 
@@ -79,7 +79,7 @@ describe('util/git/conflicts-cache', () => {
         }),
       ];
       expect(
-        getCachedConflictResult('foo', 'sha', 'bar', 'base_sha')
+        getCachedConflictResult('foo', 'sha', 'bar', 'base_sha'),
       ).toBeNull();
     });
 
@@ -94,7 +94,7 @@ describe('util/git/conflicts-cache', () => {
         }),
       ];
       expect(
-        getCachedConflictResult('foo', 'sha', 'bar', 'base_sha')
+        getCachedConflictResult('foo', 'sha', 'bar', 'base_sha'),
       ).toBeTrue();
     });
   });

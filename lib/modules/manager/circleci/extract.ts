@@ -7,7 +7,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string
+  packageFile?: string,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
@@ -29,7 +29,9 @@ export function extractPackageFile(
             lineNumber += 1;
             continue;
           }
-          const orbMatch = regEx(/^\s+([^:]+):\s(.+)$/).exec(orbLine);
+          const orbMatch = regEx(/^\s+([^:]+):\s(.+?)(?:\s*#.*)?$/).exec(
+            orbLine,
+          );
           if (orbMatch) {
             logger.trace('orbMatch');
             foundOrbOrNoop = true;
@@ -59,7 +61,7 @@ export function extractPackageFile(
             currentValue: dep.currentValue,
             currentDigest: dep.currentDigest,
           },
-          'CircleCI docker image'
+          'CircleCI docker image',
         );
         dep.depType = 'docker';
         dep.versioning = 'docker';

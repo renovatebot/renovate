@@ -28,8 +28,7 @@ describe('logger/utils', () => {
     // Mock when the function exits
     const mockExit = jest.spyOn(process, 'exit');
     mockExit.mockImplementationOnce((number) => {
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       throw new Error(`process.exit: ${number}`);
     });
     expect(() => {
@@ -55,7 +54,7 @@ describe('logger/utils', () => {
   describe('prepareError', () => {
     function getError<T extends z.ZodType>(
       schema: T,
-      input: unknown
+      input: unknown,
     ): z.ZodError | null {
       try {
         schema.parse(input);
@@ -69,23 +68,23 @@ describe('logger/utils', () => {
 
     function prepareIssues<T extends z.ZodType>(
       schema: T,
-      input: unknown
-    ): unknown | null {
+      input: unknown,
+    ): unknown {
       const error = getError(schema, input);
       return error ? prepareZodIssues(error.format()) : null;
     }
 
     it('prepareZodIssues', () => {
       expect(prepareIssues(z.string(), 42)).toBe(
-        'Expected string, received number'
+        'Expected string, received number',
       );
 
       expect(prepareIssues(z.string().array(), 42)).toBe(
-        'Expected array, received number'
+        'Expected array, received number',
       );
 
       expect(
-        prepareIssues(z.string().array(), ['foo', 'bar', 42, 42, 42, 42, 42])
+        prepareIssues(z.string().array(), ['foo', 'bar', 42, 42, 42, 42, 42]),
       ).toEqual({
         '2': 'Expected string, received number',
         '3': 'Expected string, received number',
@@ -102,7 +101,7 @@ describe('logger/utils', () => {
           key3: 42,
           key4: 42,
           key5: 42,
-        })
+        }),
       ).toEqual({
         key1: 'Expected string, received number',
         key2: 'Expected string, received number',
@@ -117,8 +116,8 @@ describe('logger/utils', () => {
               bar: z.string(),
             }),
           }),
-          { foo: { bar: [], baz: 42 } }
-        )
+          { foo: { bar: [], baz: 42 } },
+        ),
       ).toEqual({
         foo: {
           bar: 'Expected string, received array',
@@ -131,8 +130,8 @@ describe('logger/utils', () => {
             z.object({ type: z.literal('foo') }),
             z.object({ type: z.literal('bar') }),
           ]),
-          { type: 'baz' }
-        )
+          { type: 'baz' },
+        ),
       ).toEqual({
         type: "Invalid discriminator value. Expected 'foo' | 'bar'",
       });
@@ -143,8 +142,8 @@ describe('logger/utils', () => {
             z.object({ type: z.literal('foo') }),
             z.object({ type: z.literal('bar') }),
           ]),
-          {}
-        )
+          {},
+        ),
       ).toEqual({
         type: "Invalid discriminator value. Expected 'foo' | 'bar'",
       });
@@ -155,8 +154,8 @@ describe('logger/utils', () => {
             z.object({ type: z.literal('foo') }),
             z.object({ type: z.literal('bar') }),
           ]),
-          42
-        )
+          42,
+        ),
       ).toBe('Expected object, received number');
     });
 
@@ -169,7 +168,7 @@ describe('logger/utils', () => {
             }),
           }),
         }),
-        { foo: { bar: { baz: 42 } } }
+        { foo: { bar: { baz: 42 } } },
       );
 
       expect(prepareError(err!)).toEqual({

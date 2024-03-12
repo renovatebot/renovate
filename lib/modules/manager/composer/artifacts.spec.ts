@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
@@ -13,7 +14,7 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as composer from '.';
 
 jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 
@@ -44,8 +45,6 @@ const repoStatus = partial<StatusResult>({
 
 describe('modules/manager/composer/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     docker.resetPrefetchedImages();
     hostRules.clear();
@@ -75,7 +74,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -92,14 +91,17 @@ describe('modules/manager/composer/artifacts', () => {
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
-        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        updatedDeps: [
+          { depName: 'foo', newVersion: '1.0.0' },
+          { depName: 'bar', newVersion: '2.0.0' },
+        ],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction',
+        cmd: 'composer update foo:1.0.0 bar:2.0.0 --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction',
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
@@ -163,7 +165,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: authConfig,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
@@ -207,7 +209,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: authConfig,
-      })
+      }),
     ).toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -246,7 +248,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: authConfig,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
@@ -279,7 +281,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: authConfig,
-      })
+      }),
     ).toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -319,7 +321,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: authConfig,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
@@ -358,7 +360,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: authConfig,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
@@ -398,7 +400,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: authConfig,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots[0].options?.env).not.toContainKey('COMPOSER_AUTH');
   });
@@ -430,7 +432,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: authConfig,
-      })
+      }),
     ).toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -491,7 +493,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: authConfig,
-      })
+      }),
     ).toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -532,7 +534,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: authConfig,
-      })
+      }),
     ).toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -596,7 +598,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: authConfig,
-      })
+      }),
     ).toBeNull();
 
     expect(execSnapshots).toMatchObject([
@@ -630,7 +632,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -726,7 +728,7 @@ describe('modules/manager/composer/artifacts', () => {
           ...config,
           isLockFileMaintenance: true,
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -773,7 +775,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: { ...config, constraints: { composer: '^1.10.0', php: '7.3' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -851,7 +853,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: { ...config, constraints: { composer: '^1.10.0', php: '7.3' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -895,7 +897,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -925,7 +927,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         artifactError: {
@@ -951,7 +953,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([{ artifactError: { lockFile: 'composer.lock', stderr } }]);
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -961,7 +963,7 @@ describe('modules/manager/composer/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error(
-        'vendor/composer/07fe2366/sebastianbergmann-php-code-coverage-c896779/src/Report/Html/Renderer/Template/js/d3.min.js:  write error (disk full?).  Continue? (y/n/^C) '
+        'vendor/composer/07fe2366/sebastianbergmann-php-code-coverage-c896779/src/Report/Html/Renderer/Template/js/d3.min.js:  write error (disk full?).  Continue? (y/n/^C) ',
       );
     });
     await expect(
@@ -970,7 +972,7 @@ describe('modules/manager/composer/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).rejects.toThrow();
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -992,7 +994,7 @@ describe('modules/manager/composer/artifacts', () => {
           ...config,
           composerIgnorePlatformReqs: undefined,
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -1027,7 +1029,7 @@ describe('modules/manager/composer/artifacts', () => {
           ...config,
           composerIgnorePlatformReqs: ['ext-posix', 'ext-sodium'],
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -1047,7 +1049,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('installs before running the update when symfony flex is installed', async () => {
     fs.readLocalFile.mockResolvedValueOnce(
-      '{"packages":[{"name":"symfony/flex","version":"1.17.1"}]}'
+      '{"packages":[{"name":"symfony/flex","version":"1.17.1"}]}',
     );
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{ }');
@@ -1063,7 +1065,7 @@ describe('modules/manager/composer/artifacts', () => {
         config: {
           ...config,
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -1093,7 +1095,7 @@ describe('modules/manager/composer/artifacts', () => {
 
   it('installs before running the update when symfony flex is installed as dev', async () => {
     fs.readLocalFile.mockResolvedValueOnce(
-      '{"packages-dev":[{"name":"symfony/flex","version":"1.17.1"}]}'
+      '{"packages-dev":[{"name":"symfony/flex","version":"1.17.1"}]}',
     );
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{ }');
@@ -1109,7 +1111,7 @@ describe('modules/manager/composer/artifacts', () => {
         config: {
           ...config,
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -1146,14 +1148,17 @@ describe('modules/manager/composer/artifacts', () => {
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
-        updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+        updatedDeps: [
+          { depName: 'foo', newVersion: '1.0.0' },
+          { depName: 'bar', newVersion: '2.0.0' },
+        ],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader',
+        cmd: 'composer update foo:1.0.0 bar:2.0.0 --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1174,11 +1179,33 @@ describe('modules/manager/composer/artifacts', () => {
           ...config,
           ignorePlugins: true,
         },
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('includes new dependency version in update command', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [{ depName: 'foo', newVersion: '1.1.0' }],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update foo:1.1.0 --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);

@@ -33,17 +33,16 @@ describe('workers/repository/config-migration/branch/index', () => {
       GlobalConfig.set({
         dryRun: null,
       });
-      jest.resetAllMocks();
       config = getConfig();
       config.branchPrefix = 'some/';
     });
 
     it('Exits when Migration is not needed', async () => {
       await expect(
-        checkConfigMigrationBranch(config, null)
+        checkConfigMigrationBranch(config, null),
       ).resolves.toBeNull();
       expect(logger.debug).toHaveBeenCalledWith(
-        'checkConfigMigrationBranch() Config does not need migration'
+        'checkConfigMigrationBranch() Config does not need migration',
       );
     });
 
@@ -54,12 +53,12 @@ describe('workers/repository/config-migration/branch/index', () => {
       platform.refreshPr = jest.fn().mockResolvedValueOnce(null);
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(logger.debug).toHaveBeenCalledWith(
-        'Config Migration PR already exists'
+        'Config Migration PR already exists',
       );
     });
 
@@ -70,7 +69,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       mockedFunction(rebaseMigrationBranch).mockResolvedValueOnce('committed');
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
@@ -78,10 +77,10 @@ describe('workers/repository/config-migration/branch/index', () => {
 
     it('Creates migration PR', async () => {
       mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
-        'committed'
+        'committed',
       );
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
@@ -93,10 +92,10 @@ describe('workers/repository/config-migration/branch/index', () => {
         dryRun: 'full',
       });
       mockedFunction(createConfigMigrationBranch).mockResolvedValueOnce(
-        'committed'
+        'committed',
       );
       const res = await checkConfigMigrationBranch(config, migratedData);
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
       expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
@@ -117,7 +116,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
         expect(logger.debug).toHaveBeenCalledWith(
           { prTitle: title },
-          'Closed PR already exists. Skipping branch.'
+          'Closed PR already exists. Skipping branch.',
         );
         expect(platform.ensureComment).toHaveBeenCalledTimes(1);
         expect(platform.ensureComment).toHaveBeenCalledWith({
@@ -136,14 +135,14 @@ describe('workers/repository/config-migration/branch/index', () => {
         const res = await checkConfigMigrationBranch(config, migratedData);
         expect(res).toBeNull();
         expect(logger.info).toHaveBeenCalledWith(
-          `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`
+          `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`,
         );
         expect(logger.info).toHaveBeenCalledWith(
-          'DRY-RUN: Would delete branch ' + pr.sourceBranch
+          'DRY-RUN: Would delete branch ' + pr.sourceBranch,
         );
         expect(logger.debug).toHaveBeenCalledWith(
           { prTitle: title },
-          'Closed PR already exists. Skipping branch.'
+          'Closed PR already exists. Skipping branch.',
         );
         expect(platform.ensureComment).toHaveBeenCalledTimes(0);
       });

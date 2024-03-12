@@ -21,9 +21,8 @@ The same goes for any other third-party binary tool like `gradle` or `poetry` - 
 
 Renovate is available for Docker via an automated build at [`renovate/renovate` on Docker Hub](https://hub.docker.com/r/renovate/renovate/).
 It builds `latest` based on the `main` branch and all SemVer tags are published too.
-For example, all the following are valid tags:
 
-```sh
+```sh title="Example of valid tags"
 docker run --rm renovate/renovate
 docker run --rm renovate/renovate:35
 docker run --rm renovate/renovate:35.14
@@ -46,9 +45,8 @@ docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/ren
 
 Renovate's official Docker image is compatible with Kubernetes.
 The following is an example manifest of running Renovate against a GitHub Enterprise server.
-First the Kubernetes manifest:
 
-```yaml
+```yaml title="Kubernetes manifest"
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -77,9 +75,9 @@ spec:
           restartPolicy: Never
 ```
 
-And also this accompanying `secret.yaml`:
+And the `secret.yaml` that goes with it:
 
-```yaml
+```yaml title="secret.yaml"
 apiVersion: v1
 kind: Secret
 metadata:
@@ -97,7 +95,7 @@ stringData:
 
 A `config.json` file can be added to the manifest using a `ConfigMap` as shown in the following example (using a "dry run" in github.com):
 
-```yaml
+```yaml title="Adding a config.json file to the manifest with configMap"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -169,9 +167,7 @@ Secrets should be configured using environment variables (e.g. `RENOVATE_TOKEN`,
 [Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
 To share environment variables across projects, use [CircleCI Contexts](https://circleci.com/docs/2.0/contexts/).
 
-The following example runs Renovate hourly, and looks for the self-hosted configuration file at `renovate-config.js`:
-
-```yml
+```yml title="This runs Renovate hourly, and looks for the self-hosted config file at renovate-config.js"
 version: '2.1'
 orbs:
   renovate: daniel-shuy/renovate@2.2.0
@@ -192,9 +188,7 @@ workflows:
 
 #### Renovate config file validation when using CircleCI
 
-How to validate your config as part of your workflow:
-
-```yml
+```yml title="Validate your config as part of your workflow"
 version: '2.1'
 orbs:
   renovate: daniel-shuy/renovate@2.2.0
@@ -261,10 +255,9 @@ If you're running against GitHub Enterprise Server, then change the `gitlab` val
 
 You can save this file as anything you want and then use the `RENOVATE_CONFIG_FILE` environment variable to tell Renovate where to find it.
 
-Most people use cron to schedule when Renovate runs, usually on an hourly schedule.
-Here's an example Bash script that you can point `cron` to:
+Most people use `cron` to schedule when Renovate runs, usually on an hourly schedule.
 
-```sh
+```sh title="Example bash script that you can point cron to"
 #!/bin/bash
 
 export PATH="/home/user/.yarn/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
@@ -277,11 +270,11 @@ renovate
 ```
 
 Save the script file, and run the script manually.
-Only add the script to cron after you checked it works.
+Only add the script to `cron` after you checked it works.
 
 <!-- prettier-ignore -->
 !!! note
-    The GitHub.com token as an environment variable is needed to fetch Release Notes that are usually hosted on github.com.
+    The GitHub.com token as an environment variable is needed to fetch changelogs that are usually hosted on github.com.
     You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise Server, GitLab, Azure DevOps, or Bitbucket.
 
 ## Kubernetes for GitLab, using Git over SSH
@@ -411,7 +404,7 @@ The logging level output is controlled by the Bunyan logging library.
 ## Self-signed TLS/SSL certificates
 
 Renovate and invoked helper programs (like Git, or npm) use a secure TLS connection (e.g. HTTPS) to connect to remote source code and dependency hosts.
-If the remote hosts use any self-signed certificates or certificate authorities then Renovate needs to be told to trust these additional certificates.
+If the remote hosts uses self-signed certificates or certificate authorities then Renovate must be told to trust them.
 
 ### Renovate Node.js app
 
@@ -428,9 +421,8 @@ On Ubuntu/Debian and many Linux-based systems, this can be done by copying the s
 ### Renovate Docker image
 
 If you're using the official [Renovate Docker image](#docker) then we recommend you add the self-signed certificate and build your own modified Docker image.
-For example, the following `Dockerfile` is set up to use a self-signed certificate:
 
-```dockerfile
+```dockerfile title="Example of a Dockerfile that uses a self-signed certificate"
 FROM renovate/renovate
 
 # Changes to the certificate authority require root permissions

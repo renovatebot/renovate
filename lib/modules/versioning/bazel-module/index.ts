@@ -59,7 +59,7 @@ function isLessThanRange(version: string, range: string): boolean {
  */
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const target = new BzlmodVersion(range);
   const result = versions.find((ver) => {
@@ -75,7 +75,7 @@ function getSatisfyingVersion(
  */
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return getSatisfyingVersion(versions, range);
 }
@@ -84,7 +84,14 @@ function minSatisfyingVersion(
  * Calculate a new version constraint based on the current constraint, the
  * `rangeStrategy` option, and the current and new version.
  */
-function getNewValue({ newVersion }: NewValueConfig): string {
+function getNewValue({
+  currentValue,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string {
+  if (currentVersion === `v${currentValue}`) {
+    return newVersion.replace(/^v/, '');
+  }
   return newVersion;
 }
 

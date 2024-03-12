@@ -47,6 +47,7 @@ export interface LookupUpdateConfig
   replacementName?: string;
   replacementNameTemplate?: string;
   replacementVersion?: string;
+  extractVersion?: string;
 }
 
 export interface UpdateResult {
@@ -58,10 +59,12 @@ export interface UpdateResult {
   sourceUrl?: string | null;
   currentVersion?: string;
   isSingleVersion?: boolean;
+  lookupName?: string;
   skipReason?: SkipReason;
   registryUrl?: string;
   fixedVersion?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
   versioning?: string;
+  currentVersionTimestamp?: string;
 }

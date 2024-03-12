@@ -1,5 +1,7 @@
 import type { RangeStrategy } from '../../types';
 import managers from './api';
+import { customManagerList, isCustomManager } from './custom';
+import customManagers from './custom/api';
 import type {
   ExtractConfig,
   GlobalManagerConfig,
@@ -10,21 +12,26 @@ import type {
   Result,
 } from './types';
 export { hashMap } from './fingerprint.generated';
-const managerList = Array.from(managers.keys());
+
+const managerList = Array.from(managers.keys()); // does not include custom managers
+export const getManagerList = (): string[] => managerList;
+export const getManagers = (): Map<string, ManagerApi> => managers;
+export const allManagersList = [...managerList, ...customManagerList];
 
 export function get<T extends keyof ManagerApi>(
   manager: string,
-  name: T
+  name: T,
 ): ManagerApi[T] | undefined {
-  return managers.get(manager)?.[name];
+  return isCustomManager(manager)
+    ? customManagers.get(manager)?.[name]
+    : managers.get(manager)?.[name];
 }
-export const getManagerList = (): string[] => managerList;
-export const getManagers = (): Map<string, ManagerApi> => managers;
 
 export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
   let config: GlobalManagerConfig = {};
-  for (const managerName of managerList) {
-    const manager = managers.get(managerName)!;
+  for (const managerName of allManagersList) {
+    const manager =
+      managers.get(managerName)! ?? customManagers.get(managerName)!;
     if (manager.detectGlobalConfig) {
       // This should use mergeChildConfig once more than one manager is supported, but introduces a cyclic dependency
       config = { ...config, ...(await manager.detectGlobalConfig()) };
@@ -36,7 +43,7 @@ export async function detectAllGlobalConfig(): Promise<GlobalManagerConfig> {
 export async function extractAllPackageFiles(
   manager: string,
   config: ExtractConfig,
-  files: string[]
+  files: string[],
 ): Promise<PackageFile[] | null> {
   if (!managers.has(manager)) {
     return null;
@@ -57,12 +64,13 @@ export function extractPackageFile(
   manager: string,
   content: string,
   fileName: string,
-  config: ExtractConfig
+  config: ExtractConfig,
 ): Result<PackageFileContent | null> {
-  if (!managers.has(manager)) {
+  const m = managers.get(manager)! ?? customManagers.get(manager)!;
+  if (!m) {
     return null;
   }
-  const m = managers.get(manager)!;
+
   return m.extractPackageFile
     ? m.extractPackageFile(content, fileName, config)
     : null;
@@ -94,4 +102,27 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
   }
 
   return config.rangeStrategy;
+}
+
+export function isKnownManager(mgr: string): boolean {
+  return allManagersList.includes(mgr.replace('custom.', ''));
+}
+
+/**
+ * Filter a list of managers based on enabled managers.
+ *
+ * If enabledManagers is provided, this function returns a subset of allManagersList
+ * that matches the enabled manager names, including custom managers. If enabledManagers
+ * is not provided or is an empty array, it returns the full list of managers.
+ */
+export function getEnabledManagersList(enabledManagers?: string[]): string[] {
+  if (enabledManagers?.length) {
+    return allManagersList.filter(
+      (manager) =>
+        enabledManagers.includes(manager) ||
+        enabledManagers.includes(`custom.${manager}`),
+    );
+  }
+
+  return allManagersList;
 }

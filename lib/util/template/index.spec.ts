@@ -22,7 +22,7 @@ describe('util/template/index', () => {
   it('has valid exposed config options', () => {
     const allOptions = getOptions().map((option) => option.name);
     const missingOptions = template.exposedConfigOptions.filter(
-      (option) => !allOptions.includes(option)
+      (option) => !allOptions.includes(option),
     );
     expect(missingOptions).toEqual([]);
   });
@@ -114,6 +114,15 @@ describe('util/template/index', () => {
     expect(output).toBe('CUSTOM_FOO is foo');
   });
 
+  it('replace', () => {
+    const userTemplate =
+      "{{ replace '[a-z]+\\.github\\.com' 'ghc' depName }}{{ replace 'some' 'other' depType }}";
+    const output = template.compile(userTemplate, {
+      depName: 'some.github.com/dep',
+    });
+    expect(output).toBe('ghc/dep');
+  });
+
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
     const allowedArrayField = 'prBodyNotes';
@@ -170,20 +179,20 @@ describe('util/template/index', () => {
       expect(
         template.containsTemplates(
           '{{#if logJSON}}{{logJSON}}{{/if}}',
-          'logJSON'
-        )
+          'logJSON',
+        ),
       ).toBeTrue();
       expect(
         template.containsTemplates(
           '{{#with logJSON.hasReleaseNotes as | hasNotes |}}{{hasNotes}}{{/if}}',
-          'logJSON'
-        )
+          'logJSON',
+        ),
       ).toBeTrue();
       expect(
         template.containsTemplates(
           '{{#if logJSON.hasReleaseNotes}}has notes{{/if}}',
-          'logJSON'
-        )
+          'logJSON',
+        ),
       ).toBeTrue();
     });
 
@@ -196,7 +205,7 @@ describe('util/template/index', () => {
     it('encodes values', () => {
       const output = template.compile(
         '{{{encodeURIComponent "@fsouza/prettierd"}}}',
-        undefined as never
+        undefined as never,
       );
       expect(output).toBe('%40fsouza%2Fprettierd');
     });
@@ -204,9 +213,33 @@ describe('util/template/index', () => {
     it('decodes values', () => {
       const output = template.compile(
         '{{{decodeURIComponent "%40fsouza/prettierd"}}}',
-        undefined as never
+        undefined as never,
       );
       expect(output).toBe('@fsouza/prettierd');
+    });
+  });
+
+  describe('base64 encoding', () => {
+    it('encodes values', () => {
+      const output = template.compile(
+        '{{{encodeBase64 "@fsouza/prettierd"}}}',
+        undefined as never,
+      );
+      expect(output).toBe('QGZzb3V6YS9wcmV0dGllcmQ=');
+    });
+
+    it('handles null values gracefully', () => {
+      const output = template.compile('{{{encodeBase64 packageName}}}', {
+        packageName: null,
+      });
+      expect(output).toBe('');
+    });
+
+    it('handles undefined values gracefully', () => {
+      const output = template.compile('{{{encodeBase64 packageName}}}', {
+        packageName: undefined,
+      });
+      expect(output).toBe('');
     });
   });
 
@@ -217,7 +250,7 @@ describe('util/template/index', () => {
         {
           datasource: 'git-refs',
           packageName: 'renovatebot/renovate',
-        }
+        },
       );
       expect(output).toBe('https://github.com/renovatebot/renovate');
     });
@@ -228,7 +261,7 @@ describe('util/template/index', () => {
         {
           datasource: 'github-releases',
           packageName: 'renovatebot/renovate',
-        }
+        },
       );
       expect(output).toBe('renovatebot/renovate');
     });
@@ -238,7 +271,7 @@ describe('util/template/index', () => {
         '{{#if (equals newMajor "3")}}equals{{else}}not equals{{/if}}',
         {
           newMajor: 3,
-        }
+        },
       );
       expect(output).toBe('not equals');
     });

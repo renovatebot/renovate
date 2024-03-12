@@ -46,7 +46,7 @@ If you feel frustrated because better documentation would have prevented you fro
 ## Avoid spamming issues
 
 Sometimes people appear to feel frustrated that their issue or discussion has not got enough attention, and they start commenting on other issues with text such as "I'm also having problems with Gradle! See issue #xyz".
-Such comments appear intended to "pressure" Renovate maintainers into taking notice, and rarely do they benefit the people subscribed to the other, mostly-unrelated issues.
+Such comments appear intended to "pressure" Renovate maintainers into taking notice, and rarely do they help the people subscribed to the other, mostly-unrelated issues.
 Please do not do it.
 Instead, use the "Subscribe" button to follow issues.
 

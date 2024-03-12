@@ -2,6 +2,7 @@ import type { Content } from 'mdast';
 import remark from 'remark';
 import type { Plugin, Transformer } from 'unified';
 import { logger } from '../../../logger';
+import { coerceNumber } from '../../../util/number';
 import { regEx } from '../../../util/regex';
 
 interface UrlMatch {
@@ -20,8 +21,8 @@ function massageLink(input: string): string {
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
   const transformer = (tree: Content): void => {
-    const startOffset: number = tree.position?.start.offset ?? 0;
-    const endOffset: number = tree.position?.end.offset ?? 0;
+    const startOffset = coerceNumber(tree.position?.start.offset);
+    const endOffset = coerceNumber(tree.position?.end.offset);
 
     if (tree.type === 'link') {
       const substr = input.slice(startOffset, endOffset);
@@ -39,7 +40,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
       const urlMatches = [...tree.value.matchAll(globalUrlReg)];
       for (const match of urlMatches) {
         const [url] = match;
-        const start = startOffset + (match.index ?? 0);
+        const start = startOffset + coerceNumber(match.index);
         const end = start + url.length;
         const newUrl = massageLink(url);
         matches.push({ start, end, replaceTo: `[${url}](${newUrl})` });

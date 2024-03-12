@@ -12,6 +12,7 @@ import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
+  REPOSITORY_FORK_MODE_FORKED,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_CONFIG,
@@ -37,7 +38,7 @@ export interface ProcessResult {
 
 export function processResult(
   config: RenovateConfig,
-  res: string
+  res: string,
 ): ProcessResult {
   const disabledStatuses = [
     REPOSITORY_ACCESS_FORBIDDEN,
@@ -47,6 +48,7 @@ export function processResult(
     REPOSITORY_DISABLED,
     REPOSITORY_DISABLED_BY_CONFIG,
     REPOSITORY_EMPTY,
+    REPOSITORY_FORK_MODE_FORKED,
     REPOSITORY_FORKED,
     REPOSITORY_MIRRORED,
     REPOSITORY_NOT_FOUND,
@@ -84,8 +86,8 @@ export function processResult(
     status = 'unknown';
   }
   logger.debug(
-    // TODO: types (#7154)
-    `Repository result: ${res}, status: ${status}, enabled: ${enabled!}, onboarded: ${onboarded!}`
+    // TODO: types (#22198)
+    `Repository result: ${res}, status: ${status}, enabled: ${enabled!}, onboarded: ${onboarded!}`,
   );
   return { res, status, enabled, onboarded };
 }

@@ -23,15 +23,22 @@ function massageUpdateMetadata(config: BranchConfig): void {
       changelogUrl,
       dependencyUrl,
     } = upgrade;
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     let depNameLinked = upgrade.depName!;
     const primaryLink = homepage ?? sourceUrl ?? dependencyUrl;
     if (primaryLink) {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
     }
+
     const otherLinks = [];
-    if (homepage && sourceUrl) {
-      otherLinks.push(`[source](${sourceUrl})`);
+    if (sourceUrl && (!!sourceDirectory || homepage)) {
+      otherLinks.push(
+        `[source](${
+          sourceDirectory
+            ? joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory)
+            : sourceUrl
+        })`,
+      );
     }
     if (changelogUrl) {
       otherLinks.push(`[changelog](${changelogUrl})`);
@@ -69,7 +76,7 @@ const rebasingRegex = regEx(/\*\*Rebasing\*\*: .*/);
 export function getPrBody(
   branchConfig: BranchConfig,
   prBodyConfig: PrBodyConfig,
-  config: RenovateConfig
+  config: RenovateConfig,
 ): string {
   massageUpdateMetadata(branchConfig);
   let warnings = '';
@@ -78,7 +85,7 @@ export function getPrBody(
     warnings += getDepWarningsPR(
       branchConfig.packageFiles,
       config,
-      branchConfig.dependencyDashboard
+      branchConfig.dependencyDashboard,
     );
   }
   const content = {
@@ -105,7 +112,7 @@ export function getPrBody(
     if (prBodyConfig?.rebasingNotice) {
       prBody = prBody.replace(
         rebasingRegex,
-        `**Rebasing**: ${prBodyConfig.rebasingNotice}`
+        `**Rebasing**: ${prBodyConfig.rebasingNotice}`,
       );
     }
   }

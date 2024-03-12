@@ -20,11 +20,17 @@ describe('modules/manager/helmsman/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('returns null if apps not defined', () => {
+      const fileName = 'incorrect.yaml';
+      const result = extractPackageFile('incorrect', fileName, {});
+      expect(result).toBeNull();
+    });
+
     it('extract deps', () => {
       const fileName = 'helmsman.yaml';
       const result = extractPackageFile(multiDepFile, fileName, {});
       expect(result).not.toBeNull();
-      expect(result?.deps).toHaveLength(10);
+      expect(result?.deps).toHaveLength(11);
       expect(result?.deps.filter((value) => value.skipReason)).toHaveLength(5);
       expect(result).toMatchSnapshot();
     });

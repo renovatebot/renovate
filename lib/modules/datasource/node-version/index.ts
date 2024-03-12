@@ -23,8 +23,7 @@ export class NodeVersionDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${datasource}`,
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
   })
   async getReleases({
@@ -43,7 +42,7 @@ export class NodeVersionDatasource extends Datasource {
     try {
       const resp = (
         await this.http.getJson<NodeRelease[]>(
-          joinUrlParts(registryUrl, 'index.json')
+          joinUrlParts(registryUrl, 'index.json'),
         )
       ).body;
       result.releases.push(
@@ -51,7 +50,7 @@ export class NodeVersionDatasource extends Datasource {
           version,
           releaseTimestamp: date,
           isStable: lts !== false,
-        }))
+        })),
       );
     } catch (err) {
       this.handleGenericErrors(err);

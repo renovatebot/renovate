@@ -1,3 +1,4 @@
+import { coerceArray } from '../../../util/array';
 import type { PackageRule } from '../../types';
 import type { Preset } from '../types';
 
@@ -17,7 +18,7 @@ export interface PresetTemplate {
 }
 
 function generatePackageRules(
-  replacementRules: ReplacementRule[]
+  replacementRules: ReplacementRule[],
 ): PackageRule[] {
   const rules: PackageRule[] = [];
   for (const replacementRule of replacementRules) {
@@ -45,7 +46,7 @@ export function addPresets(
   presets: Record<string, Preset>,
   ...templates: PresetTemplate[]
 ): void {
-  const ext = presets.all?.extends ?? [];
+  const ext = coerceArray(presets.all?.extends);
   for (const template of templates) {
     const { title, description, packageRules } = template;
     presets[title] = {

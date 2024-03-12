@@ -4,7 +4,7 @@ describe('modules/manager/terragrunt/modules', () => {
   describe('githubRefMatchRegex', () => {
     it('should split project and tag from source', () => {
       const groups = githubRefMatchRegex.exec(
-        'github.com/hashicorp/example?ref=v1.0.0'
+        'github.com/hashicorp/example?ref=v1.0.0',
       )?.groups;
       expect(groups).toEqual({
         project: 'hashicorp/example',
@@ -14,7 +14,7 @@ describe('modules/manager/terragrunt/modules', () => {
 
     it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
       const groups = githubRefMatchRegex.exec(
-        'github.com/hashicorp/example.repo-123?ref=v1.0.0'
+        'github.com/hashicorp/example.repo-123?ref=v1.0.0',
       )?.groups;
       expect(groups).toEqual({
         project: 'hashicorp/example.repo-123',
@@ -26,13 +26,13 @@ describe('modules/manager/terragrunt/modules', () => {
   describe('gitTagsRefMatchRegex', () => {
     it('should split project and tag from source', () => {
       const http = gitTagsRefMatchRegex.exec(
-        'http://github.com/hashicorp/example?ref=v1.0.0'
+        'http://github.com/hashicorp/example?ref=v1.0.0',
       )?.groups;
       const https = gitTagsRefMatchRegex.exec(
-        'https://github.com/hashicorp/example?ref=v1.0.0'
+        'https://github.com/hashicorp/example?ref=v1.0.0',
       )?.groups;
       const ssh = gitTagsRefMatchRegex.exec(
-        'ssh://github.com/hashicorp/example?ref=v1.0.0'
+        'ssh://github.com/hashicorp/example?ref=v1.0.0',
       )?.groups;
 
       expect(http).toMatchObject({
@@ -51,13 +51,13 @@ describe('modules/manager/terragrunt/modules', () => {
 
     it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
       const http = gitTagsRefMatchRegex.exec(
-        'http://github.com/hashicorp/example.repo-123?ref=v1.0.0'
+        'http://github.com/hashicorp/example.repo-123?ref=v1.0.0',
       )?.groups;
       const https = gitTagsRefMatchRegex.exec(
-        'https://github.com/hashicorp/example.repo-123?ref=v1.0.0'
+        'https://github.com/hashicorp/example.repo-123?ref=v1.0.0',
       )?.groups;
       const ssh = gitTagsRefMatchRegex.exec(
-        'ssh://github.com/hashicorp/example.repo-123?ref=v1.0.0'
+        'ssh://github.com/hashicorp/example.repo-123?ref=v1.0.0',
       )?.groups;
 
       expect(http).toMatchObject({

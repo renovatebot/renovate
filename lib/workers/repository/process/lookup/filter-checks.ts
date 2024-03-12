@@ -9,6 +9,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import { coerceNumber } from '../../../../util/number';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { toMs } from '../../../../util/pretty-time';
 import type { LookupUpdateConfig, UpdateResult } from './types';
@@ -24,7 +25,7 @@ export async function filterInternalChecks(
   config: Partial<LookupUpdateConfig & UpdateResult>,
   versioning: VersioningApi,
   bucket: string,
-  sortedReleases: Release[]
+  sortedReleases: Release[],
 ): Promise<InternalChecksResult> {
   const { currentVersion, datasource, depName, internalChecksFilter } = config;
   let release: Release | undefined = undefined;
@@ -42,13 +43,13 @@ export async function filterInternalChecks(
       releaseConfig.updateType = getUpdateType(
         releaseConfig,
         versioning,
-        // TODO #7154
+        // TODO #22198
         currentVersion!,
-        candidateRelease.version
+        candidateRelease.version,
       );
       releaseConfig = mergeChildConfig(
         releaseConfig,
-        releaseConfig[releaseConfig.updateType]!
+        releaseConfig[releaseConfig.updateType]!,
       );
       // Apply packageRules in case any apply to updateType
       releaseConfig = applyPackageRules(releaseConfig);
@@ -61,18 +62,21 @@ export async function filterInternalChecks(
         updateType,
       } = releaseConfig;
       if (is.nonEmptyString(minimumReleaseAge) && releaseTimestamp) {
-        if (getElapsedMs(releaseTimestamp) < (toMs(minimumReleaseAge) ?? 0)) {
+        if (
+          getElapsedMs(releaseTimestamp) <
+          coerceNumber(toMs(minimumReleaseAge), 0)
+        ) {
           // Skip it if it doesn't pass checks
           logger.trace(
             { depName, check: 'minimumReleaseAge' },
-            `Release ${candidateRelease.version} is pending status checks`
+            `Release ${candidateRelease.version} is pending status checks`,
           );
           pendingReleases.unshift(candidateRelease);
           continue;
         }
       }
 
-      // TODO #7154
+      // TODO #22198
       if (isActiveConfidenceLevel(minimumConfidence!)) {
         const confidenceLevel =
           (await getMergeConfidenceLevel(
@@ -80,13 +84,13 @@ export async function filterInternalChecks(
             depName!,
             currentVersion!,
             newVersion,
-            updateType!
+            updateType!,
           )) ?? 'neutral';
-        // TODO #7154
+        // TODO #22198
         if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
           logger.trace(
             { depName, check: 'minimumConfidence' },
-            `Release ${candidateRelease.version} is pending status checks`
+            `Release ${candidateRelease.version} is pending status checks`,
           );
           pendingReleases.unshift(candidateRelease);
           continue;
@@ -101,7 +105,7 @@ export async function filterInternalChecks(
         // If all releases were pending then just take the highest
         logger.trace(
           { depName, bucket },
-          'All releases are pending - using latest'
+          'All releases are pending - using latest',
         );
         release = pendingReleases.pop();
         // None are pending anymore because we took the latest, so empty the array
@@ -113,6 +117,6 @@ export async function filterInternalChecks(
     }
   }
 
-  // TODO #7154
+  // TODO #22198
   return { release: release!, pendingChecks, pendingReleases };
 }

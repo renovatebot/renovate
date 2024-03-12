@@ -49,6 +49,12 @@ exports[`modules/manager/helmsman/extract extractPackageFile() extract deps 1`] 
       ],
     },
     {
+      "currentValue": "6.4.0",
+      "datasource": "docker",
+      "depName": "podinfo",
+      "packageName": "ghcr.io/stefanprodan/charts/podinfo",
+    },
+    {
       "datasource": "helm",
       "depName": "strimzi-operator-missing-version",
       "skipReason": "unspecified-version",

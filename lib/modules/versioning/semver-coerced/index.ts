@@ -13,7 +13,7 @@ function isStable(version: string): boolean {
   // matching a version with the semver prefix
   // v1.2.3, 1.2.3, v1.2, 1.2, v1, 1
   const regx = regEx(
-    /^v?(?<major>\d+)(?<minor>\.\d+)?(?<patch>\.\d+)?(?<others>.+)?/
+    /^v?(?<major>\d+)(?<minor>\.\d+)?(?<patch>\.\d+)?(?<others>.+)?/,
   );
   const m = regx.exec(version);
 
@@ -68,10 +68,12 @@ function isValid(version: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const coercedVersions = versions
-    .map((version) => semver.coerce(version)?.version)
+    .map((version) =>
+      semver.valid(version) ? version : semver.coerce(version)?.version,
+    )
     .filter(is.string);
 
   return semver.maxSatisfying(coercedVersions, range);
@@ -79,7 +81,7 @@ function getSatisfyingVersion(
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const coercedVersions = versions
     .map((version) => semver.coerce(version)?.version)
@@ -119,7 +121,14 @@ export const isVersion = (input: string): boolean => isValid(input);
 
 export { isVersion as isValid, getSatisfyingVersion };
 
-function getNewValue({ newVersion }: NewValueConfig): string {
+function getNewValue({
+  currentValue,
+  currentVersion,
+  newVersion,
+}: NewValueConfig): string {
+  if (currentVersion === `v${currentValue}`) {
+    return newVersion.replace(/^v/, '');
+  }
   return newVersion;
 }
 

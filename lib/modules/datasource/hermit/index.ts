@@ -5,6 +5,7 @@ import { getApiBaseUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { streamToString } from '../../../util/streams';
+import { coerceString } from '../../../util/string';
 import { parseUrl } from '../../../util/url';
 import { id } from '../../versioning/hermit';
 import { Datasource } from '../datasource';
@@ -74,7 +75,7 @@ export class HermitDatasource extends Datasource {
 
     if (!res) {
       logger.debug(
-        `Could not find hermit package ${packageName} at URL ${registryUrl}`
+        `Could not find hermit package ${packageName} at URL ${registryUrl}`,
       );
       return null;
     }
@@ -106,12 +107,12 @@ export class HermitDatasource extends Datasource {
   })
   async getHermitSearchManifest(u: URL): Promise<HermitSearchResult[] | null> {
     const registryUrl = u.toString();
-    const host = u.host ?? '';
-    const groups = this.pathRegex.exec(u.pathname ?? '')?.groups;
+    const host = coerceString(u.host);
+    const groups = this.pathRegex.exec(coerceString(u.pathname))?.groups;
     if (!groups) {
       logger.warn(
         { registryUrl },
-        'failed to get owner and repo from given url'
+        'failed to get owner and repo from given url',
       );
       return null;
     }
@@ -121,18 +122,18 @@ export class HermitDatasource extends Datasource {
     const apiBaseUrl = getApiBaseUrl(`https://${host}`);
 
     const indexRelease = await this.http.getJson<GithubRestRelease>(
-      `${apiBaseUrl}repos/${owner}/${repo}/releases/tags/index`
+      `${apiBaseUrl}repos/${owner}/${repo}/releases/tags/index`,
     );
 
     // finds asset with name index.json
     const asset = indexRelease.body.assets.find(
-      (asset) => asset.name === 'index.json'
+      (asset) => asset.name === 'index.json',
     );
 
     if (!asset) {
       logger.warn(
         { registryUrl },
-        `can't find asset index.json in the given registryUrl`
+        `can't find asset index.json in the given registryUrl`,
       );
       return null;
     }
@@ -148,7 +149,7 @@ export class HermitDatasource extends Datasource {
         headers: {
           accept: 'application/octet-stream',
         },
-      })
+      }),
     );
 
     try {

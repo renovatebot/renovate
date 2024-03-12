@@ -6,10 +6,6 @@ import {
 } from './consistent-versions-plugin';
 
 describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
-  afterAll(() => {
-    jest.resetAllMocks();
-  });
-
   it('gradle-consistent-versions plugin works for sub folders', () => {
     const fsMock = {
       'mysub/build.gradle.kts': `(this file contains) 'com.palantir.consistent-versions'`,

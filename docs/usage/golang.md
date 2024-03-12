@@ -5,7 +5,7 @@ description: Go modules support in Renovate
 
 # Automated Dependency Updates for Go Modules
 
-Renovate supports upgrading dependencies in `go.mod` files and their accompanying `go.sum` checksums.
+Renovate supports upgrading dependencies in `go.mod` files and associated `go.sum` checksums.
 
 If you're self-hosting Renovate, you may use these environment variables:
 
@@ -66,9 +66,8 @@ Renovate will commit all files changed within the `vendor/` folder.
 By default, Renovate will keep up with the latest version of the `go` binary.
 
 You can force Renovate to use a specific version of Go by setting a constraint.
-As an example, say you want Renovate to use the latest patch version of the `1.16` Go binary, you'd put this in your Renovate config:
 
-```json
+```json title="Getting Renovate to use the latest patch version of the 1.16 Go binary"
 {
   "constraints": {
     "go": "1.16"

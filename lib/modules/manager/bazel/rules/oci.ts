@@ -3,7 +3,7 @@ import { DockerDatasource } from '../../../datasource/docker';
 import { id as dockerVersioning } from '../../../versioning/docker';
 import type { PackageDependency } from '../../types';
 
-export const ociRules = ['oci_pull'] as const;
+export const ociRules = ['oci_pull', '_oci_pull'] as const;
 
 export const OciTarget = z
   .object({

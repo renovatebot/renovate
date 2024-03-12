@@ -8,7 +8,7 @@ import type { PyProject } from '../schema';
 export interface PyProjectProcessor {
   updateArtifacts(
     updateArtifact: UpdateArtifact,
-    project: PyProject
+    project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null>;
 
   /**
@@ -18,4 +18,10 @@ export interface PyProjectProcessor {
    * @param deps List of already extracted/processed dependencies
    */
   process(project: PyProject, deps: PackageDependency[]): PackageDependency[];
+
+  extractLockedVersions(
+    project: PyProject,
+    deps: PackageDependency[],
+    packageFile: string,
+  ): Promise<PackageDependency[]>;
 }

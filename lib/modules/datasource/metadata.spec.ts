@@ -1,9 +1,11 @@
+import { partial } from '../../../test/util';
 import { HelmDatasource } from './helm';
 import { MavenDatasource } from './maven';
 import {
   addMetaData,
   massageGithubUrl,
   massageUrl,
+  normalizeDate,
   shouldDeleteHomepage,
 } from './metadata';
 import { NpmDatasource } from './npm';
@@ -95,7 +97,7 @@ describe('modules/datasource/metadata', () => {
       expect(dep).toMatchObject({
         sourceUrl: expectedSourceUrl,
       });
-    }
+    },
   );
 
   it.each`
@@ -117,7 +119,7 @@ describe('modules/datasource/metadata', () => {
       addMetaData(dep, datasource, packageName);
       expect(dep.sourceDirectory).toBeUndefined();
       expect(dep).toMatchObject({ sourceUrl });
-    }
+    },
   );
 
   it('Should not overwrite any existing sourceDirectory', () => {
@@ -282,6 +284,7 @@ describe('modules/datasource/metadata', () => {
         { version: '1.0.1', releaseTimestamp: '2000-01-01T12:34:56' },
         { version: '1.0.2', releaseTimestamp: '2000-01-02T12:34:56.000Z' },
         { version: '1.0.3', releaseTimestamp: '2000-01-03T14:34:56.000+02:00' },
+        { version: '1.0.4', releaseTimestamp: '20000103150210' },
       ],
     };
     addMetaData(dep, MavenDatasource.id, 'foobar');
@@ -289,6 +292,7 @@ describe('modules/datasource/metadata', () => {
       { releaseTimestamp: '2000-01-01T12:34:56.000Z' },
       { releaseTimestamp: '2000-01-02T12:34:56.000Z' },
       { releaseTimestamp: '2000-01-03T12:34:56.000Z' },
+      { releaseTimestamp: '2000-01-03T15:02:10.000Z' },
     ]);
   });
 
@@ -338,31 +342,31 @@ describe('modules/datasource/metadata', () => {
 
   it('Should massage github git@ url to valid https url', () => {
     expect(massageGithubUrl('git@example.com:foo/bar')).toMatch(
-      'https://example.com/foo/bar'
+      'https://example.com/foo/bar',
     );
   });
 
   it('Should massage github http url to valid https url', () => {
     expect(massageGithubUrl('http://example.com/foo/bar')).toMatch(
-      'https://example.com/foo/bar'
+      'https://example.com/foo/bar',
     );
   });
 
   it('Should massage github http and git url to valid https url', () => {
     expect(massageGithubUrl('http+git://example.com/foo/bar')).toMatch(
-      'https://example.com/foo/bar'
+      'https://example.com/foo/bar',
     );
   });
 
   it('Should massage github ssh git@ url to valid https url', () => {
     expect(massageGithubUrl('ssh://git@example.com/foo/bar')).toMatch(
-      'https://example.com/foo/bar'
+      'https://example.com/foo/bar',
     );
   });
 
   it('Should massage github git url to valid https url', () => {
     expect(massageGithubUrl('git://example.com/foo/bar')).toMatch(
-      'https://example.com/foo/bar'
+      'https://example.com/foo/bar',
     );
   });
 
@@ -500,6 +504,40 @@ describe('modules/datasource/metadata', () => {
     'shouldDeleteHomepage($sourceUrl, $homepage) -> $expected',
     ({ sourceUrl, homepage, expected }) => {
       expect(shouldDeleteHomepage(sourceUrl, homepage)).toBe(expected);
-    }
+    },
   );
+
+  // for coverage
+  it('should handle dep with no releases', () => {
+    const dep = partial<ReleaseResult>({});
+
+    const datasource = PypiDatasource.id;
+    const packageName = 'django';
+
+    addMetaData(dep, datasource, packageName);
+    expect(dep).toEqual({
+      changelogUrl:
+        'https://github.com/django/django/tree/master/docs/releases',
+      sourceUrl: 'https://github.com/django/django',
+    });
+  });
+
+  describe('normalizeDate()', () => {
+    it('works for number input', () => {
+      const now = Date.now();
+      expect(normalizeDate(now)).toBe(new Date(now).toISOString());
+    });
+
+    it('works for string input', () => {
+      expect(normalizeDate('2021-01-01')).toBe(
+        new Date('2021-01-01').toISOString(),
+      );
+    });
+
+    it('works for Date instance', () => {
+      expect(normalizeDate(new Date('2021-01-01'))).toBe(
+        new Date('2021-01-01').toISOString(),
+      );
+    });
+  });
 });

@@ -1,4 +1,3 @@
-import { afterAll } from '@jest/globals';
 import { ProxyTracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
 import { NoopTracerProvider } from '@opentelemetry/api/build/src/trace/NoopTracerProvider';
@@ -105,7 +104,7 @@ describe('instrumentation/index', () => {
       expect(() =>
         instrument('test', () => {
           throw error;
-        })
+        }),
       ).toThrow(error);
     });
 
@@ -125,7 +124,7 @@ describe('instrumentation/index', () => {
         instrument('test', async () => {
           await Promise.resolve();
           throw error;
-        })
+        }),
       ).rejects.toThrow(error);
     });
   });

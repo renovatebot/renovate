@@ -87,7 +87,7 @@ Remember our example of grouping all `eslint` packages?
 If you think about it, updates to `eslint` rules don't exactly need to be applied in real time!
 You don't want to get too far behind, so how about we update `eslint` packages only once a month?
 
-```json
+```json title="Update ESLint packages once a month"
 {
   "packageRules": [
     {
@@ -101,7 +101,7 @@ You don't want to get too far behind, so how about we update `eslint` packages o
 
 Or perhaps at least weekly:
 
-```json
+```json title="Update ESLint packages weekly"
 {
   "packageRules": [
     {
@@ -161,7 +161,7 @@ This is a lot better than you waking up to two PRs and then having to deal with 
 Remember our running `eslint` example?
 Let's automerge it if all the linting updates pass:
 
-```json
+```json title="Automerge ESLint packages"
 {
   "packageRules": [
     {
@@ -175,7 +175,7 @@ Let's automerge it if all the linting updates pass:
 }
 ```
 
-Have you come up with a rule that you think others would benefit from?
+Have you come up with a rule that would help others?
 How about a PR to [our presets](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal)?
 For example the above rule could be named `":automergeEslintWeekly"` in `schedule.ts`.
 

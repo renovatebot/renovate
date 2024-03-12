@@ -1,0 +1,86 @@
+{
+  "count": 1,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 31412,
+      "upstream_id": 1429,
+      "created": "2023-05-08T21:52:11.755598Z",
+      "modified": "2023-05-08T21:52:11.758345Z",
+      "github_user": "yatesr",
+      "username": "yatesr",
+      "github_repo": "ansible-timezone",
+      "github_branch": "master",
+      "commit": "02845a002839261295b99f508d9ad989bc611cb7",
+      "commit_message": "Code quality with molecule, tox, and Travis. (#9)\n\n* Set role_name explicitly to avoid using repo name\r\n\r\n* Remove symlinks\r\n\r\nThe symlinks in this role do not play nicely with PBR, which is a\r\ndependency of Kayobe, a project that uses this role.\r\n\r\n* yam",
+      "name": "timezone",
+      "description": "Role for managing timezone.",
+      "summary_fields": {
+        "dependencies": [],
+        "namespace": {
+          "id": 7669,
+          "name": "yatesr",
+          "avatar_url": "https://github.com/yatesr.png"
+        },
+        "provider_namespace": {
+          "id": 19542,
+          "name": "yatesr",
+          "pulp_href": "/api/pulp/api/v3/pulp_ansible/namespaces/19542/"
+        },
+        "repository": {
+          "name": "timezone",
+          "original_name": "ansible-timezone"
+        },
+        "tags": [
+          "system"
+        ],
+        "versions": [
+          {
+            "id": 7863,
+            "url": "",
+            "name": "1.0.0",
+            "active": null,
+            "created": "2015-11-17T00:47:51.891999Z",
+            "related": {},
+            "version": "1.0.0",
+            "modified": "2018-04-14T05:17:23.871524Z",
+            "commit_sha": null,
+            "commit_date": "2015-11-16T19:43:42-05:00",
+            "download_url": "https://github.com/yatesr/ansible-timezone/archive/1.0.0.tar.gz",
+            "summary_fields": {}
+          },
+          {
+            "id": 38901,
+            "url": "",
+            "name": "1.1.0",
+            "active": null,
+            "created": "2017-09-25T00:31:23.862851Z",
+            "related": {},
+            "version": "1.1.0",
+            "modified": "2018-04-14T05:17:23.806464Z",
+            "commit_sha": null,
+            "commit_date": "2017-09-24T20:27:37-04:00",
+            "download_url": "https://github.com/yatesr/ansible-timezone/archive/1.1.0.tar.gz",
+            "summary_fields": {}
+          },
+          {
+            "id": 107503,
+            "url": "",
+            "name": "1.2.0",
+            "active": null,
+            "created": "2019-10-28T01:51:11.502959Z",
+            "related": {},
+            "version": "1.2.0",
+            "modified": "2019-10-28T01:51:11.502988Z",
+            "commit_sha": "02845a002839261295b99f508d9ad989bc611cb7",
+            "commit_date": "2019-10-27T21:40:43-04:00",
+            "download_url": "https://github.com/yatesr/ansible-timezone/archive/1.2.0.tar.gz",
+            "summary_fields": {}
+          }
+        ]
+      },
+      "download_count": 1579792
+    }
+  ]
+}

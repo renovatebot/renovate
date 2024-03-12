@@ -18,7 +18,7 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         simpleContent,
         '0.0.1',
-        'patch'
+        'patch',
       );
 
       const project = new XmlDocument(bumpedContent!);
@@ -29,12 +29,12 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         simpleContent,
         '0.0.1',
-        'patch'
+        'patch',
       );
       const { bumpedContent: bumpedContent2 } = bumpPackageVersion(
         bumpedContent!,
         '0.0.1',
-        'patch'
+        'patch',
       );
 
       expect(bumpedContent).toEqual(bumpedContent2);
@@ -44,12 +44,12 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         issue23526InitialContent,
         '4.9.0',
-        'minor'
+        'minor',
       );
       const { bumpedContent: bumpedContent2 } = bumpPackageVersion(
         bumpedContent!,
         '4.9.0',
-        'minor'
+        'minor',
       );
 
       expect(bumpedContent2).toEqual(issue23526ExpectedContent);
@@ -59,28 +59,36 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         minimumContent,
         '1',
-        'patch'
+        'patch',
       );
 
       const project = new XmlDocument(bumpedContent!);
       expect(project.valueWithPath('PropertyGroup.Version')).toBe('1');
     });
 
-    it('does not bump version if csproj has no version', () => {
-      const { bumpedContent } = bumpPackageVersion(
-        minimumContent,
-        undefined,
-        'patch'
-      );
+    it('does not bump version if extract found no version', () => {
+      const { bumpedContent } = bumpPackageVersion(minimumContent, '', 'patch');
 
       expect(bumpedContent).toEqual(minimumContent);
+    });
+
+    it('does not bump version if csproj has no version', () => {
+      const originalContent =
+        '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net6.0</TargetFramework></PropertyGroup></Project>';
+      const { bumpedContent } = bumpPackageVersion(
+        originalContent,
+        '0.0.1',
+        'patch',
+      );
+
+      expect(bumpedContent).toEqual(originalContent);
     });
 
     it('returns content if bumping errors', () => {
       const { bumpedContent } = bumpPackageVersion(
         simpleContent,
         '0.0.1',
-        true as any
+        true as any,
       );
       expect(bumpedContent).toEqual(simpleContent);
     });
@@ -89,11 +97,22 @@ describe('modules/manager/nuget/update', () => {
       const { bumpedContent } = bumpPackageVersion(
         prereleaseContent,
         '1.0.0-1',
-        'prerelease'
+        'prerelease',
       );
 
       const project = new XmlDocument(bumpedContent!);
       expect(project.valueWithPath('PropertyGroup.Version')).toBe('1.0.0-2');
+    });
+
+    it('bumps csproj version prefix', () => {
+      const content =
+        '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><VersionPrefix>1.0.0</VersionPrefix></PropertyGroup></Project>';
+      const { bumpedContent } = bumpPackageVersion(content, '1.0.0', 'patch');
+
+      const project = new XmlDocument(bumpedContent!);
+      expect(project.valueWithPath('PropertyGroup.VersionPrefix')).toBe(
+        '1.0.1',
+      );
     });
   });
 });

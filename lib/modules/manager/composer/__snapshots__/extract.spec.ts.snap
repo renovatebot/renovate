@@ -8,8 +8,7 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "datasource": "github-tags",
       "depName": "php",
       "depType": "require",
-      "extractVersion": "^php-(?<version>.*)$",
-      "packageName": "php/php-src",
+      "packageName": "containerbase/php-prebuild",
     },
     {
       "currentValue": "*",
@@ -222,8 +221,7 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "datasource": "github-tags",
       "depName": "php",
       "depType": "require",
-      "extractVersion": "^php-(?<version>.*)$",
-      "packageName": "php/php-src",
+      "packageName": "containerbase/php-prebuild",
     },
     {
       "currentValue": "*",

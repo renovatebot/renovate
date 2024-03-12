@@ -15,7 +15,7 @@ describe('modules/manager/composer/schema', () => {
           packagist: false,
           'packagist.org': false,
           foo: 'bar',
-        })
+        }),
       ).toEqual([
         { type: 'composer', url: 'https://wpackagist.org' },
         { name: 'someGit', type: 'git', url: 'https://some-vcs.com' },
@@ -43,7 +43,7 @@ describe('modules/manager/composer/schema', () => {
           { packagist: false },
           { 'packagist.org': false },
           { foo: 'bar' },
-        ])
+        ]),
       ).toEqual([
         { type: 'composer', url: 'https://wpackagist.org' },
         { name: 'someGit', type: 'git', url: 'https://some-vcs.com' },
@@ -73,7 +73,7 @@ describe('modules/manager/composer/schema', () => {
           },
           { name: 'someGit', type: 'vcs', url: 'https://some-vcs.com' },
           { name: 'somePath', type: 'path', url: '/some/path' },
-        ])
+        ]),
       ).toEqual({
         pathRepos: {
           somePath: { name: 'somePath', type: 'path', url: '/some/path' },
@@ -96,7 +96,7 @@ describe('modules/manager/composer/schema', () => {
           someGit: { type: 'vcs', url: 'https://some-vcs.com' },
           somePath: { type: 'path', url: '/some/path' },
           packagist: false,
-        })
+        }),
       ).toEqual({
         pathRepos: {
           somePath: { name: 'somePath', type: 'path', url: '/some/path' },

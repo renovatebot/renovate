@@ -2,12 +2,12 @@ import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 
 export const RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT = regEx(
-  /^git@[^:]*:(?<repository>.+)$/
+  /^git@[^:]*:(?<repository>.+)$/,
 );
 
 export function parseGitOwnerRepo(
   git: string,
-  githubUrl: boolean
+  githubUrl: boolean,
 ): string | null {
   const genericGitSsh = RE_REPOSITORY_GENERIC_GIT_SSH_FORMAT.exec(git);
 

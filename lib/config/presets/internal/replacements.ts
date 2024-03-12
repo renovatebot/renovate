@@ -13,7 +13,9 @@ export const presets: Record<string, Preset> = {
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
       'replacements:containerbase',
+      'replacements:cpx-to-maintenance-fork',
       'replacements:cucumber-to-scoped',
+      'replacements:fakerjs-to-scoped',
       'replacements:fastify-to-scoped',
       'replacements:hapi-to-scoped',
       'replacements:jade-to-pug',
@@ -22,12 +24,21 @@ export const presets: Record<string, Preset> = {
       'replacements:k8s-registry-move',
       'replacements:middie-to-scoped',
       'replacements:now-to-vercel',
+      'replacements:npm-run-all-to-maintenance-fork',
       'replacements:parcel-css-to-lightningcss',
+      'replacements:passport-saml',
       'replacements:react-query-devtools-to-scoped',
       'replacements:react-query-to-scoped',
       'replacements:react-scripts-ts-to-react-scripts',
+      'replacements:read-pkg-up-rename',
+      'replacements:redux-devtools-extension-to-scope',
       'replacements:renovate-pep440-to-renovatebot-pep440',
+      'replacements:rollup-babel-to-scoped',
+      'replacements:rollup-json-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:rome-to-biome',
+      'replacements:semantic-release-replace-plugin-to-unscoped',
+      'replacements:spectre-cli-to-spectre-console-cli',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
@@ -143,6 +154,33 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['renovatebot/internal-tools'],
         replacementName: 'containerbase/internal-tools',
       },
+      {
+        description: 'Replace `renovate` `slim` docker tag with `latest`.',
+        matchCurrentValue: '/^slim$/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['ghcr.io/renovatebot/renovate'],
+        matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+        replacementVersion: 'latest',
+      },
+      {
+        description: 'Remove `renovate` `-slim` docker tag suffix.',
+        extractVersion: '^(?<version>.+)-slim$',
+        matchCurrentValue: '/-slim$/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['ghcr.io/renovatebot/renovate'],
+        matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+      },
+    ],
+  },
+  'cpx-to-maintenance-fork': {
+    description: 'Maintenance fork of `cpx`',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['cpx'],
+        replacementName: 'cpx2',
+        replacementVersion: '2.0.0',
+      },
     ],
   },
   'cucumber-to-scoped': {
@@ -153,6 +191,46 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['cucumber'],
         replacementName: '@cucumber/cucumber',
         replacementVersion: '7.0.0',
+      },
+    ],
+  },
+  'fakerjs-to-scoped': {
+    description: '`fakerjs` packages became scoped.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '5.5.3',
+      },
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '4.1.0',
+      },
+      {
+        matchCurrentVersion: '>=3.0.0 <4.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '3.1.0',
+      },
+      {
+        matchCurrentVersion: '>=2.0.0 <3.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '2.1.5',
+      },
+      {
+        matchCurrentVersion: '<2.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '1.1.0',
       },
     ],
   },
@@ -594,6 +672,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'npm-run-all-to-maintenance-fork': {
+    description: 'Maintenance fork of `npm-run-all`',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['npm-run-all'],
+        replacementName: 'npm-run-all2',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
   'parcel-css-to-lightningcss': {
     description: '`@parcel/css` was renamed to `lightningcss`.',
     packageRules: [
@@ -602,6 +691,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['@parcel/css'],
         replacementName: 'lightningcss',
         replacementVersion: '1.14.0',
+      },
+    ],
+  },
+  'passport-saml': {
+    description: '`passport-saml` was renamed to `@node-saml/passport-saml`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['passport-saml'],
+        replacementName: '@node-saml/passport-saml',
+        replacementVersion: '4.0.4',
       },
     ],
   },
@@ -642,6 +742,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'read-pkg-up-rename': {
+    description: '`read-pkg-up` was renamed to `read-package-up`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['read-pkg-up'],
+        replacementName: 'read-package-up',
+        replacementVersion: '11.0.0',
+      },
+    ],
+  },
   'redux-devtools-extension-to-scope': {
     description:
       'The `redux-devtools-extension` package was renamed to `@redux-devtools/extension`.',
@@ -666,6 +777,28 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'rollup-babel-to-scoped': {
+    description: 'The babel plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-babel'],
+        replacementName: '@rollup/plugin-babel',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'rollup-json-to-scoped': {
+    description: 'The json plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-json'],
+        replacementName: '@rollup/plugin-json',
+        replacementVersion: '4.0.0',
+      },
+    ],
+  },
   'rollup-node-resolve-to-scoped': {
     description: 'The node-resolve plugin for rollup became scoped.',
     packageRules: [
@@ -674,6 +807,30 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rollup-plugin-node-resolve'],
         replacementName: '@rollup/plugin-node-resolve',
         replacementVersion: '6.0.0',
+      },
+    ],
+  },
+  'rome-to-biome': {
+    description:
+      'The Rome repository is archived, and Biome is the community replacement. Read [the Biome announcement](https://biomejs.dev/blog/annoucing-biome/) for migration instructions.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rome'],
+        replacementName: '@biomejs/biome',
+        replacementVersion: '1.0.0',
+      },
+    ],
+  },
+  'semantic-release-replace-plugin-to-unscoped': {
+    description:
+      '`semantic-release-replace-plugin` was moved out of the `google` organization.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@google/semantic-release-replace-plugin'],
+        replacementName: 'semantic-release-replace-plugin',
+        replacementVersion: '1.2.1',
       },
     ],
   },

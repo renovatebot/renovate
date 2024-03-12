@@ -4,19 +4,19 @@ import { extractPackageFile } from '.';
 const typeBinFileContent = Fixtures.get('gradle-wrapper-bin.properties');
 const typeAllFileContent = Fixtures.get('gradle-wrapper-all.properties');
 const prereleaseVersionFileContent = Fixtures.get(
-  'gradle-wrapper-prerelease.properties'
+  'gradle-wrapper-prerelease.properties',
 );
 const unknownFormatFileContent = Fixtures.get(
-  'gradle-wrapper-unknown-format.properties'
+  'gradle-wrapper-unknown-format.properties',
 );
 const whitespacePropertiesFile = Fixtures.get(
-  'gradle-wrapper-whitespace.properties'
+  'gradle-wrapper-whitespace.properties',
 );
 const customTypeBinFileContent = Fixtures.get(
-  'custom-gradle-wrapper-bin.properties'
+  'custom-gradle-wrapper-bin.properties',
 );
 const customTypeAllFileContent = Fixtures.get(
-  'custom-gradle-wrapper-all.properties'
+  'custom-gradle-wrapper-all.properties',
 );
 
 describe('modules/manager/gradle-wrapper/extract', () => {

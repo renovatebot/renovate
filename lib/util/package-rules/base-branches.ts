@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { configRegexPredicate } from '../regex';
+import { getRegexPredicate } from '../string-match';
 import { Matcher } from './base';
 
 export class BaseBranchesMatcher extends Matcher {
   override matches(
     { baseBranch }: PackageRuleInputConfig,
-    { matchBaseBranches }: PackageRule
+    { matchBaseBranches }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchBaseBranches)) {
       return null;
@@ -17,7 +17,7 @@ export class BaseBranchesMatcher extends Matcher {
     }
 
     return matchBaseBranches.some((matchBaseBranch): boolean => {
-      const isAllowedPred = configRegexPredicate(matchBaseBranch);
+      const isAllowedPred = getRegexPredicate(matchBaseBranch);
       if (isAllowedPred) {
         return isAllowedPred(baseBranch);
       }

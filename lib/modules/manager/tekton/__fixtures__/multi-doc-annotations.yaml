@@ -1,0 +1,31 @@
+---
+kind: PipelineRun
+metadata:
+  annotations:
+    pipelinesascode.tekton.dev/on-event: "[pull_request]"
+    pipelinesascode.tekton.dev/task: "[git-clone,https://github.com/foo/bar/releases/download/v0.0.4/stakater-create-git-tag.yaml]"
+    pipelinesascode.tekton.dev/pipeline: "https://raw.githubusercontent.com/foo/baz/v0.0.12/pipeline/deploy/deploy.yaml"
+---
+kind: PipelineRun
+metadata:
+  annotations:
+    pipelinesascode.tekton.dev/task: "[git-clone,
+      https://raw.githubusercontent.com/foo/bar/v0.0.6/tasks/create-git-tag/create-git-tag.yaml]"
+    pipelinesascode.tekton.dev/pipeline: "
+      https://raw.githubusercontent.com/foo/baz/v0.0.12/pipeline/deploy/deploy.yaml"
+---
+kind: PipelineRun
+metadata:
+  annotations:
+    pipelinesascode.tekton.dev/task: "git-clone"
+    pipelinesascode.tekton.dev/task-1: "https://github.com/foo/bar/raw/v0.0.8/tasks/create-git-tag/create-git-tag.yaml"
+    pipelinesascode.tekton.dev/pipeline: "https://github.com/foo/baz/raw/v0.0.14/pipeline/deploy/deploy.yaml"
+---
+kind: PipelineRun
+metadata:
+  annotations:
+    pipelinesascode.tekton.dev/task: "[git-clone,
+      https://github.com/foo/bar/releases/download/v0.0.9/stakater-create-git-tag.yaml,
+      https://github.com/foo/bar/raw/v0.0.7/tasks/create-git-tag/create-git-tag.yaml,
+      https://raw.githubusercontent.com/foo/bar/v0.0.5/tasks/create-git-tag/create-git-tag.yaml]"
+    pipelinesascode.tekton.dev/pipeline: "https://raw.githubusercontent.com/foo/baz/v0.0.25/pipeline/deploy/deploy.yaml"

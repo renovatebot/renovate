@@ -28,10 +28,28 @@
     {
       "matchFileNames": ["**/__fixtures__/**"],
       "enabled": false
+    },
+    {
+      "description": "set fix scope for base image",
+      "matchDepNames": ["ghcr.io/renovatebot/base-image"],
+      "semanticCommitType": "fix"
+    },
+    {
+      "description": "set feat scope for base image major",
+      "matchDepNames": ["ghcr.io/renovatebot/base-image"],
+      "matchUpdateTypes": ["major", "minor"],
+      "semanticCommitType": "feat"
+    },
+    {
+      "description": "fix versioning for ben-z/gh-action-mutex, eg v1.0-alpha-8",
+      "matchDepNames": ["ben-z/gh-action-mutex"],
+      "matchManagers": ["github-actions"],
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?(?<prerelease>\\-.+)?$"
     }
   ],
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["config/options/index.ts"],
       "matchStrings": [
         "default: '(?<depName>ghcr.io/containerbase/sidecar):(?<currentValue>.*)'"

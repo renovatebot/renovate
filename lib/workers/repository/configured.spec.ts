@@ -4,7 +4,6 @@ import { checkIfConfigured } from './configured';
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = partial<RenovateConfig>({
     enabled: true,
     forkProcessing: 'auto',

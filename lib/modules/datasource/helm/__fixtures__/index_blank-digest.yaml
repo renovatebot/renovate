@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  blank-digest:
+  - apiVersion: v2
+    created: '2023-09-05T13:24:19.046604000Z'
+    description: A Helm chart with a blank digest
+    digest:
+    name: blank-digest
+    urls:
+    - charts/blank-digest-3.2.1.tgz
+    version: 3.2.1
+generated: '2023-09-06T15:21:28.525139938Z'
+serverInfo:
+  contextPath: "/api/v4/projects/98765431/packages/helm"

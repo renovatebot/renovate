@@ -12,7 +12,7 @@ import {
 
 export async function generateDatasources(
   dist: string,
-  datasourceIssuesMap: OpenItems
+  datasourceIssuesMap: OpenItems,
 ): Promise<void> {
   const dsList = getDatasources();
   let datasourceContent = '\nSupported values for `datasource` are:\n\n';
@@ -28,11 +28,12 @@ export async function generateDatasources(
     const displayName = getDisplayName(datasource, definition);
     datasourceContent += `* ${getModuleLink(
       datasource,
-      `\`${datasource}\``
+      `\`${datasource}\``,
     )}\n`;
     let md = codeBlock`
       ---
       title: ${displayName}
+      edit_url: https://github.com/renovatebot/renovate/edit/main/lib/modules/datasource/${datasource}/readme.md
       ---
 
       # ${displayName} Datasource

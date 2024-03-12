@@ -17,14 +17,14 @@ const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID fo
 
 export async function getRefs(
   repoId: string,
-  branchName?: string
+  branchName?: string,
 ): Promise<GitRef[]> {
   logger.debug(`getRefs(${repoId}, ${branchName!})`);
   const azureApiGit = await azureApi.gitApi();
   const refs = await azureApiGit.getRefs(
     repoId,
     undefined,
-    getBranchNameWithoutRefsPrefix(branchName)
+    getBranchNameWithoutRefsPrefix(branchName),
   );
   return refs;
 }
@@ -37,7 +37,7 @@ export interface AzureBranchObj {
 export async function getAzureBranchObj(
   repoId: string,
   branchName: string,
-  from?: string
+  from?: string,
 ): Promise<AzureBranchObj> {
   const fromBranchName = getNewBranchName(from);
   const refs = await getRefs(repoId, fromBranchName);
@@ -50,7 +50,7 @@ export async function getAzureBranchObj(
     };
   }
   return {
-    // TODO: fix undefined (#7154)
+    // TODO: fix undefined (#22198)
     name: getNewBranchName(branchName)!,
     oldObjectId: refs[0].objectId!,
   };
@@ -60,7 +60,7 @@ export async function getAzureBranchObj(
 export async function getFile(
   repoId: string,
   filePath: string,
-  branchName: string
+  branchName: string,
 ): Promise<string | null> {
   logger.trace(`getFile(filePath=${filePath}, branchName=${branchName})`);
   const azureApiGit = await azureApi.gitApi();
@@ -77,15 +77,13 @@ export async function getFile(
       versionType: 0, // branch
       versionOptions: 0,
       version: getBranchNameWithoutRefsheadsPrefix(branchName),
-    }
+    },
   );
 
   if (item?.readable) {
     const fileContent = await streamToString(item);
     try {
-      const result = await WrappedExceptionSchema.safeParseAsync(
-        JSON.parse(fileContent)
-      );
+      const result = WrappedExceptionSchema.safeParse(fileContent);
       if (result.success) {
         if (result.data.typeKey === 'GitItemNotFoundException') {
           logger.warn(`Unable to find file ${filePath}`);
@@ -107,7 +105,7 @@ export async function getFile(
 
 export async function getCommitDetails(
   commit: string,
-  repoId: string
+  repoId: string,
 ): Promise<GitCommit> {
   logger.debug(`getCommitDetails(${commit}, ${repoId})`);
   const azureApiGit = await azureApi.gitApi();
@@ -119,8 +117,11 @@ export async function getMergeMethod(
   repoId: string,
   project: string,
   branchRef?: string | null,
-  defaultBranch?: string
+  defaultBranch?: string,
 ): Promise<GitPullRequestMergeStrategy> {
+  logger.debug(
+    `getMergeMethod(branchRef=${branchRef}, defaultBranch=${defaultBranch})`,
+  );
   type Scope = {
     repositoryId: string;
     refName?: string;
@@ -129,7 +130,7 @@ export async function getMergeMethod(
   const isRelevantScope = (scope: Scope): boolean => {
     if (
       scope.matchKind === 'DefaultBranch' &&
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       (!branchRef || branchRef === `refs/heads/${defaultBranch!}`)
     ) {
       return true;
@@ -140,7 +141,7 @@ export async function getMergeMethod(
     if (!branchRef) {
       return true;
     }
-    // TODO #7154
+    // TODO #22198
     return scope.matchKind === 'Exact'
       ? scope.refName === branchRef
       : branchRef.startsWith(scope.refName!);
@@ -154,13 +155,13 @@ export async function getMergeMethod(
     .filter((p) => p.settings.scope.some(isRelevantScope))
     .map((p) => p.settings)[0];
 
-  logger.trace(
-    // TODO: types (#7154)
-    `getMergeMethod(${repoId}, ${project}, ${branchRef!}) determining mergeMethod from matched policy:\n${JSON.stringify(
+  logger.debug(
+    // TODO: types (#22198)
+    `getMergeMethod(branchRef=${branchRef!}) determining mergeMethod from matched policy:\n${JSON.stringify(
       policyConfigurations,
       null,
-      4
-    )}`
+      4,
+    )}`,
   );
 
   try {
@@ -170,7 +171,7 @@ export async function getMergeMethod(
         (p) =>
           GitPullRequestMergeStrategy[
             p.slice(5) as never
-          ] as never as GitPullRequestMergeStrategy
+          ] as never as GitPullRequestMergeStrategy,
       )
       .find((p) => p)!;
   } catch (err) {

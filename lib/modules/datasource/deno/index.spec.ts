@@ -67,7 +67,7 @@ describe('modules/datasource/deno/index', () => {
         expect.objectContaining({
           err: expect.any(ZodError),
         }),
-        `Deno: failed to get version details for 0.161.0`
+        `Deno: failed to get version details for 0.161.0`,
       );
     });
 
@@ -81,7 +81,7 @@ describe('modules/datasource/deno/index', () => {
         deno.getReleases({
           packageName: 'https://deno.land/std',
           registryUrl: deno.defaultRegistryUrls[0],
-        })
+        }),
       ).rejects.toThrow();
     });
 
@@ -109,7 +109,7 @@ describe('modules/datasource/deno/index', () => {
         deno.getReleases({
           packageName: 'https://deno.land/std',
           registryUrl: deno.defaultRegistryUrls[0],
-        })
+        }),
       ).rejects.toThrow();
     });
 
@@ -117,7 +117,7 @@ describe('modules/datasource/deno/index', () => {
       expect(
         await deno.getReleases({
           packageName: 'https://myexample.com/std',
-        })
+        }),
       ).toBeNull();
     });
 

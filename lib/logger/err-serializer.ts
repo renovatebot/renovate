@@ -13,7 +13,7 @@ export default function errSerializer(err: Error): any {
     if (is.string(val)) {
       response[field] = val.replace(
         /https:\/\/[^@]*?@/g, // TODO #12874
-        'https://**redacted**@'
+        'https://**redacted**@',
       );
     }
   }

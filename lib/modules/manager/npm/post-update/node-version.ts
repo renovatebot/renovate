@@ -9,7 +9,7 @@ import type { LazyPackageJson } from './utils';
 
 async function getNodeFile(filename: string): Promise<string | null> {
   try {
-    // TODO #7154
+    // TODO #22198
     const constraint = (await readLocalFile(filename, 'utf8'))!
       .split(newlineRegex)[0]
       .replace(regEx(/^v/), '');
@@ -24,7 +24,7 @@ async function getNodeFile(filename: string): Promise<string | null> {
 }
 
 async function getPackageJsonConstraint(
-  pkg: LazyPackageJson
+  pkg: LazyPackageJson,
 ): Promise<string | null> {
   const constraint = (await pkg.getValue()).engines?.node;
   if (constraint && semver.validRange(constraint)) {
@@ -39,7 +39,7 @@ export async function getNodeConstraint(
   config: Partial<PostUpdateConfig>,
   upgrades: Upgrade[],
   lockFileDir: string,
-  pkg: LazyPackageJson
+  pkg: LazyPackageJson,
 ): Promise<string | null> {
   const constraint =
     getNodeUpdate(upgrades) ??
@@ -61,13 +61,13 @@ export async function getNodeToolConstraint(
   config: Partial<PostUpdateConfig>,
   upgrades: Upgrade[],
   lockFileDir: string,
-  pkg: LazyPackageJson
+  pkg: LazyPackageJson,
 ): Promise<ToolConstraint> {
   const constraint = await getNodeConstraint(
     config,
     upgrades,
     lockFileDir,
-    pkg
+    pkg,
   );
 
   return {

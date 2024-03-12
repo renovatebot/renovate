@@ -21,14 +21,14 @@ export interface Range {
 
 const parse = (range: string): Range => {
   const regExp = regEx(
-    /^(?<operator>[^\d\s]+)?(?<delimiter>\s*)(?<version>[0-9a-zA-Z-.]+)$/
+    /^(?<operator>[^\d\s]+)?(?<delimiter>\s*)(?<version>[0-9a-zA-Z-.]+)$/,
   );
 
   const value = (range || '').trim();
 
   const match = regExp.exec(value);
   if (match?.groups) {
-    const { version = '', operator = '', delimiter = ' ' } = match.groups;
+    const { version, operator = '', delimiter } = match.groups;
     return { version, operator, delimiter };
   }
 

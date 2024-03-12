@@ -76,7 +76,7 @@ If you were using SemVer ranges then this new version of `foobar` will likely be
 Like before, you need to manually work out which dependency caused it - assuming you guess correctly that it was a new dependency version at fault - and pin it manually by editing `package.json` one dependency at a time.
 
 Alternatively, if you were instead pinning `foobar` then you would get a PR for `foobar@1.2.0` which awaits your approval.
-So first of all, you can choose to read the release notes and/or visually inspect the branch yourself before merging, hopefully saving you from pushing this faulty code to production.
+So first of all, you can choose to read the changelogs and/or visually inspect the branch yourself before merging, hopefully saving you from pushing this faulty code to production.
 
 If you did not catch the fault before merging, you are still better off with a pinned version.
 If you discover something wrong in production, you can easily "roll back" commits in your development environment until you find which rollback fixes the problem.
@@ -128,7 +128,7 @@ And worse still, npm package versions that are less than 24 hours [can be unpubl
 So to reduce the interruptions of automated dependency updates, consider putting Renovate on a schedule, such as:
 
 - Update only on weekends? This way you update packages at most once per week, _and_ your CI build runners are likely to be idle anyway
-- Update daily, but between hours like midnight and 5am? That way notifications don't pop up in people's feed while they're working, _and_ you also get the benefit of not tying up build machines when developers need to use them
+- Update daily, but between midnight and 5am? This way developers aren't bothered by notifications when they're working, _and_ you're keeping the build machines free for the developers
 
 To learn all about controlling Renovate's schedule, read the [key concepts, scheduling](./key-concepts/scheduling.md) docs.
 
@@ -186,7 +186,7 @@ You could even be running `yarn upgrade` regularly to be getting _indirect_ pack
 So the lock file does not solve the same SemVer problems that pinning solves - but it compliments it.
 For this reason our usual recommendation is using a lock file regardless of whether you pin dependencies or not, and pinning even if you have a lock file.
 
-Don't forget though that our motto is "Flexible, so you don't need to be", so go ahead and configure however you want.
+But you may also go ahead and configure however you want.
 Also, we're open to ideas for how to make lock file updates more "visible" too.
 e.g. are you interested in a Renovate feature where you get a lockfile-only PR any time a direct dependency gets an in-range update?
 

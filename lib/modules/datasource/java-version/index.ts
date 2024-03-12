@@ -27,7 +27,7 @@ export class JavaVersionDatasource extends Datasource {
 
   private async getPageReleases(
     url: string,
-    page: number
+    page: number,
   ): Promise<Release[] | null> {
     const pgUrl = `${url}&page=${page}`;
     try {
@@ -54,7 +54,7 @@ export class JavaVersionDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `${registryUrl!}:${getImageType(packageName)}`,
   })
   async getReleases({
@@ -64,9 +64,9 @@ export class JavaVersionDatasource extends Datasource {
     const imageType = getImageType(packageName);
     logger.trace(
       { registryUrl, packageName, imageType },
-      'fetching java release'
+      'fetching java release',
     );
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const url = `${registryUrl!}v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
 
     const result: ReleaseResult = {

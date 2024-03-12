@@ -3,10 +3,13 @@ import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { Decorator, decorate } from '../../decorator';
-import type { DecoratorCachedRecord } from './types';
+import type { DecoratorCachedRecord, PackageCacheNamespace } from './types';
 import * as packageCache from '.';
 
 type HashFunction<T extends any[] = any[]> = (...args: T) => string;
+type NamespaceFunction<T extends any[] = any[]> = (
+  ...args: T
+) => PackageCacheNamespace;
 type BooleanFunction<T extends any[] = any[]> = (...args: T) => boolean;
 
 /**
@@ -17,7 +20,7 @@ interface CacheParameters {
    * The cache namespace
    * Either a string or a hash function that generates a string
    */
-  namespace: string | HashFunction;
+  namespace: PackageCacheNamespace | NamespaceFunction;
 
   /**
    * The cache key
@@ -51,7 +54,7 @@ export function cache<T>({
       return callback();
     }
 
-    let finalNamespace: string | undefined;
+    let finalNamespace: PackageCacheNamespace | undefined;
     if (is.string(namespace)) {
       finalNamespace = namespace;
     } else if (is.function_(namespace)) {
@@ -73,12 +76,16 @@ export function cache<T>({
     finalKey = `cache-decorator:${finalKey}`;
     const oldRecord = await packageCache.get<DecoratorCachedRecord>(
       finalNamespace,
-      finalKey
+      finalKey,
     );
 
-    const softTtl = ttlMinutes;
+    const ttlOverride = getTtlOverride(finalNamespace);
+    const softTtl = ttlOverride ?? ttlMinutes;
 
-    const cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes', 0);
+    const cacheHardTtlMinutes = GlobalConfig.get(
+      'cacheHardTtlMinutes',
+      7 * 24 * 60,
+    );
     let hardTtl = softTtl;
     if (methodName === 'getReleases' || methodName === 'getDigest') {
       hardTtl = Math.max(softTtl, cacheHardTtlMinutes);
@@ -107,7 +114,7 @@ export function cache<T>({
       } catch (err) {
         logger.debug(
           { err },
-          'Package cache decorator: callback error, returning old data'
+          'Package cache decorator: callback error, returning old data',
         );
         return oldData;
       }
@@ -117,7 +124,7 @@ export function cache<T>({
 
     if (!is.undefined(newData)) {
       const newRecord: DecoratorCachedRecord = {
-        cachedAt: DateTime.local().toISO()!,
+        cachedAt: DateTime.local().toISO(),
         value: newData,
       };
       await packageCache.set(finalNamespace, finalKey, newRecord, hardTtl);
@@ -125,4 +132,12 @@ export function cache<T>({
 
     return newData;
   });
+}
+
+export function getTtlOverride(namespace: string): number | undefined {
+  const ttl: unknown = GlobalConfig.get('cacheTtlOverride', {})[namespace];
+  if (is.number(ttl)) {
+    return ttl;
+  }
+  return undefined;
 }

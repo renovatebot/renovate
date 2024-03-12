@@ -9,6 +9,12 @@ import { MAVEN_REPO } from '../../datasource/maven/common';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { MavenProp } from './types';
 
+const supportedNamespaces = [
+  'http://maven.apache.org/SETTINGS/1.0.0',
+  'http://maven.apache.org/SETTINGS/1.1.0',
+  'http://maven.apache.org/SETTINGS/1.2.0',
+];
+
 function parsePom(raw: string, packageFile: string): XmlDocument | null {
   let project: XmlDocument;
   try {
@@ -39,7 +45,7 @@ function containsPlaceholder(str: string | null | undefined): boolean {
 
 function depFromNode(
   node: XmlElement,
-  underBuildSettingsElement = false
+  underBuildSettingsElement: boolean,
 ): PackageDependency | null {
   if (!('valueWithPath' in node)) {
     return null;
@@ -58,13 +64,12 @@ function depFromNode(
     const versionNode = node.descendantWithPath('version')!;
     const fileReplacePosition = versionNode.position;
     const datasource = MavenDatasource.id;
-    const registryUrls = [MAVEN_REPO];
     const result: PackageDependency = {
       datasource,
       depName,
       currentValue,
       fileReplacePosition,
-      registryUrls,
+      registryUrls: [],
     };
 
     switch (node.name) {
@@ -99,7 +104,7 @@ function deepExtract(
   node: XmlElement,
   result: PackageDependency[] = [],
   isRoot = true,
-  underBuildSettingsElement = false
+  underBuildSettingsElement = false,
 ): PackageDependency[] {
   const dep = depFromNode(node, underBuildSettingsElement);
   if (dep && !isRoot) {
@@ -113,7 +118,7 @@ function deepExtract(
         false,
         node.name === 'build' ||
           node.name === 'reporting' ||
-          underBuildSettingsElement
+          underBuildSettingsElement,
       );
     }
   }
@@ -123,7 +128,7 @@ function deepExtract(
 function applyProps(
   dep: PackageDependency<Record<string, any>>,
   depPackageFile: string,
-  props: MavenProp
+  props: MavenProp,
 ): PackageDependency<Record<string, any>> {
   let result = dep;
   let anyChange = false;
@@ -134,7 +139,7 @@ function applyProps(
       result,
       depPackageFile,
       props,
-      alreadySeenProps
+      alreadySeenProps,
     );
     if (fatal) {
       dep.skipReason = 'recursive-placeholder';
@@ -157,7 +162,7 @@ function applyPropsInternal(
   dep: PackageDependency<Record<string, any>>,
   depPackageFile: string,
   props: MavenProp,
-  previouslySeenProps: Set<string>
+  previouslySeenProps: Set<string>,
 ): [PackageDependency<Record<string, any>>, boolean, boolean] {
   let anyChange = false;
   let fatal = false;
@@ -198,7 +203,10 @@ function applyPropsInternal(
           groupName = propKey;
         }
         fileReplacePosition = propValue.fileReplacePosition;
-        propSource = propValue.packageFile ?? undefined;
+        propSource =
+          propValue.packageFile ??
+          // istanbul ignore next
+          undefined;
         anyChange = true;
         if (previouslySeenProps.has(propKey)) {
           fatal = true;
@@ -208,7 +216,7 @@ function applyPropsInternal(
         return propValue.val;
       }
       return substr;
-    }
+    },
   );
 
   const result: PackageDependency = {
@@ -253,7 +261,7 @@ interface MavenInterimPackageFile extends PackageFile {
 
 export function extractPackage(
   rawContent: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFile | null {
   if (!rawContent) {
     return null;
@@ -364,7 +372,7 @@ export function parseSettings(raw: string): XmlDocument | null {
   if (name !== 'settings') {
     return null;
   }
-  if (attr.xmlns === 'http://maven.apache.org/SETTINGS/1.0.0') {
+  if (supportedNamespaces.includes(attr.xmlns)) {
     return settings;
   }
   return null;
@@ -461,6 +469,8 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
     delete packageFile.parent;
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
+      //Add Registry From SuperPom
+      dep.registryUrls!.push(MAVEN_REPO);
     });
   });
   return packageFiles;
@@ -468,7 +478,7 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
 
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
-  packageFiles: string[]
+  packageFiles: string[],
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   const additionalRegistryUrls: string[] = [];
@@ -484,7 +494,7 @@ export async function extractAllPackageFiles(
       if (registries) {
         logger.debug(
           { registries, packageFile },
-          'Found registryUrls in settings.xml'
+          'Found registryUrls in settings.xml',
         );
         additionalRegistryUrls.push(...registries);
       }
@@ -500,12 +510,7 @@ export async function extractAllPackageFiles(
   if (additionalRegistryUrls) {
     for (const pkgFile of packages) {
       for (const dep of pkgFile.deps) {
-        /* istanbul ignore else */
-        if (dep.registryUrls) {
-          dep.registryUrls.push(...additionalRegistryUrls);
-        } else {
-          dep.registryUrls = [...additionalRegistryUrls];
-        }
+        dep.registryUrls!.unshift(...additionalRegistryUrls);
       }
     }
   }

@@ -8,7 +8,7 @@ describe('config/migrations/custom/version-strategy-migration', () => {
       },
       {
         rangeStrategy: 'widen',
-      }
+      },
     );
   });
 
@@ -17,7 +17,7 @@ describe('config/migrations/custom/version-strategy-migration', () => {
       {
         versionStrategy: 'test',
       },
-      {}
+      {},
     );
   });
 });

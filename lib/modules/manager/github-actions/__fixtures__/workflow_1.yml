@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Shell lint
-        uses: actions/bin/shellcheck@master
+        uses : actions/bin/shellcheck@master
         run: ./entrypoint.sh
   docker_lint:
     name: Docker lint

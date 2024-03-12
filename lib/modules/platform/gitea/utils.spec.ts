@@ -19,19 +19,19 @@ describe('modules/platform/gitea/utils', () => {
 
   it('trimTrailingApiPath', () => {
     expect(trimTrailingApiPath('https://gitea.renovatebot.com/api/v1')).toBe(
-      'https://gitea.renovatebot.com/'
+      'https://gitea.renovatebot.com/',
     );
     expect(trimTrailingApiPath('https://gitea.renovatebot.com/api/v1/')).toBe(
-      'https://gitea.renovatebot.com/'
+      'https://gitea.renovatebot.com/',
     );
     expect(trimTrailingApiPath('https://gitea.renovatebot.com/')).toBe(
-      'https://gitea.renovatebot.com/'
+      'https://gitea.renovatebot.com/',
     );
     expect(trimTrailingApiPath('https://gitea.renovatebot.com')).toBe(
-      'https://gitea.renovatebot.com'
+      'https://gitea.renovatebot.com',
     );
     expect(
-      trimTrailingApiPath('https://gitea.renovatebot.com/api/gitea/api/v1')
+      trimTrailingApiPath('https://gitea.renovatebot.com/api/gitea/api/v1'),
     ).toBe('https://gitea.renovatebot.com/api/gitea/');
   });
 
@@ -39,7 +39,7 @@ describe('modules/platform/gitea/utils', () => {
     it('should abort when endpoint is not valid', () => {
       expect.assertions(1);
       expect(() => getRepoUrl(mockRepo, 'endpoint', 'abc')).toThrow(
-        CONFIG_GIT_URL_UNAVAILABLE
+        CONFIG_GIT_URL_UNAVAILABLE,
       );
     });
   });

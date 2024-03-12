@@ -10,10 +10,14 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 const hexRepoUrl = 'https://hex.pm/';
+const hexRepoOrgUrlRegex = regEx(
+  `^https://hex\\.pm/api/repos/(?<organization>[a-z0-9_]+)/$`,
+);
 
 export async function updateArtifacts({
   packageFileName,
@@ -51,6 +55,24 @@ export async function updateArtifacts({
 
   const organizations = new Set<string>();
 
+  const hexHostRulesWithMatchHost = hostRules
+    .getAll()
+    .filter(
+      (hostRule) =>
+        !!hostRule.matchHost && hexRepoOrgUrlRegex.test(hostRule.matchHost),
+    );
+
+  for (const { matchHost } of hexHostRulesWithMatchHost) {
+    if (matchHost) {
+      const result = hexRepoOrgUrlRegex.exec(matchHost);
+
+      if (result?.groups) {
+        const { organization } = result.groups;
+        organizations.add(organization);
+      }
+    }
+  }
+
   for (const { packageName } of updatedDeps) {
     if (packageName) {
       const [, organization] = packageName.split(':');
@@ -77,6 +99,7 @@ export async function updateArtifacts({
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     docker: {},
+    userConfiguredEnv: config.env,
     toolConstraints: [
       {
         toolName: 'erlang',
@@ -109,7 +132,7 @@ export async function updateArtifacts({
 
     logger.debug(
       { err, message: err.message, command },
-      'Failed to update Mix lock file'
+      'Failed to update Mix lock file',
     );
 
     return [

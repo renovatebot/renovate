@@ -1,11 +1,17 @@
+import { codeBlock } from 'common-tags';
 import type { RenovateConfig } from '../../lib/config/types';
 import type { Category } from '../../lib/constants';
 import { getManagers } from '../../lib/modules/manager';
+import {
+  getCustomManagers,
+  isCustomManager,
+} from '../../lib/modules/manager/custom';
 import { readFile, updateFile } from '../utils';
 import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
 import {
   formatUrls,
   getDisplayName,
+  getModuleLink,
   getNameWithUrl,
   replaceContent,
 } from './utils';
@@ -13,15 +19,19 @@ import {
 const noCategoryID = 'no-category';
 const noCategoryDisplayName = 'No Category';
 
-function getTitle(manager: string, displayName: string): string {
-  if (manager === 'regex') {
-    return `Custom Manager Support using Regex`;
+function getTitle(
+  manager: string,
+  displayName: string,
+  isCustomMgr: boolean,
+): string {
+  if (isCustomMgr) {
+    return `Custom Manager Support using ${displayName}`;
   }
   return `Automated Dependency Updates for ${displayName}`;
 }
 
 function getManagerLink(manager: string): string {
-  return `[\`${manager}\`](${manager}/)`;
+  return getModuleLink(manager, `\`${manager}\``);
 }
 
 export const CategoryNames: Record<Category, string> = {
@@ -42,6 +52,7 @@ export const CategoryNames: Record<Category, string> = {
   js: 'JavaScript',
   kubernetes: 'Kubernetes',
   node: 'Node.js',
+  perl: 'Perl',
   php: 'PHP',
   python: 'Python',
   ruby: 'Ruby',
@@ -52,16 +63,17 @@ export const CategoryNames: Record<Category, string> = {
 
 export async function generateManagers(
   dist: string,
-  managerIssuesMap: OpenItems
+  managerIssuesMap: OpenItems,
 ): Promise<void> {
-  const managers = getManagers();
+  const allManagers = [...getManagers(), ...getCustomManagers()];
 
   const allCategories: Record<string, string[]> = {};
 
-  for (const [manager, definition] of managers) {
+  for (const [manager, definition] of allManagers) {
     const { defaultConfig, supportedDatasources, urls } = definition;
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
+    const isCustomMgr = isCustomManager(manager);
 
     const categories = definition.categories ?? [noCategoryID];
     for (const category of categories) {
@@ -69,11 +81,16 @@ export async function generateManagers(
       allCategories[category].push(manager);
     }
 
-    let md = `---
-title: ${getTitle(manager, displayName)}
-sidebar_label: ${displayName}
----
-`;
+    let md = codeBlock`
+      ---
+      title: ${getTitle(manager, displayName, isCustomMgr)}
+      sidebar_label: ${displayName}
+      edit_url: https://github.com/renovatebot/renovate/edit/main/lib/modules/manager/${
+        isCustomMgr ? `custom/${manager}` : manager
+      }/readme.md
+      ---
+      `;
+    md += '\n\n';
     md += '**Categories**: ';
     if (categories.length) {
       for (let i = 0; i < categories.length; i++) {
@@ -87,7 +104,7 @@ sidebar_label: ${displayName}
     }
     md += '\n\n';
 
-    if (manager !== 'regex') {
+    if (!isCustomMgr) {
       const nameWithUrl = getNameWithUrl(manager, definition);
       md += `Renovate supports updating ${nameWithUrl} dependencies.\n\n`;
       if (defaultConfig.enabled === false) {
@@ -113,12 +130,12 @@ sidebar_label: ${displayName}
           md += '\n```\n\n';
         }
       }
-      md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](/modules/manager/#file-matching).\n\n`;
+      md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](../index.md#file-matching).\n\n`;
       md += '## Supported datasources\n\n';
       const escapedDatasources = (supportedDatasources || [])
         .map(
           (datasource) =>
-            `[\`${datasource}\`](../../datasource/#${datasource}-datasource)`
+            `[\`${datasource}\`](../../datasource/${datasource}/index.md)`,
         )
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
@@ -133,9 +150,11 @@ sidebar_label: ${displayName}
       md += '```\n\n';
     }
     const managerReadmeContent = await readFile(
-      `lib/modules/manager/${manager}/readme.md`
+      `lib/modules/manager/${
+        isCustomMgr ? `custom/${manager}` : manager
+      }/readme.md`,
     );
-    if (manager !== 'regex') {
+    if (!isCustomMgr) {
       md += '\n## Additional Information\n\n';
     }
     md += managerReadmeContent;
@@ -147,7 +166,7 @@ sidebar_label: ${displayName}
 
   // add noCategoryDisplayName as last option
   const categories = Object.keys(allCategories).filter(
-    (category) => category !== noCategoryID
+    (category) => category !== noCategoryID,
   );
   categories.sort();
   categories.push(noCategoryID);

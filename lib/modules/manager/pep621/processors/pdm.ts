@@ -1,9 +1,11 @@
 import is from '@sindresorhus/is';
+import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { exec } from '../../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../../util/exec/types';
 import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { Result } from '../../../../util/result';
 import { PypiDatasource } from '../../../datasource/pypi';
 import type {
   PackageDependency,
@@ -11,7 +13,7 @@ import type {
   UpdateArtifactsResult,
   Upgrade,
 } from '../../types';
-import type { PyProject } from '../schema';
+import { PdmLockfileSchema, type PyProject } from '../schema';
 import { depTypes, parseDependencyGroupRecord } from '../utils';
 import type { PyProjectProcessor } from './types';
 
@@ -27,8 +29,8 @@ export class PdmProcessor implements PyProjectProcessor {
     deps.push(
       ...parseDependencyGroupRecord(
         depTypes.pdmDevDependencies,
-        pdm['dev-dependencies']
-      )
+        pdm['dev-dependencies'],
+      ),
     );
 
     const pdmSource = pdm.source;
@@ -52,9 +54,40 @@ export class PdmProcessor implements PyProjectProcessor {
     return deps;
   }
 
+  async extractLockedVersions(
+    project: PyProject,
+    deps: PackageDependency[],
+    packageFile: string,
+  ): Promise<PackageDependency[]> {
+    if (
+      is.nullOrUndefined(project.tool?.pdm) &&
+      project['build-system']?.['build-backend'] !== 'pdm.backend'
+    ) {
+      return Promise.resolve(deps);
+    }
+
+    const lockFileName = getSiblingFileName(packageFile, 'pdm.lock');
+    const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+    if (lockFileContent) {
+      const lockFileMapping = Result.parse(
+        lockFileContent,
+        PdmLockfileSchema.transform(({ lock }) => lock),
+      ).unwrapOrElse({});
+
+      for (const dep of deps) {
+        const packageName = dep.packageName;
+        if (packageName && packageName in lockFileMapping) {
+          dep.lockedVersion = lockFileMapping[packageName];
+        }
+      }
+    }
+
+    return Promise.resolve(deps);
+  }
+
   async updateArtifacts(
     updateArtifact: UpdateArtifact,
-    project: PyProject
+    project: PyProject,
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
 
@@ -82,6 +115,7 @@ export class PdmProcessor implements PyProjectProcessor {
       const execOptions: ExecOptions = {
         cwdFile: packageFileName,
         docker: {},
+        userConfiguredEnv: config.env,
         toolConstraints: [pythonConstraint, pdmConstraint],
       };
 
@@ -139,8 +173,8 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
         const [group, name] = dep.depName!.split('/');
         addPackageToCMDRecord(
           packagesByCMD,
-          `${pdmUpdateCMD} -G ${group}`,
-          name
+          `${pdmUpdateCMD} -G ${quote(group)}`,
+          name,
         );
         break;
       }
@@ -148,8 +182,8 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
         const [group, name] = dep.depName!.split('/');
         addPackageToCMDRecord(
           packagesByCMD,
-          `${pdmUpdateCMD} -dG ${group}`,
-          name
+          `${pdmUpdateCMD} -dG ${quote(group)}`,
+          name,
         );
         break;
       }
@@ -160,7 +194,7 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
   }
 
   for (const commandPrefix in packagesByCMD) {
-    const packageList = packagesByCMD[commandPrefix].join(' ');
+    const packageList = packagesByCMD[commandPrefix].map(quote).join(' ');
     const cmd = `${commandPrefix} ${packageList}`;
     cmds.push(cmd);
   }
@@ -171,7 +205,7 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
 function addPackageToCMDRecord(
   packagesByCMD: Record<string, string[]>,
   commandPrefix: string,
-  packageName: string
+  packageName: string,
 ): void {
   if (is.nullOrUndefined(packagesByCMD[commandPrefix])) {
     packagesByCMD[commandPrefix] = [];

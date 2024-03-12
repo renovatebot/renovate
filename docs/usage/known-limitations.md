@@ -21,7 +21,7 @@ For scheduled action to take place, both these need to happen:
 - The bot needs to run against your repository
 - The current time needs to fall within your repository's configured schedule
 
-### The Mend Renovatate app and scheduled jobs
+### The Mend Renovate app and scheduled jobs
 
 The Mend Renovate App checks each active repository roughly every three hours, if no activity has been seen before then (merged PRs, etc).
 
@@ -30,7 +30,8 @@ This makes it likely that Renovate bot checks your repository at least once duri
 
 ## Automerge limitations
 
-- Renovate automerges at most one branch per run
+- Renovate automerges at most one branch/PR per run
+- If an automerge happened, the repository run will be restarted at most once. The second run can also potentially automerge, so it may appear as like two automerges in one run.
 - Renovate will only automerge a branch when it is up-to-date with the target branch
 - Renovate may not be able to automerge as many branches as you expect, especially if your base branch is receiving regular commits at the same time
 

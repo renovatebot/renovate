@@ -44,8 +44,10 @@ describe('modules/manager/asdf/extract', () => {
     it('can handle multiple tools in one file', () => {
       const res = extractPackageFile(
         codeBlock`
+act 0.2.54
 adr-tools 3.0.0
 argocd 2.5.4
+asdf-plugin-manager 1.1.1
 awscli 2.8.6
 bun 0.2.2
 cargo-make 0.36.2
@@ -63,6 +65,7 @@ erlang 25.1.2
 flutter 3.7.6-stable
 flux2 0.41.2
 gauche 0.9.12
+github-cli 2.32.1
 gohugo extended_0.104.3
 golang 1.19.2
 golangci-lint 1.52.2
@@ -75,13 +78,17 @@ idris 1.3.4
 java adoptopenjdk-16.0.0+36
 julia 1.8.2
 just 1.7.0
+kind 0.19.0
 kotlin 1.7.20
 kubectl 1.26.3
 kustomize 4.5.7
 lua 5.4.4
+maven 3.9.6
+mimirtool 2.11.0
 nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
+opentofu 1.6.0
 perl 5.37.5
 php 8.1.12
 pnpm 7.26.2
@@ -91,6 +98,7 @@ pulumi 3.57.1
 python 3.11.0
 ruby 3.1.2
 rust 1.64.0
+sbt 1.9.7
 scala 3.2.1
 shellcheck 0.8.0
 shfmt 3.5.1
@@ -100,17 +108,27 @@ terragrunt 0.43.2
 tflint 0.44.1
 tfsec 1.28.1
 trivy 0.33.0
+vault 1.15.1
+yq 4.40.5
 zig 0.9.1
 maestro 1.24.0
 detekt 1.21.0
 ktlint 0.48.1
 yamlfmt 0.9.0
 typos 1.16.1
+steampipe 0.20.10
 dummy 1.2.3
-`
+`,
       );
       expect(res).toEqual({
         deps: [
+          {
+            currentValue: '0.2.54',
+            datasource: 'github-releases',
+            packageName: 'nektos/act',
+            depName: 'act',
+            extractVersion: '^v(?<version>\\S+)',
+          },
           {
             currentValue: '3.0.0',
             datasource: 'github-tags',
@@ -122,6 +140,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'argoproj/argo-cd',
             depName: 'argocd',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.1.1',
+            datasource: 'github-releases',
+            packageName: 'asdf-community/asdf-plugin-manager',
+            depName: 'asdf-plugin-manager',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -234,6 +259,13 @@ dummy 1.2.3
             depName: 'gauche',
           },
           {
+            currentValue: '2.32.1',
+            datasource: 'github-releases',
+            packageName: 'cli/cli',
+            depName: 'github-cli',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '0.104.3',
             datasource: 'github-releases',
             packageName: 'gohugoio/hugo',
@@ -316,6 +348,13 @@ dummy 1.2.3
             depName: 'just',
           },
           {
+            currentValue: '0.19.0',
+            datasource: 'github-releases',
+            packageName: 'kubernetes-sigs/kind',
+            depName: 'kind',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.7.20',
             datasource: 'github-releases',
             packageName: 'JetBrains/kotlin',
@@ -344,6 +383,19 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '3.9.6',
+            datasource: 'github-releases',
+            packageName: 'apache/maven',
+            depName: 'maven',
+          },
+          {
+            currentValue: '2.11.0',
+            datasource: 'github-releases',
+            packageName: 'grafana/mimir',
+            depName: 'mimirtool',
+            extractVersion: '^mimir-(?<version>\\S+)',
+          },
+          {
             currentValue: '1.6.8',
             datasource: 'github-tags',
             packageName: 'nim-lang/Nim',
@@ -360,6 +412,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'ocaml/ocaml',
             depName: 'ocaml',
+          },
+          {
+            currentValue: '1.6.0',
+            datasource: 'github-releases',
+            packageName: 'opentofu/opentofu',
+            depName: 'opentofu',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '5.37.5',
@@ -421,6 +480,13 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'rust-lang/rust',
             depName: 'rust',
+          },
+          {
+            currentValue: '1.9.7',
+            datasource: 'github-releases',
+            packageName: 'sbt/sbt',
+            depName: 'sbt',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '3.2.1',
@@ -485,6 +551,20 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '1.15.1',
+            datasource: 'github-releases',
+            packageName: 'hashicorp/vault',
+            depName: 'vault',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '4.40.5',
+            datasource: 'github-releases',
+            packageName: 'mikefarah/yq',
+            depName: 'yq',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '0.9.1',
             datasource: 'github-tags',
             packageName: 'ziglang/zig',
@@ -525,8 +605,48 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '0.20.10',
+            datasource: 'github-releases',
+            packageName: 'turbot/steampipe',
+            depName: 'steampipe',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             depName: 'dummy',
             skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
+    it('can handle multiple tools with indented versions in one file', () => {
+      const res = extractPackageFile(
+        codeBlock`
+adr-tools 3.0.0
+argocd    2.5.4
+awscli    2.8.6
+`,
+      );
+      expect(res).toEqual({
+        deps: [
+          {
+            currentValue: '3.0.0',
+            datasource: 'github-tags',
+            packageName: 'npryce/adr-tools',
+            depName: 'adr-tools',
+          },
+          {
+            currentValue: '2.5.4',
+            datasource: 'github-releases',
+            packageName: 'argoproj/argo-cd',
+            depName: 'argocd',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '2.8.6',
+            datasource: 'github-tags',
+            packageName: 'aws/aws-cli',
+            depName: 'awscli',
           },
         ],
       });
@@ -568,12 +688,38 @@ dummy 1.2.3
         ],
       });
       const adoptOpenJreRes = extractPackageFile(
-        'java adoptopenjdk-jre-16.0.0+36'
+        'java adoptopenjdk-jre-16.0.0+36',
       );
       expect(adoptOpenJreRes).toEqual({
         deps: [
           {
             currentValue: '16.0.0+36',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jre',
+          },
+        ],
+      });
+      const semeruJdkRes = extractPackageFile(
+        'java semeru-openj9-17.0.8.1+1_openj9-0.40.0',
+      );
+      expect(semeruJdkRes).toEqual({
+        deps: [
+          {
+            currentValue: '17.0.8.1+1',
+            datasource: 'java-version',
+            depName: 'java',
+            packageName: 'java-jdk',
+          },
+        ],
+      });
+      const semeruJreRes = extractPackageFile(
+        'java semeru-jre-openj9-17.0.8.1+1_openj9-0.40.0',
+      );
+      expect(semeruJreRes).toEqual({
+        deps: [
+          {
+            currentValue: '17.0.8.1+1',
             datasource: 'java-version',
             depName: 'java',
             packageName: 'java-jre',
@@ -675,12 +821,12 @@ dummy 1.2.3
               ],
             });
           });
-        }
+        },
       );
 
       it('invalid comment placements fail to parse', () => {
         const res = extractPackageFile(
-          'nodejs 16.16.0# invalid comment spacing'
+          'nodejs 16.16.0# invalid comment spacing',
         );
         expect(res).toBeNull();
       });
@@ -692,7 +838,7 @@ dummy 1.2.3
 
       it('ignores comments across multiple lines', () => {
         const res = extractPackageFile(
-          '# this is a full line comment\nnodejs 16.16.0 # this is a comment\n'
+          '# this is a full line comment\nnodejs 16.16.0 # this is a comment\n',
         );
         expect(res).toEqual({
           deps: [

@@ -19,6 +19,7 @@ describe('workers/repository/update/pr/automerge', () => {
         upgrades: [],
       } satisfies BranchConfig;
       pr = partial<Pr>();
+      spy.mockReturnValue(true);
     });
 
     it('should not automerge if not configured', async () => {

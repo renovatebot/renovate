@@ -8,39 +8,43 @@ import { extractTerragruntProvider } from './providers';
 import type { ExtractionResult, TerraformManagerData } from './types';
 
 export const githubRefMatchRegex = regEx(
-  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i
+  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
 );
 export const gitTagsRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/
+  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
+);
+export const tfrVersionMatchRegex = regEx(
+  /tfr:\/\/(?<registry>.*?)\/(?<org>[^/]+?)\/(?<name>[^/]+?)\/(?<cloud>[^/?]+).*\?(?:ref|version)=(?<currentValue>.*?)$/,
 );
 const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
 
 export function extractTerragruntModule(
   startingLine: number,
-  lines: string[]
+  lines: string[],
 ): ExtractionResult {
   const moduleName = 'terragrunt';
   const result = extractTerragruntProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
-    // TODO #7154
+    // TODO #22198
     dep.managerData!.terragruntDependencyType = 'terraform';
   });
   return result;
 }
 
 export function analyseTerragruntModule(
-  dep: PackageDependency<TerraformManagerData>
+  dep: PackageDependency<TerraformManagerData>,
 ): void {
-  // TODO #7154
+  // TODO #22198
   const source = dep.managerData!.source;
   const githubRefMatch = githubRefMatchRegex.exec(source ?? '');
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(source ?? '');
+  const tfrVersionMatch = tfrVersionMatchRegex.exec(source ?? '');
 
   if (githubRefMatch?.groups) {
     dep.depType = 'github';
     dep.packageName = githubRefMatch.groups.project.replace(
       regEx(/\.git$/),
-      ''
+      '',
     );
     dep.depName = 'github.com/' + dep.packageName;
     dep.currentValue = githubRefMatch.groups.tag;
@@ -58,6 +62,19 @@ export function analyseTerragruntModule(
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
     dep.datasource = GitTagsDatasource.id;
+  } else if (tfrVersionMatch?.groups) {
+    dep.depType = 'terragrunt';
+    dep.depName =
+      tfrVersionMatch.groups.org +
+      '/' +
+      tfrVersionMatch.groups.name +
+      '/' +
+      tfrVersionMatch.groups.cloud;
+    dep.currentValue = tfrVersionMatch.groups.currentValue;
+    dep.datasource = TerraformModuleDatasource.id;
+    if (tfrVersionMatch.groups.registry) {
+      dep.registryUrls = [`https://${tfrVersionMatch.groups.registry}`];
+    }
   } else if (source) {
     const moduleParts = source.split('//')[0].split('/');
     if (moduleParts[0] === '..') {

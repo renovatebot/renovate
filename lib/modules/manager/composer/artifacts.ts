@@ -6,6 +6,10 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import {
+  findGithubToken,
+  takePersonalAccessTokenIfPossible,
+} from '../../../util/check-token';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
@@ -20,6 +24,7 @@ import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { Json } from '../../../util/schema-utils';
+import { coerceString } from '../../../util/string';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -27,12 +32,10 @@ import { Lockfile, PackageFile } from './schema';
 import type { AuthJson } from './types';
 import {
   extractConstraints,
-  findGithubToken,
   getComposerArguments,
   getPhpConstraint,
   isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
-  takePersonalAccessTokenIfPossible,
 } from './utils';
 
 function getAuthJson(): string | null {
@@ -54,7 +57,7 @@ function getAuthJson(): string | null {
       : undefined,
     isArtifactAuthEnabled(gitTagsHostRule)
       ? findGithubToken(gitTagsHostRule)
-      : undefined
+      : undefined,
   );
 
   if (selectedGithubToken) {
@@ -69,7 +72,7 @@ function getAuthJson(): string | null {
     }
 
     if (gitlabHostRule?.token) {
-      const host = gitlabHostRule.resolvedHost ?? 'gitlab.com';
+      const host = coerceString(gitlabHostRule.resolvedHost, 'gitlab.com');
       authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
       authJson['gitlab-token'][host] = gitlabHostRule.token;
       // https://getcomposer.org/doc/articles/authentication-for-private-packages.md#gitlab-token
@@ -147,6 +150,7 @@ export async function updateArtifacts({
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
+      userConfiguredEnv: config.env,
       extraEnv: {
         COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),
         COMPOSER_AUTH: getAuthJson(),
@@ -177,7 +181,11 @@ export async function updateArtifacts({
         (
           'update ' +
           updatedDeps
-            .map((dep) => dep.depName)
+            .map((dep) =>
+              dep.newVersion
+                ? quote(`${dep.depName}:${dep.newVersion}`)
+                : quote(dep.depName!),
+            )
             .filter(is.string)
             .map((dep) => quote(dep))
             .join(' ')
@@ -236,7 +244,7 @@ export async function updateArtifacts({
     }
     if (
       err.message?.includes(
-        'Your requirements could not be resolved to an installable set of packages.'
+        'Your requirements could not be resolved to an installable set of packages.',
       )
     ) {
       logger.info('Composer requirements cannot be resolved');

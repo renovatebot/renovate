@@ -5,7 +5,11 @@ description: Self-Hosted configuration usable in config file, CLI or environment
 
 # Self-Hosted configuration options
 
-You can only use these configuration options when you're self-hosting Renovate.
+Only use these configuration options when you _self-host_ Renovate.
+
+Do _not_ put the self-hosted config options listed on this page in your "repository config" file (`renovate.json` for example), because Renovate will ignore those config options, and may also create a config error issue.
+
+The config options below _must_ be configured in the bot/admin config, so in either a environment variable, CLI option, or a special file like `config.js`.
 
 Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md).
 
@@ -59,6 +63,72 @@ But before you disable templating completely, try the `allowedPostUpgradeCommand
 
 ## allowScripts
 
+## allowedEnv
+
+Bot administrators can allow users to configure custom environment variables within repo config.
+Only environment variables matching the list will be accepted in the [`env`](./configuration-options.md#env) configuration.
+
+Examples:
+
+```json title="renovate.json"
+{
+  "env": {
+    "SOME_ENV_VARIABLE": "some_value",
+    "EXTRA_ENV_NAME": "value"
+  }
+}
+```
+
+The above would require `allowedEnv` to be configured similar to the following:
+
+```js title="config.js"
+module.exports = {
+  allowedEnv: ['SOME_ENV_*', 'EXTRA_ENV_NAME'],
+};
+```
+
+`allowedEnv` values can be exact match header names, glob patterns, or regex patterns.
+For more details on the syntax and supported patterns, see Renovate's [String Pattern Matching documentation](./string-pattern-matching.md).
+
+## allowedHeaders
+
+`allowedHeaders` can be useful when a registry uses a authentication system that's not covered by Renovate's default credential handling in `hostRules`.
+By default, all headers starting with "X-" are allowed.
+If needed, you can allow additional headers with the `allowedHeaders` option.
+Any set `allowedHeaders` overrides the default "X-" allowed headers, so you should include them in your config if you wish for them to remain allowed.
+The `allowedHeaders` config option takes an array of minimatch-compatible globs or re2-compatible regex strings.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
+Examples:
+
+| Example header | Kind of pattern  | Explanation                                 |
+| -------------- | ---------------- | ------------------------------------------- |
+| `/X/`          | Regex            | Any header with `x` anywhere in the name    |
+| `!/X/`         | Regex            | Any header without `X` anywhere in the name |
+| `X-*`          | Global pattern   | Any header starting with `X-`               |
+| `X`            | Exact match glob | Only the header matching exactly `X`        |
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://domain.com/all-versions",
+      "headers": {
+        "X-Auth-Token": "secret"
+      }
+    }
+  ]
+}
+```
+
+Or with custom `allowedHeaders`:
+
+```js title="config.js"
+module.exports = {
+  allowedHeaders: ['custom-header'],
+};
+```
+
 ## allowedPostUpgradeCommands
 
 A list of regular expressions that decide which commands in `postUpgradeTasks` are allowed to run.
@@ -80,6 +150,7 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 ## autodiscoverFilter
 
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
+The pattern matches against the organization/repo path.
 It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
 
 If you set multiple filters, then the matches of each filter are added to the overall result.
@@ -89,17 +160,20 @@ Commas will be used as delimiter for a new filter.
 
 ```
 # DO NOT use commas inside the filter if your are using env or cli variables to configure it.
-RENOVATE_AUTODISCOVER_FILTER="/myapp/{readme.md,src/**}"
+RENOVATE_AUTODISCOVER_FILTER="/MyOrg/{my-repo,foo-repo}"
+
 
 # in this example you can use regex instead
-RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
+RENOVATE_AUTODISCOVER_FILTER="/MyOrg\/(my|foo)-repo/"
 ```
 
 **Minimatch**:
 
+The configuration:
+
 ```json
 {
-  "autodiscoverFilter": ["project/*"]
+  "autodiscoverFilter": ["my-org/*"]
 }
 ```
 
@@ -122,6 +196,20 @@ If using negations, all repositories except those who match the regex are added 
 ```json
 {
   "autodiscoverFilter": ["!/project/.*/"]
+}
+```
+
+## autodiscoverNamespaces
+
+You can use this option to autodiscover projects in specific namespaces (a.k.a. groups/organizations/workspaces).
+In contrast to `autodiscoverFilter` the filtering is done by the platform and therefore more efficient.
+
+For example:
+
+```json
+{
+  "platform": "gitlab",
+  "autodiscoverNamespaces": ["a-group", "another-group/some-subgroup"]
 }
 ```
 
@@ -207,6 +295,19 @@ Results which are soft expired are reused in the following manner:
 - The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
 - If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
+## cacheTtlOverride
+
+Utilize this key-value map to override the default package cache TTL values for a specific namespace. This object contains pairs of namespaces and their corresponding TTL values in minutes.
+For example, to override the default TTL of 60 minutes for the `docker` datasource "tags" namespace: `datasource-docker-tags` use the following:
+
+```json
+{
+  "cacheTtlOverride": {
+    "datasource-docker-tags": 120
+  }
+}
+```
+
 ## checkedBranches
 
 This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
@@ -226,6 +327,31 @@ Use this option if you need such downloads to be stored outside of Renovate's re
 
 This configuration will be applied after all other environment variables so you can use it to override defaults.
 
+<!-- prettier-ignore -->
+!!! warning
+    Do not configure any secret values directly into `customEnvVariables` because they may be logged to stdout.
+    Instead, configure them into `secrets` first so that they will be redacted in logs.
+
+If configuring secrets in to `customEnvVariables`, take this approach:
+
+```js
+{
+  secrets: {
+    SECRET_TOKEN: process.env.SECRET_TOKEN,
+  },
+  customEnvVariables: {
+    SECRET_TOKEN: '{{ secrets.SECRET_TOKEN }}',
+  },
+}
+```
+
+The above configuration approach will mean the values are redacted in logs like in the following example:
+
+```
+         "secrets": {"SECRET_TOKEN": "***********"},
+         "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
+```
+
 ## detectGlobalManagerConfig
 
 The purpose of this config option is to allow you (as a bot admin) to configure manager-specific files such as a global `.npmrc` file, instead of configuring it in Renovate config.
@@ -239,11 +365,11 @@ If found, it will be imported into `config.npmrc` with `config.npmrcMerge` set t
 
 The format of the environment variables must follow:
 
-- Datasource name (e.g. `NPM`, `PYPI`)
+- Datasource name (e.g. `NPM`, `PYPI`) or Platform name (only `GITHUB`)
 - Underscore (`_`)
 - `matchHost`
 - Underscore (`_`)
-- Field name (`TOKEN`, `USERNAME`, or `PASSWORD`)
+- Field name (`TOKEN`, `USERNAME`, `PASSWORD`, `HTTPSPRIVATEKEY`, `HTTPSCERTIFICATE`, `HTTPSCERTIFICATEAUTHORITY`)
 
 Hyphens (`-`) in datasource or host name must be replaced with double underscores (`__`).
 Periods (`.`) in host names must be replaced with a single underscore (`_`).
@@ -251,6 +377,7 @@ Periods (`.`) in host names must be replaced with a single underscore (`_`).
 <!-- prettier-ignore -->
 !!! note
     You can't use these prefixes with the `detectHostRulesFromEnv` config option: `npm_config_`, `npm_lifecycle_`, `npm_package_`.
+    In addition, platform host rules will only be picked up when `matchHost` is supplied.
 
 ### npmjs registry token example
 
@@ -303,6 +430,24 @@ You can skip the host part, and use only the datasource and credentials.
 }
 ```
 
+### Platform with https authentication options
+
+`GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATE=certificate GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSPRIVATEKEY=private-key GITHUB_SOME_GITHUB__ENTERPRISE_HOST_HTTPSCERTIFICATEAUTHORITY=certificate-authority`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "github",
+      "matchHost": "some.github-enterprise.host",
+      "httpsPrivateKey": "private-key",
+      "httpsCertificate": "certificate",
+      "httpsCertificateAuthority": "certificate-authority"
+    }
+  ]
+}
+```
+
 ## dockerChildPrefix
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
@@ -322,7 +467,7 @@ You can use `dockerCliOptions` to pass Docker CLI options to Renovate's sidecar 
 
 For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `docker run` command that limits the amount of memory Renovate's sidecar Docker container can use to 4 gigabytes.
 
-Read the [Docker Docs, configure runtime resource contraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
+Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
 
 ## dockerSidecarImage
 
@@ -338,7 +483,7 @@ You would put this in your configuration file:
 }
 ```
 
-Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/containerbase/sidecar` instead of `docker.io/containerbase/sidecar`.
+Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/your_company/sidecar` instead of `ghcr.io/containerbase/sidecar`.
 
 ## dockerUser
 
@@ -347,9 +492,8 @@ The user-id (UID) and group-id (GID) must match the user that executes Renovate.
 
 Read the [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
 Set this to `1001:1002` to use UID 1001 and GID 1002.
-For example:
 
-```json
+```json title="Setting UID to 1001 and GID to 1002"
 {
   "dockerUser": "1001:1002"
 }
@@ -411,6 +555,12 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
+## forkCreation
+
+This configuration lets you disable the runtime forking of repositories when running in "fork mode".
+
+Usually you will need to keep this as the default `true`, and only set to `false` if you have some out of band process to handle the creation of forks.
+
 ## forkOrg
 
 This configuration option lets you choose an organization you want repositories forked into when "fork mode" is enabled.
@@ -432,6 +582,10 @@ If this value is configured then Renovate:
 - keep this fork's default branch up-to-date with the target
 
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
+
+<!-- prettier-ignore -->
+!!! note
+    Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
 ## gitNoVerify
 
@@ -564,7 +718,8 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 
 ## onboardingPrTitle
 
-Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
+If you have an existing Renovate installation and you change the `onboardingPrTitle`: then you may get onboarding PRs _again_ for repositories with closed non-merged onboarding PRs.
+This is similar to what happens when you change the `onboardingBranch` config option.
 
 ## onboardingRebaseCheckbox
 
@@ -572,14 +727,26 @@ Similarly to `onboardingBranch`, if you have an existing Renovate installation a
 
 When this option is `true`, Renovate will do the following during repository initialization:
 
-- Attempt to fetch the default config file (`renovate.json`)
-- Check if the file contains `"enabled": false`
+1. Try to fetch the default config file (e.g. `renovate.json`)
+1. Check if the file contains `"enabled": false`
+1. If so, skip cloning and skip the repository immediately
+
+If `onboardingConfigFileName` is set, that file name will be used instead of the default.
 
 If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
 Otherwise, it will continue as normal.
 
-This option is only useful where the ratio of disabled repos is quite high.
-It costs one extra API call per repo but has the benefit of skipping cloning of those which are disabled.
+`optimizeForDisabled` can make initialization quicker in cases where most repositories are disabled, but it uses an extra API call for enabled repositories.
+
+A second, advanced, use also exists when the bot global config has `extends: [":disableRenovate"]`.
+In that case, Renovate searches the repository config file for any of these configurations:
+
+- `extends: [":enableRenovate"]`
+- `ignorePresets: [":disableRenovate"]`
+- `enabled: true`
+
+If Renovate finds any of the above configurations, it continues initializing the repository.
+If not, then Renovate skips the repository without cloning it.
 
 ## password
 
@@ -597,6 +764,17 @@ Parameter to reduce CI load.
 CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events.
 Set as an integer.
 Default is no limit.
+
+## presetCachePersistence
+
+When this feature is enabled, resolved presets will be cached in Renovate's package cache, enabling reuse across multiple repositories.
+
+TTL is 15 minutes by default, and it is adjustable in [cacheTtlOverride](#cachettloverride).
+
+<!-- prettier-ignore -->
+!!! warning
+     Doing so improves efficiency because shared presets don't need to be reloaded/resolved for every repository, however it also means that private presets can be "leaked" between repositories.
+     You should only enable this when all repositories are trusted, such as a corporate environment.
 
 ## privateKey
 
@@ -698,15 +876,27 @@ Used as an alternative to `privateKeyOld`, if you want the key to be read from d
 
 Override this object if you want to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
+## redisPrefix
+
+If this value is set then Renovate will prepend this string to the name of all Redis cache entries used in Renovate.
+It's only used if `redisUrl` is configured.
+
 ## redisUrl
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
-The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs.
+The global cache is used to store lookup results (e.g. dependency versions and changelogs) between repositories and runs.
+
+For non encrypted connections,
+
 Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
+
+For TLS/SSL-enabled connections, use rediss prefix
+
+Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
 ## repositories
 
-Elements in the `repositories` array can be an object if you wish to define additional settings:
+Elements in the `repositories` array can be an object if you wish to define more settings:
 
 ```js
 {
@@ -722,25 +912,15 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 ## repositoryCacheType
 
-Set this to an S3 URI to enable S3 backed repository cache.
-
-```ts
+```ts title="Set repositoryCacheType to an S3 URI to enable S3 backed repository cache"
 {
   repositoryCacheType: 's3://bucket-name';
 }
 ```
 
-<!-- prettier-ignore -->
-!!! note
-    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running renovate within an EC2 instance in an ECS cluster. In this case, no additional environment variables are required.
-    Otherwise, the following environment variables should be set for the S3 client to work.
-
-```
-    AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY
-    AWS_SESSION_TOKEN
-    AWS_REGION
-```
+Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
+Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
+Read more about the default credential provider chain for AWS SDK for JavaScript V3 [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
 <!-- prettier-ignore -->
 !!! tip
@@ -817,7 +997,7 @@ Secret names must start with an upper or lower case character and can have only 
 
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
 If this is set to false, then a full install of modules will be done.
-This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
+This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
 
@@ -825,6 +1005,11 @@ This is currently applicable to `npm` and `lerna`/`npm` only, and only used in c
 
 If enabled emoji shortcodes are replaced with their Unicode equivalents.
 For example: `:warning:` will be replaced with `⚠️`.
+
+## useCloudMetadataServices
+
+Some cloud providers offer services to receive metadata about the current instance, for example [AWS Instance metadata](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html) or [GCP VM metadata](https://cloud.google.com/compute/docs/metadata/overview).
+You can control if Renovate should try to access these services with the `useCloudMetadataServices` config option.
 
 ## username
 

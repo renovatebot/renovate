@@ -10,6 +10,7 @@ import {
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { logger, setMeta } from '../../logger';
+import { resetRepositoryLogLevelRemaps } from '../../logger/remap';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
@@ -19,6 +20,7 @@ import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
+import { extractRepoProblems } from './common';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finalizeRepo } from './finalize';
@@ -34,11 +36,11 @@ import { printLookupStats, printRequestStats } from './stats';
 // istanbul ignore next
 export async function renovateRepository(
   repoConfig: RenovateConfig,
-  canRetry = true
+  canRetry = true,
 ): Promise<ProcessResult | undefined> {
   splitInit();
   let config = GlobalConfig.set(
-    applySecretsToConfig(repoConfig, undefined, false)
+    applySecretsToConfig(repoConfig, undefined, false),
   );
   await removeDanglingContainers();
   setMeta({ repository: config.repository });
@@ -63,17 +65,17 @@ export async function renovateRepository(
     if (config.semanticCommits === 'auto') {
       config.semanticCommits = await detectSemanticCommits();
     }
+
     if (
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
       await instrument('onboarding', () =>
-        ensureOnboardingPr(config, packageFiles, branches)
+        ensureOnboardingPr(config, packageFiles, branches),
       );
       addSplit('onboarding');
-
       const res = await instrument('update', () =>
-        updateRepo(config, branches)
+        updateRepo(config, branches),
       );
       setMeta({ repository: config.repository });
       addSplit('update');
@@ -82,7 +84,7 @@ export async function renovateRepository(
       }
       if (res === 'automerged') {
         if (canRetry) {
-          logger.info('Renovating repository again after automerge result');
+          logger.info('Restarting repository job after automerge result');
           const recursiveRes = await renovateRepository(repoConfig, false);
           return recursiveRes;
         }
@@ -91,9 +93,10 @@ export async function renovateRepository(
         await ensureDependencyDashboard(config, branches, packageFiles);
       }
       await finalizeRepo(config, branchList);
-      // TODO #7154
+      // TODO #22198
       repoResult = processResult(config, res!);
     }
+    printRepositoryProblems(config.repository);
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
@@ -127,6 +130,7 @@ export async function renovateRepository(
   clearDnsCache();
   const cloned = isCloned();
   logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
+  resetRepositoryLogLevelRemaps();
   return repoResult;
 }
 
@@ -137,4 +141,14 @@ function emptyExtract(config: RenovateConfig): ExtractResult {
     branchList: [config.onboardingBranch!], // to prevent auto closing
     packageFiles: {},
   };
+}
+
+export function printRepositoryProblems(repository: string | undefined): void {
+  const repoProblems = extractRepoProblems(repository);
+  if (repoProblems.size) {
+    logger.debug(
+      { repoProblems: Array.from(repoProblems) },
+      'repository problems',
+    );
+  }
 }

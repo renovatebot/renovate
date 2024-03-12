@@ -5,3 +5,4 @@ nav:
   - 'Self-Hosting Examples': '/examples/self-hosting'
   - 'Installing & Onboarding': 'installing-onboarding.md'
   - 'Private Packages': 'private-packages.md'
+  - 'Observability': '/opentelemetry'

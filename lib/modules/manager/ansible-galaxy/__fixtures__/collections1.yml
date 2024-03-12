@@ -25,6 +25,12 @@ collections:
     version: 1.2.2
     type: git
 
+  # explicit git repo
+  - name: namespace.mycollection
+    version: 3.0.0
+    type: git
+    source: https://example.com/organization/repo_name.git
+
 # appendix style version definition
   - name: https://example.com/organization/repo_name.git,1.2.2
 

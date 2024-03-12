@@ -4,11 +4,12 @@ import { GithubReleaseAttachmentsDatasource } from '../modules/datasource/github
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
 import type { PackageFileContent } from '../modules/manager/types';
+import type { HostRuleSearchResult } from '../types';
 import * as memCache from '../util/cache/memory';
 import * as hostRules from './host-rules';
 
 export function checkGithubToken(
-  packageFiles: Record<string, PackageFileContent[]> = {}
+  packageFiles: Record<string, PackageFileContent[]> = {},
 ): void {
   const { token } = hostRules.find({
     hostType: 'github',
@@ -46,14 +47,80 @@ export function checkGithubToken(
 
   if (githubDeps.length > 0) {
     const warningLogged = memCache.get<boolean | undefined>(
-      'github-token-required-warning-logged'
+      'github-token-required-warning-logged',
     );
     if (!warningLogged) {
+      const withoutDuplicates = [...new Set(githubDeps)];
       logger.warn(
-        { githubDeps },
-        `GitHub token is required for some dependencies`
+        { githubDeps: withoutDuplicates },
+        `GitHub token is required for some dependencies`,
       );
       memCache.set('github-token-required-warning-logged', true);
     }
   }
+}
+
+export function isGithubPersonalAccessToken(token: string): boolean {
+  return token.startsWith('ghp_');
+}
+
+export function isGithubServerToServerToken(token: string): boolean {
+  return token.startsWith('ghs_');
+}
+
+export function isGithubFineGrainedPersonalAccessToken(token: string): boolean {
+  return token.startsWith('github_pat_');
+}
+
+export function findGithubToken(
+  searchResult: HostRuleSearchResult,
+): string | undefined {
+  return searchResult?.token?.replace('x-access-token:', '');
+}
+
+export function takePersonalAccessTokenIfPossible(
+  githubToken: string | undefined,
+  gitTagsGithubToken: string | undefined,
+): string | undefined {
+  if (gitTagsGithubToken && isGithubPersonalAccessToken(gitTagsGithubToken)) {
+    logger.debug('Using GitHub Personal Access Token (git-tags)');
+    return gitTagsGithubToken;
+  }
+
+  if (githubToken && isGithubPersonalAccessToken(githubToken)) {
+    logger.debug('Using GitHub Personal Access Token');
+    return githubToken;
+  }
+
+  if (
+    gitTagsGithubToken &&
+    isGithubFineGrainedPersonalAccessToken(gitTagsGithubToken)
+  ) {
+    logger.debug('Using GitHub Fine-grained Personal Access Token (git-tags)');
+    return gitTagsGithubToken;
+  }
+
+  if (githubToken && isGithubFineGrainedPersonalAccessToken(githubToken)) {
+    logger.debug('Using GitHub Fine-grained Personal Access Token');
+    return githubToken;
+  }
+
+  if (gitTagsGithubToken) {
+    if (isGithubServerToServerToken(gitTagsGithubToken)) {
+      logger.debug('Using GitHub Server-to-Server token (git-tags)');
+    } else {
+      logger.debug('Using unknown GitHub token type (git-tags)');
+    }
+    return gitTagsGithubToken;
+  }
+
+  if (githubToken) {
+    if (isGithubServerToServerToken(githubToken)) {
+      logger.debug('Using GitHub Server-to-Server token');
+    } else {
+      logger.debug('Using unknown GitHub token type');
+    }
+  }
+
+  return githubToken;
 }

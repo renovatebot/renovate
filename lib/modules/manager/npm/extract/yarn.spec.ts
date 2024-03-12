@@ -1,6 +1,6 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
-import { getYarnLock } from './yarn';
+import { getYarnLock, getYarnVersionFromLock } from './yarn';
 
 jest.mock('../../../../util/fs');
 
@@ -46,7 +46,7 @@ describe('modules/manager/npm/extract/yarn', () => {
     it('ignores individual invalid entries', async () => {
       const invalidNameLock = Fixtures.get(
         'yarn1-invalid-name/yarn.lock',
-        '..'
+        '..',
       );
       fs.readLocalFile.mockResolvedValueOnce(invalidNameLock);
       const res = await getYarnLock('package.json');
@@ -54,5 +54,24 @@ describe('modules/manager/npm/extract/yarn', () => {
       expect(res.lockfileVersion).toBeUndefined();
       expect(Object.keys(res.lockedVersions!)).toHaveLength(14);
     });
+  });
+
+  it('getYarnVersionFromLock', () => {
+    expect(getYarnVersionFromLock({ isYarn1: true })).toBe('^1.22.18');
+    expect(
+      getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 12 }),
+    ).toBe('>=4.0.0');
+    expect(
+      getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 10 }),
+    ).toBe('^4.0.0');
+    expect(getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 8 })).toBe(
+      '^3.0.0',
+    );
+    expect(getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 6 })).toBe(
+      '^2.2.0',
+    );
+    expect(getYarnVersionFromLock({ isYarn1: false, lockfileVersion: 3 })).toBe(
+      '^2.0.0',
+    );
   });
 });

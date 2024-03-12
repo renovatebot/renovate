@@ -5,7 +5,7 @@ import type { GithubRestRelease } from '../../../../util/github/types';
 export class GitHubReleaseAttachmentMocker {
   constructor(
     private readonly githubApiHost: string,
-    private readonly packageName: string
+    private readonly packageName: string,
   ) {}
 
   release(version: string): GithubRestRelease {
@@ -14,7 +14,7 @@ export class GitHubReleaseAttachmentMocker {
 
   withAssets(
     version: string,
-    assets: { [key: string]: string }
+    assets: { [key: string]: string },
   ): GithubRestRelease {
     const releaseData = partial<GithubRestRelease>({
       tag_name: version,

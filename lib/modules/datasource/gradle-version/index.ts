@@ -21,13 +21,12 @@ export class GradleVersionDatasource extends Datasource {
   override readonly registryStrategy = 'merge';
 
   private static readonly buildTimeRegex = regEx(
-    '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$'
+    '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$',
   );
 
   @cache({
     namespace: `datasource-${GradleVersionDatasource.id}`,
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     key: ({ registryUrl }: GetReleasesConfig) => `${registryUrl}`,
   })
   async getReleases({
@@ -81,7 +80,7 @@ export class GradleVersionDatasource extends Datasource {
     if (GradleVersionDatasource.buildTimeRegex.test(timeStr)) {
       return timeStr.replace(
         GradleVersionDatasource.buildTimeRegex,
-        '$1-$2-$3T$4:$5:$6$7'
+        '$1-$2-$3T$4:$5:$6$7',
       );
     }
     return null;

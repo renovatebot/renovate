@@ -1,5 +1,7 @@
+import { join } from 'upath';
 import { loadModules } from '../../util/modules';
 import { getDatasourceList } from '../datasource';
+import * as customManager from './custom';
 import type { ManagerApi } from './types';
 import * as manager from '.';
 
@@ -9,11 +11,8 @@ const datasources = getDatasourceList();
 
 describe('modules/manager/index', () => {
   describe('supportedDatasources', () => {
+    // no need to check custom managers as they support all datasources
     for (const m of manager.getManagerList()) {
-      if (m === 'regex') {
-        // regex supports any
-        continue;
-      }
       const supportedDatasources = manager.get(m, 'supportedDatasources');
 
       it(`has valid supportedDatasources for ${m}`, () => {
@@ -27,7 +26,8 @@ describe('modules/manager/index', () => {
 
   describe('get()', () => {
     it('gets something', () => {
-      expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull();
+      expect(manager.get('dockerfile', 'extractPackageFile')).not.toBeNull(); // gets built-in manager
+      expect(manager.get('regex', 'extractPackageFile')).not.toBeNull(); // gets custom manager
     });
   });
 
@@ -37,8 +37,22 @@ describe('modules/manager/index', () => {
     });
   });
 
+  describe('getEnabledManagersList()', () => {
+    it('works', () => {
+      expect(manager.getEnabledManagersList()).toEqual(manager.allManagersList);
+      expect(manager.getEnabledManagersList(['custom.regex', 'npm'])).toEqual([
+        'npm',
+        'regex',
+      ]);
+    });
+  });
+
   it('validates', () => {
-    function validate(module: ManagerApi): boolean {
+    function validate(module: ManagerApi, moduleName: string): boolean {
+      // no need to validate custom as it is a wrapper and not an actual manager
+      if (moduleName === 'custom') {
+        return true;
+      }
       if (!module.defaultConfig) {
         return false;
       }
@@ -51,13 +65,21 @@ describe('modules/manager/index', () => {
       return true;
     }
     const mgrs = manager.getManagers();
+    const customMgrs = customManager.getCustomManagers();
 
-    const loadedMgr = loadModules(__dirname, validate);
-    expect(Array.from(mgrs.keys())).toEqual(Object.keys(loadedMgr));
+    const loadedMgr = {
+      ...loadModules(__dirname, validate), // validate built-in managers
+      ...loadModules(join(__dirname, 'custom'), validate), // validate custom managers
+    };
+    delete loadedMgr['custom'];
+
+    expect(Array.from([...mgrs.keys(), ...customMgrs.keys()]).sort()).toEqual(
+      Object.keys(loadedMgr).sort(),
+    );
 
     for (const name of mgrs.keys()) {
       const mgr = mgrs.get(name)!;
-      expect(validate(mgr)).toBeTrue();
+      expect(validate(mgr, name)).toBeTrue();
     }
   });
 
@@ -74,10 +96,10 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        await manager.extractAllPackageFiles('unknown', {} as any, [])
+        await manager.extractAllPackageFiles('unknown', {} as any, []),
       ).toBeNull();
       expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, [])
+        await manager.extractAllPackageFiles('dummy', {} as any, []),
       ).toBeNull();
     });
 
@@ -88,7 +110,7 @@ describe('modules/manager/index', () => {
         extractAllPackageFiles: () => Promise.resolve([]),
       });
       expect(
-        await manager.extractAllPackageFiles('dummy', {} as any, [])
+        await manager.extractAllPackageFiles('dummy', {} as any, []),
       ).not.toBeNull();
     });
 
@@ -104,11 +126,22 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        manager.extractPackageFile('unknown', '', 'filename', {})
+        manager.extractPackageFile('unknown', '', 'filename', {}),
       ).toBeNull();
       expect(
-        manager.extractPackageFile('dummy', '', 'filename', {})
+        manager.extractPackageFile('dummy', '', 'filename', {}),
       ).toBeNull();
+    });
+
+    it('handles custom managers', () => {
+      customManager.getCustomManagers().set('dummy', {
+        defaultConfig: {},
+        supportedDatasources: [],
+        extractPackageFile: () => Promise.resolve({ deps: [] }),
+      });
+      expect(
+        manager.extractPackageFile('dummy', '', 'filename', {}),
+      ).not.toBeNull();
     });
 
     it('returns non-null', () => {
@@ -119,7 +152,7 @@ describe('modules/manager/index', () => {
       });
 
       expect(
-        manager.extractPackageFile('dummy', '', 'filename', {})
+        manager.extractPackageFile('dummy', '', 'filename', {}),
       ).not.toBeNull();
     });
 
@@ -135,7 +168,7 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' })
+        manager.getRangeStrategy({ manager: 'unknown', rangeStrategy: 'auto' }),
       ).toBeNull();
     });
 
@@ -146,7 +179,7 @@ describe('modules/manager/index', () => {
         getRangeStrategy: () => 'replace',
       });
       expect(
-        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' })
+        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
       ).not.toBeNull();
 
       manager.getManagers().set('dummy', {
@@ -154,11 +187,11 @@ describe('modules/manager/index', () => {
         supportedDatasources: [],
       });
       expect(
-        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' })
+        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'auto' }),
       ).not.toBeNull();
 
       expect(
-        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'bump' })
+        manager.getRangeStrategy({ manager: 'dummy', rangeStrategy: 'bump' }),
       ).not.toBeNull();
     });
 
@@ -171,7 +204,7 @@ describe('modules/manager/index', () => {
         manager.getRangeStrategy({
           manager: 'dummy',
           rangeStrategy: 'in-range-only',
-        })
+        }),
       ).toBe('update-lockfile');
     });
 
@@ -185,12 +218,25 @@ describe('modules/manager/index', () => {
         manager.getRangeStrategy({
           manager: 'dummy',
           rangeStrategy: 'in-range-only',
-        })
+        }),
       ).toBe('update-lockfile');
     });
 
     afterEach(() => {
       manager.getManagers().delete('dummy');
+    });
+  });
+
+  describe('isKnownManager', () => {
+    it('returns true', () => {
+      expect(manager.isKnownManager('npm')).toBeTrue();
+      expect(manager.isKnownManager('regex')).toBeTrue();
+      expect(manager.isKnownManager('custom.regex')).toBeTrue();
+    });
+
+    it('returns false', () => {
+      expect(manager.isKnownManager('npm-unkown')).toBeFalse();
+      expect(manager.isKnownManager('custom.unknown')).toBeFalse();
     });
   });
 });

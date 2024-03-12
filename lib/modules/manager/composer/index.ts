@@ -1,4 +1,5 @@
 import type { Category } from '../../../constants';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import { updateArtifacts } from './artifacts';
@@ -24,6 +25,7 @@ export const defaultConfig = {
 export const categories: Category[] = ['php'];
 
 export const supportedDatasources = [
+  BitbucketTagsDatasource.id,
   GitTagsDatasource.id,
   PackagistDatasource.id,
 ];

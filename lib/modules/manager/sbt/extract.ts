@@ -1,6 +1,7 @@
 import { lang, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
+import { readLocalFile } from '../../../util/fs';
+import { newlineRegex, regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { MavenDatasource } from '../../datasource/maven';
@@ -12,8 +13,12 @@ import {
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import * as semverVersioning from '../../versioning/semver';
-import { REGISTRY_URLS } from '../gradle/parser/common';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
 import { normalizeScalaVersion } from './util';
 
 type Vars = Record<string, string>;
@@ -36,10 +41,16 @@ interface Ctx {
   variableName?: string;
 }
 
+const SBT_MVN_REPO = 'https://repo1.maven.org/maven2';
+
 const scala = lang.createLang('scala');
 
 const sbtVersionRegex = regEx(
-  'sbt\\.version *= *(?<version>\\d+\\.\\d+\\.\\d+)'
+  'sbt\\.version *= *(?<version>\\d+\\.\\d+\\.\\d+)',
+);
+
+const sbtProxyUrlRegex = regEx(
+  /^\s*(?<repoName>\S+):\s+(?<proxy>https?:\/\/[\w./-]+)/,
 );
 
 const scalaVersionMatch = q
@@ -53,7 +64,7 @@ const scalaVersionMatch = q
         ctx.scalaVersion = scalaVersion;
       }
       return ctx;
-    })
+    }),
   )
   .handler((ctx) => {
     if (ctx.scalaVersion) {
@@ -91,7 +102,7 @@ const packageFileVersionMatch = q
         ctx.packageFileVersion = packageFileVersion;
       }
       return ctx;
-    })
+    }),
   );
 
 const variableNameMatch = q
@@ -113,7 +124,7 @@ const variableDefinitionMatch = q
   .alt(
     q.sym<Ctx>('lazy').join(assignmentMatch),
     assignmentMatch,
-    variableNameMatch.op(':=')
+    variableNameMatch.op(':='),
   )
   .join(variableValueMatch);
 
@@ -125,7 +136,7 @@ const groupIdMatch = q.alt<Ctx>(
     }
     return ctx;
   }),
-  q.str<Ctx>((ctx, { value: groupId }) => ({ ...ctx, groupId }))
+  q.str<Ctx>((ctx, { value: groupId }) => ({ ...ctx, groupId })),
 );
 
 const artifactIdMatch = q.alt<Ctx>(
@@ -136,7 +147,7 @@ const artifactIdMatch = q.alt<Ctx>(
     }
     return ctx;
   }),
-  q.str<Ctx>((ctx, { value: artifactId }) => ({ ...ctx, artifactId }))
+  q.str<Ctx>((ctx, { value: artifactId }) => ({ ...ctx, artifactId })),
 );
 
 const versionMatch = q.alt<Ctx>(
@@ -148,7 +159,7 @@ const versionMatch = q.alt<Ctx>(
     }
     return ctx;
   }),
-  q.str<Ctx>((ctx, { value: currentValue }) => ({ ...ctx, currentValue }))
+  q.str<Ctx>((ctx, { value: currentValue }) => ({ ...ctx, currentValue })),
 );
 
 const simpleDependencyMatch = groupIdMatch
@@ -228,8 +239,8 @@ const sbtPackageMatch = q
     q.alt<Ctx>(
       q.sym<Ctx>('classifier').str(depTypeHandler),
       q.op<Ctx>('%').sym(depTypeHandler),
-      q.op<Ctx>('%').str(depTypeHandler)
-    )
+      q.op<Ctx>('%').str(depTypeHandler),
+    ),
   )
   .handler(depHandler);
 
@@ -262,15 +273,12 @@ const addResolverMatch = q.sym<Ctx>('resolvers').alt(
     type: 'wrapped-tree',
     maxDepth: 1,
     search: resolverMatch,
-  })
+  }),
 );
 
 function registryUrlHandler(ctx: Ctx): Ctx {
   for (const dep of ctx.deps) {
     dep.registryUrls = [...ctx.registryUrls];
-    if (dep.depType === 'plugin') {
-      dep.registryUrls.push(SBT_PLUGINS_REPO);
-    }
   }
   return ctx;
 }
@@ -284,14 +292,31 @@ const query = q.tree<Ctx>({
     sbtPackageMatch,
     sbtPluginMatch,
     addResolverMatch,
-    variableDefinitionMatch
+    variableDefinitionMatch,
   ),
   postHandler: registryUrlHandler,
 });
 
+export function extractProxyUrls(
+  content: string,
+  packageFile: string,
+): string[] {
+  const extractedProxyUrls: string[] = [];
+  logger.debug(`Parsing proxy repository file ${packageFile}`);
+  for (const line of content.split(newlineRegex)) {
+    const extraction = sbtProxyUrlRegex.exec(line);
+    if (extraction?.groups?.proxy) {
+      extractedProxyUrls.push(extraction.groups.proxy);
+    } else if (line.trim() === 'maven-central') {
+      extractedProxyUrls.push(SBT_MVN_REPO);
+    }
+  }
+  return extractedProxyUrls;
+}
+
 export function extractPackageFile(
   content: string,
-  packageFile: string
+  packageFile: string,
 ): PackageFileContent | null {
   if (
     packageFile === 'project/build.properties' ||
@@ -309,6 +334,7 @@ export function extractPackageFile(
         currentValue: sbtVersion,
         replaceString: matchString,
         extractVersion: '^v(?<version>\\S+)',
+        registryUrls: [],
       };
 
       return {
@@ -325,7 +351,7 @@ export function extractPackageFile(
     parsedResult = scala.query(content, query, {
       vars: {},
       deps: [],
-      registryUrls: [REGISTRY_URLS.mavenCentral],
+      registryUrls: [],
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, packageFile }, 'Sbt parsing error');
@@ -342,4 +368,41 @@ export function extractPackageFile(
   }
 
   return { deps, packageFileVersion };
+}
+
+export async function extractAllPackageFiles(
+  _config: ExtractConfig,
+  packageFiles: string[],
+): Promise<PackageFile[]> {
+  const packages: PackageFile[] = [];
+  const proxyUrls: string[] = [];
+
+  for (const packageFile of packageFiles) {
+    const content = await readLocalFile(packageFile, 'utf8');
+    if (!content) {
+      logger.debug({ packageFile }, 'packageFile has no content');
+      continue;
+    }
+    if (packageFile === 'repositories') {
+      const urls = extractProxyUrls(content, packageFile);
+      proxyUrls.push(...urls);
+    } else {
+      const pkg = extractPackageFile(content, packageFile);
+      if (pkg) {
+        packages.push({ deps: pkg.deps, packageFile });
+      }
+    }
+  }
+  for (const pkg of packages) {
+    for (const dep of pkg.deps) {
+      if (proxyUrls.length > 0) {
+        dep.registryUrls!.unshift(...proxyUrls);
+      } else if (dep.depType === 'plugin') {
+        dep.registryUrls!.unshift(SBT_PLUGINS_REPO, SBT_MVN_REPO);
+      } else {
+        dep.registryUrls!.unshift(SBT_MVN_REPO);
+      }
+    }
+  }
+  return packages;
 }

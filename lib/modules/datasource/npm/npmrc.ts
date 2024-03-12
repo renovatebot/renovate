@@ -136,12 +136,12 @@ export function setNpmrc(input?: string): void {
       if (
         !exposeAllEnv &&
         key.endsWith('registry') &&
-        val &&
+        is.string(val) &&
         val.includes('localhost')
       ) {
         logger.debug(
           { key, val },
-          'Detected localhost registry - rejecting npmrc file'
+          'Detected localhost registry - rejecting npmrc file',
         );
         npmrc = existingNpmrc;
         return;
@@ -173,7 +173,7 @@ export function resolveRegistryUrl(packageName: string): string {
       !matchPackagePrefixes ||
       packageName.startsWith(matchPackagePrefixes[0])
     ) {
-      // TODO: fix types #7154
+      // TODO: fix types #22198
       registryUrl = registryUrls![0];
     }
   }
@@ -182,10 +182,10 @@ export function resolveRegistryUrl(packageName: string): string {
 
 export function resolvePackageUrl(
   registryUrl: string,
-  packageName: string
+  packageName: string,
 ): string {
   return url.resolve(
     ensureTrailingSlash(registryUrl),
-    encodeURIComponent(packageName).replace(regEx(/^%40/), '@')
+    encodeURIComponent(packageName).replace(regEx(/^%40/), '@'),
   );
 }

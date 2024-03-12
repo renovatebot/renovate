@@ -1,5 +1,6 @@
 import type { Stats } from 'node:fs';
 import os from 'node:os';
+import { mockDeep } from 'jest-mock-extended';
 import type { StatusResult } from 'simple-git';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
@@ -12,7 +13,7 @@ import { updateArtifacts } from '.';
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
 jest.mock('../../../util/exec/env');
-jest.mock('../../datasource');
+jest.mock('../../datasource', () => mockDeep());
 
 process.env.CONTAINERBASE = 'true';
 
@@ -22,7 +23,7 @@ function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
   git.getRepoStatus.mockResolvedValueOnce(
     partial<StatusResult>({
       modified: [`maven.mvn/wrapper/${fileName}`],
-    })
+    }),
   );
 }
 
@@ -34,7 +35,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       partial<Stats>({
         isFile: () => true,
         mode: 0o555,
-      })
+      }),
     );
 
     resetPrefetchedImages();
@@ -391,7 +392,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots[0]!.options!.env).not.toHaveProperty('MVNW_REPOURL');
+    expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_REPOURL');
     expect(git.getRepoStatus).toHaveBeenCalledOnce();
   });
 
@@ -431,7 +432,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       },
     ]);
 
-    expect(execSnapshots[0]!.options!.env).not.toHaveProperty('MVNW_REPOURL');
+    expect(execSnapshots[0].options!.env).not.toHaveProperty('MVNW_REPOURL');
     expect(git.getRepoStatus).toHaveBeenCalledOnce();
   });
 });

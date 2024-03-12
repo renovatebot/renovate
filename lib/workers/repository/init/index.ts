@@ -2,6 +2,7 @@ import { GlobalConfig } from '../../../config/global';
 import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { setRepositoryLogLevelRemaps } from '../../../logger/remap';
 import { platform } from '../../../modules/platform';
 import { clone } from '../../../util/clone';
 import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
@@ -24,16 +25,24 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {
   if (config.filterUnavailableUsers && !platform.filterUnavailableUsers) {
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     const platform = GlobalConfig.get('platform')!;
     logger.warn(
-      `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${platform}'.`
+      `Configuration option 'filterUnavailableUsers' is not supported on the current platform '${platform}'.`,
+    );
+  }
+
+  if (config.expandCodeOwnersGroups && !platform.expandGroupMembers) {
+    // TODO: types (#22198)
+    const platform = GlobalConfig.get('platform')!;
+    logger.warn(
+      `Configuration option 'expandCodeOwnersGroups' is not supported on the current platform '${platform}'.`,
     );
   }
 }
 
 export async function initRepo(
-  config_: RenovateConfig
+  config_: RenovateConfig,
 ): Promise<RenovateConfig> {
   PackageFiles.clear();
   let config: RenovateConfig = initializeConfig(config_);
@@ -42,6 +51,7 @@ export async function initRepo(
   config = await initApis(config);
   await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
+  setRepositoryLogLevelRemaps(config.logLevelRemap);
   checkIfConfigured(config);
   warnOnUnsupportedOptions(config);
   config = applySecretsToConfig(config);
@@ -51,7 +61,7 @@ export async function initRepo(
   if (config.printConfig) {
     logger.info(
       { config, hostRules: getAll() },
-      'Full resolved config and hostRules including presets'
+      'Full resolved config and hostRules including presets',
     );
   }
   await cloneSubmodules(!!config.cloneSubmodules);
