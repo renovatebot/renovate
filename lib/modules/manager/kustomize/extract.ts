@@ -144,11 +144,18 @@ export function extractHelmChart(
     return null;
   }
 
+  let datasrc = HelmDatasource.id;
+  let registryUrl = helmChart.repo;
+  if (registryUrl.startsWith('oci://')) {
+    datasrc = DockerDatasource.id;
+    registryUrl = registryUrl.replace('oci://', 'https://');
+  }
+
   return {
     depName: helmChart.name,
     currentValue: helmChart.version,
-    registryUrls: [helmChart.repo],
-    datasource: HelmDatasource.id,
+    registryUrls: [registryUrl],
+    datasource: datasrc,
   };
 }
 
@@ -238,9 +245,13 @@ export function extractPackageFile(
   for (const helmChart of coerceArray(pkg.helmCharts)) {
     const dep = extractHelmChart(helmChart);
     if (dep) {
+      let dt = 'HelmChart';
+      if (dep.datasource === DockerDatasource.id) {
+        dt = 'Docker';
+      }
       deps.push({
         ...dep,
-        depType: 'HelmChart',
+        depType: dt,
       });
     }
   }

@@ -25,6 +25,7 @@ const newTag = Fixtures.get('newTag.yaml');
 const newName = Fixtures.get('newName.yaml');
 const digest = Fixtures.get('digest.yaml');
 const kustomizeHelmChart = Fixtures.get('kustomizeHelmChart.yaml');
+const kustomizeOciHelmChart = Fixtures.get('kustomizeOciHelmChart.yaml');
 
 describe('modules/manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
@@ -175,6 +176,22 @@ describe('modules/manager/kustomize/extract', () => {
       });
       expect(pkg).toEqual(sample);
     });
+
+    it('should correct extract an oci chart', () => {
+      const httpRegistryUrl = 'https://docs.renovatebot.com/helm-charts';
+      const ociRegistryUrl = 'oci://docs.renovatebot.com/helm-charts';
+      const sample = {
+        depName: 'renovate',
+        currentValue: '29.6.0',
+        registryUrls: [httpRegistryUrl],
+        datasource: DockerDatasource.id,
+      };
+      const pkg = extractHelmChart({
+        name: sample.depName,
+        version: sample.currentValue,
+        repo: ociRegistryUrl,
+      });
+      expect(pkg).toEqual(sample);
   });
 
   describe('image extraction', () => {
@@ -446,6 +463,20 @@ describe('modules/manager/kustomize/extract', () => {
           {
             depType: 'HelmChart',
             depName: 'minecraft',
+            currentValue: '3.1.3',
+            registryUrls: ['https://itzg.github.io/minecraft-server-charts'],
+          },
+        ],
+      });
+    });
+
+    it('parses helmChart field with oci registry', () => {
+      const res = extractPackageFile(kustomizeOciHelmChart);
+      expect(res).toMatchSnapshot({
+        deps: [
+          {
+            depType: 'Docker',
+            depName: 'oci-minecraft',
             currentValue: '3.1.3',
             registryUrls: ['https://itzg.github.io/minecraft-server-charts'],
           },
