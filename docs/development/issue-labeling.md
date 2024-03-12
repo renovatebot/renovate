@@ -224,7 +224,9 @@ Apply the `self-hosted` label when an issue is applicable only to users who self
 
 ## Automated label report
 
-There is a GitHub Action to automate the labeling process of issues, the job runs once in a week and checks for issues without the proper labels.
+We have a GitHub Action that checks if we're using the correct labels on our issues.
 
-If it finds any issues missing labels, it creates a new issue with the missing labels and details the issues found so any collaborator can label them accordingly.
+The action runs once in a week and checks for issues without the proper labels.
+
+If the action finds any issues missing labels, it creates a new issue with the missing labels and details the issues found so any collaborator can label them accordingly.
 
