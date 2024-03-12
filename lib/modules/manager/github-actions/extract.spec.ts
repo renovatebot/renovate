@@ -349,7 +349,7 @@ describe('modules/manager/github-actions/extract', () => {
           currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
           currentValue: 'v2.1.0',
           replaceString:
-            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 #   v2.1.0',
+            'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97  #   v2.1.0',
         },
         {
           currentDigest: '1e204e9a9253d643386038d443f96446fa156a97',
