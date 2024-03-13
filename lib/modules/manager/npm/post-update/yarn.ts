@@ -192,6 +192,7 @@ export async function generateLockFile(
     }
 
     const execOptions: ExecOptions = {
+      userConfiguredEnv: config.env,
       cwdFile: lockFileName,
       extraEnv,
       docker: {},
@@ -207,6 +208,17 @@ export async function generateLockFile(
       logger.debug('Updating Yarn binary');
       // TODO: types (#22198)
       commands.push(`yarn set version ${quote(yarnUpdate.newValue!)}`);
+    }
+
+    if (process.env.HTTP_PROXY && !isYarn1) {
+      commands.push(
+        `yarn config set --home httpProxy ${quote(process.env.HTTP_PROXY)}`,
+      );
+    }
+    if (process.env.HTTPS_PROXY && !isYarn1) {
+      commands.push(
+        `yarn config set --home httpsProxy ${quote(process.env.HTTPS_PROXY)}`,
+      );
     }
 
     // This command updates the lock file based on package.json

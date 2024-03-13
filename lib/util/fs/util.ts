@@ -3,11 +3,11 @@ import { GlobalConfig } from '../../config/global';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 
-function assertBaseDir(path: string, baseDir: string): void {
-  if (!path.startsWith(baseDir)) {
+function assertBaseDir(path: string, allowedDir: string): void {
+  if (!path.startsWith(allowedDir)) {
     logger.debug(
-      { path, baseDir },
-      'Preventing access to file outside the base directory',
+      { path, allowedDir },
+      'Preventing access to file outside allowed directory',
     );
     throw new Error(FILE_ACCESS_VIOLATION_ERROR);
   }

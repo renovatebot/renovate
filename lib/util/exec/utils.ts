@@ -5,6 +5,7 @@ import type { ExecOptions } from './types';
 
 export function getChildEnv({
   extraEnv,
+  userConfiguredEnv,
   env: forcedEnv = {},
 }: ExecOptions): Record<string, string> {
   const globalConfigEnv = GlobalConfig.get('customEnvVariables');
@@ -21,6 +22,7 @@ export function getChildEnv({
     ...extraEnv,
     ...parentEnv,
     ...globalConfigEnv,
+    ...userConfiguredEnv,
     ...forcedEnv,
   };
 

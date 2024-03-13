@@ -1,4 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
+import type { PackageCacheNamespace } from '../../../util/cache/package/types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import { ensureTrailingSlash } from '../../../util/url';
 import type { PagedResult, RepoInfoBody } from '../../platform/bitbucket/types';
@@ -17,7 +18,7 @@ export class BitbucketTagsDatasource extends Datasource {
 
   static readonly defaultRegistryUrls = ['https://bitbucket.org'];
 
-  static readonly cacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
+  static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
 
   constructor() {
     super(BitbucketTagsDatasource.id);

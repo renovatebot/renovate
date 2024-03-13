@@ -297,33 +297,67 @@ describe('modules/manager/kustomize/extract', () => {
       });
       expect(pkg).toEqual(sample);
     });
+
+    it('should correctly extract with registryAliases', () => {
+      const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        currentDigest: undefined,
+        currentValue: 'v1.0.0',
+        replaceString: 'v1.0.0',
+        datasource: DockerDatasource.id,
+        depName: 'docker.io/image/service',
+      };
+      const pkg = extractImage(
+        {
+          name: 'localhost:5000/repo/image/service',
+          newTag: sample.currentValue,
+        },
+        { 'localhost:5000/repo': 'docker.io' },
+      );
+      expect(pkg).toEqual(sample);
+    });
   });
 
   describe('extractPackageFile()', () => {
     it('returns null for non kustomize kubernetes files', () => {
-      expect(extractPackageFile(nonKustomize)).toBeNull();
+      expect(
+        extractPackageFile(nonKustomize, 'kustomization.yaml', {}),
+      ).toBeNull();
     });
 
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile(kustomizeWithLocal);
+      const res = extractPackageFile(
+        kustomizeWithLocal,
+        'kustomization.yaml',
+        {},
+      );
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(2);
     });
 
     it('extracts ssh dependency', () => {
-      const res = extractPackageFile(kustomizeGitSSHBase);
+      const res = extractPackageFile(
+        kustomizeGitSSHBase,
+        'kustomization.yaml',
+        {},
+      );
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts ssh dependency with a subdir', () => {
-      const res = extractPackageFile(kustomizeGitSSHSubdir);
+      const res = extractPackageFile(
+        kustomizeGitSSHSubdir,
+        'kustomization.yaml',
+        {},
+      );
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts http dependency', () => {
-      const res = extractPackageFile(kustomizeHTTP);
+      const res = extractPackageFile(kustomizeHTTP, 'kustomization.yaml', {});
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(2);
       expect(res?.deps[0].currentValue).toBe('v0.0.1');
@@ -332,7 +366,7 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('should extract out image versions', () => {
-      const res = extractPackageFile(gitImages);
+      const res = extractPackageFile(gitImages, 'kustomization.yaml', {});
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(6);
       expect(res?.deps[0].currentValue).toBe('v0.1.0');
@@ -341,15 +375,21 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('ignores non-Kubernetes empty files', () => {
-      expect(extractPackageFile('')).toBeNull();
+      expect(extractPackageFile('', 'kustomization.yaml', {})).toBeNull();
     });
 
     it('does nothing with kustomize empty kustomize files', () => {
-      expect(extractPackageFile(kustomizeEmpty)).toBeNull();
+      expect(
+        extractPackageFile(kustomizeEmpty, 'kustomization.yaml', {}),
+      ).toBeNull();
     });
 
     it('should extract bases resources and components from their respective blocks', () => {
-      const res = extractPackageFile(kustomizeDepsInResources);
+      const res = extractPackageFile(
+        kustomizeDepsInResources,
+        'kustomization.yaml',
+        {},
+      );
       expect(res).not.toBeNull();
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
@@ -365,7 +405,11 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('should extract dependencies when kind is Component', () => {
-      const res = extractPackageFile(kustomizeComponent);
+      const res = extractPackageFile(
+        kustomizeComponent,
+        'kustomization.yaml',
+        {},
+      );
       expect(res).not.toBeNull();
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
@@ -384,7 +428,9 @@ describe('modules/manager/kustomize/extract', () => {
       'sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c';
 
     it('extracts from newTag', () => {
-      expect(extractPackageFile(newTag)).toMatchSnapshot({
+      expect(
+        extractPackageFile(newTag, 'kustomization.yaml', {}),
+      ).toMatchSnapshot({
         deps: [
           {
             currentDigest: undefined,
@@ -404,7 +450,9 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('extracts from digest', () => {
-      expect(extractPackageFile(digest)).toMatchSnapshot({
+      expect(
+        extractPackageFile(digest, 'kustomization.yaml', {}),
+      ).toMatchSnapshot({
         deps: [
           {
             currentDigest: postgresDigest,
@@ -430,7 +478,9 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('extracts newName', () => {
-      expect(extractPackageFile(newName)).toMatchSnapshot({
+      expect(
+        extractPackageFile(newName, 'kustomization.yaml', {}),
+      ).toMatchSnapshot({
         deps: [
           {
             depName: 'awesome/postgres',
@@ -458,7 +508,11 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('parses helmChart field', () => {
-      const res = extractPackageFile(kustomizeHelmChart);
+      const res = extractPackageFile(
+        kustomizeHelmChart,
+        'kustomization.yaml',
+        {},
+      );
       expect(res).toMatchSnapshot({
         deps: [
           {
