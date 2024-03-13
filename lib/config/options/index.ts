@@ -289,7 +289,6 @@ const options: RenovateOptions[] = [
     allowedValues: ['disabled', 'enabled', 'reset'],
     stage: 'repository',
     default: 'disabled',
-    experimental: true,
   },
   {
     name: 'repositoryCacheType',
@@ -299,7 +298,6 @@ const options: RenovateOptions[] = [
     type: 'string',
     stage: 'repository',
     default: 'local',
-    experimental: true,
   },
   {
     name: 'force',
@@ -1024,6 +1022,7 @@ const options: RenovateOptions[] = [
       'helmfile',
       'helmv3',
       'kubernetes',
+      'kustomize',
       'terraform',
       'woodpecker',
     ],
@@ -1473,7 +1472,6 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
-    experimental: true,
   },
   {
     name: 'matchUpdateTypes',
