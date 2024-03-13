@@ -141,6 +141,7 @@ export function extractImage(
 
 export function extractHelmChart(
   helmChart: HelmChart,
+  aliases?: Record<string, string> | undefined,
 ): PackageDependency | null {
   if (!helmChart.name) {
     return null;
@@ -148,10 +149,7 @@ export function extractHelmChart(
 
   if (isOCIRegistry(helmChart.repo)) {
     return {
-      depName: helmChart.name,
-      currentValue: helmChart.version,
-      datasource: DockerDatasource.id,
-      packageName: `${helmChart.repo.replace('oci://', '')}/${helmChart.name}`,
+      ...getDep(`${helmChart.repo.replace('oci://', '')}/${helmChart.name}:${helmChart.version}`, false, aliases),
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678
       pinDigests: false,
@@ -253,7 +251,7 @@ export function extractPackageFile(
 
   // grab the helm charts
   for (const helmChart of coerceArray(pkg.helmCharts)) {
-    const dep = extractHelmChart(helmChart);
+    const dep = extractHelmChart(helmChart, config.registryAliases);
     if (dep) {
       deps.push(dep);
     }
