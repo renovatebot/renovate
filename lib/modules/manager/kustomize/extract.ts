@@ -150,6 +150,7 @@ export function extractHelmChart(
   if (isOCIRegistry(helmChart.repo)) {
     return {
       ...getDep(`${helmChart.repo.replace('oci://', '')}/${helmChart.name}:${helmChart.version}`, false, aliases),
+      depName: helmChart.name,
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678
       pinDigests: false,
