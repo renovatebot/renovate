@@ -40,3 +40,10 @@ jobs:
   build:
     runs-on: ${{ env.RUNNER }}
 ```
+
+The `github-action` manager understands `ratchet` comments, like `# ratchet:actions/checkout@v2.1.0`.
+This means that Renovate will:
+
+- update the version of a _pinned_ Ratchet version if needed
+- not delete Ratchet comments after parsing them
+- keep `# ratchet:exclude` comments

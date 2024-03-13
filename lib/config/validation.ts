@@ -121,7 +121,7 @@ export function getParentName(parentPath: string | undefined): string {
 }
 
 export async function validateConfig(
-  isGlobalConfig: boolean,
+  configType: 'global' | 'repo',
   config: RenovateConfig,
   isPreset?: boolean,
   parentPath?: string,
@@ -164,7 +164,7 @@ export async function validateConfig(
       });
     }
 
-    if (isGlobalConfig && isGlobalOption(key)) {
+    if (configType === 'global' && isGlobalOption(key)) {
       await validateGlobalConfig(
         key,
         val,
@@ -327,7 +327,7 @@ export async function validateConfig(
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
                 const subValidation = await validateConfig(
-                  isGlobalConfig,
+                  configType,
                   subval as RenovateConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`,
@@ -627,9 +627,10 @@ export async function validateConfig(
                 });
               }
             } else if (key === 'env') {
-              const allowedEnvVars = isGlobalConfig
-                ? (config.allowedEnv as string[]) ?? []
-                : GlobalConfig.get('allowedEnv', []);
+              const allowedEnvVars =
+                configType === 'global'
+                  ? (config.allowedEnv as string[]) ?? []
+                  : GlobalConfig.get('allowedEnv', []);
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!is.string(envVarValue)) {
                   errors.push({
@@ -715,7 +716,7 @@ export async function validateConfig(
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
                 const subValidation = await validateConfig(
-                  isGlobalConfig,
+                  configType,
                   val,
                   isPreset,
                   currentPath,
@@ -735,9 +736,10 @@ export async function validateConfig(
     }
 
     if (key === 'hostRules' && is.array(val)) {
-      const allowedHeaders = isGlobalConfig
-        ? (config.allowedHeaders as string[]) ?? []
-        : GlobalConfig.get('allowedHeaders', []);
+      const allowedHeaders =
+        configType === 'global'
+          ? (config.allowedHeaders as string[]) ?? []
+          : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (!rule.headers) {
           continue;
@@ -926,14 +928,14 @@ async function validateGlobalConfig(
     } else if (type === 'object') {
       if (is.plainObject(val)) {
         if (key === 'onboardingConfig') {
-          const subValidation = await validateConfig(false, val);
+          const subValidation = await validateConfig('repo', val);
           for (const warning of subValidation.warnings.concat(
             subValidation.errors,
           )) {
             warnings.push(warning);
           }
         } else if (key === 'force') {
-          const subValidation = await validateConfig(true, val);
+          const subValidation = await validateConfig('global', val);
           for (const warning of subValidation.warnings.concat(
             subValidation.errors,
           )) {

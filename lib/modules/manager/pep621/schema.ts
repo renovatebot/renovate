@@ -61,14 +61,16 @@ export const PyProjectSchema = z.object({
 export const PdmLockfileSchema = Toml.pipe(
   z.object({
     package: LooseArray(
-      z
-        .object({
-          name: z.string(),
-          version: z.string(),
-        })
-        .transform(({ name, version }): [string, string] => [name, version]),
-    )
-      .transform((entries) => Object.fromEntries(entries))
-      .catch({}),
+      z.object({
+        name: z.string(),
+        version: z.string(),
+      }),
+    ),
   }),
-).transform(({ package: lock }) => ({ lock }));
+)
+  .transform(({ package: pkg }) =>
+    Object.fromEntries(
+      pkg.map(({ name, version }): [string, string] => [name, version]),
+    ),
+  )
+  .transform((lock) => ({ lock }));

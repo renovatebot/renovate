@@ -24,78 +24,6 @@ query($owner: String!, $name: String!) {
 }
 `;
 
-export const closedPrsQuery = `
-query($owner: String!, $name: String!, $count: Int, $cursor: String) {
-  repository(owner: $owner, name: $name) {
-    pullRequests(
-      states: [CLOSED, MERGED],
-      orderBy: {
-        field: UPDATED_AT,
-        direction: DESC
-      },
-      first: $count,
-      after: $cursor
-    ) {
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
-      nodes {
-        number
-        state
-        headRefName
-        title
-        comments(last: 100) {
-          nodes {
-            databaseId
-            body
-          }
-        }
-      }
-    }
-  }
-}
-`;
-
-export const openPrsQuery = `
-query($owner: String!, $name: String!, $count: Int, $cursor: String) {
-  repository(owner: $owner, name: $name) {
-    pullRequests(
-      states: [OPEN],
-      orderBy: {
-        field: UPDATED_AT,
-        direction: DESC
-      },
-      first: $count,
-      after: $cursor
-    ) {
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
-      nodes {
-        number
-        headRefName
-        baseRefName
-        title
-        labels(last: 100) {
-          nodes {
-            name
-          }
-        }
-        assignees {
-          totalCount
-        }
-        reviewRequests {
-          totalCount
-        }
-        body
-      }
-    }
-  }
-}
-`;
-
 export const getIssuesQuery = `
 query(
   $owner: String!,
@@ -120,6 +48,7 @@ query(
         state
         title
         body
+        updatedAt
       }
     }
   }
