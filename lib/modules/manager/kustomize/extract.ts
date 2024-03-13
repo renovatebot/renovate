@@ -153,7 +153,6 @@ export function extractHelmChart(
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678
       pinDigests: false,
-      depType: 'HelmChart',
     };
   }
 
@@ -162,7 +161,6 @@ export function extractHelmChart(
     currentValue: helmChart.version,
     registryUrls: [helmChart.repo],
     datasource: HelmDatasource.id,
-    depType: 'HelmChart',
   };
 }
 
@@ -253,7 +251,10 @@ export function extractPackageFile(
   for (const helmChart of coerceArray(pkg.helmCharts)) {
     const dep = extractHelmChart(helmChart, config.registryAliases);
     if (dep) {
-      deps.push(dep);
+      deps.push({
+        ...dep,
+        depType: 'HelmChart',
+      });
     }
   }
 
