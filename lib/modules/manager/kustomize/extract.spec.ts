@@ -167,7 +167,6 @@ describe('modules/manager/kustomize/extract', () => {
         currentValue: '29.6.0',
         registryUrls: [registryUrl],
         datasource: HelmDatasource.id,
-        depType: 'HelmChart',
       };
       const pkg = extractHelmChart({
         name: sample.depName,
@@ -184,7 +183,6 @@ describe('modules/manager/kustomize/extract', () => {
         currentValue: '18.12.1',
         datasource: DockerDatasource.id,
         pinDigests: false,
-        depType: 'HelmChart',
       };
       const pkg = extractHelmChart({
         name: sample.depName,
