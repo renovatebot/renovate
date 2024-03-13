@@ -51,6 +51,11 @@ describe('util/stats', () => {
       jest.useRealTimers();
     });
 
+    it('returns empty report', () => {
+      const res = LookupStats.getReport();
+      expect(res).toEqual({});
+    });
+
     it('writes data points', () => {
       LookupStats.write('npm', 100);
       LookupStats.write('npm', 200);
