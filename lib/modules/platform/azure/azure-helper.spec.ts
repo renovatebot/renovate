@@ -238,6 +238,33 @@ describe('modules/platform/azure/azure-helper', () => {
       );
     });
 
+    it('should return Squash when Project wide exact branch policy exists', async () => {
+      azureApi.policyApi.mockImplementationOnce(
+        () =>
+          ({
+            getPolicyConfigurations: jest.fn(() => [
+              {
+                settings: {
+                  allowSquash: true,
+                  scope: [
+                    {
+                      // null here means project wide
+                      repositoryId: null,
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+            ]),
+          }) as any,
+      );
+      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+        GitPullRequestMergeStrategy.Squash,
+      );
+    });
+
     it('should return default branch policy', async () => {
       azureApi.policyApi.mockImplementationOnce(
         () =>
