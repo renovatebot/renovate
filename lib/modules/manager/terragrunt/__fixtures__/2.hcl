@@ -125,36 +125,6 @@ terraform {
   foo = "bar"
 }
 
-# foobar
-terraform {
-  source = "https://bitbucket.com/hashicorp/example?ref=v1.0.0"
-}
-
-# gittags
-terraform {
-  source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0"
-}
-
-# gittags_badversion
-terraform {
-  source = "git::https://bitbucket.com/hashicorp/example?ref=next"
-}
-
-# gittags_subdir
-terraform {
-  source = "git::https://bitbucket.com/hashicorp/example//subdir/test?ref=v1.0.1"
-}
-
-# gittags_http
-terraform {
-  source = "git::http://bitbucket.com/hashicorp/example?ref=v1.0.2"
-}
-
-# gittags_ssh
-terraform {
-  source = "git::ssh://git@bitbucket.com/hashicorp/example?ref=v1.0.3"
-}
-
 # invalid, ignored by test since it does not have source on the next line
 terraform {
 }
@@ -163,4 +133,105 @@ terraform {
 terraform {
   name  = "foo"
   dummy = "true"
+}
+
+
+# gittags
+terraform {
+  source = "git::https://mygit.com/hashicorp/example?ref=v1.0.0"
+}
+
+# gittags_badversion
+terraform {
+  source = "git::https://mygit.com/hashicorp/example?ref=next"
+}
+
+# gittags_subdir
+terraform {
+  source = "git::https://mygit.com/hashicorp/example//subdir/test?ref=v1.0.1"
+}
+
+# gittags_http
+terraform {
+  source = "git::http://mygit.com/hashicorp/example?ref=v1.0.2"
+}
+
+# gittags_ssh
+terraform {
+  source = "git::ssh://git@mygit.com/hashicorp/example?ref=v1.0.3"
+}
+
+# bitbucket-tags
+terraform {
+  source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0"
+}
+
+# bitbucket-tags_badversion
+terraform {
+  source = "git::https://bitbucket.com/hashicorp/example?ref=next"
+}
+
+# bitbucket-tags_subdir
+terraform {
+  source = "git::https://bitbucket.com/hashicorp/example//subdir/test?ref=v1.0.1"
+}
+
+# bitbucket-tags_http
+terraform {
+  source = "git::http://bitbucket.com/hashicorp/example?ref=v1.0.2"
+}
+
+# bitbucket-tags_ssh
+terraform {
+  source = "git::ssh://git@bitbucket.com/hashicorp/example?ref=v1.0.3"
+}
+
+# gitlab-tags
+terraform {
+  source = "git::https://gitlab.com/hashicorp/example?ref=v1.0.0"
+}
+
+# gitlab-tags_badversion
+terraform {
+  source = "git::https://gitlab.com/hashicorp/example?ref=next"
+}
+
+# gitlab-tags_subdir
+terraform {
+  source = "git::https://gitlab.com/hashicorp/example//subdir/test?ref=v1.0.1"
+}
+
+# gitlab-tags_http
+terraform {
+  source = "git::http://gitlab.com/hashicorp/example?ref=v1.0.2"
+}
+
+# gitlab-tags_ssh
+terraform {
+  source = "git::ssh://git@gitlab.com/hashicorp/example?ref=v1.0.3"
+}
+
+# gitea-tags
+terraform {
+  source = "git::https://gitea.com/hashicorp/example?ref=v1.0.0"
+}
+
+# gitea-tags_badversion
+terraform {
+  source = "git::https://gitea.com/hashicorp/example?ref=next"
+}
+
+# gitea-tags_subdir
+terraform {
+  source = "git::https://gitea.com/hashicorp/example//subdir/test?ref=v1.0.1"
+}
+
+# gitea-tags_http
+terraform {
+  source = "git::http://gitea.com/hashicorp/example?ref=v1.0.2"
+}
+
+# gitea-tags_ssh
+terraform {
+  source = "git::ssh://git@gitea.com/hashicorp/example?ref=v1.0.3"
 }

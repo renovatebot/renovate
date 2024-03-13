@@ -1,6 +1,9 @@
 import { logger } from '../../../logger';
+import { detectPlatform } from '../../../util/common';
 import { regEx } from '../../../util/regex';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
@@ -10,9 +13,6 @@ import type { ExtractionResult, TerraformManagerData } from './types';
 
 export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
-);
-export const gitlabRefMatchRegex = regEx(
-  /(?<host>gitlab(\.[a-z0-9-_]+)*\.com(:\d+)?)([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
 );
 export const gitTagsRefMatchRegex = regEx(
   /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
@@ -35,13 +35,26 @@ export function extractTerragruntModule(
   return result;
 }
 
+function detectGitTagDatasource(registryUrl: string): string {
+  const platform = detectPlatform(registryUrl);
+  switch (platform) {
+    case 'gitlab':
+      return GitlabTagsDatasource.id;
+    case 'bitbucket':
+      return BitbucketTagsDatasource.id;
+    case 'gitea':
+      return GiteaTagsDatasource.id;
+    default:
+      return GitTagsDatasource.id;
+  }
+}
+
 export function analyseTerragruntModule(
   dep: PackageDependency<TerraformManagerData>,
 ): void {
   // TODO #22198
   const source = dep.managerData!.source;
   const githubRefMatch = githubRefMatchRegex.exec(source ?? '');
-  const gitlabRefMatch = gitlabRefMatchRegex.exec(source ?? '');
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(source ?? '');
   const tfrVersionMatch = tfrVersionMatchRegex.exec(source ?? '');
 
@@ -54,15 +67,6 @@ export function analyseTerragruntModule(
     dep.depName = 'github.com/' + dep.packageName;
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = GithubTagsDatasource.id;
-  } else if (gitlabRefMatch?.groups) {
-    dep.depType = 'repository';
-    dep.packageName = gitlabRefMatch.groups.project.replace(
-      regEx(/\.git$/),
-      '',
-    );
-    dep.depName = `${gitlabRefMatch.groups.host}/${dep.packageName}`;
-    dep.currentValue = gitlabRefMatch.groups.tag;
-    dep.datasource = GitlabTagsDatasource.id;
   } else if (gitTagsRefMatch?.groups) {
     dep.depType = 'gitTags';
     if (gitTagsRefMatch.groups.path.includes('//')) {
@@ -75,7 +79,7 @@ export function analyseTerragruntModule(
       dep.packageName = gitTagsRefMatch.groups.url;
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
-    dep.datasource = GitTagsDatasource.id;
+    dep.datasource = detectGitTagDatasource(gitTagsRefMatch.groups.url);
   } else if (tfrVersionMatch?.groups) {
     dep.depType = 'terragrunt';
     dep.depName =
