@@ -1022,6 +1022,7 @@ const options: RenovateOptions[] = [
       'helmfile',
       'helmv3',
       'kubernetes',
+      'kustomize',
       'terraform',
       'woodpecker',
     ],
