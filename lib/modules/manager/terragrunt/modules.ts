@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import type { PackageDependency } from '../types';
 import { extractTerragruntProvider } from './providers';
@@ -9,6 +10,9 @@ import type { ExtractionResult, TerraformManagerData } from './types';
 
 export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
+);
+export const gitlabRefMatchRegex = regEx(
+  /(?<host>gitlab(\.[a-z0-9-_]+)*\.com(:\d+)?)([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
 );
 export const gitTagsRefMatchRegex = regEx(
   /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
@@ -37,6 +41,7 @@ export function analyseTerragruntModule(
   // TODO #22198
   const source = dep.managerData!.source;
   const githubRefMatch = githubRefMatchRegex.exec(source ?? '');
+  const gitlabRefMatch = gitlabRefMatchRegex.exec(source ?? '');
   const gitTagsRefMatch = gitTagsRefMatchRegex.exec(source ?? '');
   const tfrVersionMatch = tfrVersionMatchRegex.exec(source ?? '');
 
@@ -49,6 +54,15 @@ export function analyseTerragruntModule(
     dep.depName = 'github.com/' + dep.packageName;
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = GithubTagsDatasource.id;
+  } else if (gitlabRefMatch?.groups) {
+    dep.depType = 'repository';
+    dep.packageName = gitlabRefMatch.groups.project.replace(
+      regEx(/\.git$/),
+      '',
+    );
+    dep.depName = `${gitlabRefMatch.groups.host}/${dep.packageName}`;
+    dep.currentValue = gitlabRefMatch.groups.tag;
+    dep.datasource = GitlabTagsDatasource.id;
   } else if (gitTagsRefMatch?.groups) {
     dep.depType = 'gitTags';
     if (gitTagsRefMatch.groups.path.includes('//')) {

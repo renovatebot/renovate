@@ -1,4 +1,8 @@
-import { gitTagsRefMatchRegex, githubRefMatchRegex } from './modules';
+import {
+  gitTagsRefMatchRegex,
+  githubRefMatchRegex,
+  gitlabRefMatchRegex,
+} from './modules';
 
 describe('modules/manager/terragrunt/modules', () => {
   describe('githubRefMatchRegex', () => {
@@ -17,6 +21,30 @@ describe('modules/manager/terragrunt/modules', () => {
         'github.com/hashicorp/example.repo-123?ref=v1.0.0',
       )?.groups;
       expect(groups).toEqual({
+        project: 'hashicorp/example.repo-123',
+        tag: 'v1.0.0',
+      });
+    });
+  });
+
+  describe('gitlabRefMatchRegex', () => {
+    it('should split project and tag from source', () => {
+      const groups = gitlabRefMatchRegex.exec(
+        'gitlab.my-domain.com/hashicorp/example//sub-directory?ref=v1.0.0',
+      )?.groups;
+      expect(groups).toEqual({
+        host: 'gitlab.my-domain.com',
+        project: 'hashicorp/example',
+        tag: 'v1.0.0',
+      });
+    });
+
+    it('should parse alpha-numeric characters as well as dots, underscores, and dashes in repo names', () => {
+      const groups = gitlabRefMatchRegex.exec(
+        'gitlab.my-domain.com:1234/hashicorp/example.repo-123?ref=v1.0.0',
+      )?.groups;
+      expect(groups).toEqual({
+        host: 'gitlab.my-domain.com:1234',
         project: 'hashicorp/example.repo-123',
         tag: 'v1.0.0',
       });
