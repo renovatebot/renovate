@@ -26,16 +26,16 @@ describe('util/stats', () => {
 
       expect(res).toEqual({
         docker: {
-          averageMs: 1000,
+          avgMs: 1000,
           count: 1,
-          maximumMs: 1000,
+          maxMs: 1000,
           medianMs: 1000,
           totalMs: 1000,
         },
         npm: {
-          averageMs: 233,
+          avgMs: 233,
           count: 3,
-          maximumMs: 400,
+          maxMs: 400,
           medianMs: 200,
           totalMs: 700,
         },
@@ -51,9 +51,9 @@ describe('util/stats', () => {
       expect(res).toBe('foo');
       expect(LookupStats.getReport()).toEqual({
         npm: {
-          averageMs: 100,
+          avgMs: 100,
           count: 1,
-          maximumMs: 100,
+          maxMs: 100,
           medianMs: 100,
           totalMs: 100,
         },
@@ -73,16 +73,16 @@ describe('util/stats', () => {
       expect(msg).toBe('Lookup statistics');
       expect(data).toEqual({
         docker: {
-          averageMs: 1000,
+          avgMs: 1000,
           count: 1,
-          maximumMs: 1000,
+          maxMs: 1000,
           medianMs: 1000,
           totalMs: 1000,
         },
         npm: {
-          averageMs: 233,
+          avgMs: 233,
           count: 3,
-          maximumMs: 400,
+          maxMs: 400,
           medianMs: 200,
           totalMs: 700,
         },

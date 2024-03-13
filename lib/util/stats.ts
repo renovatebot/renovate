@@ -3,12 +3,22 @@ import * as memCache from './cache/memory';
 
 type LookupStatsData = Record<string, number[]>;
 
-interface LookupStatsReport {
+interface TimingStatsReport {
   count: number;
-  averageMs: number;
+  avgMs: number;
   medianMs: number;
-  maximumMs: number;
+  maxMs: number;
   totalMs: number;
+}
+
+function makeStatsReport(data: number[]): TimingStatsReport {
+  const count = data.length;
+  const totalMs = data.reduce((a, c) => a + c, 0);
+  const avgMs = count ? Math.round(totalMs / count) : 0;
+  const maxMs = Math.max(0, ...data);
+  const sorted = data.sort((a, b) => a - b);
+  const medianMs = count ? sorted[Math.floor(count / 2)] : 0;
+  return { count, avgMs, medianMs, maxMs, totalMs };
 }
 
 export class LookupStats {
@@ -30,25 +40,12 @@ export class LookupStats {
     return result;
   }
 
-  static getReport(): Record<string, LookupStatsReport> {
-    const report: Record<string, LookupStatsReport> = {};
+  static getReport(): Record<string, TimingStatsReport> {
+    const report: Record<string, TimingStatsReport> = {};
     const data = memCache.get<LookupStatsData>('lookup-stats') ?? {};
     for (const [datasource, durations] of Object.entries(data)) {
-      const count = durations.length;
-      const totalMs = durations.reduce((a, c) => a + c, 0);
-      const averageMs = Math.round(totalMs / count);
-      const maximumMs = Math.max(...durations);
-      const sorted = durations.sort((a, b) => a - b);
-      const medianMs = sorted[Math.floor(count / 2)];
-      report[datasource] = {
-        count,
-        averageMs,
-        medianMs,
-        maximumMs,
-        totalMs,
-      };
+      report[datasource] = makeStatsReport(durations);
     }
-
     return report;
   }
 
