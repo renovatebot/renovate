@@ -148,9 +148,11 @@ export function extractHelmChart(
   }
 
   if (isOCIRegistry(helmChart.repo)) {
+    const dep = getDep(`${helmChart.repo.replace('oci://', '')}/${helmChart.name}:${helmChart.version}`, false, aliases);
     return {
-      ...getDep(`${helmChart.repo.replace('oci://', '')}/${helmChart.name}:${helmChart.version}`, false, aliases),
+      ...dep,
       depName: helmChart.name,
+      packageName: dep.depName,
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678
       pinDigests: false,
