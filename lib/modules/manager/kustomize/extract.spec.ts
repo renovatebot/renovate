@@ -184,7 +184,7 @@ describe('modules/manager/kustomize/extract', () => {
         currentValue: '18.12.1',
         datasource: DockerDatasource.id,
         pinDigests: false,
-        depType: 'OCIChart',
+        depType: 'HelmChart',
       };
       const pkg = extractHelmChart({
         name: sample.depName,
