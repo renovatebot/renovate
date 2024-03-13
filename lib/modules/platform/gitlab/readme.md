@@ -35,8 +35,9 @@ If you're using a private [GitLab container registry](https://docs.gitlab.com/ee
 - Set the `RENOVATE_HOST_RULES` CI variable to `[{"matchHost": "${CI_REGISTRY}","username": "${GITLAB_USER_NAME}","password": "${RENOVATE_TOKEN}", "hostType": "docker"}]`.
 - Make sure the user that owns the `RENOVATE_TOKEN` PAT is a member of the corresponding GitLab projects/groups with the right permissions.
 - Make sure the `RENOVATE_TOKEN` PAT has the `read_registry` scope.
-- You may want to set `FORCE_COLOR: 3` or `TERM: ansi` to the job, in order to get colored output.
-  [GitLab Runner runs the container’s shell in non-interactive mode, so the shell’s `TERM` environment variable is set to `dumb`.](https://docs.gitlab.com/ee/ci/yaml/script.html#job-log-output-is-not-formatted-as-expected-or-contains-unexpected-characters)
+
+You may want to set `FORCE_COLOR: 3` or `TERM: ansi` to the job, in order to get colored output.
+[GitLab Runner runs the container’s shell in non-interactive mode, so the shell’s `TERM` environment variable is set to `dumb`.](https://docs.gitlab.com/ee/ci/yaml/script.html#job-log-output-is-not-formatted-as-expected-or-contains-unexpected-characters)
 
 ## Features awaiting implementation
 
