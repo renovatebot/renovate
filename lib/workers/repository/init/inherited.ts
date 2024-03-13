@@ -22,7 +22,7 @@ export async function mergeInheritedConfig(
     !is.string(config.inheritConfigRepoName) ||
     !is.string(config.inheritConfigFileName)
   ) {
-    // Should not happen due to config validation
+    // Config validation should prevent this error
     logger.error(
       {
         inheritConfigRepoName: config.inheritConfigRepoName,

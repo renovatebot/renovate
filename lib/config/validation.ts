@@ -194,7 +194,7 @@ export async function validateConfig(
         ) {
           warnings.push({
             topic: 'Configuration Error',
-            message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+            message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
           });
           continue;
         }

@@ -575,7 +575,7 @@ const options: RenovateOptions[] = [
   {
     name: 'inheritConfig',
     description:
-      'If true, Renovate will inherit repo config from <orgName>/renovate-config/org-inherited-config.json5.',
+      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName`.
     type: 'boolean',
     default: false,
     globalOnly: true,
@@ -583,7 +583,7 @@ const options: RenovateOptions[] = [
   {
     name: 'inheritConfigRepoName',
     description:
-      'Renovate will look in this repo for the inheritConfigFileName.',
+      'Renovate will look in this repo for the `inheritConfigFileName`.',
     type: 'string',
     default: '{{parentOrg}}/renovate-config',
     globalOnly: true,
@@ -591,7 +591,7 @@ const options: RenovateOptions[] = [
   {
     name: 'inheritConfigFileName',
     description:
-      'Renovate will look for this config file name in the inheritConfigRepoName.',
+      'Renovate will look for this config file name in the `inheritConfigRepoName`.',
     type: 'string',
     default: 'org-inherited-config.json5',
     globalOnly: true,
@@ -599,7 +599,7 @@ const options: RenovateOptions[] = [
   {
     name: 'inheritConfigStrict',
     description:
-      'If true, any inheritedConfig fetch errror will result in an aborted run.',
+      'If `true`, any `inheritedConfig` fetch errror will result in an aborted run.',
     type: 'boolean',
     default: false,
     globalOnly: true,
