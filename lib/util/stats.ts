@@ -11,7 +11,7 @@ interface TimingStatsReport {
   totalMs: number;
 }
 
-function makeStatsReport(data: number[]): TimingStatsReport {
+export function makeStatsReport(data: number[]): TimingStatsReport {
   const count = data.length;
   const totalMs = data.reduce((a, c) => a + c, 0);
   const avgMs = count ? Math.round(totalMs / count) : 0;

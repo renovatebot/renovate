@@ -1,10 +1,45 @@
 import { logger } from '../../test/util';
 import * as memCache from './cache/memory';
-import { LookupStats } from './stats';
+import { LookupStats, makeStatsReport } from './stats';
 
 describe('util/stats', () => {
   beforeEach(() => {
     memCache.init();
+  });
+
+  describe('makeStatsReport', () => {
+    it('supports empty data', () => {
+      const res = makeStatsReport([]);
+      expect(res).toEqual({
+        avgMs: 0,
+        count: 0,
+        maxMs: 0,
+        medianMs: 0,
+        totalMs: 0,
+      });
+    });
+
+    it('supports single data point', () => {
+      const res = makeStatsReport([100]);
+      expect(res).toEqual({
+        avgMs: 100,
+        count: 1,
+        maxMs: 100,
+        medianMs: 100,
+        totalMs: 100,
+      });
+    });
+
+    it('supports multiple data points', () => {
+      const res = makeStatsReport([100, 200, 400]);
+      expect(res).toEqual({
+        avgMs: 233,
+        count: 3,
+        maxMs: 400,
+        medianMs: 200,
+        totalMs: 700,
+      });
+    });
   });
 
   describe('LookupStats', () => {
