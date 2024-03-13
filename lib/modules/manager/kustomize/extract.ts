@@ -3,12 +3,15 @@ import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
 import { parseSingleYaml } from '../../../util/yaml';
-import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
-import { splitImageParts } from '../dockerfile/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { getDep } from '../dockerfile/extract';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { HelmChart, Image, Kustomize } from './types';
 
 // URL specifications should follow the hashicorp URL format
@@ -63,7 +66,10 @@ export function extractResource(base: string): PackageDependency | null {
   };
 }
 
-export function extractImage(image: Image): PackageDependency | null {
+export function extractImage(
+  image: Image,
+  aliases?: Record<string, string> | undefined,
+): PackageDependency | null {
   if (!image.name) {
     return null;
   }
@@ -72,7 +78,7 @@ export function extractImage(image: Image): PackageDependency | null {
     logger.debug({ image }, 'Invalid image name');
     return null;
   }
-  const nameDep = splitImageParts(nameToSplit);
+  const nameDep = getDep(nameToSplit, false, aliases);
   const { depName } = nameDep;
   const { digest, newTag } = image;
   if (digest && newTag) {
@@ -98,9 +104,7 @@ export function extractImage(image: Image): PackageDependency | null {
     }
 
     return {
-      datasource: DockerDatasource.id,
-      depName,
-      currentValue: nameDep.currentValue,
+      ...nameDep,
       currentDigest: digest,
       replaceString: digest,
     };
@@ -115,11 +119,9 @@ export function extractImage(image: Image): PackageDependency | null {
       };
     }
 
-    // TODO: types (#22198)
-    const dep = splitImageParts(`${depName}:${newTag}`);
+    const dep = getDep(`${depName}:${newTag}`, false, aliases);
     return {
       ...dep,
-      datasource: DockerDatasource.id,
       replaceString: newTag,
       autoReplaceStringTemplate:
         '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
@@ -129,7 +131,6 @@ export function extractImage(image: Image): PackageDependency | null {
   if (image.newName) {
     return {
       ...nameDep,
-      datasource: DockerDatasource.id,
       replaceString: image.newName,
     };
   }
@@ -180,9 +181,10 @@ export function parseKustomize(
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string, // TODO: fix tests
+  packageFile: string,
+  config: ExtractConfig,
 ): PackageFileContent | null {
-  logger.trace(`kustomize.extractPackageFile(${packageFile!})`);
+  logger.trace(`kustomize.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
 
   const pkg = parseKustomize(content, packageFile);
@@ -225,7 +227,7 @@ export function extractPackageFile(
 
   // grab the image tags
   for (const image of coerceArray(pkg.images)) {
-    const dep = extractImage(image);
+    const dep = extractImage(image, config.registryAliases);
     if (dep) {
       deps.push({
         ...dep,
