@@ -11,7 +11,7 @@ interface TimingStatsReport {
   totalMs: number;
 }
 
-export function makeStatsReport(data: number[]): TimingStatsReport {
+export function makeTimingReport(data: number[]): TimingStatsReport {
   const count = data.length;
   const totalMs = data.reduce((a, c) => a + c, 0);
   const avgMs = count ? Math.round(totalMs / count) : 0;
@@ -44,7 +44,7 @@ export class LookupStats {
     const report: Record<string, TimingStatsReport> = {};
     const data = memCache.get<LookupStatsData>('lookup-stats') ?? {};
     for (const [datasource, durations] of Object.entries(data)) {
-      report[datasource] = makeStatsReport(durations);
+      report[datasource] = makeTimingReport(durations);
     }
     return report;
   }

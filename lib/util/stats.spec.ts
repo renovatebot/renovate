@@ -1,15 +1,15 @@
 import { logger } from '../../test/util';
 import * as memCache from './cache/memory';
-import { LookupStats, makeStatsReport } from './stats';
+import { LookupStats, makeTimingReport } from './stats';
 
 describe('util/stats', () => {
   beforeEach(() => {
     memCache.init();
   });
 
-  describe('makeStatsReport', () => {
+  describe('makeTimingReport', () => {
     it('supports empty data', () => {
-      const res = makeStatsReport([]);
+      const res = makeTimingReport([]);
       expect(res).toEqual({
         avgMs: 0,
         count: 0,
@@ -20,7 +20,7 @@ describe('util/stats', () => {
     });
 
     it('supports single data point', () => {
-      const res = makeStatsReport([100]);
+      const res = makeTimingReport([100]);
       expect(res).toEqual({
         avgMs: 100,
         count: 1,
@@ -31,7 +31,7 @@ describe('util/stats', () => {
     });
 
     it('supports multiple data points', () => {
-      const res = makeStatsReport([100, 200, 400]);
+      const res = makeTimingReport([100, 200, 400]);
       expect(res).toEqual({
         avgMs: 233,
         count: 3,
