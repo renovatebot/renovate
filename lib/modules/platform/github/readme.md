@@ -2,10 +2,10 @@
 
 ## Authentication
 
-First, create a
-[fine-grained](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token)
-or [classic](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic)
-PAT ([Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#about-personal-access-tokens)) for the bot account, select `repo` scope.
+First, create a [fine-grained](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token) _or_ a [classic](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic) PAT.
+The PAT must have the `repo` scope.
+
+Read the [GitHub Docs, about Personal Access Tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#about-personal-access-tokens) to learn more about PATs.
 
 Let Renovate use your PAT by doing _one_ of the following:
 
@@ -27,11 +27,11 @@ You can choose where you want to set `endpoint`:
     If you're self-hosting Renovate on GitHub.com with GitHub Actions in forking mode, and want Renovate to apply labels then you must give the PAT `triage` level rights on `issues`.
     The `triage` level allows the PAT to apply/dismiss existing labels.
 
-## Running using a Fine-grained Token
+## Running using a fine-grained token
 
 ### Permissions
 
-These are the permissions required for a Fine-grained token:
+A fine-grained token must have these permissions:
 
 | Permission          | Access           | Level                          |
 | ------------------- | ---------------- | ------------------------------ |
