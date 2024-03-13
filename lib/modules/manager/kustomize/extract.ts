@@ -148,7 +148,11 @@ export function extractHelmChart(
   }
 
   if (isOCIRegistry(helmChart.repo)) {
-    const dep = getDep(`${helmChart.repo.replace('oci://', '')}/${helmChart.name}:${helmChart.version}`, false, aliases);
+    const dep = getDep(
+      `${helmChart.repo.replace('oci://', '')}/${helmChart.name}:${helmChart.version}`,
+      false,
+      aliases,
+    );
     return {
       ...dep,
       depName: helmChart.name,

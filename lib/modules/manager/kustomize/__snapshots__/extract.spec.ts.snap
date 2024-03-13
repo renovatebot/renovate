@@ -175,6 +175,7 @@ exports[`modules/manager/kustomize/extract extractPackageFile() parses helmChart
       ],
     },
     {
+      "currentDigest": undefined,
       "currentValue": "18.12.1",
       "datasource": "docker",
       "depName": "redis",
