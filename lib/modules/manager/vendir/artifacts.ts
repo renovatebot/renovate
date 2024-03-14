@@ -77,7 +77,7 @@ export async function updateArtifacts({
       // Files must be in the vendor path to get added
       const vendorDir = getSiblingFileName(packageFileName, './');
       const status = await getRepoStatus();
-      for (const f of status.modified.concat(status.not_added)) {
+      for (const f of (status.modified ?? []).concat(status.not_added)) {
         if (f.startsWith(vendorDir)) {
           fileChanges.push({
             file: {
@@ -88,6 +88,7 @@ export async function updateArtifacts({
           });
         }
       }
+
       for (const f of status.deleted ?? []) {
         fileChanges.push({
           file: {
