@@ -213,6 +213,21 @@ For example:
 }
 ```
 
+## autodiscoverProjects
+
+You can use this option to filter the list of autodiscovered repositories by project names.
+This feature is useful for users who want Renovate to only work on repositories within specific projects or exclude certain repositories from being processed.
+
+```json title="Example for Bitbucket"
+{
+  "platform": "bitbucket",
+  "autodiscoverProjects": ["a-group", "!another-group/some-subgroup"]
+}
+```
+
+The `autodiscoverProjects` config option takes an array of minimatch-compatible globs or RE2-compatible regex strings.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ## autodiscoverTopics
 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
@@ -918,17 +933,9 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 }
 ```
 
-<!-- prettier-ignore -->
-!!! note
-    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running Renovate within an EC2 instance in an ECS cluster. In this case, no extra environment variables are required.
-    Otherwise, the following environment variables should be set for the S3 client to work.
-
-```
-    AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY
-    AWS_SESSION_TOKEN
-    AWS_REGION
-```
+Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
+Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
+Read more about the default credential provider chain for AWS SDK for JavaScript V3 [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
 <!-- prettier-ignore -->
 !!! tip

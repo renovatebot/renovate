@@ -1,52 +1,13 @@
 import { logger } from '../../../test/util';
 import type { Logger } from '../../logger/types';
 import * as memCache from '../../util/cache/memory';
-import type { LookupStats } from '../../util/cache/memory/types';
-import { printLookupStats, printRequestStats } from './stats';
+import { printRequestStats } from './stats';
 
 const log = logger.logger as jest.Mocked<Logger>;
 
 describe('workers/repository/stats', () => {
   beforeEach(() => {
     memCache.init();
-  });
-
-  describe('printLookupStats()', () => {
-    it('runs', () => {
-      const stats: LookupStats[] = [
-        {
-          datasource: 'npm',
-          duration: 100,
-        },
-        {
-          datasource: 'npm',
-          duration: 200,
-        },
-        {
-          datasource: 'docker',
-          duration: 1000,
-        },
-      ];
-      memCache.set('lookup-stats', stats);
-      expect(printLookupStats()).toBeUndefined();
-      expect(log.debug).toHaveBeenCalledTimes(1);
-      expect(log.debug.mock.calls[0][0]).toMatchInlineSnapshot(`
-        {
-          "docker": {
-            "averageMs": 1000,
-            "count": 1,
-            "maximumMs": 1000,
-            "totalMs": 1000,
-          },
-          "npm": {
-            "averageMs": 150,
-            "count": 2,
-            "maximumMs": 200,
-            "totalMs": 300,
-          },
-        }
-      `);
-    });
   });
 
   describe('printRequestStats()', () => {

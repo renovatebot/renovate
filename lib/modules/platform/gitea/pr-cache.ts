@@ -19,7 +19,9 @@ export class GiteaPrCache {
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.gitea ??= {};
-    let pullRequestCache = repoCache.platform.gitea.pullRequestsCache;
+    let pullRequestCache = repoCache.platform.gitea.pullRequestsCache as
+      | GiteaPrCacheData
+      | undefined;
     if (!pullRequestCache || pullRequestCache.author !== author) {
       pullRequestCache = {
         items: {},
