@@ -135,7 +135,10 @@ async function gotTask<T>(
 export class Http<Opts extends HttpOptions = HttpOptions> {
   private options?: GotOptions;
 
-  constructor(protected hostType: string, options: HttpOptions = {}) {
+  constructor(
+    protected hostType: string,
+    options: HttpOptions = {},
+  ) {
     const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
     this.options = merge<GotOptions>(options, {
       context: { hostType },
