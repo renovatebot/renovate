@@ -1,5 +1,3 @@
-import is from '@sindresorhus/is';
-import semver from 'semver';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { regEx } from '../../../util/regex';
 import { GenericVersion, GenericVersioningApi } from '../generic';
@@ -16,15 +14,6 @@ export interface RegExpVersion extends GenericVersion {
    * never try to update to a version with a different compatibility.
    */
   compatibility: string;
-}
-
-// convenience method for passing a Version object into any semver.* method.
-function asSemver(version: RegExpVersion): string {
-  let vstring = `${version.release[0]}.${version.release[1]}.${version.release[2]}`;
-  if (is.nonEmptyString(version.prerelease)) {
-    vstring += `-${version.prerelease}`;
-  }
-  return vstring;
 }
 
 export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
@@ -100,58 +89,6 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
       parsedVersion &&
       parsedCurrent &&
       parsedVersion.compatibility === parsedCurrent.compatibility
-    );
-  }
-
-  override isLessThanRange(version: string, range: string): boolean {
-    const parsedVersion = this._parse(version);
-    const parsedRange = this._parse(range);
-    return !!(
-      parsedVersion &&
-      parsedRange &&
-      semver.ltr(asSemver(parsedVersion), asSemver(parsedRange))
-    );
-  }
-
-  override getSatisfyingVersion(
-    versions: string[],
-    range: string,
-  ): string | null {
-    const parsedRange = this._parse(range);
-    return parsedRange
-      ? semver.maxSatisfying(
-          versions
-            .map((v) => this._parse(v))
-            .filter(is.truthy)
-            .map(asSemver),
-          asSemver(parsedRange),
-        )
-      : null;
-  }
-
-  override minSatisfyingVersion(
-    versions: string[],
-    range: string,
-  ): string | null {
-    const parsedRange = this._parse(range);
-    return parsedRange
-      ? semver.minSatisfying(
-          versions
-            .map((v) => this._parse(v))
-            .filter(is.truthy)
-            .map(asSemver),
-          asSemver(parsedRange),
-        )
-      : null;
-  }
-
-  override matches(version: string, range: string): boolean {
-    const parsedVersion = this._parse(version);
-    const parsedRange = this._parse(range);
-    return !!(
-      parsedVersion &&
-      parsedRange &&
-      semver.satisfies(asSemver(parsedVersion), asSemver(parsedRange))
     );
   }
 }

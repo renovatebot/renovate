@@ -41,6 +41,7 @@ export interface RepoParams {
   repository: string;
   endpoint?: string;
   gitUrl?: GitUrlOption;
+  forkCreation?: boolean;
   forkOrg?: string;
   forkToken?: string;
   forkProcessing?: 'enabled' | 'disabled';
@@ -112,6 +113,7 @@ export interface CreatePRConfig {
   labels?: string[] | null;
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
+  milestone?: number;
 }
 export interface UpdatePrConfig {
   number: number;
@@ -176,6 +178,7 @@ export interface AutodiscoverConfig {
   topics?: string[];
   includeMirrors?: boolean;
   namespaces?: string[];
+  projects?: string[];
 }
 
 export interface Platform {

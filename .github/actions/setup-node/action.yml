@@ -29,12 +29,12 @@ runs:
         }}-${{
           inputs.node-version
         }}-${{
-          hashFiles('pnpm-lock.yaml')
+          hashFiles('pnpm-lock.yaml', 'package.json')
         }}' >> "$GITHUB_ENV"
 
     - name: Restore `node_modules`
       id: node-modules-restore
-      uses: actions/cache/restore@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+      uses: actions/cache/restore@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
@@ -58,7 +58,7 @@ runs:
         cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
 
     - name: Install dependencies
-      uses: nick-fields/retry@14672906e672a08bd6eeb15720e9ed3ce869cdd4 # v2.9.0
+      uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
       if: env.CACHE_HIT != 'true'
       with:
         timeout_minutes: 10
@@ -67,7 +67,7 @@ runs:
 
     - name: Write `node_modules` cache
       if: inputs.save-cache == 'true' && env.CACHE_HIT != 'true'
-      uses: actions/cache/save@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
+      uses: actions/cache/save@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
       with:
         path: node_modules
         key: ${{ env.CACHE_KEY }}
