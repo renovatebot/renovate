@@ -832,7 +832,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['npm'],
         matchPackageNames: ['rollup-plugin-terser'],
         replacementName: '@rollup/plugin-terser',
-        replacementVersion: '0.4.4',
+        replacementVersion: '0.1.0',
       },
     ],
   },
