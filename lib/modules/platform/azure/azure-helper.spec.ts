@@ -1,8 +1,6 @@
 import { Readable } from 'node:stream';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { partial } from '../../../../test/util';
-import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
-import type { PagedList }from 'azure-devops-node-api/interfaces/common/VSSInterfaces';
 import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
 
 jest.mock('./azure-got-wrapper');
