@@ -276,4 +276,28 @@ describe('util/template/index', () => {
       expect(output).toBe('not equals');
     });
   });
+
+  describe('includes', () => {
+    it('includes is true', () => {
+      const output = template.compile(
+        '{{#if (includes depTypeList "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          depTypeList: ['dependencies'],
+        },
+      );
+
+      expect(output).toBe('production');
+    });
+
+    it('includes is false', () => {
+      const output = template.compile(
+        '{{#if (includes depTypeList "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          depTypeList: ['devDependencies'],
+        },
+      );
+
+      expect(output).toBe('notProduction');
+    });
+  });
 });
