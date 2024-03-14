@@ -74,11 +74,16 @@ export async function updateArtifacts({
 
     // add modified vendir archives to artifacts
     if (is.truthy(isUpdateOptionAddVendirArchives)) {
+      logger.debug("Adding Sync'd files to git");
       // Files must be in the vendor path to get added
-      const vendorDir = getSiblingFileName(packageFileName, './');
+      const vendorDir = getSiblingFileName(packageFileName, '.');
+      logger.debug('vendorDir = ' + vendorDir);
       const status = await getRepoStatus();
       for (const f of (status.modified ?? []).concat(status.not_added)) {
-        if (f.startsWith(vendorDir)) {
+        logger.debug({ f }, 'Checking if file is in vendor directory');
+        const isFileInVendorDir = f.startsWith(vendorDir);
+        if (vendorDir === '.' || isFileInVendorDir) {
+          logger.debug({ f }, 'Adding file to artifacts/git');
           fileChanges.push({
             file: {
               type: 'addition',
