@@ -1,3 +1,4 @@
+/* eslint-disable import/order */
 import merge from 'deepmerge';
 import got, { Options, RequestError } from 'got';
 import type { SetRequired } from 'type-fest';
@@ -26,10 +27,10 @@ import type {
   HttpRequestOptions,
   HttpResponse,
   InternalHttpOptions,
-  RequestStats,
 } from './types';
 // TODO: refactor code to remove this (#9651)
 import './legacy';
+import { HttpStats, type HttpRequestStatsDataPoint } from '../stats';
 
 export { RequestError as HttpError };
 
@@ -76,6 +77,8 @@ function applyDefaultHeaders(options: Options): void {
   };
 }
 
+type QueueStatsData = Pick<HttpRequestStatsDataPoint, 'queueMs'>;
+
 // Note on types:
 // options.requestType can be either 'json' or 'buffer', but `T` should be
 // `Buffer` in the latter case.
@@ -84,7 +87,7 @@ function applyDefaultHeaders(options: Options): void {
 async function gotTask<T>(
   url: string,
   options: SetRequired<GotOptions, 'method'>,
-  requestStats: Omit<RequestStats, 'duration' | 'statusCode'>,
+  queueStats: QueueStatsData,
 ): Promise<HttpResponse<T>> {
   logger.trace({ url, options }, 'got request');
 
@@ -119,9 +122,13 @@ async function gotTask<T>(
 
     throw error;
   } finally {
-    const httpRequests = memCache.get<RequestStats[]>('http-requests') || [];
-    httpRequests.push({ ...requestStats, duration, statusCode });
-    memCache.set('http-requests', httpRequests);
+    HttpStats.write({
+      method: options.method,
+      url,
+      reqMs: duration,
+      queueMs: queueStats.queueMs,
+      status: statusCode,
+    });
   }
 }
 
@@ -236,12 +243,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       }
       const startTime = Date.now();
       const httpTask: GotTask<T> = () => {
-        const queueDuration = Date.now() - startTime;
-        return gotTask(url, options, {
-          method: options.method,
-          url,
-          queueDuration,
-        });
+        const queueMs = Date.now() - startTime;
+        return gotTask(url, options, { queueMs });
       };
 
       const throttle = this.getThrottle(url);

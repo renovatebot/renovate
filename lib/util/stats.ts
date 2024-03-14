@@ -1,5 +1,6 @@
 import { logger } from '../logger';
 import * as memCache from './cache/memory';
+import { parseUrl } from './url';
 
 type LookupStatsData = Record<string, number[]>;
 
@@ -101,5 +102,134 @@ export class PackageCacheStats {
   static report(): void {
     const report = PackageCacheStats.getReport();
     logger.debug(report, 'Package cache statistics');
+  }
+}
+
+export interface HttpRequestStatsDataPoint {
+  method: string;
+  url: string;
+  reqMs: number;
+  queueMs: number;
+  status: number;
+}
+
+interface HostStatsData {
+  count: number;
+  reqAvgMs: number;
+  reqMedianMs: number;
+  reqMaxMs: number;
+  queueAvgMs: number;
+  queueMedianMs: number;
+  queueMaxMs: number;
+}
+
+interface HttpStatsCollection {
+  urlCounts: Record<string, number>;
+  allRequests: string[];
+  requestsByHost: Record<string, HttpRequestStatsDataPoint[]>;
+  statsByHost: Record<string, HostStatsData>;
+  totalRequests: number;
+}
+
+export class HttpStats {
+  static write(data: HttpRequestStatsDataPoint): void {
+    const httpRequests =
+      memCache.get<HttpRequestStatsDataPoint[]>('http-requests') ?? [];
+    httpRequests.push(data);
+    memCache.set('http-requests', httpRequests);
+  }
+
+  static getDataPoints(): HttpRequestStatsDataPoint[] {
+    const httpRequests =
+      memCache.get<HttpRequestStatsDataPoint[]>('http-requests') ?? [];
+
+    // istanbul ignore next: sorting is hard and not worth testing
+    httpRequests.sort((a, b) => {
+      if (a.url < b.url) {
+        return -1;
+      }
+
+      if (a.url > b.url) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    return httpRequests;
+  }
+
+  static getReport(): HttpStatsCollection {
+    const dataPoints = HttpStats.getDataPoints();
+
+    const urlCounts: Record<string, number> = {};
+    const allRequests: string[] = [];
+    const requestsByHost: Record<string, HttpRequestStatsDataPoint[]> = {};
+
+    for (const dataPoint of dataPoints) {
+      const { url, reqMs, queueMs, status } = dataPoint;
+      const method = dataPoint.method.toUpperCase();
+
+      const parsedUrl = parseUrl(url);
+      if (!parsedUrl) {
+        logger.debug({ url }, 'Failed to parse URL during stats reporting');
+        continue;
+      }
+      const { hostname, origin, pathname } = parsedUrl;
+      const baseUrl = `${origin}${pathname}`;
+
+      const urlKey = `${baseUrl} (${method}, ${status})`;
+      urlCounts[urlKey] ??= 0;
+      urlCounts[urlKey] += 1;
+
+      allRequests.push(`${method} ${url} ${status} ${reqMs} ${queueMs}`);
+
+      requestsByHost[hostname] ??= [];
+      requestsByHost[hostname].push(dataPoint);
+    }
+
+    const statsByHost: Record<string, HostStatsData> = {};
+
+    let totalRequests = 0;
+    for (const [hostname, requests] of Object.entries(requestsByHost)) {
+      const count = requests.length;
+      totalRequests += count;
+
+      const reqTimes = requests.map((r) => r.reqMs);
+      const queueTimes = requests.map((r) => r.queueMs);
+
+      const reqReport = makeTimingReport(reqTimes);
+      const queueReport = makeTimingReport(queueTimes);
+
+      statsByHost[hostname] = {
+        count,
+        reqAvgMs: reqReport.avgMs,
+        reqMedianMs: reqReport.medianMs,
+        reqMaxMs: reqReport.maxMs,
+        queueAvgMs: queueReport.avgMs,
+        queueMedianMs: queueReport.medianMs,
+        queueMaxMs: queueReport.maxMs,
+      };
+    }
+
+    return {
+      urlCounts,
+      allRequests,
+      requestsByHost,
+      statsByHost,
+      totalRequests,
+    };
+  }
+
+  static report(): void {
+    const {
+      urlCounts,
+      allRequests,
+      requestsByHost,
+      statsByHost,
+      totalRequests,
+    } = HttpStats.getReport();
+    logger.trace({ allRequests, requestsByHost }, 'HTTP full stats');
+    logger.debug({ urlCounts, statsByHost, totalRequests }, 'HTTP stats');
   }
 }
