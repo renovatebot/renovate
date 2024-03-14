@@ -289,7 +289,6 @@ const options: RenovateOptions[] = [
     allowedValues: ['disabled', 'enabled', 'reset'],
     stage: 'repository',
     default: 'disabled',
-    experimental: true,
   },
   {
     name: 'repositoryCacheType',
@@ -299,7 +298,6 @@ const options: RenovateOptions[] = [
     type: 'string',
     stage: 'repository',
     default: 'local',
-    experimental: true,
   },
   {
     name: 'force',
@@ -434,7 +432,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.2.6',
+    default: 'ghcr.io/containerbase/sidecar:10.3.0',
     globalOnly: true,
   },
   {
@@ -885,6 +883,17 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['gitlab'],
   },
   {
+    name: 'autodiscoverProjects',
+    description:
+      'Filter the list of autodiscovered repositories by project names.',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    supportedPlatforms: ['bitbucket'],
+  },
+  {
     name: 'autodiscoverTopics',
     description: 'Filter the list of autodiscovered repositories by topics.',
     stage: 'global',
@@ -1024,6 +1033,7 @@ const options: RenovateOptions[] = [
       'helmfile',
       'helmv3',
       'kubernetes',
+      'kustomize',
       'terraform',
       'woodpecker',
     ],
@@ -1473,7 +1483,6 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
-    experimental: true,
   },
   {
     name: 'matchUpdateTypes',

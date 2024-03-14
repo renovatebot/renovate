@@ -9,13 +9,10 @@
 
     Before we start working on your issue we need to know exactly what's causing the current behavior.
     A minimal reproduction helps us with this.
+    Discussions without reproductions are less likely to be converted to Issues.
 
 
     To get started, please read our guide on creating a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
-
-
-    We may close the discussion if you, or someone else, haven't created a minimal reproduction within two weeks.
-    If you need more time, or are stuck, please ask for help or more time in a comment.
 
 
     Good luck,
@@ -42,15 +39,15 @@
     <details><summary>Select me to read instructions</summary>
 
 
-    If you use the Renovate app (GitHub):
+    If you use the Mend Renovate app (GitHub):
 
-    1. Go to the affected PR, and search for "View repository job log here"
+    1. Log in to [the Mend Developer Portal](https://developer.mend.io/)
 
-    1. Select the link to go to the "Mend Renovate Dashboard" and log in
+    1. Navigate to the correct organization and repository
 
-    1. You are now in the correct repository log overview screen
+    1. Locate the appropriate log (it may not always be the latest one)
 
-    1. Copy/paste the correct log
+    1. Copy/paste the log contents
 
     1. Follow the steps in the **formatting your logs** section
 
@@ -96,6 +93,9 @@
     </details>
 
 
+    If you feel the logs are too large to paste here, please use a service like [GitHub Gist](https://gist.github.com/) and paste the link here.
+
+
     Good luck,
 
 
@@ -126,6 +126,9 @@
 
     You're reporting a problem with an old version of Renovate.
     Please try the latest version and tell us if that fixes your problem.
+
+
+    Be sure to provide updated logs once you have run with a newer version.
 
 
     Good luck,
@@ -168,7 +171,7 @@
     Hi there,
 
 
-    You are using `done` comments which cause a lot of noise.
+    You are using `done` comments which cause a lot of noise/notifications.
     Instead, please use GitHub's web interface to request another review.
     Please read our [contributing guidelines](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md#resolve-review-comments-instead-of-commenting) to reduce noise.
 
@@ -184,7 +187,13 @@
 
 
     Thank you for your PR, but we need to discuss the requirements and implementation first.
-    This PR will be closed, but you can reopen it after the discussion has been resolved.
+
+
+    The maintainers believe that there is a lack of - or misalignment of - requirements about this PR.
+    We need to discuss the requirements and implementation first so that you don't write code that won't be merged.
+
+
+    This PR will be closed for now to avoid confusion, but you can reopen it after the discussion has been resolved.
 
 
     Thanks, the Renovate team
@@ -198,16 +207,19 @@
     This discussion is missing some details, making it difficult or impossible to help you.
     Please try again to provide more details.
 
+
+    For example, you may have left out information about your platform (e.g. GitHub Enterprise Server, etc), your version of Renovate (npm, Docker, GitHub Action, etc), or how you're running Renovate.
+
+
+    If you can't think of what possible information might be required, please reply to this message and ask for help.
+
 'needs-discussion':
-  unlabel:
-    - 'type:bug'
-    - 'type:feature'
-    - 'status:requirements'
   comment: >
     **Please create a GitHub Discussion instead of this issue.**
 
 
-    We only want Renovate maintainers to create new Issues. If needed, a Renovate maintainer will create an Issue after your Discussion been triaged and confirmed. As a Renovate user, please create a GitHub Discussion in this repo instead.
+    Issues in this repository are for creation by Maintainers only - please create a GitHub Discussion instead.
+    If needed, a Renovate maintainer will create an Issue after your Discussion been triaged and confirmed.
 
 
     This Issue will now be closed and locked. We may later batch-delete this issue. This way we keep Issues actionable, and free of duplicates or wrong bug reports.
@@ -271,9 +283,6 @@
      - Stop giving off more bad vibes
 
 
-    If you're unhappy with this, we suggest you stop using the repository discussions or the product altogether.
-
-
     Thanks, the Renovate team
 
 'auto:one-topic':
@@ -299,7 +308,7 @@
     Hi there,
 
 
-    Please do not unnecessarily `@` mention maintainers like `@rarkins` or `@viceice`. Doing so causes annoying notifications and makes it harder to maintain this repository.
+    Please do not unnecessarily `@` mention maintainers like `@rarkins` or `@viceice`. Doing so causes annoying mobile notifications and makes it harder to maintain this repository.
 
 
     For example, never `@` mention a maintainer when you are creating a discussion if your desire is to get attention. This is rude behavior, just like shouting out your coffee order in a Starbucks before it's your turn.
@@ -307,24 +316,5 @@
 
     It's OK to comment in an issue or discussion after multiple days or weeks. But please, still don't `@` mention people. The maintainers try to answer most discussions, but they can't answer all discussions. If you're still not getting an answer, take a look at the information you've given us and see if you can improve it.
 
-
-    Thanks, the Renovate team
-
-'auto:misclassified-problem':
-  comment: >
-    Hi there,
-
-
-    A maintainer has flagged that this discussion is _misclassified_ as a bug when it is not.
-
-
-    Incorrectly classified discussions waste maintainer time, worsen search result accuracy and make it harder to train AI on this dataset.
-
-
-    The next time you create a discussion, please keep in mind:
-     - If you are new to Renovate, try to stick to questions instead of problem reports
-     - Just because Renovate does something you don't expect, doesn't automatically mean it's a bug
-     - Unsupported features should be raised as ideas, not problems
-     - Those who appear to be _twisting_ questions into sounding like a bug for attention will be given the least support
 
     Thanks, the Renovate team

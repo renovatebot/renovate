@@ -20,6 +20,18 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     expect(usesGcv('othersub/versions.props', fsMock)).toBeFalse();
   });
 
+  it('detects lock file header introduced with gradle-consistent-versions version 2.20.0', () => {
+    const fsMock = {
+      'build.gradle.kts': `(this file contains) 'com.palantir.consistent-versions'`,
+      'versions.props': `org.apache.lucene:* = 1.2.3`,
+      'versions.lock': stripIndent`
+        # Run ./gradlew writeVersionsLock to regenerate this file
+        org.apache.lucene:lucene-core:1.2.3`,
+    };
+
+    expect(usesGcv('versions.props', fsMock)).toBeTrue();
+  });
+
   it('gradle-consistent-versions plugin correct position for CRLF and LF', () => {
     const crlfProps = parsePropsFile(`a.b:c.d=1\r\na.b:c.e=2`);
     expect(crlfProps).toBeArrayOfSize(2);
@@ -47,7 +59,6 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     expect(parsedProps[0]).toMatchObject({ size: 1 }); // no 7 is valid exact dep
     expect(parsedProps[1]).toMatchObject({ size: 1 }); // no 8 is valid glob dep
 
-    // lockfile
     const parsedLock = parseLockFile(stripIndent`
       # comment:foo.bar:1 (10 constraints: 95be0c15)
       123.foo:bar:2 (10 constraints: 95be0c15)
