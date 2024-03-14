@@ -35,8 +35,20 @@ for FILTER in "$STATUS_LABELS_FILTER" "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FI
 done
 
 if [ "$HAS_ISSUES_MISSING_LABELS" ]; then
-  # Create a new issue with the list of issues
-  gh issue create --repo 'renovatebot/renovate' --title "Label check action" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to create issue"; exit 1; }
+  LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --repo 'renovatebot/renovate' --label 'action-label-check' --json number) || { echo "Failed to fetch existing label check issue"; exit 1; }
+
+  ISSUE_NUMBER=$(echo "$LABEL_CHECK_ISSUE_EXISTS" | jq -r '.[0].number')
+
+  if [ "$ISSUE_NUMBER" == "null" ]; then
+    # Create a new issue with the list of issues
+    gh issue create --repo 'renovatebot/renovate' --title "Label check action" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to create issue"; exit 1; }
+  else
+    # Update the existing issue with the list of issues
+    gh issue edit "$ISSUE_NUMBER" --repo 'renovatebot/renovate' --title "Label check action" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to update issue"; exit 1; }
+
+    # Reopen the issue
+    gh issue reopen "$ISSUE_NUMBER" --repo 'renovatebot/renovate' || { echo "Failed to reopen issue"; exit 1; }
+  fi
 
   # Provide an output in the action itself
   echo -e "$ISSUE_BODY"
