@@ -37,6 +37,7 @@ export const presets: Record<string, Preset> = {
       'replacements:rollup-babel-to-scoped',
       'replacements:rollup-json-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:rollup-terser-to-scoped',
       'replacements:rome-to-biome',
       'replacements:semantic-release-replace-plugin-to-unscoped',
       'replacements:spectre-cli-to-spectre-console-cli',
@@ -820,6 +821,18 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rollup-plugin-node-resolve'],
         replacementName: '@rollup/plugin-node-resolve',
         replacementVersion: '6.0.0',
+      },
+    ],
+  },
+  'rollup-terser-to-scoped': {
+    description: 'The terser plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=7.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-terser'],
+        replacementName: '@rollup/plugin-terser',
+        replacementVersion: '0.1.0',
       },
     ],
   },
