@@ -2,6 +2,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
 const oneContents = Fixtures.get('one-contents.yaml');
+const ociContents = Fixtures.get('oci-contents.yaml');
 const multipleContents = Fixtures.get('multiple-contents.yaml');
 const emptyDirectories = Fixtures.get('empty-directory.yaml');
 
@@ -30,6 +31,20 @@ describe('modules/manager/vendir/extract', () => {
             currentValue: '7.10.1',
             depName: 'contour',
             datasource: 'helm',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
+          },
+        ],
+      });
+    });
+
+    it('single chart - extracts oci helm-chart from vendir.yml correctly', () => {
+      const result = extractPackageFile(ociContents);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '7.10.1',
+            depName: 'contour',
+            datasource: 'docker',
             registryUrls: ['https://charts.bitnami.com/bitnami'],
           },
         ],

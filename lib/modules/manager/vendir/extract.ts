@@ -4,7 +4,8 @@ import { parseSingleYaml } from '../../../util/yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { HelmChart, Vendir } from './types';
-import { isHelmChart } from './utils';
+import { isHelmChart, isOCIRegistry } from './utils';
+import { DockerDatasource } from '../../datasource/docker';
 
 // TODO: Add support for other vendir types (like git tags, github releases, etc.)
 // Recommend looking at the kustomize manager for more information on support.
@@ -15,12 +16,17 @@ export function extractHelmChart(
   if (!helmChart.name) {
     return null;
   }
-
+  let registryUrl = helmChart.repository.url
+  let dataSource = HelmDatasource.id
+  if (isOCIRegistry(helmChart.repository)) {
+    registryUrl = helmChart.repository.url.replace("oci://", "https://")
+    dataSource = DockerDatasource.id
+  }
   return {
     depName: helmChart.name,
     currentValue: helmChart.version,
-    registryUrls: [helmChart.repository.url],
-    datasource: HelmDatasource.id,
+    registryUrls: [registryUrl],
+    datasource: dataSource,
   };
 }
 
@@ -51,7 +57,7 @@ export function parseVendir(
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string, // TODO: fix tests
+  packageFile?: string,
 ): PackageFileContent | null {
   logger.trace(`vendir.extractPackageFile(${packageFile!})`);
   const deps: PackageDependency[] = [];
@@ -62,8 +68,6 @@ export function extractPackageFile(
   }
 
   // grab the helm charts
-  // TODO: Add support for OCI Repos by translating Registry URLs and using
-  // Docker datasource. (See Helmv3 for example implementation)
   const contents = pkg.directories.flatMap((directory) => directory.contents);
   for (const content of contents) {
     if (isHelmChart(content)) {
