@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import { parseSingleYaml } from '../../../util/yaml';
 import { logger } from '../../../logger';
+import { parseSingleYaml } from '../../../util/yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { HelmChart, Vendir } from './types';

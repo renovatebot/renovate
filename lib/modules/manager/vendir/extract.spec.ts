@@ -7,7 +7,6 @@ const emptyDirectories = Fixtures.get('empty-directory.yaml');
 
 describe('modules/manager/vendir/extract', () => {
   describe('extractPackageFile()', () => {
-
     it('returns null for invalid yaml file content', () => {
       const result = extractPackageFile('nothing here: [');
       expect(result).toBeNull();
