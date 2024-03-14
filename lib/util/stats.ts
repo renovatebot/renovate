@@ -54,3 +54,52 @@ export class LookupStats {
     logger.debug(report, 'Lookup statistics');
   }
 }
+
+type PackageCacheData = number[];
+
+export class PackageCacheStats {
+  static writeSet(duration: number): void {
+    const data = memCache.get<PackageCacheData>('package-cache-sets') ?? [];
+    data.push(duration);
+    memCache.set('package-cache-sets', data);
+  }
+
+  static async wrapSet<T>(callback: () => Promise<T>): Promise<T> {
+    const start = Date.now();
+    const result = await callback();
+    const duration = Date.now() - start;
+    PackageCacheStats.writeSet(duration);
+    return result;
+  }
+
+  static writeGet(duration: number): void {
+    const data = memCache.get<PackageCacheData>('package-cache-gets') ?? [];
+    data.push(duration);
+    memCache.set('package-cache-gets', data);
+  }
+
+  static async wrapGet<T>(callback: () => Promise<T>): Promise<T> {
+    const start = Date.now();
+    const result = await callback();
+    const duration = Date.now() - start;
+    PackageCacheStats.writeGet(duration);
+    return result;
+  }
+
+  static getReport(): { get: TimingStatsReport; set: TimingStatsReport } {
+    const packageCacheGets =
+      memCache.get<PackageCacheData>('package-cache-gets') ?? [];
+    const get = makeTimingReport(packageCacheGets);
+
+    const packageCacheSets =
+      memCache.get<PackageCacheData>('package-cache-sets') ?? [];
+    const set = makeTimingReport(packageCacheSets);
+
+    return { get, set };
+  }
+
+  static report(): void {
+    const report = PackageCacheStats.getReport();
+    logger.debug(report, 'Package cache statistics');
+  }
+}
