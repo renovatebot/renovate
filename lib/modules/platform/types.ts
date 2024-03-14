@@ -178,6 +178,7 @@ export interface AutodiscoverConfig {
   topics?: string[];
   includeMirrors?: boolean;
   namespaces?: string[];
+  projects?: string[];
 }
 
 export interface Platform {
