@@ -13,9 +13,6 @@ import { isHelmChart, isOCIRegistry } from './utils';
 export function extractHelmChart(
   helmChart: HelmChart,
 ): PackageDependency | null {
-  if (!helmChart.name) {
-    return null;
-  }
   let registryUrl = helmChart.repository.url;
   let dataSource = HelmDatasource.id;
   if (isOCIRegistry(helmChart.repository)) {
@@ -45,13 +42,6 @@ export function parseVendir(
   if (!pkg || is.string(pkg)) {
     return null;
   }
-
-  pkg.kind ??= 'Config';
-
-  if (!['Config'].includes(pkg.kind)) {
-    return null;
-  }
-
   return pkg;
 }
 
