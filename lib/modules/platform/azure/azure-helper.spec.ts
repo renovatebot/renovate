@@ -1,5 +1,9 @@
 import { Readable } from 'node:stream';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { partial } from '../../../../test/util';
+import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
+import type { PagedList }from 'azure-devops-node-api/interfaces/common/VSSInterfaces';
+import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
 
 jest.mock('./azure-got-wrapper');
 
@@ -239,28 +243,27 @@ describe('modules/platform/azure/azure-helper', () => {
     });
 
     it('should return Squash when Project wide exact branch policy exists', async () => {
-      azureApi.policyApi.mockImplementationOnce(
-        () =>
-          ({
-            getPolicyConfigurations: jest.fn(() => [
-              {
-                settings: {
-                  allowSquash: true,
-                  scope: [
-                    {
-                      // null here means project wide
-                      repositoryId: null,
-                    },
-                  ],
-                },
-                type: {
-                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
-                },
-              },
-            ]),
-          }) as any,
+      const refMock = 'refs/heads/ding';
+
+      azureApi.policyApi.mockResolvedValueOnce({
+          getPolicyConfigurations: jest.fn(() => Promise.resolve([
+            partial<PolicyConfiguration>({
+              settings: {
+                allowSquash: true,
+                scope: [
+                  {
+                    // null here means project wide
+                    repositoryId: null,
+                    matchKind: 'Exact',
+                    refName: refMock,
+                  },
+                ],
+              }
+            }),
+          ]))
+        }
       );
-      expect(await azureHelper.getMergeMethod('', '')).toEqual(
+      expect(await azureHelper.getMergeMethod('', '', refMock)).toEqual(
         GitPullRequestMergeStrategy.Squash,
       );
     });
