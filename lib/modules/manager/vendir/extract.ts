@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { parseSingleYaml } from '../../../util/yaml';
+import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { HelmChart, Vendir } from './types';
 import { isHelmChart, isOCIRegistry } from './utils';
-import { DockerDatasource } from '../../datasource/docker';
 
 // TODO: Add support for other vendir types (like git tags, github releases, etc.)
 // Recommend looking at the kustomize manager for more information on support.
@@ -16,11 +16,11 @@ export function extractHelmChart(
   if (!helmChart.name) {
     return null;
   }
-  let registryUrl = helmChart.repository.url
-  let dataSource = HelmDatasource.id
+  let registryUrl = helmChart.repository.url;
+  let dataSource = HelmDatasource.id;
   if (isOCIRegistry(helmChart.repository)) {
-    registryUrl = helmChart.repository.url.replace("oci://", "https://")
-    dataSource = DockerDatasource.id
+    registryUrl = helmChart.repository.url.replace('oci://', 'https://');
+    dataSource = DockerDatasource.id;
   }
   return {
     depName: helmChart.name,

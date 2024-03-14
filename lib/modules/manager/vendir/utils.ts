@@ -1,6 +1,6 @@
+import is from '@sindresorhus/is';
 import upath from 'upath';
 import type { Contents, HelmChartContent, Repository } from './types';
-import is from '@sindresorhus/is';
 
 export function isFileInDir(dir: string, file: string): boolean {
   return upath.relative(dir, file).startsWith('./');
@@ -10,9 +10,7 @@ export function isHelmChart(item: Contents): item is HelmChartContent {
   return 'helmChart' in item;
 }
 
-export function isOCIRegistry(
-  repository: Repository,
-): boolean {
+export function isOCIRegistry(repository: Repository): boolean {
   if (is.nullOrUndefined(repository)) {
     return false;
   }
