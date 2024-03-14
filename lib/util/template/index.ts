@@ -28,6 +28,8 @@ handlebars.registerHelper('containsString', (str, subStr) =>
 
 handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
 
+handlebars.registerHelper('includes', (arg1: string[], arg2: string) => arg1.includes(arg2));
+
 handlebars.registerHelper({
   and(...args) {
     // Need to remove the 'options', as last parameter
@@ -88,6 +90,7 @@ export const allowedFields = {
   depNameSanitized:
     'The depName field sanitized for use in branches after removing spaces and special characters',
   depType: 'The dependency type (if extracted - manager-dependent)',
+  depTypeList: 'The dependency type list (if extracted - manager-dependent)',
   displayFrom: 'The current value, formatted for display',
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
