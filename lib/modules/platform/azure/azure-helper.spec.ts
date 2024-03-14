@@ -244,7 +244,8 @@ describe('modules/platform/azure/azure-helper', () => {
       const refMock = 'refs/heads/ding';
 
       azureApi.policyApi.mockResolvedValueOnce({
-          getPolicyConfigurations: jest.fn(() => Promise.resolve([
+        getPolicyConfigurations: jest.fn(() =>
+          Promise.resolve([
             partial<PolicyConfiguration>({
               settings: {
                 allowSquash: true,
@@ -256,11 +257,11 @@ describe('modules/platform/azure/azure-helper', () => {
                     refName: refMock,
                   },
                 ],
-              }
+              },
             }),
-          ]))
-        }
-      );
+          ]),
+        ),
+      });
       expect(await azureHelper.getMergeMethod('', '', refMock)).toEqual(
         GitPullRequestMergeStrategy.Squash,
       );
