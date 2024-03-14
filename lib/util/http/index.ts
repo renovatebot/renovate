@@ -1,4 +1,3 @@
-/* eslint-disable import/order */
 import merge from 'deepmerge';
 import got, { Options, RequestError } from 'got';
 import type { SetRequired } from 'type-fest';
@@ -12,6 +11,7 @@ import { getCache } from '../cache/repository';
 import { clone } from '../clone';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
+import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
@@ -30,7 +30,6 @@ import type {
 } from './types';
 // TODO: refactor code to remove this (#9651)
 import './legacy';
-import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
 
 export { RequestError as HttpError };
 
