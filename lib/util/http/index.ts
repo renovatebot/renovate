@@ -30,7 +30,7 @@ import type {
 } from './types';
 // TODO: refactor code to remove this (#9651)
 import './legacy';
-import { HttpStats, type HttpRequestStatsDataPoint } from '../stats';
+import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
 
 export { RequestError as HttpError };
 
@@ -135,10 +135,7 @@ async function gotTask<T>(
 export class Http<Opts extends HttpOptions = HttpOptions> {
   private options?: GotOptions;
 
-  constructor(
-    protected hostType: string,
-    options: HttpOptions = {},
-  ) {
+  constructor(protected hostType: string, options: HttpOptions = {}) {
     const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
     this.options = merge<GotOptions>(options, {
       context: { hostType },
