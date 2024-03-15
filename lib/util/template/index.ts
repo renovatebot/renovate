@@ -88,6 +88,8 @@ export const allowedFields = {
   depNameSanitized:
     'The depName field sanitized for use in branches after removing spaces and special characters',
   depType: 'The dependency type (if extracted - manager-dependent)',
+  depTypes:
+    'A deduplicated array of dependency types (if extracted - manager-dependent) in a branch',
   displayFrom: 'The current value, formatted for display',
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
