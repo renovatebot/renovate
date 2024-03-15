@@ -71,7 +71,7 @@ As another example, in order for Gradle to extract dependencies Renovate must fi
 The `extractAllPackageFiles` function takes an array of filenames as input.
 It returns an array of filenames and dependencies.
 
-If you implement `extractAllPackageFiles` the manger must export as well either `updateDependency` or `extractPackageFile`.
+If you implement `extractAllPackageFiles` the manager must export as well either `updateDependency` or `extractPackageFile`.
 
 ### `getRangeStrategy(config)` (optional)
 
