@@ -1,8 +1,7 @@
 import { logger } from '../../../test/util';
 import type { Logger } from '../../logger/types';
 import * as memCache from '../../util/cache/memory';
-import type { LookupStats } from '../../util/cache/memory/types';
-import { printLookupStats, printRequestStats } from './stats';
+import { printRequestStats } from './stats';
 
 const log = logger.logger as jest.Mocked<Logger>;
 
@@ -11,48 +10,8 @@ describe('workers/repository/stats', () => {
     memCache.init();
   });
 
-  describe('printLookupStats()', () => {
-    it('runs', () => {
-      const stats: LookupStats[] = [
-        {
-          datasource: 'npm',
-          duration: 100,
-        },
-        {
-          datasource: 'npm',
-          duration: 200,
-        },
-        {
-          datasource: 'docker',
-          duration: 1000,
-        },
-      ];
-      memCache.set('lookup-stats', stats);
-      expect(printLookupStats()).toBeUndefined();
-      expect(log.debug).toHaveBeenCalledTimes(1);
-      expect(log.debug.mock.calls[0][0]).toMatchInlineSnapshot(`
-        {
-          "docker": {
-            "averageMs": 1000,
-            "count": 1,
-            "maximumMs": 1000,
-            "totalMs": 1000,
-          },
-          "npm": {
-            "averageMs": 150,
-            "count": 2,
-            "maximumMs": 200,
-            "totalMs": 300,
-          },
-        }
-      `);
-    });
-  });
-
   describe('printRequestStats()', () => {
     it('runs', () => {
-      memCache.set('package-cache-gets', [30, 100, 10, 20]);
-      memCache.set('package-cache-sets', [110, 80, 20]);
       memCache.set('http-requests', [
         {
           method: 'get',
@@ -99,7 +58,7 @@ describe('workers/repository/stats', () => {
       ]);
       expect(printRequestStats()).toBeUndefined();
       expect(log.trace).toHaveBeenCalledOnce();
-      expect(log.debug).toHaveBeenCalledTimes(2);
+      expect(log.debug).toHaveBeenCalledTimes(1);
       expect(log.trace.mock.calls[0][0]).toMatchInlineSnapshot(`
         {
           "allRequests": [
@@ -161,24 +120,6 @@ describe('workers/repository/stats', () => {
         }
       `);
       expect(log.debug.mock.calls[0][0]).toMatchInlineSnapshot(`
-        {
-          "get": {
-            "avgMs": 40,
-            "count": 4,
-            "maxMs": 100,
-            "medianMs": 20,
-            "totalMs": 160,
-          },
-          "set": {
-            "avgMs": 70,
-            "count": 3,
-            "maxMs": 110,
-            "medianMs": 80,
-            "totalMs": 210,
-          },
-        }
-      `);
-      expect(log.debug.mock.calls[1][0]).toMatchInlineSnapshot(`
         {
           "hostStats": {
             "api.github.com": {

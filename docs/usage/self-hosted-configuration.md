@@ -213,6 +213,21 @@ For example:
 }
 ```
 
+## autodiscoverProjects
+
+You can use this option to filter the list of autodiscovered repositories by project names.
+This feature is useful for users who want Renovate to only work on repositories within specific projects or exclude certain repositories from being processed.
+
+```json title="Example for Bitbucket"
+{
+  "platform": "bitbucket",
+  "autodiscoverProjects": ["a-group", "!another-group/some-subgroup"]
+}
+```
+
+The `autodiscoverProjects` config option takes an array of minimatch-compatible globs or RE2-compatible regex strings.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ## autodiscoverTopics
 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those

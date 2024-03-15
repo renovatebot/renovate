@@ -923,6 +923,17 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['gitlab'],
   },
   {
+    name: 'autodiscoverProjects',
+    description:
+      'Filter the list of autodiscovered repositories by project names.',
+    stage: 'global',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+    supportedPlatforms: ['bitbucket'],
+  },
+  {
     name: 'autodiscoverTopics',
     description: 'Filter the list of autodiscovered repositories by topics.',
     stage: 'global',
@@ -1062,6 +1073,7 @@ const options: RenovateOptions[] = [
       'helmfile',
       'helmv3',
       'kubernetes',
+      'kustomize',
       'terraform',
       'woodpecker',
     ],

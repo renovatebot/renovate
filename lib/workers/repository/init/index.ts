@@ -48,8 +48,8 @@ export async function initRepo(
   let config: RenovateConfig = initializeConfig(config_);
   await resetCaches();
   logger.once.reset();
-  await initializeCaches(config as WorkerPlatformConfig);
   config = await initApis(config);
+  await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
   setRepositoryLogLevelRemaps(config.logLevelRemap);
   checkIfConfigured(config);
