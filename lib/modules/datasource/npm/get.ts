@@ -7,13 +7,13 @@ import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
-import { Http } from '../../../util/http';
+import type { Http } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { HttpCacheStats } from '../../../util/stats';
 import { joinUrlParts } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
 import type { CachedReleaseResult, NpmResponse } from './types';
-import { HttpCacheStats } from '../../../util/stats';
 
 export const CACHE_REVISION = 1;
 
