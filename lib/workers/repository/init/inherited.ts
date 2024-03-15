@@ -28,7 +28,7 @@ export async function mergeInheritedConfig(
         inheritConfigRepoName: config.inheritConfigRepoName,
         inheritConfigFileName: config.inheritConfigFileName,
       },
-      'Invalid inherited config',
+      'Invalid inherited config.',
     );
     return config;
   }
@@ -44,10 +44,10 @@ export async function mergeInheritedConfig(
   );
   logger.trace(
     { templateConfig, inheritConfigRepoName },
-    'Compiled inheritConfigRepoName result',
+    'Compiled inheritConfigRepoName result.',
   );
   logger.debug(
-    `Checking for inherited config file ${config.inheritConfigFileName} in repo ${inheritConfigRepoName}`,
+    `Checking for inherited config file ${config.inheritConfigFileName} in repo ${inheritConfigRepoName}.`,
   );
   let configFileRaw: string | null = null;
   try {
@@ -57,13 +57,13 @@ export async function mergeInheritedConfig(
     );
   } catch (err) {
     if (config.inheritConfigStrict) {
-      logger.debug({ err }, 'Error getting inherited config');
+      logger.debug({ err }, 'Error getting inherited config.');
       throw new Error(CONFIG_INHERIT_NOT_FOUND);
     }
-    logger.trace({ err }, `Error getting inherited config`);
+    logger.trace({ err }, `Error getting inherited config.`);
   }
   if (!configFileRaw) {
-    logger.debug(`No inherited config found in ${inheritConfigRepoName}`);
+    logger.debug(`No inherited config found in ${inheritConfigRepoName}.`);
     return config;
   }
   const parseResult = parseFileConfig(
@@ -71,7 +71,7 @@ export async function mergeInheritedConfig(
     configFileRaw,
   );
   if (!parseResult.success) {
-    logger.debug({ parseResult }, 'Error parsing inherited config');
+    logger.debug({ parseResult }, 'Error parsing inherited config.');
     throw new Error(CONFIG_INHERIT_PARSE_ERROR);
   }
   const inheritedConfig = parseResult.parsedContents as RenovateConfig;
@@ -80,14 +80,14 @@ export async function mergeInheritedConfig(
   if (res.errors.length) {
     logger.warn(
       { errors: res.errors },
-      'Found errors in inherited configuration',
+      'Found errors in inherited configuration.',
     );
     throw new Error(CONFIG_VALIDATION);
   }
   if (res.warnings.length) {
     logger.warn(
       { warnings: res.warnings },
-      'Found warnings in inherited configuration',
+      'Found warnings in inherited configuration.',
     );
   }
   return mergeChildConfig(config, inheritedConfig);
