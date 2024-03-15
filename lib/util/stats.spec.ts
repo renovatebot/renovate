@@ -5,9 +5,9 @@ import {
   LookupStats,
   PackageCacheStats,
   makeTimingReport,
-} from './stats';
+} from './statistics';
 
-describe('util/stats', () => {
+describe('util/statistics', () => {
   beforeEach(() => {
     memCache.init();
   });
@@ -381,7 +381,7 @@ describe('util/stats', () => {
 
       expect(logger.logger.trace).toHaveBeenCalledTimes(1);
       const [traceData, traceMsg] = logger.logger.trace.mock.calls[0];
-      expect(traceMsg).toBe('HTTP full stats');
+      expect(traceMsg).toBe('HTTP full statistics');
       expect(traceData).toEqual({
         rawRequests: [
           'GET https://example.com/bar 200 400 40',
