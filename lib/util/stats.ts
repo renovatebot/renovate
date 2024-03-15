@@ -1,5 +1,6 @@
 import { logger } from '../logger';
 import * as memCache from './cache/memory';
+import { parseUrl } from './url';
 
 type LookupStatsData = Record<string, number[]>;
 
@@ -101,5 +102,136 @@ export class PackageCacheStats {
   static report(): void {
     const report = PackageCacheStats.getReport();
     logger.debug(report, 'Package cache statistics');
+  }
+}
+
+export interface HttpRequestStatsDataPoint {
+  method: string;
+  url: string;
+  reqMs: number;
+  queueMs: number;
+  status: number;
+}
+
+interface HostStatsData {
+  count: number;
+  reqAvgMs: number;
+  reqMedianMs: number;
+  reqMaxMs: number;
+  queueAvgMs: number;
+  queueMedianMs: number;
+  queueMaxMs: number;
+}
+
+// url -> method -> status -> count
+type UrlHttpStat = Record<string, Record<string, Record<string, number>>>;
+
+interface HttpStatsCollection {
+  // debug data
+  urls: UrlHttpStat;
+  hosts: Record<string, HostStatsData>;
+  requests: number;
+
+  // trace data
+  rawRequests: string[];
+  hostRequests: Record<string, HttpRequestStatsDataPoint[]>;
+}
+
+export class HttpStats {
+  static write(data: HttpRequestStatsDataPoint): void {
+    const httpRequests =
+      memCache.get<HttpRequestStatsDataPoint[]>('http-requests') ?? [];
+    httpRequests.push(data);
+    memCache.set('http-requests', httpRequests);
+  }
+
+  static getDataPoints(): HttpRequestStatsDataPoint[] {
+    const httpRequests =
+      memCache.get<HttpRequestStatsDataPoint[]>('http-requests') ?? [];
+
+    // istanbul ignore next: sorting is hard and not worth testing
+    httpRequests.sort((a, b) => {
+      if (a.url < b.url) {
+        return -1;
+      }
+
+      if (a.url > b.url) {
+        return 1;
+      }
+
+      return 0;
+    });
+
+    return httpRequests;
+  }
+
+  static getReport(): HttpStatsCollection {
+    const dataPoints = HttpStats.getDataPoints();
+
+    const requests = dataPoints.length;
+
+    const urls: UrlHttpStat = {};
+    const rawRequests: string[] = [];
+    const hostRequests: Record<string, HttpRequestStatsDataPoint[]> = {};
+
+    for (const dataPoint of dataPoints) {
+      const { url, reqMs, queueMs, status } = dataPoint;
+      const method = dataPoint.method.toUpperCase();
+
+      const parsedUrl = parseUrl(url);
+      if (!parsedUrl) {
+        logger.debug({ url }, 'Failed to parse URL during stats reporting');
+        continue;
+      }
+      const { hostname, origin, pathname } = parsedUrl;
+      const baseUrl = `${origin}${pathname}`;
+
+      urls[baseUrl] ??= {};
+      urls[baseUrl][method] ??= {};
+      urls[baseUrl][method][status] ??= 0;
+      urls[baseUrl][method][status] += 1;
+
+      rawRequests.push(`${method} ${url} ${status} ${reqMs} ${queueMs}`);
+
+      hostRequests[hostname] ??= [];
+      hostRequests[hostname].push(dataPoint);
+    }
+
+    const hosts: Record<string, HostStatsData> = {};
+
+    for (const [hostname, dataPoints] of Object.entries(hostRequests)) {
+      const count = dataPoints.length;
+
+      const reqTimes = dataPoints.map((r) => r.reqMs);
+      const queueTimes = dataPoints.map((r) => r.queueMs);
+
+      const reqReport = makeTimingReport(reqTimes);
+      const queueReport = makeTimingReport(queueTimes);
+
+      hosts[hostname] = {
+        count,
+        reqAvgMs: reqReport.avgMs,
+        reqMedianMs: reqReport.medianMs,
+        reqMaxMs: reqReport.maxMs,
+        queueAvgMs: queueReport.avgMs,
+        queueMedianMs: queueReport.medianMs,
+        queueMaxMs: queueReport.maxMs,
+      };
+    }
+
+    return {
+      urls,
+      rawRequests,
+      hostRequests,
+      hosts,
+      requests,
+    };
+  }
+
+  static report(): void {
+    const { urls, rawRequests, hostRequests, hosts, requests } =
+      HttpStats.getReport();
+    logger.trace({ rawRequests, hostRequests }, 'HTTP full statistics');
+    logger.debug({ urls, hosts, requests }, 'HTTP statistics');
   }
 }

@@ -19,7 +19,7 @@ import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
 import { addSplit, getSplits, splitInit } from '../../util/split';
-import { LookupStats, PackageCacheStats } from '../../util/stats';
+import { HttpStats, LookupStats, PackageCacheStats } from '../../util/stats';
 import { setBranchCache } from './cache';
 import { extractRepoProblems } from './common';
 import { ensureDependencyDashboard } from './dependency-dashboard';
@@ -32,7 +32,6 @@ import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import type { ExtractResult } from './process/extract-update';
 import { ProcessResult, processResult } from './result';
-import { printRequestStats } from './stats';
 
 // istanbul ignore next
 export async function renovateRepository(
@@ -126,7 +125,7 @@ export async function renovateRepository(
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   PackageCacheStats.report();
-  printRequestStats();
+  HttpStats.report();
   LookupStats.report();
   printDnsStats();
   clearDnsCache();
