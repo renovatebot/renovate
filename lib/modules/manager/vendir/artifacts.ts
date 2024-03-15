@@ -5,6 +5,7 @@ import type { ExecOptions } from '../../../util/exec/types';
 import {
   getParentDir,
   getSiblingFileName,
+  localPathIsFile,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
