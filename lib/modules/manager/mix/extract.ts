@@ -68,18 +68,17 @@ export async function extractPackageFile(
         }
 
         deps.set(app, dep);
-        logger.info(`setting ${app} to ${JSON.stringify(dep)}`);
+        logger.trace({dep}, `setting ${app}`);
         depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
       }
     }
   }
   const lockFileName =
     (await findLocalSiblingOrParent(packageFile, 'mix.lock')) ?? 'mix.lock';
-  const lockFileContent = await readLocalFile(lockFileName);
+  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
 
   if (lockFileContent) {
     const lockedVersions = lockFileContent
-      .toString()
       .split(newlineRegex)
       .slice(1, -1)
       .reduce<Map<string, string>>((lockedVersions, line) => {
