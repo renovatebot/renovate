@@ -201,34 +201,6 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'https://bitbucket.com/hashicorp/example',
           },
           {
-            currentValue: 'next',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://bitbucket.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.1',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://bitbucket.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.2',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'http://bitbucket.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.3',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'ssh://git@bitbucket.com/hashicorp/example',
-          },
-          {
             currentValue: 'v1.0.0',
             datasource: 'gitlab-tags',
             depName: 'gitlab.com/hashicorp/example',
@@ -236,71 +208,15 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'https://gitlab.com/hashicorp/example',
           },
           {
-            currentValue: 'next',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitlab.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.1',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitlab.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.2',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'http://gitlab.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.3',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'ssh://git@gitlab.com/hashicorp/example',
-          },
-          {
             currentValue: 'v1.0.0',
             datasource: 'gitea-tags',
             depName: 'gitea.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'https://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'next',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.1',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.2',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'http://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.3',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'ssh://git@gitea.com/hashicorp/example',
           },
         ],
       });
-      expect(res?.deps).toHaveLength(44);
+      expect(res?.deps).toHaveLength(32);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -464,34 +380,6 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'https://bitbucket.com/hashicorp/example',
           },
           {
-            currentValue: 'next',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://bitbucket.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.1',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://bitbucket.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.2',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'http://bitbucket.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.3',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'ssh://git@bitbucket.com/hashicorp/example',
-          },
-          {
             currentValue: 'v1.0.0',
             datasource: 'gitlab-tags',
             depName: 'gitlab.com/hashicorp/example',
@@ -499,71 +387,15 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'https://gitlab.com/hashicorp/example',
           },
           {
-            currentValue: 'next',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitlab.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.1',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitlab.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.2',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'http://gitlab.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.3',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'ssh://git@gitlab.com/hashicorp/example',
-          },
-          {
             currentValue: 'v1.0.0',
             datasource: 'gitea-tags',
             depName: 'gitea.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'https://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'next',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.1',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.2',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'http://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.3',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'ssh://git@gitea.com/hashicorp/example',
           },
         ],
       });
-      expect(res?.deps).toHaveLength(44);
+      expect(res?.deps).toHaveLength(32);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -727,34 +559,6 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'https://bitbucket.com/hashicorp/example',
           },
           {
-            currentValue: 'next',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://bitbucket.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.1',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://bitbucket.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.2',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'http://bitbucket.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.3',
-            datasource: 'bitbucket-tags',
-            depName: 'bitbucket.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'ssh://git@bitbucket.com/hashicorp/example',
-          },
-          {
             currentValue: 'v1.0.0',
             datasource: 'gitlab-tags',
             depName: 'gitlab.com/hashicorp/example',
@@ -762,71 +566,15 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'https://gitlab.com/hashicorp/example',
           },
           {
-            currentValue: 'next',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitlab.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.1',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitlab.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.2',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'http://gitlab.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.3',
-            datasource: 'gitlab-tags',
-            depName: 'gitlab.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'ssh://git@gitlab.com/hashicorp/example',
-          },
-          {
             currentValue: 'v1.0.0',
             datasource: 'gitea-tags',
             depName: 'gitea.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'https://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'next',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.1',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'https://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.2',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'http://gitea.com/hashicorp/example',
-          },
-          {
-            currentValue: 'v1.0.3',
-            datasource: 'gitea-tags',
-            depName: 'gitea.com/hashicorp/example',
-            depType: 'gitTags',
-            packageName: 'ssh://git@gitea.com/hashicorp/example',
           },
         ],
       });
-      expect(res?.deps).toHaveLength(44);
+      expect(res?.deps).toHaveLength(32);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 

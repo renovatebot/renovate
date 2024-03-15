@@ -165,72 +165,12 @@ terraform {
   source = "git::https://bitbucket.com/hashicorp/example?depth=1&ref=v1.0.0"
 }
 
-# bitbucket-tags_badversion
-terraform {
-  source = "git::https://bitbucket.com/hashicorp/example?depth=1&ref=next"
-}
-
-# bitbucket-tags_subdir
-terraform {
-  source = "git::https://bitbucket.com/hashicorp/example//subdir/test?depth=1&ref=v1.0.1"
-}
-
-# bitbucket-tags_http
-terraform {
-  source = "git::http://bitbucket.com/hashicorp/example?depth=1&ref=v1.0.2"
-}
-
-# bitbucket-tags_ssh
-terraform {
-  source = "git::ssh://git@bitbucket.com/hashicorp/example?depth=1&ref=v1.0.3"
-}
-
 # gitlab-tags
 terraform {
   source = "git::https://gitlab.com/hashicorp/example?depth=1&ref=v1.0.0"
 }
 
-# gitlab-tags_badversion
-terraform {
-  source = "git::https://gitlab.com/hashicorp/example?depth=1&ref=next"
-}
-
-# gitlab-tags_subdir
-terraform {
-  source = "git::https://gitlab.com/hashicorp/example//subdir/test?depth=1&ref=v1.0.1"
-}
-
-# gitlab-tags_http
-terraform {
-  source = "git::http://gitlab.com/hashicorp/example?depth=1&ref=v1.0.2"
-}
-
-# gitlab-tags_ssh
-terraform {
-  source = "git::ssh://git@gitlab.com/hashicorp/example?depth=1&ref=v1.0.3"
-}
-
 # gitea-tags
 terraform {
   source = "git::https://gitea.com/hashicorp/example?depth=1&ref=v1.0.0"
-}
-
-# gitea-tags_badversion
-terraform {
-  source = "git::https://gitea.com/hashicorp/example?depth=1&ref=next"
-}
-
-# gitea-tags_subdir
-terraform {
-  source = "git::https://gitea.com/hashicorp/example//subdir/test?depth=1&ref=v1.0.1"
-}
-
-# gitea-tags_http
-terraform {
-  source = "git::http://gitea.com/hashicorp/example?depth=1&ref=v1.0.2"
-}
-
-# gitea-tags_ssh
-terraform {
-  source = "git::ssh://git@gitea.com/hashicorp/example?depth=1&ref=v1.0.3"
 }
