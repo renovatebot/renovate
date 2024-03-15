@@ -68,7 +68,7 @@ export async function extractPackageFile(
         }
 
         deps.set(app, dep);
-        logger.trace({dep}, `setting ${app}`);
+        logger.trace({ dep }, `setting ${app}`);
         depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
       }
     }
@@ -78,16 +78,17 @@ export async function extractPackageFile(
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');
 
   if (lockFileContent) {
-    const lockedVersions = lockFileContent
-      .split(newlineRegex)
-      .slice(1, -1)
-      .reduce<Map<string, string>>((lockedVersions, line) => {
-        const groups = lockedVersionRegExp.exec(line)?.groups;
-        if (groups?.app && groups?.lockedVersion) {
-          lockedVersions.set(groups.app, groups.lockedVersion);
-        }
-        return lockedVersions;
-      }, new Map());
+    const lockFileLines = lockFileContent.split(newlineRegex).slice(1, -1);
+
+    const lockedVersions: Map<string, string> = new Map();
+
+    for (const line of lockFileLines) {
+      const groups = lockedVersionRegExp.exec(line)?.groups;
+      if (groups?.app && groups?.lockedVersion) {
+        lockedVersions.set(groups.app, groups.lockedVersion);
+      }
+    }
+
     for (const [app, dep] of deps.entries()) {
       dep.lockedVersion = lockedVersions.get(app);
       logger.debug(`Found ${dep.lockedVersion} for ${app}`);
