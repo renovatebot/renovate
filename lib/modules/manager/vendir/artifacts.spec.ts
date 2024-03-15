@@ -81,10 +81,10 @@ describe('modules/manager/vendir/artifacts', () => {
   });
 
   it('returns updated vendir.lock', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1 as never);
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
     fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2 as never);
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -165,10 +165,10 @@ describe('modules/manager/vendir/artifacts', () => {
   });
 
   it('add artifacts to file list if vendir.yml exists', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1 as never);
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
     fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
     const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2 as never);
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
@@ -188,7 +188,6 @@ describe('modules/manager/vendir/artifacts', () => {
       updatedDeps,
       newPackageFileContent: vendirFile,
       config: {
-        postUpdateOptions: ['vendirUpdateSubChartArchives'],
         ...config,
       },
     });
@@ -263,7 +262,6 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps,
         newPackageFileContent: vendirFile,
         config: {
-          postUpdateOptions: ['vendirUpdateSubChartArchives'],
           ...config,
         },
       }),
@@ -323,7 +321,6 @@ describe('modules/manager/vendir/artifacts', () => {
         updatedDeps,
         newPackageFileContent: vendirFile,
         config: {
-          postUpdateOptions: ['vendirUpdateSubChartArchives'],
           ...config,
         },
       }),

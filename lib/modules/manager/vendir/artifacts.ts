@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
+  getParentDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -73,10 +74,10 @@ export async function updateArtifacts({
     }
 
     // add modified vendir archives to artifacts
-    if (is.truthy(isUpdateOptionAddVendirArchives)) {
+    if (isUpdateOptionAddVendirArchives === true) {
       logger.debug("Adding Sync'd files to git");
       // Files must be in the vendor path to get added
-      const vendorDir = getSiblingFileName(packageFileName, '.');
+      const vendorDir = getParentDir(packageFileName);
       logger.debug('vendorDir = ' + vendorDir);
       const status = await getRepoStatus();
       for (const f of (status.modified ?? []).concat(status.not_added)) {
