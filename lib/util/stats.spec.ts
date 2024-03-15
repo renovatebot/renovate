@@ -5,9 +5,9 @@ import {
   LookupStats,
   PackageCacheStats,
   makeTimingReport,
-} from './statistics';
+} from './stats';
 
-describe('util/statistics', () => {
+describe('util/stats', () => {
   beforeEach(() => {
     memCache.init();
   });
