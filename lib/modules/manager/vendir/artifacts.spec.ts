@@ -2,12 +2,15 @@ import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git, partial } from '../../../../test/util';
+import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import type { StatusResult } from '../../../util/git/types';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as vendir from '.';
+
+const datasource = mocked(_datasource);
 
 jest.mock('../../datasource', () => mockDeep());
 jest.mock('../../../util/exec/env', () => mockDeep());
@@ -294,5 +297,133 @@ describe('modules/manager/vendir/artifacts', () => {
         },
       },
     ]);
+  });
+
+  it('works explicit global binarySource', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
+    fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await vendir.updateArtifacts({
+        packageFileName: 'vendir.yml',
+        updatedDeps,
+        newPackageFileContent: vendirFile,
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'vendir.lock.yml',
+          contents: vendirLockFile2,
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([{ cmd: 'vendir sync' }]);
+  });
+
+  it('supports install mode', async () => {
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'install',
+    });
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
+    fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
+    fs.readLocalFile.mockResolvedValueOnce('0.35.0');
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await vendir.updateArtifacts({
+        packageFileName: 'vendir.yml',
+        updatedDeps,
+        newPackageFileContent: vendirFile,
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'vendir.lock.yml',
+          contents: vendirLockFile2,
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool vendir 0.35.0' },
+      { cmd: 'vendir sync' },
+    ]);
+  });
+
+  describe('Docker', () => {
+    beforeEach(() => {
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'docker',
+      });
+    });
+
+    it('returns updated vendir.yml for lockfile maintenance', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
+      fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
+      fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
+      fs.readLocalFile.mockResolvedValueOnce('0.35.0');
+      const execSnapshots = mockExecAll();
+      fs.privateCacheDir.mockReturnValue(
+        '/tmp/renovate/cache/__renovate-private-cache',
+      );
+      fs.getParentDir.mockReturnValue('');
+      const updatedDeps = [{ depName: 'dep1' }];
+      expect(
+        await vendir.updateArtifacts({
+          packageFileName: 'vendir.yml',
+          updatedDeps,
+          newPackageFileContent: vendirFile,
+          config,
+        }),
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'vendir.lock.yml',
+            contents: vendirLockFile2,
+          },
+        },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool vendir 0.35.0' },
+        { cmd: 'vendir sync' },
+      ]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
+        { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+        {
+          cmd:
+            'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+            '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+            '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e GEM_HOME ' +
+            '-e CONTAINERBASE_CACHE_DIR ' +
+            '-w "/tmp/github/some/repo" ' +
+            'ghcr.io/containerbase/sidecar' +
+            ' bash -l -c "' +
+            'install-tool vendir 0.35.0' +
+            ' && ' +
+            'vendir sync' +
+            '"',
+        },
+      ]);
+    });
   });
 });

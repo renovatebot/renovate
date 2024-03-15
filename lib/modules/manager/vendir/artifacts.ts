@@ -34,6 +34,7 @@ export async function updateArtifacts({
     logger.debug('Updating Vendir artifacts');
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
+      docker: {},
       toolConstraints: [
         { toolName: 'vendir', constraint: config.constraints?.vendir },
         { toolName: 'helm', constraint: config.constraints?.helm },
