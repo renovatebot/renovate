@@ -123,12 +123,18 @@ interface HostStatsData {
   queueMaxMs: number;
 }
 
+// url -> method -> status -> count
+type UrlHttpStat = Record<string, Record<string, Record<string, number>>>;
+
 interface HttpStatsCollection {
-  urlCounts: Record<string, number>;
-  allRequests: string[];
-  requestsByHost: Record<string, HttpRequestStatsDataPoint[]>;
-  statsByHost: Record<string, HostStatsData>;
-  totalRequests: number;
+  // debug data
+  urls: UrlHttpStat;
+  hosts: Record<string, HostStatsData>;
+  requests: number;
+
+  // trace data
+  rawRequests: string[];
+  hostRequests: Record<string, HttpRequestStatsDataPoint[]>;
 }
 
 export class HttpStats {
@@ -162,9 +168,11 @@ export class HttpStats {
   static getReport(): HttpStatsCollection {
     const dataPoints = HttpStats.getDataPoints();
 
-    const urlCounts: Record<string, number> = {};
-    const allRequests: string[] = [];
-    const requestsByHost: Record<string, HttpRequestStatsDataPoint[]> = {};
+    const requests = dataPoints.length;
+
+    const urls: UrlHttpStat = {};
+    const rawRequests: string[] = [];
+    const hostRequests: Record<string, HttpRequestStatsDataPoint[]> = {};
 
     for (const dataPoint of dataPoints) {
       const { url, reqMs, queueMs, status } = dataPoint;
@@ -178,30 +186,29 @@ export class HttpStats {
       const { hostname, origin, pathname } = parsedUrl;
       const baseUrl = `${origin}${pathname}`;
 
-      const urlKey = `${baseUrl} (${method}, ${status})`;
-      urlCounts[urlKey] ??= 0;
-      urlCounts[urlKey] += 1;
+      urls[baseUrl] ??= {};
+      urls[baseUrl][method] ??= {};
+      urls[baseUrl][method][status] ??= 0;
+      urls[baseUrl][method][status] += 1;
 
-      allRequests.push(`${method} ${url} ${status} ${reqMs} ${queueMs}`);
+      rawRequests.push(`${method} ${url} ${status} ${reqMs} ${queueMs}`);
 
-      requestsByHost[hostname] ??= [];
-      requestsByHost[hostname].push(dataPoint);
+      hostRequests[hostname] ??= [];
+      hostRequests[hostname].push(dataPoint);
     }
 
-    const statsByHost: Record<string, HostStatsData> = {};
+    const hosts: Record<string, HostStatsData> = {};
 
-    let totalRequests = 0;
-    for (const [hostname, requests] of Object.entries(requestsByHost)) {
-      const count = requests.length;
-      totalRequests += count;
+    for (const [hostname, dataPoints] of Object.entries(hostRequests)) {
+      const count = dataPoints.length;
 
-      const reqTimes = requests.map((r) => r.reqMs);
-      const queueTimes = requests.map((r) => r.queueMs);
+      const reqTimes = dataPoints.map((r) => r.reqMs);
+      const queueTimes = dataPoints.map((r) => r.queueMs);
 
       const reqReport = makeTimingReport(reqTimes);
       const queueReport = makeTimingReport(queueTimes);
 
-      statsByHost[hostname] = {
+      hosts[hostname] = {
         count,
         reqAvgMs: reqReport.avgMs,
         reqMedianMs: reqReport.medianMs,
@@ -213,23 +220,18 @@ export class HttpStats {
     }
 
     return {
-      urlCounts,
-      allRequests,
-      requestsByHost,
-      statsByHost,
-      totalRequests,
+      urls,
+      rawRequests,
+      hostRequests,
+      hosts,
+      requests,
     };
   }
 
   static report(): void {
-    const {
-      urlCounts,
-      allRequests,
-      requestsByHost,
-      statsByHost,
-      totalRequests,
-    } = HttpStats.getReport();
-    logger.trace({ allRequests, requestsByHost }, 'HTTP full stats');
-    logger.debug({ urlCounts, statsByHost, totalRequests }, 'HTTP stats');
+    const { urls, rawRequests, hostRequests, hosts, requests } =
+      HttpStats.getReport();
+    logger.trace({ rawRequests, hostRequests }, 'HTTP full stats');
+    logger.debug({ urls, hosts, requests }, 'HTTP stats');
   }
 }

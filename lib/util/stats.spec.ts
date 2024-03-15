@@ -233,11 +233,11 @@ describe('util/stats', () => {
     it('returns empty report', () => {
       const res = HttpStats.getReport();
       expect(res).toEqual({
-        allRequests: [],
-        requestsByHost: {},
-        statsByHost: {},
-        totalRequests: 0,
-        urlCounts: {},
+        hostRequests: {},
+        hosts: {},
+        rawRequests: [],
+        requests: 0,
+        urls: {},
       });
     });
 
@@ -281,13 +281,7 @@ describe('util/stats', () => {
       const res = HttpStats.getReport();
 
       expect(res).toEqual({
-        allRequests: [
-          'GET https://example.com/bar 200 400 40',
-          'GET https://example.com/foo 200 100 10',
-          'GET https://example.com/foo 200 200 20',
-          'GET https://example.com/foo 404 800 80',
-        ],
-        requestsByHost: {
+        hostRequests: {
           'example.com': [
             {
               method: 'GET',
@@ -319,7 +313,7 @@ describe('util/stats', () => {
             },
           ],
         },
-        statsByHost: {
+        hosts: {
           'example.com': {
             count: 4,
             queueAvgMs: 38,
@@ -330,11 +324,25 @@ describe('util/stats', () => {
             reqMedianMs: 400,
           },
         },
-        totalRequests: 4,
-        urlCounts: {
-          'https://example.com/bar (GET, 200)': 1,
-          'https://example.com/foo (GET, 200)': 2,
-          'https://example.com/foo (GET, 404)': 1,
+        rawRequests: [
+          'GET https://example.com/bar 200 400 40',
+          'GET https://example.com/foo 200 100 10',
+          'GET https://example.com/foo 200 200 20',
+          'GET https://example.com/foo 404 800 80',
+        ],
+        requests: 5,
+        urls: {
+          'https://example.com/bar': {
+            GET: {
+              '200': 1,
+            },
+          },
+          'https://example.com/foo': {
+            GET: {
+              '200': 2,
+              '404': 1,
+            },
+          },
         },
       });
     });
@@ -375,13 +383,13 @@ describe('util/stats', () => {
       const [traceData, traceMsg] = logger.logger.trace.mock.calls[0];
       expect(traceMsg).toBe('HTTP full stats');
       expect(traceData).toEqual({
-        allRequests: [
+        rawRequests: [
           'GET https://example.com/bar 200 400 40',
           'GET https://example.com/foo 200 100 10',
           'GET https://example.com/foo 200 200 20',
           'GET https://example.com/foo 404 800 80',
         ],
-        requestsByHost: {
+        hostRequests: {
           'example.com': [
             {
               method: 'GET',
@@ -418,25 +426,35 @@ describe('util/stats', () => {
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
       const [debugData, debugMsg] = logger.logger.debug.mock.calls[0];
       expect(debugMsg).toBe('HTTP stats');
-      expect(debugData).toEqual({
-        statsByHost: {
-          'example.com': {
-            count: 4,
-            queueAvgMs: 38,
-            queueMaxMs: 80,
-            queueMedianMs: 40,
-            reqAvgMs: 375,
-            reqMaxMs: 800,
-            reqMedianMs: 400,
+      expect(debugData).toEqual(
+        {
+          "hosts": {
+            "example.com": {
+              "count": 4,
+              "queueAvgMs": 38,
+              "queueMaxMs": 80,
+              "queueMedianMs": 40,
+              "reqAvgMs": 375,
+              "reqMaxMs": 800,
+              "reqMedianMs": 400,
+            },
           },
-        },
-        totalRequests: 4,
-        urlCounts: {
-          'https://example.com/bar (GET, 200)': 1,
-          'https://example.com/foo (GET, 200)': 2,
-          'https://example.com/foo (GET, 404)': 1,
-        },
-      });
+          "requests": 4,
+          "urls": {
+            "https://example.com/bar": {
+              "GET": {
+                "200": 1,
+              },
+            },
+            "https://example.com/foo": {
+              "GET": {
+                "200": 2,
+                "404": 1,
+              },
+            },
+          },
+        }
+      );
     });
   });
 });
