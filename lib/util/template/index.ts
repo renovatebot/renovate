@@ -123,6 +123,7 @@ export const allowedFields = {
   packageFileDir:
     'The directory with full path where the packageFile was found',
   packageName: 'The full name that was used to look up the dependency',
+  packageScope: 'The scope of the package name. Supports Maven group ID only',
   parentDir:
     'The name of the directory that the dependency was found in, without full path',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',

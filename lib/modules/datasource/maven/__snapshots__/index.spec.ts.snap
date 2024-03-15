@@ -6,6 +6,7 @@ exports[`modules/datasource/maven/index falls back to next registry url 1`] = `
   "group": "org.example",
   "homepage": "https://package.example.org/about",
   "name": "package",
+  "packageScope": "org.example",
   "registryUrl": "https://repo.maven.apache.org/maven2",
   "releases": [
     {
@@ -53,6 +54,7 @@ exports[`modules/datasource/maven/index removes authentication header after redi
   "group": "org.example",
   "homepage": "https://package.example.org/about",
   "name": "package",
+  "packageScope": "org.example",
   "registryUrl": "https://frontend_for_private_s3_repository/maven2",
   "releases": [
     {
@@ -89,6 +91,7 @@ exports[`modules/datasource/maven/index returns releases 1`] = `
   "group": "org.example",
   "homepage": "https://package.example.org/about",
   "name": "package",
+  "packageScope": "org.example",
   "registryUrl": "https://repo.maven.apache.org/maven2",
   "releases": [
     {
@@ -116,6 +119,7 @@ exports[`modules/datasource/maven/index returns releases from custom repository 
   "group": "org.example",
   "homepage": "https://package.example.org/about",
   "name": "package",
+  "packageScope": "org.example",
   "registryUrl": "https://custom.registry.renovatebot.com",
   "releases": [
     {
@@ -143,6 +147,7 @@ exports[`modules/datasource/maven/index skips registry with invalid XML 1`] = `
   "group": "org.example",
   "homepage": "https://package.example.org/about",
   "name": "package",
+  "packageScope": "org.example",
   "registryUrl": "https://repo.maven.apache.org/maven2",
   "releases": [
     {
@@ -170,6 +175,7 @@ exports[`modules/datasource/maven/index skips registry with invalid metadata str
   "group": "org.example",
   "homepage": "https://package.example.org/about",
   "name": "package",
+  "packageScope": "org.example",
   "registryUrl": "https://repo.maven.apache.org/maven2",
   "releases": [
     {

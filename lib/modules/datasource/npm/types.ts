@@ -35,6 +35,7 @@ export interface NpmResponse {
 
 export interface CachedReleaseResult extends ReleaseResult {
   cacheData?: {
+    revision?: number;
     etag: string | undefined;
     softExpireAt: string;
   };
