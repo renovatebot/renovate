@@ -235,9 +235,10 @@ describe('modules/manager/vendir/artifacts', () => {
     ]);
   });
 
-  it('add artifacts to file list if vendir.lock.yml is missing', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
-    fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
+  it('add artifacts without old archives', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
+    fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
     const execSnapshots = mockExecAll();
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
@@ -249,7 +250,6 @@ describe('modules/manager/vendir/artifacts', () => {
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         not_added: ['vendor/Chart.yaml'],
-        deleted: ['vendor/removed.yaml'],
       }),
     );
     const updatedDeps = [{ depName: 'dep1' }];
@@ -266,62 +266,10 @@ describe('modules/manager/vendir/artifacts', () => {
       {
         file: {
           type: 'addition',
-          path: 'vendor/Chart.yaml',
-          contents: undefined,
+          path: 'vendir.lock.yml',
+          contents: vendirLockFile2,
         },
       },
-      {
-        file: {
-          type: 'deletion',
-          path: 'vendor/removed.yaml',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'vendir sync',
-        options: {
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-        },
-      },
-    ]);
-  });
-
-  it('add artifacts without old archives', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(null);
-    fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
-    const execSnapshots = mockExecAll();
-    fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache',
-    );
-    fs.getParentDir.mockReturnValue('');
-
-    // artifacts
-    fs.getSiblingFileName.mockReturnValueOnce('vendor');
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        not_added: ['vendor/Chart.yaml'],
-      }),
-    );
-    const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await vendir.updateArtifacts({
-        packageFileName: 'vendir.yml',
-        updatedDeps,
-        newPackageFileContent: vendirFile,
-        config: {
-          ...config,
-        },
-      }),
-    ).toEqual([
       {
         file: {
           type: 'addition',

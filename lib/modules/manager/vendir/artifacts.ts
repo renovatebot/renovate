@@ -5,7 +5,6 @@ import type { ExecOptions } from '../../../util/exec/types';
 import {
   getParentDir,
   getSiblingFileName,
-  localPathIsFile,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -59,6 +58,7 @@ export async function updateArtifacts({
       });
     } else {
       logger.debug('vendir.lock.yml is unchanged');
+      return null;
     }
 
     // add modified vendir archives to artifacts
@@ -66,26 +66,34 @@ export async function updateArtifacts({
     // Files must be in the vendor path to get added
     const vendorDir = getParentDir(packageFileName);
     const status = await getRepoStatus();
-    for (const f of (status.modified ?? []).concat(status.not_added)) {
-      const isFileInVendorDir = f.startsWith(vendorDir);
-      if (vendorDir || isFileInVendorDir) {
+    if (status) {
+      const modifiedFiles = status.modified ?? [];
+      const notAddedFiles = status.not_added ?? [];
+      const deletedFiles = status.deleted ?? [];
+
+      for (const f of modifiedFiles.concat(notAddedFiles)) {
+        const isFileInVendorDir = f.startsWith(vendorDir);
+        if (vendorDir || isFileInVendorDir) {
+          fileChanges.push({
+            file: {
+              type: 'addition',
+              path: f,
+              contents: await readLocalFile(f),
+            },
+          });
+        }
+      }
+
+      for (const f of deletedFiles) {
         fileChanges.push({
           file: {
-            type: 'addition',
+            type: 'deletion',
             path: f,
-            contents: await readLocalFile(f),
           },
         });
       }
-    }
-
-    for (const f of status.deleted ?? []) {
-      fileChanges.push({
-        file: {
-          type: 'deletion',
-          path: f,
-        },
-      });
+    } else {
+      logger.error('Failed to get git status');
     }
 
     return fileChanges.length > 0 ? fileChanges : null;
