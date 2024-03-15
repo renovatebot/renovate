@@ -4,7 +4,10 @@ import { extractPackageFile } from '.';
 const oneContents = Fixtures.get('one-contents.yaml');
 const ociContents = Fixtures.get('oci-contents.yaml');
 const multipleContents = Fixtures.get('multiple-contents.yaml');
-const emptyDirectories = Fixtures.get('empty-directory.yaml');
+const emptyDirectories = Fixtures.mock(
+  { apiVersion: 'vendir.k14s.io/v1alpha1', kind: 'Config', directories: [] },
+  'vendir.yml',
+);
 
 describe('modules/manager/vendir/extract', () => {
   describe('extractPackageFile()', () => {

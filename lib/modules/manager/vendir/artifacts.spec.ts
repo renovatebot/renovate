@@ -10,10 +10,10 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as vendir from '.';
 
 jest.mock('../../datasource', () => mockDeep());
-jest.mock('../../../util/exec/env');
-jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
-jest.mock('../../../util/git');
+jest.mock('../../../util/exec/env', () => mockDeep());
+jest.mock('../../../util/http', () => mockDeep());
+jest.mock('../../../util/fs', () => mockDeep());
+jest.mock('../../../util/git', () => mockDeep());
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
@@ -30,10 +30,6 @@ describe('modules/manager/vendir/artifacts', () => {
   beforeEach(() => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
-  });
-
-  afterEach(() => {
-    GlobalConfig.reset();
   });
 
   it('returns null if no vendir.lock.yml found', async () => {
@@ -61,6 +57,7 @@ describe('modules/manager/vendir/artifacts', () => {
 
   it('returns null if unchanged', async () => {
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
+    fs.getSiblingFileName.mockReturnValueOnce(vendirFile);
     fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
