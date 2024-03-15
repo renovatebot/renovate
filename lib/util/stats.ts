@@ -231,7 +231,7 @@ export class HttpStats {
   static report(): void {
     const { urls, rawRequests, hostRequests, hosts, requests } =
       HttpStats.getReport();
-    logger.trace({ rawRequests, hostRequests }, 'HTTP full stats');
-    logger.debug({ urls, hosts, requests }, 'HTTP stats');
+    logger.trace({ rawRequests, hostRequests }, 'HTTP full statistics');
+    logger.debug({ urls, hosts, requests }, 'HTTP statistics');
   }
 }

@@ -425,36 +425,34 @@ describe('util/stats', () => {
 
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
       const [debugData, debugMsg] = logger.logger.debug.mock.calls[0];
-      expect(debugMsg).toBe('HTTP stats');
-      expect(debugData).toEqual(
-        {
-          "hosts": {
-            "example.com": {
-              "count": 4,
-              "queueAvgMs": 38,
-              "queueMaxMs": 80,
-              "queueMedianMs": 40,
-              "reqAvgMs": 375,
-              "reqMaxMs": 800,
-              "reqMedianMs": 400,
+      expect(debugMsg).toBe('HTTP statistics');
+      expect(debugData).toEqual({
+        hosts: {
+          'example.com': {
+            count: 4,
+            queueAvgMs: 38,
+            queueMaxMs: 80,
+            queueMedianMs: 40,
+            reqAvgMs: 375,
+            reqMaxMs: 800,
+            reqMedianMs: 400,
+          },
+        },
+        requests: 4,
+        urls: {
+          'https://example.com/bar': {
+            GET: {
+              '200': 1,
             },
           },
-          "requests": 4,
-          "urls": {
-            "https://example.com/bar": {
-              "GET": {
-                "200": 1,
-              },
-            },
-            "https://example.com/foo": {
-              "GET": {
-                "200": 2,
-                "404": 1,
-              },
+          'https://example.com/foo': {
+            GET: {
+              '200': 2,
+              '404': 1,
             },
           },
-        }
-      );
+        },
+      });
     });
   });
 });
