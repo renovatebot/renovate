@@ -3335,7 +3335,16 @@ describe('modules/platform/github/index', () => {
     });
   });
 
-  describe('reattemptPlatformAutomerge(prNo, platformOptions)', () => {
+  describe('reattemptPlatformAutomerge(number, platformOptions)', () => {
+    const getPrListResp = [
+      {
+        number: 1234,
+        base: { sha: '1234' },
+        head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+        state: 'open',
+        title: 'Some PR',
+      },
+    ];
     const getPrResp = {
       number: 123,
       node_id: 'abcd',
@@ -3353,7 +3362,7 @@ describe('modules/platform/github/index', () => {
     };
 
     const pr: ReattemptPlatformAutomergeConfig = {
-      prNo: 123,
+      number: 123,
       platformOptions: { usePlatformAutomerge: true },
     };
 
@@ -3364,15 +3373,7 @@ describe('modules/platform/github/index', () => {
         .get(
           '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
         )
-        .reply(200, [
-          {
-            number: 1234,
-            base: { sha: '1234' },
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-            state: 'open',
-            title: 'Some PR',
-          },
-        ]);
+        .reply(200, getPrListResp);
       scope.get('/repos/some/repo/pulls/123').reply(200, getPrResp);
       await github.initRepo({ repository: 'some/repo' });
       return scope;
@@ -3425,12 +3426,34 @@ describe('modules/platform/github/index', () => {
 
       await expect(github.reattemptPlatformAutomerge(pr)).toResolve();
 
+      expect(logger.logger.debug).toHaveBeenLastCalledWith(
+        'PR platform automerge re-attempted...prNo: 123',
+      );
+
       expect(httpMock.getTrace()).toMatchObject([
         graphqlGetRepo,
         restGetPrList,
         restGetPr,
         graphqlAutomerge,
       ]);
+    });
+
+    it('handles unknown error', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+      scope
+        .get(
+          '/repos/some/repo/pulls?per_page=100&state=all&sort=updated&direction=desc&page=1',
+        )
+        .replyWithError('unknown error');
+
+      await expect(github.reattemptPlatformAutomerge(pr)).toResolve();
+
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { err: new Error('external-host-error') },
+        'Error re-attempting PR platform automerge',
+      );
     });
   });
 

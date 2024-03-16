@@ -48,6 +48,7 @@ import type {
   PlatformPrOptions,
   PlatformResult,
   Pr,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -845,8 +846,19 @@ export async function updatePr({
   if (platformOptions?.autoApprove) {
     await approvePr(iid);
   }
+}
 
-  await tryPrAutomerge(iid, platformOptions);
+export async function reattemptPlatformAutomerge({
+  number: iid,
+  platformOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
+  try {
+    await tryPrAutomerge(iid, platformOptions);
+
+    logger.debug(`PR platform automerge re-attempted...prNo: ${iid}`);
+  } catch (err) {
+    logger.warn({ err }, 'Error re-attempting PR platform automerge');
+  }
 }
 
 export async function mergePr({ id }: MergePRConfig): Promise<boolean> {

@@ -1796,20 +1796,17 @@ export async function updatePr({
 }
 
 export async function reattemptPlatformAutomerge({
-  prNo,
+  number,
   platformOptions,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
   try {
-    const result = (await getPr(prNo))!;
-    const { number, node_id } = result;
+    const result = (await getPr(number))!;
+    const { node_id } = result;
 
     await tryPrAutomerge(number, node_id, platformOptions);
 
-    logger.debug(`PR platform automerge re-attempted...prNo: ${prNo}`);
-  } catch (err) /* istanbul ignore next */ {
-    if (err instanceof ExternalHostError) {
-      throw err;
-    }
+    logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
+  } catch (err) {
     logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
 }

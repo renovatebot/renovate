@@ -124,7 +124,7 @@ export interface UpdatePrConfig {
   targetBranch?: string;
 }
 export interface ReattemptPlatformAutomergeConfig {
-  prNo: number;
+  number: number;
   platformOptions?: PlatformPrOptions;
 }
 export interface EnsureIssueConfig {

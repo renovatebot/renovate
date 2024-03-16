@@ -580,7 +580,7 @@ export async function processBranch(
         platform.reattemptPlatformAutomerge
       ) {
         await platform.reattemptPlatformAutomerge({
-          prNo: branchPr.number,
+          number: branchPr.number,
           platformOptions,
         });
       }
