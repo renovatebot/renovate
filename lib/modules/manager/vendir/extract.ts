@@ -9,14 +9,15 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { HelmChart, Vendir } from './types';
+import { HelmChartDefinition, Vendir, VendirDefinition } from './schema';
+
 import { isHelmChart } from './utils';
 
 // TODO: Add support for other vendir types (like git tags, github releases, etc.)
 // Recommend looking at the kustomize manager for more information on support.
 
 export function extractHelmChart(
-  helmChart: HelmChart,
+  helmChart: HelmChartDefinition,
   aliases?: Record<string, string> | undefined,
 ): PackageDependency | null {
   if (isOCIRegistry(helmChart.repository.url)) {
@@ -34,7 +35,10 @@ export function extractHelmChart(
       pinDigests: false,
     };
   }
-  const repository = resolveAlias(helmChart.repository.url, aliases!);
+  let repository = helmChart.repository.url || null;
+  if (aliases) {
+    repository = resolveAlias(helmChart.repository.url, aliases);
+  }
   if (!repository) {
     return {
       depName: helmChart.name,
@@ -54,10 +58,13 @@ export function extractHelmChart(
 export function parseVendir(
   content: string,
   packageFile?: string,
-): Vendir | null {
-  let pkg: Vendir | null = null;
+): VendirDefinition | null {
+  let pkg: VendirDefinition[];
   try {
-    pkg = parseSingleYaml(content);
+    pkg = parseSingleYaml(content, {
+      customSchema: Vendir,
+      removeTemplates: true,
+    });
   } catch (e) /* istanbul ignore next */ {
     logger.debug({ packageFile }, 'Error parsing vendir.yml file');
     return null;
