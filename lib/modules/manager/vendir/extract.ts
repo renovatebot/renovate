@@ -47,7 +47,7 @@ export function parseVendir(
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string,
+  packageFile: string,
 ): PackageFileContent | null {
   logger.trace(`vendir.extractPackageFile(${packageFile!})`);
   const deps: PackageDependency[] = [];
