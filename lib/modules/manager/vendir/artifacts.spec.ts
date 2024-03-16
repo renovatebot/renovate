@@ -5,6 +5,8 @@ import { Fixtures } from '../../../../test/fixtures';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
+import { ExecError } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
@@ -164,6 +166,32 @@ describe('modules/manager/vendir/artifacts', () => {
         },
       },
     ]);
+  });
+
+  it('rethrows for temporary error', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
+    fs.getSiblingFileName.mockReturnValueOnce('vendir.yml');
+    fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache',
+    );
+    fs.getParentDir.mockReturnValue('');
+    const execError = new ExecError(TEMPORARY_ERROR, {
+      cmd: '',
+      stdout: '',
+      stderr: '',
+      options: { encoding: 'utf8' },
+    });
+    const updatedDeps = [{ depName: 'dep1' }];
+    mockExecAll(execError);
+    await expect(
+      vendir.updateArtifacts({
+        packageFileName: 'vendir.yml',
+        updatedDeps,
+        newPackageFileContent: vendirFile,
+        config,
+      }),
+    ).rejects.toThrow(TEMPORARY_ERROR);
   });
 
   it('add artifacts to file list if vendir.yml exists', async () => {

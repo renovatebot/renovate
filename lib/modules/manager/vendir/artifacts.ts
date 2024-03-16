@@ -99,7 +99,6 @@ export async function updateArtifacts({
 
     return fileChanges.length > 0 ? fileChanges : null;
   } catch (err) {
-    // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
