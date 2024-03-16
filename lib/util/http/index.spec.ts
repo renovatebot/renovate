@@ -8,7 +8,6 @@ import {
 import * as memCache from '../cache/memory';
 import { resetCache } from '../cache/repository';
 import * as hostRules from '../host-rules';
-import { repoCacheProvider } from './cache/repository-http-cache-provider';
 import * as queue from './queue';
 import * as throttle from './throttle';
 import type { HttpResponse } from './types';
