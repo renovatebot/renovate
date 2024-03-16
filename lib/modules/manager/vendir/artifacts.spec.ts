@@ -30,7 +30,6 @@ const config: UpdateArtifactsConfig = {};
 const vendirLockFile1 = Fixtures.get('vendir_1.lock');
 const vendirLockFile2 = Fixtures.get('vendir_2.lock');
 const vendirFile = Fixtures.get('vendir.yml');
-const emptyVendirLock = '';
 
 describe('modules/manager/vendir/artifacts', () => {
   beforeEach(() => {

@@ -80,7 +80,7 @@ describe('modules/manager/vendir/extract', () => {
       });
     });
 
-    it('resolves aliased registry urls', async () => {
+    it('resolves aliased registry urls', () => {
       const ociresult = extractPackageFile(aliasContents, 'vendir.yml', {
         registryAliases: {
           placeholder: 'https://my-registry.gcr.io/',

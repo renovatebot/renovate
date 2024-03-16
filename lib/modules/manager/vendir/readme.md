@@ -11,57 +11,57 @@ minimumRequiredVersion: 0.8.0
 
 # one or more directories to manage with vendir
 directories:
-- # path is relative to `vendir` CLI working directory
-  path: config/_ytt_lib
+  - # path is relative to `vendir` CLI working directory
+    path: config/_ytt_lib
 
-  # set the permissions for this directory (optional; v0.33.0+)
-  # by default directories will be created with 0700
-  # can be provided as octal, in which case it needs to be prefixed with a `0`
-  permissions: 0700
-
-  contents:
-  - # path lives relative to directory path # (required)
-    path: github.com/cloudfoundry/cf-k8s-networking
-
-    # skip fetching if the config for this path has not changed since the last sync
-    # optional, `false` by default, available since v0.36.0
-    # use `vendir sync --lazy=false` to forcefully sync when needed
-    lazy: true
-
-    # fetch Helm chart contents (optional; v0.11.0+)
-    helmChart:
-      # chart name (required)
-      name: stable/redis
-      # use specific chart version (string; optional)
-      version: "1.2.1"
-      # specifies Helm repository to fetch from (optional)
-      repository:
-        # repository url; supports exprimental oci helm fetch via
-        # oci:// scheme (required)
-        url: https://...
-      # specify helm binary version to use;
-      # '3' means binary 'helm3' needs to be on the path (optional)
-      helmVersion: "3"
-
-    # includes paths specify what should be included. by default
-    # all paths are included (optional)
-    includePaths:
-    - cfroutesync/crds/**/*
-    - install/ytt/networking/**/*
-
-    # exclude paths are "placed" on top of include paths (optional)
-    excludePaths: []
-
-    # specifies paths to files that need to be includes for
-    # legal reasons such as LICENSE file. Defaults to few
-    # LICENSE, NOTICE and COPYRIGHT variations (optional)
-    legalPaths: []
-
-    # make subdirectory to be new root path within this asset (optional; v0.11.0+)
-    newRootPath: cfroutesync
-
-    # set the permissions for this content directory (optional; v0.33.0+)
-    # by default content directories will be created with 0700
+    # set the permissions for this directory (optional; v0.33.0+)
+    # by default directories will be created with 0700
     # can be provided as octal, in which case it needs to be prefixed with a `0`
     permissions: 0700
+
+    contents:
+      - # path lives relative to directory path # (required)
+        path: github.com/cloudfoundry/cf-k8s-networking
+
+        # skip fetching if the config for this path has not changed since the last sync
+        # optional, `false` by default, available since v0.36.0
+        # use `vendir sync --lazy=false` to forcefully sync when needed
+        lazy: true
+
+        # fetch Helm chart contents (optional; v0.11.0+)
+        helmChart:
+          # chart name (required)
+          name: stable/redis
+          # use specific chart version (string; optional)
+          version: '1.2.1'
+          # specifies Helm repository to fetch from (optional)
+          repository:
+            # repository url; supports exprimental oci helm fetch via
+            # oci:// scheme (required)
+            url: https://...
+          # specify helm binary version to use;
+          # '3' means binary 'helm3' needs to be on the path (optional)
+          helmVersion: '3'
+
+        # includes paths specify what should be included. by default
+        # all paths are included (optional)
+        includePaths:
+          - cfroutesync/crds/**/*
+          - install/ytt/networking/**/*
+
+        # exclude paths are "placed" on top of include paths (optional)
+        excludePaths: []
+
+        # specifies paths to files that need to be includes for
+        # legal reasons such as LICENSE file. Defaults to few
+        # LICENSE, NOTICE and COPYRIGHT variations (optional)
+        legalPaths: []
+
+        # make subdirectory to be new root path within this asset (optional; v0.11.0+)
+        newRootPath: cfroutesync
+
+        # set the permissions for this content directory (optional; v0.33.0+)
+        # by default content directories will be created with 0700
+        # can be provided as octal, in which case it needs to be prefixed with a `0`
+        permissions: 0700
 ```
