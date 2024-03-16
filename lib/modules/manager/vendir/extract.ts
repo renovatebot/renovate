@@ -1,29 +1,53 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { parseSingleYaml } from '../../../util/yaml';
-import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
-import type { PackageDependency, PackageFileContent } from '../types';
+import { getDep } from '../dockerfile/extract';
+import { isOCIRegistry, resolveAlias } from '../helmv3/utils';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { HelmChart, Vendir } from './types';
-import { isHelmChart, isOCIRegistry } from './utils';
+import { isHelmChart } from './utils';
 
 // TODO: Add support for other vendir types (like git tags, github releases, etc.)
 // Recommend looking at the kustomize manager for more information on support.
 
 export function extractHelmChart(
   helmChart: HelmChart,
+  aliases?: Record<string, string> | undefined,
 ): PackageDependency | null {
-  let registryUrl = helmChart.repository.url;
-  let dataSource = HelmDatasource.id;
-  if (isOCIRegistry(helmChart.repository)) {
-    registryUrl = helmChart.repository.url.replace('oci://', 'https://');
-    dataSource = DockerDatasource.id;
+  if (isOCIRegistry(helmChart.repository.url)) {
+    const dep = getDep(
+      `${helmChart.repository.url.replace('oci://', '')}/${helmChart.name}:${helmChart.version}`,
+      false,
+      aliases,
+    );
+    return {
+      ...dep,
+      depName: helmChart.name,
+      packageName: dep.depName,
+      // https://github.com/helm/helm/issues/10312
+      // https://github.com/helm/helm/issues/10678
+      pinDigests: false,
+    };
+  }
+  const repository = resolveAlias(helmChart.repository.url, aliases!);
+  if (!repository) {
+    return {
+      depName: helmChart.name,
+      currentValue: helmChart.version,
+      datasource: HelmDatasource.id,
+      skipReason: 'placeholder-url',
+    };
   }
   return {
     depName: helmChart.name,
     currentValue: helmChart.version,
-    registryUrls: [registryUrl],
-    datasource: dataSource,
+    registryUrls: [repository],
+    datasource: HelmDatasource.id,
   };
 }
 
@@ -48,8 +72,9 @@ export function parseVendir(
 export function extractPackageFile(
   content: string,
   packageFile: string,
+  config: ExtractConfig,
 ): PackageFileContent | null {
-  logger.trace(`vendir.extractPackageFile(${packageFile!})`);
+  logger.trace(`vendir.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
 
   const pkg = parseVendir(content, packageFile);
@@ -61,7 +86,7 @@ export function extractPackageFile(
   const contents = pkg.directories.flatMap((directory) => directory.contents);
   for (const content of contents) {
     if (isHelmChart(content)) {
-      const dep = extractHelmChart(content.helmChart);
+      const dep = extractHelmChart(content.helmChart, config.registryAliases);
       if (dep) {
         deps.push({
           ...dep,

@@ -1,0 +1,30 @@
+---
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+- path: vendor
+  contents:
+  - path: custom-repo-custom-version
+    helmChart:
+      name: oci-contour
+      version: "7.10.1"
+      repository:
+        url: alias:ociRegistry
+  - path: custom-repo-custom-version
+    helmChart:
+      name: normal-contour
+      version: "7.10.1"
+      repository:
+        url: alias:longAlias
+  - path: custom-repo-custom-version
+    helmChart:
+      name: placeholder-contour
+      version: "7.10.1"
+      repository:
+        url: '@placeholder'
+  - path: custom-repo-custom-version
+    helmChart:
+      name: broken-contour
+      version: "7.10.1"
+      repository:
+        url: alias:brokenAlias

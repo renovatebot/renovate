@@ -21,7 +21,7 @@ export async function updateArtifacts({
 
   const lockFileName = getSiblingFileName(packageFileName, 'vendir.lock.yml');
   if (!lockFileName) {
-    logger.debug('No vendir.lock.yml found');
+    logger.warn('No vendir.lock.yml found');
     return null;
   }
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
@@ -29,6 +29,7 @@ export async function updateArtifacts({
     logger.debug('No vendir.lock.yml found');
     return null;
   }
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating Vendir artifacts');

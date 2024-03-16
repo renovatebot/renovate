@@ -30,6 +30,7 @@ const config: UpdateArtifactsConfig = {};
 const vendirLockFile1 = Fixtures.get('vendir_1.lock');
 const vendirLockFile2 = Fixtures.get('vendir_2.lock');
 const vendirFile = Fixtures.get('vendir.yml');
+const emptyVendirLock = '';
 
 describe('modules/manager/vendir/artifacts', () => {
   beforeEach(() => {
@@ -39,6 +40,20 @@ describe('modules/manager/vendir/artifacts', () => {
 
   it('returns null if no vendir.lock.yml found', async () => {
     const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await vendir.updateArtifacts({
+        packageFileName: 'vendir.yml',
+        updatedDeps,
+        newPackageFileContent: '',
+        config,
+      }),
+    ).toBeNull();
+  });
+
+  it('returns null if empty vendir.lock.yml found', async () => {
+    const updatedDeps = [{ depName: 'dep1' }];
+    fs.readLocalFile.mockResolvedValueOnce('');
+    fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
     expect(
       await vendir.updateArtifacts({
         packageFileName: 'vendir.yml',
