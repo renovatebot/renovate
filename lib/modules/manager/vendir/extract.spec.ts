@@ -6,10 +6,7 @@ const ociContents = Fixtures.get('oci-contents.yaml');
 const aliasContents = Fixtures.get('alias-contents.yaml');
 const multipleContents = Fixtures.get('multiple-contents.yaml');
 const nonHelmChartContents = Fixtures.get('non-helmchart.yaml');
-const emptyDirectories = Fixtures.mock(
-  { apiVersion: 'vendir.k14s.io/v1alpha1', kind: 'Config', directories: [] },
-  'vendir.yml',
-);
+const emptyDirectories = Fixtures.get('empty-directories.yaml');
 
 describe('modules/manager/vendir/extract', () => {
   describe('extractPackageFile()', () => {
