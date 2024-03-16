@@ -1,4 +1,5 @@
 import type { Attributes, SpanKind } from '@opentelemetry/api';
+import type { BunyanRecord } from '../logger/types';
 import type { PackageFile } from '../modules/manager/types';
 import type { BranchCache } from '../util/cache/repository/types';
 
@@ -28,10 +29,12 @@ export interface SpanParameters {
 }
 
 export interface Report {
+  problems: BunyanRecord[];
   repositories: Record<string, RepoReport>;
 }
 
 interface RepoReport {
+  problems: BunyanRecord[];
   branches: Partial<BranchCache>[];
   packageFiles: Record<string, PackageFile[]>;
 }
