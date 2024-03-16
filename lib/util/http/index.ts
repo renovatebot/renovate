@@ -11,7 +11,11 @@ import { getCache } from '../cache/repository';
 import { clone } from '../clone';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
-import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
+import {
+  HttpCacheStats,
+  type HttpRequestStatsDataPoint,
+  HttpStats,
+} from '../stats';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
@@ -279,6 +283,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
           logger.debug(
             `http cache: saving ${url} (etag=${resCopy.headers.etag}, lastModified=${resCopy.headers['last-modified']})`,
           );
+          HttpCacheStats.incRemoteMisses(url);
           cache.httpCache[url] = {
             etag: resCopy.headers.etag,
             httpResponse: copyResponse(res, deepCopyNeeded),
@@ -290,6 +295,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
           logger.debug(
             `http cache: Using cached response: ${url} from ${cache.httpCache[url].timeStamp}`,
           );
+          HttpCacheStats.incRemoteHits(url);
           const cacheCopy = copyResponse(
             cache.httpCache[url].httpResponse,
             deepCopyNeeded,
