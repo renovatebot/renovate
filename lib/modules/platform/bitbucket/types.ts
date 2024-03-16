@@ -66,6 +66,9 @@ export interface RepoInfoBody {
   uuid: string;
   full_name: string;
   is_private: boolean;
+  project: {
+    name: string;
+  };
 }
 
 export interface PrResponse {

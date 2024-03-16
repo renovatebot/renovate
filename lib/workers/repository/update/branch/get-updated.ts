@@ -302,7 +302,11 @@ export async function getUpdatedPackageFiles(
           updatedDeps,
           // TODO #22198
           newPackageFileContent: packageFile.contents!.toString(),
-          config,
+          config: patchConfigForArtifactsUpdate(
+            config,
+            manager,
+            packageFile.path,
+          ),
         });
         processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
       }
@@ -329,7 +333,11 @@ export async function getUpdatedPackageFiles(
           updatedDeps,
           // TODO #22198
           newPackageFileContent: packageFile.contents!.toString(),
-          config,
+          config: patchConfigForArtifactsUpdate(
+            config,
+            manager,
+            packageFile.path,
+          ),
         });
         processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
         if (is.nonEmptyArray(results)) {

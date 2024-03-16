@@ -40,6 +40,7 @@ export async function autodiscoverRepositories(
     topics: config.autodiscoverTopics,
     includeMirrors: config.includeMirrors,
     namespaces: config.autodiscoverNamespaces,
+    projects: config.autodiscoverProjects,
   });
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
