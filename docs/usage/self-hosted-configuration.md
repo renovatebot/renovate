@@ -213,6 +213,21 @@ For example:
 }
 ```
 
+## autodiscoverProjects
+
+You can use this option to filter the list of autodiscovered repositories by project names.
+This feature is useful for users who want Renovate to only work on repositories within specific projects or exclude certain repositories from being processed.
+
+```json title="Example for Bitbucket"
+{
+  "platform": "bitbucket",
+  "autodiscoverProjects": ["a-group", "!another-group/some-subgroup"]
+}
+```
+
+The `autodiscoverProjects` config option takes an array of minimatch-compatible globs or RE2-compatible regex strings.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ## autodiscoverTopics
 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
@@ -326,6 +341,31 @@ Use this option if you need such downloads to be stored outside of Renovate's re
 ## customEnvVariables
 
 This configuration will be applied after all other environment variables so you can use it to override defaults.
+
+<!-- prettier-ignore -->
+!!! warning
+    Do not configure any secret values directly into `customEnvVariables` because they may be logged to stdout.
+    Instead, configure them into `secrets` first so that they will be redacted in logs.
+
+If configuring secrets in to `customEnvVariables`, take this approach:
+
+```js
+{
+  secrets: {
+    SECRET_TOKEN: process.env.SECRET_TOKEN,
+  },
+  customEnvVariables: {
+    SECRET_TOKEN: '{{ secrets.SECRET_TOKEN }}',
+  },
+}
+```
+
+The above configuration approach will mean the values are redacted in logs like in the following example:
+
+```
+         "secrets": {"SECRET_TOKEN": "***********"},
+         "customEnvVariables": {"SECRET_TOKEN": "{{ secrets.SECRET_TOKEN }}"},
+```
 
 ## detectGlobalManagerConfig
 
@@ -530,6 +570,12 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
+## forkCreation
+
+This configuration lets you disable the runtime forking of repositories when running in "fork mode".
+
+Usually you will need to keep this as the default `true`, and only set to `false` if you have some out of band process to handle the creation of forks.
+
 ## forkOrg
 
 This configuration option lets you choose an organization you want repositories forked into when "fork mode" is enabled.
@@ -551,6 +597,10 @@ If this value is configured then Renovate:
 - keep this fork's default branch up-to-date with the target
 
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
+
+<!-- prettier-ignore -->
+!!! note
+    Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
 ## gitNoVerify
 
@@ -902,17 +952,9 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 }
 ```
 
-<!-- prettier-ignore -->
-!!! note
-    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running Renovate within an EC2 instance in an ECS cluster. In this case, no extra environment variables are required.
-    Otherwise, the following environment variables should be set for the S3 client to work.
-
-```
-    AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY
-    AWS_SESSION_TOKEN
-    AWS_REGION
-```
+Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
+Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
+Read more about the default credential provider chain for AWS SDK for JavaScript V3 [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
 <!-- prettier-ignore -->
 !!! tip
@@ -984,12 +1026,6 @@ It could then be used in a repository config or preset like so:
 ```
 
 Secret names must start with an upper or lower case character and can have only characters, digits, or underscores.
-
-## skipInstalls
-
-By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
-If this is set to false, then a full install of modules will be done.
-This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
 

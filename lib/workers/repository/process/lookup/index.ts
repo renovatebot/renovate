@@ -4,6 +4,7 @@ import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import {
+  GetDigestInputConfig,
   Release,
   ReleaseResult,
   applyDatasourceFilters,
@@ -61,6 +62,12 @@ export async function lookupUpdates(
       'lookupUpdates',
     );
     if (config.currentValue && !is.string(config.currentValue)) {
+      // If currentValue is not a string, then it's invalid
+      if (config.currentValue) {
+        logger.debug(
+          `Invalid currentValue for ${config.packageName}: ${JSON.stringify(config.currentValue)} (${typeof config.currentValue})`,
+        );
+      }
       res.skipReason = 'invalid-value';
       return Result.ok(res);
     }
@@ -157,6 +164,8 @@ export async function lookupUpdates(
         'homepage',
         'changelogUrl',
         'dependencyUrl',
+        'lookupName',
+        'packageScope',
       ]);
 
       const latestVersion = dependency.tags?.latest;
@@ -269,6 +278,9 @@ export async function lookupUpdates(
 
       if (!currentVersion) {
         if (!config.lockedVersion) {
+          logger.debug(
+            `No currentVersion or lockedVersion found for ${config.packageName}`,
+          );
           res.skipReason = 'invalid-value';
         }
         return Result.ok(res);
@@ -423,6 +435,9 @@ export async function lookupUpdates(
       );
 
       if (!config.pinDigests && !config.currentDigest) {
+        logger.debug(
+          `Skipping ${config.packageName} because no currentDigest or pinDigests`,
+        );
         res.skipReason = 'invalid-value';
       } else {
         delete res.skipReason;
@@ -442,6 +457,24 @@ export async function lookupUpdates(
     } else if (compareValue && versioning.isSingleVersion(compareValue)) {
       res.fixedVersion = compareValue.replace(regEx(/^=+/), '');
     }
+
+    // massage versionCompatibility
+    if (
+      is.string(config.currentValue) &&
+      is.string(compareValue) &&
+      is.string(config.versionCompatibility)
+    ) {
+      for (const update of res.updates) {
+        logger.debug({ update });
+        if (is.string(config.currentValue) && is.string(update.newValue)) {
+          update.newValue = config.currentValue.replace(
+            compareValue,
+            update.newValue,
+          );
+        }
+      }
+    }
+
     // Add digests if necessary
     if (supportsDigests(config.datasource)) {
       if (config.currentDigest) {
@@ -449,7 +482,7 @@ export async function lookupUpdates(
           // digest update
           res.updates.push({
             updateType: 'digest',
-            newValue: compareValue,
+            newValue: config.currentValue,
           });
         }
       } else if (config.pinDigests) {
@@ -459,7 +492,7 @@ export async function lookupUpdates(
           res.updates.push({
             isPinDigest: true,
             updateType: 'pinDigest',
-            newValue: compareValue,
+            newValue: config.currentValue,
           });
         }
       }
@@ -478,10 +511,16 @@ export async function lookupUpdates(
       // update digest for all
       for (const update of res.updates) {
         if (config.pinDigests === true || config.currentDigest) {
+          const getDigestConfig: GetDigestInputConfig = {
+            ...config,
+            registryUrl: update.registryUrl ?? res.registryUrl,
+            lookupName: res.lookupName,
+          };
           // TODO #22198
           update.newDigest ??=
             dependency?.releases.find((r) => r.version === update.newValue)
-              ?.newDigest ?? (await getDigest(config, update.newValue))!;
+              ?.newDigest ??
+            (await getDigest(getDigestConfig, update.newValue))!;
 
           // If the digest could not be determined, report this as otherwise the
           // update will be omitted later on without notice.
@@ -516,23 +555,6 @@ export async function lookupUpdates(
           if (registryUrl && registryUrl !== res.registryUrl) {
             update.registryUrl = registryUrl;
           }
-        }
-      }
-    }
-
-    // massage versionCompatibility
-    if (
-      is.string(config.currentValue) &&
-      is.string(compareValue) &&
-      is.string(config.versionCompatibility)
-    ) {
-      for (const update of res.updates) {
-        logger.debug({ update });
-        if (is.string(config.currentValue) && is.string(update.newValue)) {
-          update.newValue = config.currentValue.replace(
-            compareValue,
-            update.newValue,
-          );
         }
       }
     }

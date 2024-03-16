@@ -14,8 +14,8 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
         200,
         codeBlock`
           {
-            "Resources": {},
-            "Functions": {}
+            "resources": {},
+            "resourceFunctions": {}
           }
         `,
       );
@@ -36,19 +36,17 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
         200,
         codeBlock`
           {
-            "Resources": {},
-            "Functions": {
+            "resources": {},
+            "resourceFunctions": {
               "microsoft.billing/billingaccounts": {
                 "2019-10-01-preview": [
                   {
-                    "RelativePath": "billing/microsoft.billing/2019-10-01-preview/types.json",
-                    "Index": 307
+                    "$ref": "billing/microsoft.billing/2019-10-01-preview/types.json#/304"
                   }
                 ],
                 "2020-05-01": [
                   {
-                    "RelativePath": "billing/microsoft.billing/2020-05-01/types.json",
-                    "Index": 287
+                    "$ref": "billing/microsoft.billing/2020-05-01/types.json#/287"
                   }
                 ]
               }
@@ -86,17 +84,15 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
         200,
         codeBlock`
           {
-            "Resources": {
+            "resources": {
               "Microsoft.Storage/storageAccounts@2015-05-01-preview": {
-                "RelativePath": "storage/microsoft.storage/2015-05-01-preview/types.json",
-                "Index": 31
+                "$ref": "storage/microsoft.storage/2015-05-01-preview/types.json#/31"
               },
               "Microsoft.Storage/storageAccounts@2018-02-01": {
-                "RelativePath": "storage/microsoft.storage/2018-02-01/types.json",
-                "Index": 85
+                "$ref": "storage/microsoft.storage/2018-02-01/types.json#/85"
               }
             },
-            "Functions": {}
+            "resourceFunctions": {}
           }
         `,
       );

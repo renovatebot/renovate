@@ -14,6 +14,8 @@ import { joinUrlParts } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
 import type { CachedReleaseResult, NpmResponse } from './types';
 
+export const CACHE_REVISION = 1;
+
 const SHORT_REPO_REGEX = regEx(
   /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/,
 );
@@ -82,8 +84,8 @@ export async function getDependency(
     cacheNamespace,
     packageUrl,
   );
-  if (cachedResult) {
-    if (cachedResult.cacheData) {
+  if (cachedResult?.cacheData) {
+    if (cachedResult.cacheData.revision === CACHE_REVISION) {
       const softExpireAt = DateTime.fromISO(
         cachedResult.cacheData.softExpireAt,
       );
@@ -94,8 +96,10 @@ export async function getDependency(
       }
       logger.trace('Cached result is soft expired');
     } else {
-      logger.trace('Reusing legacy cached result');
-      return cachedResult;
+      logger.trace(
+        `Package cache for npm package "${packageName}" is from an old revision - discarding`,
+      );
+      delete cachedResult.cacheData;
     }
   }
   const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
@@ -193,6 +197,9 @@ export async function getDependency(
       ) {
         release.sourceDirectory = source.sourceDirectory;
       }
+      if (dep.deprecationMessage) {
+        release.isDeprecated = true;
+      }
       return release;
     });
     logger.trace({ dep }, 'dep');
@@ -202,7 +209,7 @@ export async function getDependency(
       regEx(/(^|,)\s*public\s*(,|$)/).test(cacheControl)
     ) {
       dep.isPrivate = false;
-      const cacheData = { softExpireAt, etag };
+      const cacheData = { revision: CACHE_REVISION, softExpireAt, etag };
       await packageCache.set(
         cacheNamespace,
         packageUrl,

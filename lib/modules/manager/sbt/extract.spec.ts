@@ -1,6 +1,12 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile as extract } from '.';
+import { fs } from '../../../../test/util';
+import {
+  extractPackageFile as extract,
+  extractAllPackageFiles,
+} from './extract';
+
+jest.mock('../../../util/fs');
 
 const extractPackageFile = (content: string) => extract(content, 'build.sbt');
 
@@ -124,7 +130,7 @@ describe('modules/manager/sbt/extract', () => {
             datasource: 'sbt-package',
             depName: 'org.scalatest:scalatest',
             packageName: 'org.scalatest:scalatest',
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
           {
             currentValue: '1.0.11',
@@ -133,10 +139,7 @@ describe('modules/manager/sbt/extract', () => {
             depType: 'plugin',
             groupName: 'sbtReleaseVersion',
             packageName: 'com.github.gseitz:sbt-release',
-            registryUrls: [
-              'https://repo.maven.apache.org/maven2',
-              'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
-            ],
+            registryUrls: [],
             variableName: 'sbtReleaseVersion',
           },
         ],
@@ -297,7 +300,7 @@ describe('modules/manager/sbt/extract', () => {
       expect(extractPackageFile(content)).toMatchObject({
         deps: [
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             datasource: 'maven',
             depName: 'scala',
             packageName: 'org.scala-lang:scala-library',
@@ -305,14 +308,14 @@ describe('modules/manager/sbt/extract', () => {
             separateMinorPatch: true,
           },
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             depName: 'com.typesafe.scala-logging:scala-logging',
             packageName: 'com.typesafe.scala-logging:scala-logging_2.13',
             currentValue: '3.9.4',
             datasource: 'sbt-package',
           },
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             depName: 'ch.qos.logback:logback-classic',
             packageName: 'ch.qos.logback:logback-classic',
             currentValue: '1.2.10',
@@ -337,7 +340,7 @@ describe('modules/manager/sbt/extract', () => {
       expect(extractPackageFile(content)).toMatchObject({
         deps: [
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             datasource: 'maven',
             depName: 'scala',
             packageName: 'org.scala-lang:scala-library',
@@ -345,14 +348,14 @@ describe('modules/manager/sbt/extract', () => {
             separateMinorPatch: true,
           },
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             depName: 'com.typesafe.scala-logging:scala-logging',
             packageName: 'com.typesafe.scala-logging:scala-logging_2.13',
             currentValue: '3.9.4',
             datasource: 'sbt-package',
           },
           {
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
             depName: 'ch.qos.logback:logback-classic',
             packageName: 'ch.qos.logback:logback-classic',
             currentValue: '1.2.10',
@@ -436,6 +439,148 @@ describe('modules/manager/sbt/extract', () => {
           'project/build.properties',
         ),
       ).toBeNull();
+    });
+  });
+
+  describe('extractAllPackageFiles()', () => {
+    it('extracts proxy repositories', async () => {
+      const repositoryContent = codeBlock`
+      [repositories]
+      local
+      my-maven-repo: http://example.org/repo
+      my-ivy-repo: https://example.org/ivy-repo/, [organization]/[module]/[revision]/[type]s/[artifact](-[classifier]).[ext]
+      maven-central
+    `;
+      fs.readLocalFile
+        .mockResolvedValueOnce(repositoryContent)
+        .mockResolvedValueOnce(sbtDependencyFile);
+      const packages = await extractAllPackageFiles({}, [
+        'repositories',
+        'build.sbt',
+      ]);
+      const expected_packages = [
+        {
+          deps: [
+            {
+              packageName: 'org.scala-lang:scala-library',
+              currentValue: '2.13.0-RC5',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+            {
+              packageName: 'com.example:foo_2.13.0-RC5',
+              currentValue: '0.7.1',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+            {
+              packageName: 'com.abc:abc',
+              currentValue: '1.2.3',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+            {
+              packageName: 'com.abc:abc-a',
+              currentValue: '1.2.3',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+            {
+              packageName: 'com.abc:abc-b',
+              currentValue: '1.2.3',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+            {
+              packageName: 'com.abc:abc-c',
+              currentValue: '1.2.3',
+              registryUrls: [
+                'http://example.org/repo',
+                'https://example.org/ivy-repo/',
+                'https://repo1.maven.org/maven2',
+              ],
+            },
+          ],
+        },
+      ];
+      expect(packages).toMatchObject(expected_packages);
+    });
+
+    it('should include default registryUrls if no repositories file is provided', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(sbt);
+      const packages = await extractAllPackageFiles({}, ['build.sbt']);
+      for (const pkg of packages) {
+        for (const dep of pkg.deps.filter((d) => d.depType === 'plugin')) {
+          expect(dep.registryUrls).toStrictEqual([
+            'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
+            'https://repo1.maven.org/maven2',
+            'https://example.com/repos/1/',
+            'https://example.com/repos/2/',
+            'https://example.com/repos/3/',
+            'https://example.com/repos/4/',
+            'https://example.com/repos/5/',
+          ]);
+        }
+      }
+      for (const pkg of packages) {
+        for (const dep of pkg.deps.filter((d) => d.depType !== 'plugin')) {
+          expect(dep.registryUrls).toStrictEqual([
+            'https://repo1.maven.org/maven2',
+            'https://example.com/repos/1/',
+            'https://example.com/repos/2/',
+            'https://example.com/repos/3/',
+            'https://example.com/repos/4/',
+            'https://example.com/repos/5/',
+          ]);
+        }
+      }
+    });
+
+    it('should return empty packagefiles is no content is provided', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('');
+      const packages = await extractAllPackageFiles({}, ['build.sbt']);
+      expect(packages).toBeEmpty();
+    });
+
+    it('extracts build properties correctly', async () => {
+      const buildProps = codeBlock`
+      sbt.version=1.6.0
+    `;
+      fs.readLocalFile.mockResolvedValueOnce(buildProps);
+      const packages = await extractAllPackageFiles({}, [
+        'project/build.properties',
+      ]);
+      expect(packages).toMatchObject([
+        {
+          deps: [
+            {
+              datasource: 'github-releases',
+              packageName: 'sbt/sbt',
+              depName: 'sbt/sbt',
+              currentValue: '1.6.0',
+              replaceString: 'sbt.version=1.6.0',
+              versioning: 'semver',
+              extractVersion: '^v(?<version>\\S+)',
+              registryUrls: [],
+            },
+          ],
+        },
+      ]);
     });
   });
 });

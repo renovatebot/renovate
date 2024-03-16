@@ -145,6 +145,7 @@ export async function processBranch(
     config.rebaseRequested = await rebaseCheck(config, branchPr);
     logger.debug(`PR rebase requested=${config.rebaseRequested}`);
   }
+  const keepUpdatedLabel = config.keepUpdatedLabel;
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
   try {
     // Check if branch already existed
@@ -429,6 +430,7 @@ export async function processBranch(
     } else if (
       branchExists &&
       config.rebaseWhen === 'never' &&
+      !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel)) &&
       !dependencyDashboardCheck
     ) {
       logger.debug('rebaseWhen=never so skipping branch update check');
@@ -636,7 +638,8 @@ export async function processBranch(
       }
       if (
         mergeStatus === 'stale' &&
-        ['conflicted', 'never'].includes(config.rebaseWhen!)
+        ['conflicted', 'never'].includes(config.rebaseWhen!) &&
+        !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
       ) {
         logger.warn(
           'Branch cannot automerge because it is behind base branch and rebaseWhen setting disallows rebasing - raising a PR instead',

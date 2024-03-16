@@ -1,5 +1,14 @@
 body:
   - type: dropdown
+    id: question-type
+    attributes:
+      label: What would you like help with?
+      options:
+        - 'I would like help with my configuration'
+        - 'I think I found a bug'
+        - 'Other'
+
+  - type: dropdown
     id: how-are-you-running-renovate
     attributes:
       label: How are you running Renovate?
@@ -10,32 +19,14 @@ body:
   - type: input
     id: self-hosted-version
     attributes:
-      label: If you're self-hosting Renovate, tell us what version of Renovate you run.
-    validations:
-      required: false
-
-  - type: dropdown
-    id: self-hosted-platform
-    attributes:
-      label: If you're self-hosting Renovate, select which platform you are using.
-      options:
-        - 'AWS CodeCommit'
-        - 'Azure DevOps (dev.azure.com)'
-        - 'Azure DevOps Server'
-        - 'Bitbucket Cloud (bitbucket.org)'
-        - 'Bitbucket Server'
-        - 'Gitea or Forgejo'
-        - 'github.com'
-        - 'GitHub Enterprise Server'
-        - 'gitlab.com'
-        - 'GitLab self-hosted'
+      label: If you're self-hosting Renovate, tell us which platform (GitHub, GitLab, etc) and which version of Renovate.
     validations:
       required: false
 
   - type: textarea
     id: the-question
     attributes:
-      label: What is your question?
+      label: Please tell us more about your question or problem
     validations:
       required: true
 
@@ -54,7 +45,7 @@ body:
 
         ```
 
-        Copy/paste the relevant log(s) here, between the starting and ending backticks
+        Replace this text with your logs, between the starting and ending triple backticks
 
         ```
 

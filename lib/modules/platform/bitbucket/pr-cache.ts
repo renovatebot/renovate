@@ -19,8 +19,9 @@ export class BitbucketPrCache {
     repoCache.platform ??= {};
     repoCache.platform.bitbucket ??= {};
 
-    let pullRequestCache: BitbucketPrCacheData | undefined =
-      repoCache.platform.bitbucket.pullRequestsCache;
+    let pullRequestCache = repoCache.platform.bitbucket.pullRequestsCache as
+      | BitbucketPrCacheData
+      | undefined;
     if (!pullRequestCache || pullRequestCache.author !== author) {
       pullRequestCache = {
         items: {},
