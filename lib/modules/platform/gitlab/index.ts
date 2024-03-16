@@ -852,13 +852,9 @@ export async function reattemptPlatformAutomerge({
   number: iid,
   platformOptions,
 }: ReattemptPlatformAutomergeConfig): Promise<void> {
-  try {
-    await tryPrAutomerge(iid, platformOptions);
+  await tryPrAutomerge(iid, platformOptions);
 
-    logger.debug(`PR platform automerge re-attempted...prNo: ${iid}`);
-  } catch (err) {
-    logger.warn({ err }, 'Error re-attempting PR platform automerge');
-  }
+  logger.debug(`PR platform automerge re-attempted...prNo: ${iid}`);
 }
 
 export async function mergePr({ id }: MergePRConfig): Promise<boolean> {
