@@ -12,9 +12,9 @@ import { clone } from '../clone';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
 import {
+  HttpCacheStats,
   type HttpRequestStatsDataPoint,
   HttpStats,
-  HttpCacheStats,
 } from '../stats';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
