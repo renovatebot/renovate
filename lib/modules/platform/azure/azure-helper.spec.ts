@@ -1,5 +1,8 @@
 import { Readable } from 'node:stream';
-import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import type { PolicyConfiguration } from 'azure-devops-node-api/interfaces/PolicyInterfaces';
+import { partial } from '../../../../test/util';
 
 jest.mock('./azure-got-wrapper');
 
@@ -234,6 +237,35 @@ describe('modules/platform/azure/azure-helper', () => {
           }) as any,
       );
       expect(await azureHelper.getMergeMethod('', '')).toEqual(
+        GitPullRequestMergeStrategy.Squash,
+      );
+    });
+
+    it('should return Squash when Project wide exact branch policy exists', async () => {
+      const refMock = 'refs/heads/ding';
+
+      azureApi.policyApi.mockResolvedValueOnce(
+        partial<IPolicyApi>({
+          getPolicyConfigurations: jest.fn(() =>
+            Promise.resolve([
+              partial<PolicyConfiguration>({
+                settings: {
+                  allowSquash: true,
+                  scope: [
+                    {
+                      // null here means project wide
+                      repositoryId: null,
+                      matchKind: 'Exact',
+                      refName: refMock,
+                    },
+                  ],
+                },
+              }),
+            ]),
+          ),
+        }),
+      );
+      expect(await azureHelper.getMergeMethod('', '', refMock)).toEqual(
         GitPullRequestMergeStrategy.Squash,
       );
     });

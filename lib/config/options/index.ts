@@ -851,7 +851,6 @@ const options: RenovateOptions[] = [
       'Skip installing modules/dependencies if lock file updating is possible without a full install.',
     type: 'boolean',
     default: null,
-    globalOnly: true,
   },
   {
     name: 'autodiscover',

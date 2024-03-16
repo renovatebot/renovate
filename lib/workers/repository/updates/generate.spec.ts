@@ -1443,5 +1443,30 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(upgrades);
       expect(res.additionalReviewers).toEqual(['foo', 'bar']);
     });
+
+    it('merges depTypes', () => {
+      const upgrades = [
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'devDependencies',
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'dependencies',
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'devDependencies',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(upgrades);
+      expect(res.depTypes).toEqual(['dependencies', 'devDependencies']);
+    });
   });
 });
