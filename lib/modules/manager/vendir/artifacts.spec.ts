@@ -2,17 +2,15 @@ import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
+import { env, fs, git, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { ExecError } from '../../../util/exec/exec-error';
 import type { StatusResult } from '../../../util/git/types';
-import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as vendir from '.';
 
-const datasource = mocked(_datasource);
 process.env.CONTAINERBASE = 'true';
 
 jest.mock('../../datasource', () => mockDeep());
@@ -367,14 +365,10 @@ describe('modules/manager/vendir/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
     fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
-    fs.readLocalFile.mockResolvedValueOnce('0.35.0');
     const execSnapshots = mockExecAll();
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
-    datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '0.35.0' }],
-    });
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -455,9 +449,6 @@ describe('modules/manager/vendir/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
       fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
       fs.readLocalFile.mockResolvedValueOnce('0.35.0');
-      datasource.getPkgReleases.mockResolvedValueOnce({
-        releases: [{ version: '0.35.0' }],
-      });
       const execSnapshots = mockExecAll();
       fs.privateCacheDir.mockReturnValue(
         '/tmp/renovate/cache/__renovate-private-cache',
