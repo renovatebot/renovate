@@ -11,6 +11,7 @@ import type { UpdateArtifactsConfig } from '../types';
 import * as vendir from '.';
 
 const datasource = mocked(_datasource);
+process.env.CONTAINERBASE = 'true';
 
 jest.mock('../../datasource', () => mockDeep());
 jest.mock('../../../util/exec/env', () => mockDeep());
@@ -21,7 +22,8 @@ jest.mock('../../../util/git', () => mockDeep());
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: join('/tmp/renovate/cache'),
-  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
+  containerbaseDir: join('/tmp/cache/containerbase'),
+  dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -238,7 +240,7 @@ describe('modules/manager/vendir/artifacts', () => {
     ]);
   });
 
-  it('add artifacts without old archives', async () => {
+  it('add artifacts', async () => {
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
     fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
     fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
@@ -342,6 +344,9 @@ describe('modules/manager/vendir/artifacts', () => {
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache',
     );
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '0.35.0' }],
+    });
     fs.getParentDir.mockReturnValue('');
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -349,7 +354,10 @@ describe('modules/manager/vendir/artifacts', () => {
         packageFileName: 'vendir.yml',
         updatedDeps,
         newPackageFileContent: vendirFile,
-        config,
+        config: {
+          ...config,
+          constraints: { vendir: '0.35.0', helm: '3.17.0' },
+        },
       }),
     ).toEqual([
       {
@@ -361,8 +369,48 @@ describe('modules/manager/vendir/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool vendir 0.35.0' },
-      { cmd: 'vendir sync' },
+      {
+        cmd: 'install-tool vendir 0.35.0',
+        options: {
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+        },
+      },
+      {
+        cmd: 'install-tool helm 3.17.0',
+        options: {
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+        },
+      },
+      {
+        cmd: 'vendir sync',
+        options: {
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+        },
+      },
     ]);
   });
 
@@ -379,6 +427,9 @@ describe('modules/manager/vendir/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
       fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
       fs.readLocalFile.mockResolvedValueOnce('0.35.0');
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '0.35.0' }],
+      });
       const execSnapshots = mockExecAll();
       fs.privateCacheDir.mockReturnValue(
         '/tmp/renovate/cache/__renovate-private-cache',
@@ -390,7 +441,10 @@ describe('modules/manager/vendir/artifacts', () => {
           packageFileName: 'vendir.yml',
           updatedDeps,
           newPackageFileContent: vendirFile,
-          config,
+          config: {
+            ...config,
+            constraints: { vendir: '0.35.0', helm: '3.17.0' },
+          },
         }),
       ).toEqual([
         {
@@ -402,23 +456,21 @@ describe('modules/manager/vendir/artifacts', () => {
         },
       ]);
       expect(execSnapshots).toMatchObject([
-        { cmd: 'install-tool vendir 0.35.0' },
-        { cmd: 'vendir sync' },
-      ]);
-      expect(execSnapshots).toMatchObject([
         { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
         { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
         {
           cmd:
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-            '-v "/tmp/cache":"/tmp/cache" ' +
-            '-e GEM_HOME ' +
+            '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+            '-v "/tmp/cache/containerbase":"/tmp/cache/containerbase" ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'ghcr.io/containerbase/sidecar' +
             ' bash -l -c "' +
             'install-tool vendir 0.35.0' +
+            ' && ' +
+            'install-tool helm 3.17.0' +
             ' && ' +
             'vendir sync' +
             '"',
