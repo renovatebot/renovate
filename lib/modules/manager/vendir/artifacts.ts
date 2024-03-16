@@ -26,7 +26,7 @@ export async function updateArtifacts({
   }
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
-    logger.debug('No vendir.lock.yml found');
+    logger.warn('Empty vendir.lock.yml found');
     return null;
   }
 
