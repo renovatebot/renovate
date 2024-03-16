@@ -12,8 +12,8 @@ import {
   getReport,
 } from './reporting';
 
-jest.mock('../util/fs');
-jest.mock('../util/s3');
+jest.mock('../util/fs', () => mockDeep());
+jest.mock('../util/s3', () => mockDeep());
 
 describe('instrumentation/reporting', () => {
   const branchInformation: Partial<BranchCache>[] = [
