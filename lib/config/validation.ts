@@ -184,7 +184,9 @@ export async function validateConfig(
           val,
           optionTypes[key],
           warnings,
+          errors,
           currentPath,
+          config,
         );
         continue;
       } else {
