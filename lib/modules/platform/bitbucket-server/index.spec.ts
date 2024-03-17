@@ -226,6 +226,10 @@ describe('modules/platform/bitbucket-server/index', () => {
           username,
           password,
         });
+        httpMock
+          .scope(urlHost)
+          .get(`${urlPath}/rest/api/1.0/application-properties`)
+          .reply(200, { version: '8.0.0' });
         await bitbucket.initPlatform({
           endpoint,
           username,
@@ -247,6 +251,10 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
 
         it('should init', async () => {
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .reply(200, { version: '8.0.0' });
           expect(
             await bitbucket.initPlatform({
               endpoint: 'https://stash.renovatebot.com',
