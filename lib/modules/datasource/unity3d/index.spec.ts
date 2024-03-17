@@ -51,15 +51,17 @@ describe('modules/datasource/unity3d/index', () => {
 
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
-    const responses = (
-      await getPkgReleases({
-        datasource: Unity3dDatasource.id,
-        packageName: 'm_EditorVersion',
-        registryUrls: [Unity3dDatasource.streams.stable],
-      })
-    )?.releases.map((release) => release.version);
+    const responses = await getPkgReleases({
+      datasource: Unity3dDatasource.id,
+      packageName: 'm_EditorVersion',
+      registryUrls: [Unity3dDatasource.streams.stable],
+    });
 
-    expect(responses!).toHaveLength(0);
+    expect(responses).toEqual(
+      expect.objectContaining({
+        releases: expect.arrayContaining([]),
+      }),
+    );
   });
 
   it('handles missing channel element', async () => {
@@ -69,15 +71,17 @@ describe('modules/datasource/unity3d/index', () => {
 
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
-    const responses = (
-      await getPkgReleases({
-        datasource: Unity3dDatasource.id,
-        packageName: 'm_EditorVersion',
-        registryUrls: [Unity3dDatasource.streams.stable],
-      })
-    )?.releases.map((release) => release.version);
+    const responses = await getPkgReleases({
+      datasource: Unity3dDatasource.id,
+      packageName: 'm_EditorVersion',
+      registryUrls: [Unity3dDatasource.streams.stable],
+    });
 
-    expect(responses!).toHaveLength(0);
+    expect(responses).toEqual(
+      expect.objectContaining({
+        releases: expect.arrayContaining([]),
+      }),
+    );
   });
 
   it('handles missing item element', async () => {
@@ -87,62 +91,85 @@ describe('modules/datasource/unity3d/index', () => {
 
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
-    const responses = (
-      await getPkgReleases({
-        datasource: Unity3dDatasource.id,
-        packageName: 'm_EditorVersion',
-        registryUrls: [Unity3dDatasource.streams.stable],
-      })
-    )?.releases.map((release) => release.version);
+    const responses = await getPkgReleases({
+      datasource: Unity3dDatasource.id,
+      packageName: 'm_EditorVersion',
+      registryUrls: [Unity3dDatasource.streams.stable],
+    });
 
-    expect(responses!).toHaveLength(0);
+    expect(responses).toEqual(
+      expect.objectContaining({
+        releases: expect.arrayContaining([]),
+      }),
+    );
   });
 
   it('returns stable and lts releases by default', async () => {
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
     mockRSSFeeds(qualifyingStreams);
-    const responses = (
-      await getPkgReleases({
-        datasource: Unity3dDatasource.id,
-        packageName: 'm_EditorVersion',
-      })
-    )?.releases.map((release) => release.version);
+    const responses = await getPkgReleases({
+      datasource: Unity3dDatasource.id,
+      packageName: 'm_EditorVersion',
+    });
 
-    // check that only letter f is present (final releases)
-    expect(responses!.every((version) => /[fp]/.test(version))).toBe(true);
-    // check that no version contains the letter b (beta release)
-    expect(responses!.every((version) => !/b/.test(version))).toBe(true);
+    expect(responses).toEqual(
+      expect.objectContaining({
+        releases: expect.arrayContaining([
+          expect.objectContaining({
+            version: expect.stringMatching(/f/),
+          }),
+        ]),
+      }),
+    );
+
+    expect(responses).toEqual(
+      expect.objectContaining({
+        releases: expect.not.arrayContaining([
+          expect.objectContaining({
+            version: expect.stringMatching(/\(b\)/),
+          }),
+        ]),
+      }),
+    );
   });
 
   it('returns hash if requested', async () => {
     mockRSSFeeds({ stable: Unity3dDatasource.streams.stable });
-    const responsesWithoutHash = (await getPkgReleases({
+    const responsesWithHash = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersionWithRevision',
       registryUrls: [Unity3dDatasource.streams.stable],
-    }))!.releases.map((release) => release.version);
+    });
 
-    expect(responsesWithoutHash.length).toBeGreaterThan(0);
-    expect(
-      responsesWithoutHash.every((version) => /\(.*\)/.test(version)),
-    ).toBe(true);
+    expect(responsesWithHash).toEqual(
+      expect.objectContaining({
+        releases: expect.arrayContaining([
+          expect.objectContaining({
+            version: expect.stringMatching(/\(.*\)/),
+          }),
+        ]),
+      }),
+    );
   });
 
   it('returns no hash if not requested', async () => {
     mockRSSFeeds({ stable: Unity3dDatasource.streams.stable });
-    const responsesWithoutHash = (
-      await getPkgReleases({
-        datasource: Unity3dDatasource.id,
-        packageName: 'm_EditorVersion',
-        registryUrls: [Unity3dDatasource.streams.stable],
-      })
-    )?.releases.map((release) => release.version);
+    const responsesWithoutHash = await getPkgReleases({
+      datasource: Unity3dDatasource.id,
+      packageName: 'm_EditorVersion',
+      registryUrls: [Unity3dDatasource.streams.stable],
+    });
 
-    expect(responsesWithoutHash!.length).toBeGreaterThan(0);
-    expect(
-      responsesWithoutHash!.every((version) => !/\(.*\)/.test(version)),
-    ).toBe(true);
+    expect(responsesWithoutHash).toEqual(
+      expect.objectContaining({
+        releases: expect.not.arrayContaining([
+          expect.objectContaining({
+            version: expect.stringMatching(/\(.*\)/),
+          }),
+        ]),
+      }),
+    );
   });
 
   it('returns different versions for each stream', async () => {
@@ -188,11 +215,19 @@ describe('modules/datasource/unity3d/index', () => {
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
     mockRSSFeeds(qualifyingStreams);
-    const responses = (await getPkgReleases({
+    const responses = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersionWithRevision',
-    }))!.releases.map((release) => release.version);
+    });
 
-    expect(responses.every((version) => /[fp]/.test(version))).toBe(true);
+    expect(responses).toEqual(
+      expect.objectContaining({
+        releases: expect.arrayContaining([
+          expect.objectContaining({
+            version: expect.stringMatching(/[fp]/),
+          }),
+        ]),
+      }),
+    );
   });
 });
