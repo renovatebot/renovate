@@ -45,10 +45,10 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(2);
       expect(warnings).toMatchObject([
         {
-          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
         {
-          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
     });
@@ -65,10 +65,10 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(2);
       expect(warnings).toMatchObject([
         {
-          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
         {
-          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
     });
@@ -1051,7 +1051,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchObject([
         {
           topic: 'Configuration Error',
-          message: `The "customEnvVariables" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "customEnvVariables" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
     });
@@ -1457,7 +1457,7 @@ describe('config/validation', () => {
           },
           {
             topic: 'Configuration Error',
-            message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+            message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
           },
         ]);
       });
