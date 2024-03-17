@@ -1,9 +1,7 @@
 #!/bin/bash
 
 # When the repository labels are changed (i.e dropped a label, added a label, etc), you should make the same change to the lists below.
-# For example, if the repository added a "to-do" status label, then add "-label:status:to-do" to the STATUS_LABELS_FILTER.
-STATUS_LABELS_FILTER='-label:status:requirements -label:status:in-progress -label:status:blocked'
-
+# For example, if the repository added a "type:task" type label, then add "-label:type:task" to the TYPE_LABELS_FILTER.
 TYPE_LABELS_FILTER='-label:type:bug -label:type:feature -label:type:docs -label:type:refactor -label:type:help'
 
 PRIORITY_LABELS_FILTER='label:priority-1-critical -label:priority-2-high -label:priority-3-medium -label:priority-4-low'
