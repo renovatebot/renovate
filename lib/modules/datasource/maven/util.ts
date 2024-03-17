@@ -449,6 +449,11 @@ export async function getDependencyInfo(
     }
   }
 
+  const groupId = pomContent.valueWithPath('groupId');
+  if (groupId) {
+    result.packageScope = groupId;
+  }
+
   const parent = pomContent.childNamed('parent');
   if (recursionLimit > 0 && parent && (!result.sourceUrl || !result.homepage)) {
     // if we found a parent and are missing some information

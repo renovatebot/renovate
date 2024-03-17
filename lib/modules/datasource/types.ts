@@ -87,6 +87,7 @@ export interface ReleaseResult {
   replacementName?: string;
   replacementVersion?: string;
   lookupName?: string;
+  packageScope?: string;
 }
 
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';

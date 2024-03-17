@@ -1052,12 +1052,6 @@ It could then be used in a repository config or preset like so:
 
 Secret names must start with an upper or lower case character and can have only characters, digits, or underscores.
 
-## skipInstalls
-
-By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
-If this is set to false, then a full install of modules will be done.
-This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
-
 ## token
 
 ## unicodeEmoji
