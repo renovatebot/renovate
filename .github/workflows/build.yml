@@ -392,7 +392,7 @@ jobs:
           path: coverage
           merge-multiple: true
 
-      - run: find . -name "*fixtures*"
+      - run: grep -Rnw . -e 'fixtures'
 
       - name: Codecov
         uses: codecov/codecov-action@54bcd8715eee62d40e33596ef5e8f0f48dbbccab # v4.1.0
