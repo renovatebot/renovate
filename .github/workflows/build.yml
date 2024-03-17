@@ -381,9 +381,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
-        with:
-          sparse-checkout: codecov.yml
-          filter: blob:none # we don't need all blobs
 
       - name: Download coverage reports
         uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
@@ -391,8 +388,6 @@ jobs:
           pattern: coverage-*
           path: coverage
           merge-multiple: true
-
-      - run: grep -Rnw . -e 'fixtures'
 
       - name: Codecov
         uses: codecov/codecov-action@54bcd8715eee62d40e33596ef5e8f0f48dbbccab # v4.1.0
