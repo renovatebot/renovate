@@ -5,10 +5,11 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 
 export class Unity3dDatasource extends Datasource {
+  static readonly homepage = 'https://unity.com/';
   static readonly streams: { [key: string]: string } = {
-    lts: 'https://unity.com/releases/editor/lts-releases.xml',
-    stable: 'https://unity.com/releases/editor/releases.xml',
-    beta: 'https://unity.com/releases/editor/beta/latest.xml',
+    lts: `${Unity3dDatasource.homepage}/releases/editor/lts-releases.xml`,
+    stable: `${Unity3dDatasource.homepage}/releases/editor/releases.xml`,
+    beta: `${Unity3dDatasource.homepage}/releases/editor/beta/latest.xml`,
   };
 
   static readonly id = 'unity3d';
@@ -32,8 +33,11 @@ export class Unity3dDatasource extends Datasource {
   ): Promise<ReleaseResult | null> {
     const response = await this.http.get(registryUrl!);
     const document = new XmlDocument(response.body);
-    const releases = document
-      .childNamed('channel')!
+    const channel = document.childNamed('channel');
+    if (!channel) {
+      return { releases: [], homepage: Unity3dDatasource.homepage };
+    }
+    const releases = channel
       .childrenNamed('item')
       .map((itemNode) => {
         const versionWithHash = `${itemNode.childNamed('title')?.val} (${itemNode.childNamed('guid')?.val})`;
@@ -51,14 +55,14 @@ export class Unity3dDatasource extends Datasource {
 
     return {
       releases,
-      homepage: 'https://unity.com/',
+      homepage: Unity3dDatasource.homepage,
     };
   };
 
   @cache({
     namespace: `datasource-${Unity3dDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      `${registryUrl}:${packageName}`
+      `${registryUrl}:${packageName}`,
   })
   async getReleases({
     packageName,
