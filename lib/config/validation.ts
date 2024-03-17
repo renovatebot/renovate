@@ -170,7 +170,9 @@ export async function validateConfig(
         val,
         optionTypes[key],
         warnings,
+        errors,
         currentPath,
+        config,
       );
       continue;
     } else {
@@ -760,18 +762,6 @@ export async function validateConfig(
         }
       }
     }
-
-    if (
-      key === 'reportType' &&
-      is.string(val) &&
-      ['s3', 'file'].includes(val) &&
-      !is.string(config['reportPath'])
-    ) {
-      errors.push({
-        topic: 'Configuration Error',
-        message: `reportType '${val}' requires a configured reportPath`,
-      });
-    }
   }
 
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
@@ -840,7 +830,9 @@ async function validateGlobalConfig(
   val: unknown,
   type: string,
   warnings: ValidationMessage[],
+  errors: ValidationMessage[],
   currentPath: string | undefined,
+  config: RenovateConfig,
 ): Promise<void> {
   if (val !== null) {
     if (type === 'string') {
@@ -892,6 +884,17 @@ async function validateGlobalConfig(
           warnings.push({
             topic: 'Configuration Error',
             message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
+          });
+        }
+
+        if (
+          key === 'reportType' &&
+          ['s3', 'file'].includes(val) &&
+          !is.string(config['reportPath'])
+        ) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `reportType '${val}' requires a configured reportPath`,
           });
         }
       } else {

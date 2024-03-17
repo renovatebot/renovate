@@ -1621,13 +1621,12 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-
     it('fails for missing reportPath if reportType is "s3"', async () => {
       const config: RenovateConfig = {
         reportType: 's3',
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        "global",
+        'global',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1640,7 +1639,7 @@ describe('config/validation', () => {
         reportPath: 's3://bucket-name/key-name',
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        "global",
+        'global',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1652,7 +1651,7 @@ describe('config/validation', () => {
         reportType: 'file',
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        "global",
+        'global',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1665,7 +1664,7 @@ describe('config/validation', () => {
         reportPath: './report.json',
       };
       const { warnings, errors } = await configValidation.validateConfig(
-        "global",
+        'global',
         config,
       );
       expect(warnings).toHaveLength(0);
