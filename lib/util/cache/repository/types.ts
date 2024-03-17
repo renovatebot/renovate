@@ -83,7 +83,7 @@ export interface BranchCache {
    */
   branchName: string;
   /**
-   * Whether the update branch is behind base branh
+   * Whether the update branch is behind base branch
    */
   isBehindBase?: boolean;
   /**
