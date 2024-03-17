@@ -14,6 +14,24 @@ const mockRSSFeeds = (streams: { [keys: string]: string }) => {
 };
 
 describe('modules/datasource/unity3d/index', () => {
+  it('handles missing title element', async () => {
+    const content = Fixtures.get('no_title.xml');
+    const uri = new URL(Unity3dDatasource.streams.stable);
+    httpMock.scope(uri.origin).get(uri.pathname).reply(200, content);
+
+    const qualifyingStreams = { ...Unity3dDatasource.streams };
+    delete qualifyingStreams.beta;
+    const responses = (
+      await getPkgReleases({
+        datasource: Unity3dDatasource.id,
+        packageName: 'm_EditorVersion',
+        registryUrls: [Unity3dDatasource.streams.stable],
+      })
+    )?.releases.map((release) => release.version);
+
+    expect(responses!).toHaveLength(0);
+  });
+  
   it('handles missing channel element', async () => {
     const content = Fixtures.get('no_channel.xml');
     const uri = new URL(Unity3dDatasource.streams.stable);
