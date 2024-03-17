@@ -593,7 +593,7 @@ const options: RenovateOptions[] = [
     description:
       'Renovate will look for this config file name in the `inheritConfigRepoName`.',
     type: 'string',
-    default: 'org-inherited-config.json5',
+    default: 'org-inherited-config.json',
     globalOnly: true,
   },
   {

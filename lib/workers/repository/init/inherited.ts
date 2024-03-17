@@ -15,7 +15,7 @@ import * as template from '../../../util/template';
 export async function mergeInheritedConfig(
   config: RenovateConfig,
 ): Promise<RenovateConfig> {
-  // typscript doesn't know that repo is defined
+  // typescript doesn't know that repo is defined
   if (!config.repository || !config.inheritConfig) {
     return config;
   }

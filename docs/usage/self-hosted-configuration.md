@@ -669,7 +669,7 @@ Change this setting to `true` to include repositories that are mirrors as Renova
 
 ## inheritConfig
 
-When you enable this option, Renovate will look for a file `org-inherited-config.json5` in the `<orgName>/renovate-config` repo before processing a repository, and read this in as config.
+When you enable this option, Renovate will look for the `inheritConfigFileName` file (defaults to `org-inherited-config.json`) in the `inheritConfigRepoName` repository (defaults to `{{parentOrg}}/renovate-config`) before processing a repository, and read this in as config.
 If the repository is in a nested organization/group on a supported platform such as GitLab, such as `topGroup/nestedGroup/projectName` then Renovate will look in `topGroup/nestedGroup/renovate-config`.
 
 If `inheritConfig` is `true` but the inherited config file does _not_ exist then Renovate will proceed without warning.
