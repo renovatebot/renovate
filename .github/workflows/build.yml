@@ -38,7 +38,6 @@ env:
     tools/
     package.json
     pnpm-lock.yaml
-    codecov.yml
 
 jobs:
   setup:
@@ -153,6 +152,7 @@ jobs:
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          filter: blob:none # we don't need all blobs
 
       - name: Setup Node.js
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
@@ -379,6 +379,12 @@ jobs:
     timeout-minutes: 3
     if: (success() || failure()) && github.event.pull_request.draft != true
     steps:
+      - name: Checkout code
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+        with:
+          sparse-checkout: codecov.yml
+          filter: blob:none # we don't need all blobs
+
       - name: Download coverage reports
         uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
