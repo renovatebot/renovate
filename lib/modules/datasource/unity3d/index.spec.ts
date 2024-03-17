@@ -16,7 +16,7 @@ const mockRSSFeeds = (streams: { [keys: string]: string }) => {
 describe('modules/datasource/unity3d/index', () => {
   it('handle 500 response', async () => {
     const uri = new URL(Unity3dDatasource.streams.stable);
-    httpMock.scope(uri.origin).get(uri.pathname).reply(500, "500");
+    httpMock.scope(uri.origin).get(uri.pathname).reply(500, '500');
 
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
@@ -28,10 +28,10 @@ describe('modules/datasource/unity3d/index', () => {
 
     expect(response).toBeNull();
   });
-  
+
   it('handle 200 with no XML', async () => {
     const uri = new URL(Unity3dDatasource.streams.stable);
-    httpMock.scope(uri.origin).get(uri.pathname).reply(200, "not xml");
+    httpMock.scope(uri.origin).get(uri.pathname).reply(200, 'not xml');
 
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
@@ -43,7 +43,7 @@ describe('modules/datasource/unity3d/index', () => {
 
     expect(response).toBeNull();
   });
-  
+
   it('handles missing title element', async () => {
     const content = Fixtures.get('no_title.xml');
     const uri = new URL(Unity3dDatasource.streams.stable);
@@ -61,7 +61,7 @@ describe('modules/datasource/unity3d/index', () => {
 
     expect(responses!).toHaveLength(0);
   });
-  
+
   it('handles missing channel element', async () => {
     const content = Fixtures.get('no_channel.xml');
     const uri = new URL(Unity3dDatasource.streams.stable);
