@@ -1,4 +1,5 @@
 import { XmlDocument } from 'xmldoc';
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import * as Unity3dVersioning from '../../versioning/unity3d';
 import { Datasource } from '../datasource';
@@ -31,9 +32,19 @@ export class Unity3dDatasource extends Datasource {
     registryUrl: string | undefined,
     withHash: boolean,
   ): Promise<ReleaseResult | null> {
-    const response = await this.http.get(registryUrl!);
-    const document = new XmlDocument(response.body);
-    const channel = document.childNamed('channel');
+    let channel = null;
+    try {
+      const response = await this.http.get(registryUrl!);
+      const document = new XmlDocument(response.body);
+      channel = document.childNamed('channel');
+    } catch (err) {
+      logger.error(
+        { err, registryUrl },
+        'Failed to get releases from Unity3d datasource',
+      );
+      return null;
+    }
+
     if (!channel) {
       return { releases: [], homepage: Unity3dDatasource.homepage };
     }
@@ -57,7 +68,7 @@ export class Unity3dDatasource extends Datasource {
       releases,
       homepage: Unity3dDatasource.homepage,
     };
-  };
+  }
 
   @cache({
     namespace: `datasource-${Unity3dDatasource.id}`,
