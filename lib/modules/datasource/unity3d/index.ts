@@ -26,10 +26,10 @@ export class Unity3dDatasource extends Datasource {
     super(Unity3dDatasource.id);
   }
 
-  getByStream = async (
+  async getByStream(
     registryUrl: string | undefined,
     withHash: boolean,
-  ): Promise<ReleaseResult | null> => {
+  ): Promise<ReleaseResult | null> {
     const response = await this.http.get(registryUrl!);
     const document = new XmlDocument(response.body);
     const releases = document
