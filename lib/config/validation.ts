@@ -890,7 +890,7 @@ async function validateGlobalConfig(
         if (
           key === 'reportType' &&
           ['s3', 'file'].includes(val) &&
-          !is.string(config['reportPath'])
+          !is.string(config.reportPath)
         ) {
           errors.push({
             topic: 'Configuration Error',
