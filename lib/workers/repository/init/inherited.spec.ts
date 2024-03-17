@@ -4,6 +4,7 @@ import {
   CONFIG_INHERIT_PARSE_ERROR,
   CONFIG_VALIDATION,
 } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { mergeInheritedConfig } from './inherited';
 
@@ -59,5 +60,32 @@ describe('workers/repository/init/inherited', () => {
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
       CONFIG_INHERIT_PARSE_ERROR,
     );
+  });
+
+  it('should throw an error if config includes an invalid option', async () => {
+    (platform.getRawFile as jest.Mock).mockResolvedValue(
+      '{"something": "invalid"}',
+    );
+    await expect(mergeInheritedConfig(config)).rejects.toThrow(
+      CONFIG_VALIDATION,
+    );
+  });
+
+  it('should throw an error if config includes an invalid value', async () => {
+    (platform.getRawFile as jest.Mock).mockResolvedValue(
+      '{"onboarding": "invalid"}',
+    );
+    await expect(mergeInheritedConfig(config)).rejects.toThrow(
+      CONFIG_VALIDATION,
+    );
+  });
+
+  it('should warn if validateConfig returns warnings', async () => {
+    (platform.getRawFile as jest.Mock).mockResolvedValue(
+      '{"binarySource": "docker"}',
+    );
+    const res = await mergeInheritedConfig(config);
+    expect(res.binarySource).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalled();
   });
 });

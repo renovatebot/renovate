@@ -1,5 +1,9 @@
 import is from '@sindresorhus/is';
-import { mergeChildConfig } from '../../../config';
+import {
+  filterConfig,
+  mergeChildConfig,
+  removeGlobalConfig,
+} from '../../../config';
 import { parseFileConfig } from '../../../config/parse';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
@@ -92,5 +96,7 @@ export async function mergeInheritedConfig(
       'Found warnings in inherited configuration.',
     );
   }
-  return mergeChildConfig(config, inheritedConfig);
+  let filteredConfig = filterConfig(inheritedConfig, 'inherit');
+  filteredConfig = removeGlobalConfig(filteredConfig);
+  return mergeChildConfig(config, filteredConfig);
 }
