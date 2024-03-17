@@ -40,7 +40,7 @@ export class Unity3dDatasource extends Datasource {
     } catch (err) {
       logger.error(
         { err, registryUrl },
-        'Failed to get releases from Unity3d datasource',
+        'Failed to request releases from Unity3d datasource',
       );
       return null;
     }
