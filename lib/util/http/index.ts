@@ -118,11 +118,13 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options: HttpOptions = {},
   ) {
     const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
-    this.options = merge<GotOptions>(options, {
-      context: { hostType },
-      retry: {
-        limit: retryLimit,
-        maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
+    this.options = merge<GotOptions>(
+      options,
+      {
+        context: { hostType },
+        retry: {
+          limit: retryLimit,
+          maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
         },
       },
       { isMergeableObject: is.plainObject },
