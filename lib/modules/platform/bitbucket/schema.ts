@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { LooseArray } from '../../../util/schema-utils';
 
 const BitbucketSourceTypeSchema = z.enum(['commit_directory', 'commit_file']);
 
@@ -36,29 +37,33 @@ export const RepoInfo = z
         'Expected repository full_name to be in the format "owner/repo"',
       ),
     is_private: z.boolean(),
+    project: z
+      .object({
+        name: z.string(),
+      })
+      .nullable()
+      .catch(null),
   })
   .transform((repoInfoBody) => {
     const isFork = !!repoInfoBody.parent;
-    const [owner] = repoInfoBody.full_name.split('/');
+    const [owner, name] = repoInfoBody.full_name.split('/');
 
     return {
       isFork,
       owner,
+      name,
       mainbranch: repoInfoBody.mainbranch.name,
       mergeMethod: 'merge',
       has_issues: repoInfoBody.has_issues,
       uuid: repoInfoBody.uuid,
       is_private: repoInfoBody.is_private,
+      projectName: repoInfoBody.project?.name,
     };
   });
 export type RepoInfo = z.infer<typeof RepoInfo>;
 
-export const RepositoryNames = z
+export const Repositories = z
   .object({
-    values: z.array(
-      z.object({
-        full_name: z.string(),
-      }),
-    ),
+    values: LooseArray(RepoInfo),
   })
-  .transform((body) => body.values.map((repo) => repo.full_name));
+  .transform((body) => body.values);

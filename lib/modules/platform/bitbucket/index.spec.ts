@@ -56,7 +56,6 @@ describe('modules/platform/bitbucket/index', () => {
     const scope = existingScope ?? httpMock.scope(baseUrl);
 
     scope.get(`/2.0/repositories/${repository}`).reply(200, {
-      owner: { username: 'some' },
       mainbranch: { name: 'master' },
       has_issues: true,
       uuid: '123',
@@ -135,10 +134,81 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/repositories?role=contributor&pagelen=100')
         .reply(200, {
-          values: [{ full_name: 'foo/bar' }, { full_name: 'some/repo' }],
+          values: [
+            {
+              mainbranch: { name: 'master' },
+              has_issues: true,
+              uuid: '111',
+              full_name: 'foo/bar',
+              is_private: false,
+            },
+            {
+              mainbranch: { name: 'master' },
+              has_issues: true,
+              uuid: '222',
+              full_name: 'some/repo',
+              is_private: false,
+            },
+          ],
         });
-      const res = await bitbucket.getRepos();
+      const res = await bitbucket.getRepos({});
       expect(res).toEqual(['foo/bar', 'some/repo']);
+    });
+
+    it('filters repos based on autodiscoverProjects patterns', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .reply(200, {
+          values: [
+            {
+              mainbranch: { name: 'master' },
+              has_issues: true,
+              uuid: '111',
+              full_name: 'foo/bar',
+              is_private: false,
+              project: { name: 'ignore' },
+            },
+            {
+              mainbranch: { name: 'master' },
+              has_issues: true,
+              uuid: '222',
+              full_name: 'some/repo',
+              is_private: false,
+              project: { name: 'allow' },
+            },
+          ],
+        });
+      const res = await bitbucket.getRepos({ projects: ['allow'] });
+      expect(res).toEqual(['some/repo']);
+    });
+
+    it('filters repos based on autodiscoverProjects patterns with negation', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .reply(200, {
+          values: [
+            {
+              mainbranch: { name: 'master' },
+              has_issues: true,
+              uuid: '111',
+              full_name: 'foo/bar',
+              is_private: false,
+              project: { name: 'ignore' },
+            },
+            {
+              mainbranch: { name: 'master' },
+              has_issues: true,
+              uuid: '222',
+              full_name: 'some/repo',
+              is_private: false,
+              project: { name: 'allow' },
+            },
+          ],
+        });
+      const res = await bitbucket.getRepos({ projects: ['!ignore'] });
+      expect(res).toEqual(['some/repo']);
     });
   });
 
@@ -148,7 +218,6 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
         .reply(200, {
-          owner: { username: 'some' },
           mainbranch: { name: 'master' },
           has_issues: true,
           uuid: '123',
@@ -175,7 +244,6 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
         .reply(200, {
-          owner: { username: 'some' },
           mainbranch: { name: 'master' },
           has_issues: true,
           uuid: '123',
@@ -200,7 +268,6 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
         .reply(200, {
-          owner: { username: 'some' },
           mainbranch: { name: 'master' },
           has_issues: true,
           uuid: '123',
@@ -221,7 +288,6 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
         .reply(200, {
-          owner: { username: 'some' },
           mainbranch: { name: 'master' },
           has_issues: true,
           uuid: '123',
@@ -246,7 +312,6 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
         .reply(200, {
-          owner: { username: 'some' },
           mainbranch: { name: 'master' },
           has_issues: true,
           uuid: '123',

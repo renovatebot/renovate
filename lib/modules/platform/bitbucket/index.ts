@@ -10,8 +10,9 @@ import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { UUIDRegex } from '../../../util/string-match';
+import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match';
 import type {
+  AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -33,7 +34,7 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import { BitbucketPrCache } from './pr-cache';
-import { RepoInfo, RepositoryNames } from './schema';
+import { RepoInfo, Repositories } from './schema';
 import type {
   Account,
   BitbucketStatus,
@@ -112,15 +113,31 @@ export async function initPlatform({
 }
 
 // Get all repositories that the user has access to
-export async function getRepos(): Promise<string[]> {
+export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
-    const { body: repoNames } = await bitbucketHttp.getJson(
+    let { body: repos } = await bitbucketHttp.getJson(
       `/2.0/repositories/?role=contributor`,
       { paginate: true },
-      RepositoryNames,
+      Repositories,
     );
-    return repoNames;
+
+    // if autodiscoverProjects is configured
+    // filter the repos list
+    const autodiscoverProjects = config.projects;
+    if (is.nonEmptyArray(autodiscoverProjects)) {
+      logger.debug(
+        { autodiscoverProjects: config.projects },
+        'Applying autodiscoverProjects filter',
+      );
+      repos = repos.filter(
+        (repo) =>
+          repo.projectName &&
+          matchRegexOrGlobList(repo.projectName, autodiscoverProjects),
+      );
+    }
+
+    return repos.map(({ owner, name }) => `${owner}/${name}`);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
