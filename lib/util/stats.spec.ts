@@ -507,16 +507,9 @@ describe('util/stats', () => {
       const [data, msg] = logger.logger.debug.mock.calls[0];
       expect(msg).toBe('HTTP cache statistics');
       expect(data).toEqual({
-        'https://example.com/bar': {
-          hit: 1,
-          miss: 1,
-          localMiss: 1,
-        },
-        'https://example.com/foo': {
-          hit: 0,
-          miss: 0,
-          localHit: 2,
-          localMiss: 1,
+        'https://example.com': {
+          '/foo': { hit: 0, localHit: 2, localMiss: 1, miss: 0 },
+          '/bar': { hit: 1, localMiss: 1, miss: 1 },
         },
       });
     });

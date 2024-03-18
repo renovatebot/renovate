@@ -245,6 +245,14 @@ interface HttpCacheHostStatsData {
 
 type HttpCacheStatsData = Record<string, HttpCacheHostStatsData>;
 
+function sortObject<T>(obj: Record<string, T>): Record<string, T> {
+  const result: Record<string, T> = {};
+  for (const key of Object.keys(obj).sort()) {
+    result[key] = obj[key];
+  }
+  return result;
+}
+
 export class HttpCacheStats {
   static getData(): HttpCacheStatsData {
     return memCache.get<HttpCacheStatsData>('http-cache-stats') ?? {};
@@ -319,7 +327,22 @@ export class HttpCacheStats {
   }
 
   static report(): void {
-    const stats = HttpCacheStats.getData();
-    logger.debug(stats, 'HTTP cache statistics');
+    const data = HttpCacheStats.getData();
+    let report: Record<string, Record<string, HttpCacheHostStatsData>> = {};
+    for (const [url, stats] of Object.entries(data)) {
+      const parsedUrl = parseUrl(url);
+      if (parsedUrl) {
+        const { origin, pathname } = parsedUrl;
+        report[origin] ??= {};
+        report[origin][pathname] = stats;
+      }
+    }
+
+    for (const [host, hostStats] of Object.entries(report)) {
+      report[host] = sortObject(hostStats);
+    }
+    report = sortObject(report);
+
+    logger.debug(report, 'HTTP cache statistics');
   }
 }
