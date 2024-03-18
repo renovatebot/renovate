@@ -70,15 +70,6 @@ export interface HttpOptions {
   cacheProvider?: HttpCacheProvider;
 }
 
-export interface EtagCache<T = any> {
-  etag: string;
-  data: T;
-}
-
-export interface HttpRequestOptions<T = any> {
-  etagCache?: EtagCache<T>;
-}
-
 export interface InternalHttpOptions extends HttpOptions {
   json?: HttpOptions['body'];
   responseType?: 'json' | 'buffer';
