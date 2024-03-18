@@ -171,6 +171,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         matchPackageNames: ['ghcr.io/renovatebot/renovate'],
         matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+        versioning: 'semver',
       },
     ],
   },
