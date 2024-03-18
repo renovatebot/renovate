@@ -78,7 +78,7 @@ So Renovate behaves like the official NuGet client.
 
 #### v3 feed URL not ending with index.json
 
-If a `v3` feed URL does not end with `index.json`, you must specify the version explicitely.
+If a `v3` feed URL does not end with `index.json`, you must specify the version explicitly.
 
 - If the feed is defined in a `NuGet.config` file set the `protocolVersion` attribute to `3`:
 
