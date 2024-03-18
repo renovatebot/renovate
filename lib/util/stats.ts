@@ -237,12 +237,10 @@ export class HttpStats {
 }
 
 interface HttpCacheHostStatsData {
-  localHits: number;
-  localMisses: number;
-  localTotal: number;
-  remoteHits: number;
-  remoteMisses: number;
-  remoteTotal: number;
+  hit: number;
+  miss: number;
+  localHit?: number;
+  localMiss?: number;
 }
 
 type HttpCacheStatsData = Record<string, HttpCacheHostStatsData>;
@@ -255,12 +253,8 @@ export class HttpCacheStats {
   static read(key: string): HttpCacheHostStatsData {
     return (
       this.getData()?.[key] ?? {
-        localHits: 0,
-        localMisses: 0,
-        localTotal: 0,
-        remoteHits: 0,
-        remoteMisses: 0,
-        remoteTotal: 0,
+        hit: 0,
+        miss: 0,
       }
     );
   }
@@ -287,8 +281,8 @@ export class HttpCacheStats {
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
-      stats.localHits += 1;
-      stats.localTotal += 1;
+      stats.localHit ??= 0;
+      stats.localHit += 1;
       HttpCacheStats.write(host, stats);
     }
   }
@@ -298,8 +292,8 @@ export class HttpCacheStats {
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
-      stats.localMisses += 1;
-      stats.localTotal += 1;
+      stats.localMiss ??= 0;
+      stats.localMiss += 1;
       HttpCacheStats.write(host, stats);
     }
   }
@@ -309,8 +303,7 @@ export class HttpCacheStats {
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
-      stats.remoteHits += 1;
-      stats.remoteTotal += 1;
+      stats.hit += 1;
       HttpCacheStats.write(host, stats);
     }
   }
@@ -320,8 +313,7 @@ export class HttpCacheStats {
     if (baseUrl) {
       const host = baseUrl;
       const stats = HttpCacheStats.read(host);
-      stats.remoteMisses += 1;
-      stats.remoteTotal += 1;
+      stats.miss += 1;
       HttpCacheStats.write(host, stats);
     }
   }
