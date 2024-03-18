@@ -585,7 +585,7 @@ export async function getFileList(): Promise<string[]> {
 }
 
 export function getBranchList(): string[] {
-  return Object.keys(config.branchCommits);
+  return Object.keys(config.branchCommits ?? /* istanbul ignore next */ {});
 }
 
 export async function isBranchBehindBase(

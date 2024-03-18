@@ -29,7 +29,9 @@ export function extractPackageFile(
             lineNumber += 1;
             continue;
           }
-          const orbMatch = regEx(/^\s+([^:]+):\s(.+)$/).exec(orbLine);
+          const orbMatch = regEx(/^\s+([^:]+):\s(.+?)(?:\s*#.*)?$/).exec(
+            orbLine,
+          );
           if (orbMatch) {
             logger.trace('orbMatch');
             foundOrbOrNoop = true;
