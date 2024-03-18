@@ -57,10 +57,8 @@ describe('modules/platform/bitbucket/index', () => {
 
     scope.get(`/2.0/repositories/${repository}`).reply(200, {
       mainbranch: { name: 'master' },
-      has_issues: true,
       uuid: '123',
       full_name: 'some/repo',
-      is_private: false,
       ...repoResp,
     });
 
@@ -137,17 +135,13 @@ describe('modules/platform/bitbucket/index', () => {
           values: [
             {
               mainbranch: { name: 'master' },
-              has_issues: true,
               uuid: '111',
               full_name: 'foo/bar',
-              is_private: false,
             },
             {
               mainbranch: { name: 'master' },
-              has_issues: true,
               uuid: '222',
               full_name: 'some/repo',
-              is_private: false,
             },
           ],
         });
@@ -163,18 +157,14 @@ describe('modules/platform/bitbucket/index', () => {
           values: [
             {
               mainbranch: { name: 'master' },
-              has_issues: true,
               uuid: '111',
               full_name: 'foo/bar',
-              is_private: false,
               project: { name: 'ignore' },
             },
             {
               mainbranch: { name: 'master' },
-              has_issues: true,
               uuid: '222',
               full_name: 'some/repo',
-              is_private: false,
               project: { name: 'allow' },
             },
           ],
@@ -191,18 +181,14 @@ describe('modules/platform/bitbucket/index', () => {
           values: [
             {
               mainbranch: { name: 'master' },
-              has_issues: true,
               uuid: '111',
               full_name: 'foo/bar',
-              is_private: false,
               project: { name: 'ignore' },
             },
             {
               mainbranch: { name: 'master' },
-              has_issues: true,
               uuid: '222',
               full_name: 'some/repo',
-              is_private: false,
               project: { name: 'allow' },
             },
           ],
@@ -219,10 +205,8 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo')
         .reply(200, {
           mainbranch: { name: 'master' },
-          has_issues: true,
           uuid: '123',
           full_name: 'some/repo',
-          is_private: false,
         });
       expect(
         await bitbucket.initRepo({
@@ -245,10 +229,8 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo')
         .reply(200, {
           mainbranch: { name: 'master' },
-          has_issues: true,
           uuid: '123',
           full_name: 'some/repo',
-          is_private: false,
         });
       expect(
         await bitbucket.initRepo({
@@ -269,10 +251,8 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo')
         .reply(200, {
           mainbranch: { name: 'master' },
-          has_issues: true,
           uuid: '123',
           full_name: 'some/repo',
-          is_private: false,
         });
 
       const res = await bitbucket.initRepo({
@@ -289,10 +269,8 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo')
         .reply(200, {
           mainbranch: { name: 'master' },
-          has_issues: true,
           uuid: '123',
           full_name: 'some/repo',
-          is_private: false,
         })
         .get('/2.0/repositories/some/repo/branching-model')
         .reply(200, {
@@ -313,10 +291,8 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo')
         .reply(200, {
           mainbranch: { name: 'master' },
-          has_issues: true,
           uuid: '123',
           full_name: 'some/repo',
-          is_private: false,
         })
         .get('/2.0/repositories/some/repo/branching-model')
         .reply(200, {

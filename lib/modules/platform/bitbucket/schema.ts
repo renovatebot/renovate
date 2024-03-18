@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { logger } from '../../../logger';
 import { LooseArray } from '../../../util/schema-utils';
 
 const BitbucketSourceTypeSchema = z.enum(['commit_directory', 'commit_file']);
@@ -28,7 +29,10 @@ export const RepoInfo = z
     mainbranch: z.object({
       name: z.string(),
     }),
-    has_issues: z.boolean(),
+    has_issues: z.boolean().catch(() => {
+      logger.once.warn('Bitbucket: "has_issues" field missing from repo info');
+      return false;
+    }),
     uuid: z.string(),
     full_name: z
       .string()
@@ -36,13 +40,19 @@ export const RepoInfo = z
         /^[^/]+\/[^/]+$/,
         'Expected repository full_name to be in the format "owner/repo"',
       ),
-    is_private: z.boolean(),
+    is_private: z.boolean().catch(() => {
+      logger.once.warn('Bitbucket: "is_private" field missing from repo info');
+      return true;
+    }),
     project: z
       .object({
         name: z.string(),
       })
       .nullable()
-      .catch(null),
+      .catch(() => {
+        logger.once.warn('Bitbucket: "project" field missing from repo info');
+        return null;
+      }),
   })
   .transform((repoInfoBody) => {
     const isFork = !!repoInfoBody.parent;
