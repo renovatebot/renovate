@@ -612,6 +612,11 @@ const platform: Platform = {
       prUpdateParams.labels = (await map(labels, lookupLabelByName)).filter(
         is.number,
       );
+      if (labels.length !== prUpdateParams.labels.length) {
+        logger.warn(
+          'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
+        );
+      }
     }
 
     const gpr = await helper.updatePR(
