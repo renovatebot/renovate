@@ -6,11 +6,7 @@ import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { Http } from '../../../util/http';
-import type {
-  HttpOptions,
-  HttpRequestOptions,
-  HttpResponse,
-} from '../../../util/http/types';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { getS3Client, parseS3Url } from '../../../util/s3';
 import { streamToString } from '../../../util/streams';
@@ -69,7 +65,7 @@ function isUnsupportedHostError(err: { name: string }): boolean {
 export async function downloadHttpProtocol(
   http: Http,
   pkgUrl: URL | string,
-  opts: HttpOptions & HttpRequestOptions<string> = {},
+  opts: HttpOptions = {},
 ): Promise<Partial<HttpResponse>> {
   let raw: HttpResponse;
   try {
@@ -447,6 +443,11 @@ export async function getDependencyInfo(
       // going with prepending https: here which should result in potential information retrival
       result.sourceUrl = `https:${result.sourceUrl}`;
     }
+  }
+
+  const groupId = pomContent.valueWithPath('groupId');
+  if (groupId) {
+    result.packageScope = groupId;
   }
 
   const parent = pomContent.childNamed('parent');

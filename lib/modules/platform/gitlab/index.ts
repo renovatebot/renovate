@@ -48,6 +48,7 @@ import type {
   PlatformPrOptions,
   PlatformResult,
   Pr,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -608,7 +609,10 @@ async function ignoreApprovals(pr: number): Promise<void> {
     );
     const existingRegularApproverRules = rules?.filter(
       ({ rule_type, name }) =>
-        rule_type !== 'any_approver' && name !== ruleName,
+        rule_type !== 'any_approver' &&
+        name !== ruleName &&
+        rule_type !== 'report_approver' &&
+        rule_type !== 'code_owner',
     );
 
     if (existingRegularApproverRules?.length) {
@@ -845,8 +849,15 @@ export async function updatePr({
   if (platformOptions?.autoApprove) {
     await approvePr(iid);
   }
+}
 
+export async function reattemptPlatformAutomerge({
+  number: iid,
+  platformOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
   await tryPrAutomerge(iid, platformOptions);
+
+  logger.debug(`PR platform automerge re-attempted...prNo: ${iid}`);
 }
 
 export async function mergePr({ id }: MergePRConfig): Promise<boolean> {

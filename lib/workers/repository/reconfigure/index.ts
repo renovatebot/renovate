@@ -151,7 +151,7 @@ export async function validateReconfigureBranch(
   }
 
   // perform validation and provide a passing or failing check run based on result
-  const validationResult = await validateConfig(false, configFileParsed);
+  const validationResult = await validateConfig('repo', configFileParsed);
 
   // failing check
   if (validationResult.errors.length > 0) {
