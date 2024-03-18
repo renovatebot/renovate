@@ -57,6 +57,7 @@ async function runDotnetRestore(
 
   const execOptions: ExecOptions = {
     docker: {},
+    userConfiguredEnv: config.env,
     extraEnv: {
       NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
       MSBUILDDISABLENODEREUSE: '1',
@@ -87,14 +88,14 @@ export async function updateArtifacts({
 
   // https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions
   // https://github.com/microsoft/MSBuildSdks/tree/main/src/CentralPackageVersions
-  const isCentralManament =
+  const isCentralManagement =
     packageFileName === NUGET_CENTRAL_FILE ||
     packageFileName === MSBUILD_CENTRAL_FILE ||
     packageFileName.endsWith(`/${NUGET_CENTRAL_FILE}`) ||
     packageFileName.endsWith(`/${MSBUILD_CENTRAL_FILE}`);
 
   if (
-    !isCentralManament &&
+    !isCentralManagement &&
     !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
   ) {
     // This could be implemented in the future if necessary.
@@ -110,7 +111,7 @@ export async function updateArtifacts({
 
   const deps = await getDependentPackageFiles(
     packageFileName,
-    isCentralManament,
+    isCentralManagement,
   );
   const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
 

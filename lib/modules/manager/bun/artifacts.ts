@@ -45,6 +45,7 @@ export async function updateArtifacts(
     }
 
     const execOptions: ExecOptions = {
+      userConfiguredEnv: config.env,
       cwdFile: packageFileName,
       docker: {},
       toolConstraints: [

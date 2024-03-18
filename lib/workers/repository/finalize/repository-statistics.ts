@@ -1,4 +1,5 @@
 import type { RenovateConfig } from '../../../config/types';
+import { addBranchStats } from '../../../instrumentation/reporting';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
 import { getCache, isCacheModified } from '../../../util/cache/repository';
@@ -79,8 +80,10 @@ function filterDependencyDashboardData(
         fixedVersion,
         currentVersion,
         currentValue,
+        currentDigest,
         newValue,
         newVersion,
+        newDigest,
         packageFile,
         updateType,
         packageName,
@@ -93,8 +96,10 @@ function filterDependencyDashboardData(
         fixedVersion,
         currentVersion,
         currentValue,
+        currentDigest,
         newValue,
         newVersion,
+        newDigest,
         packageFile,
         updateType,
         packageName,
@@ -148,6 +153,7 @@ export function runBranchSummary(config: RenovateConfig): void {
 
   if (branches?.length) {
     const branchesInformation = filterDependencyDashboardData(branches);
+    addBranchStats(config, branchesInformation);
     logger.debug({ branchesInformation }, 'branches info extended');
   }
 }

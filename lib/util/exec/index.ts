@@ -97,6 +97,7 @@ async function prepareRawExec(
     const extraEnv = {
       ...opts.extraEnv,
       ...customEnvVariables,
+      ...opts.userConfiguredEnv,
     };
     const childEnv = getChildEnv(opts);
     const envVars = [

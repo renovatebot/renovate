@@ -10,32 +10,19 @@ import type {
   PackageFile,
 } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as memCache from '../../../util/cache/memory';
-import type { LookupStats } from '../../../util/cache/memory/types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import * as p from '../../../util/promises';
+import { Result } from '../../../util/result';
+import { LookupStats } from '../../../util/stats';
 import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
-async function withLookupStats<T>(
-  datasource: string,
-  callback: () => Promise<T>,
-): Promise<T> {
-  const start = Date.now();
-  const result = await callback();
-  const duration = Date.now() - start;
-  const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
-  lookups.push({ datasource, duration });
-  memCache.set('lookup-stats', lookups);
-  return result;
-}
-
 async function fetchDepUpdates(
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency,
-): Promise<PackageDependency> {
+): Promise<Result<PackageDependency, Error>> {
   const dep = clone(indep);
   dep.updates = [];
   if (is.string(dep.depName)) {
@@ -49,7 +36,7 @@ async function fetchDepUpdates(
     dep.skipReason = 'internal-package';
   }
   if (dep.skipReason) {
-    return dep;
+    return Result.ok(dep);
   }
   const { depName } = dep;
   // TODO: fix types
@@ -68,17 +55,20 @@ async function fetchDepUpdates(
     dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
-      try {
-        const updateResult = await withLookupStats(depConfig.datasource, () =>
-          lookupUpdates(depConfig as LookupUpdateConfig),
-        );
+      const { val: updateResult, err } = await LookupStats.wrap(
+        depConfig.datasource,
+        () =>
+          Result.wrap(lookupUpdates(depConfig as LookupUpdateConfig)).unwrap(),
+      );
+
+      if (updateResult) {
         Object.assign(dep, updateResult);
-      } catch (err) {
+      } else {
         if (
           packageFileConfig.repoIsOnboarded === true ||
           !(err instanceof ExternalHostError)
         ) {
-          throw err;
+          return Result.err(err);
         }
 
         const cause = err.err;
@@ -92,7 +82,7 @@ async function fetchDepUpdates(
     }
     dep.updates ??= [];
   }
-  return dep;
+  return Result.ok(dep);
 }
 
 async function fetchManagerPackagerFileUpdates(
@@ -110,8 +100,10 @@ async function fetchManagerPackagerFileUpdates(
   }
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
-    (dep) => (): Promise<PackageDependency> =>
-      fetchDepUpdates(packageFileConfig, dep),
+    (dep) => async (): Promise<PackageDependency> => {
+      const updates = await fetchDepUpdates(packageFileConfig, dep);
+      return updates.unwrapOrThrow();
+    },
   );
   logger.trace(
     { manager, packageFile, queueLength: queue.length },

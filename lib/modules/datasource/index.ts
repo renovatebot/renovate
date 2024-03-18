@@ -398,15 +398,18 @@ function getDigestConfig(
   datasource: DatasourceApi,
   config: GetDigestInputConfig,
 ): DigestConfig {
-  const { currentValue, currentDigest } = config;
+  const { lookupName, currentValue, currentDigest } = config;
   const packageName = config.replacementName ?? config.packageName;
-  const [registryUrl] = resolveRegistryUrls(
-    datasource,
-    config.defaultRegistryUrls,
-    config.registryUrls,
-    config.additionalRegistryUrls,
-  );
-  return { packageName, registryUrl, currentValue, currentDigest };
+  // Prefer registryUrl from getReleases() lookup if it has been passed
+  const registryUrl =
+    config.registryUrl ??
+    resolveRegistryUrls(
+      datasource,
+      config.defaultRegistryUrls,
+      config.registryUrls,
+      config.additionalRegistryUrls,
+    )[0];
+  return { lookupName, packageName, registryUrl, currentValue, currentDigest };
 }
 
 export function getDigest(
