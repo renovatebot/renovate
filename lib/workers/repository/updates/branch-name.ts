@@ -47,8 +47,8 @@ function cleanBranchName(
 
 export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
-  const newMajor = `${update.newMajor}`;
-  const newMinor = `${update.newMinor}`;
+  const newMajor = String(update.newMajor);
+  const newMinor = String(update.newMinor);
   if (update.groupName) {
     update.groupName = template.compile(update.groupName, update);
     logger.trace('Using group branchName template');
