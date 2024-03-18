@@ -189,17 +189,15 @@ export async function validateConfig(
           config,
         );
         continue;
-      } else {
-        if (
-          !isFalseGlobal(key, parentPath) &&
-          !(configType === 'inherit' && isInhertConfigOption(key))
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
-          });
-          continue;
-        }
+      } else if (
+        !isFalseGlobal(key, parentPath) &&
+        !(configType === 'inherit' && isInhertConfigOption(key))
+      ) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        });
+        continue;
       }
     }
     if (key === 'enabledManagers' && val) {
