@@ -153,10 +153,11 @@ describe('modules/manager/terragrunt/extract', () => {
             skipReason: 'no-source',
           },
           {
-            skipReason: 'no-source',
-          },
-          {
-            skipReason: 'no-source',
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depName: 'mygit.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'https://mygit.com/hashicorp/example',
           },
           {
             currentValue: 'v1.0.0',
@@ -194,6 +195,12 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'ssh://git@mygit.com/hashicorp/example',
           },
           {
+            skipReason: 'no-source',
+          },
+          {
+            skipReason: 'no-source',
+          },
+          {
             currentValue: 'v1.0.0',
             datasource: 'bitbucket-tags',
             depName: 'bitbucket.com/hashicorp/example',
@@ -216,7 +223,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(32);
+      expect(res?.deps).toHaveLength(33);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -332,10 +339,11 @@ describe('modules/manager/terragrunt/extract', () => {
             skipReason: 'no-source',
           },
           {
-            skipReason: 'no-source',
-          },
-          {
-            skipReason: 'no-source',
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depName: 'mygit.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'https://mygit.com/hashicorp/example',
           },
           {
             currentValue: 'v1.0.0',
@@ -373,6 +381,12 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'ssh://git@mygit.com/hashicorp/example',
           },
           {
+            skipReason: 'no-source',
+          },
+          {
+            skipReason: 'no-source',
+          },
+          {
             currentValue: 'v1.0.0',
             datasource: 'bitbucket-tags',
             depName: 'bitbucket.com/hashicorp/example',
@@ -395,7 +409,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(32);
+      expect(res?.deps).toHaveLength(33);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -511,10 +525,11 @@ describe('modules/manager/terragrunt/extract', () => {
             skipReason: 'no-source',
           },
           {
-            skipReason: 'no-source',
-          },
-          {
-            skipReason: 'no-source',
+            currentValue: 'v1.0.0',
+            datasource: 'git-tags',
+            depName: 'mygit.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'https://mygit.com/hashicorp/example',
           },
           {
             currentValue: 'v1.0.0',
@@ -552,6 +567,12 @@ describe('modules/manager/terragrunt/extract', () => {
             packageName: 'ssh://git@mygit.com/hashicorp/example',
           },
           {
+            skipReason: 'no-source',
+          },
+          {
+            skipReason: 'no-source',
+          },
+          {
             currentValue: 'v1.0.0',
             datasource: 'bitbucket-tags',
             depName: 'bitbucket.com/hashicorp/example',
@@ -574,7 +595,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(32);
+      expect(res?.deps).toHaveLength(33);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 

@@ -125,14 +125,9 @@ terraform {
   foo = "bar"
 }
 
-# invalid, ignored by test since it does not have source on the next line
+# foobar
 terraform {
-}
-
-# unsupported terragrunt, ignored by test since it does not have source on the next line
-terraform {
-  name  = "foo"
-  dummy = "true"
+  source = "https://mygit.com/hashicorp/example?depth=1&ref=v1.0.0"
 }
 
 # gittags
@@ -160,17 +155,29 @@ terraform {
   source = "git::ssh://git@mygit.com/hashicorp/example?depth=1&ref=v1.0.3"
 }
 
+# invalid, ignored by test since it does not have source on the next line
+terraform {
+}
+
+# unsupported terragrunt, ignored by test since it does not have source on the next line
+terraform {
+  name  = "foo"
+  dummy = "true"
+}
+
+
 # bitbucket-tags
 terraform {
-  source = "git::https://bitbucket.com/hashicorp/example?depth=1&ref=v1.0.0"
+  source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0"
 }
 
 # gitlab-tags
 terraform {
-  source = "git::https://gitlab.com/hashicorp/example?depth=1&ref=v1.0.0"
+  source = "git::https://gitlab.com/hashicorp/example?ref=v1.0.0"
 }
 
 # gitea-tags
 terraform {
-  source = "git::https://gitea.com/hashicorp/example?depth=1&ref=v1.0.0"
+  source = "git::https://gitea.com/hashicorp/example?ref=v1.0.0"
 }
+
