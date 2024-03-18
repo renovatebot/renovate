@@ -6,7 +6,6 @@ import type {
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { PrBlockedBy } from '../../../workers/types';
-import type { HttpResponse } from '../../http/types';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
