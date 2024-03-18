@@ -37,10 +37,9 @@ export async function mergeInheritedConfig(
     );
     return config;
   }
-  const repoParts = config.repository.split('/');
   const templateConfig = {
-    topLevelOrg: repoParts.shift(),
-    parentOrg: repoParts.join('/'),
+    topLevelOrg: config.topLevelOrg,
+    parentOrg: config.parentOrg,
     repository: config.repository,
   };
   const inheritConfigRepoName = template.compile(
