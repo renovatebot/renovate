@@ -191,6 +191,14 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
 }
 `;
 
+exports[`config/presets/index resolvePreset resolves self-hosted preset with templating 1`] = `
+{
+  "labels": [
+    "self-hosted with template resolved",
+  ],
+}
+`;
+
 exports[`config/presets/index resolvePreset resolves self-hosted presets without baseConfig 1`] = `
 {
   "labels": [

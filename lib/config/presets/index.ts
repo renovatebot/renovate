@@ -10,6 +10,7 @@ import * as packageCache from '../../util/cache/package';
 import { getTtlOverride } from '../../util/cache/package/decorator';
 import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
+import * as template from '../../util/template';
 import { GlobalConfig } from '../global';
 import * as massage from '../massage';
 import * as migration from '../migration';
@@ -42,6 +43,8 @@ const presetSources: Record<string, PresetApi> = {
   internal,
   http,
 };
+
+const presetTemplateIgnoredFields = ['package'];
 
 const presetCacheNamespace = 'preset';
 
@@ -320,6 +323,12 @@ export async function resolveConfigPresets(
   let config: AllConfig = {};
   // First, merge all the preset configs from left to right
   if (inputConfig.extends?.length) {
+    // Compile templates
+    inputConfig.extends = inputConfig.extends.map((tmpl) =>
+      presetTemplateIgnoredFields.some((field) => tmpl.includes(`{{${field}}}`))
+        ? tmpl
+        : template.compile(tmpl, {}),
+    );
     for (const preset of inputConfig.extends) {
       if (shouldResolvePreset(preset, existingPresets, ignorePresets)) {
         logger.trace(`Resolving preset "${preset}"`);
