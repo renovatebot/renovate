@@ -123,16 +123,9 @@ export interface BranchCache {
   result?: string;
 }
 
-export interface HttpCache {
-  etag?: string;
-  httpResponse: HttpResponse<unknown>;
-  lastModified?: string;
-  timeStamp: string;
-}
-
 export interface RepoCacheData {
   configFileName?: string;
-  httpCache?: Record<string, HttpCache>;
+  httpCache?: Record<string, unknown>;
   semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
   init?: RepoInitConfig;

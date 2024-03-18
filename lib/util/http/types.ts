@@ -4,6 +4,7 @@ import type {
   OptionsOfJSONResponseBody,
   ParseJsonFunction,
 } from 'got';
+import type { HttpCacheProvider } from './cache/types';
 
 export type GotContextOptions = {
   authType?: string;
@@ -65,7 +66,8 @@ export interface HttpOptions {
 
   token?: string;
   memCache?: boolean;
-  repoCache?: boolean;
+  repoCache?: boolean; // @deprecated
+  cacheProvider?: HttpCacheProvider;
 }
 
 export interface EtagCache<T = any> {
@@ -82,7 +84,7 @@ export interface InternalHttpOptions extends HttpOptions {
   responseType?: 'json' | 'buffer';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
   parseJson?: ParseJsonFunction;
-  repoCache?: boolean;
+  repoCache?: boolean; // @deprecated
 }
 
 export interface HttpHeaders extends IncomingHttpHeaders {
@@ -98,3 +100,11 @@ export interface HttpResponse<T = string> {
 
 export type Task<T> = () => Promise<T>;
 export type GotTask<T> = Task<HttpResponse<T>>;
+
+// @deprecated
+export interface HttpCache {
+  etag?: string;
+  httpResponse: HttpResponse<unknown>;
+  lastModified?: string;
+  timeStamp: string;
+}
