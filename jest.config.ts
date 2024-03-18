@@ -288,6 +288,11 @@ interface ShardGroup {
    * It's used to set `--test-timeout` Jest CLI flag.
    */
   'test-timeout-milliseconds': number;
+
+  /**
+   * It's used as the name for coverage artifact.
+   */
+  'upload-artifact-name': string;
 }
 
 /**
@@ -426,6 +431,7 @@ if (process.env.SCHEDULE_TEST_SHARDS) {
         'cache-key': cacheKey,
         'runner-timeout-minutes': runnerTimeoutMinutes,
         'test-timeout-milliseconds': testTimeoutMilliseconds,
+        'upload-artifact-name': `coverage-${shards.sort().join('_')}`,
       });
     }
   }

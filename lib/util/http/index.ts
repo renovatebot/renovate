@@ -11,6 +11,11 @@ import { getCache } from '../cache/repository';
 import { clone } from '../clone';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
+import {
+  HttpCacheStats,
+  type HttpRequestStatsDataPoint,
+  HttpStats,
+} from '../stats';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
@@ -26,7 +31,6 @@ import type {
   HttpRequestOptions,
   HttpResponse,
   InternalHttpOptions,
-  RequestStats,
 } from './types';
 // TODO: refactor code to remove this (#9651)
 import './legacy';
@@ -76,6 +80,8 @@ function applyDefaultHeaders(options: Options): void {
   };
 }
 
+type QueueStatsData = Pick<HttpRequestStatsDataPoint, 'queueMs'>;
+
 // Note on types:
 // options.requestType can be either 'json' or 'buffer', but `T` should be
 // `Buffer` in the latter case.
@@ -84,7 +90,7 @@ function applyDefaultHeaders(options: Options): void {
 async function gotTask<T>(
   url: string,
   options: SetRequired<GotOptions, 'method'>,
-  requestStats: Omit<RequestStats, 'duration' | 'statusCode'>,
+  queueStats: QueueStatsData,
 ): Promise<HttpResponse<T>> {
   logger.trace({ url, options }, 'got request');
 
@@ -119,9 +125,13 @@ async function gotTask<T>(
 
     throw error;
   } finally {
-    const httpRequests = memCache.get<RequestStats[]>('http-requests') || [];
-    httpRequests.push({ ...requestStats, duration, statusCode });
-    memCache.set('http-requests', httpRequests);
+    HttpStats.write({
+      method: options.method,
+      url,
+      reqMs: duration,
+      queueMs: queueStats.queueMs,
+      status: statusCode,
+    });
   }
 }
 
@@ -214,23 +224,30 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // istanbul ignore else: no cache tests
     if (!resPromise) {
       if (httpOptions.repoCache) {
-        const cachedEtag = getCache().httpCache?.[url]?.etag;
-        if (cachedEtag) {
-          logger.debug(`Using cached etag for ${url}`);
+        const responseCache = getCache().httpCache?.[url];
+        // Prefer If-Modified-Since over If-None-Match
+        if (responseCache?.['lastModified']) {
+          logger.debug(
+            `http cache: trying cached Last-Modified "${responseCache?.['lastModified']}" for ${url}`,
+          );
           options.headers = {
             ...options.headers,
-            'If-None-Match': cachedEtag,
+            'If-Modified-Since': responseCache['lastModified'],
+          };
+        } else if (responseCache?.etag) {
+          logger.debug(
+            `http cache: trying cached etag "${responseCache.etag}" for ${url}`,
+          );
+          options.headers = {
+            ...options.headers,
+            'If-None-Match': responseCache.etag,
           };
         }
       }
       const startTime = Date.now();
       const httpTask: GotTask<T> = () => {
-        const queueDuration = Date.now() - startTime;
-        return gotTask(url, options, {
-          method: options.method,
-          url,
-          queueDuration,
-        });
+        const queueMs = Date.now() - startTime;
+        return gotTask(url, options, { queueMs });
       };
 
       const throttle = this.getThrottle(url);
@@ -259,20 +276,26 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       if (httpOptions.repoCache) {
         const cache = getCache();
         cache.httpCache ??= {};
-        if (resCopy.statusCode === 200 && resCopy.headers?.etag) {
+        if (
+          resCopy.statusCode === 200 &&
+          (resCopy.headers?.etag ?? resCopy.headers['last-modified'])
+        ) {
           logger.debug(
-            `Saving response to cache: ${url} with etag ${resCopy.headers.etag}`,
+            `http cache: saving ${url} (etag=${resCopy.headers.etag}, lastModified=${resCopy.headers['last-modified']})`,
           );
+          HttpCacheStats.incRemoteMisses(url);
           cache.httpCache[url] = {
             etag: resCopy.headers.etag,
             httpResponse: copyResponse(res, deepCopyNeeded),
+            lastModified: resCopy.headers['last-modified'],
             timeStamp: new Date().toISOString(),
           };
         }
         if (resCopy.statusCode === 304 && cache.httpCache[url]?.httpResponse) {
           logger.debug(
-            `Using cached response: ${url} with etag ${resCopy.headers.etag} from ${cache.httpCache[url].timeStamp}`,
+            `http cache: Using cached response: ${url} from ${cache.httpCache[url].timeStamp}`,
           );
+          HttpCacheStats.incRemoteHits(url);
           const cacheCopy = copyResponse(
             cache.httpCache[url].httpResponse,
             deepCopyNeeded,

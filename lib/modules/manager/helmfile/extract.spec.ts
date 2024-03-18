@@ -212,15 +212,28 @@ describe('modules/manager/helmfile/extract', () => {
           },
         },
       );
-      expect(result).toMatchSnapshot({
+      expect(result).toMatchObject({
         datasource: 'helm',
         deps: [
           { depName: 'manifests', skipReason: 'local-chart' },
-          { depName: 'rabbitmq', currentValue: '7.4.3' },
-          { depName: 'kube-prometheus-stack', currentValue: '13.7' },
-          { depName: 'invalid', skipReason: 'invalid-name' },
+          {
+            depName: 'rabbitmq',
+            currentValue: '7.4.3',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
+          },
+          {
+            depName: 'kube-prometheus-stack',
+            currentValue: '13.7',
+            registryUrls: [
+              'https://prometheus-community.github.io/helm-charts',
+            ],
+          },
           { depName: 'external-dns', skipReason: 'invalid-version' },
-          { depName: 'raw' },
+          {
+            depName: 'raw',
+            currentValue: '0.1.0',
+            registryUrls: ['https://charts.helm.sh/incubator/'],
+          },
         ],
         managerData: { needKustomize: true },
       });
@@ -293,9 +306,6 @@ describe('modules/manager/helmfile/extract', () => {
             skipReason: 'invalid-version',
           },
           {
-            skipReason: 'invalid-name',
-          },
-          {
             currentValue: '1.0.0',
             depName: 'example',
           },
@@ -319,6 +329,9 @@ describe('modules/manager/helmfile/extract', () => {
         - name: jenkins
           chart: jenkins/jenkins
           version: 3.3.0
+        - name: oci-url
+          version: 0.4.2
+          chart: oci://ghcr.io/example/oci-repo/url-example
       `;
       const fileName = 'helmfile.yaml';
       const result = await extractPackageFile(content, fileName, {
@@ -338,6 +351,13 @@ describe('modules/manager/helmfile/extract', () => {
           {
             currentValue: '3.3.0',
             depName: 'jenkins',
+            registryUrls: ['https://charts.jenkins.io'],
+          },
+          {
+            currentValue: '0.4.2',
+            depName: 'url-example',
+            datasource: 'docker',
+            packageName: 'ghcr.io/example/oci-repo/url-example',
           },
         ],
       });
@@ -371,10 +391,6 @@ describe('modules/manager/helmfile/extract', () => {
             skipReason: 'local-chart',
           },
           {
-            depName: null,
-            skipReason: 'local-chart',
-          },
-          {
             depName: 'ingress-nginx',
             currentValue: '3.37.0',
             registryUrls: [],
@@ -391,7 +407,6 @@ describe('modules/manager/helmfile/extract', () => {
             registryUrls: ['https://charts.helm.sh/stable'],
           },
           { depName: 'kube-prometheus-stack', skipReason: 'invalid-version' },
-          { depName: 'example-external', skipReason: 'invalid-name' },
           {
             depName: 'external-dns',
             currentValue: '2.0.0',

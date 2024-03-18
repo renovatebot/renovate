@@ -16,6 +16,8 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
+  REPOSITORY_FORK_MISSING,
+  REPOSITORY_FORK_MODE_FORKED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
@@ -54,7 +56,6 @@ import type {
   EnsureIssueConfig,
   EnsureIssueResult,
   FindPRConfig,
-  Issue,
   MergePRConfig,
   PlatformParams,
   PlatformPrOptions,
@@ -73,6 +74,7 @@ import {
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
+import { GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
 import type {
@@ -108,7 +110,7 @@ export function resetConfigs(): void {
 resetConfigs();
 
 function escapeHash(input: string): string {
-  return input ? input.replace(regEx(/#/g), '%23') : input;
+  return input?.replace(regEx(/#/g), '%23');
 }
 
 export async function detectGhe(token: string): Promise<void> {
@@ -309,6 +311,7 @@ async function getBranchProtection(
   }
   const res = await githubApi.getJson<BranchProtection>(
     `repos/${config.repository}/branches/${escapeHash(branchName)}/protection`,
+    { repoCache: true },
   );
   return res.body;
 }
@@ -319,9 +322,10 @@ export async function getRawFile(
   branchOrTag?: string,
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
+  const isSameOrg = repo?.split('/')?.[0] === config.repositoryOwner;
   const httpOptions: InternalHttpOptions = {
-    // Only cache response if it's from the same repo
-    repoCache: repo === config.repository,
+    // Only cache response if it's from the same org
+    repoCache: isSameOrg,
   };
   let url = `repos/${repo}/contents/${fileName}`;
   if (branchOrTag) {
@@ -431,6 +435,7 @@ export async function createFork(
 export async function initRepo({
   endpoint,
   repository,
+  forkCreation,
   forkOrg,
   forkToken,
   renovateUsername,
@@ -510,6 +515,10 @@ export async function initRepo({
     }
     // istanbul ignore if
     if (!repo.defaultBranchRef?.name) {
+      logger.debug(
+        { res },
+        'No default branch returned - treating repo as empty',
+      );
       throw new Error(REPOSITORY_EMPTY);
     }
     if (
@@ -564,6 +573,9 @@ export async function initRepo({
     if (err.message.startsWith('Repository access blocked')) {
       throw new Error(REPOSITORY_BLOCKED);
     }
+    if (err.message === REPOSITORY_FORK_MODE_FORKED) {
+      throw err;
+    }
     if (err.message === REPOSITORY_FORKED) {
       throw err;
     }
@@ -582,6 +594,15 @@ export async function initRepo({
 
   if (forkToken) {
     logger.debug('Bot is in fork mode');
+    if (repo.isFork) {
+      logger.debug(
+        `Forked repos cannot be processed when running with a forkToken, so this repo will be skipped`,
+      );
+      logger.debug(
+        `Parent repo for this forked repo is ${repo.parent?.nameWithOwner}`,
+      );
+      throw new Error(REPOSITORY_FORKED);
+    }
     config.forkOrg = forkOrg;
     config.forkToken = forkToken;
     // save parent name then delete
@@ -663,10 +684,13 @@ export async function initRepo({
         }
         throw new ExternalHostError(err);
       }
-    } else {
+    } else if (forkCreation) {
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
       config.repository = forkedRepo.full_name;
+    } else {
+      logger.debug('Forked repo is not found and forkCreation is disabled');
+      throw new Error(REPOSITORY_FORK_MISSING);
     }
   }
 
@@ -701,38 +725,29 @@ export async function initRepo({
   return repoConfig;
 }
 
-export async function getRepoForceRebase(): Promise<boolean> {
-  if (config.repoForceRebase === undefined) {
+export async function getBranchForceRebase(
+  branchName: string,
+): Promise<boolean> {
+  config.branchForceRebase ??= {};
+  if (config.branchForceRebase[branchName] === undefined) {
     try {
-      config.repoForceRebase = false;
-      const branchProtection = await getBranchProtection(config.defaultBranch);
-      logger.debug('Found branch protection');
-      if (branchProtection.required_status_checks) {
-        if (branchProtection.required_status_checks.strict) {
-          logger.debug(
-            'Branch protection: PRs must be up-to-date before merging',
-          );
-          config.repoForceRebase = true;
-        }
-      }
-      if (branchProtection.restrictions) {
+      config.branchForceRebase[branchName] = false;
+      const branchProtection = await getBranchProtection(branchName);
+      logger.debug(`Found branch protection for branch ${branchName}`);
+      if (branchProtection?.required_status_checks?.strict) {
         logger.debug(
-          {
-            users: branchProtection.restrictions.users,
-            teams: branchProtection.restrictions.teams,
-          },
-          'Branch protection: Pushing to branch is restricted',
+          `Branch protection: PRs must be up-to-date before merging for ${branchName}`,
         );
-        config.pushProtection = true;
+        config.branchForceRebase[branchName] = true;
       }
     } catch (err) {
       if (err.statusCode === 404) {
-        logger.debug(`No branch protection found`);
+        logger.debug(`No branch protection found for ${branchName}`);
       } else if (
         err.message === PLATFORM_INTEGRATION_UNAUTHORIZED ||
         err.statusCode === 403
       ) {
-        logger.debug(
+        logger.once.debug(
           'Branch protection: Do not have permissions to detect branch protection',
         );
       } else {
@@ -740,7 +755,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
       }
     }
   }
-  return !!config.repoForceRebase;
+  return !!config.branchForceRebase[branchName];
 }
 
 function cachePr(pr?: GhPr | null): void {
@@ -1182,9 +1197,8 @@ export async function setBranchStatus({
 
 // Issue
 
-/* istanbul ignore next */
 async function getIssues(): Promise<Issue[]> {
-  const result = await githubApi.queryRepoField<Issue>(
+  const result = await githubApi.queryRepoField<unknown>(
     getIssuesQuery,
     'issues',
     {
@@ -1197,10 +1211,7 @@ async function getIssues(): Promise<Issue[]> {
   );
 
   logger.debug(`Retrieved ${result.length} issues`);
-  return result.map((issue) => ({
-    ...issue,
-    state: issue.state?.toLowerCase(),
-  }));
+  return Issue.array().parse(result);
 }
 
 export async function getIssueList(): Promise<Issue[]> {
@@ -1224,16 +1235,13 @@ export async function getIssue(
     return null;
   }
   try {
-    const issueBody = (
-      await githubApi.getJson<{ body: string }>(
-        `repos/${config.parentRepo ?? config.repository}/issues/${number}`,
-        { memCache: useCache, repoCache: true },
-      )
-    ).body.body;
-    return {
-      number,
-      body: issueBody,
-    };
+    const repo = config.parentRepo ?? config.repository;
+    const { body: issue } = await githubApi.getJson(
+      `repos/${repo}/issues/${number}`,
+      { memCache: useCache, repoCache: true },
+      Issue,
+    );
+    return issue;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, number }, 'Error getting issue');
     return null;
@@ -1249,8 +1257,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   logger.debug(`Found issue ${issue.number}`);
-  // TODO: can number be required? (#22198)
-  return getIssue(issue.number!);
+  return getIssue(issue.number);
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
@@ -1304,18 +1311,17 @@ export async function ensureIssue({
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
           logger.warn({ issueNo: i.number }, 'Closing duplicate issue');
-          // TODO #22198
-          await closeIssue(i.number!);
+          await closeIssue(i.number);
         }
       }
-      const issueBody = (
-        await githubApi.getJson<{ body: string }>(
-          `repos/${config.parentRepo ?? config.repository}/issues/${
-            issue.number
-          }`,
-          { repoCache: true },
-        )
-      ).body.body;
+      const repo = config.parentRepo ?? config.repository;
+      const {
+        body: { body: issueBody },
+      } = await githubApi.getJson(
+        `repos/${repo}/issues/${issue.number}`,
+        { repoCache: true },
+        Issue,
+      );
       if (
         issue.title === title &&
         issueBody === body &&
@@ -1378,10 +1384,44 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
-      // TODO #22198
-      await closeIssue(issue.number!);
+      await closeIssue(issue.number);
       logger.debug(`Issue closed, issueNo: ${issue.number}`);
     }
+  }
+}
+
+async function tryAddMilestone(
+  issueNo: number,
+  milestoneNo: number | undefined,
+): Promise<void> {
+  if (!milestoneNo) {
+    return;
+  }
+
+  logger.debug(
+    {
+      milestone: milestoneNo,
+      pr: issueNo,
+    },
+    'Adding milestone to PR',
+  );
+  const repository = config.parentRepo ?? config.repository;
+  try {
+    await githubApi.patchJson(`repos/${repository}/issues/${issueNo}`, {
+      body: {
+        milestone: milestoneNo,
+      },
+    });
+  } catch (err) {
+    const actualError = err.response?.body || /* istanbul ignore next */ err;
+    logger.warn(
+      {
+        milestone: milestoneNo,
+        pr: issueNo,
+        err: actualError,
+      },
+      'Unable to add milestone to PR',
+    );
   }
 }
 
@@ -1665,6 +1705,7 @@ export async function createPr({
   labels,
   draftPR = false,
   platformOptions,
+  milestone,
 }: CreatePRConfig): Promise<GhPr | null> {
   const body = sanitize(rawBody);
   const base = targetBranch;
@@ -1704,6 +1745,7 @@ export async function createPr({
   const { number, node_id } = result;
 
   await addLabels(number, labels);
+  await tryAddMilestone(number, milestone);
   await tryPrAutomerge(number, node_id, platformOptions);
 
   cachePr(result);

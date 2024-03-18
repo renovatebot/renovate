@@ -133,8 +133,36 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [{ full_name: 'foo/bar' }, { full_name: 'some/repo' }],
         });
-      const res = await bitbucket.getRepos();
+      const res = await bitbucket.getRepos({});
       expect(res).toEqual(['foo/bar', 'some/repo']);
+    });
+
+    it('filters repos based on autodiscoverProjects patterns', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .reply(200, {
+          values: [
+            { full_name: 'foo/bar', project: { name: 'ignore' } },
+            { full_name: 'some/repo', project: { name: 'allow' } },
+          ],
+        });
+      const res = await bitbucket.getRepos({ projects: ['allow'] });
+      expect(res).toEqual(['some/repo']);
+    });
+
+    it('filters repos based on autodiscoverProjects patterns with negation', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .reply(200, {
+          values: [
+            { full_name: 'foo/bar', project: { name: 'ignore' } },
+            { full_name: 'some/repo', project: { name: 'allow' } },
+          ],
+        });
+      const res = await bitbucket.getRepos({ projects: ['!ignore'] });
+      expect(res).toEqual(['some/repo']);
     });
   });
 
@@ -222,13 +250,6 @@ describe('modules/platform/bitbucket/index', () => {
       });
 
       expect(res.defaultBranch).toBe('master');
-    });
-  });
-
-  describe('getRepoForceRebase()', () => {
-    it('always return false, since bitbucket does not support force rebase', async () => {
-      const actual = await bitbucket.getRepoForceRebase();
-      expect(actual).toBeFalse();
     });
   });
 

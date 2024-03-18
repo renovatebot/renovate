@@ -49,15 +49,14 @@ export function determineLockFileDirs(
   const pnpmShrinkwrapDirs: (string | undefined)[] = [];
 
   for (const upgrade of config.upgrades) {
-    if (upgrade.updateType === 'lockFileMaintenance' || upgrade.isRemediation) {
+    if (
+      upgrade.updateType === 'lockFileMaintenance' ||
+      upgrade.isRemediation === true ||
+      upgrade.isLockfileUpdate === true
+    ) {
       yarnLockDirs.push(upgrade.managerData?.yarnLock);
       npmLockDirs.push(upgrade.managerData?.npmLock);
       pnpmShrinkwrapDirs.push(upgrade.managerData?.pnpmShrinkwrap);
-      continue;
-    }
-    if (upgrade.isLockfileUpdate) {
-      yarnLockDirs.push(upgrade.managerData?.yarnLock);
-      npmLockDirs.push(upgrade.managerData?.npmLock);
     }
   }
 

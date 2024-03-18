@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
@@ -10,7 +11,7 @@ jobs:
     runs-on:
       ubuntu-22.04
   test3:
-    runs-on: "macos-12-xl"
+    runs-on: "macos-12-large"
   test4:
     runs-on: 'macos-latest'
   test5:
@@ -384,7 +385,68 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString:
             'actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # v2.1.0',
         },
+        {
+          currentDigest: '689fcce700ae7ffc576f2b029b51b2ffb66d3abd',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # ratchet:actions/checkout@v2.1.0',
+        },
+        {
+          currentDigest: '689fcce700ae7ffc576f2b029b51b2ffb66d3abd',
+          currentValue: undefined,
+          replaceString:
+            'actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # ratchet:exclude',
+        },
+        {
+          currentDigest: 'f1d7c52253b89f0beae60141f8465d9495cdc2cf',
+          currentValue: 'actions-runner-controller-0.23.5',
+          replaceString:
+            'actions-runner-controller/execute-assert-arc-e2e@f1d7c52253b89f0beae60141f8465d9495cdc2cf # actions-runner-controller-0.23.5',
+        },
       ]);
+    });
+
+    it('extracts actions with fqdn', () => {
+      const res = extractPackageFile(
+        codeBlock`
+        jobs:
+          build:
+            steps:
+              - name: "test1"
+                uses: https://github.com/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1
+              - name: "test2"
+                uses: https://code.forgejo.org/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
+              - name: "test3"
+                uses: https://code.domain.test/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1
+
+          `,
+        'sample.yml',
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentDigest: '56337c425554a6be30cdef71bf441f15be286854',
+            currentValue: 'v3.1.1',
+            replaceString:
+              'https://github.com/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # tag=v3.1.1',
+            datasource: 'github-tags',
+            registryUrls: ['https://github.com/'],
+          },
+          {
+            currentDigest: '56337c425554a6be30cdef71bf441f15be286854',
+            currentValue: 'v3.1.1',
+            replaceString:
+              'https://code.forgejo.org/actions/setup-node@56337c425554a6be30cdef71bf441f15be286854 # v3.1.1',
+            datasource: 'gitea-tags',
+            registryUrls: ['https://code.forgejo.org/'],
+          },
+          {
+            skipReason: 'unsupported-url',
+          },
+        ],
+      });
+
+      expect(res!.deps[2]).not.toHaveProperty('registryUrls');
     });
 
     it('extracts multiple action runners from yaml configuration file', () => {
@@ -410,8 +472,8 @@ describe('modules/manager/github-actions/extract', () => {
         },
         {
           depName: 'macos',
-          currentValue: '12-xl',
-          replaceString: 'macos-12-xl',
+          currentValue: '12-large',
+          replaceString: 'macos-12-large',
           depType: 'github-runner',
           datasource: 'github-runners',
           autoReplaceStringTemplate: '{{depName}}-{{newValue}}',

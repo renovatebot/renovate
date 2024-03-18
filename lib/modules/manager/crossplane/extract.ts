@@ -6,7 +6,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { XPKGSchema } from './schema';
+import { type XPKG, XPKGSchema } from './schema';
 
 export function extractPackageFile(
   content: string,
@@ -19,9 +19,12 @@ export function extractPackageFile(
     return null;
   }
 
-  let list = [];
+  let list: XPKG[] = [];
   try {
-    list = parseYaml(content);
+    list = parseYaml(content, null, {
+      customSchema: XPKGSchema,
+      failureBehaviour: 'filter',
+    });
   } catch (err) {
     logger.debug(
       { err, packageFile },
@@ -31,16 +34,7 @@ export function extractPackageFile(
   }
 
   const deps: PackageDependency[] = [];
-  for (const item of list) {
-    const parsed = XPKGSchema.safeParse(item);
-    if (!parsed.success) {
-      logger.trace(
-        { item, errors: parsed.error },
-        'Invalid Crossplane package',
-      );
-      continue;
-    }
-    const xpkg = parsed.data;
+  for (const xpkg of list) {
     const dep = getDep(xpkg.spec.package, true, extractConfig?.registryAliases);
     dep.depType = xpkg.kind.toLowerCase();
     deps.push(dep);

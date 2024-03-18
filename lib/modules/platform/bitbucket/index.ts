@@ -10,8 +10,9 @@ import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { isUUID } from '../../../util/string';
+import { UUIDRegex, matchRegexOrGlobList } from '../../../util/string-match';
 import type {
+  AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -113,10 +114,10 @@ export async function initPlatform({
 }
 
 // Get all repositories that the user has access to
-export async function getRepos(): Promise<string[]> {
+export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
-    const repos = (
+    let repos = (
       await bitbucketHttp.getJson<PagedResult<RepoInfoBody>>(
         `/2.0/repositories/?role=contributor`,
         {
@@ -124,6 +125,20 @@ export async function getRepos(): Promise<string[]> {
         },
       )
     ).body.values;
+
+    // if autodiscoverProjects is configured
+    // filter the repos list
+    const autodiscoverProjects = config.projects;
+    if (is.nonEmptyArray(autodiscoverProjects)) {
+      logger.debug(
+        { autodiscoverProjects: config.projects },
+        'Applying autodiscoverProjects filter',
+      );
+      repos = repos.filter((repo) =>
+        matchRegexOrGlobList(repo.project.name, autodiscoverProjects),
+      );
+    }
+
     return repos.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
@@ -254,12 +269,6 @@ export async function initRepo({
     repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
   return repoConfig;
-}
-
-// Returns true if repository has rule enforcing PRs are up-to-date with base branch before merging
-export function getRepoForceRebase(): Promise<boolean> {
-  // BB doesn't have an option to flag staled branches
-  return Promise.resolve(false);
 }
 
 // istanbul ignore next
@@ -707,7 +716,11 @@ export async function addReviewers(
   const body = {
     title,
     reviewers: reviewers.map((username: string) => {
-      const key = isUUID(username) ? 'uuid' : 'username';
+      const isUUID =
+        username.startsWith('{') &&
+        username.endsWith('}') &&
+        UUIDRegex.test(username.slice(1, -1));
+      const key = isUUID ? 'uuid' : 'username';
       return {
         [key]: username,
       };

@@ -6,7 +6,9 @@ import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 
-export const ecrRegex = regEx(/\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/);
+export const ecrRegex = regEx(
+  /\d+\.dkr\.ecr(?:-fips)?\.([-a-z0-9]+)\.amazonaws\.com/,
+);
 export const ecrPublicRegex = regEx(/public\.ecr\.aws/);
 
 export async function getECRAuthToken(

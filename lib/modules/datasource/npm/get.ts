@@ -10,9 +10,12 @@ import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { HttpCacheStats } from '../../../util/stats';
 import { joinUrlParts } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
 import type { CachedReleaseResult, NpmResponse } from './types';
+
+export const CACHE_REVISION = 1;
 
 const SHORT_REPO_REGEX = regEx(
   /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/,
@@ -82,28 +85,31 @@ export async function getDependency(
     cacheNamespace,
     packageUrl,
   );
-  if (cachedResult) {
-    if (cachedResult.cacheData) {
+  if (cachedResult?.cacheData) {
+    if (cachedResult.cacheData.revision === CACHE_REVISION) {
       const softExpireAt = DateTime.fromISO(
         cachedResult.cacheData.softExpireAt,
       );
       if (softExpireAt.isValid && softExpireAt > DateTime.local()) {
         logger.trace('Cached result is not expired - reusing');
+        HttpCacheStats.incLocalHits(packageUrl);
         delete cachedResult.cacheData;
         return cachedResult;
       }
+
       logger.trace('Cached result is soft expired');
+      HttpCacheStats.incLocalMisses(packageUrl);
     } else {
-      logger.trace('Reusing legacy cached result');
-      return cachedResult;
+      logger.trace(
+        `Package cache for npm package "${packageName}" is from an old revision - discarding`,
+      );
+      delete cachedResult.cacheData;
     }
   }
   const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
     ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
     : 15;
-  const softExpireAt = DateTime.local()
-    .plus({ minutes: cacheMinutes })
-    .toISO()!;
+  const softExpireAt = DateTime.local().plus({ minutes: cacheMinutes }).toISO();
   let cacheHardTtlMinutes = GlobalConfig.get('cacheHardTtlMinutes');
   if (
     !(
@@ -125,6 +131,7 @@ export async function getDependency(
     const raw = await http.getJson<NpmResponse>(packageUrl, options);
     if (cachedResult?.cacheData && raw.statusCode === 304) {
       logger.trace(`Cached npm result for ${packageName} is revalidated`);
+      HttpCacheStats.incRemoteHits(packageUrl);
       cachedResult.cacheData.softExpireAt = softExpireAt;
       await packageCache.set(
         cacheNamespace,
@@ -135,6 +142,7 @@ export async function getDependency(
       delete cachedResult.cacheData;
       return cachedResult;
     }
+    HttpCacheStats.incRemoteMisses(packageUrl);
     const etag = raw.headers.etag;
     const res = raw.body;
     if (!res.versions || !Object.keys(res.versions).length) {
@@ -195,6 +203,9 @@ export async function getDependency(
       ) {
         release.sourceDirectory = source.sourceDirectory;
       }
+      if (dep.deprecationMessage) {
+        release.isDeprecated = true;
+      }
       return release;
     });
     logger.trace({ dep }, 'dep');
@@ -204,7 +215,7 @@ export async function getDependency(
       regEx(/(^|,)\s*public\s*(,|$)/).test(cacheControl)
     ) {
       dep.isPrivate = false;
-      const cacheData = { softExpireAt, etag };
+      const cacheData = { revision: CACHE_REVISION, softExpireAt, etag };
       await packageCache.set(
         cacheNamespace,
         packageUrl,

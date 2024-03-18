@@ -12,6 +12,7 @@ Here is a list of the most common cases where Renovate must update/rebase the br
 - When a pull request has conflicts due to changes on the base branch
 - When you have enabled "Require branches to be up to date before merging" on GitHub
 - When you have manually told Renovate to rebase when behind the base branch with `"rebaseWhen": "behind-base-branch"`
+- When you have set `keepUpdatedLabel` and included the label on a PR
 - When a newer version of the dependency is released
 - When you request a manual rebase from the Renovate bot
 - When you use `"automerge": true` and `"rebaseWhen": "auto"` on a branch / pr

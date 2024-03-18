@@ -8,7 +8,7 @@ import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { type AsyncResult, Result } from '../../../util/result';
-import { isDockerDigest } from '../../../util/string';
+import { isDockerDigest } from '../../../util/string-match';
 import {
   ensurePathPrefix,
   joinUrlParts,
@@ -788,13 +788,22 @@ export class DockerDatasource extends Datasource {
     },
   })
   override async getDigest(
-    { registryUrl, packageName, currentDigest }: DigestConfig,
+    { registryUrl, lookupName, packageName, currentDigest }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    const { registryHost, dockerRepository } = getRegistryRepository(
-      packageName,
-      registryUrl!,
-    );
+    let registryHost: string;
+    let dockerRepository: string;
+    if (registryUrl && lookupName) {
+      // Reuse the resolved values from getReleases()
+      registryHost = registryUrl;
+      dockerRepository = lookupName;
+    } else {
+      // Resolve values independently
+      ({ registryHost, dockerRepository } = getRegistryRepository(
+        packageName,
+        registryUrl!,
+      ));
+    }
     logger.debug(
       // TODO: types (#22198)
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`,
@@ -1006,6 +1015,10 @@ export class DockerDatasource extends Datasource {
       registryUrl: registryHost,
       releases,
     };
+    if (dockerRepository !== packageName) {
+      // This will be reused later if a getDigest() call is made
+      ret.lookupName = dockerRepository;
+    }
 
     const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
