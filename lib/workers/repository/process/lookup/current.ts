@@ -16,9 +16,15 @@ export function getCurrentVersion(
     return null;
   }
   logger.trace(`currentValue ${currentValue} is range`);
+  if (allVersions.includes(currentValue)) {
+    return currentValue;
+  }
   let useVersions = allVersions.filter((v) =>
     versioning.matches(v, currentValue),
   );
+  if (useVersions.length === 1) {
+    return useVersions[0];
+  }
   if (latestVersion && versioning.matches(latestVersion, currentValue)) {
     useVersions = useVersions.filter(
       (v) => !versioning.isGreaterThan(v, latestVersion),

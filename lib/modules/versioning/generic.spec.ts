@@ -32,19 +32,18 @@ describe('modules/versioning/generic', () => {
 
   describe('GenericVersioningApi', () => {
     class DummyScheme extends GenericVersioningApi {
-      protected override _compare(_version: string, _other: string): number {
-        return _version ? _version.localeCompare(_other) : 0;
-      }
-
       protected _parse(_version: string): GenericVersion | null {
         const matchGroups = _version.match(
-          /^(?<major>\d)\.(?<minor>\d)\.(?<patch>\d)$/,
+          /^(?<major>\d)\.(?<minor>\d)\.(?<patch>\d)(?:-(?<prerelease>.+))?$/,
         )?.groups;
         if (!matchGroups) {
           return null;
         }
-        const { major, minor, patch } = matchGroups;
-        return { release: [major, minor, patch].map((n) => parseInt(n, 10)) };
+        const { major, minor, patch, prerelease } = matchGroups;
+        return {
+          release: [major, minor, patch].map((n) => parseInt(n, 10)),
+          prerelease,
+        };
       }
     }
 
@@ -126,6 +125,7 @@ describe('modules/versioning/generic', () => {
     it('isGreaterThan', () => {
       expect(api.isGreaterThan('1.2.3', '3.2.1')).toBe(false);
       expect(api.isGreaterThan('3.2.1', '1.2.3')).toBe(true);
+      expect(api.isGreaterThan('1.2.3-a10', '1.2.3-a1')).toBe(true);
     });
 
     it('isSingleVersion', () => {
@@ -138,6 +138,7 @@ describe('modules/versioning/generic', () => {
 
     it('isValid', () => {
       expect(api.isValid('1.2.3')).toBe(true);
+      expect(api.isValid('1.2.3-a1')).toBe(true);
       expect(api.isValid('invalid')).toBe(false);
     });
 
@@ -153,8 +154,8 @@ describe('modules/versioning/generic', () => {
 
     it('sortVersions', () => {
       expect(api.sortVersions('1.2.3', '1.2.3')).toBe(0);
-      expect(api.sortVersions('1.2.3', '3.2.1')).toBe(-1);
-      expect(api.sortVersions('3.2.1', '1.2.3')).toBe(1);
+      expect(api.sortVersions('1.2.3', '3.2.1')).toBe(-2);
+      expect(api.sortVersions('3.2.1', '1.2.3')).toBe(2);
     });
 
     it('isLessThanRange', () => {

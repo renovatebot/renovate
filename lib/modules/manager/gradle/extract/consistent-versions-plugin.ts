@@ -8,8 +8,9 @@ import { isDependencyString, versionLikeSubstring } from '../utils';
 
 export const VERSIONS_PROPS = 'versions.props';
 export const VERSIONS_LOCK = 'versions.lock';
-const LOCKFILE_HEADER_TEXT =
-  '# Run ./gradlew --write-locks to regenerate this file';
+export const LOCKFIlE_HEADER_TEXT = regEx(
+  /^# Run \.\/gradlew (?:--write-locks|writeVersionsLock) to regenerate this file/,
+);
 
 /**
  * Determines if Palantir gradle-consistent-versions is in use, https://github.com/palantir/gradle-consistent-versions.
@@ -26,9 +27,8 @@ export function usesGcv(
     versionsPropsFilename,
     VERSIONS_LOCK,
   );
-  return (
-    fileContents[versionsLockFile]?.startsWith(LOCKFILE_HEADER_TEXT) ?? false
-  );
+
+  return !!fileContents[versionsLockFile]?.match(LOCKFIlE_HEADER_TEXT);
 }
 
 /**

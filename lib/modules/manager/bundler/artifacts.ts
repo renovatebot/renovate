@@ -96,6 +96,13 @@ export async function updateArtifacts(
     if (config.isLockFileMaintenance) {
       commands.push('bundler lock --update');
     } else {
+      const bundlerUpgraded = updatedDeps
+        .map((dep) => dep.depName)
+        .includes('bundler');
+      if (bundlerUpgraded) {
+        commands.push('bundler lock --update --bundler');
+      }
+
       const updateTypes = {
         patch: '--patch --strict ',
         minor: '--minor --strict ',
@@ -106,7 +113,7 @@ export async function updateArtifacts(
           .filter((dep) => (dep.updateType ?? 'major') === updateType)
           .map((dep) => dep.depName)
           .filter(is.string)
-          .filter((dep) => dep !== 'ruby');
+          .filter((dep) => dep !== 'ruby' && dep !== 'bundler');
         let additionalArgs = '';
         if (config.postUpdateOptions?.includes('bundlerConservative')) {
           additionalArgs = '--conservative ';
@@ -120,6 +127,13 @@ export async function updateArtifacts(
           }
           commands.push(cmd);
         }
+      }
+
+      const rubyUpgraded = updatedDeps
+        .map((dep) => dep.depName)
+        .includes('ruby');
+      if (rubyUpgraded) {
+        commands.push('bundler lock');
       }
     }
 
@@ -178,6 +192,7 @@ export async function updateArtifacts(
 
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
+      userConfiguredEnv: config.env,
       extraEnv: {
         ...bundlerHostRulesVariables,
         GEM_HOME: await ensureCacheDir('bundler'),

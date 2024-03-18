@@ -21,12 +21,12 @@ export async function updateLockedDependency(
   }
   if (lockFile.endsWith('pnpm-lock.yaml')) {
     logger.debug(
-      'updateLockedDependency(): pnpm is not supported yet. See https://github.com/renovatebot/renovate/issues/21438',
+      'Cannot patch pnpm lock file directly - falling back to using pnpm',
     );
-  } else {
-    logger.debug(
-      `updateLockedDependency(): unsupported lock file: ${lockFile}`,
-    );
+    return { status: 'unsupported' };
   }
+
+  logger.debug(`updateLockedDependency(): unsupported lock file: ${lockFile}`);
+
   return { status: 'update-failed' };
 }

@@ -1,12 +1,4 @@
-export interface GetRegistryUrlVarsResult {
-  haveCredentials: boolean;
-  environmentVars: {
-    PIP_INDEX_URL?: string;
-    PIP_EXTRA_INDEX_URL?: string;
-  };
-}
-
-// managers supported by pip-tools Python package
+// managers supported by pip-tools mapped to Renovate's internal names
 export type SupportedManagers =
   | 'pip_requirements'
   | 'pip_setup'
@@ -19,6 +11,7 @@ export interface PipCompileArgs {
   isCustomCommand: boolean;
   constraintsFiles?: string[];
   extra?: string[];
+  allExtras?: boolean;
   extraIndexUrl?: string[];
   indexUrl?: string;
   noEmitIndexUrl?: boolean;

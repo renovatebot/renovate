@@ -351,7 +351,8 @@ describe('modules/manager/custom/regex/index', () => {
   });
 
   it('extracts with combination strategy: sets replaceString when current version group present', async () => {
-    const config = {
+    const config: CustomExtractConfig = {
+      matchStringsStrategy: 'combination',
       matchStrings: [
         'image:\\s+(?<depName>[a-z-]+)(?::(?<currentValue>[a-z0-9.-]+))?(?:@(?<currentDigest>sha256:[a-f0-9]+))?',
       ],
@@ -377,7 +378,8 @@ describe('modules/manager/custom/regex/index', () => {
   });
 
   it('extracts with combination strategy: sets replaceString when current digest group present', async () => {
-    const config = {
+    const config: CustomExtractConfig = {
+      matchStringsStrategy: 'combination',
       matchStrings: [
         'image:\\s+(?<depName>[a-z-]+)(?::(?<currentValue>[a-z0-9.-]+))?(?:@(?<currentDigest>sha256:[a-f0-9]+))?',
       ],
