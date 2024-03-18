@@ -16,6 +16,8 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
+  REPOSITORY_FORK_MISSING,
+  REPOSITORY_FORK_MODE_FORKED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
@@ -54,7 +56,6 @@ import type {
   EnsureIssueConfig,
   EnsureIssueResult,
   FindPRConfig,
-  Issue,
   MergePRConfig,
   PlatformParams,
   PlatformPrOptions,
@@ -69,12 +70,13 @@ import { remoteBranchExists } from './branch';
 import { coerceRestPr, githubApi } from './common';
 import {
   enableAutoMergeMutation,
+  getIssuesQuery,
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
+import { GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
-import { IssuesSchema } from './schema';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -433,6 +435,7 @@ export async function createFork(
 export async function initRepo({
   endpoint,
   repository,
+  forkCreation,
   forkOrg,
   forkToken,
   renovateUsername,
@@ -570,6 +573,9 @@ export async function initRepo({
     if (err.message.startsWith('Repository access blocked')) {
       throw new Error(REPOSITORY_BLOCKED);
     }
+    if (err.message === REPOSITORY_FORK_MODE_FORKED) {
+      throw err;
+    }
     if (err.message === REPOSITORY_FORKED) {
       throw err;
     }
@@ -588,6 +594,15 @@ export async function initRepo({
 
   if (forkToken) {
     logger.debug('Bot is in fork mode');
+    if (repo.isFork) {
+      logger.debug(
+        `Forked repos cannot be processed when running with a forkToken, so this repo will be skipped`,
+      );
+      logger.debug(
+        `Parent repo for this forked repo is ${repo.parent?.nameWithOwner}`,
+      );
+      throw new Error(REPOSITORY_FORKED);
+    }
     config.forkOrg = forkOrg;
     config.forkToken = forkToken;
     // save parent name then delete
@@ -669,10 +684,13 @@ export async function initRepo({
         }
         throw new ExternalHostError(err);
       }
-    } else {
+    } else if (forkCreation) {
       logger.debug('Forked repo is not found - attempting to create it');
       forkedRepo = await createFork(forkToken, repository, forkOrg);
       config.repository = forkedRepo.full_name;
+    } else {
+      logger.debug('Forked repo is not found and forkCreation is disabled');
+      throw new Error(REPOSITORY_FORK_MISSING);
     }
   }
 
@@ -1179,24 +1197,21 @@ export async function setBranchStatus({
 
 // Issue
 
-/* istanbul ignore next */
 async function getIssues(): Promise<Issue[]> {
-  const issuesUrl = `repos/${config.parentRepo ?? config.repository}/issues?creator=${
-    config.renovateUsername
-  }&state=all`;
-  const result = (
-    await githubApi.getJson(
-      issuesUrl,
-      {
-        repoCache: true,
-        paginate: true,
+  const result = await githubApi.queryRepoField<unknown>(
+    getIssuesQuery,
+    'issues',
+    {
+      variables: {
+        owner: config.repositoryOwner,
+        name: config.repositoryName,
+        user: config.renovateUsername,
       },
-      IssuesSchema,
-    )
-  ).body;
+    },
+  );
 
   logger.debug(`Retrieved ${result.length} issues`);
-  return result;
+  return Issue.array().parse(result);
 }
 
 export async function getIssueList(): Promise<Issue[]> {
@@ -1219,25 +1234,14 @@ export async function getIssue(
   if (config.hasIssuesEnabled === false) {
     return null;
   }
-  if (useCache) {
-    const issueList = await getIssueList();
-    const issue = issueList.find((i) => i.number === number);
-    if (issue) {
-      logger.debug(`Returning issue from cache`);
-      return issue;
-    }
-  }
   try {
-    const issueBody = (
-      await githubApi.getJson<{ body: string }>(
-        `repos/${config.parentRepo ?? config.repository}/issues/${number}`,
-        { memCache: useCache, repoCache: true },
-      )
-    ).body.body;
-    return {
-      number,
-      body: issueBody,
-    };
+    const repo = config.parentRepo ?? config.repository;
+    const { body: issue } = await githubApi.getJson(
+      `repos/${repo}/issues/${number}`,
+      { memCache: useCache, repoCache: true },
+      Issue,
+    );
+    return issue;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, number }, 'Error getting issue');
     return null;
@@ -1253,8 +1257,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   logger.debug(`Found issue ${issue.number}`);
-  // TODO: can number be required? (#22198)
-  return getIssue(issue.number!);
+  return getIssue(issue.number);
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
@@ -1308,18 +1311,17 @@ export async function ensureIssue({
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
           logger.warn({ issueNo: i.number }, 'Closing duplicate issue');
-          // TODO #22198
-          await closeIssue(i.number!);
+          await closeIssue(i.number);
         }
       }
-      const issueBody = (
-        await githubApi.getJson<{ body: string }>(
-          `repos/${config.parentRepo ?? config.repository}/issues/${
-            issue.number
-          }`,
-          { repoCache: true },
-        )
-      ).body.body;
+      const repo = config.parentRepo ?? config.repository;
+      const {
+        body: { body: issueBody },
+      } = await githubApi.getJson(
+        `repos/${repo}/issues/${issue.number}`,
+        { repoCache: true },
+        Issue,
+      );
       if (
         issue.title === title &&
         issueBody === body &&
@@ -1382,8 +1384,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
-      // TODO #22198
-      await closeIssue(issue.number!);
+      await closeIssue(issue.number);
       logger.debug(`Issue closed, issueNo: ${issue.number}`);
     }
   }

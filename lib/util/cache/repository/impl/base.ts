@@ -63,7 +63,7 @@ export abstract class RepoCacheBase implements RepoCache {
         return;
       }
 
-      logger.debug('Repository cache is invalid');
+      logger.warn({ err: cacheV13.error }, 'Repository cache is invalid');
     } catch (err) /* istanbul ignore next: not easily testable */ {
       logger.debug({ err }, 'Error reading repository cache');
     }

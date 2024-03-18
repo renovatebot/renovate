@@ -556,5 +556,31 @@ describe('modules/manager/sbt/extract', () => {
       const packages = await extractAllPackageFiles({}, ['build.sbt']);
       expect(packages).toBeEmpty();
     });
+
+    it('extracts build properties correctly', async () => {
+      const buildProps = codeBlock`
+      sbt.version=1.6.0
+    `;
+      fs.readLocalFile.mockResolvedValueOnce(buildProps);
+      const packages = await extractAllPackageFiles({}, [
+        'project/build.properties',
+      ]);
+      expect(packages).toMatchObject([
+        {
+          deps: [
+            {
+              datasource: 'github-releases',
+              packageName: 'sbt/sbt',
+              depName: 'sbt/sbt',
+              currentValue: '1.6.0',
+              replaceString: 'sbt.version=1.6.0',
+              versioning: 'semver',
+              extractVersion: '^v(?<version>\\S+)',
+              registryUrls: [],
+            },
+          ],
+        },
+      ]);
+    });
   });
 });

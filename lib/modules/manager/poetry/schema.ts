@@ -5,7 +5,9 @@ import { regEx } from '../../../util/regex';
 import { LooseArray, LooseRecord, Toml } from '../../../util/schema-utils';
 import { uniq } from '../../../util/uniq';
 import { GitRefsDatasource } from '../../datasource/git-refs';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import * as gitVersioning from '../../versioning/git';
 import * as pep440Versioning from '../../versioning/pep440';
@@ -42,19 +44,24 @@ const PoetryGitDependency = z
   .transform(({ git, tag, version, branch, rev }): PackageDependency => {
     if (tag) {
       const { source, owner, name } = parseGitUrl(git);
+      const repo = `${owner}/${name}`;
       if (source === 'github.com') {
-        const repo = `${owner}/${name}`;
         return {
           datasource: GithubTagsDatasource.id,
           currentValue: tag,
           packageName: repo,
         };
+      } else if (source === 'gitlab.com') {
+        return {
+          datasource: GitlabTagsDatasource.id,
+          currentValue: tag,
+          packageName: repo,
+        };
       } else {
         return {
-          datasource: GitRefsDatasource.id,
+          datasource: GitTagsDatasource.id,
           currentValue: tag,
           packageName: git,
-          skipReason: 'git-dependency',
         };
       }
     }
@@ -67,14 +74,14 @@ const PoetryGitDependency = z
         replaceString: rev,
         packageName: git,
       };
-    } else {
-      return {
-        datasource: GitRefsDatasource.id,
-        currentValue: version,
-        packageName: git,
-        skipReason: 'git-dependency',
-      };
     }
+
+    return {
+      datasource: GitRefsDatasource.id,
+      currentValue: version,
+      packageName: git,
+      skipReason: 'git-dependency',
+    };
   });
 
 const PoetryPypiDependency = z.union([

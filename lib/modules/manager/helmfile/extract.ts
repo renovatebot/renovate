@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
@@ -10,6 +11,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import type { Doc } from './schema';
+import { Doc as documentSchema } from './schema';
 import {
   kustomizationsKeysUsed,
   localChartHasKustomizationsYaml,
@@ -39,8 +41,9 @@ export async function extractPackageFile(
   // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
   let needKustomize = false;
   try {
-    // TODO: use schema (#9610)
     docs = parseYaml(content, null, {
+      customSchema: documentSchema,
+      failureBehaviour: 'filter',
       removeTemplates: true,
       json: true,
     });
@@ -52,10 +55,6 @@ export async function extractPackageFile(
     return null;
   }
   for (const doc of docs) {
-    if (!doc) {
-      continue;
-    }
-
     // Always check for repositories in the current document and override the existing ones if any (as YAML does)
     if (doc.repositories) {
       registryAliases = {};
@@ -68,22 +67,9 @@ export async function extractPackageFile(
       );
     }
 
-    // Skip extraction if the document contains no releases
-    if (!is.array(doc.releases)) {
-      continue;
-    }
-
-    for (const dep of doc.releases) {
+    for (const dep of coerceArray(doc.releases)) {
       let depName = dep.chart;
       let repoName: string | null = null;
-
-      if (!is.string(dep.chart)) {
-        deps.push({
-          depName: dep.name,
-          skipReason: 'invalid-name',
-        });
-        continue;
-      }
 
       // If it starts with ./ ../ or / then it's a local path
       if (isLocalPath(dep.chart)) {
@@ -98,10 +84,6 @@ export async function extractPackageFile(
           skipReason: 'local-chart',
         });
         continue;
-      }
-
-      if (is.number(dep.version)) {
-        dep.version = String(dep.version);
       }
 
       if (isOciUrl(dep.chart)) {

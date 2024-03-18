@@ -2123,6 +2123,19 @@ Currently this applies to the `minimumReleaseAge` check only.
 The `flexible` mode can result in "flapping" of Pull Requests, for example: a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `minimumReleaseAge`.
 We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you can see suppressed PRs.
 
+## keepUpdatedLabel
+
+On supported platforms you may add a label to a PR so that Renovate recreates/rebases the PR when the branch falls behind the base branch.
+Adding the `keepUpdatedLabel` label to a PR makes Renovate behave as if `rebaseWhen` were set to `behind-base-branch`, but only for the given PR.
+Renovate does _not_ remove the label from the PR after it finishes rebasing.
+This is different from the `rebaseLabel` option, where Renovate _removes_ the label from the PR after rebasing.
+
+`keepUpdatedLabel` can be useful when you have approved certain PRs and want Renovate to keep the PRs up-to-date until you're ready to merge them.
+The setting `keepUpdatedLabel` is best used in this scenario:
+
+- By default, you configure `rebaseWhen` to `never` or `conflicted` to reduce rebasing
+- Sometimes, you want Renovate to keep specific PRs up-to-date with their base branch (equivalent to `rebaseWhen=behind-base-branch`)
+
 ## labels
 
 By default, Renovate won't add any labels to PRs.
@@ -3754,6 +3767,12 @@ If you wish to distinguish between patch and minor upgrades, for example if you 
 Configure this to `true` if you wish to get one PR for every separate major version upgrade of a dependency.
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
+
+## skipInstalls
+
+By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
+If this is set to false, then a full install of modules will be done.
+This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## statusCheckNames
 
