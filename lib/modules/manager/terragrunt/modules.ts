@@ -1,7 +1,11 @@
 import { logger } from '../../../logger';
+import { detectPlatform } from '../../../util/common';
 import { regEx } from '../../../util/regex';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GiteaTagsDatasource } from '../../datasource/gitea-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import type { PackageDependency } from '../types';
 import { extractTerragruntProvider } from './providers';
@@ -29,6 +33,20 @@ export function extractTerragruntModule(
     dep.managerData!.terragruntDependencyType = 'terraform';
   });
   return result;
+}
+
+function detectGitTagDatasource(registryUrl: string): string {
+  const platform = detectPlatform(registryUrl);
+  switch (platform) {
+    case 'gitlab':
+      return GitlabTagsDatasource.id;
+    case 'bitbucket':
+      return BitbucketTagsDatasource.id;
+    case 'gitea':
+      return GiteaTagsDatasource.id;
+    default:
+      return GitTagsDatasource.id;
+  }
 }
 
 export function analyseTerragruntModule(
@@ -61,7 +79,7 @@ export function analyseTerragruntModule(
       dep.packageName = gitTagsRefMatch.groups.url;
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
-    dep.datasource = GitTagsDatasource.id;
+    dep.datasource = detectGitTagDatasource(gitTagsRefMatch.groups.url);
   } else if (tfrVersionMatch?.groups) {
     dep.depType = 'terragrunt';
     dep.depName =
