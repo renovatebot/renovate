@@ -240,6 +240,7 @@ describe('modules/datasource/maven/index', () => {
       group: 'org.example',
       homepage: 'https://package.example.org/about',
       name: 'package',
+      packageScope: 'org.example',
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [
         {
@@ -268,6 +269,7 @@ describe('modules/datasource/maven/index', () => {
       group: 'org.example',
       homepage: 'https://package.example.org/about',
       name: 'package',
+      packageScope: 'org.example',
       registryUrl: 'https://repo.maven.apache.org/maven2',
       releases: [
         { version: '1.0.0', releaseTimestamp: '2021-02-22T14:43:00.000Z' },
@@ -484,6 +486,7 @@ describe('modules/datasource/maven/index', () => {
       group: 'org.example',
       homepage: 'https://package.example.org/about',
       name: 'package',
+      packageScope: 'org.example',
       registryUrl:
         'artifactregistry://maven.pkg.dev/some-project/some-repository',
       releases: [
@@ -535,6 +538,7 @@ describe('modules/datasource/maven/index', () => {
       group: 'org.example',
       homepage: 'https://package.example.org/about',
       name: 'package',
+      packageScope: 'org.example',
       registryUrl:
         'artifactregistry://maven.pkg.dev/some-project/some-repository',
       releases: [

@@ -32,11 +32,11 @@ import { googleRegex } from './google';
 import type { OciHelmConfig } from './schema';
 import type { RegistryRepository } from './types';
 
-export const dockerDatasourceId = 'docker' as const;
+export const dockerDatasourceId = 'docker';
 
-export const imageUrlLabel = 'org.opencontainers.image.url' as const;
+export const imageUrlLabel = 'org.opencontainers.image.url';
 
-export const sourceLabel = 'org.opencontainers.image.source' as const;
+export const sourceLabel = 'org.opencontainers.image.source';
 export const sourceLabels = [sourceLabel, 'org.label-schema.vcs-url'] as const;
 
 export const gitRefLabel = 'org.opencontainers.image.revision';

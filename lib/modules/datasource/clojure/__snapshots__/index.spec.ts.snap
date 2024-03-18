@@ -6,6 +6,7 @@ exports[`modules/datasource/clojure/index falls back to next registry url 1`] = 
   "group": "org.example",
   "homepage": "https://package.example.org/about",
   "name": "package",
+  "packageScope": "org.example",
   "registryUrl": "https://clojars.org/repo",
   "releases": [
     {
@@ -53,6 +54,7 @@ exports[`modules/datasource/clojure/index returns releases from custom repositor
   "group": "org.example",
   "homepage": "https://package.example.org/about",
   "name": "package",
+  "packageScope": "org.example",
   "registryUrl": "https://custom.registry.renovatebot.com",
   "releases": [
     {
@@ -80,6 +82,7 @@ exports[`modules/datasource/clojure/index skips registry with invalid XML 1`] = 
   "group": "org.example",
   "homepage": "https://package.example.org/about",
   "name": "package",
+  "packageScope": "org.example",
   "registryUrl": "https://clojars.org/repo",
   "releases": [
     {
@@ -107,6 +110,7 @@ exports[`modules/datasource/clojure/index skips registry with invalid metadata s
   "group": "org.example",
   "homepage": "https://package.example.org/about",
   "name": "package",
+  "packageScope": "org.example",
   "registryUrl": "https://clojars.org/repo",
   "releases": [
     {

@@ -385,6 +385,24 @@ describe('modules/manager/github-actions/extract', () => {
           replaceString:
             'actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # v2.1.0',
         },
+        {
+          currentDigest: '689fcce700ae7ffc576f2b029b51b2ffb66d3abd',
+          currentValue: 'v2.1.0',
+          replaceString:
+            'actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # ratchet:actions/checkout@v2.1.0',
+        },
+        {
+          currentDigest: '689fcce700ae7ffc576f2b029b51b2ffb66d3abd',
+          currentValue: undefined,
+          replaceString:
+            'actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # ratchet:exclude',
+        },
+        {
+          currentDigest: 'f1d7c52253b89f0beae60141f8465d9495cdc2cf',
+          currentValue: 'actions-runner-controller-0.23.5',
+          replaceString:
+            'actions-runner-controller/execute-assert-arc-e2e@f1d7c52253b89f0beae60141f8465d9495cdc2cf # actions-runner-controller-0.23.5',
+        },
       ]);
     });
 

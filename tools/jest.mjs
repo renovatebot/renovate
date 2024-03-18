@@ -25,4 +25,8 @@ args.push('node_modules/jest/bin/jest.js', '--logHeapUsage');
 // add other args after `node tools/jest.mjs`
 args.push(...argv.slice(2));
 
-spawnSync('node', args, { stdio: 'inherit', env });
+const res = spawnSync('node', args, { stdio: 'inherit', env });
+
+if (res.status !== null && res.status !== 0) {
+  process.exit(res.status);
+}
