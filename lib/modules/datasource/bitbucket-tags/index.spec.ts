@@ -64,10 +64,8 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         .get('/2.0/repositories/some/dep2')
         .reply(200, {
           mainbranch: { name: 'master' },
-          has_issues: true,
           uuid: '123',
           full_name: 'some/repo',
-          is_private: false,
         });
       httpMock
         .scope('https://api.bitbucket.org')
