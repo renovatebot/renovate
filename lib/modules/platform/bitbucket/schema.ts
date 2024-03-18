@@ -49,10 +49,7 @@ export const RepoInfo = z
         name: z.string(),
       })
       .nullable()
-      .catch(() => {
-        logger.once.warn('Bitbucket: "project" field missing from repo info');
-        return null;
-      }),
+      .catch(null),
   })
   .transform((repoInfoBody) => {
     const isFork = !!repoInfoBody.parent;
