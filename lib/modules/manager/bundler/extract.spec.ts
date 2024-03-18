@@ -134,7 +134,11 @@ describe('modules/manager/bundler/extract', () => {
       sourceBlockWithGroupsGemfile,
       'Gemfile',
     );
-    expect(res).toMatchSnapshot();
-    expect(res?.deps).toHaveLength(4);
+    expect(res?.deps).toMatchObject([
+      { depName: 'internal_test_gem', currentValue: '"~> 1"' },
+      { depName: 'internal_production_gem', currentValue: '"~> 1"' },
+      { depName: 'sfn_my_dep1', currentValue: '"~> 1"' },
+      { depName: 'sfn_my_dep2', currentValue: '"~> 1"' },
+    ]);
   });
 });
