@@ -56,11 +56,11 @@ import type {
   EnsureIssueConfig,
   EnsureIssueResult,
   FindPRConfig,
-  Issue,
   MergePRConfig,
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -75,6 +75,7 @@ import {
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
+import { GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
 import type {
@@ -1197,9 +1198,8 @@ export async function setBranchStatus({
 
 // Issue
 
-/* istanbul ignore next */
 async function getIssues(): Promise<Issue[]> {
-  const result = await githubApi.queryRepoField<Issue>(
+  const result = await githubApi.queryRepoField<unknown>(
     getIssuesQuery,
     'issues',
     {
@@ -1212,10 +1212,7 @@ async function getIssues(): Promise<Issue[]> {
   );
 
   logger.debug(`Retrieved ${result.length} issues`);
-  return result.map((issue) => ({
-    ...issue,
-    state: issue.state?.toLowerCase(),
-  }));
+  return Issue.array().parse(result);
 }
 
 export async function getIssueList(): Promise<Issue[]> {
@@ -1239,16 +1236,13 @@ export async function getIssue(
     return null;
   }
   try {
-    const issueBody = (
-      await githubApi.getJson<{ body: string }>(
-        `repos/${config.parentRepo ?? config.repository}/issues/${number}`,
-        { memCache: useCache, repoCache: true },
-      )
-    ).body.body;
-    return {
-      number,
-      body: issueBody,
-    };
+    const repo = config.parentRepo ?? config.repository;
+    const { body: issue } = await githubApi.getJson(
+      `repos/${repo}/issues/${number}`,
+      { memCache: useCache, repoCache: true },
+      Issue,
+    );
+    return issue;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, number }, 'Error getting issue');
     return null;
@@ -1264,8 +1258,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
     return null;
   }
   logger.debug(`Found issue ${issue.number}`);
-  // TODO: can number be required? (#22198)
-  return getIssue(issue.number!);
+  return getIssue(issue.number);
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
@@ -1319,18 +1312,17 @@ export async function ensureIssue({
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
           logger.warn({ issueNo: i.number }, 'Closing duplicate issue');
-          // TODO #22198
-          await closeIssue(i.number!);
+          await closeIssue(i.number);
         }
       }
-      const issueBody = (
-        await githubApi.getJson<{ body: string }>(
-          `repos/${config.parentRepo ?? config.repository}/issues/${
-            issue.number
-          }`,
-          { repoCache: true },
-        )
-      ).body.body;
+      const repo = config.parentRepo ?? config.repository;
+      const {
+        body: { body: issueBody },
+      } = await githubApi.getJson(
+        `repos/${repo}/issues/${issue.number}`,
+        { repoCache: true },
+        Issue,
+      );
       if (
         issue.title === title &&
         issueBody === body &&
@@ -1393,8 +1385,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
-      // TODO #22198
-      await closeIssue(issue.number!);
+      await closeIssue(issue.number);
       logger.debug(`Issue closed, issueNo: ${issue.number}`);
     }
   }
@@ -1801,6 +1792,22 @@ export async function updatePr({
       throw err;
     }
     logger.warn({ err }, 'Error updating PR');
+  }
+}
+
+export async function reattemptPlatformAutomerge({
+  number,
+  platformOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
+  try {
+    const result = (await getPr(number))!;
+    const { node_id } = result;
+
+    await tryPrAutomerge(number, node_id, platformOptions);
+
+    logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
+  } catch (err) {
+    logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
 }
 

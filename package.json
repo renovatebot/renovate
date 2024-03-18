@@ -155,7 +155,7 @@
     "@opentelemetry/context-async-hooks": "1.21.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.48.0",
     "@opentelemetry/instrumentation": "0.48.0",
-    "@opentelemetry/instrumentation-bunyan": "0.35.0",
+    "@opentelemetry/instrumentation-bunyan": "0.36.0",
     "@opentelemetry/instrumentation-http": "0.48.0",
     "@opentelemetry/resources": "1.21.0",
     "@opentelemetry/sdk-trace-base": "1.21.0",
@@ -175,7 +175,7 @@
     "aggregate-error": "3.1.0",
     "auth-header": "1.0.0",
     "aws4": "1.12.0",
-    "azure-devops-node-api": "12.4.0",
+    "azure-devops-node-api": "12.5.0",
     "better-sqlite3": "9.4.3",
     "bunyan": "1.8.15",
     "cacache": "18.0.2",
@@ -253,7 +253,7 @@
     "zod": "3.22.4"
   },
   "optionalDependencies": {
-    "re2": "1.20.9"
+    "re2": "1.20.10"
   },
   "devDependencies": {
     "@hyrious/marshal": "0.3.3",
@@ -266,7 +266,7 @@
     "@openpgp/web-stream-tools": "0.0.14",
     "@renovate/eslint-plugin": "file:tools/eslint",
     "@semantic-release/exec": "6.0.3",
-    "@swc/core": "1.4.2",
+    "@swc/core": "1.4.6",
     "@types/auth-header": "1.0.6",
     "@types/aws4": "1.11.6",
     "@types/breejs__later": "4.1.5",
@@ -295,7 +295,7 @@
     "@types/mdast": "3.0.15",
     "@types/moo": "0.5.9",
     "@types/nock": "10.0.3",
-    "@types/node": "18.19.21",
+    "@types/node": "18.19.24",
     "@types/parse-link-header": "2.0.3",
     "@types/prettier": "2.7.3",
     "@types/semver": "7.5.6",
@@ -306,8 +306,8 @@
     "@types/url-join": "4.0.3",
     "@types/validate-npm-package-name": "4.0.2",
     "@types/xmldoc": "1.1.9",
-    "@typescript-eslint/eslint-plugin": "7.1.1",
-    "@typescript-eslint/parser": "7.1.1",
+    "@typescript-eslint/eslint-plugin": "7.3.0",
+    "@typescript-eslint/parser": "7.3.0",
     "aws-sdk-client-mock": "3.0.1",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
@@ -344,7 +344,7 @@
     "tmp-promise": "3.0.3",
     "ts-jest": "29.1.2",
     "ts-node": "10.9.2",
-    "type-fest": "4.10.3",
+    "type-fest": "4.12.0",
     "typescript": "5.3.3",
     "unified": "9.2.2"
   },
@@ -352,5 +352,8 @@
   "files": [
     "dist",
     "renovate-schema.json"
-  ]
+  ],
+  "pnpm":{
+    "neverBuiltDependencies": ["dtrace-provider"]
+  }
 }

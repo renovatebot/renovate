@@ -10,6 +10,8 @@ name = "private-pypi"
 
 [packages]
 some-package = "==0.3.1"
+"splinter[django]" = "==3.43.1"
+"requests[django][security][something]" = "==1.1.1"
 some-other-package = "==1.0.0"
 "_invalid-package" = "==1.0.0"
 invalid-version = "==0 0"

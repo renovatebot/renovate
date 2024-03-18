@@ -11,6 +11,11 @@ import { getCache } from '../cache/repository';
 import { clone } from '../clone';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
+import {
+  HttpCacheStats,
+  type HttpRequestStatsDataPoint,
+  HttpStats,
+} from '../stats';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
@@ -23,10 +28,8 @@ import type {
   GotOptions,
   GotTask,
   HttpOptions,
-  HttpRequestOptions,
   HttpResponse,
   InternalHttpOptions,
-  RequestStats,
 } from './types';
 // TODO: refactor code to remove this (#9651)
 import './legacy';
@@ -37,7 +40,7 @@ export class EmptyResultError extends Error {}
 export type SafeJsonError = RequestError | ZodError | EmptyResultError;
 
 type JsonArgs<
-  Opts extends HttpOptions & HttpRequestOptions<ResT>,
+  Opts extends HttpOptions,
   ResT = unknown,
   Schema extends ZodType<ResT> = ZodType<ResT>,
 > = {
@@ -76,6 +79,8 @@ function applyDefaultHeaders(options: Options): void {
   };
 }
 
+type QueueStatsData = Pick<HttpRequestStatsDataPoint, 'queueMs'>;
+
 // Note on types:
 // options.requestType can be either 'json' or 'buffer', but `T` should be
 // `Buffer` in the latter case.
@@ -84,7 +89,7 @@ function applyDefaultHeaders(options: Options): void {
 async function gotTask<T>(
   url: string,
   options: SetRequired<GotOptions, 'method'>,
-  requestStats: Omit<RequestStats, 'duration' | 'statusCode'>,
+  queueStats: QueueStatsData,
 ): Promise<HttpResponse<T>> {
   logger.trace({ url, options }, 'got request');
 
@@ -119,9 +124,13 @@ async function gotTask<T>(
 
     throw error;
   } finally {
-    const httpRequests = memCache.get<RequestStats[]>('http-requests') || [];
-    httpRequests.push({ ...requestStats, duration, statusCode });
-    memCache.set('http-requests', httpRequests);
+    HttpStats.write({
+      method: options.method,
+      url,
+      reqMs: duration,
+      queueMs: queueStats.queueMs,
+      status: statusCode,
+    });
   }
 }
 
@@ -148,7 +157,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
   protected async request<T>(
     requestUrl: string | URL,
-    httpOptions: InternalHttpOptions & HttpRequestOptions<T>,
+    httpOptions: InternalHttpOptions,
   ): Promise<HttpResponse<T>> {
     let url = requestUrl.toString();
     if (httpOptions?.baseUrl) {
@@ -165,17 +174,6 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     );
 
     logger.trace(`HTTP request: ${options.method.toUpperCase()} ${url}`);
-
-    const etagCache =
-      httpOptions.etagCache && options.method === 'get'
-        ? httpOptions.etagCache
-        : null;
-    if (etagCache) {
-      options.headers = {
-        ...options.headers,
-        'If-None-Match': etagCache.etag,
-      };
-    }
 
     options.hooks = {
       beforeRedirect: [removeAuthorization],
@@ -236,12 +234,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       }
       const startTime = Date.now();
       const httpTask: GotTask<T> = () => {
-        const queueDuration = Date.now() - startTime;
-        return gotTask(url, options, {
-          method: options.method,
-          url,
-          queueDuration,
-        });
+        const queueMs = Date.now() - startTime;
+        return gotTask(url, options, { queueMs });
       };
 
       const throttle = this.getThrottle(url);
@@ -277,6 +271,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
           logger.debug(
             `http cache: saving ${url} (etag=${resCopy.headers.etag}, lastModified=${resCopy.headers['last-modified']})`,
           );
+          HttpCacheStats.incRemoteMisses(url);
           cache.httpCache[url] = {
             etag: resCopy.headers.etag,
             httpResponse: copyResponse(res, deepCopyNeeded),
@@ -288,6 +283,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
           logger.debug(
             `http cache: Using cached response: ${url} from ${cache.httpCache[url].timeStamp}`,
           );
+          HttpCacheStats.incRemoteHits(url);
           const cacheCopy = copyResponse(
             cache.httpCache[url].httpResponse,
             deepCopyNeeded,
@@ -306,10 +302,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
   }
 
-  get(
-    url: string,
-    options: HttpOptions & HttpRequestOptions<string> = {},
-  ): Promise<HttpResponse> {
+  get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
     return this.request<string>(url, options);
   }
 
@@ -329,11 +322,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
   private async requestJson<ResT = unknown>(
     method: InternalHttpOptions['method'],
-    {
-      url,
-      httpOptions: requestOptions,
-      schema,
-    }: JsonArgs<Opts & HttpRequestOptions<ResT>, ResT>,
+    { url, httpOptions: requestOptions, schema }: JsonArgs<Opts, ResT>,
   ): Promise<HttpResponse<ResT>> {
     const { body, ...httpOptions } = { ...requestOptions };
     const opts: InternalHttpOptions = {
@@ -351,23 +340,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
     const res = await this.request<ResT>(url, opts);
 
-    const etagCacheHit =
-      httpOptions.etagCache && res.statusCode === 304
-        ? clone(httpOptions.etagCache.data)
-        : null;
-
     if (!schema) {
-      if (etagCacheHit) {
-        res.body = etagCacheHit;
-      }
       return res;
     }
 
-    if (etagCacheHit) {
-      res.body = etagCacheHit;
-    } else {
-      res.body = await schema.parseAsync(res.body);
-    }
+    res.body = await schema.parseAsync(res.body);
     return res;
   }
 
@@ -401,22 +378,19 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     });
   }
 
-  getJson<ResT>(
-    url: string,
-    options?: Opts & HttpRequestOptions<ResT>,
-  ): Promise<HttpResponse<ResT>>;
+  getJson<ResT>(url: string, options?: Opts): Promise<HttpResponse<ResT>>;
   getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
     url: string,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
   getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
     url: string,
-    options: Opts & HttpRequestOptions<Infer<Schema>>,
+    options: Opts,
     schema: Schema,
   ): Promise<HttpResponse<Infer<Schema>>>;
   getJson<ResT = unknown, Schema extends ZodType<ResT> = ZodType<ResT>>(
     arg1: string,
-    arg2?: (Opts & HttpRequestOptions<ResT>) | Schema,
+    arg2?: Opts | Schema,
     arg3?: Schema,
   ): Promise<HttpResponse<ResT>> {
     const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
@@ -432,7 +406,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     Schema extends ZodType<ResT> = ZodType<ResT>,
   >(
     url: string,
-    options: Opts & HttpRequestOptions<Infer<Schema>>,
+    options: Opts,
     schema: Schema,
   ): AsyncResult<Infer<Schema>, SafeJsonError>;
   getJsonSafe<
@@ -440,7 +414,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     Schema extends ZodType<ResT> = ZodType<ResT>,
   >(
     arg1: string,
-    arg2?: (Opts & HttpRequestOptions<ResT>) | Schema,
+    arg2?: Opts | Schema,
     arg3?: Schema,
   ): AsyncResult<ResT, SafeJsonError> {
     const args = this.resolveArgs<ResT>(arg1, arg2, arg3);

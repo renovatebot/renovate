@@ -788,13 +788,22 @@ export class DockerDatasource extends Datasource {
     },
   })
   override async getDigest(
-    { registryUrl, packageName, currentDigest }: DigestConfig,
+    { registryUrl, lookupName, packageName, currentDigest }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    const { registryHost, dockerRepository } = getRegistryRepository(
-      packageName,
-      registryUrl!,
-    );
+    let registryHost: string;
+    let dockerRepository: string;
+    if (registryUrl && lookupName) {
+      // Reuse the resolved values from getReleases()
+      registryHost = registryUrl;
+      dockerRepository = lookupName;
+    } else {
+      // Resolve values independently
+      ({ registryHost, dockerRepository } = getRegistryRepository(
+        packageName,
+        registryUrl!,
+      ));
+    }
     logger.debug(
       // TODO: types (#22198)
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`,

@@ -4,7 +4,7 @@ import { Json, LooseRecord } from '../../../util/schema-utils';
 export const PackageManagerSchema = z
   .string()
   .transform((val) => val.split('@'))
-  .transform(([name, version]) => ({ name, version }));
+  .transform(([name, ...version]) => ({ name, version: version.join('@') }));
 
 export const PackageJsonSchema = z.object({
   engines: LooseRecord(z.string()).optional(),

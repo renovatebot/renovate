@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Yaml } from '../../../util/schema-utils';
+import { LooseArray, Yaml } from '../../../util/schema-utils';
 
 export const HelmRepository = z.object({
   name: z.string(),
@@ -11,7 +11,12 @@ export type HelmRepository = z.infer<typeof HelmRepository>;
 export const HelmRelease = z.object({
   name: z.string(),
   chart: z.string(),
-  version: z.string(),
+  version: z
+    .string()
+    .or(z.number())
+    .optional()
+    .nullable()
+    .transform((version) => (version ? version.toString() : null)),
   strategicMergePatches: z.unknown().optional(),
   jsonPatches: z.unknown().optional(),
   transformers: z.unknown().optional(),
@@ -19,8 +24,8 @@ export const HelmRelease = z.object({
 export type HelmRelease = z.infer<typeof HelmRelease>;
 
 export const Doc = z.object({
-  releases: z.array(HelmRelease).optional(),
-  repositories: z.array(HelmRepository).optional(),
+  releases: LooseArray(HelmRelease).optional(),
+  repositories: LooseArray(HelmRepository).optional(),
 });
 export type Doc = z.infer<typeof Doc>;
 
