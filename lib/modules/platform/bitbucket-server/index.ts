@@ -101,8 +101,8 @@ export async function initPlatform({
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
-  let bitbucketServerVersion: string;
   try {
+    let bitbucketServerVersion: string;
     if (process.env.RENOVATE_X_PLATFORM_VERSION) {
       bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
     } else {
@@ -121,7 +121,6 @@ export async function initPlatform({
       { err },
       'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
     );
-    throw new Error('Init: Authentication failure');
   }
 
   return Promise.resolve(platformConfig);
