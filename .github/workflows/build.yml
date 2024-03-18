@@ -607,7 +607,7 @@ jobs:
           filter: blob:none # we don't need all blobs, only the full tree
 
       - name: docker-config
-        uses: containerbase/internal-tools@b0b8472a98c981134c4271f9612203dee601fd80 # v3.0.65
+        uses: containerbase/internal-tools@91fb2e028c420d6dfeee8ea921ac85db5637d5ba # v3.0.67
         with:
           command: docker-config
 
