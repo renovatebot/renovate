@@ -41,7 +41,7 @@ export async function mergeInheritedConfig(
   const templateConfig = {
     topLevelOrg: repoParts.shift(),
     parentOrg: repoParts.join('/'),
-    repostiory: config.repository,
+    repository: config.repository,
   };
   const inheritConfigRepoName = template.compile(
     config.inheritConfigRepoName,
