@@ -669,13 +669,14 @@ Change this setting to `true` to include repositories that are mirrors as Renova
 
 ## inheritConfig
 
-When you enable this option, Renovate will look for the `inheritConfigFileName` file (defaults to `org-inherited-config.json`) in the `inheritConfigRepoName` repository (defaults to `{{parentOrg}}/renovate-config`) before processing a repository, and read this in as config.
-If the repository is in a nested organization/group on a supported platform such as GitLab, such as `topGroup/nestedGroup/projectName` then Renovate will look in `topGroup/nestedGroup/renovate-config`.
+When you enable this option, Renovate will look for the `inheritConfigFileName` file in the `inheritConfigRepoName` repository before processing a repository, and read this in as config.
+
+If the repository is in a nested organization or group on a supported platform such as GitLab, such as `topGroup/nestedGroup/projectName` then Renovate will look in `topGroup/nestedGroup/renovate-config`.
 
 If `inheritConfig` is `true` but the inherited config file does _not_ exist then Renovate will proceed without warning.
-If the file exists but cannot be parsed, then a config warning issue will be raised and the job aborted.
+If the file exists but cannot be parsed, then Renovate will raise a config warning issue and abort the job.
 
-The inherited config may include all valid repo config and these config options:
+The inherited config may include all valid repository config and these config options:
 
 - `bbUseDevelopmentBranch`
 - `onboarding`
@@ -688,11 +689,11 @@ The inherited config may include all valid repo config and these config options:
 - `onboardingRebaseCheckbox`
 - `requireConfig`
 
-This means that organizations can change/control default behavior like whether configs are required and how repositories are onboarded.
+This way organizations can change/control the default behavior, like whether configs are required and how repositories are onboarded.
 
-We disabled `inheritConfig` in the Mend Renovate App to avoid millions of wasted API calls per week.
-This is because each `404` from the GitHub API for a missing org inherited config counts as a used API call.
-A smart/dynamic approach will be added in future so that it can be enabled selectively per-org.
+We disabled `inheritConfig` in the Mend Renovate App to avoid wasting millions of API calls per week.
+This is because each `404` response from the GitHub API due to a missing org inherited config counts as a used API call.
+We will add a smart/dynamic approach in future, so that we can selectively enable `inheritConfig` per organization.
 
 ## inheritConfigFileName
 
@@ -702,14 +703,16 @@ You may use nested files, for example: `"some-dir/config.json"`.
 ## inheritConfigRepoName
 
 Change this setting if you want Renovate to look in an alternative repository for the inherited config.
-The repository must be on the same platform and endpoint, and Renovate's token must have permission to access the repository.
+The repository must be on the same platform and endpoint, and Renovate's token must have `read` permissions to the repository.
 
 ## inheritConfigStrict
 
 By default Renovate will silently (debug log message only) ignore cases where `inheritConfig=true` but no inherited config is found.
-When you set `inheritConfigStrict=true` then Renovate will abort the run and raise a config error if the inherited config is not found.
+When you set `inheritConfigStrict=true` then Renovate will abort the run and raise a config error if Renovate can't find the inherited config.
 
-Only set this config option to `true` if _every_ organization has an inherited config file _and_ you want to make sure Renovate _always_ uses that inherited config.
+<!-- prettier-ignore -->
+!!! warning
+    Only set this config option to `true` if _every_ organization has an inherited config file _and_ you want to make sure Renovate _always_ uses that inherited config.
 
 ## logContext
 
