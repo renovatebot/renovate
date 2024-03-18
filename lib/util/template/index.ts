@@ -128,6 +128,7 @@ export const allowedFields = {
   packageScope: 'The scope of the package name. Supports Maven group ID only',
   parentDir:
     'The name of the directory that the dependency was found in, without full path',
+  parentOrg: 'The name of the parent organization for the current repository',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',
   prettyDepType: 'Massaged depType',
   prettyNewMajor: 'The new major value with v prepended to it.',
@@ -144,6 +145,8 @@ export const allowedFields = {
   sourceRepoOrg: 'The repository organization in the sourceUrl, if present',
   sourceRepoSlug: 'The slugified pathname of the sourceUrl, if present',
   sourceUrl: 'The source URL for the package',
+  topLevelOrg:
+    'The name of the top-level organization for the current repository',
   updateType:
     'One of digest, pin, rollback, patch, minor, major, replacement, pinDigest',
   upgrades: 'An array of upgrade objects in the branch',
