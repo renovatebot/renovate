@@ -9,17 +9,9 @@ const GithubIssueBase = z.object({
   body: z.string(),
 });
 
-export interface GithubIssue {
-  body: string;
-  number: number;
-  state: string;
-  title: string;
-  lastModified: string;
-}
-
 const GithubGraphqlIssue = GithubIssueBase.extend({
   updatedAt: z.string(),
-}).transform((issue): GithubIssue => {
+}).transform((issue) => {
   const lastModified = issue.updatedAt;
   const { number, state, title, body } = issue;
   return { number, state, title, body, lastModified };
@@ -27,13 +19,14 @@ const GithubGraphqlIssue = GithubIssueBase.extend({
 
 const GithubRestIssue = GithubIssueBase.extend({
   updated_at: z.string(),
-}).transform((issue): GithubIssue => {
+}).transform((issue) => {
   const lastModified = issue.updated_at;
   const { number, state, title, body } = issue;
   return { number, state, title, body, lastModified };
 });
 
 export const GithubIssue = z.union([GithubGraphqlIssue, GithubRestIssue]);
+export type GithubIssue = z.infer<typeof GithubIssue>;
 
 type CacheData = Record<number, GithubIssue>;
 
