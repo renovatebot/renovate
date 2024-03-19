@@ -34,7 +34,7 @@ runs:
 
     - name: Check cache miss for MacOS
       id: macos-cache
-      uses: actions/cache/restore@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+      uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
       with:
         path: node_modules
         key: ${{ env.MACOS_KEY }}
@@ -43,7 +43,7 @@ runs:
 
     - name: Check cache miss for Windows
       id: windows-cache
-      uses: actions/cache/restore@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+      uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
       with:
         path: node_modules
         key: ${{ env.WINDOWS_KEY }}
