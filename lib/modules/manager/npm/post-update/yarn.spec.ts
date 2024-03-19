@@ -175,7 +175,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchObject([
+      { cmd: 'yarn config unset --home httpProxy' },
       { cmd: 'yarn config set --home httpProxy http://proxy' },
+      { cmd: 'yarn config unset --home httpsProxy' },
       { cmd: 'yarn config set --home httpsProxy http://proxy' },
       {},
     ]);
