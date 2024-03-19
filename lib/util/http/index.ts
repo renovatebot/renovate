@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import merge from 'deepmerge';
 import got, { Options, RequestError } from 'got';
 import type { SetRequired } from 'type-fest';
@@ -8,7 +9,6 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { getCache } from '../cache/repository';
-import { clone } from '../clone';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
 import {
@@ -27,12 +27,14 @@ import type {
   GotJSONOptions,
   GotOptions,
   GotTask,
+  HttpCache,
   HttpOptions,
   HttpResponse,
   InternalHttpOptions,
 } from './types';
 // TODO: refactor code to remove this (#9651)
 import './legacy';
+import { copyResponse } from './util';
 
 export { RequestError as HttpError };
 
@@ -48,26 +50,6 @@ type JsonArgs<
   httpOptions?: Opts;
   schema?: Schema;
 };
-
-// Copying will help to avoid circular structure
-// and mutation of the cached response.
-function copyResponse<T>(
-  response: HttpResponse<T>,
-  deep: boolean,
-): HttpResponse<T> {
-  const { body, statusCode, headers } = response;
-  return deep
-    ? {
-        statusCode,
-        body: body instanceof Buffer ? (body.subarray() as T) : clone<T>(body),
-        headers: clone(headers),
-      }
-    : {
-        statusCode,
-        body,
-        headers,
-      };
-}
 
 function applyDefaultHeaders(options: Options): void {
   const renovateVersion = pkg.version;
@@ -142,13 +124,17 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options: HttpOptions = {},
   ) {
     const retryLimit = process.env.NODE_ENV === 'test' ? 0 : 2;
-    this.options = merge<GotOptions>(options, {
-      context: { hostType },
-      retry: {
-        limit: retryLimit,
-        maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
+    this.options = merge<GotOptions>(
+      options,
+      {
+        context: { hostType },
+        retry: {
+          limit: retryLimit,
+          maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
+        },
       },
-    });
+      { isMergeableObject: is.plainObject },
+    );
   }
 
   protected getThrottle(url: string): Throttle | null {
@@ -164,13 +150,14 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
 
-    let options = merge<SetRequired<GotOptions, 'method'>, GotOptions>(
+    let options = merge<SetRequired<GotOptions, 'method'>, InternalHttpOptions>(
       {
         method: 'get',
         ...this.options,
         hostType: this.hostType,
       },
       httpOptions,
+      { isMergeableObject: is.plainObject },
     );
 
     logger.trace(`HTTP request: ${options.method.toUpperCase()} ${url}`);
@@ -212,7 +199,9 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // istanbul ignore else: no cache tests
     if (!resPromise) {
       if (httpOptions.repoCache) {
-        const responseCache = getCache().httpCache?.[url];
+        const responseCache = getCache().httpCache?.[url] as
+          | HttpCache
+          | undefined;
         // Prefer If-Modified-Since over If-None-Match
         if (responseCache?.['lastModified']) {
           logger.debug(
@@ -232,6 +221,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
           };
         }
       }
+
+      if (options.cacheProvider) {
+        await options.cacheProvider.setCacheHeaders(url, options);
+      }
+
       const startTime = Date.now();
       const httpTask: GotTask<T> = () => {
         const queueMs = Date.now() - startTime;
@@ -261,6 +255,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
+
       if (httpOptions.repoCache) {
         const cache = getCache();
         cache.httpCache ??= {};
@@ -279,19 +274,25 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
             timeStamp: new Date().toISOString(),
           };
         }
-        if (resCopy.statusCode === 304 && cache.httpCache[url]?.httpResponse) {
+        const httpCache = cache.httpCache[url] as HttpCache | undefined;
+        if (resCopy.statusCode === 304 && httpCache) {
           logger.debug(
-            `http cache: Using cached response: ${url} from ${cache.httpCache[url].timeStamp}`,
+            `http cache: Using cached response: ${url} from ${httpCache.timeStamp}`,
           );
           HttpCacheStats.incRemoteHits(url);
           const cacheCopy = copyResponse(
-            cache.httpCache[url].httpResponse,
+            httpCache.httpResponse,
             deepCopyNeeded,
           );
           cacheCopy.authorization = !!options?.headers?.authorization;
           return cacheCopy as HttpResponse<T>;
         }
       }
+
+      if (options.cacheProvider) {
+        return await options.cacheProvider.wrapResponse(url, resCopy);
+      }
+
       return resCopy;
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
