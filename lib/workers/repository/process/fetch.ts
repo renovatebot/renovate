@@ -10,28 +10,14 @@ import type {
   PackageFile,
 } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as memCache from '../../../util/cache/memory';
-import type { LookupStats } from '../../../util/cache/memory/types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import * as p from '../../../util/promises';
 import { Result } from '../../../util/result';
+import { LookupStats } from '../../../util/stats';
 import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
-
-async function withLookupStats<T>(
-  datasource: string,
-  callback: () => Promise<T>,
-): Promise<T> {
-  const start = Date.now();
-  const result = await callback();
-  const duration = Date.now() - start;
-  const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
-  lookups.push({ datasource, duration });
-  memCache.set('lookup-stats', lookups);
-  return result;
-}
 
 async function fetchDepUpdates(
   packageFileConfig: RenovateConfig & PackageFile,
@@ -69,7 +55,7 @@ async function fetchDepUpdates(
     dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
-      const { val: updateResult, err } = await withLookupStats(
+      const { val: updateResult, err } = await LookupStats.wrap(
         depConfig.datasource,
         () =>
           Result.wrap(lookupUpdates(depConfig as LookupUpdateConfig)).unwrap(),

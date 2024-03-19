@@ -1,9 +1,4 @@
-import type {
-  HttpOptions,
-  HttpRequestOptions,
-  HttpResponse,
-  InternalHttpOptions,
-} from './types';
+import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from '.';
 
 let baseUrl: string;
@@ -19,7 +14,7 @@ export class JiraHttp extends Http {
 
   protected override request<T>(
     url: string | URL,
-    options?: InternalHttpOptions & HttpRequestOptions<T>,
+    options?: InternalHttpOptions,
   ): Promise<HttpResponse<T>> {
     const opts = { baseUrl, ...options };
     return super.request<T>(url, opts);

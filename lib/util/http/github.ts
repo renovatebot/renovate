@@ -19,7 +19,6 @@ import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
   HttpOptions,
-  HttpRequestOptions,
   HttpResponse,
   InternalHttpOptions,
 } from './types';
@@ -274,7 +273,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: InternalHttpOptions & GithubHttpOptions & HttpRequestOptions<T>,
+    options?: InternalHttpOptions & GithubHttpOptions,
     okToRetry = true,
   ): Promise<HttpResponse<T>> {
     const opts: GithubHttpOptions = {
@@ -340,7 +339,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
-                { ...opts, paginate: false, repoCache: false },
+                { ...opts, paginate: false, cacheProvider: undefined },
                 okToRetry,
               );
             },
