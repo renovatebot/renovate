@@ -8,14 +8,9 @@ import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
-import { getCache } from '../cache/repository';
 import { hash } from '../hash';
 import { type AsyncResult, Result } from '../result';
-import {
-  HttpCacheStats,
-  type HttpRequestStatsDataPoint,
-  HttpStats,
-} from '../stats';
+import { type HttpRequestStatsDataPoint, HttpStats } from '../stats';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
@@ -27,7 +22,6 @@ import type {
   GotJSONOptions,
   GotOptions,
   GotTask,
-  HttpCache,
   HttpOptions,
   HttpResponse,
   InternalHttpOptions,
@@ -198,30 +192,6 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     // istanbul ignore else: no cache tests
     if (!resPromise) {
-      if (httpOptions.repoCache) {
-        const responseCache = getCache().httpCache?.[url] as
-          | HttpCache
-          | undefined;
-        // Prefer If-Modified-Since over If-None-Match
-        if (responseCache?.['lastModified']) {
-          logger.debug(
-            `http cache: trying cached Last-Modified "${responseCache?.['lastModified']}" for ${url}`,
-          );
-          options.headers = {
-            ...options.headers,
-            'If-Modified-Since': responseCache['lastModified'],
-          };
-        } else if (responseCache?.etag) {
-          logger.debug(
-            `http cache: trying cached etag "${responseCache.etag}" for ${url}`,
-          );
-          options.headers = {
-            ...options.headers,
-            'If-None-Match': responseCache.etag,
-          };
-        }
-      }
-
       if (options.cacheProvider) {
         await options.cacheProvider.setCacheHeaders(url, options);
       }
@@ -255,39 +225,6 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
-
-      if (httpOptions.repoCache) {
-        const cache = getCache();
-        cache.httpCache ??= {};
-        if (
-          resCopy.statusCode === 200 &&
-          (resCopy.headers?.etag ?? resCopy.headers['last-modified'])
-        ) {
-          logger.debug(
-            `http cache: saving ${url} (etag=${resCopy.headers.etag}, lastModified=${resCopy.headers['last-modified']})`,
-          );
-          HttpCacheStats.incRemoteMisses(url);
-          cache.httpCache[url] = {
-            etag: resCopy.headers.etag,
-            httpResponse: copyResponse(res, deepCopyNeeded),
-            lastModified: resCopy.headers['last-modified'],
-            timeStamp: new Date().toISOString(),
-          };
-        }
-        const httpCache = cache.httpCache[url] as HttpCache | undefined;
-        if (resCopy.statusCode === 304 && httpCache) {
-          logger.debug(
-            `http cache: Using cached response: ${url} from ${httpCache.timeStamp}`,
-          );
-          HttpCacheStats.incRemoteHits(url);
-          const cacheCopy = copyResponse(
-            httpCache.httpResponse,
-            deepCopyNeeded,
-          );
-          cacheCopy.authorization = !!options?.headers?.authorization;
-          return cacheCopy as HttpResponse<T>;
-        }
-      }
 
       if (options.cacheProvider) {
         return await options.cacheProvider.wrapResponse(url, resCopy);

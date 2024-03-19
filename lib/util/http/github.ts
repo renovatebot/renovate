@@ -339,7 +339,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
-                { ...opts, paginate: false, repoCache: false },
+                { ...opts, paginate: false, cacheProvider: undefined },
                 okToRetry,
               );
             },

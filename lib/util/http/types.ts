@@ -66,10 +66,6 @@ export interface HttpOptions {
 
   token?: string;
   memCache?: boolean;
-  /**
-   * @deprecated
-   */
-  repoCache?: boolean;
   cacheProvider?: HttpCacheProvider;
 }
 
@@ -78,10 +74,6 @@ export interface InternalHttpOptions extends HttpOptions {
   responseType?: 'json' | 'buffer';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
   parseJson?: ParseJsonFunction;
-  /**
-   * @deprecated
-   */
-  repoCache?: boolean;
 }
 
 export interface HttpHeaders extends IncomingHttpHeaders {
@@ -97,13 +89,3 @@ export interface HttpResponse<T = string> {
 
 export type Task<T> = () => Promise<T>;
 export type GotTask<T> = Task<HttpResponse<T>>;
-
-/**
- * @deprecated
- */
-export interface HttpCache {
-  etag?: string;
-  httpResponse: HttpResponse<unknown>;
-  lastModified?: string;
-  timeStamp: string;
-}
