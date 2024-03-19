@@ -108,7 +108,7 @@ export class GithubIssueCache {
     for (const issue of this.issuesToReconcile) {
       const cachedIssue = cacheData[issue.number];
 
-      // If we reached the the item which is already in the cache,
+      // If we reached the item which is already in the cache,
       // it means sync is done.
       if (
         cachedIssue &&
