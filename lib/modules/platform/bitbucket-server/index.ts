@@ -112,9 +112,10 @@ export async function initPlatform({
         )
       ).body;
       bitbucketServerVersion = version;
-    }
-    if (semver.valid(bitbucketServerVersion)) {
       logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    }
+
+    if (semver.valid(bitbucketServerVersion)) {
       defaults.version = bitbucketServerVersion;
     }
   } catch (err) {

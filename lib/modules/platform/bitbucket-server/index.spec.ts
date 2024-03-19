@@ -6,6 +6,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
+import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
 import type { LongCommitSha } from '../../../util/git/types';
 import type { Platform } from '../types';
@@ -185,6 +186,7 @@ describe('modules/platform/bitbucket-server/index', () => {
 
       let hostRules: jest.Mocked<HostRules>;
       let git: jest.Mocked<typeof _git>;
+      let logger: jest.Mocked<typeof _logger>;
       const username = 'abc';
       const password = '123';
 
@@ -211,6 +213,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         // reset module
         jest.resetModules();
         bitbucket = await import('.');
+        logger = (await import('../../../logger')).logger as any;
         hostRules = jest.requireMock('../../../util/host-rules');
         git = jest.requireMock('../../../util/git');
         git.branchExists.mockReturnValue(true);
@@ -248,6 +251,23 @@ describe('modules/platform/bitbucket-server/index', () => {
           await expect(
             bitbucket.initPlatform({ endpoint: 'endpoint' }),
           ).rejects.toThrow();
+        });
+
+        it('should throw if version could not be fetched', async () => {
+          httpMock
+            .scope('https://stash.renovatebot.com')
+            .get('/rest/api/1.0/application-properties')
+            .reply(403);
+
+          await bitbucket.initPlatform({
+            endpoint: 'https://stash.renovatebot.com',
+            username: 'abc',
+            password: '123',
+          });
+          expect(logger.debug).toHaveBeenCalledWith(
+            expect.any(Object),
+            'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
+          );
         });
 
         it('should init', async () => {
