@@ -238,22 +238,22 @@ describe('modules/platform/bitbucket-server/index', () => {
       });
 
       describe('initPlatform()', () => {
-        it('should throw if no endpoint', () => {
+        it('should throw if no endpoint', async () => {
           expect.assertions(1);
-          expect(() => bitbucket.initPlatform({})).toThrow();
+          await expect(bitbucket.initPlatform({})).rejects.toThrow();
         });
 
-        it('should throw if no username/password', () => {
+        it('should throw if no username/password', async () => {
           expect.assertions(1);
-          expect(() =>
+          await expect(
             bitbucket.initPlatform({ endpoint: 'endpoint' }),
-          ).toThrow();
+          ).rejects.toThrow();
         });
 
         it('should init', async () => {
           httpMock
-            .scope(urlHost)
-            .get(`${urlPath}/rest/api/1.0/application-properties`)
+            .scope('https://stash.renovatebot.com')
+            .get('/rest/api/1.0/application-properties')
             .reply(200, { version: '8.0.0' });
           expect(
             await bitbucket.initPlatform({

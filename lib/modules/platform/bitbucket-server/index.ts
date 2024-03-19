@@ -113,9 +113,10 @@ export async function initPlatform({
       ).body;
       bitbucketServerVersion = version;
     }
-
-    logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
-    defaults.version = bitbucketServerVersion;
+    if (semver.valid(bitbucketServerVersion)) {
+      logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+      defaults.version = bitbucketServerVersion;
+    }
   } catch (err) {
     logger.debug(
       { err },
@@ -123,7 +124,7 @@ export async function initPlatform({
     );
   }
 
-  return Promise.resolve(platformConfig);
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
