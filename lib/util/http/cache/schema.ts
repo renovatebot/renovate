@@ -5,6 +5,7 @@ const invalidFieldsMsg =
 
 export const HttpCacheSchema = z
   .object({
+    // TODO: remove this migration part during the Christmas eve 2024
     timeStamp: z.string().optional(),
     timestamp: z.string().optional(),
   })
