@@ -7,6 +7,7 @@ import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -163,7 +164,10 @@ export async function getRawFile(
     `/2.0/repositories/${repo}/src/` +
     (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
-  const res = await bitbucketHttp.get(url);
+  const res = await bitbucketHttp.get(url, {
+    cacheProvider: repoCacheProvider,
+    memCache: true,
+  });
   return res.body;
 }
 
