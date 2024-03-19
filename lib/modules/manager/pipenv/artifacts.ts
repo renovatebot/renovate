@@ -41,6 +41,7 @@ export function getPythonConstraint(
       return undefined;
     }
     // Exact python version has been included since 2022.10.9. It is more specific than the major.minor version
+    // https://github.com/pypa/pipenv/blob/main/CHANGELOG.md#2022109-2022-10-09
     if (result.data._meta?.requires?.python_full_version) {
       const pythonFullVersion = result.data._meta.requires.python_full_version;
       return `== ${pythonFullVersion}`;
@@ -84,7 +85,10 @@ export function getPipenvConstraint(
     const pythonFullVersion = result.data._meta?.requires?.python_full_version;
     if (is.string(pythonFullVersion) && semver.valid(pythonFullVersion)) {
       // python_full_version was added after 3.6 was already deprecated, so it should be impossible to have a 3.6 version
+      // https://github.com/pypa/pipenv/blob/main/CHANGELOG.md#2022109-2022-10-09
       if (semver.satisfies(pythonFullVersion, '3.7.*')) {
+        // Python 3.7 support was dropped in pipenv 2023.10.20
+        // https://github.com/pypa/pipenv/blob/main/CHANGELOG.md#20231020-2023-10-20
         return '< 2023.10.20';
       }
       // Future deprecations will go here
@@ -94,10 +98,12 @@ export function getPipenvConstraint(
     if (pythonVersion) {
       if (pythonVersion === '3.6') {
         // Python 3.6 was deprecated in 2022.4.20
+        // https://github.com/pypa/pipenv/blob/main/CHANGELOG.md#2022420-2022-04-20
         return '< 2022.4.20';
       }
       if (pythonVersion === '3.7') {
         // Python 3.7 was deprecated in 2023.10.20 but we shouldn't reach here unless we are < 2022.10.9
+        // https://github.com/pypa/pipenv/blob/main/CHANGELOG.md#20231020-2023-10-20
         return '< 2022.10.9';
       }
     }
