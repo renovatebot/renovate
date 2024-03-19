@@ -36,7 +36,7 @@ import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelogs } from '../../changelog';
-import { ensurePr } from '../pr';
+import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
@@ -572,9 +572,22 @@ export async function processBranch(
       await scm.checkoutBranch(config.baseBranch);
       updatesVerified = true;
     }
-    // istanbul ignore if
-    if (branchPr && platform.refreshPr) {
-      await platform.refreshPr(branchPr.number);
+
+    if (branchPr) {
+      const platformOptions = getPlatformPrOptions(config);
+      if (
+        platformOptions.usePlatformAutomerge &&
+        platform.reattemptPlatformAutomerge
+      ) {
+        await platform.reattemptPlatformAutomerge({
+          number: branchPr.number,
+          platformOptions,
+        });
+      }
+      // istanbul ignore if
+      if (platform.refreshPr) {
+        await platform.refreshPr(branchPr.number);
+      }
     }
     if (!commitSha && !branchExists) {
       return {
