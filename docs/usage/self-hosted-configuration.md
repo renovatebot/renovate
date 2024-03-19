@@ -213,6 +213,11 @@ For example:
 }
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    On Gitea/Forgejo, you can't use `autodiscoverTopics` together with `autodiscoverNamespaces` because both platforms do not support this.
+    Topics are preferred and `autodiscoverNamespaces` will be ignored when you configure `autodiscoverTopics` on Gitea/Forgejo.
+
 ## autodiscoverProjects
 
 You can use this option to filter the list of autodiscovered repositories by project names.
