@@ -164,7 +164,10 @@ export async function getRawFile(
     `/2.0/repositories/${repo}/src/` +
     (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
-  const res = await bitbucketHttp.get(url);
+  const res = await bitbucketHttp.get(url, {
+    cacheProvider: repoCacheProvider,
+    memCache: true,
+  });
   return res.body;
 }
 
