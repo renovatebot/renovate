@@ -2876,6 +2876,38 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
+  describe('reattemptPlatformAutomerge(number, platformOptions)', () => {
+    const pr = {
+      number: 12345,
+      platformOptions: {
+        usePlatformAutomerge: true,
+      },
+    };
+
+    it('should set automatic merge', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: {
+            status: 'running',
+          },
+        })
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200);
+
+      await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
+
+      expect(logger.debug).toHaveBeenLastCalledWith(
+        'PR platform automerge re-attempted...prNo: 12345',
+      );
+    });
+  });
+
   describe('mergePr(pr)', () => {
     it('merges the PR', async () => {
       httpMock

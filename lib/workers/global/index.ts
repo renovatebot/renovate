@@ -38,6 +38,10 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository,
   );
+  const repoParts = repoConfig.repository.split('/');
+  repoParts.pop();
+  repoConfig.parentOrg = repoParts.join('/');
+  repoConfig.topLevelOrg = repoParts.shift();
   // TODO: types (#22198)
   const platform = GlobalConfig.get('platform')!;
   repoConfig.localDir =

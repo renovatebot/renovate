@@ -192,7 +192,9 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     // istanbul ignore else: no cache tests
     if (!resPromise) {
-      await options.cacheProvider?.setCacheHeaders(url, options);
+      if (options.cacheProvider) {
+        await options.cacheProvider.setCacheHeaders(url, options);
+      }
 
       const startTime = Date.now();
       const httpTask: GotTask<T> = () => {
@@ -223,9 +225,12 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
       const resCopy = copyResponse(res, deepCopyNeeded);
       resCopy.authorization = !!options?.headers?.authorization;
+
       if (options.cacheProvider) {
         return await options.cacheProvider.wrapResponse(url, resCopy);
       }
+
+
       return resCopy;
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
