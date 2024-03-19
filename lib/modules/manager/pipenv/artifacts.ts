@@ -1,3 +1,5 @@
+import is from '@sindresorhus/is';
+import semver from 'semver';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
@@ -38,13 +40,15 @@ export function getPythonConstraint(
       logger.warn({ error: result.error }, 'Invalid Pipfile.lock');
       return undefined;
     }
-    if (result.data._meta?.requires?.python_version) {
-      const pythonVersion = result.data._meta.requires.python_version;
-      return `== ${pythonVersion}.*`;
-    }
+    // Exact python version has been included since 2022.10.9. It is more specific than the major.minor version
     if (result.data._meta?.requires?.python_full_version) {
       const pythonFullVersion = result.data._meta.requires.python_full_version;
       return `== ${pythonFullVersion}`;
+    }
+    // Before 2022.10.9, only the major.minor version was included
+    if (result.data._meta?.requires?.python_version) {
+      const pythonVersion = result.data._meta.requires.python_version;
+      return `== ${pythonVersion}.*`;
     }
   } catch (err) {
     // Do nothing
@@ -75,6 +79,27 @@ export function getPipenvConstraint(
     }
     if (result.data.develop?.pipenv?.version) {
       return result.data.develop.pipenv.version;
+    }
+    // Exact python version has been included since 2022.10.9
+    const pythonFullVersion = result.data._meta?.requires?.python_full_version;
+    if (is.string(pythonFullVersion) && semver.valid(pythonFullVersion)) {
+      // python_full_version was added after 3.6 was already deprecated, so it should be impossible to have a 3.6 version
+      if (semver.satisfies(pythonFullVersion, '3.7.*')) {
+        return '< 2023.10.20';
+      }
+      // Future deprecations will go here
+    }
+    // Before 2022.10.9, only the major.minor version was included
+    const pythonVersion = result.data._meta?.requires?.python_version;
+    if (pythonVersion) {
+      if (pythonVersion === '3.6') {
+        // Python 3.6 was deprecated in 2022.4.20
+        return '< 2022.4.20';
+      }
+      if (pythonVersion === '3.7') {
+        // Python 3.7 was deprecated in 2023.10.20 but we shouldn't reach here unless we are < 2022.10.9
+        return '< 2022.10.9';
+      }
     }
   } catch (err) {
     // Do nothing
