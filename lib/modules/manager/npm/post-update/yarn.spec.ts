@@ -175,7 +175,9 @@ describe('modules/manager/npm/post-update/yarn', () => {
     const res = await yarnHelper.generateLockFile('some-dir', {}, config);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(fixSnapshots(execSnapshots)).toMatchObject([
+      { cmd: 'yarn config unset --home httpProxy' },
       { cmd: 'yarn config set --home httpProxy http://proxy' },
+      { cmd: 'yarn config unset --home httpsProxy' },
       { cmd: 'yarn config set --home httpsProxy http://proxy' },
       {},
     ]);
@@ -441,6 +443,53 @@ describe('modules/manager/npm/post-update/yarn', () => {
       },
     ]);
     expect(res.lockFile).toBe('package-lock-contents');
+  });
+
+  it('supports packageManager url corepack', async () => {
+    process.env.CONTAINERBASE = 'true';
+    GlobalConfig.set({
+      localDir: '.',
+      binarySource: 'install',
+      cacheDir: '/tmp/cache',
+    });
+    const yarnLockContents = `__metadata:
+    version: 6
+    cacheKey: 8`;
+    Fixtures.mock(
+      {
+        'package.json':
+          '{ "packageManager": "yarn@https://nexus-proxy.repo.local.company.net/nexus/content/groups/npm-all/@yarnpkg/cli-dist/-/cli-dist-3.7.0.tgz#sha224.a06723957ae0292e21f598a453" }',
+        'yarn.lock': yarnLockContents,
+      },
+      'some-dir',
+    );
+    mockedFunction(getPkgReleases).mockResolvedValueOnce({
+      releases: [{ version: '0.10.0' }],
+    });
+    const execSnapshots = mockExecAll({
+      stdout: '2.1.0',
+      stderr: '',
+    });
+    const config = partial<PostUpdateConfig<NpmManagerData>>({
+      managerData: { hasPackageManager: true },
+    });
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool node 16.16.0', options: { cwd: 'some-dir' } },
+      { cmd: 'install-tool corepack 0.10.0', options: { cwd: 'some-dir' } },
+      {
+        cmd: 'yarn install --mode=update-lockfile',
+        options: {
+          cwd: 'some-dir',
+          env: {
+            YARN_ENABLE_GLOBAL_CACHE: '1',
+            YARN_ENABLE_IMMUTABLE_INSTALLS: 'false',
+            YARN_HTTP_TIMEOUT: '100000',
+          },
+        },
+      },
+    ]);
+    expect(res.lockFile).toBe(yarnLockContents);
   });
 
   it('supports corepack on grouping', async () => {

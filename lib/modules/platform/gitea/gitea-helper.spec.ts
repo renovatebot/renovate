@@ -22,6 +22,7 @@ import {
   getRepoLabels,
   getVersion,
   mergePR,
+  orgListRepos,
   requestPrReviewers,
   searchIssues,
   searchRepos,
@@ -247,6 +248,15 @@ describe('modules/platform/gitea/gitea-helper', () => {
       });
 
       await expect(searchRepos({})).rejects.toThrow();
+    });
+  });
+
+  describe('orgListRepos', () => {
+    it('should call /api/v1/orgs/[organization]/repos endpoint', async () => {
+      httpMock.scope(baseUrl).get('/orgs/some/repos').reply(200, mockRepo);
+
+      const res = await orgListRepos('some');
+      expect(res).toEqual(mockRepo);
     });
   });
 

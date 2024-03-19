@@ -395,12 +395,14 @@ export async function extractAllPackageFiles(
   }
   for (const pkg of packages) {
     for (const dep of pkg.deps) {
-      if (proxyUrls.length > 0) {
-        dep.registryUrls!.unshift(...proxyUrls);
-      } else if (dep.depType === 'plugin') {
-        dep.registryUrls!.unshift(SBT_PLUGINS_REPO, SBT_MVN_REPO);
-      } else {
-        dep.registryUrls!.unshift(SBT_MVN_REPO);
+      if (dep.datasource !== GithubReleasesDatasource.id) {
+        if (proxyUrls.length > 0) {
+          dep.registryUrls!.unshift(...proxyUrls);
+        } else if (dep.depType === 'plugin') {
+          dep.registryUrls!.unshift(SBT_PLUGINS_REPO, SBT_MVN_REPO);
+        } else {
+          dep.registryUrls!.unshift(SBT_MVN_REPO);
+        }
       }
     }
   }

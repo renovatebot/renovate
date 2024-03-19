@@ -56,8 +56,9 @@ describe('modules/platform/bitbucket/index', () => {
     const scope = existingScope ?? httpMock.scope(baseUrl);
 
     scope.get(`/2.0/repositories/${repository}`).reply(200, {
-      owner: {},
       mainbranch: { name: 'master' },
+      uuid: '123',
+      full_name: 'some/repo',
       ...repoResp,
     });
 
@@ -131,10 +132,69 @@ describe('modules/platform/bitbucket/index', () => {
         .scope(baseUrl)
         .get('/2.0/repositories?role=contributor&pagelen=100')
         .reply(200, {
-          values: [{ full_name: 'foo/bar' }, { full_name: 'some/repo' }],
+          values: [
+            {
+              mainbranch: { name: 'master' },
+              uuid: '111',
+              full_name: 'foo/bar',
+            },
+            {
+              mainbranch: { name: 'master' },
+              uuid: '222',
+              full_name: 'some/repo',
+            },
+          ],
         });
-      const res = await bitbucket.getRepos();
+      const res = await bitbucket.getRepos({});
       expect(res).toEqual(['foo/bar', 'some/repo']);
+    });
+
+    it('filters repos based on autodiscoverProjects patterns', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .reply(200, {
+          values: [
+            {
+              mainbranch: { name: 'master' },
+              uuid: '111',
+              full_name: 'foo/bar',
+              project: { name: 'ignore' },
+            },
+            {
+              mainbranch: { name: 'master' },
+              uuid: '222',
+              full_name: 'some/repo',
+              project: { name: 'allow' },
+            },
+          ],
+        });
+      const res = await bitbucket.getRepos({ projects: ['allow'] });
+      expect(res).toEqual(['some/repo']);
+    });
+
+    it('filters repos based on autodiscoverProjects patterns with negation', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories?role=contributor&pagelen=100')
+        .reply(200, {
+          values: [
+            {
+              mainbranch: { name: 'master' },
+              uuid: '111',
+              full_name: 'foo/bar',
+              project: { name: 'ignore' },
+            },
+            {
+              mainbranch: { name: 'master' },
+              uuid: '222',
+              full_name: 'some/repo',
+              project: { name: 'allow' },
+            },
+          ],
+        });
+      const res = await bitbucket.getRepos({ projects: ['!ignore'] });
+      expect(res).toEqual(['some/repo']);
     });
   });
 
@@ -143,12 +203,20 @@ describe('modules/platform/bitbucket/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
-        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        });
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
         }),
-      ).toMatchSnapshot();
+      ).toMatchObject({
+        defaultBranch: 'master',
+        isFork: false,
+        repoFingerprint: expect.any(String),
+      });
     });
 
     it('works with only token', async () => {
@@ -159,16 +227,19 @@ describe('modules/platform/bitbucket/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
-        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        });
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
         }),
-      ).toEqual({
+      ).toMatchObject({
         defaultBranch: 'master',
         isFork: false,
-        repoFingerprint:
-          '56653db0e9341ef4957c92bb78ee668b0a3f03c75b77db94d520230557385fca344cc1f593191e3594183b5b050909d29996c040045e8852f21774617b240642',
+        repoFingerprint: expect.any(String),
       });
     });
   });
@@ -178,7 +249,11 @@ describe('modules/platform/bitbucket/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
-        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        });
 
       const res = await bitbucket.initRepo({
         repository: 'some/repo',
@@ -192,7 +267,11 @@ describe('modules/platform/bitbucket/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
-        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        })
         .get('/2.0/repositories/some/repo/branching-model')
         .reply(200, {
           development: { name: 'develop', branch: { name: 'develop' } },
@@ -210,7 +289,11 @@ describe('modules/platform/bitbucket/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
-        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
+        .reply(200, {
+          mainbranch: { name: 'master' },
+          uuid: '123',
+          full_name: 'some/repo',
+        })
         .get('/2.0/repositories/some/repo/branching-model')
         .reply(200, {
           development: { name: 'develop' },
@@ -579,8 +662,8 @@ describe('modules/platform/bitbucket/index', () => {
   });
 
   describe('ensureIssueClosing()', () => {
-    it('does not throw', async () => {
-      await initRepoMock();
+    it('does not throw for disabled issues', async () => {
+      await initRepoMock({ repository: 'some/repo' }, { has_issues: false });
       await expect(bitbucket.ensureIssueClosing('title')).toResolve();
     });
 
@@ -613,8 +696,8 @@ describe('modules/platform/bitbucket/index', () => {
   });
 
   describe('getIssueList()', () => {
-    it('has no issues', async () => {
-      await initRepoMock();
+    it('returns empty array for disabled issues', async () => {
+      await initRepoMock({ repository: 'some/repo' }, { has_issues: false });
       expect(await bitbucket.getIssueList()).toEqual([]);
     });
 

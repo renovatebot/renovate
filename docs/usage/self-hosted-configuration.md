@@ -213,6 +213,26 @@ For example:
 }
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    On Gitea/Forgejo, you can't use `autodiscoverTopics` together with `autodiscoverNamespaces` because both platforms do not support this.
+    Topics are preferred and `autodiscoverNamespaces` will be ignored when you configure `autodiscoverTopics` on Gitea/Forgejo.
+
+## autodiscoverProjects
+
+You can use this option to filter the list of autodiscovered repositories by project names.
+This feature is useful for users who want Renovate to only work on repositories within specific projects or exclude certain repositories from being processed.
+
+```json title="Example for Bitbucket"
+{
+  "platform": "bitbucket",
+  "autodiscoverProjects": ["a-group", "!another-group/some-subgroup"]
+}
+```
+
+The `autodiscoverProjects` config option takes an array of minimatch-compatible globs or RE2-compatible regex strings.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ## autodiscoverTopics
 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
@@ -894,6 +914,25 @@ For TLS/SSL-enabled connections, use rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
+## reportPath
+
+`reportPath` describes the location where the report is written to.
+
+If [`reportType`](#reporttype) is set to `file`, then set `reportPath` to a filepath.
+For example: `/foo/bar.json`.
+
+If the value `s3` is used in [`reportType`](#reporttype), then use a S3 URI.
+For example: `s3://bucket-name/key-name`.
+
+## reportType
+
+Defines how the report is exposed:
+
+- `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
+- `logging` The report will be printed as part of the log messages on `INFO` level
+- `file` The report will be written to a path provided by [`reportPath`](#reportpath)
+- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`RENOVATE_X_S3_ENDPOINT`](./self-hosted-experimental.md#renovatexs3endpoint) and [`RENOVATE_X_S3_PATH_STYLE`](./self-hosted-experimental.md#renovatexs3pathstyle)
+
 ## repositories
 
 Elements in the `repositories` array can be an object if you wish to define more settings:
@@ -992,12 +1031,6 @@ It could then be used in a repository config or preset like so:
 ```
 
 Secret names must start with an upper or lower case character and can have only characters, digits, or underscores.
-
-## skipInstalls
-
-By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
-If this is set to false, then a full install of modules will be done.
-This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
 

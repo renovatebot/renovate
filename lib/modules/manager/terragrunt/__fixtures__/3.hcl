@@ -127,32 +127,32 @@ terraform {
 
 # foobar
 terraform {
-  source = "https://bitbucket.com/hashicorp/example?ref=v1.0.0&depth=1"
+  source = "https://mygit.com/hashicorp/example?ref=v1.0.0&depth=1"
 }
 
 # gittags
 terraform {
-  source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0&depth=1"
+  source = "git::https://mygit.com/hashicorp/example?ref=v1.0.0&depth=1"
 }
 
 # gittags_badversion
 terraform {
-  source = "git::https://bitbucket.com/hashicorp/example?ref=next&depth=1"
+  source = "git::https://mygit.com/hashicorp/example?ref=next&depth=1"
 }
 
 # gittags_subdir
 terraform {
-  source = "git::https://bitbucket.com/hashicorp/example//subdir/test?ref=v1.0.1&depth=1"
+  source = "git::https://mygit.com/hashicorp/example//subdir/test?ref=v1.0.1&depth=1"
 }
 
 # gittags_http
 terraform {
-  source = "git::http://bitbucket.com/hashicorp/example?ref=v1.0.2&depth=1"
+  source = "git::http://mygit.com/hashicorp/example?ref=v1.0.2&depth=1"
 }
 
 # gittags_ssh
 terraform {
-  source = "git::ssh://git@bitbucket.com/hashicorp/example?ref=v1.0.3&depth=1"
+  source = "git::ssh://git@mygit.com/hashicorp/example?ref=v1.0.3&depth=1"
 }
 
 # invalid, ignored by test since it does not have source on the next line
@@ -164,3 +164,19 @@ terraform {
   name  = "foo"
   dummy = "true"
 }
+
+# bitbucket-tags
+terraform {
+  source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0"
+}
+
+# gitlab-tags
+terraform {
+  source = "git::https://gitlab.com/hashicorp/example?ref=v1.0.0"
+}
+
+# gitea-tags
+terraform {
+  source = "git::https://gitea.com/hashicorp/example?ref=v1.0.0"
+}
+
