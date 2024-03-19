@@ -103,6 +103,7 @@ export async function initPlatform({
   };
   try {
     let bitbucketServerVersion: string;
+    // istanbul ignore if: experimental feature
     if (process.env.RENOVATE_X_PLATFORM_VERSION) {
       bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
     } else {
