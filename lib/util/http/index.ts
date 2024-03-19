@@ -230,7 +230,6 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         return await options.cacheProvider.wrapResponse(url, resCopy);
       }
 
-
       return resCopy;
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
