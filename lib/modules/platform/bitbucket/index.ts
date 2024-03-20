@@ -7,6 +7,7 @@ import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -163,7 +164,10 @@ export async function getRawFile(
     `/2.0/repositories/${repo}/src/` +
     (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
-  const res = await bitbucketHttp.get(url);
+  const res = await bitbucketHttp.get(url, {
+    cacheProvider: repoCacheProvider,
+    memCache: true,
+  });
   return res.body;
 }
 
@@ -666,13 +670,11 @@ export async function getIssueList(): Promise<Issue[]> {
       filters.push(`reporter.uuid="${renovateUserUuid}"`);
     }
     const filter = encodeURIComponent(filters.join(' AND '));
-    return (
-      (
-        await bitbucketHttp.getJson<{ values: Issue[] }>(
-          `/2.0/repositories/${config.repository}/issues?q=${filter}`,
-        )
-      ).body.values || []
-    );
+    const url = `/2.0/repositories/${config.repository}/issues?q=${filter}`;
+    const res = await bitbucketHttp.getJson<{ values: Issue[] }>(url, {
+      cacheProvider: repoCacheProvider,
+    });
+    return res.body.values || [];
   } catch (err) {
     logger.warn({ err }, 'Error finding issues');
     return [];

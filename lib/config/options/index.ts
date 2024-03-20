@@ -897,7 +897,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitlab'],
+    supportedPlatforms: ['gitea', 'gitlab'],
   },
   {
     name: 'autodiscoverProjects',
