@@ -670,13 +670,11 @@ export async function getIssueList(): Promise<Issue[]> {
       filters.push(`reporter.uuid="${renovateUserUuid}"`);
     }
     const filter = encodeURIComponent(filters.join(' AND '));
-    return (
-      (
-        await bitbucketHttp.getJson<{ values: Issue[] }>(
-          `/2.0/repositories/${config.repository}/issues?q=${filter}`,
-        )
-      ).body.values || []
-    );
+    const url = `/2.0/repositories/${config.repository}/issues?q=${filter}`;
+    const res = await bitbucketHttp.getJson<{ values: Issue[] }>(url, {
+      cacheProvider: repoCacheProvider,
+    });
+    return res.body.values || [];
   } catch (err) {
     logger.warn({ err }, 'Error finding issues');
     return [];
