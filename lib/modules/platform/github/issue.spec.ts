@@ -241,7 +241,7 @@ describe('modules/platform/github/issue', () => {
       GithubIssueCache.addIssuesToReconcile([]);
       const res = GithubIssueCache.getIssues();
 
-      expect(res).toEqual([]);
+      expect(res).toBeNull();
     });
   });
 });

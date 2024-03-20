@@ -32,24 +32,26 @@ export type GithubIssue = z.infer<typeof GithubIssue>;
 type CacheData = Record<number, GithubIssue>;
 
 export class GithubIssueCache {
-  private static reset(cacheData: CacheData): void {
+  private static reset(cacheData: CacheData | null): void {
     memCache.set('github-issues-reconcile-queue', null);
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.github ??= {};
-    repoCache.platform.github.issuesCache = cacheData;
+    if (cacheData) {
+      repoCache.platform.github.issuesCache = cacheData;
+    } else {
+      delete repoCache.platform.github.issuesCache;
+    }
   }
 
-  private static get data(): CacheData | undefined {
-    let cacheData = getCache().platform?.github?.issuesCache as
-      | CacheData
-      | undefined;
+  private static get data(): CacheData | null {
+    let cacheData: CacheData | undefined | null = getCache().platform?.github
+      ?.issuesCache as CacheData | undefined;
     if (!cacheData) {
-      return undefined;
+      return null;
     }
 
     cacheData = this.reconcile(cacheData);
-
     return cacheData;
   }
 
@@ -90,7 +92,7 @@ export class GithubIssueCache {
     memCache.set('github-issues-reconcile-queue', issues);
   }
 
-  private static reconcile(cacheData: CacheData): CacheData {
+  private static reconcile(cacheData: CacheData): CacheData | null {
     const issuesToReconcile = memCache.get<GithubIssue[]>(
       'github-issues-reconcile-queue',
     );
@@ -124,9 +126,8 @@ export class GithubIssueCache {
     }
 
     if (!isReconciled) {
-      const emptyCacheData: CacheData = {};
-      this.reset(emptyCacheData);
-      return emptyCacheData;
+      this.reset(null);
+      return null;
     }
 
     this.reset(cacheData);
