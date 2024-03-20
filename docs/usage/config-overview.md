@@ -47,6 +47,7 @@ JS files can use synchronous or asyncronous methods inside, including even to fe
 #### Environment config
 
 Global config can be defined using environment variables.
+Each config option which is supported in env has the prefix `RENOVATE_`.
 For example, `RENOVATE_PLATFORM=gitlab` is the same as setting `"platform": "gitlab"` in File config.
 
 Although the mapping from configuration option name to its corresponding Environment config name is fairly easy to understand, we recommend you consult the documentation for the field `env` for each option.
@@ -59,6 +60,15 @@ Any additional Environment config variables take precedence over values in `RENO
 <!-- prettier-ignore -->
 !!! warning
     Escaping punctionation can be challenging to get right in some environments, especially if you're passing stringified values.
+
+Renovate additionally supports a list of "experimental" environment variables which start with `RENOVATE_X_` and are documented in [Self-hosted experimental environment variables](./self-hosted-experimental.md).
+These variables are experimental, subject to change, and are not parsed as part of regular configuration.
+
+Finally, there is a limited number of special environment variables which are loaded early prior to configuration parsing because they are used during logging initialization:
+
+- `LOG_CONTEXT`: a unique identifier used in each log message to track context
+- `LOG_FORMAT`: defaults to a "pretty" human-readable output, but can be changed to "json"
+- `LOG_LEVEL`: most commonly used to change from the default `info` to `debug`
 
 #### CLI config
 
