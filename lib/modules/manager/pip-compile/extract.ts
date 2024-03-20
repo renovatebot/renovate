@@ -221,10 +221,7 @@ export async function extractAllPackageFiles(
         );
         continue;
       }
-      sourceFile.lockFiles = [
-        ...sourceFile.lockFiles!,
-        ...packageFile.lockFiles!,
-      ];
+      sourceFile.lockFiles!.push(...packageFile.lockFiles!);
     }
   }
   logger.debug(
