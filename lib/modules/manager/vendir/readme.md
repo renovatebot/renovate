@@ -29,12 +29,6 @@ directories:
 
 ## Registry Aliases
 
-The Vendir Manager supports registry aliases for helm charts for both OCI and HTTP/HTTPS registries.
-
-### HTTP/HTTPS
-
-Aliases for http/https should be prefixed with: `alias` or `@` similar to the Helmv3 manager
-
 ### OCI
 
 Aliases for OCI registries are supported via the dockerfile/docker manager

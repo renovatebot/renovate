@@ -10,11 +10,7 @@ export const HelmChart = z.object({
   name: z.string(),
   version: z.string(),
   repository: z.object({
-    // Because helm charts support multiple protocols https and oci
-    // We need to check for the following. Further, because we use the helmv3 manager
-    // to handle registryAliases for http or https sources we need to support alias and @
-    // as prefixes
-    url: z.string().regex(/^(?:oci:|https?:|alias:|@).+/),
+    url: z.string().regex(/^(?:oci|https?):\/\/.+/),
   }),
 });
 

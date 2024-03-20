@@ -10,21 +10,3 @@ directories:
       version: "7.10.1"
       repository:
         url: oci://test
-  - path: custom-repo-custom-version
-    helmChart:
-      name: https
-      version: "7.10.1"
-      repository:
-        url: alias:https://test
-  - path: custom-repo-custom-version
-    helmChart:
-      name: http
-      version: "7.10.1"
-      repository:
-        url: alias:http://test
-  - path: custom-repo-custom-version
-    helmChart:
-      name: broken
-      version: "7.10.1"
-      repository:
-        url: alias:brokenAlias

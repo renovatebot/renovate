@@ -86,8 +86,6 @@ describe('modules/manager/vendir/extract', () => {
     it('resolves aliased registry urls', () => {
       const aliasResult = extractPackageFile(aliasContents, 'vendir.yml', {
         registryAliases: {
-          'http://test': 'https://my-registry.gcr.io/',
-          'https://test': 'https://registry.example.com/',
           'oci://test': 'oci://quay.example.com/organization',
         },
       });
@@ -102,25 +100,6 @@ describe('modules/manager/vendir/extract', () => {
             depType: 'HelmChart',
             packageName: 'test/oci',
             pinDigests: false,
-          },
-          {
-            currentValue: '7.10.1',
-            depName: 'https',
-            datasource: 'helm',
-            depType: 'HelmChart',
-            registryUrls: ['https://registry.example.com/'],
-          },
-          {
-            currentValue: '7.10.1',
-            depName: 'http',
-            datasource: 'helm',
-            registryUrls: ['https://my-registry.gcr.io/'],
-          },
-          {
-            currentValue: '7.10.1',
-            depName: 'broken',
-            datasource: 'helm',
-            skipReason: 'placeholder-url',
           },
         ],
       });

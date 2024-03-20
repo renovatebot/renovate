@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import { parseSingleYaml } from '../../../util/yaml';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
-import { isOCIRegistry, resolveAlias } from '../helmv3/utils';
+import { isOCIRegistry } from '../helmv3/utils';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -32,22 +32,10 @@ export function extractHelmChart(
       pinDigests: false,
     };
   }
-  let repository = helmChart.repository.url || null;
-  if (aliases) {
-    repository = resolveAlias(helmChart.repository.url, aliases);
-  }
-  if (!repository) {
-    return {
-      depName: helmChart.name,
-      currentValue: helmChart.version,
-      datasource: HelmDatasource.id,
-      skipReason: 'placeholder-url',
-    };
-  }
   return {
     depName: helmChart.name,
     currentValue: helmChart.version,
-    registryUrls: [repository],
+    registryUrls: [helmChart.repository.url],
     datasource: HelmDatasource.id,
   };
 }
