@@ -200,6 +200,35 @@ export async function extractAllPackageFiles(
     depsBetweenFiles,
     packageFiles,
   );
+  for (const packageFile of result) {
+    for (const reqFile of packageFile.managerData?.requirementsFiles ?? []) {
+      if (fileMatches.includes(reqFile)) {
+        const sourceFile = result.find((packageFile) =>
+          packageFile.lockFiles?.includes(reqFile),
+        );
+        if (!sourceFile) {
+          logger.warn(
+            `pip-compile: ${packageFile.packageFile} references ${reqFile} which does not appear to be a requirements file managed by pip-compile`,
+          );
+          continue;
+        }
+        sourceFile.lockFiles = [
+          ...sourceFile.lockFiles!,
+          ...packageFile.lockFiles!,
+        ];
+      } else if (packageFiles.has(reqFile)) {
+        const sourceFile = packageFiles.get(reqFile)!;
+        sourceFile.lockFiles = [
+          ...sourceFile.lockFiles!,
+          ...packageFile.lockFiles!,
+        ];
+      } else {
+        logger.warn(
+          'pip-compile: references to requirements files not managed by pip-compile are not currently fully supported',
+        );
+      }
+    }
+  }
   logger.debug(
     'pip-compile: dependency graph:\n' +
       generateMermaidGraph(depsBetweenFiles, lockFileArgs),
