@@ -70,7 +70,7 @@ export async function updateArtifacts({
     const status = await getRepoStatus();
     if (status) {
       const modifiedFiles = status.modified ?? [];
-      const notAddedFiles = status.not_added ?? [];
+      const notAddedFiles = status.not_added;
       const deletedFiles = status.deleted ?? [];
 
       for (const f of modifiedFiles.concat(notAddedFiles)) {
@@ -98,7 +98,7 @@ export async function updateArtifacts({
       logger.error('Failed to get git status');
     }
 
-    return fileChanges.length > 0 ? fileChanges : null;
+    return fileChanges;
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
