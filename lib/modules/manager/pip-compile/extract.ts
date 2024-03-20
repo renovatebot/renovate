@@ -204,9 +204,7 @@ export async function extractAllPackageFiles(
   const lockFileSources = new Map<string, PackageFile>();
   for (const packageFile of result) {
     for (const lockFile of packageFile.lockFiles!) {
-      if (!lockFileSources.has(lockFile)) {
-        lockFileSources.set(lockFile, packageFile);
-      }
+      lockFileSources.set(lockFile, packageFile);
     }
   }
   for (const packageFile of result) {
