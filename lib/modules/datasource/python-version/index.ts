@@ -47,8 +47,8 @@ export class PythonVersionDatasource extends Datasource {
       await PythonVersionDatasource.pythonPrebuildDatasource.getReleases({
         packageName: 'containerbase/python-prebuild',
       });
-    const pythonPrebuildVersions = pythonPrebuildReleases?.releases.map(
-      (release) => release.version,
+    const pythonPrebuildVersions = new Set<string>(
+      pythonPrebuildReleases?.releases.map((release) => release.version),
     );
     const pythonEolVersions =
       await PythonVersionDatasource.pythonEolDatasource.getReleases({
@@ -65,9 +65,7 @@ export class PythonVersionDatasource extends Datasource {
       result.releases.push(
         ...response.body
           .filter((release) => release.isStable)
-          .filter(
-            (release) => !pythonPrebuildVersions?.includes(release.version),
-          ),
+          .filter((release) => !pythonPrebuildVersions?.has(release.version)),
       );
     } catch (err) {
       this.handleGenericErrors(err);
