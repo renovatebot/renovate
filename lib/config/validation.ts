@@ -762,18 +762,6 @@ export async function validateConfig(
         }
       }
     }
-
-    if (
-      key === 'reportType' &&
-      is.string(val) &&
-      ['s3', 'file'].includes(val) &&
-      !is.string(config['reportPath'])
-    ) {
-      errors.push({
-        topic: 'Configuration Error',
-        message: `reportType '${val}' requires a configured reportPath`,
-      });
-    }
   }
 
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
