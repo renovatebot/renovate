@@ -51,6 +51,7 @@ describe('modules/manager/vendir/extract', () => {
           {
             currentValue: '7.10.1',
             depName: 'contour',
+            packageName: 'charts.bitnami.com/bitnami/contour',
             datasource: 'docker',
           },
         ],
