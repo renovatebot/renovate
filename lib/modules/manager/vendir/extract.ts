@@ -58,18 +58,15 @@ export function parseVendir(
   content: string,
   packageFile?: string,
 ): VendirDefinition | null {
-  let pkg: VendirDefinition;
   try {
-    pkg = parseSingleYaml(content, {
+    return parseSingleYaml(content, {
       customSchema: Vendir,
       removeTemplates: true,
     });
-  } catch (e) /* istanbul ignore next */ {
+  } catch (e) {
     logger.debug({ packageFile }, 'Error parsing vendir.yml file');
     return null;
   }
-
-  return pkg;
 }
 
 export function extractPackageFile(
