@@ -59,7 +59,7 @@ export function parseVendir(
   content: string,
   packageFile?: string,
 ): VendirDefinition | null {
-  let pkg: VendirDefinition[];
+  let pkg: VendirDefinition;
   try {
     pkg = parseSingleYaml(content, {
       customSchema: Vendir,

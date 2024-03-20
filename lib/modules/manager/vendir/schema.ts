@@ -9,16 +9,18 @@ export const VendirResource = z.object({
 export const HelmChart = z.object({
   name: z.string(),
   version: z.string(),
-  repository: z.object({ url: z.string() }),
+  repository: z.object({
+    url: z.string(),
+  }),
 });
 
 export const Contents = z.object({
   path: z.string(),
-  helmChart: LooseArray(HelmChart),
+  helmChart: HelmChart,
 });
 
 export const Vendir = VendirResource.extend({
-  directories: LooseArray(
+  directories: z.array(
     z.object({
       path: z.string(),
       contents: LooseArray(Contents),
