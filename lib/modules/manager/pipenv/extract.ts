@@ -24,7 +24,7 @@ const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
 const specifierRegex = regEx(`^${specifierPattern}$`);
 function extractFromSection(
   pipfile: PipFile,
-  section: 'packages' | 'dev-packages',
+  section: string,
 ): PackageDependency[] {
   const pipfileSection = pipfile[section];
   if (!pipfileSection) {
@@ -130,10 +130,14 @@ export async function extractPackageFile(
     res.registryUrls = pipfile.source.map((source) => source.url);
   }
 
-  res.deps = [
-    ...extractFromSection(pipfile, 'packages'),
-    ...extractFromSection(pipfile, 'dev-packages'),
-  ];
+  const categories = Object.keys(pipfile).filter(
+    (category) => category !== 'source' && category !== 'requires',
+  );
+
+  res.deps = categories
+    .map((category) => extractFromSection(pipfile, category))
+    .reduce((deps, sectionDeps) => [...deps, ...sectionDeps], []);
+
   if (!res.deps.length) {
     return null;
   }
