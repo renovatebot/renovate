@@ -176,7 +176,7 @@ The [Mend Renovate App](https://github.com/apps/renovate) is a popular way to us
 
 Importantly, logs for all Renovate jobs by the Mend Renovate App are available through the [Mend Developer Portal](https://developer.mend.io) so end users can view the logs to see which settings are applied.
 
-### Onboarding
+### Onboarding behavior
 
 If an Organization is installed with "All repositories" instead of "Selected repositories" then Renovate will default to "Silent" mode (`dryRun=lookup`).
 This has been chosen for two reasons:
