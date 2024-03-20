@@ -1620,5 +1620,55 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
     });
+
+    it('fails for missing reportPath if reportType is "s3"', async () => {
+      const config: RenovateConfig = {
+        reportType: 's3',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('validates reportPath if reportType is "s3"', async () => {
+      const config: RenovateConfig = {
+        reportType: 's3',
+        reportPath: 's3://bucket-name/key-name',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('fails for missing reportPath if reportType is "file"', async () => {
+      const config: RenovateConfig = {
+        reportType: 'file',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('validates reportPath if reportType is "file"', async () => {
+      const config: RenovateConfig = {
+        reportType: 'file',
+        reportPath: './report.json',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
   });
 });

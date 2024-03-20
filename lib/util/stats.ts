@@ -235,3 +235,114 @@ export class HttpStats {
     logger.debug({ urls, hosts, requests }, 'HTTP statistics');
   }
 }
+
+interface HttpCacheHostStatsData {
+  hit: number;
+  miss: number;
+  localHit?: number;
+  localMiss?: number;
+}
+
+type HttpCacheStatsData = Record<string, HttpCacheHostStatsData>;
+
+function sortObject<T>(obj: Record<string, T>): Record<string, T> {
+  const result: Record<string, T> = {};
+  for (const key of Object.keys(obj).sort()) {
+    result[key] = obj[key];
+  }
+  return result;
+}
+
+export class HttpCacheStats {
+  static getData(): HttpCacheStatsData {
+    return memCache.get<HttpCacheStatsData>('http-cache-stats') ?? {};
+  }
+
+  static read(key: string): HttpCacheHostStatsData {
+    return (
+      this.getData()?.[key] ?? {
+        hit: 0,
+        miss: 0,
+      }
+    );
+  }
+
+  static write(key: string, data: HttpCacheHostStatsData): void {
+    const stats = memCache.get<HttpCacheStatsData>('http-cache-stats') ?? {};
+    stats[key] = data;
+    memCache.set('http-cache-stats', stats);
+  }
+
+  static getBaseUrl(url: string): string | null {
+    const parsedUrl = parseUrl(url);
+    if (!parsedUrl) {
+      logger.debug({ url }, 'Failed to parse URL during cache stats');
+      return null;
+    }
+    const { origin, pathname } = parsedUrl;
+    const baseUrl = `${origin}${pathname}`;
+    return baseUrl;
+  }
+
+  static incLocalHits(url: string): void {
+    const baseUrl = HttpCacheStats.getBaseUrl(url);
+    if (baseUrl) {
+      const host = baseUrl;
+      const stats = HttpCacheStats.read(host);
+      stats.localHit ??= 0;
+      stats.localHit += 1;
+      HttpCacheStats.write(host, stats);
+    }
+  }
+
+  static incLocalMisses(url: string): void {
+    const baseUrl = HttpCacheStats.getBaseUrl(url);
+    if (baseUrl) {
+      const host = baseUrl;
+      const stats = HttpCacheStats.read(host);
+      stats.localMiss ??= 0;
+      stats.localMiss += 1;
+      HttpCacheStats.write(host, stats);
+    }
+  }
+
+  static incRemoteHits(url: string): void {
+    const baseUrl = HttpCacheStats.getBaseUrl(url);
+    if (baseUrl) {
+      const host = baseUrl;
+      const stats = HttpCacheStats.read(host);
+      stats.hit += 1;
+      HttpCacheStats.write(host, stats);
+    }
+  }
+
+  static incRemoteMisses(url: string): void {
+    const baseUrl = HttpCacheStats.getBaseUrl(url);
+    if (baseUrl) {
+      const host = baseUrl;
+      const stats = HttpCacheStats.read(host);
+      stats.miss += 1;
+      HttpCacheStats.write(host, stats);
+    }
+  }
+
+  static report(): void {
+    const data = HttpCacheStats.getData();
+    let report: Record<string, Record<string, HttpCacheHostStatsData>> = {};
+    for (const [url, stats] of Object.entries(data)) {
+      const parsedUrl = parseUrl(url);
+      if (parsedUrl) {
+        const { origin, pathname } = parsedUrl;
+        report[origin] ??= {};
+        report[origin][pathname] = stats;
+      }
+    }
+
+    for (const [host, hostStats] of Object.entries(report)) {
+      report[host] = sortObject(hostStats);
+    }
+    report = sortObject(report);
+
+    logger.debug(report, 'HTTP cache statistics');
+  }
+}

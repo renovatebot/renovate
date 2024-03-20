@@ -213,6 +213,11 @@ For example:
 }
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    On Gitea/Forgejo, you can't use `autodiscoverTopics` together with `autodiscoverNamespaces` because both platforms do not support this.
+    Topics are preferred and `autodiscoverNamespaces` will be ignored when you configure `autodiscoverTopics` on Gitea/Forgejo.
+
 ## autodiscoverProjects
 
 You can use this option to filter the list of autodiscovered repositories by project names.
@@ -908,6 +913,25 @@ Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 For TLS/SSL-enabled connections, use rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
+
+## reportPath
+
+`reportPath` describes the location where the report is written to.
+
+If [`reportType`](#reporttype) is set to `file`, then set `reportPath` to a filepath.
+For example: `/foo/bar.json`.
+
+If the value `s3` is used in [`reportType`](#reporttype), then use a S3 URI.
+For example: `s3://bucket-name/key-name`.
+
+## reportType
+
+Defines how the report is exposed:
+
+- `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
+- `logging` The report will be printed as part of the log messages on `INFO` level
+- `file` The report will be written to a path provided by [`reportPath`](#reportpath)
+- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`RENOVATE_X_S3_ENDPOINT`](./self-hosted-experimental.md#renovatexs3endpoint) and [`RENOVATE_X_S3_PATH_STYLE`](./self-hosted-experimental.md#renovatexs3pathstyle)
 
 ## repositories
 

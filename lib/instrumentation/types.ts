@@ -1,4 +1,6 @@
 import type { Attributes, SpanKind } from '@opentelemetry/api';
+import type { PackageFile } from '../modules/manager/types';
+import type { BranchCache } from '../util/cache/repository/types';
 
 /**
  * The instrumentation decorator parameters.
@@ -23,4 +25,13 @@ export interface SpanParameters {
    * Type of span this represents. Default: SpanKind.Internal
    */
   kind?: SpanKind;
+}
+
+export interface Report {
+  repositories: Record<string, RepoReport>;
+}
+
+interface RepoReport {
+  branches: Partial<BranchCache>[];
+  packageFiles: Record<string, PackageFile[]>;
 }

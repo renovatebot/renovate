@@ -300,6 +300,24 @@ const options: RenovateOptions[] = [
     default: 'local',
   },
   {
+    name: 'reportType',
+    description: 'Set how, or if, reports should be generated.',
+    globalOnly: true,
+    type: 'string',
+    default: null,
+    experimental: true,
+    allowedValues: ['logging', 'file', 's3'],
+  },
+  {
+    name: 'reportPath',
+    description:
+      'Path to where the file should be written. In case of `s3` this has to be a full S3 URI.',
+    globalOnly: true,
+    type: 'string',
+    default: null,
+    experimental: true,
+  },
+  {
     name: 'force',
     description:
       'Any configuration set in this object will force override existing settings.',
@@ -432,7 +450,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.3.0',
+    default: 'ghcr.io/containerbase/sidecar:10.3.3',
     globalOnly: true,
   },
   {
@@ -879,7 +897,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitlab'],
+    supportedPlatforms: ['gitea', 'gitlab'],
   },
   {
     name: 'autodiscoverProjects',

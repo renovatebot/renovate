@@ -215,6 +215,8 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     Record<string, unknown> {
+  reportPath?: string;
+  reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
   baseBranches?: string[];
   commitBody?: string;

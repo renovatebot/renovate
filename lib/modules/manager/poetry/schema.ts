@@ -371,7 +371,7 @@ export const PoetrySchemaToml = Toml.pipe(PoetrySchema);
 const poetryConstraint: Record<string, string> = {
   '1.0': '<1.1.0',
   '1.1': '<1.3.0',
-  '2.0': '>=1.3.0',
+  '2.0': '>=1.3.0 <1.4.0', // 1.4.0 introduced embedding of the poetry version in lock file header
 };
 
 export const Lockfile = Toml.pipe(
