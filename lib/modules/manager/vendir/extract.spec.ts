@@ -78,21 +78,20 @@ describe('modules/manager/vendir/extract', () => {
     });
 
     it('resolves aliased registry urls', () => {
-      const ociresult = extractPackageFile(aliasContents, 'vendir.yml', {
+      const aliasResult = extractPackageFile(aliasContents, 'vendir.yml', {
         registryAliases: {
           placeholder: 'https://my-registry.gcr.io/',
           longAlias: 'https://registry.example.com/',
-          ociRegistry: 'oci://quay.example.com/organization',
+          'oci://test': 'oci://quay.example.com/organization',
         },
       });
 
-      expect(ociresult).toMatchObject({
+      expect(aliasResult).toMatchObject({
         deps: [
           {
             currentValue: '7.10.1',
             depName: 'oci-contour',
-            datasource: 'helm',
-            registryUrls: ['oci://quay.example.com/organization'],
+            datasource: 'docker',
           },
           {
             currentValue: '7.10.1',

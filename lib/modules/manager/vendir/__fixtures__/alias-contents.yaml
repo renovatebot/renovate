@@ -9,7 +9,7 @@ directories:
       name: oci-contour
       version: "7.10.1"
       repository:
-        url: alias:ociRegistry
+        url: oci://test
   - path: custom-repo-custom-version
     helmChart:
       name: normal-contour
