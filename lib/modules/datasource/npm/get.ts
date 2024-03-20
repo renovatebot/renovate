@@ -10,6 +10,7 @@ import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { HttpCacheStats } from '../../../util/stats';
 import { joinUrlParts } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
 import type { CachedReleaseResult, NpmResponse } from './types';
@@ -91,10 +92,13 @@ export async function getDependency(
       );
       if (softExpireAt.isValid && softExpireAt > DateTime.local()) {
         logger.trace('Cached result is not expired - reusing');
+        HttpCacheStats.incLocalHits(packageUrl);
         delete cachedResult.cacheData;
         return cachedResult;
       }
+
       logger.trace('Cached result is soft expired');
+      HttpCacheStats.incLocalMisses(packageUrl);
     } else {
       logger.trace(
         `Package cache for npm package "${packageName}" is from an old revision - discarding`,
@@ -127,6 +131,7 @@ export async function getDependency(
     const raw = await http.getJson<NpmResponse>(packageUrl, options);
     if (cachedResult?.cacheData && raw.statusCode === 304) {
       logger.trace(`Cached npm result for ${packageName} is revalidated`);
+      HttpCacheStats.incRemoteHits(packageUrl);
       cachedResult.cacheData.softExpireAt = softExpireAt;
       await packageCache.set(
         cacheNamespace,
@@ -137,6 +142,7 @@ export async function getDependency(
       delete cachedResult.cacheData;
       return cachedResult;
     }
+    HttpCacheStats.incRemoteMisses(packageUrl);
     const etag = raw.headers.etag;
     const res = raw.body;
     if (!res.versions || !Object.keys(res.versions).length) {

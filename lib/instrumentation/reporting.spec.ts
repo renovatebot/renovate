@@ -74,6 +74,7 @@ describe('instrumentation/reporting', () => {
     });
 
     expect(getReport()).toEqual({
+      problems: [],
       repositories: {},
     });
   });
@@ -176,7 +177,7 @@ describe('instrumentation/reporting', () => {
     addExtractionStats(config, { branchList: [], branches: [], packageFiles });
 
     fs.writeSystemFile.mockRejectedValue(null);
-    await expect(exportStats(config)).not.toReject();
+    await expect(exportStats(config)).toResolve();
   });
 
   it('should add problems to report', () => {

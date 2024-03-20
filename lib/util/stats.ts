@@ -235,3 +235,99 @@ export class HttpStats {
     logger.debug({ urls, hosts, requests }, 'HTTP statistics');
   }
 }
+
+interface HttpCacheHostStatsData {
+  localHits: number;
+  localMisses: number;
+  localTotal: number;
+  remoteHits: number;
+  remoteMisses: number;
+  remoteTotal: number;
+}
+
+type HttpCacheStatsData = Record<string, HttpCacheHostStatsData>;
+
+export class HttpCacheStats {
+  static getData(): HttpCacheStatsData {
+    return memCache.get<HttpCacheStatsData>('http-cache-stats') ?? {};
+  }
+
+  static read(key: string): HttpCacheHostStatsData {
+    return (
+      this.getData()?.[key] ?? {
+        localHits: 0,
+        localMisses: 0,
+        localTotal: 0,
+        remoteHits: 0,
+        remoteMisses: 0,
+        remoteTotal: 0,
+      }
+    );
+  }
+
+  static write(key: string, data: HttpCacheHostStatsData): void {
+    const stats = memCache.get<HttpCacheStatsData>('http-cache-stats') ?? {};
+    stats[key] = data;
+    memCache.set('http-cache-stats', stats);
+  }
+
+  static getBaseUrl(url: string): string | null {
+    const parsedUrl = parseUrl(url);
+    if (!parsedUrl) {
+      logger.debug({ url }, 'Failed to parse URL during cache stats');
+      return null;
+    }
+    const { origin, pathname } = parsedUrl;
+    const baseUrl = `${origin}${pathname}`;
+    return baseUrl;
+  }
+
+  static incLocalHits(url: string): void {
+    const baseUrl = HttpCacheStats.getBaseUrl(url);
+    if (baseUrl) {
+      const host = baseUrl;
+      const stats = HttpCacheStats.read(host);
+      stats.localHits += 1;
+      stats.localTotal += 1;
+      HttpCacheStats.write(host, stats);
+    }
+  }
+
+  static incLocalMisses(url: string): void {
+    const baseUrl = HttpCacheStats.getBaseUrl(url);
+    if (baseUrl) {
+      const host = baseUrl;
+      const stats = HttpCacheStats.read(host);
+      stats.localMisses += 1;
+      stats.localTotal += 1;
+      HttpCacheStats.write(host, stats);
+    }
+  }
+
+  static incRemoteHits(url: string): void {
+    const baseUrl = HttpCacheStats.getBaseUrl(url);
+    if (baseUrl) {
+      const host = baseUrl;
+      const stats = HttpCacheStats.read(host);
+      stats.remoteHits += 1;
+      stats.remoteTotal += 1;
+      HttpCacheStats.write(host, stats);
+    }
+  }
+
+  static incRemoteMisses(url: string): void {
+    const baseUrl = HttpCacheStats.getBaseUrl(url);
+    if (baseUrl) {
+      const host = baseUrl;
+      const stats = HttpCacheStats.read(host);
+      stats.remoteMisses += 1;
+      stats.remoteTotal += 1;
+      HttpCacheStats.write(host, stats);
+    }
+  }
+
+  static report(): void {
+    const stats = HttpCacheStats.getData();
+    logger.debug(stats, 'HTTP cache statistics');
+  }
+}
