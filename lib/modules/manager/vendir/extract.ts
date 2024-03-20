@@ -10,8 +10,6 @@ import type {
 } from '../types';
 import { HelmChartDefinition, Vendir, VendirDefinition } from './schema';
 
-import { isHelmChart } from './utils';
-
 // TODO: Add support for other vendir types (like git tags, github releases, etc.)
 // Recommend looking at the kustomize manager for more information on support.
 
@@ -85,14 +83,12 @@ export function extractPackageFile(
   // grab the helm charts
   const contents = pkg.directories.flatMap((directory) => directory.contents);
   for (const content of contents) {
-    if (isHelmChart(content)) {
-      const dep = extractHelmChart(content.helmChart, config.registryAliases);
-      if (dep) {
-        deps.push({
-          ...dep,
-          depType: 'HelmChart',
-        });
-      }
+    const dep = extractHelmChart(content.helmChart, config.registryAliases);
+    if (dep) {
+      deps.push({
+        ...dep,
+        depType: 'HelmChart',
+      });
     }
   }
 

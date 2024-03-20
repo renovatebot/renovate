@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
@@ -6,7 +7,6 @@ const ociContents = Fixtures.get('oci-contents.yaml');
 const aliasContents = Fixtures.get('alias-contents.yaml');
 const multipleContents = Fixtures.get('multiple-contents.yaml');
 const nonHelmChartContents = Fixtures.get('non-helmchart.yaml');
-const emptyDirectories = Fixtures.get('empty-directories.yaml');
 
 describe('modules/manager/vendir/extract', () => {
   describe('extractPackageFile()', () => {
@@ -21,6 +21,11 @@ describe('modules/manager/vendir/extract', () => {
     });
 
     it('returns null for empty directories key', () => {
+      const emptyDirectories = codeBlock`
+        apiVersion: vendir.k14s.io/v1alpha1
+        kind: Config
+        directories: []
+      `;
       const result = extractPackageFile(emptyDirectories, 'vendir.yml', {});
       expect(result).toBeNull();
     });
@@ -81,8 +86,8 @@ describe('modules/manager/vendir/extract', () => {
     it('resolves aliased registry urls', () => {
       const aliasResult = extractPackageFile(aliasContents, 'vendir.yml', {
         registryAliases: {
-          placeholder: 'https://my-registry.gcr.io/',
-          longAlias: 'https://registry.example.com/',
+          'http://test': 'https://my-registry.gcr.io/',
+          'https://test': 'https://registry.example.com/',
           'oci://test': 'oci://quay.example.com/organization',
         },
       });
@@ -90,25 +95,30 @@ describe('modules/manager/vendir/extract', () => {
       expect(aliasResult).toMatchObject({
         deps: [
           {
+            currentDigest: undefined,
             currentValue: '7.10.1',
-            depName: 'oci-contour',
+            depName: 'oci',
             datasource: 'docker',
+            depType: 'HelmChart',
+            packageName: 'test/oci',
+            pinDigests: false,
           },
           {
             currentValue: '7.10.1',
-            depName: 'normal-contour',
+            depName: 'https',
             datasource: 'helm',
+            depType: 'HelmChart',
             registryUrls: ['https://registry.example.com/'],
           },
           {
             currentValue: '7.10.1',
-            depName: 'placeholder-contour',
+            depName: 'http',
             datasource: 'helm',
             registryUrls: ['https://my-registry.gcr.io/'],
           },
           {
             currentValue: '7.10.1',
-            depName: 'broken-contour',
+            depName: 'broken',
             datasource: 'helm',
             skipReason: 'placeholder-url',
           },

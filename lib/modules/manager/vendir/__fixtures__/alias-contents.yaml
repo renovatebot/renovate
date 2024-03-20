@@ -6,25 +6,25 @@ directories:
   contents:
   - path: custom-repo-custom-version
     helmChart:
-      name: oci-contour
+      name: oci
       version: "7.10.1"
       repository:
         url: oci://test
   - path: custom-repo-custom-version
     helmChart:
-      name: normal-contour
+      name: https
       version: "7.10.1"
       repository:
-        url: alias:longAlias
+        url: alias:https://test
   - path: custom-repo-custom-version
     helmChart:
-      name: placeholder-contour
+      name: http
       version: "7.10.1"
       repository:
-        url: '@placeholder'
+        url: alias:http://test
   - path: custom-repo-custom-version
     helmChart:
-      name: broken-contour
+      name: broken
       version: "7.10.1"
       repository:
         url: alias:brokenAlias
