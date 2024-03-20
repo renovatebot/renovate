@@ -449,7 +449,7 @@ describe('modules/manager/pip-compile/extract', () => {
     expect(packageFiles).toBeDefined();
     expect(packageFiles?.map((p) => p.lockFiles!)).toEqual([['2.txt']]);
     expect(logger.warn).toHaveBeenCalledWith(
-      'pip-compile: references to requirements files not managed by pip-compile are not currently fully supported',
+      'pip-compile: 1.in references unmanaged-file.txt which does not appear to be a requirements file managed by pip-compile',
     );
   });
 });
