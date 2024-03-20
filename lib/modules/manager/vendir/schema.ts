@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { LooseArray } from '../../../util/schema-utils';
 
-export const KubernetesResource = z.object({
+export const VendirResource = z.object({
   apiVersion: z.literal('vendir.k14s.io/v1alpha1'),
+  kind: z.literal('Config'),
 });
 
 export const HelmChart = z.object({
@@ -16,8 +17,7 @@ export const Contents = z.object({
   helmChart: LooseArray(HelmChart),
 });
 
-export const Vendir = KubernetesResource.extend({
-  kind: z.literal('Config'),
+export const Vendir = VendirResource.extend({
   directories: LooseArray(
     z.object({
       path: z.string(),
