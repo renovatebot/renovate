@@ -39,8 +39,6 @@ export function addExtractionStats(
 }
 
 export function finalizeReport(): void {
-  // add problems to report
-  report.problems = [];
   const allProblems = structuredClone(getProblems());
   for (const problem of allProblems) {
     const repository = problem.repository;
