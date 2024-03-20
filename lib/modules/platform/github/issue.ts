@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import { z } from 'zod';
+import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
 
 const GithubIssueBase = z.object({
@@ -32,7 +33,7 @@ type CacheData = Record<number, GithubIssue>;
 
 export class GithubIssueCache {
   private static reset(cacheData: CacheData): void {
-    delete this.issuesToReconcile;
+    memCache.set('github-issues-reconcile-queue', null);
     const repoCache = getCache();
     repoCache.platform ??= {};
     repoCache.platform.github ??= {};
@@ -81,24 +82,25 @@ export class GithubIssueCache {
     }
   }
 
-  private static issuesToReconcile: GithubIssue[] | undefined;
-
   /**
    * At the moment of repo initialization, repository cache is not available.
    * What we can do is to store issues for later reconciliation.
    */
   static addIssuesToReconcile(issues: GithubIssue[] | undefined): void {
-    this.issuesToReconcile = issues;
+    memCache.set('github-issues-reconcile-queue', issues);
   }
 
   private static reconcile(cacheData: CacheData): CacheData {
-    if (!this.issuesToReconcile) {
+    const issuesToReconcile = memCache.get<GithubIssue[]>(
+      'github-issues-reconcile-queue',
+    );
+    if (!issuesToReconcile) {
       return cacheData;
     }
 
     let isReconciled = false;
 
-    for (const issue of this.issuesToReconcile) {
+    for (const issue of issuesToReconcile) {
       const cachedIssue = cacheData[issue.number];
 
       // If we reached the item which is already in the cache,
@@ -117,7 +119,7 @@ export class GithubIssueCache {
 
     // If we've just iterated over all the items in the cache,
     // it means sync is also done.
-    if (this.issuesToReconcile.length >= Object.keys(cacheData).length) {
+    if (issuesToReconcile.length >= Object.keys(cacheData).length) {
       isReconciled = true;
     }
 

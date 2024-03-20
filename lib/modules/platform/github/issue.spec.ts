@@ -1,3 +1,4 @@
+import * as memCache from '../../../util/cache/memory';
 import { getCache, resetCache } from '../../../util/cache/repository';
 import { GithubIssue, GithubIssueCache } from './issue';
 
@@ -8,6 +9,7 @@ describe('modules/platform/github/issue', () => {
     beforeEach(() => {
       resetCache();
       cache = getCache();
+      memCache.init();
     });
 
     it('returns null for empty cache', () => {
