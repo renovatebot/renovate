@@ -11,18 +11,18 @@ directories:
   - # path is relative to `vendir` CLI working directory
     path: config/_ytt_lib
     contents:
-        path: github.com/cloudfoundry/cf-k8s-networking
-        helmChart:
-          # chart name (required)
-          name: stable/redis
-          # use specific chart version (string; optional)
-          version: '1.2.1'
-          # specifies Helm repository to fetch from (optional)
-          repository:
-            # repository url; supports exprimental oci helm fetch via
-            # oci:// scheme (required)
-            url: https://...
-          # specify helm binary version to use;
-          # '3' means binary 'helm3' needs to be on the path (optional)
-          helmVersion: '3'
+      path: github.com/cloudfoundry/cf-k8s-networking
+      helmChart:
+        # chart name (required)
+        name: stable/redis
+        # use specific chart version (string; optional)
+        version: '1.2.1'
+        # specifies Helm repository to fetch from (optional)
+        repository:
+          # repository url; supports exprimental oci helm fetch via
+          # oci:// scheme (required)
+          url: https://...
+        # specify helm binary version to use;
+        # '3' means binary 'helm3' needs to be on the path (optional)
+        helmVersion: '3'
 ```

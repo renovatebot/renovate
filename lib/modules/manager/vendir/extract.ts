@@ -70,9 +70,6 @@ export function parseVendir(
     return null;
   }
 
-  if (!pkg || is.string(pkg)) {
-    return null;
-  }
   return pkg;
 }
 
