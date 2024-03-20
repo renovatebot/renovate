@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { parseSingleYaml } from '../../../util/yaml';
 import { HelmDatasource } from '../../datasource/helm';
