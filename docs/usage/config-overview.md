@@ -12,6 +12,7 @@ When Renovate runs on a repository, the final config in use is derived from:
 ### Global config
 
 Global config is the term for config defined by the person or team responsible for running the bot.
+Sometimes it's referred to as "bot config" because it's the config passed to the bot by the person running it.
 Global config can contain config which is "global only" as well as any configuration options which are valid in Inherited config or Repository config.
 
 If you are an end user of Renovate, such as a user of the Mend Renovate App, then you don't need to care too much about global config other than knowing that there are some settings you cannot change because they are global-only.
