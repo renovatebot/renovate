@@ -200,12 +200,19 @@ export async function extractAllPackageFiles(
     depsBetweenFiles,
     packageFiles,
   );
+
+  const lockFileSources = new Map<string, PackageFile>();
+  for (const packageFile of result) {
+    for (const lockFile of packageFile.lockFiles!) {
+      if (!lockFileSources.has(lockFile)) {
+        lockFileSources.set(lockFile, packageFile);
+      }
+    }
+  }
   for (const packageFile of result) {
     for (const reqFile of packageFile.managerData?.requirementsFiles ?? []) {
       if (fileMatches.includes(reqFile)) {
-        const sourceFile = result.find((packageFile) =>
-          packageFile.lockFiles?.includes(reqFile),
-        );
+        const sourceFile = lockFileSources.get(reqFile);
         if (!sourceFile) {
           logger.warn(
             `pip-compile: ${packageFile.packageFile} references ${reqFile} which does not appear to be a requirements file managed by pip-compile`,
