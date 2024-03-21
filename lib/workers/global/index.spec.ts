@@ -41,7 +41,7 @@ const initPlatform = jest.spyOn(platform, 'initPlatform');
 
 describe('workers/global/index', () => {
   beforeEach(() => {
-    logger.getProblems.mockImplementationOnce(() => []);
+    logger.getProblems.mockImplementation(() => []);
     initPlatform.mockImplementation((input) => Promise.resolve(input));
     delete process.env.AWS_SECRET_ACCESS_KEY;
     delete process.env.AWS_SESSION_TOKEN;
@@ -178,7 +178,7 @@ describe('workers/global/index', () => {
       repositories: [],
     });
     logger.getProblems.mockReset();
-    logger.getProblems.mockImplementationOnce(() => [
+    logger.getProblems.mockImplementation(() => [
       {
         level: ERROR,
         msg: 'meh',
@@ -195,7 +195,7 @@ describe('workers/global/index', () => {
       repositories: [],
     });
     logger.getProblems.mockReset();
-    logger.getProblems.mockImplementationOnce(() => [
+    logger.getProblems.mockImplementation(() => [
       {
         level: WARN,
         msg: 'meh',

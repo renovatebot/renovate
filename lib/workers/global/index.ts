@@ -16,7 +16,7 @@ import type {
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
-import { exportStats } from '../../instrumentation/reporting';
+import { exportStats, finalizeReport } from '../../instrumentation/reporting';
 import { getProblems, logger, setMeta } from '../../logger';
 import { setGlobalLogLevelRemaps } from '../../logger/remap';
 import * as hostRules from '../../util/host-rules';
@@ -216,6 +216,7 @@ export async function start(): Promise<number> {
       );
     }
 
+    finalizeReport();
     await exportStats(config);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {

@@ -69,8 +69,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@renovatebot/osv-offline':
-        specifier: 1.5.1
-        version: 1.5.1
+        specifier: 1.5.2
+        version: 1.5.2
       '@renovatebot/pep440':
         specifier: 3.0.19
         version: 3.0.19
@@ -192,8 +192,8 @@ importers:
         specifier: 1.1.23
         version: 1.1.23
       google-auth-library:
-        specifier: 9.6.3
-        version: 9.6.3
+        specifier: 9.7.0
+        version: 9.7.0
       got:
         specifier: 11.8.6
         version: 11.8.6
@@ -2836,8 +2836,8 @@ packages:
       '@seald-io/nedb': 4.0.4
     dev: false
 
-  /@renovatebot/osv-offline@1.5.1:
-    resolution: {integrity: sha512-NQT7ikG+uA2M9IrGEY/f43FNXWQrFbIKSKk4kFxcOJL+Y3mYJF6EpVcqxfp2ExIrwu50r2rBbzdX9jgbuhiwwQ==}
+  /@renovatebot/osv-offline@1.5.2:
+    resolution: {integrity: sha512-Y+Ynt5mlUu416frC8uA175XzJClVySK5VJ29DJO6Ohwv5xG26d7JWj1KNx/eMvcBCrSG1x/o5K20oNUruPB+Dw==}
     dependencies:
       '@octokit/rest': 20.0.2
       '@renovatebot/osv-offline-db': 1.6.0
@@ -6593,8 +6593,8 @@ packages:
       moo: 0.5.2
     dev: false
 
-  /google-auth-library@9.6.3:
-    resolution: {integrity: sha512-4CacM29MLC2eT9Cey5GDVK4Q8t+MMp8+OEdOaqD9MG6b0dOyLORaaeJMPQ7EESVgm/+z5EKYyFLxgzBJlJgyHQ==}
+  /google-auth-library@9.7.0:
+    resolution: {integrity: sha512-I/AvzBiUXDzLOy4iIZ2W+Zq33W4lcukQv1nl7C8WUA6SQwyQwUwu3waNmWNAvzds//FG8SZ+DnKnW/2k6mQS8A==}
     engines: {node: '>=14'}
     dependencies:
       base64-js: 1.5.1
