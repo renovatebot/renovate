@@ -16,6 +16,7 @@ describe('modules/versioning/poetry/index', () => {
       ${'1.9-0'}      | ${'1.9.0-post.0'} | ${true}
       ${'1.9.0-post'} | ${'1.9.0-post.0'} | ${true}
       ${'1.9.0dev0'}  | ${'1.9.0-dev.0'}  | ${true}
+      ${'1.9.0b01'}   | ${'1.9.0b1'}      | ${true}
     `('equals("$a", "$b") === $expected', ({ a, b, expected }) => {
       expect(versioning.equals(a, b)).toBe(expected);
     });
