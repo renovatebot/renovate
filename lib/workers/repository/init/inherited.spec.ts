@@ -5,10 +5,9 @@ import {
   CONFIG_VALIDATION,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { platform } from '../../../modules/platform';
+import { platform } from '../../../../test/util';
 import { mergeInheritedConfig } from './inherited';
 
-jest.mock('../../../modules/platform');
 
 describe('workers/repository/init/inherited', () => {
   let config: RenovateConfig;
@@ -22,7 +21,7 @@ describe('workers/repository/init/inherited', () => {
       inheritConfigStrict: false,
     };
 
-    (platform.getRawFile as jest.Mock).mockClear();
+    platform.getRawFile.mockClear();
   });
 
   it('should return the same config if repository or inheritConfig is not defined', async () => {
@@ -39,7 +38,7 @@ describe('workers/repository/init/inherited', () => {
 
   it('should throw an error if getting the raw file fails and inheritConfigStrict is true', async () => {
     config.inheritConfigStrict = true;
-    (platform.getRawFile as jest.Mock).mockRejectedValue(
+    platform.getRawFile.mockRejectedValue(
       new Error('File not found'),
     );
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
@@ -48,7 +47,7 @@ describe('workers/repository/init/inherited', () => {
   });
 
   it('should return the same config if getting the raw file fails and inheritConfigStrict is false', async () => {
-    (platform.getRawFile as jest.Mock).mockRejectedValue(
+    platform.getRawFile.mockRejectedValue(
       new Error('File not found'),
     );
     const result = await mergeInheritedConfig(config);
@@ -56,14 +55,14 @@ describe('workers/repository/init/inherited', () => {
   });
 
   it('should throw an error if parsing the inherited config fails', async () => {
-    (platform.getRawFile as jest.Mock).mockResolvedValue('invalid json');
+    platform.getRawFile.mockResolvedValue('invalid json');
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
       CONFIG_INHERIT_PARSE_ERROR,
     );
   });
 
   it('should throw an error if config includes an invalid option', async () => {
-    (platform.getRawFile as jest.Mock).mockResolvedValue(
+    platform.getRawFile.mockResolvedValue(
       '{"something": "invalid"}',
     );
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
@@ -72,7 +71,7 @@ describe('workers/repository/init/inherited', () => {
   });
 
   it('should throw an error if config includes an invalid value', async () => {
-    (platform.getRawFile as jest.Mock).mockResolvedValue(
+    platform.getRawFile.mockResolvedValue(
       '{"onboarding": "invalid"}',
     );
     await expect(mergeInheritedConfig(config)).rejects.toThrow(
@@ -81,7 +80,7 @@ describe('workers/repository/init/inherited', () => {
   });
 
   it('should warn if validateConfig returns warnings', async () => {
-    (platform.getRawFile as jest.Mock).mockResolvedValue(
+    platform.getRawFile.mockResolvedValue(
       '{"binarySource": "docker"}',
     );
     const res = await mergeInheritedConfig(config);
