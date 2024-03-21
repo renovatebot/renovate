@@ -58,9 +58,6 @@ export async function updateArtifacts({
           contents: newVendirLockContent,
         },
       });
-    } else {
-      logger.debug('vendir.lock.yml is unchanged');
-      return null;
     }
 
     // add modified vendir archives to artifacts
@@ -98,7 +95,7 @@ export async function updateArtifacts({
       logger.error('Failed to get git status');
     }
 
-    return fileChanges.length ? fileChanges: null;
+    return fileChanges.length ? fileChanges : null;
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
