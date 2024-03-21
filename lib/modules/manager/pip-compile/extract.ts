@@ -70,6 +70,7 @@ export async function extractAllPackageFiles(
   const lockFileArgs = new Map<string, PipCompileArgs>();
   const depsBetweenFiles: DependencyBetweenFiles[] = [];
   const packageFiles = new Map<string, PackageFile>();
+  const lockFileSources = new Map<string, PackageFile>();
   for (const fileMatch of fileMatches) {
     const fileContent = await readLocalFile(fileMatch, 'utf8');
     if (!fileContent) {
@@ -132,7 +133,9 @@ export async function extractAllPackageFiles(
         logger.debug(
           `pip-compile: ${packageFile} used in multiple output files`,
         );
-        packageFiles.get(packageFile)!.lockFiles!.push(fileMatch);
+        const existingPackageFile = packageFiles.get(packageFile)!;
+        existingPackageFile.lockFiles!.push(fileMatch);
+        lockFileSources.set(fileMatch, existingPackageFile);
         continue;
       }
       const content = await readLocalFile(packageFile, 'utf8');
@@ -180,11 +183,13 @@ export async function extractAllPackageFiles(
             );
           }
         }
-        packageFiles.set(packageFile, {
+        const newPackageFile: PackageFile = {
           ...packageFileContent,
           lockFiles: [fileMatch],
           packageFile,
-        });
+        };
+        packageFiles.set(packageFile, newPackageFile);
+        lockFileSources.set(fileMatch, newPackageFile);
       } else {
         logger.warn(
           { packageFile },
@@ -201,13 +206,8 @@ export async function extractAllPackageFiles(
     packageFiles,
   );
 
-  const lockFileSources = new Map<string, PackageFile>();
-  for (const packageFile of result) {
-    for (const lockFile of packageFile.lockFiles!) {
-      lockFileSources.set(lockFile, packageFile);
-    }
-  }
-  for (const packageFile of result) {
+  // This needs to go in reverse order to handle transitive dependencies
+  for (const packageFile of result.slice().reverse()) {
     for (const reqFile of packageFile.managerData?.requirementsFiles ?? []) {
       let sourceFile: PackageFile | undefined = undefined;
       if (fileMatches.includes(reqFile)) {

@@ -246,27 +246,25 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   it('return sorted package files', async () => {
-    jest
-      .spyOn(fs, 'readLocalFile')
-      // eslint-disable-next-line require-await,@typescript-eslint/require-await
-      .mockImplementation(async (name, _encoding) => {
-        if (name === '1.in') {
-          return 'foo';
-        } else if (name === '2.txt') {
-          return getSimpleRequirementsFile(
-            'pip-compile --output-file=2.txt 1.in',
-            ['foo==1.0.1'],
-          );
-        } else if (name === '3.in') {
-          return '-r 2.txt\nfoo';
-        } else if (name === '4.txt') {
-          return getSimpleRequirementsFile(
-            'pip-compile --output-file=4.txt 3.in',
-            ['foo==1.0.1'],
-          );
-        }
-        return null;
-      });
+    // eslint-disable-next-line require-await,@typescript-eslint/require-await
+    fs.readLocalFile.mockImplementation(async (name): Promise<any> => {
+      if (name === '1.in') {
+        return 'foo';
+      } else if (name === '2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === '3.in') {
+        return '-r 2.txt\nfoo';
+      } else if (name === '4.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=4.txt 3.in',
+          ['foo==1.0.1'],
+        );
+      }
+      return null;
+    });
 
     const lockFiles = ['4.txt', '2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
@@ -370,27 +368,25 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   it('handles -r reference to another input file', async () => {
-    jest
-      .spyOn(fs, 'readLocalFile')
-      // eslint-disable-next-line require-await,@typescript-eslint/require-await
-      .mockImplementation(async (name, _encoding) => {
-        if (name === '1.in') {
-          return 'foo';
-        } else if (name === '2.txt') {
-          return getSimpleRequirementsFile(
-            'pip-compile --output-file=2.txt 1.in',
-            ['foo==1.0.1'],
-          );
-        } else if (name === '3.in') {
-          return '-r 1.in\nfoo';
-        } else if (name === '4.txt') {
-          return getSimpleRequirementsFile(
-            'pip-compile --output-file=4.txt 3.in',
-            ['foo==1.0.1'],
-          );
-        }
-        return null;
-      });
+    // eslint-disable-next-line require-await,@typescript-eslint/require-await
+    fs.readLocalFile.mockImplementation(async (name): Promise<any> => {
+      if (name === '1.in') {
+        return 'foo';
+      } else if (name === '2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === '3.in') {
+        return '-r 1.in\nfoo';
+      } else if (name === '4.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=4.txt 3.in',
+          ['foo==1.0.1'],
+        );
+      }
+      return null;
+    });
 
     const lockFiles = ['4.txt', '2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
@@ -401,23 +397,59 @@ describe('modules/manager/pip-compile/extract', () => {
     ]);
   });
 
+  it('handles transitive -r references', async () => {
+    // eslint-disable-next-line require-await,@typescript-eslint/require-await
+    fs.readLocalFile.mockImplementation(async (name): Promise<any> => {
+      if (name === '1.in') {
+        return 'foo';
+      } else if (name === '2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === '3.in') {
+        return '-r 1.in\nfoo';
+      } else if (name === '4.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=4.txt 3.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === '5.in') {
+        return '-r 4.txt\nfoo';
+      } else if (name === '6.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=6.txt 5.in',
+          ['foo==1.0.1'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['4.txt', '2.txt', '6.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    expect(packageFiles?.map((p) => p.lockFiles!)).toEqual([
+      ['2.txt', '4.txt', '6.txt'],
+      ['4.txt', '6.txt'],
+      ['6.txt'],
+    ]);
+  });
+
   it('warns on -r reference to failed file', async () => {
-    jest
-      .spyOn(fs, 'readLocalFile')
-      // eslint-disable-next-line require-await,@typescript-eslint/require-await
-      .mockImplementation(async (name, _encoding) => {
-        if (name === 'reqs-no-headers.txt') {
-          return Fixtures.get('requirementsNoHeaders.txt');
-        } else if (name === '1.in') {
-          return '-r reqs-no-headers.txt\nfoo';
-        } else if (name === '2.txt') {
-          return getSimpleRequirementsFile(
-            'pip-compile --output-file=2.txt 1.in',
-            ['foo==1.0.1'],
-          );
-        }
-        return null;
-      });
+    // eslint-disable-next-line require-await,@typescript-eslint/require-await
+    fs.readLocalFile.mockImplementation(async (name): Promise<any> => {
+      if (name === 'reqs-no-headers.txt') {
+        return Fixtures.get('requirementsNoHeaders.txt');
+      } else if (name === '1.in') {
+        return '-r reqs-no-headers.txt\nfoo';
+      } else if (name === '2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      }
+      return null;
+    });
 
     const lockFiles = ['reqs-no-headers.txt', '2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
@@ -429,20 +461,18 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   it('warns on -r reference to requirements file not managed by pip-compile', async () => {
-    jest
-      .spyOn(fs, 'readLocalFile')
-      // eslint-disable-next-line require-await,@typescript-eslint/require-await
-      .mockImplementation(async (name, _encoding) => {
-        if (name === '1.in') {
-          return '-r unmanaged-file.txt\nfoo';
-        } else if (name === '2.txt') {
-          return getSimpleRequirementsFile(
-            'pip-compile --output-file=2.txt 1.in',
-            ['foo==1.0.1'],
-          );
-        }
-        return null;
-      });
+    // eslint-disable-next-line require-await,@typescript-eslint/require-await
+    fs.readLocalFile.mockImplementation(async (name): Promise<any> => {
+      if (name === '1.in') {
+        return '-r unmanaged-file.txt\nfoo';
+      } else if (name === '2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      }
+      return null;
+    });
 
     const lockFiles = ['2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
