@@ -207,7 +207,7 @@ export async function extractAllPackageFiles(
   );
 
   // This needs to go in reverse order to handle transitive dependencies
-  for (const packageFile of result.slice().reverse()) {
+  for (const packageFile of [...result].reverse()) {
     for (const reqFile of packageFile.managerData?.requirementsFiles ?? []) {
       let sourceFile: PackageFile | undefined = undefined;
       if (fileMatches.includes(reqFile)) {
