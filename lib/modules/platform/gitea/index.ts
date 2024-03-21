@@ -59,6 +59,7 @@ import {
   smartLinks,
   toRenovatePR,
   trimTrailingApiPath,
+  usableRepo,
 } from './utils';
 
 interface GiteaRepoConfig {
@@ -172,7 +173,7 @@ async function fetchRepositories(topic?: string): Promise<string[]> {
       order: process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER as SortMethod,
     }),
   });
-  return repos.filter((r) => !r.mirror).map((r) => r.full_name);
+  return repos.filter(usableRepo).map((r) => r.full_name);
 }
 
 const platform: Platform = {
@@ -266,7 +267,7 @@ const platform: Platform = {
       );
       throw new Error(REPOSITORY_MIRRORED);
     }
-    if (!repo.permissions.pull || !repo.permissions.push) {
+    if (repo.permissions.pull === false || repo.permissions.push === false) {
       logger.debug(
         'Repository does not permit pull and push - throwing error to abort renovation',
       );
