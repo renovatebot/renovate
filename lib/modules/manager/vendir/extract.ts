@@ -1,5 +1,7 @@
 import { logger } from '../../../logger';
+import { getHttpUrl } from '../../../util/git/url';
 import { parseSingleYaml } from '../../../util/yaml';
+import { GitRefsDatasource } from '../../datasource/git-refs';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import { isOCIRegistry } from '../helmv3/utils';
@@ -8,7 +10,12 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { HelmChartDefinition, Vendir, VendirDefinition } from './schema';
+import {
+  GitRefDefinition,
+  HelmChartDefinition,
+  Vendir,
+  VendirDefinition,
+} from './schema';
 
 // TODO: Add support for other vendir types (like git tags, github releases, etc.)
 // Recommend looking at the kustomize manager for more information on support.
@@ -37,6 +44,19 @@ export function extractHelmChart(
     currentValue: helmChart.version,
     registryUrls: [helmChart.repository.url],
     datasource: HelmDatasource.id,
+  };
+}
+
+export function extractGitSource(
+  gitSource: GitRefDefinition,
+): PackageDependency | null {
+  const httpUrl = getHttpUrl(gitSource.url);
+  return {
+    depName: httpUrl,
+    packageName: httpUrl,
+    currentValue: gitSource.ref,
+    registryUrls: [httpUrl],
+    datasource: GitRefsDatasource.id,
   };
 }
 
@@ -71,12 +91,22 @@ export function extractPackageFile(
   // grab the helm charts
   const contents = pkg.directories.flatMap((directory) => directory.contents);
   for (const content of contents) {
-    const dep = extractHelmChart(content.helmChart, config.registryAliases);
-    if (dep) {
-      deps.push({
-        ...dep,
-        depType: 'HelmChart',
-      });
+    if (content.helmChart) {
+      const dep = extractHelmChart(content.helmChart, config.registryAliases);
+      if (dep) {
+        deps.push({
+          ...dep,
+          depType: 'HelmChart',
+        });
+      }
+    } else if (content.git) {
+      const dep = extractGitSource(content.git);
+      if (dep) {
+        deps.push({
+          ...dep,
+          depType: 'GitSource',
+        });
+      }
     }
   }
 

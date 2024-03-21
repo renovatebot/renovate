@@ -4,6 +4,7 @@ import { extractPackageFile } from '.';
 
 const oneContents = Fixtures.get('one-contents.yaml');
 const ociContents = Fixtures.get('oci-contents.yaml');
+const gitContents = Fixtures.get('git-contents.yaml');
 const aliasContents = Fixtures.get('alias-contents.yaml');
 const multipleContents = Fixtures.get('multiple-contents.yaml');
 const nonHelmChartContents = Fixtures.get('non-helmchart.yaml');
@@ -30,7 +31,7 @@ describe('modules/manager/vendir/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null for nonHelmChart key', () => {
+    it('returns null for nonHelmChart or nonGit key', () => {
       const result = extractPackageFile(nonHelmChartContents, 'vendir.yml', {});
       expect(result).toBeNull();
     });
@@ -58,6 +59,20 @@ describe('modules/manager/vendir/extract', () => {
             depName: 'contour',
             packageName: 'charts.bitnami.com/bitnami/contour',
             datasource: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('single git source from vendir.yml correctly', () => {
+      const result = extractPackageFile(gitContents, 'vendir.yml', {});
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: '7.10.1',
+            depName: 'https://github.com/test/test',
+            packageName: 'https://github.com/test/test',
+            datasource: 'git-refs',
           },
         ],
       });

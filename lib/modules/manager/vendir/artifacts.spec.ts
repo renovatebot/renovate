@@ -392,7 +392,7 @@ describe('modules/manager/vendir/artifacts', () => {
         newPackageFileContent: vendirFile,
         config: {
           ...config,
-          constraints: { vendir: '0.35.0', helm: '3.17.0' },
+          constraints: { vendir: '0.35.0', helm: '3.17.0', git: '2.33.0' },
         },
       }),
     ).toEqual([
@@ -434,6 +434,20 @@ describe('modules/manager/vendir/artifacts', () => {
         },
       },
       {
+        cmd: 'install-tool git 2.33.0',
+        options: {
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+        },
+      },
+      {
         cmd: 'vendir sync',
         options: {
           env: {
@@ -462,7 +476,6 @@ describe('modules/manager/vendir/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
       fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
       fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
-      fs.readLocalFile.mockResolvedValueOnce('0.35.0');
       const execSnapshots = mockExecAll();
       fs.privateCacheDir.mockReturnValue(
         '/tmp/renovate/cache/__renovate-private-cache',
@@ -476,7 +489,7 @@ describe('modules/manager/vendir/artifacts', () => {
           newPackageFileContent: vendirFile,
           config: {
             ...config,
-            constraints: { vendir: '0.35.0', helm: '3.17.0' },
+            constraints: { vendir: '0.35.0', helm: '3.17.0', git: '2.33.0' },
           },
         }),
       ).toEqual([
@@ -504,6 +517,8 @@ describe('modules/manager/vendir/artifacts', () => {
             'install-tool vendir 0.35.0' +
             ' && ' +
             'install-tool helm 3.17.0' +
+            ' && ' +
+            'install-tool git 2.33.0' +
             ' && ' +
             'vendir sync' +
             '"',

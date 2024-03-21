@@ -6,6 +6,12 @@ export const VendirResource = z.object({
   kind: z.literal('Config'),
 });
 
+export const GitRef = z.object({
+  ref: z.string(),
+  url: z.string().regex(/^(?:ssh|https?):\/\/.+/),
+  depth: z.number().optional(),
+});
+
 export const HelmChart = z.object({
   name: z.string(),
   version: z.string(),
@@ -16,7 +22,8 @@ export const HelmChart = z.object({
 
 export const Contents = z.object({
   path: z.string(),
-  helmChart: HelmChart,
+  helmChart: HelmChart.optional(),
+  git: GitRef.optional(),
 });
 
 export const Vendir = VendirResource.extend({
@@ -30,3 +37,4 @@ export const Vendir = VendirResource.extend({
 
 export type VendirDefinition = z.infer<typeof Vendir>;
 export type HelmChartDefinition = z.infer<typeof HelmChart>;
+export type GitRefDefinition = z.infer<typeof GitRef>;
