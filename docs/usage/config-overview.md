@@ -230,3 +230,21 @@ Additionally, the preset `config:recommended` is added to `onboardingConfig`.
 
 A limited set of approved `postUpgradeTasks` commands are allowed in the app.
 They are not documented here as may change over time - please consult the logs to see them.
+
+## Other
+
+The below contains edge cases which you should avoid if possible, and likely don't need to use.
+They are included here because they can cause "exceptions" to some of the earlier mentions rules of config.
+
+### Optimize for Disabled
+
+The `optimizeForDisabled` option was designed for an edge case where a large percentage of repos are disabled by config.
+If this option is set to `true`, Renovate will use a platform API call to see if a `renovate.json` exists and if it contains `"enabled": false`.
+If so, the repository will be skipped without a clone necessary.
+If the file is not present or does not disable Renovate, then Renovate continues as before (having "wasted" that extra API call).
+
+### Force config
+
+The `force` option should be used avoided if possible.
+
+It can be used to "force" config over the top of other config or rules which might be merged later, so at times can cause confusion - especially if it's defined in Global config and overriding settings in Repository config.
