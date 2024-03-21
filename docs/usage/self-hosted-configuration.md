@@ -689,6 +689,11 @@ The inherited config may include all valid repository config and these config op
 - `onboardingRebaseCheckbox`
 - `requireConfig`
 
+<!-- prettier-ignore -->
+!!! note
+    The above list is prepared manually and may become out of date.
+    Consult the self-hosted configuration docs and look for `inheritConfigSupport` values there for the definitive list.
+
 This way organizations can change/control the default behavior, like whether configs are required and how repositories are onboarded.
 
 We disabled `inheritConfig` in the Mend Renovate App to avoid wasting millions of API calls per week.
