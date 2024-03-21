@@ -35,17 +35,19 @@ function extractFromSection(
       let currentValue: string | undefined;
       let nestedVersion = false;
       let skipReason: SkipReason | undefined;
-      if (requirements.git) {
-        skipReason = 'git-dependency';
-      } else if (requirements.file) {
-        skipReason = 'file-dependency';
-      } else if (requirements.path) {
-        skipReason = 'local-dependency';
-      } else if (requirements.version) {
-        currentValue = requirements.version;
-        nestedVersion = true;
-      } else if (is.object(requirements)) {
-        skipReason = 'unspecified-version';
+      if (is.object(requirements)) {
+        if (requirements.git) {
+          skipReason = 'git-dependency';
+        } else if (requirements.file) {
+          skipReason = 'file-dependency';
+        } else if (requirements.path) {
+          skipReason = 'local-dependency';
+        } else if (requirements.version) {
+          currentValue = requirements.version;
+          nestedVersion = true;
+        } else {
+          skipReason = 'unspecified-version';
+        }
       } else {
         currentValue = requirements;
       }
@@ -91,7 +93,7 @@ function extractFromSection(
         // TODO #22198
         dep.managerData!.nestedVersion = nestedVersion;
       }
-      if (requirements.index) {
+      if (is.object(requirements) && requirements.index) {
         const source = sources.find((item) => item.name === requirements.index);
         if (source) {
           dep.registryUrls = [source.url];
@@ -113,10 +115,7 @@ function isPipRequirement(
     !Array.isArray(section) &&
     typeof section === 'object' &&
     Object.entries(section).findIndex(
-      ([, dep]) =>
-        typeof dep !== 'object' &&
-        typeof dep !== 'string' &&
-        typeof dep !== 'number',
+      ([, dep]) => typeof dep !== 'object' && typeof dep !== 'string',
     ) === -1
   );
 }

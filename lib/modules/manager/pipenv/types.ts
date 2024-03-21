@@ -21,10 +21,12 @@ export interface PipFile {
     | Record<string, PipRequirement>;
 }
 
-export interface PipRequirement {
-  index?: string;
-  version?: string;
-  path?: string;
-  file?: string;
-  git?: string;
-}
+export type PipRequirement =
+  | string
+  | {
+      index?: string;
+      version?: string;
+      path?: string;
+      file?: string;
+      git?: string;
+    };
