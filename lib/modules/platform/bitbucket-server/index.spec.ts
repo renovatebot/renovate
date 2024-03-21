@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { mockDeep } from 'jest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked } from '../../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -213,7 +214,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         // reset module
         jest.resetModules();
         bitbucket = await import('.');
-        logger = (await import('../../../logger')).logger as any;
+        logger = mocked(await import('../../../logger')).logger;
         hostRules = jest.requireMock('../../../util/host-rules');
         git = jest.requireMock('../../../util/git');
         git.branchExists.mockReturnValue(true);
@@ -268,6 +269,18 @@ describe('modules/platform/bitbucket-server/index', () => {
             expect.any(Object),
             'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
           );
+        });
+
+        it('should skip api call to fetch version when platform version is set in environment', async () => {
+          process.env.RENOVATE_X_PLATFORM_VERSION = '8.0.0';
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'https://stash.renovatebot.com',
+              username: 'abc',
+              password: '123',
+            }),
+          ).toResolve();
+          delete process.env.RENOVATE_X_PLATFORM_VERSION;
         });
 
         it('should init', async () => {
