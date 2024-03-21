@@ -81,7 +81,6 @@ export function poetry2semver(
   return parts.join('');
 }
 
-
 /** Reverse normalizations applied by poetry2semver */
 export function semver2poetry(version?: string): string | null {
   if (!version) {
