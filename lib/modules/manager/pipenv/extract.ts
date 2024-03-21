@@ -105,7 +105,7 @@ function extractFromSection(
   return deps;
 }
 
-function isPipRequirement(
+function isPipRequirements(
   section?:
     | Record<string, PipRequirement>
     | Record<string, string>
@@ -146,7 +146,7 @@ export async function extractPackageFile(
     if (
       category === 'source' ||
       category === 'requires' ||
-      !isPipRequirement(section)
+      !isPipRequirements(section)
     ) {
       return;
     }
