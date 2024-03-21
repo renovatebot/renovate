@@ -75,7 +75,7 @@ Finally, there is a limited number of special environment variables which are lo
 The final way to configure Global config is through CLI parameters.
 For example, the CLI parameter `--platform=gitlab` is the same as setting `"platform": "gitlab"` in File config or `RENOVATE_PLATFORM=gitlab` in Environment config.
 
-CLI config is read last and takes precedence over Environment and File config, so if you configure conflicting values in more than one of these then the one in CLI config will "win".
+CLI config is read last and takes precedence over Environment and File config, so if you configure conflicting values in more than one of these then the one in CLI config will be merged last and "win" if values conflict.
 
 ### Inherited config
 
