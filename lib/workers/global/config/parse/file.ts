@@ -2,13 +2,12 @@ import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import JSON5 from 'json5';
 import upath from 'upath';
-import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
-import { validateConfig } from '../../../../config/validation';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
 import { readSystemFile } from '../../../../util/fs';
 import { parseSingleYaml } from '../../../../util/yaml';
+import { migrateAndValidateConfig } from './util';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   if (upath.basename(file) === '.renovaterc') {
@@ -82,22 +81,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
 
   await deleteNonDefaultConfig(env); // Try deletion only if RENOVATE_CONFIG_FILE is specified
 
-  const { isMigrated, migratedConfig } = migrateConfig(config);
-  if (isMigrated) {
-    logger.warn(
-      { originalConfig: config, migratedConfig },
-      'Config needs migrating',
-    );
-    config = migratedConfig;
-  }
-
-  const { warnings, errors } = await validateConfig(true, migratedConfig);
-  if (warnings.length) {
-    logger.warn({ configFile, warnings }, `Config validation warnings in file`);
-  }
-  if (errors.length) {
-    logger.warn({ configFile, errors }, `Config validation errors in file`);
-  }
+  config = await migrateAndValidateConfig(config, configFile);
   return config;
 }
 

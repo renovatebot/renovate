@@ -1,12 +1,11 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
-import { migrateConfig } from '../../../../config/migration';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
-import { validateConfig } from '../../../../config/validation';
 import { logger } from '../../../../logger';
 import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
+import { migrateAndValidateConfig } from './util';
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
@@ -102,29 +101,7 @@ export async function getConfig(
       config = JSON5.parse(env.RENOVATE_CONFIG);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
 
-      const { isMigrated, migratedConfig } = migrateConfig(config);
-      if (isMigrated) {
-        logger.warn(
-          { originalConfig: config, migratedConfig },
-          'RENOVATE_CONFIG needs migrating',
-        );
-        config = migratedConfig;
-      }
-
-      const { warnings, errors } = await validateConfig(true, migratedConfig);
-
-      if (warnings.length) {
-        logger.warn(
-          { warnings },
-          'Config validation warnings found in RENOVATE_CONFIG',
-        );
-      }
-      if (errors.length) {
-        logger.warn(
-          { errors },
-          'Config validation errors found in RENOVATE_CONFIG',
-        );
-      }
+      config = await migrateAndValidateConfig(config, 'RENOVATE_CONFIG');
     } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
       process.exit(1);
