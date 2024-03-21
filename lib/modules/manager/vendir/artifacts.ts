@@ -98,7 +98,7 @@ export async function updateArtifacts({
       logger.error('Failed to get git status');
     }
 
-    return fileChanges;
+    return fileChanges.length ? fileChanges: null;
   } catch (err) {
     if (err.message === TEMPORARY_ERROR) {
       throw err;
