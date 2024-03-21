@@ -88,7 +88,7 @@ export function analyseTerragruntModule(
     } else {
       // The packageName should only contain the path to the repository
       dep.packageName = path.split('//')[0];
-      dep.registryUrls = [...(dep.registryUrls ?? []), `https://${host}`];
+      dep.registryUrls = [`https://${host}`];
     }
   } else if (tfrVersionMatch?.groups) {
     dep.depType = 'terragrunt';
