@@ -15,9 +15,10 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import { find as _find } from '../../../util/host-rules';
-import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import * as _datasource from '../../datasource';
+import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
+import { extractEnvironmentVariableName } from './artifacts';
 import type { PipfileLockSchema } from './schema';
 import { updateArtifacts } from '.';
 
@@ -628,7 +629,19 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
   });
 
-  it('does not pass private credential environment vars if variable names differ from allowed', async () => {
+  it('extracts correct environment variable from credential placeholder', () => {
+    [
+      ['$USERNAME', 'USERNAME'],
+      ['$', null],
+      ['${USERNAME}', 'USERNAME'],
+      ['${USERNAME:-default}', 'USERNAME'],
+      ['${COMPLEX_NAME_1:-default}', 'COMPLEX_NAME_1'],
+    ].every((testCase) => {
+      expect(extractEnvironmentVariableName(testCase[0])).toEqual(testCase[1]);
+    });
+  });
+
+  it('updates extraEnv if variable names differ from default', async () => {
     fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.ensureCacheDir.mockResolvedValueOnce(pipCacheDir);
     fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
@@ -640,6 +653,11 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
+
+    find.mockReturnValueOnce({
+      username: 'usernameOne',
+      password: 'passwordTwo',
+    });
 
     expect(
       await updateArtifacts({
@@ -666,6 +684,8 @@ describe('modules/manager/pipenv/artifacts', () => {
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             WORKON_HOME: virtualenvsCacheDir,
+            USERNAME_FOO: 'usernameOne',
+            PAZZWORD: 'passwordTwo',
           },
         },
       },

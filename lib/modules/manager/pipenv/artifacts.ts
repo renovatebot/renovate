@@ -13,6 +13,7 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { find } from '../../../util/host-rules';
+import { parseUrl } from '../../../util/url';
 import { PypiDatasource } from '../../datasource/pypi';
 import type {
   UpdateArtifact,
@@ -113,35 +114,58 @@ export function getPipenvConstraint(
   return '';
 }
 
-function getMatchingHostRule(url: string): HostRule {
-  return find({ hostType: PypiDatasource.id, url });
+function getMatchingHostRule(url: string): HostRule | null {
+  const parsedUrl = parseUrl(url);
+  if (!parsedUrl) {
+    return null;
+  }
+  parsedUrl.username = '';
+  parsedUrl.password = '';
+  const urlWithoutCredentials = parsedUrl.toString();
+
+  return find({ hostType: PypiDatasource.id, url: urlWithoutCredentials });
 }
 
-async function findPipfileSourceUrlWithCredentials(
+async function findPipfileSourceUrlsWithCredentials(
   pipfileContent: string,
   pipfileName: string,
-): Promise<string | null> {
+): Promise<string[]> {
   const pipfile = await extractPackageFile(pipfileContent, pipfileName);
   if (!pipfile) {
     logger.debug('Error parsing Pipfile');
-    return null;
+    return [];
   }
 
-  const credentialTokens = [
-    '$USERNAME:',
-    // eslint-disable-next-line no-template-curly-in-string
-    '${USERNAME}',
-    '$PASSWORD@',
-    // eslint-disable-next-line no-template-curly-in-string
-    '${PASSWORD}',
-  ];
+  return pipfile.registryUrls?.filter((url) => !!parseUrl(url)?.username) ?? [];
+}
 
-  const sourceWithCredentials = pipfile.registryUrls?.find((url) =>
-    credentialTokens.some((token) => url.includes(token)),
+export function extractEnvironmentVariableName(
+  credential: string | null,
+): string | null {
+  if (!credential) {
+    return null;
+  }
+  const match = decodeURI(credential).match('([a-zA-Z0-9_]+)');
+  return match?.length ? match[0] : null;
+}
+
+function addExtraEnvVariable(
+  extraEnv: ExtraEnv<unknown>,
+  environmentVariableName: string,
+  environmentValue: string,
+): void {
+  logger.debug(
+    `Adding ${environmentVariableName} environment variable for pipenv`,
   );
-
-  // Only one source is currently supported
-  return sourceWithCredentials ?? null;
+  if (
+    extraEnv[environmentVariableName] &&
+    extraEnv[environmentVariableName] !== environmentValue
+  ) {
+    logger.warn(
+      `Possible misconfiguration, ${environmentVariableName} is already set to a different value`,
+    );
+  }
+  extraEnv[environmentVariableName] = environmentValue;
 }
 
 export async function updateArtifacts({
@@ -189,25 +213,43 @@ export async function updateArtifacts({
       ],
     };
 
-    const sourceUrl = await findPipfileSourceUrlWithCredentials(
+    const sourceUrls = await findPipfileSourceUrlsWithCredentials(
       newPipfileContent,
       pipfileName,
     );
-    if (sourceUrl) {
+    sourceUrls.every((sourceUrl) => {
+      const parsedSourceUrl = parseUrl(sourceUrl);
+      if (!parsedSourceUrl) {
+        return;
+      }
       logger.debug({ sourceUrl }, 'Pipfile contains credentials');
       const hostRule = getMatchingHostRule(sourceUrl);
       if (hostRule) {
         logger.debug('Found matching hostRule for Pipfile credentials');
         if (hostRule.username) {
-          logger.debug('Adding USERNAME environment variable for pipenv');
-          extraEnv.USERNAME = hostRule.username;
+          const environmentVariableName =
+            extractEnvironmentVariableName(parsedSourceUrl.username) ??
+            'USERNAME';
+          const environmentValue = hostRule.username;
+          addExtraEnvVariable(
+            extraEnv,
+            environmentVariableName,
+            environmentValue,
+          );
         }
         if (hostRule.password) {
-          logger.debug('Adding PASSWORD environment variable for pipenv');
-          extraEnv.PASSWORD = hostRule.password;
+          const environmentVariableName =
+            extractEnvironmentVariableName(parsedSourceUrl.password) ??
+            'PASSWORD';
+          const environmentValue = hostRule.password;
+          addExtraEnvVariable(
+            extraEnv,
+            environmentVariableName,
+            environmentValue,
+          );
         }
       }
-    }
+    });
     execOptions.extraEnv = extraEnv;
 
     logger.trace({ cmd }, 'pipenv lock command');
