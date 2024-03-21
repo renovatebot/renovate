@@ -511,6 +511,20 @@ describe('modules/platform/gitea/index', () => {
       );
     });
 
+    it('should abort when repo has pulls disabled', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get(`/repos/${initRepoCfg.repository}`)
+        .reply(200, {
+          ...mockRepo,
+          has_pull_requests: false,
+        });
+      await initFakePlatform(scope);
+      await expect(gitea.initRepo(initRepoCfg)).rejects.toThrow(
+        REPOSITORY_ACCESS_FORBIDDEN,
+      );
+    });
+
     it('should abort when repo has no available merge methods', async () => {
       const scope = httpMock
         .scope('https://gitea.com/api/v1')

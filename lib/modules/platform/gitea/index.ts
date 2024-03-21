@@ -278,6 +278,13 @@ const platform: Platform = {
       throw new Error(REPOSITORY_EMPTY);
     }
 
+    if (repo.has_pull_requests === false) {
+      logger.debug(
+        'Repo does not have pull requests - throwing error to abort renovation',
+      );
+      throw new Error(REPOSITORY_BLOCKED);
+    }
+
     if (repo.allow_rebase) {
       config.mergeMethod = 'rebase';
     } else if (repo.allow_rebase_explicit) {
