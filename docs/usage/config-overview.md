@@ -57,12 +57,44 @@ A special case for Environment config is the `RENOVATE_CONFIG` "meta" config opt
 The `RENOVATE_CONFIG` option accepts a stringified full config, e.g. `RENOVATE_CONFIG={"platform":"gitlab","onboarding":false}`.
 Any additional Environment config variables take precedence over values in `RENOVATE_CONFIG`.
 
+##### Environment variable examples
+
 <!-- prettier-ignore -->
 !!! warning
     Escaping punctionation can be challenging to get right in some environments, especially if you're passing stringified values.
 
+Boolean:
+
+- `RENOVATE_ONBOARDING=true`
+
+String:
+
+- `RENOVATE_BASE_DIR=/tmp/something`
+- `RENOVATE_BASE_DIR="/tmp/some thing"`
+
+Number:
+
+- `RENOVATE_PR_HOURLY_LIMIT=1`
+
+List with numbers or strings:
+
+- `RENOVATE_LABELS="abc,def,label with space"`
+
+Objects, or lists with objects:
+
+- `RENOVATE_CONFIG="{platform\":\"gitlab\",\"onboarding\":false}"`
+- `RENOVATE_PACKAGE_RULES="[{matchHost:\"gitlab\",token:\"$SOME_TOKEN\"}]"`
+
+<!-- prettier-ignore -->
+!!! tip
+    Use "stringify" ([Example online service](https://jsonformatter.org/json-stringify-online)) for strings and objects
+
+##### Experimental variables
+
 Renovate additionally supports a list of "experimental" environment variables which start with `RENOVATE_X_` and are documented in [Self-hosted experimental environment variables](./self-hosted-experimental.md).
 These variables are experimental, subject to change, and are not parsed as part of regular configuration.
+
+##### Logging variables
 
 Finally, there is a limited number of special environment variables which are loaded early prior to configuration parsing because they are used during logging initialization:
 
@@ -76,6 +108,11 @@ The final way to configure Global config is through CLI parameters.
 For example, the CLI parameter `--platform=gitlab` is the same as setting `"platform": "gitlab"` in File config or `RENOVATE_PLATFORM=gitlab` in Environment config.
 
 CLI config is read last and takes precedence over Environment and File config, so if you configure conflicting values in more than one of these then the one in CLI config will be merged last and "win" if values conflict.
+
+It is important that you:
+
+- Always provide a value, even if the field is boolean (e.g. `--onboarding=true` and not `--onboarding`), and
+- Prefer `=` notation over spaces, e.g. `--onboarding=true` instead of `--onboarding true`
 
 ### Inherited config
 
