@@ -44,8 +44,6 @@ const presetSources: Record<string, PresetApi> = {
   http,
 };
 
-const presetTemplateIgnoredFields = ['package'];
-
 const presetCacheNamespace = 'preset';
 
 const nonScopedPresetWithSubdirRegex = regEx(
@@ -325,9 +323,7 @@ export async function resolveConfigPresets(
   if (inputConfig.extends?.length) {
     // Compile templates
     inputConfig.extends = inputConfig.extends.map((tmpl) =>
-      presetTemplateIgnoredFields.some((field) => tmpl.includes(`{{${field}}}`))
-        ? tmpl
-        : template.compile(tmpl, {}),
+      template.compile(tmpl, {}),
     );
     for (const preset of inputConfig.extends) {
       if (shouldResolvePreset(preset, existingPresets, ignorePresets)) {
