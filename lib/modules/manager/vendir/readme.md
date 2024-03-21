@@ -29,6 +29,6 @@ directories:
 
 ## Registry Aliases
 
-### OCI
+#### OCI
 
 Aliases for OCI registries are supported via the dockerfile/docker manager
