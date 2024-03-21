@@ -1,9 +1,13 @@
 import is from '@sindresorhus/is';
+import extract from 'extract-zip';
 import semver from 'semver';
+import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
+import * as fs from '../../../util/fs';
+import { ensureCacheDir } from '../../../util/fs';
 import { Http, HttpError } from '../../../util/http';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
@@ -160,8 +164,15 @@ export async function getReleases(
 
   let homepage: string | null = null;
   let latestStable: string | null = null;
+  let latestNupkgUrl: string | null = null;
   const releases = catalogEntries.map(
-    ({ version, published: releaseTimestamp, projectUrl, listed }) => {
+    ({
+      version,
+      published: releaseTimestamp,
+      projectUrl,
+      listed,
+      packageContent: nupkgUrl,
+    }) => {
       const release: Release = { version: removeBuildMeta(version) };
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
@@ -169,6 +180,7 @@ export async function getReleases(
       if (versioning.isValid(version) && versioning.isStable(version)) {
         latestStable = removeBuildMeta(version);
         homepage = projectUrl ? massageUrl(projectUrl) : homepage;
+        latestNupkgUrl = nupkgUrl ? massageUrl(nupkgUrl) : null;
       }
       if (listed === false) {
         release.isDeprecated = true;
@@ -198,7 +210,6 @@ export async function getReleases(
       registryUrl,
       'PackageBaseAddress',
     );
-    // istanbul ignore else: this is a required v3 api
     if (is.nonEmptyString(packageBaseAddress)) {
       const nuspecUrl = `${ensureTrailingSlash(
         packageBaseAddress,
@@ -211,6 +222,20 @@ export async function getReleases(
       const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
       if (sourceUrl) {
         dep.sourceUrl = massageUrl(sourceUrl);
+      }
+    } else if (latestNupkgUrl) {
+      const sourceUrl = await getSourceUrlFromNupkg(
+        http,
+        pkgName,
+        latestStable,
+        latestNupkgUrl,
+      );
+      if (sourceUrl) {
+        dep.sourceUrl = massageUrl(sourceUrl);
+        logger.debug(
+          { sourceUrl, nupkgUrl: latestNupkgUrl },
+          `Determined sourceUrl from nupkgUrl`,
+        );
       }
     }
   } catch (err) {
@@ -241,4 +266,32 @@ export async function getReleases(
   }
 
   return dep;
+}
+
+async function getSourceUrlFromNupkg(
+  http: Http,
+  packageName: string,
+  packageVersion: string | null,
+  nupkgUrl: string,
+): Promise<string | undefined> {
+  const cacheDir = await ensureCacheDir(`nuget`);
+  const readStream = http.stream(nupkgUrl);
+  try {
+    const nupkgFile = upath.join(
+      cacheDir,
+      `${packageName}.${packageVersion}.nupkg`,
+    );
+    const writeStream = fs.createCacheWriteStream(nupkgFile);
+    await fs.pipeline(readStream, writeStream);
+    const contentsDir = upath.join(
+      cacheDir,
+      `${packageName}.${packageVersion}`,
+    );
+    await extract(nupkgFile, { dir: contentsDir });
+    const nuspecFile = upath.join(contentsDir, `${packageName}.nuspec`);
+    const nuspec = new XmlDocument(await fs.readCacheFile(nuspecFile, 'utf8'));
+    return nuspec.valueWithPath('metadata.repository@url');
+  } finally {
+    await fs.rmCache(cacheDir);
+  }
 }

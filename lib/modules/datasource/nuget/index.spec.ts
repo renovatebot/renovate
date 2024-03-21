@@ -1,8 +1,11 @@
+import { Readable } from 'stream';
 import { mockDeep } from 'jest-mock-extended';
+import { join } from 'upath';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { logger } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import * as _hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
 import { parseRegistryUrl } from './common';
@@ -300,6 +303,77 @@ describe('modules/datasource/nuget/index', () => {
         },
         'no PackageBaseAddress services found',
       );
+    });
+
+    it('can determine source URL from nupkg when PackageBaseAddress is missing', async () => {
+      GlobalConfig.set({
+        cacheDir: join('/tmp/cache'),
+      });
+
+      const nugetIndex = `
+        {
+          "version": "3.0.0",
+          "resources": [
+            {
+              "@id": "https://some-registry/v3/metadata",
+              "@type": "RegistrationsBaseUrl/3.0.0-beta",
+              "comment": "Get package metadata."
+            }
+          ]
+        }
+      `;
+      const nlogRegistration = `
+        {
+          "count": 1,
+          "items": [
+            {
+              "@id": "https://some-registry/v3/metadata/nlog/4.7.3.json",
+              "lower": "4.7.3",
+              "upper": "4.7.3",
+              "count": 1,
+              "items": [
+                {
+                  "@id": "foo",
+                  "catalogEntry": {
+                    "id": "NLog",
+                    "version": "4.7.3",
+                    "packageContent": "https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      `;
+      httpMock
+        .scope('https://some-registry')
+        .get('/v3/index.json')
+        .twice()
+        .reply(200, nugetIndex)
+        .get('/v3/metadata/nlog/index.json')
+        .reply(200, nlogRegistration)
+        .get('/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg')
+        .reply(200, () => {
+          const readableStream = new Readable();
+          readableStream.push(Fixtures.getBinary('nlog/NLog.4.7.3.nupkg'));
+          readableStream.push(null);
+          return readableStream;
+        });
+      const res = await getPkgReleases({
+        datasource,
+        versioning,
+        packageName: 'NLog',
+        registryUrls: ['https://some-registry/v3/index.json'],
+      });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        {
+          sourceUrl: 'https://github.com/NLog/NLog.git',
+          nupkgUrl:
+            'https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
+        },
+        'Determined sourceUrl from nupkgUrl',
+      );
+      expect(res?.sourceUrl).toBeDefined();
     });
 
     it('returns null for non 200 (v3v2)', async () => {
