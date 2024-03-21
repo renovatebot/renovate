@@ -86,7 +86,7 @@ describe('modules/manager/vendir/extract', () => {
     it('resolves aliased registry urls', () => {
       const aliasResult = extractPackageFile(aliasContents, 'vendir.yml', {
         registryAliases: {
-          'oci://test': 'oci://quay.example.com/organization',
+          'test': 'quay.example.com/organization',
         },
       });
 
