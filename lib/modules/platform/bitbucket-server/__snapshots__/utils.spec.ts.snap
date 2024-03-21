@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/platform/bitbucket-server/utils getExtraCloneOpts should configure bearer token 1`] = `
+{
+  "-c": "http.extraheader=Authorization: Bearer abc",
+}
+`;
+
+exports[`modules/platform/bitbucket-server/utils getExtraCloneOpts should not configure bearer token 1`] = `{}`;

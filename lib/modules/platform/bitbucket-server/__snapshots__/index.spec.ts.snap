@@ -154,6 +154,18 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path initPlatf
 }
 `;
 
+exports[`modules/platform/bitbucket-server/index endpoint with no path initPlatform() should not throw if token 1`] = `
+{
+  "endpoint": "endpoint/",
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with no path initPlatform() should not throw if username/password 1`] = `
+{
+  "endpoint": "endpoint/",
+}
+`;
+
 exports[`modules/platform/bitbucket-server/index endpoint with no path initRepo() generates URL if API does not contain clone links 1`] = `
 {
   "defaultBranch": "master",
@@ -355,6 +367,18 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPrList() 
 exports[`modules/platform/bitbucket-server/index endpoint with path initPlatform() should init 1`] = `
 {
   "endpoint": "https://stash.renovatebot.com/",
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initPlatform() should not throw if token 1`] = `
+{
+  "endpoint": "endpoint/",
+}
+`;
+
+exports[`modules/platform/bitbucket-server/index endpoint with path initPlatform() should not throw if username/password 1`] = `
+{
+  "endpoint": "endpoint/",
 }
 `;
 

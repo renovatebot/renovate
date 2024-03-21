@@ -8,6 +8,7 @@ import type {
 } from './types';
 import {
   BITBUCKET_INVALID_REVIEWERS_EXCEPTION,
+  getExtraCloneOpts,
   getInvalidReviewers,
   getRepoGitUrl,
 } from './utils';
@@ -268,7 +269,31 @@ describe('modules/platform/bitbucket-server/utils', () => {
             ),
           );
         });
+
+        it('works gitUrl:endpoint no basic auth', () => {
+          expect(
+            getRepoGitUrl(
+              'SOME/repo',
+              url.toString(),
+              'endpoint',
+              infoMock(url, 'SOME', 'repo'),
+              {},
+            ),
+          ).toBe(httpLink(url.toString(), 'SOME', 'repo'));
+        });
       });
+    });
+  });
+
+  describe('getExtraCloneOpts', () => {
+    it('should not configure bearer token', () => {
+      const res = getExtraCloneOpts({});
+      expect(res).toMatchSnapshot();
+    });
+
+    it('should configure bearer token', () => {
+      const res = getExtraCloneOpts({ token: 'abc' });
+      expect(res).toMatchSnapshot();
     });
   });
 });
