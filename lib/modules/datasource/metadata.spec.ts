@@ -27,12 +27,12 @@ describe('modules/datasource/metadata', () => {
     };
 
     const datasource = PypiDatasource.id;
-    const packageName = 'django';
+    const packageName = 'pycountry';
 
     addMetaData(dep, datasource, packageName);
     expect(dep).toMatchSnapshot({
       changelogUrl:
-        'https://github.com/django/django/tree/master/docs/releases',
+        'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
     });
   });
 
@@ -512,13 +512,13 @@ describe('modules/datasource/metadata', () => {
     const dep = partial<ReleaseResult>({});
 
     const datasource = PypiDatasource.id;
-    const packageName = 'django';
+    const packageName = 'pycountry';
 
     addMetaData(dep, datasource, packageName);
     expect(dep).toEqual({
       changelogUrl:
-        'https://github.com/django/django/tree/master/docs/releases',
-      sourceUrl: 'https://github.com/django/django',
+        'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
+      sourceUrl: 'https://github.com/flyingcircusio/pycountry',
     });
   });
 

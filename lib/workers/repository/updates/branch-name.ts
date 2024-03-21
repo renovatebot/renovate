@@ -54,7 +54,12 @@ export function generateBranchName(update: RenovateConfig): void {
     logger.trace(
       `Dependency ${update.depName!} is part of group ${update.groupName}`,
     );
-    update.groupSlug = slugify(update.groupSlug ?? update.groupName, {
+    if (update.groupSlug) {
+      update.groupSlug = template.compile(update.groupSlug, update);
+    } else {
+      update.groupSlug = update.groupName;
+    }
+    update.groupSlug = slugify(update.groupSlug, {
       lower: true,
     });
     if (update.updateType === 'major' && update.separateMajorMinor) {

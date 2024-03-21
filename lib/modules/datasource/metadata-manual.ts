@@ -17,17 +17,11 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
       'https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md',
   },
   pypi: {
-    alembic: 'https://alembic.sqlalchemy.org/en/latest/changelog.html',
     beautifulsoup4:
       'https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/CHANGELOG',
-    django: 'https://github.com/django/django/tree/master/docs/releases',
-    djangorestframework:
-      'https://www.django-rest-framework.org/community/release-notes/',
     flake8: 'https://flake8.pycqa.org/en/latest/release-notes/index.html',
     'django-storages':
       'https://github.com/jschneier/django-storages/blob/master/CHANGELOG.rst',
-    hypothesis:
-      'https://github.com/HypothesisWorks/hypothesis/blob/master/hypothesis-python/docs/changes.rst',
     lxml: 'https://git.launchpad.net/lxml/plain/CHANGES.txt',
     mypy: 'https://mypy-lang.blogspot.com/',
     phonenumbers:
@@ -38,12 +32,9 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
       'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
     'django-debug-toolbar':
       'https://django-debug-toolbar.readthedocs.io/en/latest/changes.html',
-    'firebase-admin':
-      'https://firebase.google.com/support/release-notes/admin/python',
     requests: 'https://github.com/psf/requests/blob/master/HISTORY.md',
     sqlalchemy: 'https://docs.sqlalchemy.org/en/latest/changelog/',
     uwsgi: 'https://uwsgi-docs.readthedocs.io/en/latest/#release-notes',
-    wagtail: 'https://github.com/wagtail/wagtail/tree/master/docs/releases',
   },
   docker: {
     'gitlab/gitlab-ce':

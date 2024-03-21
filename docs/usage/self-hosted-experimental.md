@@ -176,3 +176,7 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
 Suppress the pre-commit support warning in PR bodies.
+
+## `RENOVATE_X_YARN_IGNORE_PROXY`
+
+Skip configuring global Yarn proxy settings if HTTP proxy environment variables are detected.

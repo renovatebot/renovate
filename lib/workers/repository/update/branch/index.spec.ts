@@ -108,6 +108,7 @@ describe('workers/repository/update/branch/index', () => {
     beforeEach(() => {
       scm.branchExists.mockResolvedValue(false);
       prWorker.ensurePr = jest.fn();
+      prWorker.getPlatformPrOptions = jest.fn();
       prAutomerge.checkAutoMerge = jest.fn();
       // TODO: incompatible types (#22198)
       config = {
@@ -132,6 +133,9 @@ describe('workers/repository/update/branch/index', () => {
           sourceBranch: '',
           state: '',
         }),
+      });
+      prWorker.getPlatformPrOptions.mockReturnValue({
+        usePlatformAutomerge: true,
       });
       GlobalConfig.set(adminConfig);
       // TODO: fix types, jest is using wrong overload (#22198)

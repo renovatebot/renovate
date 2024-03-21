@@ -100,6 +100,7 @@ export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string[] | string;
   autodiscoverNamespaces?: string[];
+  autodiscoverProjects?: string[];
   autodiscoverTopics?: string[];
   baseDir?: string;
   cacheDir?: string;
@@ -214,6 +215,8 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     Record<string, unknown> {
+  reportPath?: string;
+  reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
   baseBranches?: string[];
   commitBody?: string;

@@ -4,7 +4,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as _packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
-import { getDependency } from './get';
+import { CACHE_REVISION, getDependency } from './get';
 import { resolveRegistryUrl, setNpmrc } from './npmrc';
 
 jest.mock('../../../util/cache/package');
@@ -473,16 +473,31 @@ describe('modules/datasource/npm/get', () => {
     `);
   });
 
-  it('returns cached legacy', async () => {
-    packageCache.get.mockResolvedValueOnce({ some: 'result' });
-    const dep = await getDependency(http, 'https://some.url', 'some-package');
-    expect(dep).toMatchObject({ some: 'result' });
+  it('discards cache with no revision', async () => {
+    setNpmrc('registry=https://test.org\n_authToken=XXX');
+
+    packageCache.get.mockResolvedValueOnce({
+      some: 'result',
+      cacheData: { softExpireAt: '2099' },
+    });
+
+    httpMock
+      .scope('https://test.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(200, {
+        name: '@neutrinojs/react',
+        versions: { '1.0.0': {} },
+      });
+    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
+
+    expect(dep?.releases).toHaveLength(1);
   });
 
   it('returns unexpired cache', async () => {
     packageCache.get.mockResolvedValueOnce({
       some: 'result',
-      cacheData: { softExpireAt: '2099' },
+      cacheData: { revision: CACHE_REVISION, softExpireAt: '2099' },
     });
     const dep = await getDependency(http, 'https://some.url', 'some-package');
     expect(dep).toMatchObject({ some: 'result' });
@@ -492,6 +507,7 @@ describe('modules/datasource/npm/get', () => {
     packageCache.get.mockResolvedValueOnce({
       some: 'result',
       cacheData: {
+        revision: CACHE_REVISION,
         softExpireAt: '2020',
         etag: 'some-etag',
       },
@@ -508,6 +524,7 @@ describe('modules/datasource/npm/get', () => {
     packageCache.get.mockResolvedValueOnce({
       some: 'result',
       cacheData: {
+        revision: CACHE_REVISION,
         softExpireAt: '2020',
         etag: 'some-etag',
       },
