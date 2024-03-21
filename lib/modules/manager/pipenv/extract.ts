@@ -109,11 +109,9 @@ function isPipRequirement(
     | Record<string, string>
     | PipSource[],
 ): section is Record<string, PipRequirement> {
-  if (typeof section !== 'object' || Array.isArray(section)) {
-    return false;
-  }
-
   return (
+    !Array.isArray(section) &&
+    typeof section === 'object' &&
     Object.entries(section).findIndex(
       ([, dep]) =>
         typeof dep !== 'object' &&
