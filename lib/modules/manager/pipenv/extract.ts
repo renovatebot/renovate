@@ -7,7 +7,7 @@ import { regEx } from '../../../util/regex';
 import { parse as parseToml } from '../../../util/toml';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency, PackageFileContent } from '../types';
-import type { PipFile } from './types';
+import type { PipFile, PipRequirement, PipSource } from './types';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 export const packagePattern = '[A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9]';
@@ -23,14 +23,10 @@ const specifierPartPattern = `\\s*${rangePattern.replace(
 const specifierPattern = `${specifierPartPattern}(?:,${specifierPartPattern})*`;
 const specifierRegex = regEx(`^${specifierPattern}$`);
 function extractFromSection(
-  pipfile: PipFile,
-  section: string,
+  sectionName: string,
+  pipfileSection: Record<string, PipRequirement>,
+  sources: PipSource[],
 ): PackageDependency[] {
-  const pipfileSection = pipfile[section];
-  if (!pipfileSection) {
-    return [];
-  }
-
   const deps = Object.entries(pipfileSection)
     .map((x) => {
       const [packageNameString, requirements] = x;
@@ -76,7 +72,7 @@ function extractFromSection(
         }
       }
       const dep: PackageDependency = {
-        depType: section,
+        depType: sectionName,
         depName,
         managerData: {},
       };
@@ -96,19 +92,35 @@ function extractFromSection(
         dep.managerData!.nestedVersion = nestedVersion;
       }
       if (requirements.index) {
-        if (is.array(pipfile.source)) {
-          const source = pipfile.source.find(
-            (item) => item.name === requirements.index,
-          );
-          if (source) {
-            dep.registryUrls = [source.url];
-          }
+        const source = sources.find((item) => item.name === requirements.index);
+        if (source) {
+          dep.registryUrls = [source.url];
         }
       }
       return dep;
     })
     .filter(Boolean);
   return deps;
+}
+
+function isPipRequirement(
+  section?:
+    | Record<string, PipRequirement>
+    | Record<string, string>
+    | PipSource[],
+): section is Record<string, PipRequirement> {
+  if (typeof section !== 'object' || Array.isArray(section)) {
+    return false;
+  }
+
+  return (
+    Object.entries(section).findIndex(
+      ([, dep]) =>
+        typeof dep !== 'object' &&
+        typeof dep !== 'string' &&
+        typeof dep !== 'number',
+    ) === -1
+  );
 }
 
 export async function extractPackageFile(
@@ -126,16 +138,29 @@ export async function extractPackageFile(
     return null;
   }
   const res: PackageFileContent = { deps: [] };
-  if (pipfile.source) {
-    res.registryUrls = pipfile.source.map((source) => source.url);
-  }
 
-  const categories = Object.keys(pipfile).filter(
-    (category) => category !== 'source' && category !== 'requires',
-  );
+  const sources = pipfile?.source || [];
+  res.registryUrls = sources.map((source) => source.url);
+
+  const categories: [string, Record<string, PipRequirement>][] = [];
+
+  // This should obviously just be a Array.filter() call, but TypeScript doesn't infer the types correctly
+  Object.entries(pipfile).forEach(([category, section]) => {
+    if (
+      category === 'source' ||
+      category === 'requires' ||
+      !isPipRequirement(section)
+    ) {
+      return;
+    }
+
+    categories.push([category, section]);
+  });
 
   res.deps = categories
-    .map((category) => extractFromSection(pipfile, category))
+    .map(([category, section]) =>
+      extractFromSection(category, section, sources),
+    )
     .reduce((deps, sectionDeps) => [...deps, ...sectionDeps], []);
 
   if (!res.deps.length) {
@@ -150,10 +175,10 @@ export async function extractPackageFile(
     extractedConstraints.python = `== ${pipfile.requires.python_full_version}`;
   }
 
-  if (is.nonEmptyString(pipfile.packages?.pipenv)) {
-    extractedConstraints.pipenv = pipfile.packages.pipenv;
-  } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
-    extractedConstraints.pipenv = pipfile['dev-packages'].pipenv;
+  const pipenv_constraints = categories.find(([, section]) => section?.pipenv);
+
+  if (pipenv_constraints) {
+    extractedConstraints.pipenv = pipenv_constraints[1].pipenv;
   }
 
   const lockFileName = `${packageFile}.lock`;
