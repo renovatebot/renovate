@@ -11,6 +11,9 @@ export interface PipFile {
 
   requires?: Record<string, string>;
 
+  /* Elements not defined above are always PipRequirement records
+   * however Typescript requires us to enumerate all possible types on all possible keys.
+   */
   [index: string]:
     | undefined
     | PipSource[]
