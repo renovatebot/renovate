@@ -212,7 +212,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'bitbucket.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'hashicorp/example',
-            sourceUrl: 'https://bitbucket.com',
+            registryUrls: ['https://bitbucket.com'],
           },
           {
             currentValue: 'v1.0.0',
@@ -220,7 +220,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'gitlab.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'hashicorp/example',
-            sourceUrl: 'https://gitlab.com',
+            registryUrls: ['https://gitlab.com'],
           },
           {
             currentValue: 'v1.0.0',
@@ -228,7 +228,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'gitea.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'hashicorp/example',
-            sourceUrl: 'https://gitea.com',
+            registryUrls: ['https://gitea.com'],
           },
         ],
       });
@@ -407,7 +407,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'bitbucket.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'hashicorp/example',
-            sourceUrl: 'https://bitbucket.com',
+            registryUrls: ['https://bitbucket.com'],
           },
           {
             currentValue: 'v1.0.0',
@@ -415,7 +415,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'gitlab.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'hashicorp/example',
-            sourceUrl: 'https://gitlab.com',
+            registryUrls: ['https://gitlab.com'],
           },
           {
             currentValue: 'v1.0.0',
@@ -423,7 +423,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'gitea.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'hashicorp/example',
-            sourceUrl: 'https://gitea.com',
+            registryUrls: ['https://gitea.com'],
           },
         ],
       });
@@ -602,7 +602,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'bitbucket.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'hashicorp/example',
-            sourceUrl: 'https://bitbucket.com',
+            registryUrls: ['https://bitbucket.com'],
           },
           {
             currentValue: 'v1.0.0',
@@ -610,7 +610,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'gitlab.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'hashicorp/example',
-            sourceUrl: 'https://gitlab.com',
+            registryUrls: ['https://gitlab.com'],
           },
           {
             currentValue: 'v1.0.0',
@@ -618,7 +618,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depName: 'gitea.com/hashicorp/example',
             depType: 'gitTags',
             packageName: 'hashicorp/example',
-            sourceUrl: 'https://gitea.com',
+            registryUrls: ['https://gitea.com'],
           },
         ],
       });

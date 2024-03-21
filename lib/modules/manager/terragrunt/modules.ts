@@ -78,23 +78,17 @@ export function analyseTerragruntModule(
     dep.depName = host + '/' + path.split('//')[0].replace('.git', '');
     dep.currentValue = tag;
     dep.datasource = detectGitTagDatasource(url);
-    if (
-      [
-        GitlabTagsDatasource.id,
-        BitbucketTagsDatasource.id,
-        GiteaTagsDatasource.id,
-      ].includes(dep.datasource)
-    ) {
-      // The packageName should only contain the path to the repository
-      dep.packageName = path.split('//')[0];
-      dep.sourceUrl = `https://${host}`;
-    } else {
+    if (dep.datasource === GitTagsDatasource.id) {
       if (containsSubDirectory) {
         const [protocol, hostAndPath] = url.split('//');
         dep.packageName = protocol + '//' + hostAndPath;
       } else {
         dep.packageName = url;
       }
+    } else {
+      // The packageName should only contain the path to the repository
+      dep.packageName = path.split('//')[0];
+      dep.registryUrls = [...(dep.registryUrls ?? []), `https://${host}`];
     }
   } else if (tfrVersionMatch?.groups) {
     dep.depType = 'terragrunt';
