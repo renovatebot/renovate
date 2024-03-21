@@ -24,7 +24,7 @@ export async function extractPackageFile(
   try {
     // TODO: use schema (#9610)
     chart = parseSingleYaml(content, { json: true });
-    if (!(chart?.apiVersion && chart.name && chart.version)) {
+    if (!(chart?.apiVersion && chart?.name && chart?.version)) {
       logger.debug(
         { packageFile },
         'Failed to find required fields in Chart.yaml',
