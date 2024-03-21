@@ -27,7 +27,7 @@ directories:
         helmVersion: '3'
 ```
 
-## Registry Aliases
+### Registry Aliases
 
 #### OCI
 
