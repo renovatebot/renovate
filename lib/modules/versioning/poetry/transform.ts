@@ -63,17 +63,24 @@ export function poetry2semver(
 
   const parts = [releaseParts.map((num) => num.toString()).join('.')];
   if (pre !== null) {
+    // trim leading zeros from valid numbers
+    pre.number = parseInt(pre.number, 10).toString()
     parts.push(`-${pre.letter}.${pre.number}`);
   }
   if (post !== null) {
+    // trim leading zeros from valid numbers
+    post.number = parseInt(post.number, 10).toString()
     parts.push(`-${post.letter}.${post.number}`);
   }
   if (dev !== null) {
+    // trim leading zeros from valid numbers
+    dev.number = parseInt(dev.number, 10).toString()
     parts.push(`-${dev.letter}.${dev.number}`);
   }
 
   return parts.join('');
 }
+
 
 /** Reverse normalizations applied by poetry2semver */
 export function semver2poetry(version?: string): string | null {
