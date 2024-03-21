@@ -98,7 +98,7 @@ describe('modules/manager/vendir/extract', () => {
             depName: 'oci',
             datasource: 'docker',
             depType: 'HelmChart',
-            packageName: 'test/oci',
+            packageName: 'quay.example.com/organization/oci',
             pinDigests: false,
           },
         ],
