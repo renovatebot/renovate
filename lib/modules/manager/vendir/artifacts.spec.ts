@@ -434,20 +434,6 @@ describe('modules/manager/vendir/artifacts', () => {
         },
       },
       {
-        cmd: 'install-tool git 2.33.0',
-        options: {
-          env: {
-            HOME: '/home/user',
-            HTTPS_PROXY: 'https://example.com',
-            HTTP_PROXY: 'http://example.com',
-            LANG: 'en_US.UTF-8',
-            LC_ALL: 'en_US',
-            NO_PROXY: 'localhost',
-            PATH: '/tmp/path',
-          },
-        },
-      },
-      {
         cmd: 'vendir sync',
         options: {
           env: {
@@ -517,8 +503,6 @@ describe('modules/manager/vendir/artifacts', () => {
             'install-tool vendir 0.35.0' +
             ' && ' +
             'install-tool helm 3.17.0' +
-            ' && ' +
-            'install-tool git 2.33.0' +
             ' && ' +
             'vendir sync' +
             '"',
