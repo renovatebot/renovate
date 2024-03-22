@@ -1,6 +1,6 @@
-# Renovate Configuration Overview
+# Renovate configuration overview
 
-When Renovate runs on a repository, the final config in use is derived from:
+When Renovate runs on a repository, the final config used is derived from the:
 
 - Default config
 - Global config
@@ -8,60 +8,68 @@ When Renovate runs on a repository, the final config in use is derived from:
 - Repository config
 - Resolved presets referenced in config
 
-## Types of Config
+## Types of config
 
 ### Default config
 
-Each config option supported by Renovate has a default value/setting (possibly `null`).
-These default values (or absence of) are documented in the Renovate Docs website.
+Every Renovate config option has a default value/setting.
+That default value/setting may even be `null`.
+You can find the default values on the Renovate docs website.
+
 For example:
 
 - The default value for `onboarding` is `true`
-- The option `labels` has no default value, meaning no labels are added to PRs by default
+- The option `labels` lacks a default value, which means that no labels will be added to Renovate's PRs 
 
-Default config is loaded first, and then is superseded/overridden by the configuration types below.
+The default config is loaded first, and may be superseded/overridden by the configuration types listed below.
 
 ### Global config
 
-Global config is the term for config defined by the person or team responsible for running the bot.
-Sometimes it's referred to as "bot config" because it's the config passed to the bot by the person running it.
+Global config means: the config defined by the person or team responsible for running the bot.
+This is also referred to as "bot config", because it's the config passed to the bot by the person running it.
 Global config can contain config which is "global only" as well as any configuration options which are valid in Inherited config or Repository config.
 
-If you are an end user of Renovate, such as a user of the Mend Renovate App, then you don't need to care too much about global config other than knowing that there are some settings you cannot change because they are global-only.
-You can skip the rest of this "Global config" section and proceed to "Inherited config".
+If you are an end user of Renovate, for example if you're using the Mend Renovate App, then you don't need to care as much about any global config.
+As a end-user you can not change some settings because those settings are global-only.
+If you are an end user, you can skip the rest of this "Global config" section and proceed to "Inherited config".
 
-Global config can be read from file, environment, or CLI parameters.
-You must configure at least one of these in order to provide your bot with the minimum details it needs to run, e.g. credentials.
+Global config can be read from a file, environment variable, or CLI parameters.
+You must configure at least one of these for Renovate to have the information it needs to run.
+For example: you may need to give Renovate the correct credentials.
 
 #### File config
 
 The first place Renovate global config is read from is from file.
-By default Renovate checks for the existence of `config.js` in the current working directory, but you can override this by defining `RENOVATE_CONFIG_FILE` in env, e.g. `RENOVATE_CONFIG_FILE=/tmp/my-renovate-config.js`.
+By default Renovate checks for a `config.js` file in the current working directory.
+But you can override this by defining `RENOVATE_CONFIG_FILE` in env, for example: `RENOVATE_CONFIG_FILE=/tmp/my-renovate-config.js`.
 
-By default Renovate allows the config file to be _missing_ and does not error if it cannot find it, however if you have configured `RENOVATE_CONFIG_FILE` but the path you specified is not found then Renovate will error and exit, as it's assumed you have a configuration problem.
+By default Renovate allows the config file to be _missing_ and does not error if it cannot find it.
+But if you have configured `RENOVATE_CONFIG_FILE` and the path you specified is not found then Renovate will error and exit, because it assumes you have a configuration problem.
 If the file is found but cannot be parsed then Renovate will also error and exit.
 
 Global config files can be `.js` or `.json` files.
-JS files can use synchronous or asyncronous methods inside, including even to fetch config information from remote hosts.
+You may use synchronous or asynchronous methods inside a `.js` file, including even to fetch config information from remote hosts.
 
 #### Environment config
 
 Global config can be defined using environment variables.
-Each config option which is supported in env has the prefix `RENOVATE_`.
+The config options that you can use in environment variables all have the prefix `RENOVATE_`.
 For example, `RENOVATE_PLATFORM=gitlab` is the same as setting `"platform": "gitlab"` in File config.
 
-Although the mapping from configuration option name to its corresponding Environment config name is fairly easy to understand, we recommend you consult the documentation for the field `env` for each option.
-If the `env` field is missing then it means that the configuration option does not have its own Environment config variable name.
+Usually there's a clear mapping from configuration option name to the corresponding Environment config name.
+But we recommend you still check the documentation for the field `env` for each option to make sure.
+If the configuration option lacks a `env` field, the config option also lacks a Environment config variable name.
 
 A special case for Environment config is the `RENOVATE_CONFIG` "meta" config option.
-The `RENOVATE_CONFIG` option accepts a stringified full config, e.g. `RENOVATE_CONFIG={"platform":"gitlab","onboarding":false}`.
+The `RENOVATE_CONFIG` option accepts a stringified full config, for example: `RENOVATE_CONFIG={"platform":"gitlab","onboarding":false}`.
 Any additional Environment config variables take precedence over values in `RENOVATE_CONFIG`.
 
 ##### Environment variable examples
 
 <!-- prettier-ignore -->
 !!! warning
-    Escaping punctionation can be challenging to get right in some environments, especially if you're passing stringified values.
+    Make sure to escape any punctuation.
+    Be extra careful if you're passing stringified values.
 
 Boolean:
 
@@ -87,31 +95,33 @@ Objects, or lists with objects:
 
 <!-- prettier-ignore -->
 !!! tip
-    Use "stringify" ([Example online service](https://jsonformatter.org/json-stringify-online)) for strings and objects
+    Use "stringify" ([Example online service](https://jsonformatter.org/json-stringify-online)) for strings and objects.
 
 ##### Experimental variables
 
-Renovate additionally supports a list of "experimental" environment variables which start with `RENOVATE_X_` and are documented in [Self-hosted experimental environment variables](./self-hosted-experimental.md).
-These variables are experimental, subject to change, and are not parsed as part of regular configuration.
+Renovate has "experimental" environment variables, which start with `RENOVATE_X_`.
+These variables are experimental, can be changed at any time, and are not parsed as part of regular configuration.
+Read the [Self-hosted experimental environment variables](./self-hosted-experimental.md) docs to learn more.
 
 ##### Logging variables
 
-Finally, there is a limited number of special environment variables which are loaded early prior to configuration parsing because they are used during logging initialization:
+Finally, there are some special environment variables that are loaded _before_ configuration parsing because they are used during logging initialization:
 
 - `LOG_CONTEXT`: a unique identifier used in each log message to track context
 - `LOG_FORMAT`: defaults to a "pretty" human-readable output, but can be changed to "json"
-- `LOG_LEVEL`: most commonly used to change from the default `info` to `debug`
+- `LOG_LEVEL`: most commonly used to change from the default `info` to `debug` logging
 
 #### CLI config
 
 The final way to configure Global config is through CLI parameters.
 For example, the CLI parameter `--platform=gitlab` is the same as setting `"platform": "gitlab"` in File config or `RENOVATE_PLATFORM=gitlab` in Environment config.
 
-CLI config is read last and takes precedence over Environment and File config, so if you configure conflicting values in more than one of these then the one in CLI config will be merged last and "win" if values conflict.
+CLI config is read last and takes precedence over Environment and File config.
+For example, if you configure conflicting values in Environment, File config and CLI config, then the CLI config will be merged last and "win" if values conflict.
 
 It is important that you:
 
-- Always provide a value, even if the field is boolean (e.g. `--onboarding=true` and not `--onboarding`), and
+- Always provide a value, even if the field is boolean (e.g. `--onboarding=true` and _not_ `--onboarding`), and
 - Prefer `=` notation over spaces, e.g. `--onboarding=true` instead of `--onboarding true`
 
 ### Inherited config
@@ -119,14 +129,15 @@ It is important that you:
 #### Use cases
 
 The primary purpose of Inherited config is to allow for default settings of an organization/group.
-There are two main use cases for Inherited config:
+Two main use cases for Inherited config are:
 
 - Controlling onboarding settings within an org (e.g. disabling onboarding, making config optional)
 - Defining default config settings for repos within an org
 
-Although we generally recommend the use of shared presets for org config, default settings through Inherited config are useful if:
+We recommend that organizations use shared presets instead of Inherited config, if possible.
+But default settings through Inherited config are useful if:
 
-- You don't wish to have Repository config in each repo, or
+- You want to avoid setting Repository config in each repo, or
 - You onboarded many repos prior to having a shared org config, and don't want to retrospectively edit each repo's config
 
 #### How it's found
@@ -135,17 +146,18 @@ If `inheritConfig` is `true` in Global config then Renovate will look for Inheri
 The repository and file name which Renovate looks for can be configured using the other `inheritConfig*` settings documented in Global config.
 Default values are `{{parentOrg}}/renovate-config` for repository name and `org-inherited-config.json` for file name.
 
-If found, Inherited config will be merged on top (i.e. override) Global config, however note that there are many settings which are global-only so attempting to configure one of those will result in an error.
+If found, Inherited config will be merged on top (i.e. override) Global config.
+Avoid putting any global-only setting in a Inherited config, as doing so will result in an error.
 
-Inherited config can include all Repository config settings as well as any Global config options which are documented as "supportsInheritConfig".
+Inherited config may use all Repository config settings, and any Global config options which have the "supportsInheritConfig" property in the docs.
 
 For information on how the Mend Renovate App supports Inherited config, see the dedicated "Mend Renovate App Config" section toward the end of this page.
 
 ### Repository config
 
-Repository config is the config loaded from the repository itself.
+Repository config is the config loaded from a config file in the repository.
 Alternative file names are supported, but the default is `renovate.json`.
-If multiple such file names are found in the same repository then Renovate will use the first one it finds and ignore the other(s).
+If Renovate finds more than one configuration file in the same repository, then Renovate will use the _first_ configuration file it finds and ignores the other(s).
 
 ### Config precedence
 
@@ -155,7 +167,7 @@ Presets referenced with an "extends" config are resolved first and take lower pr
 ## Onboarding
 
 When Renovate processes a repository, one of the first decisions it makes is "Does this repository need to be onboarded?".
-By default, Renovate will generate an "Onboarding PR" with a default config if a repository does not already have a Repository config file committed to the default branch.
+By default, Renovate will create an "Onboarding PR" with a default config if a repository does not have a Repository config file committed to the default branch.
 
 ### Onboarding Config
 
@@ -164,8 +176,8 @@ By default, it is essentially an empty config with only the Renovate JSON schema
 
 If you configure `onboardingConfig` in either Global config or Inherited config then Renovate will use that config directly instead of the default.
 
-Alternatively if follow Renovate's naming convention for shared presets then it can automatically detect those instead.
-If the repository `{{parentOrg}}/renovate-config` contains a `default.json` file then this will be treated as the organization's default preset and included in the Onboarding config.
+Alternatively if you follow Renovate's naming convention for shared presets then it can automatically detect those instead.
+If the repository `{{parentOrg}}/renovate-config` has a `default.json` file then this will be treated as the organization's default preset and included in the Onboarding config.
 Additionally for platforms which support nested Organization/Group hierarchies, Renovate will "hunt" up such hierarchies for a `renovate-config` repository with default config and stop when it finds the first.
 
 <!-- prettier-ignore -->
@@ -175,20 +187,20 @@ Additionally for platforms which support nested Organization/Group hierarchies, 
 If a default config is not found in a `renovate-config` repository within the Organization, Renovate will also check for the presence of a `renovate-config.json` file within a `.{{platform}}` repository parallel to the current repository.
 For example if the repository being onboarded is `abc/def` on a GitHub platform then Renovate will look for the existence of an `abc/.github` repository containing a `renovate-config.json` file.
 
-### Changing Default Behavior
+### Changing default behavior
 
 Default onboarding behavior for an Organization can be changed either in Global or Inherited config.
 
-For example, if you set `onboarding=false` then it means Renovate won't onboard repositories and instead will skip them if no Repository config is found.
-In other words, users would need to manually push a valid Repository config file in order for Renovate to be activated on the repository.
+For example, if you set `onboarding=false` then Renovate will not onboard repositories, and skip any repositories without a Repository config.
+In other words, users need to manually push a valid Repository config file to activate Renovate on the repository.
 
-If you set `onboarding=false` plus also `requireConfig=optional` then it means Renovate will skip onboarding and proceed to run on a repository even if no Repository config is found.
+If you set `onboarding=false` plus `requireConfig=optional` then it means Renovate will skip onboarding and proceed to run on a repository, even if Renovate does not find any Repository config.
 
 ## Shared Presets
 
 ### Overview
 
-The concept of shared configuration concepts are covered in detail in a dedicated [Presets](./key-concepts/presets.md) page so please read that first for details.
+The concept of shared configuration is covered in detail on the [Presets](./key-concepts/presets.md) page, so please read that first.
 
 ### Use of Presets in Global config
 
@@ -212,7 +224,7 @@ Passing `extends` through to be part of Repository config has two major conseque
 Using "centralized" configs through Renovate presets is important in order to be able to:
 
 - Save time by not repeating yourself in every repo with the same config, and
-- Being able to change settings across and entire Organization or groups of repositories in one place
+- Being able to change settings across an entire Organization or groups of repositories in one place
 
 Once you've created a centralized preset config, there are multiple ways you can pass it through to repositories:
 
@@ -222,8 +234,8 @@ Once you've created a centralized preset config, there are multiple ways you can
 
 The above possibilities go from least to most transparent when it comes to end users.
 
-Global config may be invisible to developers without log access, meaning they could be confused by any settings you apply - via presets or directly - withing Global config.
-For example they wonder why Renovate is behaving differently to its documented default behavior and may even think it's a bug.
+Global config may be invisible to developers without log access, meaning they could be confused by any settings you apply - via presets or directly - within Global config.
+For example the developers wonder why Renovate is behaving differently to its documented default behavior and may even think it's a bug.
 
 Inherited config is visible to developers (it's within a repository they can see) although it's _implicitly_ applied so without log access and if they're not aware to look for an Inherited config repository then they may again be a little confused as to why default behavior has changed.
 
@@ -238,11 +250,11 @@ Importantly, logs for all Renovate jobs by the Mend Renovate App are available t
 
 ### Onboarding behavior
 
-If an Organization is installed with "All repositories" instead of "Selected repositories" then Renovate will default to "Silent" mode (`dryRun=lookup`).
-This has been chosen for two reasons:
+If an Organization installed Renovate with "All repositories" (instead of "Selected repositories"), then Renovate will default to "Silent" mode (`dryRun=lookup`).
+We chose this behavior because:
 
-- Too often an account or org administrator selects this option without realizing it could cause the onboarding of hundreds of repositories, and
-- By offering this option, it means that org administrators _can_ install into All repositories without worrying about the noise, and then let individual Repository admins decide if/when to start onboarding
+- Too often an account or org administrator selects the "All repositories" option and accidentally onboards hundreds of repositories, and
+- By offering this option, it means that org administrators _can_ install Renovate into "All repositories" without worrying about the noise, and then let individual Repository admins decide if/when to start onboarding
 
 If Renovate is installed, and you can see a job log, but Renovate is not onboarding your repository, look for `dryRun` in the logs to confirm you are in Silent mode and then change to Interactive mode either at the Repository level or Organization level.
 
@@ -250,28 +262,28 @@ Additionally, if an Organization is installed with "Selected repositories" then 
 
 ### Fork Processing
 
-If an Organization is installed with "All repositories" then `forkProcessing` will remain as the default value `false`.
-i.e. Forked repositories are not onboarded and essentially ignored by Renovate.
+If an Organization install Renovate with the "All repositories" option, then `forkProcessing` will remain as the default value `false`.
+This means forked repositories are _not_ onboarded, Renovate essentially ignores them.
 To change this behavior you need to manually push a `renovate.json` to the repository with `"forkProcessing": true`.
 
-If an Organization is instead installed with "Selected repositories" then it's assumed that the user wants all selected repositories onboarded so `forkProcessing` is set to `true`.
+If an Organization installs Renovate with "Selected repositories" then we assume the organization wants all of the selected repositories onboarded (even forked repositories), so `forkProcessing` is set to `true`.
 
 ### Default presets
 
-The Mend Renovate App adds the `mergeConfidence:all-badges` preset to `extends` automatically.
-If you wish to disable Merge Confidence badges, add this preset to `ignorePresets`.
+The Mend Renovate app automatically adds the `mergeConfidence:all-badges` preset to the `extends` array.
+If you don't want the Merge Confidence badges, then add the `mergeConfidence:all-badges` preset to the `ignorePresets` array.
 
 Additionally, the preset `config:recommended` is added to `onboardingConfig`.
 
 ### Allowed Post-upgrade commands
 
 A limited set of approved `postUpgradeTasks` commands are allowed in the app.
-They are not documented here as may change over time - please consult the logs to see them.
+They are not documented here as they may change over time - please consult the logs to see them.
 
 ## Other
 
 The below contains edge cases which you should avoid if possible, and likely don't need to use.
-They are included here because they can cause "exceptions" to some of the earlier mentions rules of config.
+They are included here because they can cause "exceptions" to some of the previously mentioned rules of config.
 
 ### Optimize for Disabled
 
@@ -282,6 +294,6 @@ If the file is not present or does not disable Renovate, then Renovate continues
 
 ### Force config
 
-The `force` option should be used avoided if possible.
+We recommend you avoid the `force` config option, if possible.
 
 It can be used to "force" config over the top of other config or rules which might be merged later, so at times can cause confusion - especially if it's defined in Global config and overriding settings in Repository config.
