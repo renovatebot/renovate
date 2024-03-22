@@ -48,6 +48,7 @@ query(
         state
         title
         body
+        updatedAt
       }
     }
   }

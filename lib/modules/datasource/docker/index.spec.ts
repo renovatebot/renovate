@@ -491,14 +491,16 @@ describe('modules/datasource/docker/index', () => {
         .scope(gcrUrl)
         .get('/')
         .reply(200)
-        .head('/some-project/some-package/manifests/some-tag')
+        .head('/google.com/some-project/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       hostRules.find.mockReturnValue({});
       const res = await getDigest(
         {
           datasource: 'docker',
-          packageName: 'eu.gcr.io/some-project/some-package',
+          registryUrl: 'https://eu.gcr.io',
+          lookupName: 'google.com/some-project/some-package',
+          packageName: 'eu.gcr.io/google.com/some-project/some-package',
         },
         'some-tag',
       );

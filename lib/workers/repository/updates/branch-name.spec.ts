@@ -31,14 +31,15 @@ describe('workers/repository/updates/branch-name', () => {
     it('uses groupSlug if defined', () => {
       const upgrade: RenovateConfig = {
         groupName: 'some group name',
-        groupSlug: 'some group slug',
+        groupSlug: 'some group {{parentDir}}',
+        parentDir: 'abc',
         group: {
           branchName: '{{groupSlug}}-{{branchTopic}}',
           branchTopic: 'grouptopic',
         },
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toBe('some-group-slug-grouptopic');
+      expect(upgrade.branchName).toBe('some-group-abc-grouptopic');
     });
 
     it('separates major with groups', () => {

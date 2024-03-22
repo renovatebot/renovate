@@ -154,7 +154,7 @@ Avoid refactoring the code and tests at the same time, this can mask regression 
 
 ## Logging
 
-For `WARN`, `ERROR` and `FATAL log messages use logger metadata.
+For `WARN`, `ERROR` and `FATAL` log messages use logger metadata.
 Also use logger metadata the result is a complex metadata object needing a multiple-line pretty stringification.
 
 For `INFO` log messages inline the metadata into the log message.
