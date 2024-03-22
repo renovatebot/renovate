@@ -1,4 +1,6 @@
+import { deepEqual } from 'assert';
 import is from '@sindresorhus/is';
+import { dequal } from 'dequal';
 import {
   filterConfig,
   mergeChildConfig,
@@ -95,7 +97,12 @@ export async function mergeInheritedConfig(
       'Found warnings in inherited configuration.',
     );
   }
-  let filteredConfig = filterConfig(inheritedConfig, 'inherit');
-  filteredConfig = removeGlobalConfig(filteredConfig);
+  const filteredConfig = removeGlobalConfig(inheritedConfig, true);
+  if (!dequal(inheritedConfig, filteredConfig)) {
+    logger.debug(
+      { inheritedConfig, filteredConfig },
+      'Removed global config from inherited config.',
+    );
+  }
   return mergeChildConfig(config, filteredConfig);
 }

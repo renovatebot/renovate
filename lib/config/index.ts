@@ -31,9 +31,15 @@ export function getManagerConfig(
   return managerConfig;
 }
 
-export function removeGlobalConfig(config: RenovateConfig): RenovateConfig {
+export function removeGlobalConfig(
+  config: RenovateConfig,
+  keepInherited: boolean,
+): RenovateConfig {
   const outputConfig: RenovateConfig = { ...config };
   for (const option of options.getOptions()) {
+    if (keepInherited && option.inheritConfigSupport) {
+      continue;
+    }
     if (option.globalOnly) {
       delete outputConfig[option.name];
     }

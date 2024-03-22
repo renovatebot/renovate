@@ -76,4 +76,14 @@ describe('workers/repository/init/inherited', () => {
     expect(res.binarySource).toBeUndefined();
     expect(logger.warn).toHaveBeenCalled();
   });
+
+  it('should merge inherited config', async () => {
+    platform.getRawFile.mockResolvedValue(
+      '{"onboarding":false,"labels":["test"]}',
+    );
+    const res = await mergeInheritedConfig(config);
+    expect(res.labels).toEqual(['test']);
+    expect(res.onboarding).toBeFalse();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
 });
