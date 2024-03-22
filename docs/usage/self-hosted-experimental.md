@@ -143,8 +143,8 @@ The expected value for this environment variable is a JSON array of strings.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
-If set, Renovate will use this string as GitLab server version instead of checking via the GitLab API.
-This can be useful when you use the GitLab `CI_JOB_TOKEN` to authenticate Renovate.
+Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
+Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls for Bitbucket.
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
 
@@ -176,3 +176,7 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
 Suppress the pre-commit support warning in PR bodies.
+
+## `RENOVATE_X_YARN_IGNORE_PROXY`
+
+Skip configuring global Yarn proxy settings if HTTP proxy environment variables are detected.
