@@ -268,23 +268,23 @@ describe('modules/platform/bitbucket-server/index', () => {
 
         it('should not throw if username/password', async () => {
           expect.assertions(1);
-          expect(
-            await bitbucket.initPlatform({
+          await expect(
+            bitbucket.initPlatform({
               endpoint: 'endpoint',
               username: 'abc',
               password: '123',
             }),
-          ).toMatchSnapshot();
+          ).resolves.not.toThrow();
         });
 
         it('should not throw if token', async () => {
           expect.assertions(1);
-          expect(
-            await bitbucket.initPlatform({
+          await expect(
+            bitbucket.initPlatform({
               endpoint: 'endpoint',
               token: 'abc',
             }),
-          ).toMatchSnapshot();
+          ).resolves.not.toThrow();
         });
 
         it('should throw if version could not be fetched', async () => {

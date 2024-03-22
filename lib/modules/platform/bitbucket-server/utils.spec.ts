@@ -288,12 +288,14 @@ describe('modules/platform/bitbucket-server/utils', () => {
   describe('getExtraCloneOpts', () => {
     it('should not configure bearer token', () => {
       const res = getExtraCloneOpts({});
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({});
     });
 
     it('should configure bearer token', () => {
       const res = getExtraCloneOpts({ token: 'abc' });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        '-c': 'http.extraheader=Authorization: Bearer abc',
+      });
     });
   });
 });
