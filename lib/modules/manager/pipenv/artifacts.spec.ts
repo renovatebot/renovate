@@ -17,8 +17,8 @@ import * as docker from '../../../util/exec/docker';
 import type { ExtraEnv, Opt } from '../../../util/exec/types';
 import type { StatusResult } from '../../../util/git/types';
 import { find as _find } from '../../../util/host-rules';
-import * as _datasource from '../../datasource';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import {
   addExtraEnvVariable,
