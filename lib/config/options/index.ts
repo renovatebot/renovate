@@ -1052,6 +1052,7 @@ const options: RenovateOptions[] = [
       'kubernetes',
       'kustomize',
       'terraform',
+      'vendir',
       'woodpecker',
     ],
   },
