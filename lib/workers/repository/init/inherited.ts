@@ -1,11 +1,6 @@
-import { deepEqual } from 'assert';
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
-import {
-  filterConfig,
-  mergeChildConfig,
-  removeGlobalConfig,
-} from '../../../config';
+import { mergeChildConfig, removeGlobalConfig } from '../../../config';
 import { parseFileConfig } from '../../../config/parse';
 import type { RenovateConfig } from '../../../config/types';
 import { validateConfig } from '../../../config/validation';
