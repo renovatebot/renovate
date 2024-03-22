@@ -254,6 +254,18 @@ describe('modules/platform/bitbucket-server/index', () => {
           ).rejects.toThrow();
         });
 
+        it('should throw if password and token is set', async () => {
+          expect.assertions(1);
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'endpoint',
+              username: 'abc',
+              password: '123',
+              token: 'abc',
+            }),
+          ).rejects.toThrow();
+        });
+
         it('should not throw if username/password', async () => {
           expect.assertions(1);
           expect(

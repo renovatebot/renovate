@@ -96,6 +96,10 @@ export async function initPlatform({
     throw new Error(
       'Init: You must either configure a Bitbucket Server username/password or a HTTP access token',
     );
+  } else if (password && token) {
+    throw new Error(
+      'Init: You must either configure a Bitbucket Server password or a HTTP access token',
+    );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
   defaults.endpoint = ensureTrailingSlash(endpoint);
