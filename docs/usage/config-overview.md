@@ -19,7 +19,7 @@ You can find the default values on the Renovate docs website.
 For example:
 
 - The default value for `onboarding` is `true`
-- The option `labels` lacks a default value, which means that no labels will be added to Renovate's PRs 
+- The option `labels` lacks a default value, which means that no labels will be added to Renovate's PRs
 
 The default config is loaded first, and may be superseded/overridden by the configuration types listed below.
 
