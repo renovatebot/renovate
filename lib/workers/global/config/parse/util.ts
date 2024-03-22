@@ -15,7 +15,7 @@ export async function migrateAndValidateConfig(
     );
   }
 
-  const { warnings, errors } = await validateConfig(true, migratedConfig);
+  const { warnings, errors } = await validateConfig('global', migratedConfig);
 
   if (warnings.length) {
     logger.warn(
