@@ -224,7 +224,7 @@ export async function getReleases(
         dep.sourceUrl = massageUrl(sourceUrl);
       }
     } else if (latestNupkgUrl) {
-      const sourceUrl = await getSourceUrlFromNupkg(
+      const sourceUrl = await getSourceUrlFromNupkgCached(
         http,
         pkgName,
         latestStable,
@@ -268,37 +268,64 @@ export async function getReleases(
   return dep;
 }
 
+async function getSourceUrlFromNupkgCached(
+  http: Http,
+  packageName: string,
+  packageVersion: string | null,
+  nupkgUrl: string,
+): Promise<string | null> {
+  const cacheKey = `source-url:${nupkgUrl}`;
+  const sourceUrlFromCache = await packageCache.get<string | null>(
+    cacheNamespace,
+    cacheKey,
+  );
+  // istanbul ignore if
+  if (sourceUrlFromCache !== undefined) {
+    return sourceUrlFromCache;
+  }
+  const sourceUrl = await getSourceUrlFromNupkg(
+    http,
+    packageName,
+    packageVersion,
+    nupkgUrl,
+  );
+  const cacheTtl = 10080; // 1 week
+  await packageCache.set(cacheNamespace, cacheKey, sourceUrl, cacheTtl);
+  return sourceUrl;
+}
+
 async function getSourceUrlFromNupkg(
   http: Http,
   packageName: string,
   packageVersion: string | null,
   nupkgUrl: string,
-): Promise<string | undefined> {
+): Promise<string | null> {
   // istanbul ignore if: experimental feature
   if (process.env.RENOVATE_X_NUGET_DISABLE_NUPKG_DOWNLOAD) {
     logger.debug(
       `Skipping nupkg download because RENOVATE_X_NUGET_DISABLE_NUPKG_DOWNLOAD is set.`,
     );
-    return undefined;
+    return null;
   }
-  const cacheDir = await ensureCacheDir(`nuget`);
+  const cacheDir = await ensureCacheDir('nuget');
+  const nupkgFile = upath.join(
+    cacheDir,
+    `${packageName}.${packageVersion}.nupkg`,
+  );
+  const nupkgContentsDir = upath.join(
+    cacheDir,
+    `${packageName}.${packageVersion}`,
+  );
   const readStream = http.stream(nupkgUrl);
   try {
-    const nupkgFile = upath.join(
-      cacheDir,
-      `${packageName}.${packageVersion}.nupkg`,
-    );
     const writeStream = fs.createCacheWriteStream(nupkgFile);
     await fs.pipeline(readStream, writeStream);
-    const contentsDir = upath.join(
-      cacheDir,
-      `${packageName}.${packageVersion}`,
-    );
-    await extract(nupkgFile, { dir: contentsDir });
-    const nuspecFile = upath.join(contentsDir, `${packageName}.nuspec`);
+    await extract(nupkgFile, { dir: nupkgContentsDir });
+    const nuspecFile = upath.join(nupkgContentsDir, `${packageName}.nuspec`);
     const nuspec = new XmlDocument(await fs.readCacheFile(nuspecFile, 'utf8'));
-    return nuspec.valueWithPath('metadata.repository@url');
+    return nuspec.valueWithPath('metadata.repository@url') ?? null;
   } finally {
-    await fs.rmCache(cacheDir);
+    await fs.rmCache(nupkgFile);
+    await fs.rmCache(nupkgContentsDir);
   }
 }
