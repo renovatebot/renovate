@@ -274,6 +274,13 @@ async function getSourceUrlFromNupkg(
   packageVersion: string | null,
   nupkgUrl: string,
 ): Promise<string | undefined> {
+  // istanbul ignore if: experimental feature
+  if (process.env.RENOVATE_X_NUGET_DISABLE_NUPKG_DOWNLOAD) {
+    logger.debug(
+      `Skipping nupkg download because RENOVATE_X_NUGET_DISABLE_NUPKG_DOWNLOAD is set.`,
+    );
+    return undefined;
+  }
   const cacheDir = await ensureCacheDir(`nuget`);
   const readStream = http.stream(nupkgUrl);
   try {
