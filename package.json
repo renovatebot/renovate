@@ -262,7 +262,7 @@
     "@jest/reporters": "29.7.0",
     "@jest/test-result": "29.7.0",
     "@jest/types": "29.6.3",
-    "@ls-lint/ls-lint": "2.2.2",
+    "@ls-lint/ls-lint": "2.2.3",
     "@openpgp/web-stream-tools": "0.0.14",
     "@renovate/eslint-plugin": "file:tools/eslint",
     "@semantic-release/exec": "6.0.3",
