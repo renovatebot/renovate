@@ -213,7 +213,6 @@ export function getRepoGitUrl(
 
 export function getExtraCloneOpts(opts: HostRule): GitOptions {
   if (opts.token) {
-    addSecretForSanitizing(opts.token, 'global');
     return {
       '-c': `http.extraheader=Authorization: Bearer ${opts.token}`,
     };
