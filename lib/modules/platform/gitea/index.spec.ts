@@ -521,7 +521,7 @@ describe('modules/platform/gitea/index', () => {
         });
       await initFakePlatform(scope);
       await expect(gitea.initRepo(initRepoCfg)).rejects.toThrow(
-        REPOSITORY_ACCESS_FORBIDDEN,
+        REPOSITORY_BLOCKED,
       );
     });
 
