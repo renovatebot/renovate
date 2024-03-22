@@ -2055,11 +2055,11 @@ For example, consider this config:
 ```json
 {
   "extends": ["config:recommended"],
-  "ignorePresets": [":prHourlyLimit2"]
+  "ignorePresets": ["group:monorepos"]
 }
 ```
 
-It would take the entire `"config:recommended"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
+It would take the entire `"config:recommended"` preset - which has a lot of sub-presets - but ignore the `"group:monorepos"` rule.
 
 ## ignoreReviewers
 
