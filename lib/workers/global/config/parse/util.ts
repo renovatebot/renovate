@@ -13,7 +13,6 @@ export async function migrateAndValidateConfig(
       { originalConfig: config, migratedConfig },
       `${configType} needs migrating`,
     );
-    config = migratedConfig;
   }
 
   const { warnings, errors } = await validateConfig(true, migratedConfig);
