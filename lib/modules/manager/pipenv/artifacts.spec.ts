@@ -31,7 +31,6 @@ const datasource = mocked(_datasource);
 const find = mockedFunction(_find);
 const getPkgReleases = mockedFunction(_getPkgReleases);
 
-jest.mock('../../../logger');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
