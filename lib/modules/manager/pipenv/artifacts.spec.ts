@@ -12,13 +12,18 @@ import {
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { logger } from '../../../logger';
 import * as docker from '../../../util/exec/docker';
+import type { ExtraEnv, Opt } from '../../../util/exec/types';
 import type { StatusResult } from '../../../util/git/types';
 import { find as _find } from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
-import { extractEnvironmentVariableName } from './artifacts';
+import {
+  addExtraEnvVariable,
+  extractEnvironmentVariableName,
+} from './artifacts';
 import type { PipfileLockSchema } from './schema';
 import { updateArtifacts } from '.';
 
@@ -26,6 +31,7 @@ const datasource = mocked(_datasource);
 const find = mockedFunction(_find);
 const getPkgReleases = mockedFunction(_getPkgReleases);
 
+jest.mock('../../../logger');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/fs');
@@ -633,12 +639,21 @@ describe('modules/manager/pipenv/artifacts', () => {
     [
       ['$USERNAME', 'USERNAME'],
       ['$', null],
+      [null, null],
       ['${USERNAME}', 'USERNAME'],
       ['${USERNAME:-default}', 'USERNAME'],
       ['${COMPLEX_NAME_1:-default}', 'COMPLEX_NAME_1'],
     ].every((testCase) => {
       expect(extractEnvironmentVariableName(testCase[0])).toEqual(testCase[1]);
     });
+  });
+
+  it('warns about duplicate placeholders with different values', () => {
+    const extraEnv: Opt<ExtraEnv> = {
+      FOO: '1',
+    };
+    addExtraEnvVariable(extraEnv, 'FOO', '2');
+    expect(logger.warn).toHaveBeenCalledTimes(1);
   });
 
   it('updates extraEnv if variable names differ from default', async () => {

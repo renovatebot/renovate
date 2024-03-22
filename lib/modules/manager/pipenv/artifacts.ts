@@ -114,16 +114,15 @@ export function getPipenvConstraint(
   return '';
 }
 
-function getMatchingHostRule(url: string): HostRule | null {
+function getMatchingHostRule(url: string): HostRule | undefined {
   const parsedUrl = parseUrl(url);
-  if (!parsedUrl) {
-    return null;
-  }
-  parsedUrl.username = '';
-  parsedUrl.password = '';
-  const urlWithoutCredentials = parsedUrl.toString();
+  if (parsedUrl) {
+    parsedUrl.username = '';
+    parsedUrl.password = '';
+    const urlWithoutCredentials = parsedUrl.toString();
 
-  return find({ hostType: PypiDatasource.id, url: urlWithoutCredentials });
+    return find({ hostType: PypiDatasource.id, url: urlWithoutCredentials });
+  }
 }
 
 async function findPipfileSourceUrlsWithCredentials(
@@ -131,14 +130,16 @@ async function findPipfileSourceUrlsWithCredentials(
   pipfileName: string,
 ): Promise<string[]> {
   const pipfile = await extractPackageFile(pipfileContent, pipfileName);
-  if (!pipfile) {
-    logger.debug('Error parsing Pipfile');
-    return [];
-  }
 
-  return pipfile.registryUrls?.filter((url) => !!parseUrl(url)?.username) ?? [];
+  return (
+    pipfile?.registryUrls?.filter((url) => !!parseUrl(url)?.username) ?? []
+  );
 }
 
+/**
+ * This will extract the actual variable name from an environment-placeholder:
+ * ${USERNAME:-defaultvalue} will yield 'USERNAME'
+ */
 export function extractEnvironmentVariableName(
   credential: string | null,
 ): string | null {
@@ -149,7 +150,7 @@ export function extractEnvironmentVariableName(
   return match?.length ? match[0] : null;
 }
 
-function addExtraEnvVariable(
+export function addExtraEnvVariable(
   extraEnv: ExtraEnv<unknown>,
   environmentVariableName: string,
   environmentValue: string,
@@ -166,6 +167,40 @@ function addExtraEnvVariable(
     );
   }
   extraEnv[environmentVariableName] = environmentValue;
+}
+
+/**
+ * Pipenv allows configuring source-urls for remote repositories with placeholders for credentials, i.e. http://$USER:$PASS@myprivate.repo
+ * if a matching host rule exists for that repository, we need to set the corresponding variables.
+ * Simply substituting them in the URL is not an option as it would impact the hash for the resulting Pipfile.lock
+ *
+ */
+async function addCredentialsForSourceUrls(
+  newPipfileContent: string,
+  pipfileName: string,
+  extraEnv: ExtraEnv<unknown>,
+): Promise<void> {
+  (
+    await findPipfileSourceUrlsWithCredentials(newPipfileContent, pipfileName)
+  ).every((sourceUrl) => {
+    const parsedSourceUrl = parseUrl(sourceUrl);
+    if (!parsedSourceUrl) {
+      logger.warn(`Could not parse url for source: ${sourceUrl}`);
+      return;
+    }
+    logger.debug({ sourceUrl }, `Trying to add credentials for ${sourceUrl}`);
+    const { password, username } = getMatchingHostRule(sourceUrl) ?? {};
+    if (username) {
+      const environmentVariableName =
+        extractEnvironmentVariableName(parsedSourceUrl.username) ?? 'USERNAME';
+      addExtraEnvVariable(extraEnv, environmentVariableName, username);
+    }
+    if (password) {
+      const environmentVariableName =
+        extractEnvironmentVariableName(parsedSourceUrl.password) ?? 'PASSWORD';
+      addExtraEnvVariable(extraEnv, environmentVariableName, password);
+    }
+  });
 }
 
 export async function updateArtifacts({
@@ -212,44 +247,7 @@ export async function updateArtifacts({
         },
       ],
     };
-
-    const sourceUrls = await findPipfileSourceUrlsWithCredentials(
-      newPipfileContent,
-      pipfileName,
-    );
-    sourceUrls.every((sourceUrl) => {
-      const parsedSourceUrl = parseUrl(sourceUrl);
-      if (!parsedSourceUrl) {
-        return;
-      }
-      logger.debug({ sourceUrl }, 'Pipfile contains credentials');
-      const hostRule = getMatchingHostRule(sourceUrl);
-      if (hostRule) {
-        logger.debug('Found matching hostRule for Pipfile credentials');
-        if (hostRule.username) {
-          const environmentVariableName =
-            extractEnvironmentVariableName(parsedSourceUrl.username) ??
-            'USERNAME';
-          const environmentValue = hostRule.username;
-          addExtraEnvVariable(
-            extraEnv,
-            environmentVariableName,
-            environmentValue,
-          );
-        }
-        if (hostRule.password) {
-          const environmentVariableName =
-            extractEnvironmentVariableName(parsedSourceUrl.password) ??
-            'PASSWORD';
-          const environmentValue = hostRule.password;
-          addExtraEnvVariable(
-            extraEnv,
-            environmentVariableName,
-            environmentValue,
-          );
-        }
-      }
-    });
+    await addCredentialsForSourceUrls(newPipfileContent, pipfileName, extraEnv);
     execOptions.extraEnv = extraEnv;
 
     logger.trace({ cmd }, 'pipenv lock command');
