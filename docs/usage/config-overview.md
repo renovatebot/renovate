@@ -39,7 +39,7 @@ For example: you may need to give Renovate the correct credentials.
 
 #### File config
 
-The first place Renovate global config is read from is from file.
+Renovate first tries to read the global config from a file.
 By default Renovate checks for a `config.js` file in the current working directory.
 But you can override this by defining `RENOVATE_CONFIG_FILE` in env, for example: `RENOVATE_CONFIG_FILE=/tmp/my-renovate-config.js`.
 
@@ -182,7 +182,7 @@ Additionally for platforms which support nested Organization/Group hierarchies, 
 
 <!-- prettier-ignore -->
 !!! note
-    Renovate will also check for `renovate.json` but this option is deprecated and is not recommended.
+    Renovate will also check for a `renovate.json` file if it cannot find a `default.json` file in a preset, however this option is deprecated and not recommended.
 
 If a default config is not found in a `renovate-config` repository within the Organization, Renovate will also check for the presence of a `renovate-config.json` file within a `.{{platform}}` repository parallel to the current repository.
 For example if the repository being onboarded is `abc/def` on a GitHub platform then Renovate will look for the existence of an `abc/.github` repository containing a `renovate-config.json` file.
@@ -239,8 +239,11 @@ For example the developers wonder why Renovate is behaving differently to its do
 
 Inherited config is visible to developers (it's within a repository they can see) although it's _implicitly_ applied so without log access and if they're not aware to look for an Inherited config repository then they may again be a little confused as to why default behavior has changed.
 
-Extending presets through Repository config is the most explicit and obvious way to use presets from an end user point of view.
-If they wonder why behavior is a certain way, they can look at the Repository config and trace through all presets it references.
+The recommended approach for using a centralized preset is to explicitly "extend" it from every repository, which can be achieved easily if it's part of your `onboardingConfig`.
+By having your centralized preset part of each Repository config `extends`, it has these two benefits:
+
+- You still have the ability to change shared settings in a single location
+- Any user viewing the repo can see the preset being extended and trace it back to understand which config is applied
 
 ## Mend Renovate App Config
 
