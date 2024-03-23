@@ -1,6 +1,5 @@
 import url from 'node:url';
 import is from '@sindresorhus/is';
-import { ParseError } from 'got';
 import { DateTime } from 'luxon';
 import { z } from 'zod';
 import { GlobalConfig } from '../../../config/global';
@@ -269,9 +268,9 @@ export async function getDependency(
         return cachedResult;
       }
 
-      if (actualError instanceof ParseError) {
-        const wrappedError = actualError as ParseError & { body?: string };
-        wrappedError.body = wrappedError.body && 'err.body deleted by Renovate';
+      if (actualError.name === 'ParseError' && actualError.body) {
+        actualError.body = 'err.body deleted by Renovate';
+        err.err = actualError;
       }
       throw err;
     }

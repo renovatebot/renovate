@@ -256,6 +256,22 @@ describe('modules/datasource/npm/get', () => {
     ).rejects.toThrow(ExternalHostError);
   });
 
+  it('redact body for ExternalHostError when error happens on registry.npmjs.org', async () => {
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
+    const registryUrl = resolveRegistryUrl('npm-parse-error');
+    let thrownError;
+    try {
+      await getDependency(http, registryUrl, 'npm-parse-error');
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError.err.name).toBe('ParseError');
+    expect(thrownError.err.body).toBe('err.body deleted by Renovate');
+  });
+
   it('do not throw ExternalHostError when error happens on custom host', async () => {
     setNpmrc('registry=https://test.org');
     httpMock
