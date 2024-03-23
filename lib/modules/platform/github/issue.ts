@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { z } from 'zod';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
+import { logger } from '../../../logger';
 
 const GithubIssueBase = z.object({
   number: z.number(),
@@ -126,10 +127,12 @@ export class GithubIssueCache {
     }
 
     if (!isReconciled) {
+      logger.debug('Issues cache: reset');
       this.reset(null);
       return null;
     }
 
+    logger.debug('Issues cache: synced');
     this.reset(cacheData);
     return cacheData;
   }
