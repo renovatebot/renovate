@@ -8,6 +8,7 @@ import type { MergeConfidence } from '../util/merge-confidence/types';
 
 export type RenovateConfigStage =
   | 'global'
+  | 'inherit'
   | 'repository'
   | 'package'
   | 'branch'
@@ -215,6 +216,8 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     Record<string, unknown> {
+  reportPath?: string;
+  reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
   baseBranches?: string[];
   commitBody?: string;
@@ -229,6 +232,11 @@ export interface RenovateConfig
   gitAuthor?: string;
 
   hostRules?: HostRule[];
+
+  inheritConfig?: boolean;
+  inheritConfigFileName?: string;
+  inheritConfigRepoName?: string;
+  inheritConfigStrict?: boolean;
 
   ignorePresets?: string[];
   forkProcessing?: 'auto' | 'enabled' | 'disabled';
@@ -391,6 +399,8 @@ export interface RenovateOptionBase {
    * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
    */
   globalOnly?: boolean;
+
+  inheritConfigSupport?: boolean;
 
   allowedValues?: string[];
 

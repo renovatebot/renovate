@@ -122,6 +122,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'renovate/configure',
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -131,6 +132,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: null,
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -140,6 +142,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'renovate.json',
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -148,6 +151,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'onboardingPrTitle',
@@ -156,6 +160,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'Configure Renovate',
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -300,6 +305,24 @@ const options: RenovateOptions[] = [
     default: 'local',
   },
   {
+    name: 'reportType',
+    description: 'Set how, or if, reports should be generated.',
+    globalOnly: true,
+    type: 'string',
+    default: null,
+    experimental: true,
+    allowedValues: ['logging', 'file', 's3'],
+  },
+  {
+    name: 'reportPath',
+    description:
+      'Path to where the file should be written. In case of `s3` this has to be a full S3 URI.',
+    globalOnly: true,
+    type: 'string',
+    default: null,
+    experimental: true,
+  },
+  {
     name: 'force',
     description:
       'Any configuration set in this object will force override existing settings.',
@@ -432,7 +455,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.3.0',
+    default: 'ghcr.io/containerbase/sidecar:10.3.5',
     globalOnly: true,
   },
   {
@@ -489,6 +512,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'onboardingConfig',
@@ -497,6 +521,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: { $schema: 'https://docs.renovatebot.com/renovate-schema.json' },
     globalOnly: true,
+    inheritConfigSupport: true,
     mergeable: true,
   },
   {
@@ -566,6 +591,38 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'inheritConfig',
+    description:
+      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'inheritConfigRepoName',
+    description:
+      'Renovate will look in this repo for the `inheritConfigFileName`.',
+    type: 'string',
+    default: '{{parentOrg}}/renovate-config',
+    globalOnly: true,
+  },
+  {
+    name: 'inheritConfigFileName',
+    description:
+      'Renovate will look for this config file name in the `inheritConfigRepoName`.',
+    type: 'string',
+    default: 'org-inherited-config.json',
+    globalOnly: true,
+  },
+  {
+    name: 'inheritConfigStrict',
+    description:
+      'If `true`, any `inheritedConfig` fetch errror will result in an aborted run.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
     name: 'requireConfig',
     description:
       "Controls Renovate's behavior regarding repository config files such as `renovate.json`.",
@@ -574,6 +631,7 @@ const options: RenovateOptions[] = [
     default: 'required',
     allowedValues: ['required', 'optional', 'ignored'],
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'optimizeForDisabled',
@@ -851,7 +909,6 @@ const options: RenovateOptions[] = [
       'Skip installing modules/dependencies if lock file updating is possible without a full install.',
     type: 'boolean',
     default: null,
-    globalOnly: true,
   },
   {
     name: 'autodiscover',
@@ -880,7 +937,7 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     globalOnly: true,
-    supportedPlatforms: ['gitlab'],
+    supportedPlatforms: ['gitea', 'gitlab'],
   },
   {
     name: 'autodiscoverProjects',
@@ -1035,6 +1092,7 @@ const options: RenovateOptions[] = [
       'kubernetes',
       'kustomize',
       'terraform',
+      'vendir',
       'woodpecker',
     ],
   },
@@ -1903,6 +1961,7 @@ const options: RenovateOptions[] = [
     default: false,
     supportedPlatforms: ['bitbucket'],
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   // Automatic merging
   {

@@ -83,6 +83,7 @@ export function generateBranchConfig(
   const newValue: string[] = [];
   const toVersions: string[] = [];
   const toValues = new Set<string>();
+  const depTypes = new Set<string>();
   for (const upg of branchUpgrades) {
     upg.recreateClosed = upg.recreateWhen === 'always';
 
@@ -119,6 +120,9 @@ export function generateBranchConfig(
       toVersions.push(upg.newVersion!);
     }
     toValues.add(upg.newValue!);
+    if (upg.depType) {
+      depTypes.add(upg.depType);
+    }
     // prettify newVersion and newMajor for printing
     if (upg.newVersion) {
       upg.prettyNewVersion = prettifyVersion(upg.newVersion);
@@ -424,6 +428,9 @@ export function generateBranchConfig(
   );
   if (additionalReviewers.length > 0) {
     config.additionalReviewers = additionalReviewers;
+  }
+  if (depTypes.size) {
+    config.depTypes = Array.from(depTypes).sort();
   }
   return config;
 }
