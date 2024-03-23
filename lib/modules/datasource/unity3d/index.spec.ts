@@ -23,9 +23,13 @@ describe('modules/datasource/unity3d/index', () => {
     });
   };
 
+  const stableStreamUrl = new URL(Unity3dDatasource.streams.stable);
+
   it('handle 500 response', async () => {
-    const uri = new URL(Unity3dDatasource.streams.stable);
-    httpMock.scope(uri.origin).get(uri.pathname).reply(500, '500');
+    httpMock
+      .scope(stableStreamUrl.origin)
+      .get(stableStreamUrl.pathname)
+      .reply(500, '500');
 
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
@@ -39,8 +43,10 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('handle 200 with no XML', async () => {
-    const uri = new URL(Unity3dDatasource.streams.stable);
-    httpMock.scope(uri.origin).get(uri.pathname).reply(200, 'not xml');
+    httpMock
+      .scope(stableStreamUrl.origin)
+      .get(stableStreamUrl.pathname)
+      .reply(200, 'not xml');
 
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
@@ -55,8 +61,10 @@ describe('modules/datasource/unity3d/index', () => {
 
   it('handles missing title element', async () => {
     const content = fixtures.no_title;
-    const uri = new URL(Unity3dDatasource.streams.stable);
-    httpMock.scope(uri.origin).get(uri.pathname).reply(200, content);
+    httpMock
+      .scope(stableStreamUrl.origin)
+      .get(stableStreamUrl.pathname)
+      .reply(200, content);
 
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
@@ -75,8 +83,10 @@ describe('modules/datasource/unity3d/index', () => {
 
   it('handles missing channel element', async () => {
     const content = fixtures.no_channel;
-    const uri = new URL(Unity3dDatasource.streams.stable);
-    httpMock.scope(uri.origin).get(uri.pathname).reply(200, content);
+    httpMock
+      .scope(stableStreamUrl.origin)
+      .get(stableStreamUrl.pathname)
+      .reply(200, content);
 
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
@@ -95,8 +105,10 @@ describe('modules/datasource/unity3d/index', () => {
 
   it('handles missing item element', async () => {
     const content = fixtures.no_item;
-    const uri = new URL(Unity3dDatasource.streams.stable);
-    httpMock.scope(uri.origin).get(uri.pathname).reply(200, content);
+    httpMock
+      .scope(stableStreamUrl.origin)
+      .get(stableStreamUrl.pathname)
+      .reply(200, content);
 
     const qualifyingStreams = { ...Unity3dDatasource.streams };
     delete qualifyingStreams.beta;
