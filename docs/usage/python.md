@@ -71,14 +71,17 @@ Renovate detects any custom-configured sources in `pyproject.toml` and uses them
 
 ### Specify URL in configuration
 
-Create a `python` object and put a `registryUrls` array in it.
+Create a `packageRules` entry with `matchDatasources=pypi` and a `registryUrls` array.
 Fill the array with alternate index URL(s).
 
 ```json
 {
-  "python": {
-    "registryUrls": ["http://example.com/private-pypi/"]
-  }
+  "packageRules": [
+    {
+      "matchDatasources": ["pypi"],
+      "registryUrls": ["http://example.com/private-pypi/"]
+    }
+  ]
 }
 ```
 

@@ -48,9 +48,10 @@ export class HelmDatasource extends Datasource {
       this.handleGenericErrors(err);
     }
     try {
-      const doc = parseSingleYaml(res.body, {
+      // TODO: use schema (#9610)
+      const doc = parseSingleYaml<HelmRepository>(res.body, {
         json: true,
-      }) as HelmRepository;
+      });
       if (!is.plainObject<HelmRepository>(doc)) {
         logger.warn(
           { helmRepository },

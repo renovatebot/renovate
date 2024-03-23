@@ -30,7 +30,8 @@ This makes it likely that Renovate bot checks your repository at least once duri
 
 ## Automerge limitations
 
-- Renovate automerges at most one branch per run
+- Renovate automerges at most one branch/PR per run
+- If an automerge happened, the repository run will be restarted at most once. The second run can also potentially automerge, so it may appear as like two automerges in one run.
 - Renovate will only automerge a branch when it is up-to-date with the target branch
 - Renovate may not be able to automerge as many branches as you expect, especially if your base branch is receiving regular commits at the same time
 

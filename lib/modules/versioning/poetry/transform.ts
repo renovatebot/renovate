@@ -1,4 +1,5 @@
 import semver from 'semver';
+import { regEx } from '../../../util/regex';
 import { RANGE_COMPARATOR_PATTERN, VERSION_PATTERN } from './patterns';
 
 interface LetterTag {
@@ -100,7 +101,7 @@ export function semver2poetry(version?: string): string | null {
  * add a '^', because poetry treats versions without operators as
  * exact versions.
  */
-export function poetry2npm(input: string): string {
+export function poetry2npm(input: string, throwOnUnsupported = false): string {
   // replace commas with spaces, then split at valid semver comparators
   const chunks = input
     .split(',')
@@ -113,6 +114,14 @@ export function poetry2npm(input: string): string {
     .map((chunk) => poetry2semver(chunk, false) ?? chunk)
     .join('')
     .replace(/===/, '=');
+  if (throwOnUnsupported) {
+    const isUnsupported = transformed
+      .split(regEx(/\s+/))
+      .some((part) => part.startsWith('!=')); // Patterns like `!=1.2.3` can't be easily translated between poetry/npm
+    if (isUnsupported) {
+      throw new Error('Unsupported by Poetry versioning implementation');
+    }
+  }
   return transformed;
 }
 

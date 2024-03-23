@@ -57,6 +57,54 @@ describe('workers/repository/onboarding/branch/create', () => {
       });
     });
 
+    describe('applies the commitBody value', () => {
+      it('to the default commit message', async () => {
+        await createOnboardingBranch({
+          ...config,
+          commitBody: 'some commit body',
+        });
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message: `Add renovate.json\n\nsome commit body`,
+          platformCommit: false,
+        });
+      });
+
+      it('to the supplied commit message', async () => {
+        const message =
+          'We can Renovate if we want to, we can leave PRs in decline';
+
+        config.onboardingCommitMessage = message;
+
+        await createOnboardingBranch({
+          ...config,
+          commitBody: 'Signed Off: {{{gitAuthor}}}',
+          gitAuthor: '<Bot bot@botland.com>',
+        });
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
+          branchName: 'renovate/configure',
+          files: [
+            {
+              type: 'addition',
+              path: 'renovate.json',
+              contents: '{"foo":"bar"}',
+            },
+          ],
+          force: true,
+          message: `We can Renovate if we want to, we can leave PRs in decline\n\nSigned Off: <Bot bot@botland.com>`,
+          platformCommit: false,
+        });
+      });
+    });
+
     describe('applies the commitMessagePrefix value', () => {
       it('to the default commit message', async () => {
         const prefix = 'RENOV-123';

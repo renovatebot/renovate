@@ -23,7 +23,7 @@ export function getConfig(): AllConfig {
   const options = getOptions();
   const config: AllConfig = {};
   options.forEach((option) => {
-    if (!option.parent) {
+    if (!option.parents) {
       config[option.name] = getDefault(option);
     }
   });

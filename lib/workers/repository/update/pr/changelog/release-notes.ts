@@ -4,6 +4,7 @@ import MarkdownIt from 'markdown-it';
 import { logger } from '../../../../../logger';
 import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
+import type { PackageCacheNamespace } from '../../../../../util/cache/package/types';
 import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
@@ -425,7 +426,7 @@ export async function addReleaseNotes(
   };
 
   const { repository, sourceDirectory, type: projectType } = input.project;
-  const cacheNamespace = `changelog-${projectType}-notes@v2`;
+  const cacheNamespace: PackageCacheNamespace = `changelog-${projectType}-notes@v2`;
   const cacheKeyPrefix = sourceDirectory
     ? `${repository}:${sourceDirectory}`
     : `${repository}`;

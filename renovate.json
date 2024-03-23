@@ -28,6 +28,17 @@
     {
       "matchFileNames": ["**/__fixtures__/**"],
       "enabled": false
+    },
+    {
+      "description": "set fix scope for base image",
+      "matchDepNames": ["ghcr.io/renovatebot/base-image"],
+      "semanticCommitType": "fix"
+    },
+    {
+      "description": "set feat scope for base image major",
+      "matchDepNames": ["ghcr.io/renovatebot/base-image"],
+      "matchUpdateTypes": ["major", "minor"],
+      "semanticCommitType": "feat"
     }
   ],
   "customManagers": [

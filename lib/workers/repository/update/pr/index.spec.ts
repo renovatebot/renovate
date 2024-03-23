@@ -798,6 +798,54 @@ describe('workers/repository/update/pr/index', () => {
           ],
         });
       });
+
+      // compares currentVersion and currentValue separately to
+      // prevent removal false duplicates
+      it('stricter de-deuplication of changelogs', async () => {
+        platform.createPr.mockResolvedValueOnce(pr);
+        const upgrade = {
+          ...dummyUpgrade,
+          currentValue:
+            '1.21.5-alpine3.18@sha256:d8b99943fb0587b79658af03d4d4e8b57769b21dcf08a8401352a9f2a7228754',
+          newValue:
+            '1.21.6-alpine3.18@sha256:3354c3a94c3cf67cb37eb93a8e9474220b61a196b13c26f1c01715c301b22a69',
+          currentVersion: '1.21.5-alpine3.18',
+          newVersion: '1.21.6-alpine3.18',
+          logJSON: undefined,
+          sourceUrl: 'https://github.com/foo/bar',
+          hasReleaseNotes: true,
+        };
+        delete upgrade.logJSON;
+
+        const res = await ensurePr({
+          ...config,
+          upgrades: [
+            upgrade,
+            {
+              ...upgrade,
+              currentValue:
+                '1.21.5-alpine3.19@sha256:d8b99943fb0587b79658af03d4d4e8b57769b21dcf08a8401352a9f2a7228754',
+              newValue:
+                '1.21.6-alpine3.19@sha256:3354c3a94c3cf67cb37eb93a8e9474220b61a196b13c26f1c01715c301b22a69',
+              currentVersion: '1.21.5-alpine3.19',
+              newVersion: '1.21.6-alpine3.19',
+            },
+            // adding this object for coverage
+            {
+              ...upgrade,
+              currentValue: undefined,
+              newValue:
+                '1.21.6-alpine3.19@sha256:3354c3a94c3cf67cb37eb93a8e9474220b61a196b13c26f1c01715c301b22a69',
+              currentVersion: '1.21.5-alpine3.19',
+              newVersion: undefined,
+            },
+          ],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr });
+        const [[bodyConfig]] = prBody.getPrBody.mock.calls;
+        expect(bodyConfig.upgrades).toHaveLength(3);
+      });
     });
 
     describe('prCache', () => {

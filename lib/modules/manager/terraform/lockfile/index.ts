@@ -17,6 +17,7 @@ import {
   extractLocks,
   findLockFile,
   isPinnedVersion,
+  massageNewValue,
   readLockFile,
   writeLockUpdates,
 } from './util';
@@ -70,8 +71,15 @@ export function getNewConstraint(
   dep: Upgrade<Record<string, unknown>>,
   oldConstraint: string | undefined,
 ): string | undefined {
-  const { currentValue, currentVersion, newValue, newVersion, packageName } =
-    dep;
+  const {
+    currentValue,
+    currentVersion,
+    newValue: rawNewValue,
+    newVersion,
+    packageName,
+  } = dep;
+
+  const newValue = massageNewValue(rawNewValue);
 
   if (oldConstraint && currentValue && newValue && currentValue === newValue) {
     logger.debug(
@@ -91,8 +99,8 @@ export function getNewConstraint(
     );
     //remove surplus .0 version
     return oldConstraint.replace(
-      regEx(`${escapeRegExp(currentValue)}(\\.0)*`),
-      newValue,
+      regEx(`(,\\s|^)${escapeRegExp(currentValue)}(\\.0)*`),
+      `$1${newValue}`,
     );
   }
 
@@ -168,6 +176,20 @@ export async function updateArtifacts({
         // istanbul ignore if: needs test
         if (!updateLock) {
           continue;
+        }
+        if (dep.isLockfileUpdate) {
+          const versioning = getVersioning(dep.versioning);
+          const satisfyingVersion = versioning.getSatisfyingVersion(
+            [dep.newVersion!],
+            updateLock.constraints,
+          );
+
+          if (!satisfyingVersion) {
+            logger.debug(
+              `Skipping. Lockfile update with "${newVersion}" does not statisfy constraints "${updateLock.constraints}" for "${packageName}"`,
+            );
+            continue;
+          }
         }
         const newConstraint = getNewConstraint(dep, updateLock.constraints);
         const update: ProviderLockUpdate = {

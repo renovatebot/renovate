@@ -45,7 +45,7 @@ describe('workers/repository/onboarding/branch/config', () => {
   });
 
   describe('getOnboardingConfig', () => {
-    it('handles finding an organization preset', async () => {
+    it('handles finding a preset in the same group level', async () => {
       mockedPresets.getPreset.mockResolvedValueOnce({ enabled: true });
       const onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
@@ -68,7 +68,55 @@ describe('workers/repository/onboarding/branch/config', () => {
       });
     });
 
-    it('handles not finding an organization preset', async () => {
+    it('handles finding a preset in the same group', async () => {
+      config.repository = 'org/group/repo';
+      mockedPresets.getPreset.mockImplementation(({ repo }) => {
+        if (repo === 'org/group/renovate-config') {
+          return Promise.resolve({ enabled: true });
+        }
+        return Promise.reject(new Error(PRESET_DEP_NOT_FOUND));
+      });
+      const onboardingConfig = await getOnboardingConfig(config);
+      expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
+      expect(onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: ['local>org/group/renovate-config'],
+      });
+    });
+
+    it('handles finding a preset in a parent group', async () => {
+      config.repository = 'org/group/repo';
+      mockedPresets.getPreset.mockImplementation(({ repo }) => {
+        if (repo === 'org/renovate-config') {
+          return Promise.resolve({ enabled: true });
+        }
+        return Promise.reject(new Error(PRESET_DEP_NOT_FOUND));
+      });
+      const onboardingConfig = await getOnboardingConfig(config);
+      expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
+      expect(onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: ['local>org/renovate-config'],
+      });
+    });
+
+    it('handles falling back to finding a organization preset', async () => {
+      config.repository = 'org/group/repo';
+      mockedPresets.getPreset.mockImplementation(({ repo }) => {
+        if (repo === 'org/.github') {
+          return Promise.resolve({ enabled: true });
+        }
+        return Promise.reject(new Error(PRESET_DEP_NOT_FOUND));
+      });
+      const onboardingConfig = await getOnboardingConfig(config);
+      expect(mockedPresets.getPreset).toHaveBeenCalledTimes(3);
+      expect(onboardingConfig).toEqual({
+        $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+        extends: ['local>org/.github:renovate-config'],
+      });
+    });
+
+    it('handles not finding any preset', async () => {
       mockedPresets.getPreset.mockRejectedValue(
         new Error(PRESET_DEP_NOT_FOUND),
       );

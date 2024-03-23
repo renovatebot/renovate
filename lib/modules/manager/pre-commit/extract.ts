@@ -158,7 +158,8 @@ export function extractPackageFile(
   type ParsedContent = Record<string, unknown> | PreCommitConfig;
   let parsedContent: ParsedContent;
   try {
-    parsedContent = parseSingleYaml(content, { json: true }) as ParsedContent;
+    // TODO: use schema (#9610)
+    parsedContent = parseSingleYaml(content, { json: true });
   } catch (err) {
     logger.debug(
       { filename: packageFile, err },

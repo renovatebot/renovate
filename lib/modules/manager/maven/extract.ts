@@ -9,6 +9,12 @@ import { MAVEN_REPO } from '../../datasource/maven/common';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { MavenProp } from './types';
 
+const supportedNamespaces = [
+  'http://maven.apache.org/SETTINGS/1.0.0',
+  'http://maven.apache.org/SETTINGS/1.1.0',
+  'http://maven.apache.org/SETTINGS/1.2.0',
+];
+
 function parsePom(raw: string, packageFile: string): XmlDocument | null {
   let project: XmlDocument;
   try {
@@ -58,13 +64,12 @@ function depFromNode(
     const versionNode = node.descendantWithPath('version')!;
     const fileReplacePosition = versionNode.position;
     const datasource = MavenDatasource.id;
-    const registryUrls = [MAVEN_REPO];
     const result: PackageDependency = {
       datasource,
       depName,
       currentValue,
       fileReplacePosition,
-      registryUrls,
+      registryUrls: [],
     };
 
     switch (node.name) {
@@ -367,7 +372,7 @@ export function parseSettings(raw: string): XmlDocument | null {
   if (name !== 'settings') {
     return null;
   }
-  if (attr.xmlns === 'http://maven.apache.org/SETTINGS/1.0.0') {
+  if (supportedNamespaces.includes(attr.xmlns)) {
     return settings;
   }
   return null;
@@ -464,6 +469,8 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
     delete packageFile.parent;
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
+      //Add Registry From SuperPom
+      dep.registryUrls!.push(MAVEN_REPO);
     });
   });
   return packageFiles;
@@ -503,12 +510,7 @@ export async function extractAllPackageFiles(
   if (additionalRegistryUrls) {
     for (const pkgFile of packages) {
       for (const dep of pkgFile.deps) {
-        /* istanbul ignore else */
-        if (dep.registryUrls) {
-          dep.registryUrls.push(...additionalRegistryUrls);
-        } else {
-          dep.registryUrls = [...additionalRegistryUrls];
-        }
+        dep.registryUrls!.unshift(...additionalRegistryUrls);
       }
     }
   }

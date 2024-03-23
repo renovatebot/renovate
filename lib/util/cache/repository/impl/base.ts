@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import { compress, decompress } from '../../../compress';
+import { compressToBase64, decompressFromBase64 } from '../../../compress';
 import { hash } from '../../../hash';
 import { safeStringify } from '../../../stringify';
 import { CACHE_REVISION } from '../common';
@@ -41,7 +41,7 @@ export abstract class RepoCacheBase implements RepoCache {
       logger.debug('Repository cache fingerprint is invalid');
       return;
     }
-    const jsonStr = await decompress(oldCache.payload);
+    const jsonStr = await decompressFromBase64(oldCache.payload);
     this.data = RepoCacheBase.parseData(jsonStr);
     this.oldHash = oldCache.hash;
   }
@@ -63,7 +63,7 @@ export abstract class RepoCacheBase implements RepoCache {
         return;
       }
 
-      logger.debug('Repository cache is invalid');
+      logger.warn({ err: cacheV13.error }, 'Repository cache is invalid');
     } catch (err) /* istanbul ignore next: not easily testable */ {
       logger.debug({ err }, 'Error reading repository cache');
     }
@@ -80,7 +80,7 @@ export abstract class RepoCacheBase implements RepoCache {
     const repository = this.repository;
     const fingerprint = this.fingerprint;
 
-    const payload = await compress(jsonStr);
+    const payload = await compressToBase64(jsonStr);
 
     await this.write({
       revision,

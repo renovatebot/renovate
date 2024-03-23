@@ -1,3 +1,5 @@
+import type { PackageDependency } from '../types';
+
 export interface DotnetToolsManifest {
   readonly version: number;
   readonly isRoot: boolean;
@@ -40,4 +42,8 @@ export interface PackageSourceCredential {
 export interface PackageSourceMap {
   readonly name: string;
   readonly patterns: string[];
+}
+
+export interface NugetPackageDependency extends PackageDependency {
+  depName: string;
 }

@@ -18,9 +18,7 @@ When you run `renovate-config-validator` with no arguments it will check:
 For example:
 
 ```console
-$ npm install --global renovate
-added 750 packages, and audited 751 packages in 51s
-$ renovate-config-validator
+$ npx --yes --package renovate -- renovate-config-validator
  INFO: Validating renovate.json
  INFO: Config validated successfully
 ```
@@ -28,7 +26,21 @@ $ renovate-config-validator
 ### Strict mode
 
 By default, the validator program fails with a non-zero exit code if there are any validation warnings or errors.
-You can pass the `--strict` flag to make it fail if a scanned config needs migration.
+You can pass the `--strict` flag to make it fail if a scanned config needs migration:
+
+```console title="Strict mode validation"
+$ npx --yes --package renovate -- renovate-config-validator --strict
+ INFO: Validating renovate.json
+ WARN: Config migration necessary
+       "oldConfig": {
+         "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+         "extends": [ "config:base" ]
+       },
+       "newConfig": {
+         "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+         "extends": [ "config:recommended" ]
+       },
+```
 
 ### Pass file to check as CLI arguments
 
@@ -37,9 +49,7 @@ This can be handy to check a config file with a non-default name, like when you'
 For example:
 
 ```console
-$ npm install --global renovate
-added 750 packages, and audited 751 packages in 51s
-$ renovate-config-validator first_config.json
+$ npx --yes --package renovate -- renovate-config-validator first_config.json
  INFO: Validating first_config_.json
  INFO: Config validated successfully
 ```

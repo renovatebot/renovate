@@ -21,7 +21,11 @@ import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
 import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache';
-import { OnboardingState, defaultConfigFile } from '../common';
+import {
+  OnboardingState,
+  defaultConfigFile,
+  getSemanticCommitPrTitle,
+} from '../common';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getPrList } from './pr-list';
@@ -175,9 +179,7 @@ If you need any further assistance then you can also [request help here](${
       // TODO #22198
       const prTitle =
         config.semanticCommits === 'enabled'
-          ? `${config.semanticCommitType ?? 'chore'}: ${
-              config.onboardingPrTitle
-            }`
+          ? getSemanticCommitPrTitle(config)
           : config.onboardingPrTitle!;
       const pr = await platform.createPr({
         sourceBranch: config.onboardingBranch!,

@@ -36,7 +36,7 @@ import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelogs } from '../../changelog';
-import { ensurePr } from '../pr';
+import { ensurePr, getPlatformPrOptions } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
 import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
@@ -145,6 +145,7 @@ export async function processBranch(
     config.rebaseRequested = await rebaseCheck(config, branchPr);
     logger.debug(`PR rebase requested=${config.rebaseRequested}`);
   }
+  const keepUpdatedLabel = config.keepUpdatedLabel;
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
   try {
     // Check if branch already existed
@@ -429,6 +430,7 @@ export async function processBranch(
     } else if (
       branchExists &&
       config.rebaseWhen === 'never' &&
+      !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel)) &&
       !dependencyDashboardCheck
     ) {
       logger.debug('rebaseWhen=never so skipping branch update check');
@@ -570,9 +572,22 @@ export async function processBranch(
       await scm.checkoutBranch(config.baseBranch);
       updatesVerified = true;
     }
-    // istanbul ignore if
-    if (branchPr && platform.refreshPr) {
-      await platform.refreshPr(branchPr.number);
+
+    if (branchPr) {
+      const platformOptions = getPlatformPrOptions(config);
+      if (
+        platformOptions.usePlatformAutomerge &&
+        platform.reattemptPlatformAutomerge
+      ) {
+        await platform.reattemptPlatformAutomerge({
+          number: branchPr.number,
+          platformOptions,
+        });
+      }
+      // istanbul ignore if
+      if (platform.refreshPr) {
+        await platform.refreshPr(branchPr.number);
+      }
     }
     if (!commitSha && !branchExists) {
       return {
@@ -636,7 +651,8 @@ export async function processBranch(
       }
       if (
         mergeStatus === 'stale' &&
-        ['conflicted', 'never'].includes(config.rebaseWhen!)
+        ['conflicted', 'never'].includes(config.rebaseWhen!) &&
+        !(keepUpdatedLabel && branchPr?.labels?.includes(keepUpdatedLabel))
       ) {
         logger.warn(
           'Branch cannot automerge because it is behind base branch and rebaseWhen setting disallows rebasing - raising a PR instead',

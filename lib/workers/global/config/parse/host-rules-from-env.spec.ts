@@ -1,3 +1,4 @@
+import { logger } from '../../../../../test/util';
 import { hostRulesFromEnv } from './host-rules-from-env';
 
 describe('workers/global/config/parse/host-rules-from-env', () => {
@@ -91,6 +92,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
 
   it('supports platform env token', () => {
     const envParam: NodeJS.ProcessEnv = {
+      GITHUB_COM_TOKEN: 'this-should-be-ignored-here',
       GITHUB_SOME_GITHUB__ENTERPRISE_HOST_TOKEN: 'some-token',
     };
     expect(hostRulesFromEnv(envParam)).toMatchObject([
@@ -100,6 +102,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
         token: 'some-token',
       },
     ]);
+    expect(logger.logger.warn).not.toHaveBeenCalled();
   });
 
   it('rejects incomplete datasource env token', () => {

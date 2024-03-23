@@ -32,6 +32,7 @@ function getDep(
   if (digestMatch?.groups?.digest) {
     dep.currentDigest = digestMatch.groups.digest;
     dep.digestOneAndOnly = true;
+    dep.versioning = 'loose';
   }
   return dep;
 }

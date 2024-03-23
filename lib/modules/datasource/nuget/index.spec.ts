@@ -585,7 +585,7 @@ describe('modules/datasource/nuget/index', () => {
       expect(res?.sourceUrl).toBeDefined();
     });
 
-    it('processes real data no relase (v2)', async () => {
+    it('processes real data no release (v2)', async () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
@@ -625,6 +625,20 @@ describe('modules/datasource/nuget/index', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
+    });
+
+    it('extracts latest tag (v2)', async () => {
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published',
+        )
+        .reply(200, pkgListV2NoGitHubProjectUrl);
+      const res = await getPkgReleases({
+        ...configV2,
+      });
+      expect(res).not.toBeNull();
+      expect(res?.tags?.latest).toBe('3.11.0');
     });
 
     it('handles paginated results (v2)', async () => {

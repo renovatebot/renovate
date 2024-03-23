@@ -6,7 +6,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { checkIfStringIsPath } from '../terraform/util';
 import type { PackageDependency, PackageFileContent } from '../types';
-import type { FleetFile, FleetHelmBlock, GitRepo } from './types';
+import { FleetFile, type FleetHelmBlock, GitRepo } from './schema';
 
 function extractGitRepo(doc: GitRepo): PackageDependency {
   const dep: PackageDependency = {
@@ -119,19 +119,21 @@ export function extractPackageFile(
 
   try {
     if (regEx('fleet.ya?ml').test(packageFile)) {
-      // TODO: fix me (#9610)
-      const docs = parseYaml(content, null, { json: true }) as FleetFile[];
-      const fleetDeps = docs
-        .filter((doc) => is.truthy(doc?.helm))
-        .flatMap((doc) => extractFleetFile(doc));
+      const docs = parseYaml(content, null, {
+        json: true,
+        customSchema: FleetFile,
+        failureBehaviour: 'filter',
+      });
+      const fleetDeps = docs.flatMap(extractFleetFile);
 
       deps.push(...fleetDeps);
     } else {
-      // TODO: fix me (#9610)
-      const docs = parseYaml(content, null, { json: true }) as GitRepo[];
-      const gitRepoDeps = docs
-        .filter((doc) => doc.kind === 'GitRepo') // ensure only GitRepo manifests are processed
-        .flatMap((doc) => extractGitRepo(doc));
+      const docs = parseYaml(content, null, {
+        json: true,
+        customSchema: GitRepo,
+        failureBehaviour: 'filter',
+      });
+      const gitRepoDeps = docs.flatMap(extractGitRepo);
       deps.push(...gitRepoDeps);
     }
   } catch (err) {

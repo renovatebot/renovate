@@ -9,10 +9,11 @@ export function extractPackageFile(
   file: string,
   packageFile?: string,
 ): PackageFileContent | null {
-  let doc: VelaPipelineConfiguration | undefined;
+  let doc: VelaPipelineConfiguration;
 
   try {
-    doc = parseSingleYaml(file, { json: true }) as VelaPipelineConfiguration;
+    // TODO: use schema (#9610)
+    doc = parseSingleYaml(file, { json: true });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Vela file.');
     return null;

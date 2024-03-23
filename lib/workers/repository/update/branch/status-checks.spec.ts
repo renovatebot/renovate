@@ -1,4 +1,5 @@
-import { partial, platform } from '../../../../../test/util';
+import { RenovateConfig, partial, platform } from '../../../../../test/util';
+import { logger } from '../../../../logger';
 import {
   ConfidenceConfig,
   StabilityConfig,
@@ -14,6 +15,9 @@ describe('workers/repository/update/branch/status-checks', () => {
     beforeEach(() => {
       config = partial<StabilityConfig>({
         branchName: 'renovate/some-branch',
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+          minimumReleaseAge: 'renovate/stability-days',
+        }),
       });
     });
 
@@ -45,6 +49,46 @@ describe('workers/repository/update/branch/status-checks', () => {
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
     });
+
+    it('skips status if statusCheckNames.minimumReleaseAge is null', async () => {
+      config.stabilityStatus = 'green';
+      await setStability({
+        ...config,
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+          minimumReleaseAge: null,
+        }),
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition.',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('skips status if statusCheckNames.minimumReleaseAge is empty string', async () => {
+      config.stabilityStatus = 'green';
+      await setStability({
+        ...config,
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+          minimumReleaseAge: '',
+        }),
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition.',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('skips status if statusCheckNames is undefined', async () => {
+      config.stabilityStatus = 'green';
+      await setStability({
+        ...config,
+        statusCheckNames: undefined as never,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition.',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
   });
 
   describe('setConfidence', () => {
@@ -53,6 +97,9 @@ describe('workers/repository/update/branch/status-checks', () => {
     beforeEach(() => {
       config = {
         branchName: 'renovate/some-branch',
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+          mergeConfidence: 'renovate/merge-confidence',
+        }),
       };
     });
 
@@ -84,6 +131,49 @@ describe('workers/repository/update/branch/status-checks', () => {
       await setConfidence(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
+    });
+
+    it('skips status if statusCheckNames.mergeConfidence is null', async () => {
+      config.minimumConfidence = 'high';
+      config.confidenceStatus = 'green';
+      await setConfidence({
+        ...config,
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+          mergeConfidence: null,
+        }),
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition.',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('skips status if statusCheckNames.mergeConfidence is empty string', async () => {
+      config.minimumConfidence = 'high';
+      config.confidenceStatus = 'green';
+      await setConfidence({
+        ...config,
+        statusCheckNames: partial<RenovateConfig['statusCheckNames']>({
+          mergeConfidence: '',
+        }),
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition.',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
+    });
+
+    it('skips status if statusCheckNames is undefined', async () => {
+      config.minimumConfidence = 'high';
+      config.confidenceStatus = 'green';
+      await setConfidence({
+        ...config,
+        statusCheckNames: undefined as never,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Status check is null or an empty string, skipping status check addition.',
+      );
+      expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });
   });
 

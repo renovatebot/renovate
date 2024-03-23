@@ -221,6 +221,7 @@ Marking the latest version of an npm package as deprecated results in the entire
       "dependencies": undefined,
       "devDependencies": undefined,
       "gitRef": undefined,
+      "isDeprecated": true,
       "releaseTimestamp": "2018-05-06T05:21:53.000Z",
       "version": "0.0.1",
     },

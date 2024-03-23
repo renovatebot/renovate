@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import upath from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
@@ -65,6 +66,59 @@ describe('modules/manager/nuget/extract', () => {
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(17);
+    });
+
+    it('extracts ContainerBaseImage', async () => {
+      const contents = codeBlock`
+      <Project Sdk="Microsoft.NET.Sdk.Worker">
+        <PropertyGroup>
+          <Version>0.1.0</Version>
+          <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:7.0.10</ContainerBaseImage>
+        </PropertyGroup>
+      </Project>`;
+
+      expect(await extractPackageFile(contents, contents, config)).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            depName: 'mcr.microsoft.com/dotnet/runtime',
+            depType: 'docker',
+            datasource: 'docker',
+            currentValue: '7.0.10',
+            replaceString: 'mcr.microsoft.com/dotnet/runtime:7.0.10',
+          },
+        ],
+        packageFileVersion: '0.1.0',
+      });
+    });
+
+    it('extracts ContainerBaseImage with pinned digest', async () => {
+      const contents = codeBlock`
+      <Project Sdk="Microsoft.NET.Sdk.Worker">
+        <PropertyGroup>
+          <Version>0.1.0</Version>
+          <ContainerBaseImage>mcr.microsoft.com/dotnet/runtime:7.0.10@sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19</ContainerBaseImage>
+        </PropertyGroup>
+      </Project>`;
+
+      expect(await extractPackageFile(contents, contents, config)).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            depName: 'mcr.microsoft.com/dotnet/runtime',
+            depType: 'docker',
+            datasource: 'docker',
+            currentValue: '7.0.10',
+            currentDigest:
+              'sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19',
+            replaceString:
+              'mcr.microsoft.com/dotnet/runtime:7.0.10@sha256:181067029e094856691ee1ce3782ea3bd3fda01bb5b6d19411d0f673cab1ab19',
+          },
+        ],
+        packageFileVersion: '0.1.0',
+      });
     });
 
     it('considers NuGet.config', async () => {
@@ -242,9 +296,7 @@ describe('modules/manager/nuget/extract', () => {
     it('extracts msbuild-sdks from global.json', async () => {
       const packageFile = 'msbuild-sdk-files/global.json';
       const contents = Fixtures.get(packageFile);
-      expect(
-        await extractPackageFile(contents, packageFile, config),
-      ).toMatchObject({
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
           {
             currentValue: '5.0.302',
@@ -259,24 +311,26 @@ describe('modules/manager/nuget/extract', () => {
             depType: 'msbuild-sdk',
           },
         ],
+        extractedConstraints: { 'dotnet-sdk': '5.0.302' },
       });
     });
 
     it('extracts dotnet-sdk from global.json', async () => {
       const packageFile = 'msbuild-sdk-files/global.1.json';
       const contents = Fixtures.get(packageFile);
-      expect(
-        await extractPackageFile(contents, 'global.json', config),
-      ).toMatchObject({
-        deps: [
-          {
-            currentValue: '5.0.302',
-            depName: 'dotnet-sdk',
-            depType: 'dotnet-sdk',
-            datasource: DotnetVersionDatasource.id,
-          },
-        ],
-      });
+      expect(await extractPackageFile(contents, 'global.json', config)).toEqual(
+        {
+          deps: [
+            {
+              currentValue: '5.0.302',
+              depName: 'dotnet-sdk',
+              depType: 'dotnet-sdk',
+              datasource: DotnetVersionDatasource.id,
+            },
+          ],
+          extractedConstraints: { 'dotnet-sdk': '5.0.302' },
+        },
+      );
     });
 
     it('handles malformed global.json', async () => {

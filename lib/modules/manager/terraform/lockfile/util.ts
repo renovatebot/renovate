@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { get as getVersioning } from '../../../versioning';
@@ -224,4 +225,31 @@ export function writeLockUpdates(
       contents: newContent,
     },
   };
+}
+
+export function massageNewValue(value: string | undefined): string | undefined {
+  if (is.nullOrUndefined(value)) {
+    return value;
+  }
+
+  const elements = value.split(',');
+  const massagedElements: string[] = [];
+  for (const element of elements) {
+    // these constraints are allowed to miss precision
+    if (element.includes('~>')) {
+      massagedElements.push(element);
+      continue;
+    }
+
+    const missing0s = 3 - element.split('.').length;
+
+    let massagedElement = element;
+
+    for (let i = 0; i < missing0s; i++) {
+      massagedElement = `${massagedElement}.0`;
+    }
+    massagedElements.push(massagedElement);
+  }
+
+  return massagedElements.join(',');
 }

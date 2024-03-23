@@ -83,6 +83,8 @@ describe('modules/versioning/poetry/index', () => {
 
   it.each`
     version                                          | expected
+    ${null}                                          | ${false}
+    ${undefined}                                     | ${false}
     ${'17.04.00'}                                    | ${true}
     ${'17.b4.0'}                                     | ${false}
     ${'1.2.3'}                                       | ${true}
@@ -101,6 +103,7 @@ describe('modules/versioning/poetry/index', () => {
     ${'renovatebot/renovate'}                        | ${false}
     ${'renovatebot/renovate#master'}                 | ${false}
     ${'https://github.com/renovatebot/renovate.git'} | ${false}
+    ${'>=2.6, !=3.0.*, !=3.1.*, !=3.2.*, <4'}        | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(!!versioning.isValid(version)).toBe(expected);
   });
