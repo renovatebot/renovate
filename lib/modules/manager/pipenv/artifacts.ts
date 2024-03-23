@@ -187,10 +187,10 @@ async function addCredentialsForSourceUrls(
   for (const sourceUrl of sourceUrls) {
     const parsedSourceUrl = parseUrl(sourceUrl);
     if (!parsedSourceUrl) {
-      logger.warn(`Could not parse url for source: ${sourceUrl}`);
+      logger.warn(`Pipenv: could not parse url for source: ${sourceUrl}`);
       return;
     }
-    logger.debug({ sourceUrl }, `Trying to add credentials for ${sourceUrl}`);
+    logger.debug(`Trying to add credentials for ${sourceUrl}`);
     const { password, username } = getMatchingHostRule(sourceUrl) ?? {};
     if (username) {
       const environmentVariableName =
