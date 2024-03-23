@@ -3,17 +3,26 @@ import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { Unity3dDatasource } from '.';
 
-const mockRSSFeeds = (streams: { [keys: string]: string }) => {
-  Object.entries(streams).map(([stream, url]) => {
-    const content = Fixtures.get(stream + '.xml');
-
-    const uri = new URL(url);
-
-    httpMock.scope(uri.origin).get(uri.pathname).reply(200, content);
-  });
-};
-
 describe('modules/datasource/unity3d/index', () => {
+  const fixtures = Object.fromEntries(
+    [
+      ...Object.keys(Unity3dDatasource.streams),
+      'no_title',
+      'no_channel',
+      'no_item',
+    ].map((fixture) => [fixture, Fixtures.get(fixture + '.xml')]),
+  );
+
+  const mockRSSFeeds = (streams: { [keys: string]: string }) => {
+    Object.entries(streams).map(([stream, url]) => {
+      const content = fixtures[stream];
+
+      const uri = new URL(url);
+
+      httpMock.scope(uri.origin).get(uri.pathname).reply(200, content);
+    });
+  };
+
   it('handle 500 response', async () => {
     const uri = new URL(Unity3dDatasource.streams.stable);
     httpMock.scope(uri.origin).get(uri.pathname).reply(500, '500');
@@ -45,7 +54,7 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('handles missing title element', async () => {
-    const content = Fixtures.get('no_title.xml');
+    const content = fixtures.no_title;
     const uri = new URL(Unity3dDatasource.streams.stable);
     httpMock.scope(uri.origin).get(uri.pathname).reply(200, content);
 
@@ -65,7 +74,7 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('handles missing channel element', async () => {
-    const content = Fixtures.get('no_channel.xml');
+    const content = fixtures.no_channel;
     const uri = new URL(Unity3dDatasource.streams.stable);
     httpMock.scope(uri.origin).get(uri.pathname).reply(200, content);
 
@@ -85,7 +94,7 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('handles missing item element', async () => {
-    const content = Fixtures.get('no_item.xml');
+    const content = fixtures.no_item;
     const uri = new URL(Unity3dDatasource.streams.stable);
     httpMock.scope(uri.origin).get(uri.pathname).reply(200, content);
 
