@@ -638,12 +638,18 @@ Renovate supports two options:
 More advanced filtering options may come in future.
 
 There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
+Additionally, the "datasource" within Renovate must be capable of returning `constraints` values about each package's release.
+
 This feature is limited to the following datasources:
 
+- `crate`
 - `jenkins-plugins`
 - `npm`
 - `packagist`
 - `pypi`
+- `rubygems`
+
+Sometimes when using private registries they may omit constraints information, which then is another reason such filtering may not work even if the datasource and corresponding default public registry supports it.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -2055,11 +2061,11 @@ For example, consider this config:
 ```json
 {
   "extends": ["config:recommended"],
-  "ignorePresets": [":prHourlyLimit2"]
+  "ignorePresets": ["group:monorepos"]
 }
 ```
 
-It would take the entire `"config:recommended"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
+It would take the entire `"config:recommended"` preset - which has a lot of sub-presets - but ignore the `"group:monorepos"` rule.
 
 ## ignoreReviewers
 
