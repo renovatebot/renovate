@@ -19,8 +19,6 @@ describe('workers/repository/init/inherited', () => {
       inheritConfigFileName: 'config.json',
       inheritConfigStrict: false,
     };
-
-    platform.getRawFile.mockClear();
   });
 
   it('should return the same config if repository or inheritConfig is not defined', async () => {
