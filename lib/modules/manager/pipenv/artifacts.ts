@@ -180,9 +180,11 @@ async function addCredentialsForSourceUrls(
   pipfileName: string,
   extraEnv: ExtraEnv<unknown>,
 ): Promise<void> {
-  (
-    await findPipfileSourceUrlsWithCredentials(newPipfileContent, pipfileName)
-  ).every((sourceUrl) => {
+  const sourceUrls = await findPipfileSourceUrlsWithCredentials(
+    newPipfileContent,
+    pipfileName,
+  );
+  for (const sourceUrl of sourceUrls) {
     const parsedSourceUrl = parseUrl(sourceUrl);
     if (!parsedSourceUrl) {
       logger.warn(`Could not parse url for source: ${sourceUrl}`);
@@ -200,7 +202,7 @@ async function addCredentialsForSourceUrls(
         extractEnvironmentVariableName(parsedSourceUrl.password) ?? 'PASSWORD';
       addExtraEnvVariable(extraEnv, environmentVariableName, password);
     }
-  });
+  }
 }
 
 export async function updateArtifacts({
