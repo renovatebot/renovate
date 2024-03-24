@@ -144,6 +144,7 @@ export class GiteaPrCache {
     if (!url) {
       return undefined;
     }
-    return new URL(url).pathname;
+    const withBaseUrl = new URL(url);
+    return withBaseUrl.pathname + withBaseUrl.search + withBaseUrl.hash;
   }
 }
