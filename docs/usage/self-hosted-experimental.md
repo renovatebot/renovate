@@ -150,11 +150,11 @@ Read [platform details](modules/platform/gitlab/index.md) to learn why we need t
 
 ## `RENOVATE_X_REBASE_PAGINATION_LINKS`
 
-If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to use the `endpoint` URL from the Renovate config.
+If set, Renovate will rewrite GitHub Enterprise Server's and Gitea's pagination responses to use the `endpoint` URL from the Renovate config.
 
 <!-- prettier-ignore -->
 !!! note
-    For the GitHub Enterprise Server platform only.
+    For the GitHub Enterprise Server or Gitea platforms only.
 
 ## `RENOVATE_X_S3_ENDPOINT`
 
