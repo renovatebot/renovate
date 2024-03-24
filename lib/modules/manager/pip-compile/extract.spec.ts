@@ -270,7 +270,7 @@ describe('modules/manager/pip-compile/extract', () => {
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles).toBeDefined();
     expect(packageFiles?.map((p) => p.packageFile)).toEqual(['1.in', '3.in']);
-    expect(packageFiles?.map((p) => p.lockFiles!)).toEqual([
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([
       ['2.txt', '4.txt'],
       ['4.txt'],
     ]);
