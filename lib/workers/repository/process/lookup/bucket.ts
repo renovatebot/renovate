@@ -3,6 +3,7 @@ import type { VersioningApi } from '../../../../modules/versioning/types';
 export interface BucketConfig {
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
+  separateMultipleMinor?: boolean;
   separateMinorPatch?: boolean;
 }
 
@@ -12,8 +13,12 @@ export function getBucket(
   newVersion: string,
   versioning: VersioningApi,
 ): string | null {
-  const { separateMajorMinor, separateMultipleMajor, separateMinorPatch } =
-    config;
+  const {
+    separateMajorMinor,
+    separateMultipleMajor,
+    separateMultipleMinor,
+    separateMinorPatch,
+  } = config;
   if (!separateMajorMinor) {
     return 'latest';
   }
@@ -46,11 +51,9 @@ export function getBucket(
 
   // Check the minor update type first
   if (fromMinor !== toMinor) {
-    /* future option
     if (separateMultipleMinor) {
       return `v${toMajor}.${toMinor}`;
     }
-    */
 
     if (separateMinorPatch) {
       return 'minor';

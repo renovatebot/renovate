@@ -47,6 +47,8 @@ function cleanBranchName(
 
 export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
+  const newMajor = String(update.newMajor);
+  const newMinor = String(update.newMinor);
   if (update.groupName) {
     update.groupName = template.compile(update.groupName, update);
     logger.trace('Using group branchName template');
@@ -64,11 +66,13 @@ export function generateBranchName(update: RenovateConfig): void {
     });
     if (update.updateType === 'major' && update.separateMajorMinor) {
       if (update.separateMultipleMajor) {
-        const newMajor = String(update.newMajor);
         update.groupSlug = `major-${newMajor}-${update.groupSlug}`;
       } else {
         update.groupSlug = `major-${update.groupSlug}`;
       }
+    }
+    if (update.updateType === 'minor' && update.separateMultipleMinor) {
+      update.groupSlug = `minor-${newMajor}.${newMinor}-${update.groupSlug}`;
     }
     if (update.updateType === 'patch' && update.separateMinorPatch) {
       update.groupSlug = `patch-${update.groupSlug}`;
@@ -116,7 +120,9 @@ export function generateBranchName(update: RenovateConfig): void {
     update.branchName = template.compile(update.branchName, update);
     update.branchName = template.compile(update.branchName, update);
   }
-
+  if (update.updateType === 'minor' && update.separateMultipleMinor) {
+    update.branchName = update.branchName.replace('.x', `.${newMinor}.x`);
+  }
   update.branchName = cleanBranchName(
     update.branchName,
     update.branchNameStrict,

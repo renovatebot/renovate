@@ -1621,6 +1621,15 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'separateMultipleMinor',
+    description:
+      'If set to `true`, Renovate creates separate PRs for each `minor` stream.',
+    stage: 'package',
+    type: 'boolean',
+    default: false,
+    experimental: true,
+  },
+  {
     name: 'separateMinorPatch',
     description:
       'If set to `true`, Renovate will separate `minor` and `patch` updates into separate branches.',
