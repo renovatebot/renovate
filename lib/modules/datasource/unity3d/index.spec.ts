@@ -126,28 +126,28 @@ describe('modules/datasource/unity3d/index', () => {
   });
 
   it('returns beta if requested', async () => {
-    mockRSSFeeds({beta: Unity3dDatasource.streams.beta});
+    mockRSSFeeds({ beta: Unity3dDatasource.streams.beta });
     const responses = await getPkgReleases({
       datasource: Unity3dDatasource.id,
       packageName: 'm_EditorVersion',
-      registryUrls: [Unity3dDatasource.streams.beta]
+      registryUrls: [Unity3dDatasource.streams.beta],
     });
 
     expect(responses).toEqual(
       expect.objectContaining({
         releases: [
           {
-            changelogUrl: "https://unity.com/releases/editor/beta/2023.3.0b6",
+            changelogUrl: 'https://unity.com/releases/editor/beta/2023.3.0b6',
             isStable: false,
             registryUrl: Unity3dDatasource.streams.beta,
-            releaseTimestamp: "2024-02-07T07:24:40.000Z",
-            version: "2023.3.0b6",
-          }
+            releaseTimestamp: '2024-02-07T07:24:40.000Z',
+            version: '2023.3.0b6',
+          },
         ],
         homepage: 'https://unity.com/',
       }),
     );
-  }
+  });
 
   it('returns stable and lts releases by default', async () => {
     const qualifyingStreams = { ...Unity3dDatasource.streams };
@@ -162,18 +162,20 @@ describe('modules/datasource/unity3d/index', () => {
       expect.objectContaining({
         releases: [
           {
-            changelogUrl: "https://unity.com/releases/editor/whats-new/2021.3.35",
+            changelogUrl:
+              'https://unity.com/releases/editor/whats-new/2021.3.35',
             isStable: true,
             registryUrl: Unity3dDatasource.streams.stable,
-            releaseTimestamp: "2024-02-06T15:40:15.000Z",
-            version: "2021.3.35f1",
+            releaseTimestamp: '2024-02-06T15:40:15.000Z',
+            version: '2021.3.35f1',
           },
           {
-            changelogUrl: "https://unity.com/releases/editor/whats-new/2023.2.9",
+            changelogUrl:
+              'https://unity.com/releases/editor/whats-new/2023.2.9',
             isStable: true,
             registryUrl: Unity3dDatasource.streams.stable,
-            releaseTimestamp: "2024-02-07T06:56:57.000Z",
-            version: "2023.2.9f1",
+            releaseTimestamp: '2024-02-07T06:56:57.000Z',
+            version: '2023.2.9f1',
           },
         ],
         homepage: 'https://unity.com/',
