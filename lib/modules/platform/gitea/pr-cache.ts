@@ -134,14 +134,16 @@ export class GiteaPrCache {
         break;
       }
 
-      const urlWithBaseUrl = parseLinkHeader(res.headers.link)?.next?.url;
-      if (urlWithBaseUrl) {
-        url = new URL(urlWithBaseUrl).pathname;
-      } else {
-        url = undefined;
-      }
+      url = this.removeBaseUrl(parseLinkHeader(res.headers.link)?.next?.url);
     }
 
     return this;
+  }
+
+  private removeBaseUrl(url: string | undefined): string | undefined {
+    if (!url) {
+      return undefined;
+    }
+    return new URL(url).pathname;
   }
 }
