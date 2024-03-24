@@ -130,7 +130,9 @@ export async function flattenUpdates(
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;
 
-            depTypeList.push(updateConfig.depType);
+            if (updateConfig.depType) {
+              depTypeList.push(updateConfig.depType);
+            }
 
             updates.push(updateConfig);
           }
