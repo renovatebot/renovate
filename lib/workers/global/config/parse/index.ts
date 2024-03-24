@@ -73,6 +73,9 @@ export async function parseConfigs(
       // TODO: types (#22198)
       `Enabling ${config.logFileLevel!} logging to ${config.logFile}`,
     );
+    logger.warn(
+      `Using logFile  and logFileLevel is now deprecated. Please use enviroment variables LOG_FILE and LOG_FILE_LEVEL instead.`,
+    );
     await ensureDir(getParentDir(config.logFile));
     addStream({
       name: 'logfile',

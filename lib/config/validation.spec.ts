@@ -1223,6 +1223,19 @@ describe('config/validation', () => {
   });
 
   describe('validateConfig() -> globaOnly options', () => {
+    it('returns deprecation warnings', async () => {
+      const config = {
+        logFile: 'something',
+        logFileLevel: 'debug',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(2);
+      expect(warnings).toMatchSnapshot();
+    });
+
     it('validates hostRules.headers', async () => {
       const config = {
         hostRules: [
