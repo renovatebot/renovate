@@ -248,7 +248,7 @@ module.exports = {
 };
 ```
 
-Here change the `logFile` and `repositories` to something appropriate.
+Here change the `repositories` to something appropriate.
 Also replace `gitlab-token` value with the one created during the previous step.
 
 If you're running against GitHub Enterprise Server, then change the `gitlab` values in the example to the equivalent GitHub ones.
