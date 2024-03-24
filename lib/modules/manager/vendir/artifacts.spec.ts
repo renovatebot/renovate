@@ -392,7 +392,7 @@ describe('modules/manager/vendir/artifacts', () => {
         newPackageFileContent: vendirFile,
         config: {
           ...config,
-          constraints: { vendir: '0.35.0', helm: '3.17.0', git: '2.33.0' },
+          constraints: { vendir: '0.35.0', helm: '3.17.0' },
         },
       }),
     ).toEqual([
