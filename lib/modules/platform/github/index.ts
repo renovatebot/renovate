@@ -35,12 +35,10 @@ import type {
   LongCommitSha,
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import * as githubHttp from '../../../util/http/github';
 import type { GithubHttpOptions } from '../../../util/http/github';
-import type {
-  HttpResponse,
-  InternalHttpOptions,
-} from '../../../util/http/types';
+import type { HttpResponse } from '../../../util/http/types';
 import { coerceObject } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -312,7 +310,7 @@ async function getBranchProtection(
   }
   const res = await githubApi.getJson<BranchProtection>(
     `repos/${config.repository}/branches/${escapeHash(branchName)}/protection`,
-    { repoCache: true },
+    { cacheProvider: repoCacheProvider },
   );
   return res.body;
 }
@@ -323,11 +321,14 @@ export async function getRawFile(
   branchOrTag?: string,
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
+
+  // only use cache for the same org
+  const httpOptions: GithubHttpOptions = {};
   const isSameOrg = repo?.split('/')?.[0] === config.repositoryOwner;
-  const httpOptions: InternalHttpOptions = {
-    // Only cache response if it's from the same org
-    repoCache: isSameOrg,
-  };
+  if (isSameOrg) {
+    httpOptions.cacheProvider = repoCacheProvider;
+  }
+
   let url = `repos/${repo}/contents/${fileName}`;
   if (branchOrTag) {
     url += `?ref=` + branchOrTag;
@@ -1239,7 +1240,10 @@ export async function getIssue(
     const repo = config.parentRepo ?? config.repository;
     const { body: issue } = await githubApi.getJson(
       `repos/${repo}/issues/${number}`,
-      { memCache: useCache, repoCache: true },
+      {
+        memCache: useCache,
+        cacheProvider: repoCacheProvider,
+      },
       Issue,
     );
     return issue;
@@ -1320,7 +1324,7 @@ export async function ensureIssue({
         body: { body: issueBody },
       } = await githubApi.getJson(
         `repos/${repo}/issues/${issue.number}`,
-        { repoCache: true },
+        { cacheProvider: repoCacheProvider },
         Issue,
       );
       if (
