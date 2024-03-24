@@ -133,20 +133,19 @@ describe('modules/datasource/unity3d/index', () => {
       registryUrls: [Unity3dDatasource.streams.beta],
     });
 
-    expect(responses).toEqual(
-      expect.objectContaining({
-        releases: [
-          {
-            changelogUrl: 'https://unity.com/releases/editor/beta/2023.3.0b6',
-            isStable: false,
-            registryUrl: Unity3dDatasource.streams.beta,
-            releaseTimestamp: '2024-02-07T07:24:40.000Z',
-            version: '2023.3.0b6',
-          },
-        ],
-        homepage: 'https://unity.com/',
-      }),
-    );
+    expect(responses).toEqual({
+      registryUrl: Unity3dDatasource.streams.beta,
+      releases: [
+        {
+          changelogUrl: 'https://unity.com/releases/editor/beta/2023.3.0b6',
+          isStable: false,
+          registryUrl: Unity3dDatasource.streams.beta,
+          releaseTimestamp: '2024-02-07T07:24:40.000Z',
+          version: '2023.3.0b6',
+        },
+      ],
+      homepage: 'https://unity.com/',
+    });
   });
 
   it('returns stable and lts releases by default', async () => {
