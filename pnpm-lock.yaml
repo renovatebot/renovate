@@ -497,8 +497,8 @@ importers:
         specifier: 7.3.1
         version: 7.3.1(eslint@8.57.0)(typescript@5.3.3)
       aws-sdk-client-mock:
-        specifier: 3.0.1
-        version: 3.0.1
+        specifier: 3.1.0
+        version: 3.1.0
       callsite:
         specifier: 1.0.0
         version: 1.0.0
@@ -4543,8 +4543,8 @@ packages:
     dependencies:
       possible-typed-array-names: 1.0.0
 
-  /aws-sdk-client-mock@3.0.1:
-    resolution: {integrity: sha512-9VAzJLl8mz99KP9HjOm/93d8vznRRUTpJooPBOunRdUAnVYopCe9xmMuu7eVemu8fQ+w6rP7o5bBK1kAFkB2KQ==}
+  /aws-sdk-client-mock@3.1.0:
+    resolution: {integrity: sha512-3Mx5R8DDka2TB8qtr5jDbSVJsUM6uoX5tZSReBsJS8HunVtL9PHhb+RU7b+I3/53B2fJAyoEp7dJNXndBI+6MA==}
     dependencies:
       '@types/sinon': 10.0.20
       sinon: 16.1.3
