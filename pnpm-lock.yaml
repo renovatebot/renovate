@@ -69,8 +69,8 @@ importers:
         specifier: 0.1.3
         version: 0.1.3
       '@renovatebot/osv-offline':
-        specifier: 1.5.2
-        version: 1.5.2
+        specifier: 1.5.3
+        version: 1.5.3
       '@renovatebot/pep440':
         specifier: 3.0.19
         version: 3.0.19
@@ -300,8 +300,8 @@ importers:
         specifier: 2.1.2
         version: 2.1.2
       simple-git:
-        specifier: 3.22.0
-        version: 3.22.0
+        specifier: 3.23.0
+        version: 3.23.0
       slugify:
         specifier: 1.6.6
         version: 1.6.6
@@ -359,8 +359,8 @@ importers:
         specifier: 29.6.3
         version: 29.6.3
       '@ls-lint/ls-lint':
-        specifier: 2.2.2
-        version: 2.2.2
+        specifier: 2.2.3
+        version: 2.2.3
       '@openpgp/web-stream-tools':
         specifier: 0.0.14
         version: 0.0.14(typescript@5.3.3)
@@ -517,9 +517,6 @@ importers:
       eslint:
         specifier: 8.57.0
         version: 8.57.0
-      eslint-config-prettier:
-        specifier: 9.1.0
-        version: 9.1.0(eslint@8.57.0)
       eslint-formatter-gha:
         specifier: 1.4.3
         version: 1.4.3
@@ -2299,8 +2296,8 @@ packages:
     resolution: {integrity: sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==}
     dev: false
 
-  /@ls-lint/ls-lint@2.2.2:
-    resolution: {integrity: sha512-gdolCgwveSHZczfKtoVFkf+NZJjd7KRQs9QnLVEiMFEJLK4H7nBrZuC/ASl/AYMZvFmtCocRt3d5E0UF/34vCQ==}
+  /@ls-lint/ls-lint@2.2.3:
+    resolution: {integrity: sha512-ekM12jNm/7O2I/hsRv9HvYkRdfrHpiV1epVuI2NP+eTIcEgdIdKkKCs9KgQydu/8R5YXTov9aHdOgplmCHLupw==}
     cpu: [x64, arm64, s390x]
     os: [darwin, linux, win32]
     hasBin: true
@@ -2836,8 +2833,8 @@ packages:
       '@seald-io/nedb': 4.0.4
     dev: false
 
-  /@renovatebot/osv-offline@1.5.2:
-    resolution: {integrity: sha512-Y+Ynt5mlUu416frC8uA175XzJClVySK5VJ29DJO6Ohwv5xG26d7JWj1KNx/eMvcBCrSG1x/o5K20oNUruPB+Dw==}
+  /@renovatebot/osv-offline@1.5.3:
+    resolution: {integrity: sha512-HA7j8mCKZoK9HNgo/e+jYus0pmPHvhPemtrcmjNvhNLaOzaEAQZ6f8JDXdd1xqhOeGYyv63IrM8SynR6ZAXD4Q==}
     dependencies:
       '@octokit/rest': 20.0.2
       '@renovatebot/osv-offline-db': 1.6.0
@@ -4456,7 +4453,7 @@ packages:
     dependencies:
       call-bind: 1.0.7
       define-properties: 1.2.1
-      es-abstract: 1.22.5
+      es-abstract: 1.23.1
       get-intrinsic: 1.2.4
       is-string: 1.0.7
     dev: true
@@ -4472,7 +4469,7 @@ packages:
     dependencies:
       call-bind: 1.0.7
       define-properties: 1.2.1
-      es-abstract: 1.22.5
+      es-abstract: 1.23.1
       es-array-method-boxes-properly: 1.0.0
       is-string: 1.0.7
     dev: true
@@ -4483,7 +4480,7 @@ packages:
     dependencies:
       call-bind: 1.0.7
       define-properties: 1.2.1
-      es-abstract: 1.22.5
+      es-abstract: 1.23.1
       es-errors: 1.3.0
       es-shim-unscopables: 1.0.2
     dev: true
@@ -4494,7 +4491,7 @@ packages:
     dependencies:
       call-bind: 1.0.7
       define-properties: 1.2.1
-      es-abstract: 1.22.5
+      es-abstract: 1.23.1
       es-shim-unscopables: 1.0.2
     dev: true
 
@@ -4504,7 +4501,7 @@ packages:
     dependencies:
       call-bind: 1.0.7
       define-properties: 1.2.1
-      es-abstract: 1.22.5
+      es-abstract: 1.23.1
       es-shim-unscopables: 1.0.2
     dev: true
 
@@ -4515,7 +4512,7 @@ packages:
       array-buffer-byte-length: 1.0.1
       call-bind: 1.0.7
       define-properties: 1.2.1
-      es-abstract: 1.22.5
+      es-abstract: 1.23.1
       es-errors: 1.3.0
       get-intrinsic: 1.2.4
       is-array-buffer: 3.0.4
@@ -5559,53 +5556,6 @@ packages:
     dependencies:
       is-arrayish: 0.2.1
 
-  /es-abstract@1.22.5:
-    resolution: {integrity: sha512-oW69R+4q2wG+Hc3KZePPZxOiisRIqfKBVo/HLx94QcJeWGU/8sZhCvc829rd1kS366vlJbzBfXf9yWwf0+Ko7w==}
-    engines: {node: '>= 0.4'}
-    dependencies:
-      array-buffer-byte-length: 1.0.1
-      arraybuffer.prototype.slice: 1.0.3
-      available-typed-arrays: 1.0.7
-      call-bind: 1.0.7
-      es-define-property: 1.0.0
-      es-errors: 1.3.0
-      es-set-tostringtag: 2.0.3
-      es-to-primitive: 1.2.1
-      function.prototype.name: 1.1.6
-      get-intrinsic: 1.2.4
-      get-symbol-description: 1.0.2
-      globalthis: 1.0.3
-      gopd: 1.0.1
-      has-property-descriptors: 1.0.2
-      has-proto: 1.0.3
-      has-symbols: 1.0.3
-      hasown: 2.0.2
-      internal-slot: 1.0.7
-      is-array-buffer: 3.0.4
-      is-callable: 1.2.7
-      is-negative-zero: 2.0.3
-      is-regex: 1.1.4
-      is-shared-array-buffer: 1.0.3
-      is-string: 1.0.7
-      is-typed-array: 1.1.13
-      is-weakref: 1.0.2
-      object-inspect: 1.13.1
-      object-keys: 1.1.1
-      object.assign: 4.1.5
-      regexp.prototype.flags: 1.5.2
-      safe-array-concat: 1.1.2
-      safe-regex-test: 1.0.3
-      string.prototype.trim: 1.2.9
-      string.prototype.trimend: 1.0.8
-      string.prototype.trimstart: 1.0.7
-      typed-array-buffer: 1.0.2
-      typed-array-byte-length: 1.0.1
-      typed-array-byte-offset: 1.0.2
-      typed-array-length: 1.0.5
-      unbox-primitive: 1.0.2
-      which-typed-array: 1.1.15
-    dev: true
-
   /es-abstract@1.23.1:
     resolution: {integrity: sha512-r+YVn6hTqQb+P5kK0u3KeDqrmhHKm+OhU/Mw4jSL4eQtOxXmp75fXIUUb3sUqFZOlb/YtW5JRaIfEC3UyjYUZQ==}
     engines: {node: '>= 0.4'}
@@ -5727,15 +5677,6 @@ packages:
   /escape-string-regexp@5.0.0:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
-    dev: true
-
-  /eslint-config-prettier@9.1.0(eslint@8.57.0):
-    resolution: {integrity: sha512-NSWl5BFQWEPi1j4TjVNItzYV7dZXZ+wP6I6ZhrBGpChQhZRUaElihE9uRRkcbRnNb76UMKDF3r+WTmNcGPKsqw==}
-    hasBin: true
-    peerDependencies:
-      eslint: '>=7.0.0'
-    dependencies:
-      eslint: 8.57.0
     dev: true
 
   /eslint-formatter-gha@1.4.3:
@@ -6327,7 +6268,7 @@ packages:
     dependencies:
       call-bind: 1.0.7
       define-properties: 1.2.1
-      es-abstract: 1.22.5
+      es-abstract: 1.23.1
       functions-have-names: 1.2.3
     dev: true
 
@@ -8837,7 +8778,7 @@ packages:
     dependencies:
       call-bind: 1.0.7
       define-properties: 1.2.1
-      es-abstract: 1.22.5
+      es-abstract: 1.23.1
     dev: true
 
   /object.groupby@1.0.2:
@@ -8846,7 +8787,7 @@ packages:
       array.prototype.filter: 1.0.3
       call-bind: 1.0.7
       define-properties: 1.2.1
-      es-abstract: 1.22.5
+      es-abstract: 1.23.1
       es-errors: 1.3.0
     dev: true
 
@@ -8856,7 +8797,7 @@ packages:
     dependencies:
       call-bind: 1.0.7
       define-properties: 1.2.1
-      es-abstract: 1.22.5
+      es-abstract: 1.23.1
     dev: true
 
   /once@1.4.0:
@@ -9852,8 +9793,8 @@ packages:
       simple-concat: 1.0.1
     dev: false
 
-  /simple-git@3.22.0:
-    resolution: {integrity: sha512-6JujwSs0ac82jkGjMHiCnTifvf1crOiY/+tfs/Pqih6iow7VrpNKRRNdWm6RtaXpvvv/JGNYhlUtLhGFqHF+Yw==}
+  /simple-git@3.23.0:
+    resolution: {integrity: sha512-P9ggTW8vb/21CAL/AmnACAhqBDfnqSSZVpV7WuFtsFR9HLunf5IqQvk+OXAQTfkcZep8pKnt3DV3o7w3TegEkQ==}
     dependencies:
       '@kwsites/file-exists': 1.1.1
       '@kwsites/promise-deferred': 1.1.1
@@ -10080,7 +10021,7 @@ packages:
     dependencies:
       call-bind: 1.0.7
       define-properties: 1.2.1
-      es-abstract: 1.22.5
+      es-abstract: 1.23.1
     dev: true
 
   /string_decoder@1.1.1:
