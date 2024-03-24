@@ -73,7 +73,7 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
     // This rule is considered matched if there was at least one positive match and no negative matches
     if (matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
-      const toApply = { ...packageRule };
+      const toApply = removeMatchers({ ...packageRule });
       if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {
         // Need to apply groupSlug otherwise the existing one will take precedence
         toApply.groupSlug = slugify(packageRule.groupName, {
@@ -81,17 +81,19 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
         });
       }
       config = mergeChildConfig(config, toApply);
-      delete config.matchPackageNames;
-      delete config.matchPackagePatterns;
-      delete config.matchPackagePrefixes;
-      delete config.excludePackageNames;
-      delete config.excludePackagePatterns;
-      delete config.excludePackagePrefixes;
-      delete config.matchDepTypes;
-      delete config.matchCurrentValue;
-      delete config.matchCurrentVersion;
-      delete config.matchCurrentAge;
     }
   }
   return config;
+}
+
+function removeMatchers(
+  packageRule: PackageRule & PackageRuleInputConfig,
+): Record<string, unknown> {
+  for (const key of Object.keys(packageRule)) {
+    if (key.startsWith('match') || key.startsWith('exclude')) {
+      delete packageRule[key];
+    }
+  }
+
+  return packageRule;
 }

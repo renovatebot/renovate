@@ -33,6 +33,7 @@ import {
   rmCache,
   statLocalFile,
   writeLocalFile,
+  writeSystemFile,
 } from '.';
 
 jest.mock('../exec/env');
@@ -476,6 +477,14 @@ describe('util/fs/index', () => {
       const path = `${tmpDir}/file.txt`;
       await fs.outputFile(path, 'foobar', { encoding: 'utf8' });
       expect(await readSystemFile(path, 'utf8')).toBe('foobar');
+      expect(await readSystemFile(path)).toEqual(Buffer.from('foobar'));
+    });
+  });
+
+  describe('writeSystemFile', () => {
+    it('writes file', async () => {
+      const path = `${tmpDir}/file.txt`;
+      await writeSystemFile(path, 'foobar');
       expect(await readSystemFile(path)).toEqual(Buffer.from('foobar'));
     });
   });

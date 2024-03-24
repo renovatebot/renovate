@@ -252,13 +252,6 @@ describe('modules/platform/codecommit/index', () => {
     });
   });
 
-  describe('getRepoForceRebase()', () => {
-    it('Always return false, since CodeCommit does not support force rebase', async () => {
-      const actual = await codeCommit.getRepoForceRebase();
-      expect(actual).toBeFalse();
-    });
-  });
-
   describe('getPrList()', () => {
     it('gets PR list by author', async () => {
       codeCommitClient

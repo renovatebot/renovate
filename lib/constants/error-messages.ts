@@ -17,6 +17,8 @@ export const CONFIG_PRESETS_INVALID = 'config-presets-invalid';
 export const CONFIG_SECRETS_EXPOSED = 'config-secrets-exposed';
 export const CONFIG_SECRETS_INVALID = 'config-secrets-invalid';
 export const CONFIG_GIT_URL_UNAVAILABLE = 'config-git-url-unavailable';
+export const CONFIG_INHERIT_NOT_FOUND = 'config-inherit-not-found';
+export const CONFIG_INHERIT_PARSE_ERROR = 'config-inherit-parse-error';
 
 // Repository Errors - causes repo to be considered as disabled
 export const REPOSITORY_ACCESS_FORBIDDEN = 'forbidden';
@@ -28,6 +30,8 @@ export const REPOSITORY_CLOSED_ONBOARDING = 'disabled-closed-onboarding';
 export const REPOSITORY_DISABLED_BY_CONFIG = 'disabled-by-config';
 export const REPOSITORY_NO_CONFIG = 'disabled-no-config';
 export const REPOSITORY_EMPTY = 'empty';
+export const REPOSITORY_FORK_MISSING = 'fork-missing';
+export const REPOSITORY_FORK_MODE_FORKED = 'fork-mode-forked';
 export const REPOSITORY_FORKED = 'fork';
 export const REPOSITORY_MIRRORED = 'mirror';
 export const REPOSITORY_NOT_FOUND = 'not-found';

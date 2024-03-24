@@ -7,7 +7,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
   it('filter with enabledManagers', () => {
     const config = mergeChildConfig(getConfig(), {
       registryAliases: {
-        stable: 'http://some.link', // intentionally placing the field incorrectly
+        stable: 'http://some.link',
       },
       ignorePaths: ['ignore-path-1'],
       includePaths: ['include-path-1'],
@@ -47,6 +47,7 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       npmrcMerge: false,
       registryAliases: {
         notStable: 'http://some.link.2',
+        stable: 'http://some.link',
       },
       skipInstalls: null,
     });

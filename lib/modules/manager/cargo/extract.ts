@@ -224,6 +224,7 @@ export async function extractPackageFile(
   }
   /*
     There are the following sections in Cargo.toml:
+    [package]
     [dependencies]
     [dev-dependencies]
     [build-dependencies]
@@ -284,11 +285,18 @@ export async function extractPackageFile(
   if (!deps.length) {
     return null;
   }
+
+  const packageSection = cargoManifest.package;
+  let version: string | undefined = undefined;
+  if (packageSection) {
+    version = packageSection.version;
+  }
+
   const lockFileName = await findLocalSiblingOrParent(
     packageFile,
     'Cargo.lock',
   );
-  const res: PackageFileContent = { deps };
+  const res: PackageFileContent = { deps, packageFileVersion: version };
   if (lockFileName) {
     logger.debug(
       `Found lock file ${lockFileName} for packageFile: ${packageFile}`,

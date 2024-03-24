@@ -13,16 +13,18 @@ import type { RawRefs } from './types';
 const refMatch = regEx(/(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/);
 const headMatch = regEx(/(?<hash>.*?)\s+HEAD/);
 
+const gitId = 'git';
+
 // TODO: extract to a separate directory structure (#10532)
 export abstract class GitDatasource extends Datasource {
-  static id = 'git';
+  static id = gitId;
 
   constructor(id: string) {
     super(id);
   }
 
   @cache({
-    namespace: `datasource-${GitDatasource.id}`,
+    namespace: `datasource-${gitId}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
   })
   async getRawRefs({

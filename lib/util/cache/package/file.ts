@@ -3,20 +3,24 @@ import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { compressToBase64, decompressFromBase64 } from '../../compress';
+import type { PackageCacheNamespace } from './types';
 
-function getKey(namespace: string, key: string): string {
+function getKey(namespace: PackageCacheNamespace, key: string): string {
   return `${namespace}-${key}`;
 }
 
 let cacheFileName: string;
 
-async function rm(namespace: string, key: string): Promise<void> {
+async function rm(
+  namespace: PackageCacheNamespace,
+  key: string,
+): Promise<void> {
   logger.trace({ namespace, key }, 'Removing cache entry');
   await cacache.rm.entry(cacheFileName, getKey(namespace, key));
 }
 
 export async function get<T = never>(
-  namespace: string,
+  namespace: PackageCacheNamespace,
   key: string,
 ): Promise<T | undefined> {
   if (!cacheFileName) {
@@ -44,7 +48,7 @@ export async function get<T = never>(
 }
 
 export async function set(
-  namespace: string,
+  namespace: PackageCacheNamespace,
   key: string,
   value: unknown,
   ttlMinutes = 5,
@@ -58,7 +62,7 @@ export async function set(
     getKey(namespace, key),
     JSON.stringify({
       compress: true,
-      value: await compressToBase64(value),
+      value: await compressToBase64(JSON.stringify(value)),
       expiry: DateTime.local().plus({ minutes: ttlMinutes }),
     }),
   );

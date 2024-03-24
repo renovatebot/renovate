@@ -3,9 +3,14 @@ import validateNpmPackageName from 'validate-npm-package-name';
 import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags';
+import { NodeVersionDatasource } from '../../../../datasource/node-version';
 import { NpmDatasource } from '../../../../datasource/npm';
-import * as nodeVersioning from '../../../../versioning/node';
-import { api, isValid, isVersion } from '../../../../versioning/npm';
+import {
+  api,
+  isValid,
+  isVersion,
+  id as npmVersioningId,
+} from '../../../../versioning/npm';
 import type { PackageDependency } from '../../../types';
 
 const RE_REPOSITORY_GITHUB_SSH_FORMAT = regEx(
@@ -38,9 +43,7 @@ export function extractDependency(
   dep.currentValue = input.trim();
   if (depType === 'engines' || depType === 'packageManager') {
     if (depName === 'node') {
-      dep.datasource = GithubTagsDatasource.id;
-      dep.packageName = 'nodejs/node';
-      dep.versioning = nodeVersioning.id;
+      dep.datasource = NodeVersionDatasource.id;
     } else if (depName === 'yarn') {
       dep.datasource = NpmDatasource.id;
       dep.commitMessageTopic = 'Yarn';
@@ -58,6 +61,7 @@ export function extractDependency(
     } else if (depName === 'vscode') {
       dep.datasource = GithubTagsDatasource.id;
       dep.packageName = 'microsoft/vscode';
+      dep.versioning = npmVersioningId;
     } else {
       dep.skipReason = 'unknown-engines';
     }
@@ -70,9 +74,7 @@ export function extractDependency(
   // support for volta
   if (depType === 'volta') {
     if (depName === 'node') {
-      dep.datasource = GithubTagsDatasource.id;
-      dep.packageName = 'nodejs/node';
-      dep.versioning = nodeVersioning.id;
+      dep.datasource = NodeVersionDatasource.id;
     } else if (depName === 'yarn') {
       dep.datasource = NpmDatasource.id;
       dep.commitMessageTopic = 'Yarn';
@@ -165,6 +167,7 @@ export function extractDependency(
     dep.currentRawValue = dep.currentValue;
     dep.currentValue = depRefPart;
     dep.datasource = GithubTagsDatasource.id;
+    dep.versioning = npmVersioningId;
     dep.packageName = githubOwnerRepo;
     dep.pinDigests = false;
   } else if (
@@ -175,6 +178,7 @@ export function extractDependency(
     dep.currentValue = null;
     dep.currentDigest = depRefPart;
     dep.datasource = GithubTagsDatasource.id;
+    dep.versioning = npmVersioningId;
     dep.packageName = githubOwnerRepo;
   } else {
     dep.skipReason = 'unversioned-reference';

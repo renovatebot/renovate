@@ -22,7 +22,11 @@ export const presets: Record<string, Preset> = {
   },
   eslint: {
     description: 'All ESLint packages.',
-    matchPackageNames: ['@types/eslint', 'babel-eslint'],
+    matchPackageNames: [
+      '@types/eslint',
+      'babel-eslint',
+      '@babel/eslint-parser',
+    ],
     matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
   },
   gatsby: {
@@ -143,5 +147,10 @@ export const presets: Record<string, Preset> = {
   unitTest: {
     description: 'All unit test packages.',
     extends: ['packages:jsUnitTest', 'packages:phpUnitTest'],
+  },
+  vite: {
+    description: 'All Vite related packages',
+    matchDatasources: ['npm'],
+    matchPackagePatterns: ['^vite$', 'vite-plugin', '@vitejs'],
   },
 };

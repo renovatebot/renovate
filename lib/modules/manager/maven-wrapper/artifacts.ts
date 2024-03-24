@@ -147,6 +147,7 @@ async function executeWrapperCommand(
   const execOptions: ExecOptions = {
     cwdFile: wrapperFullyQualifiedPath,
     docker: {},
+    userConfiguredEnv: config.env,
     extraEnv,
     toolConstraints: [
       {

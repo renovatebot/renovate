@@ -26,11 +26,10 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 env:
-  # Currently no way to detect automatically (#8153)
-  DEFAULT_BRANCH: main
+  DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
   NODE_VERSION: 18
   DRY_RUN: true
   SPARSE_CHECKOUT: |-
@@ -39,7 +38,6 @@ env:
     tools/
     package.json
     pnpm-lock.yaml
-    codecov.yml
 
 jobs:
   setup:
@@ -94,9 +92,10 @@ jobs:
         run: gh api ${{ env.PR_URL }} | jq -rc '${{ env.JQ_FILTER }}' >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          filter: blob:none # we don't need all blobs
 
       - name: Calculate matrix for `node_modules` prefetch
         uses: ./.github/actions/calculate-prefetch-matrix
@@ -150,9 +149,10 @@ jobs:
     steps:
       - name: Checkout code
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          filter: blob:none # we don't need all blobs
 
       - name: Setup Node.js
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
@@ -172,7 +172,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -181,7 +181,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
+        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -200,7 +200,7 @@ jobs:
 
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
+        uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -215,7 +215,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -224,7 +224,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
+        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -243,7 +243,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
+        uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -255,7 +255,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -264,7 +264,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@455b6612a7b7a80f28be9e019b70abdd11696e4e # v14.0.0
+        uses: DavidAnson/markdownlint-cli2-action@510b996878fc0d1a46c8a04ec86b06dbfba09de7 # v15.0.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
@@ -282,7 +282,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -319,7 +319,7 @@ jobs:
         include: ${{ fromJSON(needs.setup.outputs.test-shard-matrix) }}
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -328,7 +328,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache jest
-        uses: actions/cache@e12d46a63a90f2fae62d114769bbf2a179198b5c # v3.3.3
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .cache/jest
           key: |
@@ -366,40 +366,63 @@ jobs:
 
       - name: Save coverage artifacts
         if: (success() || failure()) && github.event.pull_request.draft != true && matrix.coverage
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
-          name: coverage
+          name: ${{ matrix.upload-artifact-name }}
           path: |
             ./coverage/lcov
             ./coverage/json
 
-  coverage:
+  codecov:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     if: (success() || failure()) && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
         with:
-          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          filter: blob:none # we don't need all blobs
 
       - name: Download coverage reports
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
-          name: coverage
+          pattern: coverage-*
           path: coverage
+          merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@4fe8c5f003fae66aa5ebb77cfd3e7bfbbda0b6b0 # v3.1.5
+        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
         with:
           directory: coverage/lcov
+          fail_ci_if_error: true
+          verbose: true
+
+  coverage-threshold:
+    needs:
+      - test
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: (success() || failure()) && github.event.pull_request.draft != true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+        with:
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          filter: blob:none # we don't need all blobs
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+
+      - name: Download coverage reports
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        with:
+          pattern: coverage-*
+          path: coverage
+          merge-multiple: true
 
       - name: Merge coverage reports
         run: pnpm nyc merge ./coverage/json ./coverage/nyc/coverage.json
@@ -417,7 +440,11 @@ jobs:
 
   # Catch-all required check for test matrix and coverage
   test-success:
-    needs: [setup, test, coverage]
+    needs:
+      - setup
+      - test
+      - codecov
+      - coverage-threshold
     runs-on: ubuntu-latest
     timeout-minutes: 1
     if: always()
@@ -435,17 +462,30 @@ jobs:
           needs.test.result == 'skipped'
         run: exit 1
 
-      - name: Fail for failed or cancelled coverage
+      - name: Fail for failed or cancelled codecov
         if: |
-          needs.coverage.result == 'failure' ||
-          needs.coverage.result == 'cancelled'
+          needs.codecov.result == 'failure' ||
+          needs.codecov.result == 'cancelled'
         run: exit 1
 
-      - name: Fail for skipped coverage when PR is ready for review
+      - name: Fail for skipped codecov when PR is ready for review
         if: |
           github.event_name == 'pull_request' &&
           github.event.pull_request.draft != true &&
-          needs.coverage.result == 'skipped'
+          needs.codecov.result == 'skipped'
+        run: exit 1
+
+      - name: Fail for failed or cancelled coverage-threshold
+        if: |
+          needs.coverage-threshold.result == 'failure' ||
+          needs.coverage-threshold.result == 'cancelled'
+        run: exit 1
+
+      - name: Fail for skipped coverage-threshold when PR is ready for review
+        if: |
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.draft != true &&
+          needs.coverage-threshold.result == 'skipped'
         run: exit 1
 
   build:
@@ -455,7 +495,7 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -466,11 +506,16 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Build docker
+        run: pnpm build:docker build --tries=3
+        env:
+          LOG_LEVEL: debug
+
       - name: Pack
         run: pnpm test-e2e:pack
 
       - name: Upload
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: renovate-package
           path: renovate-0.0.0-semantic-release.tgz
@@ -482,7 +527,7 @@ jobs:
     if: github.event.pull_request.draft != true
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -494,7 +539,7 @@ jobs:
         run: pnpm build:docs
 
       - name: Upload
-        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
         with:
           name: docs
           path: tmp/docs/
@@ -508,10 +553,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -520,7 +565,7 @@ jobs:
         run: corepack enable
 
       - name: Download package
-        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
           name: renovate-package
 
@@ -540,26 +585,43 @@ jobs:
       - test-e2e
       - test-success
       - build-docs
-      - coverage
+      - codecov
+      - coverage-threshold
 
     if: github.repository == 'renovatebot/renovate' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     permissions:
       contents: write
       issues: write
       pull-requests: write
+      id-token: write
+      packages: write
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
         with:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
+          show-progress: false
+          filter: blob:none # we don't need all blobs, only the full tree
+
+      - name: docker-config
+        uses: containerbase/internal-tools@fcbf031ba03a836d9502ea4da2f15f2848359561 # v3.0.68
+        with:
+          command: docker-config
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
         with:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
+
+      - uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
+
+      - name: Docker registry login
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: Check dry run
         run: |
@@ -573,9 +635,8 @@ jobs:
 
       - name: semantic-release
         run: |
-          echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ./.npmrc
           pnpm semantic-release --dry-run ${{env.DRY_RUN}}
-          git checkout -- .npmrc
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }} # TODO: use action token?
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          LOG_LEVEL: debug

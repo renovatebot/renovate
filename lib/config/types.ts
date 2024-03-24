@@ -1,5 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
+import type { LogLevelRemap } from '../logger/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
@@ -7,6 +8,7 @@ import type { MergeConfidence } from '../util/merge-confidence/types';
 
 export type RenovateConfigStage =
   | 'global'
+  | 'inherit'
   | 'repository'
   | 'package'
   | 'branch'
@@ -27,68 +29,70 @@ export type RecreateWhen = 'auto' | 'never' | 'always';
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   $schema?: string;
-  automerge?: boolean;
-  automergeStrategy?: MergeStrategy;
+  addLabels?: string[];
   autoReplaceGlobalMatch?: boolean;
-  pruneBranchAfterAutomerge?: boolean;
-  branchPrefix?: string;
-  branchPrefixOld?: string;
+  automerge?: boolean;
+  automergeSchedule?: string[];
+  automergeStrategy?: MergeStrategy;
   branchName?: string;
   branchNameStrict?: boolean;
-  manager?: string;
+  branchPrefix?: string;
+  branchPrefixOld?: string;
   commitMessage?: string;
-  commitMessagePrefix?: string;
-  commitMessageTopic?: string;
   commitMessageAction?: string;
   commitMessageExtra?: string;
+  commitMessageLowerCase?: 'auto' | 'never';
+  commitMessagePrefix?: string;
+  commitMessageTopic?: string;
   confidential?: boolean;
   customChangelogUrl?: string;
+  dependencyDashboardApproval?: boolean;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
   extends?: string[];
   fileMatch?: string[];
   force?: RenovateConfig;
+  gitIgnoredAuthors?: string[];
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
-  includePaths?: string[];
+  hashedBranchLength?: number;
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;
+  includePaths?: string[];
   internalChecksAsSuccess?: boolean;
+  keepUpdatedLabel?: string;
   labels?: string[];
-  addLabels?: string[];
-  dependencyDashboardApproval?: boolean;
-  hashedBranchLength?: number;
+  manager?: string;
+  milestone?: number;
   npmrc?: string;
   npmrcMerge?: boolean;
+  platformCommit?: boolean;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
-  productLinks?: Record<string, string>;
   prPriority?: number;
+  productLinks?: Record<string, string>;
+  pruneBranchAfterAutomerge?: boolean;
   rebaseLabel?: string;
-  respectLatest?: boolean;
-  stopUpdatingLabel?: string;
   rebaseWhen?: string;
-  recreateWhen?: RecreateWhen;
   recreateClosed?: boolean;
+  recreateWhen?: RecreateWhen;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   repositoryCacheType?: RepositoryCacheType;
+  respectLatest?: boolean;
   schedule?: string[];
-  automergeSchedule?: string[];
-  semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
-  commitMessageLowerCase?: 'auto' | 'never';
   semanticCommitType?: string;
+  semanticCommits?: 'auto' | 'enabled' | 'disabled';
+  stopUpdatingLabel?: string;
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
-  gitIgnoredAuthors?: string[];
-  platformCommit?: boolean;
 }
 
 // Config options used only within the global worker
@@ -97,26 +101,27 @@ export interface GlobalOnlyConfig {
   autodiscover?: boolean;
   autodiscoverFilter?: string[] | string;
   autodiscoverNamespaces?: string[];
+  autodiscoverProjects?: string[];
   autodiscoverTopics?: string[];
   baseDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
   detectHostRulesFromEnv?: boolean;
   dockerCliOptions?: string;
+  endpoint?: string;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;
   globalExtends?: string[];
   logFile?: string;
   logFileLevel?: LogLevel;
+  platform?: PlatformId;
   prCommitsPerRunLimit?: number;
   privateKeyPath?: string;
   privateKeyPathOld?: string;
-  redisUrl?: string;
   redisPrefix?: string;
+  redisUrl?: string;
   repositories?: RenovateRepository[];
-  platform?: PlatformId;
-  endpoint?: string;
   useCloudMetadataServices?: boolean;
 }
 
@@ -127,31 +132,32 @@ export interface RepoGlobalConfig {
   allowPlugins?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
+  allowedEnv?: string[];
   allowedHeaders?: string[];
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
+  cacheDir?: string;
   cacheHardTtlMinutes?: number;
   cacheTtlOverride?: Record<string, number>;
+  containerbaseDir?: string;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerCliOptions?: string;
   dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
+  endpoint?: string;
   executionTimeout?: number;
-  gitTimeout?: number;
   exposeAllEnv?: boolean;
+  gitTimeout?: number;
   githubTokenWarn?: boolean;
+  includeMirrors?: boolean;
+  localDir?: string;
   migratePresets?: Record<string, string>;
+  platform?: PlatformId;
   presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
-  localDir?: string;
-  cacheDir?: string;
-  containerbaseDir?: string;
-  platform?: PlatformId;
-  endpoint?: string;
-  includeMirrors?: boolean;
 }
 
 export interface LegacyAdminConfig {
@@ -200,6 +206,7 @@ export const allowedStatusCheckStrings = [
   'artifactError',
 ] as const;
 export type StatusCheckKey = (typeof allowedStatusCheckStrings)[number];
+export type UserEnv = Record<string, string>;
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -209,6 +216,8 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     Record<string, unknown> {
+  reportPath?: string;
+  reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
   baseBranches?: string[];
   commitBody?: string;
@@ -223,6 +232,11 @@ export interface RenovateConfig
   gitAuthor?: string;
 
   hostRules?: HostRule[];
+
+  inheritConfig?: boolean;
+  inheritConfigFileName?: string;
+  inheritConfigRepoName?: string;
+  inheritConfigStrict?: boolean;
 
   ignorePresets?: string[];
   forkProcessing?: 'auto' | 'enabled' | 'disabled';
@@ -275,6 +289,8 @@ export interface RenovateConfig
   customizeDashboard?: Record<string, string>;
 
   statusCheckNames?: Record<StatusCheckKey, string | null>;
+  env?: UserEnv;
+  logLevelRemap?: LogLevelRemap[];
 }
 
 const CustomDatasourceFormats = ['json', 'plain', 'yaml', 'html'] as const;
@@ -334,32 +350,33 @@ export interface PackageRule
     UpdateConfig,
     Record<string, unknown> {
   description?: string | string[];
-  isVulnerabilityAlert?: boolean;
-  matchFileNames?: string[];
-  matchBaseBranches?: string[];
-  matchCurrentAge?: string;
-  matchManagers?: string[];
-  matchDatasources?: string[];
-  matchDepTypes?: string[];
-  matchDepNames?: string[];
-  matchDepPatterns?: string[];
-  matchPackageNames?: string[];
-  matchPackagePatterns?: string[];
-  matchPackagePrefixes?: string[];
-  matchRepositories?: string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
   excludeRepositories?: string[];
+  isVulnerabilityAlert?: boolean;
+  matchBaseBranches?: string[];
+  matchCategories?: string[];
+  matchConfidence?: MergeConfidence[];
+  matchCurrentAge?: string;
   matchCurrentValue?: string;
   matchCurrentVersion?: string;
+  matchDatasources?: string[];
+  matchDepNames?: string[];
+  matchDepPatterns?: string[];
+  matchDepTypes?: string[];
+  matchFileNames?: string[];
+  matchManagers?: string[];
+  matchNewValue?: string;
+  matchPackageNames?: string[];
+  matchPackagePatterns?: string[];
+  matchPackagePrefixes?: string[];
+  matchRepositories?: string[];
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
-  matchCategories?: string[];
-  matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
   vulnerabilitySeverity?: string;
 }
@@ -374,13 +391,16 @@ export type AllowedParents =
   | 'customDatasources'
   | 'hostRules'
   | 'postUpgradeTasks'
-  | 'packageRules';
+  | 'packageRules'
+  | 'logLevelRemap';
 export interface RenovateOptionBase {
   /**
    * If true, the option can only be configured by people with access to the Renovate instance.
    * Furthermore, the option should be documented in docs/usage/self-hosted-configuration.md.
    */
   globalOnly?: boolean;
+
+  inheritConfigSupport?: boolean;
 
   allowedValues?: string[];
 
@@ -491,6 +511,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depTypes?: string[];
   depName?: string;
   packageName?: string | null;
+  newValue?: string | null;
   currentValue?: string | null;
   currentVersion?: string;
   lockedVersion?: string;

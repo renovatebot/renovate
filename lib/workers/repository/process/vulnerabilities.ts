@@ -15,6 +15,7 @@ import {
   VersioningApi,
   get as getVersioning,
 } from '../../../modules/versioning';
+import { findGithubToken } from '../../../util/check-token';
 import { find } from '../../../util/host-rules';
 import { sanitizeMarkdown } from '../../../util/markdown';
 import * as p from '../../../util/promises';
@@ -48,12 +49,14 @@ export class Vulnerabilities {
 
   private async initialize(): Promise<void> {
     // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
-    const gitHubHostRule = find({
-      hostType: 'github',
-      url: 'https://api.github.com/',
-    });
+    const token = findGithubToken(
+      find({
+        hostType: 'github',
+        url: 'https://api.github.com/',
+      }),
+    );
 
-    this.osvOffline = await OsvOffline.create(gitHubHostRule?.token);
+    this.osvOffline = await OsvOffline.create(token);
   }
 
   static async create(): Promise<Vulnerabilities> {
@@ -260,7 +263,7 @@ export class Vulnerabilities {
     const versionsCleaned: Record<string, string> = {};
     for (const rule of packageRules) {
       const version = rule.allowedVersions as string;
-      versionsCleaned[version] = version.replace(regEx(/[=> ]+/g), '');
+      versionsCleaned[version] = version.replace(regEx(/[(),=> ]+/g), '');
     }
     packageRules.sort((a, b) =>
       versioningApi.sortVersions(
@@ -414,10 +417,22 @@ export class Vulnerabilities {
       this.isVersionGtOrEq(version, depVersion, versioningApi),
     );
     if (lastAffected) {
-      return `> ${lastAffected}`;
+      return this.getLastAffectedByEcosystem(lastAffected, ecosystem);
     }
 
     return null;
+  }
+
+  private getLastAffectedByEcosystem(
+    lastAffected: string,
+    ecosystem: Ecosystem,
+  ): string {
+    if (ecosystem === 'Maven') {
+      return `(${lastAffected},)`;
+    }
+
+    // crates.io, Go, Hex, npm, RubyGems, PyPI
+    return `> ${lastAffected}`;
   }
 
   private isVersionGt(

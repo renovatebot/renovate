@@ -22,7 +22,7 @@ Depending on third-party software is a sword of Damocles; you never know when a 
 
 <figure markdown>
   ![XKCD 2347](../assets/images/swissquote_xkcd.png){ loading=lazy }
-  <figcaption><a href=https://xkcd.com/2347/ target=_blank>XKCD comic 2347</a> is always relevant when talking about dependencies.</figcaption>
+  <figcaption><a href=https://xkcd.com/2347/>XKCD comic 2347</a> is always relevant when talking about dependencies.</figcaption>
 </figure>
 
 Each software dependency is a risk.
