@@ -81,8 +81,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
 
   await deleteNonDefaultConfig(env); // Try deletion only if RENOVATE_CONFIG_FILE is specified
 
-  config = await migrateAndValidateConfig(config, configFile);
-  return config;
+  return migrateAndValidateConfig(config, configFile);
 }
 
 export async function deleteNonDefaultConfig(
