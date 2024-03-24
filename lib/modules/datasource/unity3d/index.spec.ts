@@ -74,11 +74,11 @@ describe('modules/datasource/unity3d/index', () => {
       registryUrls: [Unity3dDatasource.streams.stable],
     });
 
-    expect(responses).toEqual(
-      expect.objectContaining({
-        releases: expect.arrayContaining([]),
-      }),
-    );
+    expect(responses).toEqual({
+      releases: [],
+      homepage: 'https://unity.com/',
+      registryUrl: Unity3dDatasource.streams.stable,
+    });
   });
 
   it('handles missing channel element', async () => {
@@ -96,11 +96,11 @@ describe('modules/datasource/unity3d/index', () => {
       registryUrls: [Unity3dDatasource.streams.stable],
     });
 
-    expect(responses).toEqual(
-      expect.objectContaining({
-        releases: expect.arrayContaining([]),
-      }),
-    );
+    expect(responses).toEqual({
+      releases: [],
+      homepage: 'https://unity.com/',
+      registryUrl: Unity3dDatasource.streams.stable,
+    });
   });
 
   it('handles missing item element', async () => {
@@ -118,12 +118,36 @@ describe('modules/datasource/unity3d/index', () => {
       registryUrls: [Unity3dDatasource.streams.stable],
     });
 
+    expect(responses).toEqual({
+      releases: [],
+      homepage: 'https://unity.com/',
+      registryUrl: Unity3dDatasource.streams.stable,
+    });
+  });
+
+  it('returns beta if requested', async () => {
+    mockRSSFeeds({beta: Unity3dDatasource.streams.beta});
+    const responses = await getPkgReleases({
+      datasource: Unity3dDatasource.id,
+      packageName: 'm_EditorVersion',
+      registryUrls: [Unity3dDatasource.streams.beta]
+    });
+
     expect(responses).toEqual(
       expect.objectContaining({
-        releases: expect.arrayContaining([]),
+        releases: [
+          {
+            changelogUrl: "https://unity.com/releases/editor/beta/2023.3.0b6",
+            isStable: false,
+            registryUrl: Unity3dDatasource.streams.beta,
+            releaseTimestamp: "2024-02-07T07:24:40.000Z",
+            version: "2023.3.0b6",
+          }
+        ],
+        homepage: 'https://unity.com/',
       }),
     );
-  });
+  }
 
   it('returns stable and lts releases by default', async () => {
     const qualifyingStreams = { ...Unity3dDatasource.streams };
@@ -136,11 +160,23 @@ describe('modules/datasource/unity3d/index', () => {
 
     expect(responses).toEqual(
       expect.objectContaining({
-        releases: expect.arrayContaining([
-          expect.objectContaining({
-            version: expect.stringMatching(/f/),
-          }),
-        ]),
+        releases: [
+          {
+            changelogUrl: "https://unity.com/releases/editor/whats-new/2021.3.35",
+            isStable: true,
+            registryUrl: Unity3dDatasource.streams.stable,
+            releaseTimestamp: "2024-02-06T15:40:15.000Z",
+            version: "2021.3.35f1",
+          },
+          {
+            changelogUrl: "https://unity.com/releases/editor/whats-new/2023.2.9",
+            isStable: true,
+            registryUrl: Unity3dDatasource.streams.stable,
+            releaseTimestamp: "2024-02-07T06:56:57.000Z",
+            version: "2023.2.9f1",
+          },
+        ],
+        homepage: 'https://unity.com/',
       }),
     );
 
@@ -149,8 +185,14 @@ describe('modules/datasource/unity3d/index', () => {
         releases: expect.not.arrayContaining([
           expect.objectContaining({
             version: expect.stringMatching(/\(b\)/),
+            registryUrl: Unity3dDatasource.streams.beta,
+          }),
+          expect.objectContaining({
+            version: expect.stringMatching(/\(b\)/),
+            registryUrl: Unity3dDatasource.streams.beta,
           }),
         ]),
+        homepage: 'https://unity.com/',
       }),
     );
   });
@@ -170,6 +212,8 @@ describe('modules/datasource/unity3d/index', () => {
             version: expect.stringMatching(/\(.*\)/),
           }),
         ]),
+        homepage: 'https://unity.com/',
+        registryUrl: Unity3dDatasource.streams.stable,
       }),
     );
   });
@@ -189,6 +233,8 @@ describe('modules/datasource/unity3d/index', () => {
             version: expect.stringMatching(/\(.*\)/),
           }),
         ]),
+        homepage: 'https://unity.com/',
+        registryUrl: Unity3dDatasource.streams.stable,
       }),
     );
   });
@@ -246,8 +292,14 @@ describe('modules/datasource/unity3d/index', () => {
         releases: expect.arrayContaining([
           expect.objectContaining({
             version: expect.stringMatching(/[fp]/),
+            registryUrl: expect.stringMatching(/(releases|lts)/),
+          }),
+          expect.objectContaining({
+            version: expect.stringMatching(/[fp]/),
+            registryUrl: expect.stringMatching(/(releases|lts)/),
           }),
         ]),
+        homepage: 'https://unity.com/',
       }),
     );
   });

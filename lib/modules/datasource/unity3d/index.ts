@@ -8,9 +8,9 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 export class Unity3dDatasource extends Datasource {
   static readonly homepage = 'https://unity.com/';
   static readonly streams: { [key: string]: string } = {
-    lts: `${Unity3dDatasource.homepage}/releases/editor/lts-releases.xml`,
-    stable: `${Unity3dDatasource.homepage}/releases/editor/releases.xml`,
-    beta: `${Unity3dDatasource.homepage}/releases/editor/beta/latest.xml`,
+    lts: `${Unity3dDatasource.homepage}releases/editor/lts-releases.xml`,
+    stable: `${Unity3dDatasource.homepage}releases/editor/releases.xml`,
+    beta: `${Unity3dDatasource.homepage}releases/editor/beta/latest.xml`,
   };
 
   static readonly id = 'unity3d';
@@ -46,7 +46,11 @@ export class Unity3dDatasource extends Datasource {
     }
 
     if (!channel) {
-      return { releases: [], homepage: Unity3dDatasource.homepage };
+      return {
+        releases: [],
+        homepage: Unity3dDatasource.homepage,
+        registryUrl,
+      };
     }
     const releases = channel
       .childrenNamed('item')
@@ -67,6 +71,7 @@ export class Unity3dDatasource extends Datasource {
     return {
       releases,
       homepage: Unity3dDatasource.homepage,
+      registryUrl,
     };
   }
 
