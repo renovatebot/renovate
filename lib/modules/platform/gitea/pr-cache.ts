@@ -135,7 +135,9 @@ export class GiteaPrCache {
       }
 
       if (process.env.RENOVATE_X_REBASE_PAGINATION_LINKS) {
-        url = this.removeBaseUrl(parseLinkHeader(res.headers.link)?.next?.url);
+        url = GiteaPrCache.removeBaseUrl(
+          parseLinkHeader(res.headers.link)?.next?.url,
+        );
       } else {
         url = parseLinkHeader(res.headers.link)?.next?.url;
       }
@@ -144,7 +146,7 @@ export class GiteaPrCache {
     return this;
   }
 
-  private removeBaseUrl(url: string | undefined): string | undefined {
+  private static removeBaseUrl(url: string | undefined): string | undefined {
     if (!url) {
       return undefined;
     }
