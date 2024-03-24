@@ -134,7 +134,11 @@ export class GiteaPrCache {
         break;
       }
 
-      url = this.removeBaseUrl(parseLinkHeader(res.headers.link)?.next?.url);
+      if (process.env.RENOVATE_X_REBASE_PAGINATION_LINKS) {
+        url = this.removeBaseUrl(parseLinkHeader(res.headers.link)?.next?.url);
+      } else {
+        url = parseLinkHeader(res.headers.link)?.next?.url;
+      }
     }
 
     return this;
