@@ -65,6 +65,7 @@ export async function flattenUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>,
 ): Promise<RenovateConfig[]> {
+  const depTypeList = [];
   const updates = [];
   const updateTypes = [
     'major',
@@ -75,6 +76,7 @@ export async function flattenUpdates(
     'lockFileMaintenance',
     'replacement',
   ];
+
   for (const [manager, files] of Object.entries(packageFiles)) {
     const managerConfig = getManagerConfig(config, manager);
     for (const packageFile of files) {
@@ -127,11 +129,19 @@ export async function flattenUpdates(
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;
+
+            depTypeList.push(updateConfig.depType);
+
             updates.push(updateConfig);
           }
         }
         depIndex += 1;
       }
+
+      for (const update of updates) {
+        update['depTypeList'] = depTypeList;
+      }
+
       if (
         get(manager, 'supportsLockFileMaintenance') &&
         packageFileConfig.lockFileMaintenance.enabled
