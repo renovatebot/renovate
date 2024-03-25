@@ -1,6 +1,6 @@
-import { sortNugetVersions } from './v3';
+import { sortNugetVersions } from './common';
 
-describe('modules/datasource/nuget/v3', () => {
+describe('modules/datasource/nuget/common', () => {
   it.each<{ version: string; other: string; result: number }>`
     version         | other           | result
     ${'invalid1'}   | ${'invalid2'}   | ${0}
