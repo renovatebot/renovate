@@ -137,7 +137,10 @@ export async function extractPackageFile(
   const res: PackageFileContent = { deps: [] };
 
   const sources = pipfile?.source || [];
-  res.registryUrls = sources.map((source) => source.url);
+
+  if (sources) {
+    res.registryUrls = sources.map((source) => source.url);
+  }
 
   const categories: [string, Record<string, PipRequirement>][] = [];
 
