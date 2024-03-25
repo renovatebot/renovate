@@ -4,6 +4,7 @@ import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import { getCache } from '../../../util/cache/repository';
 import type { BitbucketHttp } from '../../../util/http/bitbucket';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { Pr } from '../types';
 import type { BitbucketPrCacheData, PagedResult, PrResponse } from './types';
 import { prFieldsFilter, prInfo, prStates } from './utils';
@@ -128,7 +129,11 @@ export class BitbucketPrCache {
   private async sync(http: BitbucketHttp): Promise<BitbucketPrCache> {
     logger.debug('Syncing PR list');
     const url = this.getUrl();
-    const opts = { paginate: true, pagelen: 50 };
+    const opts = {
+      paginate: true,
+      pagelen: 50,
+      cacheProvider: repoCacheProvider,
+    };
     const res = await http.getJson<PagedResult<PrResponse>>(url, opts);
     this.reconcile(res.body.values);
     return this;

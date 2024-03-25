@@ -132,14 +132,6 @@ exports[`modules/platform/bitbucket/index getPrList() filters PR list by author 
 ]
 `;
 
-exports[`modules/platform/bitbucket/index initRepo() works with username and password 1`] = `
-{
-  "defaultBranch": "master",
-  "isFork": false,
-  "repoFingerprint": "56653db0e9341ef4957c92bb78ee668b0a3f03c75b77db94d520230557385fca344cc1f593191e3594183b5b050909d29996c040045e8852f21774617b240642",
-}
-`;
-
 exports[`modules/platform/bitbucket/index massageMarkdown() returns diff files 1`] = `
 "**foo**
 

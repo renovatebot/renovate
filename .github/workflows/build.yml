@@ -38,7 +38,6 @@ env:
     tools/
     package.json
     pnpm-lock.yaml
-    codecov.yml
 
 jobs:
   setup:
@@ -153,6 +152,7 @@ jobs:
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
         with:
           sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          filter: blob:none # we don't need all blobs
 
       - name: Setup Node.js
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
@@ -181,7 +181,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore eslint cache
-        uses: actions/cache/restore@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -200,7 +200,7 @@ jobs:
 
       - name: Save eslint cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+        uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .cache/eslint
           key: eslint-main-cache
@@ -224,7 +224,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Restore prettier cache
-        uses: actions/cache/restore@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+        uses: actions/cache/restore@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -243,7 +243,7 @@ jobs:
 
       - name: Save prettier cache
         if: github.event_name == 'push'
-        uses: actions/cache/save@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+        uses: actions/cache/save@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .cache/prettier
           key: prettier-main-cache
@@ -328,7 +328,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Cache jest
-        uses: actions/cache@ab5e6d0c87105b4c9c2047343972218f562e4319 # v4.0.1
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
         with:
           path: .cache/jest
           key: |
@@ -379,6 +379,11 @@ jobs:
     timeout-minutes: 3
     if: (success() || failure()) && github.event.pull_request.draft != true
     steps:
+      - name: Checkout code
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+        with:
+          filter: blob:none # we don't need all blobs
+
       - name: Download coverage reports
         uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
@@ -601,7 +606,7 @@ jobs:
           filter: blob:none # we don't need all blobs, only the full tree
 
       - name: docker-config
-        uses: containerbase/internal-tools@b0b8472a98c981134c4271f9612203dee601fd80 # v3.0.65
+        uses: containerbase/internal-tools@a988aa91013c6f1f235d461ab48b6b572facaac4 # v3.0.70
         with:
           command: docker-config
 
