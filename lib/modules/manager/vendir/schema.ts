@@ -20,11 +20,17 @@ export const HelmChart = z.object({
   }),
 });
 
-export const Contents = z.object({
+export const HelmChartContent = z.object({
   path: z.string(),
-  helmChart: HelmChart.optional(),
-  git: GitRef.optional(),
+  helmChart: HelmChart,
 });
+
+export const GitRefContent = z.object({
+  path: z.string(),
+  git: GitRef,
+});
+
+export const Contents = z.union([HelmChartContent, GitRefContent]);
 
 export const Vendir = VendirResource.extend({
   directories: z.array(
