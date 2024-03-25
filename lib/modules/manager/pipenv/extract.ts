@@ -114,9 +114,11 @@ function isPipRequirements(
   return (
     !is.array(section) &&
     is.object(section) &&
-    Object.entries(section).findIndex(
-      ([, dep]) => !is.object(dep) && !is.string('string'),
-    ) === -1
+    is.undefined(
+      Object.entries(section).find(
+        ([, dep]) => !is.object(dep) && !is.string(dep)
+      ),
+    )
   );
 }
 
