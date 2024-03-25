@@ -40,6 +40,7 @@ const options = getOptions();
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
+let optionInherits: Set<string>;
 
 const managerList = getManagerList();
 
@@ -98,6 +99,18 @@ function getDeprecationMessage(option: string): string | undefined {
   return deprecatedOptions[option];
 }
 
+function isInhertConfigOption(key: string): boolean {
+  if (!optionInherits) {
+    optionInherits = new Set();
+    for (const option of options) {
+      if (option.inheritConfigSupport) {
+        optionInherits.add(option.name);
+      }
+    }
+  }
+  return optionInherits.has(key);
+}
+
 function isGlobalOption(key: string): boolean {
   if (!optionGlobals) {
     optionGlobals = new Set();
@@ -121,7 +134,7 @@ export function getParentName(parentPath: string | undefined): string {
 }
 
 export async function validateConfig(
-  configType: 'global' | 'repo',
+  configType: 'global' | 'inherit' | 'repo',
   config: RenovateConfig,
   isPreset?: boolean,
   parentPath?: string,
@@ -164,22 +177,25 @@ export async function validateConfig(
       });
     }
 
-    if (configType === 'global' && isGlobalOption(key)) {
-      await validateGlobalConfig(
-        key,
-        val,
-        optionTypes[key],
-        warnings,
-        errors,
-        currentPath,
-        config,
-      );
-      continue;
-    } else {
-      if (isGlobalOption(key) && !isFalseGlobal(key, parentPath)) {
+    if (isGlobalOption(key)) {
+      if (configType === 'global') {
+        await validateGlobalConfig(
+          key,
+          val,
+          optionTypes[key],
+          warnings,
+          errors,
+          currentPath,
+          config,
+        );
+        continue;
+      } else if (
+        !isFalseGlobal(key, parentPath) &&
+        !(configType === 'inherit' && isInhertConfigOption(key))
+      ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         });
         continue;
       }
@@ -448,6 +464,7 @@ export async function validateConfig(
                     'separateMajorMinor',
                     'separateMinorPatch',
                     'separateMultipleMajor',
+                    'separateMultipleMinor',
                     'versioning',
                   ];
                   if (is.nonEmptyArray(resolvedRule.matchUpdateTypes)) {
