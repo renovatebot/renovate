@@ -10,7 +10,6 @@ const pipfile2 = Fixtures.get('Pipfile2');
 const pipfile3 = Fixtures.get('Pipfile3');
 const pipfile4 = Fixtures.get('Pipfile4');
 const pipfile5 = Fixtures.get('Pipfile5');
-const pipfile8 = Fixtures.get('Pipfile8');
 
 describe('modules/manager/pipenv/extract', () => {
   describe('extractPackageFile()', () => {
@@ -78,6 +77,20 @@ describe('modules/manager/pipenv/extract', () => {
             },
           },
           {
+            currentValue: '==1.2.3',
+            currentVersion: '1.2.3',
+            datasource: 'pypi',
+            depName: 'container-specific-package',
+            depType: 'container',
+          },
+          {
+            currentValue: '==2.3.4',
+            currentVersion: '2.3.4',
+            datasource: 'pypi',
+            depName: 'function-specific-package',
+            depType: 'function',
+          },
+          {
             depType: 'dev-packages',
             depName: 'dev-package',
             currentValue: '==0.1.0',
@@ -95,7 +108,7 @@ describe('modules/manager/pipenv/extract', () => {
         ],
       });
 
-      expect(res?.deps.filter((dep) => !dep.skipReason)).toHaveLength(6);
+      expect(res?.deps.filter((dep) => !dep.skipReason)).toHaveLength(8);
     });
 
     it('marks packages with "extras" as skipReason === unspecified-version', async () => {
@@ -147,48 +160,6 @@ describe('modules/manager/pipenv/extract', () => {
         ],
         extractedConstraints: {
           python: '== 3.6.*',
-        },
-        lockFiles: ['Pipfile.lock'],
-        registryUrls: ['https://pypi.org/simple'],
-      });
-    });
-
-    it('extracts dependencies in different categories', async () => {
-      fs.localPathExists.mockResolvedValueOnce(true);
-      const res = await extractPackageFile(pipfile8, 'Pipfile');
-      expect(res).toMatchObject({
-        deps: [
-          {
-            depType: 'packages',
-            depName: 'requests',
-            currentValue: '==2.31.0',
-            currentVersion: '2.31.0',
-            datasource: 'pypi',
-          },
-          {
-            depType: 'container',
-            depName: 'slack-bolt',
-            currentValue: '==1.18.1',
-            currentVersion: '1.18.1',
-            datasource: 'pypi',
-          },
-          {
-            depType: 'aws',
-            depName: 'boto3',
-            currentValue: '==1.34.52',
-            currentVersion: '1.34.52',
-            datasource: 'pypi',
-          },
-          {
-            depType: 'dev-packages',
-            depName: 'python-gitlab',
-            currentValue: '==4.4.0',
-            currentVersion: '4.4.0',
-            datasource: 'pypi',
-          },
-        ],
-        extractedConstraints: {
-          python: '== 3.11.*',
         },
         lockFiles: ['Pipfile.lock'],
         registryUrls: ['https://pypi.org/simple'],
