@@ -114,7 +114,7 @@ export function getPipenvConstraint(
   return '';
 }
 
-function getMatchingHostRule(url: string): HostRule | undefined {
+function getMatchingHostRule(url: string): HostRule | null {
   const parsedUrl = parseUrl(url);
   if (parsedUrl) {
     parsedUrl.username = '';
@@ -123,17 +123,18 @@ function getMatchingHostRule(url: string): HostRule | undefined {
 
     return find({ hostType: PypiDatasource.id, url: urlWithoutCredentials });
   }
+  return null;
 }
 
 async function findPipfileSourceUrlsWithCredentials(
   pipfileContent: string,
   pipfileName: string,
-): Promise<string[]> {
+): Promise<URL[]> {
   const pipfile = await extractPackageFile(pipfileContent, pipfileName);
 
-  return (
-    pipfile?.registryUrls?.filter((url) => !!parseUrl(url)?.username) ?? []
-  );
+  return (pipfile?.registryUrls
+    ?.map(parseUrl)
+    ?.filter((url) => !!url?.username) ?? []) as URL[]; //tsc does not notice null entries are removed
 }
 
 /**
@@ -184,23 +185,21 @@ async function addCredentialsForSourceUrls(
     newPipfileContent,
     pipfileName,
   );
-  for (const sourceUrl of sourceUrls) {
-    const parsedSourceUrl = parseUrl(sourceUrl);
-    if (!parsedSourceUrl) {
-      logger.warn(`Pipenv: could not parse url for source: ${sourceUrl}`);
-      return;
+  for (const parsedSourceUrl of sourceUrls) {
+    logger.debug(`Trying to add credentials for ${parsedSourceUrl.toString()}`);
+    const { password, username } =
+      getMatchingHostRule(parsedSourceUrl.toString()) ?? {};
+    const usernameVariableName = extractEnvironmentVariableName(
+      parsedSourceUrl.username,
+    );
+    if (username && usernameVariableName) {
+      addExtraEnvVariable(extraEnv, usernameVariableName, username);
     }
-    logger.debug(`Trying to add credentials for ${sourceUrl}`);
-    const { password, username } = getMatchingHostRule(sourceUrl) ?? {};
-    if (username) {
-      const environmentVariableName =
-        extractEnvironmentVariableName(parsedSourceUrl.username) ?? 'USERNAME';
-      addExtraEnvVariable(extraEnv, environmentVariableName, username);
-    }
-    if (password) {
-      const environmentVariableName =
-        extractEnvironmentVariableName(parsedSourceUrl.password) ?? 'PASSWORD';
-      addExtraEnvVariable(extraEnv, environmentVariableName, password);
+    const passwordVariableName = extractEnvironmentVariableName(
+      parsedSourceUrl.password,
+    );
+    if (password && passwordVariableName) {
+      addExtraEnvVariable(extraEnv, passwordVariableName, password);
     }
   }
 }
