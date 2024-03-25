@@ -116,7 +116,7 @@ function isPipRequirements(
     is.object(section) &&
     is.undefined(
       Object.entries(section).find(
-        ([, dep]) => !is.object(dep) && !is.string(dep)
+        ([, dep]) => !is.object(dep) && !is.string(dep),
       ),
     )
   );
