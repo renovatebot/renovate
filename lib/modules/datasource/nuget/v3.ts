@@ -301,9 +301,9 @@ async function getSourceUrlFromNupkg(
   nupkgUrl: string,
 ): Promise<string | null> {
   // istanbul ignore if: experimental feature
-  if (process.env.RENOVATE_X_NUGET_DISABLE_NUPKG_DOWNLOAD) {
+  if (!process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
     logger.debug(
-      `Skipping nupkg download because RENOVATE_X_NUGET_DISABLE_NUPKG_DOWNLOAD is set.`,
+      `Skipping nupkg download because RENOVATE_X_NUGET_DOWNLOAD_NUPKGS is not set.`,
     );
     return null;
   }
