@@ -123,6 +123,7 @@ loggerLevels.forEach((loggerLevel) => {
   logger.once[loggerLevel] = logOnceFn as never;
 });
 
+// istanbul ignore if: not easily testable
 if (is.string(process.env.LOG_FILE)) {
   const logFileLevel = validateLogLevel(process.env.LOG_FILE_LEVEL);
 
