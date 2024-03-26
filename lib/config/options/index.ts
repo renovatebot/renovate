@@ -148,9 +148,8 @@ const options: RenovateOptions[] = [
   {
     name: 'onboardingNoDeps',
     description: 'Onboard the repository even if no dependencies are found.',
-    type: 'string',
-    default: 'auto',
-    allowedValues: ['auto', 'enabled', 'disabled'],
+    type: 'boolean',
+    default: false,
     globalOnly: true,
     inheritConfigSupport: true,
   },
