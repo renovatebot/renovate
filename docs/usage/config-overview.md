@@ -2,11 +2,11 @@
 
 When Renovate runs on a repository, the final config used is derived from the:
 
-- Default config
-- Global config
-- Inherited config
-- Repository config
-- Resolved presets referenced in config
+- Default config (bot defaults)
+- Global config (admin settings)
+- Inherited config (org-level settings)
+- Repository config (repo-specific customisation)
+- Resolved presets referenced in config (shareable presets)
 
 ## Types of config
 
@@ -26,9 +26,10 @@ The default config is loaded first, and may be superseded/overridden by the conf
 ### Global config
 
 Global config means: the config defined by the person or team responsible for running the bot.
-This is also referred to as "bot config", because it's the config passed to the bot by the person running it.
+This is also referred to as "bot config", because it's the config passed to the bot by the administrator that runs the bot.
 Global config can contain config which is "global only" as well as any configuration options which are valid in Inherited config or Repository config.
 
+Global config must be supplied when you run renovate locally or "self-host" renovate.
 If you are an end user of Renovate, for example if you're using the Mend Renovate App, then you don't need to care as much about any global config.
 As a end-user you can not change some settings because those settings are global-only.
 If you are an end user, you can skip the rest of this "Global config" section and proceed to "Inherited config".
@@ -47,20 +48,28 @@ By default Renovate allows the config file to be _missing_ and does not error if
 But if you have configured `RENOVATE_CONFIG_FILE` and the path you specified is not found then Renovate will error and exit, because it assumes you have a configuration problem.
 If the file is found but cannot be parsed then Renovate will also error and exit.
 
-Global config files can be `.js` or `.json` files.
+Global config files can be `.js` or `.json` or `.yaml` files, and must accordingly be formatted using JavaScript, JSON or YAML syntax.
 You may use synchronous or asynchronous methods inside a `.js` file, including even to fetch config information from remote hosts.
 
 #### Environment config
 
-Global config can be defined using environment variables.
-The config options that you can use in environment variables all have the prefix `RENOVATE_`.
+Most config options can be set using environment variables. 
+The environment variable name is usual found by adding the prefixing `RENOVATE_` to the config option name in all-uppercase.
+(This prefix can be changed by setting the environment variable `ENV_PREFIX`.) 
 For example, `RENOVATE_PLATFORM=gitlab` is the same as setting `"platform": "gitlab"` in File config.
 
-Usually there's a clear mapping from configuration option name to the corresponding Environment config name.
-But we recommend you still check the documentation for the field `env` for each option to make sure.
-If the configuration option lacks a `env` field, the config option also lacks a Environment config variable name.
+As some environment variable names differ from the usual pattern, we recommend you still check the `env` field of the documentation for each config option to make sure.
+If the configuration option lacks a `env` field, that config option may lack the facility to be configured by environment variable.
+
+The values assigned to the environment variables may be strings, numbers, booleans, or stringified JSON.
+If using stringified JSON then be careful to use appropriate escaping.
+Key names should be quoted using double quotes, as these are JSON strings.
+If environment variables are being set from a shell console or shell script, it is generally simplest to wrap the entire stringified JSON in single quotes to prevent the shell interpreter from parsing (and removing) the escaping.
+If the environment variables are being set from a file (such as a docker env-file or in a Kubernetes manifest YAML) then those outermost single-quotes should be removed, otherwise renovate may interpret the entire value as a single string instead of interpreting it as a JSON compound object.
 
 A special case for Environment config is the `RENOVATE_CONFIG` "meta" config option.
+This is intended to allow passing the entire complex config through the value of a single environment variable.
+It can also be used to set config options that have no individual corresponding environment variable.
 The `RENOVATE_CONFIG` option accepts a stringified full config, for example: `RENOVATE_CONFIG={"platform":"gitlab","onboarding":false}`.
 Any additional Environment config variables take precedence over values in `RENOVATE_CONFIG`.
 
@@ -92,6 +101,7 @@ Objects, or lists with objects:
 
 - `RENOVATE_CONFIG="{platform\":\"gitlab\",\"onboarding\":false}"`
 - `RENOVATE_PACKAGE_RULES="[{matchHost:\"gitlab\",token:\"$SOME_TOKEN\"}]"`
+- `RENOVATE_KUBERNETES='{"fileMatch":["\\.yaml$"]}'`
 
 <!-- prettier-ignore -->
 !!! tip
