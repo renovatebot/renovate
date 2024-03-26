@@ -123,6 +123,10 @@ export interface UpdatePrConfig {
   state?: 'open' | 'closed';
   targetBranch?: string;
 }
+export interface ReattemptPlatformAutomergeConfig {
+  number: number;
+  platformOptions?: PlatformPrOptions;
+}
 export interface EnsureIssueConfig {
   title: string;
   reuseTitle?: string;
@@ -226,6 +230,9 @@ export interface Platform {
   getPr(number: number): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
+  reattemptPlatformAutomerge?(
+    prConfig: ReattemptPlatformAutomergeConfig,
+  ): Promise<void>;
   getBranchStatus(
     branchName: string,
     internalChecksAsSuccess: boolean,

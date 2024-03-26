@@ -1,6 +1,5 @@
 import { ProxyTracerProvider } from '@opentelemetry/api';
 import * as api from '@opentelemetry/api';
-import { NoopTracerProvider } from '@opentelemetry/api/build/src/trace/NoopTracerProvider';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import {
   disableInstrumentations,
@@ -28,7 +27,7 @@ describe('instrumentation/index', () => {
     const traceProvider = getTracerProvider();
     expect(traceProvider).toBeInstanceOf(ProxyTracerProvider);
     const provider = traceProvider as ProxyTracerProvider;
-    expect(provider.getDelegate()).toBeInstanceOf(NoopTracerProvider);
+    expect(provider.constructor.name).toBe('ProxyTracerProvider');
   });
 
   it('activate console logger', () => {

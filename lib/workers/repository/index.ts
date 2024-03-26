@@ -9,6 +9,7 @@ import {
 } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
+import { addExtractionStats } from '../../instrumentation/reporting';
 import { logger, setMeta } from '../../logger';
 import { resetRepositoryLogLevelRemaps } from '../../logger/remap';
 import { removeDanglingContainers } from '../../util/exec/docker';
@@ -19,7 +20,12 @@ import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
 import { addSplit, getSplits, splitInit } from '../../util/split';
-import { HttpStats, LookupStats, PackageCacheStats } from '../../util/stats';
+import {
+  HttpCacheStats,
+  HttpStats,
+  LookupStats,
+  PackageCacheStats,
+} from '../../util/stats';
 import { setBranchCache } from './cache';
 import { extractRepoProblems } from './common';
 import { ensureDependencyDashboard } from './dependency-dashboard';
@@ -59,9 +65,13 @@ export async function renovateRepository(
       config.repoIsOnboarded! ||
       !OnboardingState.onboardingCacheValid ||
       OnboardingState.prUpdateRequested;
-    const { branches, branchList, packageFiles } = performExtract
+    const extractResult = performExtract
       ? await instrument('extract', () => extractDependencies(config))
       : emptyExtract(config);
+    addExtractionStats(config, extractResult);
+
+    const { branches, branchList, packageFiles } = extractResult;
+
     if (config.semanticCommits === 'auto') {
       config.semanticCommits = await detectSemanticCommits();
     }
@@ -126,6 +136,7 @@ export async function renovateRepository(
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   PackageCacheStats.report();
   HttpStats.report();
+  HttpCacheStats.report();
   LookupStats.report();
   printDnsStats();
   clearDnsCache();

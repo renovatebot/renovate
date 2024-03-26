@@ -1,6 +1,7 @@
 import { logger } from '../../test/util';
 import * as memCache from './cache/memory';
 import {
+  HttpCacheStats,
   HttpStats,
   LookupStats,
   PackageCacheStats,
@@ -451,6 +452,64 @@ describe('util/stats', () => {
               '404': 1,
             },
           },
+        },
+      });
+    });
+  });
+
+  describe('HttpCacheStats', () => {
+    it('returns empty data', () => {
+      const res = HttpCacheStats.getData();
+      expect(res).toEqual({});
+    });
+
+    it('ignores wrong url', () => {
+      HttpCacheStats.incLocalHits('<invalid>');
+      expect(HttpCacheStats.getData()).toEqual({});
+    });
+
+    it('writes data points', () => {
+      HttpCacheStats.incLocalHits('https://example.com/foo');
+      HttpCacheStats.incLocalHits('https://example.com/foo');
+      HttpCacheStats.incLocalMisses('https://example.com/foo');
+      HttpCacheStats.incLocalMisses('https://example.com/bar');
+      HttpCacheStats.incRemoteHits('https://example.com/bar');
+      HttpCacheStats.incRemoteMisses('https://example.com/bar');
+
+      const res = HttpCacheStats.getData();
+
+      expect(res).toEqual({
+        'https://example.com/bar': {
+          hit: 1,
+          miss: 1,
+          localMiss: 1,
+        },
+        'https://example.com/foo': {
+          hit: 0,
+          miss: 0,
+          localHit: 2,
+          localMiss: 1,
+        },
+      });
+    });
+
+    it('prints report', () => {
+      HttpCacheStats.incLocalHits('https://example.com/foo');
+      HttpCacheStats.incLocalHits('https://example.com/foo');
+      HttpCacheStats.incLocalMisses('https://example.com/foo');
+      HttpCacheStats.incLocalMisses('https://example.com/bar');
+      HttpCacheStats.incRemoteHits('https://example.com/bar');
+      HttpCacheStats.incRemoteMisses('https://example.com/bar');
+
+      HttpCacheStats.report();
+
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+      const [data, msg] = logger.logger.debug.mock.calls[0];
+      expect(msg).toBe('HTTP cache statistics');
+      expect(data).toEqual({
+        'https://example.com': {
+          '/foo': { hit: 0, localHit: 2, localMiss: 1, miss: 0 },
+          '/bar': { hit: 1, localMiss: 1, miss: 1 },
         },
       });
     });

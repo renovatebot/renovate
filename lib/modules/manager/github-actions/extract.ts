@@ -100,9 +100,6 @@ function extractWithRegex(content: string): PackageDependency[] {
         dep.currentDigestShort = currentValue;
       } else {
         dep.currentValue = currentValue;
-        if (!dockerVersioning.api.isValid(currentValue)) {
-          dep.skipReason = 'invalid-version';
-        }
       }
       deps.push(dep);
     }

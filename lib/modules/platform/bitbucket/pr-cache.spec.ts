@@ -74,6 +74,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       },
     ]);
     expect(cache).toEqual({
+      httpCache: {},
       platform: {
         bitbucket: {
           pullRequestsCache: {
@@ -120,6 +121,7 @@ describe('modules/platform/bitbucket/pr-cache', () => {
       { number: 2, title: 'title' },
     ]);
     expect(cache).toEqual({
+      httpCache: {},
       platform: {
         bitbucket: {
           pullRequestsCache: {
