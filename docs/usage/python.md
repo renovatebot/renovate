@@ -27,7 +27,7 @@ Legacy versions with the `===` prefix are ignored.
 
 For the `pip_requirements` manager, the default file matching regex for `requirements.txt` follows common file name conventions.
 
-It will match `requirements.txt` and `requirements.pip`, and any file in the format `requirements-*.txt` or `requirements-*.pip`, to allow for common filename patterns such as `requirements-dev.txt`.
+It will match `requirements.txt` and `requirements.pip`, and any file in the format `requirements-*.txt` `requirements.*.txt` `requirements-*.pip` or `requirements.*.pip`, to allow for common filename patterns such as `requirements-dev.txt`.
 
 But Renovate may not find all your files.
 
