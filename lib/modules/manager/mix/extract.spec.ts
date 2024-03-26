@@ -10,7 +10,7 @@ describe('modules/manager/mix/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns empty for invalid dependency file', async () => {
       const res = await extractPackageFile('nothing here', 'mix.exs');
-      expect(res?.deps).toBeEmpty();
+      expect(res).toBeNull();
     });
 
     it('extracts all dependencies when no lockfile', async () => {

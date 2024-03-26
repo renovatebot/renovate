@@ -91,11 +91,15 @@ export async function extractPackageFile(
 
     for (const [app, dep] of deps.entries()) {
       dep.lockedVersion = lockedVersions.get(app);
-      logger.debug(`Found ${dep.lockedVersion} for ${app}`);
+      logger.trace(`Found ${dep.lockedVersion} for ${app}`);
     }
   }
+  const depsArray = Array.from(deps.values());
+  if (depsArray.length === 0) {
+    return null;
+  }
   return {
-    deps: Array.from(deps.values()),
+    deps: depsArray,
     lockFiles: lockFileContent ? [lockFileName] : undefined,
   };
 }
