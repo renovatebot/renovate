@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import * as defaultsParser from '../../../../config/defaults';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
@@ -68,13 +69,10 @@ export async function parseConfigs(
 
   // Add file logger
   // istanbul ignore if
-  if (config.logFile) {
+  if (config.logFile && is.undefined(process.env.LOG_FILE)) {
     logger.debug(
       // TODO: types (#22198)
       `Enabling ${config.logFileLevel!} logging to ${config.logFile}`,
-    );
-    logger.warn(
-      `Using logFile  and logFileLevel is now deprecated. Please use enviroment variables LOG_FILE and LOG_FILE_LEVEL instead.`,
     );
     await ensureDir(getParentDir(config.logFile));
     addStream({

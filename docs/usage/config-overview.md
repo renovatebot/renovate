@@ -108,10 +108,10 @@ Read the [Self-hosted experimental environment variables](./self-hosted-experime
 Finally, there are some special environment variables that are loaded _before_ configuration parsing because they are used during logging initialization:
 
 - `LOG_CONTEXT`: a unique identifier used in each log message to track context
-- `LOG_FORMAT`: defaults to a "pretty" human-readable output, but can be changed to "json"
-- `LOG_LEVEL`: most commonly used to change from the default `info` to `debug` logging
 - `LOG_FILE`: used to specify the log file path
 - `LOG_FILE_LEVEL`: log file logging level, defaults to `info`
+- `LOG_FORMAT`: defaults to a "pretty" human-readable output, but can be changed to "json"
+- `LOG_LEVEL`: most commonly used to change from the default `info` to `debug` logging
 
 #### CLI config
 

@@ -729,6 +729,10 @@ When you set `inheritConfigStrict=true` then Renovate will abort the run and rai
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
 If left as default (null), a random short ID will be selected.
 
+## logFile
+
+## logFileLevel
+
 ## migratePresets
 
 Use this if you have repositories that extend from a particular preset, which has now been renamed or removed.

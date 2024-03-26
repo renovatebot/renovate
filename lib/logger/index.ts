@@ -25,7 +25,7 @@ if (is.string(process.env.LOG_LEVEL)) {
 const logLevel = validateLogLevel(process.env.LOG_LEVEL);
 const stdout: bunyan.Stream = {
   name: 'stdout',
-  level: logLevel || /* istanbul ignore next: not testable */ 'info',
+  level: logLevel,
   stream: process.stdout,
 };
 
