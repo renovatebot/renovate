@@ -177,7 +177,7 @@ describe('workers/global/config/parse/index', () => {
     it('massage onboardingNoDeps when autodiscover is false', async () => {
       jest.mock(
         '../../config.js',
-        () => ({ onboardingNoDeps: 'disabled', autodiscover: false }),
+        () => ({ onboardingNoDeps: 'auto', autodiscover: false }),
         {
           virtual: true,
         },
