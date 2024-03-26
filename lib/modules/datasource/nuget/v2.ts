@@ -1,7 +1,6 @@
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../../logger';
 import type { Http } from '../../../util/http';
-import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import type { ReleaseResult } from '../types';
 import { massageUrl, removeBuildMeta } from './common';
@@ -25,8 +24,7 @@ export class NugetV2Api {
     )}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl,Published`;
     while (pkgUrlList !== null) {
       // typescript issue
-      const pkgVersionsListRaw: HttpResponse<string> =
-        await http.get(pkgUrlList);
+      const pkgVersionsListRaw = await http.get(pkgUrlList);
       const pkgVersionsListDoc = new XmlDocument(pkgVersionsListRaw.body);
 
       const pkgInfoList = pkgVersionsListDoc.childrenNamed('entry');
