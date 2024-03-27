@@ -41,6 +41,7 @@ function getGoDep(
   lineNumber: number,
   goVer: string,
   versioning: string | undefined = undefined,
+  depType: string = 'golang',
 ): PackageDependency {
   return {
     managerData: {
@@ -74,7 +75,12 @@ export function extractPackageFile(
         ? line.replace('toolchain go', '')
         : null;
       if (goToolVer && semver.valid(goToolVer)) {
-        const dep = getGoDep(lineNumber, goToolVer);
+        const dep = getGoDep(
+          lineNumber,
+          goToolVer,
+          undefined,
+          'golangtoolchain',
+        );
         deps.push(dep);
         continue;
       }
