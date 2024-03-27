@@ -6,6 +6,7 @@ import { GerritScm } from './gerrit/scm';
 import { GithubScm } from './github/scm';
 import { LocalFs } from './local/scm';
 import type { PlatformScm } from './types';
+import {SpaceScm} from "./space/scm";
 
 export const platformScmImpls = new Map<PlatformId, Constructor<PlatformScm>>();
 platformScmImpls.set('azure', DefaultGitScm);
@@ -17,6 +18,7 @@ platformScmImpls.set('gitea', DefaultGitScm);
 platformScmImpls.set('github', GithubScm);
 platformScmImpls.set('gitlab', DefaultGitScm);
 platformScmImpls.set('local', LocalFs);
+platformScmImpls.set('space', SpaceScm);
 
 let _scm: PlatformScm | undefined;
 

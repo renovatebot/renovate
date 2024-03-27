@@ -60,7 +60,7 @@ async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
 }
 
 export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
-  logger.debug('isOnboarded()');
+  logger.debug(`isOnboarded(${JSON.stringify(config)})`);
   const title = `Action required: Add a Renovate config`;
 
   // Repo is onboarded if in silent mode

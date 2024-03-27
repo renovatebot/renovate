@@ -41,6 +41,8 @@ export async function checkOnboardingBranch(
     // delete onboarding cache
     deleteOnboardingCache();
     return { ...config, repoIsOnboarded };
+  } else {
+    logger.debug('Repo is not onboarded');
   }
   if (config.isFork && config.forkProcessing !== 'enabled') {
     throw new Error(REPOSITORY_FORKED);
