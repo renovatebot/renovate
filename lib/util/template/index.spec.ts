@@ -280,9 +280,9 @@ describe('util/template/index', () => {
   describe('includes', () => {
     it('includes is true', () => {
       const output = template.compile(
-        '{{#if (includes depTypeList "dependencies")}}production{{else}}notProduction{{/if}}',
+        '{{#if (includes depTypes "dependencies")}}production{{else}}notProduction{{/if}}',
         {
-          depTypeList: ['dependencies'],
+          depTypes: ['dependencies'],
         },
       );
 
@@ -291,9 +291,9 @@ describe('util/template/index', () => {
 
     it('includes is false', () => {
       const output = template.compile(
-        '{{#if (includes depTypeList "dependencies")}}production{{else}}notProduction{{/if}}',
+        '{{#if (includes depTypes "dependencies")}}production{{else}}notProduction{{/if}}',
         {
-          depTypeList: ['devDependencies'],
+          depTypes: ['devDependencies'],
         },
       );
 
