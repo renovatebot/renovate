@@ -76,6 +76,7 @@ helmfile 0.147.0
 hugo 0.104.3
 idris 1.3.4
 java adoptopenjdk-16.0.0+36
+jq 1.7
 julia 1.8.2
 just 1.7.0
 kind 0.19.0
@@ -333,6 +334,13 @@ dummy 1.2.3
             datasource: 'java-version',
             packageName: 'java-jdk',
             depName: 'java',
+          },
+          {
+            currentValue: '1.7',
+            datasource: 'github-releases',
+            packageName: 'jqlang/jq',
+            depName: 'jq',
+            extractVersion: '^jq-(?<version>\\S+)',
           },
           {
             currentValue: '1.8.2',

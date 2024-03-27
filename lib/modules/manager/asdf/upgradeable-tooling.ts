@@ -329,6 +329,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       return undefined;
     },
   },
+  jq: {
+    asdfPluginUrl: 'https://github.com/lsanwick/asdf-jq.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'jqlang/jq',
+      extractVersion: '^jq-(?<version>\\S+)',
+    },
+  },
   julia: {
     asdfPluginUrl: 'https://github.com/rkyleg/asdf-julia',
     config: {
