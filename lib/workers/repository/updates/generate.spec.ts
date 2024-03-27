@@ -1468,5 +1468,35 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(upgrades);
       expect(res.depTypes).toEqual(['dependencies', 'devDependencies']);
     });
+
+    it('depTypes is available on each branch upgrade object', () => {
+      const upgrades = [
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'devDependencies',
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'dependencies',
+        },
+        {
+          ...requiredDefaultOptions,
+          branchName: 'some-branch',
+          manager: 'some-manager',
+          depType: 'devDependencies',
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(upgrades);
+
+      expect(res.depTypes).toEqual(['dependencies', 'devDependencies']);
+
+      for (const upgrade of res.upgrades) {
+        expect(upgrade.depTypes).toEqual(res.depTypes);
+      }
+    });
   });
 });
