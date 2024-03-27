@@ -387,8 +387,11 @@ describe('modules/datasource/nuget/index', () => {
         );
         expect(packageCache.set).toHaveBeenCalledWith(
           'datasource-nuget',
-          'source-url:https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
-          'https://github.com/NLog/NLog.git',
+          'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
+          {
+            cachedAt: expect.any(String),
+            value: 'https://github.com/NLog/NLog.git',
+          },
           60 * 24 * 7,
         );
         expect(res?.sourceUrl).toBeDefined();
@@ -454,8 +457,11 @@ describe('modules/datasource/nuget/index', () => {
         });
         expect(packageCache.set).toHaveBeenCalledWith(
           'datasource-nuget',
-          'source-url:https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
-          null,
+          'cache-decorator:source-url:https://some-registry/v3/index.json:NLog',
+          {
+            cachedAt: expect.any(String),
+            value: null,
+          },
           60 * 24 * 7,
         );
         expect(res?.sourceUrl).toBeUndefined();

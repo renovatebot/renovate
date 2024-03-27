@@ -6,6 +6,7 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
+import { cache } from '../../../util/cache/package/decorator';
 import * as fs from '../../../util/fs';
 import { ensureCacheDir } from '../../../util/fs';
 import { Http, HttpError } from '../../../util/http';
@@ -216,8 +217,9 @@ export class NugetV3Api {
           dep.sourceUrl = massageUrl(sourceUrl);
         }
       } else if (latestNupkgUrl) {
-        const sourceUrl = await this.getSourceUrlFromNupkgCached(
+        const sourceUrl = await this.getSourceUrlFromNupkg(
           http,
+          registryUrl,
           pkgName,
           latestStable,
           latestNupkgUrl,
@@ -260,39 +262,20 @@ export class NugetV3Api {
     return dep;
   }
 
-  async getSourceUrlFromNupkgCached(
-    http: Http,
-    packageName: string,
-    packageVersion: string | null,
-    nupkgUrl: string,
-  ): Promise<string | null> {
-    const cacheKey = `source-url:${nupkgUrl}`;
-    const sourceUrlFromCache = await packageCache.get<string | null>(
-      NugetV3Api.cacheNamespace,
-      cacheKey,
-    );
-    // istanbul ignore if
-    if (sourceUrlFromCache !== undefined) {
-      return sourceUrlFromCache;
-    }
-    const sourceUrl = await this.getSourceUrlFromNupkg(
-      http,
-      packageName,
-      packageVersion,
-      nupkgUrl,
-    );
-    const cacheTtl = 10080; // 1 week
-    await packageCache.set(
-      NugetV3Api.cacheNamespace,
-      cacheKey,
-      sourceUrl,
-      cacheTtl,
-    );
-    return sourceUrl;
-  }
-
+  @cache({
+    namespace: NugetV3Api.cacheNamespace,
+    key: (
+      _http: Http,
+      registryUrl: string,
+      packageName: string,
+      _packageVersion: string | null,
+      _nupkgUrl: string,
+    ) => `source-url:${registryUrl}:${packageName}`,
+    ttlMinutes: 10080, // 1 week
+  })
   async getSourceUrlFromNupkg(
     http: Http,
+    _registryUrl: string,
     packageName: string,
     packageVersion: string | null,
     nupkgUrl: string,
