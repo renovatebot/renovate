@@ -280,9 +280,9 @@ describe('util/template/index', () => {
   describe('includes', () => {
     it('includes is true', () => {
       const output = template.compile(
-        '{{#if (includes depTypes "dependencies")}}production{{else}}notProduction{{/if}}',
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
         {
-          depTypes: ['dependencies'],
+          labels: ['dependencies'],
         },
       );
 
@@ -291,9 +291,31 @@ describe('util/template/index', () => {
 
     it('includes is false', () => {
       const output = template.compile(
-        '{{#if (includes depTypes "dependencies")}}production{{else}}notProduction{{/if}}',
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
         {
-          depTypes: ['devDependencies'],
+          labels: ['devDependencies'],
+        },
+      );
+
+      expect(output).toBe('notProduction');
+    });
+
+    it('includes with incorrect type first argument', () => {
+      const output = template.compile(
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          labels: 'devDependencies',
+        },
+      );
+
+      expect(output).toBe('notProduction');
+    });
+
+    it('includes with incorrect type second argument', () => {
+      const output = template.compile(
+        '{{#if (includes labels 555)}}production{{else}}notProduction{{/if}}',
+        {
+          labels: ['devDependencies'],
         },
       );
 

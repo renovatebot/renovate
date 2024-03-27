@@ -1,6 +1,7 @@
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
+import { api as versioning } from '../../versioning/nuget';
 import type { ParsedRegistryUrl } from './types';
 
 const buildMetaRe = regEx(/\+.+$/g);
@@ -46,4 +47,24 @@ export function parseRegistryUrl(registryUrl: string): ParsedRegistryUrl {
 
   const feedUrl = parsedUrl.href;
   return { feedUrl, protocolVersion };
+}
+
+/**
+ * Compare two versions. Return:
+ * - `1` if `a > b` or `b` is invalid
+ * - `-1` if `a < b` or `a` is invalid
+ * - `0` if `a == b` or both `a` and `b` are invalid
+ */
+export function sortNugetVersions(a: string, b: string): number {
+  if (versioning.isValid(a)) {
+    if (versioning.isValid(b)) {
+      return versioning.sortVersions(a, b);
+    } else {
+      return 1;
+    }
+  } else if (versioning.isValid(b)) {
+    return -1;
+  } else {
+    return 0;
+  }
 }
