@@ -5,11 +5,13 @@ export interface ServicesIndexRaw {
   }[];
 }
 
+// See https://learn.microsoft.com/en-us/nuget/api/registration-base-url-resource#catalog-entry
 export interface CatalogEntry {
   version: string;
   published?: string;
   projectUrl?: string;
   listed?: boolean;
+  packageContent?: string;
 }
 
 export interface CatalogPage {
