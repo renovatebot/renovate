@@ -359,4 +359,27 @@ describe('modules/manager/pip-compile/extract', () => {
       'pip-compile: dependency not found in lock file',
     );
   });
+
+  it('adds transitive dependency to deps in package file', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=requirements.txt requirements.in',
+        ['friendly-bard==1.0.1', 'bards-friend==1.0.0'],
+      ),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('FrIeNdLy-._.-bArD>=1.0.0');
+
+    const lockFiles = ['requirements.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    const packageFile = packageFiles!.pop();
+    expect(packageFile!.deps).toHaveLength(2);
+    expect(packageFile!.deps[1]).toEqual({
+      datasource: 'pypi',
+      depType: 'indirect',
+      depName: 'bards-friend',
+      lockedVersion: '1.0.0',
+      enabled: false,
+    });
+  });
 });

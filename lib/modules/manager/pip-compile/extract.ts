@@ -5,7 +5,12 @@ import { ensureLocalPath } from '../../../util/fs/util';
 import { normalizeDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
-import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
 import { extractHeaderCommand } from './common';
 import type {
   DependencyBetweenFiles,
@@ -132,7 +137,9 @@ export async function extractAllPackageFiles(
         logger.debug(
           `pip-compile: ${packageFile} used in multiple output files`,
         );
-        packageFiles.get(packageFile)!.lockFiles!.push(fileMatch);
+        const packageFileContent = packageFiles.get(packageFile)!;
+        packageFileContent.lockFiles!.push(fileMatch);
+        extendWithIndirectDeps(packageFileContent, lockedDeps);
         continue;
       }
       const content = await readLocalFile(packageFile, 'utf8');
@@ -180,6 +187,7 @@ export async function extractAllPackageFiles(
             );
           }
         }
+        extendWithIndirectDeps(packageFileContent, lockedDeps);
         packageFiles.set(packageFile, {
           ...packageFileContent,
           lockFiles: [fileMatch],
@@ -204,5 +212,33 @@ export async function extractAllPackageFiles(
     'pip-compile: dependency graph:\n' +
       generateMermaidGraph(depsBetweenFiles, lockFileArgs),
   );
+  return result;
+}
+
+function extendWithIndirectDeps(
+  packageFileContent: PackageFileContent,
+  lockedDeps: PackageDependency[],
+): void {
+  for (const lockedDep of lockedDeps) {
+    if (
+      !packageFileContent.deps.find(
+        (dep) =>
+          normalizeDepName(lockedDep.depName!) ===
+          normalizeDepName(dep.depName!),
+      )
+    ) {
+      packageFileContent.deps.push(indirectDep(lockedDep));
+    }
+  }
+}
+function indirectDep(dep: PackageDependency): PackageDependency {
+  const result = {
+    ...dep,
+    lockedVersion: dep.currentVersion,
+    depType: 'indirect',
+    enabled: false,
+  };
+  delete result.currentValue;
+  delete result.currentVersion;
   return result;
 }
