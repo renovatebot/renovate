@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import type {
   GitlabInclude,
+  GitlabIncludeComponent,
   GitlabIncludeLocal,
   GitlabIncludeProject,
   GitlabPipeline,
@@ -31,4 +32,10 @@ export function isGitlabIncludeLocal(
   include: GitlabInclude,
 ): include is GitlabIncludeLocal {
   return !is.undefined((include as GitlabIncludeLocal).local);
+}
+
+export function isGitlabIncludeComponent(
+  include: GitlabInclude,
+): include is GitlabIncludeComponent {
+  return !is.undefined((include as GitlabIncludeComponent).component);
 }

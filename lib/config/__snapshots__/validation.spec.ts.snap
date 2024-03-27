@@ -259,7 +259,7 @@ exports[`config/validation validateConfig(config) validates regEx for each fileM
 exports[`config/validation validateConfig(config) warns if hostType has the wrong parent 1`] = `
 [
   {
-    "message": "hostType should only be configured within a "hostRules" object. Was found in .",
+    "message": "hostType should only be configured within one of "hostRules" objects. Was found in .",
     "topic": "hostType",
   },
 ]

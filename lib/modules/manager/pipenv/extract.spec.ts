@@ -30,12 +30,28 @@ describe('modules/manager/pipenv/extract', () => {
             depType: 'packages',
             depName: 'some-package',
             currentValue: '==0.3.1',
+            currentVersion: '0.3.1',
+            datasource: 'pypi',
+          },
+          {
+            depType: 'packages',
+            depName: 'splinter',
+            currentValue: '==3.43.1',
+            currentVersion: '3.43.1',
+            datasource: 'pypi',
+          },
+          {
+            depType: 'packages',
+            depName: 'requests',
+            currentValue: '==1.1.1',
+            currentVersion: '1.1.1',
             datasource: 'pypi',
           },
           {
             depType: 'packages',
             depName: 'some-other-package',
             currentValue: '==1.0.0',
+            currentVersion: '1.0.0',
             datasource: 'pypi',
           },
           {
@@ -54,6 +70,7 @@ describe('modules/manager/pipenv/extract', () => {
             depType: 'packages',
             depName: 'pytest-benchmark',
             currentValue: '==1.0.0',
+            currentVersion: '1.0.0',
             datasource: 'pypi',
             managerData: {
               nestedVersion: true,
@@ -63,6 +80,7 @@ describe('modules/manager/pipenv/extract', () => {
             depType: 'dev-packages',
             depName: 'dev-package',
             currentValue: '==0.1.0',
+            currentVersion: '0.1.0',
             datasource: 'pypi',
           },
         ],
@@ -76,7 +94,7 @@ describe('modules/manager/pipenv/extract', () => {
         ],
       });
 
-      expect(res?.deps.filter((dep) => !dep.skipReason)).toHaveLength(4);
+      expect(res?.deps.filter((dep) => !dep.skipReason)).toHaveLength(6);
     });
 
     it('marks packages with "extras" as skipReason === unspecified-version', async () => {
@@ -94,30 +112,35 @@ describe('modules/manager/pipenv/extract', () => {
             depType: 'packages',
             depName: 'Django',
             currentValue: '==1',
+            currentVersion: '1',
             datasource: 'pypi',
           },
           {
             depType: 'packages',
             depName: 'distribute',
             currentValue: '==0.6.27',
+            currentVersion: '0.6.27',
             datasource: 'pypi',
           },
           {
             depType: 'packages',
             depName: 'dj-database-url',
             currentValue: '==0.2',
+            currentVersion: '0.2',
             datasource: 'pypi',
           },
           {
             depType: 'packages',
             depName: 'psycopg2',
             currentValue: '==2.4.5',
+            currentVersion: '2.4.5',
             datasource: 'pypi',
           },
           {
             depType: 'packages',
             depName: 'wsgiref',
             currentValue: '==0.1.2',
+            currentVersion: '0.1.2',
             datasource: 'pypi',
           },
         ],
@@ -258,6 +281,7 @@ describe('modules/manager/pipenv/extract', () => {
             depType: 'packages',
             depName: 'requests',
             currentValue: '==0.21.0',
+            currentVersion: '0.21.0',
             datasource: 'pypi',
             managerData: {
               nestedVersion: true,

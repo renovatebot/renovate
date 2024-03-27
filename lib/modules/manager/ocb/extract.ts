@@ -37,11 +37,11 @@ export function extractPackageFile(
   }
 
   const deps: PackageDependency[] = [];
-  if (definition.dist.module && definition.dist.otelcol_version) {
+  if (definition.dist.otelcol_version) {
     deps.push({
       datasource: GoDatasource.id,
       depType: 'collector',
-      depName: definition.dist.module,
+      depName: 'go.opentelemetry.io/collector',
       currentValue: definition.dist.otelcol_version,
       extractVersion: '^v(?<version>\\S+)',
     });
@@ -49,8 +49,9 @@ export function extractPackageFile(
 
   deps.push(...processModule(definition.connectors, 'connectors'));
   deps.push(...processModule(definition.exporters, 'exports'));
-  deps.push(...processModule(definition.extension, 'extensions'));
+  deps.push(...processModule(definition.extensions, 'extensions'));
   deps.push(...processModule(definition.processors, 'processors'));
+  deps.push(...processModule(definition.receivers, 'receivers'));
 
   return {
     packageFileVersion: definition.dist.version,

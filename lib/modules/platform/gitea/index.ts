@@ -10,13 +10,16 @@ import {
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
+import { deduplicateArray } from '../../../util/array';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
+import { map } from '../../../util/promises';
 import { sanitize } from '../../../util/sanitize';
 import { ensureTrailingSlash } from '../../../util/url';
 import { getPrBodyStruct, hashBody } from '../pr-body';
 import type {
+  AutodiscoverConfig,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -152,6 +155,24 @@ async function lookupLabelByName(name: string): Promise<number | null> {
   logger.debug(`lookupLabelByName(${name})`);
   const labelList = await getLabelList();
   return labelList.find((l) => l.name === name)?.id ?? null;
+}
+
+async function fetchRepositories(topic?: string): Promise<string[]> {
+  const repos = await helper.searchRepos({
+    uid: botUserID,
+    archived: false,
+    ...(topic && {
+      topic: true,
+      q: topic,
+    }),
+    ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT && {
+      sort: process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT as RepoSortMethod,
+    }),
+    ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER && {
+      order: process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER as SortMethod,
+    }),
+  });
+  return repos.filter((r) => !r.mirror).map((r) => r.full_name);
 }
 
 const platform: Platform = {
@@ -295,20 +316,31 @@ const platform: Platform = {
     };
   },
 
-  async getRepos(): Promise<string[]> {
+  async getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug('Auto-discovering Gitea repositories');
     try {
-      const repos = await helper.searchRepos({
-        uid: botUserID,
-        archived: false,
-        ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT && {
-          sort: process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT as RepoSortMethod,
-        }),
-        ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER && {
-          order: process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER as SortMethod,
-        }),
-      });
-      return repos.filter((r) => !r.mirror).map((r) => r.full_name);
+      if (config?.topics) {
+        logger.debug({ topics: config.topics }, 'Auto-discovering by topics');
+        const repos = await map(config.topics, fetchRepositories);
+        return deduplicateArray(repos.flat());
+      } else if (config?.namespaces) {
+        logger.debug(
+          { namespaces: config.namespaces },
+          'Auto-discovering by organization',
+        );
+        const repos = await map(
+          config.namespaces,
+          async (organization: string) => {
+            const orgRepos = await helper.orgListRepos(organization);
+            return orgRepos
+              .filter((r) => !r.mirror && !r.archived)
+              .map((r) => r.full_name);
+          },
+        );
+        return deduplicateArray(repos.flat());
+      } else {
+        return await fetchRepositories();
+      }
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;
@@ -810,10 +842,6 @@ const platform: Platform = {
     }
   },
 
-  getRepoForceRebase(): Promise<boolean> {
-    return Promise.resolve(false);
-  },
-
   async ensureComment({
     number: issue,
     topic,
@@ -949,7 +977,6 @@ export const {
   getPr,
   massageMarkdown,
   getPrList,
-  getRepoForceRebase,
   getRepos,
   initPlatform,
   initRepo,

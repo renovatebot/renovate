@@ -302,6 +302,13 @@ export function readSystemFile(
   return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
 }
 
+export async function writeSystemFile(
+  fileName: string,
+  data: string | Buffer,
+): Promise<void> {
+  await fs.outputFile(fileName, data);
+}
+
 export async function getLocalFiles(
   fileNames: string[],
 ): Promise<Record<string, string | null>> {

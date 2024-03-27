@@ -192,6 +192,7 @@ export async function generateLockFile(
     }
 
     const execOptions: ExecOptions = {
+      userConfiguredEnv: config.env,
       cwdFile: lockFileName,
       extraEnv,
       docker: {},
@@ -207,6 +208,21 @@ export async function generateLockFile(
       logger.debug('Updating Yarn binary');
       // TODO: types (#22198)
       commands.push(`yarn set version ${quote(yarnUpdate.newValue!)}`);
+    }
+
+    if (process.env.RENOVATE_X_YARN_PROXY) {
+      if (process.env.HTTP_PROXY && !isYarn1) {
+        commands.push('yarn config unset --home httpProxy');
+        commands.push(
+          `yarn config set --home httpProxy ${quote(process.env.HTTP_PROXY)}`,
+        );
+      }
+      if (process.env.HTTPS_PROXY && !isYarn1) {
+        commands.push('yarn config unset --home httpsProxy');
+        commands.push(
+          `yarn config set --home httpsProxy ${quote(process.env.HTTPS_PROXY)}`,
+        );
+      }
     }
 
     // This command updates the lock file based on package.json
@@ -314,4 +330,25 @@ export async function generateLockFile(
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
   return { lockFile };
+}
+
+export function fuzzyMatchAdditionalYarnrcYml<
+  T extends { npmRegistries?: Record<string, unknown> },
+>(additionalYarnRcYml: T, existingYarnrRcYml: T): T {
+  const keys = new Map(
+    Object.keys(existingYarnrRcYml.npmRegistries ?? {}).map((x) => [
+      x.replace(/\/$/, '').replace(/^https?:/, ''),
+      x,
+    ]),
+  );
+
+  return {
+    ...additionalYarnRcYml,
+    npmRegistries: Object.entries(additionalYarnRcYml.npmRegistries ?? {})
+      .map(([k, v]) => {
+        const key = keys.get(k.replace(/\/$/, '')) ?? k;
+        return { [key]: v };
+      })
+      .reduce((acc, cur) => ({ ...acc, ...cur }), {}),
+  };
 }

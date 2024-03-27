@@ -4,8 +4,6 @@ import type {
   UpdateType,
 } from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
-import type { BitbucketPrCacheData } from '../../../modules/platform/bitbucket/types';
-import type { GiteaPrCacheData } from '../../../modules/platform/gitea/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 import type { PrBlockedBy } from '../../../workers/types';
 
@@ -84,7 +82,7 @@ export interface BranchCache {
    */
   branchName: string;
   /**
-   * Whether the update branch is behind base branh
+   * Whether the update branch is behind base branch
    */
   isBehindBase?: boolean;
   /**
@@ -126,6 +124,7 @@ export interface BranchCache {
 
 export interface RepoCacheData {
   configFileName?: string;
+  httpCache?: Record<string, unknown>;
   semanticCommits?: 'enabled' | 'disabled';
   branches?: BranchCache[];
   init?: RepoInitConfig;
@@ -133,11 +132,17 @@ export interface RepoCacheData {
   lastPlatformAutomergeFailure?: string;
   platform?: {
     gitea?: {
-      pullRequestsCache?: GiteaPrCacheData;
+      pullRequestsCache?: unknown;
     };
-    github?: Record<string, unknown>;
+    github?: {
+      /**
+       * To avoid circular dependency problem, we use `unknown` type here.
+       */
+      pullRequestsCache?: unknown;
+      graphqlPageCache?: unknown;
+    };
     bitbucket?: {
-      pullRequestsCache?: BitbucketPrCacheData;
+      pullRequestsCache?: unknown;
     };
   };
   prComments?: Record<number, Record<string, string>>;

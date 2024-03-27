@@ -16,6 +16,9 @@ describe('modules/manager/ocb/extract', () => {
           - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/alibabacloudlogserviceexporter v0.86.0
           - gomod: go.opentelemetry.io/collector/exporter/debugexporter v0.86.0
 
+        extensions:
+          - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension v0.86.0
+
         receivers:
           - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.86.0
 
@@ -27,7 +30,7 @@ describe('modules/manager/ocb/extract', () => {
         {
           currentValue: '0.40.0',
           datasource: 'go',
-          depName: 'github.com/open-telemetry/opentelemetry-collector',
+          depName: 'go.opentelemetry.io/collector',
           depType: 'collector',
           extractVersion: '^v(?<version>\\S+)',
         },
@@ -47,8 +50,21 @@ describe('modules/manager/ocb/extract', () => {
         {
           currentValue: 'v0.86.0',
           datasource: 'go',
+          depName:
+            'github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckextension',
+          depType: 'extensions',
+        },
+        {
+          currentValue: 'v0.86.0',
+          datasource: 'go',
           depName: 'go.opentelemetry.io/collector/processor/batchprocessor',
           depType: 'processors',
+        },
+        {
+          currentValue: 'v0.86.0',
+          datasource: 'go',
+          depName: 'go.opentelemetry.io/collector/receiver/otlpreceiver',
+          depType: 'receivers',
         },
       ]);
     });

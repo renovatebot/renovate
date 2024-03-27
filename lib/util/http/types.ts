@@ -4,6 +4,7 @@ import type {
   OptionsOfJSONResponseBody,
   ParseJsonFunction,
 } from 'got';
+import type { HttpCacheProvider } from './cache/types';
 
 export type GotContextOptions = {
   authType?: string;
@@ -65,15 +66,7 @@ export interface HttpOptions {
 
   token?: string;
   memCache?: boolean;
-}
-
-export interface EtagCache<T = any> {
-  etag: string;
-  data: T;
-}
-
-export interface HttpRequestOptions<T = any> {
-  etagCache?: EtagCache<T>;
+  cacheProvider?: HttpCacheProvider;
 }
 
 export interface InternalHttpOptions extends HttpOptions {

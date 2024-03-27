@@ -32,6 +32,17 @@ const staticGroups = {
       },
     ],
   },
+  allDigest: {
+    description: 'Group all `digest` updates together.',
+    packageRules: [
+      {
+        groupName: 'all digest updates',
+        groupSlug: 'all-digest',
+        matchPackagePatterns: ['*'],
+        matchUpdateTypes: ['digest'],
+      },
+    ],
+  },
   allNonMajor: {
     description: 'Group all `minor` and `patch` updates together.',
     packageRules: [
@@ -89,6 +100,21 @@ const staticGroups = {
       'fusion-tokens',
     ],
     matchPackagePrefixes: ['fusion-plugin-', 'fusion-react', '^usion-apollo'],
+  },
+  githubArtifactActions: {
+    description:
+      'Group `download-artifact` and `upload-artifact` major updates together.',
+    packageRules: [
+      {
+        groupName: 'GitHub Artifact Actions',
+        matchManagers: ['github-actions'],
+        matchPackageNames: [
+          'actions/download-artifact',
+          'actions/upload-artifact',
+        ],
+        matchUpdateTypes: ['major'],
+      },
+    ],
   },
   glimmer: {
     description: 'Group Glimmer.js packages together.',
@@ -398,6 +424,7 @@ const staticGroups = {
       'group:codemirror',
       'group:fortawesome',
       'group:fusionjs',
+      'group:githubArtifactActions',
       'group:glimmer',
       'group:goOpenapi',
       'group:hibernateCore',
@@ -760,6 +787,15 @@ const staticGroups = {
         extends: 'packages:unitTest',
         groupName: 'unit test packages',
         matchUpdateTypes: ['minor', 'patch'],
+      },
+    ],
+  },
+  vite: {
+    description: 'Group all Vite related packages together.',
+    packageRules: [
+      {
+        extends: 'packages:vite',
+        groupName: 'Vite packages',
       },
     ],
   },

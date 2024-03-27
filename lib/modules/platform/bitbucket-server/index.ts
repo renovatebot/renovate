@@ -1,4 +1,5 @@
 import { setTimeout } from 'timers/promises';
+import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
 import {
   REPOSITORY_CHANGED,
@@ -68,8 +69,10 @@ const bitbucketServerHttp = new BitbucketServerHttp();
 const defaults: {
   endpoint?: string;
   hostType: string;
+  version: string;
 } = {
   hostType: 'bitbucket-server',
+  version: '0.0.0',
 };
 
 /* istanbul ignore next */
@@ -79,7 +82,7 @@ function updatePrVersion(pr: number, version: number): number {
   return res;
 }
 
-export function initPlatform({
+export async function initPlatform({
   endpoint,
   username,
   password,
@@ -98,7 +101,32 @@ export function initPlatform({
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
-  return Promise.resolve(platformConfig);
+  try {
+    let bitbucketServerVersion: string;
+    // istanbul ignore if: experimental feature
+    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
+      bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    } else {
+      const { version } = (
+        await bitbucketServerHttp.getJson<{ version: string }>(
+          `./rest/api/1.0/application-properties`,
+        )
+      ).body;
+      bitbucketServerVersion = version;
+      logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    }
+
+    if (semver.valid(bitbucketServerVersion)) {
+      defaults.version = bitbucketServerVersion;
+    }
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
+    );
+  }
+
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -204,7 +232,7 @@ export async function initRepo({
       ...config,
       url,
       cloneSubmodules,
-      fullClone: true,
+      fullClone: semver.lte(defaults.version, '8.0.0'),
     });
 
     config.mergeMethod = 'merge';
@@ -228,9 +256,9 @@ export async function initRepo({
   }
 }
 
-export async function getRepoForceRebase(): Promise<boolean> {
-  logger.debug(`getRepoForceRebase()`);
-
+export async function getBranchForceRebase(
+  _branchName: string,
+): Promise<boolean> {
   // https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp342
   const res = await bitbucketServerHttp.getJson<{
     mergeConfig: { defaultStrategy: { id: string } };
@@ -584,6 +612,15 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
+  await retry(updatePRAndAddReviewers, [prNo, reviewers], 3, [
+    REPOSITORY_CHANGED,
+  ]);
+}
+
+async function updatePRAndAddReviewers(
+  prNo: number,
+  reviewers: string[],
+): Promise<void> {
   try {
     const pr = await getPr(prNo);
     if (!pr) {
@@ -622,6 +659,33 @@ export async function addReviewers(
       throw err;
     }
   }
+}
+
+async function retry<T extends (...arg0: any[]) => Promise<any>>(
+  fn: T,
+  args: Parameters<T>,
+  maxTries: number,
+  retryErrorMessages: string[],
+): Promise<Awaited<ReturnType<T>>> {
+  const maxAttempts = Math.max(maxTries, 1);
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await fn(...args);
+    } catch (e) {
+      lastError = e;
+      if (
+        retryErrorMessages.length !== 0 &&
+        !retryErrorMessages.includes(e.message)
+      ) {
+        logger.debug(`Error not marked for retry`);
+        throw e;
+      }
+    }
+  }
+
+  logger.debug(`All ${maxAttempts} retry attempts exhausted`);
+  throw lastError;
 }
 
 export function deleteLabel(issueNo: number, label: string): Promise<void> {

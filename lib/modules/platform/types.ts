@@ -41,6 +41,7 @@ export interface RepoParams {
   repository: string;
   endpoint?: string;
   gitUrl?: GitUrlOption;
+  forkCreation?: boolean;
   forkOrg?: string;
   forkToken?: string;
   forkProcessing?: 'enabled' | 'disabled';
@@ -112,6 +113,7 @@ export interface CreatePRConfig {
   labels?: string[] | null;
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
+  milestone?: number;
 }
 export interface UpdatePrConfig {
   number: number;
@@ -120,6 +122,10 @@ export interface UpdatePrConfig {
   prBody?: string;
   state?: 'open' | 'closed';
   targetBranch?: string;
+}
+export interface ReattemptPlatformAutomergeConfig {
+  number: number;
+  platformOptions?: PlatformPrOptions;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -176,6 +182,7 @@ export interface AutodiscoverConfig {
   topics?: string[];
   includeMirrors?: boolean;
   namespaces?: string[];
+  projects?: string[];
 }
 
 export interface Platform {
@@ -206,7 +213,7 @@ export interface Platform {
   addAssignees(number: number, assignees: string[]): Promise<void>;
   createPr(prConfig: CreatePRConfig): Promise<Pr | null>;
   getRepos(config?: AutodiscoverConfig): Promise<string[]>;
-  getRepoForceRebase(): Promise<boolean>;
+  getBranchForceRebase?(branchName: string): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
@@ -223,6 +230,9 @@ export interface Platform {
   getPr(number: number): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
+  reattemptPlatformAutomerge?(
+    prConfig: ReattemptPlatformAutomergeConfig,
+  ): Promise<void>;
   getBranchStatus(
     branchName: string,
     internalChecksAsSuccess: boolean,

@@ -16,12 +16,14 @@ const hostRules = mocked(_hostRules);
 describe('modules/datasource/go/base', () => {
   describe('simple cases', () => {
     it.each`
-      module                           | datasource          | packageName
-      ${'gopkg.in/foo'}                | ${'github-tags'}    | ${'go-foo/foo'}
-      ${'gopkg.in/foo/bar'}            | ${'github-tags'}    | ${'foo/bar'}
-      ${'github.com/foo/bar'}          | ${'github-tags'}    | ${'foo/bar'}
-      ${'bitbucket.org/foo/bar'}       | ${'bitbucket-tags'} | ${'foo/bar'}
-      ${'code.cloudfoundry.org/lager'} | ${'github-tags'}    | ${'cloudfoundry/lager'}
+      module                                  | datasource          | packageName
+      ${'gopkg.in/foo'}                       | ${'github-tags'}    | ${'go-foo/foo'}
+      ${'gopkg.in/foo/bar'}                   | ${'github-tags'}    | ${'foo/bar'}
+      ${'github.com/foo/bar'}                 | ${'github-tags'}    | ${'foo/bar'}
+      ${'bitbucket.org/foo/bar'}              | ${'bitbucket-tags'} | ${'foo/bar'}
+      ${'code.cloudfoundry.org/lager'}        | ${'github-tags'}    | ${'cloudfoundry/lager'}
+      ${'dev.azure.com/foo/bar/_git/baz.git'} | ${'git-tags'}       | ${'https://dev.azure.com/foo/bar/_git/baz'}
+      ${'dev.azure.com/foo/bar/baz.git'}      | ${'git-tags'}       | ${'https://dev.azure.com/foo/bar/_git/baz'}
     `(
       '$module -> $datasource: $packageName',
       async ({ module, datasource, packageName }) => {
@@ -238,6 +240,29 @@ describe('modules/datasource/go/base', () => {
         });
       });
 
+      it('supports GitLab EE deps in private subgroup with api/ as part of packageName and api/v4 as part of endpoint', async () => {
+        GlobalConfig.set({ endpoint: 'https://my.custom.domain/api/v4' });
+
+        hostRules.hostType.mockReturnValue('gitlab');
+        httpMock
+          .scope('https://my.custom.domain')
+          .get('/group/subgroup-api/myrepo?go-get=1')
+          .reply(
+            200,
+            Fixtures.get('go-get-gitlab-ee-private-subgroup-api.html'),
+          );
+
+        const res = await BaseGoDatasource.getDatasource(
+          'my.custom.domain/group/subgroup-api/myrepo',
+        );
+
+        expect(res).toEqual({
+          datasource: GitlabTagsDatasource.id,
+          packageName: 'group/subgroup-api/myrepo',
+          registryUrl: 'https://my.custom.domain/',
+        });
+      });
+
       it('supports GitLab EE deps in subgroup with version', async () => {
         hostRules.hostType.mockReturnValue('gitlab');
         httpMock
@@ -260,7 +285,7 @@ describe('modules/datasource/go/base', () => {
         hostRules.hostType.mockReturnValue('gitlab');
         httpMock
           .scope('https://my.custom.domain')
-          .get('/golang/subgroup/myrepo.git/v2?go-get=1')
+          .get('/golang/subgroup/myrepo?go-get=1')
           .reply(200, Fixtures.get('go-get-gitlab-ee-private-subgroup.html'));
 
         const res = await BaseGoDatasource.getDatasource(
@@ -347,21 +372,31 @@ describe('modules/datasource/go/base', () => {
 
       it('handles go-import with azure devops source', async () => {
         const meta =
-          '<meta name="go-import" content="dev.azure.com/my-organization/my-project/_git/my-repo.git git https://dev.azure.com/my-organization/my-project/_git/my-repo.git" />';
+          '<meta name="go-import" content="org.visualstudio.com/my-project/_git/my-repo.git git https://org.visualstudio.com/my-project/_git/my-repo.git" />';
         httpMock
-          .scope('https://dev.azure.com')
-          .get('/my-organization/my-project/_git/my-repo.git?go-get=1')
+          .scope('https://org.visualstudio.com')
+          .get('/my-project/_git/my-repo.git?go-get=1')
           .reply(200, meta);
-
         const res = await BaseGoDatasource.getDatasource(
-          'dev.azure.com/my-organization/my-project/_git/my-repo.git',
+          'org.visualstudio.com/my-project/_git/my-repo.git',
         );
-
         expect(res).toEqual({
           datasource: GitTagsDatasource.id,
-          packageName:
-            'https://dev.azure.com/my-organization/my-project/_git/my-repo',
+          packageName: 'https://org.visualstudio.com/my-project/_git/my-repo',
         });
+      });
+
+      it('returns null for invalid azure devops source', async () => {
+        httpMock
+          .scope('https://dev.azure.com')
+          .get('/foo/bar.git?go-get=1')
+          .reply(200);
+
+        const res = await BaseGoDatasource.getDatasource(
+          'dev.azure.com/foo/bar.git',
+        );
+
+        expect(res).toBeNull();
       });
 
       it('handles uncommon imports', async () => {

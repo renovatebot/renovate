@@ -461,6 +461,26 @@ describe('util/http/github', () => {
           }),
         ).rejects.toThrow('Sorry, this is a teapot');
       });
+
+      it('should throw original error when milestone not found', async () => {
+        const milestoneNotFoundError = {
+          message: 'Validation Failed',
+          errors: [
+            {
+              value: 1,
+              resource: 'Issue',
+              field: 'milestone',
+              code: 'invalid',
+            },
+          ],
+          documentation_url:
+            'https://docs.github.com/rest/issues/issues#update-an-issue',
+        };
+
+        await expect(fail(422, milestoneNotFoundError)).rejects.toThrow(
+          'Validation Failed',
+        );
+      });
     });
   });
 
