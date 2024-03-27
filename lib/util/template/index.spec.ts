@@ -276,4 +276,50 @@ describe('util/template/index', () => {
       expect(output).toBe('not equals');
     });
   });
+
+  describe('includes', () => {
+    it('includes is true', () => {
+      const output = template.compile(
+        '{{#if (includes depTypes "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          depTypes: ['dependencies'],
+        },
+      );
+
+      expect(output).toBe('production');
+    });
+
+    it('includes is false', () => {
+      const output = template.compile(
+        '{{#if (includes depTypes "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          depTypes: ['devDependencies'],
+        },
+      );
+
+      expect(output).toBe('notProduction');
+    });
+
+    it('includes with incorrect type first argument', () => {
+      const output = template.compile(
+        '{{#if (includes depTypes "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          depTypes: 'devDependencies',
+        },
+      );
+
+      expect(output).toBe('notProduction');
+    });
+
+    it('includes with incorrect type second argument', () => {
+      const output = template.compile(
+        '{{#if (includes depTypes 555)}}production{{else}}notProduction{{/if}}',
+        {
+          depTypes: ['devDependencies'],
+        },
+      );
+
+      expect(output).toBe('notProduction');
+    });
+  });
 });
