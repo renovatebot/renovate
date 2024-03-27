@@ -156,14 +156,14 @@ export class NugetV3Api {
 
     let homepage: string | null = null;
     let latestStable: string | null = null;
-    let latestNupkgUrl: string | null = null;
+    let nupkgUrl: string | null = null;
     const releases = catalogEntries.map(
       ({
         version,
         published: releaseTimestamp,
         projectUrl,
         listed,
-        packageContent: nupkgUrl,
+        packageContent,
       }) => {
         const release: Release = { version: removeBuildMeta(version) };
         if (releaseTimestamp) {
@@ -172,7 +172,7 @@ export class NugetV3Api {
         if (versioning.isValid(version) && versioning.isStable(version)) {
           latestStable = removeBuildMeta(version);
           homepage = projectUrl ? massageUrl(projectUrl) : homepage;
-          latestNupkgUrl = nupkgUrl ? massageUrl(nupkgUrl) : null;
+          nupkgUrl = packageContent ? massageUrl(packageContent) : null;
         }
         if (listed === false) {
           release.isDeprecated = true;
@@ -190,6 +190,7 @@ export class NugetV3Api {
       const last = catalogEntries.pop()!;
       latestStable = removeBuildMeta(last.version);
       homepage ??= last.projectUrl ?? null;
+      nupkgUrl ??= last.packageContent ? massageUrl(last.packageContent) : null;
     }
 
     const dep: ReleaseResult = {
@@ -202,7 +203,6 @@ export class NugetV3Api {
         registryUrl,
         'PackageBaseAddress',
       );
-      // istanbul ignore else: this is a required v3 api
       if (is.nonEmptyString(packageBaseAddress)) {
         const nuspecUrl = `${ensureTrailingSlash(
           packageBaseAddress,
@@ -216,20 +216,17 @@ export class NugetV3Api {
         if (sourceUrl) {
           dep.sourceUrl = massageUrl(sourceUrl);
         }
-      } else if (latestNupkgUrl) {
+      } else if (nupkgUrl) {
         const sourceUrl = await this.getSourceUrlFromNupkg(
           http,
           registryUrl,
           pkgName,
           latestStable,
-          latestNupkgUrl,
+          nupkgUrl,
         );
         if (sourceUrl) {
           dep.sourceUrl = massageUrl(sourceUrl);
-          logger.debug(
-            { sourceUrl, nupkgUrl: latestNupkgUrl },
-            `Determined sourceUrl from nupkgUrl`,
-          );
+          logger.debug(`Determined sourceUrl ${sourceUrl} from ${nupkgUrl}`);
         }
       }
     } catch (err) {

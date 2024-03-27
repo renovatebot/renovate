@@ -378,12 +378,7 @@ describe('modules/datasource/nuget/index', () => {
           registryUrls: ['https://some-registry/v3/index.json'],
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          {
-            sourceUrl: 'https://github.com/NLog/NLog.git',
-            nupkgUrl:
-              'https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
-          },
-          'Determined sourceUrl from nupkgUrl',
+          'Determined sourceUrl https://github.com/NLog/NLog.git from https://some-registry/v3-flatcontainer/nlog/4.7.3/nlog.4.7.3.nupkg',
         );
         expect(packageCache.set).toHaveBeenCalledWith(
           'datasource-nuget',
