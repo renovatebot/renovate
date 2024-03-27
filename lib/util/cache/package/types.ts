@@ -89,6 +89,7 @@ export type PackageCacheNamespace =
   | 'datasource-packagist-public-files'
   | 'datasource-packagist'
   | 'datasource-pod'
+  | 'datasource-python-version'
   | 'datasource-releases'
   | 'datasource-repology-list'
   | 'datasource-ruby-version'
