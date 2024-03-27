@@ -114,7 +114,7 @@ Returns `true` if at least one expression is `true`.
 
 Returns `true` if the value is included on the list given.
 
-`{{#if (includes depTypes "dependencies")}}production{{else}}notProduction{{/if}}`
+`{{#if (includes labels 'dependencies')}}Production Dependencies{{else}}Not Production Dependencies{{/if}}`
 
 ## Environment variables
 
