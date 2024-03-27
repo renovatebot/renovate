@@ -134,9 +134,23 @@ export class GiteaPrCache {
         break;
       }
 
-      url = parseLinkHeader(res.headers.link)?.next?.url;
+      if (process.env.RENOVATE_X_REBASE_PAGINATION_LINKS) {
+        url = GiteaPrCache.removeBaseUrl(
+          parseLinkHeader(res.headers.link)?.next?.url,
+        );
+      } else {
+        url = parseLinkHeader(res.headers.link)?.next?.url;
+      }
     }
 
     return this;
+  }
+
+  private static removeBaseUrl(url: string | undefined): string | undefined {
+    if (!url) {
+      return undefined;
+    }
+    const withBaseUrl = new URL(url);
+    return withBaseUrl.pathname + withBaseUrl.search + withBaseUrl.hash;
   }
 }

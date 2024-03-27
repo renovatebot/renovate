@@ -1126,6 +1126,66 @@ describe('modules/platform/gitea/index', () => {
       ]);
     });
 
+    it('should return list of paginated pull requests', async () => {
+      const baseUrl = 'https://gitea.com/api/v1';
+      const path = '/repos/some/repo/pulls';
+      const scope = httpMock
+        .scope(baseUrl)
+        .get(path)
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, [mockPRs[0]], {
+          link: `<${baseUrl}${path}?page=2&sort=recentupdate&state=all>; rel="next"`,
+        })
+        .get(path)
+        .query({ page: '2', state: 'all', sort: 'recentupdate' })
+        .reply(200, [mockPRs[1]], {
+          link: `<${baseUrl}${path}?page=3&sort=recentupdate&state=all>; rel="next"`,
+        })
+        .get(path)
+        .query({ page: '3', state: 'all', sort: 'recentupdate' })
+        .reply(200, [mockPRs[2]]);
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+
+      const res = await gitea.getPrList();
+      expect(res).toMatchObject([
+        { number: 1, title: 'Some PR' },
+        { number: 2, title: 'Other PR' },
+        { number: 3, title: 'Draft PR' },
+      ]);
+    });
+
+    it('should return list of paginated pull requests when pagination links are rebased', async () => {
+      const baseUrl = 'https://gitea.com/api/v1';
+      const path = '/repos/some/repo/pulls';
+      const scope = httpMock
+        .scope(baseUrl)
+        .get(path)
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, [mockPRs[0]], {
+          link: `<https://external.gitea.com/api/v1${path}?page=2&sort=recentupdate&state=all>; rel="next"`,
+        })
+        .get(path)
+        .query({ page: '2', state: 'all', sort: 'recentupdate' })
+        .reply(200, [mockPRs[1]], {
+          link: `<https://external.gitea.com/api/v1${path}?page=3&sort=recentupdate&state=all>; rel="next"`,
+        })
+        .get(path)
+        .query({ page: '3', state: 'all', sort: 'recentupdate' })
+        .reply(200, [mockPRs[2]]);
+      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+
+      const res = await gitea.getPrList();
+      expect(res).toMatchObject([
+        { number: 1, title: 'Some PR' },
+        { number: 2, title: 'Other PR' },
+        { number: 3, title: 'Draft PR' },
+      ]);
+      delete process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
+    });
+
     it('should filter list by creator', async () => {
       const thirdPartyPr = partial<PR>({
         number: 42,
