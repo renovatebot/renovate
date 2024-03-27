@@ -96,5 +96,22 @@ describe('modules/manager/gleam/artifacts', () => {
         TEMPORARY_ERROR,
       );
     });
+
+    it('handles full error', async () => {
+      const execError = new ExecError('fake_gleam_failure', {
+        cmd: '',
+        stdout: '',
+        stderr: '',
+        options: { encoding: 'utf8' },
+      });
+      updateArtifact.updatedDeps = [{ manager: 'gleam' }];
+      const oldLock = Buffer.from('old');
+      fs.readLocalFile.mockResolvedValueOnce(oldLock.toString());
+      exec.mockRejectedValueOnce(execError);
+      fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
+      expect(await updateArtifacts(updateArtifact)).toEqual([
+        { artifactError: { lockFile: 'manifest.toml', stderr: 'fake_gleam_failure' } },
+      ]);
+    });
   });
 });
