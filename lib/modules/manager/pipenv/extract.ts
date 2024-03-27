@@ -25,7 +25,7 @@ const specifierRegex = regEx(`^${specifierPattern}$`);
 function extractFromSection(
   sectionName: string,
   pipfileSection: Record<string, PipRequirement>,
-  sources: PipSource[],
+  sources?: PipSource[],
 ): PackageDependency[] {
   const deps = Object.entries(pipfileSection)
     .map((x) => {
@@ -93,7 +93,7 @@ function extractFromSection(
         // TODO #22198
         dep.managerData!.nestedVersion = nestedVersion;
       }
-      if (is.object(requirements) && requirements.index) {
+      if (sources && is.object(requirements) && requirements.index) {
         const source = sources.find((item) => item.name === requirements.index);
         if (source) {
           dep.registryUrls = [source.url];
@@ -138,7 +138,7 @@ export async function extractPackageFile(
   }
   const res: PackageFileContent = { deps: [] };
 
-  const sources = pipfile?.source || [];
+  const sources = pipfile?.source;
 
   if (sources) {
     res.registryUrls = sources.map((source) => source.url);
