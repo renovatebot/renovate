@@ -576,7 +576,7 @@ describe('modules/manager/sbt/extract', () => {
               replaceString: 'sbt.version=1.6.0',
               versioning: 'semver',
               extractVersion: '^v(?<version>\\S+)',
-              registryUrls: ['https://repo1.maven.org/maven2'],
+              registryUrls: [],
             },
           ],
         },

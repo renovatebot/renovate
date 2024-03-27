@@ -201,6 +201,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'flutter',
     versioning: npmVersioningId,
   },
+  vendir: {
+    datasource: 'github-releases',
+    packageName: 'carvel-dev/vendir',
+    versioning: semverVersioningId,
+  },
 };
 
 let _getPkgReleases: Promise<typeof import('../../modules/datasource')> | null =

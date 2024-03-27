@@ -95,8 +95,9 @@ export interface LocalRepoConfig {
   parentRepo: string | null;
   forkOrg?: string;
   forkToken?: string;
+  forkCreation?: boolean;
   prList: GhPr[] | null;
-  issueList: any[] | null;
+  issueList: GithubIssue[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
   repositoryOwner: string;
@@ -115,6 +116,9 @@ export type BranchProtection = any;
 export interface GhRepo {
   id: string;
   isFork: boolean;
+  parent?: {
+    nameWithOwner: string;
+  };
   isArchived: boolean;
   nameWithOwner: string;
   autoMergeAllowed: boolean;
@@ -148,4 +152,12 @@ export interface ApiPageItem {
 export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
   lastModified?: string;
+}
+
+export interface GithubIssue {
+  body: string;
+  number: number;
+  state: string;
+  title: string;
+  lastModified: string;
 }

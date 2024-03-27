@@ -104,6 +104,13 @@ export function getYarnVersionFromLock(lockfile: LockFile): string {
   if (isYarn1) {
     return '^1.22.18';
   }
+  if (lockfileVersion && lockfileVersion >= 12) {
+    // This will probably be v5
+    return '>=4.0.0';
+  }
+  if (lockfileVersion && lockfileVersion >= 10) {
+    return '^4.0.0';
+  }
   if (lockfileVersion && lockfileVersion >= 8) {
     // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
     return '^3.0.0';

@@ -39,12 +39,6 @@
       "matchDepNames": ["ghcr.io/renovatebot/base-image"],
       "matchUpdateTypes": ["major", "minor"],
       "semanticCommitType": "feat"
-    },
-    {
-      "description": "fix versioning for ben-z/gh-action-mutex, eg v1.0-alpha-8",
-      "matchDepNames": ["ben-z/gh-action-mutex"],
-      "matchManagers": ["github-actions"],
-      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?(?<prerelease>\\-.+)?$"
     }
   ],
   "customManagers": [

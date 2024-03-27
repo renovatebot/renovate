@@ -44,7 +44,9 @@ export function getPatch(version: string): null | number {
 
   if (typeof cleanerVersion === 'string') {
     const newVersion = semver.valid(
-      semver.coerce(cleanedVersion, options),
+      semver.coerce(cleanedVersion, {
+        loose: false,
+      }),
       options,
     );
     return Number(newVersion?.split('.')[2]);

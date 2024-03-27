@@ -40,6 +40,7 @@ const options = getOptions();
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
+let optionInherits: Set<string>;
 
 const managerList = getManagerList();
 
@@ -98,6 +99,18 @@ function getDeprecationMessage(option: string): string | undefined {
   return deprecatedOptions[option];
 }
 
+function isInhertConfigOption(key: string): boolean {
+  if (!optionInherits) {
+    optionInherits = new Set();
+    for (const option of options) {
+      if (option.inheritConfigSupport) {
+        optionInherits.add(option.name);
+      }
+    }
+  }
+  return optionInherits.has(key);
+}
+
 function isGlobalOption(key: string): boolean {
   if (!optionGlobals) {
     optionGlobals = new Set();
@@ -121,7 +134,7 @@ export function getParentName(parentPath: string | undefined): string {
 }
 
 export async function validateConfig(
-  isGlobalConfig: boolean,
+  configType: 'global' | 'inherit' | 'repo',
   config: RenovateConfig,
   isPreset?: boolean,
   parentPath?: string,
@@ -164,20 +177,25 @@ export async function validateConfig(
       });
     }
 
-    if (isGlobalConfig && isGlobalOption(key)) {
-      await validateGlobalConfig(
-        key,
-        val,
-        optionTypes[key],
-        warnings,
-        currentPath,
-      );
-      continue;
-    } else {
-      if (isGlobalOption(key) && !isFalseGlobal(key, parentPath)) {
+    if (isGlobalOption(key)) {
+      if (configType === 'global') {
+        await validateGlobalConfig(
+          key,
+          val,
+          optionTypes[key],
+          warnings,
+          errors,
+          currentPath,
+          config,
+        );
+        continue;
+      } else if (
+        !isFalseGlobal(key, parentPath) &&
+        !(configType === 'inherit' && isInhertConfigOption(key))
+      ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         });
         continue;
       }
@@ -327,7 +345,7 @@ export async function validateConfig(
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
                 const subValidation = await validateConfig(
-                  isGlobalConfig,
+                  configType,
                   subval as RenovateConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`,
@@ -446,6 +464,7 @@ export async function validateConfig(
                     'separateMajorMinor',
                     'separateMinorPatch',
                     'separateMultipleMajor',
+                    'separateMultipleMinor',
                     'versioning',
                   ];
                   if (is.nonEmptyArray(resolvedRule.matchUpdateTypes)) {
@@ -627,9 +646,10 @@ export async function validateConfig(
                 });
               }
             } else if (key === 'env') {
-              const allowedEnvVars = isGlobalConfig
-                ? (config.allowedEnv as string[]) ?? []
-                : GlobalConfig.get('allowedEnv', []);
+              const allowedEnvVars =
+                configType === 'global'
+                  ? (config.allowedEnv as string[]) ?? []
+                  : GlobalConfig.get('allowedEnv', []);
               for (const [envVarName, envVarValue] of Object.entries(val)) {
                 if (!is.string(envVarValue)) {
                   errors.push({
@@ -715,7 +735,7 @@ export async function validateConfig(
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
                 const subValidation = await validateConfig(
-                  isGlobalConfig,
+                  configType,
                   val,
                   isPreset,
                   currentPath,
@@ -735,9 +755,10 @@ export async function validateConfig(
     }
 
     if (key === 'hostRules' && is.array(val)) {
-      const allowedHeaders = isGlobalConfig
-        ? (config.allowedHeaders as string[]) ?? []
-        : GlobalConfig.get('allowedHeaders', []);
+      const allowedHeaders =
+        configType === 'global'
+          ? (config.allowedHeaders as string[]) ?? []
+          : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (!rule.headers) {
           continue;
@@ -826,7 +847,9 @@ async function validateGlobalConfig(
   val: unknown,
   type: string,
   warnings: ValidationMessage[],
+  errors: ValidationMessage[],
   currentPath: string | undefined,
+  config: RenovateConfig,
 ): Promise<void> {
   if (val !== null) {
     if (type === 'string') {
@@ -880,6 +903,17 @@ async function validateGlobalConfig(
             message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
           });
         }
+
+        if (
+          key === 'reportType' &&
+          ['s3', 'file'].includes(val) &&
+          !is.string(config.reportPath)
+        ) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `reportType '${val}' requires a configured reportPath`,
+          });
+        }
       } else {
         warnings.push({
           topic: 'Configuration Error',
@@ -926,14 +960,14 @@ async function validateGlobalConfig(
     } else if (type === 'object') {
       if (is.plainObject(val)) {
         if (key === 'onboardingConfig') {
-          const subValidation = await validateConfig(false, val);
+          const subValidation = await validateConfig('repo', val);
           for (const warning of subValidation.warnings.concat(
             subValidation.errors,
           )) {
             warnings.push(warning);
           }
         } else if (key === 'force') {
-          const subValidation = await validateConfig(true, val);
+          const subValidation = await validateConfig('global', val);
           for (const warning of subValidation.warnings.concat(
             subValidation.errors,
           )) {
