@@ -29,8 +29,8 @@ handlebars.registerHelper('containsString', (str, subStr) =>
 handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
 
 handlebars.registerHelper('includes', (arg1: string[], arg2: string) => {
-  if (arg1?.length) {
-    arg1.includes(arg2);
+  if (arg1?.length && typeof arg2 === 'string') {
+    return arg1.includes(arg2);
   }
 
   return false;
