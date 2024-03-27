@@ -239,7 +239,7 @@
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shlex": "2.1.2",
-    "simple-git": "3.22.0",
+    "simple-git": "3.23.0",
     "slugify": "1.6.6",
     "source-map-support": "0.5.21",
     "toml-eslint-parser": "0.9.3",
@@ -308,7 +308,7 @@
     "@types/xmldoc": "1.1.9",
     "@typescript-eslint/eslint-plugin": "7.3.1",
     "@typescript-eslint/parser": "7.3.1",
-    "aws-sdk-client-mock": "3.0.1",
+    "aws-sdk-client-mock": "3.1.0",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "7.0.2",
@@ -347,7 +347,7 @@
     "typescript": "5.3.3",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@8.15.4",
+  "packageManager": "pnpm@8.15.5",
   "files": [
     "dist",
     "renovate-schema.json"
