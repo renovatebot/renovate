@@ -462,7 +462,6 @@ describe('modules/manager/vendir/artifacts', () => {
       fs.readLocalFile.mockResolvedValueOnce(vendirLockFile1);
       fs.getSiblingFileName.mockReturnValueOnce('vendir.lock.yml');
       fs.readLocalFile.mockResolvedValueOnce(vendirLockFile2);
-      fs.readLocalFile.mockResolvedValueOnce('0.35.0');
       const execSnapshots = mockExecAll();
       fs.privateCacheDir.mockReturnValue(
         '/tmp/renovate/cache/__renovate-private-cache',

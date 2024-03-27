@@ -2,11 +2,8 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const oneContents = Fixtures.get('one-contents.yaml');
-const ociContents = Fixtures.get('oci-contents.yaml');
-const aliasContents = Fixtures.get('alias-contents.yaml');
-const multipleContents = Fixtures.get('multiple-contents.yaml');
-const nonHelmChartContents = Fixtures.get('non-helmchart.yaml');
+const validVendirYaml = Fixtures.get('valid-vendir.yaml');
+const invalidVendirYaml = Fixtures.get('invalid-vendir.yaml');
 
 describe('modules/manager/vendir/extract', () => {
   describe('extractPackageFile()', () => {
@@ -30,13 +27,17 @@ describe('modules/manager/vendir/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null for nonHelmChart key', () => {
-      const result = extractPackageFile(nonHelmChartContents, 'vendir.yml', {});
+    it('returns null for nonHelmChart or nonGit key', () => {
+      const result = extractPackageFile(invalidVendirYaml, 'vendir.yml', {});
       expect(result).toBeNull();
     });
 
-    it('single chart - extracts helm-chart from vendir.yml correctly', () => {
-      const result = extractPackageFile(oneContents, 'vendir.yml', {});
+    it('multiple charts - extracts helm-chart from vendir.yml correctly', () => {
+      const result = extractPackageFile(validVendirYaml, 'vendir.yml', {
+        registryAliases: {
+          test: 'quay.example.com/organization',
+        },
+      });
       expect(result).toMatchObject({
         deps: [
           {
@@ -45,53 +46,24 @@ describe('modules/manager/vendir/extract', () => {
             datasource: 'helm',
             registryUrls: ['https://charts.bitnami.com/bitnami'],
           },
-        ],
-      });
-    });
-
-    it('single chart - extracts oci helm-chart from vendir.yml correctly', () => {
-      const result = extractPackageFile(ociContents, 'vendir.yml', {});
-      expect(result).toMatchObject({
-        deps: [
+          {
+            currentValue: '7.10.1',
+            depName: 'test',
+            datasource: 'helm',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
+          },
+          {
+            currentValue: '7.10.1',
+            depName: 'https://github.com/test/test',
+            packageName: 'https://github.com/test/test',
+            datasource: 'git-refs',
+          },
           {
             currentValue: '7.10.1',
             depName: 'contour',
             packageName: 'charts.bitnami.com/bitnami/contour',
             datasource: 'docker',
           },
-        ],
-      });
-    });
-
-    it('multiple charts - extracts helm-chart from vendir.yml correctly', () => {
-      const result = extractPackageFile(multipleContents, 'vendir.yml', {});
-      expect(result).toMatchObject({
-        deps: [
-          {
-            currentValue: '7.10.1',
-            depName: 'contour',
-            datasource: 'helm',
-            registryUrls: ['https://charts.bitnami.com/bitnami'],
-          },
-          {
-            currentValue: '7.10.1',
-            depName: 'contour',
-            datasource: 'helm',
-            registryUrls: ['https://charts.bitnami.com/bitnami'],
-          },
-        ],
-      });
-    });
-
-    it('resolves aliased registry urls', () => {
-      const aliasResult = extractPackageFile(aliasContents, 'vendir.yml', {
-        registryAliases: {
-          test: 'quay.example.com/organization',
-        },
-      });
-
-      expect(aliasResult).toMatchObject({
-        deps: [
           {
             currentDigest: undefined,
             currentValue: '7.10.1',
