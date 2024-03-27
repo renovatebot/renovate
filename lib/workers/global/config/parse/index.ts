@@ -68,7 +68,6 @@ export async function parseConfigs(
   }
 
   // Add file logger
-  // istanbul ignore if
   if (config.logFile && is.undefined(process.env.LOG_FILE)) {
     logger.debug(
       // TODO: types (#22198)
