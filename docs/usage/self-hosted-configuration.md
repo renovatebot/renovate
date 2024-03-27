@@ -789,7 +789,7 @@ The default `auto` setting is converted to `disabled` if `autodiscoverRepositori
 
 In other words, the default behavior is:
 
-- If you run Renovate on all discovered repositories then it will skip those without any dependencies detected, but
+- If you run Renovate on discovered repositories then it will skip onboarding those without dependencies detected, but
 - If you run Renovate on _specific_ repositories then Renovate will onboard all such repositories even if no dependencies are found
 
 ## onboardingPrTitle
