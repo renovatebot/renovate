@@ -161,7 +161,7 @@ export async function extractPackageFile(
     .map(([category, section]) =>
       extractFromSection(category, section, sources),
     )
-    .reduce((deps, sectionDeps) => [...deps, ...sectionDeps], []);
+    .flat();
 
   if (!res.deps.length) {
     return null;
