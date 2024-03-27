@@ -11,11 +11,11 @@ describe('logger/utils', () => {
   });
 
   it('checks for valid log levels', () => {
-    expect(validateLogLevel(undefined)).toBeUndefined();
-    expect(validateLogLevel('warn')).toBeUndefined();
-    expect(validateLogLevel('debug')).toBeUndefined();
-    expect(validateLogLevel('trace')).toBeUndefined();
-    expect(validateLogLevel('info')).toBeUndefined();
+    expect(validateLogLevel(undefined)).toBe('info');
+    expect(validateLogLevel('warn')).toBe('warn');
+    expect(validateLogLevel('debug')).toBe('debug');
+    expect(validateLogLevel('trace')).toBe('trace');
+    expect(validateLogLevel('info')).toBe('info');
   });
 
   it.each`

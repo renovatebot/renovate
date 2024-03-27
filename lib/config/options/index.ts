@@ -484,14 +484,14 @@ const options: RenovateOptions[] = [
   // Log options
   {
     name: 'logFile',
-    description: 'Log file path.',
+    description: 'Log file path. (deprecated)',
     stage: 'global',
     type: 'string',
     globalOnly: true,
   },
   {
     name: 'logFileLevel',
-    description: 'Set the log file log level.',
+    description: 'Set the log file log level. (deprecated)',
     stage: 'global',
     type: 'string',
     default: 'debug',
