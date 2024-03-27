@@ -48,7 +48,7 @@ function getGoDep(
       lineNumber,
     },
     depName: 'go',
-    depType: 'golang',
+    depType,
     currentValue: goVer,
     datasource: GolangVersionDatasource.id,
     ...(versioning && { versioning }),
