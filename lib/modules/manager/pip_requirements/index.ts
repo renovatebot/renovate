@@ -6,7 +6,7 @@ export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)[\\w-]*requirements(-\\w+)?\\.(txt|pip)$'],
+  fileMatch: ['(^|/)[\\w-]*requirements([-.]\\w+)?\\.(txt|pip)$'],
 };
 
 export const categories: Category[] = ['python'];
