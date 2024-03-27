@@ -36,7 +36,7 @@ import type {
 import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
-import { prepareLabels } from './labels';
+import { getChangedLabels, prepareLabels, shouldUpdateLabels } from './labels';
 import { addParticipants } from './participants';
 import { getPrCache, setPrCache } from './pr-cache';
 import {
@@ -78,15 +78,27 @@ export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
 export function updatePrDebugData(
   targetBranch: string,
+  labels: string[],
   debugData: PrDebugData | undefined,
 ): PrDebugData {
   const createdByRenovateVersion = debugData?.createdInVer ?? pkg.version;
   const updatedByRenovateVersion = pkg.version;
-  return {
+
+  const updatedPrDebugData: PrDebugData = {
     createdInVer: createdByRenovateVersion,
     updatedInVer: updatedByRenovateVersion,
     targetBranch,
   };
+
+  // Add labels to the debug data object.
+  // When to add:
+  // 1. Add it when a new PR is created, i.e., when debugData is undefined.
+  // 2. Add it if an existing PR already has labels in the debug data, confirming that we can update its labels.
+  if (!debugData || is.array(debugData.labels)) {
+    updatedPrDebugData.labels = labels;
+  }
+
+  return updatedPrDebugData;
 }
 
 function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
@@ -319,6 +331,7 @@ export async function ensurePr(
     {
       debugData: updatePrDebugData(
         config.baseBranch,
+        prepareLabels(config), // include labels in debug data
         existingPr?.bodyStruct?.debugData,
       ),
     },
@@ -344,10 +357,22 @@ export async function ensurePr(
       const existingPrBodyHash = existingPr.bodyStruct?.hash;
       const newPrTitle = stripEmojis(prTitle);
       const newPrBodyHash = hashBody(prBody);
+
+      const prInitialLabels = existingPr.bodyStruct?.debugData?.labels;
+      const prCurrentLabels = existingPr.labels;
+      const configuredLabels = prepareLabels(config);
+
+      const labelsNeedUpdate = shouldUpdateLabels(
+        prInitialLabels,
+        prCurrentLabels,
+        configuredLabels,
+      );
+
       if (
         existingPr?.targetBranch === config.baseBranch &&
         existingPrTitle === newPrTitle &&
-        existingPrBodyHash === newPrBodyHash
+        existingPrBodyHash === newPrBodyHash &&
+        !labelsNeedUpdate
       ) {
         // adds or-cache for existing PRs
         setPrCache(branchName, prBodyFingerprint, false);
@@ -374,6 +399,36 @@ export async function ensurePr(
           'PR base branch has changed',
         );
         updatePrConfig.targetBranch = config.baseBranch;
+      }
+
+      if (labelsNeedUpdate) {
+        logger.debug(
+          {
+            branchName,
+            prCurrentLabels,
+            configuredLabels,
+          },
+          'PR labels have changed',
+        );
+
+        // Divide labels into three categories:
+        // i) addLabels: Labels that need to be added
+        // ii) removeLabels: Labels that need to be removed
+        // iii) labels: New labels for the PR, replacing the old labels array entirely.
+        // This distinction is necessary because different platforms update labels differently
+        // For more details, refer to the updatePr function of each platform.
+
+        const [addLabels, removeLabels] = getChangedLabels(
+          prCurrentLabels,
+          configuredLabels,
+        );
+
+        // for Gitea
+        updatePrConfig.labels = configuredLabels;
+
+        // for GitHub, GitLab
+        updatePrConfig.addLabels = addLabels;
+        updatePrConfig.removeLabels = removeLabels;
       }
       if (existingPrTitle !== newPrTitle) {
         logger.debug(

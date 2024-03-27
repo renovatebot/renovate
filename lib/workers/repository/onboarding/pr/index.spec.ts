@@ -106,8 +106,8 @@ describe('workers/repository/onboarding/pr/index', () => {
       );
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].labels).toEqual([
-        'label',
         'additional-label',
+        'label',
       ]);
     });
 

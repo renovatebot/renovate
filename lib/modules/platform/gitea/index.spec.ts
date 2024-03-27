@@ -112,6 +112,12 @@ describe('modules/platform/gitea/index', () => {
         sha: 'other-head-sha' as LongCommitSha,
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
+      labels: [
+        {
+          id: 1,
+          name: 'bug',
+        },
+      ],
     }),
     partial<MockPr>({
       number: 3,
@@ -1849,6 +1855,87 @@ describe('modules/platform/gitea/index', () => {
           state: 'closed',
         }),
       ).toResolve();
+    });
+
+    it('should update labels', async () => {
+      const updatedMockPR = partial<PR>({
+        ...mockPRs[0],
+        number: 1,
+        title: 'New Title',
+        body: 'New Body',
+        state: 'open',
+        labels: [
+          {
+            id: 1,
+            name: 'some-label',
+          },
+        ],
+      });
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, mockPRs)
+        .get('/repos/some/repo/labels')
+        .reply(200, mockRepoLabels)
+        .get('/orgs/some/labels')
+        .reply(200, mockOrgLabels)
+        .patch('/repos/some/repo/pulls/1')
+        .reply(200, updatedMockPR);
+
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+      await expect(
+        gitea.updatePr({
+          number: 1,
+          prTitle: 'New Title',
+          prBody: 'New Body',
+          state: 'open',
+          labels: ['some-label'],
+        }),
+      ).toResolve();
+    });
+
+    it('should log a warning if labels could not be looked up', async () => {
+      const updatedMockPR = partial<PR>({
+        ...mockPRs[0],
+        number: 1,
+        title: 'New Title',
+        body: 'New Body',
+        state: 'open',
+        labels: [
+          {
+            id: 1,
+            name: 'some-label',
+          },
+        ],
+      });
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, mockPRs)
+        .get('/repos/some/repo/labels')
+        .reply(200, mockRepoLabels)
+        .get('/orgs/some/labels')
+        .reply(200, mockOrgLabels)
+        .patch('/repos/some/repo/pulls/1')
+        .reply(200, updatedMockPR);
+
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+      await expect(
+        gitea.updatePr({
+          number: 1,
+          prTitle: 'New Title',
+          prBody: 'New Body',
+          state: 'open',
+          labels: ['some-label', 'unavailable-label'],
+        }),
+      ).toResolve();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
+      );
     });
   });
 

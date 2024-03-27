@@ -119,8 +119,10 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
     title = title.substring(DRAFT_PREFIX.length);
     isDraft = true;
   }
+  const labels = (data?.labels ?? []).map((l) => l.name);
 
   return {
+    labels,
     number: data.number,
     state: data.state,
     title,
