@@ -7,8 +7,62 @@ import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import { ensureTrailingSlash } from '../util/url';
 import { GlobalConfig } from './global';
-import { DecryptedObject } from './schema';
+import {
+  DecryptedObject,
+  type EcJwkPriv,
+  EncodedEcJwkPriv,
+  EncryptedConfigString,
+} from './schema';
 import type { RenovateConfig } from './types';
+
+export async function tryDecryptEcdhAesGcm(
+  privateKey: EcJwkPriv,
+  encryptedStr: string,
+): Promise<string | null> {
+  try {
+    const privKey = await crypto.subtle.importKey(
+      'jwk',
+      privateKey,
+      { name: 'ECDH', namedCurve: privateKey.crv },
+      false,
+      ['deriveKey'],
+    );
+
+    const parsed = await EncryptedConfigString.safeParseAsync(encryptedStr);
+
+    if (!parsed.success) {
+      const error = new Error('config-validation');
+      error.validationError = `Could not parse encrypted config.`;
+      throw error;
+    }
+
+    const pubKey = await crypto.subtle.importKey(
+      'jwk',
+      parsed.data.k,
+      { name: 'ECDH', namedCurve: parsed.data.k.crv },
+      false,
+      [],
+    );
+
+    const pw = await crypto.subtle.deriveKey(
+      { name: 'ECDH', public: pubKey },
+      privKey,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['decrypt'],
+    );
+    const buff = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: parsed.data.i },
+      pw,
+      parsed.data.m,
+    );
+    return Buffer.from(buff).toString();
+  } catch (err) {
+    logger.debug({ err }, 'Could not decrypt using ECDH/AES-GCM.');
+  }
+
+  return null;
+}
 
 export async function tryDecryptPgp(
   privateKey: string,
@@ -90,7 +144,13 @@ export async function tryDecrypt(
   repository: string,
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
-  if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
+  const pk = await EncodedEcJwkPriv.safeParseAsync(privateKey);
+  if (pk.success) {
+    const decryptedObjStr = await tryDecryptEcdhAesGcm(pk.data, encryptedStr);
+    if (decryptedObjStr) {
+      decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
+    }
+  } else if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
     const decryptedObjStr = await tryDecryptPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
       decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
