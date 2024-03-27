@@ -12,12 +12,18 @@ import {
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { logger } from '../../../logger';
 import * as docker from '../../../util/exec/docker';
+import type { ExtraEnv, Opt } from '../../../util/exec/types';
 import type { StatusResult } from '../../../util/git/types';
 import { find as _find } from '../../../util/host-rules';
 import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
+import {
+  addExtraEnvVariable,
+  extractEnvironmentVariableName,
+} from './artifacts';
 import type { PipfileLockSchema } from './schema';
 import { updateArtifacts } from '.';
 
@@ -628,7 +634,28 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
   });
 
-  it('does not pass private credential environment vars if variable names differ from allowed', async () => {
+  it('extracts correct environment variable from credential placeholder', () => {
+    [
+      ['$USERNAME', 'USERNAME'],
+      ['$', null],
+      [null, null],
+      ['${USERNAME}', 'USERNAME'],
+      ['${USERNAME:-default}', 'USERNAME'],
+      ['${COMPLEX_NAME_1:-default}', 'COMPLEX_NAME_1'],
+    ].every((testCase) => {
+      expect(extractEnvironmentVariableName(testCase[0])).toEqual(testCase[1]);
+    });
+  });
+
+  it('warns about duplicate placeholders with different values', () => {
+    const extraEnv: Opt<ExtraEnv> = {
+      FOO: '1',
+    };
+    addExtraEnvVariable(extraEnv, 'FOO', '2');
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('updates extraEnv if variable names differ from default', async () => {
     fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.ensureCacheDir.mockResolvedValueOnce(pipCacheDir);
     fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
@@ -640,6 +667,11 @@ describe('modules/manager/pipenv/artifacts', () => {
       }),
     );
     fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
+
+    find.mockReturnValueOnce({
+      username: 'usernameOne',
+      password: 'passwordTwo',
+    });
 
     expect(
       await updateArtifacts({
@@ -666,6 +698,8 @@ describe('modules/manager/pipenv/artifacts', () => {
           env: {
             PIPENV_CACHE_DIR: pipenvCacheDir,
             WORKON_HOME: virtualenvsCacheDir,
+            USERNAME_FOO: 'usernameOne',
+            PAZZWORD: 'passwordTwo',
           },
         },
       },
