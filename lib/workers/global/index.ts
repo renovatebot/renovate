@@ -144,17 +144,10 @@ export async function start(): Promise<number> {
       config = await getGlobalConfig();
       if (config?.globalExtends) {
         // resolve global presets immediately
-        if (process.env.RENOVATE_X_EAGER_GLOBAL_EXTENDS) {
-          config = mergeChildConfig(
-            await resolveGlobalExtends(config.globalExtends),
-            config,
-          );
-        } else {
-          config = mergeChildConfig(
-            config,
-            await resolveGlobalExtends(config.globalExtends),
-          );
-        }
+        config = mergeChildConfig(
+          await resolveGlobalExtends(config.globalExtends),
+          config,
+        );
       }
 
       // Set allowedHeaders in case hostRules headers are configured in file config
