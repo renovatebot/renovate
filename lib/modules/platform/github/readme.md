@@ -4,6 +4,7 @@
 
 First, create a [fine-grained](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token) _or_ a [classic](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic) PAT.
 The PAT must have the `repo` scope.
+If you want the renovate bot to also update your GitHub Action files, you also need to grant the `workflow` scope.
 
 Read the [GitHub Docs, about Personal Access Tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#about-personal-access-tokens) to learn more about PATs.
 
