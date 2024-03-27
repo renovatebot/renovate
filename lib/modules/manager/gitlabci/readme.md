@@ -16,3 +16,11 @@ If you use the predefined `CI_REGISTRY` variable make sure to configure its valu
   }
 }
 ```
+
+GitLab CI Components that are included are also supported, but should not reference environment variables.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/my-organization/my-components/specific-component@0.1.0 # This will not work
+  - component: gitlab.example.biz/my-organization/my-components/specific-component@0.1.0 # This will work
+```
