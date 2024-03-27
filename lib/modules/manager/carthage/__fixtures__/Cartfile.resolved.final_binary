@@ -1,0 +1,2 @@
+binary "https://my.domain.com/release/MyFramework.json" "3.2.1"
+github "ReactiveCocoa/ReactiveCocoa" "2.4.1"
