@@ -1,0 +1,21 @@
+name: 'Check unlabeled issues'
+on:
+  schedule:
+    # Run every Sunday at midnight
+    - cron: '0 0 * * 0'
+
+permissions:
+  issues: write
+
+jobs:
+  check-unlabeled-issues:
+    runs-on: ubuntu-latest
+
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Check for unlabeled issues
+        run: sh ./tools/check-unlabeled-issues.sh
