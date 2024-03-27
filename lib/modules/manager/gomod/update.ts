@@ -47,7 +47,9 @@ export function updateDependency({
     let updateLineExp: RegExp | undefined;
 
     if (depType === 'golang') {
-      updateLineExp = regEx(/(?<depPart>go)(?<divider>\s+)[^\s]+/);
+      updateLineExp = regEx(
+        /(?<depPart>(?:toolchain )?go)(?<divider>\s*)([^\s]+|[\w]+)/,
+      );
     }
     if (depType === 'replace') {
       if (upgrade.managerData.multiLine) {
@@ -69,7 +71,7 @@ export function updateDependency({
       }
     }
     if (updateLineExp && !updateLineExp.test(lineToChange)) {
-      logger.debug('No image line found');
+      logger.debug('No line found to update');
       return null;
     }
     let newLine: string;
