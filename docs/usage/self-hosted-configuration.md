@@ -785,10 +785,12 @@ Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
 
-The default setting is `auto`.
-Renovate generates an onboarding PR when dependencies are found.
-To force an onboarding PR even without dependencies, set it to `enabled`.
-If `autodiscoverRepositories` is diabled, this setting is automatically switched to `enabled`.
+The `auto` setting is converted to `disabled` if `autodiscoverRepositories` is `true`, or converted to `enabled` if false.
+
+In other words, the default behavior is:
+
+- If you run Renovate on all discovered repositories then it will skip those without any dependencies detected, but
+- If you run Renovate on _specific_ repositories then Renovate will onboard all such repositories even if no dependencies are found
 
 ## onboardingPrTitle
 
