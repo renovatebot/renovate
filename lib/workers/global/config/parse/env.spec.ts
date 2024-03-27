@@ -5,27 +5,27 @@ import type { ParseConfigOptions } from './types';
 
 describe('workers/global/config/parse/env', () => {
   describe('.getConfig(env)', () => {
-    it('returns empty env', () => {
-      expect(env.getConfig({})).toEqual({ hostRules: [] });
+    it('returns empty env', async () => {
+      expect(await env.getConfig({})).toEqual({ hostRules: [] });
     });
 
-    it('supports boolean true', () => {
+    it('supports boolean true', async () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_CONFIG_MIGRATION: 'true' };
-      expect(env.getConfig(envParam).configMigration).toBeTrue();
+      expect((await env.getConfig(envParam)).configMigration).toBeTrue();
     });
 
-    it('supports boolean false', () => {
+    it('supports boolean false', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_CONFIG_MIGRATION: 'false',
       };
-      expect(env.getConfig(envParam).configMigration).toBeFalse();
+      expect((await env.getConfig(envParam)).configMigration).toBeFalse();
     });
 
-    it('throws exception for invalid boolean value', () => {
+    it('throws exception for invalid boolean value', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_CONFIG_MIGRATION: 'badvalue',
       };
-      expect(() => env.getConfig(envParam)).toThrow(
+      await expect(env.getConfig(envParam)).rejects.toThrow(
         Error(
           "Invalid boolean value: expected 'true' or 'false', but got 'badvalue'",
         ),
@@ -34,54 +34,54 @@ describe('workers/global/config/parse/env', () => {
 
     delete process.env.RENOVATE_CONFIG_MIGRATION;
 
-    it('supports list single', () => {
+    it('supports list single', async () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a' };
-      expect(env.getConfig(envParam).labels).toEqual(['a']);
+      expect((await env.getConfig(envParam)).labels).toEqual(['a']);
     });
 
-    it('supports list multiple', () => {
+    it('supports list multiple', async () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a,b,c' };
-      expect(env.getConfig(envParam).labels).toEqual(['a', 'b', 'c']);
+      expect((await env.getConfig(envParam)).labels).toEqual(['a', 'b', 'c']);
     });
 
-    it('supports list multiple without blank items', () => {
+    it('supports list multiple without blank items', async () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a,b,c,' };
-      expect(env.getConfig(envParam).labels).toEqual(['a', 'b', 'c']);
+      expect((await env.getConfig(envParam)).labels).toEqual(['a', 'b', 'c']);
     });
 
-    it('supports string', () => {
+    it('supports string', async () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'a' };
-      expect(env.getConfig(envParam).token).toBe('a');
+      expect((await env.getConfig(envParam)).token).toBe('a');
     });
 
-    it('coerces string newlines', () => {
+    it('coerces string newlines', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_GIT_PRIVATE_KEY: 'abc\\ndef',
       };
-      expect(env.getConfig(envParam).gitPrivateKey).toBe('abc\ndef');
+      expect((await env.getConfig(envParam)).gitPrivateKey).toBe('abc\ndef');
     });
 
-    it('supports custom prefixes', () => {
+    it('supports custom prefixes', async () => {
       const envParam: NodeJS.ProcessEnv = {
         ENV_PREFIX: 'FOOBAR_',
         FOOBAR_TOKEN: 'abc',
       };
-      const res = env.getConfig(envParam);
+      const res = await env.getConfig(envParam);
       expect(res).toMatchObject({ token: 'abc' });
     });
 
-    it('supports json', () => {
+    it('supports json', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_LOCK_FILE_MAINTENANCE: '{}',
       };
-      expect(env.getConfig(envParam).lockFileMaintenance).toEqual({});
+      expect((await env.getConfig(envParam)).lockFileMaintenance).toEqual({});
     });
 
-    it('supports arrays of objects', () => {
+    it('supports arrays of objects', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_HOST_RULES: JSON.stringify([{ foo: 'bar' }]),
       };
-      const res = env.getConfig(envParam);
+      const res = await env.getConfig(envParam);
       expect(res).toMatchObject({ hostRules: [{ foo: 'bar' }] });
     });
 
@@ -92,16 +92,16 @@ describe('workers/global/config/parse/env', () => {
       ${{ RENOVATE_RECREATE_WHEN: 'auto' }}    | ${{ recreateWhen: 'auto' }}
       ${{ RENOVATE_RECREATE_WHEN: 'always' }}  | ${{ recreateWhen: 'always' }}
       ${{ RENOVATE_RECREATE_WHEN: 'never' }}   | ${{ recreateWhen: 'never' }}
-    `('"$envArg" -> $config', ({ envArg, config }) => {
-      expect(env.getConfig(envArg)).toMatchObject(config);
+    `('"$envArg" -> $config', async ({ envArg, config }) => {
+      expect(await env.getConfig(envArg)).toMatchObject(config);
     });
 
-    it('skips misconfigured arrays', () => {
+    it('skips misconfigured arrays', async () => {
       const envName = 'RENOVATE_HOST_RULES';
       const val = JSON.stringify('foobar');
       const envParam: NodeJS.ProcessEnv = { [envName]: val };
 
-      const res = env.getConfig(envParam);
+      const res = await env.getConfig(envParam);
 
       expect(res).toEqual({ hostRules: [] });
       expect(logger.debug).toHaveBeenLastCalledWith(
@@ -110,12 +110,12 @@ describe('workers/global/config/parse/env', () => {
       );
     });
 
-    it('skips garbage array values', () => {
+    it('skips garbage array values', async () => {
       const envName = 'RENOVATE_HOST_RULES';
       const val = '!@#';
       const envParam: NodeJS.ProcessEnv = { [envName]: val };
 
-      const res = env.getConfig(envParam);
+      const res = await env.getConfig(envParam);
 
       expect(res).toEqual({ hostRules: [] });
       expect(logger.debug).toHaveBeenLastCalledWith(
@@ -124,31 +124,31 @@ describe('workers/global/config/parse/env', () => {
       );
     });
 
-    it('supports GitHub token', () => {
+    it('supports GitHub token', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_TOKEN: 'github.com token',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
+      expect(await env.getConfig(envParam)).toMatchSnapshot({
         token: 'github.com token',
       });
     });
 
-    it('supports GitHub custom endpoint', () => {
+    it('supports GitHub custom endpoint', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
+      expect(await env.getConfig(envParam)).toMatchSnapshot({
         endpoint: 'a ghe endpoint',
       });
     });
 
-    it('supports GitHub custom endpoint and github.com', () => {
+    it('supports GitHub custom endpoint and github.com', async () => {
       const envParam: NodeJS.ProcessEnv = {
         GITHUB_COM_TOKEN: 'a github.com token',
         RENOVATE_ENDPOINT: 'a ghe endpoint',
         RENOVATE_TOKEN: 'a ghe token',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
+      expect(await env.getConfig(envParam)).toMatchSnapshot({
         endpoint: 'a ghe endpoint',
         hostRules: [
           {
@@ -161,12 +161,12 @@ describe('workers/global/config/parse/env', () => {
       });
     });
 
-    it('supports GitHub fine-grained PATs', () => {
+    it('supports GitHub fine-grained PATs', async () => {
       const envParam: NodeJS.ProcessEnv = {
         GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
         RENOVATE_TOKEN: 'a github.com token',
       };
-      expect(env.getConfig(envParam)).toEqual({
+      expect(await env.getConfig(envParam)).toEqual({
         token: 'a github.com token',
         hostRules: [
           {
@@ -178,62 +178,62 @@ describe('workers/global/config/parse/env', () => {
       });
     });
 
-    it('supports GitHub custom endpoint and gitlab.com', () => {
+    it('supports GitHub custom endpoint and gitlab.com', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
         RENOVATE_TOKEN: 'a ghe token',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
+      expect(await env.getConfig(envParam)).toMatchSnapshot({
         endpoint: 'a ghe endpoint',
         token: 'a ghe token',
       });
     });
 
-    it('supports GitLab token', () => {
+    it('supports GitLab token', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: 'gitlab',
         RENOVATE_TOKEN: 'a gitlab.com token',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
+      expect(await env.getConfig(envParam)).toMatchSnapshot({
         platform: 'gitlab',
         token: 'a gitlab.com token',
       });
     });
 
-    it('supports GitLab custom endpoint', () => {
+    it('supports GitLab custom endpoint', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: 'gitlab',
         RENOVATE_TOKEN: 'a gitlab token',
         RENOVATE_ENDPOINT: 'a gitlab endpoint',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
+      expect(await env.getConfig(envParam)).toMatchSnapshot({
         endpoint: 'a gitlab endpoint',
         platform: 'gitlab',
         token: 'a gitlab token',
       });
     });
 
-    it('supports Azure DevOps', () => {
+    it('supports Azure DevOps', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: 'azure',
         RENOVATE_TOKEN: 'an Azure DevOps token',
         RENOVATE_ENDPOINT: 'an Azure DevOps endpoint',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
+      expect(await env.getConfig(envParam)).toMatchSnapshot({
         endpoint: 'an Azure DevOps endpoint',
         platform: 'azure',
         token: 'an Azure DevOps token',
       });
     });
 
-    it('supports Bitbucket token', () => {
+    it('supports Bitbucket token', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: 'bitbucket',
         RENOVATE_ENDPOINT: 'a bitbucket endpoint',
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
+      expect(await env.getConfig(envParam)).toMatchSnapshot({
         platform: 'bitbucket',
         endpoint: 'a bitbucket endpoint',
         username: 'some-username',
@@ -241,14 +241,14 @@ describe('workers/global/config/parse/env', () => {
       });
     });
 
-    it('supports Bitbucket username/password', () => {
+    it('supports Bitbucket username/password', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: 'bitbucket',
         RENOVATE_ENDPOINT: 'a bitbucket endpoint',
         RENOVATE_USERNAME: 'some-username',
         RENOVATE_PASSWORD: 'app-password',
       };
-      expect(env.getConfig(envParam)).toMatchSnapshot({
+      expect(await env.getConfig(envParam)).toMatchSnapshot({
         endpoint: 'a bitbucket endpoint',
         hostRules: [],
         password: 'app-password',
@@ -257,42 +257,59 @@ describe('workers/global/config/parse/env', () => {
       });
     });
 
-    it('merges full config from env', () => {
+    it('merges full config from env', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_CONFIG: '{"enabled":false,"token":"foo"}',
         RENOVATE_TOKEN: 'a',
       };
-      const config = env.getConfig(envParam);
+      const config = await env.getConfig(envParam);
       expect(config.enabled).toBeFalse();
       expect(config.token).toBe('a');
     });
 
-    describe('malformed RENOVATE_CONFIG', () => {
+    describe('RENOVATE_CONFIG tests', () => {
       let processExit: jest.SpyInstance<never, [code?: number]>;
 
       beforeAll(() => {
         processExit = jest
           .spyOn(process, 'exit')
-          .mockImplementation((() => {}) as never);
+          .mockImplementation((async () => {}) as never);
       });
 
       afterAll(() => {
         processExit.mockRestore();
       });
 
-      it('crashes', () => {
+      it('crashes', async () => {
         const envParam: NodeJS.ProcessEnv = { RENOVATE_CONFIG: '!@#' };
-        env.getConfig(envParam);
+        await env.getConfig(envParam);
         expect(processExit).toHaveBeenCalledWith(1);
+      });
+
+      it('migrates RENOVATE_CONFIG', async () => {
+        const envParam: NodeJS.ProcessEnv = {
+          RENOVATE_CONFIG: '{"automerge":"any","token":"foo"}',
+        };
+        const config = await env.getConfig(envParam);
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(config.automerge).toBeTrue();
+      });
+
+      it('warns if config in RENOVATE_CONFIG is invalid', async () => {
+        const envParam: NodeJS.ProcessEnv = {
+          RENOVATE_CONFIG: '{"enabled":"invalid-value","prTitle":"something"}',
+        };
+        await env.getConfig(envParam);
+        expect(logger.warn).toHaveBeenCalledTimes(2);
       });
     });
 
     describe('migrations', () => {
-      it('renames migrated variables', () => {
+      it('renames migrated variables', async () => {
         const envParam: NodeJS.ProcessEnv = {
           RENOVATE_GIT_LAB_AUTOMERGE: 'true',
         };
-        const config = env.getConfig(envParam);
+        const config = await env.getConfig(envParam);
         expect(config.platformAutomerge).toBe(true);
       });
     });
@@ -322,43 +339,43 @@ describe('workers/global/config/parse/env', () => {
       expect(env.getEnvName(option)).toBe('RENOVATE_ONE_TWO_THREE');
     });
 
-    it('dryRun boolean true', () => {
+    it('dryRun boolean true', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_DRY_RUN: 'true',
       };
-      const config = env.getConfig(envParam);
+      const config = await env.getConfig(envParam);
       expect(config.dryRun).toBe('full');
     });
 
-    it('dryRun boolean false', () => {
+    it('dryRun boolean false', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_DRY_RUN: 'false',
       };
-      const config = env.getConfig(envParam);
+      const config = await env.getConfig(envParam);
       expect(config.dryRun).toBeUndefined();
     });
 
-    it('dryRun null', () => {
+    it('dryRun null', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_DRY_RUN: 'null',
       };
-      const config = env.getConfig(envParam);
+      const config = await env.getConfig(envParam);
       expect(config.dryRun).toBeUndefined();
     });
 
-    it('requireConfig boolean true', () => {
+    it('requireConfig boolean true', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_REQUIRE_CONFIG: 'true' as RequiredConfig,
       };
-      const config = env.getConfig(envParam);
+      const config = await env.getConfig(envParam);
       expect(config.requireConfig).toBe('required');
     });
 
-    it('requireConfig boolean false', () => {
+    it('requireConfig boolean false', async () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_REQUIRE_CONFIG: 'false' as RequiredConfig,
       };
-      const config = env.getConfig(envParam);
+      const config = await env.getConfig(envParam);
       expect(config.requireConfig).toBe('optional');
     });
   });
