@@ -90,6 +90,7 @@ import type {
   PlatformConfig,
 } from './types';
 import { getAppDetails, getUserDetails, getUserEmail } from './user';
+import { normalizeNamePerEcosystem } from '../utils/github-alerts';
 
 export const id = 'github';
 
@@ -1986,7 +1987,10 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
           } = alert.securityVulnerability;
           const patch = firstPatchedVersion?.identifier;
 
-          const key = `${ecosystem.toLowerCase()}/${name}`;
+          const normalizedName = normalizeNamePerEcosystem(name, ecosystem);
+          alert.securityVulnerability.package.name = normalizedName;
+          const key = `${ecosystem.toLowerCase()}/${normalizedName}`;
+
           const range = vulnerableVersionRange;
           const elem = shortAlerts[key] || {};
           elem[range] = coerceToNull(patch);

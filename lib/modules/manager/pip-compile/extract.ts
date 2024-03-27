@@ -2,7 +2,6 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
-import { normalizeDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import type { ExtractConfig, PackageFile, PackageFileContent } from '../types';
@@ -167,9 +166,7 @@ export async function extractAllPackageFiles(
         }
         for (const dep of packageFileContent.deps) {
           const lockedVersion = lockedDeps?.find(
-            (lockedDep) =>
-              normalizeDepName(lockedDep.depName!) ===
-              normalizeDepName(dep.depName!),
+            (lockedDep) => lockedDep.packageName! === dep.packageName!,
           )?.currentVersion;
           if (lockedVersion) {
             dep.lockedVersion = lockedVersion;
