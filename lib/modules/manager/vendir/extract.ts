@@ -34,6 +34,7 @@ export function extractHelmChart(
       ...dep,
       depName: helmChart.name,
       packageName: dep.depName,
+      depType: 'HelmChart',
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678
       pinDigests: false,
@@ -42,6 +43,7 @@ export function extractHelmChart(
   return {
     depName: helmChart.name,
     currentValue: helmChart.version,
+    depType: 'HelmChart',
     registryUrls: [helmChart.repository.url],
     datasource: HelmDatasource.id,
   };
@@ -54,6 +56,7 @@ export function extractGitSource(
   return {
     depName: httpUrl,
     packageName: httpUrl,
+    depType: 'GitSource',
     currentValue: gitSource.ref,
     registryUrls: [httpUrl],
     datasource: GitRefsDatasource.id,
@@ -96,7 +99,6 @@ export function extractPackageFile(
       if (dep) {
         deps.push({
           ...dep,
-          depType: 'HelmChart',
         });
       }
     } else if ('git' in content && content.git) {
@@ -104,7 +106,6 @@ export function extractPackageFile(
       if (dep) {
         deps.push({
           ...dep,
-          depType: 'GitSource',
         });
       }
     }
