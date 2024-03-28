@@ -5,8 +5,8 @@ import { DefaultGitScm } from './default-scm';
 import { GerritScm } from './gerrit/scm';
 import { GithubScm } from './github/scm';
 import { LocalFs } from './local/scm';
-import type { PlatformScm } from './types';
 import {SpaceScm} from "./space/scm";
+import type { PlatformScm } from './types';
 
 export const platformScmImpls = new Map<PlatformId, Constructor<PlatformScm>>();
 platformScmImpls.set('azure', DefaultGitScm);

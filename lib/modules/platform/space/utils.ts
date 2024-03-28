@@ -2,10 +2,10 @@ import {logger} from '../../../logger';
 import type {BranchStatus, PrState} from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 import {joinUrlParts} from '../../../util/url';
-import type {Pr} from '../types';
-import type {GerritChange, GerritLabelTypeInfo, SpaceMergeRequestRecord, SpaceCodeReviewState,} from './types';
-import {hashBody} from "../pr-body";
 import {mapGerritChangeStateToPrState} from "../gerrit/utils";
+import {hashBody} from "../pr-body";
+import type {Pr} from '../types';
+import type {GerritChange, GerritLabelTypeInfo, SpaceCodeReviewState, SpaceMergeRequestRecord,} from './types';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 

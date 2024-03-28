@@ -19,7 +19,7 @@ jest.mock('../../../util/host-rules');
 const baseUrl = 'https://gerrit.example.com';
 const hostRules = mocked(_hostRules);
 
-describe('modules/platform/gerrit/utils', () => {
+describe('modules/platform/space/utils', () => {
   beforeEach(() => {
     setBaseUrl(baseUrl);
   });

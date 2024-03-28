@@ -3,6 +3,7 @@ import type {BranchStatus} from '../../../types';
 import {parseJson} from '../../../util/common';
 import * as git from '../../../util/git';
 import {regEx} from '../../../util/regex';
+import {trimTrailingSlash} from "../../../util/url";
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -25,9 +26,8 @@ import {repoFingerprint} from '../util';
 
 import {smartTruncate} from '../utils/pr-body';
 import {readOnlyIssueBody} from '../utils/read-only-issue-body';
-import {getSpaceRepoUrl, mapGerritChangeToPr, mapSpaceCodeReviewDetailsToPr, TAG_PULL_REQUEST_BODY,} from './utils';
 import {SpaceClient} from "./client";
-import {ensureTrailingSlash, trimTrailingSlash} from "../../../util/url";
+import {TAG_PULL_REQUEST_BODY, getSpaceRepoUrl, mapGerritChangeToPr, mapSpaceCodeReviewDetailsToPr,} from './utils';
 
 export const id = 'space';
 
@@ -89,7 +89,7 @@ export async function initRepo({repository}: RepoParams): Promise<RepoResult> {
 
   repoConfig = {
     ...repoConfig,
-    projectKey: projectKey,
+    projectKey,
     repository: shortRepository,
   };
 
@@ -110,7 +110,7 @@ export async function initRepo({repository}: RepoParams): Promise<RepoResult> {
   }
 
   return {
-    defaultBranch: defaultBranch,
+    defaultBranch,
     isFork: false,
     repoFingerprint: repoFingerprint(repository, baseUrl),
   };

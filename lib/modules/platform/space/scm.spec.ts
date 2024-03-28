@@ -12,7 +12,7 @@ jest.mock('../../../util/git');
 jest.mock('./client');
 const clientMock = mocked(_client);
 
-describe('modules/platform/gerrit/scm', () => {
+describe('modules/platform/space/scm', () => {
   const gerritScm = new SpaceScm();
 
   beforeEach(() => {

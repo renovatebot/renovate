@@ -14,7 +14,7 @@ import type {
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
 const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
 
-describe('modules/platform/gerrit/client', () => {
+describe('modules/platform/space/client', () => {
   beforeAll(() => {
     setBaseUrl(gerritEndpointUrl);
   });

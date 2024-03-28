@@ -35,7 +35,7 @@ jest.mock('./client');
 const clientMock = mocked(_client);
 const hostRules = mocked(_hostRules);
 
-describe('modules/platform/gerrit/index', () => {
+describe('modules/platform/space/index', () => {
   beforeEach(async () => {
     hostRules.find.mockReturnValue({
       username: 'user',

@@ -1,6 +1,7 @@
 import {REPOSITORY_ARCHIVED} from '../../../constants/error-messages';
 import {logger} from '../../../logger';
 import {SpaceHttp} from "../../../util/http/space";
+import type {CreatePRConfig, FindPRConfig} from "../types";
 import type {
   CodeReviewStateFilter,
   GerritAccountInfo,
@@ -21,7 +22,6 @@ import type {
   SpaceRepositoryDetails,
 } from './types';
 import {mapPrStateToGerritFilter} from './utils';
-import type {CreatePRConfig, FindPRConfig} from "../types";
 
 export class SpaceClient {
   private requestDetails = [
@@ -160,7 +160,7 @@ export class SpaceClient {
     })
 
     if (review) {
-      return await this.getCodeReview(projectKey, review!.review.id)
+      return await this.getCodeReview(projectKey, review.review.id)
     }
   }
 
@@ -173,7 +173,7 @@ export class SpaceClient {
     logger.debug(`SPACE: createMergeRequest: projectKey=${projectKey}, repository=${repository}, config: ${JSON.stringify(config)}`)
 
     const request : SpaceCodeReviewCreateRequest = {
-      repository: repository,
+      repository,
       sourceBranch: config.sourceBranch,
       targetBranch: config.targetBranch,
       title: config.prTitle,
