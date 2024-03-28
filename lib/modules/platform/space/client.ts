@@ -194,13 +194,24 @@ export class SpaceClient {
     return executions
   }
 
+  async mergeMergeRequest(projectKey: string, codeReviewNumber: number, mergeMode: 'FF' | 'FF_ONLY' | 'NO_FF', deleteSourceBranch: boolean): Promise<void> {
+    logger.debug(`SPACE mergeMergeRequest(${projectKey}, ${codeReviewNumber}, ${mergeMode}, ${deleteSourceBranch})`)
 
+    await this.spaceHttp.putJson(
+      `/api/http/projects/key:${projectKey}/code-reviews/number:${codeReviewNumber}/merge`,
+      {body: {mergeMode, deleteSourceBranch}}
+    )
+  }
 
+  async rebaseMergeRequest(projectKey: string, codeReviewNumber: number, rebaseMode: 'FF' | 'NO_FF', squashedCommitMessage: string | null, deleteSourceBranch: boolean): Promise<void> {
+    logger.debug(`SPACE rebaseMergeRequest(${projectKey}, ${codeReviewNumber}, ${rebaseMode}, ${squashedCommitMessage}, ${deleteSourceBranch})`)
 
-
-
-
-
+    const squash = !!squashedCommitMessage
+    await this.spaceHttp.putJson(
+      `/api/http/projects/key:${projectKey}/code-reviews/number:${codeReviewNumber}/rebase`,
+      {body: {rebaseMode, deleteSourceBranch, squash, squashedCommitMessage}}
+    )
+  }
 
   async getProjectInfo(repository: string): Promise<GerritProjectInfo> {
     const projectInfo = await this.spaceHttp.getJson<GerritProjectInfo>(

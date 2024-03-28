@@ -143,19 +143,12 @@ export async function getPrList(): Promise<Pr[]> {
 
 export async function mergePr(config: MergePRConfig): Promise<boolean> {
   logger.debug(`SPACE mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`);
-  try {
-    const change = await client.submitChange(config.id);
-    return change.status === 'MERGED';
-  } catch (err) {
-    if (err.statusCode === 409) {
-      logger.warn(
-        {err},
-        "Can't submit the change, because the submit rule doesn't allow it.",
-      );
-      return false;
-    }
-    throw err;
-  }
+
+  // TODO: add deleteSourceBranch parameter to global config
+  // TODO: add support for changing target branch? (config.branch)
+
+  await dao.mergeMergeRequest(repoConfig.projectKey!, config.id, config.strategy ?? 'auto', true)
+  return true
 }
 
 /**

@@ -10,6 +10,7 @@ import type {
   SpaceMergeRequestRecord,
   SpaceRepositoryDetails
 } from "./types";
+import type {MergeStrategy} from "../../../config/types";
 
 export class SpaceDao {
   constructor(private client: SpaceClient) {
@@ -173,6 +174,27 @@ export class SpaceDao {
     logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}): total executions ${result.length}`)
 
     return result
+  }
+
+  async mergeMergeRequest(projectKey: string, codeReviewNumber: number, strategy: MergeStrategy, deleteSourceBranch: boolean): Promise<void> {
+    logger.debug(`SPACE mergeMergeRequest(${projectKey}, ${codeReviewNumber}, ${strategy}, ${deleteSourceBranch})`)
+
+    switch (strategy) {
+      case 'auto':
+      case 'merge-commit':
+        await this.client.mergeMergeRequest(projectKey, codeReviewNumber, 'NO_FF', deleteSourceBranch)
+        break
+      case 'fast-forward':
+        await this.client.mergeMergeRequest(projectKey, codeReviewNumber, 'FF', deleteSourceBranch)
+        break
+      case 'rebase':
+        await this.client.rebaseMergeRequest(projectKey, codeReviewNumber, 'FF', null, deleteSourceBranch)
+        break
+      case 'squash':
+        // TODO: figure out squash message
+        await this.client.rebaseMergeRequest(projectKey, codeReviewNumber, 'NO_FF', 'squash??', deleteSourceBranch)
+        break
+    }
   }
 
   private async findMergeRequestBody(codeReviewId: string): Promise<string | undefined> {
