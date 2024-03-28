@@ -35,7 +35,7 @@ directories:
 
 Aliases for OCI registries are supported via the dockerfile/docker manager
 
-## Git
+### Git
 
 Renovates supporting explicit refs in for git references in vendir.yml
 
