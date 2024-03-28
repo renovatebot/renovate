@@ -144,10 +144,17 @@ export async function start(): Promise<number> {
       config = await getGlobalConfig();
       if (config?.globalExtends) {
         // resolve global presets immediately
-        config = mergeChildConfig(
-          config,
-          await resolveGlobalExtends(config.globalExtends),
-        );
+        if (process.env.RENOVATE_X_EAGER_GLOBAL_EXTENDS) {
+          config = mergeChildConfig(
+            await resolveGlobalExtends(config.globalExtends),
+            config,
+          );
+        } else {
+          config = mergeChildConfig(
+            config,
+            await resolveGlobalExtends(config.globalExtends),
+          );
+        }
       }
       // initialize all submodules
       config = await globalInitialize(config);

@@ -638,12 +638,18 @@ Renovate supports two options:
 More advanced filtering options may come in future.
 
 There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
+Additionally, the "datasource" within Renovate must be capable of returning `constraints` values about each package's release.
+
 This feature is limited to the following datasources:
 
+- `crate`
 - `jenkins-plugins`
 - `npm`
 - `packagist`
 - `pypi`
+- `rubygems`
+
+Sometimes when using private registries they may omit constraints information, which then is another reason such filtering may not work even if the datasource and corresponding default public registry supports it.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -1446,7 +1452,7 @@ If this option is enabled, reviewers will need to create a new PR if more change
 By default, Renovate skips any forked repositories when in `autodiscover` mode.
 It even skips a forked repository that has a Renovate configuration file, because Renovate doesn't know if that file was added by the forked repository.
 
-**Process a fork in `autodiscover` mode`**
+**Process a fork in `autodiscover` mode**
 
 If you want Renovate to run on a forked repository when in `autodiscover` mode then:
 
@@ -2055,11 +2061,11 @@ For example, consider this config:
 ```json
 {
   "extends": ["config:recommended"],
-  "ignorePresets": [":prHourlyLimit2"]
+  "ignorePresets": ["group:monorepos"]
 }
 ```
 
-It would take the entire `"config:recommended"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
+It would take the entire `"config:recommended"` preset - which has a lot of sub-presets - but ignore the `"group:monorepos"` rule.
 
 ## ignoreReviewers
 
@@ -3766,6 +3772,15 @@ If you wish to distinguish between patch and minor upgrades, for example if you 
 Configure this to `true` if you wish to get one PR for every separate major version upgrade of a dependency.
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
+
+## separateMultipleMinor
+
+Enable this for dependencies when it is important to split updates into separate PRs per minor release stream (e.g. `python`).
+
+For example, if you are on `python@v3.9.0` currently, then by default Renovate creates a PR to upgrade you to the latest version such as `python@v3.12.x`.
+By default, Renovate skips versions in between, like `python@v3.10.x`.
+
+But if you set `separateMultipleMinor=true` then you get separate PRs for each minor stream, like `python@3.9.x`, `python@v3.10.x` and `python@v3.11.x`, etc.
 
 ## skipInstalls
 

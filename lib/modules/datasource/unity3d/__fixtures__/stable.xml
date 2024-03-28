@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0" xml:base="https://unity.com/">
+  <channel>
+    <title>Latest Unity Full Releases</title>
+    <link>https://unity.com/</link>
+    <description>Latest Unity Full Releases</description>
+    <language>en</language>
+    
+    <item>
+  <title>2023.2.9f1</title>
+  <link>https://unity.com/releases/editor/whats-new/2023.2.9</link>
+  <description>
+Stable description
+</description>
+  <pubDate>2024-02-07T06:56:57</pubDate>
+    <dc:creator>Unity Technologies</dc:creator>
+    <guid isPermaLink="false">0c9c2e1f4bef</guid>
+    </item>
+<item>
+  <title>2021.3.35f1</title>
+  <link>https://unity.com/releases/editor/whats-new/2021.3.35</link>
+  <description>
+Stable description2
+</description>
+  <pubDate>2024-02-06T15:40:15</pubDate>
+    <dc:creator>Unity Technologies</dc:creator>
+    <guid isPermaLink="false">157b46ce122a</guid>
+    </item>
+
+  </channel>
+</rss>
