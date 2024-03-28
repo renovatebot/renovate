@@ -100,6 +100,7 @@ export type PackageCacheNamespace =
   | 'datasource-terraform-provider-zip-hashes'
   | 'datasource-terraform-provider'
   | 'datasource-terraform'
+  | 'datasource-unity3d'
   | 'github-releases-datasource-v2'
   | 'github-tags-datasource-v2'
   | 'go'
