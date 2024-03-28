@@ -51,7 +51,7 @@ class SpaceClient {
     return repos.map(it => `${it.projectKey}/${it.repository}`)
   }
 
-  async getRepositoryInfo(repository: string, projectKey: string): Promise<SpaceRepositoryDetails> {
+  async getRepositoryInfo(projectKey: string, repository: string): Promise<SpaceRepositoryDetails> {
     logger.debug(`SPACE: getRepositoryInfo: repository=${repository}, projectKey=${projectKey}`);
     const repoInfo = await this.spaceHttp.getJson<SpaceRepositoryDetails>(
       `/api/http/projects/key:${projectKey}/repositories/${repository}`,

@@ -48,12 +48,10 @@ export interface SpaceRepositoryDetails {
   proxyPushNotificationBody?: string;
   initProgress?: string;
   readmeName?: string;
-  defaultBranch?: BranchInfo;
-}
-
-export interface BranchInfo {
-  head: string;
-  ref: string;
+  defaultBranch?: {
+    head: string;
+    ref: string;
+  };
 }
 
 export type CodeReviewStateFilter = 'Opened' | 'Closed' | 'RequiresAuthorAttention' | 'NeedsReview' | 'Merged' | 'null';

@@ -83,8 +83,8 @@ export async function getRepos(): Promise<string[]> {
  * Clone repository to local directory
  * @param config
  */
-export async function initRepo({repository, gitUrl}: RepoParams): Promise<RepoResult> {
-  logger.debug(`SPACE initRepo(${repository}, ${gitUrl!})`);
+export async function initRepo({repository}: RepoParams): Promise<RepoResult> {
+  logger.debug(`SPACE initRepo(${repository})`);
 
   const repoParts = repository.split('/')
   const projectKey = repoParts[0];
@@ -100,8 +100,20 @@ export async function initRepo({repository, gitUrl}: RepoParams): Promise<RepoRe
   const url = getSpaceRepoUrl(repository, baseUrl);
   await git.initRepo({url});
 
+  let defaultBranch = 'main'
+  const repoInfo = await client.getRepositoryInfo(projectKey, shortRepository)
+  if (repoInfo.defaultBranch) {
+    const ref = repoInfo.defaultBranch.head
+    const lastSlash = ref.lastIndexOf('/')
+    if (lastSlash == -1) {
+      logger.debug(`SPACE initRepo(${repository}) - invalid default branch ${ref}`)
+    } else {
+      defaultBranch = ref.substring(lastSlash + 1)
+    }
+  }
+
   return {
-    defaultBranch: 'main', // TODO: get from api
+    defaultBranch: defaultBranch,
     isFork: false,
     repoFingerprint: repoFingerprint(repository, baseUrl),
   };
@@ -192,9 +204,7 @@ export async function getPrList(): Promise<Pr[]> {
 }
 
 export async function mergePr(config: MergePRConfig): Promise<boolean> {
-  logger.debug(
-    `SPACE mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`,
-  );
+  logger.debug(`SPACE mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`);
   try {
     const change = await client.submitChange(config.id);
     return change.status === 'MERGED';
