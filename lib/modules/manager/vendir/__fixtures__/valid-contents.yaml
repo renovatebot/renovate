@@ -31,3 +31,8 @@ directories:
       version: "7.10.1"
       repository:
         url: oci://test
+  # Normal Git Repo
+  - path: custom-repo-custom-version
+    git:
+      url: https://github.com/test/test
+      ref: "7.10.1"
