@@ -102,9 +102,7 @@ export function extractPackageFile(
     } else if ('git' in content && content.git) {
       const dep = extractGitSource(content.git);
       if (dep) {
-        deps.push({
-          ...dep,
-        });
+        deps.push(dep);
       }
     }
   }
