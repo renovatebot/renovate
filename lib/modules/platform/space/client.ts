@@ -101,7 +101,7 @@ export class SpaceClient {
         return undefined
       }
 
-      const review = await this.getCodeReview(projectKey, basicReview.review.id)
+      const review = await this.getCodeReviewByCodeReviewId(projectKey, basicReview.review.id)
       if (review.state === 'Deleted') {
         // should not normally be returned, but who knows
         logger.info(`SPACE: Ignoring PR ${review.title} because it is deleted`)
@@ -113,9 +113,28 @@ export class SpaceClient {
     }, config.limit)
   }
 
-  async getCodeReview(projectKey: string, codeReviewId: string): Promise<SpaceMergeRequestRecord> {
-    const result = await this.spaceHttp.getJson<SpaceMergeRequestRecord>(`/api/http/projects/key:${projectKey}/code-reviews/${codeReviewId}`)
+  async getCodeReviewByCodeReviewId(projectKey: string, codeReviewId: string): Promise<SpaceMergeRequestRecord> {
+    const result = await this.spaceHttp.getJson<SpaceMergeRequestRecord>(`/api/http/projects/key:${projectKey}/code-reviews/id:${codeReviewId}`)
     return result.body
+  }
+
+  async getCodeReviewByCodeReviewNumber(projectKey: string, codeReviewNumber: number): Promise<SpaceMergeRequestRecord> {
+    const result = await this.spaceHttp.getJson<SpaceMergeRequestRecord>(`/api/http/projects/key:${projectKey}/code-reviews/number:${codeReviewNumber}`)
+    return result.body
+  }
+
+  async updateCodeReviewTitle(projectKey: string, codeReviewId: string, title: string): Promise<void> {
+    await this.spaceHttp.patchJson(`/api/http/projects/key:${projectKey}/code-reviews/id:${codeReviewId}/title`, {body: {title}})
+  }
+
+  async updateCodeReviewDescription(projectKey: string, codeReviewId: string, description: string): Promise<void> {
+    logger.debug(`SPACE: updateCodeReviewDescription: projectKey=${projectKey}, codeReviewId=${codeReviewId}, description=${description}`)
+    await this.spaceHttp.patchJson(`/api/http/projects/key:${projectKey}/code-reviews/id:${codeReviewId}/description`, {body: {description}})
+  }
+
+  async updateCodeReviewState(projectKey: string, codeReviewId: string, state: CodeReviewStateFilter): Promise<void> {
+    logger.debug(`SPACE: updateCodeReviewState: projectKey=${projectKey}, codeReviewId=${codeReviewId}, state=${state}`)
+    await this.spaceHttp.patchJson(`/api/http/projects/key:${projectKey}/code-reviews/id:${codeReviewId}/state`, {body: {state}})
   }
 
   async createMergeRequest(projectKey: string, request: SpaceCodeReviewCreateRequest): Promise<SpaceMergeRequestRecord> {

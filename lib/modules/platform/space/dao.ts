@@ -1,7 +1,7 @@
 import {logger} from "../../../logger";
 import type {PrState} from "../../../types";
 import {hashBody} from "../pr-body";
-import type {CreatePRConfig, FindPRConfig, Pr} from "../types";
+import type {CreatePRConfig, FindPRConfig, Pr, UpdatePrConfig} from "../types";
 import type {SpaceClient} from "./client";
 import type {
   CodeReviewStateFilter,
@@ -127,6 +127,28 @@ export class SpaceDao {
     }
 
     return 'main'
+  }
+
+  async updateMergeRequest(projectKey: string, prConfig: UpdatePrConfig): Promise<SpaceMergeRequestRecord> {
+    logger.debug(`SPACE: updating PR ${prConfig.number}`)
+
+    const review = await this.client.getCodeReviewByCodeReviewNumber(projectKey, prConfig.number)
+    if (review.title !== prConfig.prTitle) {
+      logger.debug(`SPACE: updating PR title from ${review.title} to ${prConfig.prTitle}`)
+      await this.client.updateCodeReviewTitle(projectKey, review.id, prConfig.prTitle)
+    }
+
+    if (prConfig.prBody) {
+      logger.debug(`SPACE: updating PR body for ${review.id}`)
+      await this.client.updateCodeReviewDescription(projectKey, review.id, prConfig.prBody)
+    }
+
+    if (prConfig.state === 'closed') {
+      logger.debug(`SPACE: closing PR ${review.id}`)
+      await this.client.updateCodeReviewState(projectKey, review.id, 'Closed')
+    }
+
+    return await this.client.getCodeReviewByCodeReviewId(projectKey, review.id)
   }
 
   private async findMergeRequestBody(codeReviewId: string): Promise<string | undefined> {

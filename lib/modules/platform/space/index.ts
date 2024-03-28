@@ -28,7 +28,7 @@ import {smartTruncate} from '../utils/pr-body';
 import {readOnlyIssueBody} from '../utils/read-only-issue-body';
 import {SpaceClient} from "./client";
 import {SpaceDao} from "./dao";
-import {TAG_PULL_REQUEST_BODY, getSpaceRepoUrl, mapGerritChangeToPr,} from './utils';
+import {getSpaceRepoUrl, mapGerritChangeToPr,} from './utils';
 
 export const id = 'space';
 
@@ -123,27 +123,7 @@ export async function getPr(number: number): Promise<Pr | null> {
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`SPACE updatePr(${prConfig.number}, ${prConfig.prTitle})`);
-  const change = await client.getChange(prConfig.number);
-  if (change.subject !== prConfig.prTitle) {
-    await client.updateCommitMessage(
-      prConfig.number,
-      change.change_id,
-      prConfig.prTitle,
-    );
-  }
-  if (prConfig.prBody) {
-    await client.addMessageIfNotAlreadyExists(
-      prConfig.number,
-      prConfig.prBody,
-      TAG_PULL_REQUEST_BODY,
-    );
-  }
-  if (prConfig.platformOptions?.autoApprove) {
-    await client.approveChange(prConfig.number);
-  }
-  if (prConfig.state && prConfig.state === 'closed') {
-    await client.abandonChange(prConfig.number);
-  }
+  await dao.updateMergeRequest(repoConfig.projectKey!, prConfig)
 }
 
 export async function createPr(prConfig: CreatePRConfig): Promise<Pr> {
