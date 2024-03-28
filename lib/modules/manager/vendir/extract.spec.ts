@@ -2,11 +2,8 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const oneContents = Fixtures.get('one-contents.yaml');
-const ociContents = Fixtures.get('oci-contents.yaml');
-const aliasContents = Fixtures.get('alias-contents.yaml');
-const multipleContents = Fixtures.get('multiple-contents.yaml');
-const nonHelmChartContents = Fixtures.get('non-helmchart.yaml');
+const validContents = Fixtures.get('valid-contents.yaml');
+const invalidContents = Fixtures.get('invalid-contents.yaml');
 
 describe('modules/manager/vendir/extract', () => {
   describe('extractPackageFile()', () => {
@@ -31,74 +28,48 @@ describe('modules/manager/vendir/extract', () => {
     });
 
     it('returns null for nonHelmChart key', () => {
-      const result = extractPackageFile(nonHelmChartContents, 'vendir.yml', {});
+      const result = extractPackageFile(invalidContents, 'vendir.yml', {});
       expect(result).toBeNull();
     });
 
-    it('single chart - extracts helm-chart from vendir.yml correctly', () => {
-      const result = extractPackageFile(oneContents, 'vendir.yml', {});
-      expect(result).toMatchObject({
-        deps: [
-          {
-            currentValue: '7.10.1',
-            depName: 'contour',
-            datasource: 'helm',
-            registryUrls: ['https://charts.bitnami.com/bitnami'],
-          },
-        ],
-      });
-    });
-
-    it('single chart - extracts oci helm-chart from vendir.yml correctly', () => {
-      const result = extractPackageFile(ociContents, 'vendir.yml', {});
-      expect(result).toMatchObject({
-        deps: [
-          {
-            currentValue: '7.10.1',
-            depName: 'contour',
-            packageName: 'charts.bitnami.com/bitnami/contour',
-            datasource: 'docker',
-          },
-        ],
-      });
-    });
-
     it('multiple charts - extracts helm-chart from vendir.yml correctly', () => {
-      const result = extractPackageFile(multipleContents, 'vendir.yml', {});
-      expect(result).toMatchObject({
-        deps: [
-          {
-            currentValue: '7.10.1',
-            depName: 'contour',
-            datasource: 'helm',
-            registryUrls: ['https://charts.bitnami.com/bitnami'],
-          },
-          {
-            currentValue: '7.10.1',
-            depName: 'contour',
-            datasource: 'helm',
-            registryUrls: ['https://charts.bitnami.com/bitnami'],
-          },
-        ],
-      });
-    });
-
-    it('resolves aliased registry urls', () => {
-      const aliasResult = extractPackageFile(aliasContents, 'vendir.yml', {
+      const result = extractPackageFile(validContents, 'vendir.yml', {
         registryAliases: {
           test: 'quay.example.com/organization',
         },
       });
-
-      expect(aliasResult).toMatchObject({
+      expect(result).toMatchObject({
         deps: [
+          {
+            currentValue: '7.10.1',
+            depName: 'valid-helmchart-1',
+            datasource: 'helm',
+            depType: 'HelmChart',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
+          },
+          {
+            currentValue: '7.10.1',
+            depName: 'valid-helmchart-2',
+            datasource: 'helm',
+            depType: 'HelmChart',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
+          },
           {
             currentDigest: undefined,
             currentValue: '7.10.1',
-            depName: 'oci',
+            depName: 'oci-chart',
             datasource: 'docker',
             depType: 'HelmChart',
-            packageName: 'quay.example.com/organization/oci',
+            packageName: 'charts.bitnami.com/bitnami/oci-chart',
+            pinDigests: false,
+          },
+          {
+            currentDigest: undefined,
+            currentValue: '7.10.1',
+            depName: 'aliased-oci-chart',
+            datasource: 'docker',
+            depType: 'HelmChart',
+            packageName: 'quay.example.com/organization/aliased-oci-chart',
             pinDigests: false,
           },
         ],
