@@ -122,6 +122,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'renovate/configure',
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -131,6 +132,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: null,
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -140,6 +142,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'renovate.json',
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -148,6 +151,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'onboardingPrTitle',
@@ -156,6 +160,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'Configure Renovate',
     globalOnly: true,
+    inheritConfigSupport: true,
     cli: false,
   },
   {
@@ -450,7 +455,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.3.4',
+    default: 'ghcr.io/containerbase/sidecar:10.3.8',
     globalOnly: true,
   },
   {
@@ -507,6 +512,7 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'boolean',
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'onboardingConfig',
@@ -515,6 +521,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: { $schema: 'https://docs.renovatebot.com/renovate-schema.json' },
     globalOnly: true,
+    inheritConfigSupport: true,
     mergeable: true,
   },
   {
@@ -584,6 +591,38 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'inheritConfig',
+    description:
+      'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'inheritConfigRepoName',
+    description:
+      'Renovate will look in this repo for the `inheritConfigFileName`.',
+    type: 'string',
+    default: '{{parentOrg}}/renovate-config',
+    globalOnly: true,
+  },
+  {
+    name: 'inheritConfigFileName',
+    description:
+      'Renovate will look for this config file name in the `inheritConfigRepoName`.',
+    type: 'string',
+    default: 'org-inherited-config.json',
+    globalOnly: true,
+  },
+  {
+    name: 'inheritConfigStrict',
+    description:
+      'If `true`, any `inheritedConfig` fetch errror will result in an aborted run.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
     name: 'requireConfig',
     description:
       "Controls Renovate's behavior regarding repository config files such as `renovate.json`.",
@@ -592,6 +631,7 @@ const options: RenovateOptions[] = [
     default: 'required',
     allowedValues: ['required', 'optional', 'ignored'],
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   {
     name: 'optimizeForDisabled',
@@ -1581,6 +1621,15 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'separateMultipleMinor',
+    description:
+      'If set to `true`, Renovate creates separate PRs for each `minor` stream.',
+    stage: 'package',
+    type: 'boolean',
+    default: false,
+    experimental: true,
+  },
+  {
     name: 'separateMinorPatch',
     description:
       'If set to `true`, Renovate will separate `minor` and `patch` updates into separate branches.',
@@ -1921,6 +1970,7 @@ const options: RenovateOptions[] = [
     default: false,
     supportedPlatforms: ['bitbucket'],
     globalOnly: true,
+    inheritConfigSupport: true,
   },
   // Automatic merging
   {
