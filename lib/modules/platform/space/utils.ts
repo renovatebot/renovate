@@ -5,7 +5,7 @@ import {joinUrlParts} from '../../../util/url';
 import {mapGerritChangeStateToPrState} from "../gerrit/utils";
 import {hashBody} from "../pr-body";
 import type {Pr} from '../types';
-import type {GerritChange, GerritLabelTypeInfo, SpaceCodeReviewState, SpaceMergeRequestRecord,} from './types';
+import type {GerritChange, GerritLabelTypeInfo,} from './types';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
@@ -73,42 +73,7 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
 }
 
 
-export function mapSpaceCodeReviewDetailsToPr(details: SpaceMergeRequestRecord, body: string): Pr {
-  return {
-    number: details.number,
-    state: mapSpaceCodeReviewStateToPrState(details.state, details.canBeReopened ?? false),
-    sourceBranch: details.branchPairs[0].sourceBranch,
-    targetBranch: details.branchPairs[0].targetBranch,
-    title: details.title,
-    // reviewers:
-    //   change.reviewers?.REVIEWER?.filter(
-    //     (reviewer) => typeof reviewer.username === 'string',
-    //   ).map((reviewer) => reviewer.username!) ?? [],
-    // TODO: find how to retrieve pr description?
-    bodyStruct: {
-      hash: hashBody(body),
-    },
-  };
-}
 
-export function mapSpaceCodeReviewStateToPrState(
-  state: SpaceCodeReviewState, canBeReopened: boolean
-): PrState {
-  switch (state) {
-    case 'Opened':
-      return 'open';
-    case 'Closed':
-      if (canBeReopened) {
-        return 'closed';
-      } else {
-        return 'merged';
-      }
-    case "Deleted":
-      // should not normally be here
-      return 'closed';
-  }
-  return 'all';
-}
 export function extractSourceBranch(change: GerritChange): string | undefined {
   return change.hashtags
     ?.find((tag) => tag.startsWith('sourceBranch-'))

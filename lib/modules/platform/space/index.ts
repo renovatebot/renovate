@@ -27,8 +27,8 @@ import {repoFingerprint} from '../util';
 import {smartTruncate} from '../utils/pr-body';
 import {readOnlyIssueBody} from '../utils/read-only-issue-body';
 import {SpaceClient} from "./client";
-import {getSpaceRepoUrl, mapGerritChangeToPr, mapSpaceCodeReviewDetailsToPr, TAG_PULL_REQUEST_BODY,} from './utils';
 import {SpaceDao} from "./dao";
+import {TAG_PULL_REQUEST_BODY, getSpaceRepoUrl, mapGerritChangeToPr,} from './utils';
 
 export const id = 'space';
 
@@ -41,8 +41,7 @@ let repoConfig: {
   projectKey?: string;
   repository?: string;
   head?: string;
-} = {
-};
+} = {};
 
 export function writeToConfig(newConfig: typeof repoConfig): void {
   repoConfig = {...repoConfig, ...newConfig};
@@ -71,18 +70,11 @@ export function initPlatform({endpoint, token}: PlatformParams): Promise<Platfor
   });
 }
 
-/**
- * Get all state="ACTIVE" and type="CODE" repositories from gerrit
- */
 export async function getRepos(): Promise<string[]> {
   logger.debug(`SPACE getRepos()`);
   return await dao.findRepositories();
 }
 
-/**
- * Clone repository to local directory
- * @param config
- */
 export async function initRepo({repository}: RepoParams): Promise<RepoResult> {
   logger.debug(`SPACE initRepo(${repository})`);
 
@@ -123,7 +115,7 @@ export async function findPr(
   findPRConfig: FindPRConfig,
   refreshCache?: boolean,
 ): Promise<Pr | null> {
-  logger.debug(`SPACE findPr(${JSON.stringify(findPRConfig)})`);
+  logger.debug(`SPACE findPr(${JSON.stringify(findPRConfig)}, ${refreshCache})`);
   const change = (
     await client.findChanges(repoConfig.repository!, findPRConfig, refreshCache)
   ).pop();
@@ -168,39 +160,19 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   }
 }
 
-export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
-  logger.debug(
-    `SPACE createPr(${prConfig.sourceBranch}, ${prConfig.prTitle}, ${
-      prConfig.labels?.toString() ?? ''
-    })`,
-  );
-
-  const createdPr = await client.createMergeRequest(repoConfig.projectKey!, repoConfig.repository!, prConfig)
-  return mapSpaceCodeReviewDetailsToPr(createdPr, prConfig.prBody);
+export async function createPr(prConfig: CreatePRConfig): Promise<Pr> {
+  logger.debug(`SPACE createPr(${prConfig.sourceBranch}, ${prConfig.prTitle}`);
+  return await dao.createMergeRequest(repoConfig.projectKey!, repoConfig.repository!, prConfig)
 }
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`SPACE getBranchPr(${branchName})`);
-  const pr = await client.findMergeRequest(repoConfig.projectKey!, repoConfig.repository!, {branchName, state: 'open'})
-  if (!pr) {
-    return null
-  }
-
-  const prBody = await dao.findMergeRequestBody(pr.id) ?? 'no pr body'
-  return mapSpaceCodeReviewDetailsToPr(pr, prBody)
+  return await dao.findMergeRequest(repoConfig.projectKey!, repoConfig.repository!, {branchName, state: 'open'})
 }
 
 export async function getPrList(): Promise<Pr[]> {
   logger.debug(`SPACE getPrList()`);
-  const prs = await client.findMergeRequests(repoConfig.projectKey!, repoConfig.repository!, 'Opened')
-
-  const result: Pr[] = []
-  for (const pr of prs) {
-    const prBody = await dao.findMergeRequestBody(pr.id) ?? 'no pr body'
-    result.push(mapSpaceCodeReviewDetailsToPr(pr, prBody))
-  }
-
-  return result
+  return  await dao.findAllMergeRequests(repoConfig.projectKey!, repoConfig.repository!)
 }
 
 export async function mergePr(config: MergePRConfig): Promise<boolean> {

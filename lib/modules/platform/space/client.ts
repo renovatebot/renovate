@@ -1,7 +1,6 @@
 import {REPOSITORY_ARCHIVED} from '../../../constants/error-messages';
 import {logger} from '../../../logger';
 import {SpaceHttp} from "../../../util/http/space";
-import type {CreatePRConfig, FindPRConfig} from "../types";
 import type {
   CodeReviewStateFilter,
   GerritAccountInfo,
@@ -77,72 +76,41 @@ export class SpaceClient {
     return result
   }
 
-  async findMergeRequests(projectKey: string, repository: string, state: CodeReviewStateFilter): Promise<SpaceMergeRequestRecord[]> {
-    const iterable = PaginatedIterable.fromUrl<SpaceCodeReviewBasicInfo>(
-      this.spaceHttp, `/api/http/projects/key:${projectKey}/code-reviews?state=${state}&repository=${repository}`
-    )
-    return iterable.flatMap(async basicReview => this.getCodeReview(projectKey, basicReview.review.id))
-  }
+  async findMergeRequests(
+    projectKey: string,
+    partialConfig: Partial<FindMergeRequestConfig> = {}
+  ): Promise<SpaceMergeRequestRecord[]> {
+    const config: FindMergeRequestConfig = {
+      prState: 'null',
+      predicate: () => Promise.resolve(true),
+      ...partialConfig
+    }
 
-  async findMergeRequest(projectKey: string, repository: string, config: FindPRConfig): Promise<SpaceMergeRequestRecord | undefined> {
-    let prState: CodeReviewStateFilter = 'null'
-    const allButOpen = config.state == '!open'
-    switch (config.state) {
-      case 'open':
-        prState = 'Opened';
-        break
-      case 'closed':
-        prState = 'Closed';
-        break
-      case '!open':
-      case 'all':
-        prState = 'null';
-        break
+    let repositoryQueryParam = ''
+    if (config.repository) {
+      repositoryQueryParam = `&repository=${config.repository}`
     }
 
     const iterable = PaginatedIterable.fromUrl<SpaceCodeReviewBasicInfo>(
-      this.spaceHttp,
-      `/api/http/projects/key:${projectKey}/code-reviews?state=${prState}&repository=${repository}`
+      this.spaceHttp, `/api/http/projects/key:${projectKey}/code-reviews?state=${config.prState}${repositoryQueryParam}`
     )
-    const review = await iterable.findAsync(async basicReview => {
+
+    return await iterable.flatMapNotNull(async basicReview => {
       // not sure what is this, but doesn't look like a renovate one
-      if (basicReview.review.className == 'CommitSetReviewRecord') {
-        return false
+      if (basicReview.review.className === 'CommitSetReviewRecord') {
+        return undefined
       }
 
       const review = await this.getCodeReview(projectKey, basicReview.review.id)
-      if (review.state == 'Deleted') {
+      if (review.state === 'Deleted') {
+        // should not normally be returned, but who knows
         logger.info(`SPACE: Ignoring PR ${review.title} because it is deleted`)
-        return false
+        return undefined
       }
 
-      if (allButOpen && review.state === 'Opened') {
-        logger.info(`SPACE: stateFilter=${config.state}. Ignoring PR ${review.title} because it is open`)
-        return false
-      }
-
-      // TODO: figure out what is the case here
-      if (review.branchPairs.length != 1) {
-        logger.debug(`SPACE: Not sure what to do with not a single branch pair in PR ${review.title}`)
-        return false
-      }
-
-      if (review.branchPairs[0].sourceBranch != config.branchName) {
-        logger.debug(`SPACE: branchFilter=${config.branchName}. Ignoring PR ${review.title} because it doesn't match the branch`)
-        return false
-      }
-
-      if (config.prTitle && review.title != config.prTitle) {
-        return false
-      }
-
-      logger.debug(`SPACE: branchFilter=${config.branchName}. found PR ${review.title} with state ${review.state}`)
-      return true
-    })
-
-    if (review) {
-      return await this.getCodeReview(projectKey, review.review.id)
-    }
+      const accept = await config.predicate(review)
+      return accept ? review : undefined
+    }, config.limit)
   }
 
   async getCodeReview(projectKey: string, codeReviewId: string): Promise<SpaceMergeRequestRecord> {
@@ -150,16 +118,8 @@ export class SpaceClient {
     return result.body
   }
 
-  async createMergeRequest(projectKey: string, repository: string, config: CreatePRConfig): Promise<SpaceMergeRequestRecord> {
-    logger.debug(`SPACE: createMergeRequest: projectKey=${projectKey}, repository=${repository}, config: ${JSON.stringify(config)}`)
-
-    const request: SpaceCodeReviewCreateRequest = {
-      repository,
-      sourceBranch: config.sourceBranch,
-      targetBranch: config.targetBranch,
-      title: config.prTitle,
-      description: config.prBody,
-    }
+  async createMergeRequest(projectKey: string, request: SpaceCodeReviewCreateRequest): Promise<SpaceMergeRequestRecord> {
+    logger.debug(`SPACE: createMergeRequest: projectKey=${projectKey}, request=${JSON.stringify(request)}`)
 
     const response = await this.spaceHttp.postJson<SpaceMergeRequestRecord>(`/api/http/projects/key:${projectKey}/code-reviews/merge-requests`, {body: request})
     logger.debug(`SPACE: createMergeRequest: response: ${JSON.stringify(response.body)}`)
@@ -379,6 +339,13 @@ export class SpaceClient {
   }
 }
 
+interface FindMergeRequestConfig {
+  repository?: string;
+  prState: CodeReviewStateFilter;
+  predicate: (pr: SpaceMergeRequestRecord) => Promise<boolean>;
+  limit?: number;
+}
+
 class PaginatedIterable<T> implements AsyncIterable<T[]> {
 
   constructor(private nextPage: (next?: string) => Promise<SpacePaginatedResult<T>>) {
@@ -411,11 +378,11 @@ class PaginatedIterable<T> implements AsyncIterable<T[]> {
     })
   }
 
-  async find(predicate: (value: T) => boolean): Promise<T | undefined> {
-    return this.findAsync(async it => predicate(it))
+  async findFirst(predicate: (value: T) => boolean): Promise<T | undefined> {
+    return await this.findFirstAsync(it => Promise.resolve(predicate(it)))
   }
 
-  async findAsync(predicate: (value: T) => Promise<boolean>): Promise<T | undefined> {
+  async findFirstAsync(predicate: (value: T) => Promise<boolean>): Promise<T | undefined> {
     for await (const page of this) {
       for (const element of page) {
         if (await predicate(element)) {
@@ -425,18 +392,28 @@ class PaginatedIterable<T> implements AsyncIterable<T[]> {
     }
   }
 
-  async flatMap<R>(mapper: (value: T) => Promise<R>): Promise<R[]> {
+  async flatMapNotNull<R>(mapper: (value: T) => Promise<R | undefined>, limit?: number): Promise<R[]> {
     const result: R[] = []
+
     for await (const page of this) {
       for (const element of page) {
-        result.push(await mapper(element))
+        const mapped = await mapper(element)
+        if (mapped) {
+          result.push(mapped)
+        }
+
+        if (limit && result.length >= limit) {
+          return result
+        }
       }
     }
+
     return result
   }
 
-  async all(): Promise<T[]> {
-    return this.flatMap(it => Promise.resolve(it))
+
+  all(): Promise<T[]> {
+    return this.flatMapNotNull(it => Promise.resolve(it))
   }
 }
 
@@ -450,7 +427,7 @@ class PaginatedIterator<T> implements AsyncIterator<T[]> {
 
   async next(...args: [] | [undefined]): Promise<IteratorResult<T[]>> {
     const result = await this.nextPage(this.currentPage)
-    const done = this.currentPage == result.next
+    const done = this.currentPage === result.next
     this.currentPage = result.next
     return Promise.resolve({value: result.data, done})
   }
