@@ -104,10 +104,8 @@ export async function findPr(
   refreshCache?: boolean,
 ): Promise<Pr | null> {
   logger.debug(`SPACE findPr(${JSON.stringify(findPRConfig)}, ${refreshCache})`);
-  const change = (
-    await client.findChanges(repoConfig.repository!, findPRConfig, refreshCache)
-  ).pop();
-  return change ? mapGerritChangeToPr(change) : null;
+  // TODO: add support for refreshCache
+  return await dao.findMergeRequest(repoConfig.projectKey!, repoConfig.repository!, findPRConfig)
 }
 
 export async function getPr(number: number): Promise<Pr | null> {
