@@ -110,7 +110,12 @@ describe('modules/manager/gleam/artifacts', () => {
       exec.mockRejectedValueOnce(execError);
       fs.getSiblingFileName.mockReturnValueOnce('manifest.toml');
       expect(await updateArtifacts(updateArtifact)).toEqual([
-        { artifactError: { lockFile: 'manifest.toml', stderr: 'fake_gleam_failure' } },
+        {
+          artifactError: {
+            lockFile: 'manifest.toml',
+            stderr: 'fake_gleam_failure',
+          },
+        },
       ]);
     });
   });
