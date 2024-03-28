@@ -9,8 +9,11 @@ import type {
   GerritChangeMessageInfo,
   GerritFindPRConfig,
   GerritMergeableInfo,
-  GerritProjectInfo, SpaceChannelItemRecord, SpaceChannelMessagesList,
-  SpaceCodeReviewBasicInfo, SpaceCodeReviewCreateRequest,
+  GerritProjectInfo,
+  SpaceChannelItemRecord,
+  SpaceChannelMessagesList,
+  SpaceCodeReviewBasicInfo,
+  SpaceCodeReviewCreateRequest,
   SpaceMergeRequestRecord,
   SpacePaginatedResult,
   SpaceProject,
@@ -20,7 +23,7 @@ import type {
 import {mapPrStateToGerritFilter} from './utils';
 import type {CreatePRConfig, FindPRConfig} from "../types";
 
-class SpaceClient {
+export class SpaceClient {
   private requestDetails = [
     'SUBMITTABLE', //include the submittable field in ChangeInfo, which can be used to tell if the change is reviewed and ready for submit.
     'CHECK', // include potential problems with the change.
@@ -31,7 +34,12 @@ class SpaceClient {
     'CURRENT_REVISION', //get RevisionInfo::ref to fetch
   ] as const;
 
-  private spaceHttp = new SpaceHttp();
+  private spaceHttp: SpaceHttp
+
+  constructor(baseUrl: string) {
+    this.spaceHttp = new SpaceHttp(baseUrl)
+  }
+
 
   async findProjectByKey(key: string): Promise<SpaceProject> {
     logger.debug(`SPACE: findProjectByKey(${key})`)
@@ -332,7 +340,7 @@ class SpaceClient {
   }
 
   async checkIfApproved(changeId: number): Promise<boolean> {
-    const change = await client.getChange(changeId);
+    const change = await this.getChange(changeId);
     const reviewLabels = change?.labels?.['Code-Review'];
     return reviewLabels === undefined || reviewLabels.approved !== undefined;
   }
@@ -449,5 +457,3 @@ class PaginatedIterator<T> implements AsyncIterator<T[]> {
     return Promise.resolve({value: result.data, done})
   }
 }
-
-export const client = new SpaceClient();

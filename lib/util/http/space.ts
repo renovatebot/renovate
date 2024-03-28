@@ -2,17 +2,8 @@ import {validateUrl} from '../url';
 import type {HttpOptions, HttpResponse, InternalHttpOptions} from './types';
 import {Http} from './index';
 
-let baseUrl: string;
-export function setBaseUrl(url: string): void {
-  baseUrl = url;
-}
-
-/**
- * Access Gerrit REST-API and strip-of the "magic prefix" from responses.
- * @see https://gerrit-review.googlesource.com/Documentation/rest-api.html
- */
 export class SpaceHttp extends Http {
-  constructor(options?: HttpOptions) {
+  constructor(private baseUrl: string, options?: HttpOptions) {
     super('space', options);
   }
 
@@ -20,7 +11,7 @@ export class SpaceHttp extends Http {
     path: string,
     options?: InternalHttpOptions,
   ): Promise<HttpResponse<T>> {
-    const url = validateUrl(path) ? path : baseUrl + path;
+    const url = validateUrl(path) ? path : this.baseUrl + path;
     const opts: InternalHttpOptions = {
       ...options,
     };

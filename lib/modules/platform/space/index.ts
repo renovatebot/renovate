@@ -2,7 +2,6 @@ import {logger} from '../../../logger';
 import type {BranchStatus} from '../../../types';
 import {parseJson} from '../../../util/common';
 import * as git from '../../../util/git';
-import {setBaseUrl} from '../../../util/http/space';
 import {regEx} from '../../../util/regex';
 import type {
   BranchStatusConfig,
@@ -26,8 +25,9 @@ import {repoFingerprint} from '../util';
 
 import {smartTruncate} from '../utils/pr-body';
 import {readOnlyIssueBody} from '../utils/read-only-issue-body';
-import {client} from './client';
 import {getSpaceRepoUrl, mapGerritChangeToPr, mapSpaceCodeReviewDetailsToPr, TAG_PULL_REQUEST_BODY,} from './utils';
+import {SpaceClient} from "./client";
+import {ensureTrailingSlash, trimTrailingSlash} from "../../../util/url";
 
 export const id = 'space';
 
@@ -47,6 +47,8 @@ export function writeToConfig(newConfig: typeof repoConfig): void {
   repoConfig = {...repoConfig, ...newConfig};
 }
 
+let client: SpaceClient
+
 export async function initPlatform({endpoint, token}: PlatformParams): Promise<PlatformResult> {
   logger.debug(`SPACE initPlatform(${endpoint!})`);
 
@@ -58,9 +60,8 @@ export async function initPlatform({endpoint, token}: PlatformParams): Promise<P
     throw new Error('Init: You must configure a JetBrains Space token');
   }
 
-  // defaults.endpoint = ensureTrailingSlash(endpoint); // not sure why
-  globalConfig.endpoint = endpoint;
-  setBaseUrl(`https://${endpoint}`);
+  globalConfig.endpoint = trimTrailingSlash(endpoint);
+  client = new SpaceClient(`https://${globalConfig.endpoint}`)
 
   return Promise.resolve({
     endpoint: globalConfig.endpoint,
