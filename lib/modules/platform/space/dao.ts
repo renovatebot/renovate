@@ -24,15 +24,6 @@ export class SpaceDao {
     return await this.client.getRepositoryInfo(projectKey, repository)
   }
 
-  async findMergeRequestBody(codeReviewId: string): Promise<string | undefined> {
-    const messages = await this.client.findMergeRequestMessages(codeReviewId, 1, 'asc')
-    if (messages.length === 0) {
-      return undefined
-    }
-
-    return messages.pop()?.details?.description?.text
-  }
-
   async createMergeRequest(projectKey: string, repository: string, config: CreatePRConfig): Promise<Pr> {
     const request: SpaceCodeReviewCreateRequest = {
       repository,
@@ -136,6 +127,19 @@ export class SpaceDao {
     }
 
     return 'main'
+  }
+
+  private async findMergeRequestBody(codeReviewId: string): Promise<string | undefined> {
+    logger.debug(`SPACE: searching for PR body in ${codeReviewId}`)
+    const messages = await this.client.findMergeRequestMessages(codeReviewId, 1, 'asc')
+    if (messages.length === 0) {
+      logger.debug(`SPACE: found no messages in PR ${codeReviewId}`)
+      return undefined
+    }
+
+    const body = messages.pop()?.details?.description?.text
+    logger.debug(`SPACE: found PR body in ${codeReviewId}: ${body}`)
+    return body
   }
 }
 

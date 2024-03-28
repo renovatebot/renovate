@@ -67,7 +67,7 @@ export class SpaceClient {
       logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} fetching message id=${id}`)
 
       const message = await this.spaceHttp.getJson<SpaceChannelItemRecord>(`/api/http/chats/messages/id:${id}?channel=codeReview:id:${codeReviewId}`)
-      logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} message = ${JSON.stringify(message.body)}`)
+      logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} message = ${message.body.time}`)
 
       result.push(message.body)
     }
