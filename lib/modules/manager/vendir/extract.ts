@@ -97,9 +97,7 @@ export function extractPackageFile(
     if ('helmChart' in content && content.helmChart) {
       const dep = extractHelmChart(content.helmChart, config.registryAliases);
       if (dep) {
-        deps.push({
-          ...dep,
-        });
+        deps.push(dep);
       }
     } else if ('git' in content && content.git) {
       const dep = extractGitSource(content.git);
