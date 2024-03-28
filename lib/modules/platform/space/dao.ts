@@ -1,3 +1,4 @@
+import type {MergeStrategy} from "../../../config/types";
 import {logger} from "../../../logger";
 import type {PrState} from "../../../types";
 import {hashBody} from "../pr-body";
@@ -10,7 +11,6 @@ import type {
   SpaceMergeRequestRecord,
   SpaceRepositoryDetails
 } from "./types";
-import type {MergeStrategy} from "../../../config/types";
 
 export class SpaceDao {
   constructor(private client: SpaceClient) {
