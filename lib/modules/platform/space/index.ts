@@ -27,7 +27,8 @@ import {repoFingerprint} from '../util';
 import {smartTruncate} from '../utils/pr-body';
 import {readOnlyIssueBody} from '../utils/read-only-issue-body';
 import {SpaceClient} from "./client";
-import {TAG_PULL_REQUEST_BODY, getSpaceRepoUrl, mapGerritChangeToPr, mapSpaceCodeReviewDetailsToPr,} from './utils';
+import {getSpaceRepoUrl, mapGerritChangeToPr, mapSpaceCodeReviewDetailsToPr, TAG_PULL_REQUEST_BODY,} from './utils';
+import {SpaceDao} from "./dao";
 
 export const id = 'space';
 
@@ -48,8 +49,9 @@ export function writeToConfig(newConfig: typeof repoConfig): void {
 }
 
 let client: SpaceClient
+let dao: SpaceDao
 
-export async function initPlatform({endpoint, token}: PlatformParams): Promise<PlatformResult> {
+export function initPlatform({endpoint, token}: PlatformParams): Promise<PlatformResult> {
   logger.debug(`SPACE initPlatform(${endpoint!})`);
 
   if (!endpoint) {
@@ -62,6 +64,7 @@ export async function initPlatform({endpoint, token}: PlatformParams): Promise<P
 
   globalConfig.endpoint = trimTrailingSlash(endpoint);
   client = new SpaceClient(`https://${globalConfig.endpoint}`)
+  dao = new SpaceDao(client)
 
   return Promise.resolve({
     endpoint: globalConfig.endpoint,
@@ -73,7 +76,7 @@ export async function initPlatform({endpoint, token}: PlatformParams): Promise<P
  */
 export async function getRepos(): Promise<string[]> {
   logger.debug(`SPACE getRepos()`);
-  return await client.findRepositories();
+  return await dao.findRepositories();
 }
 
 /**
@@ -102,7 +105,7 @@ export async function initRepo({repository}: RepoParams): Promise<RepoResult> {
   if (repoInfo.defaultBranch) {
     const ref = repoInfo.defaultBranch.head
     const lastSlash = ref.lastIndexOf('/')
-    if (lastSlash == -1) {
+    if (lastSlash === -1) {
       logger.debug(`SPACE initRepo(${repository}) - invalid default branch ${ref}`)
     } else {
       defaultBranch = ref.substring(lastSlash + 1)
@@ -183,7 +186,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
     return null
   }
 
-  const prBody = await client.findMergeRequestBody(pr.id) ?? 'no pr body'
+  const prBody = await dao.findMergeRequestBody(pr.id) ?? 'no pr body'
   return mapSpaceCodeReviewDetailsToPr(pr, prBody)
 }
 
@@ -193,7 +196,7 @@ export async function getPrList(): Promise<Pr[]> {
 
   const result: Pr[] = []
   for (const pr of prs) {
-    const prBody = await client.findMergeRequestBody(pr.id) ?? 'no pr body'
+    const prBody = await dao.findMergeRequestBody(pr.id) ?? 'no pr body'
     result.push(mapSpaceCodeReviewDetailsToPr(pr, prBody))
   }
 

@@ -17,7 +17,6 @@ import type {
   SpaceCodeReviewCreateRequest,
   SpaceMergeRequestRecord,
   SpacePaginatedResult,
-  SpaceProject,
   SpaceRepositoryBasicInfo,
   SpaceRepositoryDetails,
 } from './types';
@@ -40,23 +39,14 @@ export class SpaceClient {
     this.spaceHttp = new SpaceHttp(baseUrl)
   }
 
-
-  async findProjectByKey(key: string): Promise<SpaceProject> {
-    logger.debug(`SPACE: findProjectByKey(${key})`)
-
-    const iterable = PaginatedIterable.fromUrl<SpaceProject>(this.spaceHttp, '/api/http/projects')
-    const result = await iterable.find(it => it.key.key.toLowerCase() === key.toLowerCase())
-    return result!
-  }
-
-  async findRepositories(): Promise<string[]> {
+  async findRepositories(): Promise<SpaceRepositoryBasicInfo[]> {
     logger.debug("SPACE: getRepos")
 
     const iterable = PaginatedIterable.fromUrl<SpaceRepositoryBasicInfo>(this.spaceHttp, '/api/http/projects/repositories')
     const repos = await iterable.all()
     logger.debug(`SPACE: getRepos, all repos: ${JSON.stringify(repos)}`)
 
-    return repos.map(it => `${it.projectKey}/${it.repository}`)
+    return repos
   }
 
   async getRepositoryInfo(projectKey: string, repository: string): Promise<SpaceRepositoryDetails> {
@@ -67,33 +57,24 @@ export class SpaceClient {
     return repoInfo.body;
   }
 
-  async getProjectInfo(repository: string): Promise<GerritProjectInfo> {
-    const projectInfo = await this.spaceHttp.getJson<GerritProjectInfo>(
-      `a/projects/${encodeURIComponent(repository)}`,
-    );
-    if (projectInfo.body.state !== 'ACTIVE') {
-      throw new Error(REPOSITORY_ARCHIVED);
+  async findMergeRequestMessages(codeReviewId: string, limit: number, order: 'asc' | 'desc'): Promise<SpaceChannelItemRecord[]> {
+    logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId}, limit=${limit}, order=${order}`)
+
+    const apiOrder = order === 'asc' ? 'FromOldestToNewest' : 'FromNewestToOldest'
+    const channelMessages = await this.spaceHttp.getJson<SpaceChannelMessagesList>(`/api/http/chats/messages?channel=codeReview:id:${codeReviewId}&sorting=${apiOrder}&batchSize=${limit}`)
+
+    const result: SpaceChannelItemRecord[] = []
+    for (const {id} of channelMessages.body.messages) {
+      logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} fetching message id=${id}`)
+
+      const message = await this.spaceHttp.getJson<SpaceChannelItemRecord>(`/api/http/chats/messages/id:${id}?channel=codeReview:id:${codeReviewId}`)
+      logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} message = ${JSON.stringify(message.body)}`)
+
+      result.push(message.body)
     }
-    return projectInfo.body;
-  }
 
-  async getBranchInfo(repository: string): Promise<GerritBranchInfo> {
-    const branchInfo = await this.spaceHttp.getJson<GerritBranchInfo>(
-      `a/projects/${encodeURIComponent(repository)}/branches/HEAD`,
-    );
-    return branchInfo.body;
-  }
-
-  async findMergeRequestBody(codeReviewId: string) {
-    logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId}`)
-    const channelMessages = await this.spaceHttp.getJson<SpaceChannelMessagesList>(`/api/http/chats/messages?channel=codeReview:id:${codeReviewId}&sorting=FromOldestToNewest&batchSize=1`)
-    const messageId = channelMessages.body.messages[0].id
-
-    logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} first message id = ${messageId}`)
-
-    const message = await this.spaceHttp.getJson<SpaceChannelItemRecord>(`/api/http/chats/messages/id:${messageId}?channel=codeReview:id:${codeReviewId}`)
-    logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} message = ${JSON.stringify(message.body)}`)
-    return message.body.details?.description?.text
+    logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} found ${result.length} messages`)
+    return result
   }
 
   async findMergeRequests(projectKey: string, repository: string, state: CodeReviewStateFilter): Promise<SpaceMergeRequestRecord[]> {
@@ -172,7 +153,7 @@ export class SpaceClient {
   async createMergeRequest(projectKey: string, repository: string, config: CreatePRConfig): Promise<SpaceMergeRequestRecord> {
     logger.debug(`SPACE: createMergeRequest: projectKey=${projectKey}, repository=${repository}, config: ${JSON.stringify(config)}`)
 
-    const request : SpaceCodeReviewCreateRequest = {
+    const request: SpaceCodeReviewCreateRequest = {
       repository,
       sourceBranch: config.sourceBranch,
       targetBranch: config.targetBranch,
@@ -184,6 +165,23 @@ export class SpaceClient {
     logger.debug(`SPACE: createMergeRequest: response: ${JSON.stringify(response.body)}`)
 
     return response.body
+  }
+
+  async getProjectInfo(repository: string): Promise<GerritProjectInfo> {
+    const projectInfo = await this.spaceHttp.getJson<GerritProjectInfo>(
+      `a/projects/${encodeURIComponent(repository)}`,
+    );
+    if (projectInfo.body.state !== 'ACTIVE') {
+      throw new Error(REPOSITORY_ARCHIVED);
+    }
+    return projectInfo.body;
+  }
+
+  async getBranchInfo(repository: string): Promise<GerritBranchInfo> {
+    const branchInfo = await this.spaceHttp.getJson<GerritBranchInfo>(
+      `a/projects/${encodeURIComponent(repository)}/branches/HEAD`,
+    );
+    return branchInfo.body;
   }
 
   async findChanges(
