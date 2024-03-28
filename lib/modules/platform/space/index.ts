@@ -92,20 +92,8 @@ export async function initRepo({repository}: RepoParams): Promise<RepoResult> {
   const url = getSpaceRepoUrl(repository, baseUrl);
   await git.initRepo({url});
 
-  let defaultBranch = 'main'
-  const repoInfo = await client.getRepositoryInfo(projectKey, shortRepository)
-  if (repoInfo.defaultBranch) {
-    const ref = repoInfo.defaultBranch.head
-    const lastSlash = ref.lastIndexOf('/')
-    if (lastSlash === -1) {
-      logger.debug(`SPACE initRepo(${repository}) - invalid default branch ${ref}`)
-    } else {
-      defaultBranch = ref.substring(lastSlash + 1)
-    }
-  }
-
   return {
-    defaultBranch,
+    defaultBranch: await dao.findDefaultBranch(projectKey, shortRepository),
     isFork: false,
     repoFingerprint: repoFingerprint(repository, baseUrl),
   };

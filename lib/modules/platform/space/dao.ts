@@ -120,6 +120,23 @@ export class SpaceDao {
       return null
     }
   }
+
+  async findDefaultBranch(projectKey: string, repository: string): Promise<string> {
+    logger.debug(`SPACE findDefaultBranch(${projectKey}, ${repository})`)
+
+    const repoInfo = await this.client.getRepositoryInfo(projectKey, repository)
+    if (repoInfo.defaultBranch) {
+      const ref = repoInfo.defaultBranch.head
+      const lastSlash = ref.lastIndexOf('/')
+      if (lastSlash === -1) {
+        logger.debug(`SPACE initRepo(${repository}) - invalid default branch ${ref}`)
+      } else {
+        return ref.substring(lastSlash + 1)
+      }
+    }
+
+    return 'main'
+  }
 }
 
 function mapSpaceCodeReviewDetailsToPr(details: SpaceMergeRequestRecord, body: string): Pr {
