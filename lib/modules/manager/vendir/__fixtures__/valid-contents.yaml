@@ -36,3 +36,8 @@ directories:
     git:
       url: https://github.com/test/test
       ref: "7.10.1"
+  # Normal GithubRelease Repo
+  - path: custom-repo-custom-version
+    githubRelease:
+      slug: test/test
+      tag: "7.10.1"

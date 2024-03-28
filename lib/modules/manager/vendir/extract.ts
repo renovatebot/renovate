@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import { getHttpUrl } from '../../../util/git/url';
 import { parseSingleYaml } from '../../../util/yaml';
 import { GitRefsDatasource } from '../../datasource/git-refs';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import { isOCIRegistry } from '../helmv3/utils';
@@ -12,13 +13,11 @@ import type {
 } from '../types';
 import {
   GitRefDefinition,
+  GithubReleaseDefinition,
   HelmChartDefinition,
   Vendir,
   VendirDefinition,
 } from './schema';
-
-// TODO: Add support for other vendir types (like git tags, github releases, etc.)
-// Recommend looking at the kustomize manager for more information on support.
 
 export function extractHelmChart(
   helmChart: HelmChartDefinition,
@@ -63,6 +62,20 @@ export function extractGitSource(
   };
 }
 
+export function extractGithubReleaseSource(
+  githubRelease: GithubReleaseDefinition,
+): PackageDependency | null {
+  const registryUrl = 'https://github.com/' + githubRelease.slug;
+  return {
+    depName: githubRelease.slug,
+    packageName: githubRelease.slug,
+    depType: 'GithubRelease',
+    currentValue: githubRelease.tag,
+    registryUrls: [registryUrl],
+    datasource: GithubReleasesDatasource.id,
+  };
+}
+
 export function parseVendir(
   content: string,
   packageFile?: string,
@@ -101,6 +114,11 @@ export function extractPackageFile(
       }
     } else if ('git' in content && content.git) {
       const dep = extractGitSource(content.git);
+      if (dep) {
+        deps.push(dep);
+      }
+    } else if ('githubRelease' in content && content.githubRelease) {
+      const dep = extractGithubReleaseSource(content.githubRelease);
       if (dep) {
         deps.push(dep);
       }
