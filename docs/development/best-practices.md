@@ -157,11 +157,11 @@ Avoid refactoring the code and tests at the same time, this can mask regression 
 For `WARN`, `ERROR` and `FATAL` log messages use logger metadata.
 Also use logger metadata the result is a complex metadata object needing a multiple-line pretty stringification.
 
-For `INFO` log messages inline the metadata into the log message.
+For `INFO`, `DEBUG` and `TRACE` log messages inline the metadata into the log message.
 Also inline the metadata if the metadata object is complex.
 
 `WARN`, `ERROR` and `FATAL` messages are often used in metrics or error catching services.
-These log messages should have a consistent `msg` component, so they can be automatically grouped or associated.
+These log messages should have a static `msg` component, so they can be automatically grouped or associated.
 Metadata that's separate from its message is hard for humans to read.
 Try to combine the metadata into the message, unless it's too complex to do so.
 
