@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/conan/artifacts returns null if read operation failed for new conan.lock 1`] = `
+[
+  {
+    "cmd": "conan lock create conanfile.py --lockfile=""",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/conan/artifacts returns updated conan.lock if isLockFileMaintenance is true 1`] = `
+[
+  {
+    "cmd": "conan lock create conanfile.py --lockfile=""",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/conan/artifacts returns updated conan.lock if updateType is lockFileMaintenance 1`] = `
+[
+  {
+    "cmd": "conan lock create conanfile.py --lockfile=""",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
