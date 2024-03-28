@@ -138,7 +138,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 
 export async function getPrList(): Promise<Pr[]> {
   logger.debug(`SPACE getPrList()`);
-  return  await dao.findAllMergeRequests(repoConfig.projectKey!, repoConfig.repository!)
+  return await dao.findAllMergeRequests(repoConfig.projectKey!, repoConfig.repository!)
 }
 
 export async function mergePr(config: MergePRConfig): Promise<boolean> {
@@ -166,25 +166,32 @@ export async function getBranchStatus(
   branchName: string,
 ): Promise<BranchStatus> {
   logger.debug(`SPACE getBranchStatus(${branchName})`);
-  const changes = await client.findChanges(
-    repoConfig.repository!,
-    {state: 'open', branchName},
-    true,
-  );
-  if (changes.length > 0) {
-    const allSubmittable =
-      changes.filter((change) => change.submittable === true).length ===
-      changes.length;
-    if (allSubmittable) {
-      return 'green';
-    }
-    const hasProblems =
-      changes.filter((change) => change.problems.length > 0).length > 0;
-    if (hasProblems) {
-      return 'red';
-    }
+
+  const executions = await dao.findLatestJobExecutions(repoConfig.projectKey!, repoConfig.repository!, branchName)
+  if (executions.length === 0) {
+    logger.debug(`SPACE getBranchStatus(${branchName}): no executions found, setting status to yellow`)
+    return 'yellow'
   }
-  return 'yellow';
+
+  const branchStatuses = executions.map<BranchStatus>((execution) => {
+    switch (execution.status) {
+      case 'FINISHED':
+        return 'green'
+      case "FAILED":
+      case "TERMINATED":
+        return 'red'
+      default:
+        return 'yellow'
+    }
+  });
+
+  if (branchStatuses.includes('red')) {
+    return 'red'
+  } else if (branchStatuses.includes('yellow')) {
+    return 'yellow';
+  } else {
+    return 'green'
+  }
 }
 
 /**

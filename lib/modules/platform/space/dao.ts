@@ -6,7 +6,7 @@ import type {SpaceClient} from "./client";
 import type {
   CodeReviewStateFilter,
   SpaceCodeReviewCreateRequest,
-  SpaceCodeReviewState,
+  SpaceCodeReviewState, SpaceJobExecutionDTO,
   SpaceMergeRequestRecord,
   SpaceRepositoryDetails
 } from "./types";
@@ -151,6 +151,30 @@ export class SpaceDao {
     return await this.client.getCodeReviewByCodeReviewId(projectKey, review.id)
   }
 
+  async findLatestJobExecutions(projectKey: string, repository: string, branch: string): Promise<SpaceJobExecutionDTO[]> {
+    logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch})`)
+
+    const allRepositoryHead = await this.client.getRepositoryHeads(projectKey, repository)
+
+    const repositoryHead = allRepositoryHead.find(it => it.head === `refs/heads/${branch}`)!
+    logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}), head: ${JSON.stringify(repositoryHead)}`)
+    const jobs = await this.client.findAllJobs(projectKey, repository, branch)
+
+    logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}) found ${jobs.length} jobs`)
+
+    const result : SpaceJobExecutionDTO[] = []
+    for (const job of jobs) {
+      const executions = await this.client.findJobExecutions(projectKey, job.id, branch, dto => dto.commitId === repositoryHead.ref, 1)
+      logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}) job ${job.id} found executions: ${executions.length}`)
+
+      result.push(...executions)
+    }
+
+    logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}): total executions ${result.length}`)
+
+    return result
+  }
+
   private async findMergeRequestBody(codeReviewId: string): Promise<string | undefined> {
     logger.debug(`SPACE: searching for PR body in ${codeReviewId}`)
     const messages = await this.client.findMergeRequestMessages(codeReviewId, 1, 'asc')
@@ -160,7 +184,7 @@ export class SpaceDao {
     }
 
     const body = messages.pop()?.details?.description?.text
-    logger.debug(`SPACE: found PR body in ${codeReviewId}: ${body}`)
+    logger.debug(`SPACE: found PR body in ${codeReviewId} of length ${body?.length}`)
     return body
   }
 }

@@ -10,10 +10,13 @@ import type {
   GerritFindPRConfig,
   GerritMergeableInfo,
   GerritProjectInfo,
+  SpaceBranchInfo,
   SpaceChannelItemRecord,
   SpaceChannelMessagesList,
   SpaceCodeReviewBasicInfo,
   SpaceCodeReviewCreateRequest,
+  SpaceJobDTO,
+  SpaceJobExecutionDTO,
   SpaceMergeRequestRecord,
   SpacePaginatedResult,
   SpaceRepositoryBasicInfo,
@@ -41,7 +44,7 @@ export class SpaceClient {
   async findRepositories(): Promise<SpaceRepositoryBasicInfo[]> {
     logger.debug("SPACE: getRepos")
 
-    const iterable = PaginatedIterable.fromUrl<SpaceRepositoryBasicInfo>(this.spaceHttp, '/api/http/projects/repositories')
+    const iterable = PaginatedIterable.fromGetUsingNext<SpaceRepositoryBasicInfo>(this.spaceHttp, '/api/http/projects/repositories')
     const repos = await iterable.all()
     logger.debug(`SPACE: getRepos, all repos: ${JSON.stringify(repos)}`)
 
@@ -91,7 +94,7 @@ export class SpaceClient {
       repositoryQueryParam = `&repository=${config.repository}`
     }
 
-    const iterable = PaginatedIterable.fromUrl<SpaceCodeReviewBasicInfo>(
+    const iterable = PaginatedIterable.fromGetUsingNext<SpaceCodeReviewBasicInfo>(
       this.spaceHttp, `/api/http/projects/key:${projectKey}/code-reviews?state=${config.prState}${repositoryQueryParam}`
     )
 
@@ -145,6 +148,59 @@ export class SpaceClient {
 
     return response.body
   }
+
+  async findAllJobs(projectKey: string, repository: string, branch: string): Promise<SpaceJobDTO[]> {
+    logger.debug(`SPACE: findAllJobs: projectKey=${projectKey}, repository=${repository}, branch=${branch}`)
+
+    const iterable = PaginatedIterable.fromGetUsingNext<SpaceJobDTO>(
+      this.spaceHttp, `/api/http/projects/key:${projectKey}/automation/jobs?repoFilter=${repository}&branchFilter=${branch}`
+    )
+    const jobs = await iterable.all()
+    logger.debug(`SPACE: findAllJobs: all jobs: ${JSON.stringify(jobs)}`)
+
+    return jobs
+  }
+
+  async getRepositoryHeads(projectKey: string, repository: string): Promise<SpaceBranchInfo[]> {
+    logger.debug(`SPACE: findRepositoryHeads: projectKey=${projectKey}, repository=${repository}`)
+
+    const iterable = PaginatedIterable.fromGetUsingSkip<SpaceBranchInfo>(
+      this.spaceHttp, `/api/http/projects/key:${projectKey}/repositories/${repository}/heads`
+    )
+
+    const heads = await iterable.all();
+    logger.debug(`SPACE: findRepositoryHeads: result: ${JSON.stringify(heads)}`)
+
+    return heads
+  }
+
+  async findJobExecutions(projectKey: string, jobId: string, branch: string, predicate: (dto: SpaceJobExecutionDTO) => boolean = () => true, limit?: number): Promise<SpaceJobExecutionDTO[]> {
+    logger.debug(`SPACE: findJobExecutions: projectKey=${projectKey}, jobId=${jobId}, branch=${branch}`)
+
+    const iterable = PaginatedIterable.fromGetUsingNext<SpaceJobExecutionDTO>(
+      this.spaceHttp, `/api/http/projects/key:${projectKey}/automation/graph-executions?jobId=${jobId}&branchFilter=${branch}`
+    )
+
+    const executions = await iterable.flatMapNotNull(dto => {
+      if (predicate(dto)) {
+        return Promise.resolve(dto)
+      } else {
+        return Promise.resolve(undefined)
+      }
+    }, limit)
+
+    logger.debug(`SPACE: findJobExecutions: found: ${executions.length}`)
+
+    return executions
+  }
+
+
+
+
+
+
+
+
 
   async getProjectInfo(repository: string): Promise<GerritProjectInfo> {
     const projectInfo = await this.spaceHttp.getJson<GerritProjectInfo>(
@@ -375,7 +431,15 @@ class PaginatedIterable<T> implements AsyncIterable<T[]> {
     return new PaginatedIterator(this.nextPage)
   }
 
-  static fromUrl<T>(http: SpaceHttp, basePath: string): PaginatedIterable<T> {
+  static fromGetUsingNext<T>(http: SpaceHttp, basePath: string): PaginatedIterable<T> {
+    return this.fromUsing(http, basePath, 'next')
+  }
+
+  static fromGetUsingSkip<T>(http: SpaceHttp, basePath: string): PaginatedIterable<T> {
+    return this.fromUsing(http, basePath, 'skip')
+  }
+
+  private static fromUsing<T>(http: SpaceHttp, basePath: string, parameter: string): PaginatedIterable<T> {
     const hasQuery = basePath.includes('?')
 
     return new PaginatedIterable<T>(async (next?: string) => {
@@ -384,9 +448,9 @@ class PaginatedIterable<T> implements AsyncIterable<T[]> {
       let path = basePath
       if (next) {
         if (hasQuery) {
-          path += `&next=${next}`
+          path += `&${parameter}=${next}`
         } else {
-          path += `?next=${next}`
+          path += `?${parameter}=${next}`
         }
       }
 

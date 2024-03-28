@@ -148,6 +148,40 @@ export interface SpaceReviewCreatedEvent {
   // commits?: Array<UnfurlDetailsCommit>;
 }
 
+export interface SpaceJobDTO {
+  id: string;
+  name: string;
+  repoName: string;
+  repository: {
+    name: string;
+    isDeleted: boolean;
+  };
+  archive: boolean;
+}
+
+export interface SpaceJobExecutionDTO {
+  executionId: string;
+  executionNumber: number;
+  jobId: string;
+  jobName: string;
+  projectId: string;
+  branch: string;
+  status: SpaceExecutionStatus;
+  triggeredTime: number;
+  startedTime?: number;
+  finishedTime?: number;
+  changesCount: number;
+  // failureConditions: Array<FailureConditionDTO>;
+  commitId?: string;
+}
+
+export interface SpaceBranchInfo {
+  head: string;
+  ref: string;
+}
+
+export type SpaceExecutionStatus = 'SCHEDULED' | 'PENDING' | 'READY_TO_START' | 'RUNNING' | 'FINISHING' | 'FINISHED' | 'TERMINATING' | 'TERMINATED' | 'HIBERNATING' | 'HIBERNATED' | 'RESTARTING' | 'FAILED' | 'SKIPPED';
+
 
 export interface GerritProjectInfo {
   id: string;
