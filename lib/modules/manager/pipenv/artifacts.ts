@@ -114,7 +114,7 @@ export function getPipenvConstraint(
   return '';
 }
 
-function getMatchingHostRule(url: string): HostRule | null {
+export function getMatchingHostRule(url: string): HostRule | null {
   const parsedUrl = parseUrl(url);
   if (parsedUrl) {
     parsedUrl.username = '';

@@ -1,3 +1,4 @@
+import { expect } from '@jest/globals';
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
@@ -23,6 +24,7 @@ import type { UpdateArtifactsConfig } from '../types';
 import {
   addExtraEnvVariable,
   extractEnvironmentVariableName,
+  getMatchingHostRule,
 } from './artifacts';
 import type { PipfileLockSchema } from './schema';
 import { updateArtifacts } from '.';
@@ -632,6 +634,10 @@ describe('modules/manager/pipenv/artifacts', () => {
         },
       },
     ]);
+  });
+
+  it('returns no host rule on invalid url', () => {
+    expect(getMatchingHostRule('')).toBeNull();
   });
 
   it('extracts correct environment variable from credential placeholder', () => {
