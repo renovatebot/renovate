@@ -27,8 +27,7 @@ import {repoFingerprint} from '../util';
 import {smartTruncate} from '../utils/pr-body';
 import {readOnlyIssueBody} from '../utils/read-only-issue-body';
 import {client} from './client';
-import type {GerritLabelTypeInfo, GerritProjectInfo} from './types';
-import {getSpaceRepoUrl, mapBranchStatusToLabel, mapGerritChangeToPr, mapSpaceCodeReviewDetailsToPr, TAG_PULL_REQUEST_BODY,} from './utils';
+import {getSpaceRepoUrl, mapGerritChangeToPr, mapSpaceCodeReviewDetailsToPr, TAG_PULL_REQUEST_BODY,} from './utils';
 
 export const id = 'space';
 
@@ -41,10 +40,7 @@ let repoConfig: {
   projectKey?: string;
   repository?: string;
   head?: string;
-  config?: GerritProjectInfo;
-  labels: Record<string, GerritLabelTypeInfo>;
 } = {
-  labels: {},
 };
 
 export function writeToConfig(newConfig: typeof repoConfig): void {
@@ -259,27 +255,26 @@ export async function getBranchStatusCheck(
   branchName: string,
   context: string,
 ): Promise<BranchStatus | null> {
-  const label = repoConfig.labels[context];
-  if (label) {
-    const change = (
-      await client.findChanges(
-        repoConfig.repository!,
-        {branchName, state: 'open'},
-        true,
-      )
-    ).pop();
-    if (change) {
-      const labelRes = change.labels?.[context];
-      if (labelRes) {
-        if (labelRes.approved) {
-          return 'green';
-        }
-        if (labelRes.rejected) {
-          return 'red';
-        }
-      }
-    }
-  }
+  // if (label) {
+  //   const change = (
+  //     await client.findChanges(
+  //       repoConfig.repository!,
+  //       {branchName, state: 'open'},
+  //       true,
+  //     )
+  //   ).pop();
+  //   if (change) {
+  //     const labelRes = change.labels?.[context];
+  //     if (labelRes) {
+  //       if (labelRes.approved) {
+  //         return 'green';
+  //       }
+  //       if (labelRes.rejected) {
+  //         return 'red';
+  //       }
+  //     }
+  //   }
+  // }
   return 'yellow';
 }
 
@@ -291,16 +286,16 @@ export async function getBranchStatusCheck(
 export async function setBranchStatus(
   branchStatusConfig: BranchStatusConfig,
 ): Promise<void> {
-  const label = repoConfig.labels[branchStatusConfig.context];
-  const labelValue =
-    label && mapBranchStatusToLabel(branchStatusConfig.state, label);
-  if (branchStatusConfig.context && labelValue) {
-    const pr = await getBranchPr(branchStatusConfig.branchName);
-    if (pr === null) {
-      return;
-    }
-    await client.setLabel(pr.number, branchStatusConfig.context, labelValue);
-  }
+  // const label = repoConfig.labels[branchStatusConfig.context];
+  // const labelValue =
+  //   label && mapBranchStatusToLabel(branchStatusConfig.state, label);
+  // if (branchStatusConfig.context && labelValue) {
+  //   const pr = await getBranchPr(branchStatusConfig.branchName);
+  //   if (pr === null) {
+  //     return;
+  //   }
+  //   await client.setLabel(pr.number, branchStatusConfig.context, labelValue);
+  // }
 }
 
 export function getRawFile(
