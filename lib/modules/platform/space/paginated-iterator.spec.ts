@@ -20,14 +20,14 @@ describe('modules/platform/space/paginated-iterator', () => {
   const next2 = 'test-next-2'
 
   describe('plain iterator', () => {
-    it('iterates once over an empty response', async () => {
+    it('should iterate once over an empty response', async () => {
       mockHttp([])
 
       const actual = await toArray(iterable)
       expect(actual).toEqual([])
     })
 
-    it('iterates over first page', async () => {
+    it('should iterates over first page', async () => {
       // first request
       mockHttp([testDto1, testDto2], { next: next1 })
 
@@ -38,7 +38,7 @@ describe('modules/platform/space/paginated-iterator', () => {
       expect(actual).toEqual([[testDto1, testDto2]])
     })
 
-    it('iterates over two pages', async () => {
+    it('should iterates over two pages', async () => {
       // first request
       mockHttp([testDto1], { next: next1 })
 
@@ -52,7 +52,51 @@ describe('modules/platform/space/paginated-iterator', () => {
       expect(actual).toEqual([[testDto1], [testDto2]])
     })
 
-    it('not fails with empty response is missing', async () => {
+    it('should use parametrized field names', async () => {
+      // page 1
+      httpMock
+        .scope(spaceEndpointUrl)
+        .get(urlPath)
+        .reply(200, {
+            myNextField: next1,
+            myDataField: [testDto1]
+          },
+          jsonResultHeader,
+        );
+
+      // page 2
+      httpMock
+        .scope(spaceEndpointUrl)
+        .get(`${urlPath}?myNextParam=${next1}`)
+        .reply(200, {
+            myNextField: next2,
+            myDataField: [testDto2]
+          },
+          jsonResultHeader,
+        );
+
+      // final page
+      httpMock
+        .scope(spaceEndpointUrl)
+        .get(`${urlPath}?myNextParam=${next2}`)
+        .reply(200, {
+            myNextField: 'whatever',
+            myDataField: []
+          },
+          jsonResultHeader,
+        );
+
+      const iterableWithCustomFieldNames = PaginatedIterable.fromUsing<TestDto>(new SpaceHttp(spaceEndpointUrl), urlPath, {
+        queryParameter: 'myNextParam',
+        dataField: 'myDataField',
+        nextField: 'myNextField'
+      })
+
+      const actual = await toArray(iterableWithCustomFieldNames)
+      expect(actual).toEqual([[testDto1], [testDto2]])
+    });
+
+    it('should not fails with empty response is missing', async () => {
       // first request
       mockHttp([testDto1], { next: next1 })
 
