@@ -1,18 +1,11 @@
-import { mocked, partial } from '../../../../test/util';
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import type { BranchStatus } from '../../../types';
+import {mocked, partial} from '../../../../test/util';
+import {CONFIG_GIT_URL_UNAVAILABLE} from '../../../constants/error-messages';
+import type {BranchStatus} from '../../../types';
 import * as _hostRules from '../../../util/host-rules';
-import { setBaseUrl } from '../../../util/http/gerrit';
-import { hashBody } from '../pr-body';
-import type {
-  GerritAccountInfo,
-  GerritChange,
-  GerritChangeMessageInfo,
-  GerritChangeStatus,
-  GerritLabelTypeInfo,
-} from './types';
+import {hashBody} from '../pr-body';
+import type {GerritAccountInfo, GerritChange, GerritChangeMessageInfo, GerritChangeStatus, GerritLabelTypeInfo,} from './types';
 import * as utils from './utils';
-import { mapBranchStatusToLabel } from './utils';
+import {mapBranchStatusToLabel} from './utils';
 
 jest.mock('../../../util/host-rules');
 
@@ -20,30 +13,37 @@ const baseUrl = 'https://gerrit.example.com';
 const hostRules = mocked(_hostRules);
 
 describe('modules/platform/space/utils', () => {
-  beforeEach(() => {
-    setBaseUrl(baseUrl);
-  });
+  describe('getSpaceRepoUrl()', () => {
+    const repoName = 'main/my-repo'
+    const orgName = 'my-org'
+    const endpoint = `${orgName}.jetbrains.space`
+    it('create a git url with token', () => {
 
-  describe('getGerritRepoUrl()', () => {
-    it('create a git url with username/password', () => {
+      const token = 'my-secret-token'
       hostRules.find.mockReturnValue({
-        username: 'abc',
-        password: '123',
+        token
       });
-      const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl);
-      expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
+
+      const repoUrl = utils.getSpaceRepoUrl(repoName, endpoint);
+      expect(repoUrl).toBe(`https://username-doesnt-matter:${token}@git.jetbrains.space/${orgName}/${repoName}`);
     });
 
-    it('create a git url without username/password', () => {
+    it('fails to create a repo url without token', () => {
       hostRules.find.mockReturnValue({});
-      expect(() => utils.getGerritRepoUrl('web/apps', baseUrl)).toThrow(
-        'Init: You must configure a Gerrit Server username/password',
+      expect(() => utils.getSpaceRepoUrl(repoName, endpoint)).toThrow(
+        'Init: You must configure a JetBrains Space token',
       );
     });
 
     it('throws on invalid endpoint', () => {
-      expect(() => utils.getGerritRepoUrl('web/apps', '...')).toThrow(
+      expect(() => utils.getSpaceRepoUrl(repoName, '...')).toThrow(
         Error(CONFIG_GIT_URL_UNAVAILABLE),
+      );
+    });
+
+    it('throws on invalid repo name', () => {
+      expect(() => utils.getSpaceRepoUrl('bla', endpoint)).toThrow(
+        Error('Init: repository name must include project key, like my-project/my-repo (default project key is "main")'),
       );
     });
   });
