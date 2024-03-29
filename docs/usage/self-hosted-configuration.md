@@ -213,6 +213,26 @@ For example:
 }
 ```
 
+<!-- prettier-ignore -->
+!!! note
+    On Gitea/Forgejo, you can't use `autodiscoverTopics` together with `autodiscoverNamespaces` because both platforms do not support this.
+    Topics are preferred and `autodiscoverNamespaces` will be ignored when you configure `autodiscoverTopics` on Gitea/Forgejo.
+
+## autodiscoverProjects
+
+You can use this option to filter the list of autodiscovered repositories by project names.
+This feature is useful for users who want Renovate to only work on repositories within specific projects or exclude certain repositories from being processed.
+
+```json title="Example for Bitbucket"
+{
+  "platform": "bitbucket",
+  "autodiscoverProjects": ["a-group", "!another-group/some-subgroup"]
+}
+```
+
+The `autodiscoverProjects` config option takes an array of minimatch-compatible globs or RE2-compatible regex strings.
+For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ## autodiscoverTopics
 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those
@@ -652,6 +672,58 @@ By default, Renovate does not autodiscover repositories that are mirrors.
 
 Change this setting to `true` to include repositories that are mirrors as Renovate targets.
 
+## inheritConfig
+
+When you enable this option, Renovate will look for the `inheritConfigFileName` file in the `inheritConfigRepoName` repository before processing a repository, and read this in as config.
+
+If the repository is in a nested organization or group on a supported platform such as GitLab, such as `topGroup/nestedGroup/projectName` then Renovate will look in `topGroup/nestedGroup/renovate-config`.
+
+If `inheritConfig` is `true` but the inherited config file does _not_ exist then Renovate will proceed without warning.
+If the file exists but cannot be parsed, then Renovate will raise a config warning issue and abort the job.
+
+The inherited config may include all valid repository config and these config options:
+
+- `bbUseDevelopmentBranch`
+- `onboarding`
+- `onboardingBranch`
+- `onboardingCommitMessage`
+- `onboardingConfig`
+- `onboardingConfigFileName`
+- `onboardingNoDeps`
+- `onboardingPrTitle`
+- `onboardingRebaseCheckbox`
+- `requireConfig`
+
+<!-- prettier-ignore -->
+!!! note
+    The above list is prepared manually and may become out of date.
+    Consult the self-hosted configuration docs and look for `inheritConfigSupport` values there for the definitive list.
+
+This way organizations can change/control the default behavior, like whether configs are required and how repositories are onboarded.
+
+We disabled `inheritConfig` in the Mend Renovate App to avoid wasting millions of API calls per week.
+This is because each `404` response from the GitHub API due to a missing org inherited config counts as a used API call.
+We will add a smart/dynamic approach in future, so that we can selectively enable `inheritConfig` per organization.
+
+## inheritConfigFileName
+
+Change this setting if you want Renovate to look for a different file name within the `inheritConfigRepoName` repository.
+You may use nested files, for example: `"some-dir/config.json"`.
+
+## inheritConfigRepoName
+
+Change this setting if you want Renovate to look in an alternative repository for the inherited config.
+The repository must be on the same platform and endpoint, and Renovate's token must have `read` permissions to the repository.
+
+## inheritConfigStrict
+
+By default Renovate will silently (debug log message only) ignore cases where `inheritConfig=true` but no inherited config is found.
+When you set `inheritConfigStrict=true` then Renovate will abort the run and raise a config error if Renovate can't find the inherited config.
+
+<!-- prettier-ignore -->
+!!! warning
+    Only set this config option to `true` if _every_ organization has an inherited config file _and_ you want to make sure Renovate _always_ uses that inherited config.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
@@ -894,6 +966,25 @@ For TLS/SSL-enabled connections, use rediss prefix
 
 Example URL structure: `rediss://[[username]:[password]]@localhost:6379/0`.
 
+## reportPath
+
+`reportPath` describes the location where the report is written to.
+
+If [`reportType`](#reporttype) is set to `file`, then set `reportPath` to a filepath.
+For example: `/foo/bar.json`.
+
+If the value `s3` is used in [`reportType`](#reporttype), then use a S3 URI.
+For example: `s3://bucket-name/key-name`.
+
+## reportType
+
+Defines how the report is exposed:
+
+- `<unset>` If unset, no report will be provided, though the debug logs will still have partial information of the report
+- `logging` The report will be printed as part of the log messages on `INFO` level
+- `file` The report will be written to a path provided by [`reportPath`](#reportpath)
+- `s3` The report is pushed to an S3 bucket defined by [`reportPath`](#reportpath). This option reuses [`RENOVATE_X_S3_ENDPOINT`](./self-hosted-experimental.md#renovatexs3endpoint) and [`RENOVATE_X_S3_PATH_STYLE`](./self-hosted-experimental.md#renovatexs3pathstyle)
+
 ## repositories
 
 Elements in the `repositories` array can be an object if you wish to define more settings:
@@ -918,17 +1009,9 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 }
 ```
 
-<!-- prettier-ignore -->
-!!! note
-    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running Renovate within an EC2 instance in an ECS cluster. In this case, no extra environment variables are required.
-    Otherwise, the following environment variables should be set for the S3 client to work.
-
-```
-    AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY
-    AWS_SESSION_TOKEN
-    AWS_REGION
-```
+Renovate uses the [AWS SDK for JavaScript V3](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/welcome.html) to connect to the S3 instance.
+Therefore, Renovate supports all the authentication methods supported by the AWS SDK.
+Read more about the default credential provider chain for AWS SDK for JavaScript V3 [here](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/Package/-aws-sdk-credential-providers/#fromnodeproviderchain).
 
 <!-- prettier-ignore -->
 !!! tip
@@ -1000,12 +1083,6 @@ It could then be used in a repository config or preset like so:
 ```
 
 Secret names must start with an upper or lower case character and can have only characters, digits, or underscores.
-
-## skipInstalls
-
-By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
-If this is set to false, then a full install of modules will be done.
-This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
 

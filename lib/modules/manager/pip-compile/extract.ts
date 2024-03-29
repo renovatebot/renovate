@@ -75,6 +75,7 @@ export async function extractAllPackageFiles(
   const lockFileArgs = new Map<string, PipCompileArgs>();
   const depsBetweenFiles: DependencyBetweenFiles[] = [];
   const packageFiles = new Map<string, PackageFile>();
+  const lockFileSources = new Map<string, PackageFile>();
   for (const fileMatch of fileMatches) {
     const fileContent = await readLocalFile(fileMatch, 'utf8');
     if (!fileContent) {
@@ -137,9 +138,10 @@ export async function extractAllPackageFiles(
         logger.debug(
           `pip-compile: ${packageFile} used in multiple output files`,
         );
-        const packageFileContent = packageFiles.get(packageFile)!;
-        packageFileContent.lockFiles!.push(fileMatch);
-        extendWithIndirectDeps(packageFileContent, lockedDeps);
+        const existingPackageFile = packageFiles.get(packageFile)!;
+        existingPackageFile.lockFiles!.push(fileMatch);
+        extendWithIndirectDeps(existingPackageFile, lockedDeps);
+        lockFileSources.set(fileMatch, existingPackageFile);
         continue;
       }
       const content = await readLocalFile(packageFile, 'utf8');
@@ -188,11 +190,13 @@ export async function extractAllPackageFiles(
           }
         }
         extendWithIndirectDeps(packageFileContent, lockedDeps);
-        packageFiles.set(packageFile, {
+        const newPackageFile: PackageFile = {
           ...packageFileContent,
           lockFiles: [fileMatch],
           packageFile,
-        });
+        };
+        packageFiles.set(packageFile, newPackageFile);
+        lockFileSources.set(fileMatch, newPackageFile);
       } else {
         logger.warn(
           { packageFile },
@@ -208,6 +212,25 @@ export async function extractAllPackageFiles(
     depsBetweenFiles,
     packageFiles,
   );
+
+  // This needs to go in reverse order to handle transitive dependencies
+  for (const packageFile of [...result].reverse()) {
+    for (const reqFile of packageFile.managerData?.requirementsFiles ?? []) {
+      let sourceFile: PackageFile | undefined = undefined;
+      if (fileMatches.includes(reqFile)) {
+        sourceFile = lockFileSources.get(reqFile);
+      } else if (packageFiles.has(reqFile)) {
+        sourceFile = packageFiles.get(reqFile);
+      }
+      if (!sourceFile) {
+        logger.warn(
+          `pip-compile: ${packageFile.packageFile} references ${reqFile} which does not appear to be a requirements file managed by pip-compile`,
+        );
+        continue;
+      }
+      sourceFile.lockFiles!.push(...packageFile.lockFiles!);
+    }
+  }
   logger.debug(
     'pip-compile: dependency graph:\n' +
       generateMermaidGraph(depsBetweenFiles, lockFileArgs),

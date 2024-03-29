@@ -47,6 +47,7 @@ const repoGroups = {
     'https://github.com/awslabs/aws-lambda-powertools-typescript',
     'https://github.com/aws-powertools/powertools-lambda-typescript',
   ],
+  'aws-sdk-client-mock': 'https://github.com/m-radzikowski/aws-sdk-client-mock',
   'aws-sdk-go': 'https://github.com/aws/aws-sdk-go',
   'aws-sdk-go-v2': 'https://github.com/aws/aws-sdk-go-v2',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',

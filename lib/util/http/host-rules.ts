@@ -217,36 +217,16 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
   return options;
 }
 
-export function getConcurrentRequestsLimit(
-  url: string,
-  defaultValue: number | null,
-): number | null {
+export function getConcurrentRequestsLimit(url: string): number | null {
   const { concurrentRequestLimit } = hostRules.find({ url });
-
-  if (!is.number(concurrentRequestLimit)) {
-    return defaultValue;
-  }
-
-  if (concurrentRequestLimit > 0) {
-    return concurrentRequestLimit;
-  }
-
-  return null;
+  return is.number(concurrentRequestLimit) && concurrentRequestLimit > 0
+    ? concurrentRequestLimit
+    : null;
 }
 
-export function getThrottleIntervalMs(
-  url: string,
-  defaultValue: number | null,
-): number | null {
+export function getThrottleIntervalMs(url: string): number | null {
   const { maxRequestsPerSecond } = hostRules.find({ url });
-
-  if (!is.number(maxRequestsPerSecond)) {
-    return defaultValue ? Math.ceil(1000 / defaultValue) : defaultValue; // 5 requests per second
-  }
-
-  if (maxRequestsPerSecond > 0) {
-    return Math.ceil(1000 / maxRequestsPerSecond);
-  }
-
-  return null;
+  return is.number(maxRequestsPerSecond) && maxRequestsPerSecond > 0
+    ? Math.ceil(1000 / maxRequestsPerSecond)
+    : null;
 }

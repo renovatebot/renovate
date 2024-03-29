@@ -23,24 +23,6 @@ Legacy versions with the `===` prefix are ignored.
 1. Renovate searches for the latest version on [PyPI](https://pypi.org/) to decide if there are upgrades
 1. If the source package includes a GitHub URL as its source, and has a "changelog" file _or_ uses GitHub releases, a Release Note will be embedded in the generated PR
 
-## Alternative file names
-
-For the `pip_requirements` manager, the default file matching regex for `requirements.txt` follows common file name conventions.
-
-It will match `requirements.txt` and `requirements.pip`, and any file in the format `requirements-*.txt` or `requirements-*.pip`, to allow for common filename patterns such as `requirements-dev.txt`.
-
-But Renovate may not find all your files.
-
-You can tell Renovate where to find your file(s) by setting your own `fileMatch` regex:
-
-```json title="Setting a custom fileMatch regex"
-{
-  "pip_requirements": {
-    "fileMatch": ["my/specifically-named.file", "\\.requirements$"]
-  }
-}
-```
-
 ## Alternate registries
 
 By default Renovate checks for upgrades on the `pypi.org` registry.

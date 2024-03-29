@@ -36,6 +36,7 @@ export function extractPackageFile(
     definitions = parseYaml(content, null, {
       customSchema: ApplicationDefinition,
       failureBehaviour: 'filter',
+      removeTemplates: true,
     });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse ArgoCD definition.');

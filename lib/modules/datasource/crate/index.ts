@@ -102,6 +102,11 @@ export class CrateDatasource extends Datasource {
         if (version.yanked) {
           release.isDeprecated = true;
         }
+        if (version.rust_version) {
+          release.constraints = {
+            rust: [version.rust_version],
+          };
+        }
         return release;
       })
       .filter((release) => release.version);
