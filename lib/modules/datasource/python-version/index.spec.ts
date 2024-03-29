@@ -1,3 +1,4 @@
+import { satisfies } from '@renovatebot/pep440';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
@@ -20,18 +21,6 @@ describe('modules/datasource/python-version/index', () => {
           ?.isDeprecated,
       ).toBeTrue();
     });
-
-    it('returns Python prebuild data', async () => {
-      jest
-        .spyOn(githubGraphql, 'queryReleases')
-        .mockResolvedValueOnce(JSON.parse(Fixtures.get('prebuild.json')));
-      // httpMock
-      //   .scope('https://api.github.com/')
-      //   .post('/graphql')
-      //   .reply(200, Fixtures.get('prebuild.json'));
-      const res = await PythonVersionDatasource.getPrebuildReleases();
-      expect(res).toMatchSnapshot();
-    });
   });
 
   describe('getReleases', () => {
@@ -40,6 +29,33 @@ describe('modules/datasource/python-version/index', () => {
         .scope('https://endoflife.date')
         .get('/api/python.json')
         .reply(200, Fixtures.get('eol.json'));
+
+      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+        {
+          id: 1,
+          url: 'https://example.com',
+          name: 'containerbase/python-prebuild',
+          description: 'some description',
+          version: '3.12.1',
+          releaseTimestamp: '2020-03-09T13:00:00Z',
+        },
+        {
+          id: 2,
+          url: 'https://example.com',
+          name: 'containerbase/python-prebuild',
+          description: 'some description',
+          version: '3.12.0',
+          releaseTimestamp: '2020-03-09T13:00:00Z',
+        },
+        {
+          id: 3,
+          url: 'https://example.com',
+          name: 'containerbase/python-prebuild',
+          description: 'some description',
+          version: '3.7.8',
+          releaseTimestamp: '2020-03-09T13:00:00Z',
+        },
+      ]);
     });
 
     it('throws for 500', async () => {
@@ -86,9 +102,10 @@ describe('modules/datasource/python-version/index', () => {
           packageName: 'python',
         });
         expect(res?.releases[0]).toEqual({
+          isDeprecated: true,
           isStable: true,
-          releaseTimestamp: '2001-06-22T00:00:00.000Z',
-          version: '2.0.1',
+          releaseTimestamp: '2020-06-27T12:55:01.000Z',
+          version: '3.7.8',
         });
       });
 
@@ -100,6 +117,30 @@ describe('modules/datasource/python-version/index', () => {
         res?.releases.forEach((release) => {
           expect(release.isStable).toBeTrue();
         });
+      });
+
+      it('returns no version that is not prebuilt', async () => {
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'python',
+        });
+        expect(
+          res?.releases.filter((release) =>
+            satisfies(release.version, '>3.12.1'),
+          ),
+        ).toHaveLength(0);
+      });
+
+      it('returns isDeprecated status for Python 3 minor releases', async () => {
+        const res = await getPkgReleases({
+          datasource,
+          packageName: 'python',
+        });
+        res?.releases
+          .filter((release) => satisfies(release.version, '>=3'))
+          .forEach((release) => {
+            expect(release.isDeprecated).toBeBoolean();
+          });
       });
     });
   });

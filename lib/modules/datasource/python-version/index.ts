@@ -1,4 +1,3 @@
-import { satisfies } from '@renovatebot/pep440';
 import { cache } from '../../../util/cache/package/decorator';
 import { id as versioning } from '../../versioning/python';
 import { Datasource } from '../datasource';
@@ -6,7 +5,7 @@ import { EndoflifeDatePackagesource } from '../endoflife-date';
 import { registryUrl as eolRegistryUrl } from '../endoflife-date/common';
 import { GithubReleasesDatasource } from '../github-releases';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { datasource, defaultRegistryUrl } from './common';
+import { datasource, defaultRegistryUrl, githubBaseUrl } from './common';
 import { PythonRelease } from './schema';
 
 export class PythonVersionDatasource extends Datasource {
@@ -32,7 +31,7 @@ export class PythonVersionDatasource extends Datasource {
 
   static async getPrebuildReleases(): Promise<ReleaseResult | null> {
     return await PythonVersionDatasource.pythonPrebuildDatasource.getReleases({
-      registryUrl: 'https://api.github.com',
+      registryUrl: githubBaseUrl,
       packageName: 'containerbase/python-prebuild',
     });
   }
@@ -63,7 +62,15 @@ export class PythonVersionDatasource extends Datasource {
     const pythonPrebuildVersions = new Set<string>(
       pythonPrebuildReleases?.releases.map((release) => release.version),
     );
-    const pythonEolVersions = await PythonVersionDatasource.getEolReleases();
+    const pythonEolReleases = await PythonVersionDatasource.getEolReleases();
+    const pythonEolVersions = new Map<string, boolean | undefined>(
+      pythonEolReleases?.releases
+        .filter((release) => release.isDeprecated !== undefined)
+        .map((release) => [
+          release.version.split('.').slice(0, 2).join('.'),
+          release.isDeprecated,
+        ]),
+    );
     const result: ReleaseResult = {
       homepage: 'https://python.org',
       sourceUrl: 'https://github.com/python/cpython',
@@ -75,15 +82,15 @@ export class PythonVersionDatasource extends Datasource {
       result.releases.push(
         ...response.body
           .filter((release) => release.isStable)
-          .filter((release) => !pythonPrebuildVersions?.has(release.version)),
+          .filter((release) => pythonPrebuildVersions?.has(release.version)),
       );
     } catch (err) {
       this.handleGenericErrors(err);
     }
     for (const release of result.releases) {
-      release.isDeprecated = pythonEolVersions?.releases.find((cycle) =>
-        satisfies(release.version, '==' + cycle.version),
-      )?.isDeprecated;
+      release.isDeprecated = pythonEolVersions.get(
+        release.version.split('.').slice(0, 2).join('.'),
+      );
     }
 
     return result.releases.length ? result : null;
