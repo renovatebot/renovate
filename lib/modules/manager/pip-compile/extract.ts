@@ -231,6 +231,22 @@ function extendWithIndirectDeps(
     }
   }
 }
+
+/**
+ * As indirect dependecies don't exist in the package file, we need to
+ * create them from the lock file.
+ *
+ * By removing currentValue and currentVersion, we ensure that they
+ * are handled like unconstrained dependencies with locked version.
+ * Such packages are updated when their update strategy
+ * is set to 'update-lockfile',
+ * see: lib/workers/repository/process/lookup/index.ts.
+ *
+ * By disabling them by default, we won't create noise by updating them.
+ * Unless they have vulnerability alert, then they are forced to be updated.
+ * @param dep dependency extracted from lock file (requirements.txt)
+ * @returns unconstrained dependency with locked version
+ */
 function indirectDep(dep: PackageDependency): PackageDependency {
   const result = {
     ...dep,
