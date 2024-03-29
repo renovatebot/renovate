@@ -44,7 +44,6 @@ export function writeToConfig(newConfig: typeof repoConfig): void {
   repoConfig = {...repoConfig, ...newConfig};
 }
 
-let client: SpaceClient
 let dao: SpaceDao
 
 export function initPlatform({endpoint, token}: PlatformParams): Promise<PlatformResult> {
@@ -59,8 +58,7 @@ export function initPlatform({endpoint, token}: PlatformParams): Promise<Platfor
   }
 
   globalConfig.endpoint = trimTrailingSlash(endpoint);
-  client = new SpaceClient(`https://${globalConfig.endpoint}`)
-  dao = new SpaceDao(client)
+  dao = new SpaceDao(new SpaceClient(`https://${globalConfig.endpoint}`))
 
   return Promise.resolve({
     endpoint: globalConfig.endpoint,
