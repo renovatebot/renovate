@@ -3,6 +3,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { id as versioning } from '../../versioning/python';
 import { Datasource } from '../datasource';
 import { EndoflifeDatePackagesource } from '../endoflife-date';
+import { registryUrl as eolRegistryUrl } from '../endoflife-date/common';
 import { GithubReleasesDatasource } from '../github-releases';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
@@ -29,7 +30,21 @@ export class PythonVersionDatasource extends Datasource {
 
   static pythonPrebuildDatasource: GithubReleasesDatasource;
 
+  static async getPrebuildReleases(): Promise<ReleaseResult | null> {
+    return await PythonVersionDatasource.pythonPrebuildDatasource.getReleases({
+      registryUrl: 'https://api.github.com',
+      packageName: 'containerbase/python-prebuild',
+    });
+  }
+
   static pythonEolDatasource: EndoflifeDatePackagesource;
+
+  static async getEolReleases(): Promise<ReleaseResult | null> {
+    return await PythonVersionDatasource.pythonEolDatasource.getReleases({
+      registryUrl: eolRegistryUrl,
+      packageName: 'python',
+    });
+  }
 
   @cache({
     namespace: `datasource-${datasource}`,
@@ -44,16 +59,11 @@ export class PythonVersionDatasource extends Datasource {
       return null;
     }
     const pythonPrebuildReleases =
-      await PythonVersionDatasource.pythonPrebuildDatasource.getReleases({
-        packageName: 'containerbase/python-prebuild',
-      });
+      await PythonVersionDatasource.getPrebuildReleases();
     const pythonPrebuildVersions = new Set<string>(
       pythonPrebuildReleases?.releases.map((release) => release.version),
     );
-    const pythonEolVersions =
-      await PythonVersionDatasource.pythonEolDatasource.getReleases({
-        packageName: 'python',
-      });
+    const pythonEolVersions = await PythonVersionDatasource.getEolReleases();
     const result: ReleaseResult = {
       homepage: 'https://python.org',
       sourceUrl: 'https://github.com/python/cpython',
