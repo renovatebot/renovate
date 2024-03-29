@@ -48,23 +48,23 @@ export function getSpaceRepoUrl(repository: string, endpoint: string): string {
   return url.toString();
 }
 
-export async function findFirst<T>(iterable: AsyncIterable<T[]>, predicate: (value: T) => Promise<boolean>): Promise<T | undefined> {
-  const result = await flatMapNotNull(iterable, async it => {
-    if (await predicate(it)) {
-      return it
-    } else {
-      return undefined
-    }
-  }, 1)
+// export async function findFirstFlatten<T>(iterable: AsyncIterable<T[]>, predicate: (value: T) => Promise<boolean>): Promise<T | undefined> {
+//   const result = await mapNotNullFlatten(iterable, async it => {
+//     if (await predicate(it)) {
+//       return it
+//     } else {
+//       return undefined
+//     }
+//   }, 1)
+//
+//   return result.pop()
+// }
 
-  return result.pop()
+export async function flatten<T>(iterable: AsyncIterable<T[]>): Promise<T[]> {
+  return await mapNotNullFlatten(iterable, it => Promise.resolve(it))
 }
 
-export async function all<T>(iterable: AsyncIterable<T[]>): Promise<T[]> {
-  return await flatMapNotNull(iterable, it => Promise.resolve(it))
-}
-
-export async function flatMapNotNull<T, R>(iterable: AsyncIterable<T[]>, mapper: (value: T) => Promise<R | undefined>, limit?: number): Promise<R[]> {
+export async function mapNotNullFlatten<T, R>(iterable: AsyncIterable<T[]>, mapper: (value: T) => Promise<R | undefined>, limit?: number): Promise<R[]> {
   const result: R[] = []
 
   for await (const page of iterable) {

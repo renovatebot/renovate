@@ -4,7 +4,7 @@ import * as _hostRules from '../../../util/host-rules';
 import {hashBody} from '../pr-body';
 import type {SpaceMergeRequestRecord,} from './types';
 import * as utils from './utils';
-import {flatMapNotNull} from './utils';
+import {flatten, mapNotNullFlatten} from './utils';
 
 jest.mock('../../../util/host-rules');
 
@@ -77,8 +77,9 @@ describe('modules/platform/space/utils', () => {
     });
   });
 
-  describe('flatMapNotNull()', () => {
-    it('should filter out nulls and map non-nulls', async () => {
+  describe('AsyncIterator', () => {
+
+    it('should map not null and flatten', async () => {
       const valueToSkip = 'valueToSkip'
       const valueToKeep1 = 'valueToKeep1'
       const valueToKeep2 = 'valueToKeep2'
@@ -86,7 +87,7 @@ describe('modules/platform/space/utils', () => {
       const prefix = "my-prefix-"
 
       const iterable = new TestIterable([[valueToSkip], [valueToKeep1], [valueToKeep2]])
-      const result = await flatMapNotNull(iterable, it => {
+      const result = await mapNotNullFlatten(iterable, it => {
         if (it === valueToSkip) {
           return Promise.resolve(undefined)
         } else {
@@ -96,6 +97,17 @@ describe('modules/platform/space/utils', () => {
 
       expect(result).toEqual([prefix + valueToKeep1, prefix + valueToKeep2])
     });
+
+    it('should flatten', async () => {
+      const value1 = 'value1'
+      const value2 = 'value2'
+      const iterable = new TestIterable([[value1], [value2]])
+
+      const actual = await flatten(iterable)
+      expect(actual).toEqual([value1, value2])
+    })
+
+
   })
 });
 

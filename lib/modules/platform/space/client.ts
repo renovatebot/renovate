@@ -16,7 +16,7 @@ import type {
   SpaceRepositoryDetails,
 } from './types';
 import {PaginatedIterable} from "./paginated-iterator";
-import {flatMapNotNull} from "./utils";
+import {flatten, mapNotNullFlatten} from "./utils";
 
 export class SpaceClient {
 
@@ -30,7 +30,7 @@ export class SpaceClient {
     logger.debug("SPACE: getAllRepositoriesForAllProjects")
 
     const iterable = PaginatedIterable.fromGetUsingNext<SpaceRepositoryBasicInfo>(this.spaceHttp, '/api/http/projects/repositories')
-    const repos = await iterable.all()
+    const repos = await flatten(iterable)
     logger.debug(`SPACE: getAllRepositoriesForAllProjects, all repos: ${JSON.stringify(repos)}`)
 
     return repos
@@ -118,7 +118,7 @@ export class SpaceClient {
       this.spaceHttp, `/api/http/projects/key:${projectKey}/code-reviews?$top=1&state=${config.prState}${repositoryQueryParam}`
     )
 
-    return await iterable.flatMapNotNull(async basicReview => {
+    return await mapNotNullFlatten(iterable, async basicReview => {
       // not sure what is this, but doesn't look like a renovate one
       if (basicReview.review.className === 'CommitSetReviewRecord') {
         return undefined
@@ -175,7 +175,7 @@ export class SpaceClient {
     const iterable = PaginatedIterable.fromGetUsingNext<SpaceJobDTO>(
       this.spaceHttp, `/api/http/projects/key:${projectKey}/automation/jobs?repoFilter=${repository}&branchFilter=${branch}`
     )
-    const jobs = await iterable.all()
+    const jobs = await flatten(iterable)
     logger.debug(`SPACE: findAllJobs: all jobs: ${JSON.stringify(jobs)}`)
 
     return jobs
@@ -188,7 +188,7 @@ export class SpaceClient {
       this.spaceHttp, `/api/http/projects/key:${projectKey}/repositories/${repository}/heads`
     )
 
-    const heads = await iterable.all();
+    const heads = await flatten(iterable)
     logger.debug(`SPACE: findRepositoryHeads: result: ${JSON.stringify(heads)}`)
 
     return heads
@@ -201,7 +201,7 @@ export class SpaceClient {
       this.spaceHttp, `/api/http/projects/key:${projectKey}/automation/graph-executions?jobId=${jobId}&branchFilter=${branch}`
     )
 
-    const executions = await flatMapNotNull(iterable, dto => {
+    const executions = await mapNotNullFlatten(iterable, dto => {
       if (predicate(dto)) {
         return Promise.resolve(dto)
       } else {
