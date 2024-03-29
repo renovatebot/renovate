@@ -12,10 +12,10 @@ import type {
   SpaceJobDTO,
   SpaceJobExecutionDTO,
   SpaceMergeRequestRecord,
-  SpacePaginatedResult,
   SpaceRepositoryBasicInfo,
   SpaceRepositoryDetails,
 } from './types';
+import {PaginatedIterable} from "./paginated-iterator";
 
 export class SpaceClient {
 
@@ -44,7 +44,7 @@ export class SpaceClient {
   }
 
   // finding messages by code review number is not supported yet
-  async findMergeRequestMessages(codeReviewId: string, limit: number, order: 'asc' | 'desc'): Promise<SpaceChannelItemRecord[]> {
+  async findCodeReviewMessages(codeReviewId: string, limit: number, order: 'asc' | 'desc'): Promise<SpaceChannelItemRecord[]> {
     logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId}, limit=${limit}, order=${order}`)
 
     const apiOrder = order === 'asc' ? 'FromOldestToNewest' : 'FromNewestToOldest'
@@ -261,97 +261,4 @@ interface FindMergeRequestConfig {
   limit?: number;
 }
 
-class PaginatedIterable<T> implements AsyncIterable<T[]> {
 
-  constructor(private nextPage: (next?: string) => Promise<SpacePaginatedResult<T>>) {
-
-  }
-
-  [Symbol.asyncIterator](): AsyncIterator<T[]> {
-    return new PaginatedIterator(this.nextPage)
-  }
-
-  static fromGetUsingNext<T>(http: SpaceHttp, basePath: string): PaginatedIterable<T> {
-    return this.fromUsing(http, basePath, 'next')
-  }
-
-  static fromGetUsingSkip<T>(http: SpaceHttp, basePath: string): PaginatedIterable<T> {
-    return this.fromUsing(http, basePath, '$skip')
-  }
-
-  private static fromUsing<T>(http: SpaceHttp, basePath: string, parameter: string): PaginatedIterable<T> {
-    const hasQuery = basePath.includes('?')
-
-    return new PaginatedIterable<T>(async (next?: string) => {
-      logger.debug(`SPACE: iterating over ${basePath} with next=${next}`)
-
-      let path = basePath
-      if (next) {
-        if (hasQuery) {
-          path += `&${parameter}=${next}`
-        } else {
-          path += `?${parameter}=${next}`
-        }
-      }
-
-      const result = await http.getJson<SpacePaginatedResult<T>>(path)
-      logger.debug(`SPACE: from ${path} and next ${next} got ${JSON.stringify(result.body.data)}`)
-
-      return result.body
-    })
-  }
-
-  async findFirst(predicate: (value: T) => boolean): Promise<T | undefined> {
-    return await this.findFirstAsync(it => Promise.resolve(predicate(it)))
-  }
-
-  async findFirstAsync(predicate: (value: T) => Promise<boolean>): Promise<T | undefined> {
-    for await (const page of this) {
-      for (const element of page) {
-        if (await predicate(element)) {
-          return element
-        }
-      }
-    }
-  }
-
-  async flatMapNotNull<R>(mapper: (value: T) => Promise<R | undefined>, limit?: number): Promise<R[]> {
-    const result: R[] = []
-
-    for await (const page of this) {
-      for (const element of page) {
-        const mapped = await mapper(element)
-        if (mapped) {
-          result.push(mapped)
-        }
-
-        if (limit && result.length >= limit) {
-          return result
-        }
-      }
-    }
-
-    return result
-  }
-
-
-  all(): Promise<T[]> {
-    return this.flatMapNotNull(it => Promise.resolve(it))
-  }
-}
-
-class PaginatedIterator<T> implements AsyncIterator<T[]> {
-
-  private currentPage?: string = undefined
-
-  constructor(private nextPage: (next?: string) => Promise<SpacePaginatedResult<T>>) {
-
-  }
-
-  async next(...args: [] | [undefined]): Promise<IteratorResult<T[]>> {
-    const result = await this.nextPage(this.currentPage)
-    const done = result.totalCount?.toString() === result.next
-    this.currentPage = result.next
-    return Promise.resolve({value: result.data, done})
-  }
-}

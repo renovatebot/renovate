@@ -1,7 +1,5 @@
-export interface SpacePaginatedResult<T> {
-  next: string;
-  totalCount?: number;
-  data: T[];
+export interface SpacePaginatedResult {
+
 }
 
 export interface SpaceRepositoryBasicInfo {

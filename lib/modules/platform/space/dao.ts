@@ -236,7 +236,7 @@ export class SpaceDao {
 
     const review = await this.client.getCodeReviewByCodeReviewNumber(projectKey, codeReviewNumber)
     // TODO: change it to accept a predicate
-    const messages = await this.client.findMergeRequestMessages(review.id, 50, 'desc')
+    const messages = await this.client.findCodeReviewMessages(review.id, 50, 'desc')
     for (const message of messages) {
       if (message.externalId === topic && message.text === comment) {
         logger.debug(`SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment}): message exists, doing nothing`)
@@ -252,7 +252,7 @@ export class SpaceDao {
     logger.debug(`SPACE: ensureCommentRemoval(${projectKey}, ${codeReviewNumber}, ${topic}, ${content})`)
 
     const review = await this.client.getCodeReviewByCodeReviewNumber(projectKey, codeReviewNumber)
-    const messages = await this.client.findMergeRequestMessages(review.id, 50, 'desc')
+    const messages = await this.client.findCodeReviewMessages(review.id, 50, 'desc')
 
     let foundMessage: SpaceChannelItemRecord | undefined = undefined
     for (const message of messages) {
@@ -301,7 +301,7 @@ export class SpaceDao {
 
   private async findMergeRequestBody(codeReviewId: string): Promise<string | undefined> {
     logger.debug(`SPACE: searching for PR body in ${codeReviewId}`)
-    const messages = await this.client.findMergeRequestMessages(codeReviewId, 1, 'asc')
+    const messages = await this.client.findCodeReviewMessages(codeReviewId, 1, 'asc')
     if (messages.length === 0) {
       logger.debug(`SPACE: found no messages in PR ${codeReviewId}`)
       return undefined
