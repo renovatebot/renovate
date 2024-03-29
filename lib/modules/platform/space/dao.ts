@@ -1,6 +1,6 @@
 import type {MergeStrategy} from "../../../config/types";
 import {logger} from "../../../logger";
-import type {PrState} from "../../../types";
+import type {BranchStatus, PrState} from "../../../types";
 import {hashBody} from "../pr-body";
 import type {CreatePRConfig, FindPRConfig, Pr, UpdatePrConfig} from "../types";
 import type {SpaceClient} from "./client";
@@ -152,7 +152,61 @@ export class SpaceDao {
     return await this.client.getCodeReviewByCodeReviewId(projectKey, review.id)
   }
 
-  async findLatestJobExecutions(projectKey: string, repository: string, branch: string): Promise<SpaceJobExecutionDTO[]> {
+  async mergeMergeRequest(projectKey: string, codeReviewNumber: number, strategy: MergeStrategy, deleteSourceBranch: boolean): Promise<void> {
+    logger.debug(`SPACE mergeMergeRequest(${projectKey}, ${codeReviewNumber}, ${strategy}, ${deleteSourceBranch})`)
+
+    switch (strategy) {
+      case 'auto':
+      case 'merge-commit':
+        await this.client.mergeMergeRequest(projectKey, codeReviewNumber, 'NO_FF', deleteSourceBranch)
+        break
+      case 'fast-forward':
+        await this.client.mergeMergeRequest(projectKey, codeReviewNumber, 'FF', deleteSourceBranch)
+        break
+      case 'rebase':
+        await this.client.rebaseMergeRequest(projectKey, codeReviewNumber, 'FF', null, deleteSourceBranch)
+        break
+      case 'squash':
+        // TODO: figure out squash message
+        await this.client.rebaseMergeRequest(projectKey, codeReviewNumber, 'NO_FF', 'squash??', deleteSourceBranch)
+        break
+    }
+  }
+
+  async findBranchStatus(projectKey: string, repository: string, branch: string): Promise<BranchStatus> {
+    logger.debug(`SPACE findBranchStatus(${projectKey}, ${repository}, ${branch})`);
+
+    const executions = await this.findLatestJobExecutions(projectKey, repository, branch)
+    if (executions.length === 0) {
+      logger.debug(`SPACE getBranchStatus(${branch}): no executions found, setting status to yellow`)
+      return 'yellow'
+    }
+
+    const branchStatuses = executions.map<BranchStatus>((execution) => {
+      switch (execution.status) {
+        case 'FINISHED':
+          return 'green'
+        case "FAILED":
+        case "TERMINATED":
+          return 'red'
+        default:
+          return 'yellow'
+      }
+    });
+
+    if (branchStatuses.includes('red')) {
+      logger.debug(`SPACE: findBranchStatus: status is 'red'`)
+      return 'red'
+    } else if (branchStatuses.includes('yellow')) {
+      logger.debug(`SPACE: findBranchStatus: status is 'yellow'`)
+      return 'yellow';
+    } else {
+      logger.debug(`SPACE: findBranchStatus: status is 'green'`)
+      return 'green'
+    }
+  }
+
+  private async findLatestJobExecutions(projectKey: string, repository: string, branch: string): Promise<SpaceJobExecutionDTO[]> {
     logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch})`)
 
     const allRepositoryHead = await this.client.getRepositoryHeads(projectKey, repository)
@@ -174,27 +228,6 @@ export class SpaceDao {
     logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}): total executions ${result.length}`)
 
     return result
-  }
-
-  async mergeMergeRequest(projectKey: string, codeReviewNumber: number, strategy: MergeStrategy, deleteSourceBranch: boolean): Promise<void> {
-    logger.debug(`SPACE mergeMergeRequest(${projectKey}, ${codeReviewNumber}, ${strategy}, ${deleteSourceBranch})`)
-
-    switch (strategy) {
-      case 'auto':
-      case 'merge-commit':
-        await this.client.mergeMergeRequest(projectKey, codeReviewNumber, 'NO_FF', deleteSourceBranch)
-        break
-      case 'fast-forward':
-        await this.client.mergeMergeRequest(projectKey, codeReviewNumber, 'FF', deleteSourceBranch)
-        break
-      case 'rebase':
-        await this.client.rebaseMergeRequest(projectKey, codeReviewNumber, 'FF', null, deleteSourceBranch)
-        break
-      case 'squash':
-        // TODO: figure out squash message
-        await this.client.rebaseMergeRequest(projectKey, codeReviewNumber, 'NO_FF', 'squash??', deleteSourceBranch)
-        break
-    }
   }
 
   private async findMergeRequestBody(codeReviewId: string): Promise<string | undefined> {

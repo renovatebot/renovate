@@ -159,32 +159,7 @@ export async function getBranchStatus(
   branchName: string,
 ): Promise<BranchStatus> {
   logger.debug(`SPACE getBranchStatus(${branchName})`);
-
-  const executions = await dao.findLatestJobExecutions(repoConfig.projectKey!, repoConfig.repository!, branchName)
-  if (executions.length === 0) {
-    logger.debug(`SPACE getBranchStatus(${branchName}): no executions found, setting status to yellow`)
-    return 'yellow'
-  }
-
-  const branchStatuses = executions.map<BranchStatus>((execution) => {
-    switch (execution.status) {
-      case 'FINISHED':
-        return 'green'
-      case "FAILED":
-      case "TERMINATED":
-        return 'red'
-      default:
-        return 'yellow'
-    }
-  });
-
-  if (branchStatuses.includes('red')) {
-    return 'red'
-  } else if (branchStatuses.includes('yellow')) {
-    return 'yellow';
-  } else {
-    return 'green'
-  }
+  return await dao.findBranchStatus(repoConfig.projectKey!, repoConfig.repository!, branchName)
 }
 
 /**
