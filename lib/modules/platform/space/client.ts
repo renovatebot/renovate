@@ -14,7 +14,8 @@ import type {
   SpaceChannelItemRecord,
   SpaceChannelMessagesList,
   SpaceCodeReviewBasicInfo,
-  SpaceCodeReviewCreateRequest, SpaceCodeReviewParticipantRole,
+  SpaceCodeReviewCreateRequest,
+  SpaceCodeReviewParticipantRole,
   SpaceFileContent,
   SpaceJobDTO,
   SpaceJobExecutionDTO,
@@ -60,10 +61,13 @@ export class SpaceClient {
     return repoInfo.body;
   }
 
+  // finding messages by code review number is not supported yet
   async findMergeRequestMessages(codeReviewId: string, limit: number, order: 'asc' | 'desc'): Promise<SpaceChannelItemRecord[]> {
     logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId}, limit=${limit}, order=${order}`)
 
     const apiOrder = order === 'asc' ? 'FromOldestToNewest' : 'FromNewestToOldest'
+
+    // TODO: add pagination
     const channelMessages = await this.spaceHttp.getJson<SpaceChannelMessagesList>(`/api/http/chats/messages?channel=codeReview:id:${codeReviewId}&sorting=${apiOrder}&batchSize=${limit}`)
 
     const result: SpaceChannelItemRecord[] = []
@@ -78,6 +82,23 @@ export class SpaceClient {
 
     logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} found ${result.length} messages`)
     return result
+  }
+
+  async addCodeReviewComment(codeReviewId: string, comment: string): Promise<void> {
+    logger.debug(`SPACE addCodeReviewComment(${codeReviewId}, ${comment})`)
+
+    await this.spaceHttp.postJson(
+      `/api/http/chats/messages/send-message`,
+      {
+        body: {
+          channel: `codeReview:id:${codeReviewId}`,
+          content: {
+            className: "ChatMessage.Text",
+            text: comment
+          }
+        }
+      }
+    )
   }
 
   async findMergeRequests(
@@ -234,9 +255,6 @@ export class SpaceClient {
       {body: {role}}
     )
   }
-
-
-
 
 
   async getProjectInfo(repository: string): Promise<GerritProjectInfo> {

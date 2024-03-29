@@ -184,16 +184,11 @@ export async function addAssignees(
 export async function ensureComment(
   ensureComment: EnsureCommentConfig,
 ): Promise<boolean> {
-  logger.debug(
-    `ensureComment(${ensureComment.number}, ${ensureComment.topic!}, ${
-      ensureComment.content
-    })`,
+  logger.debug(`SPACE ensureComment(${ensureComment.number}, ${ensureComment.topic!}, ${ensureComment.content})`,
   );
-  await client.addMessageIfNotAlreadyExists(
-    ensureComment.number,
-    ensureComment.content,
-    ensureComment.topic ?? undefined,
-  );
+
+  // there is no concept of a topic for a comment
+  await dao.ensureComment(repoConfig.projectKey!, ensureComment.number, ensureComment.content)
   return true;
 }
 

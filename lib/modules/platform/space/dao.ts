@@ -230,6 +230,23 @@ export class SpaceDao {
     }
   }
 
+  async ensureComment(projectKey: string, codeReviewNumber: number, comment: string): Promise<void> {
+    logger.debug(`SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment})`)
+
+    const review = await this.client.getCodeReviewByCodeReviewNumber(projectKey, codeReviewNumber)
+    // TODO: change it to accept a predicate
+    const messages = await this.client.findMergeRequestMessages(review.id, 50, 'desc')
+    for (const message of messages) {
+      if (message.text === comment) {
+        logger.debug(`SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment}): message exists, doing nothing`)
+        return Promise.resolve()
+      }
+    }
+
+    logger.debug(`SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment}): message wasn't found, creating new one`)
+    await this.client.addCodeReviewComment(review.id, comment)
+  }
+
   private async findLatestJobExecutions(projectKey: string, repository: string, branch: string): Promise<SpaceJobExecutionDTO[]> {
     logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch})`)
 
