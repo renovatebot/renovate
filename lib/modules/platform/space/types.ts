@@ -1,16 +1,3 @@
-import type {FindPRConfig} from '../types';
-
-export interface GerritFindPRConfig extends FindPRConfig {
-  label?: string;
-}
-
-/**
- * The Interfaces for the Gerrit API Responses ({@link https://gerrit-review.googlesource.com/Documentation/rest-api.html | REST-API})
- * minimized to only needed properties.
- *
- * @packageDocumentation
- */
-
 export interface SpacePaginatedResult<T> {
   next: string;
   totalCount?: number;
@@ -21,22 +8,6 @@ export interface SpaceRepositoryBasicInfo {
   projectKey: string;
   repository: string;
   starred: boolean;
-}
-
-export interface SpaceProject {
-  id: string;
-  key: SpaceProjectKey;
-  name: string;
-  _private: boolean;
-  description?: string;
-  icon?: string;
-  latestRepositoryActivity?: Date;
-  createdAt?: Date;
-  archived: boolean;
-}
-
-export interface SpaceProjectKey {
-  key: string;
 }
 
 export interface SpaceRepositoryDetails {
@@ -68,7 +39,9 @@ export type CodeReviewClassName = 'MergeRequestRecord' | 'CommitSetReviewRecord'
 
 export interface SpaceMergeRequestRecord {
   id: string;
-  project: SpaceProjectKey;
+  project: {
+    key: string;
+  };
   projectId: string;
   number: number;
   title: string;
@@ -180,7 +153,20 @@ export interface SpaceBranchInfo {
   ref: string;
 }
 
-export type SpaceExecutionStatus = 'SCHEDULED' | 'PENDING' | 'READY_TO_START' | 'RUNNING' | 'FINISHING' | 'FINISHED' | 'TERMINATING' | 'TERMINATED' | 'HIBERNATING' | 'HIBERNATED' | 'RESTARTING' | 'FAILED' | 'SKIPPED';
+export type SpaceExecutionStatus =
+  'SCHEDULED'
+  | 'PENDING'
+  | 'READY_TO_START'
+  | 'RUNNING'
+  | 'FINISHING'
+  | 'FINISHED'
+  | 'TERMINATING'
+  | 'TERMINATED'
+  | 'HIBERNATING'
+  | 'HIBERNATED'
+  | 'RESTARTING'
+  | 'FAILED'
+  | 'SKIPPED';
 
 export interface SpaceFileContent {
   type: 'TEXT' | 'LARGE' | 'LINK' | 'IMAGE' | 'BINARY_OTHER';
@@ -203,84 +189,3 @@ export interface CodeLine {
 
 export type SpaceCodeReviewParticipantRole = 'Reviewer' | 'Author' | 'Watcher';
 
-
-export interface GerritProjectInfo {
-  id: string;
-  name: string;
-  state?: 'ACTIVE' | 'READ_ONLY' | 'HIDDEN';
-  labels?: Record<string, GerritLabelTypeInfo>;
-}
-
-export interface GerritLabelTypeInfo {
-  values: Record<number, string>;
-  default_value: number;
-}
-
-export interface GerritBranchInfo {
-  ref: string;
-  revision: string;
-}
-
-export type GerritChangeStatus = 'NEW' | 'MERGED' | 'ABANDONED';
-
-export type GerritReviewersType = 'REVIEWER' | 'CC' | 'REMOVED';
-
-export interface GerritChange {
-  branch: string;
-  hashtags?: string[];
-  change_id: string;
-  subject: string;
-  status: GerritChangeStatus;
-  submittable?: boolean;
-  _number: number;
-  labels?: Record<string, GerritLabelInfo>;
-  reviewers?: Record<GerritReviewersType, GerritAccountInfo[]>;
-  messages?: GerritChangeMessageInfo[];
-  current_revision?: string;
-  /**
-   * All patch sets of this change as a map that maps the commit ID of the patch set to a RevisionInfo entity.
-   */
-  revisions?: Record<string, GerritRevisionInfo>;
-  problems: unknown[];
-}
-
-export interface GerritRevisionInfo {
-  uploader: GerritAccountInfo;
-  /**
-   * The Git reference for the patch set.
-   */
-  ref: string;
-  actions?: Record<string, GerritActionInfo>;
-}
-
-export interface GerritChangeMessageInfo {
-  id: string;
-  message: string;
-  tag?: string;
-}
-
-export interface GerritLabelInfo {
-  approved?: GerritAccountInfo;
-  rejected?: GerritAccountInfo;
-}
-
-export interface GerritActionInfo {
-  method?: string;
-  enabled?: boolean;
-}
-
-export interface GerritAccountInfo {
-  _account_id: number;
-  username?: string;
-}
-
-export interface GerritMergeableInfo {
-  submit_type:
-    | 'MERGE_IF_NECESSARY'
-    | 'FAST_FORWARD_ONLY'
-    | 'REBASE_IF_NECESSARY'
-    | 'REBASE_ALWAYS'
-    | 'MERGE_ALWAYS'
-    | 'CHERRY_PICK';
-  mergeable: boolean;
-}
