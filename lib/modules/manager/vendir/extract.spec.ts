@@ -78,6 +78,12 @@ describe('modules/manager/vendir/extract', () => {
             packageName: 'https://github.com/test/test',
             datasource: 'git-refs',
           },
+          {
+            currentValue: '7.10.1',
+            depName: 'test/test',
+            packageName: 'test/test',
+            datasource: 'github-releases',
+          },
         ],
       });
     });

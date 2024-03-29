@@ -58,3 +58,20 @@ directories:
         depth: 1
         ...
 ```
+
+### GithubRelease
+
+Renovates supporting explicit tags in for github releases in vendir.yml
+
+```yaml title="Example github vendir.yml"
+directories:
+  - path: config/_ytt_lib
+    contents:
+      path: github.com/cloudfoundry/cf-k8s-networking
+      githubRelease:
+        # slug for repository (org/repo) (required)
+        slug: k14s/kapp-controller
+        # use release tag (optional)
+        # optional if tagSelection is specified (available in v0.22.0+)
+        tag: v0.1.0
+```
