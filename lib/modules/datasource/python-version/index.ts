@@ -82,7 +82,7 @@ export class PythonVersionDatasource extends Datasource {
       result.releases.push(
         ...response.body
           .filter((release) => release.isStable)
-          .filter((release) => pythonPrebuildVersions?.has(release.version)),
+          .filter((release) => pythonPrebuildVersions.has(release.version)),
       );
     } catch (err) {
       this.handleGenericErrors(err);
