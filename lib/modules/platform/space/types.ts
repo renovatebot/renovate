@@ -182,6 +182,25 @@ export interface SpaceBranchInfo {
 
 export type SpaceExecutionStatus = 'SCHEDULED' | 'PENDING' | 'READY_TO_START' | 'RUNNING' | 'FINISHING' | 'FINISHED' | 'TERMINATING' | 'TERMINATED' | 'HIBERNATING' | 'HIBERNATED' | 'RESTARTING' | 'FAILED' | 'SKIPPED';
 
+export interface SpaceFileContent {
+  type: 'TEXT' | 'LARGE' | 'LINK' | 'IMAGE' | 'BINARY_OTHER';
+  lineEnding?: 'CR' | 'LF' | 'CRLF';
+  bom?: {
+    name: string
+  };
+  lines: Array<CodeLine>;
+  // widgets?: Array<CodeMDWidget>;
+  // folds?: Array<CodeFold>;
+  // scopes?: Array<CodeScopeRange>;
+}
+
+export interface CodeLine {
+  text: string;
+  index?: number;
+  offset: number;
+  // syntax?: Array<SyntaxMarkup>;
+}
+
 
 export interface GerritProjectInfo {
   id: string;

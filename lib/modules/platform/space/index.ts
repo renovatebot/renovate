@@ -162,57 +162,18 @@ export async function getBranchStatus(
   return await dao.findBranchStatus(repoConfig.projectKey!, repoConfig.repository!, branchName)
 }
 
-/**
- * check the gerrit-change for the presence of the corresponding "$context" Gerrit label if configured,
- *  return 'yellow' if not configured or not set
- * @param branchName
- * @param context renovate/stability-days || ...
- */
-export async function getBranchStatusCheck(
+export function getBranchStatusCheck(
   branchName: string,
   context: string,
 ): Promise<BranchStatus | null> {
-  // if (label) {
-  //   const change = (
-  //     await client.findChanges(
-  //       repoConfig.repository!,
-  //       {branchName, state: 'open'},
-  //       true,
-  //     )
-  //   ).pop();
-  //   if (change) {
-  //     const labelRes = change.labels?.[context];
-  //     if (labelRes) {
-  //       if (labelRes.approved) {
-  //         return 'green';
-  //       }
-  //       if (labelRes.rejected) {
-  //         return 'red';
-  //       }
-  //     }
-  //   }
-  // }
-  return 'yellow';
+  // TODO: space doesn't seem to support custom "checks"
+  return Promise.resolve('yellow');
 }
 
-/**
- * Apply the branch state $context to the corresponding gerrit label (if available)
- * context === "renovate/stability-days" / "renovate/merge-confidence" and state === "green"/...
- * @param branchStatusConfig
- */
 export async function setBranchStatus(
   branchStatusConfig: BranchStatusConfig,
 ): Promise<void> {
-  // const label = repoConfig.labels[branchStatusConfig.context];
-  // const labelValue =
-  //   label && mapBranchStatusToLabel(branchStatusConfig.state, label);
-  // if (branchStatusConfig.context && labelValue) {
-  //   const pr = await getBranchPr(branchStatusConfig.branchName);
-  //   if (pr === null) {
-  //     return;
-  //   }
-  //   await client.setLabel(pr.number, branchStatusConfig.context, labelValue);
-  // }
+  // TODO: space doesn't seem to support custom "checks"
 }
 
 export function getRawFile(
@@ -220,10 +181,9 @@ export function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  const repo = repoName ?? repoConfig.repository ?? 'All-Projects';
-  const branch =
-    branchOrTag ?? (repo === repoConfig.repository ? repoConfig.head! : 'HEAD');
-  return client.getFile(repo, branch, fileName);
+  const repo = repoName ?? repoConfig.repository!;
+  const branch = branchOrTag ?? (repo === repoConfig.repository ? repoConfig.head! : 'HEAD');
+  return dao.getFileTextContent(repo, branch, fileName);
 }
 
 export async function getJsonFile(
@@ -244,21 +204,11 @@ export async function addReviewers(
   }
 }
 
-/**
- * add "CC" (only one possible)
- */
 export async function addAssignees(
   number: number,
   assignees: string[],
 ): Promise<void> {
-  if (assignees.length) {
-    if (assignees.length > 1) {
-      logger.debug(
-        `addAssignees(${number}, ${assignees.toString()}) called with more then one assignee! Gerrit only supports one assignee! Using the first from list.`,
-      );
-    }
-    await client.addAssignee(number, assignees[0]);
-  }
+  // same as a reviewer, just with role=Author
 }
 
 export async function ensureComment(

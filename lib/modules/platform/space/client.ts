@@ -15,6 +15,7 @@ import type {
   SpaceChannelMessagesList,
   SpaceCodeReviewBasicInfo,
   SpaceCodeReviewCreateRequest,
+  SpaceFileContent,
   SpaceJobDTO,
   SpaceJobExecutionDTO,
   SpaceMergeRequestRecord,
@@ -212,6 +213,24 @@ export class SpaceClient {
       {body: {rebaseMode, deleteSourceBranch, squash, squashedCommitMessage}}
     )
   }
+
+  async getFileTextContent(projectKey: string, repository: string, path: string, commit: string): Promise<string> {
+    logger.debug(`SPACE getFileTextContent(${projectKey}, ${repository}, ${commit}, ${path})`)
+
+    const fileContent = await this.spaceHttp.getJson<SpaceFileContent>(
+      `/api/http/projects/key:${projectKey}/repositories/${repository}/text-content?commit=${commit}&path=${path}`,
+    )
+    const body = fileContent.body
+    logger.debug(`SPACE getFileTextContent(${projectKey}, ${repository}, ${commit}, ${path}): got ${body.lines.length}`)
+
+    return body.lines.map(it => it.text).join("\n")
+  }
+
+
+
+
+
+
 
   async getProjectInfo(repository: string): Promise<GerritProjectInfo> {
     const projectInfo = await this.spaceHttp.getJson<GerritProjectInfo>(

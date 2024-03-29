@@ -206,6 +206,18 @@ export class SpaceDao {
     }
   }
 
+  async getFileTextContent(projectKey: string, repository: string, path: string, commit: string = 'HEAD'): Promise<string> {
+    return await this.client.getFileTextContent(projectKey, repository, path, commit)
+  }
+
+  // async addReviewers(projectKey: string, codeReviewNumber: number, usernames: string[]): Promise<void> {
+  //
+  // }
+  //
+  // async addAssignees(projectKey: string, codeReviewNumber: number, usernames: string[]): Promise<void> {
+  //
+  // }
+
   private async findLatestJobExecutions(projectKey: string, repository: string, branch: string): Promise<SpaceJobExecutionDTO[]> {
     logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch})`)
 
