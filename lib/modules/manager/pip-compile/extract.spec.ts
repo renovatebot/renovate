@@ -246,8 +246,7 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   it('return sorted package files', async () => {
-    // eslint-disable-next-line require-await,@typescript-eslint/require-await
-    fs.readLocalFile.mockImplementation(async (name): Promise<any> => {
+    fs.readLocalFile.mockImplementation((name): any => {
       if (name === '1.in') {
         return 'foo';
       } else if (name === '2.txt') {
@@ -368,8 +367,7 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   it('handles -r reference to another input file', async () => {
-    // eslint-disable-next-line require-await,@typescript-eslint/require-await
-    fs.readLocalFile.mockImplementation(async (name): Promise<any> => {
+    fs.readLocalFile.mockImplementation((name): any => {
       if (name === '1.in') {
         return 'foo';
       } else if (name === '2.txt') {
@@ -390,7 +388,6 @@ describe('modules/manager/pip-compile/extract', () => {
 
     const lockFiles = ['4.txt', '2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
-    expect(packageFiles).toBeDefined();
     expect(packageFiles?.map((p) => p.lockFiles)).toEqual([
       ['2.txt', '4.txt'],
       ['4.txt'],
@@ -398,8 +395,7 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   it('handles transitive -r references', async () => {
-    // eslint-disable-next-line require-await,@typescript-eslint/require-await
-    fs.readLocalFile.mockImplementation(async (name): Promise<any> => {
+    fs.readLocalFile.mockImplementation((name): any => {
       if (name === '1.in') {
         return 'foo';
       } else if (name === '2.txt') {
@@ -427,8 +423,7 @@ describe('modules/manager/pip-compile/extract', () => {
 
     const lockFiles = ['4.txt', '2.txt', '6.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
-    expect(packageFiles).toBeDefined();
-    expect(packageFiles?.map((p) => p.lockFiles!)).toEqual([
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([
       ['2.txt', '4.txt', '6.txt'],
       ['4.txt', '6.txt'],
       ['6.txt'],
@@ -436,8 +431,7 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   it('warns on -r reference to failed file', async () => {
-    // eslint-disable-next-line require-await,@typescript-eslint/require-await
-    fs.readLocalFile.mockImplementation(async (name): Promise<any> => {
+    fs.readLocalFile.mockImplementation((name): any => {
       if (name === 'reqs-no-headers.txt') {
         return Fixtures.get('requirementsNoHeaders.txt');
       } else if (name === '1.in') {
@@ -453,16 +447,14 @@ describe('modules/manager/pip-compile/extract', () => {
 
     const lockFiles = ['reqs-no-headers.txt', '2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
-    expect(packageFiles).toBeDefined();
-    expect(packageFiles?.map((p) => p.lockFiles!)).toEqual([['2.txt']]);
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([['2.txt']]);
     expect(logger.warn).toHaveBeenCalledWith(
       'pip-compile: 1.in references reqs-no-headers.txt which does not appear to be a requirements file managed by pip-compile',
     );
   });
 
   it('warns on -r reference to requirements file not managed by pip-compile', async () => {
-    // eslint-disable-next-line require-await,@typescript-eslint/require-await
-    fs.readLocalFile.mockImplementation(async (name): Promise<any> => {
+    fs.readLocalFile.mockImplementation((name): any => {
       if (name === '1.in') {
         return '-r unmanaged-file.txt\nfoo';
       } else if (name === '2.txt') {
@@ -476,8 +468,7 @@ describe('modules/manager/pip-compile/extract', () => {
 
     const lockFiles = ['2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
-    expect(packageFiles).toBeDefined();
-    expect(packageFiles?.map((p) => p.lockFiles!)).toEqual([['2.txt']]);
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([['2.txt']]);
     expect(logger.warn).toHaveBeenCalledWith(
       'pip-compile: 1.in references unmanaged-file.txt which does not appear to be a requirements file managed by pip-compile',
     );
