@@ -39,10 +39,6 @@ export type CodeReviewClassName = 'MergeRequestRecord' | 'CommitSetReviewRecord'
 
 export interface SpaceMergeRequestRecord {
   id: string;
-  project: {
-    key: string;
-  };
-  projectId: string;
   number: number;
   title: string;
   state: SpaceCodeReviewState;
@@ -54,15 +50,15 @@ export interface SpaceMergeRequestRecord {
   feedChannelId?: string;
   readOnly?: boolean;
   description?: string;
-  issueIds: Array<string>;
+  // issueIds: Array<string>;
 }
 
 export interface SpaceMergeRequestBranchPair {
   repositoryId?: string;
-  repository: string;
+  // repository: string;
   sourceBranch: string;
   targetBranch: string;
-  sourceBranchRef: string;
+  // sourceBranchRef: string;
   isMerged?: boolean;
   isStale?: boolean;
 }

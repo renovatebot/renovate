@@ -2,6 +2,10 @@ import {CONFIG_GIT_URL_UNAVAILABLE} from "../../../constants/error-messages";
 import {logger} from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
 import {joinUrlParts} from '../../../util/url';
+import type {SpaceCodeReviewState, SpaceMergeRequestRecord} from "./types";
+import type {Pr} from "../types";
+import {hashBody} from "../pr-body";
+import type {PrState} from "../../../types";
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
@@ -41,4 +45,40 @@ export function getSpaceRepoUrl(repository: string, endpoint: string): string {
     'using URL based on configured endpoint',
   );
   return url.toString();
+}
+
+export function mapSpaceCodeReviewDetailsToPr(details: SpaceMergeRequestRecord, body: string): Pr {
+  return {
+    number: details.number,
+    state: mapSpaceCodeReviewStateToPrState(details.state, details.canBeReopened ?? false),
+    sourceBranch: details.branchPairs[0].sourceBranch,
+    targetBranch: details.branchPairs[0].targetBranch,
+    title: details.title,
+    // TODO: add reviewers retrieval
+    // reviewers:
+    //   change.reviewers?.REVIEWER?.filter(
+    //     (reviewer) => typeof reviewer.username === 'string',
+    //   ).map((reviewer) => reviewer.username!) ?? [],
+    bodyStruct: {
+      hash: hashBody(body),
+    },
+  };
+}
+
+function mapSpaceCodeReviewStateToPrState(state: SpaceCodeReviewState, canBeReopened: boolean): PrState {
+  switch (state) {
+    case 'Opened':
+      return 'open';
+    case 'Closed':
+      if (canBeReopened) {
+        return 'closed';
+      } else {
+        return 'merged';
+      }
+    case "Deleted":
+      // should not normally reach here
+      return 'closed';
+    default:
+      return 'all'
+  }
 }
