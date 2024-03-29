@@ -23,9 +23,6 @@ import type {
   UpdatePrConfig,
 } from '../types';
 import {repoFingerprint} from '../util';
-
-import {smartTruncate} from '../utils/pr-body';
-import {readOnlyIssueBody} from '../utils/read-only-issue-body';
 import {SpaceClient} from "./client";
 import {SpaceDao} from "./dao";
 import {getSpaceRepoUrl, mapGerritChangeToPr,} from './utils';
@@ -151,29 +148,11 @@ export async function mergePr(config: MergePRConfig): Promise<boolean> {
   return true
 }
 
-/**
- * BranchStatus for Gerrit assumes that the branchName refers to a change.
- * @param branchName
- */
 export async function getBranchStatus(
   branchName: string,
 ): Promise<BranchStatus> {
   logger.debug(`SPACE getBranchStatus(${branchName})`);
   return await dao.findBranchStatus(repoConfig.projectKey!, repoConfig.repository!, branchName)
-}
-
-export function getBranchStatusCheck(
-  branchName: string,
-  context: string,
-): Promise<BranchStatus | null> {
-  // TODO: space doesn't seem to support custom "checks"
-  return Promise.resolve('yellow');
-}
-
-export async function setBranchStatus(
-  branchStatusConfig: BranchStatusConfig,
-): Promise<void> {
-  // TODO: space doesn't seem to support custom "checks"
 }
 
 export function getRawFile(
@@ -226,30 +205,31 @@ export async function ensureComment(
 }
 
 export function massageMarkdown(prBody: string): string {
-  //TODO: do more Gerrit specific replacements?
-  return smartTruncate(readOnlyIssueBody(prBody), 16384) //TODO: check the real gerrit limit (max. chars)
-    .replace(regEx(/Pull Request(s)?/g), 'Change-Request$1')
-    .replace(regEx(/\bPR(s)?\b/g), 'Change-Request$1')
-    .replace(regEx(/<\/?summary>/g), '**')
-    .replace(regEx(/<\/?details>/g), '')
-    .replace(regEx(/&#8203;/g), '') //remove zero-width-space not supported in gerrit-markdown
-    .replace(
-      'close this Change-Request unmerged.',
-      'abandon or down vote this Change-Request with -2.',
-    )
-    .replace('Branch creation', 'Change creation')
-    .replace(
-      'Close this Change-Request',
-      'Down-vote this Change-Request with -2',
-    )
+  return prBody
+    .replace(regEx(/Pull Request(s)?/g), 'Code Review$1')
+    .replace(regEx(/\bPR(s)?\b/g), 'Code Review$1')
     .replace(
       'you tick the rebase/retry checkbox',
-      'add "rebase!" at the beginning of the commit message.',
+      'rename PR to start with "rebase!"',
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
 
+// TODO: space doesn't seem to support custom "checks"
+export function getBranchStatusCheck(
+  branchName: string,
+  context: string,
+): Promise<BranchStatus | null> {
+  return Promise.resolve('yellow');
+}
+
+export async function setBranchStatus(
+  branchStatusConfig: BranchStatusConfig,
+): Promise<void> {
+}
+
+// TODO: no labels either
 export function deleteLabel(number: number, label: string): Promise<void> {
   return Promise.resolve();
 }
