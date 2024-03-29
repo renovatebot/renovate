@@ -25,7 +25,7 @@ import type {
 import {repoFingerprint} from '../util';
 import {SpaceClient} from "./client";
 import {SpaceDao} from "./dao";
-import {getSpaceRepoUrl, mapGerritChangeToPr,} from './utils';
+import {getSpaceRepoUrl,} from './utils';
 
 export const id = 'space';
 
@@ -102,20 +102,13 @@ export async function findPr(
 ): Promise<Pr | null> {
   logger.debug(`SPACE findPr(${JSON.stringify(findPRConfig)}, ${refreshCache})`);
   // TODO: add support for refreshCache
+  // why there are 2 refreshCache parameters: one in FindPRConfig, another is a parameter
   return await dao.findMergeRequest(repoConfig.projectKey!, repoConfig.repository!, findPRConfig)
 }
 
 export async function getPr(number: number): Promise<Pr | null> {
   logger.debug(`SPACE getPr(${number})`);
-  try {
-    const change = await client.getChange(number);
-    return mapGerritChangeToPr(change);
-  } catch (err) {
-    if (err.statusCode === 404) {
-      return null;
-    }
-    throw err;
-  }
+  return await dao.getPr(repoConfig.projectKey!, number)
 }
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {

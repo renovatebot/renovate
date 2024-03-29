@@ -48,7 +48,7 @@ export class SpaceDao {
     const result: Pr[] = []
     for (const mergeRequest of mergeRequests) {
       const body = await this.findMergeRequestBody(mergeRequest.id)
-      result.push(mapSpaceCodeReviewDetailsToPr(mergeRequest, body ?? 'no pr body'))
+      result.push(mapSpaceCodeReviewDetailsToPr(mergeRequest, body ?? DEFAULT_PR_BODY))
     }
 
     logger.debug(`SPACE: found ${result.length} PRs`)
@@ -107,10 +107,16 @@ export class SpaceDao {
     logger.debug(`SPACE: found ${mergeRequest ? 'a' : 'no'} PR`)
 
     if (mergeRequest) {
-      return mapSpaceCodeReviewDetailsToPr(mergeRequest, await this.findMergeRequestBody(mergeRequest.id) ?? 'no pr body')
+      return mapSpaceCodeReviewDetailsToPr(mergeRequest, await this.findMergeRequestBody(mergeRequest.id) ?? DEFAULT_PR_BODY)
     } else {
       return null
     }
+  }
+
+  async getPr(projectKey: string, codeReviewNumber: number): Promise<Pr> {
+    logger.debug(`SPACE getPr(${projectKey}, ${codeReviewNumber})`)
+    const review = await this.client.getCodeReviewByCodeReviewNumber(projectKey, codeReviewNumber)
+    return mapSpaceCodeReviewDetailsToPr(review, await this.findMergeRequestBody(review.id) ?? DEFAULT_PR_BODY)
   }
 
   async findDefaultBranch(projectKey: string, repository: string): Promise<string> {
@@ -298,3 +304,5 @@ function mapSpaceCodeReviewStateToPrState(
   }
   return 'all';
 }
+
+const DEFAULT_PR_BODY = 'no pr body'
