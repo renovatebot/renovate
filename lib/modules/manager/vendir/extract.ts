@@ -65,13 +65,11 @@ export function extractGitSource(
 export function extractGithubReleaseSource(
   githubRelease: GithubReleaseDefinition,
 ): PackageDependency | null {
-  const registryUrl = 'https://github.com/' + githubRelease.slug;
   return {
     depName: githubRelease.slug,
     packageName: githubRelease.slug,
     depType: 'GithubRelease',
     currentValue: githubRelease.tag,
-    registryUrls: [registryUrl],
     datasource: GithubReleasesDatasource.id,
   };
 }
