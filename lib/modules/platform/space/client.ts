@@ -16,6 +16,7 @@ import type {
   SpaceRepositoryDetails,
 } from './types';
 import {PaginatedIterable} from "./paginated-iterator";
+import {flatMapNotNull} from "./utils";
 
 export class SpaceClient {
 
@@ -200,7 +201,7 @@ export class SpaceClient {
       this.spaceHttp, `/api/http/projects/key:${projectKey}/automation/graph-executions?jobId=${jobId}&branchFilter=${branch}`
     )
 
-    const executions = await iterable.flatMapNotNull(dto => {
+    const executions = await flatMapNotNull(iterable, dto => {
       if (predicate(dto)) {
         return Promise.resolve(dto)
       } else {

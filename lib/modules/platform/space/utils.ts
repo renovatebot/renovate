@@ -7,6 +7,7 @@ import type {Pr} from "../types";
 import {hashBody} from "../pr-body";
 import type {PrState} from "../../../types";
 
+
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
 export function getSpaceRepoUrl(repository: string, endpoint: string): string {
@@ -41,10 +42,45 @@ export function getSpaceRepoUrl(repository: string, endpoint: string): string {
   );
 
   logger.debug(
-    { url: url.toString() },
+    {url: url.toString()},
     'using URL based on configured endpoint',
   );
   return url.toString();
+}
+
+export async function findFirst<T>(iterable: AsyncIterable<T[]>, predicate: (value: T) => Promise<boolean>): Promise<T | undefined> {
+  const result = await flatMapNotNull(iterable, async it => {
+    if (await predicate(it)) {
+      return it
+    } else {
+      return undefined
+    }
+  }, 1)
+
+  return result.pop()
+}
+
+export async function all<T>(iterable: AsyncIterable<T[]>): Promise<T[]> {
+  return await flatMapNotNull(iterable, it => Promise.resolve(it))
+}
+
+export async function flatMapNotNull<T, R>(iterable: AsyncIterable<T[]>, mapper: (value: T) => Promise<R | undefined>, limit?: number): Promise<R[]> {
+  const result: R[] = []
+
+  for await (const page of iterable) {
+    for (const element of page) {
+      const mapped = await mapper(element)
+      if (mapped) {
+        result.push(mapped)
+      }
+
+      if (limit && result.length >= limit) {
+        return result
+      }
+    }
+  }
+
+  return result
 }
 
 export function mapSpaceCodeReviewDetailsToPr(details: SpaceMergeRequestRecord, body: string): Pr {

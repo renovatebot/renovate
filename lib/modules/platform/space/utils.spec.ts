@@ -4,18 +4,20 @@ import * as _hostRules from '../../../util/host-rules';
 import {hashBody} from '../pr-body';
 import type {SpaceMergeRequestRecord,} from './types';
 import * as utils from './utils';
+import {flatMapNotNull} from './utils';
 
 jest.mock('../../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
 describe('modules/platform/space/utils', () => {
+
   describe('getSpaceRepoUrl()', () => {
     const repoName = 'main/my-repo'
     const orgName = 'my-org'
     const endpoint = `${orgName}.jetbrains.space`
-    it('create a git url with token', () => {
 
+    it('create a git url with token', () => {
       const token = 'my-secret-token'
       hostRules.find.mockReturnValue({
         token
@@ -74,4 +76,40 @@ describe('modules/platform/space/utils', () => {
       });
     });
   });
+
+  describe('flatMapNotNull()', () => {
+    it('should filter out nulls and map non-nulls', async () => {
+      const valueToSkip = 'valueToSkip'
+      const valueToKeep1 = 'valueToKeep1'
+      const valueToKeep2 = 'valueToKeep2'
+
+      const prefix = "my-prefix-"
+
+      const iterable = new TestIterable([[valueToSkip], [valueToKeep1], [valueToKeep2]])
+      const result = await flatMapNotNull(iterable, it => {
+        if (it === valueToSkip) {
+          return Promise.resolve(undefined)
+        } else {
+          return Promise.resolve(prefix + it)
+        }
+      })
+
+      expect(result).toEqual([prefix + valueToKeep1, prefix + valueToKeep2])
+    });
+  })
 });
+
+class TestIterable implements AsyncIterable<string[]> {
+  constructor(private data: string[][]) {
+  }
+
+  [Symbol.asyncIterator](): AsyncIterator<string[]> {
+    const it = this.data.values()
+    return {
+      next(): Promise<IteratorResult<string[]>> {
+        return Promise.resolve(it.next())
+      }
+    }
+  }
+
+}

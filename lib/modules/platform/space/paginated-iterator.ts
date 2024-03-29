@@ -54,44 +54,6 @@ export class PaginatedIterable<T> implements AsyncIterable<T[]> {
       return result.body
     }, config)
   }
-
-  async findFirst(predicate: (value: T) => boolean): Promise<T | undefined> {
-    return await this.findFirstAsync(it => Promise.resolve(predicate(it)))
-  }
-
-  async findFirstAsync(predicate: (value: T) => Promise<boolean>): Promise<T | undefined> {
-    for await (const page of this) {
-      for (const element of page) {
-        if (await predicate(element)) {
-          return element
-        }
-      }
-    }
-  }
-
-  async flatMapNotNull<R>(mapper: (value: T) => Promise<R | undefined>, limit?: number): Promise<R[]> {
-    const result: R[] = []
-
-    for await (const page of this) {
-      for (const element of page) {
-        const mapped = await mapper(element)
-        if (mapped) {
-          result.push(mapped)
-        }
-
-        if (limit && result.length >= limit) {
-          return result
-        }
-      }
-    }
-
-    return result
-  }
-
-
-  all(): Promise<T[]> {
-    return this.flatMapNotNull(it => Promise.resolve(it))
-  }
 }
 
 class PaginatedIterator<T> implements AsyncIterator<T[]> {
