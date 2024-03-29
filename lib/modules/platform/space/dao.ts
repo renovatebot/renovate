@@ -6,8 +6,10 @@ import type {CreatePRConfig, FindPRConfig, Pr, UpdatePrConfig} from "../types";
 import type {SpaceClient} from "./client";
 import type {
   CodeReviewStateFilter,
+  SpaceChannelItemRecord,
   SpaceCodeReviewCreateRequest,
-  SpaceCodeReviewState, SpaceJobExecutionDTO,
+  SpaceCodeReviewState,
+  SpaceJobExecutionDTO,
   SpaceMergeRequestRecord,
   SpaceRepositoryDetails
 } from "./types";
@@ -230,21 +232,48 @@ export class SpaceDao {
     }
   }
 
-  async ensureComment(projectKey: string, codeReviewNumber: number, comment: string): Promise<void> {
+  async ensureComment(projectKey: string, codeReviewNumber: number, topic: string | null, comment: string): Promise<void> {
     logger.debug(`SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment})`)
 
     const review = await this.client.getCodeReviewByCodeReviewNumber(projectKey, codeReviewNumber)
     // TODO: change it to accept a predicate
     const messages = await this.client.findMergeRequestMessages(review.id, 50, 'desc')
     for (const message of messages) {
-      if (message.text === comment) {
+      if (message.externalId === topic && message.text === comment) {
         logger.debug(`SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment}): message exists, doing nothing`)
         return Promise.resolve()
       }
     }
 
     logger.debug(`SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment}): message wasn't found, creating new one`)
-    await this.client.addCodeReviewComment(review.id, comment)
+    await this.client.addCodeReviewComment(review.id, comment, topic)
+  }
+
+  async ensureCommentRemoval(projectKey: string, codeReviewNumber: number, topic: string | null, content: string | null): Promise<void> {
+    logger.debug(`SPACE: ensureCommentRemoval(${projectKey}, ${codeReviewNumber}, ${topic}, ${content})`)
+
+    const review = await this.client.getCodeReviewByCodeReviewNumber(projectKey, codeReviewNumber)
+    const messages = await this.client.findMergeRequestMessages(review.id, 50, 'desc')
+
+    let foundMessage: SpaceChannelItemRecord | undefined = undefined
+    for (const message of messages) {
+      if (topic && message.externalId === topic) {
+        foundMessage = message
+        break
+      }
+
+      if (content && message.text === content) {
+        foundMessage = message
+        break
+      }
+    }
+
+    if (!foundMessage) {
+      logger.debug(`SPACE: ensureCommentRemoval(${projectKey}, ${codeReviewNumber}, ${topic}, ${content}): matching message not found`)
+      return Promise.resolve()
+    }
+
+    await this.client.deleteCodeReviewComment(review.id, foundMessage.id)
   }
 
   private async findLatestJobExecutions(projectKey: string, repository: string, branch: string): Promise<SpaceJobExecutionDTO[]> {

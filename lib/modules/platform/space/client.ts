@@ -84,7 +84,7 @@ export class SpaceClient {
     return result
   }
 
-  async addCodeReviewComment(codeReviewId: string, comment: string): Promise<void> {
+  async addCodeReviewComment(codeReviewId: string, comment: string, externalId: string | null): Promise<void> {
     logger.debug(`SPACE addCodeReviewComment(${codeReviewId}, ${comment})`)
 
     await this.spaceHttp.postJson(
@@ -95,7 +95,22 @@ export class SpaceClient {
           content: {
             className: "ChatMessage.Text",
             text: comment
-          }
+          },
+          externalId
+        }
+      }
+    )
+  }
+
+  async deleteCodeReviewComment(codeReviewId: string, messageId: string): Promise<void> {
+    logger.debug(`SPACE deleteCodeReviewCommentByExternalId(${codeReviewId}, ${messageId})`)
+
+    await this.spaceHttp.postJson(
+      `/api/http/chats/messages/delete-message`,
+      {
+        body: {
+          channel: `codeReview:id:${codeReviewId}`,
+          id: `id:${messageId}`
         }
       }
     )

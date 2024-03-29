@@ -188,8 +188,27 @@ export async function ensureComment(
   );
 
   // there is no concept of a topic for a comment
-  await dao.ensureComment(repoConfig.projectKey!, ensureComment.number, ensureComment.content)
+  await dao.ensureComment(repoConfig.projectKey!, ensureComment.number, ensureComment.topic, ensureComment.content)
   return true;
+}
+
+export async function ensureCommentRemoval(
+  ensureCommentRemoval:
+    | EnsureCommentRemovalConfigByTopic
+    | EnsureCommentRemovalConfigByContent,
+): Promise<void> {
+  logger.debug(`SPACE ensureCommentRemoval(${JSON.stringify(ensureCommentRemoval)})`)
+
+  let topic: string | null = null
+  let content: string | null = null
+
+  if (ensureCommentRemoval.type === 'by-topic') {
+    topic = ensureCommentRemoval.topic;
+  } else {
+    content = ensureCommentRemoval.content;
+  }
+
+  await dao.ensureCommentRemoval(repoConfig.projectKey!, ensureCommentRemoval.number, topic, content)
 }
 
 export function massageMarkdown(prBody: string): string {
@@ -219,14 +238,6 @@ export async function setBranchStatus(
 
 // TODO: no labels either
 export function deleteLabel(number: number, label: string): Promise<void> {
-  return Promise.resolve();
-}
-
-export function ensureCommentRemoval(
-  ensureCommentRemoval:
-    | EnsureCommentRemovalConfigByTopic
-    | EnsureCommentRemovalConfigByContent,
-): Promise<void> {
   return Promise.resolve();
 }
 
