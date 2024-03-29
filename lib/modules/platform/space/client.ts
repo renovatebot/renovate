@@ -25,17 +25,17 @@ export class SpaceClient {
     this.spaceHttp = new SpaceHttp(baseUrl)
   }
 
-  async findRepositories(): Promise<SpaceRepositoryBasicInfo[]> {
-    logger.debug("SPACE: getRepos")
+  async getAllRepositoriesForAllProjects(): Promise<SpaceRepositoryBasicInfo[]> {
+    logger.debug("SPACE: getAllRepositoriesForAllProjects")
 
     const iterable = PaginatedIterable.fromGetUsingNext<SpaceRepositoryBasicInfo>(this.spaceHttp, '/api/http/projects/repositories')
     const repos = await iterable.all()
-    logger.debug(`SPACE: getRepos, all repos: ${JSON.stringify(repos)}`)
+    logger.debug(`SPACE: getAllRepositoriesForAllProjects, all repos: ${JSON.stringify(repos)}`)
 
     return repos
   }
 
-  async getRepositoryInfo(projectKey: string, repository: string): Promise<SpaceRepositoryDetails> {
+  async getRepository(projectKey: string, repository: string): Promise<SpaceRepositoryDetails> {
     logger.debug(`SPACE: getRepositoryInfo: repository=${repository}, projectKey=${projectKey}`);
     const repoInfo = await this.spaceHttp.getJson<SpaceRepositoryDetails>(
       `/api/http/projects/key:${projectKey}/repositories/${repository}`,
@@ -113,8 +113,8 @@ export class SpaceClient {
       repositoryQueryParam = `&repository=${config.repository}`
     }
 
-    const iterable = PaginatedIterable.fromGetUsingNext<SpaceCodeReviewBasicInfo>(
-      this.spaceHttp, `/api/http/projects/key:${projectKey}/code-reviews?state=${config.prState}${repositoryQueryParam}`
+    const iterable = PaginatedIterable.fromGetUsingSkip<SpaceCodeReviewBasicInfo>(
+      this.spaceHttp, `/api/http/projects/key:${projectKey}/code-reviews?$top=1&state=${config.prState}${repositoryQueryParam}`
     )
 
     return await iterable.flatMapNotNull(async basicReview => {
@@ -267,7 +267,7 @@ class PaginatedIterable<T> implements AsyncIterable<T[]> {
 
   }
 
-  [Symbol.asyncIterator](): AsyncIterator<T[], any, undefined> {
+  [Symbol.asyncIterator](): AsyncIterator<T[]> {
     return new PaginatedIterator(this.nextPage)
   }
 
@@ -276,7 +276,7 @@ class PaginatedIterable<T> implements AsyncIterable<T[]> {
   }
 
   static fromGetUsingSkip<T>(http: SpaceHttp, basePath: string): PaginatedIterable<T> {
-    return this.fromUsing(http, basePath, 'skip')
+    return this.fromUsing(http, basePath, '$skip')
   }
 
   private static fromUsing<T>(http: SpaceHttp, basePath: string, parameter: string): PaginatedIterable<T> {
@@ -295,7 +295,7 @@ class PaginatedIterable<T> implements AsyncIterable<T[]> {
       }
 
       const result = await http.getJson<SpacePaginatedResult<T>>(path)
-      logger.debug(`SPACE: from ${basePath} and next ${next} got ${JSON.stringify(result.body.data)}`)
+      logger.debug(`SPACE: from ${path} and next ${next} got ${JSON.stringify(result.body.data)}`)
 
       return result.body
     })
@@ -350,7 +350,7 @@ class PaginatedIterator<T> implements AsyncIterator<T[]> {
 
   async next(...args: [] | [undefined]): Promise<IteratorResult<T[]>> {
     const result = await this.nextPage(this.currentPage)
-    const done = this.currentPage === result.next
+    const done = result.totalCount?.toString() === result.next
     this.currentPage = result.next
     return Promise.resolve({value: result.data, done})
   }

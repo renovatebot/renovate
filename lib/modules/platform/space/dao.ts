@@ -18,12 +18,12 @@ export class SpaceDao {
   }
 
   async findRepositories(): Promise<string[]> {
-    const repos = await this.client.findRepositories()
+    const repos = await this.client.getAllRepositoriesForAllProjects()
     return repos.map(it => `${it.projectKey}/${it.repository}`)
   }
 
   async getRepositoryInfo(projectKey: string, repository: string): Promise<SpaceRepositoryDetails> {
-    return await this.client.getRepositoryInfo(projectKey, repository)
+    return await this.client.getRepository(projectKey, repository)
   }
 
   async createMergeRequest(projectKey: string, repository: string, config: CreatePRConfig): Promise<Pr> {
@@ -123,7 +123,7 @@ export class SpaceDao {
   async findDefaultBranch(projectKey: string, repository: string): Promise<string> {
     logger.debug(`SPACE findDefaultBranch(${projectKey}, ${repository})`)
 
-    const repoInfo = await this.client.getRepositoryInfo(projectKey, repository)
+    const repoInfo = await this.client.getRepository(projectKey, repository)
     if (repoInfo.defaultBranch) {
       const ref = repoInfo.defaultBranch.head
       const lastSlash = ref.lastIndexOf('/')

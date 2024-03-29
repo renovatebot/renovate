@@ -1,41 +1,45 @@
 import * as httpMock from '../../../../test/http-mock';
-import { partial } from '../../../../test/util';
-import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
-import { setBaseUrl } from '../../../util/http/gerrit';
-import type { FindPRConfig } from '../types';
-import { client } from './client';
-import type {
-  GerritChange,
-  GerritChangeMessageInfo,
-  GerritFindPRConfig,
-  GerritMergeableInfo,
-} from './types';
+import {SpaceClient} from "./client";
 
-const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
+
+const spaceEndpointUrl = 'https://myorg.jetbrains.space';
 const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
 
 describe('modules/platform/space/client', () => {
-  beforeAll(() => {
-    setBaseUrl(gerritEndpointUrl);
-  });
 
-  describe('getRepos()', () => {
+  const client = new SpaceClient(spaceEndpointUrl)
+
+  describe('getAllRepositoriesForAllProjects()', () => {
     it('returns repos', async () => {
       httpMock
-        .scope(gerritEndpointUrl)
-        .get('/a/projects/?type=CODE&state=ACTIVE')
+        .scope(spaceEndpointUrl)
+        .get('/api/http/projects/repositories')
         .reply(
           200,
-          gerritRestResponse({
-            repo1: { id: 'repo1', state: 'ACTIVE' },
-            repo2: { id: 'repo2', state: 'ACTIVE' },
-          }),
+          {
+            next: "2",
+            totalCount: 2,
+            data: [
+              {
+                projectKey: 'main',
+                repository: 'repo1',
+                starred: false
+              },
+              {
+                projectKey: 'main',
+                repository: 'repo2',
+                starred: false
+              }
+            ]
+          },
           jsonResultHeader,
         );
-      expect(await client.findRepositories()).toEqual(['repo1', 'repo2']);
+      expect(await client.getAllRepositoriesForAllProjects()).toEqual(['repo1', 'repo2']);
     });
   });
 
+
+  /*
   describe('getProjectInfo()', () => {
     it('inactive', async () => {
       httpMock
@@ -489,13 +493,5 @@ describe('modules/platform/space/client', () => {
         ),
       ).toBeFalse();
     });
-  });
+  });*/
 });
-
-function gerritRestResponse(body: any): any {
-  return `)]}'\n${JSON.stringify(body)}`;
-}
-
-function gerritFileResponse(content: string): any {
-  return Buffer.from(content).toString('base64');
-}
