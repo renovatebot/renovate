@@ -210,13 +210,19 @@ export class SpaceDao {
     return await this.client.getFileTextContent(projectKey, repository, path, commit)
   }
 
-  // async addReviewers(projectKey: string, codeReviewNumber: number, usernames: string[]): Promise<void> {
-  //
-  // }
-  //
-  // async addAssignees(projectKey: string, codeReviewNumber: number, usernames: string[]): Promise<void> {
-  //
-  // }
+  async addReviewers(projectKey: string, codeReviewNumber: number, usernames: string[]): Promise<void> {
+    logger.debug(`SPACE: addReviewers(${projectKey}, ${codeReviewNumber}, [${usernames.join(', ')}])`)
+    for (const username of usernames) {
+      await this.client.addReviewer(projectKey, codeReviewNumber, username, 'Reviewer')
+    }
+  }
+
+  async addAuthors(projectKey: string, codeReviewNumber: number, usernames: string[]): Promise<void> {
+    logger.debug(`SPACE: addAuthors(${projectKey}, ${codeReviewNumber}, [${usernames.join(', ')}])`)
+    for (const username of usernames) {
+      await this.client.addReviewer(projectKey, codeReviewNumber, username, 'Author')
+    }
+  }
 
   private async findLatestJobExecutions(projectKey: string, repository: string, branch: string): Promise<SpaceJobExecutionDTO[]> {
     logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch})`)

@@ -199,16 +199,14 @@ export async function addReviewers(
   number: number,
   reviewers: string[],
 ): Promise<void> {
-  for (const reviewer of reviewers) {
-    await client.addReviewer(number, reviewer);
-  }
+  await dao.addReviewers(repoConfig.projectKey!, number, reviewers)
 }
 
 export async function addAssignees(
   number: number,
   assignees: string[],
 ): Promise<void> {
-  // same as a reviewer, just with role=Author
+  await dao.addAuthors(repoConfig.projectKey!, number, assignees)
 }
 
 export async function ensureComment(

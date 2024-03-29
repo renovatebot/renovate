@@ -14,7 +14,7 @@ import type {
   SpaceChannelItemRecord,
   SpaceChannelMessagesList,
   SpaceCodeReviewBasicInfo,
-  SpaceCodeReviewCreateRequest,
+  SpaceCodeReviewCreateRequest, SpaceCodeReviewParticipantRole,
   SpaceFileContent,
   SpaceJobDTO,
   SpaceJobExecutionDTO,
@@ -226,7 +226,14 @@ export class SpaceClient {
     return body.lines.map(it => it.text).join("\n")
   }
 
+  async addReviewer(projectKey: string, codeReviewNumber: number, username: string, role: SpaceCodeReviewParticipantRole): Promise<void> {
+    logger.debug(`SPACE addReviewer(${projectKey}, ${codeReviewNumber}, ${username}, ${role})`)
 
+    await this.spaceHttp.postJson(
+      `/api/http/projects/key:${projectKey}/code-reviews/number:${codeReviewNumber}/participants/username:${username}`,
+      {body: {role}}
+    )
+  }
 
 
 
@@ -365,12 +372,6 @@ export class SpaceClient {
       `a/changes/${changeNumber}/revisions/current/review`,
       {body: {labels: {[label]: value}}},
     );
-  }
-
-  async addReviewer(changeNumber: number, reviewer: string): Promise<void> {
-    await this.spaceHttp.postJson(`a/changes/${changeNumber}/reviewers`, {
-      body: {reviewer},
-    });
   }
 
   async addAssignee(changeNumber: number, assignee: string): Promise<void> {

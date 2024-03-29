@@ -201,6 +201,8 @@ export interface CodeLine {
   // syntax?: Array<SyntaxMarkup>;
 }
 
+export type SpaceCodeReviewParticipantRole = 'Reviewer' | 'Author' | 'Watcher';
+
 
 export interface GerritProjectInfo {
   id: string;
