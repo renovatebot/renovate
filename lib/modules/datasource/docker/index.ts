@@ -3,6 +3,7 @@ import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
+import { experimentalFlagValue } from '../../../util/experimental-flags';
 import { HttpError } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
@@ -641,9 +642,8 @@ export class DockerDatasource extends Datasource {
       return null;
     }
     let page = 0;
-    const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
-      ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
-      : 20;
+    const dockerMaxPages = experimentalFlagValue('dockerMaxPages');
+    const pages = dockerMaxPages ? parseInt(dockerMaxPages, 10) : 20;
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
@@ -998,9 +998,11 @@ export class DockerDatasource extends Datasource {
         'dockerhub-error' as const,
       ).catch(getTags);
 
+    const allowDockerHubTags = is.string(
+      experimentalFlagValue('dockerHubTags'),
+    );
     const tagsResult =
-      registryHost === 'https://index.docker.io' &&
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS
+      registryHost === 'https://index.docker.io' && allowDockerHubTags
         ? getDockerHubTags()
         : getTags();
 
