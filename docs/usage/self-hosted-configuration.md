@@ -548,6 +548,25 @@ Information provided mainly in debug log level.
 Default execution timeout in minutes for child processes Renovate creates.
 If this option is not set, Renovate will fallback to 15 minutes.
 
+## experimentalFlags
+
+The `experimentalFlags` configuration option is a new feature designed to streamline the management of experimental settings within Renovate. This option replaces the use of environment variables prefixed with `RENOVATE_X_`, providing a more structured and manageable approach.
+
+Overview:
+Old Approach: Previously, users had to set experimental environment variables like `RENOVATE_X_DOCKER_MAX_PAGES`, and others.
+
+New Approach: With `experimentalFlags`, users can specify experimental settings directly within the configuration file, enhancing clarity and ease of maintenance.
+
+```js
+module.exports = {
+  experimentalFlags: ['dockerMaxPages=10'],
+};
+```
+
+Each setting can be specified in the two formats available `flagName` or `flagName=value`.
+
+Please also see [Self-Hosted Experimental Flags](./self-hosted-experimental.md) for the full list of flags supported by Renovate.
+
 ## exposeAllEnv
 
 To keep you safe, Renovate only passes a limited set of environment variables to package managers.
