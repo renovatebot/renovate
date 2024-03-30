@@ -2975,6 +2975,15 @@ const options: RenovateOptions[] = [
     default: null,
     supportedPlatforms: ['github'],
   },
+  {
+    name: 'experimentalFlags',
+    description:
+      'This option is used to specify the experimental flags which Renovate supports.',
+    type: 'array',
+    subType: 'string',
+    default: null,
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
