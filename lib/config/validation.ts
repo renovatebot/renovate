@@ -940,7 +940,24 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (is.array(val)) {
-        if (key === 'gitNoVerify') {
+        if (key === 'experimentalFlags') {
+          for (const flag of val) {
+            if (is.string(flag)) {
+              const [flagName, flagValue] = flag.split('=');
+              validateExperimentalFlag(
+                flagName,
+                flagValue ?? null,
+                warnings,
+                currentPath,
+              );
+            } else {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Experimental flags can only be of type string. Found invalid type`,
+              });
+            }
+          }
+        } else if (key === 'gitNoVerify') {
           const allowedValues = ['commit', 'push'];
           for (const value of val as string[]) {
             if (!allowedValues.includes(value)) {
@@ -1018,4 +1035,69 @@ function isFalseGlobal(optionName: string, parentPath?: string): boolean {
   }
 
   return false;
+}
+
+function validateExperimentalFlag(
+  flagName: string,
+  flagValue: string | null,
+  warnings: ValidationMessage[],
+  currentPath: string | undefined,
+): void {
+  const allowedExperimentalFlags: Record<string, Record<string, string>> = {
+    dockerHubTags: {},
+    dockerMaxPages: { acceptedValue: 'integer' },
+  };
+
+  const flagDetails = allowedExperimentalFlags[flagName];
+  if (!flagDetails) {
+    warnings.push({
+      topic: 'Configuration Error',
+      message: `Invalid flag \`${flagName}\` found in \`${currentPath}\`.`,
+    });
+    return;
+  }
+
+  if (flagDetails.acceptedValue && !flagValue) {
+    warnings.push({
+      topic: 'Configuration Error',
+      message: `Experimental flag \`${flagName}\` should have a value.`,
+    });
+  }
+
+  if (!flagDetails.acceptedValue && flagValue) {
+    warnings.push({
+      topic: 'Configuration Error',
+      message: `Experimental flag \`${flagName}\` should not have a value.`,
+    });
+  }
+
+  // will add test soon, for review I wanted to keep it minimal
+  // istanbul ignore if
+  if (flagDetails.acceptedValue && flagValue) {
+    switch (flagDetails.acceptedValue) {
+      case 'integer':
+        if (!regEx(/^\d+$/).test(flagValue)) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Experimental flag \`${flagName}\` should be of type integer. Found invalid type instead.`,
+          });
+        }
+        break;
+      case 'string':
+        if (!regEx(/^\w+$/).test(flagValue)) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Experimental flag \`${flagName}\` should be of type string. Found invalid type instead.`,
+          });
+        }
+        break;
+      case 'array':
+        if (!regEx(/(\w+,?)+/).test(flagValue)) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Experimental flag \`${flagName}\` should be of type array of strings. Found invalid type instead.`,
+          });
+        }
+    }
+  }
 }

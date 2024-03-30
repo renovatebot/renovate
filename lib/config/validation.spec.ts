@@ -1702,4 +1702,123 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
   });
+
+  describe('validate experimental flags', () => {
+    beforeEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('warns if invalid flag found', async () => {
+      const config = {
+        experimentalFlags: [
+          'invalidintegertag=10',
+          'invalidtag',
+          'invalidstringtag=string',
+          'invalidarraytag=a,b,c',
+          10,
+        ],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Experimental flags can only be of type string. Found invalid type',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid flag `invalidarraytag` found in `experimentalFlags`.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid flag `invalidintegertag` found in `experimentalFlags`.',
+        },
+        {
+          topic: 'Configuration Error',
+          message:
+            'Invalid flag `invalidstringtag` found in `experimentalFlags`.',
+        },
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid flag `invalidtag` found in `experimentalFlags`.',
+        },
+      ]);
+    });
+
+    it('dockerHubTags', async () => {
+      const config = {
+        experimentalFlags: ['dockerHubTags'],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('warns if invalid value set for dockerHubTags', async () => {
+      const config = {
+        experimentalFlags: ['dockerHubTags=10'],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Experimental flag `dockerHubTags` should not have a value.',
+        },
+      ]);
+    });
+
+    it('dockerMaxPages', async () => {
+      const config = {
+        experimentalFlags: ['dockerMaxPages=10'],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('warns if invalid value set for dockerMaxPages', async () => {
+      const config = {
+        experimentalFlags: ['dockerMaxPages=string'],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message:
+            'Experimental flag `dockerMaxPages` should be of type integer. Found invalid type instead.',
+        },
+      ]);
+    });
+
+    it('warns if no value set for dockerMaxPages', async () => {
+      const config = {
+        experimentalFlags: ['dockerMaxPages'],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Experimental flag `dockerMaxPages` should have a value.',
+        },
+      ]);
+    });
+  });
 });
