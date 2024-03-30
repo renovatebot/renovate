@@ -18,12 +18,12 @@ export class SpaceDao {
   }
 
   async findRepositories(): Promise<string[]> {
-    const repos = await this.client.getAllRepositoriesForAllProjects()
+    const repos = await this.client.repository.getAll()
     return repos.map(it => `${it.projectKey}/${it.repository}`)
   }
 
   async getRepositoryInfo(projectKey: string, repository: string): Promise<SpaceRepositoryDetails> {
-    return await this.client.getRepository(projectKey, repository)
+    return await this.client.repository.getByName(projectKey, repository)
   }
 
   async createMergeRequest(projectKey: string, repository: string, config: CreatePRConfig): Promise<Pr> {
@@ -35,13 +35,13 @@ export class SpaceDao {
       description: config.prBody,
     }
 
-    const response = await this.client.createMergeRequest(projectKey, request)
+    const response = await this.client.codeReview.write.create(projectKey, request)
     return mapSpaceCodeReviewDetailsToPr(response, config.prBody);
   }
 
   async findAllMergeRequests(projectKey: string, repository: string): Promise<Pr[]> {
     logger.debug(`SPACE: searching for PRs in ${projectKey}/${repository}`)
-    const mergeRequests = await this.client.findMergeRequests(projectKey, {
+    const mergeRequests = await this.client.codeReview.read.find(projectKey, {
       prState: 'null',
       repository,
     })
@@ -74,7 +74,7 @@ export class SpaceDao {
         break
     }
 
-    const mergeRequests = await this.client.findMergeRequests(projectKey, {
+    const mergeRequests = await this.client.codeReview.read.find(projectKey, {
       prState,
       repository,
       limit: 1,
@@ -116,14 +116,14 @@ export class SpaceDao {
 
   async getPr(projectKey: string, codeReviewNumber: number): Promise<Pr> {
     logger.debug(`SPACE getPr(${projectKey}, ${codeReviewNumber})`)
-    const review = await this.client.getCodeReviewByCodeReviewNumber(projectKey, codeReviewNumber)
+    const review = await this.client.codeReview.read.getByCodeReviewNumber(projectKey, codeReviewNumber)
     return mapSpaceCodeReviewDetailsToPr(review, await this.findMergeRequestBody(review.id) ?? DEFAULT_PR_BODY)
   }
 
   async findDefaultBranch(projectKey: string, repository: string): Promise<string> {
     logger.debug(`SPACE findDefaultBranch(${projectKey}, ${repository})`)
 
-    const repoInfo = await this.client.getRepository(projectKey, repository)
+    const repoInfo = await this.client.repository.getByName(projectKey, repository)
     if (repoInfo.defaultBranch) {
       const ref = repoInfo.defaultBranch.head
       const lastSlash = ref.lastIndexOf('/')
@@ -140,23 +140,23 @@ export class SpaceDao {
   async updateMergeRequest(projectKey: string, prConfig: UpdatePrConfig): Promise<SpaceMergeRequestRecord> {
     logger.debug(`SPACE: updating PR ${prConfig.number}`)
 
-    const review = await this.client.getCodeReviewByCodeReviewNumber(projectKey, prConfig.number)
+    const review = await this.client.codeReview.read.getByCodeReviewNumber(projectKey, prConfig.number)
     if (review.title !== prConfig.prTitle) {
       logger.debug(`SPACE: updating PR title from ${review.title} to ${prConfig.prTitle}`)
-      await this.client.updateCodeReviewTitle(projectKey, review.id, prConfig.prTitle)
+      await this.client.codeReview.write.setTitle(projectKey, review.id, prConfig.prTitle)
     }
 
     if (prConfig.prBody) {
       logger.debug(`SPACE: updating PR body for ${review.id}`)
-      await this.client.updateCodeReviewDescription(projectKey, review.id, prConfig.prBody)
+      await this.client.codeReview.write.setDescription(projectKey, review.id, prConfig.prBody)
     }
 
     if (prConfig.state === 'closed') {
       logger.debug(`SPACE: closing PR ${review.id}`)
-      await this.client.updateCodeReviewState(projectKey, review.id, 'Closed')
+      await this.client.codeReview.write.setState(projectKey, review.id, 'Closed')
     }
 
-    return await this.client.getCodeReviewByCodeReviewId(projectKey, review.id)
+    return await this.client.codeReview.read.getByCodeReviewId(projectKey, review.id)
   }
 
   async mergeMergeRequest(projectKey: string, codeReviewNumber: number, strategy: MergeStrategy, deleteSourceBranch: boolean): Promise<void> {
@@ -165,17 +165,17 @@ export class SpaceDao {
     switch (strategy) {
       case 'auto':
       case 'merge-commit':
-        await this.client.mergeMergeRequest(projectKey, codeReviewNumber, 'NO_FF', deleteSourceBranch)
+        await this.client.codeReview.write.merge(projectKey, codeReviewNumber, 'NO_FF', deleteSourceBranch)
         break
       case 'fast-forward':
-        await this.client.mergeMergeRequest(projectKey, codeReviewNumber, 'FF', deleteSourceBranch)
+        await this.client.codeReview.write.merge(projectKey, codeReviewNumber, 'FF', deleteSourceBranch)
         break
       case 'rebase':
-        await this.client.rebaseMergeRequest(projectKey, codeReviewNumber, 'FF', null, deleteSourceBranch)
+        await this.client.codeReview.write.rebase(projectKey, codeReviewNumber, 'FF', null, deleteSourceBranch)
         break
       case 'squash':
         // TODO: figure out squash message
-        await this.client.rebaseMergeRequest(projectKey, codeReviewNumber, 'NO_FF', 'squash??', deleteSourceBranch)
+        await this.client.codeReview.write.rebase(projectKey, codeReviewNumber, 'NO_FF', 'squash??', deleteSourceBranch)
         break
     }
   }
@@ -214,29 +214,29 @@ export class SpaceDao {
   }
 
   async getFileTextContent(projectKey: string, repository: string, path: string, commit: string = 'HEAD'): Promise<string> {
-    return await this.client.getFileTextContent(projectKey, repository, path, commit)
+    return await this.client.repository.getFileContent(projectKey, repository, path, commit)
   }
 
   async addReviewers(projectKey: string, codeReviewNumber: number, usernames: string[]): Promise<void> {
     logger.debug(`SPACE: addReviewers(${projectKey}, ${codeReviewNumber}, [${usernames.join(', ')}])`)
     for (const username of usernames) {
-      await this.client.addReviewer(projectKey, codeReviewNumber, username, 'Reviewer')
+      await this.client.codeReview.write.addReviewer(projectKey, codeReviewNumber, username, 'Reviewer')
     }
   }
 
   async addAuthors(projectKey: string, codeReviewNumber: number, usernames: string[]): Promise<void> {
     logger.debug(`SPACE: addAuthors(${projectKey}, ${codeReviewNumber}, [${usernames.join(', ')}])`)
     for (const username of usernames) {
-      await this.client.addReviewer(projectKey, codeReviewNumber, username, 'Author')
+      await this.client.codeReview.write.addReviewer(projectKey, codeReviewNumber, username, 'Author')
     }
   }
 
   async ensureComment(projectKey: string, codeReviewNumber: number, topic: string | null, comment: string): Promise<void> {
     logger.debug(`SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment})`)
 
-    const review = await this.client.getCodeReviewByCodeReviewNumber(projectKey, codeReviewNumber)
+    const review = await this.client.codeReview.read.getByCodeReviewNumber(projectKey, codeReviewNumber)
     // TODO: change it to accept a predicate
-    const messages = await this.client.findCodeReviewMessages(review.id, 50, 'desc')
+    const messages = await this.client.codeReview.read.getMessages(review.id, 50, 'desc')
     for (const message of messages) {
       if (message.externalId === topic && message.text === comment) {
         logger.debug(`SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment}): message exists, doing nothing`)
@@ -245,14 +245,14 @@ export class SpaceDao {
     }
 
     logger.debug(`SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment}): message wasn't found, creating new one`)
-    await this.client.addCodeReviewComment(review.id, comment, topic)
+    await this.client.codeReview.write.addMessage(review.id, comment, topic)
   }
 
   async ensureCommentRemoval(projectKey: string, codeReviewNumber: number, topic: string | null, content: string | null): Promise<void> {
     logger.debug(`SPACE: ensureCommentRemoval(${projectKey}, ${codeReviewNumber}, ${topic}, ${content})`)
 
-    const review = await this.client.getCodeReviewByCodeReviewNumber(projectKey, codeReviewNumber)
-    const messages = await this.client.findCodeReviewMessages(review.id, 50, 'desc')
+    const review = await this.client.codeReview.read.getByCodeReviewNumber(projectKey, codeReviewNumber)
+    const messages = await this.client.codeReview.read.getMessages(review.id, 50, 'desc')
 
     let foundMessage: SpaceChannelItemRecord | undefined = undefined
     for (const message of messages) {
@@ -272,23 +272,23 @@ export class SpaceDao {
       return Promise.resolve()
     }
 
-    await this.client.deleteCodeReviewComment(review.id, foundMessage.id)
+    await this.client.codeReview.write.deleteMessage(review.id, foundMessage.id)
   }
 
   private async findLatestJobExecutions(projectKey: string, repository: string, branch: string): Promise<SpaceJobExecutionDTO[]> {
     logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch})`)
 
-    const allRepositoryHead = await this.client.getRepositoryHeads(projectKey, repository)
+    const allRepositoryHead = await this.client.repository.getAllBranchesHeads(projectKey, repository)
 
     const repositoryHead = allRepositoryHead.find(it => it.head === `refs/heads/${branch}`)!
     logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}), head: ${JSON.stringify(repositoryHead)}`)
-    const jobs = await this.client.findAllJobs(projectKey, repository, branch)
+    const jobs = await this.client.jobs.getAllJobs(projectKey, repository, branch)
 
     logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}) found ${jobs.length} jobs`)
 
     const result : SpaceJobExecutionDTO[] = []
     for (const job of jobs) {
-      const executions = await this.client.findJobExecutions(projectKey, job.id, branch, dto => dto.commitId === repositoryHead.ref, 1)
+      const executions = await this.client.jobs.findJobExecutions(projectKey, job.id, branch, dto => dto.commitId === repositoryHead.ref, 1)
       logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}) job ${job.id} found executions: ${executions.length}`)
 
       result.push(...executions)
@@ -301,7 +301,7 @@ export class SpaceDao {
 
   private async findMergeRequestBody(codeReviewId: string): Promise<string | undefined> {
     logger.debug(`SPACE: searching for PR body in ${codeReviewId}`)
-    const messages = await this.client.findCodeReviewMessages(codeReviewId, 1, 'asc')
+    const messages = await this.client.codeReview.read.getMessages(codeReviewId, 1, 'asc')
     if (messages.length === 0) {
       logger.debug(`SPACE: found no messages in PR ${codeReviewId}`)
       return undefined
