@@ -366,6 +366,29 @@ describe('modules/manager/pip-compile/extract', () => {
     );
   });
 
+  it('adds transitive dependency to deps in package file', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=requirements.txt requirements.in',
+        ['friendly-bard==1.0.1', 'bards-friend==1.0.0'],
+      ),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('FrIeNdLy-._.-bArD>=1.0.0');
+
+    const lockFiles = ['requirements.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    const packageFile = packageFiles!.pop();
+    expect(packageFile!.deps).toHaveLength(2);
+    expect(packageFile!.deps[1]).toEqual({
+      datasource: 'pypi',
+      depType: 'indirect',
+      depName: 'bards-friend',
+      lockedVersion: '1.0.0',
+      enabled: false,
+    });
+  });
+
   it('handles -r reference to another input file', async () => {
     fs.readLocalFile.mockImplementation((name): any => {
       if (name === '1.in') {
