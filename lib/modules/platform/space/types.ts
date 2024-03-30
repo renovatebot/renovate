@@ -5,7 +5,6 @@ export interface SpacePaginatedResult {
 export interface SpaceRepositoryBasicInfo {
   projectKey: string;
   repository: string;
-  starred: boolean;
 }
 
 export interface SpaceRepositoryDetails {
@@ -13,10 +12,6 @@ export interface SpaceRepositoryDetails {
   name: string;
   description: string;
   latestActivity?: Date;
-  proxyPushNotification?: Date;
-  proxyPushNotificationBody?: string;
-  initProgress?: string;
-  readmeName?: string;
   defaultBranch?: {
     head: string;
     ref: string;
@@ -140,7 +135,7 @@ export interface SpaceJobExecutionDTO {
   commitId?: string;
 }
 
-export interface SpaceBranchInfo {
+export interface SpaceBranchHead {
   head: string;
   ref: string;
 }
@@ -162,10 +157,10 @@ export type SpaceExecutionStatus =
 
 export interface SpaceFileContent {
   type: 'TEXT' | 'LARGE' | 'LINK' | 'IMAGE' | 'BINARY_OTHER';
-  lineEnding?: 'CR' | 'LF' | 'CRLF';
-  bom?: {
-    name: string
-  };
+  // lineEnding?: 'CR' | 'LF' | 'CRLF';
+  // bom?: {
+  //   name: string
+  // };
   lines: Array<CodeLine>;
   // widgets?: Array<CodeMDWidget>;
   // folds?: Array<CodeFold>;
@@ -174,8 +169,8 @@ export interface SpaceFileContent {
 
 export interface CodeLine {
   text: string;
-  index?: number;
-  offset: number;
+  // index?: number;
+  // offset: number;
   // syntax?: Array<SyntaxMarkup>;
 }
 

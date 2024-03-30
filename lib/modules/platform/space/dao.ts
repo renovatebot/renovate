@@ -278,7 +278,7 @@ export class SpaceDao {
   private async findLatestJobExecutions(projectKey: string, repository: string, branch: string): Promise<SpaceJobExecutionDTO[]> {
     logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch})`)
 
-    const allRepositoryHead = await this.client.repository.getAllBranchesHeads(projectKey, repository)
+    const allRepositoryHead = await this.client.repository.getBranchesHeads(projectKey, repository)
 
     const repositoryHead = allRepositoryHead.find(it => it.head === `refs/heads/${branch}`)!
     logger.debug(`SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}), head: ${JSON.stringify(repositoryHead)}`)

@@ -1,5 +1,5 @@
 import type {SpaceHttp} from "../../../../util/http/space";
-import type {SpaceBranchInfo, SpaceFileContent, SpaceRepositoryBasicInfo, SpaceRepositoryDetails} from "../types";
+import type {SpaceBranchHead, SpaceFileContent, SpaceRepositoryBasicInfo, SpaceRepositoryDetails} from "../types";
 import {logger} from "../../../../logger";
 import {PaginatedIterable} from "../paginated-iterator";
 import {flatten} from "../utils";
@@ -27,10 +27,10 @@ export class SpaceRepositoryClient {
     return repoInfo.body;
   }
 
-  async getAllBranchesHeads(projectKey: string, repository: string): Promise<SpaceBranchInfo[]> {
+  async getBranchesHeads(projectKey: string, repository: string): Promise<SpaceBranchHead[]> {
     logger.debug(`SPACE: getRepositoriesHeads: projectKey=${projectKey}, repository=${repository}`)
 
-    const iterable = PaginatedIterable.fromGetUsingSkip<SpaceBranchInfo>(
+    const iterable = PaginatedIterable.fromGetUsingSkip<SpaceBranchHead>(
       this.http, `/api/http/projects/key:${projectKey}/repositories/${repository}/heads`
     )
 
