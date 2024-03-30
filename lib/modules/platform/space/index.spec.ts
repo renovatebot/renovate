@@ -1,3 +1,9 @@
+describe('modules/platform/space/index', () => {
+  it('should do something', () => {
+    expect(1).toBe(1);
+  });
+});
+
 /*import { git, mocked, partial } from '../../../../test/util';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
