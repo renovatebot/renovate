@@ -1,9 +1,12 @@
-import {validateUrl} from '../url';
-import type {HttpOptions, HttpResponse, InternalHttpOptions} from './types';
-import {Http} from './index';
+import { validateUrl } from '../url';
+import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
+import { Http } from './index';
 
 export class SpaceHttp extends Http {
-  constructor(private baseUrl: string, options?: HttpOptions) {
+  constructor(
+    private baseUrl: string,
+    options?: HttpOptions,
+  ) {
     super('space', options);
   }
 

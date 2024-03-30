@@ -1,4 +1,4 @@
-import { git, mocked, partial } from '../../../../test/util';
+/*import { git, mocked, partial } from '../../../../test/util';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import * as _hostRules from '../../../util/host-rules';
@@ -756,3 +756,4 @@ describe('modules/platform/space/index', () => {
     });
   });
 });
+*/

@@ -1,9 +1,9 @@
-import {logger} from '../../../logger';
-import type {BranchStatus} from '../../../types';
-import {parseJson} from '../../../util/common';
+import { logger } from '../../../logger';
+import type { BranchStatus } from '../../../types';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
-import {regEx} from '../../../util/regex';
-import {trimTrailingSlash} from "../../../util/url";
+import { regEx } from '../../../util/regex';
+import { trimTrailingSlash } from '../../../util/url';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -22,10 +22,10 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
-import {repoFingerprint} from '../util';
-import {SpaceClient} from "./client";
-import {SpaceDao} from "./dao";
-import {getSpaceRepoUrl,} from './utils';
+import { repoFingerprint } from '../util';
+import { SpaceClient } from './client';
+import { SpaceDao } from './dao';
+import { getSpaceRepoUrl } from './utils';
 
 export const id = 'space';
 
@@ -41,12 +41,15 @@ let repoConfig: {
 } = {};
 
 export function writeToConfig(newConfig: typeof repoConfig): void {
-  repoConfig = {...repoConfig, ...newConfig};
+  repoConfig = { ...repoConfig, ...newConfig };
 }
 
-let dao: SpaceDao
+let dao: SpaceDao;
 
-export function initPlatform({endpoint, token}: PlatformParams): Promise<PlatformResult> {
+export function initPlatform({
+  endpoint,
+  token,
+}: PlatformParams): Promise<PlatformResult> {
   logger.debug(`SPACE initPlatform(${endpoint!})`);
 
   if (!endpoint) {
@@ -58,7 +61,7 @@ export function initPlatform({endpoint, token}: PlatformParams): Promise<Platfor
   }
 
   globalConfig.endpoint = trimTrailingSlash(endpoint);
-  dao = new SpaceDao(new SpaceClient(`https://${globalConfig.endpoint}`))
+  dao = new SpaceDao(new SpaceClient(`https://${globalConfig.endpoint}`));
 
   return Promise.resolve({
     endpoint: globalConfig.endpoint,
@@ -70,10 +73,12 @@ export async function getRepos(): Promise<string[]> {
   return await dao.findRepositories();
 }
 
-export async function initRepo({repository}: RepoParams): Promise<RepoResult> {
+export async function initRepo({
+  repository,
+}: RepoParams): Promise<RepoResult> {
   logger.debug(`SPACE initRepo(${repository})`);
 
-  const repoParts = repository.split('/')
+  const repoParts = repository.split('/');
   const projectKey = repoParts[0];
   const shortRepository = repoParts[1];
 
@@ -85,7 +90,7 @@ export async function initRepo({repository}: RepoParams): Promise<RepoResult> {
 
   const baseUrl = globalConfig.endpoint!;
   const url = getSpaceRepoUrl(repository, baseUrl);
-  await git.initRepo({url});
+  await git.initRepo({ url });
 
   return {
     defaultBranch: await dao.findDefaultBranch(projectKey, shortRepository),
@@ -98,52 +103,80 @@ export async function findPr(
   findPRConfig: FindPRConfig,
   refreshCache?: boolean,
 ): Promise<Pr | null> {
-  logger.debug(`SPACE findPr(${JSON.stringify(findPRConfig)}, ${refreshCache})`);
+  logger.debug(
+    `SPACE findPr(${JSON.stringify(findPRConfig)}, ${refreshCache})`,
+  );
   // TODO: add support for refreshCache
   // why there are 2 refreshCache parameters: one in FindPRConfig, another is a parameter
-  return await dao.findMergeRequest(repoConfig.projectKey!, repoConfig.repository!, findPRConfig)
+  return await dao.findMergeRequest(
+    repoConfig.projectKey!,
+    repoConfig.repository!,
+    findPRConfig,
+  );
 }
 
 export async function getPr(number: number): Promise<Pr | null> {
   logger.debug(`SPACE getPr(${number})`);
-  return await dao.getPr(repoConfig.projectKey!, number)
+  return await dao.getPr(repoConfig.projectKey!, number);
 }
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`SPACE updatePr(${prConfig.number}, ${prConfig.prTitle})`);
-  await dao.updateMergeRequest(repoConfig.projectKey!, prConfig)
+  await dao.updateMergeRequest(repoConfig.projectKey!, prConfig);
 }
 
 export async function createPr(prConfig: CreatePRConfig): Promise<Pr> {
   logger.debug(`SPACE createPr(${prConfig.sourceBranch}, ${prConfig.prTitle}`);
-  return await dao.createMergeRequest(repoConfig.projectKey!, repoConfig.repository!, prConfig)
+  return await dao.createMergeRequest(
+    repoConfig.projectKey!,
+    repoConfig.repository!,
+    prConfig,
+  );
 }
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`SPACE getBranchPr(${branchName})`);
-  return await dao.findMergeRequest(repoConfig.projectKey!, repoConfig.repository!, {branchName, state: 'open'})
+  return await dao.findMergeRequest(
+    repoConfig.projectKey!,
+    repoConfig.repository!,
+    { branchName, state: 'open' },
+  );
 }
 
 export async function getPrList(): Promise<Pr[]> {
   logger.debug(`SPACE getPrList()`);
-  return await dao.findAllMergeRequests(repoConfig.projectKey!, repoConfig.repository!)
+  return await dao.findAllMergeRequests(
+    repoConfig.projectKey!,
+    repoConfig.repository!,
+  );
 }
 
 export async function mergePr(config: MergePRConfig): Promise<boolean> {
-  logger.debug(`SPACE mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`);
+  logger.debug(
+    `SPACE mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`,
+  );
 
   // TODO: add deleteSourceBranch parameter to global config
   // TODO: add support for changing target branch? (config.branch)
 
-  await dao.mergeMergeRequest(repoConfig.projectKey!, config.id, config.strategy ?? 'auto', true)
-  return true
+  await dao.mergeMergeRequest(
+    repoConfig.projectKey!,
+    config.id,
+    config.strategy ?? 'auto',
+    true,
+  );
+  return true;
 }
 
 export async function getBranchStatus(
   branchName: string,
 ): Promise<BranchStatus> {
   logger.debug(`SPACE getBranchStatus(${branchName})`);
-  return await dao.findBranchStatus(repoConfig.projectKey!, repoConfig.repository!, branchName)
+  return await dao.findBranchStatus(
+    repoConfig.projectKey!,
+    repoConfig.repository!,
+    branchName,
+  );
 }
 
 export function getRawFile(
@@ -152,7 +185,8 @@ export function getRawFile(
   branchOrTag?: string,
 ): Promise<string | null> {
   const repo = repoName ?? repoConfig.repository!;
-  const branch = branchOrTag ?? (repo === repoConfig.repository ? repoConfig.head! : 'HEAD');
+  const branch =
+    branchOrTag ?? (repo === repoConfig.repository ? repoConfig.head! : 'HEAD');
   return dao.getFileTextContent(repo, branch, fileName);
 }
 
@@ -169,24 +203,30 @@ export async function addReviewers(
   number: number,
   reviewers: string[],
 ): Promise<void> {
-  await dao.addReviewers(repoConfig.projectKey!, number, reviewers)
+  await dao.addReviewers(repoConfig.projectKey!, number, reviewers);
 }
 
 export async function addAssignees(
   number: number,
   assignees: string[],
 ): Promise<void> {
-  await dao.addAuthors(repoConfig.projectKey!, number, assignees)
+  await dao.addAuthors(repoConfig.projectKey!, number, assignees);
 }
 
 export async function ensureComment(
   ensureComment: EnsureCommentConfig,
 ): Promise<boolean> {
-  logger.debug(`SPACE ensureComment(${ensureComment.number}, ${ensureComment.topic!}, ${ensureComment.content})`,
+  logger.debug(
+    `SPACE ensureComment(${ensureComment.number}, ${ensureComment.topic!}, ${ensureComment.content})`,
   );
 
   // there is no concept of a topic for a comment
-  await dao.ensureComment(repoConfig.projectKey!, ensureComment.number, ensureComment.topic, ensureComment.content)
+  await dao.ensureComment(
+    repoConfig.projectKey!,
+    ensureComment.number,
+    ensureComment.topic,
+    ensureComment.content,
+  );
   return true;
 }
 
@@ -195,10 +235,12 @@ export async function ensureCommentRemoval(
     | EnsureCommentRemovalConfigByTopic
     | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
-  logger.debug(`SPACE ensureCommentRemoval(${JSON.stringify(ensureCommentRemoval)})`)
+  logger.debug(
+    `SPACE ensureCommentRemoval(${JSON.stringify(ensureCommentRemoval)})`,
+  );
 
-  let topic: string | null = null
-  let content: string | null = null
+  let topic: string | null = null;
+  let content: string | null = null;
 
   if (ensureCommentRemoval.type === 'by-topic') {
     topic = ensureCommentRemoval.topic;
@@ -206,7 +248,12 @@ export async function ensureCommentRemoval(
     content = ensureCommentRemoval.content;
   }
 
-  await dao.ensureCommentRemoval(repoConfig.projectKey!, ensureCommentRemoval.number, topic, content)
+  await dao.ensureCommentRemoval(
+    repoConfig.projectKey!,
+    ensureCommentRemoval.number,
+    topic,
+    content,
+  );
 }
 
 export function massageMarkdown(prBody: string): string {
@@ -231,8 +278,7 @@ export function getBranchStatusCheck(
 
 export async function setBranchStatus(
   branchStatusConfig: BranchStatusConfig,
-): Promise<void> {
-}
+): Promise<void> {}
 
 // TODO: no labels either
 export function deleteLabel(number: number, label: string): Promise<void> {

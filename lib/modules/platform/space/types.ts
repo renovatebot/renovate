@@ -1,6 +1,4 @@
-export interface SpacePaginatedResult {
-
-}
+export interface SpacePaginatedResult {}
 
 export interface SpaceRepositoryBasicInfo {
   projectKey: string;
@@ -18,17 +16,25 @@ export interface SpaceRepositoryDetails {
   };
 }
 
-export type CodeReviewStateFilter = 'Opened' | 'Closed' | 'RequiresAuthorAttention' | 'NeedsReview' | 'Merged' | 'null';
+export type CodeReviewStateFilter =
+  | 'Opened'
+  | 'Closed'
+  | 'RequiresAuthorAttention'
+  | 'NeedsReview'
+  | 'Merged'
+  | 'null';
 
 export interface SpaceCodeReviewBasicInfo {
   review: {
-    className: CodeReviewClassName,
-    id: string
-  },
-  messagesCount: number
+    className: CodeReviewClassName;
+    id: string;
+  };
+  messagesCount: number;
 }
 
-export type CodeReviewClassName = 'MergeRequestRecord' | 'CommitSetReviewRecord'
+export type CodeReviewClassName =
+  | 'MergeRequestRecord'
+  | 'CommitSetReviewRecord';
 
 export interface SpaceMergeRequestRecord {
   id: string;
@@ -58,7 +64,6 @@ export interface SpaceMergeRequestBranchPair {
 
 export type SpaceCodeReviewState = 'Opened' | 'Closed' | 'Deleted';
 
-
 export interface SpaceCodeReviewCreateRequest {
   repository: string;
   sourceBranch: string;
@@ -69,7 +74,7 @@ export interface SpaceCodeReviewCreateRequest {
 }
 
 export interface SpaceChannelItem {
-  id: string
+  id: string;
 }
 
 export interface SpaceChannelItemRecord {
@@ -130,7 +135,7 @@ export interface SpaceBranchHead {
 }
 
 export type SpaceExecutionStatus =
-  'SCHEDULED'
+  | 'SCHEDULED'
   | 'PENDING'
   | 'READY_TO_START'
   | 'RUNNING'
@@ -164,4 +169,3 @@ export interface CodeLine {
 }
 
 export type SpaceCodeReviewParticipantRole = 'Reviewer' | 'Author' | 'Watcher';
-

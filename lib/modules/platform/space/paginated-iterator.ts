@@ -1,83 +1,95 @@
-import {logger} from "../../../logger";
-import type {SpaceHttp} from "../../../util/http/space";
+import { logger } from '../../../logger';
+import type { SpaceHttp } from '../../../util/http/space';
 
 /**
  * Asynchronous iterator that can perform some extra operations over received data as it is fetched
  */
 export class PaginatedIterable<T> implements AsyncIterable<T[]> {
-
-  constructor(private nextPage: (next?: string) => Promise<any>, private config: PaginatedIterableConfig) {
-
-  }
+  constructor(
+    private nextPage: (next?: string) => Promise<any>,
+    private config: PaginatedIterableConfig,
+  ) {}
 
   [Symbol.asyncIterator](): AsyncIterator<T[]> {
-    return new PaginatedIterator(this.nextPage, this.config)
+    return new PaginatedIterator(this.nextPage, this.config);
   }
 
-  static fromGetUsingNext<T>(http: SpaceHttp, basePath: string): PaginatedIterable<T> {
+  static fromGetUsingNext<T>(
+    http: SpaceHttp,
+    basePath: string,
+  ): PaginatedIterable<T> {
     return this.fromUsing(http, basePath, {
       queryParameter: 'next',
-      dataField: it => it.data,
-      nextField: it => it.next
-    })
+      dataField: (it) => it.data,
+      nextField: (it) => it.next,
+    });
   }
 
-  static fromGetUsingSkip<T>(http: SpaceHttp, basePath: string): PaginatedIterable<T> {
+  static fromGetUsingSkip<T>(
+    http: SpaceHttp,
+    basePath: string,
+  ): PaginatedIterable<T> {
     return this.fromUsing(http, basePath, {
       queryParameter: '$skip',
-      dataField: it => it.data,
-      nextField: it => it.next
-    })
+      dataField: (it) => it.data,
+      nextField: (it) => it.next,
+    });
   }
 
-  static fromUsing<T>(http: SpaceHttp, basePath: string, config: PaginatedIterableConfig): PaginatedIterable<T> {
-    const hasQuery = basePath.includes('?')
+  static fromUsing<T>(
+    http: SpaceHttp,
+    basePath: string,
+    config: PaginatedIterableConfig,
+  ): PaginatedIterable<T> {
+    const hasQuery = basePath.includes('?');
 
-    const encodedQueryParameter = encodeURIComponent(config.queryParameter)
+    const encodedQueryParameter = encodeURIComponent(config.queryParameter);
 
     return new PaginatedIterable<T>(async (next?: string) => {
-      logger.debug(`SPACE: iterating over ${basePath} with next=${next}`)
+      logger.debug(`SPACE: iterating over ${basePath} with next=${next}`);
 
-      let path = basePath
+      let path = basePath;
       if (next) {
-        const encodedNext = encodeURIComponent(next)
+        const encodedNext = encodeURIComponent(next);
         if (hasQuery) {
-          path += `&${encodedQueryParameter}=${encodedNext}`
+          path += `&${encodedQueryParameter}=${encodedNext}`;
         } else {
-          path += `?${encodedQueryParameter}=${encodedNext}`
+          path += `?${encodedQueryParameter}=${encodedNext}`;
         }
       }
 
-      const result = await http.getJson<any>(path)
-      logger.debug(`SPACE: from ${path} and next ${next} got ${JSON.stringify(result.body.data)}`)
+      const result = await http.getJson<any>(path);
+      logger.debug(
+        `SPACE: from ${path} and next ${next} got ${JSON.stringify(result.body.data)}`,
+      );
 
-      return result.body
-    }, config)
+      return result.body;
+    }, config);
   }
 }
 
 class PaginatedIterator<T> implements AsyncIterator<T[]> {
+  private nextQuery?: string = undefined;
 
-  private nextQuery?: string = undefined
-
-  constructor(private nextPage: (next?: string) => Promise<any>, private config: PaginatedIteratorConfig) {
-
-  }
+  constructor(
+    private nextPage: (next?: string) => Promise<any>,
+    private config: PaginatedIteratorConfig,
+  ) {}
 
   async next(): Promise<IteratorResult<T[]>> {
-    const result = await this.nextPage(this.nextQuery)
+    const result = await this.nextPage(this.nextQuery);
 
-    this.nextQuery = this.config.nextField(result)
+    this.nextQuery = this.config.nextField(result);
 
-    const data = this.config.dataField(result) as T[]
+    const data = this.config.dataField(result) as T[];
     return Promise.resolve({
       value: data,
-      done: data.length === 0
-    })
+      done: data.length === 0,
+    });
   }
 }
 
-interface PaginatedIterableConfig extends PaginatedIteratorConfig{
+interface PaginatedIterableConfig extends PaginatedIteratorConfig {
   queryParameter: string;
 }
 
