@@ -135,9 +135,9 @@ function mockRepositoriesPage(
   next: string,
   nextQuery?: string,
 ) {
-  let path = '/api/http/projects/repositories';
+  let path = '/api/http/projects/repositories/find?term=';
   if (nextQuery) {
-    path += `?next=${nextQuery}`;
+    path += `&$skip=${nextQuery}`;
   }
 
   httpMock.scope(spaceEndpointUrl).get(path).reply(

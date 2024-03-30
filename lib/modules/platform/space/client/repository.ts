@@ -16,9 +16,9 @@ export class SpaceRepositoryClient {
     logger.debug('SPACE: getAllRepositoriesForAllProjects');
 
     const iterable =
-      PaginatedIterable.fromGetUsingNext<SpaceRepositoryBasicInfo>(
+      PaginatedIterable.fromGetUsingSkip<SpaceRepositoryBasicInfo>(
         this.http,
-        '/api/http/projects/repositories',
+        '/api/http/projects/repositories/find?term=',
       );
     const repos = await flatten(iterable);
     logger.debug(
