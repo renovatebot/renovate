@@ -10,6 +10,7 @@ import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
@@ -47,8 +48,7 @@ describe('modules/datasource/docker/index', () => {
       password: 'some-password',
     });
     hostRules.hosts.mockReturnValue([]);
-    delete process.env.RENOVATE_X_DOCKER_MAX_PAGES;
-    delete process.env.RENOVATE_X_DOCKER_HUB_TAGS;
+    GlobalConfig.reset();
   });
 
   describe('getDigest', () => {
@@ -1286,7 +1286,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('uses custom max pages', async () => {
-      process.env.RENOVATE_X_DOCKER_MAX_PAGES = '2';
+      GlobalConfig.set({ experimentalFlags: ['dockerMaxPages=2'] });
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -1793,7 +1793,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('Uses Docker Hub tags for registry-1.docker.io', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
+      GlobalConfig.set({ experimentalFlags: ['dockerHubTags'] });
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000')
@@ -1834,7 +1834,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (implicit)', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
+      GlobalConfig.set({ experimentalFlags: ['dockerHubTags'] });
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
@@ -1863,7 +1863,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
+      GlobalConfig.set({ experimentalFlags: ['dockerHubTags'] });
       httpMock
         .scope(dockerHubUrl)
         .get('/library/node/tags?page_size=1000')
