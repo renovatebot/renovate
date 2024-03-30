@@ -17,16 +17,16 @@ export class PaginatedIterable<T> implements AsyncIterable<T[]> {
   static fromGetUsingNext<T>(http: SpaceHttp, basePath: string): PaginatedIterable<T> {
     return this.fromUsing(http, basePath, {
       queryParameter: 'next',
-      dataField: 'data',
-      nextField: 'next'
+      dataField: it => it.data,
+      nextField: it => it.next
     })
   }
 
   static fromGetUsingSkip<T>(http: SpaceHttp, basePath: string): PaginatedIterable<T> {
     return this.fromUsing(http, basePath, {
       queryParameter: '$skip',
-      dataField: 'data',
-      nextField: 'next'
+      dataField: it => it.data,
+      nextField: it => it.next
     })
   }
 
@@ -67,9 +67,9 @@ class PaginatedIterator<T> implements AsyncIterator<T[]> {
   async next(): Promise<IteratorResult<T[]>> {
     const result = await this.nextPage(this.nextQuery)
 
-    this.nextQuery = result[this.config.nextField]
+    this.nextQuery = this.config.nextField(result)
 
-    const data = result[this.config.dataField] as T[]
+    const data = this.config.dataField(result) as T[]
     return Promise.resolve({
       value: data,
       done: data.length === 0
@@ -82,6 +82,6 @@ interface PaginatedIterableConfig extends PaginatedIteratorConfig{
 }
 
 interface PaginatedIteratorConfig {
-  nextField: string;
-  dataField: string;
+  nextField: (val: any) => string;
+  dataField: (val: any) => any[];
 }

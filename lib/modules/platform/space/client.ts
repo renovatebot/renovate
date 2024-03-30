@@ -3,8 +3,8 @@ import {SpaceHttp} from "../../../util/http/space";
 import type {
   CodeReviewStateFilter,
   SpaceBranchInfo,
+  SpaceChannelItem,
   SpaceChannelItemRecord,
-  SpaceChannelMessagesList,
   SpaceCodeReviewBasicInfo,
   SpaceCodeReviewCreateRequest,
   SpaceCodeReviewParticipantRole,
@@ -44,24 +44,27 @@ export class SpaceClient {
     return repoInfo.body;
   }
 
-  // finding messages by code review number is not supported yet
   async findCodeReviewMessages(codeReviewId: string, limit: number, order: 'asc' | 'desc'): Promise<SpaceChannelItemRecord[]> {
     logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId}, limit=${limit}, order=${order}`)
 
     const apiOrder = order === 'asc' ? 'FromOldestToNewest' : 'FromNewestToOldest'
 
-    // TODO: add pagination
-    const channelMessages = await this.spaceHttp.getJson<SpaceChannelMessagesList>(`/api/http/chats/messages?channel=codeReview:id:${codeReviewId}&sorting=${apiOrder}&batchSize=${limit}`)
+    const iterable = PaginatedIterable.fromUsing<SpaceChannelItem>(this.spaceHttp, `/api/http/chats/messages?channel=codeReview:id:${codeReviewId}&sorting=${apiOrder}&batchSize=${limit}`, {
+      queryParameter: 'startFromDate',
+      dataField: it => it.messages,
+      nextField: it => it.nextStartFromDate.iso
+    })
 
-    const result: SpaceChannelItemRecord[] = []
-    for (const {id} of channelMessages.body.messages) {
+    const result = await mapNotNullFlatten(iterable, async channelItem => {
+      const id = channelItem.id
+
       logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} fetching message id=${id}`)
 
       const message = await this.spaceHttp.getJson<SpaceChannelItemRecord>(`/api/http/chats/messages/id:${id}?channel=codeReview:id:${codeReviewId}`)
       logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} message = ${message.body.time}`)
 
-      result.push(message.body)
-    }
+      return message.body
+    })
 
     logger.debug(`SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} found ${result.length} messages`)
     return result

@@ -73,10 +73,8 @@ export interface SpaceCodeReviewCreateRequest {
   // reviewers?: Array<ReviewerParam>;
 }
 
-export interface SpaceChannelMessagesList {
-  messages: [{
-    id: string;
-  }]
+export interface SpaceChannelItem {
+  id: string
 }
 
 export interface SpaceChannelItemRecord {

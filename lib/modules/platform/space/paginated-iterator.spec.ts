@@ -88,8 +88,8 @@ describe('modules/platform/space/paginated-iterator', () => {
 
       const iterableWithCustomFieldNames = PaginatedIterable.fromUsing<TestDto>(new SpaceHttp(spaceEndpointUrl), urlPath, {
         queryParameter: 'myNextParam',
-        dataField: 'myDataField',
-        nextField: 'myNextField'
+        dataField: it => it.myDataField,
+        nextField: it => it.myNextField
       })
 
       const actual = await toArray(iterableWithCustomFieldNames)
