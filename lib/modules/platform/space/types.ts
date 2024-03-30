@@ -112,10 +112,6 @@ export interface SpaceJobDTO {
   id: string;
   name: string;
   repoName: string;
-  repository: {
-    name: string;
-    isDeleted: boolean;
-  };
   archive: boolean;
 }
 
@@ -123,15 +119,8 @@ export interface SpaceJobExecutionDTO {
   executionId: string;
   executionNumber: number;
   jobId: string;
-  jobName: string;
-  projectId: string;
   branch: string;
   status: SpaceExecutionStatus;
-  triggeredTime: number;
-  startedTime?: number;
-  finishedTime?: number;
-  changesCount: number;
-  // failureConditions: Array<FailureConditionDTO>;
   commitId?: string;
 }
 

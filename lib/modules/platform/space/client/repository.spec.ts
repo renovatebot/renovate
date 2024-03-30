@@ -81,9 +81,9 @@ describe('modules/platform/space/client/repository', () => {
       const next1 = 'next1'
       const next2 = 'next2'
 
-      mockBranchesHeads(projectKey, repository, [head1], next1)
-      mockBranchesHeads(projectKey, repository, [head2], next2, next1)
-      mockBranchesHeads(projectKey, repository, [], next2, next2)
+      mockBranchesHeadsPage(projectKey, repository, [head1], next1)
+      mockBranchesHeadsPage(projectKey, repository, [head2], next2, next1)
+      mockBranchesHeadsPage(projectKey, repository, [], next2, next2)
 
       const actual = await client.getBranchesHeads(projectKey, repository)
       expect(actual).toEqual([head1, head2]);
@@ -144,7 +144,7 @@ function mockRepositoriesPage(repos: SpaceRepositoryBasicInfo[], next: string, n
     );
 }
 
-function mockBranchesHeads(projectKey: string, repository: string, heads: SpaceBranchHead[], next: string, nextQuery?: string) {
+function mockBranchesHeadsPage(projectKey: string, repository: string, heads: SpaceBranchHead[], next: string, nextQuery?: string) {
   let path = `/api/http/projects/key:${projectKey}/repositories/${repository}/heads`
   if (nextQuery) {
     path += `?$skip=${nextQuery}`
