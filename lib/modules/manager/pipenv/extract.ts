@@ -93,7 +93,7 @@ function extractFromSection(
         // TODO #22198
         dep.managerData!.nestedVersion = nestedVersion;
       }
-      if (sources && is.object(requirements) && requirements.index) {
+      if (sources && is.object(requirements) && requirements?.index) {
         const source = sources.find((item) => item.name === requirements.index);
         if (source) {
           dep.registryUrls = [source.url];
