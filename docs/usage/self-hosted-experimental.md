@@ -119,6 +119,10 @@ You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE`
 
 The process that runs Renovate must have the correct permissions to delete the config file.
 
+## `RENOVATE_X_EAGER_GLOBAL_EXTENDS`
+
+Resolve and merge `globalExtends` presets before other global config, instead of after.
+
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.

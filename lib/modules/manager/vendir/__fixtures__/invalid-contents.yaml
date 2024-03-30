@@ -1,0 +1,12 @@
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+- path: vendor
+  contents:
+  - path: github.com/cloudfoundry/cf-k8s-networking
+    invalid:
+      # http or ssh urls are supported (required)
+      url: https://github.com/cloudfoundry/cf-k8s-networking
+      # branch, tag, commit; origin is the name of the remote (required)
+      # optional if refSelection is specified (available in v0.11.0+)
+      ref: origin/master
