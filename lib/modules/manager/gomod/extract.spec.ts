@@ -146,7 +146,7 @@ replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0`;
               lineNumber: 3,
             },
             depName: 'go',
-            depType: 'golangtoolchain',
+            depType: 'toolchain',
             currentValue: '1.21.7',
             datasource: 'golang-version',
           },

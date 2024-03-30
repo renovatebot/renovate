@@ -75,12 +75,7 @@ export function extractPackageFile(
         ? line.replace('toolchain go', '')
         : null;
       if (goToolVer && semver.valid(goToolVer)) {
-        const dep = getGoDep(
-          lineNumber,
-          goToolVer,
-          undefined,
-          'golangtoolchain',
-        );
+        const dep = getGoDep(lineNumber, goToolVer, undefined, 'toolchain');
         deps.push(dep);
         continue;
       }
