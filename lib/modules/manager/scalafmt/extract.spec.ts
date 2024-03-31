@@ -29,5 +29,20 @@ describe('modules/manager/scalafmt/extract', () => {
         },
       ]);
     });
+
+    it('ignore file if no version specified', async () => {
+      const scalafmtConf = codeBlock`
+      maxColumn = 80
+    `;
+      fs.readLocalFile.mockResolvedValueOnce(scalafmtConf);
+      const packages = await extractAllPackageFiles({}, ['.scalafmt.conf']);
+      expect(packages).toBeEmpty();
+    });
+
+    it('should return empty packagefiles is no content is provided', async () => {
+      fs.readLocalFile.mockResolvedValueOnce('');
+      const packages = await extractAllPackageFiles({}, ['.scalafmt.conf']);
+      expect(packages).toBeEmpty();
+    });
   });
 });
