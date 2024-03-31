@@ -1,6 +1,6 @@
 {
-  "image:": "devcontainer.registry.renovate.com/test:1.2.3",
+  "image": "devcontainer.registry.renovate.com/test/image:1.2.3",
   "features": {
-    "devcontainer.registry.renovate.com/test/feature:1.2.3": {}
+    "devcontainer.registry.renovate.com/test/feature:4.5.6": {}
   }
 }
