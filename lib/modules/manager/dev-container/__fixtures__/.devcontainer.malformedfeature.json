@@ -1,0 +1,5 @@
+{
+  "features": {
+    "devcontainer.registry.renovate.com/test": {}
+  }
+}
