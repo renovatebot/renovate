@@ -25,14 +25,10 @@ function parseLine(line: string): PackageDependency | null {
   }
 
   return {
-    autoReplaceStringTemplate:
-      '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}',
-    currentDigest: undefined,
     currentValue: version,
     datasource: 'unity3d',
     depName: key,
     depType: 'final',
-    replaceString: matches[0],
   };
 };
 
