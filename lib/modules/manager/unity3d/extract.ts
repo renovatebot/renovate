@@ -9,7 +9,7 @@ const supportedExtensionsKey = [
   'm_EditorVersionWithRevision',
   'm_EditorVersion',
 ];
-const parseLine = (line: string): PackageDependency | null => {
+function parseLine(line: string): PackageDependency | null {
   const matches = regEx(/^(?<depName>.+): (?<currentValue>.+)/g).exec(line);
   if (!matches) {
     return null;
