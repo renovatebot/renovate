@@ -2,6 +2,8 @@ import type { Category } from '../../../constants';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import * as semverVersioning from '../../versioning/semver';
 
+export { extractAllPackageFiles, extractPackageFile } from './extract';
+
 export const supportedDatasources = [GithubReleasesDatasource.id];
 
 export const defaultConfig = {
