@@ -1,6 +1,11 @@
 import { logger } from '../../../logger';
+import { isValidDependency } from '../custom/regex/utils';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { DevContainerFile } from './schema';
 
 export function extractPackageFile(
@@ -46,9 +51,27 @@ export function extractPackageFile(
       return null;
     }
 
-    const deps = images.map((image) =>
-      getDep(image, true, extractConfig.registryAliases),
-    );
+    const deps: PackageDependency<Record<string, any>>[] = [];
+
+    for (const _image of images) {
+      try {
+        const dep = getDep(_image, true, extractConfig.registryAliases);
+        if (!isValidDependency(dep)) {
+          logger.debug(`Skipping invalid dependency: '${image}'`);
+          continue;
+        }
+        deps.push(dep);
+      } catch (err) {
+        logger.debug(`Failed to determine dependency for image: '${_image}'`);
+      }
+    }
+
+    if (deps.length < 1) {
+      logger.debug(
+        `No dev container deps to process for file: '${packageFile}'`,
+      );
+      return null;
+    }
 
     return { deps };
   } catch (err) /* istanbul ignore next */ {
@@ -73,7 +96,7 @@ function getFeatureImages(file: DevContainerFile): string[] {
   const features = file?.features;
 
   if (features !== undefined && features !== null) {
-    for (const feature in features) {
+    for (const feature of Object.keys(features)) {
       images.push(feature);
     }
   }
