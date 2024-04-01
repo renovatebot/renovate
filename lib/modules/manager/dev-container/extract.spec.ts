@@ -25,10 +25,15 @@ const fixtures = {
   nullFeatures: getFixture('.devcontainer.nullfeatures.json'),
   nullImage: getFixture('.devcontainer.nullimage.json'),
   nullImageAndFeatures: getFixture('.devcontainer.nullimageandfeatures.json'),
+  allKindsOfFeatures: getFixture('.devcontainer.allkindsoffeatures.json'),
 };
 
 describe('modules/manager/dev-container/extract', () => {
   describe('extractPackageFile()', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
     it('returns null when file is empty', () => {
       // Arrange
       const content = '';
@@ -244,6 +249,33 @@ describe('modules/manager/dev-container/extract', () => {
           "datasource": "docker",
           "depName": "devcontainer.registry.renovate.com/test/feature",
           "replaceString": "devcontainer.registry.renovate.com/test/feature:4.5.6",
+        },
+      ]
+      `);
+    });
+
+    it('returns only docker dependencies', () => {
+      // Arrange
+      const content = fixtures.allKindsOfFeatures.content;
+      const packageFile = fixtures.allKindsOfFeatures.path;
+      const extractConfig = {};
+
+      // Act
+      const result = extractPackageFile(content, packageFile, extractConfig);
+
+      // Assert
+      expect(result).not.toBeNull();
+      expect(result?.deps).not.toBeNull();
+      expect(result?.deps.length).toBe(1);
+      expect(result?.deps).toMatchInlineSnapshot(`
+      [
+        {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentDigest": undefined,
+          "currentValue": "1.2.3",
+          "datasource": "docker",
+          "depName": "devcontainer.registry.renovate.com/test/feature",
+          "replaceString": "devcontainer.registry.renovate.com/test/feature:1.2.3",
         },
       ]
       `);
