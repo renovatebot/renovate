@@ -37,7 +37,7 @@ export function extractPackageFile(
       );
     }
 
-    const featureImages = getFeatureImages(file) ?? [];
+    const featureImages = getFeatureImages(file);
 
     if (featureImages.length > 0) {
       images = images.concat(featureImages);
