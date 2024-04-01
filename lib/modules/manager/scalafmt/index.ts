@@ -1,6 +1,5 @@
 import type { Category } from '../../../constants';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
-import * as semverVersioning from '../../versioning/semver';
 
 export { extractPackageFile } from './extract';
 
