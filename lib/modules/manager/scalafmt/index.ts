@@ -8,7 +8,6 @@ export const supportedDatasources = [GithubReleasesDatasource.id];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.scalafmt.conf$'],
-  versioning: semverVersioning.id,
 };
 
 export const categories: Category[] = ['java'];
