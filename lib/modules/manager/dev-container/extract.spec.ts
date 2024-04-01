@@ -1,5 +1,6 @@
 import upath from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
+import * as dockerfileExtract from '../dockerfile/extract';
 import { extractPackageFile } from './extract';
 
 function getFixture(devContainerJsonFixtureFileName: string) {
@@ -216,6 +217,36 @@ describe('modules/manager/dev-container/extract', () => {
 
       // Assert
       expect(result).toBeNull();
+    });
+
+    it('returns valid dependencies when others throw error when calling getDep', () => {
+      // Arrange
+      const content = fixtures.imageAndFeature.content;
+      const packageFile = fixtures.imageAndFeature.path;
+      const extractConfig = {};
+      jest.spyOn(dockerfileExtract, 'getDep').mockImplementationOnce(() => {
+        throw new Error('Dependency error');
+      });
+
+      // Act
+      const result = extractPackageFile(content, packageFile, extractConfig);
+
+      // Assert
+      expect(result).not.toBeNull();
+      expect(result?.deps).not.toBeNull();
+      expect(result?.deps.length).toBe(1);
+      expect(result?.deps).toMatchInlineSnapshot(`
+      [
+        {
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "currentDigest": undefined,
+          "currentValue": "4.5.6",
+          "datasource": "docker",
+          "depName": "devcontainer.registry.renovate.com/test/feature",
+          "replaceString": "devcontainer.registry.renovate.com/test/feature:4.5.6",
+        },
+      ]
+      `);
     });
   });
 });
