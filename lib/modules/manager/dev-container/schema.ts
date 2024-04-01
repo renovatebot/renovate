@@ -1,4 +1,4 @@
 export interface DevContainerFile {
   image?: string;
-  features: any;
+  features: Map<string, any>;
 }
