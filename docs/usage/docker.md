@@ -9,6 +9,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 - Docker's `Dockerfile` files
 - Docker Compose `docker-compose.yml`, `compose.yml` files
+- Visual Studio Code dev containers and GitHub Codespace image and features
 - CircleCI config files
 - Kubernetes manifest files
 - Ansible configuration files
