@@ -54,21 +54,21 @@ You may use synchronous or asynchronous methods inside a `.js` file, including e
 #### Environment config
 
 Most config options can be set using environment variables. 
-The environment variable name is usual found by adding the prefixing `RENOVATE_` to the config option name in all-uppercase.
+The environment variable name is usually found by adding the prefix `RENOVATE_` to the config option name in all-uppercase.
 (This prefix can be changed by setting the environment variable `ENV_PREFIX`.) 
 For example, `RENOVATE_PLATFORM=gitlab` is the same as setting `"platform": "gitlab"` in File config.
 
 As some environment variable names differ from the usual pattern, we recommend you still check the `env` field of the documentation for each config option to make sure.
-If the configuration option lacks a `env` field, that config option may lack the facility to be configured by environment variable.
+If the configuration option lacks the `env` field, that config option may lack the facility to be configured by a separate environment variable.
 
 The values assigned to the environment variables may be strings, numbers, booleans, or stringified JSON.
 If using stringified JSON then be careful to use appropriate escaping.
-Key names should be quoted using double quotes, as these are JSON strings.
-If environment variables are being set from a shell console or shell script, it is generally simplest to wrap the entire stringified JSON in single quotes to prevent the shell interpreter from parsing (and removing) the escaping.
-If the environment variables are being set from a file (such as a docker env-file or in a Kubernetes manifest YAML) then those outermost single-quotes should be removed, otherwise renovate may interpret the entire value as a single string instead of interpreting it as a JSON compound object.
+Key names should be quoted using double quotes, as these are strings in JSON.
+If environment variables are being set from a shell console or shell script, it is generally simplest to wrap the entire stringified JSON in single quotes to prevent the shell interpreter from parsing (and removing) the escaping or punctuation.
+If the environment variables are being set from a file (such as a docker env-file or in a Kubernetes manifest YAML) then those outermost single-quotes should usually be removed, otherwise renovate may interpret the entire value as a simple string instead of as a compound JSON object.
 
 A special case for Environment config is the `RENOVATE_CONFIG` "meta" config option.
-This is intended to allow passing the entire complex config through the value of a single environment variable.
+This is intended to allow passing the entire global config as the value of a single environment variable.
 It can also be used to set config options that have no individual corresponding environment variable.
 The `RENOVATE_CONFIG` option accepts a stringified full config, for example: `RENOVATE_CONFIG={"platform":"gitlab","onboarding":false}`.
 Any additional Environment config variables take precedence over values in `RENOVATE_CONFIG`.
