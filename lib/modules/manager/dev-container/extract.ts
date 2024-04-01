@@ -18,7 +18,8 @@ export function extractPackageFile(
     file = JSON.parse(content) as DevContainerFile;
   } catch (err) {
     logger.debug(
-      `Failed to parse dev container JSON file '${packageFile}': ${err}`,
+      { err, packageFile },
+      'Failed to parse dev container JSON file',
     );
     return null;
   }
@@ -31,7 +32,8 @@ export function extractPackageFile(
       images.push(image);
     } else {
       logger.debug(
-        `No image defined in dev container JSON file '${packageFile}'`,
+        { packageFile },
+        'No image defined in dev container JSON file.',
       );
     }
 
@@ -41,13 +43,15 @@ export function extractPackageFile(
       images = images.concat(featureImages);
     } else {
       logger.debug(
-        `No dev container features in dev container JSON file '${packageFile}'`,
+        { packageFile },
+        'No dev container features in dev container JSON file',
       );
     }
 
     if (images.length < 1) {
       logger.debug(
-        `No images found in dev container JSON file '${packageFile}'`,
+        { packageFile },
+        'No images found in dev container JSON file.',
       );
       return null;
     }
@@ -59,21 +63,24 @@ export function extractPackageFile(
         const dep = getDep(_image, true, extractConfig.registryAliases);
         if (!isValidDependency(dep)) {
           logger.debug(
-            `Skipping invalid dependency '${image}' in dev container JSON file '${packageFile}'`,
+            { image, packageFile },
+            'Skipping invalid dependency in dev container JSON file.',
           );
           continue;
         }
         deps.push(dep);
       } catch (err) {
         logger.debug(
-          `Failed to determine dependency for image '${_image}' in dev container JSON file '${packageFile}'`,
+          { _image, packageFile },
+          'Failed to determine dependency for image in dev container JSON file.',
         );
       }
     }
 
     if (deps.length < 1) {
       logger.debug(
-        `No dependencies to process for dev container JSON file '${packageFile}'`,
+        { packageFile },
+        'No dependencies to process for dev container JSON file.',
       );
       return null;
     }
@@ -81,7 +88,8 @@ export function extractPackageFile(
     return { deps };
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
-      `Error extracting dev container JSON file '${packageFile}': ${err}`,
+      { err, packageFile },
+      'Error extracting dev container JSON file',
     );
     return null;
   }
