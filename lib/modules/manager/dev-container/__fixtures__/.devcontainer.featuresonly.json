@@ -1,6 +1,0 @@
-{
-  "features": {
-    "devcontainer.registry.renovate.com/test/features/first:1.2.3": {},
-    "devcontainer.registry.renovate.com/test/features/second:4.5.6": {}
-  }
-}

@@ -1,31 +1,70 @@
+import { randomUUID } from 'crypto';
 import upath from 'upath';
-import { Fixtures } from '../../../../test/fixtures';
 import * as dockerfileExtract from '../dockerfile/extract';
 import { extractPackageFile } from './extract';
 
-function getFixture(devContainerJsonFixtureFileName: string) {
+function getFixture(content: string) {
   return {
-    content: Fixtures.get(devContainerJsonFixtureFileName),
-    path: upath.resolve(
-      __dirname,
-      '__fixtures__',
-      devContainerJsonFixtureFileName,
-    ),
+    content,
+    path: upath.resolve(__dirname, randomUUID()),
   };
 }
 
 const fixtures = {
-  featuresOnly: getFixture('.devcontainer.featuresonly.json'),
-  imageAndFeature: getFixture('.devcontainer.imageandfeature.json'),
-  imageOnly: getFixture('.devcontainer.imageonly.json'),
-  malformedFeature: getFixture('.devcontainer.malformedfeature.json'),
-  malformedFeatures: getFixture('.devcontainer.malformedfeatures.json'),
-  malformedImage: getFixture('.devcontainer.malformedimage.json'),
-  noImageOrFeatures: getFixture('.devcontainer.noimageorfeatures.json'),
-  nullFeatures: getFixture('.devcontainer.nullfeatures.json'),
-  nullImage: getFixture('.devcontainer.nullimage.json'),
-  nullImageAndFeatures: getFixture('.devcontainer.nullimageandfeatures.json'),
-  allKindsOfFeatures: getFixture('.devcontainer.allkindsoffeatures.json'),
+  featuresOnly: getFixture(`
+  {
+    "features": {
+      "devcontainer.registry.renovate.com/test/features/first:1.2.3": {},
+      "devcontainer.registry.renovate.com/test/features/second:4.5.6": {}
+    }
+  }`),
+  imageAndFeature: getFixture(`
+  {
+    "image": "devcontainer.registry.renovate.com/test/image:1.2.3",
+    "features": {
+      "devcontainer.registry.renovate.com/test/feature:4.5.6": {}
+    }
+  }`),
+  imageOnly: getFixture(`
+  {
+    "image": "devcontainer.registry.renovate.com/test/image:1.2.3"
+  }`),
+  malformedFeature: getFixture(`
+  {
+    "features": {
+      "malformedFeature": {}
+    }
+  }`),
+  malformedFeatures: getFixture(`
+  {
+    "features": "devcontainer.registry.renovate.com/test:1.2.3"
+  }`),
+  malformedImage: getFixture(`
+  {
+    "image:": "devcontainer.registry.renovate.com/test/image:1.2.3"
+  }`),
+  noImageOrFeatures: getFixture('{}'),
+  nullFeatures: getFixture(`
+  {
+    "features": null
+  }`),
+  nullImage: getFixture(`
+  {
+    "image": null
+  }`),
+  nullImageAndFeatures: getFixture(`
+  {
+    "image": null,
+    "features": null
+  }`),
+  allKindsOfFeatures: getFixture(`
+  {
+    "features": {
+      "devcontainer.registry.renovate.com/test/feature:1.2.3": {},
+      "./localfeature": {},
+      "devcontainer.registry.renovate.com/test/feature/other.tgz": {}
+    }
+  }`),
 };
 
 describe('modules/manager/dev-container/extract', () => {

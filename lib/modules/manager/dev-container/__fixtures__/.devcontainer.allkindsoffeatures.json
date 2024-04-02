@@ -1,7 +1,0 @@
-{
-  "features": {
-    "devcontainer.registry.renovate.com/test/feature:1.2.3": {},
-    "./localfeature": {},
-    "devcontainer.registry.renovate.com/test/feature/other.tgz": {}
-  }
-}
