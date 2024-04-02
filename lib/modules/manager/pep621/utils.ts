@@ -87,9 +87,9 @@ export function parseDependencyGroupRecord(
   }
 
   const deps: PackageDependency[] = [];
-  for (const [groupName, pep508Strings] of Object.entries(records)) {
+  for (const pep508Strings of Object.values(records)) {
     for (const dep of parseDependencyList(depType, pep508Strings)) {
-      deps.push({ ...dep, depName: `${groupName}/${dep.packageName!}` });
+      deps.push({ ...dep, depName: dep.packageName! });
     }
   }
   return deps;
