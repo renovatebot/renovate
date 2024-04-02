@@ -112,6 +112,10 @@ const configV3AzureDevOps = {
 };
 
 describe('modules/datasource/nuget/index', () => {
+  beforeEach(() => {
+    GlobalConfig.reset();
+  });
+
   describe('parseRegistryUrl', () => {
     it('extracts feed version from registry URL hash (v3)', () => {
       const parsed = parseRegistryUrl('https://my-registry#protocolVersion=3');
