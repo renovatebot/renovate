@@ -7,6 +7,7 @@ import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -34,6 +35,7 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import { BitbucketPrCache } from './pr-cache';
+import { RepoInfo, Repositories } from './schema';
 import type {
   Account,
   BitbucketStatus,
@@ -43,8 +45,6 @@ import type {
   PagedResult,
   PrResponse,
   RepoBranchingModel,
-  RepoInfo,
-  RepoInfoBody,
 } from './types';
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
@@ -117,14 +117,11 @@ export async function initPlatform({
 export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
-    let repos = (
-      await bitbucketHttp.getJson<PagedResult<RepoInfoBody>>(
-        `/2.0/repositories/?role=contributor`,
-        {
-          paginate: true,
-        },
-      )
-    ).body.values;
+    let { body: repos } = await bitbucketHttp.getJson(
+      `/2.0/repositories/?role=contributor`,
+      { paginate: true },
+      Repositories,
+    );
 
     // if autodiscoverProjects is configured
     // filter the repos list
@@ -134,12 +131,14 @@ export async function getRepos(config: AutodiscoverConfig): Promise<string[]> {
         { autodiscoverProjects: config.projects },
         'Applying autodiscoverProjects filter',
       );
-      repos = repos.filter((repo) =>
-        matchRegexOrGlobList(repo.project.name, autodiscoverProjects),
+      repos = repos.filter(
+        (repo) =>
+          repo.projectName &&
+          matchRegexOrGlobList(repo.projectName, autodiscoverProjects),
       );
     }
 
-    return repos.map((repo) => repo.full_name);
+    return repos.map(({ owner, name }) => `${owner}/${name}`);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
     throw err;
@@ -165,7 +164,10 @@ export async function getRawFile(
     `/2.0/repositories/${repo}/src/` +
     (finalBranchOrTag ?? `HEAD`) +
     `/${path}`;
-  const res = await bitbucketHttp.get(url);
+  const res = await bitbucketHttp.get(url, {
+    cacheProvider: repoCacheProvider,
+    memCache: true,
+  });
   return res.body;
 }
 
@@ -198,13 +200,11 @@ export async function initRepo({
   let info: RepoInfo;
   let mainBranch: string;
   try {
-    info = utils.repoInfoTransformer(
-      (
-        await bitbucketHttp.getJson<RepoInfoBody>(
-          `/2.0/repositories/${repository}`,
-        )
-      ).body,
+    const { body: repoInfo } = await bitbucketHttp.getJson(
+      `/2.0/repositories/${repository}`,
+      RepoInfo,
     );
+    info = repoInfo;
 
     mainBranch = info.mainbranch;
 
@@ -670,13 +670,11 @@ export async function getIssueList(): Promise<Issue[]> {
       filters.push(`reporter.uuid="${renovateUserUuid}"`);
     }
     const filter = encodeURIComponent(filters.join(' AND '));
-    return (
-      (
-        await bitbucketHttp.getJson<{ values: Issue[] }>(
-          `/2.0/repositories/${config.repository}/issues?q=${filter}`,
-        )
-      ).body.values || []
-    );
+    const url = `/2.0/repositories/${config.repository}/issues?q=${filter}`;
+    const res = await bitbucketHttp.getJson<{ values: Issue[] }>(url, {
+      cacheProvider: repoCacheProvider,
+    });
+    return res.body.values || [];
   } catch (err) {
     logger.warn({ err }, 'Error finding issues');
     return [];

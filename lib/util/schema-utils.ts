@@ -228,7 +228,7 @@ export const UtcDate = z
 
 export const Yaml = z.string().transform((str, ctx): JsonValue => {
   try {
-    return parseSingleYaml(str, { json: true }) as JsonValue;
+    return parseSingleYaml(str, { json: true });
   } catch (e) {
     ctx.addIssue({ code: 'custom', message: 'Invalid YAML' });
     return z.NEVER;

@@ -45,10 +45,30 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(2);
       expect(warnings).toMatchObject([
         {
-          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
         {
-          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+      ]);
+    });
+
+    it('catches global options in inherit config', async () => {
+      const config = {
+        binarySource: 'something',
+        username: 'user',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'inherit',
+        config,
+      );
+      expect(warnings).toHaveLength(2);
+      expect(warnings).toMatchObject([
+        {
+          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+        {
+          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
     });
@@ -65,6 +85,17 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('does not warn for valid inheritConfig', async () => {
+      const config = {
+        onboarding: false,
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'inherit',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -1020,7 +1051,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchObject([
         {
           topic: 'Configuration Error',
-          message: `The "customEnvVariables" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "customEnvVariables" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
     });
@@ -1426,7 +1457,7 @@ describe('config/validation', () => {
           },
           {
             topic: 'Configuration Error',
-            message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+            message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
           },
         ]);
       });
@@ -1615,6 +1646,56 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         'global',
         // @ts-expect-error: contains invalid values
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('fails for missing reportPath if reportType is "s3"', async () => {
+      const config: RenovateConfig = {
+        reportType: 's3',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('validates reportPath if reportType is "s3"', async () => {
+      const config: RenovateConfig = {
+        reportType: 's3',
+        reportPath: 's3://bucket-name/key-name',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+    });
+
+    it('fails for missing reportPath if reportType is "file"', async () => {
+      const config: RenovateConfig = {
+        reportType: 'file',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
+
+    it('validates reportPath if reportType is "file"', async () => {
+      const config: RenovateConfig = {
+        reportType: 'file',
+        reportPath: './report.json',
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        'global',
         config,
       );
       expect(warnings).toHaveLength(0);

@@ -9,6 +9,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { PypiDatasource } from '../../datasource/pypi';
+import { normalizeDepName } from '../../datasource/pypi/common';
 import * as gitVersioning from '../../versioning/git';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
@@ -157,10 +158,7 @@ export const PoetryDependencies = LooseRecord(
   for (const [depName, dep] of Object.entries(record)) {
     dep.depName = depName;
     if (!dep.packageName) {
-      const pep503NormalizeRegex = regEx(/[-_.]+/g);
-      const packageName = depName
-        .toLowerCase()
-        .replace(pep503NormalizeRegex, '-');
+      const packageName = normalizeDepName(depName);
       if (depName !== packageName) {
         dep.packageName = packageName;
       }
@@ -371,7 +369,7 @@ export const PoetrySchemaToml = Toml.pipe(PoetrySchema);
 const poetryConstraint: Record<string, string> = {
   '1.0': '<1.1.0',
   '1.1': '<1.3.0',
-  '2.0': '>=1.3.0',
+  '2.0': '>=1.3.0 <1.4.0', // 1.4.0 introduced embedding of the poetry version in lock file header
 };
 
 export const Lockfile = Toml.pipe(
