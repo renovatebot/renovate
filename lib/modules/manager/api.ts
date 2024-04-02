@@ -120,7 +120,7 @@ api.set('conan', conan);
 api.set('cpanfile', cpanfile);
 api.set('crossplane', crossplane);
 api.set('deps-edn', depsEdn);
-api.set('dev-container', devContainer);
+api.set('devcontainer', devContainer);
 api.set('docker-compose', dockerCompose);
 api.set('dockerfile', dockerfile);
 api.set('droneci', droneci);
