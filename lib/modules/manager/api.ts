@@ -24,7 +24,7 @@ import * as conan from './conan';
 import * as cpanfile from './cpanfile';
 import * as crossplane from './crossplane';
 import * as depsEdn from './deps-edn';
-import * as devContainer from './dev-container';
+import * as devContainer from './devcontainer';
 import * as dockerCompose from './docker-compose';
 import * as dockerfile from './dockerfile';
 import * as droneci from './droneci';

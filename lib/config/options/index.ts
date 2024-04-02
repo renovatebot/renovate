@@ -1082,7 +1082,7 @@ const options: RenovateOptions[] = [
       'ansible',
       'bitbucket-pipelines',
       'crossplane',
-      'dev-container',
+      'devcontainer',
       'docker-compose',
       'dockerfile',
       'droneci',

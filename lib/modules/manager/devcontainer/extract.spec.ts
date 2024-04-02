@@ -67,7 +67,7 @@ const fixtures = {
   }`),
 };
 
-describe('modules/manager/dev-container/extract', () => {
+describe('modules/manager/devcontainer/extract', () => {
   describe('extractPackageFile()', () => {
     afterEach(() => {
       jest.restoreAllMocks();
