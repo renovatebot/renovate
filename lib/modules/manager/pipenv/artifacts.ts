@@ -144,10 +144,7 @@ async function findPipfileSourceUrlsWithCredentials(
 export function extractEnvironmentVariableName(
   credential: string | null,
 ): string | null {
-  if (!credential) {
-    return null;
-  }
-  const match = decodeURI(credential).match('([a-zA-Z0-9_]+)');
+  const match = decodeURI(credential ?? '').match('([a-zA-Z0-9_]+)');
   return match?.length ? match[0] : null;
 }
 
