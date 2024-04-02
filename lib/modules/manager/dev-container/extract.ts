@@ -15,11 +15,11 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   try {
     const file = DevContainerFile.parse(content);
-    let images: string[] = [];
+    let targets: string[] = [];
     const image = getImage(file);
 
     if (image !== undefined && image !== null) {
-      images.push(image);
+      targets.push(image);
     } else {
       logger.debug(
         { packageFile },
@@ -27,30 +27,27 @@ export function extractPackageFile(
       );
     }
 
-    const featureImages = getFeatureImages(file);
+    const features = getFeatures(file);
 
-    if (featureImages.length > 0) {
-      images = images.concat(featureImages);
+    if (features.length > 0) {
+      targets = targets.concat(features);
     } else {
-      logger.debug(
-        { packageFile },
-        'No dev container features in dev container JSON file',
-      );
+      logger.debug({ packageFile }, 'No features in dev container JSON file');
     }
 
-    if (images.length < 1) {
+    if (targets.length < 1) {
       logger.debug(
         { packageFile },
-        'No images found in dev container JSON file.',
+        'No deps found in dev container JSON file.',
       );
       return null;
     }
 
     const deps: PackageDependency<Record<string, any>>[] = [];
 
-    for (const _image of images) {
+    for (const target of targets) {
       try {
-        const dep = getDep(_image, true, extractConfig.registryAliases);
+        const dep = getDep(target, true, extractConfig.registryAliases);
         if (!isValidDependency(dep)) {
           logger.debug(
             { image, packageFile },
@@ -61,8 +58,8 @@ export function extractPackageFile(
         deps.push(dep);
       } catch (err) {
         logger.debug(
-          { _image, packageFile },
-          'Failed to determine dependency for image in dev container JSON file.',
+          { target, packageFile },
+          'Failed to determine dependency in dev container JSON file.',
         );
       }
     }
@@ -93,14 +90,14 @@ function getImage(file: DevContainerFile): string | null {
   return image;
 }
 
-function getFeatureImages(file: DevContainerFile): string[] {
-  const images: string[] = [];
-  const features = file?.features;
+function getFeatures(file: DevContainerFile): string[] {
+  const features: string[] = [];
+  const fileFeatures = file?.features;
 
-  if (features !== undefined && features !== null) {
-    for (const feature of Object.keys(features)) {
-      images.push(feature);
+  if (fileFeatures !== undefined && fileFeatures !== null) {
+    for (const feature of Object.keys(fileFeatures)) {
+      features.push(feature);
     }
   }
-  return images;
+  return features;
 }
