@@ -6,25 +6,15 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { DevContainerFile } from './schema';
+import { DevContainerFile } from './schema';
 
 export function extractPackageFile(
   content: string,
   packageFile: string,
   extractConfig: ExtractConfig,
 ): PackageFileContent | null {
-  let file: DevContainerFile;
   try {
-    file = JSON.parse(content) as DevContainerFile;
-  } catch (err) {
-    logger.debug(
-      { err, packageFile },
-      'Failed to parse dev container JSON file',
-    );
-    return null;
-  }
-
-  try {
+    const file = DevContainerFile.parse(content);
     let images: string[] = [];
     const image = getImage(file);
 
