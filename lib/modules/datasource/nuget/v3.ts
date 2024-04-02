@@ -172,7 +172,7 @@ export class NugetV3Api {
         if (versioning.isValid(version) && versioning.isStable(version)) {
           latestStable = removeBuildMeta(version);
           homepage = projectUrl ? massageUrl(projectUrl) : homepage;
-          nupkgUrl = packageContent ? massageUrl(packageContent) : null;
+          nupkgUrl = massageUrl(packageContent);
         }
         if (listed === false) {
           release.isDeprecated = true;
@@ -190,7 +190,7 @@ export class NugetV3Api {
       const last = catalogEntries.pop()!;
       latestStable = removeBuildMeta(last.version);
       homepage ??= last.projectUrl ?? null;
-      nupkgUrl ??= last.packageContent ? massageUrl(last.packageContent) : null;
+      nupkgUrl ??= massageUrl(last.packageContent);
     }
 
     const dep: ReleaseResult = {
