@@ -12,6 +12,7 @@ import { getS3Client, parseS3Url } from '../../../s3';
 import { streamToString } from '../../../streams';
 import type { RepoCacheRecord } from '../schema';
 import { RepoCacheBase } from './base';
+import {getLocalCacheFileName} from "../common";
 
 export class RepoCacheS3 extends RepoCacheBase {
   private readonly s3Client;
@@ -65,8 +66,9 @@ export class RepoCacheS3 extends RepoCacheBase {
     };
     try {
       await this.s3Client.send(new PutObjectCommand(s3Params));
-      if (process.env.RENOVATE_X_S3_PERSIST_CACHE === 'true') {
-        const cacheLocalFileName = this.getLocalCacheFileName();
+      cacheType
+      if (s3PersistCache === '/tmp/..') {
+        const cacheLocalFileName = getLocalCacheFileName(this.platform, this.repository);
         await outputCacheFile(cacheLocalFileName, Body);
       }
     } catch (err) {
@@ -92,12 +94,5 @@ export class RepoCacheS3 extends RepoCacheBase {
 
   private getCacheFileName(): string {
     return `${this.dir}${this.platform}/${this.repository}/cache.json`;
-  }
-
-  private getLocalCacheFileName(): string {
-    const repoCachePath = 'renovate/repository/';
-    const platform = this.platform;
-    const fileName = `${this.repository}.json`;
-    return upath.join(repoCachePath, platform, fileName);
   }
 }
