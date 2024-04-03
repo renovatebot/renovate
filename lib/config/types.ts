@@ -434,6 +434,10 @@ export interface RenovateOptionBase {
   experimentalIssues?: number[];
 
   advancedUse?: boolean;
+
+  deprecated?: boolean;
+
+  deprecationMsg?: string;
 }
 
 export interface RenovateArrayOption<

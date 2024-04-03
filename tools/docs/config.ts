@@ -179,6 +179,17 @@ function genExperimentalMsg(el: Record<string, any>): string {
   return warning + '\n';
 }
 
+function genDeprecationMsg(el: Record<string, any>): string {
+  let warning =
+    '\n<!-- prettier-ignore -->\n!!! warning "This feature has been deprecated"\n';
+
+  if (el.deprecationMsg) {
+    warning += indent`${2}${el.deprecationMsg}`;
+  }
+
+  return warning + '\n';
+}
+
 function indexMarkdown(lines: string[]): Record<string, [number, number]> {
   const indexed: Record<string, [number, number]> = {};
 
@@ -240,6 +251,10 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       if (el.experimental) {
         configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+      }
+
+      if (el.deprecated) {
+        configOptionsRaw[footerIndex] += genDeprecationMsg(el);
       }
     });
 
