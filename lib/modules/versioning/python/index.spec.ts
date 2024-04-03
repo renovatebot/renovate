@@ -1,5 +1,3 @@
-import { partial } from '../../../../test/util';
-import type { NewValueConfig } from '../types';
 import { api as versioning } from '.';
 
 describe('modules/versioning/python/index', () => {
