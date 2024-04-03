@@ -1,33 +1,22 @@
-import { expect } from '@jest/globals';
-import { mockDeep } from 'jest-mock-extended';
-import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
-import {
-  env,
-  fs,
-  git,
-  mocked,
-  mockedFunction,
-  partial,
-} from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { logger } from '../../../logger';
+import {expect} from '@jest/globals';
+import {mockDeep} from 'jest-mock-extended';
+import {join} from 'upath';
+import {envMock, mockExecAll} from '../../../../test/exec-util';
+import {Fixtures} from '../../../../test/fixtures';
+import {env, fs, git, mocked, mockedFunction, partial,} from '../../../../test/util';
+import {GlobalConfig} from '../../../config/global';
+import type {RepoGlobalConfig} from '../../../config/types';
+import {logger} from '../../../logger';
 import * as docker from '../../../util/exec/docker';
-import type { ExtraEnv, Opt } from '../../../util/exec/types';
-import type { StatusResult } from '../../../util/git/types';
-import { find as _find } from '../../../util/host-rules';
-import { getPkgReleases as _getPkgReleases } from '../../datasource';
+import type {ExtraEnv, Opt} from '../../../util/exec/types';
+import type {StatusResult} from '../../../util/git/types';
+import {find as _find} from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import {
-  addExtraEnvVariable,
-  extractEnvironmentVariableName,
-  getMatchingHostRule,
-} from './artifacts';
-import type { PipfileLockSchema } from './schema';
-import { updateArtifacts } from '.';
+import {getPkgReleases as _getPkgReleases} from '../../datasource';
+import type {UpdateArtifactsConfig} from '../types';
+import {addExtraEnvVariable, extractEnvironmentVariableName, getMatchingHostRule,} from './artifacts';
+import type {PipfileLockSchema} from './schema';
+import {updateArtifacts} from '.';
 
 const datasource = mocked(_datasource);
 const find = mockedFunction(_find);
@@ -55,7 +44,7 @@ const dockerAdminConfig = {
 };
 
 const config: UpdateArtifactsConfig = {};
-const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
+const lockMaintenanceConfig = {...config, isLockFileMaintenance: true};
 const pipenvCacheDir = '/tmp/renovate/cache/others/pipenv';
 const pipCacheDir = '/tmp/renovate/cache/others/pip';
 const virtualenvsCacheDir = '/tmp/renovate/cache/others/virtualenvs';
@@ -73,28 +62,28 @@ describe('modules/manager/pipenv/artifacts', () => {
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
     pipFileLock = {
-      _meta: { requires: {} },
-      default: { pipenv: {} },
-      develop: { pipenv: {} },
+      _meta: {requires: {}},
+      default: {pipenv: {}},
+      develop: {pipenv: {}},
     };
 
     // python
     getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: '3.6.5' },
-        { version: '3.7.6' },
-        { version: '3.8.5' },
-        { version: '3.9.1' },
-        { version: '3.10.2' },
+        {version: '3.6.5'},
+        {version: '3.7.6'},
+        {version: '3.8.5'},
+        {version: '3.9.1'},
+        {version: '3.10.2'},
       ],
     });
 
     // pipenv
     getPkgReleases.mockResolvedValueOnce({
       releases: [
-        { version: '2013.5.19' },
-        { version: '2013.6.11' },
-        { version: '2013.6.12' },
+        {version: '2013.5.19'},
+        {version: '2013.6.11'},
+        {version: '2013.6.12'},
       ],
     });
   });
@@ -190,7 +179,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: { ...config, constraints: { python: '== 3.8.*' } },
+        config: {...config, constraints: {python: '== 3.8.*'}},
       }),
     ).not.toBeNull();
 
@@ -218,7 +207,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     // pipenv
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '2023.1.2' }],
+      releases: [{version: '2023.1.2'}],
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
@@ -238,8 +227,8 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
-      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {cmd: 'docker pull ghcr.io/containerbase/sidecar'},
+      {cmd: 'docker ps --filter name=renovate_sidecar -aq'},
       {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
@@ -271,7 +260,7 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('supports install mode', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    GlobalConfig.set({...adminConfig, binarySource: 'install'});
     pipFileLock._meta!.requires!.python_version = '3.6';
     fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.ensureCacheDir.mockResolvedValueOnce(pipCacheDir);
@@ -279,7 +268,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     // pipenv
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '2023.1.2' }],
+      releases: [{version: '2023.1.2'}],
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
@@ -299,8 +288,8 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool python 3.6.5' },
-      { cmd: 'install-tool pipenv 2013.6.12' },
+      {cmd: 'install-tool python 3.6.5'},
+      {cmd: 'install-tool pipenv 2013.6.12'},
       {
         cmd: 'pipenv lock',
         options: {
@@ -316,14 +305,14 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('defaults to latest if no lock constraints', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    GlobalConfig.set({...adminConfig, binarySource: 'install'});
     fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.ensureCacheDir.mockResolvedValueOnce(pipCacheDir);
     fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     // pipenv
     datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: '2023.1.2' }],
+      releases: [{version: '2023.1.2'}],
     });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
@@ -343,8 +332,8 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool python 3.10.2' },
-      { cmd: 'install-tool pipenv 2013.6.12' },
+      {cmd: 'install-tool python 3.10.2'},
+      {cmd: 'install-tool pipenv 2013.6.12'},
       {
         cmd: 'pipenv lock',
         options: {
@@ -376,7 +365,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         config,
       }),
     ).toEqual([
-      { artifactError: { lockFile: 'Pipfile.lock', stderr: 'not found' } },
+      {artifactError: {lockFile: 'Pipfile.lock', stderr: 'not found'}},
     ]);
   });
 
@@ -442,8 +431,8 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
-      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {cmd: 'docker pull ghcr.io/containerbase/sidecar'},
+      {cmd: 'docker ps --filter name=renovate_sidecar -aq'},
       {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
@@ -498,8 +487,8 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
-      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {cmd: 'docker pull ghcr.io/containerbase/sidecar'},
+      {cmd: 'docker ps --filter name=renovate_sidecar -aq'},
       {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
@@ -549,13 +538,13 @@ describe('modules/manager/pipenv/artifacts', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: { ...config, constraints: { pipenv: '==2020.1.1' } },
+        config: {...config, constraints: {pipenv: '==2020.1.1'}},
       }),
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull ghcr.io/containerbase/sidecar' },
-      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {cmd: 'docker pull ghcr.io/containerbase/sidecar'},
+      {cmd: 'docker ps --filter name=renovate_sidecar -aq'},
       {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
@@ -608,7 +597,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: Fixtures.get('Pipfile6'),
-        config: { ...config, constraints: { python: '== 3.8.*' } },
+        config: {...config, constraints: {python: '== 3.8.*'}},
       }),
     ).toEqual([
       {
@@ -641,16 +630,16 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it('extracts correct environment variable from credential placeholder', () => {
-    [
-      ['$USERNAME', 'USERNAME'],
-      ['$', null],
-      [null, null],
-      ['${USERNAME}', 'USERNAME'],
-      ['${USERNAME:-default}', 'USERNAME'],
-      ['${COMPLEX_NAME_1:-default}', 'COMPLEX_NAME_1'],
-    ].every((testCase) => {
-      expect(extractEnvironmentVariableName(testCase[0])).toEqual(testCase[1]);
-    });
+    for (const testCase of [
+      {credential: '$USERNAME', result: 'USERNAME'},
+      {credential: '$', result: null},
+      {credential: '', result: null},
+      {credential: '${USERNAME}', result: 'USERNAME'},
+      {credential: '${USERNAME:-default}', result: 'USERNAME'},
+      {credential: '${COMPLEX_NAME_1:-default}', result: 'COMPLEX_NAME_1'},
+    ]) {
+      expect(extractEnvironmentVariableName(testCase.credential)).toEqual(testCase.result);
+    }
   });
 
   it('warns about duplicate placeholders with different values', () => {
@@ -684,7 +673,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: Fixtures.get('Pipfile7'),
-        config: { ...config, constraints: { python: '== 3.8.*' } },
+        config: {...config, constraints: {python: '== 3.8.*'}},
       }),
     ).toEqual([
       {
