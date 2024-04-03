@@ -172,6 +172,10 @@ If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 clie
 
 Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
 
+## `RENOVATE_X_S3_PERSIST_CACHE`
+
+If set, Renovate will persist repository cache locally after uploading to S3.
+
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 
 If set, Renovate will use SQLite as the backend for the package cache.

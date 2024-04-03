@@ -5,7 +5,9 @@ import {
   PutObjectCommand,
   PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
+import upath from 'upath';
 import { logger } from '../../../../logger';
+import { outputCacheFile } from '../../../fs';
 import { getS3Client, parseS3Url } from '../../../s3';
 import { streamToString } from '../../../streams';
 import type { RepoCacheRecord } from '../schema';
@@ -54,14 +56,19 @@ export class RepoCacheS3 extends RepoCacheBase {
 
   async write(data: RepoCacheRecord): Promise<void> {
     const cacheFileName = this.getCacheFileName();
+    const Body = JSON.stringify(data);
     const s3Params: PutObjectCommandInput = {
       Bucket: this.bucket,
       Key: cacheFileName,
-      Body: JSON.stringify(data),
+      Body,
       ContentType: 'application/json',
     };
     try {
       await this.s3Client.send(new PutObjectCommand(s3Params));
+      if (process.env.RENOVATE_X_S3_PERSIST_CACHE === 'true') {
+        const cacheLocalFileName = this.getLocalCacheFileName();
+        await outputCacheFile(cacheLocalFileName, Body);
+      }
     } catch (err) {
       logger.warn({ err }, 'RepoCacheS3.write() - failure');
     }
@@ -85,5 +92,12 @@ export class RepoCacheS3 extends RepoCacheBase {
 
   private getCacheFileName(): string {
     return `${this.dir}${this.platform}/${this.repository}/cache.json`;
+  }
+
+  private getLocalCacheFileName(): string {
+    const repoCachePath = 'renovate/repository/';
+    const platform = this.platform;
+    const fileName = `${this.repository}.json`;
+    return upath.join(repoCachePath, platform, fileName);
   }
 }
