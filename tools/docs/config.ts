@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getOptions } from '../../lib/config/options';
 import { allManagersList } from '../../lib/modules/manager';
@@ -253,7 +254,7 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         configOptionsRaw[footerIndex] += genExperimentalMsg(el);
       }
 
-      if (el.deprecated) {
+      if (is.nonEmptyString(el.deprecationMsg)) {
         configOptionsRaw[footerIndex] += genDeprecationMsg(el);
       }
     });

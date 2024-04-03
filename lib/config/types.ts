@@ -435,8 +435,6 @@ export interface RenovateOptionBase {
 
   advancedUse?: boolean;
 
-  deprecated?: boolean;
-
   deprecationMsg?: string;
 }
 

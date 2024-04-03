@@ -2065,7 +2065,6 @@ const options: RenovateOptions[] = [
     description: 'Branch name template.',
     type: 'string',
     default: '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
-    deprecated: true,
     deprecationMsg:
       'Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`',
     cli: false,
@@ -2091,7 +2090,6 @@ const options: RenovateOptions[] = [
     type: 'string',
     default:
       '{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
-    deprecated: true,
     deprecationMsg:
       'Direct editing of commitMessage is now deprecated. Please edit commitMessage subcomponents instead.',
     cli: false,
@@ -2167,7 +2165,6 @@ const options: RenovateOptions[] = [
       'Pull Request title template. Inherits from `commitMessage` if null.',
     type: 'string',
     default: null,
-    deprecated: true,
     deprecationMsg:
       'Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.',
     cli: false,
