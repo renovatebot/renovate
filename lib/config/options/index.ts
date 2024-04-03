@@ -2065,6 +2065,9 @@ const options: RenovateOptions[] = [
     description: 'Branch name template.',
     type: 'string',
     default: '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+    deprecated: true,
+    deprecationMsg:
+      'Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`',
     cli: false,
   },
   {
@@ -2088,6 +2091,9 @@ const options: RenovateOptions[] = [
     type: 'string',
     default:
       '{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
+    deprecated: true,
+    deprecationMsg:
+      'Direct editing of commitMessage is now deprecated. Please edit commitMessage subcomponents instead.',
     cli: false,
   },
   {
