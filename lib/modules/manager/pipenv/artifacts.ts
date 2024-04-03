@@ -1,25 +1,34 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
-import {TEMPORARY_ERROR} from '../../../constants/error-messages';
-import {logger} from '../../../logger';
-import type {HostRule} from '../../../types';
-import {exec} from '../../../util/exec';
-import type {ExecOptions, ExtraEnv, Opt} from '../../../util/exec/types';
-import {deleteLocalFile, ensureCacheDir, readLocalFile, writeLocalFile,} from '../../../util/fs';
-import {getRepoStatus} from '../../../util/git';
-import {find} from '../../../util/host-rules';
-import {parseUrl} from '../../../util/url';
-import {PypiDatasource} from '../../datasource/pypi';
-import type {UpdateArtifact, UpdateArtifactsConfig, UpdateArtifactsResult,} from '../types';
-import {extractPackageFile} from './extract';
-import {PipfileLockSchema} from './schema';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
+import type { HostRule } from '../../../types';
+import { exec } from '../../../util/exec';
+import type { ExecOptions, ExtraEnv, Opt } from '../../../util/exec/types';
+import {
+  deleteLocalFile,
+  ensureCacheDir,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs';
+import { getRepoStatus } from '../../../util/git';
+import { find } from '../../../util/host-rules';
+import { parseUrl } from '../../../util/url';
+import { PypiDatasource } from '../../datasource/pypi';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types';
+import { extractPackageFile } from './extract';
+import { PipfileLockSchema } from './schema';
 
 export function getPythonConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig,
 ): string | undefined {
-  const {constraints = {}} = config;
-  const {python} = constraints;
+  const { constraints = {} } = config;
+  const { python } = constraints;
 
   if (python) {
     logger.debug('Using python constraint from config');
@@ -29,7 +38,7 @@ export function getPythonConstraint(
     const result = PipfileLockSchema.safeParse(existingLockFileContent);
     // istanbul ignore if: not easily testable
     if (!result.success) {
-      logger.warn({error: result.error}, 'Invalid Pipfile.lock');
+      logger.warn({ error: result.error }, 'Invalid Pipfile.lock');
       return undefined;
     }
     // Exact python version has been included since 2022.10.9. It is more specific than the major.minor version
@@ -53,8 +62,8 @@ export function getPipenvConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig,
 ): string {
-  const {constraints = {}} = config;
-  const {pipenv} = constraints;
+  const { constraints = {} } = config;
+  const { pipenv } = constraints;
 
   if (pipenv) {
     logger.debug('Using pipenv constraint from config');
@@ -64,7 +73,7 @@ export function getPipenvConstraint(
     const result = PipfileLockSchema.safeParse(existingLockFileContent);
     // istanbul ignore if: not easily testable
     if (!result.success) {
-      logger.warn({error: result.error}, 'Invalid Pipfile.lock');
+      logger.warn({ error: result.error }, 'Invalid Pipfile.lock');
       return '';
     }
     if (result.data.default?.pipenv?.version) {
@@ -112,7 +121,7 @@ export function getMatchingHostRule(url: string): HostRule | null {
     parsedUrl.password = '';
     const urlWithoutCredentials = parsedUrl.toString();
 
-    return find({hostType: PypiDatasource.id, url: urlWithoutCredentials});
+    return find({ hostType: PypiDatasource.id, url: urlWithoutCredentials });
   }
   return null;
 }
@@ -181,24 +190,31 @@ async function addCredentialsForSourceUrls(
         parsedSourceUrl.username,
       );
       if (matchingHostRule.username && usernameVariableName) {
-        addExtraEnvVariable(extraEnv, usernameVariableName, matchingHostRule.username);
+        addExtraEnvVariable(
+          extraEnv,
+          usernameVariableName,
+          matchingHostRule.username,
+        );
       }
       const passwordVariableName = extractEnvironmentVariableName(
         parsedSourceUrl.password,
       );
       if (matchingHostRule.password && passwordVariableName) {
-        addExtraEnvVariable(extraEnv, passwordVariableName, matchingHostRule.password);
+        addExtraEnvVariable(
+          extraEnv,
+          passwordVariableName,
+          matchingHostRule.password,
+        );
       }
-
     }
   }
 }
 
 export async function updateArtifacts({
-                                        packageFileName: pipfileName,
-                                        newPackageFileContent: newPipfileContent,
-                                        config,
-                                      }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+  packageFileName: pipfileName,
+  newPackageFileContent: newPipfileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
 
   const lockFileName = pipfileName + '.lock';
@@ -241,7 +257,7 @@ export async function updateArtifacts({
     await addCredentialsForSourceUrls(newPipfileContent, pipfileName, extraEnv);
     execOptions.extraEnv = extraEnv;
 
-    logger.trace({cmd}, 'pipenv lock command');
+    logger.trace({ cmd }, 'pipenv lock command');
     await exec(cmd, execOptions);
     const status = await getRepoStatus();
     if (!status?.modified.includes(lockFileName)) {
@@ -262,7 +278,7 @@ export async function updateArtifacts({
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    logger.debug({err}, 'Failed to update Pipfile.lock');
+    logger.debug({ err }, 'Failed to update Pipfile.lock');
     return [
       {
         artifactError: {
