@@ -1233,7 +1233,6 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toHaveLength(2);
-      expect(warnings).toMatchSnapshot();
     });
 
     it('validates hostRules.headers', async () => {

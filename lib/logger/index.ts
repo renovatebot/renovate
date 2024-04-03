@@ -22,10 +22,9 @@ if (is.string(process.env.LOG_LEVEL)) {
   process.env.LOG_LEVEL = process.env.LOG_LEVEL.toLowerCase().trim();
 }
 
-const logLevel = validateLogLevel(process.env.LOG_LEVEL);
 const stdout: bunyan.Stream = {
   name: 'stdout',
-  level: logLevel,
+  level: validateLogLevel(process.env.LOG_LEVEL),
   stream: process.stdout,
 };
 
@@ -125,8 +124,6 @@ loggerLevels.forEach((loggerLevel) => {
 
 // istanbul ignore if: not easily testable
 if (is.string(process.env.LOG_FILE)) {
-  const logFileLevel = validateLogLevel(process.env.LOG_FILE_LEVEL);
-
   // ensure log file directory exists
   const directoryName = upath.dirname(process.env.LOG_FILE);
   fs.ensureDirSync(directoryName);
@@ -134,7 +131,7 @@ if (is.string(process.env.LOG_FILE)) {
   addStream({
     name: 'logfile',
     path: process.env.LOG_FILE,
-    level: logFileLevel,
+    level: validateLogLevel(process.env.LOG_FILE_LEVEL),
   });
 }
 

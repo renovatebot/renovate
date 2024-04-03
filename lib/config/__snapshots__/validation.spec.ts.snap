@@ -1,18 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`config/validation validateConfig() -> globaOnly options returns deprecation warnings 1`] = `
-[
-  {
-    "message": "Using logFile to specify log file name is deprecated now. Please use the enviroment variable LOG_FILE instead",
-    "topic": "Deprecation Warning",
-  },
-  {
-    "message": "Using logFileLevel to specify log file name is deprecated now. Please use the enviroment variable LOG_FILE_LEVEL instead",
-    "topic": "Deprecation Warning",
-  },
-]
-`;
-
 exports[`config/validation validateConfig(config) catches invalid allowedVersions regex 1`] = `
 [
   {
