@@ -15,9 +15,8 @@ export async function rebaseMigrationBranch(
   migratedConfigData: MigratedData,
 ): Promise<string | null> {
   logger.debug('Checking if migration branch needs rebasing');
-  const base = config.defaultBranch!;
   const branchName = getMigrationBranchName(config);
-  if (await scm.isBranchModified(branchName, base)) {
+  if (await scm.isBranchModified(branchName)) {
     logger.debug('Migration branch has been edited and cannot be rebased');
     return null;
   }
@@ -43,7 +42,7 @@ export async function rebaseMigrationBranch(
   );
   const commitMessage = commitMessageFactory.getCommitMessage();
 
-  await scm.checkoutBranch(base);
+  await scm.checkoutBranch(config.defaultBranch!);
   contents =
     await MigratedDataFactory.applyPrettierFormatting(migratedConfigData);
   return scm.commitAndPush({
