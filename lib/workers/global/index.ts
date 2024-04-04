@@ -169,6 +169,7 @@ export async function start(): Promise<number> {
         platform: config.platform,
         endpoint: config.endpoint,
       });
+
       await validatePresets(config);
 
       checkEnv();
