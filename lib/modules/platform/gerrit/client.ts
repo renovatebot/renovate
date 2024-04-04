@@ -12,6 +12,8 @@ import type {
 } from './types';
 import { mapPrStateToGerritFilter } from './utils';
 
+const QUOTES_REGEX = new RegExp('"', 'g');
+
 class GerritClient {
   private requestDetails = [
     'SUBMITTABLE', //include the submittable field in ChangeInfo, which can be used to tell if the change is reviewed and ready for submit.
@@ -235,8 +237,10 @@ class GerritClient {
       filters.push(`label:Code-Review=${searchConfig.label}`);
     }
     if (searchConfig.prTitle) {
+      // escaping support in Gerrit is not great, so we need to remove quotes
+      // special characters are ignored anyway in the search so it does not create any issues
       filters.push(
-        `message:${encodeURIComponent('"' + searchConfig.prTitle + '"')}`,
+        `message:${encodeURIComponent('"' + searchConfig.prTitle.replace(QUOTES_REGEX, '') + '"')}`,
       );
     }
     return filters;
