@@ -109,7 +109,7 @@ describe('modules/datasource/python-version/index', () => {
         });
       });
 
-      it('returns no unstable versions', async () => {
+      it('only returns stable versions', async () => {
         const res = await getPkgReleases({
           datasource,
           packageName: 'python',
