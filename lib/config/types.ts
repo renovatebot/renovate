@@ -435,6 +435,9 @@ export interface RenovateOptionBase {
 
   advancedUse?: boolean;
 
+  /**
+   * This is used to add depreciation message in the docs
+   */
   deprecationMsg?: string;
 }
 
