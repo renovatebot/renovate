@@ -156,14 +156,17 @@ export async function start(): Promise<number> {
           );
         }
       }
-      // initialize all submodules
-      config = await globalInitialize(config);
 
       // Set platform and endpoint in case local presets are used
+      // Set allowedHeaders in case hostRules headers are configured in file config
       GlobalConfig.set({
         platform: config.platform,
         endpoint: config.endpoint,
+        allowedHeaders: config.allowedHeaders,
       });
+
+      // initialize all submodules
+      config = await globalInitialize(config);
 
       await validatePresets(config);
 
