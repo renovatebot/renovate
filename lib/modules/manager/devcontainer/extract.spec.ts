@@ -73,7 +73,7 @@ describe('modules/manager/devcontainer/extract', () => {
       jest.restoreAllMocks();
     });
 
-    it('returns null when file is empty', () => {
+    it('returns null when the dev container JSON file is empty', () => {
       // Arrange
       const content = '';
       const packageFile = '';
@@ -85,7 +85,7 @@ describe('modules/manager/devcontainer/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null when file contents are malformed', () => {
+    it('returns null when the dev container JSON file contents are malformed', () => {
       // Arrange
       const content = 'malformed json}}}';
       const packageFile = '';
@@ -97,7 +97,7 @@ describe('modules/manager/devcontainer/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns feature images when only features is defined', () => {
+    it('returns feature image deps when only the features property is defined in dev container JSON file', () => {
       // Arrange
       const content = fixtures.featuresOnly.content;
       const packageFile = fixtures.featuresOnly.path;
@@ -131,7 +131,7 @@ describe('modules/manager/devcontainer/extract', () => {
       `);
     });
 
-    it('returns image and feature images when both image and features are defined', () => {
+    it('returns image and feature image deps when both image and features properties are defined in dev container JSON file', () => {
       // Arrange
       const content = fixtures.imageAndFeature.content;
       const packageFile = fixtures.imageAndFeature.path;
@@ -165,7 +165,7 @@ describe('modules/manager/devcontainer/extract', () => {
       `);
     });
 
-    it('returns image when only image is defined', () => {
+    it('returns image dep when only the image property is defined in dev container JSON file', () => {
       // Arrange
       const content = fixtures.imageOnly.content;
       const packageFile = fixtures.imageOnly.path;
@@ -191,7 +191,7 @@ describe('modules/manager/devcontainer/extract', () => {
       `);
     });
 
-    it('returns null when the only feature is malformed and no image is defined', () => {
+    it('returns null when the only feature property is malformed and no image property is defined in dev container JSON file', () => {
       // Arrange
       const content = fixtures.malformedFeature.content;
       const packageFile = fixtures.malformedFeature.path;
@@ -203,7 +203,7 @@ describe('modules/manager/devcontainer/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null when features is malformed and no image is defined', () => {
+    it('returns null when the features property is malformed and no image property is defined in dev container JSON file', () => {
       // Arrange
       const content = fixtures.malformedFeatures.content;
       const packageFile = fixtures.malformedFeatures.path;
@@ -215,7 +215,7 @@ describe('modules/manager/devcontainer/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null when image is malformed and no features are defined', () => {
+    it('returns null when the image property is malformed and no features are defined in dev container JSON file', () => {
       // Arrange
       const content = fixtures.malformedImage.content;
       const packageFile = fixtures.malformedImage.path;
@@ -227,7 +227,7 @@ describe('modules/manager/devcontainer/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null when no image or features are defined', () => {
+    it('returns null when no image or features properties are defined in dev container JSON file', () => {
       // Arrange
       const content = fixtures.noImageOrFeatures.content;
       const packageFile = fixtures.noImageOrFeatures.path;
@@ -239,7 +239,7 @@ describe('modules/manager/devcontainer/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null when features is null and no image is defined', () => {
+    it('returns null when the features property is null and no image property is defined in dev container JSON file', () => {
       // Arrange
       const content = fixtures.nullImage.content;
       const packageFile = fixtures.nullImage.path;
@@ -251,7 +251,7 @@ describe('modules/manager/devcontainer/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null when both image and features are null', () => {
+    it('returns null when both the image and features properties are null', () => {
       // Arrange
       const content = fixtures.nullImageAndFeatures.content;
       const packageFile = fixtures.nullImageAndFeatures.path;
@@ -263,7 +263,7 @@ describe('modules/manager/devcontainer/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns valid dependencies when others throw error when calling getDep', () => {
+    it('returns only valid dependencies when others throw error when calling getDep', () => {
       // Arrange
       const content = fixtures.imageAndFeature.content;
       const packageFile = fixtures.imageAndFeature.path;
@@ -293,7 +293,7 @@ describe('modules/manager/devcontainer/extract', () => {
       `);
     });
 
-    it('returns only docker dependencies', () => {
+    it('returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file', () => {
       // Arrange
       const content = fixtures.allKindsOfFeatures.content;
       const packageFile = fixtures.allKindsOfFeatures.path;
