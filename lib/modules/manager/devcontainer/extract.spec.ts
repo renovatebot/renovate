@@ -85,7 +85,7 @@ describe('modules/manager/devcontainer/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('returns null when file contents is malformed', () => {
+    it('returns null when file contents are malformed', () => {
       // Arrange
       const content = 'malformed json}}}';
       const packageFile = '';
