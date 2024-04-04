@@ -119,7 +119,7 @@ describe('modules/datasource/python-version/index', () => {
         });
       });
 
-      it('returns no version that is not prebuilt', async () => {
+      it('only returns versions that are prebuilt', async () => {
         const res = await getPkgReleases({
           datasource,
           packageName: 'python',
