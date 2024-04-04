@@ -327,28 +327,40 @@ describe('util/git/index', () => {
     });
 
     it('should return false when branch is not found', async () => {
-      expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
+      expect(
+        await git.isBranchModified('renovate/not_found', 'main'),
+      ).toBeFalse();
     });
 
     it('should return false when author matches', async () => {
-      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
-      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
+      expect(
+        await git.isBranchModified('renovate/future_branch', 'main'),
+      ).toBeFalse();
+      expect(
+        await git.isBranchModified('renovate/future_branch', 'main'),
+      ).toBeFalse();
     });
 
     it('should return false when author is ignored', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
-      expect(await git.isBranchModified('renovate/custom_author')).toBeFalse();
+      expect(
+        await git.isBranchModified('renovate/custom_author', 'main'),
+      ).toBeFalse();
     });
 
     it('should return true when custom author is unknown', async () => {
-      expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
+      expect(
+        await git.isBranchModified('renovate/custom_author', 'main'),
+      ).toBeTrue();
     });
 
     it('should return value stored in modifiedCacheResult', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(true);
-      expect(await git.isBranchModified('renovate/future_branch')).toBeTrue();
+      expect(
+        await git.isBranchModified('renovate/future_branch', 'main'),
+      ).toBeTrue();
     });
   });
 
