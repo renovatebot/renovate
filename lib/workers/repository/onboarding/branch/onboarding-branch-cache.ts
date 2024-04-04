@@ -74,7 +74,7 @@ export async function isOnboardingBranchModified(
   ) {
     return onboardingCache.isModified;
   } else {
-    isModified = await scm.isBranchModified(onboardingBranch, 'FIXME');
+    isModified = await scm.isBranchModified(onboardingBranch);
   }
 
   return isModified;
