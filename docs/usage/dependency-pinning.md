@@ -6,7 +6,7 @@ description: The pros and cons of dependency pinning for JavaScript/npm
 # Should you Pin your JavaScript Dependencies?
 
 Once you start using a tool/service like Renovate, probably the biggest decision you need to make is whether to "pin" your dependencies instead of using SemVer ranges.
-The answer is "It's your choice", but we can certainly make some generalisations/recommendations to help you.
+The answer is "It's your choice", but we can certainly make some generalizations/recommendations to help you.
 
 If you don't want to read the in-depth discussion, you can skip ahead to our recommendations in the ["So what's best?" section](#so-whats-best).
 
@@ -72,7 +72,7 @@ By pinning dependencies you know exactly what you're running and you know exactl
 Now consider a similar theoretical scenario where `foobar@1.2.0` is faulty but it is _not_ caught by any of your automated tests.
 This is more common and more dangerous.
 
-If you were using SemVer ranges then this new version of `foobar` will likely be deployed to production automatically one day, sometime after which you notice errors and realise you need to fix it.
+If you were using SemVer ranges then this new version of `foobar` will likely be deployed to production automatically one day, sometime after which you notice errors and realize you need to fix it.
 Like before, you need to manually work out which dependency caused it - assuming you guess correctly that it was a new dependency version at fault - and pin it manually by editing `package.json` one dependency at a time.
 
 Alternatively, if you were instead pinning `foobar` then you would get a PR for `foobar@1.2.0` which awaits your approval.
