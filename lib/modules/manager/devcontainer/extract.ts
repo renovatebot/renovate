@@ -32,7 +32,7 @@ export function extractPackageFile(
     if (features.length > 0) {
       targets = targets.concat(features);
     } else {
-      logger.debug({ packageFile }, 'No features in dev container JSON file');
+      logger.debug({ packageFile }, 'No features in dev container JSON file.');
     }
 
     if (targets.length < 1) {
