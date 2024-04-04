@@ -657,7 +657,7 @@ export async function isBranchModified(
   const committedAuthors: Set<string> = new Set();
   try {
     const commits = baseBranch
-      ? await git.log([`origin/main..origin/${branchName}`])
+      ? await git.log([`origin/${baseBranch}..origin/${branchName}`])
       : await git.log(['-1', `origin/${branchName}`]);
 
     commits.all.forEach((commit) => committedAuthors.add(commit.author_email));
