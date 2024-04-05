@@ -1,6 +1,4 @@
-This datasource returns releases from a versioned AWS ARN.
-
-It currently supports Lambda Layer ARNs only.
+This datasource returns releases from a AWM Lambda Layer.
 
 **AWS API configuration**
 
@@ -49,14 +47,25 @@ Here's an example of using the regex manager to configure this datasource:
 The configuration above matches every Terraform file, and recognizes these line:
 
 ```hcl
-locals {
-  # renovate: datasource=aws-lambda-layer filter={"name": "my-layer", "architecture": "x86_64", "runtime": "python3.7"}
-  my_layer_arn = "arn:aws:lambda:us-east-1:123456789012:layer:my-layer:21"
-}
-
 resource "aws_lambda_function" "example" {
   # ... other configuration ...
 
-  layers = [local.my_layer_arn]
+  layers = [data.aws_lambda_layer_version.datadog_extension.arn]
 }
+
+data "aws_lambda_layer_version" "datadog_extension" {
+  layer_name = "arn:aws:lambda:us-east-1:464622532012:layer:Datadog-Extension"
+  # renovate: datasource=aws-lambda-layer filter={"name": "my-layer", "architecture": "x86_64", "runtime": "python3.7"}
+  version = 37
+}
+```
+
+**3rd party lambda layers**
+
+In case you are referring to a 3rd party lambda layer, you need to add the necessary permissions to the layer version.
+This is done by the 3rd party by running the following command:
+
+```shell
+aws lambda add-layer-version-permission --layer-name Datadog-Extension --statement-id allow-version-access \
+  --action lambda:ListLayerVersion --principal "*" --version-number your-version-number --output text
 ```
