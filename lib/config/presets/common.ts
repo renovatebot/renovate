@@ -30,7 +30,7 @@ export const removedPresets: Record<string, string | null> = {
   'group:jsTestMonMajor': 'group:jsTestNonMajor',
   'github>whitesource/merge-confidence:beta': 'mergeConfidence:all-badges',
   'replacements:messageFormat-{{package}}-to-@messageformat/{{package}}':
-    'replacements:messageFormat-package-to-@messageformat/package',
+    'replacements:messageFormat-to-scoped',
 };
 
 const renamedMonorepos: Record<string, string> = {

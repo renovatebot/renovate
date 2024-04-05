@@ -110,6 +110,12 @@ Returns `true` if at least one expression is `true`.
 
 `{{#if (or isPatch isSingleVersion}}Small update, safer to merge and release.{{else}}Check out the changelog for all versions before merging!{{/if}}`
 
+### includes
+
+Returns `true` if the value is included on the list given.
+
+`{{#if (includes labels 'dependencies')}}Production Dependencies{{else}}Not Production Dependencies{{/if}}`
+
 ## Environment variables
 
 By default, you can only access a handful of basic environment variables like `HOME` or `PATH`.

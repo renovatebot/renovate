@@ -7,21 +7,7 @@ import type {
   BitbucketMergeStrategy,
   MergeRequestBody,
   PrResponse,
-  RepoInfo,
-  RepoInfoBody,
 } from './types';
-
-export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
-  return {
-    isFork: !!repoInfoBody.parent,
-    owner: repoInfoBody.owner.username,
-    mainbranch: repoInfoBody.mainbranch.name,
-    mergeMethod: 'merge',
-    has_issues: repoInfoBody.has_issues,
-    uuid: repoInfoBody.uuid,
-    is_private: repoInfoBody.is_private,
-  };
-}
 
 const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
   new Map([

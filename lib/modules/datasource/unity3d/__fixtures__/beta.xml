@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0" xml:base="https://unity.com/">
+  <channel>
+    <title>Latest Unity Beta Releases</title>
+    <link>https://unity.com/</link>
+    <description>Latest Unity Beta Releases</description>
+    <language>en</language>
+    
+    <item>
+  <title>2023.3.0b6</title>
+  <link>https://unity.com/releases/editor/beta/2023.3.0b6</link>
+  <description>
+Beta description
+</description>
+  <pubDate>2024-02-07T07:24:40</pubDate>
+    <dc:creator>Unity Technologies</dc:creator>
+    <guid isPermaLink="false">4ca2224a582d</guid>
+    </item>
+
+  </channel>
+</rss>

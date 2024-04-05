@@ -56,6 +56,7 @@ export interface PrDebugData {
   createdInVer: string;
   updatedInVer: string;
   targetBranch: string;
+  labels?: string[];
 }
 
 export interface PrBodyStruct {
@@ -122,6 +123,32 @@ export interface UpdatePrConfig {
   prBody?: string;
   state?: 'open' | 'closed';
   targetBranch?: string;
+
+  /**
+   * This field allows for label management and is designed to
+   * accommodate the different label update methods on various platforms.
+   *
+   * - For Gitea, labels are updated by replacing the entire labels array.
+   * - In the case of GitHub and GitLab, specific endpoints exist
+   *   for adding and removing labels.
+   */
+  labels?: string[] | null;
+
+  /**
+   * Specifies an array of labels to be added.
+   * @see {@link labels}
+   */
+  addLabels?: string[] | null;
+
+  /**
+   * Specifies an array of labels to be removed.
+   * @see {@link labels}
+   */
+  removeLabels?: string[] | null;
+}
+export interface ReattemptPlatformAutomergeConfig {
+  number: number;
+  platformOptions?: PlatformPrOptions;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -178,6 +205,7 @@ export interface AutodiscoverConfig {
   topics?: string[];
   includeMirrors?: boolean;
   namespaces?: string[];
+  projects?: string[];
 }
 
 export interface Platform {
@@ -210,6 +238,7 @@ export interface Platform {
   getRepos(config?: AutodiscoverConfig): Promise<string[]>;
   getBranchForceRebase?(branchName: string): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
+  addLabel?(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;
   getBranchStatusCheck(
     branchName: string,
@@ -225,6 +254,9 @@ export interface Platform {
   getPr(number: number): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
+  reattemptPlatformAutomerge?(
+    prConfig: ReattemptPlatformAutomergeConfig,
+  ): Promise<void>;
   getBranchStatus(
     branchName: string,
     internalChecksAsSuccess: boolean,

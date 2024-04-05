@@ -1,0 +1,43 @@
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+- path: vendor
+  contents:
+  # Normal Helm Chart
+  - path: custom-repo-custom-version
+    helmChart:
+      name: valid-helmchart-1
+      version: "7.10.1"
+      repository:
+        url: https://charts.bitnami.com/bitnami
+  # Normal Helm Chart 2 for handling lists
+  - path: thing
+    helmChart:
+      name: valid-helmchart-2
+      version: "7.10.1"
+      repository:
+        url: https://charts.bitnami.com/bitnami
+  # OCI Helm Chart
+  - path: custom-repo-custom-version
+    helmChart:
+      name: oci-chart
+      version: "7.10.1"
+      repository:
+        url: oci://charts.bitnami.com/bitnami
+  # Aliased OCI Helm Chart
+  - path: custom-repo-custom-version
+    helmChart:
+      name: aliased-oci-chart
+      version: "7.10.1"
+      repository:
+        url: oci://test
+  # Normal Git Repo
+  - path: custom-repo-custom-version
+    git:
+      url: https://github.com/test/test
+      ref: "7.10.1"
+  # Normal GithubRelease Repo
+  - path: custom-repo-custom-version
+    githubRelease:
+      slug: test/test
+      tag: "7.10.1"

@@ -31,14 +31,15 @@ describe('workers/repository/updates/branch-name', () => {
     it('uses groupSlug if defined', () => {
       const upgrade: RenovateConfig = {
         groupName: 'some group name',
-        groupSlug: 'some group slug',
+        groupSlug: 'some group {{parentDir}}',
+        parentDir: 'abc',
         group: {
           branchName: '{{groupSlug}}-{{branchTopic}}',
           branchTopic: 'grouptopic',
         },
       };
       generateBranchName(upgrade);
-      expect(upgrade.branchName).toBe('some-group-slug-grouptopic');
+      expect(upgrade.branchName).toBe('some-group-abc-grouptopic');
     });
 
     it('separates major with groups', () => {
@@ -56,6 +57,43 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toBe('major-2-some-group-slug-grouptopic');
+    });
+
+    it('separates minor with groups', () => {
+      const upgrade: RenovateConfig = {
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'minor',
+        separateMultipleMinor: true,
+        newMinor: 1,
+        newMajor: 2,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('minor-2.1-some-group-slug-grouptopic');
+    });
+
+    it('separates minor when separateMultipleMinor=true', () => {
+      const upgrade: RenovateConfig = {
+        branchName:
+          '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
+        branchPrefix: 'renovate/',
+        additionalBranchPrefix: '',
+        depNameSanitized: 'lodash',
+        newMajor: 4,
+        separateMinorPatch: true,
+        isPatch: true,
+        newMinor: 17,
+        branchTopic:
+          '{{{depNameSanitized}}}-{{{newMajor}}}{{#if separateMinorPatch}}{{#if isPatch}}.{{{newMinor}}}{{/if}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}',
+        depName: 'dep',
+        group: {},
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toBe('renovate/lodash-4.17.x');
     });
 
     it('uses single major with groups', () => {

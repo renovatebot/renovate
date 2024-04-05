@@ -383,6 +383,7 @@ const azureToRenovateStatusMapping: Record<GitStatusState, BranchStatus> = {
   [GitStatusState.NotApplicable]: 'green',
   [GitStatusState.NotSet]: 'yellow',
   [GitStatusState.Pending]: 'yellow',
+  [GitStatusState.PartiallySucceeded]: 'yellow',
   [GitStatusState.Error]: 'red',
   [GitStatusState.Failed]: 'red',
 };
