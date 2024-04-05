@@ -1,13 +1,7 @@
-import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
+import { scm } from '../../../../modules/platform/scm';
 import type { RangeStrategy } from '../../../../types';
-import {
-  branchExists,
-  isBranchBehindBase,
-  isBranchConflicted,
-  isBranchModified,
-} from '../../../../util/git';
 import type { BranchConfig } from '../../../types';
 
 type ParentBranch = {
@@ -16,55 +10,50 @@ type ParentBranch = {
   isConflicted?: boolean;
 };
 
+async function shouldKeepUpdated(
+  config: BranchConfig,
+  baseBranch: string,
+  branchName: string,
+): Promise<boolean> {
+  const keepUpdatedLabel = config.keepUpdatedLabel;
+  if (!keepUpdatedLabel) {
+    return false;
+  }
+
+  const branchPr = await platform.getBranchPr(
+    config.branchName,
+    config.baseBranch,
+  );
+
+  if (branchPr?.labels?.includes(keepUpdatedLabel)) {
+    return true;
+  }
+
+  return false;
+}
+
 export async function shouldReuseExistingBranch(
-  config: BranchConfig
+  config: BranchConfig,
 ): Promise<ParentBranch> {
   const { baseBranch, branchName } = config;
   const result: ParentBranch = { reuseExistingBranch: false };
   // Check if branch exists
-  if (!branchExists(branchName)) {
+  if (!(await scm.branchExists(branchName))) {
     logger.debug(`Branch needs creating`);
     return result;
   }
   logger.debug(`Branch already exists`);
-
-  // Check for existing PR
-  const pr = await platform.getBranchPr(branchName);
-
-  if (pr) {
-    if (pr.title?.startsWith('rebase!')) {
-      logger.debug(`Manual rebase requested via PR title for #${pr.number}`);
-      return result;
-    }
-    if (pr.bodyStruct?.rebaseRequested) {
-      logger.debug(`Manual rebase requested via PR checkbox for #${pr.number}`);
-      return result;
-    }
-    if (pr.labels?.includes(config.rebaseLabel!)) {
-      logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
-      // istanbul ignore if
-      if (GlobalConfig.get('dryRun')) {
-        logger.info(
-          `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
-            pr.number
-          }`
-        );
-      } else {
-        await platform.deleteLabel(pr.number, config.rebaseLabel!);
-      }
-      return result;
-    }
-  }
-
   if (
     config.rebaseWhen === 'behind-base-branch' ||
+    (await shouldKeepUpdated(config, baseBranch, branchName)) ||
     (config.rebaseWhen === 'auto' &&
-      (config.automerge || (await platform.getRepoForceRebase())))
+      (config.automerge === true ||
+        (await platform.getBranchForceRebase?.(config.baseBranch))))
   ) {
-    if (await isBranchBehindBase(branchName, baseBranch)) {
+    if (await scm.isBranchBehindBase(branchName, baseBranch)) {
       logger.debug(`Branch is behind base branch and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
-      if (await isBranchModified(branchName)) {
+      if (await scm.isBranchModified(branchName)) {
         logger.debug('Cannot rebase branch as it has been modified');
         result.reuseExistingBranch = true;
         result.isModified = true;
@@ -76,18 +65,21 @@ export async function shouldReuseExistingBranch(
     logger.debug('Branch is up-to-date');
   } else {
     logger.debug(
-      `Skipping behind base branch check due to rebaseWhen=${config.rebaseWhen!}`
+      `Skipping behind base branch check due to rebaseWhen=${config.rebaseWhen!}`,
     );
   }
 
   // Now check if PR is unmergeable. If so then we also rebase
-  result.isConflicted = await isBranchConflicted(baseBranch, branchName);
+  result.isConflicted = await scm.isBranchConflicted(baseBranch, branchName);
   if (result.isConflicted) {
     logger.debug('Branch is conflicted');
 
-    if ((await isBranchModified(branchName)) === false) {
+    if ((await scm.isBranchModified(branchName)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
-      if (config.rebaseWhen === 'never') {
+      if (
+        config.rebaseWhen === 'never' &&
+        !(await shouldKeepUpdated(config, baseBranch, branchName))
+      ) {
         logger.debug('Rebasing disabled by config');
         result.reuseExistingBranch = true;
         result.isModified = false;
@@ -117,7 +109,7 @@ export async function shouldReuseExistingBranch(
       groupedByPackageFile[packageFile].has('update-lockfile')
     ) {
       logger.debug(
-        `Detected multiple rangeStrategies along with update-lockfile`
+        `Detected multiple rangeStrategies along with update-lockfile`,
       );
       result.reuseExistingBranch = false;
       result.isModified = false;

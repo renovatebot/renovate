@@ -4,11 +4,11 @@ describe('modules/platform/azure/azure-got-wrapper', () => {
   let azure: typeof import('./azure-got-wrapper');
   let hostRules: typeof _hostRules;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // reset module
     jest.resetModules();
-    hostRules = require('../../../util/host-rules');
-    azure = require('./azure-got-wrapper');
+    hostRules = await import('../../../util/host-rules');
+    azure = await import('./azure-got-wrapper');
   });
 
   describe('gitApi', () => {

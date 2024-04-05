@@ -15,8 +15,8 @@ describe('modules/datasource/dart/index', () => {
       expect(
         await getPkgReleases({
           datasource: DartDatasource.id,
-          depName: 'non_sense',
-        })
+          packageName: 'non_sense',
+        }),
       ).toBeNull();
     });
 
@@ -32,8 +32,8 @@ describe('modules/datasource/dart/index', () => {
       expect(
         await getPkgReleases({
           datasource: DartDatasource.id,
-          depName: 'shared_preferences',
-        })
+          packageName: 'shared_preferences',
+        }),
       ).toBeNull();
 
       const withoutLatest = {
@@ -47,8 +47,8 @@ describe('modules/datasource/dart/index', () => {
       expect(
         await getPkgReleases({
           datasource: DartDatasource.id,
-          depName: 'shared_preferences',
-        })
+          packageName: 'shared_preferences',
+        }),
       ).toBeNull();
     });
 
@@ -57,8 +57,8 @@ describe('modules/datasource/dart/index', () => {
       expect(
         await getPkgReleases({
           datasource: DartDatasource.id,
-          depName: 'shared_preferences',
-        })
+          packageName: 'shared_preferences',
+        }),
       ).toBeNull();
     });
 
@@ -67,8 +67,8 @@ describe('modules/datasource/dart/index', () => {
       await expect(
         getPkgReleases({
           datasource: DartDatasource.id,
-          depName: 'shared_preferences',
-        })
+          packageName: 'shared_preferences',
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -77,8 +77,8 @@ describe('modules/datasource/dart/index', () => {
       expect(
         await getPkgReleases({
           datasource: DartDatasource.id,
-          depName: 'shared_preferences',
-        })
+          packageName: 'shared_preferences',
+        }),
       ).toBeNull();
     });
 
@@ -86,7 +86,7 @@ describe('modules/datasource/dart/index', () => {
       httpMock.scope(baseUrl).get('/shared_preferences').reply(200, body);
       const res = await getPkgReleases({
         datasource: DartDatasource.id,
-        depName: 'shared_preferences',
+        packageName: 'shared_preferences',
       });
       expect(res).toMatchSnapshot();
     });

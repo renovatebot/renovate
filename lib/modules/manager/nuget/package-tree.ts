@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import Graph from 'graph-data-structure';
-import minimatch from 'minimatch';
+import { Graph } from 'graph-data-structure';
 import upath from 'upath';
 import { logger } from '../../../logger';
-import { getFileList } from '../../../util/git';
+import { minimatchFilter } from '../../../util/minimatch';
+import { scm } from '../../platform/scm';
 import type { ProjectFile } from './types';
 import { readFileAsXmlDocument } from './util';
 
@@ -15,12 +15,12 @@ export const MSBUILD_CENTRAL_FILE = 'Packages.props';
  */
 export async function getDependentPackageFiles(
   packageFileName: string,
-  isCentralManament = false
+  isCentralManagement = false,
 ): Promise<ProjectFile[]> {
   const packageFiles = await getAllPackageFiles();
   const graph: ReturnType<typeof Graph> = Graph();
 
-  if (isCentralManament) {
+  if (isCentralManagement) {
     graph.addNode(packageFileName);
   }
 
@@ -33,7 +33,7 @@ export async function getDependentPackageFiles(
   for (const f of packageFiles) {
     graph.addNode(f);
 
-    if (isCentralManament && upath.dirname(f).startsWith(parentDir)) {
+    if (isCentralManagement && upath.dirname(f).startsWith(parentDir)) {
       graph.addEdge(packageFileName, f);
     }
   }
@@ -52,10 +52,10 @@ export async function getDependentPackageFiles(
       .filter(is.nonEmptyString);
 
     const projectReferences = projectReferenceAttributes.map((a) =>
-      upath.normalize(a)
+      upath.normalize(a),
     );
     const normalizedRelativeProjectReferences = projectReferences.map((r) =>
-      reframeRelativePathToRootOfRepo(f, r)
+      reframeRelativePathToRootOfRepo(f, r),
     );
 
     for (const ref of normalizedRelativeProjectReferences) {
@@ -70,7 +70,7 @@ export async function getDependentPackageFiles(
   const deps = new Map<string, boolean>();
   recursivelyGetDependentPackageFiles(packageFileName, graph, deps);
 
-  if (isCentralManament) {
+  if (isCentralManagement) {
     // remove props file, as we don't need it
     deps.delete(packageFileName);
   }
@@ -85,7 +85,7 @@ export async function getDependentPackageFiles(
 function recursivelyGetDependentPackageFiles(
   packageFileName: string,
   graph: ReturnType<typeof Graph>,
-  deps: Map<string, boolean>
+  deps: Map<string, boolean>,
 ): void {
   const dependents = graph.adjacent(packageFileName);
 
@@ -106,20 +106,20 @@ function recursivelyGetDependentPackageFiles(
  */
 function reframeRelativePathToRootOfRepo(
   dependentProjectRelativePath: string,
-  projectReference: string
+  projectReference: string,
 ): string {
   const virtualRepoRoot = '/';
   const absoluteDependentProjectPath = upath.resolve(
     virtualRepoRoot,
-    dependentProjectRelativePath
+    dependentProjectRelativePath,
   );
   const absoluteProjectReferencePath = upath.resolve(
     upath.dirname(absoluteDependentProjectPath),
-    projectReference
+    projectReference,
   );
   const relativeProjectReferencePath = upath.relative(
     virtualRepoRoot,
-    absoluteProjectReferencePath
+    absoluteProjectReferencePath,
   );
 
   return relativeProjectReferencePath;
@@ -129,9 +129,9 @@ function reframeRelativePathToRootOfRepo(
  * Get a list of package files in localDir
  */
 async function getAllPackageFiles(): Promise<string[]> {
-  const allFiles = await getFileList();
+  const allFiles = await scm.getFileList();
   const filteredPackageFiles = allFiles.filter(
-    minimatch.filter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true })
+    minimatchFilter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true }),
   );
 
   logger.trace({ filteredPackageFiles }, 'Found package files');

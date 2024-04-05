@@ -1,6 +1,8 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../../../logger';
 import type { PackageDependency } from '../../../types';
 import { TerraformProviderExtractor } from '../../base';
+import type { TerraformDefinitionFile } from '../../hcl/types';
 import type { ProviderLock } from '../../lockfile/types';
 
 export class ProvidersExtractor extends TerraformProviderExtractor {
@@ -8,9 +10,21 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
     return ['provider'];
   }
 
-  extract(hclRoot: any, locks: ProviderLock[]): PackageDependency[] {
+  extract(
+    hclRoot: TerraformDefinitionFile,
+    locks: ProviderLock[],
+  ): PackageDependency[] {
     const providerTypes = hclRoot?.provider;
     if (is.nullOrUndefined(providerTypes)) {
+      return [];
+    }
+
+    // istanbul ignore if
+    if (!is.plainObject(providerTypes)) {
+      logger.debug(
+        { providerTypes },
+        'Terraform: unexpected `providerTypes` value',
+      );
       return [];
     }
 
@@ -22,11 +36,10 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
             currentValue: providerTypeElement.version,
             managerData: {
               moduleName: providerTypeName,
-              source: providerTypeElement.source,
             },
           },
           locks,
-          'provider'
+          'provider',
         );
         dependencies.push(dep);
       }

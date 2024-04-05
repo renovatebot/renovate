@@ -8,9 +8,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "datasource": "maven",
       "depName": "scala",
       "packageName": "org.scala-lang:scala-library",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
       "separateMinorPatch": true,
     },
     {
@@ -18,9 +16,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "datasource": "sbt-package",
       "depName": "com.example:foo",
       "packageName": "com.example:foo_2.13.0-RC5",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
     },
     {
       "currentValue": "1.2.3",
@@ -28,9 +24,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "depName": "com.abc:abc",
       "groupName": "abcVersion",
       "packageName": "com.abc:abc",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
+      "variableName": "abcVersion",
     },
   ],
   "packageFileVersion": undefined,
@@ -45,9 +40,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "datasource": "maven",
       "depName": "scala",
       "packageName": "org.scala-lang:scala-library",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
       "separateMinorPatch": true,
     },
     {
@@ -55,9 +48,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "datasource": "sbt-package",
       "depName": "com.example:foo",
       "packageName": "com.example:foo_2.13.0-RC5",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
     },
     {
       "currentValue": "1.2.3",
@@ -65,9 +56,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "depName": "com.abc:abc",
       "groupName": "abcVersion",
       "packageName": "com.abc:abc",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
+      "variableName": "abcVersion",
     },
     {
       "currentValue": "1.2.3",
@@ -75,9 +65,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "depName": "com.abc:abc-a",
       "groupName": "abcVersion",
       "packageName": "com.abc:abc-a",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
+      "variableName": "abcVersion",
     },
     {
       "currentValue": "1.2.3",
@@ -85,9 +74,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "depName": "com.abc:abc-b",
       "groupName": "abcVersion",
       "packageName": "com.abc:abc-b",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
+      "variableName": "abcVersion",
     },
     {
       "currentValue": "1.2.3",
@@ -95,9 +83,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "depName": "com.abc:abc-c",
       "groupName": "abcVersion",
       "packageName": "com.abc:abc-c",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
+      "variableName": "abcVersion",
     },
   ],
   "packageFileVersion": undefined,
@@ -113,7 +100,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depName": "scala",
       "packageName": "org.scala-lang:scala-library",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -128,7 +114,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depName": "org.example:foo",
       "packageName": "org.example:foo",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -142,7 +127,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depName": "org.example:bar",
       "packageName": "org.example:bar_2.9.10",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -156,7 +140,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depName": "org.example:baz",
       "packageName": "org.example:baz_2.9.10",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -170,7 +153,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depName": "org.example:qux",
       "packageName": "org.example:qux",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -185,7 +167,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depType": "sources",
       "packageName": "org.scala-lang:scala-library",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -199,7 +180,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depName": "org.example:quux",
       "packageName": "org.example:quux",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -214,7 +194,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depType": "test",
       "packageName": "org.example:quuz_2.9.10",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -229,7 +208,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depType": "test",
       "packageName": "org.example:abc_2.9.10",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -244,7 +222,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depType": "Provided",
       "packageName": "org.example:corge",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -260,13 +237,13 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "groupName": "versionExample",
       "packageName": "org.example:grault",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
       ],
+      "variableName": "versionExample",
     },
     {
       "currentValue": "0.0.9",
@@ -275,13 +252,11 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depType": "plugin",
       "packageName": "org.example:waldo",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
-        "https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases",
       ],
     },
     {
@@ -290,7 +265,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "depName": "org.example:fred",
       "packageName": "org.example:fred",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -312,7 +286,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "depName": "scala",
       "packageName": "org.scala-lang:scala-library",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -327,7 +300,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "depName": "org.example:foo",
       "packageName": "org.example:foo",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -341,7 +313,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "depName": "org.example:bar",
       "packageName": "org.example:bar_2.12",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -355,7 +326,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "depName": "org.example:baz",
       "packageName": "org.example:baz_2.12",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -369,7 +339,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "depName": "org.example:qux",
       "packageName": "org.example:qux",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -383,7 +352,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "depName": "org.example:quux",
       "packageName": "org.example:quux",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -398,7 +366,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "depType": "test",
       "packageName": "org.example:quuz_2.12",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -413,7 +380,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "depType": "Provided",
       "packageName": "org.example:corge",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
@@ -429,13 +395,13 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "groupName": "versionExample",
       "packageName": "org.example:grault",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
       ],
+      "variableName": "versionExample",
     },
     {
       "currentValue": "0.0.9",
@@ -444,13 +410,11 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "depType": "plugin",
       "packageName": "org.example:waldo",
       "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
         "https://example.com/repos/1/",
         "https://example.com/repos/2/",
         "https://example.com/repos/3/",
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
-        "https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases",
       ],
     },
   ],
@@ -466,9 +430,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "maven",
       "depName": "scala",
       "packageName": "org.scala-lang:scala-library",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
       "separateMinorPatch": true,
     },
     {
@@ -476,9 +438,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "sbt-package",
       "depName": "org.example:bar",
       "packageName": "org.example:bar_2.12",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
     },
   ],
   "packageFileVersion": undefined,
@@ -493,9 +453,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "maven",
       "depName": "scala",
       "packageName": "org.scala-lang:scala-library",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
       "separateMinorPatch": true,
     },
     {
@@ -503,9 +461,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "sbt-package",
       "depName": "org.example:bar",
       "packageName": "org.example:bar_2.12",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
     },
   ],
   "packageFileVersion": undefined,
@@ -520,9 +476,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "maven",
       "depName": "scala",
       "packageName": "org.scala-lang:scala-library",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
       "separateMinorPatch": true,
     },
     {
@@ -530,9 +484,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "sbt-package",
       "depName": "org.example:bar",
       "packageName": "org.example:bar_2.12",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
     },
   ],
   "packageFileVersion": undefined,
@@ -547,9 +499,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "maven",
       "depName": "scala",
       "packageName": "org.scala-lang:scala-library",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
       "separateMinorPatch": true,
     },
     {
@@ -557,9 +507,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "sbt-package",
       "depName": "org.example:bar",
       "packageName": "org.example:bar_2.12",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
+      "registryUrls": [],
     },
   ],
   "packageFileVersion": undefined,

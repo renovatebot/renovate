@@ -8,10 +8,10 @@ export const presets: Record<string, Preset> = {
       enabled: false,
     },
     description: 'Disable Docker updates.',
-    docker: {
+    'docker-compose': {
       enabled: false,
     },
-    'docker-compose': {
+    dockerfile: {
       enabled: false,
     },
   },
@@ -37,8 +37,11 @@ export const presets: Record<string, Preset> = {
   },
   pinDigests: {
     description: 'Pin Docker digests.',
-    docker: {
-      pinDigests: true,
-    },
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        pinDigests: true,
+      },
+    ],
   },
 };

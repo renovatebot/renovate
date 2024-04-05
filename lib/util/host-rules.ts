@@ -9,13 +9,15 @@ import { parseUrl, validateUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
-interface LegacyHostRule {
+export interface LegacyHostRule {
   hostName?: string;
   domainName?: string;
   baseUrl?: string;
+  host?: string;
+  endpoint?: string;
 }
 
-function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
+export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
   const cloned: LegacyHostRule & HostRule = clone(rule);
   delete cloned.hostName;
   delete cloned.domainName;
@@ -30,7 +32,7 @@ function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
     result.matchHost = matchHost;
   } else if (hostValues.length > 1) {
     throw new Error(
-      `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
+      `hostRules cannot contain more than one host-matching field - use "matchHost" only.`,
     );
   }
 
@@ -47,8 +49,10 @@ export function add(params: HostRule): void {
     confidentialFields.forEach((field) => {
       if (rule[field]) {
         logger.debug(
-          // TODO: types (#7154)
-          `Adding ${field} authentication for ${rule.matchHost!} to hostRules`
+          // TODO: types (#22198)
+          `Adding ${field} authentication for ${rule.matchHost!} (hostType=${
+            rule.hostType
+          }) to hostRules`,
         );
       }
     });
@@ -61,7 +65,7 @@ export function add(params: HostRule): void {
   });
   if (rule.username && rule.password) {
     sanitize.addSecretForSanitizing(
-      toBase64(`${rule.username}:${rule.password}`)
+      toBase64(`${rule.username}:${rule.password}`),
     );
   }
   hostRules.push(rule);
@@ -120,11 +124,11 @@ function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
 }
 
 export function find(search: HostRuleSearch): HostRuleSearchResult {
-  if (!(search.hostType || search.url)) {
+  if (!(!!search.hostType || search.url)) {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
   }
-  let res = {} as any as HostRule;
+  let res: HostRule = {};
   // First, apply empty rule matches
   hostRules
     .filter((rule) => isEmptyRule(rule))
@@ -149,7 +153,7 @@ export function find(search: HostRuleSearch): HostRuleSearchResult {
       (rule) =>
         isMultiRule(rule) &&
         matchesHostType(rule, search) &&
-        matchesHost(rule, search)
+        matchesHost(rule, search),
     )
     .sort(prioritizeLongestMatchHost)
     .forEach((rule) => {
@@ -193,5 +197,5 @@ export function getAll(): HostRule[] {
 export function clear(): void {
   logger.debug('Clearing hostRules');
   hostRules = [];
-  sanitize.clearSanitizedSecretsList();
+  sanitize.clearRepoSanitizedSecretsList();
 }

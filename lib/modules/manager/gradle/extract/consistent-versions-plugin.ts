@@ -1,14 +1,16 @@
 import { logger } from '../../../../logger';
 import * as fs from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
+import { coerceString } from '../../../../util/string';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
 import { isDependencyString, versionLikeSubstring } from '../utils';
 
 export const VERSIONS_PROPS = 'versions.props';
 export const VERSIONS_LOCK = 'versions.lock';
-const LOCKFILE_HEADER_TEXT =
-  '# Run ./gradlew --write-locks to regenerate this file';
+export const LOCKFIlE_HEADER_TEXT = regEx(
+  /^# Run \.\/gradlew (?:--write-locks|writeVersionsLock) to regenerate this file/,
+);
 
 /**
  * Determines if Palantir gradle-consistent-versions is in use, https://github.com/palantir/gradle-consistent-versions.
@@ -19,15 +21,14 @@ const LOCKFILE_HEADER_TEXT =
  */
 export function usesGcv(
   versionsPropsFilename: string,
-  fileContents: Record<string, string | null>
+  fileContents: Record<string, string | null>,
 ): boolean {
   const versionsLockFile: string = fs.getSiblingFileName(
     versionsPropsFilename,
-    VERSIONS_LOCK
+    VERSIONS_LOCK,
   );
-  return (
-    fileContents[versionsLockFile]?.startsWith(LOCKFILE_HEADER_TEXT) ?? false
-  );
+
+  return !!fileContents[versionsLockFile]?.match(LOCKFIlE_HEADER_TEXT);
 }
 
 /**
@@ -57,11 +58,11 @@ export function isGcvLockFile(fileName: string): boolean {
  */
 export function parseGcv(
   propsFileName: string,
-  fileContents: Record<string, string | null>
+  fileContents: Record<string, string | null>,
 ): PackageDependency<GradleManagerData>[] {
-  const propsFileContent = fileContents[propsFileName] ?? '';
+  const propsFileContent = coerceString(fileContents[propsFileName]);
   const lockFileName = fs.getSiblingFileName(propsFileName, VERSIONS_LOCK);
-  const lockFileContent = fileContents[lockFileName] ?? '';
+  const lockFileContent = coerceString(fileContents[lockFileName]);
   const lockFileMap = parseLockFile(lockFileContent);
   const [propsFileExactMap, propsFileRegexMap] =
     parsePropsFile(propsFileContent);
@@ -80,7 +81,7 @@ export function parseGcv(
         currentValue: versionAndPosition.version,
         lockedVersion: lockFileMap.get(propDep)?.version,
         depType: lockFileMap.get(propDep)?.depType,
-      } as PackageDependency<GradleManagerData>;
+      } satisfies PackageDependency<GradleManagerData>;
       extractedDeps.push(newDep);
       // Remove from the lockfile map so the same exact lib will not be included in globbing
       lockFileMap.delete(propDep);
@@ -102,7 +103,7 @@ export function parseGcv(
           lockedVersion: lockVersionAndDepType.version,
           depType: lockVersionAndDepType.depType,
           groupName: propDepGlob,
-        } as PackageDependency<GradleManagerData>;
+        } satisfies PackageDependency<GradleManagerData>;
         extractedDeps.push(newDep);
         // Remove from the lockfile map so the same lib will not be included in more generic globs later
         lockFileMap.delete(exactDep);
@@ -119,7 +120,7 @@ function globToRegex(depName: string): RegExp {
     depName
       .replace(/\*/g, '_WC_CHAR_')
       .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
-      .replace('_WC_CHAR_', '.*?')
+      .replace(/_WC_CHAR_/g, '.*?'),
   );
 }
 
@@ -138,7 +139,7 @@ interface VersionWithDepType {
  */
 export function parseLockFile(input: string): Map<string, VersionWithDepType> {
   const lockLineRegex = regEx(
-    `^(?<depName>[^:]+:[^:]+):(?<lockVersion>[^ ]+) \\(\\d+ constraints: [0-9a-f]+\\)$`
+    `^(?<depName>[^:]+:[^:]+):(?<lockVersion>[^ ]+) \\(\\d+ constraints: [0-9a-f]+\\)$`,
   );
 
   const depVerMap = new Map<string, VersionWithDepType>();
@@ -158,7 +159,7 @@ export function parseLockFile(input: string): Map<string, VersionWithDepType> {
     }
   }
   logger.trace(
-    `Found ${depVerMap.size} locked dependencies in ${VERSIONS_LOCK}.`
+    `Found ${depVerMap.size} locked dependencies in ${VERSIONS_LOCK}.`,
   );
   return depVerMap;
 }
@@ -169,10 +170,10 @@ export function parseLockFile(input: string): Map<string, VersionWithDepType> {
  * @return two maps, first being exact matches, second regex matches
  */
 export function parsePropsFile(
-  input: string
+  input: string,
 ): [Map<string, VersionWithPosition>, Map<string, VersionWithPosition>] {
   const propsLineRegex = regEx(
-    `^(?<depName>[^:]+:[^=]+?) *= *(?<propsVersion>.*)$`
+    `^(?<depName>[^:]+:[^=]+?) *= *(?<propsVersion>.*)$`,
   );
   const depVerExactMap = new Map<string, VersionWithPosition>();
   const depVerRegexMap = new Map<string, VersionWithPosition>();
@@ -206,7 +207,7 @@ export function parsePropsFile(
     startOfLineIdx += line.length + (isCrLf ? 2 : 1);
   }
   logger.trace(
-    `Found ${depVerExactMap.size} dependencies and ${depVerRegexMap.size} wildcard dependencies in ${VERSIONS_PROPS}.`
+    `Found ${depVerExactMap.size} dependencies and ${depVerRegexMap.size} wildcard dependencies in ${VERSIONS_PROPS}.`,
   );
   return [depVerExactMap, new Map([...depVerRegexMap].sort().reverse())];
 }

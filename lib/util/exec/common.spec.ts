@@ -1,11 +1,11 @@
-import { spawn as _spawn } from 'child_process';
-import type { ChildProcess, SendHandle, Serializable } from 'child_process';
-import { Readable } from 'stream';
+import { spawn as _spawn } from 'node:child_process';
+import type { SendHandle, Serializable } from 'node:child_process';
+import { Readable } from 'node:stream';
 import { mockedFunction, partial } from '../../../test/util';
 import { exec } from './common';
 import type { RawExecOptions } from './types';
 
-jest.mock('child_process');
+jest.mock('node:child_process');
 const spawn = mockedFunction(_spawn);
 
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;
@@ -38,7 +38,7 @@ interface StubArgs {
 
 function getReadable(
   data: string | undefined,
-  encoding: BufferEncoding
+  encoding: BufferEncoding,
 ): Readable {
   const readable = new Readable();
   readable._read = (size: number): void => {
@@ -57,7 +57,7 @@ function getReadable(
   return readable;
 }
 
-// TODO: fix types, jest is using wrong overload (#7154)
+// TODO: fix types, jest is using wrong overload (#22198)
 function getSpawnStub(args: StubArgs): any {
   const {
     cmd,
@@ -144,17 +144,13 @@ function getSpawnStub(args: StubArgs): any {
     unref,
     kill,
     pid,
-  } as ChildProcess;
+  };
 }
 
 describe('util/exec/common', () => {
   const cmd = 'ls -l';
   const stdout = 'out message';
   const stderr = 'err message';
-
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
 
   describe('rawExec', () => {
     it('command exits with code 0', async () => {
@@ -170,8 +166,8 @@ describe('util/exec/common', () => {
       await expect(
         exec(
           cmd,
-          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' })
-        )
+          partial<RawExecOptions>({ encoding: 'utf8', shell: 'bin/bash' }),
+        ),
       ).resolves.toEqual({
         stderr,
         stdout,
@@ -185,7 +181,7 @@ describe('util/exec/common', () => {
       const stub = getSpawnStub({ cmd, exitCode, exitSignal: null, stderr });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
       ).rejects.toMatchObject({
         cmd,
         message: `Command failed: ${cmd}\n${stderr}`,
@@ -200,7 +196,7 @@ describe('util/exec/common', () => {
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
       ).rejects.toMatchObject({
         cmd,
         signal: exitSignal,
@@ -218,7 +214,7 @@ describe('util/exec/common', () => {
       });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
       ).toReject();
     });
 
@@ -233,7 +229,7 @@ describe('util/exec/common', () => {
       });
       spawn.mockImplementationOnce((cmd, opts) => stub);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
       ).rejects.toMatchObject({ cmd: 'ls -l', message: 'error message' });
     });
 
@@ -252,8 +248,8 @@ describe('util/exec/common', () => {
           partial<RawExecOptions>({
             encoding: 'utf8',
             maxBuffer: 5,
-          })
-        )
+          }),
+        ),
       ).rejects.toMatchObject({
         cmd: 'ls -l',
         message: 'stdout maxBuffer exceeded',
@@ -276,8 +272,8 @@ describe('util/exec/common', () => {
           partial<RawExecOptions>({
             encoding: 'utf8',
             maxBuffer: 5,
-          })
-        )
+          }),
+        ),
       ).rejects.toMatchObject({
         cmd: 'ls -l',
         message: 'stderr maxBuffer exceeded',
@@ -303,7 +299,7 @@ describe('util/exec/common', () => {
       spawn.mockImplementationOnce((cmd, opts) => stub);
       killSpy.mockImplementationOnce((pid, signal) => true);
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
       ).rejects.toMatchObject({
         cmd,
         signal: exitSignal,
@@ -322,7 +318,7 @@ describe('util/exec/common', () => {
         throw new Error();
       });
       await expect(
-        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' }))
+        exec(cmd, partial<RawExecOptions>({ encoding: 'utf8' })),
       ).rejects.toMatchObject({
         cmd,
         signal: exitSignal,

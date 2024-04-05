@@ -1,6 +1,8 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
+import { coerceString } from '../../../util/string';
+import { validateUrl } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { TerraformDatasource } from './base';
@@ -22,6 +24,11 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   override readonly defaultRegistryUrls = ['https://registry.terraform.io'];
 
   override readonly defaultVersioning = hashicorpVersioning.id;
+
+  readonly extendedApiRegistryUrls = [
+    'https://registry.terraform.io',
+    'https://app.terraform.io',
+  ];
 
   /**
    * This function will fetch a package from the specified Terraform registry and return all semver versions.
@@ -46,24 +53,24 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       TerraformModuleDatasource.getRegistryRepository(packageName, registryUrl);
     logger.trace(
       { registryUrlNormalized, terraformRepository: repository },
-      'terraform-module.getReleases()'
+      'terraform-module.getReleases()',
     );
 
     const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-      registryUrlNormalized
+      registryUrlNormalized,
     );
-    if (registryUrlNormalized === this.defaultRegistryUrls[0]) {
+    if (this.extendedApiRegistryUrls.includes(registryUrlNormalized)) {
       return await this.queryRegistryExtendedApi(
         serviceDiscovery,
         registryUrlNormalized,
-        repository
+        repository,
       );
     }
 
     return await this.queryRegistryVersions(
       serviceDiscovery,
       registryUrlNormalized,
-      repository
+      repository,
     );
   }
 
@@ -75,19 +82,19 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   private async queryRegistryExtendedApi(
     serviceDiscovery: ServiceDiscoveryResult,
     registryUrl: string,
-    repository: string
+    repository: string,
   ): Promise<ReleaseResult | null> {
     let res: TerraformRelease;
     let pkgUrl: string;
 
     try {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
 
       pkgUrl = createSDBackendURL(
         registryUrl,
         'modules.v1',
         serviceDiscovery,
-        repository
+        repository,
       );
       res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
@@ -111,7 +118,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     dep.homepage = `${registryUrl}/modules/${repository}`;
     // set published date for latest release
     const latestVersion = dep.releases.find(
-      (release) => res.version === release.version
+      (release) => res.version === release.version,
     );
     if (latestVersion) {
       latestVersion.releaseTimestamp = res.published_at;
@@ -126,17 +133,17 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   private async queryRegistryVersions(
     serviceDiscovery: ServiceDiscoveryResult,
     registryUrl: string,
-    repository: string
+    repository: string,
   ): Promise<ReleaseResult | null> {
     let res: TerraformModuleVersions;
     let pkgUrl: string;
     try {
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       pkgUrl = createSDBackendURL(
         registryUrl,
         'modules.v1',
         serviceDiscovery,
-        `${repository}/versions`
+        `${repository}/versions`,
       );
       res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
       if (res.modules.length < 1) {
@@ -153,12 +160,18 @@ export class TerraformModuleDatasource extends TerraformDatasource {
         version,
       })),
     };
+
+    // Add the source URL if given
+    if (validateUrl(res.modules[0].source)) {
+      dep.sourceUrl = res.modules[0].source;
+    }
+
     return dep;
   }
 
   private static getRegistryRepository(
     packageName: string,
-    registryUrl = ''
+    registryUrl: string | undefined,
   ): RegistryRepository {
     let registry: string;
     const split = packageName.split('/');
@@ -166,7 +179,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
       [registry] = split;
       split.shift();
     } else {
-      registry = registryUrl;
+      registry = coerceString(registryUrl);
     }
     if (!regEx(/^https?:\/\//).test(registry)) {
       registry = `https://${registry}`;

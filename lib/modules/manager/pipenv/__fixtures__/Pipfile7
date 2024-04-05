@@ -1,0 +1,12 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "https://$USERNAME_FOO:${PAZZWORD}@mypypi.example.com/simple"
+verify_ssl = true
+name = "private"
+
+[packages]
+requests = {version = "==0.21.0", index = "private"}

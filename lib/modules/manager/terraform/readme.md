@@ -33,7 +33,7 @@ Renovate can update the `required_version` attribute of the Terraform block.
 
 #### helm_release
 
-Renovate can update the version attribute of `helm_release` resources.
+Renovate can update the version attribute of `helm_release` resources. This applies to both helm chart repositories and [charts published in OCI registries](https://helm.sh/docs/topics/registries/).
 
 | Name             | Public hosting | Private hosting |
 | ---------------- | :------------: | :-------------: |
@@ -102,4 +102,4 @@ You can use these `depTypes` for fine-grained control, for example to disable pa
 | Kubernetes StatefulSet               |       `kubernetes_stateful_set`        |                                                                            |
 | Kubernetes StatefulSet v1            |      `kubernetes_stateful_set_v1`      |                                                                            |
 
-If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.
+If you need to change the versioning format, read the [versioning](../../versioning.md) documentation to learn more.

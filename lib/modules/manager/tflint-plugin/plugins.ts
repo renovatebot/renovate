@@ -9,7 +9,7 @@ import { keyValueExtractionRegex } from './util';
 export function extractTFLintPlugin(
   startingLine: number,
   lines: string[],
-  pluginName: string
+  pluginName: string,
 ): ExtractionResult {
   let lineNumber = startingLine;
   const deps: PackageDependency[] = [];
@@ -62,7 +62,7 @@ export function extractTFLintPlugin(
 
 function analyseTFLintPlugin(
   source: string | null,
-  version: string | null
+  version: string | null,
 ): PackageDependency {
   const dep: PackageDependency = {};
 

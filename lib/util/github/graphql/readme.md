@@ -36,7 +36,7 @@ It is responsible for handling several aspects of the fetch process, including:
 - Handling and aggregating errors that may occur during the fetch process
 - Dynamically adjusting the page size and retrying in the event of server errors
 - Enforcing a maximum limit on the number of queries that can be made
-- Detecting whether a package is private or public, and selecting the appropriate cache strategy (in-memory or long-term) accordingly
+- Detecting whether a package is private or public, and selecting the right cache strategy (in-memory or long-term) accordingly
 - Ensuring proper concurrency when querying the same package simultaneously.
 
 The `cache-strategies/` directory is responsible for caching implementation.
@@ -99,7 +99,6 @@ As we retrieve items during the fetch process, we gradually construct a data str
     "2.0.0": { "version": "2.0.0", "releaseTimestamp": "2022-09-01" },
   },
   "createdAt": "2022-12-20",
-  "updatedAt": "2022-12-20",
 }
 ```
 
@@ -159,7 +158,6 @@ Given we performed fetch at the day of latest release, new cache looks like:
     "2.0.0": { "version": "2.0.0", "releaseTimestamp": "2022-09-01" },
   },
   "createdAt": "2022-12-20",
-  "updatedAt": "2022-12-30",
 }
 ```
 

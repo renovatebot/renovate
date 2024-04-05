@@ -31,9 +31,9 @@ function getDescriptionArray(config: RenovateConfig): string[] {
 
 export function getConfigDesc(
   config: RenovateConfig,
-  packageFiles?: Record<string, PackageFile[]>
+  packageFiles?: Record<string, PackageFile[]>,
 ): string {
-  // TODO: type (#7154)
+  // TODO: type (#22198)
   const configFile = configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!
     : defaultConfigFile;
@@ -52,9 +52,13 @@ export function getConfigDesc(
   });
   desc += '\n';
   desc += emojify(
-    `:abcd: Would you like to change the way Renovate is upgrading your dependencies?`
+    `:abcd: Do you want to change how Renovate upgrades your dependencies?`,
   );
-  desc += ` Simply edit the \`${configFile}\` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time Renovate runs.`;
+  desc += ` Add your custom config to \`${configFile}\` in this branch${
+    config.onboardingRebaseCheckbox
+      ? ' and select the Retry/Rebase checkbox below'
+      : ''
+  }. Renovate will update the Pull Request description the next time it runs.`;
   desc += '\n\n---\n';
   return desc;
 }

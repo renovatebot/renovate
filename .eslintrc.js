@@ -16,7 +16,6 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
     'plugin:jest-formatting/recommended',
-    'prettier',
   ],
   parserOptions: {
     ecmaVersion: 9,
@@ -40,6 +39,8 @@ module.exports = {
       { devDependencies: ['test/**/*', '**/*.spec.ts'] },
     ],
     'import/prefer-default-export': 0, // no benefit
+
+    'import/no-cycle': 2, // cycles don't work when moving to esm
 
     /*
      * This rule is not needed since the project uses typescript and the rule
@@ -98,7 +99,7 @@ module.exports = {
 
     // TODO: fix lint
     '@typescript-eslint/no-explicit-any': 0,
-    // TODO: https://github.com/renovatebot/renovate/issues/7154
+    // TODO: https://github.com/renovatebot/renovate/discussions/22198
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-unused-vars': [
       2,
@@ -135,7 +136,7 @@ module.exports = {
       },
     ],
 
-    '@typescript-eslint/unbound-method': 2,
+    '@typescript-eslint/unbound-method': [2, { ignoreStatic: true }],
     '@typescript-eslint/ban-types': 2,
     '@renovate/jest-root-describe': 2,
 
@@ -206,6 +207,7 @@ module.exports = {
           'error',
           { devDependencies: true },
         ],
+        'no-console': 'off',
       },
     },
     {

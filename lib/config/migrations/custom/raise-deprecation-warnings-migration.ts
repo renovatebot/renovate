@@ -12,7 +12,7 @@ export class RaiseDeprecationWarningsMigration extends AbstractMigration {
         'suppressNotifications',
         Array.isArray(suppressNotifications)
           ? suppressNotifications.concat(['deprecationWarningIssues'])
-          : ['deprecationWarningIssues']
+          : ['deprecationWarningIssues'],
       );
     }
   }

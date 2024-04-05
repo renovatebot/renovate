@@ -16,6 +16,10 @@ export interface GitlabIncludeTemplate {
   template: string;
 }
 
+export interface GitlabIncludeComponent {
+  component: string;
+}
+
 export interface GitlabPipeline {
   include?: GitlabInclude[] | GitlabInclude;
 }
@@ -39,4 +43,5 @@ export type GitlabInclude =
   | GitlabIncludeProject
   | GitlabIncludeRemote
   | GitlabIncludeTemplate
+  | GitlabIncludeComponent
   | string;

@@ -1,6 +1,8 @@
 import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../config/global';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
+  GITEA_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
 } from '../../constants';
@@ -8,15 +10,44 @@ import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
+import { matchRegexOrGlobList } from '../string-match';
+import { parseUrl } from '../url';
 import { dnsLookup } from './dns';
-import { keepaliveAgents } from './keepalive';
+import { keepAliveAgents } from './keep-alive';
 import type { GotOptions } from './types';
 
-export function findMatchingRules(options: GotOptions, url: string): HostRule {
+export type HostRulesGotOptions = Pick<
+  GotOptions,
+  | 'hostType'
+  | 'url'
+  | 'noAuth'
+  | 'headers'
+  | 'token'
+  | 'username'
+  | 'password'
+  | 'context'
+  | 'enabled'
+  | 'abortOnError'
+  | 'abortIgnoreStatusCodes'
+  | 'timeout'
+  | 'lookup'
+  | 'agent'
+  | 'http2'
+  | 'https'
+>;
+
+export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
+  url: string,
+  options: GotOptions,
+): HostRule {
   const { hostType } = options;
   let res = hostRules.find({ hostType, url });
 
-  if (res.token || res.username || res.password) {
+  if (
+    is.nonEmptyString(res.token) ||
+    is.nonEmptyString(res.username) ||
+    is.nonEmptyString(res.password)
+  ) {
     // do not fallback if we already have auth infos
     return res;
   }
@@ -66,57 +97,123 @@ export function findMatchingRules(options: GotOptions, url: string): HostRule {
     };
   }
 
+  // Fallback to `gitea` hostType
+  if (
+    hostType &&
+    GITEA_API_USING_HOST_TYPES.includes(hostType) &&
+    hostType !== 'gitea'
+  ) {
+    res = {
+      ...hostRules.find({
+        hostType: 'gitea',
+        url,
+      }),
+      ...res,
+    };
+  }
+
   return res;
 }
 
 // Apply host rules to requests
-export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
-  const options: GotOptions = { ...inOptions };
-  const foundRules = findMatchingRules(options, url);
-  const { username, password, token, enabled, authType } = foundRules;
+export function applyHostRule<GotOptions extends HostRulesGotOptions>(
+  url: string,
+  options: GotOptions,
+  hostRule: HostRule,
+): GotOptions {
+  const { username, password, token, enabled, authType } = hostRule;
+  const host = parseUrl(url)?.host;
   if (options.noAuth) {
     logger.trace({ url }, `Authorization disabled`);
   } else if (
-    options.headers?.authorization ||
-    options.password ||
-    options.token
+    is.nonEmptyString(options.headers?.authorization) ||
+    is.nonEmptyString(options.password) ||
+    is.nonEmptyString(options.token)
   ) {
+    logger.once.debug(`hostRules: authentication already set for ${host}`);
     logger.trace({ url }, `Authorization already set`);
   } else if (password !== undefined) {
+    logger.once.debug(`hostRules: applying Basic authentication for ${host}`);
     logger.trace({ url }, `Applying Basic authentication`);
     options.username = username;
     options.password = password;
   } else if (token) {
+    logger.once.debug(`hostRules: applying Bearer authentication for ${host}`);
     logger.trace({ url }, `Applying Bearer authentication`);
     options.token = token;
     options.context = { ...options.context, authType };
   } else if (enabled === false) {
     options.enabled = false;
+  } else {
+    logger.once.debug(`hostRules: no authentication for ${host}`);
   }
   // Apply optional params
-  if (foundRules.abortOnError) {
-    options.abortOnError = foundRules.abortOnError;
+  if (hostRule.abortOnError) {
+    options.abortOnError = hostRule.abortOnError;
   }
 
-  if (foundRules.abortIgnoreStatusCodes) {
-    options.abortIgnoreStatusCodes = foundRules.abortIgnoreStatusCodes;
+  if (hostRule.abortIgnoreStatusCodes) {
+    options.abortIgnoreStatusCodes = hostRule.abortIgnoreStatusCodes;
   }
 
-  if (foundRules.timeout) {
-    options.timeout = foundRules.timeout;
+  if (hostRule.timeout) {
+    options.timeout = hostRule.timeout;
   }
 
-  if (foundRules.dnsCache) {
+  if (hostRule.dnsCache) {
     options.lookup = dnsLookup;
   }
 
-  if (foundRules.keepalive) {
-    options.agent = keepaliveAgents;
+  if (hostRule.headers) {
+    const allowedHeaders = GlobalConfig.get('allowedHeaders', []);
+    const filteredHeaders: Record<string, string> = {};
+
+    for (const [header, value] of Object.entries(hostRule.headers)) {
+      if (matchRegexOrGlobList(header, allowedHeaders)) {
+        filteredHeaders[header] = value;
+      } else {
+        logger.once.error(
+          { allowedHeaders, header },
+          'Disallowed hostRules headers',
+        );
+      }
+    }
+
+    options.headers = {
+      ...filteredHeaders,
+      ...options.headers,
+    };
   }
 
-  if (!hasProxy() && foundRules.enableHttp2 === true) {
+  if (hostRule.keepAlive) {
+    options.agent = keepAliveAgents;
+  }
+
+  if (!hasProxy() && hostRule.enableHttp2 === true) {
     options.http2 = true;
   }
+
+  if (is.nonEmptyString(hostRule.httpsCertificateAuthority)) {
+    options.https = {
+      ...(options.https ?? {}),
+      certificateAuthority: hostRule.httpsCertificateAuthority,
+    };
+  }
+
+  if (is.nonEmptyString(hostRule.httpsPrivateKey)) {
+    options.https = {
+      ...(options.https ?? {}),
+      key: hostRule.httpsPrivateKey,
+    };
+  }
+
+  if (is.nonEmptyString(hostRule.httpsCertificate)) {
+    options.https = {
+      ...(options.https ?? {}),
+      certificate: hostRule.httpsCertificate,
+    };
+  }
+
   return options;
 }
 

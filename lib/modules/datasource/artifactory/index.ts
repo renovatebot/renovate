@@ -24,8 +24,7 @@ export class ArtifactoryDatasource extends Datasource {
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      // TODO: types (#22198)
       `${registryUrl}:${packageName}`,
   })
   async getReleases({
@@ -35,7 +34,7 @@ export class ArtifactoryDatasource extends Datasource {
     if (!registryUrl) {
       logger.warn(
         { packageName },
-        'artifactory datasource requires custom registryUrl. Skipping datasource'
+        'artifactory datasource requires custom registryUrl. Skipping datasource',
       );
       return null;
     }
@@ -59,7 +58,7 @@ export class ArtifactoryDatasource extends Datasource {
       nodes
         .filter(
           // filter out hyperlink to navigate to parent folder
-          (node) => node.innerHTML !== '../' && node.innerHTML !== '..'
+          (node) => node.innerHTML !== '../' && node.innerHTML !== '..',
         )
         .forEach(
           // extract version and published time for each node
@@ -70,7 +69,7 @@ export class ArtifactoryDatasource extends Datasource {
                 : node.innerHTML;
 
             const published = ArtifactoryDatasource.parseReleaseTimestamp(
-              node.nextSibling?.text
+              node.nextSibling!.text, // TODO: can be null (#22198)
             );
 
             const thisRelease: Release = {
@@ -79,18 +78,18 @@ export class ArtifactoryDatasource extends Datasource {
             };
 
             result.releases.push(thisRelease);
-          }
+          },
         );
 
       if (result.releases.length) {
         logger.trace(
           { registryUrl, packageName, versions: result.releases.length },
-          'artifactory: Found versions'
+          'artifactory: Found versions',
         );
       } else {
         logger.trace(
           { registryUrl, packageName },
-          'artifactory: No versions found'
+          'artifactory: No versions found',
         );
       }
     } catch (err) {
@@ -99,7 +98,7 @@ export class ArtifactoryDatasource extends Datasource {
         if (err.response?.statusCode === 404) {
           logger.warn(
             { registryUrl, packageName },
-            'artifactory: `Not Found` error'
+            'artifactory: `Not Found` error',
           );
           return null;
         }

@@ -1,5 +1,4 @@
-// TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
+// TODO: types (#22198)
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
@@ -29,6 +28,11 @@ export function updateDependency({
     }
     const depNameNoVersion = getDepNameWithNoVersion(depName);
     const lines = fileContent.split(newlineRegex);
+    // istanbul ignore if: hard to test
+    if (lines.length <= upgrade.managerData.lineNumber) {
+      logger.warn('go.mod current line no longer exists after update');
+      return null;
+    }
     const lineToChange = lines[upgrade.managerData.lineNumber];
     if (
       !lineToChange.includes(depNameNoVersion) &&
@@ -36,7 +40,7 @@ export function updateDependency({
     ) {
       logger.debug(
         { lineToChange, depName },
-        "go.mod current line doesn't contain dependency"
+        "go.mod current line doesn't contain dependency",
       );
       return null;
     }
@@ -48,11 +52,11 @@ export function updateDependency({
     if (depType === 'replace') {
       if (upgrade.managerData.multiLine) {
         updateLineExp = regEx(
-          /^(?<depPart>\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
+          /^(?<depPart>\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/,
         );
       } else {
         updateLineExp = regEx(
-          /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
+          /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/,
         );
       }
     } else if (depType === 'require' || depType === 'indirect') {
@@ -60,7 +64,7 @@ export function updateDependency({
         updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
       } else {
         updateLineExp = regEx(
-          /^(?<depPart>require\s+[^\s]+)(?<divider>\s+)[^\s]+/
+          /^(?<depPart>require\s+[^\s]+)(?<divider>\s+)[^\s]+/,
         );
       }
     }
@@ -72,25 +76,25 @@ export function updateDependency({
     if (upgrade.updateType === 'digest') {
       const newDigestRightSized = upgrade.newDigest!.substring(
         0,
-        upgrade.currentDigest!.length
+        upgrade.currentDigest!.length,
       );
       if (lineToChange.includes(newDigestRightSized)) {
         return fileContent;
       }
       logger.debug(
         { depName, lineToChange, newDigestRightSized },
-        'gomod: need to update digest'
+        'gomod: need to update digest',
       );
       newLine = lineToChange.replace(
-        // TODO: can be undefined? (#7154)
+        // TODO: can be undefined? (#22198)
         updateLineExp!,
-        `$<depPart>$<divider>${newDigestRightSized}`
+        `$<depPart>$<divider>${newDigestRightSized}`,
       );
     } else {
       newLine = lineToChange.replace(
-        // TODO: can be undefined? (#7154)
+        // TODO: can be undefined? (#22198)
         updateLineExp!,
-        `$<depPart>$<divider>${upgrade.newValue}`
+        `$<depPart>$<divider>${upgrade.newValue}`,
       );
     }
     if (upgrade.updateType === 'major') {
@@ -101,11 +105,12 @@ export function updateDependency({
         // Package renames - I couldn't think of a better place to do this
         newLine = newLine.replace(
           'gorethink/gorethink.v5',
-          'rethinkdb/rethinkdb-go.v5'
+          'rethinkdb/rethinkdb-go.v5',
         );
       } else if (
         upgrade.newMajor! > 1 &&
-        !newLine.includes(`/v${upgrade.newMajor}`)
+        !newLine.includes(`/v${upgrade.newMajor}`) &&
+        !upgrade.newValue!.endsWith('+incompatible')
       ) {
         if (depName === depNameNoVersion) {
           // If package currently has no version, pin to latest one.
@@ -115,7 +120,7 @@ export function updateDependency({
           const [oldV] = upgrade.currentValue!.split('.');
           newLine = newLine.replace(
             regEx(`/${oldV}(\\s+)`, undefined, false),
-            `/v${upgrade.newMajor}$1`
+            `/v${upgrade.newMajor}$1`,
           );
         }
       }
@@ -137,7 +142,10 @@ export function updateDependency({
     }
 
     if (depType === 'indirect') {
-      newLine += ' // indirect';
+      newLine = newLine.replace(
+        regEx(/\s*(?:\/\/\s*indirect(?:\s*;)?\s*)*$/),
+        ' // indirect',
+      );
     }
 
     lines[upgrade.managerData.lineNumber] = newLine;

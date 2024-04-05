@@ -14,16 +14,21 @@ describe('workers/repository/process/sort', () => {
           prTitle: 'some pin',
         },
         {
-          updateType: 'pin' as UpdateType,
-          prTitle: 'some other pin',
-        },
-        {
           updateType: 'minor' as UpdateType,
           prTitle: 'a minor update',
+        },
+        {
+          updateType: 'pin' as UpdateType,
+          prTitle: 'some other other pin',
+        },
+        {
+          updateType: 'pin' as UpdateType,
+          prTitle: 'some other pin',
         },
       ];
       sortBranches(branches);
       expect(branches).toEqual([
+        { prTitle: 'some other other pin', updateType: 'pin' },
         { prTitle: 'some other pin', updateType: 'pin' },
         { prTitle: 'some pin', updateType: 'pin' },
         { prTitle: 'a minor update', updateType: 'minor' },

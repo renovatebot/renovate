@@ -8,7 +8,7 @@ describe('config/migrations/custom/schedule-migration', () => {
       } as any,
       {
         schedule: 'on friday',
-      } as any
+      } as any,
     );
   });
 
@@ -20,7 +20,7 @@ describe('config/migrations/custom/schedule-migration', () => {
       {
         schedule: 'every weekday',
       } as any,
-      false
+      false,
     );
   });
 
@@ -32,7 +32,7 @@ describe('config/migrations/custom/schedule-migration', () => {
       {
         schedule: 'after 5:00pm on wednesday and thursday',
       } as any,
-      false
+      false,
     );
   });
 
@@ -44,7 +44,7 @@ describe('config/migrations/custom/schedule-migration', () => {
       {
         schedule: 'after 1:00pm and before 5:00pm',
       } as any,
-      false
+      false,
     );
   });
 
@@ -56,7 +56,7 @@ describe('config/migrations/custom/schedule-migration', () => {
       {
         schedule: 'after and before 5:00',
       } as any,
-      false
+      false,
     );
   });
 });

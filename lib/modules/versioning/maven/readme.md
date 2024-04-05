@@ -1,4 +1,5 @@
-Maven versioning is similar to SemVer but also very different in places. It's specified by Maven itself.
+Maven versioning is similar to SemVer but also very different in places.
+It's specified by Maven itself.
 
 Ranges are supported using Maven's special syntax.
 
@@ -13,5 +14,3 @@ Display parameters as parsed by Maven (in canonical form) and comparison result:
    3.2.4-SNAPSHOT < 3.2.4.0
 3. 3.2.4.0 == 3.2.4
 ```
-
-Also, take a look at [maven-cmp](https://github.com/zharinov/maven-cmp) utility.

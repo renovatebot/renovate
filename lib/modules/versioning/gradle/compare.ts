@@ -13,7 +13,7 @@ type Token = {
 
 function iterateChars(
   str: string,
-  cb: (p: string | null, n: string | null) => void
+  cb: (p: string | null, n: string | null) => void,
 ): void {
   let prev = null;
   let next = null;
@@ -50,6 +50,7 @@ export function tokenize(versionStr: string): Token[] | null {
 
   function yieldToken(): void {
     if (currentVal === '') {
+      // We tried to yield an empty token, which means we're in a bad state.
       result = null;
     }
     if (result) {
@@ -253,7 +254,7 @@ export function parsePrefixRange(input: string): PrefixRange | null {
 }
 
 const mavenBasedRangeRegex = regEx(
-  /^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])$/
+  /^(?<leftBoundStr>[[\](]\s*)(?<leftVal>[-._+a-zA-Z0-9]*?)(?<separator>\s*,\s*)(?<rightVal>[-._+a-zA-Z0-9]*?)(?<rightBoundStr>\s*[[\])])$/,
 );
 
 export function parseMavenBasedRange(input: string): MavenBasedRange | null {

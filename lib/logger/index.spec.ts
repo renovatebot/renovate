@@ -1,4 +1,6 @@
-import _fs from 'fs-extra';
+import type { WriteStream } from 'node:fs';
+import fs from 'fs-extra';
+import { partial } from '../../test/util';
 import { add } from '../util/host-rules';
 import { addSecretForSanitizing as addSecret } from '../util/sanitize';
 import {
@@ -15,9 +17,6 @@ import {
 } from '.';
 
 jest.unmock('.');
-
-jest.mock('fs-extra');
-const fs: any = _fs;
 
 describe('logger/index', () => {
   it('inits', () => {
@@ -80,7 +79,7 @@ describe('logger/index', () => {
       addStream({
         name: 'logfile',
         level: 'error',
-      })
+      }),
     ).toThrow("Missing 'stream' or 'path' for bunyan stream");
   });
 
@@ -91,18 +90,21 @@ describe('logger/index', () => {
         path: 'file.log',
         level: 'error',
         type: 'rotating-file',
-      })
+      }),
     ).toThrow("Rotating files aren't supported");
   });
 
   it('supports file-based logging', () => {
     let chunk = '';
-    fs.createWriteStream.mockReturnValueOnce({
-      writable: true,
-      write(x: string) {
-        chunk = x;
-      },
-    });
+    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+      partial<WriteStream>({
+        writable: true,
+        write(x: string): boolean {
+          chunk = x;
+          return true;
+        },
+      }),
+    );
 
     addStream({
       name: 'logfile',
@@ -117,12 +119,15 @@ describe('logger/index', () => {
 
   it('handles cycles', () => {
     let logged: Record<string, any> = {};
-    fs.createWriteStream.mockReturnValueOnce({
-      writable: true,
-      write(x: string) {
-        logged = JSON.parse(x);
-      },
-    });
+    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+      partial<WriteStream>({
+        writable: true,
+        write(x: string): boolean {
+          logged = JSON.parse(x);
+          return true;
+        },
+      }),
+    );
 
     addStream({
       name: 'logfile',
@@ -142,12 +147,15 @@ describe('logger/index', () => {
 
   it('sanitizes secrets', () => {
     let logged: Record<string, any> = {};
-    fs.createWriteStream.mockReturnValueOnce({
-      writable: true,
-      write(x: string) {
-        logged = JSON.parse(x);
-      },
-    });
+    jest.spyOn(fs, 'createWriteStream').mockReturnValueOnce(
+      partial<WriteStream>({
+        writable: true,
+        write(x: string): boolean {
+          logged = JSON.parse(x);
+          return true;
+        },
+      }),
+    );
 
     addStream({
       name: 'logfile',

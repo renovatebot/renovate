@@ -32,6 +32,11 @@ export function getConfig(input: string[]): AllConfig {
         .replace(/^--dry-run$/, '--dry-run=true')
         .replace(/^--require-config$/, '--require-config=true')
         .replace('--aliases', '--registry-aliases')
+        .replace('--include-forks=true', '--fork-processing=enabled')
+        .replace('--include-forks', '--fork-processing=enabled')
+        .replace('--recreate-closed=false', '--recreate-when=auto')
+        .replace('--recreate-closed=true', '--recreate-when=always')
+        .replace('--recreate-closed', '--recreate-when=always'),
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
@@ -47,7 +52,7 @@ export function getConfig(input: string[]): AllConfig {
       program = program.option(
         optionString,
         option.description,
-        coersions[option.type]
+        coersions[option.type],
       );
     }
   });
@@ -59,11 +64,11 @@ export function getConfig(input: string[]): AllConfig {
     console.log('');
     console.log('    $ renovate --token 123test singapore/lint-condo');
     console.log(
-      '    $ LOG_LEVEL=debug renovate --labels=renovate,dependency --ignore-unstable=false singapore/lint-condo'
+      '    $ LOG_LEVEL=debug renovate --labels=renovate,dependency --ignore-unstable=false singapore/lint-condo',
     );
     console.log('    $ renovate singapore/lint-condo singapore/package-test');
     console.log(
-      `    $ renovate singapore/lint-condo --onboarding-config='{"extends":["config:base"]}'`
+      `    $ renovate singapore/lint-condo --onboarding-config='{"extends":["config:recommended"]}'`,
     );
     /* eslint-enable no-console */
   }
@@ -83,12 +88,12 @@ export function getConfig(input: string[]): AllConfig {
             if (option.name === 'dryRun') {
               if (config[option.name] === 'true') {
                 logger.warn(
-                  'cli config dryRun property has been changed to full'
+                  'cli config dryRun property has been changed to full',
                 );
                 config[option.name] = 'full';
               } else if (config[option.name] === 'false') {
                 logger.warn(
-                  'cli config dryRun property has been changed to null'
+                  'cli config dryRun property has been changed to null',
                 );
                 config[option.name] = null;
               } else if (config[option.name] === 'null') {
@@ -98,12 +103,12 @@ export function getConfig(input: string[]): AllConfig {
             if (option.name === 'requireConfig') {
               if (config[option.name] === 'true') {
                 logger.warn(
-                  'cli config requireConfig property has been changed to required'
+                  'cli config requireConfig property has been changed to required',
                 );
                 config[option.name] = 'required';
               } else if (config[option.name] === 'false') {
                 logger.warn(
-                  'cli config requireConfig property has been changed to optional'
+                  'cli config requireConfig property has been changed to optional',
                 );
                 config[option.name] = 'optional';
               }

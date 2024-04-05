@@ -1,11 +1,18 @@
-name: 'Code scanning - action'
+name: 'Code scanning'
 
 on:
   push:
     branches: [main]
+
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [main]
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
   schedule:
     - cron: '0 13 * * 1'
 
@@ -14,15 +21,17 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  security-events: write
+  contents: read
 
 jobs:
   CodeQL-Build:
     runs-on: ubuntu-latest
-
+    if: github.event.pull_request.draft != true
+    permissions:
+      security-events: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
 
       - name: Delete fixtures to suppress false positives
         run: |
@@ -30,7 +39,7 @@ jobs:
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@515828d97454b8354517688ddc5b48402b723750 # v2.1.38
+        uses: github/codeql-action/init@4355270be187e1b672a7a1c7c7bae5afdc1ab94a # v3.24.10
         with:
           languages: javascript
 
@@ -40,7 +49,7 @@ jobs:
       # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
       # If this step fails, then you should remove it and run the build manually (see below)
       - name: Autobuild
-        uses: github/codeql-action/autobuild@515828d97454b8354517688ddc5b48402b723750 # v2.1.38
+        uses: github/codeql-action/autobuild@4355270be187e1b672a7a1c7c7bae5afdc1ab94a # v3.24.10
 
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 https://git.io/JvXDl
@@ -54,4 +63,4 @@ jobs:
       #   make release
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@515828d97454b8354517688ddc5b48402b723750 # v2.1.38
+        uses: github/codeql-action/analyze@4355270be187e1b672a7a1c7c7bae5afdc1ab94a # v3.24.10

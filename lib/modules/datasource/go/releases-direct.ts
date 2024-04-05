@@ -1,29 +1,75 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
+import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
-import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
 import { getSourceUrl } from './common';
+
+/**
+ * This function tries to select tags with longest prefix could be constructed from `packageName`.
+ *
+ * For package named `example.com/foo/bar/baz/qux`, it will try to detect tags with following prefixes:
+ *
+ *   - `foo/bar/baz/qux/vX.Y.Z`
+ *   - `bar/baz/qux/vX.Y.Z`
+ *   - `baz/qux/vX.Y.Z`
+ *   - `qux/vX.Y.Z`
+ *
+ * If none of the following is found, it falls back to simply returning all tags like `vX.Y.Z`.
+ */
+function filterByPrefix(packageName: string, releases: Release[]): Release[] {
+  const nameParts = packageName
+    .replace(regEx(/\/v\d+$/), '')
+    .split('/')
+    .slice(1);
+
+  const submoduleReleases: Release[] = [];
+  while (nameParts.length) {
+    const prefix = `${nameParts.join('/')}/`;
+
+    for (const release of releases) {
+      if (!release.version.startsWith(prefix)) {
+        continue;
+      }
+
+      const normalizedVersion = release.version.replace(prefix, '');
+      if (!normalizedVersion.match(regEx(/^v\d[^/]*/))) {
+        continue;
+      }
+
+      release.version = release.version.replace(prefix, '');
+      submoduleReleases.push(release);
+    }
+
+    if (submoduleReleases.length) {
+      return submoduleReleases;
+    }
+
+    nameParts.shift();
+  }
+
+  return releases.filter((release) => release.version.startsWith('v'));
+}
 
 export class GoDirectDatasource extends Datasource {
   static readonly id = 'go-direct';
 
   git: GitTagsDatasource;
   github: GithubTagsDatasource;
-  gitlab: DatasourceApi;
-  bitbucket: DatasourceApi;
+  gitlab: GitlabTagsDatasource;
+  bitbucket: BitbucketTagsDatasource;
 
   constructor() {
     super(GoDirectDatasource.id);
     this.git = new GitTagsDatasource();
     this.github = new GithubTagsDatasource();
     this.gitlab = new GitlabTagsDatasource();
-    this.bitbucket = new BitBucketTagsDatasource();
+    this.bitbucket = new BitbucketTagsDatasource();
   }
 
   /**
@@ -52,7 +98,7 @@ export class GoDirectDatasource extends Datasource {
     if (!source) {
       logger.info(
         { packageName },
-        'Unsupported go host - cannot look up versions'
+        'Unsupported go host - cannot look up versions',
       );
       return null;
     }
@@ -70,7 +116,7 @@ export class GoDirectDatasource extends Datasource {
         res = await this.gitlab.getReleases(source);
         break;
       }
-      case BitBucketTagsDatasource.id: {
+      case BitbucketTagsDatasource.id: {
         res = await this.bitbucket.getReleases(source);
         break;
       }
@@ -85,51 +131,9 @@ export class GoDirectDatasource extends Datasource {
       return null;
     }
 
-    const sourceUrl = getSourceUrl(source);
+    const sourceUrl = getSourceUrl(source) ?? null;
 
-    /**
-     * github.com/org/mod/submodule should be tagged as submodule/va.b.c
-     * and that tag should be used instead of just va.b.c, although for compatibility
-     * the old behaviour stays the same.
-     */
-    const nameParts = packageName.replace(regEx(/\/v\d+$/), '').split('/');
-    logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
-
-    // If it has more than 3 parts it's a submodule or subgroup (gitlab only)
-    if (nameParts.length > 3) {
-      const prefix = nameParts.slice(3, nameParts.length).join('/');
-      logger.trace(`go.getReleases.prefix:${prefix}`);
-
-      // Filter the releases so that we only get the ones that are for this submodule
-      // Also trim the submodule prefix from the version number
-      const submodReleases = res.releases
-        .filter((release) => release.version?.startsWith(prefix))
-        .map((release) => {
-          const r2 = release;
-          r2.version = r2.version.replace(`${prefix}/`, '');
-          return r2;
-        });
-      logger.trace({ submodReleases }, 'go.getReleases');
-
-      // If not from gitlab -> no subgroups -> must be submodule
-      // If from gitlab and directory one level above has tags -> has to be submodule, since groups can't have tags
-      // If not, it's simply a repo in a subfolder, and the normal tags are used.
-      if (
-        !(source.datasource === GitlabTagsDatasource.id) ||
-        (source.datasource === GitlabTagsDatasource.id && submodReleases.length)
-      ) {
-        return {
-          sourceUrl,
-          releases: submodReleases,
-        };
-      }
-    }
-
-    if (res.releases) {
-      res.releases = res.releases.filter((release) =>
-        release.version?.startsWith('v')
-      );
-    }
+    res.releases = filterByPrefix(packageName, res.releases);
 
     return { ...res, sourceUrl };
   }

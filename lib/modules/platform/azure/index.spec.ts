@@ -1,12 +1,14 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import {
+  GitPullRequest,
   GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import { partial } from '../../../../test/util';
+import { mockDeep } from 'jest-mock-extended';
+import { mocked, partial } from '../../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_NOT_FOUND,
@@ -17,30 +19,32 @@ import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
 import { AzurePrVote } from './types';
 
+jest.mock('./azure-got-wrapper');
+jest.mock('./azure-helper');
+jest.mock('../../../util/git');
+jest.mock('../../../util/host-rules', () => mockDeep());
+jest.mock('../../../util/sanitize', () =>
+  mockDeep({ sanitize: (s: string) => s }),
+);
+jest.mock('timers/promises');
+
 describe('modules/platform/azure/index', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: Platform;
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
   let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
   let git: jest.Mocked<typeof _git>;
-  let logger: jest.Mocked<typeof _logger>;
+  let logger: jest.MockedObject<typeof _logger>;
 
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    jest.mock('./azure-got-wrapper');
-    jest.mock('./azure-helper');
-    jest.mock('../../../util/git');
-    jest.mock('../../../util/host-rules');
-    jest.mock('../../../logger');
-    jest.mock('delay');
-    hostRules = require('../../../util/host-rules');
-    require('../../../util/sanitize').sanitize = jest.fn((input) => input);
+    hostRules = jest.requireMock('../../../util/host-rules');
     azure = await import('.');
-    azureApi = require('./azure-got-wrapper');
-    azureHelper = require('./azure-helper');
-    logger = (await import('../../../logger')).logger as never;
-    git = require('../../../util/git');
+    azureApi = jest.requireMock('./azure-got-wrapper');
+    azureHelper = jest.requireMock('./azure-helper');
+    logger = mocked(await import('../../../logger')).logger;
+    git = jest.requireMock('../../../util/git');
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(false);
     hostRules.find.mockReturnValue({
@@ -70,9 +74,17 @@ describe('modules/platform/azure/index', () => {
               project: {
                 name: 'prj1',
               },
+              isDisabled: false,
+            },
+            {
+              name: 'repoDisabled',
+              project: {
+                name: 'prj1',
+              },
+              isDisabled: true,
             },
           ]),
-        } as any)
+        }) as any,
     );
     return azure.getRepos();
   }
@@ -88,7 +100,7 @@ describe('modules/platform/azure/index', () => {
       expect(() =>
         azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
-        })
+        }),
       ).toThrow();
     });
 
@@ -98,7 +110,7 @@ describe('modules/platform/azure/index', () => {
         azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
           username: 'user',
-        })
+        }),
       ).toThrow();
     });
 
@@ -108,7 +120,7 @@ describe('modules/platform/azure/index', () => {
         azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
           password: 'pass',
-        })
+        }),
       ).toThrow();
     });
 
@@ -117,7 +129,7 @@ describe('modules/platform/azure/index', () => {
         await azure.initPlatform({
           endpoint: 'https://dev.azure.com/renovate12345',
           token: 'token',
-        })
+        }),
       ).toMatchSnapshot();
     });
   });
@@ -126,7 +138,7 @@ describe('modules/platform/azure/index', () => {
     it('should return an array of repos', async () => {
       const repos = await getRepos(
         'sometoken',
-        'https://dev.azure.com/renovate12345'
+        'https://dev.azure.com/renovate12345',
       );
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(repos).toMatchSnapshot();
@@ -161,7 +173,7 @@ describe('modules/platform/azure/index', () => {
             isDisabled: true,
           },
         ]),
-      })
+      }),
     );
 
     if (is.string(args)) {
@@ -189,7 +201,7 @@ describe('modules/platform/azure/index', () => {
       await expect(
         initRepo({
           repository: 'some/repo3',
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
     });
 
@@ -197,18 +209,12 @@ describe('modules/platform/azure/index', () => {
       await expect(
         initRepo({
           repository: 'some/missing',
-        })
+        }),
       ).rejects.toThrow(REPOSITORY_NOT_FOUND);
     });
   });
 
-  describe('getRepoForceRebase', () => {
-    it('should return false', async () => {
-      expect(await azure.getRepoForceRebase()).toBeFalse();
-    });
-  });
-
-  describe('findPr(branchName, prTitle, state)', () => {
+  describe('findPr(branchName, prTitle, state, targetBranch)', () => {
     it('returns pr if found it open', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
@@ -226,14 +232,28 @@ describe('modules/platform/azure/index', () => {
                 },
               ]),
             getPullRequestCommits: jest.fn().mockReturnValue([]),
-          } as any)
+          }) as any,
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
         state: 'open',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'open',
+        status: 1,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
+      });
     });
 
     it('returns pr if found not open', async () => {
@@ -253,14 +273,28 @@ describe('modules/platform/azure/index', () => {
                 },
               ]),
             getPullRequestCommits: jest.fn().mockReturnValue([]),
-          } as any)
+          }) as any,
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
         state: '!open',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'merged',
+        status: 3,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
+      });
     });
 
     it('returns pr if found it close', async () => {
@@ -280,14 +314,28 @@ describe('modules/platform/azure/index', () => {
                 },
               ]),
             getPullRequestCommits: jest.fn().mockReturnValue([]),
-          } as any)
+          }) as any,
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
         state: 'closed',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'closed',
+        status: 2,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
+      });
     });
 
     it('returns pr if found it all state', async () => {
@@ -307,20 +355,130 @@ describe('modules/platform/azure/index', () => {
                 },
               ]),
             getPullRequestCommits: jest.fn().mockReturnValue([]),
-          } as any)
+          }) as any,
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'closed',
+        status: 2,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
+      });
+    });
+
+    it('returns pr if found matches targetBranch', async () => {
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests: jest
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              {
+                pullRequestId: 1,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+              {
+                pullRequestId: 2,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-c',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+            ]),
+          getPullRequestCommits: jest.fn().mockReturnValue([]),
+        }),
+      );
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: 'open',
+        targetBranch: 'branch-c',
+      });
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 2,
+        pullRequestId: 2,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'open',
+        status: 1,
+        targetBranch: 'branch-c',
+        targetRefName: 'refs/heads/branch-c',
+        title: 'branch a pr',
+      });
+    });
+
+    it('returns first pr if found does not match targetBranch', async () => {
+      azureApi.gitApi.mockResolvedValueOnce(
+        partial<IGitApi>({
+          getPullRequests: jest
+            .fn()
+            .mockReturnValue([])
+            .mockReturnValueOnce([
+              {
+                pullRequestId: 1,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+              {
+                pullRequestId: 2,
+                sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-c',
+                title: 'branch a pr',
+                status: PullRequestStatus.Active,
+              },
+            ]),
+          getPullRequestCommits: jest.fn().mockReturnValue([]),
+        }),
+      );
+      const res = await azure.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+        state: 'open',
+        targetBranch: 'branch-d',
+      });
+      expect(res).toEqual({
+        bodyStruct: {
+          hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+        },
+        createdAt: undefined,
+        number: 1,
+        pullRequestId: 1,
+        sourceBranch: 'branch-a',
+        sourceRefName: 'refs/heads/branch-a',
+        state: 'open',
+        status: 1,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
+        title: 'branch a pr',
+      });
     });
 
     it('catches errors', async () => {
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
           getPullRequests: jest.fn().mockRejectedValueOnce(new Error()),
-        })
+        }),
       );
       const res = await azure.findPr({
         branchName: 'branch-a',
@@ -336,19 +494,19 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getPullRequests: jest.fn(() => []),
-          } as any)
+          }) as any,
       );
       expect(await azure.getPrList()).toEqual([]);
     });
   });
 
-  describe('getBranchPr(branchName)', () => {
+  describe('getBranchPr(branchName, targetBranch)', () => {
     it('should return null if no PR exists', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockResolvedValue(
         partial<IGitApi>({
           getPullRequests: jest.fn().mockResolvedValueOnce([]),
-        })
+        }),
       );
       const pr = await azure.getBranchPr('somebranch');
       expect(pr).toBeNull();
@@ -364,22 +522,21 @@ describe('modules/platform/azure/index', () => {
               {
                 pullRequestId: 1,
                 sourceRefName: 'refs/heads/branch-a',
+                targetRefName: 'refs/heads/branch-b',
                 title: 'branch a pr',
                 status: 1,
               },
             ])
             .mockResolvedValueOnce([]),
           getPullRequestLabels: jest.fn().mockResolvedValue([]),
-        })
+        }),
       );
-      const pr = await azure.getBranchPr('branch-a');
+      const pr = await azure.getBranchPr('branch-a', 'branch-b');
       expect(pr).toEqual({
         bodyStruct: {
           hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
         createdAt: undefined,
-        displayNumber: 'Pull Request #1',
-        hasReviewers: false,
         labels: [],
         number: 1,
         pullRequestId: 1,
@@ -387,7 +544,8 @@ describe('modules/platform/azure/index', () => {
         sourceRefName: 'refs/heads/branch-a',
         state: 'open',
         status: 1,
-        targetBranch: undefined,
+        targetBranch: 'branch-b',
+        targetRefName: 'refs/heads/branch-b',
         title: 'branch a pr',
       });
     });
@@ -406,11 +564,11 @@ describe('modules/platform/azure/index', () => {
                 context: { genre: 'a-genre', name: 'a-name' },
               },
             ]),
-          } as any)
+          }) as any,
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
-        'a-genre/a-name'
+        'a-genre/a-name',
       );
       expect(res).toBe('green');
     });
@@ -427,11 +585,11 @@ describe('modules/platform/azure/index', () => {
                 context: { genre: 'a-genre', name: 'a-name' },
               },
             ]),
-          } as any)
+          }) as any,
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
-        'a-genre/a-name'
+        'a-genre/a-name',
       );
       expect(res).toBe('green');
     });
@@ -448,11 +606,11 @@ describe('modules/platform/azure/index', () => {
                 context: { genre: 'a-genre', name: 'a-name' },
               },
             ]),
-          } as any)
+          }) as any,
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
-        'a-genre/a-name'
+        'a-genre/a-name',
       );
       expect(res).toBe('red');
     });
@@ -469,11 +627,11 @@ describe('modules/platform/azure/index', () => {
                 context: { genre: 'a-genre', name: 'a-name' },
               },
             ]),
-          } as any)
+          }) as any,
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
-        'a-genre/a-name'
+        'a-genre/a-name',
       );
       expect(res).toBe('red');
     });
@@ -490,11 +648,11 @@ describe('modules/platform/azure/index', () => {
                 context: { genre: 'a-genre', name: 'a-name' },
               },
             ]),
-          } as any)
+          }) as any,
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
-        'a-genre/a-name'
+        'a-genre/a-name',
       );
       expect(res).toBe('yellow');
     });
@@ -511,11 +669,11 @@ describe('modules/platform/azure/index', () => {
                 context: { genre: 'a-genre', name: 'a-name' },
               },
             ]),
-          } as any)
+          }) as any,
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
-        'a-genre/a-name'
+        'a-genre/a-name',
       );
       expect(res).toBe('yellow');
     });
@@ -533,11 +691,11 @@ describe('modules/platform/azure/index', () => {
               context: { genre: 'a-genre', name: 'a-name' },
             },
           ]),
-        })
+        }),
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
-        'a-genre/a-name'
+        'a-genre/a-name',
       );
       expect(res).toBe('yellow');
     });
@@ -554,11 +712,11 @@ describe('modules/platform/azure/index', () => {
                 context: { genre: 'another-genre', name: 'a-name' },
               },
             ]),
-          } as any)
+          }) as any,
       );
       const res = await azure.getBranchStatusCheck(
         'somebranch',
-        'a-genre/a-name'
+        'a-genre/a-name',
       );
       expect(res).toBeNull();
     });
@@ -571,11 +729,34 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
-          } as any)
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'renovate' },
+              },
+            ]),
+          }) as any,
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
+    });
+
+    it('should not treat internal checks as success', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'renovate' },
+              },
+            ]),
+          }) as any,
+      );
+      const res = await azure.getBranchStatus('somebranch', false);
+      expect(res).toBe('yellow');
     });
 
     it('should pass through failed', async () => {
@@ -585,9 +766,9 @@ describe('modules/platform/azure/index', () => {
           ({
             getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
             getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
-          } as any)
+          }) as any,
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('red');
     });
 
@@ -598,9 +779,9 @@ describe('modules/platform/azure/index', () => {
           ({
             getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
             getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
-          } as any)
+          }) as any,
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
 
@@ -611,9 +792,9 @@ describe('modules/platform/azure/index', () => {
           ({
             getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
             getStatuses: jest.fn(() => []),
-          } as any)
+          }) as any,
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
   });
@@ -630,7 +811,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getPullRequests: jest.fn(() => []),
-          } as any)
+          }) as any,
       );
       const pr = await azure.getPr(1234);
       expect(pr).toBeNull();
@@ -659,7 +840,7 @@ describe('modules/platform/azure/index', () => {
                 },
               },
             ]),
-          } as any)
+          }) as any,
       );
       const pr = await azure.getPr(1234);
       expect(pr).toMatchSnapshot();
@@ -674,10 +855,9 @@ describe('modules/platform/azure/index', () => {
           ({
             createPullRequest: jest.fn(() => ({
               pullRequestId: 456,
-              displayNumber: `Pull Request #456`,
             })),
             createPullRequestLabel: jest.fn(() => ({})),
-          } as any)
+          }) as any,
       );
       const pr = await azure.createPr({
         sourceBranch: 'some-branch',
@@ -696,10 +876,9 @@ describe('modules/platform/azure/index', () => {
           ({
             createPullRequest: jest.fn(() => ({
               pullRequestId: 456,
-              displayNumber: `Pull Request #456`,
             })),
             createPullRequestLabel: jest.fn(() => ({})),
-          } as any)
+          }) as any,
       );
       const pr = await azure.createPr({
         sourceBranch: 'some-branch',
@@ -711,55 +890,251 @@ describe('modules/platform/azure/index', () => {
       expect(pr).toMatchSnapshot();
     });
 
-    it('should create and return a PR object with auto-complete set', async () => {
-      await initRepo({ repository: 'some/repo' });
-      const prResult = {
-        pullRequestId: 456,
-        title: 'The Title',
-        displayNumber: `Pull Request #456`,
-        createdBy: {
-          id: 123,
-        },
-      };
-      const prUpdateResult = {
-        ...prResult,
-        autoCompleteSetBy: {
-          id: prResult.createdBy.id,
-        },
-        completionOptions: {
-          squashMerge: true,
-          deleteSourceBranch: true,
-          mergeCommitMessage: 'The Title',
-        },
-      };
-      const updateFn = jest
-        .fn(() => prUpdateResult)
-        .mockName('updatePullRequest');
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            createPullRequest: jest.fn(() => prResult),
-            createPullRequestLabel: jest.fn(() => ({})),
+    describe('when usePlatformAutomerge is set', () => {
+      it('should create and return a PR object with auto-complete set', async () => {
+        await initRepo({ repository: 'some/repo' });
+        const prResult = {
+          pullRequestId: 456,
+          title: 'The Title',
+          createdBy: {
+            id: '123',
+          },
+        };
+        const prUpdateResult = {
+          ...prResult,
+          autoCompleteSetBy: {
+            id: prResult.createdBy.id,
+          },
+          completionOptions: {
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
+            deleteSourceBranch: true,
+            mergeCommitMessage: 'The Title',
+          },
+        };
+        const updateFn = jest.fn().mockResolvedValue(prUpdateResult);
+        azureApi.gitApi.mockResolvedValueOnce(
+          partial<IGitApi>({
+            createPullRequest: jest.fn().mockResolvedValue(prResult),
+            createPullRequestLabel: jest.fn().mockResolvedValue({}),
             updatePullRequest: updateFn,
-          } as any)
-      );
-      const pr = await azure.createPr({
-        sourceBranch: 'some-branch',
-        targetBranch: 'dev',
-        prTitle: 'The Title',
-        prBody: 'Hello world',
-        labels: ['deps', 'renovate'],
-        platformOptions: { usePlatformAutomerge: true },
+          }),
+        );
+        const pr = await azure.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'dev',
+          prTitle: 'The Title',
+          prBody: 'Hello world',
+          labels: ['deps', 'renovate'],
+          platformOptions: { usePlatformAutomerge: true },
+        });
+        expect(updateFn).toHaveBeenCalled();
+        expect(pr).toMatchSnapshot();
       });
-      expect(updateFn).toHaveBeenCalled();
-      expect(pr).toMatchSnapshot();
+
+      it('should only call getMergeMethod once per run when automergeStrategy is auto', async () => {
+        await initRepo({ repository: 'some/repo' });
+        const prResult = [
+          {
+            pullRequestId: 456,
+            title: 'The Title',
+            createdBy: {
+              id: '123',
+            },
+          },
+          {
+            pullRequestId: 457,
+            title: 'The Second Title',
+            createdBy: {
+              id: '123',
+            },
+          },
+        ];
+        const prUpdateResults = [
+          {
+            ...prResult[0],
+            autoCompleteSetBy: {
+              id: prResult[0].createdBy.id,
+            },
+            completionOptions: {
+              mergeStrategy: GitPullRequestMergeStrategy.Squash,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'The Title',
+            },
+          },
+          {
+            ...prResult[1],
+            autoCompleteSetBy: {
+              id: prResult[1].createdBy.id,
+            },
+            completionOptions: {
+              mergeStrategy: GitPullRequestMergeStrategy.Squash,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'The Second Title',
+            },
+          },
+        ];
+        const updateFn = jest.fn(() =>
+          Promise.resolve(prUpdateResults.shift()!),
+        );
+
+        azureHelper.getMergeMethod.mockResolvedValueOnce(
+          GitPullRequestMergeStrategy.Squash,
+        );
+
+        azureApi.gitApi.mockResolvedValue(
+          partial<IGitApi>({
+            createPullRequest: jest.fn(() =>
+              Promise.resolve(prResult.shift()!),
+            ),
+            createPullRequestLabel: jest.fn().mockResolvedValue({}),
+            updatePullRequest: updateFn,
+          }),
+        );
+        await azure.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'dev',
+          prTitle: 'The Title',
+          prBody: 'Hello world',
+          labels: ['deps', 'renovate'],
+          platformOptions: {
+            automergeStrategy: 'auto',
+            usePlatformAutomerge: true,
+          },
+        });
+
+        await azure.createPr({
+          sourceBranch: 'some-other-branch',
+          targetBranch: 'dev',
+          prTitle: 'The Second Title',
+          prBody: 'Hello world',
+          labels: ['deps', 'renovate'],
+          platformOptions: {
+            automergeStrategy: 'auto',
+            usePlatformAutomerge: true,
+          },
+        });
+
+        expect(updateFn).toHaveBeenCalledTimes(2);
+        expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
+      });
+
+      it.each`
+        automergeStrategy
+        ${'fast-forward'}
+        ${'merge-commit'}
+        ${'rebase'}
+        ${'squash'}
+      `(
+        'should not call getMergeMethod when automergeStrategy is $automergeStrategy',
+        async (automergeStrategy) => {
+          await initRepo({ repository: 'some/repo' });
+          const prResult = {
+            pullRequestId: 123,
+            title: 'The Title',
+            createdBy: {
+              id: '123',
+            },
+          };
+          const prUpdateResults = {
+            ...prResult,
+            autoCompleteSetBy: {
+              id: prResult.createdBy.id,
+            },
+            completionOptions: {
+              mergeStrategy: GitPullRequestMergeStrategy.Squash,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'The Title',
+            },
+          };
+          const updateFn = jest.fn(() => Promise.resolve(prUpdateResults));
+
+          azureApi.gitApi.mockResolvedValue(
+            partial<IGitApi>({
+              createPullRequest: jest.fn(() => Promise.resolve(prResult)),
+              createPullRequestLabel: jest.fn().mockResolvedValue({}),
+              updatePullRequest: updateFn,
+            }),
+          );
+          await azure.createPr({
+            sourceBranch: 'some-branch',
+            targetBranch: 'dev',
+            prTitle: 'The Title',
+            prBody: 'Hello world',
+            labels: ['deps', 'renovate'],
+            platformOptions: {
+              automergeStrategy,
+              usePlatformAutomerge: true,
+            },
+          });
+
+          expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(0);
+        },
+      );
+
+      it.each`
+        automergeStrategy | prMergeStrategy
+        ${'fast-forward'} | ${GitPullRequestMergeStrategy.Rebase}
+        ${'merge-commit'} | ${GitPullRequestMergeStrategy.NoFastForward}
+        ${'rebase'}       | ${GitPullRequestMergeStrategy.Rebase}
+        ${'squash'}       | ${GitPullRequestMergeStrategy.Squash}
+      `(
+        'should create PR with mergeStrategy $prMergeStrategy',
+        async ({ automergeStrategy, prMergeStrategy }) => {
+          await initRepo({ repository: 'some/repo' });
+          const prResult = {
+            pullRequestId: 456,
+            title: 'The Title',
+            createdBy: {
+              id: '123',
+            },
+          };
+          const prUpdateResult = {
+            ...prResult,
+            autoCompleteSetBy: {
+              id: prResult.createdBy.id,
+            },
+            completionOptions: {
+              mergeStrategy: prMergeStrategy,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'The Title',
+            },
+          };
+          const updateFn = jest.fn().mockResolvedValue(prUpdateResult);
+          azureApi.gitApi.mockResolvedValueOnce(
+            partial<IGitApi>({
+              createPullRequest: jest.fn().mockResolvedValue(prResult),
+              createPullRequestLabel: jest.fn().mockResolvedValue({}),
+              updatePullRequest: updateFn,
+            }),
+          );
+          const pr = await azure.createPr({
+            sourceBranch: 'some-branch',
+            targetBranch: 'dev',
+            prTitle: 'The Title',
+            prBody: 'Hello world',
+            labels: ['deps', 'renovate'],
+            platformOptions: {
+              automergeStrategy,
+              usePlatformAutomerge: true,
+            },
+          });
+
+          expect((pr as GitPullRequest).completionOptions?.mergeStrategy).toBe(
+            prMergeStrategy,
+          );
+          expect(updateFn).toHaveBeenCalled();
+          expect(
+            updateFn.mock.calls[0][0].completionOptions.mergeStrategy,
+          ).toBe(prMergeStrategy);
+          expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(0);
+        },
+      );
     });
 
     it('should create and return an approved PR object', async () => {
       await initRepo({ repository: 'some/repo' });
       const prResult = {
         pullRequestId: 456,
-        displayNumber: 'Pull Request #456',
         createdBy: {
           id: 123,
           url: 'user-url',
@@ -780,7 +1155,7 @@ describe('modules/platform/azure/index', () => {
             createPullRequest: jest.fn(() => prResult),
             createPullRequestLabel: jest.fn(() => ({})),
             createPullRequestReviewer: updateFn,
-          } as any)
+          }) as any,
       );
       const pr = await azure.createPr({
         sourceBranch: 'some-branch',
@@ -788,14 +1163,14 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { azureAutoApprove: true },
+        platformOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
     });
   });
 
-  describe('updatePr(prNo, title, body)', () => {
+  describe('updatePr(prNo, title, body, platformOptions)', () => {
     it('should update the PR', async () => {
       await initRepo({ repository: 'some/repo' });
       const updatePullRequest = jest.fn();
@@ -803,12 +1178,13 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             updatePullRequest,
-          } as any)
+          }) as any,
       );
       await azure.updatePr({
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
+        targetBranch: 'new_base',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
@@ -820,7 +1196,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             updatePullRequest,
-          } as any)
+          }) as any,
       );
       await azure.updatePr({
         number: 1234,
@@ -836,7 +1212,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             updatePullRequest,
-          } as any)
+          }) as any,
       );
       await azure.updatePr({
         number: 1234,
@@ -854,7 +1230,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             updatePullRequest,
-          } as any)
+          }) as any,
       );
       await azure.updatePr({
         number: 1234,
@@ -863,6 +1239,43 @@ describe('modules/platform/azure/index', () => {
         state: 'open',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
+    });
+
+    it('should re-approve the PR', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const prResult = {
+        pullRequestId: 456,
+        createdBy: {
+          id: 123,
+          url: 'user-url',
+        },
+      };
+      const prUpdateResult = {
+        reviewerUrl: prResult.createdBy.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      };
+      const updateFn = jest.fn(() => prUpdateResult);
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            updatePullRequest: jest.fn(() => prResult),
+            createPullRequestReviewer: updateFn,
+            getPullRequestById: jest.fn(() => ({
+              pullRequestId: prResult.pullRequestId,
+              createdBy: prResult.createdBy,
+            })),
+          }) as any,
+      );
+      const pr = await azure.updatePr({
+        number: prResult.pullRequestId,
+        prTitle: 'The Title',
+        prBody: 'Hello world',
+        platformOptions: { autoApprove: true },
+      });
+      expect(updateFn).toHaveBeenCalled();
+      expect(pr).toMatchSnapshot();
     });
   });
 
@@ -962,10 +1375,40 @@ describe('modules/platform/azure/index', () => {
       expect(gitApiMock.createThread.mock.calls).toMatchSnapshot();
       expect(gitApiMock.updateComment.mock.calls).toMatchSnapshot();
     });
+
+    it('passes comment through massageMarkdown', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const gitApiMock = {
+        createThread: jest.fn().mockResolvedValue([{ id: 123 }]),
+        getThreads: jest.fn().mockResolvedValue([
+          {
+            comments: [{ content: 'end-user comment', id: 1 }],
+            id: 2,
+          },
+        ]),
+        updateComment: jest.fn().mockResolvedValue({ id: 123 }),
+      };
+      azureApi.gitApi.mockResolvedValue(partial<IGitApi>(gitApiMock));
+
+      await azure.ensureComment({
+        number: 42,
+        topic: 'some-subject',
+        content:
+          'You can manually request rebase by checking the rebase/retry box above.',
+      });
+
+      const commentContent = gitApiMock.createThread.mock.calls[0];
+      expect(JSON.stringify(commentContent)).not.toContain(
+        'checking the rebase/retry box above',
+      );
+      expect(JSON.stringify(commentContent)).toContain(
+        'renaming the PR to start with \\"rebase!\\"',
+      );
+    });
   });
 
   describe('ensureCommentRemoval', () => {
-    // TODO: fix types #7154
+    // TODO: fix types #22198
     let gitApiMock: any;
 
     beforeEach(() => {
@@ -997,7 +1440,7 @@ describe('modules/platform/azure/index', () => {
         { status: 4 },
         '1',
         42,
-        123
+        123,
       );
     });
 
@@ -1013,7 +1456,7 @@ describe('modules/platform/azure/index', () => {
         { status: 4 },
         '1',
         42,
-        124
+        124,
       );
     });
 
@@ -1038,7 +1481,7 @@ describe('modules/platform/azure/index', () => {
             getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
             createThread: jest.fn(() => [{ id: 123 }]),
             getThreads: jest.fn(() => []),
-          } as any)
+          }) as any,
       );
       azureApi.coreApi.mockImplementation(
         () =>
@@ -1050,7 +1493,7 @@ describe('modules/platform/azure/index', () => {
             getTeamMembersWithExtendedProperties: jest.fn(() => [
               { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
             ]),
-          } as any)
+          }) as any,
       );
       await azure.addAssignees(123, ['test@bonjour.fr', 'jyc', 'def']);
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
@@ -1058,14 +1501,14 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('Reviewers', () => {
-    it('addReviewers', async () => {
+    it('addReviewers one valid', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementation(
         () =>
           ({
             getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
             createPullRequestReviewer: jest.fn(),
-          } as any)
+          }) as any,
       );
       azureApi.coreApi.mockImplementation(
         () =>
@@ -1077,10 +1520,37 @@ describe('modules/platform/azure/index', () => {
             getTeamMembersWithExtendedProperties: jest.fn(() => [
               { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
             ]),
-          } as any)
+          }) as any,
       );
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'required:def']);
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      expect(logger.once.info).toHaveBeenCalledTimes(1);
+    });
+
+    it('addReviewers all valid', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
+            createPullRequestReviewer: jest.fn(),
+          }) as any,
+      );
+      azureApi.coreApi.mockImplementation(
+        () =>
+          ({
+            getTeams: jest.fn(() => [
+              { id: 3, name: 'abc' },
+              { id: 4, name: 'def' },
+            ]),
+            getTeamMembersWithExtendedProperties: jest.fn(() => [
+              { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
+            ]),
+          }) as any,
+      );
+      await azure.addReviewers(123, ['required:jyc']);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      expect(logger.once.info).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -1090,7 +1560,16 @@ describe('modules/platform/azure/index', () => {
         '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
         'plus also [a link](https://github.com/foo/bar/issues/5)';
       expect(azure.massageMarkdown(prBody)).toBe(
-        'plus also [a link](https://github.com/foo/bar/issues/5)'
+        'plus also [a link](https://github.com/foo/bar/issues/5)',
+      );
+    });
+
+    it('returns updated comment content', () => {
+      const commentContent =
+        'You can manually request rebase by checking the rebase/retry box above.\n\n' +
+        'plus also [a link](https://github.com/foo/bar/issues/5)';
+      expect(azure.massageMarkdown(commentContent)).toBe(
+        'You can manually request rebase by renaming the PR to start with "rebase!".\n\nplus also [a link](https://github.com/foo/bar/issues/5)',
       );
     });
   });
@@ -1104,7 +1583,7 @@ describe('modules/platform/azure/index', () => {
           ({
             getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
             createCommitStatus: createCommitStatusMock,
-          } as any)
+          }) as any,
       );
       await azure.setBranchStatus({
         branchName: 'test',
@@ -1124,7 +1603,7 @@ describe('modules/platform/azure/index', () => {
           targetUrl: 'test.com',
         },
         'abcd1234',
-        '1'
+        '1',
       );
     });
 
@@ -1136,7 +1615,7 @@ describe('modules/platform/azure/index', () => {
           ({
             getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
             createCommitStatus: createCommitStatusMock,
-          } as any)
+          }) as any,
       );
       await azure.setBranchStatus({
         branchName: 'test',
@@ -1156,7 +1635,7 @@ describe('modules/platform/azure/index', () => {
           targetUrl: 'test.com',
         },
         'abcd1234',
-        '1'
+        '1',
       );
     });
   });
@@ -1179,7 +1658,7 @@ describe('modules/platform/azure/index', () => {
               title: 'title',
             })),
             updatePullRequest: updatePullRequestMock,
-          } as any)
+          }) as any,
       );
 
       azureHelper.getMergeMethod = jest
@@ -1189,6 +1668,7 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.mergePr({
         branchName: branchNameMock,
         id: pullRequestIdMock,
+        strategy: 'auto',
       });
 
       expect(updatePullRequestMock).toHaveBeenCalledWith(
@@ -1202,10 +1682,63 @@ describe('modules/platform/azure/index', () => {
           },
         },
         '1',
-        pullRequestIdMock
+        pullRequestIdMock,
       );
       expect(res).toBeTrue();
     });
+
+    it.each`
+      automergeStrategy | prMergeStrategy
+      ${'fast-forward'} | ${GitPullRequestMergeStrategy.Rebase}
+      ${'merge-commit'} | ${GitPullRequestMergeStrategy.NoFastForward}
+      ${'rebase'}       | ${GitPullRequestMergeStrategy.Rebase}
+      ${'squash'}       | ${GitPullRequestMergeStrategy.Squash}
+    `(
+      'should complete PR with mergeStrategy $prMergeStrategy',
+      async ({ automergeStrategy, prMergeStrategy }) => {
+        await initRepo({ repository: 'some/repo' });
+        const pullRequestIdMock = 12345;
+        const branchNameMock = 'test';
+        const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+        const updatePullRequestMock = jest.fn(() => ({
+          status: 3,
+        }));
+        azureApi.gitApi.mockImplementationOnce(
+          () =>
+            ({
+              getPullRequestById: jest.fn(() => ({
+                lastMergeSourceCommit: lastMergeSourceCommitMock,
+                targetRefName: 'refs/heads/ding',
+                title: 'title',
+              })),
+              updatePullRequest: updatePullRequestMock,
+            }) as any,
+        );
+
+        azureHelper.getMergeMethod = jest.fn().mockReturnValue(prMergeStrategy);
+
+        const res = await azure.mergePr({
+          branchName: branchNameMock,
+          id: pullRequestIdMock,
+          strategy: automergeStrategy,
+        });
+
+        expect(updatePullRequestMock).toHaveBeenCalledWith(
+          {
+            status: PullRequestStatus.Completed,
+            lastMergeSourceCommit: lastMergeSourceCommitMock,
+            completionOptions: {
+              mergeStrategy: prMergeStrategy,
+              deleteSourceBranch: true,
+              mergeCommitMessage: 'title',
+            },
+          },
+          '1',
+          pullRequestIdMock,
+        );
+        expect(res).toBeTrue();
+      },
+    );
 
     it('should return false if the PR does not update successfully', async () => {
       await initRepo({ repository: 'some/repo' });
@@ -1221,7 +1754,7 @@ describe('modules/platform/azure/index', () => {
             updatePullRequest: jest
               .fn()
               .mockRejectedValue(new Error(`oh no pr couldn't be updated`)),
-          } as any)
+          }) as any,
       );
 
       azureHelper.getMergeMethod = jest
@@ -1245,7 +1778,7 @@ describe('modules/platform/azure/index', () => {
               targetRefName: 'refs/heads/ding',
             })),
             updatePullRequest: jest.fn(),
-          } as any)
+          }) as any,
       );
       azureHelper.getMergeMethod = jest
         .fn()
@@ -1254,10 +1787,12 @@ describe('modules/platform/azure/index', () => {
       await azure.mergePr({
         branchName: 'test-branch-1',
         id: 1234,
+        strategy: 'auto',
       });
       await azure.mergePr({
         branchName: 'test-branch-2',
         id: 5678,
+        strategy: 'auto',
       });
 
       expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
@@ -1280,7 +1815,7 @@ describe('modules/platform/azure/index', () => {
             updatePullRequest: jest.fn(() => ({
               status: 1,
             })),
-          } as any)
+          }) as any,
       );
       azureHelper.getMergeMethod = jest
         .fn()
@@ -1290,7 +1825,6 @@ describe('modules/platform/azure/index', () => {
         branchName: branchNameMock,
         id: pullRequestIdMock,
       });
-
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(2);
       expect(res).toBeTrue();
     });
@@ -1313,29 +1847,20 @@ describe('modules/platform/azure/index', () => {
             updatePullRequest: jest.fn(() => ({
               status: 1,
             })),
-          } as any)
+          }) as any,
       );
       azureHelper.getMergeMethod = jest
         .fn()
         .mockReturnValue(GitPullRequestMergeStrategy.Squash);
-
       const res = await azure.mergePr({
         branchName: branchNameMock,
         id: pullRequestIdMock,
       });
-
       expect(getPullRequestByIdMock).toHaveBeenCalledTimes(
-        expectedNumRetries + 1
+        expectedNumRetries + 1,
       );
       expect(logger.warn).toHaveBeenCalled();
       expect(res).toBeTrue();
-    });
-  });
-
-  describe('getVulnerabilityAlerts()', () => {
-    it('returns empty', async () => {
-      const res = await azure.getVulnerabilityAlerts();
-      expect(res).toHaveLength(0);
     });
   });
 
@@ -1346,7 +1871,7 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             deletePullRequestLabels: jest.fn(),
-          } as any)
+          }) as any,
       );
       await azure.deleteLabel(1234, 'rebase');
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
@@ -1364,9 +1889,9 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from(JSON.stringify(data)))
+              Promise.resolve(Readable.from(JSON.stringify(data))),
             ),
-          } as any)
+          }) as any,
       );
       const res = await azure.getJsonFile('file.json');
       expect(res).toEqual(data);
@@ -1383,9 +1908,9 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from(json5Data))
+              Promise.resolve(Readable.from(json5Data)),
             ),
-          } as any)
+          }) as any,
       );
       const res = await azure.getJsonFile('file.json5');
       expect(res).toEqual({ foo: 'bar' });
@@ -1397,9 +1922,9 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from(JSON.stringify(data)))
+              Promise.resolve(Readable.from(JSON.stringify(data))),
             ),
-          } as any)
+          }) as any,
       );
       const res = await azure.getJsonFile('file.json', undefined, 'dev');
       expect(res).toEqual(data);
@@ -1410,9 +1935,9 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getItemContent: jest.fn(() =>
-              Promise.resolve(Readable.from('!@#'))
+              Promise.resolve(Readable.from('!@#')),
             ),
-          } as any)
+          }) as any,
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
@@ -1424,7 +1949,7 @@ describe('modules/platform/azure/index', () => {
             getItemContent: jest.fn(() => {
               throw new Error('some error');
             }),
-          } as any)
+          }) as any,
       );
       await expect(azure.getJsonFile('file.json')).rejects.toThrow();
     });
@@ -1433,12 +1958,12 @@ describe('modules/platform/azure/index', () => {
       const data = { foo: 'bar' };
       const gitApiMock = {
         getItemContent: jest.fn(() =>
-          Promise.resolve(Readable.from(JSON.stringify(data)))
+          Promise.resolve(Readable.from(JSON.stringify(data))),
         ),
         getRepositories: jest.fn(() =>
           Promise.resolve([
             { id: '123456', name: 'bar', project: { name: 'foo' } },
-          ])
+          ]),
         ),
       };
       azureApi.gitApi.mockImplementationOnce(() => gitApiMock as any);
@@ -1451,7 +1976,7 @@ describe('modules/platform/azure/index', () => {
       azureApi.gitApi.mockResolvedValueOnce(
         partial<IGitApi>({
           getRepositories: jest.fn(() => Promise.resolve([])),
-        })
+        }),
       );
       const res = await azure.getJsonFile('file.json', 'foo/bar');
       expect(res).toBeNull();

@@ -10,7 +10,6 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "depName": "actions/bin",
     "depType": "action",
     "replaceString": "actions/bin/shellcheck@master",
-    "skipReason": "invalid-version",
     "versioning": "docker",
   },
   {
@@ -87,6 +86,33 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "actions-rs/cargo@v1.0.3",
     "versioning": "docker",
   },
+  {
+    "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+    "skipReason": "invalid-version",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+    "skipReason": "invalid-version",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+    "skipReason": "invalid-version",
+  },
 ]
 `;
 
@@ -100,7 +126,6 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "depName": "actions/bin",
     "depType": "action",
     "replaceString": "actions/bin/shellcheck@master",
-    "skipReason": "invalid-version",
     "versioning": "docker",
   },
   {
@@ -120,7 +145,6 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "depName": "actions/docker",
     "depType": "action",
     "replaceString": "actions/docker/cli@master",
-    "skipReason": "invalid-version",
     "versioning": "docker",
   },
   {
@@ -131,6 +155,42 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "depName": "node",
     "depType": "docker",
     "replaceString": "node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+    "skipReason": "invalid-version",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+    "skipReason": "invalid-version",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+    "skipReason": "invalid-version",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+    "skipReason": "invalid-version",
   },
   {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -160,6 +220,15 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "replaceString": "postgres:10",
   },
   {
+    "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+    "skipReason": "invalid-version",
+  },
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "16-bullseye",
@@ -167,6 +236,15 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "depName": "node",
     "depType": "container",
     "replaceString": "node:16-bullseye",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}-{{newValue}}",
+    "currentValue": "latest",
+    "datasource": "github-runners",
+    "depName": "ubuntu",
+    "depType": "github-runner",
+    "replaceString": "ubuntu-latest",
+    "skipReason": "invalid-version",
   },
 ]
 `;

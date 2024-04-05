@@ -1,28 +1,31 @@
 import { logger } from '../../../../logger';
-import { DotnetDatasource } from '../../../datasource/dotnet';
+import { DotnetVersionDatasource } from '../../../datasource/dotnet-version';
 import { NugetDatasource } from '../../../datasource/nuget';
-import type { PackageDependency, PackageFile } from '../../types';
-import type { MsbuildGlobalManifest } from '../types';
+import type { PackageDependency, PackageFileContent } from '../../types';
+import type {
+  MsbuildGlobalManifest,
+  NugetPackageDependency,
+  Registry,
+} from '../types';
+import { applyRegistries } from '../util';
 
 export function extractMsbuildGlobalManifest(
   content: string,
-  packageFile: string
-): PackageFile | null {
+  packageFile: string,
+  registries: Registry[] | undefined,
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   let manifest: MsbuildGlobalManifest;
-
+  let extractedConstraints: Record<string, string> | undefined;
   try {
     manifest = JSON.parse(content);
   } catch (err) {
-    logger.debug(`Invalid JSON in ${packageFile}`);
+    logger.debug({ packageFile }, `Invalid JSON`);
     return null;
   }
 
   if (!manifest['msbuild-sdks'] && !manifest.sdk?.version) {
-    logger.debug(
-      { fileName: packageFile },
-      'This global.json is not a Nuget file'
-    );
+    logger.debug({ packageFile }, 'This global.json is not a Nuget file');
     return null;
   }
 
@@ -31,23 +34,27 @@ export function extractMsbuildGlobalManifest(
       depType: 'dotnet-sdk',
       depName: 'dotnet-sdk',
       currentValue: manifest.sdk?.version,
-      datasource: DotnetDatasource.id,
+      datasource: DotnetVersionDatasource.id,
     });
+
+    extractedConstraints = { 'dotnet-sdk': manifest.sdk?.version };
   }
 
   if (manifest['msbuild-sdks']) {
     for (const depName of Object.keys(manifest['msbuild-sdks'])) {
       const currentValue = manifest['msbuild-sdks'][depName];
-      const dep: PackageDependency = {
+      const dep: NugetPackageDependency = {
         depType: 'msbuild-sdk',
         depName,
         currentValue,
         datasource: NugetDatasource.id,
       };
 
+      applyRegistries(dep, registries);
+
       deps.push(dep);
     }
   }
 
-  return { deps };
+  return { deps, ...(extractedConstraints && { extractedConstraints }) };
 }

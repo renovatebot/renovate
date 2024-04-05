@@ -43,6 +43,7 @@ export class CpanDatasource extends Datasource {
             filter: {
               and: [
                 { term: { 'module.name': packageName } },
+                { term: { 'module.authorized': true } },
                 { exists: { field: 'module.associated_pod' } },
               ],
             },
@@ -60,7 +61,7 @@ export class CpanDatasource extends Datasource {
       };
       const res = await this.http.postJson<MetaCpanApiFileSearchResult>(
         searchUrl,
-        { body }
+        { body },
       );
       hits = res.body?.hits?.hits?.map(({ _source }) => _source);
     } catch (err) {
@@ -79,7 +80,7 @@ export class CpanDatasource extends Datasource {
           maturity,
         } = hit;
         const version = module.find(
-          ({ name }) => name === packageName
+          ({ name }) => name === packageName,
         )?.version;
         if (version) {
           // https://metacpan.org/pod/CPAN::DistnameInfo#maturity

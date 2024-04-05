@@ -6,10 +6,7 @@ import { qAssignments } from './assignments';
 import {
   REGISTRY_URLS,
   cleanupTempVars,
-  qConcatExpr,
-  qPropertyAccessIdentifier,
-  qTemplateString,
-  qVariableAccessIdentifier,
+  qValueMatcher,
   storeInTokenMap,
   storeVarToken,
 } from './common';
@@ -19,12 +16,6 @@ import {
 } from './handlers';
 import { qPlugins } from './plugins';
 
-const qValueMatcher = qConcatExpr(
-  qTemplateString,
-  qPropertyAccessIdentifier,
-  qVariableAccessIdentifier
-);
-
 // uri("https://foo.bar/baz")
 // "https://foo.bar/baz"
 const qUri = q
@@ -33,7 +24,7 @@ const qUri = q
       maxDepth: 1,
       search: qValueMatcher,
     }),
-    qValueMatcher
+    qValueMatcher,
   )
   .handler((ctx) => storeInTokenMap(ctx, 'registryUrl'));
 
@@ -52,7 +43,7 @@ const qPredefinedRegistries = q
       type: 'wrapped-tree',
       startsWith: '{',
       endsWith: '}',
-    })
+    }),
   )
   .handler((ctx) => storeInTokenMap(ctx, 'registryUrl'))
   .handler(handlePredefinedRegistryUrl)
@@ -87,9 +78,9 @@ const qCustomRegistryUrl = q
           startsWith: '(',
           endsWith: ')',
           search: q.begin<Ctx>().join(qUri).end(),
-        })
+        }),
       ),
-    })
+    }),
   )
   .handler(handleCustomRegistryUrl)
   .handler(cleanupTempVars);
@@ -115,7 +106,7 @@ const qPluginManagement = q.sym<Ctx>('pluginManagement', storeVarToken).tree({
       qApplyFrom,
       qPlugins,
       qPredefinedRegistries,
-      qCustomRegistryUrl
+      qCustomRegistryUrl,
     ),
   postHandler: (ctx) => {
     delete ctx.tmpTokenStore.registryScope;
@@ -127,5 +118,5 @@ export const qRegistryUrls = q.alt<Ctx>(
   q.sym<Ctx>('publishing').tree(),
   qPluginManagement,
   qPredefinedRegistries,
-  qCustomRegistryUrl
+  qCustomRegistryUrl,
 );

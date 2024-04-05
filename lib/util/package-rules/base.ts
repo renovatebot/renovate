@@ -10,7 +10,7 @@ export abstract class Matcher implements MatcherApi {
    */
   excludes(
     inputConfig: PackageRuleInputConfig,
-    packageRule: PackageRule
+    packageRule: PackageRule,
   ): boolean | null {
     return null;
   }
@@ -23,6 +23,6 @@ export abstract class Matcher implements MatcherApi {
    */
   abstract matches(
     inputConfig: PackageRuleInputConfig,
-    packageRule: PackageRule
+    packageRule: PackageRule,
   ): boolean | null;
 }

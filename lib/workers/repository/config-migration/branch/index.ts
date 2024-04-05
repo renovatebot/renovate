@@ -3,11 +3,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { FindPRConfig, Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import {
-  branchExists,
-  checkoutBranch,
-  deleteBranch,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import { createConfigMigrationBranch } from './create';
@@ -16,7 +12,7 @@ import { rebaseMigrationBranch } from './rebase';
 
 export async function checkConfigMigrationBranch(
   config: RenovateConfig,
-  migratedConfigData: MigratedData | null
+  migratedConfigData: MigratedData | null,
 ): Promise<string | null> {
   logger.debug('checkConfigMigrationBranch()');
   if (!migratedConfigData) {
@@ -25,18 +21,22 @@ export async function checkConfigMigrationBranch(
   }
   const configMigrationBranch = getMigrationBranchName(config);
 
-  const branchPr = await migrationPrExists(configMigrationBranch); // handles open/autoClosed PRs
+  const branchPr = await migrationPrExists(
+    configMigrationBranch,
+    config.baseBranch,
+  ); // handles open/autoClosed PRs
 
   if (!branchPr) {
     const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
       config,
-      migratedConfigData.filename
+      migratedConfigData.filename,
     );
     const prTitle = commitMessageFactory.getPrTitle();
     const closedPrConfig: FindPRConfig = {
       branchName: configMigrationBranch,
       prTitle,
       state: 'closed',
+      targetBranch: config.baseBranch,
     };
 
     // handles closed PR
@@ -46,9 +46,9 @@ export async function checkConfigMigrationBranch(
     if (closedPr) {
       logger.debug(
         { prTitle: closedPr.title },
-        'Closed PR already exists. Skipping branch.'
+        'Closed PR already exists. Skipping branch.',
       );
-      await handlepr(config, closedPr);
+      await handlePr(config, closedPr);
       return null;
     }
   }
@@ -58,7 +58,8 @@ export async function checkConfigMigrationBranch(
     await rebaseMigrationBranch(config, migratedConfigData);
     if (platform.refreshPr) {
       const configMigrationPr = await platform.getBranchPr(
-        configMigrationBranch
+        configMigrationBranch,
+        config.baseBranch,
       );
       if (configMigrationPr) {
         await platform.refreshPr(configMigrationPr.number);
@@ -70,38 +71,41 @@ export async function checkConfigMigrationBranch(
     await createConfigMigrationBranch(config, migratedConfigData);
   }
   if (!GlobalConfig.get('dryRun')) {
-    await checkoutBranch(configMigrationBranch);
+    await scm.checkoutBranch(configMigrationBranch);
   }
   return configMigrationBranch;
 }
 
-export async function migrationPrExists(branchName: string): Promise<boolean> {
-  return !!(await platform.getBranchPr(branchName));
+export async function migrationPrExists(
+  branchName: string,
+  targetBranch?: string,
+): Promise<boolean> {
+  return !!(await platform.getBranchPr(branchName, targetBranch));
 }
 
-async function handlepr(config: RenovateConfig, pr: Pr): Promise<void> {
+async function handlePr(config: RenovateConfig, pr: Pr): Promise<void> {
   if (
     pr.state === 'closed' &&
     !config.suppressNotifications!.includes('prIgnoreNotification')
   ) {
     if (GlobalConfig.get('dryRun')) {
       logger.info(
-        `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`
+        `DRY-RUN: Would ensure closed PR comment in PR #${pr.number}`,
       );
     } else {
       const content =
-        '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
+        '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.';
       await ensureComment({
         number: pr.number,
         topic: 'Renovate Ignore Notification',
         content,
       });
     }
-    if (branchExists(pr.sourceBranch)) {
+    if (await scm.branchExists(pr.sourceBranch)) {
       if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Would delete branch ' + pr.sourceBranch);
       } else {
-        await deleteBranch(pr.sourceBranch);
+        await scm.deleteBranch(pr.sourceBranch);
       }
     }
   }

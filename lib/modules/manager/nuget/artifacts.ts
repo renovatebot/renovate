@@ -6,21 +6,20 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureDir,
-  getFileContentMap,
+  getLocalFiles,
   getSiblingFileName,
   outputCacheFile,
   privateCacheDir,
   writeLocalFile,
 } from '../../../util/fs';
-import * as hostRules from '../../../util/host-rules';
+import { getFiles } from '../../../util/git';
 import { regEx } from '../../../util/regex';
-import { NugetDatasource } from '../../datasource/nuget';
-import { parseRegistryUrl } from '../../datasource/nuget/common';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import { createNuGetConfigXml } from './config-formatter';
 import {
   MSBUILD_CENTRAL_FILE,
   NUGET_CENTRAL_FILE,
@@ -28,47 +27,37 @@ import {
 } from './package-tree';
 import { getConfiguredRegistries, getDefaultRegistries } from './util';
 
-async function addSourceCmds(
+async function createCachedNuGetConfigFile(
+  nugetCacheDir: string,
   packageFileName: string,
-  _config: UpdateArtifactsConfig,
-  nugetConfigFile: string
-): Promise<string[]> {
+): Promise<string> {
   const registries =
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
-  const result: string[] = [];
-  for (const registry of registries) {
-    const { username, password } = hostRules.find({
-      hostType: NugetDatasource.id,
-      url: registry.url,
-    });
-    const registryInfo = parseRegistryUrl(registry.url);
-    let addSourceCmd = `dotnet nuget add source ${quote(
-      registryInfo.feedUrl
-    )} --configfile ${quote(nugetConfigFile)}`;
-    if (registry.name) {
-      // Add name for registry, if known.
-      addSourceCmd += ` --name ${quote(registry.name)}`;
-    }
-    if (username && password) {
-      // Add registry credentials from host rules, if configured.
-      addSourceCmd += ` --username ${quote(username)} --password ${quote(
-        password
-      )} --store-password-in-clear-text`;
-    }
-    result.push(addSourceCmd);
-  }
-  return result;
+
+  const contents = createNuGetConfigXml(registries);
+
+  const cachedNugetConfigFile = join(nugetCacheDir, `nuget.config`);
+  await ensureDir(nugetCacheDir);
+  await outputCacheFile(cachedNugetConfigFile, contents);
+
+  return cachedNugetConfigFile;
 }
 
 async function runDotnetRestore(
   packageFileName: string,
   dependentPackageFileNames: string[],
-  config: UpdateArtifactsConfig
+  config: UpdateArtifactsConfig,
 ): Promise<void> {
   const nugetCacheDir = join(privateCacheDir(), 'nuget');
 
+  const nugetConfigFile = await createCachedNuGetConfigFile(
+    nugetCacheDir,
+    packageFileName,
+  );
+
   const execOptions: ExecOptions = {
     docker: {},
+    userConfiguredEnv: config.env,
     extraEnv: {
       NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
       MSBUILDDISABLENODEREUSE: '1',
@@ -78,22 +67,12 @@ async function runDotnetRestore(
     ],
   };
 
-  const nugetConfigFile = join(nugetCacheDir, `nuget.config`);
-
-  await ensureDir(nugetCacheDir);
-
-  await outputCacheFile(
-    nugetConfigFile,
-    `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`
-  );
-
   const cmds = [
-    ...(await addSourceCmds(packageFileName, config, nugetConfigFile)),
     ...dependentPackageFileNames.map(
       (fileName) =>
         `dotnet restore ${quote(
-          fileName
-        )} --force-evaluate --configfile ${quote(nugetConfigFile)}`
+          fileName,
+        )} --force-evaluate --configfile ${quote(nugetConfigFile)}`,
     ),
   ];
   await exec(cmds, execOptions);
@@ -109,14 +88,14 @@ export async function updateArtifacts({
 
   // https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions
   // https://github.com/microsoft/MSBuildSdks/tree/main/src/CentralPackageVersions
-  const isCentralManament =
+  const isCentralManagement =
     packageFileName === NUGET_CENTRAL_FILE ||
     packageFileName === MSBUILD_CENTRAL_FILE ||
     packageFileName.endsWith(`/${NUGET_CENTRAL_FILE}`) ||
     packageFileName.endsWith(`/${MSBUILD_CENTRAL_FILE}`);
 
   if (
-    !isCentralManament &&
+    !isCentralManagement &&
     !regEx(/(?:cs|vb|fs)proj$/i).test(packageFileName)
   ) {
     // This could be implemented in the future if necessary.
@@ -125,35 +104,35 @@ export async function updateArtifacts({
     // have been changed in such cases.
     logger.debug(
       { packageFileName },
-      'Not updating lock file for non project files'
+      'Not updating lock file for non project files',
     );
     return null;
   }
 
   const deps = await getDependentPackageFiles(
     packageFileName,
-    isCentralManament
+    isCentralManagement,
   );
   const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
 
   logger.trace(
     { packageFiles },
-    `Found ${packageFiles.length} dependent package files`
+    `Found ${packageFiles.length} dependent package files`,
   );
 
   const lockFileNames = deps.map((f) =>
-    getSiblingFileName(f.name, 'packages.lock.json')
+    getSiblingFileName(f.name, 'packages.lock.json'),
   );
 
-  const existingLockFileContentMap = await getFileContentMap(lockFileNames);
+  const existingLockFileContentMap = await getFiles(lockFileNames);
 
   const hasLockFileContent = Object.values(existingLockFileContentMap).some(
-    (val) => !!val
+    (val) => !!val,
   );
   if (!hasLockFileContent) {
     logger.debug(
       { packageFileName },
-      'No lock file found for package or dependents'
+      'No lock file found for package or dependents',
     );
     return null;
   }
@@ -161,7 +140,7 @@ export async function updateArtifacts({
   try {
     if (updatedDeps.length === 0 && config.isLockFileMaintenance !== true) {
       logger.debug(
-        `Not updating lock file because no deps changed and no lock file maintenance.`
+        `Not updating lock file because no deps changed and no lock file maintenance.`,
       );
       return null;
     }
@@ -170,7 +149,7 @@ export async function updateArtifacts({
 
     await runDotnetRestore(packageFileName, packageFiles, config);
 
-    const newLockFileContentMap = await getFileContentMap(lockFileNames, true);
+    const newLockFileContentMap = await getLocalFiles(lockFileNames);
 
     const retArray: UpdateArtifactsResult[] = [];
     for (const lockFileName of lockFileNames) {

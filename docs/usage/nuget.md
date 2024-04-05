@@ -78,15 +78,26 @@ So Renovate behaves like the official NuGet client.
 
 #### v3 feed URL not ending with index.json
 
-If a `v3` feed URL does not end with `index.json`, you must append `#protocolVersion=3` to the registry URL:
+If a `v3` feed URL does not end with `index.json`, you must specify the version explicitly.
 
-```json
-{
-  "nuget": {
-    "registryUrls": ["http://myV3feed#protocolVersion=3"]
+- If the feed is defined in a `NuGet.config` file set the `protocolVersion` attribute to `3`:
+
+  ```xml
+  <packageSources>
+     <clear />
+     <add key="myV3feed" value="http://myV3feed" protocolVersion="3" />
+  </packageSources>
+  ```
+
+- If the feed is defined via Renovate configuration append `#protocolVersion=3` to the registry URL:
+
+  ```json
+  {
+    "nuget": {
+      "registryUrls": ["http://myV3feed#protocolVersion=3"]
+    }
   }
-}
-```
+  ```
 
 You may need this workaround when you use the JFrog Artifactory.
 
@@ -113,7 +124,8 @@ If you're using Azure DevOps, you can set `matchHost` to `pkgs.dev.azure.com`.
 !!! note
     Only Basic HTTP authentication (via username and password) is supported.
     For Azure DevOps, you can use a PAT with `read` permissions on `Packaging` plus an empty username.
+    The generated `nuget.config` enforces basic authentication and cannot be overridden externally!
 
 ## Future work
 
-Contributions and/or feature requests are welcome to support more patterns or additional use cases.
+We welcome contributions or feature requests to support more patterns or use cases.

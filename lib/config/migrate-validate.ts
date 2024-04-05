@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { dequal } from 'dequal';
 import { logger } from '../logger';
 import * as configMassage from './massage';
 import * as configMigration from './migration';
@@ -7,7 +8,7 @@ import * as configValidation from './validation';
 
 export async function migrateAndValidate(
   config: RenovateConfig,
-  input: RenovateConfig
+  input: RenovateConfig,
 ): Promise<RenovateConfig> {
   logger.debug('migrateAndValidate()');
   try {
@@ -15,20 +16,23 @@ export async function migrateAndValidate(
     if (isMigrated) {
       logger.debug(
         { oldConfig: input, newConfig: migratedConfig },
-        'Config migration necessary'
+        'Config migration necessary',
       );
     } else {
       logger.debug('No config migration necessary');
     }
     const massagedConfig = configMassage.massageConfig(migratedConfig);
-    logger.debug({ config: massagedConfig }, 'massaged config');
+    // log only if it's changed
+    if (!dequal(input, massagedConfig)) {
+      logger.debug({ config: massagedConfig }, 'Post-massage config');
+    }
     const {
       warnings,
       errors,
     }: {
       warnings: ValidationMessage[];
       errors: ValidationMessage[];
-    } = await configValidation.validateConfig(massagedConfig);
+    } = await configValidation.validateConfig('repo', massagedConfig);
     // istanbul ignore if
     if (is.nonEmptyArray(warnings)) {
       logger.warn({ warnings }, 'Found renovate config warnings');

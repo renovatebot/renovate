@@ -6,12 +6,12 @@
     "test": "renovate --version && renovate-config-validator"
   },
   "dependencies": {
-    "renovate": "file:../../renovate-v0.0.0-semantic-release.tgz"
+    "renovate": "file:../../renovate-0.0.0-semantic-release.tgz"
   },
   "renovate-config": {
     "default": {
       "extends": [
-        "config:base",
+        "config:recommended",
         ":assignAndReview(rarkins)",
         ":maintainLockFilesWeekly"
       ]

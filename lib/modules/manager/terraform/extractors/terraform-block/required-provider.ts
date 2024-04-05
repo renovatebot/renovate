@@ -1,6 +1,10 @@
 import is from '@sindresorhus/is';
 import type { PackageDependency } from '../../../types';
 import { TerraformProviderExtractor } from '../../base';
+import type {
+  TerraformDefinitionFile,
+  TerraformRequiredProvider,
+} from '../../hcl/types';
 import type { ProviderLock } from '../../lockfile/types';
 
 export class RequiredProviderExtractor extends TerraformProviderExtractor {
@@ -8,7 +12,10 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
     return ['required_providers'];
   }
 
-  extract(hclRoot: any, locks: ProviderLock[]): PackageDependency[] {
+  extract(
+    hclRoot: TerraformDefinitionFile,
+    locks: ProviderLock[],
+  ): PackageDependency[] {
     const terraformBlocks = hclRoot?.terraform;
     if (is.nullOrUndefined(terraformBlocks)) {
       return [];
@@ -21,35 +28,31 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
         continue;
       }
 
-      for (const requiredProvidersMap of requiredProviders) {
-        for (const requiredProviderName of Object.keys(requiredProvidersMap)) {
-          const value = requiredProvidersMap[requiredProviderName];
-
-          // name = version declaration method
-          let dep: PackageDependency;
-          if (typeof value === 'string') {
-            dep = {
-              currentValue: value,
-              managerData: {
-                moduleName: requiredProviderName,
-              },
-            };
-          }
+      const entries: [string, TerraformRequiredProvider | string][] =
+        requiredProviders.flatMap(Object.entries);
+      for (const [requiredProviderName, value] of entries) {
+        // name = version declaration method
+        let dep: PackageDependency;
+        if (is.string(value)) {
+          dep = {
+            currentValue: value,
+            managerData: {
+              moduleName: requiredProviderName,
+            },
+          };
+        } else {
           // block declaration aws = { source = 'aws', version = '2.0.0' }
-          dep ??= {
+          dep = {
             currentValue: value['version'],
             managerData: {
               moduleName: requiredProviderName,
               source: value['source'],
             },
           };
-          const massagedDep = this.analyzeTerraformProvider(
-            dep,
-            locks,
-            'required_provider'
-          );
-          dependencies.push(massagedDep);
         }
+        dependencies.push(
+          this.analyzeTerraformProvider(dep, locks, 'required_provider'),
+        );
       }
     }
     return dependencies;

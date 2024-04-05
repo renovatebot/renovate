@@ -29,7 +29,7 @@ export class ExtendsMigration extends AbstractMigration {
   }
 
   private normalizePreset(preset: string): string | null {
-    const { migratePresets } = GlobalConfig.get();
+    const migratePresets = GlobalConfig.get('migratePresets');
 
     if (removedPresets[preset] !== undefined) {
       return removedPresets[preset];

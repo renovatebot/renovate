@@ -33,6 +33,8 @@ Presets can be nested.
 
 Presets should be hosted in repositories, which usually means the same platform host as Renovate is running against.
 
+Alternatively, Renovate can fetch preset files from an HTTP server.
+
 <!-- prettier-ignore -->
 !!! warning
     We deprecated npm-based presets.
@@ -101,7 +103,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 An example of a small rule is `:preserveSemverRanges`, which has the description "Preserve (but continue to upgrade) any existing SemVer ranges.".
 It simply sets the configuration option `rangeStrategy` to `replace`.
 
-An example of a full config is `config:base`, which is Renovate's default configuration.
+An example of a full config is `config:recommended`, which is Renovate's default configuration.
 It mostly uses Renovate config defaults but adds a few smart customizations such as grouping monorepo packages together.
 
 <!-- prettier-ignore -->
@@ -111,27 +113,27 @@ It mostly uses Renovate config defaults but adds a few smart customizations such
 
 ## How to Use Preset Configs
 
-By default, Renovate App's onboarding PR suggests the `["config:base]"` preset.
-If you're self hosting, and want to use the `config:base` preset, then you must add `"onboardingConfig": { "extends": ["config:base"] }` to your bot's config.
+By default, Renovate App's onboarding PR suggests the `["config:recommended]"` preset.
+If you're self hosting, and want to use the `config:recommended` preset, then you must add `"onboardingConfig": { "extends": ["config:recommended"] }` to your bot's config.
 
-Read the [Full Config Presets](https://docs.renovatebot.com/presets-config/) page to learn more about our `config:` presets.
+Read the [Full Config Presets](./presets-config.md) page to learn more about our `config:` presets.
 
 A typical onboarding `renovate.json` looks like this:
 
 ```json
 {
-  "extends": ["config:base"]
+  "extends": ["config:recommended"]
 }
 ```
 
 Here's an example of using presets to change Renovate's behavior.
-You're happy with the `config:base` preset, but want Renovate to create PRs when you're not at the office.
+You're happy with the `config:recommended` preset, but want Renovate to create PRs when you're not at the office.
 You look at our `schedule:` presets, and find the `schedule:nonOfficeHours` preset.
 You put `schedule:nonOfficeHours` in the `extends` array of your `renovate.json` file, like this:
 
 ```json
 {
-  "extends": ["config:base", "schedule:nonOfficeHours"]
+  "extends": ["config:recommended", "schedule:nonOfficeHours"]
 }
 ```
 
@@ -163,8 +165,8 @@ Here is how you would use these in your Renovate config:
 In short, the number of `{{argx}}` parameters in the definition is how many parameters you need to provide.
 Parameters must be strings, non-quoted, and separated by commas if there are more than one.
 
-If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself.
-Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository.
+If you find that you are repeating config a lot, you might consider publishing one of these types of parameterized presets yourself.
+Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository, see [Contributing to presets](#contributing-to-presets).
 
 ## GitHub-hosted Presets
 
@@ -208,18 +210,43 @@ This is especially helpful in self-hosted scenarios where public presets cannot 
 Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`.
 Renovate will determine the current platform and look up the preset from there.
 
+## Fetching presets from an HTTP server
+
+If your desired platform is not yet supported, or if you want presets to work when you run Renovate with `--platform=local`, you can specify presets using HTTP URLs:
+
+```json
+{
+  "extends": [
+    "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain"
+  ]
+}
+```
+
+Parameters are supported similar to other methods:
+
+```json
+{
+  "extends": [
+    "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain(param)"
+  ]
+}
+```
+
 ## Contributing to presets
 
-Have you configured a rule that you think others might benefit from?
-Please consider contributing it to the [Renovate](https://github.com/renovatebot/renovate) repository so that it gains higher visibility and saves others from reinventing the same thing.
+Have you configured a rule that could help others?
+Please consider contributing it to the [Renovate repository](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal) so that it gains higher visibility and saves others from reinventing the same thing.
 
-## Organization level presets
+Create a [discussion](https://github.com/renovatebot/renovate/discussions) to propose your preset to the Renovate maintainers.
+The maintainers can also help improve the preset, and let you know where to put it in the code.
+If you are proposing a "monorepo" preset addition then it's OK to raise a PR directly as that can be more efficient than a GitHub Discussion.
 
-Whenever repository onboarding happens, Renovate checks if the current user/group/org has a default config to extend.
-It looks for:
+## Group/Organization level presets
 
-- A repository called `renovate-config` under the same user/group/org with a `default.json` file or
-- A repository named like `.{{platform}}` (e.g. `.github`) under the same user/group/org with `renovate-config.json`
+Whenever repository onboarding happens, Renovate checks for a a default config to extend.
+Renovate will check for a repository called `renovate-config` with a `default.json` file in the parent user/group/org of the repository.
+On platforms that support nested groups (e.g. GitLab), Renovate will check for this repository at each level of grouping, from nearest to furthest, and use the first one it finds.
+On all platforms, it will then look for a repository named like `.{{platform}}` (e.g. `.github`) with a `renovate-config.json`, under the same top-level user/group/org.
 
 If found, that repository's preset will be suggested as the sole extended preset, and any existing `onboardingConfig` config will be ignored/overridden.
 For example the result may be:
@@ -253,7 +280,7 @@ For example:
   "version": "0.0.1",
   "renovate-config": {
     "default": {
-      "extends": ["config:base", "schedule:nonOfficeHours"]
+      "extends": ["config:recommended", "schedule:nonOfficeHours"]
     }
   }
 }

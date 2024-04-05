@@ -1,85 +1,74 @@
-simply keeps Puppetfiles updated
+Renovate can update Puppetfiles.
 
-### How It Works
+### How it works
 
-1. Renovate searches in each repository for any `Puppetfile` files
-1. Existing dependencies are extracted from the relevant sections of the file
-1. Renovate resolves the dependency on the provided forges (or uses `https://forgeapi.puppetlabs.com` as default)
-1. A PR is created with `Puppetfile` updated in the same commit
-1. If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
+Renovate:
 
-### supported Puppetfile formats
+1. Searches each repository for any `Puppetfile` files
+1. Extracts dependencies from the relevant sections of the `Puppetfile`
+1. Resolves the dependency on the default forge: `https://forgeapi.puppetlabs.com`, or on a user-defined forge
+1. Creates a PR that updates the `Puppetfile`
 
-the manager extracts the deps from one Puppetfile
+Finally, if the source repository has a "changelog" file _or_ uses GitHub releases, then Renovate puts the changelogs for each version in its PR.
 
-the Puppetfile supports at the moment different ways to configure forges
+### Supported Puppetfile formats
 
-1. no forge defined
+The `puppet` manager extracts the dependencies from one Puppetfile.
+You can define a forge in your `puppetfile` in these ways:
 
-   ```ruby
-   mod 'puppetlabs/apt', '8.3.0'
-   mod 'puppetlabs/apache', '7.0.0'
-   ```
+- No forge
+- One forge
+- Multiple forges
+- GitHub-based forge
+- Git-based forge
 
-2. one forge defined: `forge "https://forgeapi.puppetlabs.com"`
+For example:
 
-   ```ruby
-   forge "https://forgeapi.puppetlabs.com"
+```ruby title="No forge"
+mod 'puppetlabs/apt', '8.3.0'
+mod 'puppetlabs/apache', '7.0.0'
+```
 
-   mod 'puppetlabs/apt', '8.3.0'
-   mod 'puppetlabs/apache', '7.0.0'
-   mod 'puppetlabs/concat', '7.1.1'
-   ```
+```ruby title="One forge"
+forge "https://forgeapi.puppetlabs.com"
 
-3. multiple forges defined
+mod 'puppetlabs/apt', '8.3.0'
+mod 'puppetlabs/apache', '7.0.0'
+mod 'puppetlabs/concat', '7.1.1'
+```
 
-   ```ruby
-   forge "https://forgeapi.puppetlabs.com"
+```ruby title="Multiple forges"
+forge "https://forgeapi.puppetlabs.com"
 
-   mod 'puppetlabs/apt', '8.3.0'
-   mod 'puppetlabs/apache', '7.0.0'
-   mod 'puppetlabs/concat', '7.1.1'
+mod 'puppetlabs/apt', '8.3.0'
+mod 'puppetlabs/apache', '7.0.0'
+mod 'puppetlabs/concat', '7.1.1'
 
-   # private forge
-   forge "https://forgeapi.example.com"
+# Private forge
+forge "https://forgeapi.example.com"
 
-   mod 'example/infra', '3.3.0'
-   ```
+mod 'example/infra', '3.3.0'
+```
 
-4. github based version
+```ruby title="GitHub-based forge, tag based"
+mod 'example/standalone_jar',
+    :git => 'git@gitlab.example.de:puppet/example-standalone_jar',
+    :tag => '0.9.0'
+```
 
-   ```ruby
-   # tag based
-   mod 'example/standalone_jar',
-      :git => 'git@gitlab.example.de:puppet/example-standalone_jar',
-      :tag => '0.9.0'
-   ```
-
-5. git based version
-
-   ```ruby
-   # tag based
-   mod 'stdlib',
+```ruby title="Git-based forge, tag based"
+mod 'stdlib',
     :git => 'git@gitlab.com:example/project_stdlib.git',
     :tag => '5.0.0'
-   ```
+```
 
-### possible improvements
-
-#### further git-support
-
-usually you can add the versions to a forge and use the already provided
-way of updating
-
-```ruby
-# branch based
+```ruby title="Git-based forge, branch based"
 mod 'example/samba',
     :git    => 'https://github.com/example/puppet-samba',
     :branch => 'stable_version'
 ```
 
-```ruby
-# ref based
+```ruby title="Git-based forge, ref based"
 mod 'example/samba',
     :git => 'https://github.com/example/puppet-samba',
     :ref => 'stable_version'

@@ -9,7 +9,7 @@ describe('config/migrations/custom/separate-multiple-major-migration', () => {
       },
       {
         separateMajorReleases: true,
-      }
+      },
     );
   });
 
@@ -21,7 +21,7 @@ describe('config/migrations/custom/separate-multiple-major-migration', () => {
       {
         separateMultipleMajor: true,
       },
-      false
+      false,
     );
   });
 });

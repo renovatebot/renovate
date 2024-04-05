@@ -1,67 +1,54 @@
-import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
-import {
-  getFile,
-  isBranchBehindBase,
-  isBranchModified,
-} from '../../../../util/git';
-import { toSha256 } from '../../../../util/hasha';
-import { OnboardingState, defaultConfigFile } from '../common';
+import { scm } from '../../../../modules/platform/scm';
+import { toSha256 } from '../../../../util/hash';
+import { defaultConfigFile } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
 export async function rebaseOnboardingBranch(
   config: RenovateConfig,
-  previousConfigHash?: string
+  previousConfigHash: string | undefined,
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
+
+  // skip platforms that do not support html comments in pr
+  const platform = GlobalConfig.get('platform')!;
+  if (!['github', 'gitea', 'gitlab'].includes(platform)) {
+    logger.debug(
+      `Skipping rebase as ${platform} does not support html comments`,
+    );
+    return null;
+  }
+
   const configFile = defaultConfigFile(config);
-  const existingContents =
-    (await getFile(configFile, config.onboardingBranch)) ?? '';
-  const currentConfigHash = toSha256(existingContents);
   const contents = await getOnboardingConfigContents(config, configFile);
+  const currentConfigHash = toSha256(contents);
 
-  if (config.onboardingRebaseCheckbox) {
-    handleOnboardingManualRebase(previousConfigHash, currentConfigHash);
-  }
-
-  // TODO #7154
-  if (await isBranchModified(config.onboardingBranch!)) {
-    logger.debug('Onboarding branch has been edited and cannot be rebased');
+  if (previousConfigHash === currentConfigHash) {
+    logger.debug('No rebase needed');
     return null;
   }
-
-  // TODO: fix types (#7154)
-  if (
-    contents === existingContents &&
-    !(await isBranchBehindBase(config.onboardingBranch!, config.defaultBranch!))
-  ) {
-    logger.debug('Onboarding branch is up to date');
-    return null;
-  }
-
-  logger.debug('Rebasing onboarding branch');
-  if (config.onboardingRebaseCheckbox) {
-    OnboardingState.prUpdateRequested = true;
-  }
-  // istanbul ignore next
-  const commitMessageFactory = new OnboardingCommitMessageFactory(
-    config,
-    configFile
+  logger.debug(
+    { previousConfigHash, currentConfigHash },
+    'Rebasing onboarding branch',
   );
-  const commitMessage = commitMessageFactory.create();
 
-  // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }
 
-  // TODO #7154
-  return commitAndPush({
+  const commitMessageFactory = new OnboardingCommitMessageFactory(
+    config,
+    configFile,
+  );
+  const commitMessage = commitMessageFactory.create();
+
+  // TODO #22198
+  return scm.commitAndPush({
+    baseBranch: config.baseBranch,
     branchName: config.onboardingBranch!,
     files: [
       {
@@ -73,17 +60,4 @@ export async function rebaseOnboardingBranch(
     message: commitMessage.toString(),
     platformCommit: !!config.platformCommit,
   });
-}
-
-function handleOnboardingManualRebase(
-  previousConfigHash: string | undefined,
-  currentConfigHash: string
-): void {
-  if (is.nullOrUndefined(previousConfigHash)) {
-    logger.debug('Missing previousConfigHash bodyStruct prop in onboarding PR');
-    OnboardingState.prUpdateRequested = true;
-  } else if (previousConfigHash !== currentConfigHash) {
-    logger.debug('Onboarding config has been modified by the user');
-    OnboardingState.prUpdateRequested = true;
-  }
 }

@@ -11,7 +11,7 @@ describe('util/package-rules/dep-patterns', () => {
         },
         {
           matchDepPatterns: ['@opentelemetry/http'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -25,7 +25,7 @@ describe('util/package-rules/dep-patterns', () => {
         },
         {
           excludeDepPatterns: ['@opentelemetry/http'],
-        }
+        },
       );
       expect(result).toBeFalse();
     });

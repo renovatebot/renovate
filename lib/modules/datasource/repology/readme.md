@@ -1,5 +1,5 @@
 With [Repology](https://repology.org/) you can look up package versions from many package repositories.
-You can combine Repology with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to update dependencies which are not supported by Renovate.
+You can combine Repology with [regex managers](../../manager/regex/index.md) to update dependencies which are not supported by Renovate.
 
 The `packageName` field should be constructed using the repository identifier and the actual package name separated by a slash.
 For example: `alpine_3_12/gcc` would look for a binary (or source package) called `gcc` within the `alpine_3_12` repository.
@@ -14,12 +14,13 @@ For example, the `Alpine Linux 3.12` repository has this URL: `https://repology.
 Say you're using system packages in a Dockerfile and want to update them with Repology.
 With the Repology datasource you can "pin" each dependency, and get automatic updates.
 
-First you would set a generic regex manager in your `renovate.json` file for `Dockerfile`:
+First you would set a custom manager in your `renovate.json` file for `Dockerfile`:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=\"(?<currentValue>.*)\"\\s"
@@ -49,5 +50,5 @@ When the operating system package for `gcc` of `Alpine Linux 3.12` is updated, R
 
 <!-- prettier-ignore -->
 !!! tip
-    We recommend you try `loose` versioning for distribution packages first.
-    This is because the version number usually doesn't match Renovate's default `semver` specification.
+    We recommend you try `loose` or `deb` versioning for distribution packages first.
+    This is because the version number usually doesn't match Renovate's default `semver-coerced` specification.

@@ -1,15 +1,21 @@
 import is from '@sindresorhus/is';
 import { getDep } from '../../../dockerfile/extract';
-import type { PackageDependency } from '../../../types';
+import type { ExtractConfig, PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
+import type { TerraformDefinitionFile } from '../../hcl/types';
+import type { ProviderLock } from '../../lockfile/types';
 import { generic_image_resource } from './utils';
 
-export class GenericDockerImageRef extends DependencyExtractor {
+export class GenericDockerImageRefExtractor extends DependencyExtractor {
   getCheckList(): string[] {
     return generic_image_resource.map((value) => `"${value.type}"`);
   }
 
-  extract(hclMap: any): PackageDependency[] {
+  extract(
+    hclMap: TerraformDefinitionFile,
+    _locks: ProviderLock[],
+    config: ExtractConfig,
+  ): PackageDependency[] {
     const resourceTypMap = hclMap.resource;
     if (is.nullOrUndefined(resourceTypMap)) {
       return [];
@@ -21,18 +27,15 @@ export class GenericDockerImageRef extends DependencyExtractor {
       const { type, path } = image_resource_def;
       const resourceInstancesMap = resourceTypMap[type];
       // is there a resource with current looked at type ( `image_resource_def` )
-      if (is.nullOrUndefined(resourceInstancesMap)) {
+      if (!is.nonEmptyObject(resourceInstancesMap)) {
         continue;
       }
 
       // loop over instances of a resource type
-      for (const instanceName of Object.keys(resourceInstancesMap)) {
-        const instanceList = resourceInstancesMap[instanceName];
-        for (const instance of instanceList) {
-          dependencies.push(
-            ...this.walkPath({ depType: type }, instance, path)
-          );
-        }
+      for (const instance of Object.values(resourceInstancesMap).flat()) {
+        dependencies.push(
+          ...this.walkPath({ depType: type }, instance, path, config),
+        );
       }
     }
     return dependencies;
@@ -48,14 +51,15 @@ export class GenericDockerImageRef extends DependencyExtractor {
    */
   private walkPath(
     abstractDep: PackageDependency,
-    parentElement: any,
-    leftPath: string[]
+    parentElement: unknown,
+    leftPath: string[],
+    config: ExtractConfig,
   ): PackageDependency[] {
     const dependencies: PackageDependency[] = [];
     // if there are no path elements left, we have reached the end of the path
     if (leftPath.length === 0) {
       // istanbul ignore if
-      if (is.nullOrUndefined(parentElement)) {
+      if (!is.nonEmptyString(parentElement)) {
         return [
           {
             ...abstractDep,
@@ -63,7 +67,7 @@ export class GenericDockerImageRef extends DependencyExtractor {
           },
         ];
       }
-      const test = getDep(parentElement);
+      const test = getDep(parentElement, true, config.registryAliases);
       const dep: PackageDependency = {
         ...abstractDep,
         ...test,
@@ -75,7 +79,9 @@ export class GenericDockerImageRef extends DependencyExtractor {
     const pathElement = leftPath[0];
 
     // get sub element
-    const element = parentElement[pathElement];
+    const element = is.nonEmptyObject(parentElement)
+      ? parentElement[pathElement]
+      : null;
     if (is.nullOrUndefined(element)) {
       return leftPath.length === 1 // if this is the last element assume a false defined dependency
         ? [
@@ -89,11 +95,16 @@ export class GenericDockerImageRef extends DependencyExtractor {
     if (is.array(element)) {
       for (const arrayElement of element) {
         dependencies.push(
-          ...this.walkPath(abstractDep, arrayElement, leftPath.slice(1))
+          ...this.walkPath(
+            abstractDep,
+            arrayElement,
+            leftPath.slice(1),
+            config,
+          ),
         );
       }
       return dependencies;
     }
-    return this.walkPath(abstractDep, element, leftPath.slice(1));
+    return this.walkPath(abstractDep, element, leftPath.slice(1), config);
   }
 }

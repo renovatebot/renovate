@@ -17,5 +17,6 @@ kotest = [ "kotest-runner-junit5", "kotest-assertions-core-jvm" ]
 
 [plugins]
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-publish-on-central = { id = "org.danilopianini.publish-on-central", version.ref = "publish-on-central" }
+publish-on-central = { id = "org.danilopianini.publish-on-central", version.ref = "publish_on.central" }
 grgit = { id = "org.ajoberstar.grgit", version.unknown = "this will fail" }
+grgit2 = { id = "org.ajoberstar.grgit2", version.ref = "unknown-ref" }

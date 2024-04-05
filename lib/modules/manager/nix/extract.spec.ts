@@ -52,7 +52,7 @@ describe('modules/manager/nix/extract', () => {
     ]);
   });
 
-  it('ignores nixpkgs with no explicit ref', () => {
+  it('includes nixpkgs with no explicit ref', () => {
     const content = `{
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs";
@@ -61,6 +61,16 @@ describe('modules/manager/nix/extract', () => {
 
     const res = extractPackageFile(content);
 
-    expect(res).toBeNull();
+    expect(res).toMatchObject({
+      deps: [
+        {
+          currentValue: undefined,
+          datasource: 'git-refs',
+          depName: 'nixpkgs',
+          packageName: 'https://github.com/NixOS/nixpkgs',
+          versioning: 'nixpkgs',
+        },
+      ],
+    });
   });
 });

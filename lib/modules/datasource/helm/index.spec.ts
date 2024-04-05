@@ -9,17 +9,13 @@ const indexYaml = Fixtures.get('index.yaml');
 
 describe('modules/datasource/helm/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns null if packageName was not provided', async () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: undefined as never, // #7154
+          packageName: undefined as never, // #22198
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -32,9 +28,9 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'some_chart',
+          packageName: 'some_chart',
           registryUrls: [],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -46,9 +42,9 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'non_existent_chart',
+          packageName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -56,13 +52,13 @@ describe('modules/datasource/helm/index', () => {
       httpMock
         .scope('https://example-repository.com')
         .get('/index.yaml')
-        .reply(200, undefined);
+        .reply(200);
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'non_existent_chart',
+          packageName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -74,9 +70,9 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'some_chart',
+          packageName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -88,9 +84,9 @@ describe('modules/datasource/helm/index', () => {
       await expect(
         getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'some_chart',
+          packageName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -102,9 +98,9 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'some_chart',
+          packageName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -115,7 +111,7 @@ describe('modules/datasource/helm/index', () => {
         .reply(200, '# A comment');
       const releases = await getPkgReleases({
         datasource: HelmDatasource.id,
-        depName: 'non_existent_chart',
+        packageName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
@@ -134,7 +130,7 @@ describe('modules/datasource/helm/index', () => {
         .reply(200, res);
       const releases = await getPkgReleases({
         datasource: HelmDatasource.id,
-        depName: 'non_existent_chart',
+        packageName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
@@ -147,7 +143,7 @@ describe('modules/datasource/helm/index', () => {
         .reply(200, indexYaml);
       const releases = await getPkgReleases({
         datasource: HelmDatasource.id,
-        depName: 'non_existent_chart',
+        packageName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
@@ -160,11 +156,29 @@ describe('modules/datasource/helm/index', () => {
         .reply(200, indexYaml);
       const releases = await getPkgReleases({
         datasource: HelmDatasource.id,
-        depName: 'ambassador',
+        packageName: 'ambassador',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).not.toBeNull();
       expect(releases).toMatchSnapshot();
+    });
+
+    it('returns list of versions for other packages if one packages has no versions', async () => {
+      httpMock
+        .scope('https://example-repository.com')
+        .get('/index.yaml')
+        .reply(200, Fixtures.get('index_emptypackage.yaml'));
+      const releases = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        packageName: 'ambassador',
+        registryUrls: ['https://example-repository.com'],
+      });
+      expect(releases).toMatchObject({
+        homepage: 'https://www.getambassador.io/',
+        registryUrl: 'https://example-repository.com',
+        sourceUrl: 'https://github.com/datawire/ambassador',
+        releases: expect.toBeArrayOfSize(1),
+      });
     });
 
     it('adds trailing slash to subdirectories', async () => {
@@ -174,7 +188,7 @@ describe('modules/datasource/helm/index', () => {
         .reply(200, indexYaml);
       const res = await getPkgReleases({
         datasource: HelmDatasource.id,
-        depName: 'ambassador',
+        packageName: 'ambassador',
         registryUrls: ['https://example-repository.com/subdir'],
       });
 
@@ -183,6 +197,28 @@ describe('modules/datasource/helm/index', () => {
         registryUrl: 'https://example-repository.com/subdir',
         sourceUrl: 'https://github.com/datawire/ambassador',
         releases: expect.toBeArrayOfSize(27),
+      });
+    });
+
+    it('uses undefined as the newDigest when no digest is provided', async () => {
+      httpMock
+        .scope('https://example-repository.com')
+        .get('/index.yaml')
+        .reply(200, Fixtures.get('index_blank-digest.yaml'));
+      const releases = await getPkgReleases({
+        datasource: HelmDatasource.id,
+        packageName: 'blank-digest',
+        registryUrls: ['https://example-repository.com'],
+      });
+      expect(releases).toMatchObject({
+        registryUrl: 'https://example-repository.com',
+        releases: [
+          {
+            newDigest: undefined,
+            releaseTimestamp: '2023-09-05T13:24:19.046Z',
+            version: '3.2.1',
+          },
+        ],
       });
     });
   });

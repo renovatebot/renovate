@@ -5,14 +5,14 @@ import { Matcher } from './base';
 export class DepTypesMatcher extends Matcher {
   override matches(
     { depTypes, depType }: PackageRuleInputConfig,
-    { matchDepTypes }: PackageRule
+    { matchDepTypes }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchDepTypes)) {
       return null;
     }
 
     const result =
-      (depType && matchDepTypes.includes(depType)) ||
+      (is.string(depType) && matchDepTypes.includes(depType)) ||
       depTypes?.some((dt) => matchDepTypes.includes(dt));
     return result ?? false;
   }

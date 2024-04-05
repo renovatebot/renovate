@@ -7,6 +7,9 @@ export interface JenkinsPluginVersion {
   version: string;
   buildDate?: string;
   url?: string;
+  requiredCore?: string;
+
+  releaseTimestamp?: string;
 }
 
 export interface JenkinsPluginsInfoResponse {

@@ -11,9 +11,50 @@ describe('util/package-rules/package-patterns', () => {
         },
         {
           matchPackagePatterns: ['@opentelemetry/http'],
-        }
+        },
       );
       expect(result).toBeFalse();
+    });
+
+    it('should match packageName', () => {
+      const result = packageNameMatcher.matches(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          matchPackagePatterns: ['def'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should fall back to matching depName', () => {
+      const result = packageNameMatcher.matches(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          matchPackagePatterns: ['abc'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
+  });
+
+  describe('exclude', () => {
+    it('should exclude packageName', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          excludePackagePatterns: ['def'],
+        },
+      );
+      expect(result).toBeTrue();
     });
   });
 });

@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { GithubHttp, GithubHttpOptions } from '../../../util/http/github';
 import { parseLinkHeader } from '../../../util/url';
 import { ApiCache } from './api-cache';
@@ -12,10 +13,9 @@ function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
   repoCache.platform ??= {};
   repoCache.platform.github ??= {};
-  delete repoCache.platform.github.prCache;
   repoCache.platform.github.pullRequestsCache ??= { items: {} };
   const prApiCache = new ApiCache<GhPr>(
-    repoCache.platform.github.pullRequestsCache as ApiPageCache<GhPr>
+    repoCache.platform.github.pullRequestsCache as ApiPageCache<GhPr>,
   );
   return prApiCache;
 }
@@ -50,7 +50,7 @@ function getPrApiCache(): ApiCache<GhPr> {
 export async function getPrCache(
   http: GithubHttp,
   repo: string,
-  username: string | null
+  username: string | null,
 ): Promise<Record<number, GhPr>> {
   const prApiCache = getPrApiCache();
   const isInitial = is.emptyArray(prApiCache.getItems());
@@ -64,9 +64,12 @@ export async function getPrCache(
     let pageIdx = 1;
     while (needNextPageFetch && needNextPageSync) {
       const opts: GithubHttpOptions = { paginate: false };
-      if (pageIdx === 1 && isInitial) {
-        // Speed up initial fetch
-        opts.paginate = true;
+      if (pageIdx === 1) {
+        opts.cacheProvider = repoCacheProvider;
+        if (isInitial) {
+          // Speed up initial fetch
+          opts.paginate = true;
+        }
       }
 
       const perPage = isInitial ? 100 : 20;
@@ -84,7 +87,7 @@ export async function getPrCache(
 
       if (username) {
         page = page.filter(
-          (ghPr) => ghPr?.user?.login && ghPr.user.login === username
+          (ghPr) => ghPr?.user?.login && ghPr.user.login === username,
         );
       }
 
@@ -106,7 +109,7 @@ export async function getPrCache(
         requestsTotal,
         apiQuotaAffected,
       },
-      `getPrList success`
+      `getPrList success`,
     );
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'getPrList err');

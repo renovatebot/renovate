@@ -1,6 +1,7 @@
 import { git, mockedFunction } from '../../../test/util';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { initPlatform as _initPlatform } from '../../modules/platform';
+import * as hostRules from '../../util/host-rules';
 import { globalInitialize } from './initialize';
 
 jest.mock('../../util/git');
@@ -37,6 +38,68 @@ describe('workers/global/initialize', () => {
       };
       git.validateGitVersion.mockResolvedValueOnce(true);
       await expect(globalInitialize(config)).toResolve();
+    });
+  });
+
+  describe('setGlobalHostRules', () => {
+    beforeEach(() => {
+      hostRules.clear();
+    });
+
+    it('should have run before initPlatform', async () => {
+      const hostRule = {
+        hostType: 'github',
+        matchHost: 'https://some.github-enterprise.host',
+        httpsPrivateKey: 'private-key',
+        httpsCertificate: 'certificate',
+        httpsCertificateAuthority: 'certificate-authority',
+      };
+
+      initPlatform.mockReset();
+      initPlatform.mockImplementationOnce((r) => {
+        const foundRule = hostRules.find({
+          hostType: hostRule.hostType,
+          url: hostRule.matchHost,
+        });
+
+        expect(foundRule.httpsPrivateKey).toEqual(hostRule.httpsPrivateKey);
+        expect(foundRule.httpsCertificateAuthority).toEqual(
+          hostRule.httpsCertificateAuthority,
+        );
+        expect(foundRule.httpsCertificate).toEqual(hostRule.httpsCertificate);
+
+        return Promise.resolve(r);
+      });
+
+      const config: RenovateConfig = {
+        hostRules: [hostRule],
+      };
+
+      git.validateGitVersion.mockResolvedValueOnce(true);
+      await expect(globalInitialize(config)).toResolve();
+    });
+  });
+
+  describe('configureThirdPartyLibraries()', () => {
+    beforeEach(() => {
+      delete process.env.AWS_EC2_METADATA_DISABLED;
+      delete process.env.METADATA_SERVER_DETECTION;
+    });
+
+    it('sets env vars when cloud metadata services disabled', async () => {
+      const config: RenovateConfig = { useCloudMetadataServices: false };
+      git.validateGitVersion.mockResolvedValueOnce(true);
+      await expect(globalInitialize(config)).toResolve();
+      expect(process.env.AWS_EC2_METADATA_DISABLED).toBe('true');
+      expect(process.env.METADATA_SERVER_DETECTION).toBe('none');
+    });
+
+    it('does not set env vars when cloud metadata services enabled', async () => {
+      const config: RenovateConfig = { useCloudMetadataServices: true };
+      git.validateGitVersion.mockResolvedValueOnce(true);
+      await expect(globalInitialize(config)).toResolve();
+      expect(process.env.AWS_EC2_METADATA_DISABLED).toBeUndefined();
+      expect(process.env.METADATA_SERVER_DETECTION).toBeUndefined();
     });
   });
 });

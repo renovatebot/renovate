@@ -1,3 +1,6 @@
+// TODO: types (#22198)
+import is from '@sindresorhus/is';
+import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -17,17 +20,51 @@ import {
   readLocalFile,
   renameLocalFile,
 } from '../../../../util/fs';
+import { minimatch } from '../../../../util/minimatch';
+import { Result } from '../../../../util/result';
+import { trimSlashes } from '../../../../util/url';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import { PackageLock } from '../schema';
 import { composeLockFile, parseLockFile } from '../utils';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
+import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
+
+async function getNpmConstraintFromPackageLock(
+  lockFileDir: string,
+  filename: string,
+): Promise<string | null> {
+  const packageLockFileName = upath.join(lockFileDir, filename);
+  const packageLockContents = await readLocalFile(packageLockFileName, 'utf8');
+  const packageLockJson = Result.parse(
+    packageLockContents,
+    PackageLock,
+  ).unwrapOrNull();
+  if (!packageLockJson) {
+    logger.debug(`Could not parse ${packageLockFileName}`);
+    return null;
+  }
+  const { lockfileVersion } = packageLockJson;
+  if (lockfileVersion === 1) {
+    logger.debug(`Using npm constraint <7 for lockfileVersion=1`);
+    return `<7`;
+  }
+  if (lockfileVersion === 2) {
+    logger.debug(`Using npm constraint <9 for lockfileVersion=2`);
+    return `<9`;
+  }
+  logger.debug(
+    `Using npm constraint >=9 for lockfileVersion=${lockfileVersion}`,
+  );
+  return `>=9`;
+}
 
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
   filename: string,
   config: Partial<PostUpdateConfig> = {},
-  upgrades: Upgrade[] = []
+  upgrades: Upgrade[] = [],
 ): Promise<GenerateLockFileResult> {
   // TODO: don't assume package-lock.json is in the same directory
   const lockFileName = upath.join(lockFileDir, filename);
@@ -37,18 +74,35 @@ export async function generateLockFile(
 
   let lockFile: string | null = null;
   try {
+    const lazyPkgJson = lazyLoadPackageJson(lockFileDir);
     const npmToolConstraint: ToolConstraint = {
       toolName: 'npm',
-      constraint: config.constraints?.npm,
+      constraint:
+        config.constraints?.npm ??
+        getPackageManagerVersion('npm', await lazyPkgJson.getValue()) ??
+        (await getNpmConstraintFromPackageLock(lockFileDir, filename)) ??
+        null,
     };
+    const supportsPreferDedupeFlag =
+      !npmToolConstraint.constraint ||
+      semver.intersects('>=7.0.0', npmToolConstraint.constraint);
     const commands: string[] = [];
     let cmdOptions = '';
-    if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
+    if (
+      (postUpdateOptions?.includes('npmDedupe') === true &&
+        !supportsPreferDedupeFlag) ||
+      skipInstalls === false
+    ) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--no-audit';
     } else {
       logger.debug('Updating lock file only');
       cmdOptions += '--package-lock-only --no-audit';
+    }
+
+    if (postUpdateOptions?.includes('npmDedupe') && supportsPreferDedupeFlag) {
+      logger.debug('Deduplicate dependencies on installation');
+      cmdOptions += ' --prefer-dedupe';
     }
 
     if (!GlobalConfig.get('allowScripts') || config.ignoreScripts) {
@@ -61,9 +115,10 @@ export async function generateLockFile(
     };
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
+      userConfiguredEnv: config.env,
       extraEnv,
       toolConstraints: [
-        await getNodeToolConstraint(config, upgrades, lockFileDir),
+        await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
         npmToolConstraint,
       ],
       docker: {},
@@ -81,15 +136,35 @@ export async function generateLockFile(
 
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
-    if (lockUpdates.length) {
+
+    // divide the deps in two categories: workspace and root
+    const { lockRootUpdates, lockWorkspacesUpdates, workspaces, rootDeps } =
+      divideWorkspaceAndRootDeps(lockFileDir, lockUpdates);
+
+    if (workspaces.size && lockWorkspacesUpdates.length) {
+      logger.debug('Performing lockfileUpdate (npm-workspaces)');
+      for (const workspace of workspaces) {
+        const currentWorkspaceUpdates = lockWorkspacesUpdates
+          .filter((update) => update.workspace === workspace)
+          .map((update) => update.managerData?.packageKey)
+          .filter((packageKey) => !rootDeps.has(packageKey));
+
+        if (currentWorkspaceUpdates.length) {
+          const updateCmd = `npm install ${cmdOptions} --workspace=${workspace} ${currentWorkspaceUpdates.join(
+            ' ',
+          )}`;
+          commands.push(updateCmd);
+        }
+      }
+    }
+
+    if (lockRootUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm)');
       const updateCmd =
-        `npm install ${cmdOptions}` +
-        lockUpdates
-          // TODO: types (#7154)
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          .map((update) => ` ${update.depName}@${update.newVersion}`)
-          .join('');
+        `npm install ${cmdOptions} ` +
+        lockRootUpdates
+          .map((update) => update.managerData?.packageKey)
+          .join(' ');
       commands.push(updateCmd);
     }
 
@@ -99,21 +174,24 @@ export async function generateLockFile(
     }
 
     // postUpdateOptions
-    if (config.postUpdateOptions?.includes('npmDedupe')) {
-      logger.debug('Performing npm dedupe');
+    if (
+      config.postUpdateOptions?.includes('npmDedupe') &&
+      !supportsPreferDedupeFlag
+    ) {
+      logger.debug('Performing npm dedupe after installation');
       commands.push('npm dedupe');
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
-        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`,
       );
       try {
         await deleteLocalFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
-          'Error removing package-lock.json for lock file maintenance'
+          'Error removing package-lock.json for lock file maintenance',
         );
       }
     }
@@ -128,30 +206,35 @@ export async function generateLockFile(
     ) {
       await renameLocalFile(
         upath.join(lockFileDir, 'package-lock.json'),
-        upath.join(lockFileDir, 'npm-shrinkwrap.json')
+        upath.join(lockFileDir, 'npm-shrinkwrap.json'),
       );
     }
 
     // Read the result
-    // TODO #7154
+    // TODO #22198
     lockFile = (await readLocalFile(
       upath.join(lockFileDir, filename),
-      'utf8'
+      'utf8',
     ))!;
 
     // Massage lockfile counterparts of package.json that were modified
     // because npm install was called with an explicit version for rangeStrategy=update-lockfile
     if (lockUpdates.length) {
       const { detectedIndent, lockFileParsed } = parseLockFile(lockFile);
-      if (lockFileParsed?.lockfileVersion === 2) {
+      if (
+        lockFileParsed?.lockfileVersion === 2 ||
+        lockFileParsed?.lockfileVersion === 3
+      ) {
         lockUpdates.forEach((lockUpdate) => {
           const depType = lockUpdate.depType as
             | 'dependencies'
             | 'optionalDependencies';
 
-          // TODO #7154
-          if (lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.depName!]) {
-            lockFileParsed.packages[''][depType]![lockUpdate.depName!] =
+          // TODO #22198
+          if (
+            lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.packageName!]
+          ) {
+            lockFileParsed.packages[''][depType]![lockUpdate.packageName!] =
               lockUpdate.newValue!;
           }
         });
@@ -167,12 +250,88 @@ export async function generateLockFile(
         err,
         type: 'npm',
       },
-      'lock file error'
+      'lock file error',
     );
     if (err.stderr?.includes('ENOSPC: no space left on device')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
     return { error: true, stderr: err.stderr };
   }
-  return { lockFile };
+  return { error: !lockFile, lockFile };
+}
+
+export function divideWorkspaceAndRootDeps(
+  lockFileDir: string,
+  lockUpdates: Upgrade[],
+): {
+  lockRootUpdates: Upgrade[];
+  lockWorkspacesUpdates: Upgrade[];
+  workspaces: Set<string>;
+  rootDeps: Set<string>;
+} {
+  const lockRootUpdates: Upgrade[] = []; // stores all upgrades which are present in root package.json
+  const lockWorkspacesUpdates: Upgrade[] = []; // stores all upgrades which are present in workspaces package.json
+  const workspaces = new Set<string>(); // name of all workspaces
+  const rootDeps = new Set<string>(); // packageName of all upgrades in root package.json (makes it check duplicate deps in root)
+
+  // divide the deps in two categories: workspace and root
+  for (const upgrade of lockUpdates) {
+    upgrade.managerData ??= {};
+    upgrade.managerData.packageKey = generatePackageKey(
+      upgrade.packageName!,
+      upgrade.newVersion!,
+    );
+    if (
+      upgrade.managerData.workspacesPackages?.length &&
+      is.string(upgrade.packageFile)
+    ) {
+      const workspacePatterns = upgrade.managerData.workspacesPackages; // glob pattern or directory name/path
+      const packageFileDir = trimSlashes(
+        upgrade.packageFile.replace('package.json', ''),
+      );
+
+      // workspaceDir = packageFileDir - lockFileDir
+      const workspaceDir = trimSlashes(packageFileDir.replace(lockFileDir, ''));
+
+      if (is.nonEmptyString(workspaceDir)) {
+        let workspaceName: string | undefined;
+        // compare workspaceDir to workspace patterns
+        // stop when the first match is found and
+        // add workspaceDir to workspaces set and upgrade object
+        for (const workspacePattern of workspacePatterns) {
+          const massagedPattern = (workspacePattern as string).replace(
+            /^\.\//,
+            '',
+          );
+          if (minimatch(massagedPattern).match(workspaceDir)) {
+            workspaceName = workspaceDir;
+            break;
+          }
+        }
+        if (workspaceName) {
+          if (
+            !rootDeps.has(upgrade.managerData.packageKey) // prevent same dep from existing in root and workspace
+          ) {
+            workspaces.add(workspaceName);
+            upgrade.workspace = workspaceName;
+            lockWorkspacesUpdates.push(upgrade);
+          }
+        } else {
+          logger.warn(
+            { workspacePatterns, workspaceDir },
+            'workspaceDir not found',
+          );
+        }
+        continue;
+      }
+    }
+    lockRootUpdates.push(upgrade);
+    rootDeps.add(upgrade.managerData.packageKey);
+  }
+
+  return { lockRootUpdates, lockWorkspacesUpdates, workspaces, rootDeps };
+}
+
+function generatePackageKey(packageName: string, version: string): string {
+  return `${packageName}@${version}`;
 }

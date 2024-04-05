@@ -7,7 +7,7 @@ describe('modules/manager/bazelisk/extract', () => {
       expect(res.deps).toEqual([
         {
           currentValue: '5.2.0',
-          datasource: 'github-releases',
+          datasource: 'github-tags',
           depName: 'bazel',
           packageName: 'bazelbuild/bazel',
         },
@@ -15,11 +15,11 @@ describe('modules/manager/bazelisk/extract', () => {
     });
 
     it('supports ranges', () => {
-      const res = extractPackageFile('5.2\n');
+      const res = extractPackageFile('5.2');
       expect(res.deps).toEqual([
         {
           currentValue: '5.2',
-          datasource: 'github-releases',
+          datasource: 'github-tags',
           depName: 'bazel',
           packageName: 'bazelbuild/bazel',
         },
@@ -31,7 +31,7 @@ describe('modules/manager/bazelisk/extract', () => {
       expect(res.deps).toEqual([
         {
           currentValue: 'latestn',
-          datasource: 'github-releases',
+          datasource: 'github-tags',
           depName: 'bazel',
           packageName: 'bazelbuild/bazel',
         },
@@ -43,7 +43,7 @@ describe('modules/manager/bazelisk/extract', () => {
       expect(res.deps).toEqual([
         {
           currentValue: '5.2.0',
-          datasource: 'github-releases',
+          datasource: 'github-tags',
           depName: 'bazel',
           packageName: 'bazelbuild/bazel',
         },

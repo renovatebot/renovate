@@ -38,7 +38,7 @@ export class DartVersionDatasource extends Datasource {
       for (const channel of this.channels) {
         const resp = (
           await this.http.getJson<DartResponse>(
-            `${registryUrl}/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F${channel}%2Frelease%2F&alt=json`
+            `${registryUrl}/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F${channel}%2Frelease%2F&alt=json`,
           )
         ).body;
         const releases = this.getReleasesFromResponse(channel, resp.prefixes);
@@ -53,7 +53,7 @@ export class DartVersionDatasource extends Datasource {
 
   private getReleasesFromResponse(
     channel: string,
-    prefixes: string[]
+    prefixes: string[],
   ): Release[] {
     return prefixes
       .map((prefix) => this.getVersionFromPrefix(prefix))

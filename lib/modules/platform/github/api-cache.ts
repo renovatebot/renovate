@@ -5,14 +5,6 @@ import type { ApiPageCache, ApiPageItem } from './types';
 export class ApiCache<T extends ApiPageItem> {
   constructor(private cache: ApiPageCache<T>) {}
 
-  /**
-   * @returns Date formatted to use in HTTP headers
-   */
-  get lastModified(): string | null {
-    const { lastModified } = this.cache;
-    return lastModified ? DateTime.fromISO(lastModified).toHTTP() : null;
-  }
-
   getItems(): T[] {
     const items = Object.values(this.cache.items);
     return items;

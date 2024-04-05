@@ -1,17 +1,17 @@
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import { logger } from '../../logger';
 import { stripEmojis } from '../../util/emoji';
+import { toSha256 } from '../../util/hash';
 import { regEx } from '../../util/regex';
 import { fromBase64 } from '../../util/string';
 import type { PrBodyStruct } from './types';
 
 export const prDebugDataRe = regEx(
-  /\n?<!--renovate-debug:(?<payload>.*?)-->\n?/
+  /\n?<!--renovate-debug:(?<payload>.*?)-->\n?/,
 );
 
 const renovateConfigHashRe = regEx(
-  /\n?<!--renovate-config-hash:(?<payload>.*?)-->\n?/
+  /\n?<!--renovate-config-hash:(?<payload>.*?)-->\n?/,
 );
 
 const prCheckboxRe = regEx(/- (?<checkbox>\[[\sx]]) <!-- rebase-check -->/);
@@ -31,7 +31,7 @@ export function hashBody(body: string | undefined): string {
   }
   result = stripEmojis(result);
   result = noWhitespaceOrHeadings(result);
-  result = hasha(result, { algorithm: 'sha256' });
+  result = toSha256(result);
   return result;
 }
 
@@ -54,7 +54,7 @@ export function getRenovateConfigHashPayload(body: string): string | undefined {
 }
 
 export function getPrBodyStruct(
-  input: string | undefined | null
+  input: string | undefined | null,
 ): PrBodyStruct {
   const body = input ?? '';
   const hash = hashBody(body);

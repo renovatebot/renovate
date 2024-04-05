@@ -10,10 +10,6 @@ describe('workers/repository/update/pr/body/config-description', () => {
       upgrades: [],
     };
 
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('renders stopUpdating=true', () => {
       const res = getPrConfigDescription({
         ...config,
@@ -21,7 +17,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
       });
 
       expect(res).toContain(
-        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`
+        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`,
       );
     });
 
@@ -32,7 +28,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
       });
 
       expect(res).toContain(
-        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`
+        `**Rebasing**: Never, or you tick the rebase/retry checkbox.`,
       );
     });
 
@@ -67,12 +63,25 @@ describe('workers/repository/update/pr/body/config-description', () => {
       expect(res).toContain(`At any time (no schedule defined).`);
     });
 
-    it('renders recreateClosed', () => {
+    it('renders recreateClosed=true', () => {
       const res = getPrConfigDescription({
         ...config,
         recreateClosed: true,
       });
       expect(res).toContain(`**Immortal**`);
+    });
+
+    it('does not render recreateClosed=false', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        recreateClosed: false,
+      });
+      expect(res).not.toContain(`**Immortal**`);
+    });
+
+    it('does not render recreateClosed=undefined', () => {
+      const res = getPrConfigDescription(config);
+      expect(res).not.toContain(`**Immortal**`);
     });
 
     it('renders singular', () => {
@@ -86,6 +95,16 @@ describe('workers/repository/update/pr/body/config-description', () => {
     it('renders automerge', () => {
       const res = getPrConfigDescription({ ...config, automerge: true });
       expect(res).toContain(`**Automerge**: Enabled.`);
+    });
+
+    it('renders blocked automerge', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        automergedPreviously: true,
+      });
+      expect(res).toContain(
+        `**Automerge**: Disabled because a matching PR was automerged previously.`,
+      );
     });
   });
 });

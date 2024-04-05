@@ -16,7 +16,6 @@ describe('util/exec/containerbase', () => {
   describe('isDynamicInstall()', () => {
     beforeEach(() => {
       GlobalConfig.reset();
-      delete process.env.BUILDPACK;
       delete process.env.CONTAINERBASE;
     });
 
@@ -50,7 +49,7 @@ describe('util/exec/containerbase', () => {
   describe('resolveConstraint()', () => {
     it('returns from config', async () => {
       expect(
-        await resolveConstraint({ toolName: 'composer', constraint: '1.1.0' })
+        await resolveConstraint({ toolName: 'composer', constraint: '1.1.0' }),
       ).toBe('1.1.0');
     });
 
@@ -73,7 +72,7 @@ describe('util/exec/containerbase', () => {
         releases: [{ version: '2.0.14-b.1' }, { version: '2.1.0-a.1' }],
       });
       expect(await resolveConstraint({ toolName: 'composer' })).toBe(
-        '2.1.0-a.1'
+        '2.1.0-a.1',
       );
     });
 
@@ -110,7 +109,7 @@ describe('util/exec/containerbase', () => {
 
     it('throws for unknown tools', async () => {
       await expect(resolveConstraint({ toolName: 'whoops' })).rejects.toThrow(
-        'Invalid tool to install: whoops'
+        'Invalid tool to install: whoops',
       );
     });
 
@@ -119,7 +118,7 @@ describe('util/exec/containerbase', () => {
         releases: [],
       });
       await expect(resolveConstraint({ toolName: 'composer' })).rejects.toThrow(
-        'No tool releases found.'
+        'No tool releases found.',
       );
     });
 
@@ -128,7 +127,7 @@ describe('util/exec/containerbase', () => {
         releases: [{ version: '1.2.3' }],
       });
       expect(
-        await resolveConstraint({ toolName: 'composer', constraint: '^3.1.0' })
+        await resolveConstraint({ toolName: 'composer', constraint: '^3.1.0' }),
       ).toBe('1.2.3');
     });
 
@@ -137,7 +136,7 @@ describe('util/exec/containerbase', () => {
         releases: [{ version: '1.2.3' }],
       });
       expect(
-        await resolveConstraint({ toolName: 'composer', constraint: 'whoops' })
+        await resolveConstraint({ toolName: 'composer', constraint: 'whoops' }),
       ).toBe('1.2.3');
     });
 
@@ -160,9 +159,80 @@ describe('util/exec/containerbase', () => {
           ],
         });
         expect(
-          await resolveConstraint({ toolName: 'python', constraint })
+          await resolveConstraint({ toolName: 'python', constraint }),
         ).toBe(expected);
-      }
+      },
+    );
+
+    it('removes pep440 ==', async () => {
+      expect(
+        await resolveConstraint({
+          toolName: 'pipenv',
+          constraint: '==2020.8.13',
+        }),
+      ).toBe('2020.8.13');
+    });
+
+    it.each`
+      version                             | expected
+      ${'>=2.5.0 <2.6.0'}                 | ${'2.5.1'}
+      ${'>=2.6.0-0.0.pre <2.7.0-0.0.pre'} | ${'2.6.0-0.0.pre'}
+      ${'>=2.8.0'}                        | ${'2.8.1'}
+      ${'<2.9.0-0.1.pre'}                 | ${'2.8.1'}
+      ${'2.10.0-0.2.pre'}                 | ${'2.10.0-0.2.pre'}
+      ${'>=2.11.0-0.1.pre'}               | ${'2.12.0-4.1.pre'}
+      ${'<=2.10.0'}                       | ${'2.8.1'}
+    `(
+      'supports flutter ranges "$version" => "$expected"',
+      async ({ version: constraint, expected }) => {
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [
+            { version: '2.5.0-1.0.pre', isStable: false },
+            { version: '2.5.0', isStable: true },
+            { version: '2.5.1', isStable: true },
+            { version: '2.6.0-0.0.pre', isStable: false },
+            { version: '2.8.0', isStable: true },
+            { version: '2.8.1', isStable: true },
+            { version: '2.9.0-0.1.pre', isStable: false },
+            { version: '2.12.0-4.1.pre', isStable: false },
+          ],
+        });
+        expect(
+          await resolveConstraint({ toolName: 'flutter', constraint }),
+        ).toBe(expected);
+      },
+    );
+
+    it.each`
+      version              | expected
+      ${'>2.17.0 <2.17.8'} | ${'2.17.7'}
+      ${'>2.19.0'}         | ${'2.19.0-81.0.dev'}
+      ${'<=2.17.5'}        | ${'2.17.5'}
+      ${'<2.17.5'}         | ${'2.19.0-81.0.dev'}
+      ${'<2.17.6'}         | ${'2.17.5'}
+    `(
+      'supports dart ranges "$version" => "$expected"',
+      async ({ version: constraint, expected }) => {
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [
+            { version: '2.17.0-69.2.beta', isStable: false },
+            { version: '2.17.0-7.0.dev', isStable: false },
+            { version: '2.17.5', isStable: true },
+            { version: '2.17.6', isStable: true },
+            { version: '2.17.7', isStable: true },
+            { version: '2.18.0', isStable: true },
+            { version: '2.18.0-44.1.beta', isStable: false },
+            { version: '2.18.0-99.0.dev', isStable: false },
+            { version: '2.18.4', isStable: true },
+            { version: '2.18.5', isStable: true },
+            { version: '2.19.0-255.2.beta', isStable: false },
+            { version: '2.19.0-81.0.dev', isStable: false },
+          ],
+        });
+        expect(await resolveConstraint({ toolName: 'dart', constraint })).toBe(
+          expected,
+        );
+      },
     );
   });
 

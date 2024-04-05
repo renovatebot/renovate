@@ -9,7 +9,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[md]": {
-    "editor.wordBasedSuggestions": false
+    "editor.wordBasedSuggestions": "off"
   },
   "files.associations": {
     "Dockerfile.*": "dockerfile",
@@ -17,6 +17,10 @@
   },
   "omnisharp.autoStart": false,
   "jest.autoRun": "off",
-  "jest.jestCommandLine": "yarn jest",
-  "npm.packageManager": "yarn"
+  "jest.jestCommandLine": "pnpm jest",
+  "npm.packageManager": "pnpm",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
 }

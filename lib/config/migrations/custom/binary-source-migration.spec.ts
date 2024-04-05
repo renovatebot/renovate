@@ -8,7 +8,7 @@ describe('config/migrations/custom/binary-source-migration', () => {
       },
       {
         binarySource: 'global',
-      }
+      },
     );
   });
 });

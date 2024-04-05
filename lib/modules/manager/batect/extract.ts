@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { parseSingleYaml } from '../../../util/yaml';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
@@ -17,11 +17,11 @@ import type {
 } from './types';
 
 function loadConfig(content: string): BatectConfig {
-  const config = load(content);
+  const config = parseSingleYaml(content);
 
   if (typeof config !== 'object') {
     throw new Error(
-      `Configuration file does not contain a YAML object (it is ${typeof config}).`
+      `Configuration file does not contain a YAML object (it is ${typeof config}).`,
     );
   }
 
@@ -55,7 +55,7 @@ function extractImageDependencies(config: BatectConfig): PackageDependency[] {
 }
 
 function includeIsGitInclude(
-  include: BatectInclude
+  include: BatectInclude,
 ): include is BatectGitInclude {
   return typeof include === 'object' && include.type === 'git';
 }
@@ -92,14 +92,14 @@ function includeIsStringFileInclude(include: BatectInclude): include is string {
 }
 
 function includeIsObjectFileInclude(
-  include: BatectInclude
+  include: BatectInclude,
 ): include is BatectFileInclude {
   return typeof include === 'object' && include.type === 'file';
 }
 
 function extractReferencedConfigFiles(
   config: BatectConfig,
-  fileName: string
+  fileName: string,
 ): string[] {
   if (config.include === undefined) {
     return [];
@@ -119,9 +119,9 @@ function extractReferencedConfigFiles(
 
 export function extractPackageFile(
   content: string,
-  fileName: string
+  packageFile: string,
 ): ExtractionResult | null {
-  logger.trace(`batect.extractPackageFile() fileName: ${fileName}`);
+  logger.trace(`batect.extractPackageFile(${packageFile})`);
 
   try {
     const config = loadConfig(content);
@@ -132,14 +132,14 @@ export function extractPackageFile(
 
     const referencedConfigFiles = extractReferencedConfigFiles(
       config,
-      fileName
+      packageFile,
     );
 
     return { deps, referencedConfigFiles };
   } catch (err) {
-    logger.warn(
-      { err, fileName },
-      'Extracting dependencies from Batect configuration file failed'
+    logger.debug(
+      { err, packageFile },
+      'Extracting dependencies from Batect configuration file failed',
     );
 
     return null;
@@ -148,7 +148,7 @@ export function extractPackageFile(
 
 export async function extractAllPackageFiles(
   config: ExtractConfig,
-  packageFiles: string[]
+  packageFiles: string[],
 ): Promise<PackageFile[] | null> {
   const filesToExamine = new Set<string>(packageFiles);
   const filesAlreadyExamined = new Set<string>();
@@ -160,7 +160,7 @@ export async function extractAllPackageFiles(
     filesAlreadyExamined.add(packageFile);
 
     const content = await readLocalFile(packageFile, 'utf8');
-    // TODO #7154
+    // TODO #22198
     const result = extractPackageFile(content!, packageFile);
 
     if (result !== null) {

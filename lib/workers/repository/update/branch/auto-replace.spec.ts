@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../../test/fixtures';
-import { getConfig } from '../../../../../test/util';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { extractPackageFile } from '../../../../modules/manager/html';
@@ -9,10 +9,10 @@ import { doAutoReplace } from './auto-replace';
 
 const sampleHtml = Fixtures.get(
   'sample.html',
-  `../../../../modules/manager/html`
+  `../../../../modules/manager/html`,
 );
 
-jest.mock('fs-extra', () => Fixtures.fsExtra());
+jest.mock('../../../../util/fs');
 
 describe('workers/repository/update/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
@@ -26,7 +26,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     beforeEach(() => {
-      // TODO: fix types (#7154)
+      // TODO: fix types (#22198)
       upgrade = getConfig() as BranchUpgradeConfig;
       upgrade.packageFile = 'test';
       upgrade.manager = 'html';
@@ -39,7 +39,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(
         upgrade,
         'existing content',
-        reuseExistingBranch
+        reuseExistingBranch,
       );
       expect(res).toBeNull();
     });
@@ -47,6 +47,29 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('rebases if the deps to update has changed', async () => {
       upgrade.baseDeps = extractPackageFile(sampleHtml)?.deps;
       upgrade.baseDeps![0].currentValue = '1.0.0';
+      reuseExistingBranch = true;
+      const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
+      expect(res).toBeNull();
+    });
+
+    // for coverage
+    it('uses depName or packageName', async () => {
+      upgrade.baseDeps = [
+        {
+          datasource: 'cdnjs',
+          packageName: 'react-router/react-router-test.min.js',
+          currentValue: '4.2.1',
+          replaceString:
+            '<script src=" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js">',
+        },
+        {
+          datasource: 'cdnjs',
+          depName: 'react-router-test',
+          currentValue: '4.1.1',
+          replaceString:
+            '<script src=" https://cdnjs.cloudflare.com/ajax/libs/react-router/4.3.1/react-router.min.js">',
+        },
+      ];
       reuseExistingBranch = true;
       const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
       expect(res).toBeNull();
@@ -97,7 +120,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(
         upgrade,
         srcAlreadyUpdated,
-        reuseExistingBranch
+        reuseExistingBranch,
       );
       expect(res).toEqual(srcAlreadyUpdated);
     });
@@ -132,7 +155,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(
         upgrade,
         'wrong source',
-        reuseExistingBranch
+        reuseExistingBranch,
       );
       expect(res).toBe('wrong source');
     });
@@ -152,7 +175,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString = script;
       const res = await doAutoReplace(upgrade, script, reuseExistingBranch);
       expect(res).toBe(
-        `<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js" integrity="sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" crossorigin="anonymous">`
+        `<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.js" integrity="sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" crossorigin="anonymous">`,
       );
     });
 
@@ -174,7 +197,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
         '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       expect(res).toBe(
-        `FROM node:8.11.4-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS node`
+        `FROM node:8.11.4-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS node`,
       );
     });
 
@@ -210,7 +233,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
           "file: 'ci-include-docker-test-base.yml'\n" +
           "- project: 'pipeline-solutions/gitlab/fragments/docker-lint'\n" +
           'ref: 2-4-1\n' +
-          "file: 'ci-include-docker-lint-base.yml'"
+          "file: 'ci-include-docker-lint-base.yml'",
       );
     });
 
@@ -230,6 +253,24 @@ describe('workers/repository/update/branch/auto-replace', () => {
         'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
       ];
       const res = doAutoReplace(upgrade, yml, reuseExistingBranch);
+      await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
+    });
+
+    it('fails with digest mismatch', async () => {
+      const dockerfile = codeBlock`
+        FROM java:11@sha256-1234 as build
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'java';
+      upgrade.currentValue = '11';
+      upgrade.currentDigest = 'sha256-1234';
+      upgrade.depIndex = 0;
+      upgrade.newName = 'java';
+      upgrade.newValue = '11';
+      upgrade.newDigest = 'sha256-5678';
+      upgrade.packageFile = 'Dockerfile';
+      const res = doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
     });
 
@@ -318,7 +359,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -340,7 +381,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -364,7 +405,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -387,7 +428,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -406,7 +447,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -429,7 +470,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -451,7 +492,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         gemfile
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -470,7 +511,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         build
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -491,7 +532,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         cargo
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -514,7 +555,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -532,7 +573,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         podfile
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -556,7 +597,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         json
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -579,7 +620,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         edn
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -602,7 +643,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -621,7 +662,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         dockerfile
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -643,7 +684,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
         dockerfile
           .replace(upgrade.depName, upgrade.newName)
           .replace(upgrade.currentValue, upgrade.newValue)
-          .replace(upgrade.currentDigest, upgrade.newDigest)
+          .replace(upgrade.currentDigest, upgrade.newDigest),
       );
     });
 
@@ -666,7 +707,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -685,7 +726,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -709,7 +750,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -727,7 +768,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         txt
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -753,7 +794,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         js
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -787,7 +828,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
           'xml2js': '0.2.0',
           'connect': '2.7.10'
         });
-      `
+      `,
       );
     });
 
@@ -828,7 +869,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         exs
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -856,7 +897,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         json
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -878,7 +919,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         yml
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -901,7 +942,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         tf
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -909,7 +950,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const tf = codeBlock`
         module "vpc" {
           source  = "terraform-aws-modules/vpc/aws"
-         version = "3.14.2"
+          version = "3.14.2"
         }
       `;
       upgrade.manager = 'terraform';
@@ -924,7 +965,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         tf
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -945,7 +986,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         tf
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -963,7 +1004,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toBe(
         tf
           .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
+          .replace(upgrade.currentValue, upgrade.newValue),
       );
     });
 
@@ -987,7 +1028,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
           FROM ubuntu:16.04
           FROM ubuntu:20.04
           FROM alpine:3.16
-        `
+        `,
       );
     });
 
@@ -1011,7 +1052,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
           FROM ubuntu:16.04
           FROM alpine:3.16
           FROM ubuntu:18.04
-        `
+        `,
       );
     });
 
@@ -1035,7 +1076,297 @@ describe('workers/repository/update/branch/auto-replace', () => {
           FROM notUbuntu:18.04
           FROM alsoNotUbuntu:18.04
           FROM alpine:3.16
-        `
+        `,
+      );
+    });
+
+    it('docker: updates with pinDigest enabled but no currentDigest value', async () => {
+      const dockerfile = codeBlock`
+        FROM ubuntu:18.04
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.updateType = 'replacement';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'ubuntu';
+      upgrade.currentValue = '18.04';
+      upgrade.currentDigest = undefined;
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'ubuntu:18.04';
+      upgrade.newName = 'alpine';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM alpine:3.16
+        `,
+      );
+    });
+
+    it('docker: updates with pinDigest enabled and a currentDigest value', async () => {
+      const dockerfile = codeBlock`
+        FROM ubuntu:18.04@sha256:q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.updateType = 'replacement';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'ubuntu';
+      upgrade.currentValue = '18.04';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'ubuntu:18.04@sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.newName = 'alpine';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM alpine:3.16@sha256:p0o9i8u7z6t5r4e3w2q1
+        `,
+      );
+    });
+
+    it('autoReplaceGlobalMatch: throws error when globally replacing recurring values across version and digests', async () => {
+      const dockerfile = codeBlock`
+        FROM java:6@sha256:q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'java';
+      upgrade.currentValue = '6';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'java:6@sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.newName = 'eclipse-temurin';
+      upgrade.newValue = '11';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
+    });
+
+    it('autoReplaceGlobalMatch: updates when replacing first match only of recurring values across version and digests', async () => {
+      const dockerfile = codeBlock`
+        FROM java:6@sha256:q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.autoReplaceGlobalMatch = false;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'java';
+      upgrade.currentValue = '6';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'java:6@sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.newName = 'eclipse-temurin';
+      upgrade.newValue = '11';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM eclipse-temurin:11@sha256:p0o9i8u7z6t5r4e3w2q1
+        `,
+      );
+    });
+
+    it('regex: updates with pinDigest enabled but no currentDigest value', async () => {
+      const yml = 'image: "some.url.com/my-repository:1.0"';
+      upgrade.manager = 'regex';
+      upgrade.updateType = 'replacement';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'some.url.com/my-repository';
+      upgrade.currentValue = '1.0';
+      upgrade.currentDigest = undefined;
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'image: "some.url.com/my-repository:1.0"';
+      upgrade.packageFile = 'k8s/base/defaults.yaml';
+      upgrade.newName = 'some.other.url.com/some-new-repo';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.matchStrings = [
+        'image:\\s*?\\\'?\\"?(?<depName>[^:\\\'\\"]+):(?<currentValue>[^@\\\'\\"]+)@?(?<currentDigest>[^\\s\\\'\\"]+)?\\"?\\\'?\\s*',
+      ];
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe('image: "some.other.url.com/some-new-repo:3.16"');
+    });
+
+    it('regex: updates with pinDigest enabled and a currentDigest value', async () => {
+      const yml =
+        'image: "some.url.com/my-repository:1.0@sha256:q1w2e3r4t5z6u7i8o9p0"';
+      upgrade.manager = 'regex';
+      upgrade.updateType = 'replacement';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'some.url.com/my-repository';
+      upgrade.currentValue = '1.0';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'image: "some.url.com/my-repository:1.0@sha256:q1w2e3r4t5z6u7i8o9p0"';
+      upgrade.packageFile = 'k8s/base/defaults.yaml';
+      upgrade.newName = 'some.other.url.com/some-new-repo';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.matchStrings = [
+        'image:\\s*[\\\'\\"]?(?<depName>[^:]+):(?<currentValue>[^@]+)?@?(?<currentDigest>[^\\s\\\'\\"]+)?[\\\'\\"]?\\s*',
+      ];
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(
+        'image: "some.other.url.com/some-new-repo:3.16@sha256:p0o9i8u7z6t5r4e3w2q1"',
+      );
+    });
+
+    it('github-actions: updates with newValue only', async () => {
+      const githubAction = codeBlock`
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v1.0.0
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.updateType = 'replacement';
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
+      upgrade.depName = 'actions/checkout';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.currentDigest = undefined;
+      upgrade.currentDigestShort = undefined;
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'actions/checkout@v1.0.0';
+      upgrade.newValue = 'v2.0.0';
+      upgrade.newDigest = undefined;
+      upgrade.packageFile = 'workflows/build.yml';
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch,
+      );
+      expect(res).toBe(
+        codeBlock`
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v2.0.0
+        `,
+      );
+    });
+
+    it('github-actions: updates with newValue and newDigest', async () => {
+      const githubAction = codeBlock`
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v1.0.0
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.updateType = 'replacement';
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
+      upgrade.depName = 'actions/checkout';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.currentDigest = undefined;
+      upgrade.currentDigestShort = undefined;
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'actions/checkout@v1.0.0';
+      upgrade.newValue = 'v2.0.0';
+      upgrade.newDigest = '1cf887';
+      upgrade.packageFile = 'workflows/build.yml';
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch,
+      );
+      expect(res).toBe(
+        codeBlock`
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@1cf887 # v2.0.0
+        `,
+      );
+    });
+
+    it('github-actions: updates with pinDigest enabled but no currentDigest value', async () => {
+      const githubAction = codeBlock`
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v1.0.0
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.updateType = 'replacement';
+      upgrade.pinDigests = true;
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
+      upgrade.depName = 'actions/checkout';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.currentDigest = undefined;
+      upgrade.currentDigestShort = undefined;
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'actions/checkout@v1.0.0';
+      upgrade.newName = 'some-other-action/checkout';
+      upgrade.newValue = 'v2.0.0';
+      upgrade.newDigest = '1cf887';
+      upgrade.packageFile = 'workflows/build.yml';
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch,
+      );
+      expect(res).toBe(
+        codeBlock`
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: some-other-action/checkout@v2.0.0
+        `,
+      );
+    });
+
+    it('github-actions: updates with pinDigest enabled and a currentDigest value', async () => {
+      const githubAction = codeBlock`
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@2485f4 # tag=v1.0.0
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.updateType = 'replacement';
+      upgrade.pinDigests = true;
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
+      upgrade.depName = 'actions/checkout';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.currentDigestShort = '2485f4';
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'actions/checkout@2485f4 # tag=v1.0.0';
+      upgrade.newName = 'some-other-action/checkout';
+      upgrade.newValue = 'v2.0.0';
+      upgrade.newDigest = '1cf887';
+      upgrade.packageFile = 'workflow.yml';
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch,
+      );
+      expect(res).toBe(
+        codeBlock`
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: some-other-action/checkout@1cf887 # tag=v2.0.0
+        `,
       );
     });
   });

@@ -1,4 +1,5 @@
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import type { Category } from '../../../constants';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -8,10 +9,11 @@ import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
 
 export { updateArtifacts } from './lockfile';
+export { updateLockedDependency } from './lockfile/update-locked';
 export { extractPackageFile } from './extract';
 
 export const supportedDatasources = [
-  BitBucketTagsDatasource.id,
+  BitbucketTagsDatasource.id,
   DockerDatasource.id,
   GitTagsDatasource.id,
   GithubTagsDatasource.id,
@@ -27,3 +29,5 @@ export const defaultConfig = {
   fileMatch: ['\\.tf$'],
   pinDigests: false,
 };
+
+export const categories: Category[] = ['iac', 'terraform'];

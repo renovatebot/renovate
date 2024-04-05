@@ -1,4 +1,6 @@
+import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
+import type { PackageCacheNamespace } from '../../../cache/package/types';
 import type {
   GithubDatasourceItem,
   GithubGraphqlCacheRecord,
@@ -11,7 +13,7 @@ import { isDateExpired } from '../util';
  * and reconciling them with newly obtained ones from paginated queries.
  */
 export abstract class AbstractGithubGraphqlCacheStrategy<
-  GithubItem extends GithubDatasourceItem
+  GithubItem extends GithubDatasourceItem,
 > implements GithubGraphqlCacheStrategy<GithubItem>
 {
   /**
@@ -22,24 +24,36 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   /**
    * The time which is used during single cache access cycle.
    */
-  protected readonly now = DateTime.now();
+  protected readonly now = DateTime.now().toUTC();
 
   /**
    * Set of all versions which were reconciled
    * during the current cache access cycle.
    */
-  private readonly reconciledVersions = new Set<string>();
+  private reconciledVersions: Set<string> | undefined;
 
   /**
    * These fields will be persisted.
    */
   private items: Record<string, GithubItem> | undefined;
-  protected createdAt = this.now;
-  protected updatedAt = this.now;
+  protected createdAt: DateTime = this.now;
+
+  /**
+   * This flag indicates whether there is any new or updated items
+   */
+  protected hasNovelty = false;
+
+  /**
+   * Loading and persisting data is delegated to the concrete strategy.
+   */
+  abstract load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined>;
+  abstract persist(
+    cacheRecord: GithubGraphqlCacheRecord<GithubItem>,
+  ): Promise<void>;
 
   constructor(
-    protected readonly cacheNs: string,
-    protected readonly cacheKey: string
+    protected readonly cacheNs: PackageCacheNamespace,
+    protected readonly cacheKey: string,
   ) {}
 
   /**
@@ -53,22 +67,20 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
 
     let result: GithubGraphqlCacheRecord<GithubItem> = {
       items: {},
-      createdAt: this.createdAt.toISO(),
-      updatedAt: this.updatedAt.toISO(),
+      createdAt: this.createdAt.toISO()!,
     };
 
     const storedData = await this.load();
     if (storedData) {
       const cacheTTLDuration = {
-        days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
+        hours: AbstractGithubGraphqlCacheStrategy.cacheTTLDays * 24,
       };
       if (!isDateExpired(this.now, storedData.createdAt, cacheTTLDuration)) {
         result = storedData;
       }
     }
 
-    this.createdAt = DateTime.fromISO(result.createdAt);
-    this.updatedAt = DateTime.fromISO(result.updatedAt);
+    this.createdAt = DateTime.fromISO(result.createdAt).toUTC();
     this.items = result.items;
     return this.items;
   }
@@ -79,7 +91,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    */
   private isStabilized(item: GithubItem): boolean {
     const unstableDuration = {
-      days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
+      hours: AbstractGithubGraphqlCacheStrategy.cacheTTLDays * 24,
     };
     return isDateExpired(this.now, item.releaseTimestamp, unstableDuration);
   }
@@ -95,16 +107,26 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     let isPaginationDone = false;
     for (const item of items) {
       const { version } = item;
+      const oldItem = cachedItems[version];
 
       // If we reached previously stored item that is stabilized,
       // we assume the further pagination will not yield any new items.
-      const oldItem = cachedItems[version];
+      //
+      // However, we don't break the loop here, allowing to reconcile
+      // the entire page of items. This protects us from unusual cases
+      // when release authors intentionally break the timeline. Therefore,
+      // while it feels appealing to break early, please don't do that.
       if (oldItem && this.isStabilized(oldItem)) {
         isPaginationDone = true;
-        break;
+      }
+
+      // Check if item is new or updated
+      if (!oldItem || !dequal(oldItem, item)) {
+        this.hasNovelty = true;
       }
 
       cachedItems[version] = item;
+      this.reconciledVersions ??= new Set();
       this.reconciledVersions.add(version);
     }
 
@@ -116,37 +138,36 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    * Handle removed items for packages that are not stabilized
    * and return the list of all items.
    */
-  async finalize(): Promise<GithubItem[]> {
+  async finalizeAndReturn(): Promise<GithubItem[]> {
     const cachedItems = await this.getItems();
-    const resultItems: Record<string, GithubItem> = {};
+    let resultItems: Record<string, GithubItem>;
 
-    for (const [version, item] of Object.entries(cachedItems)) {
-      if (this.isStabilized(item) || this.reconciledVersions.has(version)) {
-        resultItems[version] = item;
+    let hasDeletedItems = false;
+    if (this.reconciledVersions) {
+      resultItems = {};
+      for (const [version, item] of Object.entries(cachedItems)) {
+        if (this.reconciledVersions.has(version) || this.isStabilized(item)) {
+          resultItems[version] = item;
+        } else {
+          hasDeletedItems = true;
+        }
       }
+    } else {
+      resultItems = cachedItems;
     }
 
-    await this.store(resultItems);
+    if (this.hasNovelty || hasDeletedItems) {
+      await this.store(resultItems);
+    }
+
     return Object.values(resultItems);
   }
 
-  /**
-   * Update `updatedAt` field and persist the data.
-   */
   private async store(cachedItems: Record<string, GithubItem>): Promise<void> {
     const cacheRecord: GithubGraphqlCacheRecord<GithubItem> = {
       items: cachedItems,
-      createdAt: this.createdAt.toISO(),
-      updatedAt: this.now.toISO(),
+      createdAt: this.createdAt.toISO()!,
     };
     await this.persist(cacheRecord);
   }
-
-  /**
-   * Loading and persisting data is delegated to the concrete strategy.
-   */
-  abstract load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined>;
-  abstract persist(
-    cacheRecord: GithubGraphqlCacheRecord<GithubItem>
-  ): Promise<void>;
 }

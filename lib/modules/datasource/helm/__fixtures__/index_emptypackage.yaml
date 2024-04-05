@@ -1,0 +1,19 @@
+apiVersion: v1
+entries:
+  aerospike: []
+  ambassador:
+  - apiVersion: v1
+    appVersion: 0.70.1
+    created: 2019-06-02T08:56:36.119470813Z
+    description: A Helm chart for Datawire Ambassador
+    digest: 880002d74accfc9dab1debcc78c134fb4989e73ff84b137ce7aa92bf4d726297
+    engine: gotpl
+    home: https://www.getambassador.io/
+    icon: https://www.getambassador.io/images/logo.png
+    name: ambassador
+    sources:
+    - https://github.com/datawire/ambassador
+    - https://github.com/prometheus/statsd_exporter
+    urls:
+    - https://charts.helm.sh/stable/packages/ambassador-2.7.0.tgz
+    version: 2.7.0

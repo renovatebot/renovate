@@ -2,12 +2,8 @@ import JSON5 from 'json5';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
-import {
-  checkoutBranch,
-  getFile,
-  isBranchModified,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
+import { getFile } from '../../../../util/git';
 import { quickStringify } from '../../../../util/stringify';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
@@ -16,11 +12,11 @@ import type { MigratedData } from './migrated-data';
 
 export async function rebaseMigrationBranch(
   config: RenovateConfig,
-  migratedConfigData: MigratedData
+  migratedConfigData: MigratedData,
 ): Promise<string | null> {
   logger.debug('Checking if migration branch needs rebasing');
   const branchName = getMigrationBranchName(config);
-  if (await isBranchModified(branchName)) {
+  if (await scm.isBranchModified(branchName)) {
     logger.debug('Migration branch has been edited and cannot be rebased');
     return null;
   }
@@ -42,15 +38,15 @@ export async function rebaseMigrationBranch(
 
   const commitMessageFactory = new ConfigMigrationCommitMessageFactory(
     config,
-    configFileName
+    configFileName,
   );
   const commitMessage = commitMessageFactory.getCommitMessage();
 
-  await checkoutBranch(config.defaultBranch!);
-  contents = await MigratedDataFactory.applyPrettierFormatting(
-    migratedConfigData
-  );
-  return commitAndPush({
+  await scm.checkoutBranch(config.defaultBranch!);
+  contents =
+    await MigratedDataFactory.applyPrettierFormatting(migratedConfigData);
+  return scm.commitAndPush({
+    baseBranch: config.baseBranch,
     branchName,
     files: [
       {
@@ -79,5 +75,8 @@ export function jsonStripWhitespaces(json: string | null): string | null {
    *
    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
    */
-  return quickStringify(JSON5.parse(json)) ?? null;
+  return (
+    quickStringify(JSON5.parse(json)) ??
+    /* istanbul ignore next: should never happen */ null
+  );
 }

@@ -2,14 +2,18 @@ import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
 export function extractPackageFile(
   content: string,
-  _filename: string,
-  config: ExtractConfig
-): PackageFile | null {
-  logger.trace('ansible.extractPackageFile()');
+  packageFile: string,
+  config: ExtractConfig,
+): PackageFileContent | null {
+  logger.trace(`ansible.extractPackageFile(${packageFile})`);
   let deps: PackageDependency[] = [];
   const re = regEx(/^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);
   for (const line of content.split(newlineRegex)) {
@@ -23,7 +27,7 @@ export function extractPackageFile(
           currentValue: dep.currentValue,
           currentDigest: dep.currentDigest,
         },
-        'Docker image inside ansible'
+        'Docker image inside ansible',
       );
       dep.versioning = dockerVersioning.id;
       deps.push(dep);

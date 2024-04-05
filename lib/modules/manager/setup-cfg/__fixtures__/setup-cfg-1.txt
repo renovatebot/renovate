@@ -17,6 +17,8 @@ install_requires =
 
     requests[security] ~=2.18
     compact~=1.2.3;python>'3.10'
+install_requires= 
+    responses >=2.27.0
 
 setup_requires =
     six ~=1.4

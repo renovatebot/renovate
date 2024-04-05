@@ -65,14 +65,14 @@ export function matches(version: string, range: string): boolean {
 
 export function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return npm.getSatisfyingVersion(versions, normalizeValue(range));
 }
 
 export function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return npm.minSatisfyingVersion(versions, normalizeValue(range));
 }
@@ -85,6 +85,7 @@ export const api: VersioningApi = {
   matches,
   getSatisfyingVersion,
   minSatisfyingVersion,
+  allowUnstableMajorUpgrades: true,
 };
 
 export default api;

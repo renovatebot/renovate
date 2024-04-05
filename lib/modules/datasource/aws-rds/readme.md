@@ -29,9 +29,9 @@ Read the [AWS RDS IAM reference](https://docs.aws.amazon.com/service-authorizati
 
 **Usage**
 
-Because Renovate has no manager for the AWS RDS datasource, you need to help Renovate by configuring the regex manager to identify the RDS dependencies you want updated.
+Because Renovate has no manager for the AWS RDS datasource, you need to help Renovate by configuring the custom manager to identify the RDS dependencies you want updated.
 
-When configuring the regex manager, you have to pass a [filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-rds/interfaces/describedbengineversionscommandinput.html#filters) as minified JSON as the `packageName`.
+When configuring the custom manager, you have to pass a [filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-rds/interfaces/describedbengineversionscommandinput.html#filters) as minified JSON as the `packageName`.
 For example:
 
 ```yaml
@@ -53,12 +53,13 @@ For example:
 [{"Name":"engine","Values":["mysql"]},{"Name":"engine-version","Values":["5.7"]}]
 ```
 
-Here's an example of using the regex manager to configure this datasource:
+Here's an example of using the custom manager to configure this datasource:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["\\.yaml$"],
       "matchStrings": [
         ".*amiFilter=(?<lookupName>.+?)[ ]*\n[ ]*(?<depName>[a-zA-Z0-9-_:]*)[ ]*?:[ ]*?[\"|']?(?<currentValue>[.\\d]+)[\"|']?.*"

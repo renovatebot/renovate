@@ -11,7 +11,7 @@ import type {
 export function updateAtPosition(
   fileContent: string,
   upgrade: Upgrade,
-  endingAnchor: string
+  endingAnchor: string,
 ): string | null {
   const { depName, currentValue, newValue, fileReplacePosition } = upgrade;
   const leftPart = fileContent.slice(0, fileReplacePosition);
@@ -24,7 +24,7 @@ export function updateAtPosition(
     return fileContent;
   }
   if (version === currentValue || upgrade.groupName) {
-    // TODO: validate newValue (#7154)
+    // TODO: validate newValue (#22198)
     const replacedPart = versionPart.replace(version, newValue!);
     return leftPart + replacedPart + restPart;
   }
@@ -55,24 +55,19 @@ export function updateDependency({
 
 export function bumpPackageVersion(
   content: string,
-  currentValue: string | undefined,
-  bumpVersion: ReleaseType | string
+  currentValue: string,
+  bumpVersion: ReleaseType,
 ): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
-    'Checking if we should bump pom.xml version'
+    'Checking if we should bump pom.xml version',
   );
   let bumpedContent = content;
-
-  if (!currentValue) {
-    logger.warn('Unable to bump pom.xml version, pom.xml has no version');
-    return { bumpedContent };
-  }
 
   if (!semver.valid(currentValue)) {
     logger.warn(
       { currentValue },
-      'Unable to bump pom.xml version, not a valid semver'
+      'Unable to bump pom.xml version, not a valid semver',
     );
     return { bumpedContent };
   }
@@ -83,7 +78,7 @@ export function bumpPackageVersion(
     const startTagPosition = versionNode.startTagPosition;
     const versionPosition = content.indexOf(versionNode.val, startTagPosition);
 
-    const newPomVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
+    const newPomVersion = semver.inc(currentValue, bumpVersion);
     if (!newPomVersion) {
       throw new Error('semver inc failed');
     }
@@ -93,7 +88,7 @@ export function bumpPackageVersion(
       content,
       versionPosition,
       currentValue,
-      newPomVersion
+      newPomVersion,
     );
 
     if (bumpedContent === content) {
@@ -108,7 +103,7 @@ export function bumpPackageVersion(
         currentValue,
         bumpVersion,
       },
-      'Failed to bumpVersion'
+      'Failed to bumpVersion',
     );
   }
   return { bumpedContent };

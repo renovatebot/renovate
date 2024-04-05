@@ -1,5 +1,0 @@
-{
-  "*.md": "markdownlint-cli2-fix",
-  "**/*.{ts,js,mjs,cjs}": "eslint --cache --fix",
-  "*": "prettier --cache --ignore-unknown --write"
-}

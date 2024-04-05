@@ -10,7 +10,7 @@ import type { PreCommitConfig, PreCommitDependency } from './types';
  *     rev: v1.0.0
  */
 export function matchesPrecommitConfigHeuristic(
-  data: unknown
+  data: unknown,
 ): data is PreCommitConfig {
   return !!(data && typeof data === 'object' && hasKey('repos', data));
 }
@@ -23,7 +23,7 @@ export function matchesPrecommitConfigHeuristic(
  *     rev: v1.0.0
  */
 export function matchesPrecommitDependencyHeuristic(
-  data: unknown
+  data: unknown,
 ): data is PreCommitDependency {
   return !!(
     data &&

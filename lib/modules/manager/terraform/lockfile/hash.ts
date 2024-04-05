@@ -1,7 +1,12 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import extract from 'extract-zip';
 import upath from 'upath';
 import { logger } from '../../../../logger';
+import {
+  coerceArray,
+  deduplicateArray,
+  isNotNullOrUndefined,
+} from '../../../../util/array';
 import { cache } from '../../../../util/cache/package/decorator';
 import * as fs from '../../../../util/fs';
 import { ensureCacheDir } from '../../../../util/fs';
@@ -32,7 +37,7 @@ export class TerraformProviderHash {
 
       // add double space, the filename and a new line char
       rootHash.update('  ');
-      const fileName = file.replace(regEx(/^.*[\\/]/), '');
+      const fileName = file.replace(regEx(/^.*[/]/), '');
       rootHash.update(fileName);
       rootHash.update('\n');
     }
@@ -42,7 +47,7 @@ export class TerraformProviderHash {
 
   static async hashOfZipContent(
     zipFilePath: string,
-    extractPath: string
+    extractPath: string,
   ): Promise<string> {
     await extract(zipFilePath, { dir: extractPath });
     const files = await fs.listCacheDir(extractPath);
@@ -65,12 +70,12 @@ export class TerraformProviderHash {
   })
   static async calculateSingleHash(
     build: TerraformBuild,
-    cacheDir: string
+    cacheDir: string,
   ): Promise<string> {
     const downloadFileName = upath.join(cacheDir, build.filename);
     const extractPath = upath.join(cacheDir, 'extract', build.filename);
     logger.trace(
-      `Downloading archive and generating hash for ${build.name}-${build.version}...`
+      `Downloading archive and generating hash for ${build.name}-${build.version}...`,
     );
     const readStream = TerraformProviderHash.http.stream(build.url);
     const writeStream = fs.createCacheWriteStream(downloadFileName);
@@ -81,7 +86,7 @@ export class TerraformProviderHash {
       const hash = await this.hashOfZipContent(downloadFileName, extractPath);
       logger.trace(
         { hash },
-        `Generated hash for ${build.name}-${build.version}`
+        `Generated hash for ${build.name}-${build.version}`,
       );
       return hash;
     } finally {
@@ -90,7 +95,9 @@ export class TerraformProviderHash {
     }
   }
 
-  static async calculateHashes(builds: TerraformBuild[]): Promise<string[]> {
+  static async calculateHashScheme1Hashes(
+    builds: TerraformBuild[],
+  ): Promise<string[]> {
     const cacheDir = await ensureCacheDir('./others/terraform');
 
     // for each build download ZIP, extract content and generate hash for all containing files
@@ -102,19 +109,39 @@ export class TerraformProviderHash {
   static async createHashes(
     registryURL: string,
     repository: string,
-    version: string
+    version: string,
   ): Promise<string[] | null> {
     const builds = await TerraformProviderHash.terraformDatasource.getBuilds(
       registryURL,
       repository,
-      version
+      version,
     );
     if (!builds) {
       return null;
     }
-    const hashes = await TerraformProviderHash.calculateHashes(builds);
+
+    // check if the publisher uses one shasum file for all builds or separate ones
+    // we deduplicate to reduce the number of API calls
+    const shaUrls = deduplicateArray(
+      builds.map((build) => build.shasums_url).filter(isNotNullOrUndefined),
+    );
+
+    const zhHashes: string[] = [];
+    for (const shaUrl of shaUrls) {
+      const hashes =
+        await TerraformProviderHash.terraformDatasource.getZipHashes(shaUrl);
+
+      zhHashes.push(...coerceArray(hashes));
+    }
+
+    const h1Hashes =
+      await TerraformProviderHash.calculateHashScheme1Hashes(builds);
+
+    const hashes = [];
+    hashes.push(...h1Hashes.map((hash) => `h1:${hash}`));
+    hashes.push(...zhHashes.map((hash) => `zh:${hash}`));
 
     // sorting the hash alphabetically as terraform does this as well
-    return hashes.sort().map((hash) => `h1:${hash}`);
+    return hashes.sort();
   }
 }

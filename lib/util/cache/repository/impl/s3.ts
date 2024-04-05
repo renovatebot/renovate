@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import {
   GetObjectCommand,
   GetObjectCommandInput,
@@ -8,7 +8,7 @@ import {
 import { logger } from '../../../../logger';
 import { getS3Client, parseS3Url } from '../../../s3';
 import { streamToString } from '../../../streams';
-import type { RepoCacheRecord } from '../schemas';
+import type { RepoCacheRecord } from '../schema';
 import { RepoCacheBase } from './base';
 
 export class RepoCacheS3 extends RepoCacheBase {
@@ -32,14 +32,14 @@ export class RepoCacheS3 extends RepoCacheBase {
     };
     try {
       const { Body: res } = await this.s3Client.send(
-        new GetObjectCommand(s3Params)
+        new GetObjectCommand(s3Params),
       );
       if (res instanceof Readable) {
         logger.debug('RepoCacheS3.read() - success');
         return await streamToString(res);
       }
       logger.warn(
-        `RepoCacheS3.read() - failure - expecting Readable return type got '${typeof res}' type instead`
+        `RepoCacheS3.read() - failure - expecting Readable return type got '${typeof res}' type instead`,
       );
     } catch (err) {
       // https://docs.aws.amazon.com/AmazonS3/latest/API/ErrorResponses.html
@@ -78,7 +78,7 @@ export class RepoCacheS3 extends RepoCacheBase {
 
     logger.warn(
       { pathname },
-      'RepoCacheS3.getCacheFolder() - appending missing trailing slash to pathname'
+      'RepoCacheS3.getCacheFolder() - appending missing trailing slash to pathname',
     );
     return pathname + '/';
   }

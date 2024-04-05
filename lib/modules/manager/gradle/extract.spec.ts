@@ -1,6 +1,6 @@
 import { codeBlock, stripIndent } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
-import { fs, logger } from '../../../../test/util';
+import { fs, logger, partial } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
 import * as parser from './parser';
 import { extractAllPackageFiles } from '.';
@@ -8,30 +8,28 @@ import { extractAllPackageFiles } from '.';
 jest.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
-  // TODO: fix types, jest is using wrong overload (#7154)
-  fs.getFileContentMap.mockImplementation(
-    (fileNames: string[]): Promise<any> => {
-      const fileContentMap: Record<string, string | null> = {};
-      for (const fileName of fileNames) {
-        fileContentMap[fileName] = files?.[fileName];
-      }
-
-      return Promise.resolve(fileContentMap);
+  // TODO: fix types, jest is using wrong overload (#22198)
+  fs.getLocalFiles.mockImplementation((fileNames: string[]): Promise<any> => {
+    const fileContentMap: Record<string, string | null> = {};
+    for (const fileName of fileNames) {
+      fileContentMap[fileName] = files?.[fileName];
     }
-  );
+
+    return Promise.resolve(fileContentMap);
+  });
 
   fs.getSiblingFileName.mockImplementation(
     (existingFileNameWithPath: string, otherFileName: string) => {
       return existingFileNameWithPath
         .slice(0, existingFileNameWithPath.lastIndexOf('/') + 1)
         .concat(otherFileName);
-    }
+    },
   );
 }
 
 describe('modules/manager/gradle/extract', () => {
-  afterAll(() => {
-    jest.resetAllMocks();
+  beforeEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('returns null', async () => {
@@ -42,22 +40,29 @@ describe('modules/manager/gradle/extract', () => {
     mockFs(fsMock);
 
     expect(
-      await extractAllPackageFiles({} as ExtractConfig, Object.keys(fsMock))
+      await extractAllPackageFiles(
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
+      ),
     ).toBeNull();
   });
 
   it('logs a warning in case parseGradle throws an exception', async () => {
     const filename = 'build.gradle';
     const err = new Error('unknown');
+    const fsMock = {
+      'build.gradle': '',
+    };
+    mockFs(fsMock);
 
     jest.spyOn(parser, 'parseGradle').mockImplementationOnce(() => {
       throw err;
     });
-    await extractAllPackageFiles({} as ExtractConfig, [filename]);
+    await extractAllPackageFiles(partial<ExtractConfig>(), [filename]);
 
-    expect(logger.logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledWith(
       { err, config: {}, packageFile: filename },
-      `Failed to process Gradle file`
+      `Failed to process Gradle file`,
     );
   });
 
@@ -69,8 +74,8 @@ describe('modules/manager/gradle/extract', () => {
     mockFs(fsMock);
 
     const res = await extractAllPackageFiles(
-      {} as ExtractConfig,
-      Object.keys(fsMock)
+      partial<ExtractConfig>(),
+      Object.keys(fsMock),
     );
 
     expect(res).toMatchObject([
@@ -96,8 +101,8 @@ describe('modules/manager/gradle/extract', () => {
     mockFs(fsMock);
 
     const res = await extractAllPackageFiles(
-      {} as ExtractConfig,
-      Object.keys(fsMock)
+      partial<ExtractConfig>(),
+      Object.keys(fsMock),
     );
 
     expect(res).toMatchObject([
@@ -115,6 +120,126 @@ describe('modules/manager/gradle/extract', () => {
     ]);
   });
 
+  it('resolves cross-file Kotlin objects', async () => {
+    const fsMock = {
+      'buildSrc/src/main/kotlin/Deps.kt': codeBlock`
+        object Libraries {
+          const val jacksonAnnotations = "com.fasterxml.jackson.core:jackson-annotations:\${Versions.jackson}"
+          const val rxjava: String = "io.reactivex.rxjava2:rxjava:" + Versions.rxjava
+          const val jCache = "javax.cache:cache-api:1.1.0"
+          private const val shadowVersion = "7.1.2"
+
+          object Kotlin {
+            const val version = GradleDeps.Kotlin.version
+            const val stdlibJdk = "org.jetbrains.kotlin:kotlin-stdlib:$version"
+          }
+
+          object Android {
+            object Tools {
+              private const val version = "4.1.2"
+              const val buildGradle = "com.android.tools.build:gradle:$version"
+            }
+          }
+
+          val modulePlugins = mapOf(
+            "shadow" to shadowVersion
+          )
+
+          object Test {
+            private const val version = "1.3.0-rc01"
+            const val core = "androidx.test:core:\${Test.version}"
+
+            object Espresso {
+              private const val version = "3.3.0-rc01"
+              const val espressoCore = "androidx.test.espresso:espresso-core:$version"
+            }
+
+            object Androidx {
+              const val coreKtx = "androidx.test:core-ktx:$version"
+            }
+          }
+        }
+      `,
+      'buildSrc/src/main/kotlin/GradleDeps.kt': codeBlock`
+        object GradleDeps {
+          object Kotlin {
+            const val version = "1.8.10"
+          }
+        }
+      `,
+      'buildSrc/src/main/kotlin/Versions.kt': codeBlock`
+        object Versions {
+          const val jackson = "2.9.10"
+          const val rxjava: String = "1.2.3"
+        }
+      `,
+    };
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      partial<ExtractConfig>(),
+      Object.keys(fsMock),
+    );
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'buildSrc/src/main/kotlin/Deps.kt',
+        deps: [
+          {
+            depName: 'javax.cache:cache-api',
+            currentValue: '1.1.0',
+            groupName: 'Libraries.jCache',
+          },
+          {
+            depName: 'com.android.tools.build:gradle',
+            currentValue: '4.1.2',
+            groupName: 'Libraries.Android.Tools.version',
+          },
+          {
+            depName: 'androidx.test:core',
+            currentValue: '1.3.0-rc01',
+            groupName: 'Libraries.Test.version',
+          },
+          {
+            depName: 'androidx.test.espresso:espresso-core',
+            currentValue: '3.3.0-rc01',
+            groupName: 'Libraries.Test.Espresso.version',
+          },
+          {
+            depName: 'androidx.test:core-ktx',
+            currentValue: '1.3.0-rc01',
+            groupName: 'Libraries.Test.version',
+          },
+        ],
+      },
+      {
+        packageFile: 'buildSrc/src/main/kotlin/GradleDeps.kt',
+        deps: [
+          {
+            depName: 'org.jetbrains.kotlin:kotlin-stdlib',
+            currentValue: '1.8.10',
+            groupName: 'GradleDeps.Kotlin.version',
+          },
+        ],
+      },
+      {
+        packageFile: 'buildSrc/src/main/kotlin/Versions.kt',
+        deps: [
+          {
+            depName: 'com.fasterxml.jackson.core:jackson-annotations',
+            currentValue: '2.9.10',
+            groupName: 'Versions.jackson',
+          },
+          {
+            depName: 'io.reactivex.rxjava2:rxjava',
+            currentValue: '1.2.3',
+            groupName: 'Versions.rxjava',
+          },
+        ],
+      },
+    ]);
+  });
+
   it('inherits gradle variables', async () => {
     const fsMock = {
       'gradle.properties': 'foo=1.0.0',
@@ -126,8 +251,8 @@ describe('modules/manager/gradle/extract', () => {
     mockFs(fsMock);
 
     const res = await extractAllPackageFiles(
-      {} as ExtractConfig,
-      Object.keys(fsMock)
+      partial<ExtractConfig>(),
+      Object.keys(fsMock),
     );
 
     expect(res).toMatchObject([
@@ -173,8 +298,8 @@ describe('modules/manager/gradle/extract', () => {
     mockFs(fsMock);
 
     const res = await extractAllPackageFiles(
-      {} as ExtractConfig,
-      Object.keys(fsMock)
+      partial<ExtractConfig>(),
+      Object.keys(fsMock),
     );
 
     expect(res).toMatchObject([
@@ -198,8 +323,8 @@ describe('modules/manager/gradle/extract', () => {
     mockFs(fsMock);
 
     const res = await extractAllPackageFiles(
-      {} as ExtractConfig,
-      Object.keys(fsMock)
+      partial<ExtractConfig>(),
+      Object.keys(fsMock),
     );
 
     expect(res).toMatchObject([
@@ -232,8 +357,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -280,8 +405,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -341,8 +466,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -379,8 +504,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
       expect(res).toMatchObject([
         {
@@ -415,7 +540,6 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'org.mockito:mockito-core',
-              groupName: 'org.mockito',
               currentValue: '3.10.0',
               managerData: {
                 fileReplacePosition: 474,
@@ -424,7 +548,6 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'com.github.siom79.japicmp:japicmp',
-              groupName: 'com.github.siom79.japicmp',
               currentValue: '0.15.+',
               managerData: {
                 fileReplacePosition: 561,
@@ -479,7 +602,12 @@ describe('modules/manager/gradle/extract', () => {
                 packageFile: 'gradle/libs.versions.toml',
               },
               registryUrls: ['https://plugins.gradle.org/m2/'],
-              skipReason: 'unknown-version',
+              skipReason: 'unspecified-version',
+            },
+            {
+              depName: 'org.ajoberstar.grgit2',
+              depType: 'plugin',
+              skipReason: 'unspecified-version',
             },
           ],
         },
@@ -493,8 +621,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -503,37 +631,34 @@ describe('modules/manager/gradle/extract', () => {
           deps: [
             {
               depName: 'com.squareup.okhttp3:okhttp',
-              groupName: 'com.squareup.okhttp3',
               currentValue: '4.9.0',
               managerData: {
-                fileReplacePosition: 99,
+                fileReplacePosition: 100,
                 packageFile: 'gradle/libs.versions.toml',
               },
             },
             {
               depName: 'com.squareup.okio:okio',
-              groupName: 'com.squareup.okio',
               currentValue: '2.8.0',
               managerData: {
-                fileReplacePosition: 161,
+                fileReplacePosition: 162,
                 packageFile: 'gradle/libs.versions.toml',
               },
             },
             {
               depName: 'com.squareup.picasso:picasso',
-              groupName: 'com.squareup.picasso',
               currentValue: '2.5.1',
               managerData: {
-                fileReplacePosition: 243,
+                fileReplacePosition: 244,
                 packageFile: 'gradle/libs.versions.toml',
               },
             },
             {
               depName: 'com.squareup.retrofit2:retrofit',
-              groupName: 'retrofit',
+              groupName: 'retro.fit',
               currentValue: '2.8.2',
               managerData: {
-                fileReplacePosition: 41,
+                fileReplacePosition: 42,
                 packageFile: 'gradle/libs.versions.toml',
               },
             },
@@ -542,21 +667,21 @@ describe('modules/manager/gradle/extract', () => {
               managerData: {
                 packageFile: 'gradle/libs.versions.toml',
               },
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
             {
               depName: 'google-firebase-crashlytics',
               managerData: {
                 packageFile: 'gradle/libs.versions.toml',
               },
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
             {
               depName: 'google-firebase-messaging',
               managerData: {
                 packageFile: 'gradle/libs.versions.toml',
               },
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
             {
               depName: 'org.jetbrains.kotlin.jvm',
@@ -566,7 +691,7 @@ describe('modules/manager/gradle/extract', () => {
               packageName:
                 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
               managerData: {
-                fileReplacePosition: 661,
+                fileReplacePosition: 663,
                 packageFile: 'gradle/libs.versions.toml',
               },
               registryUrls: ['https://plugins.gradle.org/m2/'],
@@ -591,7 +716,7 @@ describe('modules/manager/gradle/extract', () => {
               packageName:
                 'org.danilopianini.multi-jvm-test-plugin:org.danilopianini.multi-jvm-test-plugin.gradle.plugin',
               managerData: {
-                fileReplacePosition: 822,
+                fileReplacePosition: 824,
                 packageFile: 'gradle/libs.versions.toml',
               },
               registryUrls: ['https://plugins.gradle.org/m2/'],
@@ -608,7 +733,10 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       expect(
-        await extractAllPackageFiles({} as ExtractConfig, Object.keys(fsMock))
+        await extractAllPackageFiles(
+          partial<ExtractConfig>(),
+          Object.keys(fsMock),
+        ),
       ).toBeNull();
     });
 
@@ -628,8 +756,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
       expect(res).toMatchObject([
         {
@@ -671,8 +799,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
       expect(res).toMatchObject([
         {
@@ -690,7 +818,7 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'mocha-junit:mocha-junit',
-              groupName: 'mocha-junit-reporter',
+              groupName: 'mocha.junit.reporter',
               currentValue: '2.0.2',
               managerData: {
                 fileReplacePosition: 82,
@@ -741,8 +869,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -821,8 +949,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -842,7 +970,10 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       expect(
-        await extractAllPackageFiles({} as ExtractConfig, Object.keys(fsMock))
+        await extractAllPackageFiles(
+          partial<ExtractConfig>(),
+          Object.keys(fsMock),
+        ),
       ).toBeNull();
     });
 
@@ -853,7 +984,10 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       expect(
-        await extractAllPackageFiles({} as ExtractConfig, Object.keys(fsMock))
+        await extractAllPackageFiles(
+          partial<ExtractConfig>(),
+          Object.keys(fsMock),
+        ),
       ).toBeNull();
     });
   });
@@ -871,8 +1005,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
 
       expect(res).toMatchObject([
@@ -919,8 +1053,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
       expect(res).toBeNull();
     });
@@ -933,8 +1067,8 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
       expect(res).toBeNull();
     });
@@ -946,6 +1080,7 @@ describe('modules/manager/gradle/extract', () => {
           org.apache.lucene:* = 3
           org.apache.lucene:a.* = 2
           org.apache.lucene:a.b = 1
+          org.apache.foo*:* = 5
         `,
         'versions.lock': stripIndent`
           # Run ./gradlew --write-locks to regenerate this file
@@ -955,13 +1090,14 @@ describe('modules/manager/gradle/extract', () => {
           org.apache.lucene:a.d:1 (10 constraints: 95be0c15)
           org.apache.lucene:d:1 (10 constraints: 95be0c15)
           org.apache.lucene:e.f:1 (10 constraints: 95be0c15)
+          org.apache.foo-bar:a:1 (10 constraints: 95be0c15)
         `,
       };
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        {} as ExtractConfig,
-        Object.keys(fsMock)
+        partial<ExtractConfig>(),
+        Object.keys(fsMock),
       );
 
       // Each lock dep is only present once, with highest prio for exact prop match, then globs from longest to shortest
@@ -1030,6 +1166,18 @@ describe('modules/manager/gradle/extract', () => {
               lockedVersion: '1',
               groupName: 'org.apache.lucene:*',
               fileReplacePosition: 39,
+              depType: 'dependencies',
+            },
+            {
+              managerData: {
+                fileReplacePosition: 113,
+                packageFile: 'versions.props',
+              },
+              depName: 'org.apache.foo-bar:a',
+              currentValue: '5',
+              lockedVersion: '1',
+              groupName: 'org.apache.foo*:*',
+              fileReplacePosition: 113,
               depType: 'dependencies',
             },
           ],

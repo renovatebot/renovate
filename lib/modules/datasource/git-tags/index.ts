@@ -46,7 +46,7 @@ export class GitTagsDatasource extends GitDatasource {
 
   override async getDigest(
     { packageName }: DigestConfig,
-    newValue?: string
+    newValue?: string,
   ): Promise<string | null> {
     const rawRefs = await this.getRawRefs({ packageName });
     const findValue = newValue ?? 'HEAD';

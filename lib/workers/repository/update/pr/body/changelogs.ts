@@ -11,23 +11,11 @@ export function getChangelogs(config: BranchConfig): string {
     return releaseNotes;
   }
 
-  const countReleaseNodesByRepoName: Record<string, number> = {};
-
   for (const upgrade of config.upgrades) {
     if (upgrade.hasReleaseNotes && upgrade.repoName) {
-      countReleaseNodesByRepoName[upgrade.repoName] =
-        (countReleaseNodesByRepoName[upgrade.repoName] || 0) + 1;
-    }
-  }
-
-  for (const upgrade of config.upgrades) {
-    if (upgrade.hasReleaseNotes && upgrade.repoName) {
-      // TODO: types (#7154)
-      upgrade.releaseNotesSummaryTitle = `${upgrade.repoName}${
-        countReleaseNodesByRepoName[upgrade.repoName] > 1
-          ? ` (${upgrade.depName!})`
-          : ''
-      }`;
+      upgrade.releaseNotesSummaryTitle = `${
+        upgrade.repoName
+      } (${upgrade.depName!})`;
     }
   }
 

@@ -8,7 +8,7 @@ const baseUrl = 'https://storage.googleapis.com';
 const urlPath =
   '/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2Fstable%2Frelease%2F&alt=json';
 const datasource = DartVersionDatasource.id;
-const depName = 'dart';
+const packageName = 'dart';
 const channels = ['stable', 'beta', 'dev'];
 
 describe('modules/datasource/dart-version/index', () => {
@@ -18,8 +18,8 @@ describe('modules/datasource/dart-version/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName,
-        })
+          packageName,
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
@@ -28,18 +28,25 @@ describe('modules/datasource/dart-version/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName,
-        })
+          packageName,
+        }),
       ).toBeNull();
     });
 
     it('returns null for empty 200 OK', async () => {
-      httpMock.scope(baseUrl).get(urlPath).reply(200, []);
+      const scope = httpMock.scope(baseUrl);
+      for (const channel of channels) {
+        scope
+          .get(
+            `/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F${channel}%2Frelease%2F&alt=json`,
+          )
+          .reply(200, { prefixes: [] });
+      }
       expect(
         await getPkgReleases({
           datasource,
-          depName,
-        })
+          packageName,
+        }),
       ).toBeNull();
     });
 
@@ -48,14 +55,14 @@ describe('modules/datasource/dart-version/index', () => {
         httpMock
           .scope(baseUrl)
           .get(
-            `/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F${channel}%2Frelease%2F&alt=json`
+            `/storage/v1/b/dart-archive/o?delimiter=%2F&prefix=channels%2F${channel}%2Frelease%2F&alt=json`,
           )
           .reply(200, Fixtures.get(`${channel}.json`));
       }
 
       const res = await getPkgReleases({
         datasource,
-        depName,
+        packageName,
       });
 
       expect(res).toBeDefined();

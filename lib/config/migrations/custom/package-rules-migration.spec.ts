@@ -27,10 +27,10 @@ describe('config/migrations/custom/package-rules-migration', () => {
 
     const mappedProperties = Object.keys(migratedPackageRules![0]);
     const expectedMappedProperties = Object.keys(
-      originalConfig.packageRules![0]
+      originalConfig.packageRules![0],
     ).map((key) => renameMap[key as keyof typeof renameMap] ?? key);
 
-    expect(expectedMappedProperties).toEqual(mappedProperties);
+    expect(mappedProperties).toEqual(expectedMappedProperties);
   });
 
   it('should not migrate nested packageRules', () => {
@@ -48,13 +48,63 @@ describe('config/migrations/custom/package-rules-migration', () => {
       {
         packageRules: [
           {
-            matchPaths: [],
+            matchFileNames: [],
             packgageRules: {
               languages: ['javascript'],
             },
           },
         ],
-      }
+      },
+    );
+  });
+
+  it('should migrate languages to categories', () => {
+    expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            matchLanguages: ['docker', 'js'],
+            addLabels: ['docker'],
+          },
+          {
+            languages: ['java'],
+            addLabels: ['java'],
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            matchCategories: ['docker', 'js'],
+            addLabels: ['docker'],
+          },
+          {
+            matchCategories: ['java'],
+            addLabels: ['java'],
+          },
+        ],
+      },
+    );
+  });
+
+  it('should migrate single match rule', () => {
+    expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            matchLanguages: ['python'],
+            addLabels: ['py'],
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            matchCategories: ['python'],
+            addLabels: ['py'],
+          },
+        ],
+      },
     );
   });
 });

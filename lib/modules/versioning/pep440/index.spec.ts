@@ -1,7 +1,7 @@
 import pep440 from '.';
 
 describe('modules/versioning/pep440/index', () => {
-  test.each`
+  it.each`
     input                                            | expected
     ${'0.750'}                                       | ${true}
     ${'1.2.3'}                                       | ${true}
@@ -20,7 +20,7 @@ describe('modules/versioning/pep440/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input            | expected
     ${'1.2.3'}       | ${true}
     ${'1.2.3rc0'}    | ${false}
@@ -29,7 +29,7 @@ describe('modules/versioning/pep440/index', () => {
     expect(pep440.isStable(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a          | b             | expected
     ${'1.0'}   | ${'1.0.0'}    | ${true}
     ${'1.0.0'} | ${'1.0..foo'} | ${false}
@@ -37,7 +37,7 @@ describe('modules/versioning/pep440/index', () => {
     expect(pep440.equals(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version       | isSingle
     ${'1.2.3'}    | ${true}
     ${'1.2.3rc0'} | ${true}
@@ -61,7 +61,7 @@ describe('modules/versioning/pep440/index', () => {
     '2.0.3',
   ];
 
-  test.each`
+  it.each`
     range        | expected
     ${'~=1.2.1'} | ${'1.2.3'}
     ${'~=2.1'}   | ${null}
@@ -69,10 +69,10 @@ describe('modules/versioning/pep440/index', () => {
     'getSatisfyingVersion($versions, "$range") === $expected',
     ({ range, expected }) => {
       expect(pep440.getSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     range        | expected
     ${'~=1.2.1'} | ${'1.2.1'}
     ${'~=2.1'}   | ${null}
@@ -80,10 +80,10 @@ describe('modules/versioning/pep440/index', () => {
     'minSatisfyingVersion($versions, "$range") === $expected',
     ({ range, expected }) => {
       expect(pep440.minSatisfyingVersion(versions, range)).toBe(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     currentValue            | rangeStrategy    | currentVersion | newVersion   | expected
     ${'1.0.0'}              | ${'bump'}        | ${'1.0.0'}     | ${'1.2.3'}   | ${'1.2.3'}
     ${'1.0.0'}              | ${'replace'}     | ${'1.0.0'}     | ${'1.2.3'}   | ${'1.2.3'}
@@ -189,10 +189,10 @@ describe('modules/versioning/pep440/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     currentValue            | rangeStrategy    | currentVersion | newVersion   | expected
     ${'1.0.0'}              | ${'bump'}        | ${'1.0.0'}     | ${'1.2.3'}   | ${'1.2.3'}
     ${'1.0.0'}              | ${'replace'}     | ${'1.0.0'}     | ${'1.2.3'}   | ${'1.2.3'}
@@ -306,10 +306,10 @@ describe('modules/versioning/pep440/index', () => {
         isReplacement,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     version      | range                  | expected
     ${'0.9.9.9'} | ${'>= 1.0.0, < 2.0.0'} | ${true}
     ${'1.0.0a0'} | ${'>= 1.0.0, < 2.0.0'} | ${true}
@@ -337,6 +337,6 @@ describe('modules/versioning/pep440/index', () => {
     'isLessThanRange("$version", "$range") === "$expected"',
     ({ version, range, expected }) => {
       expect(pep440.isLessThanRange?.(version, range)).toBe(expected);
-    }
+    },
   );
 });

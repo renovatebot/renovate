@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
@@ -6,7 +7,7 @@ import { toBase64 } from '../../../util/string';
 import { PRESET_INVALID_JSON, PRESET_NOT_FOUND } from '../util';
 import * as gitea from '.';
 
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 
 const hostRules = mocked(_hostRules);
 
@@ -32,7 +33,7 @@ describe('config/presets/gitea/index', () => {
         'some/repo',
         'some-filename.json',
         giteaApiHost,
-        null
+        null,
       );
       expect(res).toEqual({ from: 'api' });
     });
@@ -49,7 +50,7 @@ describe('config/presets/gitea/index', () => {
         'some/repo',
         'some-filename.json5',
         giteaApiHost,
-        null
+        null,
       );
       expect(res).toEqual({ from: 'api' });
     });
@@ -74,7 +75,7 @@ describe('config/presets/gitea/index', () => {
         .reply(200, { content: toBase64('invalid') });
 
       await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
-        PRESET_INVALID_JSON
+        PRESET_INVALID_JSON,
       );
     });
 
@@ -87,7 +88,7 @@ describe('config/presets/gitea/index', () => {
         });
 
       await expect(gitea.getPreset({ repo: 'some/repo' })).rejects.toThrow(
-        PRESET_INVALID_JSON
+        PRESET_INVALID_JSON,
       );
     });
 
@@ -123,7 +124,7 @@ describe('config/presets/gitea/index', () => {
         .get(`${basePath}/somefile.json`)
         .reply(200, {
           content: Buffer.from(
-            '{"somename":{"somesubname":{"foo":"bar"}}}'
+            '{"somename":{"somesubname":{"foo":"bar"}}}',
           ).toString('base64'),
         });
 
@@ -174,7 +175,7 @@ describe('config/presets/gitea/index', () => {
         gitea.getPreset({
           repo: 'some/repo',
           presetName: 'somefile/somename/somesubname',
-        })
+        }),
       ).rejects.toThrow(PRESET_NOT_FOUND);
     });
   });
@@ -188,7 +189,7 @@ describe('config/presets/gitea/index', () => {
           content: toBase64('{"from":"api"}'),
         });
       expect(
-        await gitea.getPresetFromEndpoint('some/repo', 'default', undefined)
+        await gitea.getPresetFromEndpoint('some/repo', 'default', undefined),
       ).toEqual({ from: 'api' });
     });
 
@@ -205,9 +206,9 @@ describe('config/presets/gitea/index', () => {
             'some/repo',
             'default',
             undefined,
-            'https://api.gitea.example.org'
+            'https://api.gitea.example.org',
           )
-          .catch(() => ({ from: 'api' }))
+          .catch(() => ({ from: 'api' })),
       ).toEqual({ from: 'api' });
     });
 
@@ -224,8 +225,8 @@ describe('config/presets/gitea/index', () => {
           'default',
           undefined,
           giteaApiHost,
-          'someTag'
-        )
+          'someTag',
+        ),
       ).toEqual({ from: 'api' });
     });
 
@@ -243,9 +244,9 @@ describe('config/presets/gitea/index', () => {
             'default',
             undefined,
             'https://api.gitea.example.org',
-            'someTag'
+            'someTag',
           )
-          .catch(() => ({ from: 'api' }))
+          .catch(() => ({ from: 'api' })),
       ).toEqual({ from: 'api' });
     });
   });

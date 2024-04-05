@@ -1,4 +1,5 @@
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import is from '@sindresorhus/is';
+import { findLocalSiblingOrParent, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifactsResult } from '../../types';
@@ -10,20 +11,20 @@ import type {
 } from './types';
 
 const providerStartLineRegex = regEx(
-  `^provider "(?<registryUrl>[^/]*)\\/(?<namespace>[^/]*)\\/(?<depName>[^/]*)"`
+  `^provider "(?<registryUrl>[^/]*)/(?<namespace>[^/]*)/(?<depName>[^/]*)"`,
 );
 const versionLineRegex = regEx(
-  `^(?<prefix>[\\s]*version[\\s]*=[\\s]*")(?<version>[^"']+)(?<suffix>".*)$`
+  `^(?<prefix>[\\s]*version[\\s]*=[\\s]*")(?<version>[^"']+)(?<suffix>".*)$`,
 );
 const constraintLineRegex = regEx(
-  `^(?<prefix>[\\s]*constraints[\\s]*=[\\s]*")(?<constraint>[^"']+)(?<suffix>".*)$`
+  `^(?<prefix>[\\s]*constraints[\\s]*=[\\s]*")(?<constraint>[^"']+)(?<suffix>".*)$`,
 );
 const hashLineRegex = regEx(`^(?<prefix>\\s*")(?<hash>[^"]+)(?<suffix>",.*)$`);
 
 const lockFile = '.terraform.lock.hcl';
 
-export function findLockFile(packageFilePath: string): string {
-  return getSiblingFileName(packageFilePath, lockFile);
+export function findLockFile(packageFilePath: string): Promise<string | null> {
+  return findLocalSiblingOrParent(packageFilePath, lockFile);
 }
 
 export function readLockFile(lockFilePath: string): Promise<string | null> {
@@ -132,36 +133,36 @@ export function isPinnedVersion(value: string | undefined): boolean {
 export function writeLockUpdates(
   updates: ProviderLockUpdate[],
   lockFilePath: string,
-  oldLockFileContent: string
+  oldLockFileContent: string,
 ): UpdateArtifactsResult {
   const lines = oldLockFileContent.split(newlineRegex);
 
   const sections: string[][] = [];
 
   // sort updates in order of appearance in the lockfile
-  // TODO #7154
+  // TODO #22198
   updates.sort(
-    (a, b) => a.lineNumbers.block!.start - b.lineNumbers.block!.start
+    (a, b) => a.lineNumbers.block!.start - b.lineNumbers.block!.start,
   );
   updates.forEach((update, index, array) => {
     // re add leading whitespace
     let startWhitespace: number | undefined;
     if (index > 0) {
       // get end of the
-      // TODO #7154
+      // TODO #22198
       startWhitespace = array[index - 1].lineNumbers.block!.end;
     }
     const leadingNonRelevantLines = lines.slice(
       startWhitespace,
-      // TODO #7154
-      update.lineNumbers.block!.start
+      // TODO #22198
+      update.lineNumbers.block!.start,
     );
     sections.push(leadingNonRelevantLines);
 
     const providerBlockLines = lines.slice(
-      // TODO #7154
+      // TODO #22198
       update.lineNumbers.block!.start,
-      update.lineNumbers.block!.end
+      update.lineNumbers.block!.end,
     );
     const newProviderBlockLines: string[] = [];
     let hashLinePrefix = '';
@@ -169,7 +170,7 @@ export function writeLockUpdates(
     providerBlockLines.forEach((providerBlockLine, providerBlockIndex) => {
       const versionLine = providerBlockLine.replace(
         versionLineRegex,
-        `$<prefix>${update.newVersion}$<suffix>`
+        `$<prefix>${update.newVersion}$<suffix>`,
       );
       if (versionLine !== providerBlockLine) {
         newProviderBlockLines.push(versionLine);
@@ -178,7 +179,7 @@ export function writeLockUpdates(
 
       const constraintLine = providerBlockLine.replace(
         constraintLineRegex,
-        `$<prefix>${update.newConstraint}$<suffix>`
+        `$<prefix>${update.newConstraint}$<suffix>`,
       );
       if (constraintLine !== providerBlockLine) {
         newProviderBlockLines.push(constraintLine);
@@ -196,24 +197,24 @@ export function writeLockUpdates(
     });
 
     const hashesWithWhitespace = update.newHashes.map(
-      (value) => `${hashLinePrefix}${value}${hashLineSuffix}`
+      (value) => `${hashLinePrefix}${value}${hashLineSuffix}`,
     );
     newProviderBlockLines.splice(
-      // TODO #7154
+      // TODO #22198
       update.lineNumbers.hashes.start!,
       0,
-      ...hashesWithWhitespace
+      ...hashesWithWhitespace,
     );
     sections.push(newProviderBlockLines);
   });
 
   const trailingNotUpdatedLines = lines.slice(
-    updates[updates.length - 1].lineNumbers.block?.end
+    updates[updates.length - 1].lineNumbers.block?.end,
   );
   sections.push(trailingNotUpdatedLines);
 
   const newLines = sections.reduce((previousValue, currentValue) =>
-    previousValue.concat(currentValue)
+    previousValue.concat(currentValue),
   );
   const newContent = newLines.join('\n');
 
@@ -224,4 +225,31 @@ export function writeLockUpdates(
       contents: newContent,
     },
   };
+}
+
+export function massageNewValue(value: string | undefined): string | undefined {
+  if (is.nullOrUndefined(value)) {
+    return value;
+  }
+
+  const elements = value.split(',');
+  const massagedElements: string[] = [];
+  for (const element of elements) {
+    // these constraints are allowed to miss precision
+    if (element.includes('~>')) {
+      massagedElements.push(element);
+      continue;
+    }
+
+    const missing0s = 3 - element.split('.').length;
+
+    let massagedElement = element;
+
+    for (let i = 0; i < missing0s; i++) {
+      massagedElement = `${massagedElement}.0`;
+    }
+    massagedElements.push(massagedElement);
+  }
+
+  return massagedElements.join(',');
 }

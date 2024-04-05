@@ -1,4 +1,4 @@
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 describe('modules/manager/nodenv/extract', () => {
   describe('extractPackageFile()', () => {
@@ -7,9 +7,8 @@ describe('modules/manager/nodenv/extract', () => {
       expect(res.deps).toEqual([
         {
           currentValue: '8.4.0',
-          datasource: 'github-tags',
+          datasource: 'node-version',
           depName: 'node',
-          packageName: 'nodejs/node',
         },
       ]);
     });
@@ -19,9 +18,8 @@ describe('modules/manager/nodenv/extract', () => {
       expect(res.deps).toEqual([
         {
           currentValue: '8.4',
-          datasource: 'github-tags',
+          datasource: 'node-version',
           depName: 'node',
-          packageName: 'nodejs/node',
         },
       ]);
     });
@@ -31,9 +29,8 @@ describe('modules/manager/nodenv/extract', () => {
       expect(res.deps).toEqual([
         {
           currentValue: 'latestn',
-          datasource: 'github-tags',
+          datasource: 'node-version',
           depName: 'node',
-          packageName: 'nodejs/node',
         },
       ]);
     });

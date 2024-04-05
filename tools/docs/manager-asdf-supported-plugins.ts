@@ -9,7 +9,7 @@ function generateTooling(): string {
 }
 
 export async function generateManagerAsdfSupportedPlugins(
-  dist: string
+  dist: string,
 ): Promise<void> {
   const indexFileName = `${dist}/modules/manager/asdf/index.md`;
   let indexContent = await readFile(indexFileName);

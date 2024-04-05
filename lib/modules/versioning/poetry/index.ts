@@ -64,7 +64,19 @@ function isLessThanRange(version: string, range: string): boolean {
 }
 
 export function isValid(input: string): boolean {
-  return npm.isValid(poetry2npm(input));
+  if (!input) {
+    return false;
+  }
+
+  try {
+    return npm.isValid(poetry2npm(input, true));
+  } catch (err) {
+    logger.once.debug(
+      { version: input },
+      'Poetry version or range is not supported by current implementation',
+    );
+    return false;
+  }
 }
 
 function isStable(version: string): boolean {
@@ -83,7 +95,7 @@ function matches(version: string, range: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const semverVersions: string[] = [];
   versions.forEach((version) => {
@@ -99,7 +111,7 @@ function getSatisfyingVersion(
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const semverVersions: string[] = [];
   versions.forEach((version) => {
@@ -124,7 +136,7 @@ function isSingleVersion(constraint: string): boolean {
 function handleShort(
   operator: string,
   currentValue: string,
-  newVersion: string
+  newVersion: string,
 ): string | null {
   const toVersionMajor = getMajor(newVersion);
   const toVersionMinor = getMinor(newVersion);
@@ -167,7 +179,7 @@ function getNewValue({
     } catch (err) /* istanbul ignore next */ {
       logger.info(
         { err },
-        'Poetry versioning: Error caught checking if newVersion satisfies currentValue'
+        'Poetry versioning: Error caught checking if newVersion satisfies currentValue',
       );
     }
     const parsedRange = parseRange(npmCurrentValue);
@@ -190,11 +202,11 @@ function getNewValue({
 
   // Explicitly check whether this is a fully-qualified version
   if (
-    (VERSION_PATTERN.exec(newVersion)?.groups?.release || '').split('.')
+    (VERSION_PATTERN.exec(newVersion)?.groups?.release ?? '').split('.')
       .length !== 3
   ) {
     logger.debug(
-      'Cannot massage python version to npm - returning currentValue'
+      'Cannot massage python version to npm - returning currentValue',
     );
     return currentValue;
   }
@@ -219,7 +231,7 @@ function getNewValue({
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       { currentValue, rangeStrategy, currentVersion, newVersion, err },
-      'Could not generate new value using npm.getNewValue()'
+      'Could not generate new value using npm.getNewValue()',
     );
   }
 
@@ -230,6 +242,10 @@ function getNewValue({
 function sortVersions(a: string, b: string): number {
   // istanbul ignore next
   return npm.sortVersions(poetry2semver(a) ?? '', poetry2semver(b) ?? '');
+}
+
+function subset(subRange: string, superRange: string): boolean | undefined {
+  return npm.subset!(poetry2npm(subRange), poetry2npm(superRange));
 }
 
 export const api: VersioningApi = {
@@ -249,5 +265,6 @@ export const api: VersioningApi = {
   matches,
   minSatisfyingVersion,
   sortVersions,
+  subset,
 };
 export default api;

@@ -1,6 +1,6 @@
 import { checkRangeAndRemoveUnnecessaryRangeLimit } from './range';
 
-test.each`
+it.each`
   rangeInput           | newVersion | expected
   ${'==4.1.*,>=3.2.2'} | ${'4.1.1'} | ${'==4.1.*'}
   ${'==4.0.*,>=3.2.2'} | ${'4.0.0'} | ${'==4.0.*'}
@@ -10,8 +10,8 @@ test.each`
   ({ rangeInput, newVersion, expected }) => {
     const res = checkRangeAndRemoveUnnecessaryRangeLimit(
       rangeInput,
-      newVersion
+      newVersion,
     );
     expect(res).toEqual(expected);
-  }
+  },
 );

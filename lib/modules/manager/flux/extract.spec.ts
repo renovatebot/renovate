@@ -2,7 +2,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -24,7 +24,7 @@ describe('modules/manager/flux/extract', () => {
     it('extracts multiple resources', () => {
       const result = extractPackageFile(
         Fixtures.get('multidoc.yaml'),
-        'multidoc.yaml'
+        'multidoc.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -43,7 +43,7 @@ describe('modules/manager/flux/extract', () => {
           },
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentDigest: undefined,
             currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
@@ -54,38 +54,49 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
-    it('extracts version and components from system manifests', () => {
-      const result = extractPackageFile(
-        Fixtures.get('flux-system/gotk-components.yaml'),
-        'clusters/my-cluster/flux-system/gotk-components.yaml'
-      );
-      expect(result).toEqual({
-        deps: [
-          {
-            currentValue: 'v0.24.1',
-            datasource: 'github-releases',
-            depName: 'fluxcd/flux2',
-            managerData: {
-              components:
-                'source-controller,kustomize-controller,helm-controller,notification-controller',
+    it.each`
+      filepath
+      ${'clusters/my-cluster/flux-system/gotk-components.yaml'}
+      ${'clusters/my-cluster/flux-system/gotk-components.yml'}
+      ${'clusters/my-cluster/gotk-components.yaml'}
+      ${'clusters/my-cluster/gotk-components.yml'}
+      ${'gotk-components.yaml'}
+    `(
+      'extracts version and components from system manifest at $filepath',
+      ({ filepath }) => {
+        const result = extractPackageFile(
+          Fixtures.get('flux-system/gotk-components.yaml'),
+          filepath,
+        );
+        expect(result).toEqual({
+          deps: [
+            {
+              currentValue: 'v0.24.1',
+              datasource: 'github-releases',
+              depName: 'fluxcd/flux2',
+              managerData: {
+                components:
+                  'source-controller,kustomize-controller,helm-controller,notification-controller',
+              },
             },
-          },
-        ],
-      });
-    });
+          ],
+        });
+      },
+    );
 
     it('considers components optional in system manifests', () => {
       const result = extractPackageFile(
         `# Flux Version: v0.27.0`,
-        'clusters/my-cluster/flux-system/gotk-components.yaml'
+        'clusters/my-cluster/flux-system/gotk-components.yaml',
       );
+      expect(result).not.toBeNull();
       expect(result?.deps[0].managerData?.components).toBeUndefined();
     });
 
     it('ignores system manifests without a version', () => {
       const result = extractPackageFile(
         'not actually a system manifest!',
-        'clusters/my-cluster/flux-system/gotk-components.yaml'
+        'clusters/my-cluster/flux-system/gotk-components.yaml',
       );
       expect(result).toBeNull();
     });
@@ -93,7 +104,7 @@ describe('modules/manager/flux/extract', () => {
     it('extracts releases without repositories', () => {
       const result = extractPackageFile(
         Fixtures.get('helmRelease.yaml'),
-        'helmRelease.yaml'
+        'helmRelease.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -125,7 +136,7 @@ describe('modules/manager/flux/extract', () => {
           apiVersion: source.toolkit.fluxcd.io/v1beta1
           kind: HelmRepository
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -155,7 +166,7 @@ describe('modules/manager/flux/extract', () => {
                   name: sealed-secrets
                 version: "2.0.2"
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toBeNull();
     });
@@ -181,18 +192,9 @@ describe('modules/manager/flux/extract', () => {
                   name: sealed-secrets
                 version: "2.0.2"
         `,
-        'test.yaml'
+        'test.yaml',
       );
-      expect(result).toEqual({
-        deps: [
-          {
-            currentValue: '2.0.2',
-            datasource: HelmDatasource.id,
-            depName: 'sealed-secrets',
-            skipReason: 'unknown-registry',
-          },
-        ],
-      });
+      expect(result).toBeNull();
     });
 
     it('does not match HelmRelease resources without a sourceRef', () => {
@@ -204,13 +206,14 @@ describe('modules/manager/flux/extract', () => {
           kind: HelmRelease
           metadata:
             name: sealed-secrets
+            namespace: test
           spec:
             chart:
               spec:
                 chart: sealed-secrets
                 version: "2.0.2"
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -240,18 +243,9 @@ describe('modules/manager/flux/extract', () => {
                   name: sealed-secrets
                 version: "2.0.2"
         `,
-        'test.yaml'
+        'test.yaml',
       );
-      expect(result).toEqual({
-        deps: [
-          {
-            currentValue: '2.0.2',
-            datasource: HelmDatasource.id,
-            depName: 'sealed-secrets',
-            skipReason: 'unknown-registry',
-          },
-        ],
-      });
+      expect(result).toBeNull();
     });
 
     it('ignores HelmRepository resources without a namespace', () => {
@@ -264,7 +258,7 @@ describe('modules/manager/flux/extract', () => {
           metadata:
             name: test
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -289,7 +283,7 @@ describe('modules/manager/flux/extract', () => {
             name: sealed-secrets
             namespace: kube-system
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -314,7 +308,7 @@ describe('modules/manager/flux/extract', () => {
           spec:
             url: https://github.com/renovatebot/renovate
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -336,7 +330,7 @@ describe('modules/manager/flux/extract', () => {
               commit: c93154b
             url: https://github.com/renovatebot/renovate
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -365,7 +359,7 @@ describe('modules/manager/flux/extract', () => {
               tag: v11.35.9
             url: git@github.com:renovatebot/renovate.git
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -393,7 +387,7 @@ describe('modules/manager/flux/extract', () => {
               tag: v11.35.9
             url: https://github.com/renovatebot/renovate
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -421,7 +415,7 @@ describe('modules/manager/flux/extract', () => {
               tag: 1.2.3
             url: https://gitlab.com/renovatebot/renovate
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -449,13 +443,13 @@ describe('modules/manager/flux/extract', () => {
               tag: 2020.5.6+staging.ze
             url: https://bitbucket.org/renovatebot/renovate
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
           {
             currentValue: '2020.5.6+staging.ze',
-            datasource: BitBucketTagsDatasource.id,
+            datasource: BitbucketTagsDatasource.id,
             depName: 'renovate-repo',
             packageName: 'renovatebot/renovate',
             sourceUrl: 'https://bitbucket.org/renovatebot/renovate',
@@ -477,7 +471,7 @@ describe('modules/manager/flux/extract', () => {
               tag: "7.56.4_p1"
             url: https://example.com/renovatebot/renovate
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -503,7 +497,7 @@ describe('modules/manager/flux/extract', () => {
         spec:
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -528,13 +522,13 @@ describe('modules/manager/flux/extract', () => {
             tag: v1.8.2
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentValue: 'v1.8.2',
             currentDigest: undefined,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
@@ -558,7 +552,7 @@ describe('modules/manager/flux/extract', () => {
             digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -585,13 +579,13 @@ describe('modules/manager/flux/extract', () => {
             tag: v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             currentValue: 'v1.8.2',
@@ -618,7 +612,7 @@ describe('modules/manager/flux/extract', () => {
             tag: v1.8.2
           url: oci://ghcr.io/kyverno/manifests/kyverno
       `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toEqual({
         deps: [
@@ -638,7 +632,7 @@ describe('modules/manager/flux/extract', () => {
           kind: SomethingElse
           apiVersion: helm.toolkit.fluxcd.io/v2beta1
         `,
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toBeNull();
     });
@@ -646,7 +640,7 @@ describe('modules/manager/flux/extract', () => {
     it('ignores resources without a kind', () => {
       const result = extractPackageFile(
         'apiVersion: helm.toolkit.fluxcd.io/v2beta1',
-        'test.yaml'
+        'test.yaml',
       );
       expect(result).toBeNull();
     });
@@ -700,7 +694,7 @@ describe('modules/manager/flux/extract', () => {
           deps: [
             {
               autoReplaceStringTemplate:
-                '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+                '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
               currentDigest: undefined,
               currentValue: 'v1.8.2',
               depName: 'ghcr.io/kyverno/manifests/kyverno',
@@ -724,6 +718,49 @@ describe('modules/manager/flux/extract', () => {
           ],
           packageFile:
             'lib/modules/manager/flux/__fixtures__/flux-system/gotk-components.yaml',
+        },
+      ]);
+    });
+
+    it('should handle HelmRepository with type OCI', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+      ]);
+      expect(result).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '0.4.0',
+              datasource: DockerDatasource.id,
+              depName: 'actions-runner-controller-charts/gha-runner-scale-set',
+              packageName:
+                'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+        },
+      ]);
+    });
+
+    it('should handle HelmRepository w/o type oci and url starts with oci', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/helmOCISource2.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmOCIRelease2.yaml',
+      ]);
+      expect(result).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '2.6.0',
+              datasource: DockerDatasource.id,
+              depName: 'kyverno',
+              packageName: 'ghcr.io/kyverno/charts/kyverno',
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/helmOCIRelease2.yaml',
         },
       ]);
     });

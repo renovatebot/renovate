@@ -1,8 +1,7 @@
 import upath from 'upath';
-import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { cachePathExists, outputCacheFile, readCacheFile } from '../../../fs';
-import type { RepoCacheRecord } from '../schemas';
+import type { RepoCacheRecord } from '../schema';
 import { RepoCacheBase } from './base';
 
 export class RepoCacheLocal extends RepoCacheBase {
@@ -30,10 +29,9 @@ export class RepoCacheLocal extends RepoCacheBase {
   }
 
   private getCacheFileName(): string {
-    const cacheDir = GlobalConfig.get('cacheDir');
-    const repoCachePath = '/renovate/repository/';
+    const repoCachePath = 'renovate/repository/';
     const platform = this.platform;
     const fileName = `${this.repository}.json`;
-    return upath.join(cacheDir, repoCachePath, platform, fileName);
+    return upath.join(repoCachePath, platform, fileName);
   }
 }

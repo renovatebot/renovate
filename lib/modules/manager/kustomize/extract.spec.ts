@@ -1,4 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -6,10 +7,10 @@ import { HelmDatasource } from '../../datasource/helm';
 import {
   extractHelmChart,
   extractImage,
-  extractPackageFile,
   extractResource,
   parseKustomize,
 } from './extract';
+import { extractPackageFile } from '.';
 
 const kustomizeGitSSHBase = Fixtures.get('gitSshBase.yaml');
 const kustomizeEmpty = Fixtures.get('kustomizeEmpty.yaml');
@@ -75,7 +76,7 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should extract the version of a non http base', () => {
       const pkg = extractResource(
-        'ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3'
+        'ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3',
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
@@ -87,7 +88,7 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should extract the depName if the URL includes a port number', () => {
       const pkg = extractResource(
-        'ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3'
+        'ssh://git@bitbucket.com:7999/user/test-repo?ref=v1.2.3',
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
@@ -99,7 +100,7 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should extract the version of a non http base with subdir', () => {
       const pkg = extractResource(
-        'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3'
+        'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3',
       );
       expect(pkg).toEqual({
         currentValue: 'v1.2.3',
@@ -174,6 +175,22 @@ describe('modules/manager/kustomize/extract', () => {
       });
       expect(pkg).toEqual(sample);
     });
+
+    it('should correctly extract an OCI chart', () => {
+      const sample = {
+        depName: 'redis',
+        packageName: 'registry-1.docker.io/bitnamicharts/redis',
+        currentValue: '18.12.1',
+        datasource: DockerDatasource.id,
+        pinDigests: false,
+      };
+      const pkg = extractHelmChart({
+        name: sample.depName,
+        version: sample.currentValue,
+        repo: 'oci://registry-1.docker.io/bitnamicharts',
+      });
+      expect(pkg).toEqual(sample);
+    });
   });
 
   describe('image extraction', () => {
@@ -185,8 +202,19 @@ describe('modules/manager/kustomize/extract', () => {
       expect(pkg).toBeNull();
     });
 
+    it('should return null on invalid input', () => {
+      const pkg = extractImage({
+        // @ts-expect-error: for testing
+        name: 3,
+        newTag: '',
+      });
+      expect(pkg).toBeNull();
+    });
+
     it('should correctly extract a default image', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -202,6 +230,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract an image in a repo', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -217,6 +247,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract from a different registry', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -232,6 +264,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract from a different port', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: DockerDatasource.id,
@@ -247,6 +281,8 @@ describe('modules/manager/kustomize/extract', () => {
 
     it('should correctly extract from a multi-depth registry', () => {
       const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
         currentDigest: undefined,
         currentValue: 'v1.0.0',
         replaceString: 'v1.0.0',
@@ -259,33 +295,67 @@ describe('modules/manager/kustomize/extract', () => {
       });
       expect(pkg).toEqual(sample);
     });
+
+    it('should correctly extract with registryAliases', () => {
+      const sample = {
+        autoReplaceStringTemplate:
+          '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+        currentDigest: undefined,
+        currentValue: 'v1.0.0',
+        replaceString: 'v1.0.0',
+        datasource: DockerDatasource.id,
+        depName: 'docker.io/image/service',
+      };
+      const pkg = extractImage(
+        {
+          name: 'localhost:5000/repo/image/service',
+          newTag: sample.currentValue,
+        },
+        { 'localhost:5000/repo': 'docker.io' },
+      );
+      expect(pkg).toEqual(sample);
+    });
   });
 
   describe('extractPackageFile()', () => {
     it('returns null for non kustomize kubernetes files', () => {
-      expect(extractPackageFile(nonKustomize)).toBeNull();
+      expect(
+        extractPackageFile(nonKustomize, 'kustomization.yaml', {}),
+      ).toBeNull();
     });
 
     it('extracts multiple image lines', () => {
-      const res = extractPackageFile(kustomizeWithLocal);
+      const res = extractPackageFile(
+        kustomizeWithLocal,
+        'kustomization.yaml',
+        {},
+      );
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(2);
     });
 
     it('extracts ssh dependency', () => {
-      const res = extractPackageFile(kustomizeGitSSHBase);
+      const res = extractPackageFile(
+        kustomizeGitSSHBase,
+        'kustomization.yaml',
+        {},
+      );
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts ssh dependency with a subdir', () => {
-      const res = extractPackageFile(kustomizeGitSSHSubdir);
+      const res = extractPackageFile(
+        kustomizeGitSSHSubdir,
+        'kustomization.yaml',
+        {},
+      );
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(1);
     });
 
     it('extracts http dependency', () => {
-      const res = extractPackageFile(kustomizeHTTP);
+      const res = extractPackageFile(kustomizeHTTP, 'kustomization.yaml', {});
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(2);
       expect(res?.deps[0].currentValue).toBe('v0.0.1');
@@ -294,7 +364,7 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('should extract out image versions', () => {
-      const res = extractPackageFile(gitImages);
+      const res = extractPackageFile(gitImages, 'kustomization.yaml', {});
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(6);
       expect(res?.deps[0].currentValue).toBe('v0.1.0');
@@ -303,15 +373,21 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('ignores non-Kubernetes empty files', () => {
-      expect(extractPackageFile('')).toBeNull();
+      expect(extractPackageFile('', 'kustomization.yaml', {})).toBeNull();
     });
 
     it('does nothing with kustomize empty kustomize files', () => {
-      expect(extractPackageFile(kustomizeEmpty)).toBeNull();
+      expect(
+        extractPackageFile(kustomizeEmpty, 'kustomization.yaml', {}),
+      ).toBeNull();
     });
 
     it('should extract bases resources and components from their respective blocks', () => {
-      const res = extractPackageFile(kustomizeDepsInResources);
+      const res = extractPackageFile(
+        kustomizeDepsInResources,
+        'kustomization.yaml',
+        {},
+      );
       expect(res).not.toBeNull();
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
@@ -327,7 +403,11 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('should extract dependencies when kind is Component', () => {
-      const res = extractPackageFile(kustomizeComponent);
+      const res = extractPackageFile(
+        kustomizeComponent,
+        'kustomization.yaml',
+        {},
+      );
       expect(res).not.toBeNull();
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
@@ -346,7 +426,9 @@ describe('modules/manager/kustomize/extract', () => {
       'sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c';
 
     it('extracts from newTag', () => {
-      expect(extractPackageFile(newTag)).toMatchSnapshot({
+      expect(
+        extractPackageFile(newTag, 'kustomization.yaml', {}),
+      ).toMatchSnapshot({
         deps: [
           {
             currentDigest: undefined,
@@ -366,7 +448,9 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('extracts from digest', () => {
-      expect(extractPackageFile(digest)).toMatchSnapshot({
+      expect(
+        extractPackageFile(digest, 'kustomization.yaml', {}),
+      ).toMatchSnapshot({
         deps: [
           {
             currentDigest: postgresDigest,
@@ -392,7 +476,9 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('extracts newName', () => {
-      expect(extractPackageFile(newName)).toMatchSnapshot({
+      expect(
+        extractPackageFile(newName, 'kustomization.yaml', {}),
+      ).toMatchSnapshot({
         deps: [
           {
             depName: 'awesome/postgres',
@@ -420,17 +506,313 @@ describe('modules/manager/kustomize/extract', () => {
     });
 
     it('parses helmChart field', () => {
-      const res = extractPackageFile(kustomizeHelmChart);
+      const res = extractPackageFile(
+        kustomizeHelmChart,
+        'kustomization.yaml',
+        {},
+      );
       expect(res).toMatchSnapshot({
         deps: [
           {
             depType: 'HelmChart',
             depName: 'minecraft',
             currentValue: '3.1.3',
+            datasource: HelmDatasource.id,
             registryUrls: ['https://itzg.github.io/minecraft-server-charts'],
+          },
+          {
+            depType: 'HelmChart',
+            depName: 'redis',
+            currentValue: '18.12.1',
+            datasource: DockerDatasource.id,
+            packageName: 'registry-1.docker.io/bitnamicharts/redis',
+            pinDigests: false,
           },
         ],
       });
     });
+  });
+
+  describe('extractResource', () => {
+    const urls = [
+      {
+        name: 'https aws code commit url',
+        url: 'https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somedir',
+        host: 'git-codecommit.us-east-2.amazonaws.com/',
+        project: 'someorg/somerepo',
+        packageName:
+          'https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo',
+      },
+      {
+        name: 'legacy azure https url with params',
+        url: 'https://fabrikops2.visualstudio.com/someorg/somerepo',
+        host: 'fabrikops2.visualstudio.com/',
+        project: 'someorg/somerepo',
+        packageName: 'https://fabrikops2.visualstudio.com/someorg/somerepo',
+      },
+      {
+        name: 'http github url without git suffix',
+        url: 'http://github.com/someorg/somerepo/somedir',
+        host: 'github.com/',
+        project: 'someorg/somerepo',
+      },
+      {
+        name: 'scp github url without git suffix',
+        url: 'git@github.com:someorg/somerepo/somedir',
+        host: 'github.com:',
+        project: 'someorg/somerepo',
+      },
+      {
+        name: 'http github url with git suffix',
+        url: 'http://github.com/someorg/somerepo.git/somedir',
+        host: 'github.com/',
+        project: 'someorg/somerepo',
+      },
+      {
+        name: 'scp github url with git suffix',
+        url: 'git@github.com:someorg/somerepo.git/somedir',
+        host: 'github.com:',
+        project: 'someorg/somerepo',
+      },
+      {
+        name: 'non-github_scp',
+        url: 'git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git',
+        host: 'gitlab2.sqtools.ru:',
+        project: 'infra/kubernetes/thanos-base',
+        packageName: 'git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git',
+      },
+      {
+        name: 'non-github_scp with path delimiter',
+        url: 'git@bitbucket.org:company/project.git//path',
+        host: 'bitbucket.org:',
+        project: 'company/project',
+        packageName: 'git@bitbucket.org:company/project.git',
+      },
+      {
+        name: 'non-github_scp incorrectly using slash (invalid but currently passed through to git)',
+        url: 'git@bitbucket.org/company/project.git//path',
+        host: 'bitbucket.org/',
+        project: 'company/project',
+        packageName: 'git@bitbucket.org/company/project.git',
+      },
+      {
+        name: 'non-github_git-user_ssh',
+        url: 'ssh://git@bitbucket.org/company/project.git//path',
+        host: 'bitbucket.org/',
+        project: 'company/project',
+        packageName: 'ssh://git@bitbucket.org/company/project.git',
+      },
+      {
+        name: '_git host delimiter in non-github url',
+        url: 'https://itfs.mycompany.com/collection/project/_git/somerepos',
+        host: 'itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        name: '_git host delimiter in non-github url with params',
+        url: 'https://itfs.mycompany.com/collection/project/_git/somerepos',
+        host: 'itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        name: '_git host delimiter in non-github url with kust root path and params',
+        url: 'https://itfs.mycompany.com/collection/project/_git/somerepos/somedir',
+        host: 'itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        name: '_git host delimiter in non-github url with no kust root path',
+        url: 'git::https://itfs.mycompany.com/collection/project/_git/somerepos',
+        host: 'itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        name: 'https bitbucket url with git suffix',
+        url: 'https://bitbucket.example.com/scm/project/repository.git',
+        host: 'bitbucket.example.com/',
+        project: 'scm/project/repository',
+        packageName: 'https://bitbucket.example.com/scm/project/repository.git',
+      },
+      {
+        name: 'ssh aws code commit url',
+        url: 'ssh://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somepath',
+        host: 'git-codecommit.us-east-2.amazonaws.com/',
+        project: 'someorg/somerepo',
+        packageName:
+          'ssh://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo',
+      },
+      {
+        name: 'scp Github with slash fixed to colon',
+        url: 'git@github.com/someorg/somerepo/somepath',
+        host: 'github.com:',
+        project: 'someorg/somerepo',
+      },
+      {
+        name: 'https Github with double slash path delimiter and params',
+        url: 'https://github.com/kubernetes-sigs/kustomize//examples/multibases/dev/',
+        host: 'github.com/',
+        project: 'kubernetes-sigs/kustomize',
+      },
+      {
+        name: 'ssh Github with double-slashed path delimiter and params',
+        url: 'ssh://git@github.com/kubernetes-sigs/kustomize//examples/multibases/dev',
+        host: 'github.com:',
+        project: 'kubernetes-sigs/kustomize',
+      },
+      {
+        name: 'arbitrary https host with double-slash path delimiter',
+        url: 'https://example.org/path/to/repo//examples/multibases/dev',
+        host: 'example.org/',
+        project: 'path/to/repo',
+        packageName: 'https://example.org/path/to/repo',
+      },
+      {
+        name: 'arbitrary https host with .git repo suffix',
+        url: 'https://example.org/path/to/repo.git/examples/multibases/dev',
+        host: 'example.org/',
+        project: 'path/to/repo',
+        packageName: 'https://example.org/path/to/repo.git',
+      },
+      {
+        name: 'arbitrary ssh host with double-slash path delimiter',
+        url: 'ssh://alice@example.com/path/to/repo//examples/multibases/dev',
+        host: 'example.com/',
+        project: 'path/to/repo',
+        packageName: 'ssh://alice@example.com/path/to/repo',
+      },
+      // {
+      //   name: 'query_slash',
+      //   url: 'https://authority/org/repo?ref=group/version',
+      //   host: 'authority/',
+      //   project: 'org/repo',
+      //   packageName: 'https://authority/org/repo',
+      // },
+      // {
+      //   name: 'query_git_delimiter',
+      //   url: 'https://authority/org/repo/?ref=includes_git/for_some_reason',
+      //   host: 'authority/',
+      //   project: 'org/repo',
+      //   packageName: 'https://authority/org/repo',
+      // },
+      // {
+      //   name: 'query_git_suffix',
+      //   url: 'https://authority/org/repo/?ref=includes.git/for_some_reason',
+      //   host: 'authority/',
+      //   project: 'org/repo',
+      //   packageName: 'https://authority/org/repo',
+      // },
+      {
+        name: 'non_parsable_path',
+        url: 'https://authority/org/repo/%-invalid-uri-so-not-parsable-by-net/url.Parse',
+        host: 'authority/',
+        project: 'org/repo',
+        packageName: 'https://authority/org/repo',
+      },
+      {
+        name: 'non-git username with non-github host',
+        url: 'ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git//path',
+        host: 'bitbucket.org/',
+        project: 'ourteamname/ourrepositoryname',
+        packageName:
+          'ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git',
+      },
+      {
+        name: 'username with http protocol (invalid but currently passed through to git)',
+        url: 'http://git@home.com/path/to/repository.git//path',
+        host: 'home.com/',
+        project: 'path/to/repository',
+        packageName: 'http://git@home.com/path/to/repository.git',
+      },
+      {
+        name: 'username with https protocol (invalid but currently passed through to git)',
+        url: 'https://git@home.com/path/to/repository.git//path',
+        host: 'home.com/',
+        project: 'path/to/repository',
+        packageName: 'https://git@home.com/path/to/repository.git',
+      },
+      {
+        name: 'complex github ssh url from docs',
+        url: 'ssh://git@ssh.github.com:443/YOUR-USERNAME/YOUR-REPOSITORY.git',
+        host: 'ssh.github.com:443/',
+        project: 'YOUR-USERNAME/YOUR-REPOSITORY',
+      },
+      {
+        name: 'colon behind slash not scp delimiter',
+        url: 'git@gitlab.com/user:name/YOUR-REPOSITORY.git/path',
+        host: 'gitlab.com/',
+        project: 'user:name/YOUR-REPOSITORY',
+        packageName: 'git@gitlab.com/user:name/YOUR-REPOSITORY.git',
+      },
+      {
+        name: 'gitlab URLs with explicit git suffix',
+        url: 'git@gitlab.com:gitlab-tests/sample-project.git',
+        host: 'gitlab.com:',
+        project: 'gitlab-tests/sample-project',
+        packageName: 'git@gitlab.com:gitlab-tests/sample-project.git',
+      },
+      {
+        name: 'gitlab URLs without explicit git suffix',
+        url: 'git@gitlab.com:gitlab-tests/sample-project',
+        host: 'gitlab.com:',
+        project: 'gitlab-tests/sample-project',
+        packageName: 'git@gitlab.com:gitlab-tests/sample-project',
+      },
+      {
+        name: 'azure host with _git and // path separator',
+        url: 'https://username@dev.azure.com/org/project/_git/repo//path/to/kustomization/root',
+        host: 'dev.azure.com/',
+        project: 'org/project/_git/repo',
+        packageName: 'https://username@dev.azure.com/org/project/_git/repo',
+      },
+      {
+        name: 'legacy format azure host with _git',
+        url: 'https://org.visualstudio.com/project/_git/repo/path/to/kustomization/root',
+        host: 'org.visualstudio.com/',
+        project: 'project/_git/repo',
+        packageName: 'https://org.visualstudio.com/project/_git/repo',
+      },
+      {
+        name: 'ssh on github with custom username for custom ssh certificate authority',
+        url: 'ssh://org-12345@github.com/kubernetes-sigs/kustomize',
+        host: 'github.com:',
+        project: 'kubernetes-sigs/kustomize',
+      },
+      {
+        name: 'scp on github with custom username for custom ssh certificate authority',
+        url: 'org-12345@github.com/kubernetes-sigs/kustomize',
+        host: 'github.com:',
+        project: 'kubernetes-sigs/kustomize',
+      },
+    ];
+
+    // as per kustomize URL specifications
+    it.each(urls)(
+      'extracts correct project from $name',
+      ({ url, host, project, packageName }) => {
+        const version = 'v1.0.0';
+        const sample: any = {
+          currentValue: version,
+        };
+        if (regEx(/(?:github\.com)(:|\/)/).test(url)) {
+          sample.depName = project;
+          sample.datasource = GithubTagsDatasource.id;
+        } else {
+          sample.depName = host + project;
+          sample.packageName = packageName;
+          sample.datasource = GitTagsDatasource.id;
+        }
+
+        const pkg = extractResource(`${url}?ref=${version}`);
+        expect(pkg).toEqual(sample);
+      },
+    );
   });
 });

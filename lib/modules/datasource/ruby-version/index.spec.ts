@@ -14,19 +14,21 @@ describe('modules/datasource/ruby-version/index', () => {
         .reply(200, Fixtures.get('releases.html'));
       const res = await getPkgReleases({
         datasource,
-        depName: 'ruby',
+        packageName: 'ruby',
       });
       expect(res).toMatchSnapshot();
     });
 
-    it('throws for empty result', async () => {
+    it('returns null for empty result', async () => {
       httpMock
         .scope('https://www.ruby-lang.org')
         .get('/en/downloads/releases/')
         .reply(200, {});
-      await expect(
-        getPkgReleases({ datasource, depName: 'ruby' })
-      ).rejects.toThrow();
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'ruby',
+      });
+      expect(res).toBeNull();
     });
 
     it('throws for 404', async () => {
@@ -35,7 +37,7 @@ describe('modules/datasource/ruby-version/index', () => {
         .get('/en/downloads/releases/')
         .reply(404);
       await expect(
-        getPkgReleases({ datasource, depName: 'ruby' })
+        getPkgReleases({ datasource, packageName: 'ruby' }),
       ).rejects.toThrow();
     });
   });

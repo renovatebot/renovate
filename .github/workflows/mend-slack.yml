@@ -1,0 +1,23 @@
+name: 'Mend Slack Notifier'
+
+on:
+  discussion:
+    types: [labeled]
+
+permissions:
+  discussions: read
+
+jobs:
+  slack:
+    if: contains(github.event.label.name, 'mend-app')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post to Slack
+        id: slack
+        uses: slackapi/slack-github-action@6c661ce58804a1a20f6dc5fbee7f0381b469e001 # v1.25.0
+        with:
+          channel-id: 'C05NLTMGCJC'
+          # For posting a simple plain text message
+          slack-message: '<${{ github.event.discussion.html_url }}|${{ github.event.discussion.title }}>'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

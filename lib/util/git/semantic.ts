@@ -10,7 +10,7 @@ export async function detectSemanticCommits(): Promise<DetectedSemanticCommit> {
   const cache = getCache();
   if (cache.semanticCommits) {
     logger.debug(
-      `semanticCommits: returning "${cache.semanticCommits}" from cache`
+      `semanticCommits: returning "${cache.semanticCommits}" from cache`,
     );
     return cache.semanticCommits;
   }

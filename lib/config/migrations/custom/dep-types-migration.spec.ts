@@ -84,7 +84,7 @@ describe('config/migrations/custom/dep-types-migration', () => {
             respectLatest: false,
           },
         ],
-      }
+      },
     );
   });
 });

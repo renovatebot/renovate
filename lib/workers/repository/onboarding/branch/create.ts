@@ -2,30 +2,41 @@ import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
+import { scm } from '../../../../modules/platform/scm';
+import { compile } from '../../../../util/template';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
 const defaultConfigFile = configFileNames[0];
 
 export async function createOnboardingBranch(
-  config: Partial<RenovateConfig>
+  config: Partial<RenovateConfig>,
 ): Promise<string | null> {
-  // TODO #7154
+  // TODO #22198
   const configFile = configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName
     : defaultConfigFile;
 
   logger.debug('createOnboardingBranch()');
-  // TODO #7154
+  // TODO #22198
   const contents = await getOnboardingConfigContents(config, configFile!);
   logger.debug('Creating onboarding branch');
 
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
-    configFile!
+    configFile!,
   );
-  const commitMessage = commitMessageFactory.create();
+  let commitMessage = commitMessageFactory.create().toString();
+
+  if (config.commitBody) {
+    commitMessage = `${commitMessage}\n\n${compile(
+      config.commitBody,
+      // only allow gitAuthor template value in the commitBody
+      { gitAuthor: config.gitAuthor },
+    )}`;
+
+    logger.trace(`commitMessage: ${commitMessage}`);
+  }
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
@@ -33,17 +44,19 @@ export async function createOnboardingBranch(
     return null;
   }
 
-  return commitAndPush({
+  return scm.commitAndPush({
+    baseBranch: config.baseBranch,
     branchName: config.onboardingBranch!,
     files: [
       {
         type: 'addition',
-        // TODO #7154
+        // TODO #22198
         path: configFile!,
         contents,
       },
     ],
-    message: commitMessage.toString(),
+    message: commitMessage,
     platformCommit: !!config.platformCommit,
+    force: true,
   });
 }

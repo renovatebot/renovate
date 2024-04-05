@@ -11,7 +11,7 @@ describe('util/package-rules/current-value', () => {
         },
         {
           matchCurrentValue: '^v',
-        }
+        },
       );
       expect(result).toBeFalse();
     });
@@ -23,9 +23,21 @@ describe('util/package-rules/current-value', () => {
         },
         {
           matchCurrentValue: '/^v/',
-        }
+        },
       );
       expect(result).toBeFalse();
+    });
+
+    it('case insensitive match', () => {
+      const result = matcher.matches(
+        {
+          currentValue: '"V1.1.0"',
+        },
+        {
+          matchCurrentValue: '/^"v/i',
+        },
+      );
+      expect(result).toBeTrue();
     });
 
     it('return true for regex version match', () => {
@@ -35,7 +47,7 @@ describe('util/package-rules/current-value', () => {
         },
         {
           matchCurrentValue: '/^"/',
-        }
+        },
       );
       expect(result).toBeTrue();
     });
@@ -45,7 +57,7 @@ describe('util/package-rules/current-value', () => {
         {},
         {
           matchCurrentValue: '/^v?[~ -]?0/',
-        }
+        },
       );
       expect(result).toBeFalse();
     });

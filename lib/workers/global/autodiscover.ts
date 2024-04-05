@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
-import { configRegexPredicate, isConfigRegex } from '../../util/regex';
+import { minimatchFilter } from '../../util/minimatch';
+import { getRegexPredicate, isRegexMatch } from '../../util/string-match';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {
@@ -11,32 +11,50 @@ function repoName(value: string | { repository: string }): string {
 }
 
 export async function autodiscoverRepositories(
-  config: AllConfig
+  config: AllConfig,
 ): Promise<AllConfig> {
+  const { autodiscoverFilter } = config;
+  if (config.platform === 'local') {
+    if (config.repositories?.length) {
+      logger.debug(
+        { repositories: config.repositories },
+        'Found repositories when in local mode',
+      );
+      throw new Error(
+        'Invalid configuration: repositories list not supported when platform=local',
+      );
+    }
+    config.repositories = ['local'];
+    return config;
+  }
   if (!config.autodiscover) {
     if (!config.repositories?.length) {
       logger.warn(
-        'No repositories found - did you want to run with flag --autodiscover?'
+        'No repositories found - did you want to run with flag --autodiscover?',
       );
     }
     return config;
   }
   // Autodiscover list of repositories
-  let discovered = await platform.getRepos();
+  let discovered = await platform.getRepos({
+    topics: config.autodiscoverTopics,
+    includeMirrors: config.includeMirrors,
+    namespaces: config.autodiscoverNamespaces,
+    projects: config.autodiscoverProjects,
+  });
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
-    logger.debug(
-      'The account associated with your token does not have access to any repos'
-    );
+    logger.debug('No repositories were autodiscovered');
     return config;
   }
 
-  if (config.autodiscoverFilter) {
+  logger.debug(`Autodiscovered ${discovered.length} repositories`);
+
+  if (autodiscoverFilter) {
+    logger.debug({ autodiscoverFilter }, 'Applying autodiscoverFilter');
     discovered = applyFilters(
       discovered,
-      is.string(config.autodiscoverFilter)
-        ? [config.autodiscoverFilter]
-        : config.autodiscoverFilter
+      is.string(autodiscoverFilter) ? [autodiscoverFilter] : autodiscoverFilter,
     );
 
     if (!discovered.length) {
@@ -48,13 +66,13 @@ export async function autodiscoverRepositories(
 
   logger.info(
     { length: discovered.length, repositories: discovered },
-    `Autodiscovered repositories`
+    `Autodiscovered repositories`,
   );
 
   // istanbul ignore if
   if (config.repositories?.length) {
     logger.debug(
-      'Checking autodiscovered repositories against configured repositories'
+      'Checking autodiscovered repositories against configured repositories',
     );
     for (const configuredRepo of config.repositories) {
       const repository = repoName(configuredRepo);
@@ -70,7 +88,7 @@ export async function autodiscoverRepositories(
       if (!found) {
         logger.warn(
           { repository },
-          'Configured repository is in not in autodiscover list'
+          'Configured repository is in not in autodiscover list',
         );
       }
     }
@@ -83,14 +101,14 @@ export function applyFilters(repos: string[], filters: string[]): string[] {
 
   for (const filter of filters) {
     let res: string[];
-    if (isConfigRegex(filter)) {
-      const autodiscoveryPred = configRegexPredicate(filter);
+    if (isRegexMatch(filter)) {
+      const autodiscoveryPred = getRegexPredicate(filter);
       if (!autodiscoveryPred) {
         throw new Error(`Failed to parse regex pattern "${filter}"`);
       }
       res = repos.filter(autodiscoveryPred);
     } else {
-      res = repos.filter(minimatch.filter(filter));
+      res = repos.filter(minimatchFilter(filter, { dot: true, nocase: true }));
     }
     for (const repository of res) {
       matched.add(repository);

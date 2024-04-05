@@ -31,6 +31,8 @@ function execSnapshot(cmd: string, options?: RawExecOptions): ExecSnapshot {
     if (is.string(v)) {
       const val = v
         .replace(regEx(/\\(\w)/g), '/$1')
+        .replace(regEx(/^[A-Z]:\//), '/') // replace windows paths
+        .replace(regEx(/"[A-Z]:\//g), '"/') // replace windows paths
         .replace(cwd, '/root/project');
       this.update(val);
     }
@@ -40,7 +42,7 @@ function execSnapshot(cmd: string, options?: RawExecOptions): ExecSnapshot {
 const defaultExecResult = { stdout: '', stderr: '' };
 
 export function mockExecAll(
-  execResult: ExecResult = defaultExecResult
+  execResult: ExecResult = defaultExecResult,
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
   exec.mockImplementation((cmd, options) => {

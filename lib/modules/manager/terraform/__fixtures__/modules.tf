@@ -132,6 +132,10 @@ module "relative" {
   source = "../../modules/fe"
 }
 
+module "relative" {
+  source = "./relative"
+}
+
 module "nosauce" {
   foo = "bar"
 }

@@ -10,7 +10,7 @@ describe('config/migrations/custom/automerge-patch-migration', () => {
         patch: {
           automerge: true,
         },
-      }
+      },
     );
   });
 
@@ -19,15 +19,15 @@ describe('config/migrations/custom/automerge-patch-migration', () => {
       {
         automergePatch: 'some-value',
         patch: {
-          matchFiles: ['test'],
+          matchFileNames: ['test'],
         },
       },
       {
         patch: {
           automerge: true,
-          matchFiles: ['test'],
+          matchFileNames: ['test'],
         },
-      }
+      },
     );
   });
 
@@ -41,7 +41,7 @@ describe('config/migrations/custom/automerge-patch-migration', () => {
         patch: {
           automerge: true,
         },
-      }
+      },
     );
   });
 });

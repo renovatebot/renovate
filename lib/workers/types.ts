@@ -4,6 +4,7 @@ import type {
   LegacyAdminConfig,
   RenovateConfig,
   RenovateSharedConfig,
+  UserEnv,
   ValidationMessage,
 } from '../config/types';
 import type { Release } from '../modules/datasource/types';
@@ -16,7 +17,7 @@ import type {
 } from '../modules/manager/types';
 import type { PlatformPrOptions } from '../modules/platform/types';
 import type { FileChange } from '../util/git/types';
-import type { MergeConfidence } from '../util/merge-confidence';
+import type { MergeConfidence } from '../util/merge-confidence/types';
 import type {
   ChangeLogRelease,
   ChangeLogResult,
@@ -38,12 +39,14 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
+  depIndex?: number;
+
+  displayPending?: string;
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
-  language?: string;
   manager: string;
   packageFile?: string;
   lockFile?: string;
@@ -55,12 +58,13 @@ export interface BranchUpgradeConfig
   prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
+  prTitleStrict?: boolean;
   prettyNewMajor?: string;
   prettyNewVersion?: string;
   releases?: ReleaseWithNotes[];
   releaseTimestamp?: string;
   repoName?: string;
-  minimumConfidence?: MergeConfidence;
+  minimumConfidence?: MergeConfidence | undefined;
   sourceDirectory?: string;
 
   updatedPackageFiles?: FileChange[];
@@ -76,6 +80,7 @@ export interface BranchUpgradeConfig
   sourceRepo?: string;
   sourceRepoOrg?: string;
   sourceRepoName?: string;
+  env?: UserEnv;
 }
 
 export type PrBlockedBy =
@@ -109,6 +114,7 @@ export interface BranchConfig
     PlatformPrOptions {
   automergeComment?: string;
   automergeType?: string;
+  automergedPreviously?: boolean;
   baseBranch: string;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
@@ -123,16 +129,17 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
-  branchFingerprint?: string;
+  commitFingerprint?: string;
   skipBranchUpdate?: boolean;
+  env?: UserEnv;
 }
 
 export interface BranchMetadata {
   branchName: string;
-  branchSha: string | null;
+  branchSha?: string | null;
   baseBranch?: string;
   baseBranchSha?: string | null;
-  automerge: boolean;
+  automerge?: boolean;
   isModified?: boolean;
   isPristine?: boolean;
 }
@@ -143,9 +150,10 @@ export interface BaseBranchMetadata {
 }
 
 export interface BranchSummary {
-  cacheModified?: boolean;
   baseBranches: BaseBranchMetadata[];
   branches: BranchMetadata[];
+  cacheModified?: boolean;
+  defaultBranch?: string;
   inactiveBranches: string[];
 }
 
@@ -176,6 +184,7 @@ export interface UpgradeFingerprintConfig {
   currentVersion?: string;
   datasource?: string;
   depName?: string;
+  env?: UserEnv;
   lockFile?: string;
   lockedVersion?: string;
   manager?: string | null;
@@ -185,4 +194,9 @@ export interface UpgradeFingerprintConfig {
   newVersion?: string;
   packageFile?: string;
   replaceString?: string;
+}
+
+export interface ExtractResult {
+  extractionFingerprints: Record<string, string | undefined>;
+  packageFiles: Record<string, PackageFile[]>;
 }

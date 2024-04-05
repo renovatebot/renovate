@@ -1,4 +1,3 @@
-import { afterAll } from '@jest/globals';
 import { instrument } from './decorator';
 import { disableInstrumentations } from '.';
 

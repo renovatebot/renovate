@@ -1,9 +1,12 @@
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { NpmDatasource } from '../../datasource/npm';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+): PackageFileContent | null {
   let deps: PackageDependency[] = [];
   const npmDepends = regEx(/\nNpm\.depends\({([\s\S]*?)}\);/).exec(content);
   if (!npmDepends) {
@@ -30,7 +33,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       })
       .filter((dep) => dep.depName && dep.currentValue);
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ content }, 'Failed to parse meteor package.js');
+    logger.warn({ err, packageFile }, 'Failed to parse meteor package.js');
   }
   // istanbul ignore if
   if (!deps.length) {

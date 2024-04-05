@@ -15,7 +15,6 @@ const gitlab = mocked(_gitlab);
 
 describe('config/presets/local/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     const preset = { resolved: 'preset' };
     platform.getRawFile.mockResolvedValue('{ resolved: "preset" }');
     gitea.getPresetFromEndpoint.mockResolvedValueOnce(preset);
@@ -66,7 +65,7 @@ describe('config/presets/local/index', () => {
       expect(platform.getRawFile).toHaveBeenCalledWith(
         'default.json',
         'some/repo',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -85,7 +84,7 @@ describe('config/presets/local/index', () => {
       expect(platform.getRawFile).toHaveBeenCalledWith(
         'default.json',
         'some/repo',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -104,7 +103,7 @@ describe('config/presets/local/index', () => {
       expect(platform.getRawFile).toHaveBeenCalledWith(
         'default.json',
         'some/repo',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -123,7 +122,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         undefined,
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -143,7 +142,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         'https://api.gitea.example.com',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -162,7 +161,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         undefined,
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -183,7 +182,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         'https://api.github.example.com',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -203,7 +202,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         undefined,
-        'someTag'
+        'someTag',
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -225,14 +224,14 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         'https://api.github.example.com',
-        'someTag'
+        'someTag',
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
 
     it('forwards to gitlab', async () => {
       GlobalConfig.set({
-        platform: 'GitLab',
+        platform: 'gitlab',
       });
       const content = await local.getPreset({
         repo: 'some/repo',
@@ -245,7 +244,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         undefined,
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -266,13 +265,13 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         'https://gitlab.example.com/api/v4',
-        undefined
+        undefined,
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
 
     it('forwards to gitlab with a tag', async () => {
-      GlobalConfig.set({ platform: 'GitLab' });
+      GlobalConfig.set({ platform: 'gitlab' });
       const content = await local.getPreset({
         repo: 'some/repo',
         presetName: 'default',
@@ -285,7 +284,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         undefined,
-        'someTag'
+        'someTag',
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -307,7 +306,7 @@ describe('config/presets/local/index', () => {
         'default',
         undefined,
         'https://gitlab.example.com/api/v4',
-        'someTag'
+        'someTag',
       );
       expect(content).toEqual({ resolved: 'preset' });
     });

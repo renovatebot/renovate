@@ -3,9 +3,12 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { OrbDatasource } from '../../datasource/orb';
 import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split(newlineRegex);
@@ -26,7 +29,9 @@ export function extractPackageFile(content: string): PackageFile | null {
             lineNumber += 1;
             continue;
           }
-          const orbMatch = regEx(/^\s+([^:]+):\s(.+)$/).exec(orbLine);
+          const orbMatch = regEx(/^\s+([^:]+):\s(.+?)(?:\s*#.*)?$/).exec(
+            orbLine,
+          );
           if (orbMatch) {
             logger.trace('orbMatch');
             foundOrbOrNoop = true;
@@ -41,7 +46,6 @@ export function extractPackageFile(content: string): PackageFile | null {
               packageName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
               versioning: npmVersioning.id,
-              rangeStrategy: 'pin',
             };
             deps.push(dep);
           }
@@ -57,7 +61,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             currentValue: dep.currentValue,
             currentDigest: dep.currentDigest,
           },
-          'CircleCI docker image'
+          'CircleCI docker image',
         );
         dep.depType = 'docker';
         dep.versioning = 'docker';
@@ -72,7 +76,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting circleci images');
+    logger.debug({ err, packageFile }, 'Error extracting circleci images');
   }
   if (!deps.length) {
     return null;

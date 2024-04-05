@@ -22,7 +22,7 @@ If there were any doubts about whether you'd found a genuine problem before, the
 Next, when a reproduction has minimal config, it can often let us narrow down or even identify the root cause, suggest workarounds, etc.
 This means we can often help you from code inspection alone.
 
-Finally, by making the code/dependencies minimal, it usually makes the problem feasible to step through using a debugging if code inspection wasn't sufficient.
+Finally, by making the code/dependencies minimal, it usually makes the problem feasible to step through using a debugger if code inspection wasn't sufficient.
 Production repositories or non-minimal reproductions are often very difficult to debug because break points get triggered dozens or hundreds or times.
 
 ## What is a minimal reproduction?
@@ -32,8 +32,8 @@ A minimal reproduction helps the developers see where the bug or missing feature
 
 ## Where to host the minimal reproduction
 
-If you can, use GitHub to host your reproduction.
-If the reproduction needs to be on GitLab or Bitbucket, that's also okay.
+Unless it's impossible, use a public repository on GitHub.com to host your reproduction.
+If the reproduction needs to be on another platform like GitLab or Bitbucket because it's related to functionality only on that platform, then that's okay.
 
 ## Creating a minimal reproduction
 
@@ -44,7 +44,7 @@ There are two ways to create a minimal reproduction:
 
 General steps:
 
-1. Create your minimal reproduction repository on GitHub, only use GitLab or Bitbucket if really needed
+1. Create your minimal reproduction repository on GitHub, only use GitLab or Bitbucket if needed
 1. Use the fewest number of repository files and dependencies
 1. Reduce the Renovate config to a minimum
 1. Remove private or secret information
@@ -68,20 +68,36 @@ A production repository usually has:
 
 Having lots of "moving parts" makes debugging tricky, because debug break points can be triggered hundreds of times.
 
-When you have lots of custom config for Renovate, it's easy to think that you've found the root cause of the behavior.
+When you have lots of custom config for Renovate, it's hard to find the root cause of the behavior.
 Bugs are often caused by multiple features interacting.
 Reducing the config to a minimum helps us find out exactly which config elements are required to trigger the bug.
 
 ### "It's too much work to create a minimal reproduction"
 
-We'd love to get down to zero reported bugs or feature requests remaining, but we have a lot to do and must set our priorities.
-This means we prefer working on issues with a minimal reproduction, as they allow us to spend our time efficiently.
-
-If you don't create a minimal reproduction, we won't prioritize working on your issue.
-
-Issues without a reproduction will probably stay open until you, or somebody else, creates a minimal reproduction.
-After a while, issues without a reproduction may be closed unfixed.
+If you don't create a minimal reproduction, the Renovate maintainers won't prioritize working on your issue.
+Discussions without a reproduction will probably go stale unless you, or somebody else, creates a minimal reproduction.
 
 ### "I already described what you need in the issue"
 
-If it's simple then it shouldn't take you much time to commit it to a repo.
+Thank you for describing your issue in detail.
+But we still need a minimal reproduction in a repository, and we'd like you to be the one to make sure it matches both your description as well as expected behavior.
+
+### Forcing Renovate to create a lot of pending updates
+
+Put an old version of a frequently updated dependency in your repository.
+Set a high `minimumReleaseAge` for that dependency, for example:
+
+```json
+{
+  "extends": ["config:best-practices"],
+  "packageRules": [
+    {
+      "description": "Force lots of pending updates for the Prettier package",
+      "matchPackageNames": ["prettier"],
+      "minimumReleaseAge": "365 days"
+    }
+  ]
+}
+```
+
+You'll get a lot of pending updates, which you can see on the Dependency Dashboard.

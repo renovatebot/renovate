@@ -2,7 +2,7 @@ import { api as conan } from '.';
 
 describe('modules/versioning/conan/index', () => {
   // isValid(version: string): boolean;
-  test.each`
+  it.each`
     version                                                      | result
     ${'[1.2.3.4, loose=False]'}                                  | ${false}
     ${'[NOT VALID, loose=False]'}                                | ${false}
@@ -114,7 +114,7 @@ describe('modules/versioning/conan/index', () => {
 
   // isVersion(version: string): boolean;
   // isSingleVersion(version: string): boolean;
-  test.each`
+  it.each`
     version                                            | result
     ${'1.0.7-prerelease.1'}                            | ${true}
     ${'1.0.7-prerelease.1, include_prerelease=True'}   | ${true}
@@ -160,7 +160,7 @@ describe('modules/versioning/conan/index', () => {
   });
 
   // isCompatible(version: string, range?: string): boolean;
-  test.each`
+  it.each`
     range                                                                           | version              | result
     ${'[>1.1 <2.0]'}                                                                | ${'1.2.3'}           | ${true}
     ${'["~1.2.3", loose=False, include_prerelease=True]'}                           | ${'1.2.3-pre.1'}     | ${false}
@@ -351,11 +351,11 @@ describe('modules/versioning/conan/index', () => {
     ({ version, range, result }) => {
       const res = !!conan.isCompatible(version, range);
       expect(res).toBe(result);
-    }
+    },
   );
 
   // matches(version: string, range: string | Range): string | boolean | null;
-  test.each`
+  it.each`
     range                                                                           | version              | result
     ${'[>1.1 <2.0]'}                                                                | ${'1.2.3'}           | ${true}
     ${'["~1.2.3", loose=False, include_prerelease=True]'}                           | ${'1.2.3-pre.1'}     | ${true}
@@ -546,11 +546,11 @@ describe('modules/versioning/conan/index', () => {
     ({ version, range, result }) => {
       const res = !!conan.matches(version, range);
       expect(res).toBe(result);
-    }
+    },
   );
 
   // isStable(version: string): boolean;
-  test.each`
+  it.each`
     version                                          | result
     ${'5.0.1'}                                       | ${true}
     ${'19.00'}                                       | ${true}
@@ -562,7 +562,7 @@ describe('modules/versioning/conan/index', () => {
   });
 
   // getNewValue(newValueConfig: NewValueConfig): string;
-  test.each`
+  it.each`
     currentValue                                          | rangeStrategy | currentVersion                     | newVersion                         | result
     ${'[<=1.2.3]'}                                        | ${'widen'}    | ${'1.0.0'}                         | ${'1.2.3'}                         | ${'[<=1.2.3]'}
     ${'[<1.2.3]'}                                         | ${'widen'}    | ${'1.5.5'}                         | ${'1.5.6'}                         | ${'[<1.5.7]'}
@@ -643,11 +643,11 @@ describe('modules/versioning/conan/index', () => {
         newVersion,
       });
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // getSatisfyingVersion(versions: string[], range: string): string | null;
-  test.each`
+  it.each`
     versions                                                                                   | range                                                              | result
     ${['1.2.4', '1.2.3', '1.2.5-beta']}                                                        | ${'["~1.2.3", loose=False, include_prerelease=True]'}              | ${'1.2.5-beta'}
     ${['1.2.4', '1.2.3', '1.2.5-beta']}                                                        | ${'["~1.2.3", loose=False, include_prerelease=False]'}             | ${'1.2.4'}
@@ -701,11 +701,11 @@ describe('modules/versioning/conan/index', () => {
     ({ versions, range, result }) => {
       const res = conan.getSatisfyingVersion(versions, range);
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // minSatisfyingVersion(versions: string[], range: string): string | null;
-  test.each`
+  it.each`
     versions                                                                                   | range                                                  | result
     ${['1.2.3', '1.2.4', '1.2.5', '1.2.6', '2.0.1']}                                           | ${'["~1.2.3", loose=False]'}                           | ${'1.2.3'}
     ${['1.1.0', '1.2.0', '1.3.0', '2.0.0b1', '2.0.0b3', '2.0.0', '2.1.0']}                     | ${'[~2.0.0]'}                                          | ${'2.0.0'}
@@ -722,11 +722,11 @@ describe('modules/versioning/conan/index', () => {
     ({ versions, range, result }) => {
       const res = conan.minSatisfyingVersion(versions, range);
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // test 4-digit
-  test.each`
+  it.each`
     version                | major   | minor   | patch
     ${'4.1.3'}             | ${4}    | ${1}    | ${3}
     ${'4.1.3+jenkins'}     | ${4}    | ${1}    | ${3}
@@ -745,11 +745,11 @@ describe('modules/versioning/conan/index', () => {
       expect(conan.getMajor(version)).toBe(major);
       expect(conan.getMinor(version)).toBe(minor);
       expect(conan.getPatch(version)).toBe(patch);
-    }
+    },
   );
 
   // getMajor(version: string): null | number;
-  test.each`
+  it.each`
     version       | result
     ${'4.1.33.2'} | ${4}
   `('getMajor("$version") === "$result"', ({ version, result }) => {
@@ -758,7 +758,7 @@ describe('modules/versioning/conan/index', () => {
   });
 
   // getMinor(version: string): null | number;
-  test.each`
+  it.each`
     version       | result
     ${'1.2.3'}    | ${2}
     ${'5.2.1'}    | ${2}
@@ -769,7 +769,7 @@ describe('modules/versioning/conan/index', () => {
   });
 
   // getPatch(version: string): null | number;
-  test.each`
+  it.each`
     version       | result
     ${'1.2.3'}    | ${3}
     ${'5.2.1'}    | ${1}
@@ -780,7 +780,7 @@ describe('modules/versioning/conan/index', () => {
   });
 
   // equals(version: string, other: string): boolean;
-  test.each`
+  it.each`
     version               | other                                     | result
     ${'1.2.3'}            | ${'1.2.3'}                                | ${true}
     ${'2.3.1'}            | ${'1.2.3'}                                | ${false}
@@ -827,11 +827,11 @@ describe('modules/versioning/conan/index', () => {
     ({ version, other, result }) => {
       const res = conan.equals(version, other);
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // isGreaterThan(version: string, other: string): boolean;
-  test.each`
+  it.each`
     version                              | other                                 | result
     ${'1.2.3'}                           | ${'1.2.3'}                            | ${false}
     ${'19.00'}                           | ${'16.00'}                            | ${true}
@@ -873,11 +873,11 @@ describe('modules/versioning/conan/index', () => {
     ({ version, other, result }) => {
       const res = conan.isGreaterThan(version, other);
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // sortVersions(version: string, other: string): boolean;
-  test.each`
+  it.each`
     version    | other      | result
     ${'1.2'}   | ${'1.3'}   | ${-1}
     ${'1.2.3'} | ${'1.2.3'} | ${0}
@@ -888,11 +888,11 @@ describe('modules/versioning/conan/index', () => {
     ({ version, other, result }) => {
       const res = conan.sortVersions(version, other);
       expect(res).toEqual(result);
-    }
+    },
   );
 
   // isLessThanRange(version: string, range: string): boolean;
-  test.each`
+  it.each`
     version    | range         | result
     ${'1.2.3'} | ${'[>1.2.3]'} | ${true}
     ${'2.3.1'} | ${'[>1.2.3]'} | ${false}
@@ -902,6 +902,6 @@ describe('modules/versioning/conan/index', () => {
     ({ version, range, result }) => {
       const res = conan.isLessThanRange?.(version, range);
       expect(res).toEqual(result);
-    }
+    },
   );
 });
