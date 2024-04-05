@@ -293,6 +293,28 @@ describe('modules/manager/npm/extract/index', () => {
       ).toBeArrayIncludingOnly(['https://registry.example.com']);
     });
 
+    it('resolves registry URLs using the package name if set', async () => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === '.yarnrc.yml') {
+          return Promise.resolve(
+            'npmScopes:\n  yarnpkg:\n    npmRegistryServer: https://registry.example.com',
+          );
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        '{"packageManager": "yarn@4.1.1"}',
+        'package.json',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'yarn',
+          registryUrls: ['https://registry.example.com'],
+        }),
+      ]);
+    });
+
     it('finds complex yarn workspaces', async () => {
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         return Promise.resolve(null);
