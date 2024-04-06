@@ -630,7 +630,7 @@ export async function isBranchBehindBase(
 
 export async function isBranchModified(
   branchName: string,
-  baseBranch?: string,
+  baseBranch: string | undefined,
 ): Promise<boolean> {
   if (!branchExists(branchName)) {
     logger.debug('branch.isModified(): no cache');

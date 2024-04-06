@@ -270,7 +270,10 @@ export interface Platform {
 
 export interface PlatformScm {
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
-  isBranchModified(branchName: string, baseBranch?: string): Promise<boolean>;
+  isBranchModified(
+    branchName: string,
+    baseBranch: string | undefined,
+  ): Promise<boolean>;
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<LongCommitSha | null>;

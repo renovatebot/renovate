@@ -388,7 +388,10 @@ describe('util/git/index', () => {
         gitIgnoredAuthors: ['author1@example.com'],
       });
       expect(
-        await git.isBranchModified('renovate/branch_with_multiple_authors'),
+        await git.isBranchModified(
+          'renovate/branch_with_multiple_authors',
+          undefined,
+        ),
       ).toBeTrue();
     });
 
@@ -397,7 +400,10 @@ describe('util/git/index', () => {
         gitIgnoredAuthors: ['author2@example.com'],
       });
       expect(
-        await git.isBranchModified('renovate/branch_with_multiple_authors'),
+        await git.isBranchModified(
+          'renovate/branch_with_multiple_authors',
+          undefined,
+        ),
       ).toBeFalse();
     });
 
