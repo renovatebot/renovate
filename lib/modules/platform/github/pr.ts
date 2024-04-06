@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { GithubHttp, GithubHttpOptions } from '../../../util/http/github';
 import { parseLinkHeader } from '../../../util/url';
 import { ApiCache } from './api-cache';
@@ -12,7 +13,6 @@ function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
   repoCache.platform ??= {};
   repoCache.platform.github ??= {};
-  delete repoCache.platform.github.prCache;
   repoCache.platform.github.pullRequestsCache ??= { items: {} };
   const prApiCache = new ApiCache<GhPr>(
     repoCache.platform.github.pullRequestsCache as ApiPageCache<GhPr>,
@@ -65,7 +65,7 @@ export async function getPrCache(
     while (needNextPageFetch && needNextPageSync) {
       const opts: GithubHttpOptions = { paginate: false };
       if (pageIdx === 1) {
-        opts.repoCache = true;
+        opts.cacheProvider = repoCacheProvider;
         if (isInitial) {
           // Speed up initial fetch
           opts.paginate = true;

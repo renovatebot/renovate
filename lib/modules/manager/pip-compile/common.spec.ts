@@ -1,5 +1,6 @@
 import { mockDeep } from 'jest-mock-extended';
 import { hostRules } from '../../../../test/util';
+import { logger } from '../../../logger';
 import {
   allowedPipOptions,
   extractHeaderCommand,
@@ -23,7 +24,11 @@ describe('modules/manager/pip-compile/common', () => {
   describe('extractHeaderCommand()', () => {
     it.each([
       '-v',
+      '--all-extras',
+      `--allow-unsafe`,
       '--generate-hashes',
+      `--no-emit-index-url`,
+      `--strip-extras`,
       '--resolver=backtracking',
       '--resolver=legacy',
       '--output-file=reqs.txt',
@@ -35,6 +40,7 @@ describe('modules/manager/pip-compile/common', () => {
           'reqs.txt',
         ),
       ).toBeObject();
+      expect(logger.warn).toHaveBeenCalledTimes(0);
     });
 
     it.each(['--resolver', '--output-file reqs.txt', '--extra = jupyter'])(

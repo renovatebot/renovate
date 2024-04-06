@@ -22,6 +22,7 @@ import {
   getRepoLabels,
   getVersion,
   mergePR,
+  orgListRepos,
   requestPrReviewers,
   searchIssues,
   searchRepos,
@@ -250,6 +251,15 @@ describe('modules/platform/gitea/gitea-helper', () => {
     });
   });
 
+  describe('orgListRepos', () => {
+    it('should call /api/v1/orgs/[organization]/repos endpoint', async () => {
+      httpMock.scope(baseUrl).get('/orgs/some/repos').reply(200, mockRepo);
+
+      const res = await orgListRepos('some');
+      expect(res).toEqual(mockRepo);
+    });
+  });
+
   describe('getRepo', () => {
     it('should call /api/v1/repos/[repo] endpoint', async () => {
       httpMock
@@ -377,8 +387,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .patch(`/repos/${mockRepo.full_name}/pulls/${mockPR.number}`)
         .reply(200);
 
-      const res = await closePR(mockRepo.full_name, mockPR.number);
-      expect(res).toBeUndefined();
+      await expect(closePR(mockRepo.full_name, mockPR.number)).toResolve();
     });
   });
 
@@ -389,10 +398,11 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .post(`/repos/${mockRepo.full_name}/pulls/${mockPR.number}/merge`)
         .reply(200);
 
-      const res = await mergePR(mockRepo.full_name, mockPR.number, {
-        Do: 'rebase',
-      });
-      expect(res).toBeUndefined();
+      await expect(
+        mergePR(mockRepo.full_name, mockPR.number, {
+          Do: 'rebase',
+        }),
+      ).toResolve();
     });
   });
 
@@ -569,12 +579,9 @@ describe('modules/platform/gitea/gitea-helper', () => {
         )
         .reply(200);
 
-      const res = await unassignLabel(
-        mockRepo.full_name,
-        mockIssue.number,
-        mockLabel.id,
-      );
-      expect(res).toBeUndefined();
+      await expect(
+        unassignLabel(mockRepo.full_name, mockIssue.number, mockLabel.id),
+      ).toResolve();
     });
   });
 

@@ -71,6 +71,26 @@ export class BaseGoDatasource {
       };
     }
 
+    if (goModule.startsWith('dev.azure.com/')) {
+      const split = goModule.split('/');
+      if ((split.length > 4 && split[3] === '_git') || split.length > 3) {
+        const packageName =
+          'https://dev.azure.com/' +
+          split[1] +
+          '/' +
+          split[2] +
+          '/_git/' +
+          (split[3] === '_git' ? split[4] : split[3]).replace(
+            regEx(/\.git$/),
+            '',
+          );
+        return {
+          datasource: GitTagsDatasource.id,
+          packageName,
+        };
+      }
+    }
+
     return await BaseGoDatasource.goGetDatasource(goModule);
   }
 
@@ -164,7 +184,7 @@ export class BaseGoDatasource {
         endpoint,
       );
 
-      if (endpointPrefix) {
+      if (endpointPrefix && endpointPrefix[1] !== 'api/') {
         packageName = packageName.replace(endpointPrefix[1], '');
       }
 
@@ -235,7 +255,7 @@ export class BaseGoDatasource {
     if (datasource !== null) {
       return datasource;
     }
-    // fall back to old behaviour if detection did not work
+    // fall back to old behavior if detection did not work
 
     switch (detectPlatform(goImportURL)) {
       case 'github': {

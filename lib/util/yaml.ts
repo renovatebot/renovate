@@ -49,7 +49,7 @@ export function parseYaml<ResT = unknown>(
     if (options?.failureBehaviour !== 'filter') {
       throw new Error('Failed to parse YAML file', { cause: result.error });
     }
-    logger.debug(
+    logger.trace(
       { error: result.error, document: element },
       'Failed to parse schema for YAML',
     );

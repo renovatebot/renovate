@@ -22,6 +22,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean | null;
+  repository?: string;
 }
 
 export interface UpdateArtifactsConfig {
@@ -100,6 +101,10 @@ export interface LookupUpdate {
   registryUrl?: string;
 }
 
+/**
+ * @property {string} depName - Display name of the package. See #16012
+ * @property {string} packageName - The name of the package, used in comparisons. depName is used as fallback if this is not set. See #16012
+ */
 export interface PackageDependency<T = Record<string, any>>
   extends ManagerData<T> {
   currentValue?: string | null;

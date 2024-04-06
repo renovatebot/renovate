@@ -15,6 +15,7 @@ export const presets: Record<string, Preset> = {
       'replacements:containerbase',
       'replacements:cpx-to-maintenance-fork',
       'replacements:cucumber-to-scoped',
+      'replacements:eslint-plugin-node-to-maintained-fork',
       'replacements:fakerjs-to-scoped',
       'replacements:fastify-to-scoped',
       'replacements:hapi-to-scoped',
@@ -22,6 +23,7 @@ export const presets: Record<string, Preset> = {
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
       'replacements:k8s-registry-move',
+      'replacements:mem-rename',
       'replacements:middie-to-scoped',
       'replacements:now-to-vercel',
       'replacements:npm-run-all-to-maintenance-fork',
@@ -36,6 +38,7 @@ export const presets: Record<string, Preset> = {
       'replacements:rollup-babel-to-scoped',
       'replacements:rollup-json-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:rollup-terser-to-scoped',
       'replacements:rome-to-biome',
       'replacements:semantic-release-replace-plugin-to-unscoped',
       'replacements:spectre-cli-to-spectre-console-cli',
@@ -169,6 +172,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         matchPackageNames: ['ghcr.io/renovatebot/renovate'],
         matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+        versioning: 'semver',
       },
     ],
   },
@@ -191,6 +195,19 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['cucumber'],
         replacementName: '@cucumber/cucumber',
         replacementVersion: '7.0.0',
+      },
+    ],
+  },
+  'eslint-plugin-node-to-maintained-fork': {
+    description:
+      'Replace stale `eslint-plugin-node` with a maintained fork: `eslint-plugin-n`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^11.1.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['eslint-plugin-node'],
+        replacementName: 'eslint-plugin-n',
+        replacementVersion: '14.0.0',
       },
     ],
   },
@@ -648,6 +665,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'mem-rename': {
+    description: '`mem` was renamed to `memoize`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^10.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['mem'],
+        replacementName: 'memoize',
+        replacementVersion: '10.0.0',
+      },
+    ],
+  },
   'middie-to-scoped': {
     description: '`middie` became scoped.',
     packageRules: [
@@ -810,6 +839,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'rollup-terser-to-scoped': {
+    description: 'The terser plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=7.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-terser'],
+        replacementName: '@rollup/plugin-terser',
+        replacementVersion: '0.1.0',
+      },
+    ],
+  },
   'rome-to-biome': {
     description:
       'The Rome repository is archived, and Biome is the community replacement. Read [the Biome announcement](https://biomejs.dev/blog/annoucing-biome/) for migration instructions.',
@@ -913,7 +954,7 @@ const mui: PresetTemplate = {
 
 const messageFormat: PresetTemplate = {
   description:
-    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
+    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}` to `@messageformat/{{package}}`.',
   packageRules: [
     {
       matchCurrentVersion: '>=2.0.0 <3.0.0',
@@ -940,7 +981,7 @@ const messageFormat: PresetTemplate = {
       replacementVersion: '5.0.0',
     },
   ],
-  title: 'messageFormat-{{package}}-to-@messageformat/{{package}}',
+  title: 'messageFormat-to-scoped',
 };
 
 addPresets(presets, messageFormat, mui);

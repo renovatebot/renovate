@@ -19,6 +19,7 @@ import type { Pr } from '../../../../modules/platform/types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import type { PrCache } from '../../../../util/cache/repository/types';
 import { fingerprint } from '../../../../util/fingerprint';
+import { toBase64 } from '../../../../util/string';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import { embedChangelogs } from '../../changelog';
@@ -269,6 +270,137 @@ describe('workers/repository/update/pr/index', () => {
     });
 
     describe('Update', () => {
+      it('updates PR if labels have changed in config', async () => {
+        const prDebugData = {
+          createdInVer: '1.0.0',
+          targetBranch: 'main',
+          labels: ['old_label'],
+        };
+
+        const existingPr: Pr = {
+          ...pr,
+          bodyStruct: getPrBodyStruct(
+            `\n<!--renovate-debug:${toBase64(
+              JSON.stringify(prDebugData),
+            )}-->\n Some body`,
+          ),
+          labels: ['old_label'],
+        };
+        platform.getBranchPr.mockResolvedValueOnce(existingPr);
+        prBody.getPrBody.mockReturnValueOnce(
+          `\n<!--renovate-debug:${toBase64(
+            JSON.stringify({ ...prDebugData, labels: ['new_label'] }),
+          )}-->\n Some body`,
+        );
+        config.labels = ['new_label'];
+        const res = await ensurePr(config);
+
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: {
+            ...pr,
+            labels: ['old_label'],
+            bodyStruct: {
+              hash: expect.any(String),
+              debugData: {
+                createdInVer: '1.0.0',
+                labels: ['new_label'],
+                targetBranch: 'main',
+              },
+            },
+          },
+        });
+        expect(platform.updatePr).toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          {
+            branchName: 'renovate-branch',
+            prCurrentLabels: ['old_label'],
+            configuredLabels: ['new_label'],
+          },
+          `PR labels have changed`,
+        );
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
+      it('skips pr update if existing pr does not have labels in debugData', async () => {
+        const existingPr: Pr = {
+          ...pr,
+          labels: ['old_label'],
+        };
+        platform.getBranchPr.mockResolvedValueOnce(existingPr);
+
+        config.labels = ['new_label'];
+        const res = await ensurePr(config);
+
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: { ...pr, labels: ['old_label'] },
+        });
+        expect(platform.updatePr).not.toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          {
+            branchName: 'renovate-branch',
+            oldLabels: ['old_label'],
+            newLabels: ['new_label'],
+          },
+          `PR labels have changed`,
+        );
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
+      it('skips pr update if pr labels have been modified by user', async () => {
+        const prDebugData = {
+          createdInVer: '1.0.0',
+          targetBranch: 'main',
+          labels: ['old_label'],
+        };
+
+        const existingPr: Pr = {
+          ...pr,
+          bodyStruct: getPrBodyStruct(
+            `\n<!--renovate-debug:${toBase64(
+              JSON.stringify(prDebugData),
+            )}-->\n Some body`,
+          ),
+        };
+        platform.getBranchPr.mockResolvedValueOnce(existingPr);
+
+        config.labels = ['new_label'];
+        const res = await ensurePr(config);
+
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: {
+            ...pr,
+            bodyStruct: {
+              hash: expect.any(String),
+              debugData: {
+                createdInVer: '1.0.0',
+                labels: ['old_label'],
+                targetBranch: 'main',
+              },
+            },
+          },
+        });
+        expect(platform.updatePr).not.toHaveBeenCalled();
+        expect(platform.createPr).not.toHaveBeenCalled();
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          {
+            branchName: 'renovate-branch',
+            prCurrentLabels: ['old_label'],
+            configuredLabels: ['new_label'],
+          },
+          `PR labels have changed`,
+        );
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          { prInitialLabels: ['old_label'], prCurrentLabels: [] },
+          'PR labels have been modified by user, skipping labels update',
+        );
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
       it('updates PR due to title change', async () => {
         const changedPr: Pr = { ...pr, title: 'Another title' }; // user changed the prTitle
         platform.getBranchPr.mockResolvedValueOnce(changedPr);

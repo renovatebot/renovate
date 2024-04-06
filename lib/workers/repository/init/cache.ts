@@ -15,7 +15,6 @@ export async function resetCaches(): Promise<void> {
 export async function initializeCaches(
   config: WorkerPlatformConfig,
 ): Promise<void> {
-  memCache.init();
   await initRepoCache(config);
   await fs.ensureDir(privateCacheDir());
   npmApi.setNpmrc();

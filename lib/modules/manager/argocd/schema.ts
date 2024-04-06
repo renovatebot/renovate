@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { LooseArray } from '../../../util/schema-utils';
 
 export const KubernetesResource = z.object({
   apiVersion: z.string(),
@@ -13,7 +14,7 @@ export type ApplicationSource = z.infer<typeof ApplicationSource>;
 
 export const ApplicationSpec = z.object({
   source: ApplicationSource.optional(),
-  sources: z.array(ApplicationSource).optional(),
+  sources: LooseArray(ApplicationSource).optional(),
 });
 export type ApplicationSpec = z.infer<typeof ApplicationSpec>;
 
