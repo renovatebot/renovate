@@ -295,6 +295,18 @@ describe('modules/platform/bitbucket-server/utils', () => {
       const res = getExtraCloneOpts({ token: 'abc' });
       expect(res).toEqual({
         '-c': 'http.extraheader=Authorization: Bearer abc',
+
+        it('works with gitUrl:endpoint and no username/password', () => {
+          expect(
+            getRepoGitUrl(
+              'SOME/repo',
+              url.toString(),
+              'endpoint',
+              infoMock(url, 'SOME', 'repo'),
+              { username: '' },
+            ),
+          ).toBe(httpLink(url.toString(), 'SOME', 'repo'));
+        });
       });
     });
   });
