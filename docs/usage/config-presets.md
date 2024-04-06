@@ -48,7 +48,9 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | ------------------------------------------- | -------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
 | GitHub default                              | `github>abc/foo`                 | `default` | `https://github.com/abc/foo` | `default.json`  | Default branch |
 | GitHub with preset name                     | `github>abc/foo:xyz`             | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | Default branch |
+| GitHub with subpreset name                  | `github>abc/foo:xyz/sub`         | `sub`     | `https://github.com/abc/foo` | `xyz.json`      | Default branch |
 | GitHub with preset name (JSON5)             | `github>abc/foo:xyz.json5`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json5`     | Default branch |
+| GitHub with subpreset name (JSON5)          | `github>abc/foo:xyz.json5/sub`   | `sub`     | `https://github.com/abc/foo` | `xyz.json5`     | Default branch |
 | GitHub with preset name and path            | `github>abc/foo//path/xyz`       | `xyz`     | `https://github.com/abc/foo` | `path/xyz.json` | Default branch |
 | GitHub default with a tag                   | `github>abc/foo#1.2.3`           | `default` | `https://github.com/abc/foo` | `default.json`  | `1.2.3`        |
 | GitHub with preset name with a tag          | `github>abc/foo:xyz#1.2.3`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | `1.2.3`        |
@@ -61,7 +63,9 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | ------------------------------------------- | -------------------------------- | --------- | ---------------------------- | --------------- | -------------- |
 | GitLab default                              | `gitlab>abc/foo`                 | `default` | `https://gitlab.com/abc/foo` | `default.json`  | Default branch |
 | GitLab with preset name                     | `gitlab>abc/foo:xyz`             | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | Default branch |
+| GitLab with subpreset name                  | `gitlab>abc/foo:xyz/sub`         | `sub`     | `https://gitlab.com/abc/foo` | `xyz.json`      | Default branch |
 | GitLab with preset name (JSON5)             | `gitlab>abc/foo:xyz.json5`       | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json5`     | Default branch |
+| GitLab with subpreset name (JSON5)          | `gitlab>abc/foo:xyz.json5/sub`   | `sub`     | `https://gitlab.com/abc/foo` | `xyz.json5`     | Default branch |
 | GitLab default with a tag                   | `gitlab>abc/foo#1.2.3`           | `default` | `https://gitlab.com/abc/foo` | `default.json`  | `1.2.3`        |
 | GitLab with preset name with a tag          | `gitlab>abc/foo:xyz#1.2.3`       | `xyz`     | `https://gitlab.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 | GitLab with preset name and path with a tag | `gitlab>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://gitlab.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
@@ -73,7 +77,9 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | ------------------------------------------ | ------------------------------- | --------- | --------------------------- | --------------- | -------------- |
 | Gitea default                              | `gitea>abc/foo`                 | `default` | `https://gitea.com/abc/foo` | `default.json`  | Default branch |
 | Gitea with preset name                     | `gitea>abc/foo:xyz`             | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`      | Default branch |
+| Gitea with subpreset name                  | `gitea>abc/foo:xyz/sub`         | `sub`     | `https://gitea.com/abc/foo` | `xyz.json`      | Default branch |
 | Gitea with preset name (JSON5)             | `gitea>abc/foo:xyz.json5`       | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json5`     | Default branch |
+| Gitea with subpreset name (JSON5)          | `gitea>abc/foo:xyz.json5/sub`   | `sub`     | `https://gitea.com/abc/foo` | `xyz.json5`     | Default branch |
 | Gitea default with a tag                   | `gitea>abc/foo#1.2.3`           | `default` | `https://gitea.com/abc/foo` | `default.json`  | `1.2.3`        |
 | Gitea with preset name with a tag          | `gitea>abc/foo:xyz#1.2.3`       | `xyz`     | `https://gitea.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 | Gitea with preset name and path with a tag | `gitea>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://gitea.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
@@ -84,8 +90,10 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | name                                       | example use                     | preset    | resolves as                          | filename        | Git tag        |
 | ------------------------------------------ | ------------------------------- | --------- | ------------------------------------ | --------------- | -------------- |
 | Local default                              | `local>abc/foo`                 | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
-| Local with preset path                     | `local>abc/foo:xyz`             | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | Default branch |
-| Local with preset path (JSON5)             | `local>abc/foo:xyz.json5`       | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json5`     | Default branch |
+| Local with preset name                     | `local>abc/foo:xyz`             | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | Default branch |
+| Local with subpreset name                  | `local>abc/foo:xyz/sub`         | `sub`     | `https://github.company.com/abc/foo` | `xyz.json`      | Default branch |
+| Local with preset name (JSON5)             | `local>abc/foo:xyz.json5`       | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json5`     | Default branch |
+| Local with subpreset name (JSON5)          | `local>abc/foo:xyz.json5/sub`   | `sub`     | `https://github.company.com/abc/foo` | `xyz.json5`     | Default branch |
 | Local with preset name and path            | `local>abc/foo//path/xyz`       | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | Default branch |
 | Local default with a tag                   | `local>abc/foo#1.2.3`           | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.2.3`        |
 | Local with preset name with a tag          | `local>abc/foo:xyz#1.2.3`       | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.2.3`        |
