@@ -66,9 +66,9 @@ const api = new Map<string, DatasourceApi>();
 export default api;
 
 api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
+api.set(AwsLambdaLayerDataSource.id, new AwsLambdaLayerDataSource());
 api.set(AwsMachineImageDataSource.id, new AwsMachineImageDataSource());
 api.set(AwsRdsDataSource.id, new AwsRdsDataSource());
-api.set(AwsLambdaLayerDataSource.id, new AwsLambdaLayerDataSource());
 api.set(AzureBicepResourceDatasource.id, new AzureBicepResourceDatasource());
 api.set(AzurePipelinesTasksDatasource.id, new AzurePipelinesTasksDatasource());
 api.set(BazelDatasource.id, new BazelDatasource());
