@@ -569,8 +569,8 @@ importers:
         specifier: 0.12.1
         version: 0.12.1
       memfs:
-        specifier: 4.8.0
-        version: 4.8.0
+        specifier: 4.8.1
+        version: 4.8.1
       nock:
         specifier: 13.5.4
         version: 13.5.4
@@ -8143,8 +8143,8 @@ packages:
     resolution: {integrity: sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==}
     dev: true
 
-  /memfs@4.8.0:
-    resolution: {integrity: sha512-fcs7trFxZlOMadmTw5nyfOwS3il9pr3y+6xzLfXNwmuR/D0i4wz6rJURxArAbcJDGalbpbMvQ/IFI0NojRZgRg==}
+  /memfs@4.8.1:
+    resolution: {integrity: sha512-7q/AdPzf2WpwPlPL4v1kE2KsJsHl7EF4+hAeVzlyanr2+YnR21NVn9mDqo+7DEaKDRsQy8nvxPlKH4WqMtiO0w==}
     engines: {node: '>= 4.0.0'}
     dependencies:
       tslib: 2.6.2
