@@ -689,8 +689,8 @@ export async function isBranchModified(
       {
         branchName,
         baseBranch,
-        committedAuthors,
-        includedAuthors,
+        committedAuthors: [...committedAuthors],
+        includedAuthors: [...includedAuthors],
         gitAuthorEmail,
         ignoredAuthors,
       },
@@ -704,8 +704,8 @@ export async function isBranchModified(
     {
       branchName,
       baseBranch,
-      committedAuthors,
-      includedAuthors,
+      committedAuthors: [...committedAuthors],
+      includedAuthors: [...includedAuthors],
       gitAuthorEmail,
       ignoredAuthors,
     },
