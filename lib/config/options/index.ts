@@ -2066,7 +2066,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
     deprecationMsg:
-      'Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`',
+      'We strongly recommended that you avoid configuring this field directly. Please edit `branchPrefix`, `additionalBranchPrefix`, or `branchTopic` instead.',
     cli: false,
   },
   {
@@ -2091,7 +2091,7 @@ const options: RenovateOptions[] = [
     default:
       '{{{commitMessagePrefix}}} {{{commitMessageAction}}} {{{commitMessageTopic}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
     deprecationMsg:
-      'Direct editing of commitMessage is now deprecated. Please edit commitMessage subcomponents instead.',
+      'We deprecated editing the `commitMessage` directly, and we recommend you stop using this config option. Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, to create the commit message you want.',
     cli: false,
   },
   {
@@ -2166,7 +2166,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: null,
     deprecationMsg:
-      'Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.',
+      'Direct editing of `prTitle` is now deprecated. Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, as they will be passed through to `prTitle`.',
     cli: false,
   },
   {
