@@ -5,13 +5,13 @@ const parsedExperimentalFlags: Record<string, string> = {};
 export function experimentalFlagValue(flagName: string): string | null {
   const experimentalFlags = GlobalConfig.get('experimentalFlags');
 
+  if (!experimentalFlags) {
+    return null;
+  }
+
   // Check if the flag value is already parsed and stored
   if (parsedExperimentalFlags[flagName]) {
     return parsedExperimentalFlags[flagName];
-  }
-
-  if (!experimentalFlags) {
-    return null;
   }
 
   for (const flag of experimentalFlags) {
