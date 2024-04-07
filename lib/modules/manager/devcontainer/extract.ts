@@ -16,7 +16,7 @@ export function extractPackageFile(
   try {
     const file = DevContainerFile.parse(content);
     let targets: string[] = [];
-    const image = getImage(file);
+    const image = file?.image ?? null;
 
     if (image) {
       targets.push(image);
@@ -80,14 +80,6 @@ export function extractPackageFile(
     );
     return null;
   }
-}
-
-function getImage(file: DevContainerFile): string | null {
-  const image = file?.image;
-  if (image === undefined || image === null) {
-    return null;
-  }
-  return image;
 }
 
 function getFeatures(file: DevContainerFile): string[] {
