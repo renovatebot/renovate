@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
 import upath from 'upath';
 import * as dockerfileExtract from '../dockerfile/extract';
-import { extractPackageFile } from './extract';
+import { extractPackageFile } from '.';
 
 function getFixture(content: string) {
   return {
