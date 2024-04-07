@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import upath from 'upath';
 import * as dockerfileExtract from '../dockerfile/extract';
 import { extractPackageFile } from '.';
@@ -6,66 +5,9 @@ import { extractPackageFile } from '.';
 function getFixture(content: string) {
   return {
     content,
-    path: upath.resolve(__dirname, randomUUID()),
+    path: upath.resolve(__dirname, 'devcontainer.json'),
   };
 }
-
-const fixtures = {
-  featuresOnly: getFixture(`
-  {
-    "features": {
-      "devcontainer.registry.renovate.com/test/features/first:1.2.3": {},
-      "devcontainer.registry.renovate.com/test/features/second:4.5.6": {}
-    }
-  }`),
-  imageAndFeature: getFixture(`
-  {
-    "image": "devcontainer.registry.renovate.com/test/image:1.2.3",
-    "features": {
-      "devcontainer.registry.renovate.com/test/feature:4.5.6": {}
-    }
-  }`),
-  imageOnly: getFixture(`
-  {
-    "image": "devcontainer.registry.renovate.com/test/image:1.2.3"
-  }`),
-  malformedFeature: getFixture(`
-  {
-    "features": {
-      "malformedFeature": {}
-    }
-  }`),
-  malformedFeatures: getFixture(`
-  {
-    "features": "devcontainer.registry.renovate.com/test:1.2.3"
-  }`),
-  malformedImage: getFixture(`
-  {
-    "image:": "devcontainer.registry.renovate.com/test/image:1.2.3"
-  }`),
-  noImageOrFeatures: getFixture('{}'),
-  nullFeatures: getFixture(`
-  {
-    "features": null
-  }`),
-  nullImage: getFixture(`
-  {
-    "image": null
-  }`),
-  nullImageAndFeatures: getFixture(`
-  {
-    "image": null,
-    "features": null
-  }`),
-  allKindsOfFeatures: getFixture(`
-  {
-    "features": {
-      "devcontainer.registry.renovate.com/test/feature:1.2.3": {},
-      "./localfeature": {},
-      "devcontainer.registry.renovate.com/test/feature/other.tgz": {}
-    }
-  }`),
-};
 
 describe('modules/manager/devcontainer/extract', () => {
   describe('extractPackageFile()', () => {
@@ -99,11 +41,20 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns feature image deps when only the features property is defined in dev container JSON file', () => {
       // Arrange
-      const content = fixtures.featuresOnly.content;
-      const packageFile = fixtures.featuresOnly.path;
+      const fixture = getFixture(`
+      {
+        "features": {
+          "devcontainer.registry.renovate.com/test/features/first:1.2.3": {},
+          "devcontainer.registry.renovate.com/test/features/second:4.5.6": {}
+        }
+      }`);
       const extractConfig = {};
       // Act
-      const result = extractPackageFile(content, packageFile, extractConfig);
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
 
       // Assert
       expect(result).not.toBeNull();
@@ -133,11 +84,21 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns image and feature image deps when both image and features properties are defined in dev container JSON file', () => {
       // Arrange
-      const content = fixtures.imageAndFeature.content;
-      const packageFile = fixtures.imageAndFeature.path;
+      const fixture = getFixture(`
+      {
+        "image": "devcontainer.registry.renovate.com/test/image:1.2.3",
+        "features": {
+          "devcontainer.registry.renovate.com/test/feature:4.5.6": {}
+        }
+      }`);
       const extractConfig = {};
+
       // Act
-      const result = extractPackageFile(content, packageFile, extractConfig);
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
 
       // Assert
       expect(result).not.toBeNull();
@@ -167,11 +128,17 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns image dep when only the image property is defined in dev container JSON file', () => {
       // Arrange
-      const content = fixtures.imageOnly.content;
-      const packageFile = fixtures.imageOnly.path;
+      const fixture = getFixture(`
+      {
+        "image": "devcontainer.registry.renovate.com/test/image:1.2.3"
+      }`);
       const extractConfig = {};
       // Act
-      const result = extractPackageFile(content, packageFile, extractConfig);
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
 
       // Assert
       expect(result).not.toBeNull();
@@ -193,11 +160,19 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when the only feature property is malformed and no image property is defined in dev container JSON file', () => {
       // Arrange
-      const content = fixtures.malformedFeature.content;
-      const packageFile = fixtures.malformedFeature.path;
+      const fixture = getFixture(`
+      {
+        "features": {
+          "malformedFeature": {}
+        }
+      }`);
       const extractConfig = {};
       // Act
-      const result = extractPackageFile(content, packageFile, extractConfig);
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
 
       // Assert
       expect(result).toBeNull();
@@ -205,11 +180,17 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when the features property is malformed and no image property is defined in dev container JSON file', () => {
       // Arrange
-      const content = fixtures.malformedFeatures.content;
-      const packageFile = fixtures.malformedFeatures.path;
+      const fixture = getFixture(`
+      {
+        "features": "devcontainer.registry.renovate.com/test:1.2.3"
+      }`);
       const extractConfig = {};
       // Act
-      const result = extractPackageFile(content, packageFile, extractConfig);
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
 
       // Assert
       expect(result).toBeNull();
@@ -217,11 +198,17 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when the image property is malformed and no features are defined in dev container JSON file', () => {
       // Arrange
-      const content = fixtures.malformedImage.content;
-      const packageFile = fixtures.malformedImage.path;
+      const fixture = getFixture(`
+      {
+        "image:": "devcontainer.registry.renovate.com/test/image:1.2.3"
+      }`);
       const extractConfig = {};
       // Act
-      const result = extractPackageFile(content, packageFile, extractConfig);
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
 
       // Assert
       expect(result).toBeNull();
@@ -229,11 +216,14 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when no image or features properties are defined in dev container JSON file', () => {
       // Arrange
-      const content = fixtures.noImageOrFeatures.content;
-      const packageFile = fixtures.noImageOrFeatures.path;
+      const fixture = getFixture('{}');
       const extractConfig = {};
       // Act
-      const result = extractPackageFile(content, packageFile, extractConfig);
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
 
       // Assert
       expect(result).toBeNull();
@@ -241,11 +231,35 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when the features property is null and no image property is defined in dev container JSON file', () => {
       // Arrange
-      const content = fixtures.nullImage.content;
-      const packageFile = fixtures.nullImage.path;
+      const fixture = getFixture(`
+      {
+        "features": null
+      }`);
       const extractConfig = {};
       // Act
-      const result = extractPackageFile(content, packageFile, extractConfig);
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
+
+      // Assert
+      expect(result).toBeNull();
+    });
+
+    it('returns null when the features property is not defined and the image property is null in dev container JSON file', () => {
+      // Arrange
+      const fixture = getFixture(`
+      {
+        "image": null
+      }`);
+      const extractConfig = {};
+      // Act
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
 
       // Assert
       expect(result).toBeNull();
@@ -253,11 +267,18 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when both the image and features properties are null', () => {
       // Arrange
-      const content = fixtures.nullImageAndFeatures.content;
-      const packageFile = fixtures.nullImageAndFeatures.path;
+      const fixture = getFixture(`
+      {
+        "image": null,
+        "features": null
+      }`);
       const extractConfig = {};
       // Act
-      const result = extractPackageFile(content, packageFile, extractConfig);
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
 
       // Assert
       expect(result).toBeNull();
@@ -265,15 +286,24 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns only valid dependencies when others throw error when calling getDep', () => {
       // Arrange
-      const content = fixtures.imageAndFeature.content;
-      const packageFile = fixtures.imageAndFeature.path;
+      const fixture = getFixture(`
+      {
+        "image": "devcontainer.registry.renovate.com/test/image:1.2.3",
+        "features": {
+          "devcontainer.registry.renovate.com/test/feature:4.5.6": {}
+        }
+      }`);
       const extractConfig = {};
       jest.spyOn(dockerfileExtract, 'getDep').mockImplementationOnce(() => {
         throw new Error('Dependency error');
       });
 
       // Act
-      const result = extractPackageFile(content, packageFile, extractConfig);
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
 
       // Assert
       expect(result).not.toBeNull();
@@ -295,12 +325,22 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file', () => {
       // Arrange
-      const content = fixtures.allKindsOfFeatures.content;
-      const packageFile = fixtures.allKindsOfFeatures.path;
+      const fixture = getFixture(`
+      {
+        "features": {
+          "devcontainer.registry.renovate.com/test/feature:1.2.3": {},
+          "./localfeature": {},
+          "devcontainer.registry.renovate.com/test/feature/other.tgz": {}
+        }
+      }`);
       const extractConfig = {};
 
       // Act
-      const result = extractPackageFile(content, packageFile, extractConfig);
+      const result = extractPackageFile(
+        fixture.content,
+        fixture.path,
+        extractConfig,
+      );
 
       // Assert
       expect(result).not.toBeNull();
