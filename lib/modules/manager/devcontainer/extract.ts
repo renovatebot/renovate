@@ -73,7 +73,7 @@ export function extractPackageFile(
     }
 
     return { deps };
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.debug(
       { err, packageFile },
       'Error extracting dev container JSON file',
