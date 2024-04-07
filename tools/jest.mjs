@@ -14,7 +14,7 @@ const args = ['--experimental-vm-modules'];
  * - #27375
  * - https://nodejs.org/en/blog/vulnerability/february-2024-security-releases#nodejs-is-vulnerable-to-the-marvin-attack-timing-variant-of-the-bleichenbacher-attack-against-pkcs1-v15-padding-cve-2023-46809---medium
  *
- * Sadly there is no way to suppress `SECURITY WARNING: Reverting CVE-2023-46809: Marvin attack on PKCS#1 padding` warining
+ * Sadly there is no way to suppress this warning: `SECURITY WARNING: Reverting CVE-2023-46809: Marvin attack on PKCS#1 padding`
  */
 if (semver.satisfies(version, '^18.19.1 || ^20.11.1 || >=21.6.2')) {
   args.push('--security-revert=CVE-2023-46809');
