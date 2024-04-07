@@ -180,6 +180,16 @@ export function extractDependency(
     dep.datasource = GithubTagsDatasource.id;
     dep.versioning = npmVersioningId;
     dep.packageName = githubOwnerRepo;
+  } else if (
+    depRefPart.startsWith('semver:') &&
+    isVersion(depRefPart.slice('semver:'.length))
+  ) {
+    dep.currentRawValue = dep.currentValue;
+    dep.currentValue = depRefPart.slice('semver:'.length);
+    dep.datasource = GithubTagsDatasource.id;
+    dep.versioning = npmVersioningId;
+    dep.packageName = githubOwnerRepo;
+    dep.pinDigests = false;
   } else {
     dep.skipReason = 'unversioned-reference';
     return dep;
