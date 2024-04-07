@@ -175,10 +175,12 @@ export async function extractPackageFile(
     extractedConstraints.python = `== ${pipfile.requires.python_full_version}`;
   }
 
-  const pipenv_constraints = categories.find(([, section]) => section?.pipenv);
+  const pipenv_constraint_category = categories.find(
+    ([, section]) => section?.pipenv,
+  );
 
-  if (pipenv_constraints) {
-    extractedConstraints.pipenv = pipenv_constraints[1].pipenv;
+  if (pipenv_constraint_category) {
+    extractedConstraints.pipenv = pipenv_constraint_category[1].pipenv;
   }
 
   const lockFileName = `${packageFile}.lock`;
