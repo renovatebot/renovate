@@ -94,7 +94,7 @@ function getFeatures(file: DevContainerFile): string[] {
   const features: string[] = [];
   const fileFeatures = file?.features;
 
-  if (fileFeatures !== undefined && fileFeatures !== null) {
+  if (fileFeatures) {
     for (const feature of Object.keys(fileFeatures)) {
       features.push(feature);
     }
