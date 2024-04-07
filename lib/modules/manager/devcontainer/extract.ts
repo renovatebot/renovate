@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { isValidDependency } from '../custom/regex/utils';
-import { getDep } from '../dockerfile/extract';
+import { getDep as getDockerDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -15,11 +15,13 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   try {
     const file = DevContainerFile.parse(content);
-    let targets: string[] = [];
-    const image = file?.image ?? null;
+    const deps: PackageDependency[] = [];
 
-    if (image) {
-      targets.push(image);
+    const image = file?.image ?? null;
+    const imageDep = getDep(image, packageFile, extractConfig.registryAliases);
+
+    if (imageDep) {
+      deps.push(imageDep);
     } else {
       logger.debug(
         { packageFile },
@@ -27,40 +29,23 @@ export function extractPackageFile(
       );
     }
 
-    const features = getFeatures(file);
+    const features = file.features ?? {};
 
-    if (features.length > 0) {
-      targets = targets.concat(features);
-    } else {
-      logger.debug({ packageFile }, 'No features in dev container JSON file.');
-    }
-
-    if (targets.length < 1) {
-      logger.debug(
-        { packageFile },
-        'No deps found in dev container JSON file.',
-      );
-      return null;
-    }
-
-    const deps: PackageDependency<Record<string, any>>[] = [];
-
-    for (const target of targets) {
-      try {
-        const dep = getDep(target, true, extractConfig.registryAliases);
-        if (!isValidDependency(dep)) {
+    if (features) {
+      for (const feature of Object.keys(features)) {
+        const featureDep = getDep(
+          feature,
+          packageFile,
+          extractConfig.registryAliases,
+        );
+        if (!featureDep) {
           logger.debug(
-            { image, packageFile },
+            { feature, packageFile },
             'Skipping invalid dependency in dev container JSON file.',
           );
           continue;
         }
-        deps.push(dep);
-      } catch (err) {
-        logger.debug(
-          { target, packageFile },
-          'Failed to determine dependency in dev container JSON file.',
-        );
+        deps.push(featureDep);
       }
     }
 
@@ -82,14 +67,29 @@ export function extractPackageFile(
   }
 }
 
-function getFeatures(file: DevContainerFile): string[] {
-  const features: string[] = [];
-  const fileFeatures = file?.features;
-
-  if (fileFeatures) {
-    for (const feature of Object.keys(fileFeatures)) {
-      features.push(feature);
-    }
+function getDep(
+  subject: string | null,
+  packageFile: string,
+  registryAliases?: Record<string, string>,
+): PackageDependency | null {
+  if (!subject) {
+    return null;
   }
-  return features;
+  try {
+    const dep = getDockerDep(subject, true, registryAliases);
+    if (!isValidDependency(dep)) {
+      logger.debug(
+        { subject, packageFile },
+        'Skipping invalid docker dependency in dev container JSON file.',
+      );
+      return null;
+    }
+    return dep;
+  } catch (err) {
+    logger.error(
+      { subject, packageFile },
+      'An error occurred whilst getting docker dependency from dev container JSON file.',
+    );
+  }
+  return null;
 }
