@@ -17,8 +17,8 @@ export function experimentalFlagValue(flagName: string): string | null {
   for (const flag of experimentalFlags) {
     if (flag.includes(flagName)) {
       const [key, value] = flag.split('=');
-      parsedExperimentalFlags[key] = value;
-      return value ? value : key;
+      parsedExperimentalFlags[key] = value ?? key;
+      return value ?? key;
     }
   }
 
