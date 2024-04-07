@@ -18,7 +18,7 @@ export function extractPackageFile(
     let targets: string[] = [];
     const image = getImage(file);
 
-    if (image !== undefined && image !== null) {
+    if (image) {
       targets.push(image);
     } else {
       logger.debug(
