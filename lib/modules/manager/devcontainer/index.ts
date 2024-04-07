@@ -1,8 +1,6 @@
 import type { Category } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
-import { extractPackageFile } from './extract';
-
-export { extractPackageFile };
+export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: ['^.devcontainer/devcontainer.json$', '^.devcontainer.json$'],
