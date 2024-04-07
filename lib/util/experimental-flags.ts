@@ -1,6 +1,6 @@
 import { GlobalConfig } from '../config/global';
 
-const parsedExperimentalFlags: Record<string, any> = {};
+const parsedExperimentalFlags: Record<string, string> = {};
 
 export function experimentalFlagValue(flagName: string): string | null {
   const experimentalFlags = GlobalConfig.get('experimentalFlags');
