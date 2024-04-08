@@ -553,7 +553,6 @@ If this option is not set, Renovate will fallback to 15 minutes.
 The `experimentalFlags` configuration option streamlines managing experimental settings within Renovate.
 This option replaces the use of environment variables (prefixed with `RENOVATE_X_`), providing a more structured and manageable approach.
 
-Overview:
 Old Approach: Previously, users had to set experimental environment variables like `RENOVATE_X_DOCKER_MAX_PAGES`, and others.
 
 New Approach: With `experimentalFlags`, users can specify experimental settings directly within the configuration file, enhancing clarity and ease of maintenance.
