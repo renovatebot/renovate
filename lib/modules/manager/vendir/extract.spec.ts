@@ -72,6 +72,18 @@ describe('modules/manager/vendir/extract', () => {
             packageName: 'quay.example.com/organization/aliased-oci-chart',
             pinDigests: false,
           },
+          {
+            currentValue: '7.10.1',
+            depName: 'https://github.com/test/test',
+            packageName: 'https://github.com/test/test',
+            datasource: 'git-refs',
+          },
+          {
+            currentValue: '7.10.1',
+            depName: 'test/test',
+            packageName: 'test/test',
+            datasource: 'github-releases',
+          },
         ],
       });
     });

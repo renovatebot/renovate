@@ -455,7 +455,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.3.8',
+    default: 'ghcr.io/containerbase/sidecar:10.3.11',
     globalOnly: true,
   },
   {
@@ -1578,7 +1578,7 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
   },
-  // Version behaviour
+  // Version behavior
   {
     name: 'allowedVersions',
     description:
@@ -1840,7 +1840,7 @@ const options: RenovateOptions[] = [
     allowedValues: ['auto', 'never'],
     default: 'auto',
   },
-  // PR Behaviour
+  // PR Behavior
   {
     name: 'keepUpdatedLabel',
     description:
