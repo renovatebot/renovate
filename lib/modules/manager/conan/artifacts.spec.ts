@@ -56,7 +56,7 @@ describe('modules/manager/conan/artifacts', () => {
     ).toBeNull();
   });
 
-  it('returns null if there is no dependencies to update', async () => {
+  it('returns null if there are no dependencies to update', async () => {
     expect(
       await conan.updateArtifacts({
         packageFileName: 'conanfile.py',
