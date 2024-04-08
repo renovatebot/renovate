@@ -99,6 +99,7 @@ export async function cleanup(): Promise<void> {
         deletedCount += 1;
       }
     }
+    await cacache.verify(cacheFileName);
     const durationMs = Math.round(Date.now() - startTime);
     logger.debug(
       `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`,
