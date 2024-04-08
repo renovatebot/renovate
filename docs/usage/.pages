@@ -7,6 +7,7 @@ nav:
       - 'Overview': 'config-overview.md'
       - 'Repository': 'configuration-options.md'
       - 'Self-hosted': 'self-hosted-configuration.md'
+      - 'Self-hosted experimental flags': 'self-hosted-experimental-flags.md'
       - 'Presets': 'config-presets.md'
       - 'Validation': 'config-validation.md'
   - ... | key-concepts
