@@ -14,7 +14,7 @@ How it works:
    - and the `python_requires`, `requires` and `build_requires` variables in the `conanfile.py` format
 1. Renovate resolves the dependency's version using the Conan v2 API
 1. If Renovate finds an update, Renovate will update `conanfile.txt` or `conanfile.py`
-1. Renovate also updates `conan.lock` basing on updated `conanfile` if `conan.lock` exists and if `updateType` is `lockFileMaintenance` or `isLockFileMaintenance` is `true`
+1. Renovate also updates `conan.lock` basing on updated `conanfile` if `conan.lock` exists
 
 Enabling Conan updating
 
