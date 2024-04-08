@@ -80,7 +80,7 @@ export async function extractPackageFile(
   if (lockFileContent) {
     const lockFileLines = lockFileContent.split(newlineRegex).slice(1, -1);
 
-    const lockedVersions: Map<string, string> = new Map();
+    const lockedVersions = new Map<string, string>();
 
     for (const line of lockFileLines) {
       const groups = lockedVersionRegExp.exec(line)?.groups;
@@ -90,8 +90,11 @@ export async function extractPackageFile(
     }
 
     for (const [app, dep] of deps.entries()) {
-      dep.lockedVersion = lockedVersions.get(app);
-      logger.trace(`Found ${dep.lockedVersion} for ${app}`);
+      const lockedVersion = lockedVersions.get(app);
+      if (lockedVersion) {
+        dep.lockedVersion = lockedVersion;
+        logger.trace(`Found ${lockedVersion} for ${app}`);
+      }
     }
   }
   const depsArray = Array.from(deps.values());
