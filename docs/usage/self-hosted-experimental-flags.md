@@ -16,7 +16,7 @@ We will try to keep breakage to a minimum, but make no guarantees that an experi
 
 ## `dockerHubTags`
 
-If added to the experimentalFlags list, Renovate will use the Docker Hub API (`https://hub.docker.com`) to fetch tags instead of the normal Docker API for images pulled from `https://index.docker.io`.
+If added to the `experimentalFlags` list, Renovate will use the Docker Hub API (`https://hub.docker.com`) to fetch tags instead of the normal Docker API for images pulled from `https://index.docker.io`.
 
 ```js
 experimentalFlags: ['dockerHubTags'];
@@ -24,8 +24,9 @@ experimentalFlags: ['dockerHubTags'];
 
 ## `dockerMaxPages`
 
-If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
-This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
+The default maximum page number for Docker tags lookup on Docker registries is `20`.
+You can override this default by setting a new integer number in the `dockerMaxPages` field.
+This is useful for registries which ignore the `n` parameter in the query string and only return `50` tags per page.
 
 Example usage:
 

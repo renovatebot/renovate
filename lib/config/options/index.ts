@@ -2978,7 +2978,7 @@ const options: RenovateOptions[] = [
   {
     name: 'experimentalFlags',
     description:
-      'This option is used to specify the experimental flags which Renovate supports.',
+      'Set which experimental flags you want Renovate to use.',
     type: 'array',
     subType: 'string',
     default: null,
