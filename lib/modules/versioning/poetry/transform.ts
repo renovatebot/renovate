@@ -64,17 +64,17 @@ export function poetry2semver(
   const parts = [releaseParts.map((num) => num.toString()).join('.')];
   if (pre !== null) {
     // trim leading zeros from valid numbers
-    pre.number = parseInt(pre.number, 10).toString();
+    pre.number = pre.number.replace(/^0+(?!$)/, '');
     parts.push(`-${pre.letter}.${pre.number}`);
   }
   if (post !== null) {
     // trim leading zeros from valid numbers
-    post.number = parseInt(post.number, 10).toString();
+    post.number = post.number.replace(/^0+(?!$)/, '');
     parts.push(`-${post.letter}.${post.number}`);
   }
   if (dev !== null) {
     // trim leading zeros from valid numbers
-    dev.number = parseInt(dev.number, 10).toString();
+    dev.number = dev.number.replace(/^0+(?!$)/, '');
     parts.push(`-${dev.letter}.${dev.number}`);
   }
 
