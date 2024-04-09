@@ -12,7 +12,7 @@ import type {
 } from './types';
 import { mapPrStateToGerritFilter } from './utils';
 
-const QUOTES_REGEX = new RegExp('"', 'g');
+const QUOTES_REGEX = regEx('"', 'g');
 
 class GerritClient {
   private requestDetails = [
