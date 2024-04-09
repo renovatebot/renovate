@@ -99,7 +99,7 @@ export async function cleanup(): Promise<void> {
         deletedCount += 1;
       }
     }
-    logger.debug("Verifying and cleaning cache.", { cacheFileName });
+    logger.debug({ cacheFileName }, "Verifying and cleaning cache.");
     await cacache.verify(cacheFileName);
     const durationMs = Math.round(Date.now() - startTime);
     logger.debug(
