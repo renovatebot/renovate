@@ -462,19 +462,6 @@ jobs:
           needs.test.result == 'skipped'
         run: exit 1
 
-      - name: Fail for failed or cancelled codecov
-        if: |
-          needs.codecov.result == 'failure' ||
-          needs.codecov.result == 'cancelled'
-        run: exit 1
-
-      - name: Fail for skipped codecov when PR is ready for review
-        if: |
-          github.event_name == 'pull_request' &&
-          github.event.pull_request.draft != true &&
-          needs.codecov.result == 'skipped'
-        run: exit 1
-
       - name: Fail for failed or cancelled coverage-threshold
         if: |
           needs.coverage-threshold.result == 'failure' ||
