@@ -66,8 +66,7 @@ export class RepoCacheS3 extends RepoCacheBase {
     };
     try {
       await this.s3Client.send(new PutObjectCommand(s3Params));
-      cacheType
-      if (s3PersistCache === '/tmp/..') {
+      if (process.env.RENOVATE_X_S3_PERSIST_CACHE === 'true') {
         const cacheLocalFileName = getLocalCacheFileName(this.platform, this.repository);
         await outputCacheFile(cacheLocalFileName, Body);
       }
