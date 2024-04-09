@@ -5,7 +5,6 @@ import {
   PutObjectCommand,
   PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
-import upath from 'upath';
 import { logger } from '../../../../logger';
 import { outputCacheFile } from '../../../fs';
 import { getS3Client, parseS3Url } from '../../../s3';
