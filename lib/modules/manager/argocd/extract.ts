@@ -20,7 +20,7 @@ import {
 } from './schema';
 import { fileTestRegex } from './util';
 
-const kustomizeImageRe = regEx(/.+=(?<image>.+)/);
+const kustomizeImageRe = regEx(/=(?<image>.+)$/);
 
 export function extractPackageFile(
   content: string,
