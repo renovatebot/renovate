@@ -10,9 +10,9 @@ import { logger } from '../../../../logger';
 import { outputCacheFile } from '../../../fs';
 import { getS3Client, parseS3Url } from '../../../s3';
 import { streamToString } from '../../../streams';
+import {getLocalCacheFileName} from "../common";
 import type { RepoCacheRecord } from '../schema';
 import { RepoCacheBase } from './base';
-import {getLocalCacheFileName} from "../common";
 
 export class RepoCacheS3 extends RepoCacheBase {
   private readonly s3Client;

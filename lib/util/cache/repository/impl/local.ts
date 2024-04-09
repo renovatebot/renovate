@@ -1,9 +1,8 @@
-import upath from 'upath';
 import { logger } from '../../../../logger';
 import { cachePathExists, outputCacheFile, readCacheFile } from '../../../fs';
+import {getLocalCacheFileName} from "../common";
 import type { RepoCacheRecord } from '../schema';
 import { RepoCacheBase } from './base';
-import {getLocalCacheFileName} from "../common";
 
 export class RepoCacheLocal extends RepoCacheBase {
   constructor(repository: string, fingerprint: string) {
