@@ -296,9 +296,11 @@ describe('modules/manager/npm/extract/index', () => {
     it('resolves registry URLs using the package name if set', async () => {
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc.yml') {
-          return Promise.resolve(
-            'npmScopes:\n  yarnpkg:\n    npmRegistryServer: https://registry.example.com',
-          );
+          return Promise.resolve(codeblock`
+          npmScopes:
+            yarnpkg:
+                npmRegistryServer: https://registry.example.com
+          `);
         }
         return Promise.resolve(null);
       });
