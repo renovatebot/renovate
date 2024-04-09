@@ -1,6 +1,7 @@
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { GerritHttp } from '../../../util/http/gerrit';
+import { regEx } from '../../../util/regex';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
