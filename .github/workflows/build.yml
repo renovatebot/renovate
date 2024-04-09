@@ -394,6 +394,7 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
           fail_ci_if_error: true
           verbose: true
