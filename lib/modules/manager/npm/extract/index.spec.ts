@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
 import { logger } from '../../../../logger';
@@ -296,10 +297,10 @@ describe('modules/manager/npm/extract/index', () => {
     it('resolves registry URLs using the package name if set', async () => {
       fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc.yml') {
-          return Promise.resolve(codeblock`
-          npmScopes:
-            yarnpkg:
-                npmRegistryServer: https://registry.example.com
+          return Promise.resolve(codeBlock`
+            npmScopes:
+              yarnpkg:
+                  npmRegistryServer: https://registry.example.com
           `);
         }
         return Promise.resolve(null);
