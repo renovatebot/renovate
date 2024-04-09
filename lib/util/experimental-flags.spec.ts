@@ -23,6 +23,7 @@ describe('util/experimental-flags', () => {
         experimentalFlags: ['dockerHubTags', 'dockerMaxPages=19'],
       });
       expect(experimentalFlagValue('dockerHubTags')).toBe('dockerHubTags');
+      expect(experimentalFlagValue('dockerHubTags')).toBe('dockerHubTags'); // validate caching
       expect(experimentalFlagValue('dockerMaxPages')).toBe('19');
       expect(experimentalFlagValue('dockerMaxPages')).toBe('19'); // coverage for stored values
     });
