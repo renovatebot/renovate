@@ -200,7 +200,7 @@ describe('util/cache/repository/impl/s3', () => {
   });
 
   it('should persists data locally after uploading to s3', async () => {
-    process.env.RENOVATE_X_S3_PERSIST_CACHE = 'true';
+    process.env.RENOVATE_X_REPO_CACHE_S3_LOCAL = 'true';
     const putObjectCommandOutput: PutObjectCommandOutput = {
       $metadata: { attempts: 1, httpStatusCode: 200, totalRetryDelay: 0 },
     };
