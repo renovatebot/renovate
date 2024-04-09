@@ -96,7 +96,7 @@ export function extractPackageJson(
                 setNodeCommitTopic(dep);
                 dep.prettyDepType = depTypes[depName];
                 deps.push(dep);
-              } else {
+              } else if (is.object(overridesVal)) {
                 deps.push(
                   ...extractOverrideDepsRec(
                     [overridesKey],
