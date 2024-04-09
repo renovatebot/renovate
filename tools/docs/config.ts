@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import stringify from 'json-stringify-pretty-compact';
 import { getOptions } from '../../lib/config/options';
 import { allManagersList } from '../../lib/modules/manager';
@@ -92,6 +93,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'experimentalDescription',
     'experimentalIssues',
     'advancedUse',
+    'deprecationMsg',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -179,6 +181,17 @@ function genExperimentalMsg(el: Record<string, any>): string {
   return warning + '\n';
 }
 
+function genDeprecationMsg(el: Record<string, any>): string {
+  let warning =
+    '\n<!-- prettier-ignore -->\n!!! warning "This feature has been deprecated"\n';
+
+  if (el.deprecationMsg) {
+    warning += indent`${2}${el.deprecationMsg}`;
+  }
+
+  return warning + '\n';
+}
+
 function indexMarkdown(lines: string[]): Record<string, [number, number]> {
   const indexed: Record<string, [number, number]> = {};
 
@@ -240,6 +253,10 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
 
       if (el.experimental) {
         configOptionsRaw[footerIndex] += genExperimentalMsg(el);
+      }
+
+      if (is.nonEmptyString(el.deprecationMsg)) {
+        configOptionsRaw[footerIndex] += genDeprecationMsg(el);
       }
     });
 
