@@ -9,7 +9,7 @@ import { logger } from '../../../../logger';
 import { outputCacheFile } from '../../../fs';
 import { getS3Client, parseS3Url } from '../../../s3';
 import { streamToString } from '../../../streams';
-import {getLocalCacheFileName} from "../common";
+import { getLocalCacheFileName } from '../common';
 import type { RepoCacheRecord } from '../schema';
 import { RepoCacheBase } from './base';
 
@@ -66,7 +66,10 @@ export class RepoCacheS3 extends RepoCacheBase {
     try {
       await this.s3Client.send(new PutObjectCommand(s3Params));
       if (process.env.RENOVATE_X_S3_PERSIST_CACHE === 'true') {
-        const cacheLocalFileName = getLocalCacheFileName(this.platform, this.repository);
+        const cacheLocalFileName = getLocalCacheFileName(
+          this.platform,
+          this.repository,
+        );
         await outputCacheFile(cacheLocalFileName, Body);
       }
     } catch (err) {
