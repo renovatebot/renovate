@@ -160,6 +160,10 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 !!! note
     For the GitHub Enterprise Server platform only.
 
+## `RENOVATE_X_REPO_CACHE_S3_LOCAL`
+
+If set, Renovate will persist repository cache locally after uploading to S3.
+
 ## `RENOVATE_X_S3_ENDPOINT`
 
 If set, Renovate will use this string as the `endpoint` when instantiating the AWS S3 client.
@@ -171,10 +175,6 @@ If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 clie
 > Whether to force path style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
 
 Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
-
-## `RENOVATE_X_REPO_CACHE_S3_LOCAL`
-
-If set, Renovate will persist repository cache locally after uploading to S3.
 
 ## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
 
