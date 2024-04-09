@@ -295,7 +295,7 @@
     "@types/mdast": "3.0.15",
     "@types/moo": "0.5.9",
     "@types/nock": "10.0.3",
-    "@types/node": "18.19.26",
+    "@types/node": "18.19.30",
     "@types/parse-link-header": "2.0.3",
     "@types/prettier": "2.7.3",
     "@types/semver": "7.5.8",
@@ -332,7 +332,7 @@
     "jest-mock-extended": "3.0.5",
     "jest-snapshot": "29.7.0",
     "markdownlint-cli2": "0.12.1",
-    "memfs": "4.8.0",
+    "memfs": "4.8.1",
     "nock": "13.5.4",
     "npm-run-all2": "6.1.2",
     "nyc": "15.1.0",
@@ -347,7 +347,7 @@
     "typescript": "5.3.3",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@8.15.5",
+  "packageManager": "pnpm@8.15.6",
   "files": [
     "dist",
     "renovate-schema.json"
