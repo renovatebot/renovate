@@ -56,11 +56,11 @@ export class RepoCacheS3 extends RepoCacheBase {
 
   async write(data: RepoCacheRecord): Promise<void> {
     const cacheFileName = this.getCacheFileName();
-    const Body = JSON.stringify(data);
+    const stringifiedCache = JSON.stringify(data);
     const s3Params: PutObjectCommandInput = {
       Bucket: this.bucket,
       Key: cacheFileName,
-      Body,
+      Body: stringifiedCache,
       ContentType: 'application/json',
     };
     try {
@@ -70,7 +70,7 @@ export class RepoCacheS3 extends RepoCacheBase {
           this.platform,
           this.repository,
         );
-        await outputCacheFile(cacheLocalFileName, Body);
+        await outputCacheFile(cacheLocalFileName, stringifiedCache);
       }
     } catch (err) {
       logger.warn({ err }, 'RepoCacheS3.write() - failure');
