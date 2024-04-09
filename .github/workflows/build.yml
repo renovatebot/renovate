@@ -396,7 +396,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
-          fail_ci_if_error: true
+          fail_ci_if_error: github.event_name != 'pull_request'
           verbose: true
 
   coverage-threshold:
