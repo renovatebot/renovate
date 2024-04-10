@@ -29,7 +29,7 @@ export function extractPackageFile(
       );
     }
 
-    const features = file.features ?? {};
+    const features = file.features;
 
     if (features) {
       for (const feature of Object.keys(features)) {
