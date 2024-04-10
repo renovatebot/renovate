@@ -185,6 +185,10 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 
 Suppress the pre-commit support warning in PR bodies.
 
+## `RENOVATE_X_USE_OPENPGP`
+
+Use `openpgp` instead of `kbpgp` for `PGP` decryption.
+
 ## `RENOVATE_X_YARN_PROXY`
 
 Configure global Yarn proxy settings if HTTP proxy environment variables are detected.
