@@ -28,3 +28,11 @@ export function toArray<T>(value: T | T[]): T[] {
 export function deduplicateArray<T>(array: T[]): T[] {
   return Array.from(new Set(array));
 }
+
+export async function asyncFilter<T>(
+  arr: T[],
+  predicate: (value: T) => Promise<boolean>,
+): Promise<T[]> {
+  const results = await Promise.all(arr.map(predicate));
+  return arr.filter((_v, index) => results[index]);
+}
