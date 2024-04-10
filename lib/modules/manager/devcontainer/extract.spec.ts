@@ -1,13 +1,6 @@
-import upath from 'upath';
+import { codeBlock } from 'common-tags';
 import * as dockerfileExtract from '../dockerfile/extract';
 import { extractPackageFile } from '.';
-
-function getFixture(content: string) {
-  return {
-    content,
-    path: upath.resolve(__dirname, 'devcontainer.json'),
-  };
-}
 
 describe('modules/manager/devcontainer/extract', () => {
   describe('extractPackageFile()', () => {
@@ -41,7 +34,7 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns feature image deps when only the features property is defined in dev container JSON file', () => {
       // Arrange
-      const fixture = getFixture(`
+      const content = codeBlock(`
       {
         "features": {
           "devcontainer.registry.renovate.com/test/features/first:1.2.3": {},
@@ -51,8 +44,8 @@ describe('modules/manager/devcontainer/extract', () => {
       const extractConfig = {};
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
@@ -84,7 +77,7 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns image and feature image deps when both image and features properties are defined in dev container JSON file', () => {
       // Arrange
-      const fixture = getFixture(`
+      const content = codeBlock(`
       {
         "image": "devcontainer.registry.renovate.com/test/image:1.2.3",
         "features": {
@@ -95,8 +88,8 @@ describe('modules/manager/devcontainer/extract', () => {
 
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
@@ -128,15 +121,15 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns image dep when only the image property is defined in dev container JSON file', () => {
       // Arrange
-      const fixture = getFixture(`
+      const content = codeBlock(`
       {
         "image": "devcontainer.registry.renovate.com/test/image:1.2.3"
       }`);
       const extractConfig = {};
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
@@ -160,7 +153,7 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when the only feature property is malformed and no image property is defined in dev container JSON file', () => {
       // Arrange
-      const fixture = getFixture(`
+      const content = codeBlock(`
       {
         "features": {
           "malformedFeature": {}
@@ -169,8 +162,8 @@ describe('modules/manager/devcontainer/extract', () => {
       const extractConfig = {};
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
@@ -180,15 +173,15 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when the features property is malformed and no image property is defined in dev container JSON file', () => {
       // Arrange
-      const fixture = getFixture(`
+      const content = codeBlock(`
       {
         "features": "devcontainer.registry.renovate.com/test:1.2.3"
       }`);
       const extractConfig = {};
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
@@ -198,15 +191,15 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when the image property is malformed and no features are defined in dev container JSON file', () => {
       // Arrange
-      const fixture = getFixture(`
+      const content = codeBlock(`
       {
         "image:": "devcontainer.registry.renovate.com/test/image:1.2.3"
       }`);
       const extractConfig = {};
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
@@ -216,12 +209,12 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when no image or features properties are defined in dev container JSON file', () => {
       // Arrange
-      const fixture = getFixture('{}');
+      const content = codeBlock('{}');
       const extractConfig = {};
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
@@ -231,15 +224,15 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when the features property is null and no image property is defined in dev container JSON file', () => {
       // Arrange
-      const fixture = getFixture(`
+      const content = codeBlock(`
       {
         "features": null
       }`);
       const extractConfig = {};
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
@@ -249,15 +242,15 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when the features property is not defined and the image property is null in dev container JSON file', () => {
       // Arrange
-      const fixture = getFixture(`
+      const content = codeBlock(`
       {
         "image": null
       }`);
       const extractConfig = {};
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
@@ -267,7 +260,7 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns null when both the image and features properties are null', () => {
       // Arrange
-      const fixture = getFixture(`
+      const content = codeBlock(`
       {
         "image": null,
         "features": null
@@ -275,8 +268,8 @@ describe('modules/manager/devcontainer/extract', () => {
       const extractConfig = {};
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
@@ -286,7 +279,7 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns only valid dependencies when others throw error when calling getDep', () => {
       // Arrange
-      const fixture = getFixture(`
+      const content = codeBlock(`
       {
         "image": "devcontainer.registry.renovate.com/test/image:1.2.3",
         "features": {
@@ -300,8 +293,8 @@ describe('modules/manager/devcontainer/extract', () => {
 
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
@@ -325,7 +318,7 @@ describe('modules/manager/devcontainer/extract', () => {
 
     it('returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file', () => {
       // Arrange
-      const fixture = getFixture(`
+      const content = codeBlock(`
       {
         "features": {
           "devcontainer.registry.renovate.com/test/feature:1.2.3": {},
@@ -337,8 +330,8 @@ describe('modules/manager/devcontainer/extract', () => {
 
       // Act
       const result = extractPackageFile(
-        fixture.content,
-        fixture.path,
+        content,
+        'devcontainer.json',
         extractConfig,
       );
 
