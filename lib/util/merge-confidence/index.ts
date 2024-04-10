@@ -5,6 +5,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../cache/package';
 import { parseJson } from '../common';
+import { experimentalFlagValue } from '../experimental-flags';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
 import { regEx } from '../regex';
@@ -37,8 +38,9 @@ export function initConfig(): void {
 }
 
 export function parseSupportedDatasourceString(): string[] | undefined {
-  const supportedDatasourceString =
-    process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES;
+  const supportedDatasourceString = experimentalFlagValue(
+    'mergeConfidenceSupportedDatasources',
+  );
 
   if (!is.string(supportedDatasourceString)) {
     return undefined;

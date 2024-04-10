@@ -40,23 +40,6 @@ If set to "false" (string), Renovate will remove any existing `package-lock.json
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
 
-## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
-
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
-
-The order method for autodiscover server side repository search.
-
-> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `asc`
-- `desc`
-
-Default value: `asc`.
-
 ## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
 
 <!-- prettier-ignore -->
@@ -130,11 +113,6 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 
 If set, Renovate will query this API for Merge Confidence data.
 This feature is in private beta.
-
-## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`
-
-If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
-The expected value for this environment variable is a JSON array of strings.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 

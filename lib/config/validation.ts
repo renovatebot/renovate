@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
+import { getDatasourceList } from '../modules/datasource';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
 import type {
@@ -8,6 +9,7 @@ import type {
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types/host-rules';
+import { parseJson } from '../util/common';
 import { regEx } from '../util/regex';
 import {
   getRegexPredicate,
@@ -26,6 +28,7 @@ import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import {
   AllowedParents,
+  ExperimentalFlagValue,
   type RenovateConfig,
   type RenovateOptions,
   type StatusCheckKey,
@@ -43,6 +46,7 @@ let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 
 const managerList = getManagerList();
+const datasourceList = getDatasourceList();
 
 const topLevelObjects = [...managerList, 'env'];
 
@@ -1043,9 +1047,14 @@ function validateExperimentalFlag(
   warnings: ValidationMessage[],
   currentPath: string | undefined,
 ): void {
-  const allowedExperimentalFlags: Record<string, Record<string, string>> = {
-    dockerHubTags: {},
-    dockerMaxPages: { acceptedValue: 'integer' },
+  const allowedExperimentalFlags: Record<string, ExperimentalFlagValue> = {
+    dockerHubTags: { type: 'boolean' },
+    dockerMaxPages: { type: 'integer' },
+    autoDiscoverRepoOrder: { type: 'string', acceptedValues: ['asc', 'desc'] },
+    mergeConfidenceSupportedDatasources: {
+      type: 'json-strings',
+      acceptedValues: datasourceList,
+    },
   };
 
   const flagDetails = allowedExperimentalFlags[flagName];
@@ -1057,24 +1066,24 @@ function validateExperimentalFlag(
     return;
   }
 
-  if (flagDetails.acceptedValue && !flagValue) {
+  if (flagDetails.type && !flagValue) {
     warnings.push({
       topic: 'Configuration Error',
       message: `Experimental flag \`${flagName}\` should have a value.`,
     });
+    return;
   }
 
-  if (!flagDetails.acceptedValue && flagValue) {
-    warnings.push({
-      topic: 'Configuration Error',
-      message: `Experimental flag \`${flagName}\` should not have a value.`,
-    });
-  }
-
-  // will add test soon, for review I wanted to keep it minimal
-  // istanbul ignore if
-  if (flagDetails.acceptedValue && flagValue) {
-    switch (flagDetails.acceptedValue) {
+  if (flagDetails.type && flagValue) {
+    switch (flagDetails.type) {
+      case 'boolean':
+        if (flagValue !== 'true' && flagValue !== 'false') {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Experimental flag \`${flagName}\` should be of type boolean. Found invalid type instead.`,
+          });
+        }
+        break;
       case 'integer':
         if (!regEx(/^\d+$/).test(flagValue)) {
           warnings.push({
@@ -1084,20 +1093,52 @@ function validateExperimentalFlag(
         }
         break;
       case 'string':
-        if (!regEx(/^\w+$/).test(flagValue)) {
+        if (!regEx(/^[a-zA-Z]+$/).test(flagValue)) {
           warnings.push({
             topic: 'Configuration Error',
             message: `Experimental flag \`${flagName}\` should be of type string. Found invalid type instead.`,
           });
+          return;
         }
-        break;
-      case 'array':
-        if (!regEx(/(\w+,?)+/).test(flagValue)) {
+        if (
+          flagDetails.acceptedValues &&
+          !flagDetails.acceptedValues.includes(flagValue)
+        ) {
           warnings.push({
             topic: 'Configuration Error',
-            message: `Experimental flag \`${flagName}\` should be of type array of strings. Found invalid type instead.`,
+            message: `Invalid value \`${flagValue}\` found for experimental flag \`${flagName}\`.The allowed values are ${flagDetails.acceptedValues.join(', ')}.`,
           });
         }
+        break;
+      case 'json-strings':
+        try {
+          const values = parseJson(flagValue, '.json5');
+
+          if (!is.array<string>(values, is.string)) {
+            warnings.push({
+              topic: 'Configuration Error',
+              message: `Experimental flag \`${flagName}\` should be an array of strings. But got ${typeof values} instead.`,
+            });
+            return;
+          }
+
+          if (flagDetails.acceptedValues) {
+            for (const value of values) {
+              if (!flagDetails.acceptedValues.includes(value)) {
+                warnings.push({
+                  topic: 'Configuration Error',
+                  message: `Invalid value \`${value}\` found for experimental flag \`${flagName}\`.The allowed values are ${flagDetails.acceptedValues.join(', ')}.`,
+                });
+              }
+            }
+          }
+        } catch (err) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Experimental flag \`${flagName}\` should be of json array of string format. Found invalid format instead.`,
+          });
+        }
+        break;
     }
   }
 }

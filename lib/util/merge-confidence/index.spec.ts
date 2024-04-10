@@ -1,4 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
+import { GlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
@@ -430,7 +431,7 @@ describe('util/merge-confidence/index', () => {
         };
 
         afterEach(() => {
-          delete process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES;
+          GlobalConfig.reset();
         });
 
         it.each([
@@ -465,8 +466,11 @@ describe('util/merge-confidence/index', () => {
             datasourceListString,
             expected,
           }: ParseSupportedDatasourceTestCase) => {
-            process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES =
-              datasourceListString;
+            GlobalConfig.set({
+              experimentalFlags: [
+                `mergeConfidenceSupportedDatasources=${datasourceListString}`,
+              ],
+            });
 
             expect(parseSupportedDatasourceString()).toStrictEqual(expected);
           },
