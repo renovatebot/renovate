@@ -50,9 +50,6 @@ describe('modules/manager/devcontainer/extract', () => {
       );
 
       // Assert
-      expect(result).not.toBeNull();
-      expect(result?.deps).not.toBeNull();
-      expect(result?.deps.length).toBe(2);
       expect(result?.deps).toMatchInlineSnapshot(`
       [
         {
@@ -94,9 +91,6 @@ describe('modules/manager/devcontainer/extract', () => {
       );
 
       // Assert
-      expect(result).not.toBeNull();
-      expect(result?.deps).not.toBeNull();
-      expect(result?.deps.length).toBe(2);
       expect(result?.deps).toMatchInlineSnapshot(`
       [
         {
@@ -134,9 +128,6 @@ describe('modules/manager/devcontainer/extract', () => {
       );
 
       // Assert
-      expect(result).not.toBeNull();
-      expect(result?.deps).not.toBeNull();
-      expect(result?.deps.length).toBe(1);
       expect(result?.deps).toMatchInlineSnapshot(`
       [
         {
@@ -299,9 +290,6 @@ describe('modules/manager/devcontainer/extract', () => {
       );
 
       // Assert
-      expect(result).not.toBeNull();
-      expect(result?.deps).not.toBeNull();
-      expect(result?.deps.length).toBe(1);
       expect(result?.deps).toMatchInlineSnapshot(`
       [
         {
@@ -336,9 +324,6 @@ describe('modules/manager/devcontainer/extract', () => {
       );
 
       // Assert
-      expect(result).not.toBeNull();
-      expect(result?.deps).not.toBeNull();
-      expect(result?.deps.length).toBe(1);
       expect(result?.deps).toMatchInlineSnapshot(`
       [
         {
