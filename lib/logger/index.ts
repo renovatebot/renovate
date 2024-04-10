@@ -131,7 +131,7 @@ if (is.string(process.env.LOG_FILE)) {
   addStream({
     name: 'logfile',
     path: process.env.LOG_FILE,
-    level: validateLogLevel(process.env.LOG_FILE_LEVEL),
+    level: validateLogLevel(process.env.LOG_FILE_LEVEL, 'debug'),
   });
 }
 
