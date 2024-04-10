@@ -38,14 +38,13 @@ export function extractPackageFile(
           packageFile,
           extractConfig.registryAliases,
         );
-        if (!featureDep) {
-          logger.debug(
-            { feature, packageFile },
-            'Skipping invalid dependency in dev container JSON file.',
-          );
-          continue;
+        if (featureDep) {
+          deps.push(featureDep);
         }
-        deps.push(featureDep);
+        logger.debug(
+          { feature, packageFile },
+          'Skipping invalid dependency in dev container JSON file.',
+        );
       }
     }
 
