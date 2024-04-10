@@ -160,7 +160,7 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 !!! note
     For the GitHub Enterprise Server platform only.
 
-## `RENOVATE_X_REPO_CACHE_S3_LOCAL`
+## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
 
 If set, Renovate will persist repository cache locally after uploading to S3.
 
