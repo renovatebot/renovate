@@ -24,7 +24,7 @@ export class TerraformProviderHash {
   static terraformDatasource = new TerraformProviderDatasource();
 
   static hashCacheTTL = 10080; // in minutes == 1 week
-  // https://github.com/golang/go/issues/53448
+
   private static async hashFiles(
     basePath: string,
     files: string[],
@@ -47,6 +47,40 @@ export class TerraformProviderHash {
     return rootHash.digest('base64');
   }
 
+  /**
+   * This is a reimplementation of the Go H1 hash algorithm found at https://github.com/golang/mod/blob/master/sumdb/dirhash/hash.go
+   * The package provides two function HashDir and HashZip where the first is for hashing the contents of a directory
+   * and the second for doing the same but implicitly extracting the contents first.
+   *
+   * The problem starts with that there is a bug which leads to the fact that HashDir and HashZip do not return the same
+   * hash if there are folders inside the content which should be hashed.
+   *
+   * In a folder structure such as
+   * .
+   * ├── Readme.md
+   * └── readme-assets/
+   *     └── image.jpg
+   *
+   * HashDir will create a list of following entries which in turn will hash again
+   * aaaaaaaaaaa  Readme.md\n
+   * ccccccccccc  readme-assets/image.jpg\n
+   *
+   * HashZip in contrast will not filter out the directory itself but rather includes it in the hash list
+   * aaaaaaaaaaa  Readme.md\n
+   * bbbbbbbbbbb  readme-assets/\n
+   * ccccccccccc  readme-assets/image.jpg\n
+   *
+   * As the resulting string is used to generate the final hash it will differ based on which function has been used.
+   * The issue is tracked here: https://github.com/golang/go/issues/53448
+   *
+   * This implementation follows the intended implementation and filters out folder entries.
+   * Terraform seems NOT to use HashZip for provider validation, but rather extracts it and then do the hash calculation
+   * even as both are set up in their code base.
+   * https://github.com/hashicorp/terraform/blob/3fdfbd69448b14a4982b3c62a5d36835956fcbaa/internal/getproviders/hash.go#L283-L305
+   *
+   * @param zipFilePath path to the zip file
+   * @param extractPath path to where to temporarily extract the data
+   */
   static async hashOfZipContent(
     zipFilePath: string,
     extractPath: string,
