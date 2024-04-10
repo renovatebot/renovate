@@ -10,11 +10,11 @@ import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked } from '../../../../test/util';
+import { ExperimentalFlag } from '../../../config/experimental-flags';
 import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
-import { ExperimentalFlag } from '../../../config/experimental-flags';
 
 const hostRules = mocked(_hostRules);
 const googleAuth = mocked(_googleAuth);

@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
+import { ExperimentalFlag } from '../../../config/experimental-flags';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -60,7 +61,6 @@ import {
   toRenovatePR,
   trimTrailingApiPath,
 } from './utils';
-import { ExperimentalFlag } from '../../../config/experimental-flags';
 
 interface GiteaRepoConfig {
   repository: string;

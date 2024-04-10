@@ -1,4 +1,5 @@
 import * as httpMock from '../../../test/http-mock';
+import { ExperimentalFlag } from '../../config/experimental-flags';
 import { GlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -14,7 +15,6 @@ import {
   resetConfig,
   satisfiesConfidenceLevel,
 } from '.';
-import { ExperimentalFlag } from '../../config/experimental-flags';
 
 describe('util/merge-confidence/index', () => {
   const apiBaseUrl = 'https://www.baseurl.com/';

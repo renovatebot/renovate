@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { ExperimentalFlag } from '../../config/experimental-flags';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
 import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';
@@ -11,7 +12,6 @@ import { regEx } from '../regex';
 import { ensureTrailingSlash, joinUrlParts } from '../url';
 import { MERGE_CONFIDENCE } from './common';
 import type { MergeConfidence } from './types';
-import { ExperimentalFlag } from '../../config/experimental-flags';
 
 const hostType = 'merge-confidence';
 const http = new Http(hostType);

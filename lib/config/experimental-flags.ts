@@ -11,7 +11,7 @@ export class ExperimentalFlag {
     }
 
     // Check if the flag value is already parsed and stored
-    if (ExperimentalFlag.parsedFlags.hasOwnProperty(key)) {
+    if (ExperimentalFlag.parsedFlags[key]) {
       return ExperimentalFlag.parsedFlags[key];
     }
 

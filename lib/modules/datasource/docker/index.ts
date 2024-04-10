@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { ExperimentalFlag } from '../../../config/experimental-flags';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -46,7 +47,6 @@ import {
   OciImageConfig,
   OciImageManifest,
 } from './schema';
-import { ExperimentalFlag } from '../../../config/experimental-flags';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',

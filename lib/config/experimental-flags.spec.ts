@@ -1,7 +1,7 @@
 import { GlobalConfig } from '../config/global';
 import { ExperimentalFlag } from './experimental-flags';
 
-describe('util/experimental-flags', () => {
+describe('config/experimental-flags', () => {
   describe('experimentalFlagValue()', () => {
     beforeEach(() => {
       GlobalConfig.reset();
