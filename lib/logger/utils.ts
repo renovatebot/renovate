@@ -284,7 +284,7 @@ export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
  */
 export function validateLogLevel(
   logLevelToCheck: string | undefined,
-  defaultLevel?: bunyan.LogLevelString
+  defaultLevel?: bunyan.LogLevelString,
 ): bunyan.LogLevelString {
   const allowedValues: bunyan.LogLevelString[] = [
     'trace',
