@@ -35,6 +35,20 @@ export const presets: Record<string, Preset> = {
       'workarounds:all',
     ],
   },
+  security: {
+    description: 'Security only configuration.',
+    extends: ['config:recommended'],
+    packageRules: [
+      {
+        enabled: false,
+        matchPackageNames: ['*'],
+      }
+    ],
+    vulnerabilityAlerts: {
+      enabled: true,
+    },
+    osvVulnerabilityAlerts: true
+  },
   semverAllMonthly: {
     description:
       'Preserve SemVer ranges and update everything together once a month.',
