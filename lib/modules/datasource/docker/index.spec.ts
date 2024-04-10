@@ -14,6 +14,7 @@ import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '.';
+import { ExperimentalFlag } from '../../../config/experimental-flags';
 
 const hostRules = mocked(_hostRules);
 const googleAuth = mocked(_googleAuth);
@@ -49,6 +50,7 @@ describe('modules/datasource/docker/index', () => {
     });
     hostRules.hosts.mockReturnValue([]);
     GlobalConfig.reset();
+    ExperimentalFlag.reset();
   });
 
   describe('getDigest', () => {

@@ -3,7 +3,6 @@ import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
-import { experimentalFlagValue } from '../../../util/experimental-flags';
 import { HttpError } from '../../../util/http';
 import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
@@ -47,6 +46,7 @@ import {
   OciImageConfig,
   OciImageManifest,
 } from './schema';
+import { ExperimentalFlag } from '../../../config/experimental-flags';
 
 const defaultConfig = {
   commitMessageTopic: '{{{depName}}} Docker tag',
@@ -642,7 +642,7 @@ export class DockerDatasource extends Datasource {
       return null;
     }
     let page = 0;
-    const dockerMaxPages = experimentalFlagValue('dockerMaxPages');
+    const dockerMaxPages = ExperimentalFlag.get('dockerMaxPages');
     const pages = dockerMaxPages ? parseInt(dockerMaxPages, 10) : 20;
     let foundMaxResultsError = false;
     do {
@@ -998,9 +998,7 @@ export class DockerDatasource extends Datasource {
         'dockerhub-error' as const,
       ).catch(getTags);
 
-    const allowDockerHubTags = is.string(
-      experimentalFlagValue('dockerHubTags'),
-    );
+    const allowDockerHubTags = is.string(ExperimentalFlag.get('dockerHubTags'));
     const tagsResult =
       registryHost === 'https://index.docker.io' && allowDockerHubTags
         ? getDockerHubTags()
