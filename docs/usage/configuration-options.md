@@ -368,11 +368,6 @@ Solutions:
 
 ## branchName
 
-<!-- prettier-ignore -->
-!!! warning
-    We strongly recommended that you avoid configuring this field directly.
-    Use at your own risk.
-
 If you truly need to configure this then it probably means either:
 
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
@@ -459,9 +454,9 @@ For example, To add `[skip ci]` to every commit you could configure:
 }
 ```
 
-Another example would be if you want to configure a DCO signoff to each commit.
+Another example would be if you want to configure a DCO sign off to each commit.
 
-If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
+If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
 
 ```json
 {
@@ -472,11 +467,6 @@ If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](./pr
 ## commitBodyTable
 
 ## commitMessage
-
-<!-- prettier-ignore -->
-!!! warning
-    We deprecated editing the `commitMessage` directly, and we recommend you stop using this config option.
-    Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, to create the commit message you want.
 
 ## commitMessageAction
 
@@ -531,12 +521,12 @@ Composer `2.2` and up will be run with `--ignore-platform-req='ext-*' --ignore-p
 Older Composer versions will be run with `--ignore-platform-reqs`, which means that all platform constraints (including the PHP version) will be ignored by default.
 This can result in updated dependencies that are not compatible with your platform.
 
-To customize this behaviour, you can explicitly ignore platform requirements (for example `ext-zip`) by setting them separately in this array.
+To customize this behavior, you can explicitly ignore platform requirements (for example `ext-zip`) by setting them separately in this array.
 Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
 Note that this requires your project to use Composer V2, as V1 doesn't support excluding single platform requirements.
 The used PHP version will be guessed automatically from your `composer.json` definition, so `php` should not be added as explicit dependency.
 
-If an empty array is configured, Renovate uses its default behaviour.
+If an empty array is configured, Renovate uses its default behavior.
 
 Set to `null` (not recommended) to fully omit `--ignore-platform-reqs/--ignore-platform-req` during Composer invocation.
 This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed, otherwise Renovate will fail to create the updated lock file.
@@ -1412,7 +1402,7 @@ For now, you can only use this option on the GitLab platform.
 
 For `followTag` to work, the datasource must support distribution streams or tags, like for example npm does.
 
-The main usecase is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
+The main use case is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
 
 ```json
 {
@@ -1452,7 +1442,7 @@ If this option is enabled, reviewers will need to create a new PR if more change
 By default, Renovate skips any forked repositories when in `autodiscover` mode.
 It even skips a forked repository that has a Renovate configuration file, because Renovate doesn't know if that file was added by the forked repository.
 
-**Process a fork in `autodiscover` mode`**
+**Process a fork in `autodiscover` mode**
 
 If you want Renovate to run on a forked repository when in `autodiscover` mode then:
 
@@ -2165,10 +2155,10 @@ Consider this example:
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
 
-Renovate only adds labels when it creates the PR, which means:
+Behavior details:
 
-- If you remove labels which Renovate added, it won't re-apply them
-- If you change your config, the new/changed labels are not applied to any open PRs
+- On GitHub, GitLab and Gitea: Renovate will keep PR labels in sync with configured labels, provided that no other user or bot has made changes to the labels after PR creation. If labels are changed by any other account, Renovate will stop making further changes.
+- For other platforms, Renovate will add labels only at time of PR creation and not update them after that.
 
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
 If you want to add/combine labels, use the `addLabels` config option, which is mergeable.

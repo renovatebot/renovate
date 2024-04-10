@@ -264,7 +264,7 @@ jobs:
           os: ${{ runner.os }}
 
       - name: Lint markdown
-        uses: DavidAnson/markdownlint-cli2-action@510b996878fc0d1a46c8a04ec86b06dbfba09de7 # v15.0.0
+        uses: DavidAnson/markdownlint-cli2-action@b4c9feab76d8025d1e83c653fa3990936df0e6c8 # v16.0.0
 
       - name: Lint fenced code blocks
         run: pnpm doc-fence-check
@@ -377,7 +377,7 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    if: (success() || failure()) && github.event.pull_request.draft != true
+    if: (success() || failure()) && github.event_name != 'merge_group' && github.event.pull_request.draft != true
     steps:
       - name: Checkout code
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
@@ -392,10 +392,11 @@ jobs:
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # v3.1.6
+        uses: codecov/codecov-action@84508663e988701840491b86de86b666e8a86bed # v4.3.0
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
-          fail_ci_if_error: true
+          fail_ci_if_error: github.event_name != 'pull_request'
           verbose: true
 
   coverage-threshold:
@@ -606,7 +607,7 @@ jobs:
           filter: blob:none # we don't need all blobs, only the full tree
 
       - name: docker-config
-        uses: containerbase/internal-tools@fcbf031ba03a836d9502ea4da2f15f2848359561 # v3.0.68
+        uses: containerbase/internal-tools@4fc221aabfbaa2e0a61bf8b4e9f2dbe4783fd1cc # v3.0.74
         with:
           command: docker-config
 

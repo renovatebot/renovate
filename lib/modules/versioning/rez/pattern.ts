@@ -70,7 +70,7 @@ export const matchVersion = regEx(
 export const exactVersion = regEx(
   `^(?<exact_version>==(?<exact_version_group>${versionGroup})?)$`,
 ); /* Match an exact version number (e.g. ==1.0.0) */
-// inclusiveBound is called inclusive but behaviour in rez is this:
+// inclusiveBound is called inclusive but behavior in rez is this:
 // package-1..3 will match versions 1.2.3, 2.3.4, but not 3.0.0 or above
 export const inclusiveBound = regEx(
   `^(?<inclusive_bound>(?<inclusive_lower_version>${versionGroup})?\\.\\.(?<inclusive_upper_version>${versionGroup})?)$`,
