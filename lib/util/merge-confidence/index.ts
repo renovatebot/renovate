@@ -5,13 +5,13 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../cache/package';
 import { parseJson } from '../common';
-import { experimentalFlagValue } from '../experimental-flags';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
 import { regEx } from '../regex';
 import { ensureTrailingSlash, joinUrlParts } from '../url';
 import { MERGE_CONFIDENCE } from './common';
 import type { MergeConfidence } from './types';
+import { ExperimentalFlag } from '../../config/experimental-flags';
 
 const hostType = 'merge-confidence';
 const http = new Http(hostType);
@@ -38,7 +38,7 @@ export function initConfig(): void {
 }
 
 export function parseSupportedDatasourceString(): string[] | undefined {
-  const supportedDatasourceString = experimentalFlagValue(
+  const supportedDatasourceString = ExperimentalFlag.get(
     'mergeConfidenceSupportedDatasources',
   );
 

@@ -14,6 +14,7 @@ import {
   resetConfig,
   satisfiesConfidenceLevel,
 } from '.';
+import { ExperimentalFlag } from '../../config/experimental-flags';
 
 describe('util/merge-confidence/index', () => {
   const apiBaseUrl = 'https://www.baseurl.com/';
@@ -432,6 +433,7 @@ describe('util/merge-confidence/index', () => {
 
         afterEach(() => {
           GlobalConfig.reset();
+          ExperimentalFlag.reset();
         });
 
         it.each([
