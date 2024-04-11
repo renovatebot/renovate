@@ -8,7 +8,6 @@ import type { GitOptions, GitProtocol } from '../../../types/git';
 import * as git from '../../../util/git';
 import { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
-import { addSecretForSanitizing } from '../../../util/sanitize';
 import { parseUrl } from '../../../util/url';
 import { getPrBodyStruct } from '../pr-body';
 import type { GitUrlOption } from '../types';
