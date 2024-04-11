@@ -1755,7 +1755,7 @@ describe('config/validation', () => {
 
     it('dockerHubTags', async () => {
       const config = {
-        experimentalFlags: ['dockerHubTags=true'],
+        experimentalFlags: ['dockerHubTags'],
       };
       const { warnings } = await configValidation.validateConfig(
         'global',
@@ -1764,7 +1764,7 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
     });
 
-    it('warns if invalid value set for dockerHubTags', async () => {
+    it('warns if value set for dockerHubTags', async () => {
       const config = {
         experimentalFlags: ['dockerHubTags=10'],
       };
@@ -1775,8 +1775,7 @@ describe('config/validation', () => {
       expect(warnings).toEqual([
         {
           topic: 'Configuration Error',
-          message:
-            'Experimental flag `dockerHubTags` should be of type boolean. Found invalid type instead.',
+          message: 'Experimental flag `dockerHubTags` should not have a value.',
         },
       ]);
     });

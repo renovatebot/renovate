@@ -1048,7 +1048,7 @@ function validateExperimentalFlag(
   currentPath: string | undefined,
 ): void {
   const allowedExperimentalFlags: Record<string, ExperimentalFlagValue> = {
-    dockerHubTags: { type: 'boolean' },
+    dockerHubTags: {},
     dockerMaxPages: { type: 'integer' },
     autoDiscoverRepoOrder: { type: 'string', acceptedValues: ['asc', 'desc'] },
     mergeConfidenceSupportedDatasources: {
@@ -1074,16 +1074,16 @@ function validateExperimentalFlag(
     return;
   }
 
+  if (!flagDetails.type && flagValue) {
+    warnings.push({
+      topic: 'Configuration Error',
+      message: `Experimental flag \`${flagName}\` should not have a value.`,
+    });
+    return;
+  }
+
   if (flagDetails.type && flagValue) {
     switch (flagDetails.type) {
-      case 'boolean':
-        if (flagValue !== 'true' && flagValue !== 'false') {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Experimental flag \`${flagName}\` should be of type boolean. Found invalid type instead.`,
-          });
-        }
-        break;
       case 'integer':
         if (!regEx(/^\d+$/).test(flagValue)) {
           warnings.push({

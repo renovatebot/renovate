@@ -567,10 +567,10 @@ export interface ValidationResult {
  * Experimental Flags can have the following values:
  * 1. integer                // dockerMaxPages=10
  * 2. string                 // s3Endpoint=some-url
- * 3. json-strings       // mergeConfidenceSupportedDatasources=[docker,azure]
- * 4. boolean               //  dockerHugTags=true
+ * 3. json-strings           // mergeConfidenceSupportedDatasources=[docker,azure]
+ * 4. no value               //  dockerHugTags
  */
 export interface ExperimentalFlagValue {
-  type?: 'boolean' | 'integer' | 'string' | 'json-strings';
+  type?: 'integer' | 'string' | 'json-strings';
   acceptedValues?: string[];
 }

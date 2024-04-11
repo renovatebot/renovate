@@ -25,6 +25,7 @@ describe('config/experimental-flags', () => {
           'dockerHubTags',
           'dockerMaxPages=19',
           'mergeConfidenceSupportedDatasources=["docker"]',
+          'autoDiscoverRepoOrder=desc',
         ],
       });
       expect(ExperimentalFlag.get('dockerHubTags')).toBe('dockerHubTags');
@@ -33,6 +34,7 @@ describe('config/experimental-flags', () => {
       expect(ExperimentalFlag.get('mergeConfidenceSupportedDatasources')).toBe(
         '["docker"]',
       );
+      expect(ExperimentalFlag.get('autoDiscoverRepoOrder')).toBe('desc');
     });
   });
 });
