@@ -1,11 +1,9 @@
-import { GlobalConfig } from '../config/global';
-import { ExperimentalFlag } from './experimental-flags';
+import { ExperimentalFlag, GlobalConfig } from './global';
 
 describe('config/experimental-flags', () => {
   describe('experimentalFlagValue()', () => {
     beforeEach(() => {
       GlobalConfig.reset();
-      ExperimentalFlag.reset();
     });
 
     it('returns null if flag not found', () => {
