@@ -558,7 +558,7 @@ module.exports = {
 };
 ```
 
-Each setting can be specified in the format`flagName=value`.
+Each setting can be specified in the format `flagName=value`.
 
 Read [Self-Hosted Experimental Flags](./self-hosted-experimental.md) for the full list of flags supported by Renovate.
 
