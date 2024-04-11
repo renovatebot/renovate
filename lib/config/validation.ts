@@ -1053,7 +1053,7 @@ function validateExperimentalFlag(
     autoDiscoverRepoOrder: { type: 'string', acceptedValues: ['asc', 'desc'] },
     autoDiscoverRepoSort: {
       type: 'string',
-      acceptedValues: ['alpha', `created`, `updated`, `size`, `id`],
+      acceptedValues: ['alpha', 'created', 'updated', 'size', 'id'],
     },
     mergeConfidenceSupportedDatasources: {
       type: 'json-strings',
