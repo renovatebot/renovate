@@ -160,6 +160,7 @@ async function lookupLabelByName(name: string): Promise<number | null> {
 
 async function fetchRepositories(topic?: string): Promise<string[]> {
   const autodiscoverRepoOrder = ExperimentalFlag.get('autoDiscoverRepoOrder');
+  const autodiscoverRepoSort = ExperimentalFlag.get('autoDiscoverRepoSort');
   const repos = await helper.searchRepos({
     uid: botUserID,
     archived: false,
@@ -167,8 +168,8 @@ async function fetchRepositories(topic?: string): Promise<string[]> {
       topic: true,
       q: topic,
     }),
-    ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT && {
-      sort: process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT as RepoSortMethod,
+    ...(autodiscoverRepoSort && {
+      sort: autodiscoverRepoSort as RepoSortMethod,
     }),
     ...(autodiscoverRepoOrder && {
       order: autodiscoverRepoOrder as SortMethod,

@@ -37,6 +37,32 @@ Example usage:
 experimentalFlags: ['autoDiscoverRepoOrder=desc'];
 ```
 
+## `autoDiscoverRepoSort`
+
+<!-- prettier-ignore -->
+!!! note
+    For the Forgejo and Gitea platform only.
+
+The sort method for autodiscover server side repository search.
+
+> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
+
+Allowed values:
+
+- `alpha`
+- `created`
+- `updated`
+- `size`
+- `id`
+
+Default value: `alpha`.
+
+Example usage:
+
+```js
+experimentalFlags: ['autoDiscoverRepoSort=alpha'];
+```
+
 ## `dockerHubTags`
 
 If added to the `experimentalFlags` list, Renovate will use the Docker Hub API (`https://hub.docker.com`) to fetch tags instead of the normal Docker API for images pulled from `https://index.docker.io`.

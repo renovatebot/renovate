@@ -225,7 +225,6 @@ describe('modules/platform/gitea/index', () => {
 
     GlobalConfig.reset();
     ExperimentalFlag.reset();
-    delete process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT;
   });
 
   async function initFakePlatform(
@@ -420,8 +419,12 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('Sorts repos', async () => {
-      GlobalConfig.set({ experimentalFlags: ['autoDiscoverRepoOrder=desc'] });
-      process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT = 'updated';
+      GlobalConfig.set({
+        experimentalFlags: [
+          'autoDiscoverRepoOrder=desc',
+          'autoDiscoverRepoSort=updated',
+        ],
+      });
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/search')
