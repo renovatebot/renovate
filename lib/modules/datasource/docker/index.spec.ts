@@ -10,7 +10,6 @@ import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked } from '../../../../test/util';
-import { ExperimentalFlag } from '../../../config/experimental-flags';
 import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
@@ -50,7 +49,6 @@ describe('modules/datasource/docker/index', () => {
     });
     hostRules.hosts.mockReturnValue([]);
     GlobalConfig.reset();
-    ExperimentalFlag.reset();
   });
 
   describe('getDigest', () => {

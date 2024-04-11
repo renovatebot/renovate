@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { ExperimentalFlag } from '../../config/experimental-flags';
+import { ExperimentalFlag } from '../../config/global';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
 import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';

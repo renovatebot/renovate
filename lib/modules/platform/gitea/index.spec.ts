@@ -1,8 +1,6 @@
 import type { EnsureIssueConfig, Platform, RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked, partial } from '../../../../test/util';
-import { ExperimentalFlag } from '../../../config/experimental-flags';
-import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -40,6 +38,7 @@ describe('modules/platform/gitea/index', () => {
   let git: jest.Mocked<typeof _git>;
   let hostRules: typeof import('../../../util/host-rules');
   let memCache: typeof import('../../../util/cache/memory');
+  let globalConfig: typeof import('../../../config/global');
 
   const mockCommitHash =
     '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
@@ -220,11 +219,10 @@ describe('modules/platform/gitea/index', () => {
     git.getBranchCommit.mockReturnValue(mockCommitHash);
     hostRules = await import('../../../util/host-rules');
     hostRules.clear();
-
+    globalConfig = await import('../../../config/global');
     setBaseUrl('https://gitea.renovatebot.com/');
 
-    GlobalConfig.reset();
-    ExperimentalFlag.reset();
+    globalConfig.GlobalConfig.reset();
   });
 
   async function initFakePlatform(
@@ -419,7 +417,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('Sorts repos', async () => {
-      GlobalConfig.set({
+      globalConfig.GlobalConfig.set({
         experimentalFlags: [
           'autoDiscoverRepoOrder=desc',
           'autoDiscoverRepoSort=updated',

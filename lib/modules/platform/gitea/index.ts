@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
-import { ExperimentalFlag } from '../../../config/experimental-flags';
+import { ExperimentalFlag } from '../../../config/global';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,

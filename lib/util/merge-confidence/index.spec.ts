@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { ExperimentalFlag } from '../../config/experimental-flags';
 import { GlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -433,7 +432,6 @@ describe('util/merge-confidence/index', () => {
 
         afterEach(() => {
           GlobalConfig.reset();
-          ExperimentalFlag.reset();
         });
 
         it.each([

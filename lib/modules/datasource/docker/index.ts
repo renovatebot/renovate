@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { ExperimentalFlag } from '../../../config/experimental-flags';
+import { ExperimentalFlag } from '../../../config/global';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
