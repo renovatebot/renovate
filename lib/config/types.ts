@@ -568,7 +568,7 @@ export interface ValidationResult {
  * 1. integer                // dockerMaxPages=10
  * 2. string                 // s3Endpoint=some-url
  * 3. json-strings           // mergeConfidenceSupportedDatasources=[docker,azure]
- * 4. no value               //  dockerHugTags
+ * 4. no value               // dockerHugTags
  */
 export interface ExperimentalFlagValue {
   type?: 'integer' | 'string' | 'json-strings';

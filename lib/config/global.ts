@@ -64,6 +64,10 @@ export class GlobalConfig {
     return result;
   }
 
+  /**
+   * only used for testing
+   * @internal
+   */
   static reset(): void {
     GlobalConfig.config = {};
     ExperimentalFlag.reset();
@@ -97,6 +101,7 @@ export class ExperimentalFlag {
 
   /**
    * only used for testing
+   * @internal
    */
   static reset(): void {
     ExperimentalFlag.parsedFlags = {};
