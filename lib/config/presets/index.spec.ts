@@ -345,7 +345,7 @@ describe('config/presets/index', () => {
       const res = await presets.resolveConfigPresets(config);
 
       expect(res.labels).toEqual(['self-hosted with template resolved']);
-      expect(local.getPreset.mock.calls).toHaveLength(1);
+      expect(local.getPreset).toHaveBeenCalledOnce();
     });
 
     it('resolves self-hosted transitive presets without baseConfig', async () => {
