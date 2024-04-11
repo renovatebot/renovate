@@ -1867,6 +1867,49 @@ describe('config/validation', () => {
       ]);
     });
 
+    it('autoDiscoverRepoSort', async () => {
+      const config = {
+        experimentalFlags: ['autoDiscoverRepoSort=alpha'],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toBeEmptyArray();
+    });
+
+    it('warns if invalid value set for autoDiscoverRepoSort', async () => {
+      const config = {
+        experimentalFlags: ['autoDiscoverRepoSort=string'],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: `Invalid value \`string\` found for experimental flag \`autoDiscoverRepoSort\`.The allowed values are alpha, created, updated, size, id.`,
+        },
+      ]);
+    });
+
+    it('warns if invalid type set for autoDiscoverRepoSort', async () => {
+      const config = {
+        experimentalFlags: ['autoDiscoverRepoSort=10'],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: `Experimental flag \`autoDiscoverRepoSort\` should be of type string. Found invalid type instead.`,
+        },
+      ]);
+    });
+
     it('mergeConfidenceSupportedDatasources', async () => {
       const config = {
         experimentalFlags: [

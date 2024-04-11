@@ -1051,6 +1051,10 @@ function validateExperimentalFlag(
     dockerHubTags: {},
     dockerMaxPages: { type: 'integer' },
     autoDiscoverRepoOrder: { type: 'string', acceptedValues: ['asc', 'desc'] },
+    autoDiscoverRepoSort: {
+      type: 'string',
+      acceptedValues: ['alpha', `created`, `updated`, `size`, `id`],
+    },
     mergeConfidenceSupportedDatasources: {
       type: 'json-strings',
       acceptedValues: datasourceList,

@@ -66,11 +66,11 @@ export class GlobalConfig {
 
   static reset(): void {
     GlobalConfig.config = {};
-    ExperimentalFlag.parsedFlags = {};
+    ExperimentalFlag.reset();
   }
 }
 export class ExperimentalFlag {
-  static parsedFlags: Record<string, string> = {};
+  private static parsedFlags: Record<string, string> = {};
 
   static get(key: string): string | null {
     const experimentalFlags = GlobalConfig.get('experimentalFlags');
@@ -93,5 +93,12 @@ export class ExperimentalFlag {
     }
 
     return null;
+  }
+
+  /**
+   * only used for testing
+   */
+  static reset(): void {
+    ExperimentalFlag.parsedFlags = {};
   }
 }
