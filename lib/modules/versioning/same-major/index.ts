@@ -1,5 +1,5 @@
-import is from '@sindresorhus/is';
 import semver from 'semver';
+import semverVersioning from '../semver';
 import { api as semverCoerced } from '../semver-coerced';
 import type { VersioningApi } from '../types';
 
@@ -8,46 +8,46 @@ export const displayName = 'Same Major Versioning';
 // export const urls = ['https://semver.org/'];
 export const supportsRanges = true;
 
-function matches(version: string, range: string): boolean {
-  const coercedVersion = semver.coerce(version);
-  let newRange = range;
-  if (!semverCoerced.isSingleVersion(range)) {
-    const major = semverCoerced.getMajor(range) ?? 0;
-    const min = semver.coerce(major)?.version;
-    const max = semver.coerce(major + 1)?.version;
-    newRange = `>=${min} <${max}`;
+/**
+ *
+ * Converts input to range if it's a version
+ * eg. 1.0.0 -> >=1.0.0 <2.0.0
+ * If range is input no change is made
+ */
+function massageVersion(input: string): string {
+  let res = input;
+  const major = semverCoerced.getMajor(res);
+  if (semverVersioning.isValid(res) && major !== null) {
+    const upperLimit = semver.coerce(major + 1);
+    const max = upperLimit ? upperLimit.version : `${major + 1}.0.0`;
+    res = `>=${input} <${max}`;
   }
 
-  return coercedVersion ? semver.satisfies(coercedVersion, newRange) : false;
+  return res;
+}
+
+function matches(version: string, range: string): boolean {
+  return semverCoerced.matches(version, massageVersion(range));
 }
 
 function getSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  const coercedVersions = versions
-    .map((version) =>
-      semver.valid(version) ? version : semver.coerce(version)?.version,
-    )
-    .filter(is.string);
-
-  return semver.maxSatisfying(coercedVersions, range);
+  return semverCoerced.getSatisfyingVersion(versions, massageVersion(range));
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string,
 ): string | null {
-  const coercedVersions = versions
-    .map((version) => semver.coerce(version)?.version)
-    .filter(is.string);
-
-  return semver.minSatisfying(coercedVersions, range);
+  return semverCoerced.minSatisfyingVersion(versions, massageVersion(range));
 }
 
 function isLessThanRange(version: string, range: string): boolean {
-  const coercedVersion = semver.coerce(version);
-  return coercedVersion ? semver.ltr(coercedVersion, range) : false;
+  return semverCoerced.isLessThanRange
+    ? semverCoerced.isLessThanRange(version, massageVersion(range))
+    : false;
 }
 
 export const api: VersioningApi = {
