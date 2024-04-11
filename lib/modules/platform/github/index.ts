@@ -1534,15 +1534,13 @@ async function deleteComment(commentId: number): Promise<void> {
 async function getComments(issueNo: number): Promise<Comment[]> {
   // GET /repos/:owner/:repo/issues/:number/comments
   logger.debug(`Getting comments for #${issueNo}`);
-  const url = `repos/${
-    config.parentRepo ?? config.repository
-  }/issues/${issueNo}/comments?per_page=100`;
+  const repo = config.parentRepo ?? config.repository;
+  const url = `repos/${repo}/issues/${issueNo}/comments?per_page=100`;
   try {
-    const comments = (
-      await githubApi.getJson<Comment[]>(url, {
-        paginate: true,
-      })
-    ).body;
+    const { body: comments } = await githubApi.getJson<Comment[]>(url, {
+      paginate: true,
+      cacheProvider: repoCacheProvider,
+    });
     logger.debug(`Found ${comments.length} comments`);
     return comments;
   } catch (err) /* istanbul ignore next */ {
