@@ -232,11 +232,12 @@ export async function extractAllPackageFiles(
         );
         continue;
       }
+      const files = new Set([...packageFile.lockFiles!].reverse());
       for (const sourceFile of sourceFiles) {
         // These get reversed before merging so that we keep the last instance of any common
         // lock files, since a file that -r includes multiple lock files needs to be updated after
         // all of the lock files it includes
-        const merged = new Set<string>([...packageFile.lockFiles!].reverse());
+        const merged = new Set(files);
         for (const lockFile of [...sourceFile.lockFiles!].reverse()) {
           merged.add(lockFile);
         }
