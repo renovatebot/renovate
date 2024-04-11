@@ -5,6 +5,7 @@ import {
   PutObjectCommand,
   PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
+import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { outputCacheFile } from '../../../fs';
 import { getS3Client, parseS3Url } from '../../../s3';
@@ -12,7 +13,6 @@ import { streamToString } from '../../../streams';
 import { getLocalCacheFileName } from '../common';
 import type { RepoCacheRecord } from '../schema';
 import { RepoCacheBase } from './base';
-import is from "@sindresorhus/is";
 
 export class RepoCacheS3 extends RepoCacheBase {
   private readonly s3Client;
