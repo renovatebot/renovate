@@ -189,5 +189,22 @@ describe('workers/global/config/parse/index', () => {
         'Enabling debug logging to somepath',
       );
     });
+
+    it('skips initializing file logging when logFile is set but env vars LOG_FILE is defined', async () => {
+      process.env.LOG_FILE = 'somepath';
+      jest.mock(
+        '../../../../../config.js',
+        () => ({ logFile: 'somepath', logFileLevel: 'debug' }),
+        {
+          virtual: true,
+        },
+      );
+      const env: NodeJS.ProcessEnv = {};
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
+      expect(logger.debug).not.toHaveBeenCalledWith(
+        'Enabling debug logging to somepath',
+      );
+    });
   });
 });
