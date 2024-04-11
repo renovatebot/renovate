@@ -51,25 +51,28 @@ describe('modules/manager/devcontainer/extract', () => {
 
       // Assert
       expect(result).toEqual({
-      deps:
-      [
-        {
-          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-          "currentDigest": undefined,
-          "currentValue": "1.2.3",
-          "datasource": "docker",
-          "depName": "devcontainer.registry.renovate.com/test/features/first",
-          "replaceString": "devcontainer.registry.renovate.com/test/features/first:1.2.3",
-        },
-        {
-          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-          "currentDigest": undefined,
-          "currentValue": "4.5.6",
-          "datasource": "docker",
-          "depName": "devcontainer.registry.renovate.com/test/features/second",
-          "replaceString": "devcontainer.registry.renovate.com/test/features/second:4.5.6",
-        },
-      ]
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '1.2.3',
+            datasource: 'docker',
+            depName: 'devcontainer.registry.renovate.com/test/features/first',
+            replaceString:
+              'devcontainer.registry.renovate.com/test/features/first:1.2.3',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '4.5.6',
+            datasource: 'docker',
+            depName: 'devcontainer.registry.renovate.com/test/features/second',
+            replaceString:
+              'devcontainer.registry.renovate.com/test/features/second:4.5.6',
+          },
+        ],
       });
     });
 
