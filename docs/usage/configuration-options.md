@@ -4004,3 +4004,7 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
   }
 }
 ```
+
+<!-- prettier-ignore -->
+!!! note
+    If you want to raise only vulnerability fix PRs, you may use the `security:only-security-updates` preset.
