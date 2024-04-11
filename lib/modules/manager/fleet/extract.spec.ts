@@ -61,6 +61,15 @@ kind: Fleet
             registryUrls: ['https://kubernetes-charts.banzaicloud.com'],
             depType: 'fleet',
           },
+          {
+            currentValue: '25.19.1',
+            datasource: 'helm',
+            depName: 'prometheus',
+            registryUrls: [
+              'https://prometheus-community.github.io/helm-charts',
+            ],
+            depType: 'fleet',
+          },
         ]);
       });
 
