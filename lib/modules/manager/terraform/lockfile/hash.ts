@@ -1,11 +1,9 @@
 import crypto from 'node:crypto';
-import path from 'node:path';
 import util from 'node:util';
 import extract from 'extract-zip';
 import upath from 'upath';
 import { logger } from '../../../../logger';
 import {
-  asyncFilter,
   coerceArray,
   deduplicateArray,
   isNotNullOrUndefined,
@@ -25,22 +23,26 @@ export class TerraformProviderHash {
 
   static hashCacheTTL = 10080; // in minutes == 1 week
 
-  private static async hashFiles(
+  private static async hashElementList(
     basePath: string,
-    files: string[],
+    fileSystemEntries: string[],
   ): Promise<string> {
     const rootHash = crypto.createHash('sha256');
 
-    for (const file of files) {
+    for (const entryPath of fileSystemEntries) {
+      const absolutePath = upath.resolve(basePath, entryPath);
+      if (!(await fs.cachePathIsFile(absolutePath))) {
+        continue;
+      }
+
       // build for every file a line looking like "aaaaaaaaaaaaaaa  file.txt\n"
 
       // get hash of specific file
       const hash = crypto.createHash('sha256');
-      const fileBuffer = await fs.readCacheFile(file);
+      const fileBuffer = await fs.readCacheFile(absolutePath);
       hash.update(fileBuffer);
 
-      const fileName = path.relative(basePath, file);
-      const line = util.format('%s  %s\n', hash.digest('hex'), fileName);
+      const line = util.format('%s  %s\n', hash.digest('hex'), entryPath);
       rootHash.update(line);
     }
 
@@ -98,16 +100,11 @@ export class TerraformProviderHash {
   static async hashOfDir(dirPath: string): Promise<string> {
     const elements = await fs.listCacheDir(dirPath, { recursive: true });
 
-    const sortedFiles = elements.sort();
-    const elementsWithPath = sortedFiles.map(
-      (element) => `${dirPath}/${element}`,
+    const sortedFileSystemObjects = elements.sort();
+    return await TerraformProviderHash.hashElementList(
+      dirPath,
+      sortedFileSystemObjects,
     );
-
-    const filesWithPath = await asyncFilter(
-      elementsWithPath,
-      fs.cachePathIsFile,
-    );
-    return await TerraformProviderHash.hashFiles(dirPath, filesWithPath);
   }
 
   @cache({

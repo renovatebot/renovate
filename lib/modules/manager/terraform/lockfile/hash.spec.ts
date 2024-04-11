@@ -1,6 +1,6 @@
 import { createReadStream } from 'node:fs';
-import path from 'node:path';
 import { DirectoryResult, dir } from 'tmp-promise';
+import upath from 'upath';
 import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { getFixturePath, logger } from '../../../../../test/util';
@@ -435,7 +435,7 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       await expect(
         TerraformProviderHash.hashOfZipContent(
           zipWithFolderPath,
-          path.join(cacheDir.path, 'test'),
+          upath.join(cacheDir.path, 'test'),
         ),
       ).resolves.toBe('g92f/mR2hlVmeWBlplxxJyP2H3fdyPwYccr7uJhcRz8=');
     });
