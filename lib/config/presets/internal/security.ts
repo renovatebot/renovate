@@ -22,17 +22,18 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'only-security-updates': {
-    description: 'Only update dependencies if vulnerabilities have been detected.',
+    description:
+      'Only update dependencies if vulnerabilities have been detected.',
     extends: ['config:recommended'],
     packageRules: [
       {
         enabled: false,
         matchPackageNames: ['*'],
-      }
+      },
     ],
     vulnerabilityAlerts: {
       enabled: true,
     },
-    osvVulnerabilityAlerts: true
+    osvVulnerabilityAlerts: true,
   },
 };
