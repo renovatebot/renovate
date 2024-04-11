@@ -238,7 +238,13 @@ describe('config/presets/index', () => {
           'babel-eslint',
           '@babel/eslint-parser',
         ],
-        matchPackagePrefixes: ['@typescript-eslint/', 'eslint', 'stylelint'],
+        matchPackagePrefixes: [
+          '@eslint/',
+          '@types/eslint__',
+          '@typescript-eslint/',
+          'eslint',
+          'stylelint',
+        ],
       });
     });
 
@@ -259,7 +265,12 @@ describe('config/presets/index', () => {
               'babel-eslint',
               '@babel/eslint-parser',
             ],
-            matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
+            matchPackagePrefixes: [
+              '@eslint/',
+              '@types/eslint__',
+              '@typescript-eslint/',
+              'eslint',
+            ],
           },
         ],
       });
@@ -269,7 +280,7 @@ describe('config/presets/index', () => {
       config.extends = ['packages:eslint'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.matchPackagePrefixes).toHaveLength(2);
+      expect(res.matchPackagePrefixes).toHaveLength(4);
     });
 
     it('resolves linters', async () => {
@@ -278,7 +289,7 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
       expect(res.matchPackageNames).toHaveLength(10);
       expect(res.matchPackagePatterns).toHaveLength(1);
-      expect(res.matchPackagePrefixes).toHaveLength(4);
+      expect(res.matchPackagePrefixes).toHaveLength(6);
     });
 
     it('resolves nested groups', async () => {
@@ -289,7 +300,7 @@ describe('config/presets/index', () => {
       expect(rule.automerge).toBeTrue();
       expect(rule.matchPackageNames).toHaveLength(10);
       expect(rule.matchPackagePatterns).toHaveLength(1);
-      expect(rule.matchPackagePrefixes).toHaveLength(4);
+      expect(rule.matchPackagePrefixes).toHaveLength(6);
     });
 
     it('migrates automerge in presets', async () => {
