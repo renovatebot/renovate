@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { ExperimentalFlag } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -642,7 +642,7 @@ export class DockerDatasource extends Datasource {
       return null;
     }
     let page = 0;
-    const dockerMaxPages = ExperimentalFlag.get('dockerMaxPages');
+    const dockerMaxPages = GlobalConfig.getExperimentalFlag('dockerMaxPages');
     const pages = dockerMaxPages ? parseInt(dockerMaxPages, 10) : 20;
     let foundMaxResultsError = false;
     do {
@@ -998,7 +998,9 @@ export class DockerDatasource extends Datasource {
         'dockerhub-error' as const,
       ).catch(getTags);
 
-    const allowDockerHubTags = is.string(ExperimentalFlag.get('dockerHubTags'));
+    const allowDockerHubTags = is.string(
+      GlobalConfig.getExperimentalFlag('dockerHubTags'),
+    );
     const tagsResult =
       registryHost === 'https://index.docker.io' && allowDockerHubTags
         ? getDockerHubTags()

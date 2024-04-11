@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
-import { ExperimentalFlag } from '../../../config/global';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -159,8 +159,12 @@ async function lookupLabelByName(name: string): Promise<number | null> {
 }
 
 async function fetchRepositories(topic?: string): Promise<string[]> {
-  const autodiscoverRepoOrder = ExperimentalFlag.get('autoDiscoverRepoOrder');
-  const autodiscoverRepoSort = ExperimentalFlag.get('autoDiscoverRepoSort');
+  const autodiscoverRepoOrder = GlobalConfig.getExperimentalFlag(
+    'autoDiscoverRepoOrder',
+  );
+  const autodiscoverRepoSort = GlobalConfig.getExperimentalFlag(
+    'autoDiscoverRepoSort',
+  );
   const repos = await helper.searchRepos({
     uid: botUserID,
     archived: false,

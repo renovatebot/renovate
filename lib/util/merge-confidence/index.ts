@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { ExperimentalFlag } from '../../config/global';
+import { GlobalConfig } from '../../config/global';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
 import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';
@@ -38,7 +38,7 @@ export function initConfig(): void {
 }
 
 export function parseSupportedDatasourceString(): string[] | undefined {
-  const supportedDatasourceString = ExperimentalFlag.get(
+  const supportedDatasourceString = GlobalConfig.getExperimentalFlag(
     'mergeConfidenceSupportedDatasources',
   );
 

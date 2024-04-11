@@ -1,4 +1,4 @@
-import { ExperimentalFlag, GlobalConfig } from './global';
+import { GlobalConfig } from './global';
 
 describe('config/experimental-flags', () => {
   describe('experimentalFlagValue()', () => {
@@ -10,11 +10,11 @@ describe('config/experimental-flags', () => {
       GlobalConfig.set({
         experimentalFlags: ['dockerMaxPages=19'],
       });
-      expect(ExperimentalFlag.get('dockerHubTags')).toBeNull();
+      expect(GlobalConfig.getExperimentalFlag('dockerHubTags')).toBeNull();
     });
 
     it('returns null if experimentalFlags is undefined', () => {
-      expect(ExperimentalFlag.get('dockerHubTags')).toBeNull();
+      expect(GlobalConfig.getExperimentalFlag('dockerHubTags')).toBeNull();
     });
 
     it('returns value', () => {
@@ -26,13 +26,19 @@ describe('config/experimental-flags', () => {
           'autoDiscoverRepoOrder=desc',
         ],
       });
-      expect(ExperimentalFlag.get('dockerHubTags')).toBe('dockerHubTags');
-      expect(ExperimentalFlag.get('dockerHubTags')).toBe('dockerHubTags'); // validate caching
-      expect(ExperimentalFlag.get('dockerMaxPages')).toBe('19');
-      expect(ExperimentalFlag.get('mergeConfidenceSupportedDatasources')).toBe(
-        '["docker"]',
+      expect(GlobalConfig.getExperimentalFlag('dockerHubTags')).toBe(
+        'dockerHubTags',
       );
-      expect(ExperimentalFlag.get('autoDiscoverRepoOrder')).toBe('desc');
+      expect(GlobalConfig.getExperimentalFlag('dockerHubTags')).toBe(
+        'dockerHubTags',
+      ); // validate caching
+      expect(GlobalConfig.getExperimentalFlag('dockerMaxPages')).toBe('19');
+      expect(
+        GlobalConfig.getExperimentalFlag('mergeConfidenceSupportedDatasources'),
+      ).toBe('["docker"]');
+      expect(GlobalConfig.getExperimentalFlag('autoDiscoverRepoOrder')).toBe(
+        'desc',
+      );
     });
   });
 });
