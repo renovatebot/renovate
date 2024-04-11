@@ -50,7 +50,8 @@ describe('modules/manager/devcontainer/extract', () => {
       );
 
       // Assert
-      expect(result?.deps).toMatchInlineSnapshot(`
+      expect(result).toEqual({
+      deps:
       [
         {
           "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
@@ -69,7 +70,7 @@ describe('modules/manager/devcontainer/extract', () => {
           "replaceString": "devcontainer.registry.renovate.com/test/features/second:4.5.6",
         },
       ]
-      `);
+      });
     });
 
     it('returns image and feature image deps when both image and features properties are defined in dev container JSON file', () => {
