@@ -2,8 +2,10 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
+import { isOCIRegistry } from '../helmv3/utils';
 import { checkIfStringIsPath } from '../terraform/util';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { FleetFile, type FleetHelmBlock, GitRepo } from './schema';
@@ -50,6 +52,24 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
       skipReason: 'missing-depname',
     };
   }
+
+  if (isOCIRegistry(doc.chart)) {
+    const ociImageName = doc.chart.replace('oci://', '').split('/').at(-1);
+    const ociRegistryPath = doc.chart
+      .replace('oci://', '')
+      .split('/')
+      .slice(0, -1)
+      .join('/');
+
+    dep.datasource = DockerDatasource.id;
+    dep.depName = ociImageName;
+    dep.currentValue = doc.version;
+    dep.packageName = `${ociRegistryPath}/${ociImageName}`;
+    dep.registryUrls = ['oci://' + ociRegistryPath];
+
+    return dep;
+  }
+
   dep.depName = doc.chart;
   dep.packageName = doc.chart;
 
