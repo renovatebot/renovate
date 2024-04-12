@@ -240,12 +240,11 @@ In order to provide flexible preset configurations, Renovate provides support us
 
 The following example shows a self-hosted Renovate configuration for a company called "Renovators".
 The company is split into multiple organisations `foo`, `bar` and `baz`, where each organisation provides its opinionated shareable preset.
-Renovate is configured to run in separate CI jobs on a daily basis for each organisation.
-An environment variable `ORGANISATION_SLUG` is passed, to be able to load the shareable preset of each organisation.
+Renovate is configured to load the preset of each organisation dynamically based on the repository path.
 
 ```javascript
 module.exports = {
-  extends: ['local>{{ env.CI_PROJECT_ROOT_NAMESPACE }}/renovate'],
+  extends: ['local>{{ topLevelOrg }}/renovate'],
 };
 ```
 
