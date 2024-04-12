@@ -74,8 +74,8 @@ kind: Fleet
             currentValue: '7.1.2',
             datasource: 'docker',
             depName: 'external-dns',
-            registryUrls: ['oci://registry-1.docker.io/bitnamicharts'],
             depType: 'fleet',
+            pinDigests: false,
           },
         ]);
       });

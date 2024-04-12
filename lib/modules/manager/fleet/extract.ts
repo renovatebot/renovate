@@ -2,9 +2,9 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
-import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
+import { getDep } from '../dockerfile/extract';
 import { isOCIRegistry } from '../helmv3/utils';
 import { checkIfStringIsPath } from '../terraform/util';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -54,20 +54,18 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
   }
 
   if (isOCIRegistry(doc.chart)) {
-    const ociImageName = doc.chart.replace('oci://', '').split('/').at(-1);
-    const ociRegistryPath = doc.chart
-      .replace('oci://', '')
-      .split('/')
-      .slice(0, -1)
-      .join('/');
+    const ociImageRegistry = doc.chart.replace('oci://', '');
+    const dockerDep = getDep(`${ociImageRegistry}:${doc.version}`, false);
 
-    dep.datasource = DockerDatasource.id;
-    dep.depName = ociImageName;
-    dep.currentValue = doc.version;
-    dep.packageName = `${ociRegistryPath}/${ociImageName}`;
-    dep.registryUrls = ['oci://' + ociRegistryPath];
-
-    return dep;
+    return {
+      ...dockerDep,
+      depType: 'fleet',
+      depName: ociImageRegistry.split('/').at(-1),
+      packageName: dockerDep.depName,
+      // https://github.com/helm/helm/issues/10312
+      // https://github.com/helm/helm/issues/10678
+      pinDigests: false,
+    };
   }
 
   dep.depName = doc.chart;
