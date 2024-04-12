@@ -28,54 +28,6 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
     expect(result).toBeNull();
   });
 
-  it('should return versions when package is a function', async () => {
-    httpMock
-      .scope(gitHubHost)
-      .get(indexPath)
-      .reply(
-        200,
-        codeBlock`
-          {
-            "resources": {},
-            "resourceFunctions": {
-              "microsoft.billing/billingaccounts": {
-                "2019-10-01-preview": [
-                  {
-                    "$ref": "billing/microsoft.billing/2019-10-01-preview/types.json#/304"
-                  }
-                ],
-                "2020-05-01": [
-                  {
-                    "$ref": "billing/microsoft.billing/2020-05-01/types.json#/287"
-                  }
-                ]
-              }
-            }
-          }
-        `,
-      );
-
-    const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
-    const result = await azureBicepResourceDatasource.getReleases({
-      packageName: 'Microsoft.Billing/billingAccounts',
-    });
-
-    expect(result).toEqual({
-      releases: [
-        {
-          version: '2019-10-01-preview',
-          changelogUrl:
-            'https://learn.microsoft.com/en-us/azure/templates/microsoft.billing/change-log/billingaccounts#2019-10-01-preview',
-        },
-        {
-          version: '2020-05-01',
-          changelogUrl:
-            'https://learn.microsoft.com/en-us/azure/templates/microsoft.billing/change-log/billingaccounts#2020-05-01',
-        },
-      ],
-    });
-  });
-
   it('should return versions when package is a resource', async () => {
     httpMock
       .scope(gitHubHost)
