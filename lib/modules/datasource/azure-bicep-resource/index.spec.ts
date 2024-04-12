@@ -117,4 +117,46 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
       ],
     });
   });
+
+  it('should return versions when package is a resource when resourceFunctions APIs are also present', async () => {
+    httpMock
+      .scope(gitHubHost)
+      .get(indexPath)
+      .reply(
+        200,
+        codeBlock`
+          {
+            "resources": {
+              "Microsoft.OperationalInsights/workspaces@2023-09-01": {
+                "$ref": "operationalinsights/microsoft.operationalinsights/2023-09-01/types.json#/31"
+              }
+            },
+            "resourceFunctions": {
+              "microsoft.operationalinsights/workspaces": {
+                "2015-03-20": [
+                  {
+                    "$ref": "operationalinsights/workspaces/2015-03-20/types.json#/304"
+                  }
+                ]
+              }
+            }
+          }
+        `,
+      );
+
+    const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
+    const result = await azureBicepResourceDatasource.getReleases({
+      packageName: 'Microsoft.OperationalInsights/workspaces',
+    });
+
+    expect(result).toEqual({
+      releases: [
+        {
+          version: '2023-09-01',
+          changelogUrl:
+            'https://learn.microsoft.com/en-us/azure/templates/microsoft.operationalinsights/change-log/workspaces#2023-09-01',
+        },
+      ],
+    });
+  });
 });
