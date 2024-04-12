@@ -65,6 +65,7 @@ const repoGroups = {
   brave: 'https://github.com/openzipkin/brave',
   capacitor: 'https://github.com/ionic-team/capacitor',
   chromely: 'https://github.com/chromelyapps/Chromely',
+  ckeditor: 'https://github.com/ckeditor/ckeditor5',
   clarity: 'https://github.com/vmware/clarity',
   commitlint: 'https://github.com/conventional-changelog/commitlint',
   docusaurus: 'https://github.com/facebook/docusaurus',
