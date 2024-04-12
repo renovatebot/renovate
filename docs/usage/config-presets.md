@@ -253,8 +253,8 @@ Renovate is configured to use the shareable preset as a base configuration.
 
 ```javascript
 module.export = {
-  extends: ["local>my-org/renovate"]
-}
+  extends: ['local>my-org/renovate'],
+};
 ```
 
 However, using this approach Renovate only loads the preset from the default branch of the repository (usually called `main`).
@@ -266,8 +266,8 @@ module.exports = {
   customEnvVariables: {
     GITLAB_REF: process.env.CI_COMMIT_REF_NAME,
   },
-  extends: ["local>my-org/renovate#{{ env.GITLAB_REF }}"]
-}
+  extends: ['local>my-org/renovate#{{ env.GITLAB_REF }}'],
+};
 ```
 
 ## Contributing to presets
