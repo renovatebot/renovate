@@ -2981,6 +2981,15 @@ const options: RenovateOptions[] = [
     default: null,
     supportedPlatforms: ['github'],
   },
+  {
+    name: 'httpCacheTtlDays',
+    description:
+      'Maximum duration in days to keep HTTP cache entries. Set to `0` to disable HTTP cache.',
+    type: 'integer',
+    stage: 'repository',
+    default: 90 * 24 * 60,
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
