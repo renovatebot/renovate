@@ -1,6 +1,6 @@
 The `circleci` manager extracts both `docker` as well as `orb` datasources from CircleCI config files.
 
-If you need to change the versioning format, read the [versioning](../../versioning.md) documentation to learn more.
+If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.
 
 ### Private orbs
 

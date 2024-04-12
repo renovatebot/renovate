@@ -247,11 +247,44 @@ describe('modules/platform/bitbucket-server/index', () => {
           await expect(bitbucket.initPlatform({})).rejects.toThrow();
         });
 
-        it('should throw if no username/password', async () => {
+        it('should throw if no username/password/token', async () => {
           expect.assertions(1);
           await expect(
             bitbucket.initPlatform({ endpoint: 'endpoint' }),
           ).rejects.toThrow();
+        });
+
+        it('should throw if password and token is set', async () => {
+          expect.assertions(1);
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'endpoint',
+              username: 'abc',
+              password: '123',
+              token: 'abc',
+            }),
+          ).rejects.toThrow();
+        });
+
+        it('should not throw if username/password', async () => {
+          expect.assertions(1);
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'endpoint',
+              username: 'abc',
+              password: '123',
+            }),
+          ).resolves.not.toThrow();
+        });
+
+        it('should not throw if token', async () => {
+          expect.assertions(1);
+          await expect(
+            bitbucket.initPlatform({
+              endpoint: 'endpoint',
+              token: 'abc',
+            }),
+          ).resolves.not.toThrow();
         });
 
         it('should throw if version could not be fetched', async () => {
