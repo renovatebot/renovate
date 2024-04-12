@@ -95,26 +95,30 @@ describe('modules/manager/devcontainer/extract', () => {
       );
 
       // Assert
-      expect(result?.deps).toMatchInlineSnapshot(`
-      [
-        {
-          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-          "currentDigest": undefined,
-          "currentValue": "1.2.3",
-          "datasource": "docker",
-          "depName": "devcontainer.registry.renovate.com/test/image",
-          "replaceString": "devcontainer.registry.renovate.com/test/image:1.2.3",
-        },
-        {
-          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-          "currentDigest": undefined,
-          "currentValue": "4.5.6",
-          "datasource": "docker",
-          "depName": "devcontainer.registry.renovate.com/test/feature",
-          "replaceString": "devcontainer.registry.renovate.com/test/feature:4.5.6",
-        },
-      ]
-      `);
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '1.2.3',
+            datasource: 'docker',
+            depName: 'devcontainer.registry.renovate.com/test/image',
+            replaceString:
+              'devcontainer.registry.renovate.com/test/image:1.2.3',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '4.5.6',
+            datasource: 'docker',
+            depName: 'devcontainer.registry.renovate.com/test/feature',
+            replaceString:
+              'devcontainer.registry.renovate.com/test/feature:4.5.6',
+          },
+        ],
+      });
     });
 
     it('returns image dep when only the image property is defined in dev container JSON file', () => {
@@ -132,18 +136,20 @@ describe('modules/manager/devcontainer/extract', () => {
       );
 
       // Assert
-      expect(result?.deps).toMatchInlineSnapshot(`
-      [
-        {
-          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-          "currentDigest": undefined,
-          "currentValue": "1.2.3",
-          "datasource": "docker",
-          "depName": "devcontainer.registry.renovate.com/test/image",
-          "replaceString": "devcontainer.registry.renovate.com/test/image:1.2.3",
-        },
-      ]
-      `);
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '1.2.3',
+            datasource: 'docker',
+            depName: 'devcontainer.registry.renovate.com/test/image',
+            replaceString:
+              'devcontainer.registry.renovate.com/test/image:1.2.3',
+          },
+        ],
+      });
     });
 
     it('returns null when the only feature property is malformed and no image property is defined in dev container JSON file', () => {
@@ -294,18 +300,20 @@ describe('modules/manager/devcontainer/extract', () => {
       );
 
       // Assert
-      expect(result?.deps).toMatchInlineSnapshot(`
-      [
-        {
-          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-          "currentDigest": undefined,
-          "currentValue": "4.5.6",
-          "datasource": "docker",
-          "depName": "devcontainer.registry.renovate.com/test/feature",
-          "replaceString": "devcontainer.registry.renovate.com/test/feature:4.5.6",
-        },
-      ]
-      `);
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '4.5.6',
+            datasource: 'docker',
+            depName: 'devcontainer.registry.renovate.com/test/feature',
+            replaceString:
+              'devcontainer.registry.renovate.com/test/feature:4.5.6',
+          },
+        ],
+      });
     });
 
     it('returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file', () => {
@@ -328,18 +336,20 @@ describe('modules/manager/devcontainer/extract', () => {
       );
 
       // Assert
-      expect(result?.deps).toMatchInlineSnapshot(`
-      [
-        {
-          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
-          "currentDigest": undefined,
-          "currentValue": "1.2.3",
-          "datasource": "docker",
-          "depName": "devcontainer.registry.renovate.com/test/feature",
-          "replaceString": "devcontainer.registry.renovate.com/test/feature:1.2.3",
-        },
-      ]
-      `);
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '1.2.3',
+            datasource: 'docker',
+            depName: 'devcontainer.registry.renovate.com/test/feature',
+            replaceString:
+              'devcontainer.registry.renovate.com/test/feature:1.2.3',
+          },
+        ],
+      });
     });
   });
 });
