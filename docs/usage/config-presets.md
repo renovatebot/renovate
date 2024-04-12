@@ -232,6 +232,44 @@ Parameters are supported similar to other methods:
 }
 ```
 
+## Templating presets
+
+In order to provide flexible preset configurations, Renovate provides support using [templates](./templates.md) for preset names.
+
+### Example use-case
+
+The following example shows a self-hosted Renovate setup (`config.js`) within a Git repository `my-org/renovate` of a self-hosted GitLab instance.
+Additionally, there is a shareable config preset configured within the same repository (`default.json`).
+
+Simplified repository tree
+
+```
+- .gitlab-ci.yml
+- config.js
+- default.json
+```
+
+Renovate is configured to use the shareable preset as a base configuration.
+
+```javascript
+module.export = {
+  extends: ["local>my-org/renovate"]
+}
+```
+
+However, using this approach Renovate only loads the preset from the default branch of the repository (usually called `main`).
+In case you want to apply changes to the preset, e.g. via opening a new merge-request, the changes should be validated to not break the Renovate setup (e.g. using the `renovate-config-validator`).
+Here the templating can be used to create a dynamic reference, which can be used by Renovate to load the correct preset (else it would just load the preset from the default branch).
+
+```javascript
+module.exports = {
+  customEnvVariables: {
+    GITLAB_REF: process.env.CI_COMMIT_REF_NAME,
+  },
+  extends: ["local>my-org/renovate#{{ env.GITLAB_REF }}"]
+}
+```
+
 ## Contributing to presets
 
 Have you configured a rule that could help others?
