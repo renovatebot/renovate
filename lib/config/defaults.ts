@@ -1,3 +1,4 @@
+import { dequal } from 'dequal';
 import { getOptions } from './options';
 import type { AllConfig, RenovateOptions } from './types';
 
@@ -23,7 +24,7 @@ export function getConfig(): AllConfig {
   const options = getOptions();
   const config: AllConfig = {};
   options.forEach((option) => {
-    if (!option.parents) {
+    if (!option.parents || dequal(option.parents, ['.'])) {
       config[option.name] = getDefault(option);
     }
   });
