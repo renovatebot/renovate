@@ -27,7 +27,7 @@ async function cleanUpBranches(
       });
       const branchIsModified = await scm.isBranchModified(
         branchName,
-        config.baseBranch,
+        config.defaultBranch!,
       );
       if (pr) {
         if (branchIsModified) {

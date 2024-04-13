@@ -630,7 +630,7 @@ export async function isBranchBehindBase(
 
 export async function isBranchModified(
   branchName: string,
-  baseBranch: string | undefined,
+  baseBranch: string,
 ): Promise<boolean> {
   if (!branchExists(branchName)) {
     logger.debug('branch.isModified(): no cache');
@@ -656,9 +656,9 @@ export async function isBranchModified(
   await syncGit();
   const committedAuthors: Set<string> = new Set();
   try {
-    const commits = baseBranch
-      ? await git.log([`origin/${baseBranch}..origin/${branchName}`])
-      : await git.log(['-1', `origin/${branchName}`]);
+    const commits = await git.log([
+      `origin/${baseBranch}..origin/${branchName}`,
+    ]);
 
     commits.all.forEach((commit) => committedAuthors.add(commit.author_email));
   } catch (err) /* istanbul ignore next */ {

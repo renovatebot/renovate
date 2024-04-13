@@ -383,30 +383,6 @@ describe('util/git/index', () => {
       ).toBeFalse();
     });
 
-    it('should return true for non-ignored authors on the latest commit when not given a base branch', async () => {
-      git.setUserRepoConfig({
-        gitIgnoredAuthors: ['author1@example.com'],
-      });
-      expect(
-        await git.isBranchModified(
-          'renovate/branch_with_multiple_authors',
-          undefined,
-        ),
-      ).toBeTrue();
-    });
-
-    it('should return false for ignored authors on the latest commit when not given a base branch', async () => {
-      git.setUserRepoConfig({
-        gitIgnoredAuthors: ['author2@example.com'],
-      });
-      expect(
-        await git.isBranchModified(
-          'renovate/branch_with_multiple_authors',
-          undefined,
-        ),
-      ).toBeFalse();
-    });
-
     it('should return true when custom author is unknown', async () => {
       expect(
         await git.isBranchModified('renovate/custom_author', defaultBranch),
