@@ -23,7 +23,7 @@ export function extractPackageFile(
     if (imageDep) {
       deps.push(imageDep);
     } else {
-      logger.debug(
+      logger.trace(
         { packageFile },
         'No image defined in dev container JSON file.',
       );
