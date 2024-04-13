@@ -54,13 +54,15 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
   }
 
   if (isOCIRegistry(doc.chart)) {
-    const ociImageRegistry = doc.chart.replace('oci://', '');
-    const dockerDep = getDep(`${ociImageRegistry}:${doc.version}`, false);
+    const dockerDep = getDep(
+      `${doc.chart.replace('oci://', '')}:${doc.version}`,
+      false,
+    );
 
     return {
       ...dockerDep,
       depType: 'fleet',
-      depName: ociImageRegistry.split('/').at(-1),
+      depName: dockerDep.depName,
       packageName: dockerDep.depName,
       // https://github.com/helm/helm/issues/10312
       // https://github.com/helm/helm/issues/10678

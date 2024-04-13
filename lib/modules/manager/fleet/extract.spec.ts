@@ -73,7 +73,7 @@ kind: Fleet
           {
             currentValue: '7.1.2',
             datasource: 'docker',
-            depName: 'external-dns',
+            depName: 'registry-1.docker.io/bitnamicharts/external-dns',
             packageName: 'registry-1.docker.io/bitnamicharts/external-dns',
             depType: 'fleet',
             pinDigests: false,
