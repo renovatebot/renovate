@@ -28,6 +28,41 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
     expect(result).toBeNull();
   });
 
+  it('should return null when package is a function', async () => {
+    httpMock
+      .scope(gitHubHost)
+      .get(indexPath)
+      .reply(
+        200,
+        codeBlock`
+          {
+            "resources": {},
+            "resourceFunctions": {
+              "microsoft.billing/billingaccounts": {
+                "2019-10-01-preview": [
+                  {
+                    "$ref": "billing/microsoft.billing/2019-10-01-preview/types.json#/304"
+                  }
+                ],
+                "2020-05-01": [
+                  {
+                    "$ref": "billing/microsoft.billing/2020-05-01/types.json#/287"
+                  }
+                ]
+              }
+            }
+          }
+        `,
+      );
+
+    const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
+    const result = await azureBicepResourceDatasource.getReleases({
+      packageName: 'unknown',
+    });
+
+    expect(result).toBeNull();
+  });
+
   it('should return versions when package is a resource', async () => {
     httpMock
       .scope(gitHubHost)
@@ -70,7 +105,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
     });
   });
 
-  it('should return versions when package is a resource when resourceFunctions APIs are also present', async () => {
+  it('should return versions when package is a resource and a function', async () => {
     httpMock
       .scope(gitHubHost)
       .get(indexPath)
