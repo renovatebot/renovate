@@ -189,6 +189,30 @@ describe('util/http/auth', () => {
         token: 'test',
       });
     });
+
+    it(`honors authType`, () => {
+      const opts: GotOptions = {
+        headers: {},
+        token: 'test',
+        context: {
+          authType: 'Bearer',
+        },
+        hostType: 'custom',
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toEqual({
+        context: {
+          authType: 'Bearer',
+        },
+        headers: {
+          authorization: 'Bearer test',
+        },
+        hostType: 'custom',
+        token: 'test',
+      });
+    });
   });
 
   describe('removeAuthorization', () => {

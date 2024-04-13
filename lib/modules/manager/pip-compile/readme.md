@@ -83,3 +83,9 @@ Renovate reads the `requirements.txt` file and extracts these `pip-compile` argu
 - `--output-file`
 
 All other allowed `pip-compile` arguments will be passed over without modification.
+
+### Transitive / indirect dependencies
+
+This manager detects dependencies that only appear in lock files.
+They are disabled by default but can be forced to enable by vulnerability alerts.
+They will be upgraded with `--upgrade-package` option.
