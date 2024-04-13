@@ -51,7 +51,7 @@ export function extractRepository(
         );
 
         // if the repository from which the pipline is referencing templates does not contain the Azure DevOps project name, get the project name from the repository containing the pipeline file being process
-      } else if (currentRepository && currentRepository.includes('/')) {
+      } else if (currentRepository?.includes('/')) {
         const projectName = currentRepository.split('/')[0];
         depName = `${projectName}/${repository.name}`;
         repositoryUrl = joinUrlParts(

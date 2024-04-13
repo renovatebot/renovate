@@ -2874,6 +2874,35 @@ describe('modules/platform/gitlab/index', () => {
         }),
       ).toResolve();
     });
+
+    it('adds and removes labels', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: 'open',
+          },
+        ])
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200);
+      await expect(
+        gitlab.updatePr({
+          number: 1,
+          prTitle: 'title',
+          prBody: 'body',
+          state: 'closed',
+          addLabels: ['new_label'],
+          removeLabels: ['old_label'],
+        }),
+      ).toResolve();
+    });
   });
 
   describe('reattemptPlatformAutomerge(number, platformOptions)', () => {

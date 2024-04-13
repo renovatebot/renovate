@@ -80,4 +80,4 @@ If instead you have all your Flux manifests inside a `flux/` directory, you woul
 
 ### Versioning
 
-If you need to change the versioning format, read the [versioning](../../versioning.md) documentation to learn more.
+If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.

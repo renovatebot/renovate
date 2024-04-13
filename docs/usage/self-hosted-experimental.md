@@ -93,6 +93,10 @@ If set to any value, Renovate will use the Docker Hub API (`https://hub.docker.c
 If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
 This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
 
+## `RENOVATE_X_EAGER_GLOBAL_EXTENDS`
+
+Resolve and merge `globalExtends` presets before other global config, instead of after.
+
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
@@ -156,6 +160,10 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 !!! note
     For the GitHub Enterprise Server platform only.
 
+## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
+
+If set, Renovate will persist repository cache locally after uploading to S3.
+
 ## `RENOVATE_X_S3_ENDPOINT`
 
 If set, Renovate will use this string as the `endpoint` when instantiating the AWS S3 client.
@@ -177,6 +185,6 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 
 Suppress the pre-commit support warning in PR bodies.
 
-## `RENOVATE_X_YARN_IGNORE_PROXY`
+## `RENOVATE_X_YARN_PROXY`
 
-Skip configuring global Yarn proxy settings if HTTP proxy environment variables are detected.
+Configure global Yarn proxy settings if HTTP proxy environment variables are detected.
