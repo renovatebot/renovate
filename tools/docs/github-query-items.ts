@@ -36,6 +36,7 @@ export interface RenovateOpenItems {
   managers: OpenItems;
   platforms: OpenItems;
   datasources: OpenItems;
+  versionings: OpenItems;
 }
 
 export type OpenItems = Record<string, Items | undefined>;
@@ -63,6 +64,7 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
       managers: extractIssues(rawItems, 'manager:'),
       platforms: extractIssues(rawItems, 'platform:'),
       datasources: extractIssues(rawItems, 'datasource:'),
+      versionings: extractIssues(rawItems, 'versioning:'),
     };
 
     return renovateOpenItems;
@@ -71,7 +73,7 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
     if (process.env.CI) {
       throw err;
     }
-    return { managers: {}, platforms: {}, datasources: {} };
+    return { managers: {}, platforms: {}, datasources: {}, versionings: {} };
   }
 }
 
