@@ -42,7 +42,7 @@ export function extractPackageFile(
           deps.push(featureDep);
           continue;
         }
-        logger.debug(
+        logger.trace(
           { feature, packageFile },
           'Skipping invalid dependency in dev container JSON file.',
         );
