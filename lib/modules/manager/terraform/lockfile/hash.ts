@@ -41,7 +41,7 @@ export class TerraformProviderHash {
       const fileBuffer = await fs.readCacheFile(absolutePath);
       hash.update(fileBuffer);
 
-      const line = `${hash.digest('hex')}  ${entryPath}\n`;
+      const line = `${hash.digest('hex')}  ${upath.normalize(entryPath)}\n`;
       rootHash.update(line);
     }
 
