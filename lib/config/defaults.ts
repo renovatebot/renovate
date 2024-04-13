@@ -1,4 +1,3 @@
-import { dequal } from 'dequal';
 import { getOptions, isTopLevelOnlyOption } from './options';
 import type { AllConfig, RenovateOptions } from './types';
 

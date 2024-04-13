@@ -1,4 +1,3 @@
-import { dequal } from 'dequal';
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import { getOptions, isTopLevelOnlyOption } from '../lib/config/options';
