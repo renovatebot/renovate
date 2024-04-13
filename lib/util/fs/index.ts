@@ -255,7 +255,7 @@ export function listCacheDir(
 ): Promise<string[]> {
   const fullPath = ensureCachePath(path);
   return fs.readdir(fullPath, {
-    encoding: null,
+    encoding: 'utf-8',
     recursive: options.recursive,
   });
 }

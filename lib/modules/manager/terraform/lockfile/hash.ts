@@ -1,5 +1,4 @@
 import crypto from 'node:crypto';
-import util from 'node:util';
 import extract from 'extract-zip';
 import upath from 'upath';
 import { logger } from '../../../../logger';
@@ -42,7 +41,7 @@ export class TerraformProviderHash {
       const fileBuffer = await fs.readCacheFile(absolutePath);
       hash.update(fileBuffer);
 
-      const line = util.format('%s  %s\n', hash.digest('hex'), entryPath);
+      const line = `${hash.digest('hex')}  ${entryPath}\n`;
       rootHash.update(line);
     }
 
