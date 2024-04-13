@@ -1,10 +1,12 @@
 import { DateTime, Settings } from 'luxon';
+import { GlobalConfig } from '../../../config/global';
 import { cleanupHttpCache } from './http-cache';
 
 describe('util/cache/repository/http-cache', () => {
   beforeEach(() => {
     const now = DateTime.fromISO('2024-04-12T12:00:00.000Z').valueOf();
     Settings.now = () => now;
+    GlobalConfig.reset();
   });
 
   it('should not throw if cache is not a valid HttpCache', () => {
@@ -46,6 +48,8 @@ describe('util/cache/repository/http-cache', () => {
   });
 
   it('should remove all items if ttlDays is not configured', () => {
+    GlobalConfig.set({ httpCacheTtlDays: 0 });
+
     const now = DateTime.now();
     const cache = {
       httpCache: {

@@ -11,9 +11,9 @@ export function cleanupHttpCache(cacheData: unknown): void {
   }
   const httpCache = cacheData['httpCache'];
 
-  const ttlDays = GlobalConfig.get('httpCacheTtlDays');
-  if (!ttlDays) {
-    logger.trace('cleanupHttpCache: no ttlDays configured, skipping');
+  const ttlDays = GlobalConfig.get('httpCacheTtlDays', 90);
+  if (ttlDays === 0) {
+    logger.trace('cleanupHttpCache: zero value received, removing the cache');
     delete cacheData['httpCache'];
     return;
   }
