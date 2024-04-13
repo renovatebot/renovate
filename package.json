@@ -28,8 +28,6 @@
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
     "jest": "node tools/jest.mjs",
-    "jest:vscode": "node tools/jest.mjs",
-    "jest-debug": "NODE_OPTIONS='$NODE_OPTIONS --inspect-brk' node tools/jest.mjs --testTimeout=100000000",
     "lint": "run-s ls-lint type-check eslint prettier markdown-lint git-check doc-fence-check",
     "lint-fix": "run-s eslint-fix prettier-fix markdown-lint-fix",
     "ls-lint": "ls-lint",
