@@ -40,6 +40,7 @@ export function extractPackageFile(
         );
         if (featureDep) {
           deps.push(featureDep);
+          continue;
         }
         logger.debug(
           { feature, packageFile },
