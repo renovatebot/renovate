@@ -132,9 +132,9 @@ async function findPipfileSourceUrlsWithCredentials(
 ): Promise<URL[]> {
   const pipfile = await extractPackageFile(pipfileContent, pipfileName);
 
-  return (pipfile?.registryUrls
-    ?.map(parseUrl)
-    ?.filter((url) => !!url?.username) ?? []) as URL[]; //tsc does not notice null entries are removed
+  return pipfile?.registryUrls
+    .filter(is.urlInstance)
+    .filter((url) => is.nonEmptyStringAndNotWhitespace(url.username)) ?? [];
 }
 
 /**
@@ -144,7 +144,7 @@ async function findPipfileSourceUrlsWithCredentials(
 export function extractEnvironmentVariableName(
   credential: string,
 ): string | null {
-  const match = decodeURI(credential).match('([a-zA-Z0-9_]+)');
+  const match = regEx('([a-z0-9_]+)', 'i').exec(decodeURI(credential));
   return match?.length ? match[0] : null;
 }
 
@@ -153,7 +153,7 @@ export function addExtraEnvVariable(
   environmentVariableName: string,
   environmentValue: string,
 ): void {
-  logger.debug(
+  logger.trace(
     `Adding ${environmentVariableName} environment variable for pipenv`,
   );
   if (
@@ -183,7 +183,7 @@ async function addCredentialsForSourceUrls(
     pipfileName,
   );
   for (const parsedSourceUrl of sourceUrls) {
-    logger.debug(`Trying to add credentials for ${parsedSourceUrl.toString()}`);
+    logger.trace(`Trying to add credentials for ${parsedSourceUrl}`);
     const matchingHostRule = getMatchingHostRule(parsedSourceUrl.toString());
     if (matchingHostRule) {
       const usernameVariableName = extractEnvironmentVariableName(
