@@ -368,11 +368,6 @@ Solutions:
 
 ## branchName
 
-<!-- prettier-ignore -->
-!!! warning
-    We strongly recommended that you avoid configuring this field directly.
-    Use at your own risk.
-
 If you truly need to configure this then it probably means either:
 
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
@@ -472,11 +467,6 @@ If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./p
 ## commitBodyTable
 
 ## commitMessage
-
-<!-- prettier-ignore -->
-!!! warning
-    We deprecated editing the `commitMessage` directly, and we recommend you stop using this config option.
-    Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, to create the commit message you want.
 
 ## commitMessageAction
 
@@ -2757,7 +2747,7 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
 }
 ```
 
-The syntax of the version range must follow the [versioning scheme](modules/versioning.md#supported-versioning) used by the matched package(s).
+The syntax of the version range must follow the [versioning scheme](modules/versioning/index.md#supported-versioning) used by the matched package(s).
 This is usually defined by the [manager](modules/manager/index.md#supported-managers) which discovered them or by the default versioning for the package's [datasource](modules/datasource/index.md).
 For example, a Gradle package would typically need Gradle constraint syntax (e.g. `[,7.0)`) and not SemVer syntax (e.g. `<7.0`).
 
@@ -4014,3 +4004,7 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
   }
 }
 ```
+
+<!-- prettier-ignore -->
+!!! note
+    If you want to raise only vulnerability fix PRs, you may use the `security:only-security-updates` preset.
