@@ -3013,6 +3013,10 @@ export function getOptions(): RenovateOptions[] {
   return options;
 }
 
+export function isTopLevelOnlyOption(option: RenovateOptions): boolean {
+  return option.parents?.length === 1 && option.parents[0] === '.';
+}
+
 function loadManagerOptions(): void {
   const allManagers = new Map([...getManagers(), ...getCustomManagers()]);
   for (const [name, config] of allManagers.entries()) {
