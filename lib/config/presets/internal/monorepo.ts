@@ -493,6 +493,7 @@ const repoGroups = {
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   tika: 'https://github.com/apache/tika',
   tiptap: 'https://github.com/ueberdosis/tiptap',
+  tonic: 'https://github.com/hyperium/tonic',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
   'trust-dns': 'https://github.com/bluejekyll/trust-dns',
