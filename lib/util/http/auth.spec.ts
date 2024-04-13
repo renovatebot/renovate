@@ -57,7 +57,7 @@ describe('util/http/auth', () => {
       expect(opts).toMatchInlineSnapshot(`
         {
           "headers": {
-            "authorization": "token XXXX",
+            "authorization": "Bearer XXXX",
           },
           "hostType": "gitea",
           "token": "XXXX",
