@@ -2074,7 +2074,7 @@ const options: RenovateOptions[] = [
       minimumReleaseAge: null,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
-      branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
+      branchTopic: `{{{datasource}}}-{{{depNameSanitized}}}-vulnerability`,
       prCreation: 'immediate',
     },
     mergeable: true,
