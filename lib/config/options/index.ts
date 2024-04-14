@@ -2134,14 +2134,6 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
-    name: 'transitiveRemediation',
-    description: 'Enable remediation of transitive dependencies.',
-    type: 'boolean',
-    default: false,
-    supportedManagers: ['npm'],
-    supportedPlatforms: ['github'],
-  },
-  {
     name: 'vulnerabilityAlerts',
     description:
       'Config to apply when a PR is needed due to a vulnerability in the existing package version.',
