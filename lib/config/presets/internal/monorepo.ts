@@ -71,6 +71,7 @@ const repoGroups = {
   capacitor: 'https://github.com/ionic-team/capacitor',
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   chromely: 'https://github.com/chromelyapps/Chromely',
+  ckeditor: 'https://github.com/ckeditor/ckeditor5',
   clarity: 'https://github.com/vmware/clarity',
   clearscript: [
     'https://github.com/microsoft/ClearScript',
@@ -492,6 +493,8 @@ const repoGroups = {
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   tika: 'https://github.com/apache/tika',
   tiptap: 'https://github.com/ueberdosis/tiptap',
+  'tokio-prost': 'https://github.com/tokio-rs/prost',
+  'tokio-tracing': 'https://github.com/tokio-rs/tracing',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
   'trust-dns': 'https://github.com/bluejekyll/trust-dns',

@@ -5,6 +5,7 @@ import type { AllConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
+import { migrateAndValidateConfig } from './util';
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
@@ -82,7 +83,9 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
-export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
+export async function getConfig(
+  inputEnv: NodeJS.ProcessEnv,
+): Promise<AllConfig> {
   let env = inputEnv;
   env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
   env = renameEnvKeys(env);
@@ -97,6 +100,8 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
     try {
       config = JSON5.parse(env.RENOVATE_CONFIG);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
+
+      config = await migrateAndValidateConfig(config, 'RENOVATE_CONFIG');
     } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
       process.exit(1);

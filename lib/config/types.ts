@@ -159,6 +159,7 @@ export interface RepoGlobalConfig {
   privateKey?: string;
   privateKeyOld?: string;
   experimentalFlags?: string[];
+  httpCacheTtlDays?: number;
 }
 
 export interface LegacyAdminConfig {

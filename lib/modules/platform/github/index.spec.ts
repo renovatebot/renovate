@@ -1745,7 +1745,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'new-title',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'new-title',
         body: 'new-content',
@@ -1860,7 +1866,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'new-title',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'new-title',
         body: 'new-content',
@@ -1966,7 +1978,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .patch('/repos/some/repo/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'newer-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-3',
         reuseTitle: 'title-2',
@@ -2019,7 +2037,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .patch('/repos/some/repo/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'open',
+          title: 'title-2',
+          body: 'newer-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-3',
         reuseTitle: 'title-2',
@@ -2108,14 +2132,6 @@ describe('modules/platform/github/index', () => {
             },
           },
         })
-        .get('/repos/some/repo/issues/2')
-        .reply(200, {
-          number: 2,
-          state: 'open',
-          title: 'title-1',
-          body: 'newer-content',
-          updated_at: '2021-01-01T00:00:00Z',
-        })
         .patch('/repos/some/repo/issues/1')
         .reply(200);
       const res = await github.ensureIssue({
@@ -2162,7 +2178,13 @@ describe('modules/platform/github/index', () => {
           updated_at: '2023-01-01T00:00:00Z',
         })
         .post('/repos/some/repo/issues')
-        .reply(200);
+        .reply(200, {
+          number: 3,
+          state: 'open',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       const res = await github.ensureIssue({
         title: 'title-2',
         body: 'new-content',
@@ -2253,7 +2275,13 @@ describe('modules/platform/github/index', () => {
           },
         })
         .patch('/repos/undefined/issues/2')
-        .reply(200);
+        .reply(200, {
+          number: 2,
+          state: 'closed',
+          title: 'title-2',
+          body: 'new-content',
+          updated_at: '2023-01-01T00:00:00Z',
+        });
       await expect(github.ensureIssueClosing('title-2')).toResolve();
     });
   });
@@ -2272,7 +2300,13 @@ describe('modules/platform/github/index', () => {
     it('should add the given assignees to the issue', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.post('/repos/some/repo/issues/42/assignees').reply(200);
+      scope.post('/repos/some/repo/issues/42/assignees').reply(200, {
+        number: 42,
+        state: 'open',
+        title: 'title-42',
+        body: 'body-42',
+        updated_at: '2023-01-01T00:00:00Z',
+      });
       await github.initRepo({ repository: 'some/repo' });
       await expect(
         github.addAssignees(42, ['someuser', 'someotheruser']),
@@ -3006,7 +3040,13 @@ describe('modules/platform/github/index', () => {
           });
         scope
           .patch('/repos/some/repo/issues/123', (body) => body.milestone === 1)
-          .reply(200, {});
+          .reply(200, {
+            number: 123,
+            state: 'open',
+            title: 'bump someDep to v2',
+            body: 'many informations about someDep',
+            updated_at: '2023-01-01T00:00:00Z',
+          });
         await github.initRepo({ repository: 'some/repo' });
         const pr = await github.createPr({
           targetBranch: 'main',

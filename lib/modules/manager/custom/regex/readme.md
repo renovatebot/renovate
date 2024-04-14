@@ -24,7 +24,7 @@ Before Renovate can look up a dependency and decide about updates, it needs this
 
 - The dependency's name
 - Which `datasource` to use: npm, Docker, GitHub tags, and so on. For how to format this references see [datasource overview](../../datasource/index.md#supported-datasources)
-- Which version scheme to use: defaults to `semver-coerced`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](../../versioning.md#supported-versioning)
+- Which version scheme to use: defaults to `semver-coerced`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](../../versioning/index.md#supported-versioning)
 
 Configuration-wise, it works like this:
 
