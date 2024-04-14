@@ -1912,9 +1912,7 @@ describe('config/validation', () => {
 
     it('mergeConfidenceSupportedDatasources', async () => {
       const config = {
-        experimentalFlags: [
-          'mergeConfidenceSupportedDatasources=["docker","deno"]',
-        ],
+        experimentalFlags: ['mergeConfidenceSupportedDatasources=docker,deno'],
       };
       const { warnings } = await configValidation.validateConfig(
         'global',
@@ -1923,44 +1921,10 @@ describe('config/validation', () => {
       expect(warnings).toBeEmptyArray();
     });
 
-    it('warns if invalid type set for mergeConfidenceSupportedDatasources', async () => {
-      const config = {
-        experimentalFlags: ['mergeConfidenceSupportedDatasources=string'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message:
-            'Experimental flag `mergeConfidenceSupportedDatasources` should be of json array of string format. Found invalid format instead.',
-        },
-      ]);
-    });
-
-    it('warns if non-string value set for mergeConfidenceSupportedDatasources', async () => {
-      const config = {
-        experimentalFlags: ['mergeConfidenceSupportedDatasources=[10,10]'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message:
-            'Experimental flag `mergeConfidenceSupportedDatasources` should be an array of strings. But got object instead.',
-        },
-      ]);
-    });
-
     it('warns if invalid datasource set for mergeConfidenceSupportedDatasources', async () => {
       const config = {
         experimentalFlags: [
-          'mergeConfidenceSupportedDatasources=["docker","invalid-datasource"]',
+          'mergeConfidenceSupportedDatasources=docker,invalid-datasource',
         ],
       };
       const { warnings } = await configValidation.validateConfig(

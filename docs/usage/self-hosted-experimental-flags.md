@@ -93,5 +93,5 @@ The expected value for this environment variable is a list of strings separated 
 Example usage:
 
 ```js
-experimentalFlags: ['mergeConfidenceSupportedDatasources=["docker","deno"]'];
+experimentalFlags: ['mergeConfidenceSupportedDatasources=docker,deno'];
 ```

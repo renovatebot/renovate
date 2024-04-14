@@ -9,7 +9,6 @@ import type {
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types/host-rules';
-import { parseJson } from '../util/common';
 import { regEx } from '../util/regex';
 import {
   getRegexPredicate,
@@ -1056,7 +1055,7 @@ function validateExperimentalFlag(
       acceptedValues: ['alpha', 'created', 'updated', 'size', 'id'],
     },
     mergeConfidenceSupportedDatasources: {
-      type: 'json-strings',
+      type: 'multiple-strings',
       acceptedValues: datasourceList,
     },
   };
@@ -1114,33 +1113,23 @@ function validateExperimentalFlag(
           });
         }
         break;
-      case 'json-strings':
-        try {
-          const values = parseJson(flagValue, '.json5');
-
-          if (!is.array<string>(values, is.string)) {
-            warnings.push({
-              topic: 'Configuration Error',
-              message: `Experimental flag \`${flagName}\` should be an array of strings. But got ${typeof values} instead.`,
-            });
-            return;
-          }
-
-          if (flagDetails.acceptedValues) {
-            for (const value of values) {
-              if (!flagDetails.acceptedValues.includes(value)) {
-                warnings.push({
-                  topic: 'Configuration Error',
-                  message: `Invalid value \`${value}\` found for experimental flag \`${flagName}\`.The allowed values are ${flagDetails.acceptedValues.join(', ')}.`,
-                });
-              }
-            }
-          }
-        } catch (err) {
+      case 'multiple-strings':
+        if (!regEx(/^([a-zA-Z0-9-],?)+[^,]$/).test(flagValue)) {
           warnings.push({
             topic: 'Configuration Error',
-            message: `Experimental flag \`${flagName}\` should be of json array of string format. Found invalid format instead.`,
+            message: `Experimental flag \`${flagName}\` should be a list of strings separated by a comma. Found invalid format instead.`,
           });
+          return;
+        }
+        if (flagDetails.acceptedValues) {
+          for (const value of flagValue.split(',')) {
+            if (!flagDetails.acceptedValues.includes(value)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid value \`${value}\` found for experimental flag \`${flagName}\`.The allowed values are ${flagDetails.acceptedValues.join(', ')}.`,
+              });
+            }
+          }
         }
         break;
     }

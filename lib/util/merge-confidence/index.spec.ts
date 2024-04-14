@@ -442,22 +442,17 @@ describe('util/merge-confidence/index', () => {
           },
           {
             name: 'it should successfully parse the given datasource list',
-            datasourceListString: `["go","npm"]`,
+            datasourceListString: 'go,npm',
             expected: ['go', 'npm'],
           },
           {
-            name: 'it should gracefully handle invalid json',
-            datasourceListString: `{`,
+            name: 'it should gracefully handle invalid string format',
+            datasourceListString: '{',
             expected: undefined,
           },
           {
-            name: 'it should discard non-array JSON input',
-            datasourceListString: `{}`,
-            expected: undefined,
-          },
-          {
-            name: 'it should discard non-string array JSON input',
-            datasourceListString: `[1,2]`,
+            name: 'it should discard non-string input',
+            datasourceListString: '1,2',
             expected: undefined,
           },
         ])(
@@ -468,7 +463,7 @@ describe('util/merge-confidence/index', () => {
           }: ParseSupportedDatasourceTestCase) => {
             GlobalConfig.set({
               experimentalFlags: [
-                `mergeConfidenceSupportedDatasources=${datasourceListString}`,
+                `mergeConfidenceSupportedDatasources=${datasourceListString ?? ''}`,
               ],
             });
 
