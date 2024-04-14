@@ -495,6 +495,7 @@ const repoGroups = {
   tiptap: 'https://github.com/ueberdosis/tiptap',
   tonic: 'https://github.com/hyperium/tonic',
   'tokio-prost': 'https://github.com/tokio-rs/prost',
+  'tokio-tracing': 'https://github.com/tokio-rs/tracing',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
   'trust-dns': 'https://github.com/bluejekyll/trust-dns',
