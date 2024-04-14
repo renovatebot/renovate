@@ -319,12 +319,28 @@ const platform: Platform = {
   async getRepos(config?: AutodiscoverConfig): Promise<string[]> {
     logger.debug('Auto-discovering Gitea repositories');
     try {
-      if (!config?.topics) {
+      if (config?.topics) {
+        logger.debug({ topics: config.topics }, 'Auto-discovering by topics');
+        const repos = await map(config.topics, fetchRepositories);
+        return deduplicateArray(repos.flat());
+      } else if (config?.namespaces) {
+        logger.debug(
+          { namespaces: config.namespaces },
+          'Auto-discovering by organization',
+        );
+        const repos = await map(
+          config.namespaces,
+          async (organization: string) => {
+            const orgRepos = await helper.orgListRepos(organization);
+            return orgRepos
+              .filter((r) => !r.mirror && !r.archived)
+              .map((r) => r.full_name);
+          },
+        );
+        return deduplicateArray(repos.flat());
+      } else {
         return await fetchRepositories();
       }
-
-      const repos = await map(config.topics, fetchRepositories);
-      return deduplicateArray(repos.flat());
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
       throw err;
@@ -490,7 +506,7 @@ const platform: Platform = {
     logger.debug(`Creating pull request: ${title} (${head} => ${base})`);
     try {
       const labels = Array.isArray(labelNames)
-        ? await Promise.all(labelNames.map(lookupLabelByName))
+        ? await map(labelNames, lookupLabelByName)
         : [];
       const gpr = await helper.createPR(config.repository, {
         base,
@@ -583,6 +599,7 @@ const platform: Platform = {
     number,
     prTitle,
     prBody: body,
+    labels,
     state,
     targetBranch,
   }: UpdatePrConfig): Promise<void> {
@@ -598,6 +615,24 @@ const platform: Platform = {
     };
     if (targetBranch) {
       prUpdateParams.base = targetBranch;
+    }
+
+    /**
+     * Update PR labels.
+     * In the Gitea API, labels are replaced on each update if the field is present.
+     * If the field is not present (i.e., undefined), labels aren't updated.
+     * However, the labels array must contain label IDs instead of names,
+     * so a lookup is performed to fetch the details (including the ID) of each label.
+     */
+    if (Array.isArray(labels)) {
+      prUpdateParams.labels = (await map(labels, lookupLabelByName)).filter(
+        is.number,
+      );
+      if (labels.length !== prUpdateParams.labels.length) {
+        logger.warn(
+          'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
+        );
+      }
     }
 
     const gpr = await helper.updatePR(

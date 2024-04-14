@@ -2785,6 +2785,21 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('should upgrade to 16 minors', async () => {
+      config.currentValue = '1.0.0';
+      config.separateMultipleMinor = true;
+      config.packageName = 'webpack';
+      config.datasource = NpmDatasource.id;
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+      expect(updates).toHaveLength(16);
+    });
+
     it('does not jump  major unstable', async () => {
       config.currentValue = '^4.4.0-canary.3';
       config.rangeStrategy = 'replace';
@@ -2970,7 +2985,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('rejects non-fully specified in-range updates', async () => {
-      config.rangeStrategy = 'bump';
+      config.rangeStrategy = 'update-lockfile';
       config.currentValue = '1.x';
       config.packageName = 'q';
       config.datasource = NpmDatasource.id;

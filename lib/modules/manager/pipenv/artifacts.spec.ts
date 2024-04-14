@@ -15,7 +15,6 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import { find as _find } from '../../../util/host-rules';
-import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import type { PipfileLockSchema } from './schema';
@@ -23,7 +22,6 @@ import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);
 const find = mockedFunction(_find);
-const getPkgReleases = mockedFunction(_getPkgReleases);
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
@@ -71,8 +69,9 @@ describe('modules/manager/pipenv/artifacts', () => {
     };
 
     // python
-    getPkgReleases.mockResolvedValueOnce({
+    datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
+        { version: '3.6.5' },
         { version: '3.7.6' },
         { version: '3.8.5' },
         { version: '3.9.1' },
@@ -81,7 +80,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     });
 
     // pipenv
-    getPkgReleases.mockResolvedValueOnce({
+    datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
         { version: '2013.5.19' },
         { version: '2013.6.11' },
@@ -263,7 +262,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    pipFileLock._meta!.requires!.python_full_version = '3.7.6';
+    pipFileLock._meta!.requires!.python_version = '3.6';
     fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.ensureCacheDir.mockResolvedValueOnce(pipCacheDir);
     fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
@@ -290,7 +289,51 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).not.toBeNull();
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool python 3.7.6' },
+      { cmd: 'install-tool python 3.6.5' },
+      { cmd: 'install-tool pipenv 2013.6.12' },
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+            PIP_CACHE_DIR: pipCacheDir,
+            WORKON_HOME: virtualenvsCacheDir,
+          },
+        },
+      },
+    ]);
+  });
+
+  it('defaults to latest if no lock constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
+    fs.ensureCacheDir.mockResolvedValueOnce(pipCacheDir);
+    fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
+    fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+    // pipenv
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '2023.1.2' }],
+    });
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('new lock');
+
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: 'some new content',
+        config,
+      }),
+    ).not.toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.10.2' },
       { cmd: 'install-tool pipenv 2013.6.12' },
       {
         cmd: 'pipenv lock',

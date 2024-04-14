@@ -4,6 +4,7 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { setRepositoryLogLevelRemaps } from '../../../logger/remap';
 import { platform } from '../../../modules/platform';
+import * as memCache from '../../../util/cache/memory';
 import { clone } from '../../../util/clone';
 import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
@@ -48,6 +49,7 @@ export async function initRepo(
   let config: RenovateConfig = initializeConfig(config_);
   await resetCaches();
   logger.once.reset();
+  memCache.init();
   config = await initApis(config);
   await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
