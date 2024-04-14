@@ -2984,7 +2984,7 @@ const options: RenovateOptions[] = [
   {
     name: 'httpCacheTtlDays',
     description:
-      'Maximum duration in days to keep HTTP cache entries. Set to `0` to disable HTTP cache.',
+      'Maximum duration in days to keep HTTP cache entries.',
     type: 'integer',
     stage: 'repository',
     default: 90,
