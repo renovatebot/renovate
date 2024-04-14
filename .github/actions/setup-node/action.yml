@@ -55,7 +55,7 @@ runs:
       uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
       with:
         node-version: ${{ inputs.node-version }}
-        cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
+        # cache: ${{ env.CACHE_HIT != 'true' && 'pnpm' || '' }}
 
     - name: Install dependencies
       uses: nick-fields/retry@7152eba30c6575329ac0576536151aca5a72780e # v3.0.0
