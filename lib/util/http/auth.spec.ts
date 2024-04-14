@@ -57,7 +57,7 @@ describe('util/http/auth', () => {
       expect(opts).toMatchInlineSnapshot(`
         {
           "headers": {
-            "authorization": "token XXXX",
+            "authorization": "Bearer XXXX",
           },
           "hostType": "gitea",
           "token": "XXXX",
@@ -186,6 +186,30 @@ describe('util/http/auth', () => {
         headers: {
           authorization: 'test',
         },
+        token: 'test',
+      });
+    });
+
+    it(`honors authType`, () => {
+      const opts: GotOptions = {
+        headers: {},
+        token: 'test',
+        context: {
+          authType: 'Bearer',
+        },
+        hostType: 'custom',
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toEqual({
+        context: {
+          authType: 'Bearer',
+        },
+        headers: {
+          authorization: 'Bearer test',
+        },
+        hostType: 'custom',
         token: 'test',
       });
     });

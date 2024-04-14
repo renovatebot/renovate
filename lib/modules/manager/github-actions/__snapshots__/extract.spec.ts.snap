@@ -10,7 +10,6 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "depName": "actions/bin",
     "depType": "action",
     "replaceString": "actions/bin/shellcheck@master",
-    "skipReason": "invalid-version",
     "versioning": "docker",
   },
   {
@@ -127,7 +126,6 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "depName": "actions/bin",
     "depType": "action",
     "replaceString": "actions/bin/shellcheck@master",
-    "skipReason": "invalid-version",
     "versioning": "docker",
   },
   {
@@ -147,7 +145,6 @@ exports[`modules/manager/github-actions/extract extractPackageFile() extracts mu
     "depName": "actions/docker",
     "depType": "action",
     "replaceString": "actions/docker/cli@master",
-    "skipReason": "invalid-version",
     "versioning": "docker",
   },
   {

@@ -8,6 +8,7 @@ import type { MergeConfidence } from '../util/merge-confidence/types';
 
 export type RenovateConfigStage =
   | 'global'
+  | 'inherit'
   | 'repository'
   | 'package'
   | 'branch'
@@ -232,6 +233,11 @@ export interface RenovateConfig
 
   hostRules?: HostRule[];
 
+  inheritConfig?: boolean;
+  inheritConfigFileName?: string;
+  inheritConfigRepoName?: string;
+  inheritConfigStrict?: boolean;
+
   ignorePresets?: string[];
   forkProcessing?: 'auto' | 'enabled' | 'disabled';
   isFork?: boolean;
@@ -394,6 +400,8 @@ export interface RenovateOptionBase {
    */
   globalOnly?: boolean;
 
+  inheritConfigSupport?: boolean;
+
   allowedValues?: string[];
 
   allowString?: boolean;
@@ -426,6 +434,11 @@ export interface RenovateOptionBase {
   experimentalIssues?: number[];
 
   advancedUse?: boolean;
+
+  /**
+   * This is used to add depreciation message in the docs
+   */
+  deprecationMsg?: string;
 }
 
 export interface RenovateArrayOption<

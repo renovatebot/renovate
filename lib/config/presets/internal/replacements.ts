@@ -15,6 +15,7 @@ export const presets: Record<string, Preset> = {
       'replacements:containerbase',
       'replacements:cpx-to-maintenance-fork',
       'replacements:cucumber-to-scoped',
+      'replacements:eslint-plugin-node-to-maintained-fork',
       'replacements:fakerjs-to-scoped',
       'replacements:fastify-to-scoped',
       'replacements:hapi-to-scoped',
@@ -171,6 +172,7 @@ export const presets: Record<string, Preset> = {
         matchDatasources: ['docker'],
         matchPackageNames: ['ghcr.io/renovatebot/renovate'],
         matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+        versioning: 'semver',
       },
     ],
   },
@@ -193,6 +195,19 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['cucumber'],
         replacementName: '@cucumber/cucumber',
         replacementVersion: '7.0.0',
+      },
+    ],
+  },
+  'eslint-plugin-node-to-maintained-fork': {
+    description:
+      'Replace stale `eslint-plugin-node` with a maintained fork: `eslint-plugin-n`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^11.1.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['eslint-plugin-node'],
+        replacementName: 'eslint-plugin-n',
+        replacementVersion: '14.0.0',
       },
     ],
   },
@@ -939,7 +954,7 @@ const mui: PresetTemplate = {
 
 const messageFormat: PresetTemplate = {
   description:
-    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
+    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}` to `@messageformat/{{package}}`.',
   packageRules: [
     {
       matchCurrentVersion: '>=2.0.0 <3.0.0',
@@ -966,7 +981,7 @@ const messageFormat: PresetTemplate = {
       replacementVersion: '5.0.0',
     },
   ],
-  title: 'messageFormat-{{package}}-to-@messageformat/{{package}}',
+  title: 'messageFormat-to-scoped',
 };
 
 addPresets(presets, messageFormat, mui);

@@ -246,26 +246,32 @@ describe('modules/manager/pip-compile/extract', () => {
   });
 
   it('return sorted package files', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(
-      getSimpleRequirementsFile('pip-compile --output-file=4.txt 3.in', [
-        'foo==1.0.1',
-      ]),
-    );
-    fs.readLocalFile.mockResolvedValueOnce('-r 2.txt\nfoo');
-    fs.readLocalFile.mockResolvedValueOnce(
-      getSimpleRequirementsFile('pip-compile --output-file=2.txt 1.in', [
-        'foo==1.0.1',
-      ]),
-    );
-    fs.readLocalFile.mockResolvedValueOnce('foo');
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === '1.in') {
+        return 'foo';
+      } else if (name === '2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === '3.in') {
+        return '-r 2.txt\nfoo';
+      } else if (name === '4.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=4.txt 3.in',
+          ['foo==1.0.1'],
+        );
+      }
+      return null;
+    });
 
     const lockFiles = ['4.txt', '2.txt'];
     const packageFiles = await extractAllPackageFiles({}, lockFiles);
     expect(packageFiles).toBeDefined();
     expect(packageFiles?.map((p) => p.packageFile)).toEqual(['1.in', '3.in']);
-    expect(packageFiles?.map((p) => p.lockFiles!.pop())).toEqual([
-      '2.txt',
-      '4.txt',
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([
+      ['2.txt', '4.txt'],
+      ['4.txt'],
     ]);
   });
 
@@ -357,6 +363,137 @@ describe('modules/manager/pip-compile/extract', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       { depName: 'bar', lockFile: 'requirements.txt' },
       'pip-compile: dependency not found in lock file',
+    );
+  });
+
+  it('adds transitive dependency to deps in package file', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(
+      getSimpleRequirementsFile(
+        'pip-compile --output-file=requirements.txt requirements.in',
+        ['friendly-bard==1.0.1', 'bards-friend==1.0.0'],
+      ),
+    );
+    fs.readLocalFile.mockResolvedValueOnce('FrIeNdLy-._.-bArD>=1.0.0');
+
+    const lockFiles = ['requirements.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles).toBeDefined();
+    const packageFile = packageFiles!.pop();
+    expect(packageFile!.deps).toHaveLength(2);
+    expect(packageFile!.deps[1]).toEqual({
+      datasource: 'pypi',
+      depType: 'indirect',
+      depName: 'bards-friend',
+      lockedVersion: '1.0.0',
+      enabled: false,
+    });
+  });
+
+  it('handles -r reference to another input file', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === '1.in') {
+        return 'foo';
+      } else if (name === '2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === '3.in') {
+        return '-r 1.in\nfoo';
+      } else if (name === '4.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=4.txt 3.in',
+          ['foo==1.0.1'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['4.txt', '2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([
+      ['2.txt', '4.txt'],
+      ['4.txt'],
+    ]);
+  });
+
+  it('handles transitive -r references', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === '1.in') {
+        return 'foo';
+      } else if (name === '2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === '3.in') {
+        return '-r 1.in\nfoo';
+      } else if (name === '4.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=4.txt 3.in',
+          ['foo==1.0.1'],
+        );
+      } else if (name === '5.in') {
+        return '-r 4.txt\nfoo';
+      } else if (name === '6.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=6.txt 5.in',
+          ['foo==1.0.1'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['4.txt', '2.txt', '6.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([
+      ['2.txt', '4.txt', '6.txt'],
+      ['4.txt', '6.txt'],
+      ['6.txt'],
+    ]);
+  });
+
+  it('warns on -r reference to failed file', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === 'reqs-no-headers.txt') {
+        return Fixtures.get('requirementsNoHeaders.txt');
+      } else if (name === '1.in') {
+        return '-r reqs-no-headers.txt\nfoo';
+      } else if (name === '2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['reqs-no-headers.txt', '2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([['2.txt']]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'pip-compile: 1.in references reqs-no-headers.txt which does not appear to be a requirements file managed by pip-compile',
+    );
+  });
+
+  it('warns on -r reference to requirements file not managed by pip-compile', async () => {
+    fs.readLocalFile.mockImplementation((name): any => {
+      if (name === '1.in') {
+        return '-r unmanaged-file.txt\nfoo';
+      } else if (name === '2.txt') {
+        return getSimpleRequirementsFile(
+          'pip-compile --output-file=2.txt 1.in',
+          ['foo==1.0.1'],
+        );
+      }
+      return null;
+    });
+
+    const lockFiles = ['2.txt'];
+    const packageFiles = await extractAllPackageFiles({}, lockFiles);
+    expect(packageFiles?.map((p) => p.lockFiles)).toEqual([['2.txt']]);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'pip-compile: 1.in references unmanaged-file.txt which does not appear to be a requirements file managed by pip-compile',
     );
   });
 });

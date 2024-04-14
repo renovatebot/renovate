@@ -480,20 +480,15 @@ describe('util/stats', () => {
 
       expect(res).toEqual({
         'https://example.com/bar': {
-          localHits: 0,
-          localMisses: 1,
-          localTotal: 1,
-          remoteHits: 1,
-          remoteMisses: 1,
-          remoteTotal: 2,
+          hit: 1,
+          miss: 1,
+          localMiss: 1,
         },
         'https://example.com/foo': {
-          localHits: 2,
-          localMisses: 1,
-          localTotal: 3,
-          remoteHits: 0,
-          remoteMisses: 0,
-          remoteTotal: 0,
+          hit: 0,
+          miss: 0,
+          localHit: 2,
+          localMiss: 1,
         },
       });
     });
@@ -512,21 +507,9 @@ describe('util/stats', () => {
       const [data, msg] = logger.logger.debug.mock.calls[0];
       expect(msg).toBe('HTTP cache statistics');
       expect(data).toEqual({
-        'https://example.com/bar': {
-          localHits: 0,
-          localMisses: 1,
-          localTotal: 1,
-          remoteHits: 1,
-          remoteMisses: 1,
-          remoteTotal: 2,
-        },
-        'https://example.com/foo': {
-          localHits: 2,
-          localMisses: 1,
-          localTotal: 3,
-          remoteHits: 0,
-          remoteMisses: 0,
-          remoteTotal: 0,
+        'https://example.com': {
+          '/foo': { hit: 0, localHit: 2, localMiss: 1, miss: 0 },
+          '/bar': { hit: 1, localMiss: 1, miss: 1 },
         },
       });
     });

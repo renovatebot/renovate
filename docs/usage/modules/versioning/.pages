@@ -1,0 +1,7 @@
+title: Versionings
+nav:
+  - Introduction: index.md
+  - ...
+collapse_single_pages: true
+order: asc
+sort_type: natural

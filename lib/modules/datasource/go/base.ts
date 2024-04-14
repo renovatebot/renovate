@@ -255,7 +255,7 @@ export class BaseGoDatasource {
     if (datasource !== null) {
       return datasource;
     }
-    // fall back to old behaviour if detection did not work
+    // fall back to old behavior if detection did not work
 
     switch (detectPlatform(goImportURL)) {
       case 'github': {

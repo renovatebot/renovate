@@ -9,11 +9,13 @@ import {
   addBranchStats,
   addExtractionStats,
   exportStats,
+  finalizeReport,
   getReport,
 } from './reporting';
 
 jest.mock('../util/fs', () => mockDeep());
 jest.mock('../util/s3', () => mockDeep());
+jest.mock('../logger', () => mockDeep());
 
 describe('instrumentation/reporting', () => {
   const branchInformation: Partial<BranchCache>[] = [
@@ -52,8 +54,10 @@ describe('instrumentation/reporting', () => {
   };
 
   const expectedReport = {
+    problems: [],
     repositories: {
       'myOrg/myRepo': {
+        problems: [],
         branches: branchInformation,
         packageFiles,
       },
@@ -70,6 +74,7 @@ describe('instrumentation/reporting', () => {
     });
 
     expect(getReport()).toEqual({
+      problems: [],
       repositories: {},
     });
   });
@@ -173,5 +178,50 @@ describe('instrumentation/reporting', () => {
 
     fs.writeSystemFile.mockRejectedValue(null);
     await expect(exportStats(config)).toResolve();
+  });
+
+  it('should add problems to report', () => {
+    const config: RenovateConfig = {
+      repository: 'myOrg/myRepo',
+      reportType: 'logging',
+    };
+    const expectedReport = {
+      problems: [
+        {
+          level: 30,
+          msg: 'a root problem',
+        },
+      ],
+      repositories: {
+        'myOrg/myRepo': {
+          problems: [
+            {
+              level: 30,
+              msg: 'a repo problem',
+            },
+          ],
+          branches: branchInformation,
+          packageFiles,
+        },
+      },
+    };
+
+    addBranchStats(config, branchInformation);
+    addExtractionStats(config, { branchList: [], branches: [], packageFiles });
+
+    logger.getProblems.mockReturnValue([
+      {
+        repository: 'myOrg/myRepo',
+        level: 30,
+        msg: 'a repo problem',
+      },
+      {
+        level: 30,
+        msg: 'a root problem',
+      },
+    ]);
+    finalizeReport();
+
+    expect(getReport()).toEqual(expectedReport);
   });
 });

@@ -35,12 +35,10 @@ import type {
   LongCommitSha,
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import * as githubHttp from '../../../util/http/github';
 import type { GithubHttpOptions } from '../../../util/http/github';
-import type {
-  HttpResponse,
-  InternalHttpOptions,
-} from '../../../util/http/types';
+import type { HttpResponse } from '../../../util/http/types';
 import { coerceObject } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -60,6 +58,7 @@ import type {
   PlatformParams,
   PlatformPrOptions,
   PlatformResult,
+  ReattemptPlatformAutomergeConfig,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -74,7 +73,7 @@ import {
   repoInfoQuery,
   vulnerabilityAlertsQuery,
 } from './graphql';
-import { GithubIssue as Issue } from './issue';
+import { GithubIssueCache, GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
 import type {
@@ -311,7 +310,7 @@ async function getBranchProtection(
   }
   const res = await githubApi.getJson<BranchProtection>(
     `repos/${config.repository}/branches/${escapeHash(branchName)}/protection`,
-    { repoCache: true },
+    { cacheProvider: repoCacheProvider },
   );
   return res.body;
 }
@@ -322,11 +321,14 @@ export async function getRawFile(
   branchOrTag?: string,
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
+
+  // only use cache for the same org
+  const httpOptions: GithubHttpOptions = {};
   const isSameOrg = repo?.split('/')?.[0] === config.repositoryOwner;
-  const httpOptions: InternalHttpOptions = {
-    // Only cache response if it's from the same org
-    repoCache: isSameOrg,
-  };
+  if (isSameOrg) {
+    httpOptions.cacheProvider = repoCacheProvider;
+  }
+
   let url = `repos/${repo}/contents/${fileName}`;
   if (branchOrTag) {
     url += `?ref=` + branchOrTag;
@@ -495,6 +497,7 @@ export async function initRepo({
       variables: {
         owner: config.repositoryOwner,
         name: config.repositoryName,
+        user: renovateUsername,
       },
     });
 
@@ -555,6 +558,11 @@ export async function initRepo({
     config.autoMergeAllowed = repo.autoMergeAllowed;
     config.hasIssuesEnabled = repo.hasIssuesEnabled;
     config.hasVulnerabilityAlertsEnabled = repo.hasVulnerabilityAlertsEnabled;
+
+    const recentIssues = Issue.array()
+      .catch([])
+      .parse(res?.data?.repository?.issues?.nodes);
+    GithubIssueCache.addIssuesToReconcile(recentIssues);
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (
@@ -589,7 +597,6 @@ export async function initRepo({
     throw err;
   }
   // This shouldn't be necessary, but occasional strange errors happened until it was added
-  config.issueList = null;
   config.prList = null;
 
   if (forkToken) {
@@ -1219,17 +1226,16 @@ export async function getIssueList(): Promise<Issue[]> {
   if (config.hasIssuesEnabled === false) {
     return [];
   }
-  if (!config.issueList) {
+  let issueList = GithubIssueCache.getIssues();
+  if (!issueList) {
     logger.debug('Retrieving issueList');
-    config.issueList = await getIssues();
+    issueList = await getIssues();
+    GithubIssueCache.setIssues(issueList);
   }
-  return config.issueList;
+  return issueList;
 }
 
-export async function getIssue(
-  number: number,
-  useCache = true,
-): Promise<Issue | null> {
+export async function getIssue(number: number): Promise<Issue | null> {
   // istanbul ignore if
   if (config.hasIssuesEnabled === false) {
     return null;
@@ -1238,9 +1244,12 @@ export async function getIssue(
     const repo = config.parentRepo ?? config.repository;
     const { body: issue } = await githubApi.getJson(
       `repos/${repo}/issues/${number}`,
-      { memCache: useCache, repoCache: true },
+      {
+        cacheProvider: repoCacheProvider,
+      },
       Issue,
     );
+    GithubIssueCache.updateIssue(issue);
     return issue;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, number }, 'Error getting issue');
@@ -1262,12 +1271,13 @@ export async function findIssue(title: string): Promise<Issue | null> {
 
 async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
-  await githubApi.patchJson(
-    `repos/${config.parentRepo ?? config.repository}/issues/${issueNumber}`,
-    {
-      body: { state: 'closed' },
-    },
+  const repo = config.parentRepo ?? config.repository;
+  const { body: closedIssue } = await githubApi.patchJson(
+    `repos/${repo}/issues/${issueNumber}`,
+    { body: { state: 'closed' } },
+    Issue,
   );
+  GithubIssueCache.updateIssue(closedIssue);
 }
 
 export async function ensureIssue({
@@ -1314,17 +1324,18 @@ export async function ensureIssue({
           await closeIssue(i.number);
         }
       }
+
       const repo = config.parentRepo ?? config.repository;
-      const {
-        body: { body: issueBody },
-      } = await githubApi.getJson(
+      const { body: serverIssue } = await githubApi.getJson(
         `repos/${repo}/issues/${issue.number}`,
-        { repoCache: true },
+        { cacheProvider: repoCacheProvider },
         Issue,
       );
+      GithubIssueCache.updateIssue(serverIssue);
+
       if (
         issue.title === title &&
-        issueBody === body &&
+        serverIssue.body === body &&
         issue.state === 'open'
       ) {
         logger.debug('Issue is open and up to date - nothing to do');
@@ -1336,19 +1347,18 @@ export async function ensureIssue({
         if (labels) {
           data.labels = labels;
         }
-        await githubApi.patchJson(
-          `repos/${config.parentRepo ?? config.repository}/issues/${
-            issue.number
-          }`,
-          {
-            body: data,
-          },
+        const repo = config.parentRepo ?? config.repository;
+        const { body: updatedIssue } = await githubApi.patchJson(
+          `repos/${repo}/issues/${issue.number}`,
+          { body: data },
+          Issue,
         );
+        GithubIssueCache.updateIssue(updatedIssue);
         logger.debug('Issue updated');
         return 'updated';
       }
     }
-    await githubApi.postJson(
+    const { body: createdIssue } = await githubApi.postJson(
       `repos/${config.parentRepo ?? config.repository}/issues`,
       {
         body: {
@@ -1357,10 +1367,11 @@ export async function ensureIssue({
           labels: labels ?? [],
         },
       },
+      Issue,
     );
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
-    config.issueList = null;
+    GithubIssueCache.updateIssue(createdIssue);
     return 'created';
   } catch (err) /* istanbul ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
@@ -1405,13 +1416,14 @@ async function tryAddMilestone(
     },
     'Adding milestone to PR',
   );
-  const repository = config.parentRepo ?? config.repository;
   try {
-    await githubApi.patchJson(`repos/${repository}/issues/${issueNo}`, {
-      body: {
-        milestone: milestoneNo,
-      },
-    });
+    const repo = config.parentRepo ?? config.repository;
+    const { body: updatedIssue } = await githubApi.patchJson(
+      `repos/${repo}/issues/${issueNo}`,
+      { body: { milestone: milestoneNo } },
+      Issue,
+    );
+    GithubIssueCache.updateIssue(updatedIssue);
   } catch (err) {
     const actualError = err.response?.body || /* istanbul ignore next */ err;
     logger.warn(
@@ -1431,11 +1443,12 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees '${assignees.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo ?? config.repository;
-  await githubApi.postJson(`repos/${repository}/issues/${issueNo}/assignees`, {
-    body: {
-      assignees,
-    },
-  });
+  const { body: updatedIssue } = await githubApi.postJson(
+    `repos/${repository}/issues/${issueNo}/assignees`,
+    { body: { assignees } },
+    Issue,
+  );
+  GithubIssueCache.updateIssue(updatedIssue);
 }
 
 export async function addReviewers(
@@ -1756,6 +1769,8 @@ export async function updatePr({
   number: prNo,
   prTitle: title,
   prBody: rawBody,
+  addLabels: labelsToAdd,
+  removeLabels,
   state,
   targetBranch,
 }: UpdatePrConfig): Promise<void> {
@@ -1778,7 +1793,19 @@ export async function updatePr({
   if (config.forkToken) {
     options.token = config.forkToken;
   }
+
+  // Update PR labels
   try {
+    if (labelsToAdd) {
+      await addLabels(prNo, labelsToAdd);
+    }
+
+    if (removeLabels) {
+      for (const label of removeLabels) {
+        await deleteLabel(prNo, label);
+      }
+    }
+
     const { body: ghPr } = await githubApi.patchJson<GhRestPr>(
       `repos/${config.parentRepo ?? config.repository}/pulls/${prNo}`,
       options,
@@ -1791,6 +1818,22 @@ export async function updatePr({
       throw err;
     }
     logger.warn({ err }, 'Error updating PR');
+  }
+}
+
+export async function reattemptPlatformAutomerge({
+  number,
+  platformOptions,
+}: ReattemptPlatformAutomergeConfig): Promise<void> {
+  try {
+    const result = (await getPr(number))!;
+    const { node_id } = result;
+
+    await tryPrAutomerge(number, node_id, platformOptions);
+
+    logger.debug(`PR platform automerge re-attempted...prNo: ${number}`);
+  } catch (err) {
+    logger.warn({ err }, 'Error re-attempting PR platform automerge');
   }
 }
 

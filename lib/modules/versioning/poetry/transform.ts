@@ -63,12 +63,18 @@ export function poetry2semver(
 
   const parts = [releaseParts.map((num) => num.toString()).join('.')];
   if (pre !== null) {
+    // trim leading zeros from valid numbers
+    pre.number = pre.number.replace(regEx(/^0+(\d+)/), '$1');
     parts.push(`-${pre.letter}.${pre.number}`);
   }
   if (post !== null) {
+    // trim leading zeros from valid numbers
+    post.number = post.number.replace(regEx(/^0+(\d+)/), '$1');
     parts.push(`-${post.letter}.${post.number}`);
   }
   if (dev !== null) {
+    // trim leading zeros from valid numbers
+    dev.number = dev.number.replace(regEx(/^0+(\d+)/), '$1');
     parts.push(`-${dev.letter}.${dev.number}`);
   }
 
