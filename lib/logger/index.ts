@@ -24,7 +24,7 @@ if (is.string(process.env.LOG_LEVEL)) {
 
 const stdout: bunyan.Stream = {
   name: 'stdout',
-  level: validateLogLevel(process.env.LOG_LEVEL),
+  level: validateLogLevel(process.env.LOG_LEVEL, 'info'),
   stream: process.stdout,
 };
 
