@@ -2019,14 +2019,6 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
-    name: 'transitiveRemediation',
-    description: 'Enable remediation of transitive dependencies.',
-    type: 'boolean',
-    default: false,
-    supportedManagers: ['npm'],
-    supportedPlatforms: ['github'],
-  },
-  {
     name: 'vulnerabilityAlerts',
     description:
       'Config to apply when a PR is needed due to a vulnerability in the existing package version.',
@@ -2038,7 +2030,7 @@ const options: RenovateOptions[] = [
       minimumReleaseAge: null,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
-      branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
+      branchTopic: `{{{datasource}}}-{{{depNameSanitized}}}-vulnerability`,
       prCreation: 'immediate',
     },
     mergeable: true,

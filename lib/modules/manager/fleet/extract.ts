@@ -4,6 +4,8 @@ import { regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
+import { getDep } from '../dockerfile/extract';
+import { isOCIRegistry } from '../helmv3/utils';
 import { checkIfStringIsPath } from '../terraform/util';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { FleetFile, type FleetHelmBlock, GitRepo } from './schema';
@@ -50,6 +52,24 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
       skipReason: 'missing-depname',
     };
   }
+
+  if (isOCIRegistry(doc.chart)) {
+    const dockerDep = getDep(
+      `${doc.chart.replace('oci://', '')}:${doc.version}`,
+      false,
+    );
+
+    return {
+      ...dockerDep,
+      depType: 'fleet',
+      depName: dockerDep.depName,
+      packageName: dockerDep.depName,
+      // https://github.com/helm/helm/issues/10312
+      // https://github.com/helm/helm/issues/10678
+      pinDigests: false,
+    };
+  }
+
   dep.depName = doc.chart;
   dep.packageName = doc.chart;
 
