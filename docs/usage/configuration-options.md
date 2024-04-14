@@ -4028,15 +4028,6 @@ The above config will suppress the comment which is added to a PR whenever you c
 It is only recommended to configure this field if you wish to use the `schedules` feature and want to write them in your local timezone.
 Please see the above link for valid timezone names.
 
-## transitiveRemediation
-
-When enabled, Renovate tries to remediate vulnerabilities even if they exist only in transitive dependencies.
-
-Applicable only for GitHub platform (with vulnerability alerts enabled) and `npm` manager.
-When the `lockfileVersion` is higher than `1` in `package-lock.json`, remediations are only possible when changes are made to `package.json`.
-
-This is considered a feature flag with the aim to remove it and default to this behavior once it has been more widely tested.
-
 ## updateInternalDeps
 
 Renovate defaults to skipping any internal package dependencies within monorepos.
