@@ -135,10 +135,10 @@ describe('modules/manager/bundler/extract', () => {
       'Gemfile',
     );
     expect(res?.deps).toMatchObject([
-      { depName: 'internal_test_gem', currentValue: '"~> 1"' },
-      { depName: 'internal_production_gem', currentValue: '"~> 1"' },
-      { depName: 'sfn_my_dep1', currentValue: '"~> 1"' },
-      { depName: 'sfn_my_dep2', currentValue: '"~> 1"' },
+      { depName: 'sfn_my_dep1', currentValue: '~> 1' },
+      { depName: 'sfn_my_dep2', currentValue: '~> 1' },
+      { depName: 'internal_test_gem', currentValue: '~> 1' },
+      { depName: 'internal_production_gem', currentValue: '~> 1' },
     ]);
   });
 });

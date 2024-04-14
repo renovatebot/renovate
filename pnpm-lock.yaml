@@ -314,6 +314,12 @@ importers:
       traverse:
         specifier: 0.6.8
         version: 0.6.8
+      tree-sitter:
+        specifier: 0.20.6
+        version: 0.20.6
+      tree-sitter-ruby:
+        specifier: 0.20.1
+        version: 0.20.1
       tslib:
         specifier: 2.6.2
         version: 2.6.2
@@ -10234,6 +10240,25 @@ packages:
   /traverse@0.6.8:
     resolution: {integrity: sha512-aXJDbk6SnumuaZSANd21XAo15ucCDE38H4fkqiGsc3MhCK+wOlZvLP9cB/TvpHT0mOyWgC4Z8EwRlzqYSUzdsA==}
     engines: {node: '>= 0.4'}
+
+  /tree-sitter-ruby@0.20.1:
+    resolution: {integrity: sha512-zS/bdIhLosi7NkjAXbkSxe1UwBB7r3osM9GseL+A1QLQJJmfZAESEWyvOU6Hg+pHB6w2GRghasvRNzgAiJlpng==}
+    requiresBuild: true
+    dependencies:
+      nan: 2.19.0
+      node-gyp: 10.1.0
+      prebuild-install: 7.1.2
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /tree-sitter@0.20.6:
+    resolution: {integrity: sha512-GxJodajVpfgb3UREzzIbtA1hyRnTxVbWVXrbC6sk4xTMH5ERMBJk9HJNq4c8jOJeUaIOmLcwg+t6mez/PDvGqg==}
+    requiresBuild: true
+    dependencies:
+      nan: 2.19.0
+      prebuild-install: 7.1.2
+    dev: false
 
   /treeify@1.1.0:
     resolution: {integrity: sha512-1m4RA7xVAJrSGrrXGs0L3YTwyvBs2S8PbRHaLZAkFw7JR8oIFwYtysxlBZhYIa7xSyiYJKZ3iGrrk55cGA3i9A==}
