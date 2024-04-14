@@ -173,5 +173,18 @@ describe('workers/global/config/parse/index', () => {
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed).toContainEntries([['dryRun', null]]);
     });
+
+    it('massage onboardingNoDeps when autodiscover is false', async () => {
+      jest.mock(
+        '../../config.js',
+        () => ({ onboardingNoDeps: 'auto', autodiscover: false }),
+        {
+          virtual: true,
+        },
+      );
+      const env: NodeJS.ProcessEnv = {};
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'enabled']]);
+    });
   });
 });
