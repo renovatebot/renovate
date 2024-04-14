@@ -71,6 +71,7 @@ export class MigrationsService {
     'maintainYarnLock',
     'statusCheckVerify',
     'supportPolicy',
+    'transitiveRemediation',
     'yarnCacheFolder',
     'yarnMaintenanceBranchName',
     'yarnMaintenanceCommitMessage',

@@ -598,23 +598,6 @@ describe('modules/manager/npm/post-update/index', () => {
       });
     });
 
-    it('skip transitive remediation', async () => {
-      expect(
-        await getAdditionalFiles(
-          {
-            ...baseConfig,
-            upgrades: [{ isVulnerabilityAlert: true }],
-            transitiveRemediation: true,
-            updateLockFiles: true,
-          },
-          additionalFiles,
-        ),
-      ).toStrictEqual({
-        artifactErrors: [],
-        updatedArtifacts: [],
-      });
-    });
-
     it('fails for npm', async () => {
       spyNpm.mockResolvedValueOnce({ error: true, stderr: 'some-error' });
       expect(
