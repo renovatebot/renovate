@@ -1938,5 +1938,23 @@ describe('config/validation', () => {
         },
       ]);
     });
+
+    it('warns if invalid format used for mergeConfidenceSupportedDatasources', async () => {
+      const config = {
+        experimentalFlags: [
+          'mergeConfidenceSupportedDatasources=[docker,invalid-datasource]',
+        ],
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: `Experimental flag \`mergeConfidenceSupportedDatasources\` should be a list of strings separated by a comma. Found invalid format instead.`,
+        },
+      ]);
+    });
   });
 });
