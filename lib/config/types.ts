@@ -3,7 +3,7 @@ import type { PlatformId } from '../constants';
 import type { LogLevelRemap } from '../logger/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types';
-import type { GitNoVerifyOption, LongCommitSha } from '../util/git/types';
+import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
 
 export type RenovateConfigStage =
@@ -224,7 +224,6 @@ export interface RenovateConfig
   useBaseBranchConfig?: UseBaseBranchConfigType;
   baseBranch?: string;
   defaultBranch?: string;
-  defaultBranchSha?: LongCommitSha;
   branchList?: string[];
   description?: string | string[];
   force?: RenovateConfig;
