@@ -108,7 +108,7 @@ export async function checkOnboardingBranch(
       Object.entries((await extractAllDependencies(mergedConfig)).packageFiles)
         .length === 0
     ) {
-      if (!config?.onboardingNoDeps) {
+      if (config.onboardingNoDeps !== 'enabled') {
         throw new Error(REPOSITORY_NO_PACKAGE_FILES);
       }
     }
