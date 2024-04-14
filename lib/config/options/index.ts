@@ -2987,7 +2987,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: null,
-     globalOnly: true,
+    globalOnly: true,
   },
   {
     name: 'httpCacheTtlDays',
