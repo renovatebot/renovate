@@ -113,6 +113,12 @@ export async function parseConfigs(
     config.forkProcessing = 'enabled';
   }
 
+  // Massage onboardingNoDeps
+  if (!config.autodiscover && config.onboardingNoDeps !== 'disabled') {
+    logger.debug('Enabling onboardingNoDeps while in non-autodiscover mode');
+    config.onboardingNoDeps = 'enabled';
+  }
+
   // Remove log file entries
   delete config.logFile;
   delete config.logFileLevel;

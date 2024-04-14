@@ -273,7 +273,7 @@ To get a onboarding PR from Renovate, change to Interactive mode either at the R
 
 #### Installing Renovate into selected repositories always leads to onboarding PRs
 
-Additionally, if an Organization is installed with "Selected repositories" then the app will change `onboardingNoDeps` to `true` so that an Onboarding PR is created even if no dependencies are detected.
+Additionally, if an Organization is installed with "Selected repositories" then the app will change `onboardingNoDeps` to `"enabled"` so that an Onboarding PR is created even if no dependencies are detected.
 
 ### Fork Processing
 
