@@ -124,6 +124,7 @@ function isArgumentListNode(node: SyntaxNode): node is ArgumentListNode {
 }
 
 function extractStringArgs(node: CallNode): string[] {
+  // istanbul ignore if: should never happen
   if (!node.argumentsNode || !isArgumentListNode(node.argumentsNode)) {
     return [];
   }
@@ -253,6 +254,7 @@ export function parseGemfile(content: string): PackageDependency[] {
         let parent = node.parent;
         while (parent) {
           if (isCallNode(parent)) {
+            // istanbul ignore if: should never happen
             if (!isIdentifierNode(parent.methodNode)) {
               continue;
             }
@@ -281,6 +283,7 @@ export function parseGemfile(content: string): PackageDependency[] {
               }
 
               if (source) {
+                cachedSources.set(parent, source);
                 blockSources.push(source);
               }
             }

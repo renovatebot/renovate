@@ -22,6 +22,7 @@ describe('modules/manager/bundler/parser', () => {
     it('parses simplest gem instruction', () => {
       const src = codeBlock`
         source :rubygems
+        source :foobar
         gem 'foo'
       `;
 
