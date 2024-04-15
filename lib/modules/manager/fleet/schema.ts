@@ -4,12 +4,9 @@ const FleetHelmBlock = z.object({
   chart: z.string().optional(),
   repo: z.string().optional(),
   version: z.string().optional(),
+  releaseName: z.string().optional(),
 });
 export type FleetHelmBlock = z.infer<typeof FleetHelmBlock>;
-
-const FleetFileHelm = FleetHelmBlock.extend({
-  releaseName: z.string(),
-});
 
 /**
   Represent a GitRepo Kubernetes manifest of Fleet.
@@ -32,7 +29,7 @@ export type GitRepo = z.infer<typeof GitRepo>;
  @link https://fleet.rancher.io/gitrepo-structure/#fleetyaml
  */
 export const FleetFile = z.object({
-  helm: FleetFileHelm,
+  helm: FleetHelmBlock,
   targetCustomizations: z
     .array(
       z.object({

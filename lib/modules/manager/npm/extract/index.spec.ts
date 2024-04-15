@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
 import { logger } from '../../../../logger';
@@ -291,6 +292,30 @@ describe('modules/manager/npm/extract/index', () => {
       expect(
         res?.deps.flatMap((dep) => dep.registryUrls),
       ).toBeArrayIncludingOnly(['https://registry.example.com']);
+    });
+
+    it('resolves registry URLs using the package name if set', async () => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === '.yarnrc.yml') {
+          return Promise.resolve(codeBlock`
+            npmScopes:
+              yarnpkg:
+                  npmRegistryServer: https://registry.example.com
+          `);
+        }
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        '{"packageManager": "yarn@4.1.1"}',
+        'package.json',
+        {},
+      );
+      expect(res?.deps).toEqual([
+        expect.objectContaining({
+          depName: 'yarn',
+          registryUrls: ['https://registry.example.com'],
+        }),
+      ]);
     });
 
     it('finds complex yarn workspaces', async () => {
@@ -810,6 +835,87 @@ describe('modules/manager/npm/extract/index', () => {
             "bar2": "1.0.0"
           },
           "emptyObject":{}
+        }
+      }`;
+      const res = await npmExtract.extractPackageFile(
+        content,
+        'package.json',
+        defaultExtractConfig,
+      );
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depType: 'devDependencies',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'devDependency',
+          },
+          {
+            depType: 'overrides',
+            depName: 'node',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+            commitMessageTopic: 'Node.js',
+            prettyDepType: 'overrides',
+          },
+          {
+            depType: 'overrides',
+            depName: '@types/react',
+            currentValue: '18.0.5',
+            datasource: 'npm',
+            prettyDepType: 'overrides',
+          },
+          {
+            depName: 'node',
+            managerData: { parents: ['baz'] },
+            commitMessageTopic: 'Node.js',
+            currentValue: '8.9.2',
+            datasource: 'npm',
+          },
+          {
+            depName: 'foo',
+            managerData: { parents: ['baz', 'bar'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            depName: 'foo2',
+            managerData: { parents: ['foo2'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+          {
+            depName: 'bar2',
+            managerData: { parents: ['foo2'] },
+            currentValue: '1.0.0',
+            datasource: 'npm',
+          },
+        ],
+      });
+    });
+
+    it('extracts dependencies from pnpm.overrides', async () => {
+      const content = `{
+        "devDependencies": {
+          "@types/react": "18.0.5"
+        },
+        "pnpm": {
+          "overrides": {
+            "node": "8.9.2",
+            "@types/react": "18.0.5",
+            "baz": {
+              "node": "8.9.2",
+              "bar": {
+                "foo": "1.0.0"
+              }
+            },
+            "foo2": {
+              ".": "1.0.0",
+              "bar2": "1.0.0"
+            },
+            "emptyObject":{}
+          }
         }
       }`;
       const res = await npmExtract.extractPackageFile(

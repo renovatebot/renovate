@@ -15,7 +15,6 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import { find as _find } from '../../../util/host-rules';
-import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import type { PipfileLockSchema } from './schema';
@@ -23,7 +22,6 @@ import { updateArtifacts } from '.';
 
 const datasource = mocked(_datasource);
 const find = mockedFunction(_find);
-const getPkgReleases = mockedFunction(_getPkgReleases);
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
@@ -71,7 +69,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     };
 
     // python
-    getPkgReleases.mockResolvedValueOnce({
+    datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
         { version: '3.6.5' },
         { version: '3.7.6' },
@@ -82,7 +80,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     });
 
     // pipenv
-    getPkgReleases.mockResolvedValueOnce({
+    datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
         { version: '2013.5.19' },
         { version: '2013.6.11' },

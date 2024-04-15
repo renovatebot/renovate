@@ -267,7 +267,7 @@ function getRepoUrl(
     res.body.http_url_to_repo === null
   ) {
     if (res.body.http_url_to_repo === null) {
-      logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
+      logger.debug('no http_url_to_repo found. Falling back to old behavior.');
     }
     if (process.env.GITLAB_IGNORE_REPO_URL) {
       logger.warn(
@@ -818,6 +818,8 @@ export async function updatePr({
   number: iid,
   prTitle,
   prBody: description,
+  addLabels,
+  removeLabels,
   state,
   platformOptions,
   targetBranch,
@@ -839,6 +841,14 @@ export async function updatePr({
   };
   if (targetBranch) {
     body.target_branch = targetBranch;
+  }
+
+  if (addLabels) {
+    body.add_labels = addLabels;
+  }
+
+  if (removeLabels) {
+    body.remove_labels = removeLabels;
   }
 
   await gitlabApi.putJson(
