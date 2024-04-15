@@ -44,9 +44,7 @@ function minSatisfyingVersion(
 }
 
 function isLessThanRange(version: string, range: string): boolean {
-  return semverCoerced.isLessThanRange
-    ? semverCoerced.isLessThanRange(version, massageVersion(range))
-    : false;
+  return !!semverCoerced.isLessThanRange?.(version, massageVersion(range));
 }
 
 export const api: VersioningApi = {
