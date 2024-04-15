@@ -32,6 +32,7 @@ export class GlobalConfig {
     'gitTimeout',
     'platform',
     'endpoint',
+    'httpCacheTtlDays',
   ];
 
   private static config: RepoGlobalConfig = {};
