@@ -176,7 +176,7 @@ describe('workers/global/config/parse/index', () => {
 
     it('massage onboardingNoDeps when autodiscover is false', async () => {
       jest.mock(
-        '../../config.js',
+        '../../../../../config.js',
         () => ({ onboardingNoDeps: 'auto', autodiscover: false }),
         {
           virtual: true,
@@ -189,7 +189,7 @@ describe('workers/global/config/parse/index', () => {
 
     it('initalizes file logging when logFile is set and env vars LOG_FILE is undefined', async () => {
       jest.mock(
-        '../../config.js',
+        '../../../../../config.js',
         () => ({ logFile: 'somepath', logFileLevel: 'debug' }),
         {
           virtual: true,
@@ -205,7 +205,7 @@ describe('workers/global/config/parse/index', () => {
 
     it('skips initializing file logging when logFile is set but env vars LOG_FILE is defined', async () => {
       jest.mock(
-        '../../config.js',
+        '../../../../../config.js',
         () => ({ logFile: 'somepath', logFileLevel: 'debug' }),
         {
           virtual: true,
