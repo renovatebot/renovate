@@ -279,9 +279,7 @@ export class NugetV3Api {
   ): Promise<string | null> {
     // istanbul ignore if: experimental feature
     if (!process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
-      logger.once.debug(
-        'RENOVATE_X_NUGET_DOWNLOAD_NUPKGS is not set'
-      );
+      logger.once.debug('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS is not set');
       return null;
     }
     const cacheDir = await ensureCacheDir('nuget');
