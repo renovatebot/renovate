@@ -140,7 +140,7 @@ jobs:
     strategy:
       matrix:
         os: ${{ fromJSON(needs.setup.outputs.os-matrix-prefetch) }}
-        node-version: [20]
+        node-version: [18]
 
     runs-on: ${{ matrix.os }}
 
