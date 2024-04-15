@@ -564,7 +564,7 @@ const patternGroups = {
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',
-  testingLibrary: '^@testing-library/',
+  testinglibrary: '^@testing-library/',
   wordpress: '^@wordpress/',
 };
 
