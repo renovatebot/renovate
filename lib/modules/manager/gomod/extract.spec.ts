@@ -121,5 +121,46 @@ replace (
         ],
       });
     });
+
+    it('extracts the toolchain directive', () => {
+      const goMod = `
+module github.com/renovate-tests/gomod
+go 1.21
+toolchain go1.21.7
+replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0`;
+      const res = extractPackageFile(goMod);
+      expect(res).toEqual({
+        deps: [
+          {
+            managerData: {
+              lineNumber: 2,
+            },
+            depName: 'go',
+            depType: 'golang',
+            currentValue: '1.21',
+            datasource: 'golang-version',
+            versioning: 'go-mod-directive',
+          },
+          {
+            managerData: {
+              lineNumber: 3,
+            },
+            depName: 'go',
+            depType: 'toolchain',
+            currentValue: '1.21.7',
+            datasource: 'golang-version',
+          },
+          {
+            managerData: {
+              lineNumber: 4,
+            },
+            depName: 'github.com/pravesht/gocql',
+            depType: 'replace',
+            currentValue: 'v0.0.0',
+            datasource: 'go',
+          },
+        ],
+      });
+    });
   });
 });

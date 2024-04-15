@@ -24,7 +24,7 @@ export async function parseConfigs(
   const defaultConfig = defaultsParser.getConfig();
   const fileConfig = await fileParser.getConfig(env);
   const cliConfig = cliParser.getConfig(argv);
-  const envConfig = envParser.getConfig(env);
+  const envConfig = await envParser.getConfig(env);
 
   let config: AllConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
@@ -111,6 +111,12 @@ export async function parseConfigs(
   if (!config.autodiscover && config.forkProcessing !== 'disabled') {
     logger.debug('Enabling forkProcessing while in non-autodiscover mode');
     config.forkProcessing = 'enabled';
+  }
+
+  // Massage onboardingNoDeps
+  if (!config.autodiscover && config.onboardingNoDeps !== 'disabled') {
+    logger.debug('Enabling onboardingNoDeps while in non-autodiscover mode');
+    config.onboardingNoDeps = 'enabled';
   }
 
   // Remove log file entries

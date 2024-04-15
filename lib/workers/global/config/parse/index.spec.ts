@@ -173,8 +173,21 @@ describe('workers/global/config/parse/index', () => {
       const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed).toContainEntries([['dryRun', null]]);
     });
-
-    it('initalizes file logging when logFile is set and env vars LOG_FILE is undefined', async () => {
+    
+    it('massage onboardingNoDeps when autodiscover is false', async () => {
+      jest.mock(
+        '../../../../../config.js',
+        () => ({ onboardingNoDeps: 'auto', autodiscover: false }),
+        {
+          virtual: true,
+        },
+      );
+      const env: NodeJS.ProcessEnv = {};
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'enabled']]);
+    });
+    
+     it('initalizes file logging when logFile is set and env vars LOG_FILE is undefined', async () => {
       jest.mock(
         '../../../../../config.js',
         () => ({ logFile: 'somepath', logFileLevel: 'debug' }),

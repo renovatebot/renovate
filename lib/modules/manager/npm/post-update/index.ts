@@ -133,7 +133,7 @@ export async function writeExistingFiles(
     const npmrcFilename = upath.join(basedir, '.npmrc');
     if (is.string(npmrc)) {
       try {
-        await writeLocalFile(npmrcFilename, `${npmrc}\n`);
+        await writeLocalFile(npmrcFilename, npmrc.replace(/\n?$/, '\n'));
       } catch (err) /* istanbul ignore next */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
@@ -439,16 +439,6 @@ export async function getAdditionalFiles(
   }
   if (!config.updateLockFiles) {
     logger.debug('Skipping lock file generation');
-    return { artifactErrors, updatedArtifacts };
-  }
-  if (
-    !config.updatedPackageFiles?.length &&
-    config.transitiveRemediation &&
-    config.upgrades?.every(
-      (upgrade) => upgrade.isRemediation ?? upgrade.isVulnerabilityAlert,
-    )
-  ) {
-    logger.debug('Skipping lock file generation for remediations');
     return { artifactErrors, updatedArtifacts };
   }
   if (
