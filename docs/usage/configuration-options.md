@@ -3754,8 +3754,7 @@ If you want to enforce grouped package updates, you need to set this option to `
 ## separateMinorPatch
 
 By default, Renovate groups `patch` (`1.0.x`) and `minor` (`1.x.0`) releases into a single PR.
-
-For example: you are running version `1.0.0` of a package, which released two updates:
+For example: you are running version `1.0.0` of a package, which has two updates:
 
 - `1.0.1`, a `patch` type update
 - `1.1.0`, a `minor` type update
