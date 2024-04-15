@@ -31,7 +31,7 @@
       "request": "launch",
       "name": "Jest Current File",
       "runtimeExecutable": "pnpm",
-      "program": "jest",
+      "program": "jest:vscode",
       "args": [
         "--runInBand",
         "--collectCoverage=false",
@@ -52,7 +52,7 @@
       "request": "launch",
       "name": "Jest All",
       "runtimeExecutable": "pnpm",
-      "program": "jest",
+      "program": "jest:vscode",
       "args": [
         "--runInBand",
         "--collectCoverage=false",
@@ -71,7 +71,7 @@
       "request": "launch",
       "name": "Jest Current Folder",
       "runtimeExecutable": "pnpm",
-      "program": "jest",
+      "program": "jest:vscode",
       "args": [
         "--runInBand",
         "--collectCoverage=false",
@@ -84,29 +84,14 @@
     },
     {
       "type": "node",
-      "name": "vscode-jest-tests.v2",
+      "name": "vscode-jest-tests",
       "request": "launch",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "openOnSessionStart",
+      "internalConsoleOptions": "neverOpen",
       "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["--experimental-vm-modules"],
-      "program": "node_modules/jest/bin/jest.js",
-      "args": [
-        "--runInBand",
-        "--watchAll=false",
-        "--testTimeout=100000000",
-        "--coverage=false",
-        "--runTestsByPath",
-        "${jest.testFile}",
-        "--testNamePattern",
-        "${jest.testNamePattern}"
-      ],
-      "env": {
-        "NODE_ENV": "test",
-        "LOG_LEVEL": "trace",
-        "GIT_ALLOW_PROTOCOL": "file"
-      }
+      "runtimeExecutable": "pnpm",
+      "program": "jest:vscode",
+      "args": ["--runInBand", "--watchAll=false", "--testTimeout=100000000"]
     }
   ]
 }
