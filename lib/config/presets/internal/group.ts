@@ -469,6 +469,7 @@ const staticGroups = {
       'group:springWebflow',
       'group:springWs',
       'group:symfony',
+      'group:testingLibrary',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -758,6 +759,15 @@ const staticGroups = {
       {
         extends: 'packages:test',
         groupName: 'test packages',
+      },
+    ],
+  },
+  testingLibrary: {
+    description: 'Group Testing Library packages together.',
+    packageRules: [
+      {
+        groupName: 'Testing Library packages',
+        matchPackagePatterns: ['@testing-library/'],
       },
     ],
   },
