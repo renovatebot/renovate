@@ -64,7 +64,6 @@ export const exposedConfigOptions = [
   'commitMessagePrefix',
   'commitMessageSuffix',
   'commitMessageTopic',
-  'extends',
   'gitAuthor',
   'group',
   'groupName',
