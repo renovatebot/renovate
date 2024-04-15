@@ -16,6 +16,8 @@ describe('logger/utils', () => {
     expect(validateLogLevel('debug', 'info')).toBe('debug');
     expect(validateLogLevel('trace', 'info')).toBe('trace');
     expect(validateLogLevel('info', 'info')).toBe('info');
+    expect(validateLogLevel('error', 'info')).toBe('error');
+    expect(validateLogLevel('fatal', 'info')).toBe('fatal');
   });
 
   it.each`

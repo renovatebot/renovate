@@ -28,7 +28,7 @@ const stdout: bunyan.Stream = {
   stream: process.stdout,
 };
 
-// istanbul ignore else: not testable
+// istanbul ignore if: not testable
 if (process.env.LOG_FORMAT !== 'json') {
   // TODO: typings (#9615)
   const prettyStdOut = new RenovateStream() as any;
