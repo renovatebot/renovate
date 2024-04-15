@@ -557,6 +557,7 @@ const patternGroups = {
   forge: '^@forge/',
   fullcalendar: '^@fullcalendar/',
   hotchocolate: '^HotChocolate\\.',
+  testingLibrary: '^@testing-library/',
   'prometheus-simpleclient': '^io.prometheus:simpleclient',
   // Can't specify the russh repo (https://github.com/warp-tech/russh) in repoGroups because parts
   // of it (e.g. russh-config) are released separately.
