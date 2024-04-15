@@ -495,6 +495,7 @@ const repoGroups = {
   tiptap: 'https://github.com/ueberdosis/tiptap',
   'tokio-prost': 'https://github.com/tokio-rs/prost',
   'tokio-tracing': 'https://github.com/tokio-rs/tracing',
+  tonic: 'https://github.com/hyperium/tonic',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
   'trust-dns': 'https://github.com/bluejekyll/trust-dns',
@@ -563,6 +564,7 @@ const patternGroups = {
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',
+  'testing-library': '^@testing-library/',
   wordpress: '^@wordpress/',
 };
 
