@@ -725,7 +725,7 @@ export async function validateConfig(
                     if (
                       !(
                         is.string(subValue) ||
-                        (is.array(subValue) && subValue.every(is.string))
+                        (is.array(subValue, is.string))
                       )
                     ) {
                       errors.push({
