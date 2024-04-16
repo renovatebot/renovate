@@ -9,6 +9,10 @@ describe('util/cache/repository/http-cache', () => {
     GlobalConfig.reset();
   });
 
+  it('should not throw if cache is missing', () => {
+    expect(() => cleanupHttpCache(undefined)).not.toThrow();
+  });
+
   it('should not throw if cache is not a valid HttpCache', () => {
     expect(() => cleanupHttpCache('not a valid cache')).not.toThrow();
   });
