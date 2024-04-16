@@ -6,7 +6,7 @@ import { HttpCacheSchema } from '../../http/cache/schema';
 
 export function cleanupHttpCache(cacheData: unknown): void {
   if (!is.plainObject(cacheData) || !is.plainObject(cacheData['httpCache'])) {
-    logger.warn('cleanupHttpCache: invalid cache data');
+    logger.debug('cleanupHttpCache: invalid cache data');
     return;
   }
   const httpCache = cacheData['httpCache'];
