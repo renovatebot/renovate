@@ -1,5 +1,4 @@
-import semver from 'semver';
-import semverVersioning from '../semver';
+import is from '@sindresorhus/is';
 import { api as semverCoerced } from '../semver-coerced';
 import type { VersioningApi } from '../types';
 
@@ -14,15 +13,18 @@ export const supportsRanges = false;
  * If the input is already a range, it returns the input.
  */
 function massageVersion(input: string): string {
-  let res = input;
-  const major = semverCoerced.getMajor(res);
-  if (semverVersioning.isValid(res) && major !== null) {
-    const nextMajor = semver.coerce(major + 1);
-    const nextMajorVersion = nextMajor ? nextMajor.version : `${major + 1}.0.0`;
-    res = `>=${input} <${nextMajorVersion}`;
+  // return the input if it is a range
+  if (!semverCoerced.isSingleVersion(input)) {
+    return input;
   }
 
-  return res;
+  const major = semverCoerced.getMajor(input);
+  // should not happen since we have confirmed that version is valid
+  if (is.null_(major)) {
+    return input;
+  }
+
+  return `>=${input} <${major + 1}.0.0`;
 }
 
 function matches(version: string, range: string): boolean {
