@@ -5,9 +5,6 @@ import { logger } from '../../../logger';
 import { HttpCacheSchema } from '../../http/cache/schema';
 
 export function cleanupHttpCache(cacheData: unknown): void {
-  if (!cacheData) {
-    return;
-  }
   if (!is.plainObject(cacheData) || !is.plainObject(cacheData['httpCache'])) {
     logger.warn('cleanupHttpCache: invalid cache data');
     return;
