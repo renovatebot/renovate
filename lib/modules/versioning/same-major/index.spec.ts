@@ -2,7 +2,7 @@ import sameMajor from '.';
 
 describe('modules/versioning/same-major/index', () => {
   describe('.matches(version, range)', () => {
-    it('should return true when version is has same major', () => {
+    it('should return true when version has same major', () => {
       expect(sameMajor.matches('1.0.1', '1.0.0')).toBeTrue();
     });
 
@@ -10,8 +10,10 @@ describe('modules/versioning/same-major/index', () => {
       expect(sameMajor.matches('2.0.1', '1.0.0')).toBeFalse();
     });
 
-    it('should return false when version is lesser than the current version', () => {
+    it('should return false when version is out of range', () => {
       expect(sameMajor.matches('1.2.3', '1.2.4')).toBeFalse();
+      expect(sameMajor.matches('2.0.0', '1.2.4')).toBeFalse();
+      expect(sameMajor.matches('3.2.4', '1.2.4')).toBeFalse();
     });
   });
 
