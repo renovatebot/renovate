@@ -4,6 +4,7 @@ describe('modules/versioning/same-major/index', () => {
   describe('.matches(version, range)', () => {
     it('should return true when version has same major', () => {
       expect(sameMajor.matches('1.0.1', '1.0.0')).toBeTrue();
+      expect(sameMajor.matches('1.0.1', '^1.0.0')).toBeTrue(); // coverage for when ranges are passed to the function
     });
 
     it('should return false when version has different major', () => {
@@ -14,6 +15,10 @@ describe('modules/versioning/same-major/index', () => {
       expect(sameMajor.matches('1.2.3', '1.2.4')).toBeFalse();
       expect(sameMajor.matches('2.0.0', '1.2.4')).toBeFalse();
       expect(sameMajor.matches('3.2.4', '1.2.4')).toBeFalse();
+    });
+
+    it('should return false when version is invalid', () => {
+      expect(sameMajor.matches('1.0.0', 'xxx')).toBeFalse();
     });
   });
 

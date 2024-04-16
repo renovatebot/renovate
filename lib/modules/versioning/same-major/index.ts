@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { api as semverCoerced } from '../semver-coerced';
 import type { VersioningApi } from '../types';
 
@@ -18,12 +17,8 @@ function massageVersion(input: string): string {
     return input;
   }
 
-  const major = semverCoerced.getMajor(input);
-  // should not happen since we have confirmed that version is valid
-  if (is.null_(major)) {
-    return input;
-  }
-
+  // we are sure to get a majot because of the isSingleVersion check
+  const major = semverCoerced.getMajor(input)!;
   return `>=${input} <${major + 1}.0.0`;
 }
 
