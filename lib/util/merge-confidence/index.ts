@@ -47,7 +47,7 @@ export function parseSupportedDatasourceString(): string[] | undefined {
     return undefined;
   }
 
-  if (!regEx(/^([a-zA-Z0-9-],?)+[^,]$/).test(supportedDatasourceString)) {
+  if (!regEx(/^([a-z0-9-],?)+[^,]$/, 'i').test(supportedDatasourceString)) {
     logger.warn(
       { mergeConfidenceSupportedDatasources: supportedDatasourceString },
       `Expected a list of strings separated by comma. But got invalid format instead`,

@@ -1096,7 +1096,7 @@ function validateExperimentalFlag(
         }
         break;
       case 'string':
-        if (!regEx(/^[a-zA-Z]+$/).test(flagValue)) {
+        if (!regEx(/^[a-z]+$/, 'i').test(flagValue)) {
           warnings.push({
             topic: 'Configuration Error',
             message: `Experimental flag \`${flagName}\` should be of type string. Found invalid type instead.`,
@@ -1114,7 +1114,7 @@ function validateExperimentalFlag(
         }
         break;
       case 'multiple-strings':
-        if (!regEx(/^([a-zA-Z0-9-],?)+[^,]$/).test(flagValue)) {
+        if (!regEx(/^([a-z0-9-],?)+[^,]$/, 'i').test(flagValue)) {
           warnings.push({
             topic: 'Configuration Error',
             message: `Experimental flag \`${flagName}\` should be a list of strings separated by a comma. Found invalid format instead.`,
