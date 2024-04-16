@@ -2195,6 +2195,7 @@ const options: RenovateOptions[] = [
     description: 'Customize sections in the Dependency Dashboard issue.',
     type: 'object',
     default: {},
+    freeChoice: true,
     additionalProperties: {
       type: 'string',
     },
