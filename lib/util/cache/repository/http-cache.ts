@@ -5,7 +5,7 @@ import { HttpCacheSchema } from '../../http/cache/schema';
 import type { RepoCacheData } from './types';
 
 export function cleanupHttpCache(cacheData: RepoCacheData): void {
-  if (!cacheData['httpCache']) {
+  if (!cacheData.httpCache) {
     logger.trace('cleanupHttpCache: no http cache to clean up');
     return;
   }
