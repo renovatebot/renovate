@@ -18,7 +18,7 @@ const http = new Http(hostType);
 let token: string | undefined;
 let apiBaseUrl: string | undefined;
 let supportedDatasources: string[] = [];
-const datasourceList = getDatasourceList();
+const datasourceList = new Set(getDatasourceList());
 
 export const confidenceLevels: Record<MergeConfidence, number> = {
   low: -1,
@@ -50,23 +50,14 @@ export function parseSupportedDatasourceString(): string[] | undefined {
   if (!regEx(/^([a-zA-Z0-9-],?)+[^,]$/).test(supportedDatasourceString)) {
     logger.warn(
       { mergeConfidenceSupportedDatasources: supportedDatasourceString },
-      `Expected a list of strings separated by comma. But got nvalid format instead`,
+      `Expected a list of strings separated by comma. But got invalid format instead`,
     );
     return undefined;
   }
 
-  let parsedDatasourceList: string[] = [];
-  try {
-    parsedDatasourceList = supportedDatasourceString.split(',');
-  } catch (err) {
-    logger.error(
-      { supportedDatasourceString, err },
-      'Failed to parse supported datasources list; Invalid format',
-    );
-  }
-
+  const parsedDatasourceList = supportedDatasourceString.split(',');
   for (const datasource of parsedDatasourceList) {
-    if (!datasourceList.includes(datasource)) {
+    if (!datasourceList.has(datasource)) {
       logger.warn(
         `Merge datasources should only consist allowed datasources. Found invalid datasource \`{datasource}\` instead.`,
       );

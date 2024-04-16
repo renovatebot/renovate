@@ -1,10 +1,13 @@
-import { getDatasourceList } from '../modules/datasource';
 import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
-const datasourceList = getDatasourceList();
+jest.mock('../modules/datasource', () => {
+  return {
+    getDatasourceList: jest.fn(() => ['docker', 'deno']),
+  };
+});
 
 describe('config/validation', () => {
   describe('getParentName()', () => {
@@ -1934,7 +1937,7 @@ describe('config/validation', () => {
       expect(warnings).toEqual([
         {
           topic: 'Configuration Error',
-          message: `Invalid value \`invalid-datasource\` found for experimental flag \`mergeConfidenceSupportedDatasources\`.The allowed values are ${datasourceList.join(', ')}.`,
+          message: `Invalid value \`invalid-datasource\` found for experimental flag \`mergeConfidenceSupportedDatasources\`.The allowed values are docker, deno.`,
         },
       ]);
     });
