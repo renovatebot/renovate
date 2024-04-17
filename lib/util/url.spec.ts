@@ -3,6 +3,7 @@ import {
   ensurePathPrefix,
   ensureTrailingSlash,
   getQueryString,
+  isHttpUrl,
   joinUrlParts,
   parseLinkHeader,
   parseUrl,
@@ -10,7 +11,6 @@ import {
   resolveBaseUrl,
   trimSlashes,
   trimTrailingSlash,
-  validateUrl,
 } from './url';
 
 describe('util/url', () => {
@@ -97,15 +97,22 @@ describe('util/url', () => {
     expect(getQueryString({ a: 1, b: [1, 2] })).toBe('a=1&b=1&b=2');
   });
 
-  it('validates URLs', () => {
-    expect(validateUrl(undefined)).toBeFalse();
-    expect(validateUrl('')).toBeFalse();
-    expect(validateUrl(null)).toBeFalse();
-    expect(validateUrl('foo')).toBeFalse();
-    expect(validateUrl('ssh://github.com')).toBeFalse();
-    expect(validateUrl('http://github.com')).toBeTrue();
-    expect(validateUrl('https://github.com')).toBeTrue();
-    expect(validateUrl('https://github.com', false)).toBeTrue();
+  it('validates http-based URLs', () => {
+    expect(isHttpUrl(undefined)).toBeFalse();
+    expect(isHttpUrl('')).toBeFalse();
+    expect(isHttpUrl(null)).toBeFalse();
+    expect(isHttpUrl('foo')).toBeFalse();
+    expect(isHttpUrl('ssh://github.com')).toBeFalse();
+    expect(isHttpUrl('http://github.com')).toBeTrue();
+    expect(isHttpUrl('https://github.com')).toBeTrue();
+
+    function bla(x: string | null) {
+      if (isHttpUrl(x)) {
+        x;
+      } else {
+        x;
+      }
+    }
   });
 
   it('parses URL', () => {
