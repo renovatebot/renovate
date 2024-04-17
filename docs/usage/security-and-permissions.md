@@ -71,7 +71,7 @@ We don't know of any public registries which reverse lookup IP addresses to asso
 
 Before you start self-hosting Renovate you must understand the security implications associated with monitoring and updating repositories.
 The process that Renovate uses to update dependencies runs under the same user context as the Renovate process itself.
-This means it (what does it refer to here???) has the same level of access to information and resources as the user context!
+This also means the process has the same level of access to information and resources as the user context!
 
 ##### Trusting Repository Developers
 
