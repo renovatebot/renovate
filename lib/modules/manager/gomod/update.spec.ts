@@ -36,7 +36,7 @@ describe('modules/manager/gomod/update', () => {
       const upgrade = {
         depName: 'go',
         managerData: { lineNumber: 134 },
-        newValue: '1.122.2',
+        newValue: '1.22.2',
         depType: 'toolchain',
       };
       const res = updateDependency({ fileContent: gomod3, upgrade });
