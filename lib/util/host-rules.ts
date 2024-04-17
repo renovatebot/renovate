@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import merge from 'deepmerge';
 import { logger } from '../logger';
-import type { HostRule, HostRuleSearchResult } from '../types';
+import type { CombinedHostRule, HostRule } from '../types';
 import { clone } from './clone';
 import * as sanitize from './sanitize';
 import { toBase64 } from './string';
@@ -123,7 +123,7 @@ function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
   return rule1.matchHost.length - rule2.matchHost.length;
 }
 
-export function find(search: HostRuleSearch): HostRuleSearchResult {
+export function find(search: HostRuleSearch): CombinedHostRule {
   if (!(!!search.hostType || search.url)) {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
