@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
 import { api as npm } from '../npm';
@@ -30,7 +31,7 @@ function getNewValue({
     }
     return shorten(newVersion);
   }
-  if (rangeStrategy === 'replace' && !matches(currentValue, newVersion)) {
+  if (rangeStrategy === 'replace' && !matches(newVersion, currentValue)) {
     if (npm.matches(newVersion, '>=1.20.0')) {
       return newVersion;
     }
