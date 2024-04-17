@@ -19,7 +19,7 @@ export async function migrateAndValidateConfig(
   const massagedConfig = massageConfig(migratedConfig);
   // log only if it's changed
   if (!dequal(migratedConfig, massagedConfig)) {
-    logger.debug({ config: massagedConfig }, 'Post-massage config');
+    logger.trace({ config: massagedConfig }, 'Post-massage config');
   }
 
   const { warnings, errors } = await validateConfig('global', massagedConfig);
