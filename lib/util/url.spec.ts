@@ -105,14 +105,6 @@ describe('util/url', () => {
     expect(isHttpUrl('ssh://github.com')).toBeFalse();
     expect(isHttpUrl('http://github.com')).toBeTrue();
     expect(isHttpUrl('https://github.com')).toBeTrue();
-
-    function bla(x: string | null) {
-      if (isHttpUrl(x)) {
-        x;
-      } else {
-        x;
-      }
-    }
   });
 
   it('parses URL', () => {
