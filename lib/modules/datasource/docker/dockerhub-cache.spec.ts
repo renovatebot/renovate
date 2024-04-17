@@ -1,0 +1,176 @@
+import { mocked } from '../../../../test/util';
+import * as _packageCache from '../../../util/cache/package';
+import { DockerHubCache, DockerHubCacheData } from './dockerhub-cache';
+import type { DockerHubTag } from './schema';
+
+jest.mock('../../../util/cache/package');
+const packageCache = mocked(_packageCache);
+
+function oldCacheData(): DockerHubCacheData {
+  return {
+    items: {
+      1: {
+        id: 1,
+        last_updated: '2022-01-01',
+        name: '1',
+        tag_last_pushed: '2022-01-01',
+        digest: 'sha256:111',
+      },
+      2: {
+        id: 2,
+        last_updated: '2022-01-02',
+        name: '2',
+        tag_last_pushed: '2022-01-02',
+        digest: 'sha256:222',
+      },
+      3: {
+        id: 3,
+        last_updated: '2022-01-03',
+        name: '3',
+        tag_last_pushed: '2022-01-03',
+        digest: 'sha256:333',
+      },
+    },
+    updatedAt: '2022-01-01',
+  };
+}
+
+function newItem(): DockerHubTag {
+  return {
+    id: 4,
+    last_updated: '2022-01-04',
+    name: '4',
+    tag_last_pushed: '2022-01-04',
+    digest: 'sha256:444',
+  };
+}
+
+function newCacheData(): DockerHubCacheData {
+  const { items } = oldCacheData();
+  const item = newItem();
+  return {
+    items: {
+      ...items,
+      [item.id]: item,
+    },
+    updatedAt: '2022-01-04',
+  };
+}
+
+describe('modules/datasource/docker/dockerhub-cache', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  const dockerRepository = 'foo/bar';
+
+  it('initializes empty cache', async () => {
+    packageCache.get.mockResolvedValue(undefined);
+
+    const res = await DockerHubCache.init(dockerRepository);
+
+    expect(res).toEqual({
+      dockerRepository,
+      cache: {
+        items: {},
+        updatedAt: null,
+      },
+      isChanged: false,
+    });
+  });
+
+  it('initializes cache with data', async () => {
+    const oldCache = oldCacheData();
+    packageCache.get.mockResolvedValue(oldCache);
+
+    const res = await DockerHubCache.init(dockerRepository);
+
+    expect(res).toEqual({
+      dockerRepository,
+      cache: oldCache,
+      isChanged: false,
+    });
+  });
+
+  it('reconciles new items', async () => {
+    const oldCache = oldCacheData();
+    const newCache = newCacheData();
+
+    packageCache.get.mockResolvedValue(oldCache);
+    const cache = await DockerHubCache.init(dockerRepository);
+    const newItems: DockerHubTag[] = [newItem()];
+
+    const needNextPage = cache.reconcile(newItems);
+
+    expect(needNextPage).toBe(true);
+    expect(cache).toEqual({
+      cache: newCache,
+      dockerRepository: 'foo/bar',
+      isChanged: true,
+    });
+
+    const res = cache.getItems();
+    expect(res).toEqual(Object.values(newCache.items));
+
+    await cache.save();
+    expect(packageCache.set).toHaveBeenCalledWith(
+      'datasource-docker-cache',
+      'foo/bar',
+      newCache,
+      3 * 60 * 24 * 30,
+    );
+  });
+
+  it('reconciles existing items', async () => {
+    const oldCache = oldCacheData();
+
+    packageCache.get.mockResolvedValue(oldCache);
+    const cache = await DockerHubCache.init(dockerRepository);
+    const items: DockerHubTag[] = Object.values(oldCache.items);
+
+    const needNextPage = cache.reconcile(items);
+
+    expect(needNextPage).toBe(false);
+    expect(cache).toEqual({
+      cache: oldCache,
+      dockerRepository: 'foo/bar',
+      isChanged: false,
+    });
+
+    const res = cache.getItems();
+    expect(res).toEqual(items);
+
+    await cache.save();
+    expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
+  it('reconciles from empty cache', async () => {
+    const item = newItem();
+    const expectedCache = {
+      items: {
+        [item.id]: item,
+      },
+      updatedAt: item.last_updated,
+    };
+    const cache = await DockerHubCache.init(dockerRepository);
+
+    const needNextPage = cache.reconcile([item]);
+    expect(needNextPage).toBe(true);
+    expect(cache).toEqual({
+      cache: expectedCache,
+      dockerRepository: 'foo/bar',
+      isChanged: true,
+    });
+
+    const res = cache.getItems();
+    expect(res).toEqual([item]);
+
+    await cache.save();
+    expect(packageCache.set).toHaveBeenCalledWith(
+      'datasource-docker-cache',
+      'foo/bar',
+      expectedCache,
+      3 * 60 * 24 * 30,
+    );
+  });
+});
