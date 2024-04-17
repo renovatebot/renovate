@@ -6,7 +6,7 @@ import type { CombinedHostRule, HostRule } from '../types';
 import { clone } from './clone';
 import * as sanitize from './sanitize';
 import { toBase64 } from './string';
-import { parseUrl, validateUrl } from './url';
+import { isHttpUrl, parseUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
@@ -108,7 +108,7 @@ function isOnlyMatchHost(
 }
 
 function matchesHost(url: string, matchHost: string): boolean {
-  if (validateUrl(url) && validateUrl(matchHost)) {
+  if (isHttpUrl(url) && isHttpUrl(matchHost)) {
     return url.startsWith(matchHost);
   }
 
