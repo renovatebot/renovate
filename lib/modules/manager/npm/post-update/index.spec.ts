@@ -217,7 +217,6 @@ describe('modules/manager/npm/post-update/index', () => {
         ['package-lock.json'],
         ['yarn.lock'],
         ['yarn.lock'],
-        ['packages/pnpm/pnpm-lock.yaml'],
       ]);
     });
 

@@ -226,13 +226,6 @@ export async function writeExistingFiles(
     if (yarnLock && config.reuseLockFiles === false) {
       await deleteLocalFile(yarnLock);
     }
-    // istanbul ignore next
-    if (
-      packageFile.managerData.pnpmShrinkwrap &&
-      config.reuseLockFiles === false
-    ) {
-      await deleteLocalFile(packageFile.managerData.pnpmShrinkwrap);
-    }
   }
 }
 
