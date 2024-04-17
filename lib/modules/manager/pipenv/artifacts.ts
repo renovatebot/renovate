@@ -13,6 +13,7 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { find } from '../../../util/host-rules';
+import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import { PypiDatasource } from '../../datasource/pypi';
 import type {
@@ -132,9 +133,12 @@ async function findPipfileSourceUrlsWithCredentials(
 ): Promise<URL[]> {
   const pipfile = await extractPackageFile(pipfileContent, pipfileName);
 
-  return pipfile?.registryUrls
-    .filter(is.urlInstance)
-    .filter((url) => is.nonEmptyStringAndNotWhitespace(url.username)) ?? [];
+  return (
+    pipfile?.registryUrls
+      ?.map(parseUrl)
+      .filter(is.urlInstance)
+      .filter((url) => is.nonEmptyStringAndNotWhitespace(url.username)) ?? []
+  );
 }
 
 /**
@@ -183,7 +187,7 @@ async function addCredentialsForSourceUrls(
     pipfileName,
   );
   for (const parsedSourceUrl of sourceUrls) {
-    logger.trace(`Trying to add credentials for ${parsedSourceUrl}`);
+    logger.trace(`Trying to add credentials for ${parsedSourceUrl.toString()}`);
     const matchingHostRule = getMatchingHostRule(parsedSourceUrl.toString());
     if (matchingHostRule) {
       const usernameVariableName = extractEnvironmentVariableName(
