@@ -72,7 +72,6 @@ export abstract class RepoCacheBase implements RepoCache {
 
   async save(): Promise<void> {
     cleanupHttpCache(this.data);
-
     const jsonStr = safeStringify(this.data);
     const hashedJsonStr = hash(jsonStr);
     if (hashedJsonStr === this.oldHash) {
