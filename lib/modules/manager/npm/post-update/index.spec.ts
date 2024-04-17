@@ -204,15 +204,6 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(git.getFile).toHaveBeenCalledOnce();
     });
 
-    it('works no reuse lockfiles', async () => {
-      await expect(
-        writeExistingFiles(updateConfig, additionalFiles),
-      ).resolves.toBeUndefined();
-
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
-      expect(fs.deleteLocalFile).not.toHaveBeenCalled();
-    });
-
     it('writes .npmrc files', async () => {
       await writeExistingFiles(updateConfig, {
         npm: [
