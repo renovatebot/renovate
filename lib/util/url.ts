@@ -88,7 +88,7 @@ export function getQueryString(params: Record<string, any>): string {
 export function validateUrl(
   url: string | null | undefined,
   httpOnly = true,
-): boolean {
+): url is string {
   if (!is.nonEmptyString(url)) {
     return false;
   }
