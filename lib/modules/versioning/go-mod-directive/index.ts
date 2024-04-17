@@ -1,4 +1,3 @@
-import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
 import { api as npm } from '../npm';
