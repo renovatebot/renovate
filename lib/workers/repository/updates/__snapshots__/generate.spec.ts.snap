@@ -25,7 +25,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
   "prettyDepType": "dependency",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
-  "reuseLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -108,7 +107,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles @typ
   "prettyDepType": "dependency",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
-  "reuseLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -186,7 +184,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   "prettyDepType": "dependency",
   "recreateClosed": true,
   "releaseTimestamp": undefined,
-  "reuseLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",
@@ -231,7 +228,6 @@ exports[`workers/repository/updates/generate generateBranchConfig() handles lock
   "prettyNewVersion": "v1.0.1",
   "recreateClosed": false,
   "releaseTimestamp": undefined,
-  "reuseLockFiles": true,
   "upgrades": [
     {
       "branchName": "some-branch",

@@ -111,7 +111,7 @@ export async function generateLockFile(
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
-          'Error removing yarn.lock for lock file maintenance',
+          'Error removing `pnpm-lock.yaml` for lock file maintenance',
         );
       }
     }

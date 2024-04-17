@@ -141,10 +141,7 @@ export async function writeExistingFiles(
     const npmLock = packageFile.managerData.npmLock;
     if (npmLock) {
       const npmLockPath = npmLock;
-      if (
-        process.env.RENOVATE_REUSE_PACKAGE_LOCK === 'false' ||
-        config.reuseLockFiles === false
-      ) {
+      if (process.env.RENOVATE_REUSE_PACKAGE_LOCK === 'false') {
         logger.debug(`Ensuring ${npmLock} is removed`);
         await deleteLocalFile(npmLockPath);
       } else {
@@ -221,10 +218,6 @@ export async function writeExistingFiles(
           await writeLocalFile(npmLockPath, existingNpmLock);
         }
       }
-    }
-    const { yarnLock } = packageFile.managerData;
-    if (yarnLock && config.reuseLockFiles === false) {
-      await deleteLocalFile(yarnLock);
     }
   }
 }
