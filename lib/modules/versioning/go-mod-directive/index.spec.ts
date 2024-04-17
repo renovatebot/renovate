@@ -76,6 +76,7 @@ describe('modules/versioning/go-mod-directive/index', () => {
     ${'1.16'}    | ${'bump'}     | ${'1.16.4'}    | ${'1.21.3'} | ${'1.21.3'}
     ${'1.21.2'}  | ${'bump'}     | ${'1.21.2'}    | ${'1.21.3'} | ${'1.21.3'}
     ${'1.21.2'}  | ${'replace'}  | ${'1.21.2'}    | ${'1.22.2'} | ${'1.21.2'}
+    ${'1.21.2'}  | ${'replace'}  | ${'1.21.2'}    | ${'2.0.0'}  | ${'2.0.0'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
