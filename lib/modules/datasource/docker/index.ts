@@ -928,7 +928,7 @@ export class DockerDatasource extends Datasource {
     key: (dockerRepository: string) => `${dockerRepository}`,
   })
   async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
-    let url: string = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
+    let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
 
     const cache = await DockerHubCache.init(dockerRepository);
     let needNextPage: boolean = true;
