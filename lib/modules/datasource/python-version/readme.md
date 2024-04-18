@@ -4,7 +4,6 @@ It also fetches deprecated versions from [Endoflife Date Datasource](/modules/da
 
 Because Renovate depends on [containerbase/python-prebuild](https://github.com/containerbase/python-prebuild/releases) it will also fetch Github API for releases there.
 
-
 ## Example custom manager
 
 Below is a [custom regex manager](/modules/manager/regex/) for updating Python version in a Dockerfile. Python version in some cases omits dot separating major and minor number, ex.: `3.11` becomes `311`. So this example handles this case.
