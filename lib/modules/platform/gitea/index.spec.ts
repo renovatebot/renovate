@@ -1616,6 +1616,31 @@ describe('modules/platform/gitea/index', () => {
       });
     });
 
+    it('should use platform automerge on forgejo v7', async () => {
+      memCache.set('gitea-pr-cache-synced', true);
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .post('/repos/some/repo/pulls')
+        .reply(200, mockNewPR)
+        .post('/repos/some/repo/pulls/42/merge')
+        .reply(200);
+      await initFakePlatform(scope, '7.0.0-dev-2136-f075579c95+gitea-1.22.0');
+      await initFakeRepo(scope);
+
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(res).toMatchObject({
+        number: 42,
+        title: 'pr-title',
+      });
+    });
+
     it('continues on platform automerge error', async () => {
       memCache.set('gitea-pr-cache-synced', true);
       const scope = httpMock
