@@ -723,10 +723,7 @@ export async function validateConfig(
                     }
                   } else if (subKey === 'description') {
                     if (
-                      !(
-                        is.string(subValue) ||
-                        (is.array(subValue, is.string))
-                      )
+                      !(is.string(subValue) || is.array(subValue, is.string))
                     ) {
                       errors.push({
                         topic: 'Configuration Error',
