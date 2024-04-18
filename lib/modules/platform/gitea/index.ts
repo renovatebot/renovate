@@ -201,9 +201,9 @@ const platform: Platform = {
       botUserID = user.id;
       botUserName = user.username;
       defaults.version = await helper.getVersion({ token });
-      if (defaults.version?.includes('+gitea-')) {
+      if (defaults.version?.includes('gitea-')) {
         defaults.version = defaults.version.substring(
-          defaults.version.indexOf('+gitea-') + 7,
+          defaults.version.indexOf('gitea-') + 6,
         );
         defaults.isForgejo = true;
       }
