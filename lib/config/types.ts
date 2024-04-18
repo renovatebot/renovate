@@ -353,6 +353,7 @@ export interface PackageRule
   description?: string | string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
+  excludeDepPrefixes?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
