@@ -550,15 +550,15 @@ If this option is not set, Renovate will fallback to 15 minutes.
 
 ## experimentalFlags
 
-The `experimentalFlags` configuration option streamlines managing experimental settings within Renovate.
+The `experimentalFlags` configuration option helps you manage experimental settings within Renovate.
 
-```js
+```javascript
 module.exports = {
   experimentalFlags: ['dockerMaxPages=10'],
 };
 ```
 
-Each setting can be specified in the format `flagName=value`.
+Each setting must be format like this:`flagName=value`or `flagName`.
 
 Read [Self-Hosted Experimental Flags](./self-hosted-experimental.md) for the full list of flags supported by Renovate.
 
