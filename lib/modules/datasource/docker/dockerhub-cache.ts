@@ -8,6 +8,8 @@ export interface DockerHubCacheData {
   updatedAt: string | null;
 }
 
+const cacheNamespace = 'datasource-docker-hub-cache';
+
 export class DockerHubCache {
   private isChanged = false;
 
@@ -18,7 +20,7 @@ export class DockerHubCache {
 
   static async init(dockerRepository: string): Promise<DockerHubCache> {
     let repoCache = await packageCache.get<DockerHubCacheData>(
-      'datasource-docker-cache',
+      cacheNamespace,
       dockerRepository,
     );
 
@@ -62,7 +64,7 @@ export class DockerHubCache {
   async save(): Promise<void> {
     if (this.isChanged) {
       await packageCache.set(
-        'datasource-docker-cache',
+        cacheNamespace,
         this.dockerRepository,
         this.cache,
         3 * 60 * 24 * 30,
