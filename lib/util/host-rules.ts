@@ -133,6 +133,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
     return {};
   }
 
+  // Sort primarily by rank, and secondarily by matchHost length
   const sortedRules = hostRules
     .sort(fromShorterToLongerMatchHost)
     .sort(fromLowerToHigherRank);
