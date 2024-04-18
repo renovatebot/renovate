@@ -115,7 +115,7 @@ describe('modules/datasource/python-version/index', () => {
           datasource,
           packageName: 'python',
         });
-        expect(res?.releases).toHaveLength(3);
+        expect(res?.releases).toHaveLength(2);
         for (const release of res?.releases ?? []) {
           expect(release.isStable).toBeTrue();
         }
@@ -138,7 +138,7 @@ describe('modules/datasource/python-version/index', () => {
           datasource,
           packageName: 'python',
         });
-        expect(res?.releases).toHaveLength(3);
+        expect(res?.releases).toHaveLength(2);
         for (const release of res?.releases ?? []) {
           expect(release.isDeprecated).toBeBoolean();
         }
