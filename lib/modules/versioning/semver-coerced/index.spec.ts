@@ -30,7 +30,7 @@ describe('modules/versioning/semver-coerced/index', () => {
     });
 
     it('invalid version', () => {
-      expect(semverCoerced.getMajor('')).toBeNull();
+      expect(semverCoerced.getMajor('xxx')).toBeNull();
     });
   });
 

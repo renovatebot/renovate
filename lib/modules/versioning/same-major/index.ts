@@ -17,9 +17,9 @@ function massageVersion(input: string): string {
     return input;
   }
 
-  // we are sure to get a majot because of the isSingleVersion check
+  // we are sure to get a major because of the isSingleVersion check
   const major = semverCoerced.getMajor(input)!;
-  return `>=${input} <${major + 1}.0.0`;
+  return `>=${input} <${major + 1}`;
 }
 
 function matches(version: string, range: string): boolean {
@@ -41,7 +41,7 @@ function minSatisfyingVersion(
 }
 
 function isLessThanRange(version: string, range: string): boolean {
-  return !!semverCoerced.isLessThanRange?.(version, massageVersion(range));
+  return semverCoerced.isLessThanRange!(version, massageVersion(range));
 }
 
 export const api: VersioningApi = {
