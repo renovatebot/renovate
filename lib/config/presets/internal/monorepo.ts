@@ -71,6 +71,7 @@ const repoGroups = {
   capacitor: 'https://github.com/ionic-team/capacitor',
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   chromely: 'https://github.com/chromelyapps/Chromely',
+  'citation-js': 'https://github.com/citation-js/citation-js',
   ckeditor: 'https://github.com/ckeditor/ckeditor5',
   clarity: 'https://github.com/vmware/clarity',
   clearscript: [
