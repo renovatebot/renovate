@@ -11,11 +11,12 @@ import { PythonVersionDatasource } from '.';
 describe('modules/datasource/python-version/index', () => {
   describe('dependent datasources', () => {
     it('returns Python EOL data', async () => {
+      const datasource = new PythonVersionDatasource();
       httpMock
         .scope(eolRegistryUrl)
         .get('/python.json')
         .reply(200, Fixtures.get('eol.json'));
-      const res = await PythonVersionDatasource.getEolReleases();
+      const res = await datasource.getEolReleases();
       expect(
         res?.releases.find((release) => release.version === '3.7.17')
           ?.isDeprecated,
@@ -114,9 +115,10 @@ describe('modules/datasource/python-version/index', () => {
           datasource,
           packageName: 'python',
         });
-        res?.releases.forEach((release) => {
+        expect(res?.releases).toHaveLength(3);
+        for (const release of res?.releases ?? []) {
           expect(release.isStable).toBeTrue();
-        });
+        }
       });
 
       it('only returns versions that are prebuilt', async () => {
@@ -136,11 +138,10 @@ describe('modules/datasource/python-version/index', () => {
           datasource,
           packageName: 'python',
         });
-        res?.releases
-          .filter((release) => satisfies(release.version, '>=3'))
-          .forEach((release) => {
-            expect(release.isDeprecated).toBeBoolean();
-          });
+        expect(res?.releases).toHaveLength(3);
+        for (const release of res?.releases ?? []) {
+          expect(release.isDeprecated).toBeBoolean();
+        }
       });
     });
   });
