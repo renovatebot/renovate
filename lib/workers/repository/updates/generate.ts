@@ -338,9 +338,6 @@ export function generateBranchConfig(
     ...config.upgrades[0],
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
-  config.reuseLockFiles = config.upgrades.every(
-    (upgrade) => upgrade.updateType !== 'lockFileMaintenance',
-  );
   config.dependencyDashboardApproval = config.upgrades.some(
     (upgrade) => upgrade.dependencyDashboardApproval,
   );

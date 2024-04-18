@@ -32,10 +32,6 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_REUSE_PACKAGE_LOCK`
-
-If set to "false" (string), Renovate will remove any existing `package-lock.json` before trying to update it.
-
 ## `RENOVATE_USER_AGENT`
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
@@ -159,6 +155,10 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 <!-- prettier-ignore -->
 !!! note
     For the GitHub Enterprise Server platform only.
+
+## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
+
+If set, Renovate will persist repository cache locally after uploading to S3.
 
 ## `RENOVATE_X_S3_ENDPOINT`
 

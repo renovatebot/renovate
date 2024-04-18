@@ -4,7 +4,7 @@ import type { HostRule } from '../../types';
 import { detectPlatform } from '../common';
 import { find, getAll } from '../host-rules';
 import { regEx } from '../regex';
-import { createURLFromHostOrURL, validateUrl } from '../url';
+import { createURLFromHostOrURL, isHttpUrl } from '../url';
 import type { AuthenticationRule } from './types';
 import { parseGitUrl } from './url';
 
@@ -203,7 +203,7 @@ function addAuthFromHostRule(
 ): NodeJS.ProcessEnv {
   let environmentVariables = env;
   const httpUrl = createURLFromHostOrURL(hostRule.matchHost!)?.toString();
-  if (validateUrl(httpUrl)) {
+  if (isHttpUrl(httpUrl)) {
     logger.trace(`Adding Git authentication for ${httpUrl} using token auth.`);
     environmentVariables = getGitAuthenticatedEnvironmentVariables(
       httpUrl!,

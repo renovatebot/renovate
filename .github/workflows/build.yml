@@ -392,7 +392,7 @@ jobs:
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@7afa10ed9b269c561c2336fd862446844e0cbf71 # v4.2.0
+        uses: codecov/codecov-action@84508663e988701840491b86de86b666e8a86bed # v4.3.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
@@ -607,7 +607,7 @@ jobs:
           filter: blob:none # we don't need all blobs, only the full tree
 
       - name: docker-config
-        uses: containerbase/internal-tools@4fc221aabfbaa2e0a61bf8b4e9f2dbe4783fd1cc # v3.0.74
+        uses: containerbase/internal-tools@633b9fc56b62495a3010c5bbb397d2f54f197c15 # v3.0.76
         with:
           command: docker-config
 
@@ -617,7 +617,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           os: ${{ runner.os }}
 
-      - uses: sigstore/cosign-installer@e1523de7571e31dbe865fd2e80c5c7c23ae71eb4 # v3.4.0
+      - uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
 
       - name: Docker registry login
         run: |
