@@ -234,20 +234,33 @@ Parameters are supported similar to other methods:
 
 ## Templating presets
 
-In order to provide flexible preset configurations, Renovate provides support using [templates](./templates.md) for preset names.
+You can use [handlebars](https://handlebarsjs.com/) templates to be flexible with your presets.
+This can be handy when you want to do include presets conditionally.
+
+<!-- prettier-ignore -->
+!!! note
+    The template only supports a small subset of options, but you can extend them via `customEnvVariables`.
+
+Read the [templates](./templates.md) section to learn more.
 
 ### Example use-case
 
 The following example shows a self-hosted Renovate configuration for a company called "Renovators".
-The company is split into multiple organisations `foo`, `bar` and `baz`, where each organisation provides its opinionated shareable preset.
-Renovate is configured to load the preset of each organisation dynamically based on the `ORGANISATION_SLUG`environment variable.
+The company is split into multiple organizations
+
+- `foo`
+- `bar`
+- `baz`
+
+Each organization provides its opinionated shareable preset.
+Renovate is configured to load the preset of each organization dynamically based on the `ORGANIZATION_SLUG` environment variable.
 
 ```javascript
 module.exports = {
   customEnvVariables: {
-    ORGANISATION_SLUG: process.env.ORGANISATION_SLUG,
+    ORGANIZATION_SLUG: process.env.ORGANIZATION_SLUG,
   },
-  extends: ['local>{{ env.ORGANISATION_SLUG }}/renovate'],
+  extends: ['local>{{ env.ORGANIZATION_SLUG }}/renovate'],
 };
 ```
 
