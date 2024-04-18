@@ -234,7 +234,7 @@ Parameters are supported similar to other methods:
 
 ## Templating presets
 
-You can use [handlebars](https://handlebarsjs.com/) templates to be flexible with your presets.
+You can use [Handlebars](https://handlebarsjs.com/) templates to be flexible with your presets.
 This can be handy when you want to do include presets conditionally.
 
 <!-- prettier-ignore -->
