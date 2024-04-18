@@ -10,13 +10,13 @@ import { PythonRelease } from './schema';
 
 export class PythonVersionDatasource extends Datasource {
   static readonly id = datasource;
+  pythonPrebuildDatasource: GithubReleasesDatasource;
+  pythonEolDatasource: EndoflifeDatePackagesource;
 
   constructor() {
     super(datasource);
-    PythonVersionDatasource.pythonPrebuildDatasource =
-      new GithubReleasesDatasource();
-    PythonVersionDatasource.pythonEolDatasource =
-      new EndoflifeDatePackagesource();
+    this.pythonPrebuildDatasource = new GithubReleasesDatasource();
+    this.pythonEolDatasource = new EndoflifeDatePackagesource();
   }
 
   override readonly customRegistrySupport = false;
@@ -27,19 +27,15 @@ export class PythonVersionDatasource extends Datasource {
 
   override readonly caching = true;
 
-  static pythonPrebuildDatasource: GithubReleasesDatasource;
-
-  static async getPrebuildReleases(): Promise<ReleaseResult | null> {
-    return await PythonVersionDatasource.pythonPrebuildDatasource.getReleases({
+  async getPrebuildReleases(): Promise<ReleaseResult | null> {
+    return await this.pythonPrebuildDatasource.getReleases({
       registryUrl: githubBaseUrl,
       packageName: 'containerbase/python-prebuild',
     });
   }
 
-  static pythonEolDatasource: EndoflifeDatePackagesource;
-
-  static async getEolReleases(): Promise<ReleaseResult | null> {
-    return await PythonVersionDatasource.pythonEolDatasource.getReleases({
+  async getEolReleases(): Promise<ReleaseResult | null> {
+    return await this.pythonEolDatasource.getReleases({
       registryUrl: eolRegistryUrl,
       packageName: 'python',
     });
@@ -57,12 +53,11 @@ export class PythonVersionDatasource extends Datasource {
     if (!registryUrl) {
       return null;
     }
-    const pythonPrebuildReleases =
-      await PythonVersionDatasource.getPrebuildReleases();
+    const pythonPrebuildReleases = await this.getPrebuildReleases();
     const pythonPrebuildVersions = new Set<string>(
       pythonPrebuildReleases?.releases.map((release) => release.version),
     );
-    const pythonEolReleases = await PythonVersionDatasource.getEolReleases();
+    const pythonEolReleases = await this.getEolReleases();
     const pythonEolVersions = new Map<string, boolean | undefined>(
       pythonEolReleases?.releases
         .filter((release) => release.isDeprecated !== undefined)
