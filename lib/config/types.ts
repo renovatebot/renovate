@@ -367,6 +367,7 @@ export interface PackageRule
   matchDatasources?: string[];
   matchDepNames?: string[];
   matchDepPatterns?: string[];
+  matchDepPrefixes?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
   matchManagers?: string[];
