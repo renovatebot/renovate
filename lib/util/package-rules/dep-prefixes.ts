@@ -17,4 +17,19 @@ export class DepPrefixesMatcher extends Matcher {
 
     return matchDepPrefixes.some((prefix) => depName.startsWith(prefix));
   }
+
+  override excludes(
+    { depName }: PackageRuleInputConfig,
+    { excludeDepPrefixes }: PackageRule,
+  ): boolean | null {
+    if (is.undefined(excludeDepPrefixes)) {
+      return null;
+    }
+
+    if (is.undefined(depName)) {
+      return false;
+    }
+
+    return excludeDepPrefixes.some((prefix) => depName.startsWith(prefix));
+  }
 }

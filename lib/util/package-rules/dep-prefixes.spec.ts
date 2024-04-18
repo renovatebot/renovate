@@ -52,4 +52,54 @@ describe('util/package-rules/dep-prefixes', () => {
       expect(result).toBeFalse();
     });
   });
+
+  describe('exclude', () => {
+    it('should return null if excludeDepPrefixes is not defined', () => {
+      const result = depPrefixesMatcher.excludes(
+        {
+          depName: 'abc1',
+        },
+        {
+          excludeDepPrefixes: undefined,
+        },
+      );
+      expect(result).toBeNull();
+    });
+
+    it('should return false if depName is not defined', () => {
+      const result = depPrefixesMatcher.excludes(
+        {
+          depName: undefined,
+        },
+        {
+          excludeDepPrefixes: ['@opentelemetry'],
+        },
+      );
+      expect(result).toBeFalse();
+    });
+
+    it('should return true if depName matched', () => {
+      const result = depPrefixesMatcher.excludes(
+        {
+          depName: 'abc1',
+        },
+        {
+          excludeDepPrefixes: ['abc'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should return false if depName does not match', () => {
+      const result = depPrefixesMatcher.excludes(
+        {
+          depName: 'abc1',
+        },
+        {
+          excludeDepPrefixes: ['def'],
+        },
+      );
+      expect(result).toBeFalse();
+    });
+  });
 });
