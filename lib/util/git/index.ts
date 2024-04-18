@@ -660,7 +660,9 @@ export async function isBranchModified(
       `origin/${baseBranch}..origin/${branchName}`,
     ]);
 
-    commits.all.forEach((commit) => committedAuthors.add(commit.author_email));
+    for (const commit of commits.all) {
+      committedAuthors.add(commit.author_email);
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
