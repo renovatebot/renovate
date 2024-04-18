@@ -173,54 +173,46 @@ describe('workers/global/config/parse/index', () => {
       expect(parsed).toContainEntries([['dryRun', null]]);
     });
 
-    describe('haha', () => {
-      beforeEach(() => {
-        jest.resetModules();
-      });
+    it('initalizes file logging when logFile is set and env vars LOG_FILE is undefined', async () => {
+      jest.doMock(
+        '../../../../../config.js',
+        () => ({ logFile: 'somepath', logFileLevel: 'debug' }),
+        {
+          virtual: true,
+        },
+      );
+      const env: NodeJS.ProcessEnv = {};
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
+      expect(getParentDir).toHaveBeenCalledWith('somepath');
+    });
 
-      it('initalizes file logging when logFile is set and env vars LOG_FILE is undefined', async () => {
-        jest.doMock(
-          '../../../../../config.js',
-          () => ({ logFile: 'somepath', logFileLevel: 'debug' }),
-          {
-            virtual: true,
-          },
-        );
-        const env: NodeJS.ProcessEnv = {};
-        const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-        expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
-        expect(getParentDir).toHaveBeenCalledWith('somepath');
-      });
+    it('skips initializing file logging when logFile is set but env vars LOG_FILE is defined', async () => {
+      jest.doMock(
+        '../../../../../config.js',
+        () => ({ logFile: 'somepath', logFileLevel: 'debug' }),
+        {
+          virtual: true,
+        },
+      );
+      const env: NodeJS.ProcessEnv = {};
+      process.env.LOG_FILE = 'somepath';
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
+      expect(getParentDir).not.toHaveBeenCalled();
+    });
 
-      it('skips initializing file logging when logFile is set but env vars LOG_FILE is defined', async () => {
-        jest.doMock(
-          '../../../../../config.js',
-          () => ({ logFile: 'somepath', logFileLevel: 'debug' }),
-          {
-            virtual: true,
-          },
-        );
-        const env: NodeJS.ProcessEnv = {};
-        process.env.LOG_FILE = 'somepath';
-        const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-        expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
-        expect(getParentDir).not.toHaveBeenCalled();
-      });
-
-      it('massage onboardingNoDeps when autodiscover is false', async () => {
-        jest.doMock(
-          '../../../../../config.js',
-          () => ({ onboardingNoDeps: 'auto', autodiscover: false }),
-          {
-            virtual: true,
-          },
-        );
-        const env: NodeJS.ProcessEnv = {};
-        const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-        expect(parsedConfig).toContainEntries([
-          ['onboardingNoDeps', 'enabled'],
-        ]);
-      });
+    it('massage onboardingNoDeps when autodiscover is false', async () => {
+      jest.doMock(
+        '../../../../../config.js',
+        () => ({ onboardingNoDeps: 'auto', autodiscover: false }),
+        {
+          virtual: true,
+        },
+      );
+      const env: NodeJS.ProcessEnv = {};
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toContainEntries([['onboardingNoDeps', 'enabled']]);
     });
   });
 });
