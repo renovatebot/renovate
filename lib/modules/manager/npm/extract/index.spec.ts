@@ -1,4 +1,5 @@
 import { codeBlock } from 'common-tags';
+import { extractAllPackageFiles } from '..';
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
 import { logger } from '../../../../logger';
@@ -980,10 +981,9 @@ describe('modules/manager/npm/extract/index', () => {
   describe('.extractAllPackageFiles()', () => {
     it('runs', async () => {
       fs.readLocalFile.mockResolvedValueOnce(input02Content);
-      const res = await npmExtract.extractAllPackageFiles(
-        defaultExtractConfig,
-        ['package.json'],
-      );
+      const res = await extractAllPackageFiles(defaultExtractConfig, [
+        'package.json',
+      ]);
       expect(res).toEqual([
         {
           deps: [
