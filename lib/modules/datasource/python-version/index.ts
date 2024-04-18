@@ -58,7 +58,7 @@ export class PythonVersionDatasource extends Datasource {
       pythonPrebuildReleases?.releases.map((release) => release.version),
     );
     const pythonEolReleases = await this.getEolReleases();
-    const pythonEolVersions = new Map<string, boolean | undefined>(
+    const pythonEolVersions = new Map(
       pythonEolReleases?.releases
         .filter((release) => release.isDeprecated !== undefined)
         .map((release) => [
