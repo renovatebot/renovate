@@ -114,7 +114,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
 
     await cache.save();
     expect(packageCache.set).toHaveBeenCalledWith(
-      'datasource-docker-cache',
+      'datasource-docker-hub-cache',
       'foo/bar',
       newCache,
       3 * 60 * 24 * 30,
@@ -167,7 +167,7 @@ describe('modules/datasource/docker/dockerhub-cache', () => {
 
     await cache.save();
     expect(packageCache.set).toHaveBeenCalledWith(
-      'datasource-docker-cache',
+      'datasource-docker-hub-cache',
       'foo/bar',
       expectedCache,
       3 * 60 * 24 * 30,
