@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { Json, LooseArray } from '../../../util/schema-utils';
-import type { Release } from '../types';
 
 // OCI manifests
 
