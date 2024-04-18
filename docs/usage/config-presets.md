@@ -246,7 +246,7 @@ Read the [templates](./templates.md) section to learn more.
 ### Example use-case
 
 The following example shows a self-hosted Renovate configuration for a company called "Renovators".
-The company is split into multiple organizations
+The company is split into multiple organizations:
 
 - `foo`
 - `bar`
