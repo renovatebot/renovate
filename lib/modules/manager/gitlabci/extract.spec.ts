@@ -42,8 +42,15 @@ describe('modules/manager/gitlabci/extract', () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.multi-doc.yaml',
       ]);
-      expect(res).toMatchSnapshot();
       expect(res).toHaveLength(3);
+
+      const deps: PackageDependency[] = [];
+      res?.forEach((e) => {
+        e.deps.forEach((d) => {
+          deps.push(d);
+        });
+      });
+      expect(deps).toHaveLength(8);
     });
 
     it('extracts multiple included image lines', async () => {
