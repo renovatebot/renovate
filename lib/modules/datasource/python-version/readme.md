@@ -1,6 +1,6 @@
 This datasource returns Python releases from the [python.org API](https://www.python.org/api/v2/downloads/release/).
 
-It also fetches deprecated versions from [Endoflife Date Datasource](/modules/datasource/endoflife-date/)
+It also fetches deprecated versions from the [Endoflife Date datasource](/modules/datasource/endoflife-date/).
 
 Because Renovate depends on [`containerbase/python-prebuild`](https://github.com/containerbase/python-prebuild/releases) it will also fetch releases from the GitHub API.
 
