@@ -38,79 +38,12 @@ describe('modules/manager/gitlabci/extract', () => {
       ).toBeNull();
     });
 
-    it('returns non-null for multidoc yaml', async () => {
+    it('extracts from multidoc yaml', async () => {
       const res = await extractAllPackageFiles(config, [
         'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.multi-doc.yaml',
       ]);
-      expect(res?.[0]?.deps).toEqual([
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '19.70.8-slim',
-          datasource: 'docker',
-          depName: 'renovate/renovate',
-          depType: 'image-name',
-          replaceString: 'renovate/renovate:19.70.8-slim',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '10.4.11',
-          datasource: 'docker',
-          depName: 'mariadb',
-          depType: 'service-image',
-          replaceString: 'mariadb:10.4.11',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '1.0.0',
-          datasource: 'docker',
-          depName: 'other/image',
-          depType: 'service-image',
-          replaceString: 'other/image:1.0.0',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '19.70.8-slim',
-          datasource: 'docker',
-          depName: 'renovate/renovate',
-          depType: 'image-name',
-          replaceString: 'renovate/renovate:19.70.8-slim',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '10.4.11',
-          datasource: 'docker',
-          depName: 'mariadb',
-          depType: 'service-image',
-          replaceString: 'mariadb:10.4.11',
-        },
-        {
-          autoReplaceStringTemplate:
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentDigest: undefined,
-          currentValue: '1.0.0',
-          datasource: 'docker',
-          depName: 'other/image',
-          depType: 'service-image',
-          replaceString: 'other/image:1.0.0',
-        },
-      ]);
-    });
-
-    it('returns null for empty multidoc yaml', async () => {
-      const res = await extractAllPackageFiles(config, [
-        'lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.multi-doc.yaml',
-      ]);
-      expect(res).toBeNull();
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(3);
     });
 
     it('extracts multiple included image lines', async () => {
