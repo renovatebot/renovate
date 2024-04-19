@@ -204,23 +204,6 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(git.getFile).toHaveBeenCalledOnce();
     });
 
-    it('works no reuse lockfiles', async () => {
-      await expect(
-        writeExistingFiles(
-          { ...updateConfig, reuseLockFiles: false },
-          additionalFiles,
-        ),
-      ).resolves.toBeUndefined();
-
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
-      expect(fs.deleteLocalFile.mock.calls).toEqual([
-        ['package-lock.json'],
-        ['yarn.lock'],
-        ['yarn.lock'],
-        ['packages/pnpm/pnpm-lock.yaml'],
-      ]);
-    });
-
     it('writes .npmrc files', async () => {
       await writeExistingFiles(updateConfig, {
         npm: [

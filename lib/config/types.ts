@@ -158,6 +158,7 @@ export interface RepoGlobalConfig {
   presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
+  httpCacheTtlDays?: number;
 }
 
 export interface LegacyAdminConfig {

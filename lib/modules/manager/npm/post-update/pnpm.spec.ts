@@ -360,7 +360,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       expect(res).toBeNull();
     });
 
-    it('returns null if lockfileVersion is not a number', async () => {
+    it('returns null if lockfileVersion is not a number or numeric string', async () => {
       fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: foo\n');
       const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
       expect(res).toBeNull();
@@ -376,6 +376,18 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: 5.3\n');
       const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
       expect(res).toBe('>=6 <7');
+    });
+
+    it('maps supported versions for v6', async () => {
+      fs.readLocalFile.mockResolvedValueOnce("lockfileVersion: '6.0'\n");
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=7.24.2 <9');
+    });
+
+    it('maps supported versions for v9', async () => {
+      fs.readLocalFile.mockResolvedValueOnce("lockfileVersion: '9.0'\n");
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
+      expect(res).toBe('>=9');
     });
   });
 });
