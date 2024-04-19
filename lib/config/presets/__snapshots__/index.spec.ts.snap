@@ -122,6 +122,8 @@ exports[`config/presets/index resolvePreset resolves eslint 1`] = `
     "@babel/eslint-parser",
   ],
   "matchPackagePrefixes": [
+    "@eslint/",
+    "@types/eslint__",
     "@typescript-eslint/",
     "eslint",
   ],
@@ -150,6 +152,8 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
   ],
   "matchPackagePrefixes": [
     "ember-template-lint",
+    "@eslint/",
+    "@types/eslint__",
     "@typescript-eslint/",
     "eslint",
     "stylelint",
@@ -185,6 +189,8 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
       ],
       "matchPackagePrefixes": [
         "ember-template-lint",
+        "@eslint/",
+        "@types/eslint__",
         "@typescript-eslint/",
         "eslint",
         "stylelint",

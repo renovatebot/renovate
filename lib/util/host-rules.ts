@@ -1,11 +1,12 @@
 import is from '@sindresorhus/is';
 import merge from 'deepmerge';
+import type { SetRequired } from 'type-fest';
 import { logger } from '../logger';
-import type { HostRule, HostRuleSearchResult } from '../types';
+import type { CombinedHostRule, HostRule } from '../types';
 import { clone } from './clone';
 import * as sanitize from './sanitize';
 import { toBase64 } from './string';
-import { parseUrl, validateUrl } from './url';
+import { isHttpUrl, parseUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
@@ -76,43 +77,59 @@ export interface HostRuleSearch {
   url?: string;
 }
 
-function isEmptyRule(rule: HostRule): boolean {
+function isEmpty(
+  rule: HostRule,
+): rule is Omit<HostRule, 'hostType' | 'matchHost' | 'resolvedHost'> {
   return !rule.hostType && !rule.resolvedHost;
 }
 
-function isHostTypeRule(rule: HostRule): boolean {
-  return !!rule.hostType && !rule.resolvedHost;
-}
-
-function isHostOnlyRule(rule: HostRule): boolean {
-  return !rule.hostType && !!rule.matchHost;
-}
-
-function isMultiRule(rule: HostRule): boolean {
+function isComplete(
+  rule: HostRule,
+): rule is SetRequired<HostRule, 'hostType' | 'matchHost' | 'resolvedHost'> {
   return !!rule.hostType && !!rule.resolvedHost;
 }
 
-function matchesHostType(rule: HostRule, search: HostRuleSearch): boolean {
-  return rule.hostType === search.hostType;
+function isOnlyHostType(
+  rule: HostRule,
+): rule is Omit<
+  SetRequired<HostRule, 'hostType'>,
+  'matchHost' | 'resolvedHost'
+> {
+  return !!rule.hostType && !rule.resolvedHost;
 }
 
-function matchesHost(rule: HostRule, search: HostRuleSearch): boolean {
-  // istanbul ignore if
-  if (!rule.matchHost) {
+function isOnlyMatchHost(
+  rule: HostRule,
+): rule is Omit<
+  SetRequired<HostRule, 'matchHost' | 'resolvedHost'>,
+  'hostType'
+> {
+  return !rule.hostType && !!rule.matchHost;
+}
+
+function matchesHost(url: string, matchHost: string): boolean {
+  if (isHttpUrl(url) && isHttpUrl(matchHost)) {
+    return url.startsWith(matchHost);
+  }
+
+  const parsedUrl = parseUrl(url);
+  if (!parsedUrl) {
     return false;
   }
-  if (search.url && validateUrl(rule.matchHost)) {
-    return search.url.startsWith(rule.matchHost);
-  }
-  const parsedUrl = search.url ? parseUrl(search.url) : null;
-  if (!parsedUrl?.hostname) {
-    return false;
-  }
+
   const { hostname } = parsedUrl;
-  const dotPrefixedMatchHost = rule.matchHost.startsWith('.')
-    ? rule.matchHost
-    : `.${rule.matchHost}`;
-  return hostname === rule.matchHost || hostname.endsWith(dotPrefixedMatchHost);
+  if (!hostname) {
+    return false;
+  }
+
+  if (hostname === matchHost) {
+    return true;
+  }
+
+  const topLevelSuffix = matchHost.startsWith('.')
+    ? matchHost
+    : `.${matchHost}`;
+  return hostname.endsWith(topLevelSuffix);
 }
 
 function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
@@ -123,7 +140,7 @@ function prioritizeLongestMatchHost(rule1: HostRule, rule2: HostRule): number {
   return rule1.matchHost.length - rule2.matchHost.length;
 }
 
-export function find(search: HostRuleSearch): HostRuleSearchResult {
+export function find(search: HostRuleSearch): CombinedHostRule {
   if (!(!!search.hostType || search.url)) {
     logger.warn({ search }, 'Invalid hostRules search');
     return {};
@@ -131,18 +148,23 @@ export function find(search: HostRuleSearch): HostRuleSearchResult {
   let res: HostRule = {};
   // First, apply empty rule matches
   hostRules
-    .filter((rule) => isEmptyRule(rule))
+    .filter((rule) => isEmpty(rule))
     .forEach((rule) => {
       res = merge(res, rule);
     });
   // Next, find hostType-only matches
   hostRules
-    .filter((rule) => isHostTypeRule(rule) && matchesHostType(rule, search))
+    .filter((rule) => isOnlyHostType(rule) && rule.hostType === search.hostType)
     .forEach((rule) => {
       res = merge(res, rule);
     });
   hostRules
-    .filter((rule) => isHostOnlyRule(rule) && matchesHost(rule, search))
+    .filter(
+      (rule) =>
+        isOnlyMatchHost(rule) &&
+        search.url &&
+        matchesHost(search.url, rule.matchHost),
+    )
     .sort(prioritizeLongestMatchHost)
     .forEach((rule) => {
       res = merge(res, rule);
@@ -151,9 +173,10 @@ export function find(search: HostRuleSearch): HostRuleSearchResult {
   hostRules
     .filter(
       (rule) =>
-        isMultiRule(rule) &&
-        matchesHostType(rule, search) &&
-        matchesHost(rule, search),
+        isComplete(rule) &&
+        rule.hostType === search.hostType &&
+        search.url &&
+        matchesHost(search.url, rule.matchHost),
     )
     .sort(prioritizeLongestMatchHost)
     .forEach((rule) => {
@@ -175,7 +198,7 @@ export function hosts({ hostType }: { hostType: string }): string[] {
 export function hostType({ url }: { url: string }): string | null {
   return (
     hostRules
-      .filter((rule) => matchesHost(rule, { url }))
+      .filter((rule) => rule.matchHost && matchesHost(url, rule.matchHost))
       .sort(prioritizeLongestMatchHost)
       .map((rule) => rule.hostType)
       .filter(is.truthy)
