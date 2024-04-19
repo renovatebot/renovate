@@ -558,7 +558,7 @@ module.exports = {
 };
 ```
 
-Each setting must be format like this:`flagName=value`or `flagName`.
+Each setting must be formatted like this: `flagName=value` or `flagName`.
 
 Read [Self-Hosted Experimental Flags](./self-hosted-experimental.md) for the full list of flags supported by Renovate.
 
