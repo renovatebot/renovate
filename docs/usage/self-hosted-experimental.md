@@ -134,6 +134,7 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 ## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
 
 If set, Renovate will query this API for Merge Confidence data.
+If using Mend Renovate Enterprise and a static merge confidence token that you set via `MEND_RNV_MC_TOKEN`, you will need to set this variable at the server as well as the workers, if you have specified the token as a [match confidence] `hostRule`, you will only need to set this variable at the workers.
 This feature is in private beta.
 
 ## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`
