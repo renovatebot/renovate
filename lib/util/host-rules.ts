@@ -158,7 +158,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
     }
 
     if (hostTypeMatch && hostMatch) {
-      matchedRules.push(rule);
+      matchedRules.push(clone(rule));
     }
   }
 
