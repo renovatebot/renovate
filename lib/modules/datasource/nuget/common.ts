@@ -12,10 +12,14 @@ export function removeBuildMeta(version: string): string {
 
 const urlWhitespaceRe = regEx(/\s/g);
 
-export function massageUrl(url: string): string {
+export function massageUrl(url: string | null | undefined): string | null {
+  if (url === null || url === undefined) {
+    return null;
+  }
+
   let resultUrl = url;
 
-  // During `dotnet pack` certain URLs are being URL decoded which may introduce whitespaces
+  // During `dotnet pack` certain URLs are being URL decoded which may introduce whitespace
   // and causes Markdown link generation problems.
   resultUrl = resultUrl.replace(urlWhitespaceRe, '%20');
 

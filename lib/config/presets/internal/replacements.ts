@@ -15,6 +15,7 @@ export const presets: Record<string, Preset> = {
       'replacements:containerbase',
       'replacements:cpx-to-maintenance-fork',
       'replacements:cucumber-to-scoped',
+      'replacements:eslint-config-standard-with-typescript-to-eslint-config-love',
       'replacements:eslint-plugin-node-to-maintained-fork',
       'replacements:fakerjs-to-scoped',
       'replacements:fastify-to-scoped',
@@ -195,6 +196,19 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['cucumber'],
         replacementName: '@cucumber/cucumber',
         replacementVersion: '7.0.0',
+      },
+    ],
+  },
+  'eslint-config-standard-with-typescript-to-eslint-config-love': {
+    description:
+      '`eslint-config-standard-with-typescript` was renamed to `eslint-config-love`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^43.0.1',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['eslint-config-standard-with-typescript'],
+        replacementName: 'eslint-config-love',
+        replacementVersion: '43.1.0',
       },
     ],
   },
