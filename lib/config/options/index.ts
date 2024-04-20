@@ -1376,6 +1376,34 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchDepPrefixes',
+    description:
+      'Dep names prefixes to match. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
+    name: 'excludeDepPrefixes',
+    description:
+      'Dep names prefixes to exclude. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
     name: 'matchPackagePatterns',
     description:
       'Package name patterns to match. Valid only within a `packageRules` object.',
