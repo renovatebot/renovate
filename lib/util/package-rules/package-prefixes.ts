@@ -23,7 +23,7 @@ export class PackagePrefixesMatcher extends Matcher {
       return true;
     }
     if (matchPackagePrefixes.some((prefix) => depName.startsWith(prefix))) {
-      logger.once.info(
+      logger.once.warn(
         { packageName, depName },
         'Use matchDepPatterns instead of matchPackagePrefixes',
       );
@@ -52,7 +52,7 @@ export class PackagePrefixesMatcher extends Matcher {
       return true;
     }
     if (excludePackagePrefixes.some((prefix) => depName.startsWith(prefix))) {
-      logger.once.info(
+      logger.once.warn(
         { packageName, depName },
         'Use excludeDepPatterns instead of excludePackagePrefixes',
       );
