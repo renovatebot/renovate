@@ -1,5 +1,4 @@
 import { codeBlock } from 'common-tags';
-import * as dockerfileExtract from '../dockerfile/extract';
 import { extractPackageFile } from '.';
 
 describe('modules/manager/devcontainer/extract', () => {
@@ -276,44 +275,6 @@ describe('modules/manager/devcontainer/extract', () => {
 
       // Assert
       expect(result).toBeNull();
-    });
-
-    it('returns only valid dependencies when others throw error when calling getDep', () => {
-      // Arrange
-      const content = codeBlock(`
-      {
-        "image": "devcontainer.registry.renovate.com/test/image:1.2.3",
-        "features": {
-          "devcontainer.registry.renovate.com/test/feature:4.5.6": {}
-        }
-      }`);
-      const extractConfig = {};
-      jest.spyOn(dockerfileExtract, 'getDep').mockImplementationOnce(() => {
-        throw new Error('Dependency error');
-      });
-
-      // Act
-      const result = extractPackageFile(
-        content,
-        'devcontainer.json',
-        extractConfig,
-      );
-
-      // Assert
-      expect(result).toEqual({
-        deps: [
-          {
-            autoReplaceStringTemplate:
-              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-            currentDigest: undefined,
-            currentValue: '4.5.6',
-            datasource: 'docker',
-            depName: 'devcontainer.registry.renovate.com/test/feature',
-            replaceString:
-              'devcontainer.registry.renovate.com/test/feature:4.5.6',
-          },
-        ],
-      });
     });
 
     it('returns only docker dependencies when non-docker feature types are defined beneath the features property in dev container JSON file', () => {

@@ -75,21 +75,13 @@ function getDep(
   if (!subject) {
     return null;
   }
-  try {
-    const dep = getDockerDep(subject, true, registryAliases);
-    if (!isValidDependency(dep)) {
-      logger.debug(
-        { subject, packageFile },
-        'Skipping invalid docker dependency in dev container JSON file.',
-      );
-      return null;
-    }
-    return dep;
-  } catch (err) {
-    logger.error(
+  const dep = getDockerDep(subject, true, registryAliases);
+  if (!isValidDependency(dep)) {
+    logger.debug(
       { subject, packageFile },
-      'An error occurred whilst getting docker dependency from dev container JSON file.',
+      'Skipping invalid docker dependency in dev container JSON file.',
     );
+    return null;
   }
-  return null;
+  return dep;
 }
