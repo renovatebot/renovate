@@ -90,7 +90,6 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 If set, Renovate will query this API for Merge Confidence data.
 This feature is in private beta.
 
-
 ## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
 
 If set to any value, Renovate will download `nupkg` files for determining package metadata.
