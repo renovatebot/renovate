@@ -4,6 +4,8 @@ import { platform } from '../../../../modules/platform';
 import type { BranchStatus } from '../../../../types';
 import { isActiveConfidenceLevel } from '../../../../util/merge-confidence';
 import type { MergeConfidence } from '../../../../util/merge-confidence/types';
+import { coerceString } from '../../../../util/string';
+import { joinUrlParts } from '../../../../util/url';
 
 export async function resolveBranchStatus(
   branchName: string,
@@ -75,12 +77,18 @@ export async function setStability(config: StabilityConfig): Promise<void> {
     config.stabilityStatus === 'green'
       ? 'Updates have met minimum release age requirement'
       : 'Updates have not met minimum release age requirement';
+
+  const docsLink = joinUrlParts(
+    coerceString(config.productLinks?.documentation),
+    'configuration-options/#minimumreleaseage',
+  );
+
   await setStatusCheck(
     config.branchName,
     context,
     description,
     config.stabilityStatus,
-    config.productLinks?.documentation,
+    docsLink,
   );
 }
 
@@ -110,11 +118,17 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
     config.confidenceStatus === 'green'
       ? 'Updates have met Merge Confidence requirement'
       : 'Updates have not met Merge Confidence requirement';
+
+  const docsLink = joinUrlParts(
+    coerceString(config.productLinks?.documentation),
+    'merge-confidence',
+  );
+
   await setStatusCheck(
     config.branchName,
     context,
     description,
     config.confidenceStatus,
-    config.productLinks?.documentation,
+    docsLink,
   );
 }

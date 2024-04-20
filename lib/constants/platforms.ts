@@ -14,7 +14,6 @@ export const GITEA_API_USING_HOST_TYPES = [
   'gitea-changelog',
   'gitea-releases',
   'gitea-tags',
-  'custom',
 ];
 
 export const GITHUB_API_USING_HOST_TYPES = [
@@ -26,7 +25,6 @@ export const GITHUB_API_USING_HOST_TYPES = [
   'hermit',
   'github-changelog',
   'conan',
-  'custom',
 ];
 
 export const GITLAB_API_USING_HOST_TYPES = [
@@ -36,12 +34,10 @@ export const GITLAB_API_USING_HOST_TYPES = [
   'gitlab-packages',
   'gitlab-changelog',
   'pypi',
-  'custom',
 ];
 
 export const BITBUCKET_API_USING_HOST_TYPES = [
   'bitbucket',
   'bitbucket-changelog',
   'bitbucket-tags',
-  'custom',
 ];

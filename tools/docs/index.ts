@@ -32,7 +32,7 @@ export async function generateDocs(): Promise<void> {
 
     // versionings
     logger.info('* versionings');
-    await generateVersioning(dist);
+    await generateVersioning(dist, openItems.versionings);
 
     // datasources
     logger.info('* datasources');
