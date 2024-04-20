@@ -10,7 +10,7 @@ import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
-import { anyMatchRegexOrMinimatch } from '../string-match';
+import { matchRegexOrGlobList } from '../string-match';
 import { parseUrl } from '../url';
 import { dnsLookup } from './dns';
 import { keepAliveAgents } from './keep-alive';
@@ -169,7 +169,7 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
     const filteredHeaders: Record<string, string> = {};
 
     for (const [header, value] of Object.entries(hostRule.headers)) {
-      if (anyMatchRegexOrMinimatch(header, allowedHeaders)) {
+      if (matchRegexOrGlobList(header, allowedHeaders)) {
         filteredHeaders[header] = value;
       } else {
         logger.once.error(

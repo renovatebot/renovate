@@ -57,6 +57,7 @@ describe('util/package-rules/index', () => {
         },
         {
           matchUpdateTypes: ['bump'],
+          labels: ['bump'],
         },
         {
           excludePackageNames: ['a'],
@@ -69,7 +70,7 @@ describe('util/package-rules/index', () => {
     };
     expect(applyPackageRules(config)).toEqual({
       ...config,
-      matchUpdateTypes: ['bump'],
+      labels: ['bump'],
     });
   });
 

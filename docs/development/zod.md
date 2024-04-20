@@ -8,7 +8,7 @@
     - [Inferred types](#inferred-types)
     - [Specify only necessary fields](#specify-only-necessary-fields)
     - [Use `Json`, `Yaml` and `Toml` for string parsing](#use-json-yaml-and-toml-for-string-parsing)
-    - [Use `.transform()` method to process parsed data](#use-transform-method-to-process-validated-data)
+    - [Use `.transform()` method to process validated data](#use-transform-method-to-process-validated-data)
       - [Rename and move fields at the top level transform](#rename-and-move-fields-at-the-top-level-transform)
     - [Stick to permissive behavior when possible](#stick-to-permissive-behavior-when-possible)
       - [Use `.catch()` to force default values](#use-catch-to-force-default-values)
@@ -180,7 +180,7 @@ const { width, height, length } = Box.parse(input);
 const volume = width * height * length;
 ```
 
-Instead, use the idiomatic `.tranform()` method:
+Instead, use the idiomatic `.transform()` method:
 
 ```ts
 const BoxVolume = z

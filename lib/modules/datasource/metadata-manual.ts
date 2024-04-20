@@ -17,17 +17,11 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
       'https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md',
   },
   pypi: {
-    alembic: 'https://alembic.sqlalchemy.org/en/latest/changelog.html',
     beautifulsoup4:
       'https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/CHANGELOG',
-    django: 'https://github.com/django/django/tree/master/docs/releases',
-    djangorestframework:
-      'https://www.django-rest-framework.org/community/release-notes/',
     flake8: 'https://flake8.pycqa.org/en/latest/release-notes/index.html',
     'django-storages':
       'https://github.com/jschneier/django-storages/blob/master/CHANGELOG.rst',
-    hypothesis:
-      'https://github.com/HypothesisWorks/hypothesis/blob/master/hypothesis-python/docs/changes.rst',
     lxml: 'https://git.launchpad.net/lxml/plain/CHANGES.txt',
     mypy: 'https://mypy-lang.blogspot.com/',
     phonenumbers:
@@ -38,12 +32,9 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
       'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
     'django-debug-toolbar':
       'https://django-debug-toolbar.readthedocs.io/en/latest/changes.html',
-    'firebase-admin':
-      'https://firebase.google.com/support/release-notes/admin/python',
     requests: 'https://github.com/psf/requests/blob/master/HISTORY.md',
     sqlalchemy: 'https://docs.sqlalchemy.org/en/latest/changelog/',
     uwsgi: 'https://uwsgi-docs.readthedocs.io/en/latest/#release-notes',
-    wagtail: 'https://github.com/wagtail/wagtail/tree/master/docs/releases',
   },
   docker: {
     'gitlab/gitlab-ce':
@@ -53,6 +44,26 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
     'google/cloud-sdk': 'https://cloud.google.com/sdk/docs/release-notes',
     neo4j: 'https://neo4j.com/release-notes/',
     'whitesource/renovate': 'https://github.com/whitesource/renovate-on-prem',
+  },
+  maven: {
+    'ch.qos.logback:logback-access': 'https://logback.qos.ch/news.html',
+    'ch.qos.logback:logback-classic': 'https://logback.qos.ch/news.html',
+    'ch.qos.logback:logback-core': 'https://logback.qos.ch/news.html',
+    'org.slf4j:jcl-over-slf4j': 'https://www.slf4j.org/news.html',
+    'org.slf4j:jul-over-slf4j': 'https://www.slf4j.org/news.html',
+    'org.slf4j:jul-to-slf4j': 'https://www.slf4j.org/news.html',
+    'org.slf4j:log4j-over-slf4j': 'https://www.slf4j.org/news.html',
+    'org.slf4j:slf4j': 'https://www.slf4j.org/news.html',
+    'org.slf4j:slf4j-android': 'https://www.slf4j.org/news.html',
+    'org.slf4j:slf4j-api': 'https://www.slf4j.org/news.html',
+    'org.slf4j:slf4j-bom': 'https://www.slf4j.org/news.html',
+    'org.slf4j:slf4j-ext': 'https://www.slf4j.org/news.html',
+    'org.slf4j:slf4j-jcl': 'https://www.slf4j.org/news.html',
+    'org.slf4j:slf4j-jdk-platform-logging': 'https://www.slf4j.org/news.html',
+    'org.slf4j:slf4j-migrator': 'https://www.slf4j.org/news.html',
+    'org.slf4j:slf4j-nop': 'https://www.slf4j.org/news.html',
+    'org.slf4j:slf4j-reload4j': 'https://www.slf4j.org/news.html',
+    'org.slf4j:slf4j-simple': 'https://www.slf4j.org/news.html',
   },
 };
 

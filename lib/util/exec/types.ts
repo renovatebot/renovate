@@ -1,4 +1,5 @@
 import type { SpawnOptions as ChildProcessSpawnOptions } from 'node:child_process';
+import type { UserEnv } from '../../config/types';
 
 export interface ToolConstraint {
   toolName: string;
@@ -45,6 +46,7 @@ export interface ExecOptions {
   cwd?: string;
   cwdFile?: string;
   env?: Opt<ExtraEnv>;
+  userConfiguredEnv?: UserEnv;
   extraEnv?: Opt<ExtraEnv>;
   docker?: Opt<DockerOptions>;
   toolConstraints?: Opt<ToolConstraint[]>;

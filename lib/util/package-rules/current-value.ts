@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
-import { configRegexPredicate } from '../string-match';
+import { getRegexPredicate } from '../string-match';
 import { Matcher } from './base';
 
 export class CurrentValueMatcher extends Matcher {
@@ -12,7 +12,7 @@ export class CurrentValueMatcher extends Matcher {
     if (is.undefined(matchCurrentValue)) {
       return null;
     }
-    const matchCurrentValuePred = configRegexPredicate(matchCurrentValue);
+    const matchCurrentValuePred = getRegexPredicate(matchCurrentValue);
 
     if (!matchCurrentValuePred) {
       logger.debug(

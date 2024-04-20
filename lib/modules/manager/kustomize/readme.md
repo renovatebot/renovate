@@ -18,6 +18,7 @@ This manager uses three `depType`s to allow fine-grained control of which depend
 - Component
 - Kustomization
 - HelmChart
+- OCIChart
 
 **Limitations**
 

@@ -1,6 +1,7 @@
 import AggregateError from 'aggregate-error';
 import * as httpMock from '../../../../test/http-mock';
-import { partial } from '../../../../test/util';
+import { mocked, partial } from '../../../../test/util';
+import * as _packageCache from '../../../util/cache/package';
 import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
 import { range } from '../../range';
 import {
@@ -12,6 +13,9 @@ import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
 } from './types';
+
+jest.mock('../../../util/cache/package');
+const packageCache = mocked(_packageCache);
 
 interface TestAdapterInput {
   version: string;
@@ -115,7 +119,10 @@ describe('util/github/graphql/datasource-fetcher', () => {
       httpMock
         .scope('https://api.github.com/')
         .post('/graphql')
-        .reply(200, resp(false, []));
+        .reply(
+          200,
+          resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
+        );
 
       const res = await Datasource.query(
         { packageName: 'foo/bar' },
@@ -123,7 +130,30 @@ describe('util/github/graphql/datasource-fetcher', () => {
         adapter,
       );
 
-      expect(res).toBeEmptyArray();
+      expect(res).toEqual([
+        { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
+      ]);
+    });
+
+    it('performs query when persistence flag is set and cache is expired', async () => {
+      packageCache.get.mockResolvedValueOnce(true);
+      httpMock
+        .scope('https://api.github.com/')
+        .post('/graphql')
+        .reply(
+          200,
+          resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
+        );
+
+      const res = await Datasource.query(
+        { packageName: 'foo/bar' },
+        http,
+        adapter,
+      );
+
+      expect(res).toEqual([
+        { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
+      ]);
     });
 
     it('throws on unknown errors', async () => {
@@ -383,13 +413,13 @@ describe('util/github/graphql/datasource-fetcher', () => {
       ];
 
       it.each`
-        isPrivate    | isCacheable
+        isPrivate    | isPersistent
         ${undefined} | ${false}
         ${true}      | ${false}
         ${false}     | ${true}
       `(
-        'private=$isPrivate => isCacheable=$isCacheable',
-        async ({ isPrivate, isCacheable }) => {
+        'private=$isPrivate => isPersistent=$isPersistent',
+        async ({ isPrivate, isPersistent }) => {
           httpMock
             .scope('https://api.github.com/')
             .post('/graphql')
@@ -402,7 +432,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
           );
           await instance.getItems();
 
-          expect(instance).toHaveProperty('isCacheable', isCacheable);
+          expect(instance).toHaveProperty('isPersistent', isPersistent);
         },
       );
     });

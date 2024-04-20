@@ -3,12 +3,12 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:1.24.0@sha256:b1182a00abbeaa66934072b8f7e1918072343e7a70ed6e82a66513e3f4ea08a1 AS slim-base
+FROM ghcr.io/renovatebot/base-image:2.2.5@sha256:30ab9b5ce4a1a5e749d037298c2ddc1458381639d3a45e321c30cc5ea949b216 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:1.24.0-full@sha256:0133365764c7b5a92819582f10f3258193f8c8b383c41f8f56c109167bb4a448 AS full-base
+FROM ghcr.io/renovatebot/base-image:2.2.5-full@sha256:583d07d52f8ca5e16024ee8506de04abe54b86ff942a33f2047cd01760b0912d AS full-base
 
 # --------------------------------------
 # build image
@@ -18,7 +18,6 @@ FROM slim-base as build
 WORKDIR /usr/local/renovate
 
 ENV CI=1 npm_config_modules_cache_max_age=0
-ENV RE2_DOWNLOAD_MIRROR=https://github.com/containerbase/node-re2-prebuild/releases/download RE2_DOWNLOAD_SKIP_PATH=1
 
 COPY pnpm-lock.yaml ./
 
@@ -30,7 +29,6 @@ COPY . ./
 # install
 RUN set -ex; \
   pnpm install --prod --offline --ignore-scripts; \
-  npm explore re2 -- npm run install; \
   true
 
 # test

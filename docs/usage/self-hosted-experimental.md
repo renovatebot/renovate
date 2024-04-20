@@ -99,7 +99,7 @@ If set, Renovate will terminate the whole process group of a terminated child pr
 
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
-If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergable before trying to automerge.
+If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
 The formula for the delay between attempts is `RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY * attempt * attempt` milliseconds.
 
 Default value: `5` (attempts results in max. 13.75 seconds timeout).
@@ -143,8 +143,8 @@ The expected value for this environment variable is a JSON array of strings.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
-If set, Renovate will use this string as GitLab server version instead of checking via the GitLab API.
-This can be useful when you use the GitLab `CI_JOB_TOKEN` to authenticate Renovate.
+Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
+Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls for Bitbucket.
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
 
@@ -155,6 +155,10 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 <!-- prettier-ignore -->
 !!! note
     For the GitHub Enterprise Server platform only.
+
+## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
+
+If set, Renovate will persist repository cache locally after uploading to S3.
 
 ## `RENOVATE_X_S3_ENDPOINT`
 
@@ -172,3 +176,11 @@ Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://doc
 
 If set, Renovate will use SQLite as the backend for the package cache.
 Don't combine with `redisUrl`, Redis would be preferred over SQlite.
+
+## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
+
+Suppress the pre-commit support warning in PR bodies.
+
+## `RENOVATE_X_YARN_PROXY`
+
+Configure global Yarn proxy settings if HTTP proxy environment variables are detected.

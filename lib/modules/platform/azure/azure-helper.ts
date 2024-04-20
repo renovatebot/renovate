@@ -135,7 +135,7 @@ export async function getMergeMethod(
     ) {
       return true;
     }
-    if (scope.repositoryId !== repoId) {
+    if (scope.repositoryId !== repoId && scope.repositoryId !== null) {
       return false;
     }
     if (!branchRef) {

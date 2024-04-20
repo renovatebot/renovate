@@ -102,4 +102,4 @@ You can use these `depTypes` for fine-grained control, for example to disable pa
 | Kubernetes StatefulSet               |       `kubernetes_stateful_set`        |                                                                            |
 | Kubernetes StatefulSet v1            |      `kubernetes_stateful_set_v1`      |                                                                            |
 
-If you need to change the versioning format, read the [versioning](../../versioning.md) documentation to learn more.
+If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.

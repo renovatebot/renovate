@@ -593,7 +593,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         config: {
           ...config,
           updateType: 'lockFileMaintenance',
-          registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
+          registryAliases: { stable: 'the stable_url', repo1: 'the_repo1_url' },
         },
       }),
     ).toMatchObject([

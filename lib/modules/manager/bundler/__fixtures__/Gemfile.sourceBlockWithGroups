@@ -1,0 +1,12 @@
+source 'https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/' do
+  gem 'sfn_my_dep1', "~> 1"
+  gem 'sfn_my_dep2', "~> 1"
+
+  group :test, :development do
+    gem 'internal_test_gem', "~> 1"
+  end
+
+  group :production do
+    gem 'internal_production_gem', "~> 1"
+  end
+end

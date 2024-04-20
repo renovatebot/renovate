@@ -26,6 +26,32 @@ Second sentence on a new line.
 And so on.
 ```
 
+## Avoid contractions/possessives
+
+Avoid:
+
+```markdown
+don't
+won't
+doesn't
+shouldn't
+wouldn't
+manager's
+file's
+```
+
+Do:
+
+```markdown
+do not
+will not
+does not
+should not
+would not
+```
+
+Avoid possessives like `manager's` or `file's`, if needed rewrite the sentence.
+
 ## Avoid manually ordering numbered lists
 
 Avoid:

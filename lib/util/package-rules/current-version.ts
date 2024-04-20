@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
 import * as allVersioning from '../../modules/versioning';
-import { configRegexPredicate } from '../string-match';
+import { getRegexPredicate } from '../string-match';
 import { Matcher } from './base';
 
 export class CurrentVersionMatcher extends Matcher {
@@ -22,9 +22,7 @@ export class CurrentVersionMatcher extends Matcher {
       !!lockedVersion && is.nullOrUndefined(currentValue);
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
-    const matchCurrentVersionPred = configRegexPredicate(
-      matchCurrentVersionStr,
-    );
+    const matchCurrentVersionPred = getRegexPredicate(matchCurrentVersionStr);
 
     if (matchCurrentVersionPred) {
       const compareVersion = lockedVersion ?? currentVersion ?? currentValue;

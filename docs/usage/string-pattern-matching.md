@@ -1,52 +1,83 @@
 # String Pattern Matching - Regex or Glob
 
-Renovate string matching syntax for some configuration options allows the user to choose between [`minimatch`](https://github.com/isaacs/minimatch) glob patterns, including exact strings matches, or regular expression (regex) patterns.
+Renovate string matching syntax for some configuration options allows you, as user, to choose between:
+
+- [`minimatch`](https://github.com/isaacs/minimatch) glob patterns, including exact strings matches
+- regular expression (regex) patterns
 
 ## Regex matching
 
-Users can choose to use regex patterns by starting the pattern string with `/` or `!/` and ending with `/` or `/i`.
-Regex patterns are evaluated with case sensitivity unless the `i` flag is specified.
+A valid regex pattern:
 
-Renovate uses the [`re2`](https://github.com/google/re2) library for regex matching, which is not entirely the same syntax/support as the full regex specification.
-For a full list of re2 syntax, see [the re2 syntax wiki page](https://github.com/google/re2/wiki/Syntax).
+1. Starts with `/` or `!/`
+1. Ends with `/` or `/i`
 
-Example regex patterns:
+### Regex is case sensitive by default
 
-- `/^abc/` is a regex pattern matching any string starting with lower-case `abc`.
-- `/^abc/i` is a regex pattern matching any string starting with `abc` in lower or upper case, or a mix.
-- `!/^a/` is a regex pattern matching any string no starting with `a` in lower case.
+By default, regex patterns are evaluated as case sensitive.
+To ignore case sensitivity you must set the `i` flag, see the regex patterns table for an example.
+
+### Renovate uses re2 syntax
+
+Renovate uses the [`re2` library](https://github.com/google/re2) for regex matching.
+`re2` is different from the full regex specification, because `re2` has a different sytax/support.
+
+For the full `re2` syntax, read [the `re2` syntax wiki page](https://github.com/google/re2/wiki/Syntax).
+
+### Example regex patterns
+
+| Pattern   | Regex pattern explanation                                               |
+| --------- | ----------------------------------------------------------------------- |
+| `/^abc/`  | matches any string starting with lower-case `abc`                       |
+| `/^abc/i` | matches any string starting with `abc` in lower or upper case, or a mix |
+| `!/^a/`   | matches any string not starting with `a` in lower case                  |
+
+### Use regex101 to test your patterns
 
 If you want to test your patterns interactively online, we recommend [regex101.com](https://regex101.com/?flavor=javascript&flags=ginst).
-Be aware that backslashes (`\`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`. You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
+You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
+
+<!-- prettier-ignore -->
+!!! warning "Escape the backslashes from regex101"
+    Before you copy/paste the regex from regex101 into your Renovate config, you must escape the backslashes (`\`) first.
+    For example: `\n\s` --> `\\n\\s`.
 
 ## Glob matching
 
 If the string provided is not a regex pattern then it will be treated as a glob pattern and parsed using the `minimatch` library.
 Although glob patterns were designed originally for file name matching, many users find glob syntax easier to understand than regex so prefer it.
 
-Glob patterns are evaluated with case _insensitivity_ and this is not configurable, so if you require a case-sensitive pattern then you should use a regex pattern instead.
+### Glob patterns always ignore casing
 
-Examples:
+Glob patterns are always evaluated with case _insensitivity_ and you can not change this.
+If you need a case-sensitive pattern you must use a regex pattern.
 
-- `abc123` matches `abc123` exactly, or `AbC123`.
-- `abc*` matches `abc`, `abc123`, `ABCabc`, etc.
+### Example glob patterns
+
+| Pattern  | Glob pattern explanation                |
+| -------- | --------------------------------------- |
+| `abc123` | matches `abc123` exactly, or `AbC123`   |
+| `abc*`   | matches `abc`, `abc123`, `ABCabc`, etc. |
 
 ## Negative matching
 
 Renovate has a specific approach to negative matching strings.
 
-"Positive" matches are patterns (in glob or regex) which don't start with `!`.
-"Negative" matches are patterns starting with `!` (e.g. `!/^a/` or `!b*`).
+"Positive" matches are patterns (in glob or regex) which do _not_ start with `!`.
+"Negative" matches are patterns starting with `!`, like `!/^a/` or `!b*`.
 
 For an array of patterns to match, the following must be true:
 
-- If any positive matches are included, at least one must match.
-- If any negative matches are included, none must match.
+- If any _positive_ matches are included, at least _one_ must match
+- If any _negative_ matches are included, _none_ must match
 
-For example, `["/^abc/", "!/^abcd/", "!/abce/"]` would match "abc" and "abcf" but not "foo", "abcd", "abce", or "abcdef".
+For example, the pattern `["/^abc/", "!/^abcd/", "!/abce/"]`:
+
+- matches `"abc"` and `"abcf"`
+- does _not_ match `"foo"`, `"abcd"`, `"abce"`, or `"abcdef"`
 
 ## Usage in Renovate configuration options
 
-Renovate has matured its approach to string pattern matching over time, but this means that existing configurations may have a mix of approaches and not be entirely consistent with each other.
+Renovate has evolved its approach to string pattern matching over time, but this means that existing configurations may have a mix of approaches and not be entirely consistent with each other.
 
-The configuration options which support this "regex or glob" syntax have it noted in their documentation with a link to this page for more details.
+The configuration options that support "regex or glob" syntax mention this in their documentation, and also link to this page.

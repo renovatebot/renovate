@@ -8,6 +8,7 @@ import * as _helmv3 from '../../../../modules/manager/helmv3';
 import * as _npm from '../../../../modules/manager/npm';
 import * as _pep621 from '../../../../modules/manager/pep621';
 import * as _poetry from '../../../../modules/manager/poetry';
+import type { PackageFile } from '../../../../modules/manager/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -202,6 +203,117 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('for updatedArtifacts passes proper lockFiles', async () => {
+      config.upgrades.push({
+        packageFile: 'composer.json',
+        manager: 'composer',
+        branchName: '',
+      });
+      config.lockFiles = ['different.lock'];
+      config.packageFiles = {
+        composer: [
+          {
+            packageFile: 'composer.json',
+            lockFiles: ['composer.lock'],
+            deps: [],
+          },
+        ] satisfies PackageFile[],
+      };
+      autoReplace.doAutoReplace.mockResolvedValueOnce('some new content');
+      composer.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            type: 'addition',
+            path: 'composer.lock',
+            contents: 'some contents',
+          },
+        },
+      ]);
+      await getUpdatedPackageFiles(config);
+      expect(composer.updateArtifacts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({
+            lockFiles: ['composer.lock'],
+          }),
+        }),
+      );
+    });
+
+    it('for nonUpdatedArtifacts passes proper lockFiles', async () => {
+      config.upgrades.push({
+        packageFile: 'composer.json',
+        manager: 'composer',
+        branchName: '',
+        isLockfileUpdate: true,
+      });
+      composer.updateLockedDependency.mockReturnValueOnce({
+        status: 'unsupported',
+      });
+      config.lockFiles = ['different.lock'];
+      config.packageFiles = {
+        composer: [
+          {
+            packageFile: 'composer.json',
+            lockFiles: ['composer.lock'],
+            deps: [],
+          },
+        ] satisfies PackageFile[],
+      };
+      composer.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            type: 'addition',
+            path: 'composer.lock',
+            contents: 'some contents',
+          },
+        },
+      ]);
+      await getUpdatedPackageFiles(config);
+      expect(composer.updateArtifacts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({
+            lockFiles: ['composer.lock'],
+          }),
+        }),
+      );
+    });
+
+    it('for lockFileMaintenance passes proper lockFiles', async () => {
+      config.upgrades.push({
+        manager: 'composer',
+        updateType: 'lockFileMaintenance',
+        packageFile: 'composer.json',
+        branchName: 'some-branch',
+      } satisfies BranchUpgradeConfig);
+      config.lockFiles = ['different.lock'];
+      config.packageFiles = {
+        composer: [
+          {
+            packageFile: 'composer.json',
+            lockFiles: ['composer.lock'],
+            deps: [],
+          },
+        ] satisfies PackageFile[],
+      };
+      composer.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            type: 'addition',
+            path: 'composer.json',
+            contents: 'some contents',
+          },
+        },
+      ]);
+      await getUpdatedPackageFiles(config);
+      expect(composer.updateArtifacts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({
+            lockFiles: ['composer.lock'],
+          }),
+        }),
+      );
     });
 
     it('handles isRemediation success', async () => {

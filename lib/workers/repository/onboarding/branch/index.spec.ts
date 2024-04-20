@@ -59,7 +59,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it("doesn't throw if there are no package files and onboardingNoDeps config option is set", async () => {
-      config.onboardingNoDeps = true;
+      config.onboardingNoDeps = 'enabled';
       await expect(checkOnboardingBranch(config)).resolves.not.toThrow(
         REPOSITORY_NO_PACKAGE_FILES,
       );

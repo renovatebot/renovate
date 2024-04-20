@@ -249,9 +249,15 @@ export async function statLocalFile(
   }
 }
 
-export function listCacheDir(path: string): Promise<string[]> {
+export function listCacheDir(
+  path: string,
+  options: { recursive: boolean } = { recursive: false },
+): Promise<string[]> {
   const fullPath = ensureCachePath(path);
-  return fs.readdir(fullPath);
+  return fs.readdir(fullPath, {
+    encoding: 'utf-8',
+    recursive: options.recursive,
+  });
 }
 
 export async function rmCache(path: string): Promise<void> {
@@ -265,6 +271,16 @@ export async function cachePathExists(pathName: string): Promise<boolean> {
     const s = await fs.stat(path);
     return !!s;
   } catch (_) {
+    return false;
+  }
+}
+
+export async function cachePathIsFile(pathName: string): Promise<boolean> {
+  const path = ensureCachePath(pathName);
+  try {
+    const s = await fs.stat(path);
+    return s.isFile();
+  } catch (e) {
     return false;
   }
 }
@@ -300,6 +316,13 @@ export function readSystemFile(
   encoding?: BufferEncoding,
 ): Promise<string | Buffer> {
   return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
+}
+
+export async function writeSystemFile(
+  fileName: string,
+  data: string | Buffer,
+): Promise<void> {
+  await fs.outputFile(fileName, data);
 }
 
 export async function getLocalFiles(

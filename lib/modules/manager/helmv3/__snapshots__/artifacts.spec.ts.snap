@@ -496,7 +496,7 @@ exports[`modules/manager/helmv3/artifacts returns updated Chart.lock with docker
 exports[`modules/manager/helmv3/artifacts sets repositories from registryAliases 1`] = `
 [
   {
-    "cmd": "helm repo add stable the_stable_url --force-update",
+    "cmd": "helm repo add stable 'the stable_url' --force-update",
     "options": {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

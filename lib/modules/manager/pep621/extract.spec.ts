@@ -1,19 +1,22 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
+import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';
+
+jest.mock('../../../util/fs');
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
 const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');
 
 describe('modules/manager/pep621/extract', () => {
   describe('extractPackageFile()', () => {
-    it('should return null for empty content', function () {
-      const result = extractPackageFile('', 'pyproject.toml');
+    it('should return null for empty content', async () => {
+      const result = await extractPackageFile('', 'pyproject.toml');
       expect(result).toBeNull();
     });
 
-    it('should return null for invalid toml', function () {
-      const result = extractPackageFile(
+    it('should return null for invalid toml', async () => {
+      const result = await extractPackageFile(
         codeBlock`
         [project]
         name =
@@ -23,8 +26,8 @@ describe('modules/manager/pep621/extract', () => {
       expect(result).toBeNull();
     });
 
-    it('should return dependencies for valid content', function () {
-      const result = extractPackageFile(pdmPyProject, 'pyproject.toml');
+    it('should return dependencies for valid content', async () => {
+      const result = await extractPackageFile(pdmPyProject, 'pyproject.toml');
 
       expect(result).toMatchObject({
         extractedConstraints: {
@@ -131,14 +134,14 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
           currentValue: '>12',
-          depName: 'pytest/pytest',
+          depName: 'pytest',
         },
         {
           packageName: 'pytest-mock',
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
           skipReason: 'unspecified-version',
-          depName: 'pytest/pytest-mock',
+          depName: 'pytest-mock',
         },
       ]);
 
@@ -151,34 +154,37 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           skipReason: 'unspecified-version',
-          depName: 'test/pdm',
+          depName: 'pdm',
         },
         {
           packageName: 'pytest-rerunfailures',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=10.2',
-          depName: 'test/pytest-rerunfailures',
+          depName: 'pytest-rerunfailures',
         },
         {
           packageName: 'tox',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           skipReason: 'unspecified-version',
-          depName: 'tox/tox',
+          depName: 'tox',
         },
         {
           packageName: 'tox-pdm',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=0.5',
-          depName: 'tox/tox-pdm',
+          depName: 'tox-pdm',
         },
       ]);
     });
 
-    it('should return dependencies with overwritten pypi registryUrl', function () {
-      const result = extractPackageFile(pdmSourcesPyProject, 'pyproject.toml');
+    it('should return dependencies with overwritten pypi registryUrl', async () => {
+      const result = await extractPackageFile(
+        pdmSourcesPyProject,
+        'pyproject.toml',
+      );
 
       expect(result?.deps).toEqual([
         {
@@ -208,7 +214,7 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
           currentValue: '>12',
-          depName: 'pytest/pytest',
+          depName: 'pytest',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
@@ -219,7 +225,7 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=10.2',
-          depName: 'test/pytest-rerunfailures',
+          depName: 'pytest-rerunfailures',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
@@ -230,7 +236,7 @@ describe('modules/manager/pep621/extract', () => {
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=0.5',
-          depName: 'tox/tox-pdm',
+          depName: 'tox-pdm',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
@@ -239,8 +245,8 @@ describe('modules/manager/pep621/extract', () => {
       ]);
     });
 
-    it('should return dependencies with original pypi registryUrl', function () {
-      const result = extractPackageFile(
+    it('should return dependencies with original pypi registryUrl', async () => {
+      const result = await extractPackageFile(
         codeBlock`
       [project]
       dependencies = [
@@ -270,9 +276,9 @@ describe('modules/manager/pep621/extract', () => {
       ]);
     });
 
-    it('should extract dependencies from hatch environments', function () {
+    it('should extract dependencies from hatch environments', async () => {
       const hatchPyProject = Fixtures.get('pyproject_with_hatch.toml');
-      const result = extractPackageFile(hatchPyProject, 'pyproject.toml');
+      const result = await extractPackageFile(hatchPyProject, 'pyproject.toml');
 
       expect(result?.deps).toEqual([
         {
@@ -322,7 +328,7 @@ describe('modules/manager/pep621/extract', () => {
       ]);
     });
 
-    it('should extract project version', () => {
+    it('should extract project version', async () => {
       const content = codeBlock`
         [project]
         name = "test"
@@ -330,11 +336,11 @@ describe('modules/manager/pep621/extract', () => {
         dependencies = [ "requests==2.30.0" ]
       `;
 
-      const res = extractPackageFile(content, 'pyproject.toml');
+      const res = await extractPackageFile(content, 'pyproject.toml');
       expect(res?.packageFileVersion).toBe('0.0.2');
     });
 
-    it('should extract dependencies from build-system.requires', function () {
+    it('should extract dependencies from build-system.requires', async () => {
       const content = codeBlock`
         [build-system]
         requires = ["hatchling==1.18.0", "setuptools==69.0.3"]
@@ -345,7 +351,7 @@ describe('modules/manager/pep621/extract', () => {
         version = "0.0.2"
         dependencies = [ "requests==2.30.0" ]
       `;
-      const result = extractPackageFile(content, 'pyproject.toml');
+      const result = await extractPackageFile(content, 'pyproject.toml');
 
       expect(result?.deps).toEqual([
         {
@@ -373,6 +379,37 @@ describe('modules/manager/pep621/extract', () => {
           packageName: 'setuptools',
         },
       ]);
+    });
+
+    it('should resolve lockedVersions from pdm.lock', async () => {
+      fs.readLocalFile.mockResolvedValue(
+        Fixtures.get('pyproject_pdm_lockedversion.lock'),
+      );
+
+      const res = await extractPackageFile(
+        Fixtures.get('pyproject_pdm_lockedversion.toml'),
+        'pyproject.toml',
+      );
+      expect(res).toMatchObject({
+        extractedConstraints: { python: '>=3.11' },
+        deps: [
+          {
+            packageName: 'jwcrypto',
+            depName: 'jwcrypto',
+            datasource: 'pypi',
+            depType: 'project.dependencies',
+            currentValue: '>=1.4.1',
+            lockedVersion: '1.4.1',
+          },
+          {
+            packageName: 'pdm-backend',
+            depName: 'pdm-backend',
+            datasource: 'pypi',
+            depType: 'build-system.requires',
+            skipReason: 'unspecified-version',
+          },
+        ],
+      });
     });
   });
 });

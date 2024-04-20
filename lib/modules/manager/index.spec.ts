@@ -59,6 +59,14 @@ describe('modules/manager/index', () => {
       if (!module.extractPackageFile && !module.extractAllPackageFiles) {
         return false;
       }
+      // managers must export either extractPackageFile or a custom updateDependency function in addition to extractAllPackageFiles
+      if (
+        module.extractAllPackageFiles &&
+        !module.extractPackageFile &&
+        !module.updateDependency
+      ) {
+        return false;
+      }
       if (Object.values(module).some((v) => v === undefined)) {
         return false;
       }

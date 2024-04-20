@@ -6,6 +6,7 @@ import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   cachePathExists,
+  cachePathIsFile,
   chmodLocalFile,
   createCacheWriteStream,
   deleteLocalFile,
@@ -33,6 +34,7 @@ import {
   rmCache,
   statLocalFile,
   writeLocalFile,
+  writeSystemFile,
 } from '.';
 
 jest.mock('../exec/env');
@@ -453,6 +455,12 @@ describe('util/fs/index', () => {
     });
   });
 
+  describe('cachePathIsFile', () => {
+    it('returns false if does not exist', async () => {
+      await expect(cachePathIsFile(`a/a/file.txt`)).resolves.toBe(false);
+    });
+  });
+
   describe('readCacheFile', () => {
     it('reads file', async () => {
       await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
@@ -476,6 +484,14 @@ describe('util/fs/index', () => {
       const path = `${tmpDir}/file.txt`;
       await fs.outputFile(path, 'foobar', { encoding: 'utf8' });
       expect(await readSystemFile(path, 'utf8')).toBe('foobar');
+      expect(await readSystemFile(path)).toEqual(Buffer.from('foobar'));
+    });
+  });
+
+  describe('writeSystemFile', () => {
+    it('writes file', async () => {
+      const path = `${tmpDir}/file.txt`;
+      await writeSystemFile(path, 'foobar');
       expect(await readSystemFile(path)).toEqual(Buffer.from('foobar'));
     });
   });

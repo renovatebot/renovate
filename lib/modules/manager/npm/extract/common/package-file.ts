@@ -47,6 +47,7 @@ export function extractPackageJson(
     resolutions: 'resolutions',
     packageManager: 'packageManager',
     overrides: 'overrides',
+    pnpm: 'pnpm',
   };
 
   for (const depType of Object.keys(depTypes) as (keyof typeof depTypes)[]) {
@@ -82,6 +83,28 @@ export function extractPackageJson(
                 val as unknown as NpmManagerData,
               ),
             );
+          } else if (depType === 'pnpm' && depName === 'overrides') {
+            for (const [overridesKey, overridesVal] of Object.entries(
+              val as unknown as NpmPackageDependency,
+            )) {
+              if (is.string(overridesVal)) {
+                dep = {
+                  depName: overridesKey,
+                  depType: 'overrides',
+                  ...extractDependency(depName, overridesKey, overridesVal),
+                };
+                setNodeCommitTopic(dep);
+                dep.prettyDepType = depTypes[depName];
+                deps.push(dep);
+              } else if (is.object(overridesVal)) {
+                deps.push(
+                  ...extractOverrideDepsRec(
+                    [overridesKey],
+                    overridesVal as unknown as NpmManagerData,
+                  ),
+                );
+              }
+            }
           } else {
             // TODO: fix type #22198
             dep = { ...dep, ...extractDependency(depType, depName, val!) };
