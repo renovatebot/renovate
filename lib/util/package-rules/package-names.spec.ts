@@ -17,6 +17,19 @@ describe('util/package-rules/package-names', () => {
       expect(result).toBeFalse();
     });
 
+    it('should return false if not matching', () => {
+      const result = packageNameMatcher.matches(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          matchPackageNames: ['ghi'],
+        },
+      );
+      expect(result).toBeFalse();
+    });
+
     it('should matchPackageName', () => {
       const result = packageNameMatcher.matches(
         {
@@ -57,32 +70,45 @@ describe('util/package-rules/package-names', () => {
       );
       expect(result).toBeFalse();
     });
-  });
 
-  it('should excludePackageName', () => {
-    const result = packageNameMatcher.excludes(
-      {
-        depName: 'abc',
-        packageName: 'def',
-      },
-      {
-        excludePackageNames: ['def', 'ghi'],
-      },
-    );
-    expect(result).toBeTrue();
-  });
+    it('should return false if not matching', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          excludePackageNames: ['ghi'],
+        },
+      );
+      expect(result).toBeFalse();
+    });
 
-  it('should fall back to depName excludePackageName', () => {
-    const result = packageNameMatcher.excludes(
-      {
-        depName: 'abc',
-        packageName: 'def',
-      },
-      {
-        excludePackageNames: ['abc', 'ghi'],
-      },
-    );
-    expect(result).toBeTrue();
-    expect(logger.logger.once.warn).toHaveBeenCalled();
+    it('should excludePackageName', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          excludePackageNames: ['def', 'ghi'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should fall back to depName excludePackageName', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          excludePackageNames: ['abc', 'ghi'],
+        },
+      );
+      expect(result).toBeTrue();
+      expect(logger.logger.once.warn).toHaveBeenCalled();
+    });
   });
 });
