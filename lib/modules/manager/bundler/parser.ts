@@ -220,7 +220,8 @@ export function parseGemfile(content: string): PackageDependency[] {
         for (const arg of node.children) {
           if (arg.type === 'pair') {
             const keyNode = arg.firstChild!;
-            if (keyNode.text === 'group') {
+            const key = extractSymValue(keyNode);
+            if (key === 'group') {
               const valNode = arg.lastChild!;
 
               if (valNode.type === 'string') {
@@ -239,7 +240,7 @@ export function parseGemfile(content: string): PackageDependency[] {
               }
             }
 
-            if (keyNode.text === 'source') {
+            if (key === 'source') {
               const node = arg.lastChild!;
               const source = extractRegistry(node);
               if (source) {

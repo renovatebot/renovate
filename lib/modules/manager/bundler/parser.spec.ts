@@ -45,7 +45,9 @@ describe('modules/manager/bundler/parser', () => {
         ${`gem 'foo', 1`}                                            | ${'foo'} | ${'1'}     | ${undefined}
         ${`gem 'foo', 1.2`}                                          | ${'foo'} | ${'1.2'}   | ${undefined}
         ${`gem 'foo', '1.0.0', group: "test"`}                       | ${'foo'} | ${'1.0.0'} | ${'test'}
+        ${`gem 'foo', '1.0.0', :group => "test"`}                    | ${'foo'} | ${'1.0.0'} | ${'test'}
         ${`gem 'foo', '1.0.0', group: :test`}                        | ${'foo'} | ${'1.0.0'} | ${'test'}
+        ${`gem 'foo', '1.0.0', :group => :test`}                     | ${'foo'} | ${'1.0.0'} | ${'test'}
         ${`gem 'foo', '1.0.0', foo: :foo, group: :test`}             | ${'foo'} | ${'1.0.0'} | ${'test'}
         ${`gem 'foo', '1.0.0', foo: :foo, group: :test, bar: "bar"`} | ${'foo'} | ${'1.0.0'} | ${'test'}
       `('$input', ({ input, depName, version, group }) => {
