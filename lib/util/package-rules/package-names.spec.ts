@@ -1,3 +1,4 @@
+import { logger } from '../../../test/util';
 import { PackageNameMatcher } from './package-names';
 
 describe('util/package-rules/package-names', () => {
@@ -23,7 +24,7 @@ describe('util/package-rules/package-names', () => {
           packageName: 'def',
         },
         {
-          matchPackageNames: ['def'],
+          matchPackageNames: ['def', 'ghi'],
         },
       );
       expect(result).toBeTrue();
@@ -36,15 +37,16 @@ describe('util/package-rules/package-names', () => {
           packageName: 'def',
         },
         {
-          matchPackageNames: ['abc'],
+          matchPackageNames: ['ghi', 'abc'],
         },
       );
       expect(result).toBeTrue();
+      expect(logger.logger.once.warn).toHaveBeenCalled();
     });
   });
 
   describe('exclude', () => {
-    it('should return false if packageFile is not defined', () => {
+    it('should return false if packageName is not defined', () => {
       const result = packageNameMatcher.excludes(
         {
           depName: undefined,
@@ -64,9 +66,23 @@ describe('util/package-rules/package-names', () => {
         packageName: 'def',
       },
       {
-        excludePackageNames: ['def'],
+        excludePackageNames: ['def', 'ghi'],
       },
     );
     expect(result).toBeTrue();
+  });
+
+  it('should fall back to depName excludePackageName', () => {
+    const result = packageNameMatcher.excludes(
+      {
+        depName: 'abc',
+        packageName: 'def',
+      },
+      {
+        excludePackageNames: ['abc', 'ghi'],
+      },
+    );
+    expect(result).toBeTrue();
+    expect(logger.logger.once.warn).toHaveBeenCalled();
   });
 });
