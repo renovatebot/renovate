@@ -4,10 +4,10 @@ describe('util/package-rules/package-names', () => {
   const packageNameMatcher = new PackageNameMatcher();
 
   describe('match', () => {
-    it('should return false if packageFile is not defined', () => {
+    it('should return false if packageName is not defined', () => {
       const result = packageNameMatcher.matches(
         {
-          depName: undefined,
+          packageName: undefined,
         },
         {
           matchPackageNames: ['@opentelemetry/http'],
@@ -19,7 +19,6 @@ describe('util/package-rules/package-names', () => {
     it('should matchPackageName', () => {
       const result = packageNameMatcher.matches(
         {
-          depName: 'abc',
           packageName: 'def',
         },
         {
@@ -28,26 +27,13 @@ describe('util/package-rules/package-names', () => {
       );
       expect(result).toBeTrue();
     });
-
-    it('should fall back to matching depName', () => {
-      const result = packageNameMatcher.matches(
-        {
-          depName: 'abc',
-          packageName: 'def',
-        },
-        {
-          matchPackageNames: ['abc'],
-        },
-      );
-      expect(result).toBeTrue();
-    });
   });
 
   describe('exclude', () => {
-    it('should return false if packageFile is not defined', () => {
+    it('should return false if packageName is not defined', () => {
       const result = packageNameMatcher.excludes(
         {
-          depName: undefined,
+          packageName: undefined,
         },
         {
           excludePackageNames: ['@opentelemetry/http'],
@@ -60,7 +46,6 @@ describe('util/package-rules/package-names', () => {
   it('should excludePackageName', () => {
     const result = packageNameMatcher.excludes(
       {
-        depName: 'abc',
         packageName: 'def',
       },
       {
