@@ -681,9 +681,9 @@ export async function isBranchModified(
     includedAuthors.delete(gitAuthorEmail);
   }
 
-  ignoredAuthors?.forEach((ignoredAuthor) => {
+  for (const ignoredAuthor of ignoredAuthors ?? []) {
     includedAuthors.delete(ignoredAuthor);
-  });
+  }
 
   if (includedAuthors.size === 0) {
     // authors all match - branch has not been modified
