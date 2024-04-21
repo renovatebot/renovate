@@ -51,9 +51,9 @@ This includes the following:
 - Applying package rules dependent on the labels
 - Including the sourceUrls in PR bodies
 
-## `RENOVATE_X_DOCKER_HUB_TAGS`
+## `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE`
 
-If set to any value, Renovate will use the Docker Hub API (`https://hub.docker.com`) to fetch tags instead of the normal Docker API for images pulled from `https://index.docker.io`.
+If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
 
 ## `RENOVATE_X_DOCKER_MAX_PAGES`
 
