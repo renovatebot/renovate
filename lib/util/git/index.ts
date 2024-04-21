@@ -681,7 +681,7 @@ export async function isBranchModified(
     includedAuthors.delete(gitAuthorEmail);
   }
 
-  for (const ignoredAuthor of ignoredAuthors ?? []) {
+  for (const ignoredAuthor of ignoredAuthors) {
     includedAuthors.delete(ignoredAuthor);
   }
 
