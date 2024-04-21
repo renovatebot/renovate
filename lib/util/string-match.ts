@@ -19,6 +19,9 @@ export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {
 }
 
 export function matchRegexOrGlob(input: string, pattern: string): boolean {
+  if (pattern === '*') {
+    return true;
+  }
   const predicate = getRegexOrGlobPredicate(pattern);
   return predicate(input);
 }

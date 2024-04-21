@@ -14,6 +14,10 @@ describe('util/string-match', () => {
       expect(matchRegexOrGlobList('test', ['/test2/'])).toBeFalse();
     });
 
+    it('returns true if star', () => {
+      expect(matchRegexOrGlobList('&&&', ['*'])).toBeTrue();
+    });
+
     it('returns true if any match', () => {
       expect(matchRegexOrGlobList('test', ['test', '/test2/'])).toBeTrue();
     });
