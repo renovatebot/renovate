@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
+import { matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
 
 export class PackagePrefixesMatcher extends Matcher {
@@ -15,9 +16,10 @@ export class PackagePrefixesMatcher extends Matcher {
       return false;
     }
 
-    return matchPackagePrefixes.some((prefix) =>
-      packageName.startsWith(prefix),
+    const massagedPatterns = matchPackagePrefixes.map(
+      (pattern) => `${pattern}**`,
     );
+    return matchRegexOrGlobList(packageName, massagedPatterns);
   }
 
   override excludes(
@@ -32,8 +34,9 @@ export class PackagePrefixesMatcher extends Matcher {
       return false;
     }
 
-    return excludePackagePrefixes.some((prefix) =>
-      packageName.startsWith(prefix),
+    const massagedPatterns = excludePackagePrefixes.map(
+      (pattern) => `${pattern}**`,
     );
+    return matchRegexOrGlobList(packageName, massagedPatterns);
   }
 }

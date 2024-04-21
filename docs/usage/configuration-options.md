@@ -2828,6 +2828,8 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 
 ### matchDepNames
 
+This field behaves the same as `matchPackageNames` except it matches against `depName` instead of `packageName`.
+
 ### matchDepPatterns
 
 ### matchNewValue
@@ -2866,13 +2868,17 @@ For more details on this syntax see Renovate's [string pattern matching document
 
 ### matchPackageNames
 
-Use this field if you want to have one or more exact name matches in your package rule.
-See also `excludePackageNames`.
+Use this field to match against the `packageName` field.
+This matching can be an exact match, Glob match, or Regular Express match.
 
-```json
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+Note that Glob matching (including exact name matching) is case-insensitive.
+
+```json title="exact name match"
 {
   "packageRules": [
     {
+      "matchDatasources": ["npm"],
       "matchPackageNames": ["angular"],
       "rangeStrategy": "pin"
     }
@@ -2880,25 +2886,39 @@ See also `excludePackageNames`.
 }
 ```
 
-The above will configure `rangeStrategy` to `pin` only for the package `angular`.
+The above will configure `rangeStrategy` to `pin` only for the npm package `angular`.
 
-### matchPackagePatterns
-
-Use this field if you want to have one or more package names patterns in your package rule.
-See also `excludePackagePatterns`.
-
-```json
+```json title="prefix match using Glob"
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^angular"],
-      "rangeStrategy": "replace"
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["@angular/*", "!@angular/abc"],
+      "groupName": "Angular"
     }
   ]
 }
 ```
 
-The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+The above will group together any npm package which starts with `@angular/` except `@angular/abc`.
+
+```json title="pattern match using RegEx"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["/angular/"],
+      "groupName": "Angular"
+    }
+  ]
+}
+```
+
+The above will group together any npm package which contains the string `angular`.
+
+### matchPackagePatterns
+
+Use this field if you want to have one or more package names patterns in your package rule.
 
 ### matchPackagePrefixes
 
