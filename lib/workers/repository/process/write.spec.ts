@@ -173,6 +173,9 @@ describe('workers/repository/process/write', () => {
           upgrades: [
             partial<BranchUpgradeConfig>({
               manager: 'unknown-manager',
+              env: {
+                SOME_VAR: 'SOME_VALUE',
+              },
             }),
           ],
         },

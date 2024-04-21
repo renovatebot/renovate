@@ -1,0 +1,54 @@
+body:
+  - type: dropdown
+    id: question-type
+    attributes:
+      label: What would you like help with?
+      options:
+        - 'I would like help with my configuration'
+        - 'I think I found a bug'
+        - 'Other'
+
+  - type: dropdown
+    id: how-are-you-running-renovate
+    attributes:
+      label: How are you running Renovate?
+      options:
+        - 'Mend Renovate hosted app on github.com'
+        - 'Self-hosted'
+
+  - type: input
+    id: self-hosted-version
+    attributes:
+      label: If you're self-hosting Renovate, tell us which platform (GitHub, GitLab, etc) and which version of Renovate.
+    validations:
+      required: false
+
+  - type: textarea
+    id: the-question
+    attributes:
+      label: Please tell us more about your question or problem
+    validations:
+      required: true
+
+  - type: textarea
+    id: debug-logs
+    attributes:
+      label: Logs (if relevant)
+      description: |
+        If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
+        If you are using the Renovate App, log into [Renovate's app dashboard](https://developer.mend.io) and locate the correct job log for when the problem occurred (e.g. when the PR was created).
+        Try to paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others don't have permissions to view them).
+        If you're not sure about the relevant parts of the log, then feel free to post the full log to a [Github Gist](https://gist.github.com/) and link to it.
+        Try to highlight the important logs into the issue itself.
+      value: |
+        <details><summary>Logs</summary>
+
+        ```
+
+        Replace this text with your logs, between the starting and ending triple backticks
+
+        ```
+
+        </details>
+    validations:
+      required: false

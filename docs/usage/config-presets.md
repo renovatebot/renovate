@@ -33,6 +33,8 @@ Presets can be nested.
 
 Presets should be hosted in repositories, which usually means the same platform host as Renovate is running against.
 
+Alternatively, Renovate can fetch preset files from an HTTP server.
+
 <!-- prettier-ignore -->
 !!! warning
     We deprecated npm-based presets.
@@ -163,7 +165,7 @@ Here is how you would use these in your Renovate config:
 In short, the number of `{{argx}}` parameters in the definition is how many parameters you need to provide.
 Parameters must be strings, non-quoted, and separated by commas if there are more than one.
 
-If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself.
+If you find that you are repeating config a lot, you might consider publishing one of these types of parameterized presets yourself.
 Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository, see [Contributing to presets](#contributing-to-presets).
 
 ## GitHub-hosted Presets
@@ -207,6 +209,28 @@ Renovate also supports local presets, e.g. presets that are hosted on the same p
 This is especially helpful in self-hosted scenarios where public presets cannot be used.
 Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`.
 Renovate will determine the current platform and look up the preset from there.
+
+## Fetching presets from an HTTP server
+
+If your desired platform is not yet supported, or if you want presets to work when you run Renovate with `--platform=local`, you can specify presets using HTTP URLs:
+
+```json
+{
+  "extends": [
+    "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain"
+  ]
+}
+```
+
+Parameters are supported similar to other methods:
+
+```json
+{
+  "extends": [
+    "http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain(param)"
+  ]
+}
+```
 
 ## Contributing to presets
 

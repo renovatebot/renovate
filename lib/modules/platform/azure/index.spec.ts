@@ -1501,7 +1501,7 @@ describe('modules/platform/azure/index', () => {
   });
 
   describe('Reviewers', () => {
-    it('addReviewers', async () => {
+    it('addReviewers one valid', async () => {
       await initRepo({ repository: 'some/repo' });
       azureApi.gitApi.mockImplementation(
         () =>
@@ -1524,6 +1524,33 @@ describe('modules/platform/azure/index', () => {
       );
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'required:def']);
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      expect(logger.once.info).toHaveBeenCalledTimes(1);
+    });
+
+    it('addReviewers all valid', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            getRepositories: jest.fn(() => [{ id: '1', project: { id: 2 } }]),
+            createPullRequestReviewer: jest.fn(),
+          }) as any,
+      );
+      azureApi.coreApi.mockImplementation(
+        () =>
+          ({
+            getTeams: jest.fn(() => [
+              { id: 3, name: 'abc' },
+              { id: 4, name: 'def' },
+            ]),
+            getTeamMembersWithExtendedProperties: jest.fn(() => [
+              { identity: { displayName: 'jyc', uniqueName: 'jyc', id: 123 } },
+            ]),
+          }) as any,
+      );
+      await azure.addReviewers(123, ['required:jyc']);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      expect(logger.once.info).toHaveBeenCalledTimes(0);
     });
   });
 

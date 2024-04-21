@@ -17,15 +17,24 @@ You can "activate" the manager by specifying a `fileMatch` pattern such as:
 }
 ```
 
+`pip-compile` reads the output files to extract the arguments passed to the original command, as such the `fileMatch` must be configured for `*.txt` files and not `*.in`.
+
 ### Assumption of header with a command
 
-If Renovate matches a `pip-compile` output file it will extract original command that was used to create it from header in this file. Because of that `pip-compile` manager poses restrictions on how this file is generated:
+As Renovate matches a `pip-compile` output file it will extract original command that was used to create it from header in this file.
+Because of that `pip-compile` manager poses restrictions on how this file is generated:
 
 - Use default header generation, don't use `--no-header` option.
 - Pass all source files explicitly.
 
-In turn `pip-compile` manager will find all source files and parse them as package files.
-Currently only `*.in` files associated with `pip_requirements` manager and `setup.py` files associated with `pip_setup` manager are handled.
+In turn `pip-compile` manager will find all source files and parse them as package files using their respective managers.
+
+The following files are currently supported:
+
+| Source filename | Manager            |
+| --------------: | ------------------ |
+|      `setup.py` | `pip_setup`        |
+|          `*.in` | `pip_requirements` |
 
 Example header:
 
@@ -74,3 +83,9 @@ Renovate reads the `requirements.txt` file and extracts these `pip-compile` argu
 - `--output-file`
 
 All other allowed `pip-compile` arguments will be passed over without modification.
+
+### Transitive / indirect dependencies
+
+This manager detects dependencies that only appear in lock files.
+They are disabled by default but can be forced to enable by vulnerability alerts.
+They will be upgraded with `--upgrade-package` option.

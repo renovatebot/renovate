@@ -491,14 +491,16 @@ describe('modules/datasource/docker/index', () => {
         .scope(gcrUrl)
         .get('/')
         .reply(200)
-        .head('/some-project/some-package/manifests/some-tag')
+        .head('/google.com/some-project/some-package/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
 
       hostRules.find.mockReturnValue({});
       const res = await getDigest(
         {
           datasource: 'docker',
-          packageName: 'eu.gcr.io/some-project/some-package',
+          registryUrl: 'https://eu.gcr.io',
+          lookupName: 'google.com/some-project/some-package',
+          packageName: 'eu.gcr.io/google.com/some-project/some-package',
         },
         'some-tag',
       );
@@ -1457,6 +1459,7 @@ describe('modules/datasource/docker/index', () => {
           packageName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
         }),
       ).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://123456789.dkr.ecr.us-east-1.amazonaws.com',
         releases: [],
       });
@@ -1509,6 +1512,7 @@ describe('modules/datasource/docker/index', () => {
           packageName: 'public.ecr.aws/amazonlinux/amazonlinux',
         }),
       ).toEqual({
+        lookupName: 'amazonlinux/amazonlinux',
         registryUrl: 'https://public.ecr.aws',
         releases: [],
       });
@@ -1567,6 +1571,7 @@ describe('modules/datasource/docker/index', () => {
             packageName: 'ecr-proxy.company.com/node',
           }),
         ).toEqual({
+          lookupName: 'node',
           registryUrl: 'https://ecr-proxy.company.com',
           releases: [],
           sourceUrl: 'https://github.com/renovatebot/renovate',
@@ -1791,21 +1796,25 @@ describe('modules/datasource/docker/index', () => {
       process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
       httpMock
         .scope(dockerHubUrl)
-        .get('/library/node/tags?page_size=1000')
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(200, {
-          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000`,
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
           results: [
             {
+              id: 2,
+              last_updated: '2021-01-01T00:00:00.000Z',
               name: '1.0.0',
               tag_last_pushed: '2021-01-01T00:00:00.000Z',
               digest: 'aaa',
             },
           ],
         })
-        .get('/library/node/tags?page=2&page_size=1000')
+        .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
         .reply(200, {
           results: [
             {
+              id: 1,
+              last_updated: '2020-01-01T00:00:00.000Z',
               name: '0.9.0',
               tag_last_pushed: '2020-01-01T00:00:00.000Z',
               digest: 'bbb',
@@ -1833,7 +1842,7 @@ describe('modules/datasource/docker/index', () => {
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
-        .get('/library/node/tags?page_size=1000')
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(404);
       httpMock
         .scope(baseUrl)
@@ -1861,21 +1870,25 @@ describe('modules/datasource/docker/index', () => {
       process.env.RENOVATE_X_DOCKER_HUB_TAGS = 'true';
       httpMock
         .scope(dockerHubUrl)
-        .get('/library/node/tags?page_size=1000')
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(200, {
-          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000`,
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
           results: [
             {
+              id: 2,
+              last_updated: '2021-01-01T00:00:00.000Z',
               name: '1.0.0',
               tag_last_pushed: '2021-01-01T00:00:00.000Z',
               digest: 'aaa',
             },
           ],
         })
-        .get('/library/node/tags?page=2&page_size=1000')
+        .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
         .reply(200, {
           results: [
             {
+              id: 1,
+              last_updated: '2020-01-01T00:00:00.000Z',
               name: '0.9.0',
               tag_last_pushed: '2020-01-01T00:00:00.000Z',
               digest: 'bbb',
@@ -2026,6 +2039,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2081,6 +2095,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2144,6 +2159,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
         sourceUrl: 'https://github.com/renovatebot/renovate',
@@ -2171,6 +2187,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2195,6 +2212,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2216,6 +2234,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2266,6 +2285,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2320,6 +2340,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2350,6 +2371,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2404,6 +2426,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'registry.company.com/node',
       });
       expect(res).toEqual({
+        lookupName: 'node',
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2463,6 +2486,7 @@ describe('modules/datasource/docker/index', () => {
         packageName: 'ghcr.io/visualon/drone-git',
       });
       expect(res).toEqual({
+        lookupName: 'visualon/drone-git',
         registryUrl: 'https://ghcr.io',
         sourceUrl: 'https://github.com/visualon/drone-git',
         releases: [{ version: '1.0.0' }],

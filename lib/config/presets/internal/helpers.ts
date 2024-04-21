@@ -37,7 +37,7 @@ export const presets: Record<string, Preset> = {
         extends: ['helpers:pinGitHubActionDigests'],
         extractVersion: '^(?<version>v\\d+\\.\\d+\\.\\d+)$',
         versioning:
-          'regex:^v(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
+          'regex:^v?(?<major>\\d+)(\\.(?<minor>\\d+)\\.(?<patch>\\d+))?$',
       },
     ],
   },

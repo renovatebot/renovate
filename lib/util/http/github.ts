@@ -19,7 +19,6 @@ import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
   HttpOptions,
-  HttpRequestOptions,
   HttpResponse,
   InternalHttpOptions,
 } from './types';
@@ -134,6 +133,8 @@ function handleGotError(
     if (
       message.includes('Review cannot be requested from pull request author')
     ) {
+      return err;
+    } else if (err.body?.errors?.find((e: any) => e.field === 'milestone')) {
       return err;
     } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
@@ -272,7 +273,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: InternalHttpOptions & GithubHttpOptions & HttpRequestOptions<T>,
+    options?: InternalHttpOptions & GithubHttpOptions,
     okToRetry = true,
   ): Promise<HttpResponse<T>> {
     const opts: GithubHttpOptions = {
@@ -338,7 +339,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
-                { ...opts, paginate: false, repoCache: false },
+                { ...opts, paginate: false, cacheProvider: undefined },
                 okToRetry,
               );
             },

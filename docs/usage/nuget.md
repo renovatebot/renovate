@@ -78,15 +78,26 @@ So Renovate behaves like the official NuGet client.
 
 #### v3 feed URL not ending with index.json
 
-If a `v3` feed URL does not end with `index.json`, you must append `#protocolVersion=3` to the registry URL:
+If a `v3` feed URL does not end with `index.json`, you must specify the version explicitly.
 
-```json
-{
-  "nuget": {
-    "registryUrls": ["http://myV3feed#protocolVersion=3"]
+- If the feed is defined in a `NuGet.config` file set the `protocolVersion` attribute to `3`:
+
+  ```xml
+  <packageSources>
+     <clear />
+     <add key="myV3feed" value="http://myV3feed" protocolVersion="3" />
+  </packageSources>
+  ```
+
+- If the feed is defined via Renovate configuration append `#protocolVersion=3` to the registry URL:
+
+  ```json
+  {
+    "nuget": {
+      "registryUrls": ["http://myV3feed#protocolVersion=3"]
+    }
   }
-}
-```
+  ```
 
 You may need this workaround when you use the JFrog Artifactory.
 
