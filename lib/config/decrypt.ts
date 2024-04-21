@@ -101,14 +101,14 @@ export async function tryDecrypt(
     if (is.string(decryptedStr)) {
       logger.warn(
         { keyName },
-        'Encrypted value is using deprecated default padding, please change to using PGP.',
+        'Encrypted value is using deprecated default padding, please change to using PGP encryption.',
       );
     } else {
       decryptedStr = tryDecryptPublicKeyPKCS1(privateKey, encryptedStr);
       if (is.string(decryptedStr)) {
         logger.warn(
           { keyName },
-          'Encrypted value is using deprecated PKCS1 padding, please change to using PGP.',
+          'Encrypted value is using deprecated PKCS1 padding, please change to using PGP encryption.',
         );
       }
     }
