@@ -548,6 +548,8 @@ const options: RenovateOptions[] = [
     stage: 'global',
     type: 'string',
     globalOnly: true,
+    deprecationMsg:
+      'Instead of configuring log file path in the file config. Use the `LOG_FILE` environment variable instead.',
   },
   {
     name: 'logFileLevel',
@@ -556,6 +558,8 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'debug',
     globalOnly: true,
+    deprecationMsg:
+      'Instead of configuring log file level in the file config. Use the `LOG_FILE_LEVEL` environment variable instead.',
   },
   {
     name: 'logContext',
