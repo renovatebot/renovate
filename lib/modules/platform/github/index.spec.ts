@@ -3889,6 +3889,40 @@ describe('modules/platform/github/index', () => {
       );
       expect(logger.logger.error).not.toHaveBeenCalled();
     });
+
+    it('returns normalized names for PIP ecosystem', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              vulnerabilityAlerts: {
+                edges: [
+                  {
+                    node: {
+                      securityAdvisory: { severity: 'HIGH', references: [] },
+                      securityVulnerability: {
+                        package: {
+                          ecosystem: 'PIP',
+                          name: 'FrIeNdLy-._.-bArD',
+                          range: '0.0.2',
+                        },
+                        vulnerableVersionRange: '0.0.2',
+                        firstPatchedVersion: { identifier: '0.0.3' },
+                      },
+                      vulnerableManifestFilename: 'foo',
+                      vulnerableManifestPath: 'bar',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+      const res = await github.getVulnerabilityAlerts();
+      expect(res[0].securityVulnerability.package.name).toBe('friendly-bard');
+    });
   });
 
   describe('getJsonFile()', () => {
