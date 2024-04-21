@@ -1388,6 +1388,23 @@ describe('config/validation', () => {
   });
 
   describe('validateConfig() -> globaOnly options', () => {
+    it('returns deprecation warnings', async () => {
+      const config = {
+        logFile: 'something',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'Using logFile to specify log file name is deprecated now. Please use the enviroment variable LOG_FILE instead',
+          topic: 'Deprecation Warning',
+        },
+      ]);
+    });
+
     it('validates hostRules.headers', async () => {
       const config = {
         hostRules: [
@@ -1501,6 +1518,23 @@ describe('config/validation', () => {
   });
 
   describe('validate globalOptions()', () => {
+    it('binarySource', async () => {
+      const config = {
+        binarySource: 'invalid' as never,
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toEqual([
+        {
+          message:
+            'Invalid value `invalid` for `binarySource`. The allowed values are docker, global, install, hermit.',
+          topic: 'Configuration Error',
+        },
+      ]);
+    });
+
     describe('validates string type options', () => {
       it('binarySource', async () => {
         const config = {
