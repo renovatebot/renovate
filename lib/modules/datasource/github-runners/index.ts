@@ -16,9 +16,9 @@ export class GithubRunnersDatasource extends Datasource {
       { version: '16.04', isDeprecated: true },
     ],
     macos: [
-      { version: '14', isStable: false },
-      { version: '14-large', isStable: false },
-      { version: '14-xlarge', isStable: false },
+      { version: '14' },
+      { version: '14-large' },
+      { version: '14-xlarge' },
       { version: '13' },
       { version: '13-large' },
       { version: '13-xlarge' },

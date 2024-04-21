@@ -396,11 +396,13 @@ export async function validateConfig(
               'matchDepTypes',
               'matchDepNames',
               'matchDepPatterns',
+              'matchDepPrefixes',
               'matchPackageNames',
               'matchPackagePatterns',
               'matchPackagePrefixes',
               'excludeDepNames',
               'excludeDepPatterns',
+              'excludeDepPrefixes',
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
@@ -712,19 +714,28 @@ export async function validateConfig(
                   if (!allowedKeys.includes(subKey)) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: key is not allowed`,
+                      message: `Invalid \`${currentPath}.${subKey}\` configuration: key is not allowed`,
                     });
                   } else if (subKey === 'transformTemplates') {
                     if (!is.array(subValue, is.string)) {
                       errors.push({
                         topic: 'Configuration Error',
-                        message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is not an array of string`,
+                        message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of string`,
+                      });
+                    }
+                  } else if (subKey === 'description') {
+                    if (
+                      !(is.string(subValue) || is.array(subValue, is.string))
+                    ) {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of strings`,
                       });
                     }
                   } else if (!is.string(subValue)) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is a string`,
+                      message: `Invalid \`${currentPath}.${subKey}\` configuration: is a string`,
                     });
                   }
                 }

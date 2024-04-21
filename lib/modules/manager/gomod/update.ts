@@ -34,6 +34,7 @@ export function updateDependency({
       return null;
     }
     const lineToChange = lines[upgrade.managerData.lineNumber];
+    logger.trace({ upgrade, lineToChange }, 'go.mod current line');
     if (
       !lineToChange.includes(depNameNoVersion) &&
       !lineToChange.includes('rethinkdb/rethinkdb-go.v5')
@@ -46,7 +47,7 @@ export function updateDependency({
     }
     let updateLineExp: RegExp | undefined;
 
-    if (depType === 'golang') {
+    if (depType === 'golang' || depType === 'toolchain') {
       updateLineExp = regEx(
         /(?<depPart>(?:toolchain )?go)(?<divider>\s*)([^\s]+|[\w]+)/,
       );
