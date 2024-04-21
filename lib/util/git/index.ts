@@ -654,7 +654,7 @@ export async function isBranchModified(
   logger.debug('branch.isModified(): using git to calculate');
 
   await syncGit();
-  const committedAuthors: Set<string> = new Set();
+  const committedAuthors = new Set<string>();
   try {
     const commits = await git.log([
       `origin/${baseBranch}..origin/${branchName}`,
