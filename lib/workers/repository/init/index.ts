@@ -56,7 +56,7 @@ export async function initRepo(
   setRepositoryLogLevelRemaps(config.logLevelRemap);
   if (config.mode === 'silent') {
     logger.info(
-      'Repository is running with mode=silent and will not make Issues or Prs by default',
+      'Repository is running with mode=silent and will not make Issues or PRs by default',
     );
   }
   checkIfConfigured(config);
