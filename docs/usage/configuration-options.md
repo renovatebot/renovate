@@ -2907,14 +2907,14 @@ The above will group together any npm package which starts with `@angular/` exce
   "packageRules": [
     {
       "matchDatasources": ["npm"],
-      "matchPackageNames": ["/angular/"],
+      "matchPackageNames": ["/^angular/"],
       "groupName": "Angular"
     }
   ]
 }
 ```
 
-The above will group together any npm package which contains the string `angular`.
+The above will group together any npm package which starts with the string `angular`.
 
 ### matchPackagePatterns
 
