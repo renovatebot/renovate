@@ -5,9 +5,10 @@ export function normalizeNamePerEcosystem({
   name,
   ecosystem,
 }: VulnerabilityPackage): string {
-  if (ecosystem === 'PIP') {
-    return normalizePythonDepName(name);
-  } else {
-    return name;
+  switch (ecosystem) {
+    case 'pip':
+      return normalizePythonDepName(name);
+    default:
+      return name;
   }
 }
