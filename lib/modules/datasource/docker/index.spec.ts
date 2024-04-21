@@ -1224,6 +1224,7 @@ describe('modules/datasource/docker/index', () => {
 
   describe('getReleases', () => {
     it('returns null if no token', async () => {
+      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
