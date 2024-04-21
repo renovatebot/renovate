@@ -5,6 +5,38 @@ Renovate string matching syntax for some configuration options allows you, as us
 - [`minimatch`](https://github.com/isaacs/minimatch) glob patterns, including exact strings matches
 - regular expression (regex) patterns
 
+The following fields support this pattern matching:
+
+- `allowedEnv`
+- `allowedHeaders`
+- `autodiscoverProjects`
+- `matchRepositories`
+
+## Special case: Match everything
+
+The value `*` is a special case which means "match everything".
+It is not valid to combine `*` with any other positive or negative match.
+
+```json title="Example of valid wildcard use"
+{
+  "allowedEnv": ["*"]
+}
+```
+
+```json title="Example of invalid wildcard use with additional match"
+{
+  "allowedEnv": ["*", "ABC"]
+}
+```
+
+```json title="Example of invalid wildcard use with negation"
+{
+  "allowedEnv": ["*", "!ABC"]
+}
+```
+
+In the latter case, the `*` can be ommitted and achieve the same thing.
+
 ## Regex matching
 
 A valid regex pattern:
@@ -75,6 +107,9 @@ For example, the pattern `["/^abc/", "!/^abcd/", "!/abce/"]`:
 
 - matches `"abc"` and `"abcf"`
 - does _not_ match `"foo"`, `"abcd"`, `"abce"`, or `"abcdef"`
+
+If you find yourself in a situation where you need to positive-match a string which starts with `!`, then you need to do so using a regular expression pattern.
+For example, `["/^!abc$/"]` will positively match against the string `"!abc"`.
 
 ## Usage in Renovate configuration options
 
