@@ -3,10 +3,6 @@ import { extractPackageFile } from '.';
 
 describe('modules/manager/devcontainer/extract', () => {
   describe('extractPackageFile()', () => {
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
     it('returns null when the dev container JSON file is empty', () => {
       // Arrange
       const content = '';
