@@ -40,6 +40,7 @@ export interface BranchUpgradeConfig
   currentDigestShort?: string;
   currentValue?: string;
   depIndex?: number;
+  depTypes?: string[];
 
   displayPending?: string;
   excludeCommitPaths?: string[];
