@@ -666,6 +666,16 @@ Use the `extends` field instead of this if, for example, you need the ability fo
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
 
+## httpCacheTtlDays
+
+This option sets the number of days that Renovate will cache HTTP responses.
+The default value is 90 days.
+Value of `0` means no caching.
+
+<!-- prettier-ignore -->
+!!! warning
+    When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
+
 ## includeMirrors
 
 By default, Renovate does not autodiscover repositories that are mirrors.

@@ -4,6 +4,10 @@ import { regEx } from './regex';
 
 export type StringMatchPredicate = (s: string) => boolean;
 
+export interface matchRegexOrGlobOptions {
+  massagePattern?: boolean;
+}
+
 export function isDockerDigest(input: string): boolean {
   return /^sha256:[a-f0-9]{64}$/i.test(input);
 }
@@ -18,7 +22,15 @@ export function getRegexOrGlobPredicate(pattern: string): StringMatchPredicate {
   return (x: string): boolean => mm.match(x);
 }
 
-export function matchRegexOrGlob(input: string, pattern: string): boolean {
+export function matchRegexOrGlob(
+  input: string,
+  rawPattern: string,
+  options?: matchRegexOrGlobOptions,
+): boolean {
+  const pattern = options?.massagePattern
+    ? massagePattern(rawPattern)
+    : rawPattern;
+
   const predicate = getRegexOrGlobPredicate(pattern);
   return predicate(input);
 }
@@ -26,6 +38,7 @@ export function matchRegexOrGlob(input: string, pattern: string): boolean {
 export function matchRegexOrGlobList(
   input: string,
   patterns: string[],
+  options?: matchRegexOrGlobOptions,
 ): boolean {
   if (!patterns.length) {
     return false;
@@ -37,7 +50,9 @@ export function matchRegexOrGlobList(
   );
   if (
     positivePatterns.length &&
-    !positivePatterns.some((pattern) => matchRegexOrGlob(input, pattern))
+    !positivePatterns.some((pattern) =>
+      matchRegexOrGlob(input, pattern, options),
+    )
   ) {
     return false;
   }
@@ -48,7 +63,9 @@ export function matchRegexOrGlobList(
   );
   if (
     negativePatterns.length &&
-    !negativePatterns.every((pattern) => matchRegexOrGlob(input, pattern))
+    !negativePatterns.every((pattern) =>
+      matchRegexOrGlob(input, pattern, options),
+    )
   ) {
     return false;
   }
@@ -93,4 +110,8 @@ export function getRegexPredicate(input: string): StringMatchPredicate | null {
     }
   }
   return null;
+}
+
+function massagePattern(pattern: string): string {
+  return pattern === '^*$' || pattern === '*' ? '**' : `/${pattern}/`;
 }

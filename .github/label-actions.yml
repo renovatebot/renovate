@@ -59,7 +59,7 @@
     <details><summary>Select me to read instructions</summary>
 
 
-    If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
+    Read the [Renovate docs, troubleshooting, self-hosted](https://docs.renovatebot.com/troubleshooting/#self-hosted) to learn how to find the logs.
 
     </details>
 

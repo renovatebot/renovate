@@ -237,6 +237,7 @@ describe('config/validation', () => {
       const config = {
         customDatasources: {
           foo: {
+            description: 3,
             randomKey: '',
             defaultRegistryUrlTemplate: [],
             transformTemplates: [{}],
@@ -247,15 +248,19 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `customDatasources.customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
+            'Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
         },
         {
           message:
-            'Invalid `customDatasources.customDatasources.randomKey` configuration: key is not allowed',
+            'Invalid `customDatasources.description` configuration: is not an array of strings',
         },
         {
           message:
-            'Invalid `customDatasources.customDatasources.transformTemplates` configuration: is not an array of string',
+            'Invalid `customDatasources.randomKey` configuration: key is not allowed',
+        },
+        {
+          message:
+            'Invalid `customDatasources.transformTemplates` configuration: is not an array of string',
         },
       ]);
     });

@@ -456,7 +456,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.3.13',
+    default: 'ghcr.io/containerbase/sidecar:10.3.15',
     globalOnly: true,
   },
   {
@@ -1381,6 +1381,34 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchDepPrefixes',
+    description:
+      'Dep names prefixes to match. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
+    name: 'excludeDepPrefixes',
+    description:
+      'Dep names prefixes to exclude. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
     name: 'matchPackagePatterns',
     description:
       'Package name patterns to match. Valid only within a `packageRules` object.',
@@ -2192,6 +2220,7 @@ const options: RenovateOptions[] = [
     description: 'Customize sections in the Dependency Dashboard issue.',
     type: 'object',
     default: {},
+    freeChoice: true,
     additionalProperties: {
       type: 'string',
     },
@@ -2977,6 +3006,14 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: null,
     supportedPlatforms: ['github'],
+  },
+  {
+    name: 'httpCacheTtlDays',
+    description: 'Maximum duration in days to keep HTTP cache entries.',
+    type: 'integer',
+    stage: 'repository',
+    default: 90,
+    globalOnly: true,
   },
 ];
 

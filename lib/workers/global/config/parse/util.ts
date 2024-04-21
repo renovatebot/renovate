@@ -1,3 +1,5 @@
+import { dequal } from 'dequal';
+import { massageConfig } from '../../../../config/massage';
 import { migrateConfig } from '../../../../config/migration';
 import type { RenovateConfig } from '../../../../config/types';
 import { validateConfig } from '../../../../config/validation';
@@ -14,8 +16,13 @@ export async function migrateAndValidateConfig(
       `${configType} needs migrating`,
     );
   }
+  const massagedConfig = massageConfig(migratedConfig);
+  // log only if it's changed
+  if (!dequal(migratedConfig, massagedConfig)) {
+    logger.trace({ config: massagedConfig }, 'Post-massage config');
+  }
 
-  const { warnings, errors } = await validateConfig('global', migratedConfig);
+  const { warnings, errors } = await validateConfig('global', massagedConfig);
 
   if (warnings.length) {
     logger.warn(
@@ -27,5 +34,5 @@ export async function migrateAndValidateConfig(
     logger.warn({ errors }, `Config validation errors found in ${configType}`);
   }
 
-  return migratedConfig;
+  return massagedConfig;
 }
