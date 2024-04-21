@@ -141,6 +141,10 @@ This feature is in private beta.
 If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
 The expected value for this environment variable is a JSON array of strings.
 
+## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
+
+If set to any value, Renovate will download `nupkg` files for determining package metadata.
+
 ## `RENOVATE_X_PLATFORM_VERSION`
 
 Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
