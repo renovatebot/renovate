@@ -27,6 +27,9 @@ export function matchRegexOrGlob(
   rawPattern: string,
   options?: matchRegexOrGlobOptions,
 ): boolean {
+  if (rawPattern === '*') {
+    return true;
+  }
   const pattern = options?.massagePattern
     ? massagePattern(rawPattern)
     : rawPattern;
