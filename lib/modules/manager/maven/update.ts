@@ -101,6 +101,7 @@ export function bumpPackageVersion(
     } else {
       // A release version without any qualifier is present.
       // Therefore the SNAPSHOT qualifier will be added if a prerelease is requested.
+      // This will do a normal increment, ignoring SNAPSNOT, if a non-prerelease bumpVersion is configured
       newPomVersion = semver.inc(currentValue, bumpVersion, 'SNAPSHOT', false);
     }
     if (!newPomVersion) {
