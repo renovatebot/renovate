@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { logger } from '../../logger';
 import { Matcher } from './base';
 
 export class PackagePrefixesMatcher extends Matcher {
@@ -13,7 +12,7 @@ export class PackagePrefixesMatcher extends Matcher {
       return null;
     }
 
-    if (is.undefined(depName)) {
+    if (!packageName) {
       return false;
     }
 
@@ -23,26 +22,19 @@ export class PackagePrefixesMatcher extends Matcher {
     ) {
       return true;
     }
-    if (matchPackagePrefixes.some((prefix) => depName.startsWith(prefix))) {
-      logger.once.warn(
-        { packageRule, packageName, depName },
-        'Use matchDepPrefixes instead of matchPackagePrefixes',
-      );
-      return true;
-    }
 
     return false;
   }
 
   override excludes(
-    { depName, packageName }: PackageRuleInputConfig,
+    { packageName }: PackageRuleInputConfig,
     packageRule: PackageRule,
   ): boolean | null {
     const { excludePackagePrefixes } = packageRule;
     if (is.undefined(excludePackagePrefixes)) {
       return null;
     }
-    if (is.undefined(depName)) {
+    if (!packageName) {
       return false;
     }
 
@@ -50,13 +42,6 @@ export class PackagePrefixesMatcher extends Matcher {
       is.string(packageName) &&
       excludePackagePrefixes.some((prefix) => packageName.startsWith(prefix))
     ) {
-      return true;
-    }
-    if (excludePackagePrefixes.some((prefix) => depName.startsWith(prefix))) {
-      logger.once.warn(
-        { packageRule, packageName, depName },
-        'Use excludeDepPrefixes instead of excludePackagePrefixes',
-      );
       return true;
     }
 
