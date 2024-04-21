@@ -20,7 +20,7 @@ function matchPatternsAgainstName(
 
 export class PackagePatternsMatcher extends Matcher {
   override matches(
-    { depName, packageName }: PackageRuleInputConfig,
+    { packageName }: PackageRuleInputConfig,
     packageRule: PackageRule,
   ): boolean | null {
     const { matchPackagePatterns } = packageRule;
@@ -28,29 +28,15 @@ export class PackagePatternsMatcher extends Matcher {
       return null;
     }
 
-    if (is.undefined(depName)) {
+    if (!packageName) {
       return false;
     }
 
-    if (
-      is.string(packageName) &&
-      matchPatternsAgainstName(matchPackagePatterns, packageName)
-    ) {
-      return true;
-    }
-    if (matchPatternsAgainstName(matchPackagePatterns, depName)) {
-      logger.once.warn(
-        { packageRule, packageName, depName },
-        'Use matchDepPatterns instead of matchPackagePatterns',
-      );
-      return true;
-    }
-
-    return false;
+    return matchPatternsAgainstName(matchPackagePatterns, packageName);
   }
 
   override excludes(
-    { depName, packageName }: PackageRuleInputConfig,
+    { packageName }: PackageRuleInputConfig,
     packageRule: PackageRule,
   ): boolean | null {
     const { excludePackagePatterns } = packageRule;
@@ -58,26 +44,11 @@ export class PackagePatternsMatcher extends Matcher {
     if (is.undefined(excludePackagePatterns)) {
       return null;
     }
-    if (is.undefined(depName)) {
+    if (!packageName) {
       return false;
     }
 
-    if (
-      is.string(packageName) &&
-      matchPatternsAgainstName(excludePackagePatterns, packageName)
-    ) {
-      return true;
-    }
-
-    if (matchPatternsAgainstName(excludePackagePatterns, depName)) {
-      logger.once.warn(
-        { packageRule, packageName, depName },
-        'Use excludeDepPatterns instead of excludePackagePatterns',
-      );
-      return true;
-    }
-
-    return false;
+    return matchPatternsAgainstName(excludePackagePatterns, packageName);
   }
 }
 

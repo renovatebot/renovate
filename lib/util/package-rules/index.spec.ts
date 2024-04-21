@@ -40,7 +40,7 @@ describe('util/package-rules/index', () => {
 
   it('applies', () => {
     const config: PackageRuleInputConfig = {
-      depName: 'a',
+      packageName: 'a',
       isBump: true,
       currentValue: '1.0.0',
       packageRules: [
@@ -76,7 +76,7 @@ describe('util/package-rules/index', () => {
 
   it('applies both rules for a', () => {
     const dep = {
-      depName: 'a',
+      packageName: 'a',
     };
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBe(2);
@@ -86,7 +86,7 @@ describe('util/package-rules/index', () => {
 
   it('applies both rules for b', () => {
     const dep = {
-      depName: 'b',
+      packageName: 'b',
     };
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBe(2);
@@ -96,7 +96,7 @@ describe('util/package-rules/index', () => {
 
   it('applies the second rule', () => {
     const dep = {
-      depName: 'abc',
+      packageName: 'abc',
     };
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
@@ -106,7 +106,7 @@ describe('util/package-rules/index', () => {
 
   it('applies matchPackagePrefixes', () => {
     const dep = {
-      depName: 'xyz/abc',
+      packageName: 'xyz/abc',
     };
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBe(2);
@@ -116,7 +116,7 @@ describe('util/package-rules/index', () => {
 
   it('applies excludePackageNames', () => {
     const dep = {
-      depName: 'xyz/foo',
+      packageName: 'xyz/foo',
     };
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.groupName).toBeUndefined();
@@ -124,7 +124,7 @@ describe('util/package-rules/index', () => {
 
   it('applies excludePackagePrefixes', () => {
     const dep = {
-      depName: 'xyz/foo-a',
+      packageName: 'xyz/foo-a',
     };
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
@@ -133,7 +133,7 @@ describe('util/package-rules/index', () => {
 
   it('applies the second second rule', () => {
     const dep = {
-      depName: 'bc',
+      packageName: 'bc',
     };
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
@@ -142,7 +142,7 @@ describe('util/package-rules/index', () => {
 
   it('excludes package name', () => {
     const dep = {
-      depName: 'aa',
+      packageName: 'aa',
     };
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
@@ -151,7 +151,7 @@ describe('util/package-rules/index', () => {
 
   it('excludes package pattern', () => {
     const dep = {
-      depName: 'bcd',
+      packageName: 'bcd',
     };
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.x).toBeUndefined();
@@ -171,7 +171,7 @@ describe('util/package-rules/index', () => {
     };
     const res = applyPackageRules(dep);
     expect(res.automerge).toBeFalse();
-    const res2 = applyPackageRules({ ...dep, depName: 'foo' });
+    const res2 = applyPackageRules({ ...dep, packageName: 'foo' });
     expect(res2.automerge).toBeTrue();
   });
 
@@ -189,7 +189,7 @@ describe('util/package-rules/index', () => {
     };
     const res = applyPackageRules(dep);
     expect(res.automerge).toBeTrue();
-    const res2 = applyPackageRules({ ...dep, depName: 'foo' });
+    const res2 = applyPackageRules({ ...dep, packageName: 'foo' });
     expect(res2.automerge).toBeTrue();
   });
 
@@ -206,7 +206,7 @@ describe('util/package-rules/index', () => {
     };
     const res = applyPackageRules(dep);
     expect(res.automerge).toBeTrue();
-    const res2 = applyPackageRules({ ...dep, depName: 'foo' });
+    const res2 = applyPackageRules({ ...dep, packageName: 'foo' });
     expect(res2.automerge).toBeFalse();
   });
 
@@ -268,12 +268,12 @@ describe('util/package-rules/index', () => {
     };
     const res1 = applyPackageRules({
       ...config,
-      depName: 'foo',
+      packageName: 'foo',
     });
     expect(res1.x).toBeUndefined();
     const res2 = applyPackageRules({
       ...config,
-      depName: 'bar',
+      packageName: 'bar',
     });
     expect(res2.x).toBeDefined();
   });
@@ -288,11 +288,11 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
-    const res1 = applyPackageRules({ ...config, depName: 'neutrino' });
+    const res1 = applyPackageRules({ ...config, packageName: 'neutrino' });
     expect(res1.x).toBeDefined();
     const res2 = applyPackageRules({
       ...config,
-      depName: '@neutrino/something',
+      packageName: '@neutrino/something',
     });
     expect(res2.x).toBeDefined();
   });
@@ -309,7 +309,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      depName: 'a',
+      packageName: 'a',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
@@ -327,7 +327,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depTypes: ['build', 'test'],
-      depName: 'a',
+      packageName: 'a',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
@@ -346,7 +346,7 @@ describe('util/package-rules/index', () => {
     const dep = {
       depType: 'dependencies',
       manager: 'meteor',
-      depName: 'node',
+      packageName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
@@ -367,7 +367,7 @@ describe('util/package-rules/index', () => {
       language: 'python',
       categories: ['python'],
       manager: 'pipenv',
-      depName: 'node',
+      packageName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -387,7 +387,7 @@ describe('util/package-rules/index', () => {
       depType: 'dependencies',
       categories: ['javascript', 'node'],
       manager: 'meteor',
-      depName: 'node',
+      packageName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
@@ -407,7 +407,7 @@ describe('util/package-rules/index', () => {
       depType: 'dependencies',
       categories: ['python'],
       manager: 'pipenv',
-      depName: 'node',
+      packageName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -425,7 +425,7 @@ describe('util/package-rules/index', () => {
     const dep = {
       depType: 'dependencies',
       manager: 'pipenv',
-      depName: 'node',
+      packageName: 'node',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -557,7 +557,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      depName: 'a',
+      packageName: 'a',
       updateType: 'patch' as UpdateType,
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -579,7 +579,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      depName: 'a',
+      packageName: 'a',
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/renovatebot/presets',
     };
@@ -601,7 +601,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      depName: 'a',
+      packageName: 'a',
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/vuejs/vue',
     };
@@ -623,7 +623,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      depName: 'a',
+      packageName: 'a',
       updateType: 'patch' as UpdateType,
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -644,7 +644,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      depName: 'a',
+      packageName: 'a',
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/renovatebot/presets',
     };
@@ -666,7 +666,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      depName: 'a',
+      packageName: 'a',
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/facebook/react-native',
     };
@@ -688,7 +688,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      depName: 'a',
+      packageName: 'a',
       updateType: 'patch' as UpdateType,
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -717,7 +717,7 @@ describe('util/package-rules/index', () => {
       };
       const dep = {
         depType: 'dependencies',
-        depName: 'a',
+        packageName: 'a',
         mergeConfidenceLevel: 'high' as MergeConfidence,
       };
       const res = applyPackageRules({ ...config, ...dep });
@@ -735,7 +735,7 @@ describe('util/package-rules/index', () => {
       };
       const dep = {
         depType: 'dependencies',
-        depName: 'a',
+        packageName: 'a',
         mergeConfidenceLevel: 'low' as MergeConfidence,
       };
       const res = applyPackageRules({ ...config, ...dep });
@@ -753,7 +753,7 @@ describe('util/package-rules/index', () => {
       };
       const dep = {
         depType: 'dependencies',
-        depName: 'a',
+        packageName: 'a',
         mergeConfidenceLevel: undefined,
       };
       const res = applyPackageRules({ ...config, ...dep });
@@ -798,7 +798,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      depName: 'a',
+      packageName: 'a',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
@@ -816,7 +816,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'devDependencies',
-      depName: 'a',
+      packageName: 'a',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -836,7 +836,7 @@ describe('util/package-rules/index', () => {
     const res1 = applyPackageRules({
       ...config,
       ...{
-        depName: 'test',
+        packageName: 'test',
         currentValue: '^1.0.0',
         currentVersion: '1.0.3',
       },
@@ -845,7 +845,7 @@ describe('util/package-rules/index', () => {
     const res2 = applyPackageRules({
       ...config,
       ...{
-        depName: 'test',
+        packageName: 'test',
         currentValue: '^1.0.0',
       },
     });
@@ -853,7 +853,7 @@ describe('util/package-rules/index', () => {
     const res3 = applyPackageRules({
       ...config,
       ...{
-        depName: 'test',
+        packageName: 'test',
         lockedVersion: '^1.0.0',
       },
     });
@@ -874,7 +874,7 @@ describe('util/package-rules/index', () => {
     const res1 = applyPackageRules({
       ...config,
       ...{
-        depName: 'test',
+        packageName: 'test',
         currentValue: '2.4.6',
         currentVersion: '2.4.6',
       },
@@ -896,7 +896,7 @@ describe('util/package-rules/index', () => {
     const res1 = applyPackageRules({
       ...config,
       ...{
-        depName: 'test',
+        packageName: 'test',
         currentValue: '^2.0.0',
       },
     });
@@ -904,7 +904,7 @@ describe('util/package-rules/index', () => {
     const res2 = applyPackageRules({
       ...config,
       ...{
-        depName: 'test',
+        packageName: 'test',
         currentValue: '~2.0.0',
       },
     });
@@ -924,7 +924,7 @@ describe('util/package-rules/index', () => {
     const res1 = applyPackageRules({
       ...config,
       ...{
-        depName: 'test',
+        packageName: 'test',
         currentValue: '4.6.0',
         currentVersion: '4.6.0',
       },
@@ -945,7 +945,7 @@ describe('util/package-rules/index', () => {
     const res1 = applyPackageRules({
       ...config,
       ...{
-        depName: 'test',
+        packageName: 'test',
         currentValue: '4.6.0',
         currentVersion: '4.6.0',
       },
@@ -953,7 +953,7 @@ describe('util/package-rules/index', () => {
     const res2 = applyPackageRules({
       ...config,
       ...{
-        depName: 'test',
+        packageName: 'test',
         currentValue: '5.6.0',
         currentVersion: '5.6.0',
       },
@@ -975,7 +975,7 @@ describe('util/package-rules/index', () => {
     const res1 = applyPackageRules({
       ...config,
       ...{
-        depName: 'test',
+        packageName: 'test',
         currentValue: '4.6.0',
         currentVersion: '4.6.0',
       },
@@ -983,7 +983,7 @@ describe('util/package-rules/index', () => {
     const res2 = applyPackageRules({
       ...config,
       ...{
-        depName: 'test',
+        packageName: 'test',
         currentValue: '5.6.0',
         currentVersion: '5.6.0',
       },
@@ -1004,13 +1004,13 @@ describe('util/package-rules/index', () => {
     };
     const res1 = applyPackageRules({
       ...config,
-      depName: 'test',
+      packageName: 'test',
     });
     expect(res1.x).toBeUndefined();
     config.packageFile = 'package.json';
     const res2 = applyPackageRules({
       ...config,
-      depName: 'test',
+      packageName: 'test',
     });
     expect(res2.x).toBeDefined();
   });
@@ -1042,19 +1042,19 @@ describe('util/package-rules/index', () => {
     };
     const res1 = applyPackageRules({
       ...config,
-      depName: 'test',
+      packageName: 'test',
     });
     expect(res1.x).toBeDefined();
     config.packageFile = 'package.json';
     const res2 = applyPackageRules({
       ...config,
-      depName: 'test',
+      packageName: 'test',
     });
     expect(res2.x).toBeUndefined();
     config.packageFile = 'lib/a/package.json';
     const res3 = applyPackageRules({
       ...config,
-      depName: 'test',
+      packageName: 'test',
     });
     expect(res3.x).toBeUndefined();
   });
@@ -1070,7 +1070,7 @@ describe('util/package-rules/index', () => {
 
   it('creates groupSlug if necessary', () => {
     const config: TestConfig = {
-      depName: 'foo',
+      packageName: 'foo',
       packageRules: [
         {
           matchPackagePatterns: ['*'],
@@ -1101,7 +1101,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      depName: 'a',
+      packageName: 'a',
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/renovatebot/Presets',
     };
@@ -1123,7 +1123,7 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      depName: 'a',
+      packageName: 'a',
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/renovatebot/Renovate',
     };
@@ -1142,7 +1142,7 @@ describe('util/package-rules/index', () => {
       ],
     };
     const dep = {
-      depName: 'abc',
+      packageName: 'abc',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -1159,7 +1159,7 @@ describe('util/package-rules/index', () => {
       ],
     };
     const dep = {
-      depName: 'abc',
+      packageName: 'abc',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -1176,7 +1176,7 @@ describe('util/package-rules/index', () => {
       ],
     };
     const dep = {
-      depName: 'abc',
+      packageName: 'abc',
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
