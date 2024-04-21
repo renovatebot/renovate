@@ -88,6 +88,7 @@ export async function tryDecrypt(
   privateKey: string,
   encryptedStr: string,
   repository: string,
+  keyName: string,
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
   if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
@@ -97,8 +98,20 @@ export async function tryDecrypt(
     }
   } else {
     decryptedStr = tryDecryptPublicKeyDefault(privateKey, encryptedStr);
-    if (!is.string(decryptedStr)) {
+    if (is.string(decryptedStr)) {
+      logger.warn(
+        { keyName },
+        'Encrypted value is using deprecated default padding, please change to using PGP encryption.',
+      );
+    } else {
       decryptedStr = tryDecryptPublicKeyPKCS1(privateKey, encryptedStr);
+      // istanbul ignore if
+      if (is.string(decryptedStr)) {
+        logger.warn(
+          { keyName },
+          'Encrypted value is using deprecated PKCS1 padding, please change to using PGP encryption.',
+        );
+      }
     }
   }
   return decryptedStr;
@@ -191,10 +204,20 @@ export async function decryptConfig(
       if (privateKey) {
         for (const [eKey, eVal] of Object.entries(val)) {
           logger.debug('Trying to decrypt ' + eKey);
-          let decryptedStr = await tryDecrypt(privateKey, eVal, repository);
+          let decryptedStr = await tryDecrypt(
+            privateKey,
+            eVal,
+            repository,
+            eKey,
+          );
           if (privateKeyOld && !is.nonEmptyString(decryptedStr)) {
             logger.debug(`Trying to decrypt with old private key`);
-            decryptedStr = await tryDecrypt(privateKeyOld, eVal, repository);
+            decryptedStr = await tryDecrypt(
+              privateKeyOld,
+              eVal,
+              repository,
+              eKey,
+            );
           }
           if (!is.nonEmptyString(decryptedStr)) {
             const error = new Error('config-validation');
