@@ -50,7 +50,7 @@ export function extractPackageFile(
     }
 
     if (deps.length < 1) {
-      logger.debug(
+      logger.trace(
         { packageFile },
         'No dependencies to process for dev container JSON file.',
       );
