@@ -148,8 +148,15 @@ export function generateBranchConfig(
   const useGroupSettings = hasGroupName && groupEligible;
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: string;
+
+  if (depTypes.size) {
+    config.depTypes = Array.from(depTypes).sort();
+  }
+
   for (const branchUpgrade of branchUpgrades) {
     let upgrade: BranchUpgradeConfig = { ...branchUpgrade };
+
+    upgrade.depTypes = config.depTypes;
 
     // needs to be done for each upgrade, as we reorder them below
     if (newValue.length > 1 && !groupEligible) {
@@ -425,9 +432,6 @@ export function generateBranchConfig(
   );
   if (additionalReviewers.length > 0) {
     config.additionalReviewers = additionalReviewers;
-  }
-  if (depTypes.size) {
-    config.depTypes = Array.from(depTypes).sort();
   }
   return config;
 }
