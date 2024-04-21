@@ -17,7 +17,7 @@ export class DepPatternsMatcher extends Matcher {
     }
 
     const massagedPatterns = matchDepPatterns.map((pattern) =>
-      pattern === '*' ? '**' : `/${pattern}/`,
+      pattern === '^*$' || pattern === '*' ? '**' : `/${pattern}/`,
     );
     return matchRegexOrGlobList(depName, massagedPatterns);
   }
@@ -34,7 +34,7 @@ export class DepPatternsMatcher extends Matcher {
     }
 
     const massagedPatterns = excludeDepPatterns.map((pattern) =>
-      pattern === '*' ? '**' : `/${pattern}/`,
+      pattern === '^*$' || pattern === '*' ? '**' : `/${pattern}/`,
     );
     return matchRegexOrGlobList(depName, massagedPatterns);
   }

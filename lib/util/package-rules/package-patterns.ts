@@ -18,7 +18,7 @@ export class PackagePatternsMatcher extends Matcher {
     }
 
     const massagedPatterns = matchPackagePatterns.map((pattern) =>
-      pattern === '*' ? '**' : `/${pattern}/`,
+      pattern === '^*$' || pattern === '*' ? '**' : `/${pattern}/`,
     );
     return matchRegexOrGlobList(packageName, massagedPatterns);
   }
@@ -37,7 +37,7 @@ export class PackagePatternsMatcher extends Matcher {
     }
 
     const massagedPatterns = excludePackagePatterns.map((pattern) =>
-      pattern === '*' ? '**' : `/${pattern}/`,
+      pattern === '^*$' || pattern === '*' ? '**' : `/${pattern}/`,
     );
     return matchRegexOrGlobList(packageName, massagedPatterns);
   }
