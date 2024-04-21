@@ -1,6 +1,8 @@
 import is from '@sindresorhus/is';
 import * as bunyan from 'bunyan';
+import fs from 'fs-extra';
 import { nanoid } from 'nanoid';
+import upath from 'upath';
 import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
@@ -20,16 +22,13 @@ if (is.string(process.env.LOG_LEVEL)) {
   process.env.LOG_LEVEL = process.env.LOG_LEVEL.toLowerCase().trim();
 }
 
-validateLogLevel(process.env.LOG_LEVEL);
 const stdout: bunyan.Stream = {
   name: 'stdout',
-  level:
-    (process.env.LOG_LEVEL as bunyan.LogLevel) ||
-    /* istanbul ignore next: not testable */ 'info',
+  level: validateLogLevel(process.env.LOG_LEVEL, 'info'),
   stream: process.stdout,
 };
 
-// istanbul ignore else: not testable
+// istanbul ignore if: not testable
 if (process.env.LOG_FORMAT !== 'json') {
   // TODO: typings (#9615)
   const prettyStdOut = new RenovateStream() as any;
@@ -122,6 +121,19 @@ loggerLevels.forEach((loggerLevel) => {
   };
   logger.once[loggerLevel] = logOnceFn as never;
 });
+
+// istanbul ignore if: not easily testable
+if (is.string(process.env.LOG_FILE)) {
+  // ensure log file directory exists
+  const directoryName = upath.dirname(process.env.LOG_FILE);
+  fs.ensureDirSync(directoryName);
+
+  addStream({
+    name: 'logfile',
+    path: process.env.LOG_FILE,
+    level: validateLogLevel(process.env.LOG_FILE_LEVEL, 'debug'),
+  });
+}
 
 export function setContext(value: string): void {
   logContext = value;

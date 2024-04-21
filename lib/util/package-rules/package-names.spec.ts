@@ -1,4 +1,3 @@
-import { logger } from '../../../test/util';
 import { PackageNameMatcher } from './package-names';
 
 describe('util/package-rules/package-names', () => {
@@ -56,15 +55,16 @@ describe('util/package-rules/package-names', () => {
       expect(result).toBeFalse();
     });
 
-  it('should excludePackageName', () => {
-    const result = packageNameMatcher.excludes(
-      {
-        packageName: 'def',
-      },
-      {
-        excludePackageNames: ['def'],
-      },
-    );
-    expect(result).toBeTrue();
+    it('should excludePackageName', () => {
+      const result = packageNameMatcher.excludes(
+        {
+          packageName: 'def',
+        },
+        {
+          excludePackageNames: ['def'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
   });
 });

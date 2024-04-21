@@ -109,7 +109,7 @@ For example, the pattern `["/^abc/", "!/^abcd/", "!/abce/"]`:
 - does _not_ match `"foo"`, `"abcd"`, `"abce"`, or `"abcdef"`
 
 If you find yourself in a situation where you need to positive-match a string which starts with `!`, then you need to do so using a regular expression pattern.
-For example, `["/^!abc/$"]` will positively match against the string `"!abc"`.
+For example, `["/^!abc$/"]` will positively match against the string `"!abc"`.
 
 ## Usage in Renovate configuration options
 
