@@ -98,6 +98,8 @@ function getDeprecationMessage(option: string): string | undefined {
     branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
     commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
     prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
+    logFile: `Using logFile to specify log file name is deprecated now. Please use the enviroment variable LOG_FILE instead`,
+    logFileLevel: `Using logFileLevel to specify log level for file logging is deprecated now. Please use the enviroment variable LOG_FILE_LEVEL instead`,
   };
   return deprecatedOptions[option];
 }
