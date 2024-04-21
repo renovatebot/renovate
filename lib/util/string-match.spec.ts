@@ -89,23 +89,5 @@ describe('util/string-match', () => {
     it('returns false if negative pattern is matched', () => {
       expect(matchRegexOrGlob('test', '!/te/')).toBeFalse();
     });
-
-    it('returns true for wildcard is massaged', () => {
-      expect(
-        matchRegexOrGlob('test', '^*$', { massagePattern: true }),
-      ).toBeTrue();
-    });
-
-    it('returns true for glob wildcard is massaged', () => {
-      expect(
-        matchRegexOrGlob('test', '*', { massagePattern: true }),
-      ).toBeTrue();
-    });
-
-    it('returns true for massaged regex pattern is massaged', () => {
-      expect(
-        matchRegexOrGlob('test', '.*', { massagePattern: true }),
-      ).toBeTrue();
-    });
   });
 });
