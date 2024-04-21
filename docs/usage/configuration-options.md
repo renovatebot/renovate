@@ -2510,6 +2510,8 @@ Invalid if used outside of a `packageRule`.
 
 ### excludeDepPatterns
 
+### excludeDepPrefixes
+
 ### excludePackageNames
 
 **Important**: Do not mix this up with the option `ignoreDeps`.
@@ -2831,6 +2833,8 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 This field behaves the same as `matchPackageNames` except it matches against `depName` instead of `packageName`.
 
 ### matchDepPatterns
+
+### matchDepPrefixes
 
 ### matchNewValue
 
