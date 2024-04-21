@@ -1,12 +1,12 @@
 import type { VulnerabilityPackage } from '../../../types';
-import { normalizeDepName as normalizeForPip } from '../../datasource/pypi/common';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 
 export function normalizeNamePerEcosystem({
   name,
   ecosystem,
 }: VulnerabilityPackage): string {
   if (ecosystem === 'PIP') {
-    return normalizeForPip(name);
+    return normalizePythonDepName(name);
   } else {
     return name;
   }
