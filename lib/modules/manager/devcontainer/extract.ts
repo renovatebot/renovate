@@ -77,7 +77,7 @@ function getDep(
   }
   const dep = getDockerDep(subject, true, registryAliases);
   if (!isValidDependency(dep)) {
-    logger.debug(
+    logger.trace(
       { subject, packageFile },
       'Skipping invalid docker dependency in dev container JSON file.',
     );
