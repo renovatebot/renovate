@@ -946,6 +946,10 @@ Doing so will mean that Renovate will first try to decrypt using the GPG key but
 
 You can remove the `privateKeyOld` config option once all the old encrypted values have been migrated, or if you no longer want to support the old key and let the processing of repositories fail.
 
+<!-- prettier-ignore -->
+!!! note
+    Renovate now logs a warning whenever repositories use non-GPG encrypted config variables.
+
 ## privateKeyPath
 
 Used as an alternative to `privateKey`, if you want the key to be read from disk instead.
