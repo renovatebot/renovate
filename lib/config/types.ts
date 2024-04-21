@@ -158,6 +158,7 @@ export interface RepoGlobalConfig {
   presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
+  httpCacheTtlDays?: number;
 }
 
 export interface LegacyAdminConfig {
@@ -168,7 +169,7 @@ export interface LegacyAdminConfig {
   onboarding?: boolean;
   onboardingBranch?: string;
   onboardingCommitMessage?: string;
-  onboardingNoDeps?: boolean;
+  onboardingNoDeps?: 'auto' | 'enabled' | 'disabled';
   onboardingRebaseCheckbox?: boolean;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
@@ -352,6 +353,7 @@ export interface PackageRule
   description?: string | string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
+  excludeDepPrefixes?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
@@ -366,6 +368,7 @@ export interface PackageRule
   matchDatasources?: string[];
   matchDepNames?: string[];
   matchDepPatterns?: string[];
+  matchDepPrefixes?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
   matchManagers?: string[];

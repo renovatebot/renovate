@@ -1780,21 +1780,25 @@ describe('modules/datasource/docker/index', () => {
     it('Uses Docker Hub tags for registry-1.docker.io', async () => {
       httpMock
         .scope(dockerHubUrl)
-        .get('/library/node/tags?page_size=1000')
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(200, {
-          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000`,
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
           results: [
             {
+              id: 2,
+              last_updated: '2021-01-01T00:00:00.000Z',
               name: '1.0.0',
               tag_last_pushed: '2021-01-01T00:00:00.000Z',
               digest: 'aaa',
             },
           ],
         })
-        .get('/library/node/tags?page=2&page_size=1000')
+        .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
         .reply(200, {
           results: [
             {
+              id: 1,
+              last_updated: '2020-01-01T00:00:00.000Z',
               name: '0.9.0',
               tag_last_pushed: '2020-01-01T00:00:00.000Z',
               digest: 'bbb',
@@ -1821,7 +1825,7 @@ describe('modules/datasource/docker/index', () => {
       const tags = ['1.0.0'];
       httpMock
         .scope(dockerHubUrl)
-        .get('/library/node/tags?page_size=1000')
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(404);
       httpMock
         .scope(baseUrl)
@@ -1848,21 +1852,25 @@ describe('modules/datasource/docker/index', () => {
     it('adds library/ prefix for Docker Hub (explicit)', async () => {
       httpMock
         .scope(dockerHubUrl)
-        .get('/library/node/tags?page_size=1000')
+        .get('/library/node/tags?page_size=1000&ordering=last_updated')
         .reply(200, {
-          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000`,
+          next: `${dockerHubUrl}/library/node/tags?page=2&page_size=1000&ordering=last_updated`,
           results: [
             {
+              id: 2,
+              last_updated: '2021-01-01T00:00:00.000Z',
               name: '1.0.0',
               tag_last_pushed: '2021-01-01T00:00:00.000Z',
               digest: 'aaa',
             },
           ],
         })
-        .get('/library/node/tags?page=2&page_size=1000')
+        .get('/library/node/tags?page=2&page_size=1000&ordering=last_updated')
         .reply(200, {
           results: [
             {
+              id: 1,
+              last_updated: '2020-01-01T00:00:00.000Z',
               name: '0.9.0',
               tag_last_pushed: '2020-01-01T00:00:00.000Z',
               digest: 'bbb',

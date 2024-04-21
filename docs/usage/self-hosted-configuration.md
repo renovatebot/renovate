@@ -666,6 +666,16 @@ Use the `extends` field instead of this if, for example, you need the ability fo
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
 
+## httpCacheTtlDays
+
+This option sets the number of days that Renovate will cache HTTP responses.
+The default value is 90 days.
+Value of `0` means no caching.
+
+<!-- prettier-ignore -->
+!!! warning
+    When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
+
 ## includeMirrors
 
 By default, Renovate does not autodiscover repositories that are mirrors.
@@ -785,8 +795,12 @@ Falls back to `renovate.json` if the name provided is not valid.
 
 ## onboardingNoDeps
 
-Set this to `true` if you want Renovate to create an onboarding PR even if no dependencies are found.
-Otherwise, Renovate skips onboarding a repository if it finds no dependencies in it.
+The default `auto` setting is converted to `disabled` if `autodiscoverRepositories` is `true`, or converted to `enabled` if false.
+
+In other words, the default behavior is:
+
+- If you run Renovate on discovered repositories then it will skip onboarding those without dependencies detected, but
+- If you run Renovate on _specific_ repositories then Renovate will onboard all such repositories even if no dependencies are found
 
 ## onboardingPrTitle
 
