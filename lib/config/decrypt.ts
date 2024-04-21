@@ -105,6 +105,7 @@ export async function tryDecrypt(
       );
     } else {
       decryptedStr = tryDecryptPublicKeyPKCS1(privateKey, encryptedStr);
+      // istanbul ignore if
       if (is.string(decryptedStr)) {
         logger.warn(
           { keyName },
