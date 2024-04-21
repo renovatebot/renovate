@@ -2834,7 +2834,17 @@ This field behaves the same as `matchPackageNames` except it matches against `de
 
 ### matchDepPatterns
 
+<!-- prettier-ignore -->
+!!! note
+    `matchDepNames` now supports pattern matching and should be used instead.
+    Use of `matchDepPatterns` is now deprecated and will be migrated in future.
+
 ### matchDepPrefixes
+
+<!-- prettier-ignore -->
+!!! note
+    `matchDepNames` now supports pattern matching and should be used instead.
+    Use of `matchDepPrefixes` is now deprecated and will be migrated in future.
 
 ### matchNewValue
 
@@ -2922,9 +2932,19 @@ The above will group together any npm package which starts with the string `angu
 
 ### matchPackagePatterns
 
+<!-- prettier-ignore -->
+!!! note
+    `matchPackageNames` now supports pattern matching and should be used instead.
+    Use of `matchPackagePatterns` is now deprecated and will be migrated in future.
+
 Use this field if you want to have one or more package names patterns in your package rule.
 
 ### matchPackagePrefixes
+
+<!-- prettier-ignore -->
+!!! note
+    `matchPackageNames` now supports pattern matching and should be used instead.
+    Use of `matchPackagePrefixes` is now deprecated and will be migrated in future.
 
 Use this field to match a package prefix without needing to write a regex expression.
 See also `excludePackagePrefixes`.
