@@ -163,7 +163,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
       readOnlyMatch = false;
       if (search.readOnly === rule.readOnly) {
         readOnlyMatch = true;
-        hostTypeMatch = true;
+        hostTypeMatch = true; // When we match `readOnly`, we don't care about `hostType`
       }
     }
 

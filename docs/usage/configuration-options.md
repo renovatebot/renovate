@@ -898,6 +898,25 @@ It will be compiled using Handlebars and the regex `groups` result.
 It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
 
+### readOnly
+
+If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
+Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
+
+This option could be used to avoid rate limits for certain platforms like Renovate or Bitbucket, by offloading the read operations to a different user.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "readOnly": true,
+      "token": "********"
+    }
+  ]
+}
+```
+
 ### currentValueTemplate
 
 If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
