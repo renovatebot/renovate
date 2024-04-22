@@ -1,9 +1,9 @@
-import {codeBlock, html} from 'common-tags';
-import {getPkgReleases} from '..';
-import {Fixtures} from '../../../../test/fixtures';
+import { codeBlock, html } from 'common-tags';
+import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import {fs} from '../../../../test/util';
-import {CustomDatasource} from './index';
+import { fs } from '../../../../test/util';
+import { CustomDatasource } from './index';
 
 jest.mock('../../../util/fs');
 
@@ -591,9 +591,9 @@ describe('modules/datasource/custom/index', () => {
 
       const content = html`
         <html>
-        <body>
-        <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
-        </body>
+          <body>
+            <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+          </body>
         </html>
       `;
 
@@ -629,9 +629,9 @@ describe('modules/datasource/custom/index', () => {
 
       const content = html`
         <html>
-        <body>
-        <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
-        </body>
+          <body>
+            <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+          </body>
         </html>
       `;
 
@@ -720,10 +720,7 @@ describe('modules/datasource/custom/index', () => {
       const content = html`
         <html>
         <body>
-        <h1></pre>
-          <hr>
-        </body>
-        <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+        <h1></pre><hr></body><a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
         </html>
       `;
 

@@ -316,6 +316,16 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     });
   }
 
+  async getToml(url: string, options?: Opts): Promise<HttpResponse> {
+    const opt = options ?? {};
+    return await this.get(url, {
+      headers: {
+        Accept: 'application/toml'
+      },
+      ...opt,
+    })
+  }
+
   getJson<ResT>(url: string, options?: Opts): Promise<HttpResponse<ResT>>;
   getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
     url: string,
