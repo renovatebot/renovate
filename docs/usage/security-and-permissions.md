@@ -65,7 +65,7 @@ For example, if you have an `npm` package and do not configure a private registr
 You could avoid this by configuring private registries but such registries need to query public registries anyway.
 We don't know of any public registries which reverse lookup IP addresses to associate companies with packages.
 
-#### Security advisory for self-hosted Renovate instances
+#### Security awareness for self-hosted Renovate instances
 
 ##### Introduction
 
