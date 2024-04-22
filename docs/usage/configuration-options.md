@@ -903,7 +903,7 @@ It will default to the value of `depName` if left unconfigured/undefined.
 If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
 Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
 
-This option could be used to avoid rate limits for certain platforms like Renovate or Bitbucket, by offloading the read operations to a different user.
+This option could be used to avoid rate limits for certain platforms like GitHub or Bitbucket, by offloading the read operations to a different user.
 
 ```json
 {
