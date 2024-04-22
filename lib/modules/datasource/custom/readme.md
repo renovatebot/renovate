@@ -8,9 +8,9 @@ This example shows how to update the `k3s.version` file with a custom datasource
 Options:
 
 | option                     | default  | description                                                                                                                                                              |
-| -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| -------------------------- | -------- |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | defaultRegistryUrlTemplate | `""`     | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
-| format                     | `"json"` | format used by the API. Available values are: `json`, `plain`, `yaml`, `html`                                                                                            |
+| format                     | `"json"` | format used by the API. Available values are: `json`, `plain`, `yaml`, `html`, `toml`                                                                                     |
 | transformTemplates         | `[]`     | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 Available template variables:
@@ -152,6 +152,42 @@ When Renovate receives this response with the `yaml` format, it will convert it 
 ```
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
+
+#### TOML
+
+If `toml` is used, response is parsed and converted into TOML for further processing.
+
+The below TOML document
+
+```toml
+[[releases]]
+version = "1.0.0"
+
+[[releases]]
+version = "2.0.0"
+
+[[releases]]
+version = "3.0.0"
+```
+
+Will convert applying any `jsonata` rules defined in the `transformTemplates` section will be applied.
+
+```json
+{
+  "releases": [
+    {
+      "version": "1.0.0"
+    },
+    {
+      "version": "2.0.0"
+    },
+    {
+      "version": "3.0.0"
+    }
+  ]
+}
+```
+
 
 #### HTML
 

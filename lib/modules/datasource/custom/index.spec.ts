@@ -1,9 +1,9 @@
-import { codeBlock, html } from 'common-tags';
-import { getPkgReleases } from '..';
-import { Fixtures } from '../../../../test/fixtures';
+import {codeBlock, html} from 'common-tags';
+import {getPkgReleases} from '..';
+import {Fixtures} from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
-import { fs } from '../../../../test/util';
-import { CustomDatasource } from './index';
+import {fs} from '../../../../test/util';
+import {CustomDatasource} from './index';
 
 jest.mock('../../../util/fs');
 
@@ -233,7 +233,7 @@ describe('modules/datasource/custom/index', () => {
       expect(result).toBeNull();
     });
 
-    it('return releases for yaml API directly exposing in Renovate format', async () => {
+    it('returns releases for yaml API directly exposing in Renovate format', async () => {
       const expected = {
         releases: [
           {
@@ -308,6 +308,91 @@ describe('modules/datasource/custom/index', () => {
 
       expect(result).toEqual(expected);
     });
+
+    it('returns releases for toml API directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+
+      const toml = codeBlock`
+        [[releases]]
+        version = "1.0.0"
+
+        [[releases]]
+        version = "2.0.0"
+
+        [[releases]]
+        version = "3.0.0"
+      `;
+
+      httpMock.scope('https://example.com').get('/v1').reply(200, toml, {
+        'Content-Type': 'application/toml',
+      });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/v1',
+            format: 'toml',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+    it('return releases for toml file directly exposing in Renovate format', async () => {
+      const expected = {
+        releases: [
+          {
+            version: '1.0.0',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '3.0.0',
+          },
+        ],
+      };
+
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+        [[releases]]
+        version = "1.0.0"
+
+        [[releases]]
+        version = "2.0.0"
+
+        [[releases]]
+        version = "3.0.0"
+      `);
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'file://test.toml',
+            format: 'toml',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
 
     it('return releases for json file directly exposing in Renovate format', async () => {
       const expected = {
@@ -506,9 +591,9 @@ describe('modules/datasource/custom/index', () => {
 
       const content = html`
         <html>
-          <body>
-            <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
-          </body>
+        <body>
+        <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+        </body>
         </html>
       `;
 
@@ -544,9 +629,9 @@ describe('modules/datasource/custom/index', () => {
 
       const content = html`
         <html>
-          <body>
-            <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
-          </body>
+        <body>
+        <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+        </body>
         </html>
       `;
 
@@ -635,7 +720,10 @@ describe('modules/datasource/custom/index', () => {
       const content = html`
         <html>
         <body>
-        <h1></pre><hr></body><a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+        <h1></pre>
+          <hr>
+        </body>
+        <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
         </html>
       `;
 
