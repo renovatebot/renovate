@@ -343,7 +343,7 @@
     "ts-jest": "29.1.2",
     "ts-node": "10.9.2",
     "type-fest": "4.15.0",
-    "typescript": "5.3.3",
+    "typescript": "5.4.5",
     "unified": "9.2.2"
   },
   "packageManager": "pnpm@8.15.7",
