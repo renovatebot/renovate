@@ -2477,6 +2477,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'readOnly',
+    description:
+      'Match against requests that only read data and do not mutate anything.',
+    type: 'boolean',
+    stage: 'repository',
+    parents: ['hostRules'],
+    cli: false,
+    env: false,
+  },
+  {
     name: 'timeout',
     description: 'Timeout (in milliseconds) for queries to external endpoints.',
     type: 'integer',

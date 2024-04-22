@@ -461,6 +461,7 @@ export async function initRepo({
   const opts = hostRules.find({
     hostType: 'github',
     url: platformConfig.endpoint,
+    readOnly: true,
   });
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
@@ -499,6 +500,7 @@ export async function initRepo({
         name: config.repositoryName,
         user: renovateUsername,
       },
+      readOnly: true,
     });
 
     if (res?.errors) {
@@ -1214,6 +1216,7 @@ async function getIssues(): Promise<Issue[]> {
         name: config.repositoryName,
         user: config.renovateUsername,
       },
+      readOnly: true,
     },
   );
 
@@ -1975,6 +1978,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       variables: { owner: config.repositoryOwner, name: config.repositoryName },
       paginate: false,
       acceptHeader: 'application/vnd.github.vixen-preview+json',
+      readOnly: true,
     });
   } catch (err) {
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
