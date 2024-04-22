@@ -63,7 +63,7 @@ COPY --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 RUN set -ex; \
   renovate --version; \
   renovate-config-validator; \
-  node -e "new require('re2')('.*').exec('test')"; \
+  cd /usr/local/renovate && node -e "new require('re2')('.*').exec('test')"; \
   true
 
 LABEL \
