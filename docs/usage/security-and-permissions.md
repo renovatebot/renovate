@@ -99,6 +99,8 @@ This is particularly true during, for example:
 These scripts can contain arbitrary code.
 This may pose a significant security risk if the repository's integrity is compromised, or if the repository maintainers have malicious intentions.
 
+Because such insider attack is an inherent and unavoidable risk, the Renovate project will not issue CVEs for such attacks or weaknesses other than in exceptional circumstances.
+
 ##### Centralized logging and sensitive information management
 
 Centralized logging is key to monitor and troubleshoot self-hosted Renovate environments.
