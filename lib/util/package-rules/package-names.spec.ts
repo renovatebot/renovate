@@ -54,7 +54,7 @@ describe('util/package-rules/package-names', () => {
         },
       );
       expect(result).toBeTrue();
-      expect(logger.logger.once.info).toHaveBeenCalled();
+      expect(logger.logger.once.warn).toHaveBeenCalled();
     });
   });
 
@@ -108,7 +108,7 @@ describe('util/package-rules/package-names', () => {
         },
       );
       expect(result).toBeTrue();
-      expect(logger.logger.once.info).toHaveBeenCalled();
+      expect(logger.logger.once.warn).toHaveBeenCalled();
     });
   });
 });
