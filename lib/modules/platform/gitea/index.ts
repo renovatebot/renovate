@@ -263,32 +263,26 @@ const platform: Platform = {
 
     // Ensure appropriate repository state and permissions
     if (repo.archived) {
-      logger.debug(
-        'Repository is archived - throwing error to abort renovation',
-      );
+      logger.debug('Repository is archived - aborting renovation');
       throw new Error(REPOSITORY_ARCHIVED);
     }
     if (repo.mirror) {
-      logger.debug(
-        'Repository is a mirror - throwing error to abort renovation',
-      );
+      logger.debug('Repository is a mirror - aborting renovation');
       throw new Error(REPOSITORY_MIRRORED);
     }
     if (repo.permissions.pull === false || repo.permissions.push === false) {
       logger.debug(
-        'Repository does not permit pull and push - throwing error to abort renovation',
+        'Repository does not permit pull or push - aborting renovation',
       );
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
     if (repo.empty) {
-      logger.debug('Repository is empty - throwing error to abort renovation');
+      logger.debug('Repository is empty - aborting renovation');
       throw new Error(REPOSITORY_EMPTY);
     }
 
     if (repo.has_pull_requests === false) {
-      logger.debug(
-        'Repo does not have pull requests - throwing error to abort renovation',
-      );
+      logger.debug('Repo has disabled pull requests - aborting renovation');
       throw new Error(REPOSITORY_BLOCKED);
     }
 
@@ -302,7 +296,7 @@ const platform: Platform = {
       config.mergeMethod = 'merge';
     } else {
       logger.debug(
-        'Repository has no allowed merge methods - throwing error to abort renovation',
+        'Repository has no allowed merge methods - aborting renovation',
       );
       throw new Error(REPOSITORY_BLOCKED);
     }

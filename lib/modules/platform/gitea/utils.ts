@@ -142,12 +142,12 @@ export function toRenovatePR(data: PR, author: string | null): Pr | null {
 
 /**
  * Check if a repository is usable.
- * A repo isn't usable:
- * - if it's a mirror
- * - if we don't have push permissions
- * - if it doesn't have pull requests
+ * A repo isn't usable if one of the following conditions is met:
+ * - The repo is a `mirror`
+ * - We don't have pull or push permissions
+ * - Pull requests are disabled
  * @param repo Repo to check
- * @returns  true` if the repository is usable, `false` otherwise
+ * @returns  `true` if the repository is usable, `false` otherwise
  */
 export function usableRepo(repo: Repo): boolean {
   if (repo.mirror === true) {
@@ -156,14 +156,14 @@ export function usableRepo(repo: Repo): boolean {
 
   if (repo.permissions.pull === false || repo.permissions.push === false) {
     logger.debug(
-      `Skipping repository ${repo.full_name} due to lack of pull or push permissions`,
+      `Skipping repository ${repo.full_name} because of missing pull or push permissions`,
     );
     return false;
   }
 
   if (repo.has_pull_requests === false) {
     logger.debug(
-      `Skipping repository ${repo.full_name} due to lack of pull requests`,
+      `Skipping repository ${repo.full_name} because pull requests are disabled`,
     );
     return false;
   }
