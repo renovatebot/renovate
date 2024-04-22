@@ -2886,6 +2886,12 @@ See also `excludePackageNames`.
 
 The above will configure `rangeStrategy` to `pin` only for the package `angular`.
 
+<!-- prettier-ignore -->
+!!! note
+    `matchPackageNames` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepNames` instead.
+
 ### matchPackagePatterns
 
 Use this field if you want to have one or more package names patterns in your package rule.
@@ -2903,6 +2909,12 @@ See also `excludePackagePatterns`.
 ```
 
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+
+<!-- prettier-ignore -->
+!!! note
+    `matchPackagePatterns` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepPatterns` instead.
 
 ### matchPackagePrefixes
 
@@ -2922,8 +2934,11 @@ See also `excludePackagePrefixes`.
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
-`matchPackagePrefixes` will match against `packageName` first, and then `depName`, however `depName` matching is deprecated and will be removed in a future major release.
-If matching against `depName`, use `matchDepPatterns` instead.
+<!-- prettier-ignore -->
+!!! note
+    `matchPackagePrefixes` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepPatterns` instead.
 
 ### matchSourceUrlPrefixes
 
