@@ -687,7 +687,7 @@ export async function isBranchModified(
 
   if (includedAuthors.size === 0) {
     // authors all match - branch has not been modified
-    logger.debug(
+    logger.trace(
       {
         branchName,
         baseBranch,
@@ -698,11 +698,12 @@ export async function isBranchModified(
       },
       'branch.isModified() = false',
     );
+    logger.debug('branch.isModified() = false');
     config.branchIsModified[branchName] = false;
     setCachedModifiedResult(branchName, false);
     return false;
   }
-  logger.debug(
+  logger.trace(
     {
       branchName,
       baseBranch,
@@ -713,6 +714,7 @@ export async function isBranchModified(
     },
     'branch.isModified() = true',
   );
+  logger.debug('branch.isModified() = true');
   config.branchIsModified[branchName] = true;
   setCachedModifiedResult(branchName, true);
   return true;
