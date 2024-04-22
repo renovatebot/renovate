@@ -27,7 +27,7 @@
     "generate": "run-s 'generate:*'",
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
-    "jest": "node tools/jest.mjs",
+    "jest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal node --experimental-vm-modules node_modules/jest/bin/jest.js --logHeapUsage",
     "lint": "run-s ls-lint type-check eslint prettier markdown-lint git-check doc-fence-check",
     "lint-fix": "run-s eslint-fix prettier-fix markdown-lint-fix",
     "ls-lint": "ls-lint",
