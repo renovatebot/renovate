@@ -192,8 +192,8 @@ export function parseGemfile(content: string): PackageDependency[] {
     }
   }
 
-  const cachedGroups: WeakMap<SyntaxNode, string[]> = new WeakMap();
-  const cachedSources: WeakMap<SyntaxNode, string> = new WeakMap();
+  const cachedGroups = new WeakMap<SyntaxNode, string[]>();
+  const cachedSources = new WeakMap<SyntaxNode, string>();
   let weirdVersion: string | null = null;
   for (const gemMatch of gemQuery.matches(tree.rootNode)) {
     const dep: PackageDependency = {
