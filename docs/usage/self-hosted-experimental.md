@@ -32,10 +32,6 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_REUSE_PACKAGE_LOCK`
-
-If set to "false" (string), Renovate will remove any existing `package-lock.json` before trying to update it.
-
 ## `RENOVATE_USER_AGENT`
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
@@ -145,6 +141,10 @@ This feature is in private beta.
 If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
 The expected value for this environment variable is a JSON array of strings.
 
+## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
+
+If set to any value, Renovate will download `nupkg` files for determining package metadata.
+
 ## `RENOVATE_X_PLATFORM_VERSION`
 
 Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
@@ -184,6 +184,10 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
 Suppress the pre-commit support warning in PR bodies.
+
+## `RENOVATE_X_USE_OPENPGP`
+
+Use `openpgp` instead of `kbpgp` for `PGP` decryption.
 
 ## `RENOVATE_X_YARN_PROXY`
 

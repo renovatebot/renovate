@@ -1,4 +1,4 @@
-import { joinUrlParts, validateUrl } from '../../../util/url';
+import { isHttpUrl, joinUrlParts } from '../../../util/url';
 import type {
   ServiceDiscoveryEndpointType,
   ServiceDiscoveryResult,
@@ -12,7 +12,7 @@ export function createSDBackendURL(
 ): string {
   const sdEndpoint = sdResult[sdType] ?? '';
   const fullPath = joinUrlParts(sdEndpoint, subPath);
-  if (validateUrl(fullPath)) {
+  if (isHttpUrl(fullPath)) {
     return fullPath;
   }
   return joinUrlParts(registryURL, fullPath);
