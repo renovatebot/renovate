@@ -22,13 +22,13 @@ ENV CI=1 npm_config_modules_cache_max_age=0
 COPY pnpm-lock.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
-RUN pnpm fetch --prod
+RUN corepack pnpm fetch --prod
 
 COPY . ./
 
 # install
 RUN set -ex; \
-  pnpm install --prod --offline --ignore-scripts; \
+  corepack pnpm install --prod --offline --ignore-scripts; \
   true
 
 # test
