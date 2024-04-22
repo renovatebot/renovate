@@ -4,6 +4,7 @@ import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import { ensureTrailingSlash } from '../util/url';
+import { tryDecryptKbPgp } from './decrypt/kbpgp';
 import {
   tryDecryptPublicKeyDefault,
   tryDecryptPublicKeyPKCS1,
@@ -21,7 +22,10 @@ export async function tryDecrypt(
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
   if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
-    const decryptedObjStr = await tryDecryptOpenPgp(privateKey, encryptedStr);
+    const decryptedObjStr =
+      process.env.RENOVATE_X_USE_OPENPGP === 'true'
+        ? await tryDecryptOpenPgp(privateKey, encryptedStr)
+        : await tryDecryptKbPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
       decryptedStr = validateDecryptedValue(decryptedObjStr, repository);
     }
