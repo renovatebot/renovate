@@ -157,7 +157,9 @@ export async function extractAllPackageFiles(
         }
         for (const dep of packageFileContent.deps) {
           const lockedVersion = lockedDeps?.find(
-            (lockedDep) => lockedDep.packageName! === dep.packageName!,
+            (lockedDep) =>
+              normalizePythonDepName(lockedDep.depName!) ===
+              normalizePythonDepName(dep.depName!),
           )?.currentVersion;
           if (lockedVersion) {
             dep.lockedVersion = lockedVersion;
