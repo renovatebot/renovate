@@ -917,6 +917,8 @@ This option could be used to avoid rate limits for certain platforms like GitHub
 }
 ```
 
+If more than one token matches for a read-only request then the `readOnly` token will be given preference.
+
 ### currentValueTemplate
 
 If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
