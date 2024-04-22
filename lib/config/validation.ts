@@ -40,6 +40,7 @@ const options = getOptions();
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
+let optionInherits: Set<string>;
 
 const managerList = getManagerList();
 
@@ -98,6 +99,18 @@ function getDeprecationMessage(option: string): string | undefined {
   return deprecatedOptions[option];
 }
 
+function isInhertConfigOption(key: string): boolean {
+  if (!optionInherits) {
+    optionInherits = new Set();
+    for (const option of options) {
+      if (option.inheritConfigSupport) {
+        optionInherits.add(option.name);
+      }
+    }
+  }
+  return optionInherits.has(key);
+}
+
 function isGlobalOption(key: string): boolean {
   if (!optionGlobals) {
     optionGlobals = new Set();
@@ -121,7 +134,7 @@ export function getParentName(parentPath: string | undefined): string {
 }
 
 export async function validateConfig(
-  configType: 'global' | 'repo',
+  configType: 'global' | 'inherit' | 'repo',
   config: RenovateConfig,
   isPreset?: boolean,
   parentPath?: string,
@@ -164,22 +177,25 @@ export async function validateConfig(
       });
     }
 
-    if (configType === 'global' && isGlobalOption(key)) {
-      await validateGlobalConfig(
-        key,
-        val,
-        optionTypes[key],
-        warnings,
-        errors,
-        currentPath,
-        config,
-      );
-      continue;
-    } else {
-      if (isGlobalOption(key) && !isFalseGlobal(key, parentPath)) {
+    if (isGlobalOption(key)) {
+      if (configType === 'global') {
+        await validateGlobalConfig(
+          key,
+          val,
+          optionTypes[key],
+          warnings,
+          errors,
+          currentPath,
+          config,
+        );
+        continue;
+      } else if (
+        !isFalseGlobal(key, parentPath) &&
+        !(configType === 'inherit' && isInhertConfigOption(key))
+      ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         });
         continue;
       }
@@ -380,11 +396,13 @@ export async function validateConfig(
               'matchDepTypes',
               'matchDepNames',
               'matchDepPatterns',
+              'matchDepPrefixes',
               'matchPackageNames',
               'matchPackagePatterns',
               'matchPackagePrefixes',
               'excludeDepNames',
               'excludeDepPatterns',
+              'excludeDepPrefixes',
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
@@ -448,6 +466,7 @@ export async function validateConfig(
                     'separateMajorMinor',
                     'separateMinorPatch',
                     'separateMultipleMajor',
+                    'separateMultipleMinor',
                     'versioning',
                   ];
                   if (is.nonEmptyArray(resolvedRule.matchUpdateTypes)) {
@@ -695,19 +714,28 @@ export async function validateConfig(
                   if (!allowedKeys.includes(subKey)) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: key is not allowed`,
+                      message: `Invalid \`${currentPath}.${subKey}\` configuration: key is not allowed`,
                     });
                   } else if (subKey === 'transformTemplates') {
                     if (!is.array(subValue, is.string)) {
                       errors.push({
                         topic: 'Configuration Error',
-                        message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is not an array of string`,
+                        message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of string`,
+                      });
+                    }
+                  } else if (subKey === 'description') {
+                    if (
+                      !(is.string(subValue) || is.array(subValue, is.string))
+                    ) {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of strings`,
                       });
                     }
                   } else if (!is.string(subValue)) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is a string`,
+                      message: `Invalid \`${currentPath}.${subKey}\` configuration: is a string`,
                     });
                   }
                 }

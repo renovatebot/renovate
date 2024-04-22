@@ -116,6 +116,12 @@ describe('modules/platform/gitea/index', () => {
         sha: 'other-head-sha' as LongCommitSha,
         repo: partial<Repo>({ full_name: mockRepo.full_name }),
       },
+      labels: [
+        {
+          id: 1,
+          name: 'bug',
+        },
+      ],
     }),
     partial<MockPr>({
       number: 3,
@@ -1605,6 +1611,8 @@ describe('modules/platform/gitea/index', () => {
 
     it('should use platform automerge', async () => {
       memCache.set('gitea-pr-cache-synced', true);
+      const helper = await import('./gitea-helper');
+      const mergePR = jest.spyOn(helper, 'mergePR');
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .post('/repos/some/repo/pulls')
@@ -1626,6 +1634,63 @@ describe('modules/platform/gitea/index', () => {
         number: 42,
         title: 'pr-title',
       });
+      expect(mergePR).toHaveBeenCalled();
+    });
+
+    it('should use platform automerge on forgejo v7', async () => {
+      memCache.set('gitea-pr-cache-synced', true);
+      const helper = await import('./gitea-helper');
+      const mergePR = jest.spyOn(helper, 'mergePR');
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .post('/repos/some/repo/pulls')
+        .reply(200, mockNewPR)
+        .post('/repos/some/repo/pulls/42/merge')
+        .reply(200);
+      await initFakePlatform(scope, '7.0.0-dev-2136-f075579c95+gitea-1.22.0');
+      await initFakeRepo(scope);
+
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(res).toMatchObject({
+        number: 42,
+        title: 'pr-title',
+      });
+      expect(mergePR).toHaveBeenCalled();
+    });
+
+    it('should use platform automerge on forgejo v7 LTS', async () => {
+      memCache.set('gitea-pr-cache-synced', true);
+      const helper = await import('./gitea-helper');
+      const mergePR = jest.spyOn(helper, 'mergePR');
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .post('/repos/some/repo/pulls')
+        .reply(200, mockNewPR)
+        .post('/repos/some/repo/pulls/42/merge')
+        .reply(200);
+      await initFakePlatform(scope, '7.0.0+LTS-gitea-1.22.0');
+      await initFakeRepo(scope);
+
+      const res = await gitea.createPr({
+        sourceBranch: mockNewPR.head.label,
+        targetBranch: 'master',
+        prTitle: mockNewPR.title,
+        prBody: mockNewPR.body,
+        platformOptions: { usePlatformAutomerge: true },
+      });
+
+      expect(res).toMatchObject({
+        number: 42,
+        title: 'pr-title',
+      });
+      expect(mergePR).toHaveBeenCalled();
     });
 
     it('continues on platform automerge error', async () => {
@@ -1867,6 +1932,87 @@ describe('modules/platform/gitea/index', () => {
           state: 'closed',
         }),
       ).toResolve();
+    });
+
+    it('should update labels', async () => {
+      const updatedMockPR = partial<PR>({
+        ...mockPRs[0],
+        number: 1,
+        title: 'New Title',
+        body: 'New Body',
+        state: 'open',
+        labels: [
+          {
+            id: 1,
+            name: 'some-label',
+          },
+        ],
+      });
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, mockPRs)
+        .get('/repos/some/repo/labels')
+        .reply(200, mockRepoLabels)
+        .get('/orgs/some/labels')
+        .reply(200, mockOrgLabels)
+        .patch('/repos/some/repo/pulls/1')
+        .reply(200, updatedMockPR);
+
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+      await expect(
+        gitea.updatePr({
+          number: 1,
+          prTitle: 'New Title',
+          prBody: 'New Body',
+          state: 'open',
+          labels: ['some-label'],
+        }),
+      ).toResolve();
+    });
+
+    it('should log a warning if labels could not be looked up', async () => {
+      const updatedMockPR = partial<PR>({
+        ...mockPRs[0],
+        number: 1,
+        title: 'New Title',
+        body: 'New Body',
+        state: 'open',
+        labels: [
+          {
+            id: 1,
+            name: 'some-label',
+          },
+        ],
+      });
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get('/repos/some/repo/pulls')
+        .query({ state: 'all', sort: 'recentupdate' })
+        .reply(200, mockPRs)
+        .get('/repos/some/repo/labels')
+        .reply(200, mockRepoLabels)
+        .get('/orgs/some/labels')
+        .reply(200, mockOrgLabels)
+        .patch('/repos/some/repo/pulls/1')
+        .reply(200, updatedMockPR);
+
+      await initFakePlatform(scope);
+      await initFakeRepo(scope);
+      await expect(
+        gitea.updatePr({
+          number: 1,
+          prTitle: 'New Title',
+          prBody: 'New Body',
+          state: 'open',
+          labels: ['some-label', 'unavailable-label'],
+        }),
+      ).toResolve();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Some labels could not be looked up. Renovate may halt label updates assuming changes by others.',
+      );
     });
   });
 

@@ -666,11 +666,73 @@ Use the `extends` field instead of this if, for example, you need the ability fo
     When Renovate resolves `globalExtends` it does not fully process the configuration.
     This means that Renovate does not have the authentication it needs to fetch private things.
 
+## httpCacheTtlDays
+
+This option sets the number of days that Renovate will cache HTTP responses.
+The default value is 90 days.
+Value of `0` means no caching.
+
+<!-- prettier-ignore -->
+!!! warning
+    When you set `httpCacheTtlDays` to `0`, Renovate will remove the cached HTTP data.
+
 ## includeMirrors
 
 By default, Renovate does not autodiscover repositories that are mirrors.
 
 Change this setting to `true` to include repositories that are mirrors as Renovate targets.
+
+## inheritConfig
+
+When you enable this option, Renovate will look for the `inheritConfigFileName` file in the `inheritConfigRepoName` repository before processing a repository, and read this in as config.
+
+If the repository is in a nested organization or group on a supported platform such as GitLab, such as `topGroup/nestedGroup/projectName` then Renovate will look in `topGroup/nestedGroup/renovate-config`.
+
+If `inheritConfig` is `true` but the inherited config file does _not_ exist then Renovate will proceed without warning.
+If the file exists but cannot be parsed, then Renovate will raise a config warning issue and abort the job.
+
+The inherited config may include all valid repository config and these config options:
+
+- `bbUseDevelopmentBranch`
+- `onboarding`
+- `onboardingBranch`
+- `onboardingCommitMessage`
+- `onboardingConfig`
+- `onboardingConfigFileName`
+- `onboardingNoDeps`
+- `onboardingPrTitle`
+- `onboardingRebaseCheckbox`
+- `requireConfig`
+
+<!-- prettier-ignore -->
+!!! note
+    The above list is prepared manually and may become out of date.
+    Consult the self-hosted configuration docs and look for `inheritConfigSupport` values there for the definitive list.
+
+This way organizations can change/control the default behavior, like whether configs are required and how repositories are onboarded.
+
+We disabled `inheritConfig` in the Mend Renovate App to avoid wasting millions of API calls per week.
+This is because each `404` response from the GitHub API due to a missing org inherited config counts as a used API call.
+We will add a smart/dynamic approach in future, so that we can selectively enable `inheritConfig` per organization.
+
+## inheritConfigFileName
+
+Change this setting if you want Renovate to look for a different file name within the `inheritConfigRepoName` repository.
+You may use nested files, for example: `"some-dir/config.json"`.
+
+## inheritConfigRepoName
+
+Change this setting if you want Renovate to look in an alternative repository for the inherited config.
+The repository must be on the same platform and endpoint, and Renovate's token must have `read` permissions to the repository.
+
+## inheritConfigStrict
+
+By default Renovate will silently (debug log message only) ignore cases where `inheritConfig=true` but no inherited config is found.
+When you set `inheritConfigStrict=true` then Renovate will abort the run and raise a config error if Renovate can't find the inherited config.
+
+<!-- prettier-ignore -->
+!!! warning
+    Only set this config option to `true` if _every_ organization has an inherited config file _and_ you want to make sure Renovate _always_ uses that inherited config.
 
 ## logContext
 
@@ -803,7 +865,7 @@ This private key is used to decrypt config files.
 The corresponding public key can be used to create encrypted values for config files.
 If you want a UI to encrypt values you can put the public key in a HTML page similar to <https://app.renovatebot.com/encrypt>.
 
-To create the key pair with GPG use the following commands:
+To create the PGP key pair with GPG use the following commands:
 
 - `gpg --full-generate-key` and follow the prompts to generate a key. Name and email are not important to Renovate, and do not configure a passphrase. Use a 4096bit key.
 
@@ -864,7 +926,7 @@ sub   rsa4096 2021-09-10 [E]
 The private key should then be added to your Renovate Bot global config (either using `privateKeyPath` or exporting it to the `RENOVATE_PRIVATE_KEY` environment variable).
 The public key can be used to replace the existing key in <https://app.renovatebot.com/encrypt> for your own use.
 
-Any encrypted secrets using GPG must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
+Any PGP-encrypted secrets must have a mandatory organization/group scope, and optionally can be scoped for a single repository only.
 The reason for this is to avoid "replay" attacks where someone could learn your encrypted secret and then reuse it in their own Renovate repositories.
 Instead, with scoped secrets it means that Renovate ensures that the organization and optionally repository values encrypted with the secret match against the running repository.
 
@@ -879,10 +941,14 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 Use this field if you need to perform a "key rotation" and support more than one keypair at a time.
 Decryption with this key will be tried after `privateKey`.
 
-If you are migrating from the legacy public key encryption approach to use GPG, then move your legacy private key from `privateKey` to `privateKeyOld` and then put your new GPG private key in `privateKey`.
-Doing so will mean that Renovate will first try to decrypt using the GPG key but fall back to the legacy key and try that next.
+If you are migrating from the legacy public key encryption approach to use a PGP key, then move your legacy private key from `privateKey` to `privateKeyOld` and then put your new PGP private key in `privateKey`.
+Doing so will mean that Renovate will first try to decrypt using the PGP key but fall back to the legacy key and try that next.
 
 You can remove the `privateKeyOld` config option once all the old encrypted values have been migrated, or if you no longer want to support the old key and let the processing of repositories fail.
+
+<!-- prettier-ignore -->
+!!! note
+    Renovate now logs a warning whenever repositories use non-PGP encrypted config variables.
 
 ## privateKeyPath
 

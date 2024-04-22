@@ -1,5 +1,10 @@
 import { getConfig } from './defaults';
-import { filterConfig, getManagerConfig, mergeChildConfig } from './index';
+import {
+  filterConfig,
+  getManagerConfig,
+  mergeChildConfig,
+  removeGlobalConfig,
+} from './index';
 
 jest.mock('../modules/datasource/npm');
 jest.mock('../../config.js', () => ({}), { virtual: true });
@@ -129,6 +134,22 @@ describe('config/index', () => {
       };
       const config = mergeChildConfig(parentConfig, childConfig);
       expect(config.vulnerabilitySeverity).toBe('CRITICAL');
+    });
+  });
+
+  describe('removeGlobalConfig()', () => {
+    it('removes all global config', () => {
+      const filteredConfig = removeGlobalConfig(defaultConfig, false);
+      expect(filteredConfig).not.toHaveProperty('onboarding');
+      expect(filteredConfig).not.toHaveProperty('binarySource');
+      expect(filteredConfig.prHourlyLimit).toBe(2);
+    });
+
+    it('retains inherited config', () => {
+      const filteredConfig = removeGlobalConfig(defaultConfig, true);
+      expect(filteredConfig).toHaveProperty('onboarding');
+      expect(filteredConfig).not.toHaveProperty('binarySource');
+      expect(filteredConfig.prHourlyLimit).toBe(2);
     });
   });
 });

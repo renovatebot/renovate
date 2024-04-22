@@ -4,6 +4,7 @@ nav:
   - ... | getting-started
   - Troubleshooting: 'troubleshooting.md'
   - Configuration:
+      - 'Overview': 'config-overview.md'
       - 'Repository': 'configuration-options.md'
       - 'Self-hosted': 'self-hosted-configuration.md'
       - 'Presets': 'config-presets.md'

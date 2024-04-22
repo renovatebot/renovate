@@ -45,10 +45,30 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(2);
       expect(warnings).toMatchObject([
         {
-          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
         {
-          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+      ]);
+    });
+
+    it('catches global options in inherit config', async () => {
+      const config = {
+        binarySource: 'something',
+        username: 'user',
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'inherit',
+        config,
+      );
+      expect(warnings).toHaveLength(2);
+      expect(warnings).toMatchObject([
+        {
+          message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
+        },
+        {
+          message: `The "username" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
     });
@@ -65,6 +85,17 @@ describe('config/validation', () => {
       };
       const { warnings } = await configValidation.validateConfig(
         'repo',
+        config,
+      );
+      expect(warnings).toHaveLength(0);
+    });
+
+    it('does not warn for valid inheritConfig', async () => {
+      const config = {
+        onboarding: false,
+      };
+      const { warnings } = await configValidation.validateConfig(
+        'inherit',
         config,
       );
       expect(warnings).toHaveLength(0);
@@ -206,6 +237,7 @@ describe('config/validation', () => {
       const config = {
         customDatasources: {
           foo: {
+            description: 3,
             randomKey: '',
             defaultRegistryUrlTemplate: [],
             transformTemplates: [{}],
@@ -216,15 +248,19 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'Invalid `customDatasources.customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
+            'Invalid `customDatasources.defaultRegistryUrlTemplate` configuration: is a string',
         },
         {
           message:
-            'Invalid `customDatasources.customDatasources.randomKey` configuration: key is not allowed',
+            'Invalid `customDatasources.description` configuration: is not an array of strings',
         },
         {
           message:
-            'Invalid `customDatasources.customDatasources.transformTemplates` configuration: is not an array of string',
+            'Invalid `customDatasources.randomKey` configuration: key is not allowed',
+        },
+        {
+          message:
+            'Invalid `customDatasources.transformTemplates` configuration: is not an array of string',
         },
       ]);
     });
@@ -1020,7 +1056,7 @@ describe('config/validation', () => {
       expect(warnings).toMatchObject([
         {
           topic: 'Configuration Error',
-          message: `The "customEnvVariables" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+          message: `The "customEnvVariables" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         },
       ]);
     });
@@ -1426,7 +1462,7 @@ describe('config/validation', () => {
           },
           {
             topic: 'Configuration Error',
-            message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within repository config file.`,
+            message: `The "binarySource" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
           },
         ]);
       });

@@ -32,10 +32,6 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_REUSE_PACKAGE_LOCK`
-
-If set to "false" (string), Renovate will remove any existing `package-lock.json` before trying to update it.
-
 ## `RENOVATE_USER_AGENT`
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
@@ -93,6 +89,10 @@ If set to any value, Renovate will use the Docker Hub API (`https://hub.docker.c
 If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
 This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
 
+## `RENOVATE_X_EAGER_GLOBAL_EXTENDS`
+
+Resolve and merge `globalExtends` presets before other global config, instead of after.
+
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
@@ -141,6 +141,10 @@ This feature is in private beta.
 If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
 The expected value for this environment variable is a JSON array of strings.
 
+## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
+
+If set to any value, Renovate will download `nupkg` files for determining package metadata.
+
 ## `RENOVATE_X_PLATFORM_VERSION`
 
 Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
@@ -155,6 +159,10 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 <!-- prettier-ignore -->
 !!! note
     For the GitHub Enterprise Server platform only.
+
+## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
+
+If set, Renovate will persist repository cache locally after uploading to S3.
 
 ## `RENOVATE_X_S3_ENDPOINT`
 
@@ -177,6 +185,6 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 
 Suppress the pre-commit support warning in PR bodies.
 
-## `RENOVATE_X_YARN_IGNORE_PROXY`
+## `RENOVATE_X_YARN_PROXY`
 
-Skip configuring global Yarn proxy settings if HTTP proxy environment variables are detected.
+Configure global Yarn proxy settings if HTTP proxy environment variables are detected.
