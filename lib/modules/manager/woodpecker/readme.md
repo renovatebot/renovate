@@ -4,4 +4,4 @@ Extracts all Docker images from Woodpecker Pipeline YAML files.
 - [Woodpecker Docs: Pipeline Syntax](https://woodpecker-ci.org/docs/usage/pipeline-syntax) ([section with dependencies](https://woodpecker-ci.org/docs/usage/pipeline-syntax#image))
 - [`woodpecker-ci` JSON schema](https://raw.githubusercontent.com/woodpecker-ci/woodpecker/master/pipeline/schema/schema.json)
 
-If you need to change the versioning format, read the [versioning](../../versioning.md) documentation to learn more.
+If you need to change the versioning format, read the [versioning](../../versioning/index.md) documentation to learn more.

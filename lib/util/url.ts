@@ -85,16 +85,13 @@ export function getQueryString(params: Record<string, any>): string {
   return usp.toString();
 }
 
-export function validateUrl(
-  url: string | null | undefined,
-  httpOnly = true,
-): boolean {
+export function isHttpUrl(url: unknown): boolean {
   if (!is.nonEmptyString(url)) {
     return false;
   }
   try {
     const { protocol } = new URL(url);
-    return httpOnly ? !!protocol.startsWith('http') : !!protocol;
+    return protocol === 'https:' || protocol === 'http:';
   } catch (err) {
     return false;
   }

@@ -24,7 +24,7 @@ Before Renovate can look up a dependency and decide about updates, it needs this
 
 - The dependency's name
 - Which `datasource` to use: npm, Docker, GitHub tags, and so on. For how to format this references see [datasource overview](../../datasource/index.md#supported-datasources)
-- Which version scheme to use: defaults to `semver-coerced`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](../../versioning.md#supported-versioning)
+- Which version scheme to use: defaults to `semver-coerced`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](../../versioning/index.md#supported-versioning)
 
 Configuration-wise, it works like this:
 
@@ -90,9 +90,9 @@ Instead you enhance your `Dockerfile` like this:
 ```Dockerfile
 ARG IMAGE=node:12@sha256:6e5264cd4cfaefd7174b2bc10c7f9a1c2b99d98d127fc57a802d264da9fb43bd
 FROM ${IMAGE}
- # renovate: datasource=github-tags depName=nodejs/node versioning=node
+# renovate: datasource=github-tags depName=nodejs/node versioning=node
 ENV NODE_VERSION=10.19.0
- # renovate: datasource=github-releases depName=composer/composer
+# renovate: datasource=github-releases depName=composer/composer
 ENV COMPOSER_VERSION=1.9.3
 # renovate: datasource=docker depName=docker versioning=docker
 ENV DOCKER_VERSION=19.03.1

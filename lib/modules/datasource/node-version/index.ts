@@ -13,8 +13,6 @@ export class NodeVersionDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = false;
-
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
   override readonly defaultVersioning = versioning;

@@ -2985,7 +2985,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('rejects non-fully specified in-range updates', async () => {
-      config.rangeStrategy = 'bump';
+      config.rangeStrategy = 'update-lockfile';
       config.currentValue = '1.x';
       config.packageName = 'q';
       config.datasource = NpmDatasource.id;
