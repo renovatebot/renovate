@@ -123,10 +123,12 @@ export function extractPackageFile(
       dep = {
         ...dep,
         depName,
-        packageName: normalizePythonDepName(depName),
         currentValue,
         datasource: PypiDatasource.id,
       };
+      if (depName !== normalizePythonDepName(depName)) {
+        dep.packageName = normalizePythonDepName(depName);
+      }
       if (currentValue?.startsWith('==')) {
         dep.currentVersion = currentValue.replace(/^==\s*/, '');
       }
