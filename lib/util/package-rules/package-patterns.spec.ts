@@ -29,7 +29,7 @@ describe('util/package-rules/package-patterns', () => {
     });
 
     it('should fall back to matching depName', () => {
-      const result = packageNameMatcher.matches(
+      const result = packagePatternsMatcher.matches(
         {
           depName: 'abc',
           packageName: 'def',
