@@ -18,7 +18,7 @@ export const presets: Record<string, Preset> = {
   },
   emberTemplateLint: {
     description: 'All ember-template-lint packages.',
-    matchPackagePrefixes: ['ember-template-lint'],
+    matchPackageNames: ['ember-template-lint**'],
   },
   eslint: {
     description: 'All ESLint packages.',
@@ -26,12 +26,10 @@ export const presets: Record<string, Preset> = {
       '@types/eslint',
       'babel-eslint',
       '@babel/eslint-parser',
-    ],
-    matchPackagePrefixes: [
-      '@eslint/',
-      '@types/eslint__',
-      '@typescript-eslint/',
-      'eslint',
+      '@eslint/**',
+      '@types/eslint__**',
+      '@typescript-eslint/**',
+      'eslint**',
     ],
   },
   gatsby: {
@@ -41,8 +39,7 @@ export const presets: Record<string, Preset> = {
   googleapis: {
     description: 'All `googleapis` packages.',
     matchDatasources: ['npm'],
-    matchPackageNames: ['google-auth-library'],
-    matchPackagePrefixes: ['@google-cloud/'],
+    matchPackageNames: ['google-auth-library', '@google-cloud/**'],
   },
   jsTest: {
     description: 'JavaScript test packages.',
@@ -76,17 +73,15 @@ export const presets: Record<string, Preset> = {
       'ts-auto-mock',
       'ts-jest',
       'vitest',
-    ],
-    matchPackagePrefixes: [
-      '@testing-library',
-      '@types/testing-library__',
-      '@vitest',
-      'chai',
-      'jest',
-      'mocha',
-      'qunit',
-      'should',
-      'sinon',
+      '@testing-library**',
+      '@types/testing-library__**',
+      '@vitest**',
+      'chai**',
+      'jest**',
+      'mocha**',
+      'qunit**',
+      'should**',
+      'sinon**',
     ],
   },
   linters: {
@@ -102,7 +97,7 @@ export const presets: Record<string, Preset> = {
   },
   mapbox: {
     description: 'All Mapbox-related packages.',
-    matchPackagePrefixes: ['leaflet', 'mapbox'],
+    matchPackageNames: ['leaflet**', 'mapbox**'],
   },
   phpLinters: {
     description: 'All PHP lint-related packages.',
@@ -123,22 +118,21 @@ export const presets: Record<string, Preset> = {
       'phpspec/prophecy-phpunit',
       'phpspec/phpspec',
       'phpunit/phpunit',
+      'pestphp/**',
+      'php-mock/**',
     ],
-    matchPackagePrefixes: ['pestphp/', 'php-mock/'],
   },
   postcss: {
     description: 'All PostCSS packages.',
-    matchPackageNames: ['postcss'],
-    matchPackagePrefixes: ['postcss-'],
+    matchPackageNames: ['postcss', 'postcss-**'],
   },
   react: {
     description: 'All React packages.',
-    matchPackageNames: ['@types/react'],
-    matchPackagePrefixes: ['react'],
+    matchPackageNames: ['@types/react', 'react**'],
   },
   stylelint: {
     description: 'All Stylelint packages.',
-    matchPackagePrefixes: ['stylelint'],
+    matchPackageNames: ['stylelint**'],
   },
   test: {
     description: 'Test packages.',
@@ -146,8 +140,7 @@ export const presets: Record<string, Preset> = {
   },
   tslint: {
     description: 'All TSLint packages.',
-    matchPackageNames: ['codelyzer'],
-    matchPackagePatterns: ['\\btslint\\b'],
+    matchPackageNames: ['codelyzer', '/\\btslint\\b/'],
   },
   unitTest: {
     description: 'All unit test packages.',
@@ -156,6 +149,6 @@ export const presets: Record<string, Preset> = {
   vite: {
     description: 'All Vite related packages',
     matchDatasources: ['npm'],
-    matchPackagePatterns: ['^vite$', 'vite-plugin', '@vitejs'],
+    matchPackageNames: ['vite', '**vite-plugin**', '@vitejs/**'],
   },
 };

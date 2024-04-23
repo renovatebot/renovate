@@ -19,20 +19,15 @@ describe('util/package-rules/index', () => {
 
     packageRules: [
       {
-        matchPackageNames: ['a', 'b'],
-        matchPackagePrefixes: ['xyz/'],
-        excludePackagePrefixes: ['xyz/foo'],
+        matchPackageNames: ['a', 'b', 'xyz/**', '!xyz/foo**'],
         x: 2,
       },
       {
-        matchPackagePatterns: ['a', 'b'],
-        excludePackageNames: ['aa'],
-        excludePackagePatterns: ['d'],
+        matchPackageNames: ['/a/', '/b/', '!aa', '!/d/'],
         y: 2,
       },
       {
-        matchPackagePrefixes: ['xyz/'],
-        excludePackageNames: ['xyz/foo'],
+        matchPackageNames: ['xyz/**', '!xyz/foo'],
         groupName: 'xyz',
       },
     ],
@@ -45,23 +40,19 @@ describe('util/package-rules/index', () => {
       currentValue: '1.0.0',
       packageRules: [
         {
-          matchPackagePatterns: ['*'],
+          matchPackageNames: ['*'],
           matchCurrentVersion: '<= 2.0.0',
         },
         {
           matchPackageNames: ['b'],
           matchCurrentVersion: '<= 2.0.0',
-        },
-        {
-          excludePackagePatterns: ['*'],
         },
         {
           matchUpdateTypes: ['bump'],
           labels: ['bump'],
         },
         {
-          excludePackageNames: ['a'],
-          matchPackageNames: ['b'],
+          matchPackageNames: ['b', '!a'],
         },
         {
           matchCurrentVersion: '<= 2.0.0',
@@ -104,31 +95,12 @@ describe('util/package-rules/index', () => {
     expect(res.groupName).toBeUndefined();
   });
 
-  it('applies matchPackagePrefixes', () => {
-    const dep = {
-      packageName: 'xyz/abc',
-    };
-    const res = applyPackageRules({ ...config1, ...dep });
-    expect(res.x).toBe(2);
-    expect(res.y).toBe(2);
-    expect(res.groupName).toBe('xyz');
-  });
-
-  it('applies excludePackageNames', () => {
+  it('applies matchPackageNames', () => {
     const dep = {
       packageName: 'xyz/foo',
     };
     const res = applyPackageRules({ ...config1, ...dep });
     expect(res.groupName).toBeUndefined();
-  });
-
-  it('applies excludePackagePrefixes', () => {
-    const dep = {
-      packageName: 'xyz/foo-a',
-    };
-    const res = applyPackageRules({ ...config1, ...dep });
-    expect(res.x).toBeUndefined();
-    expect(res.groupName).toBe('xyz');
   });
 
   it('applies the second second rule', () => {
@@ -164,31 +136,13 @@ describe('util/package-rules/index', () => {
       updateType: 'lockFileMaintenance' as UpdateType,
       packageRules: [
         {
-          excludePackagePatterns: ['^foo'],
+          matchPackageNames: ['!/^foo/'],
           automerge: false,
         },
       ],
     };
     const res = applyPackageRules(dep);
     expect(res.automerge).toBeFalse();
-    const res2 = applyPackageRules({ ...dep, packageName: 'foo' });
-    expect(res2.automerge).toBeTrue();
-  });
-
-  it('do not apply rule with empty matchPackagePattern', () => {
-    const dep = {
-      automerge: true,
-      updateType: 'lockFileMaintenance' as UpdateType,
-      packageRules: [
-        {
-          matchPackagePatterns: [],
-          excludePackagePatterns: ['^foo'],
-          automerge: false,
-        },
-      ],
-    };
-    const res = applyPackageRules(dep);
-    expect(res.automerge).toBeTrue();
     const res2 = applyPackageRules({ ...dep, packageName: 'foo' });
     expect(res2.automerge).toBeTrue();
   });
@@ -214,7 +168,7 @@ describe('util/package-rules/index', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          excludePackageNames: ['foo'],
+          matchPackageNames: ['!foo'],
           x: 1,
         },
       ],
@@ -235,8 +189,7 @@ describe('util/package-rules/index', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchPackageNames: ['neutrino'],
-          matchPackagePatterns: ['^@neutrino\\/'],
+          matchPackageNames: ['neutrino', '/^@neutrino\\//'],
           x: 1,
         },
       ],
@@ -1026,12 +979,12 @@ describe('util/package-rules/index', () => {
       packageName: 'foo',
       packageRules: [
         {
-          matchPackagePatterns: ['*'],
+          matchPackageNames: ['*'],
           groupName: 'A',
           groupSlug: 'a',
         },
         {
-          matchPackagePatterns: ['*'],
+          matchPackageNames: ['*'],
           groupName: 'B',
         },
       ],
@@ -1157,125 +1110,5 @@ describe('util/package-rules/index', () => {
 
     expect(res1.x).toBe(1);
     expect(res2.x).toBeUndefined();
-  });
-
-  it('matches excludeDepNames(depName)', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          excludeDepNames: ['test1'],
-          x: 1,
-        },
-      ],
-    };
-
-    const res1 = applyPackageRules({
-      ...config,
-      depName: 'test1',
-    });
-    const res2 = applyPackageRules({
-      ...config,
-      depName: 'test2',
-    });
-    applyPackageRules(config); // coverage
-
-    expect(res1.x).toBeUndefined();
-    expect(res2.x).toBe(1);
-  });
-
-  it('matches matchDepPatterns(depName)', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          matchDepPatterns: ['^test$'],
-          x: 1,
-        },
-      ],
-    };
-
-    const res1 = applyPackageRules({
-      ...config,
-      depName: 'test',
-    });
-    const res2 = applyPackageRules({
-      ...config,
-      depName: 'test1',
-    });
-    applyPackageRules(config); // coverage
-
-    expect(res1.x).toBe(1);
-    expect(res2.x).toBeUndefined();
-  });
-
-  it('matches excludeDepPatterns(depName)', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          excludeDepPatterns: ['^test$'],
-          x: 1,
-        },
-      ],
-    };
-
-    const res1 = applyPackageRules({
-      ...config,
-      depName: 'test',
-    });
-    const res2 = applyPackageRules({
-      ...config,
-      depName: 'test1',
-    });
-    applyPackageRules(config); // coverage
-
-    expect(res1.x).toBeUndefined();
-    expect(res2.x).toBe(1);
-  });
-
-  it('matches matchDepPrefixes(depName)', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          matchDepPrefixes: ['abc'],
-          x: 1,
-        },
-      ],
-    };
-
-    const res1 = applyPackageRules({
-      ...config,
-      depName: 'abc1',
-    });
-    const res2 = applyPackageRules({
-      ...config,
-      depName: 'def1',
-    });
-    applyPackageRules(config); // coverage
-
-    expect(res1.x).toBe(1);
-    expect(res2.x).toBeUndefined();
-  });
-
-  it('matches excludeDepPrefixes(depName)', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          excludeDepPrefixes: ['abc'],
-          x: 1,
-        },
-      ],
-    };
-
-    const res1 = applyPackageRules({
-      ...config,
-      depName: 'abc1',
-    });
-    const res2 = applyPackageRules({
-      ...config,
-      depName: 'def1',
-    });
-    applyPackageRules(config); // coverage
-
-    expect(res1.x).toBeUndefined();
-    expect(res2.x).toBe(1);
   });
 });

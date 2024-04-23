@@ -248,7 +248,7 @@ describe('config/migration', () => {
 
     it('migrates packages', () => {
       const config = {
-        packages: [
+        packageRules: [
           {
             packagePatterns: '^(@angular|typescript)',
             groupName: ['angular packages'],
@@ -261,7 +261,7 @@ describe('config/migration', () => {
       expect(migratedConfig).toEqual({
         packageRules: [
           {
-            matchPackagePatterns: '^(@angular|typescript)',
+            matchPackageNames: ['/^(@angular|typescript)/'],
             groupName: 'angular packages',
           },
         ],
@@ -551,15 +551,12 @@ describe('config/migration', () => {
       expect(migratedConfig).toEqual({
         packageRules: [
           {
-            excludePackageNames: ['baz'],
-            excludePackagePatterns: ['^baz'],
             matchBaseBranches: ['master'],
             matchDatasources: ['orb'],
             matchDepTypes: ['peerDependencies'],
             matchCategories: ['python'],
             matchManagers: ['dockerfile'],
-            matchPackageNames: ['foo'],
-            matchPackagePatterns: ['^bar'],
+            matchPackageNames: ['foo', '/^bar/', '!baz', '!/^baz/'],
             matchFileNames: ['package.json'],
             matchSourceUrlPrefixes: ['https://github.com/lodash'],
             matchUpdateTypes: ['major'],
@@ -610,7 +607,7 @@ describe('config/migration', () => {
           packageRules: [
             {
               groupName: 'definitelyTyped',
-              matchPackagePrefixes: ['@types/'],
+              matchPackageNames: ['@types/**'],
             },
             {
               matchDepTypes: ['dependencies'],

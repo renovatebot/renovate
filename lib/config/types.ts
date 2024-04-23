@@ -351,12 +351,6 @@ export interface PackageRule
     UpdateConfig,
     Record<string, unknown> {
   description?: string | string[];
-  excludeDepNames?: string[];
-  excludeDepPatterns?: string[];
-  excludeDepPrefixes?: string[];
-  excludePackageNames?: string[];
-  excludePackagePatterns?: string[];
-  excludePackagePrefixes?: string[];
   excludeRepositories?: string[];
   isVulnerabilityAlert?: boolean;
   matchBaseBranches?: string[];
@@ -367,15 +361,11 @@ export interface PackageRule
   matchCurrentVersion?: string;
   matchDatasources?: string[];
   matchDepNames?: string[];
-  matchDepPatterns?: string[];
-  matchDepPrefixes?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
   matchManagers?: string[];
   matchNewValue?: string;
   matchPackageNames?: string[];
-  matchPackagePatterns?: string[];
-  matchPackagePrefixes?: string[];
   matchRepositories?: string[];
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];

@@ -324,8 +324,11 @@ describe('config/validation', () => {
         timezone: 'Asia/Singapore',
         packageRules: [
           {
-            matchPackagePatterns: ['*'],
-            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            matchPackageNames: [
+              '*',
+              '/abc ([a-z]+) ([a-z]+))/',
+              '!/abc ([a-z]+) ([a-z]+))/',
+            ],
             enabled: true,
           },
         ],
@@ -339,7 +342,7 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(3);
+      expect(errors).toHaveLength(4);
       expect(errors).toMatchSnapshot();
     });
 
@@ -432,18 +435,12 @@ describe('config/validation', () => {
         extends: [':timezone(Europe/Brussel)'],
         packageRules: [
           {
-            excludePackageNames: ['foo'],
-            enabled: true,
-          },
-          {
             foo: 1,
           },
           'what?' as any,
           {
-            matchDepPatterns: 'abc ([a-z]+) ([a-z]+))',
-            matchPackagePatterns: 'abc ([a-z]+) ([a-z]+))',
-            excludeDepPatterns: ['abc ([a-z]+) ([a-z]+))'],
-            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            matchPackageNames: '/abc ([a-z]+) ([a-z]+))/',
+            matchDepNames: ['abc ([a-z]+) ([a-z]+))'],
             enabled: false,
           },
         ],
@@ -455,7 +452,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(15);
+      expect(errors).toHaveLength(12);
     });
 
     it('selectors outside packageRules array trigger errors', async () => {
@@ -989,9 +986,7 @@ describe('config/validation', () => {
 
     it('warns if only selectors in packageRules', async () => {
       const config = {
-        packageRules: [
-          { matchDepTypes: ['foo'], excludePackageNames: ['bar'] },
-        ],
+        packageRules: [{ matchDepTypes: ['foo'], matchPackageNames: ['bar'] }],
       };
       const { warnings, errors } = await configValidation.validateConfig(
         'repo',

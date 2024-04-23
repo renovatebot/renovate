@@ -40,28 +40,14 @@ describe('util/package-rules/package-names', () => {
       );
       expect(result).toBeTrue();
     });
-  });
 
-  describe('exclude', () => {
-    it('should return false if packageName is not defined', () => {
-      const result = packageNameMatcher.excludes(
+    it('should match pattern', () => {
+      const result = packageNameMatcher.matches(
         {
-          packageName: undefined,
+          packageName: 'b',
         },
         {
-          excludePackageNames: ['@opentelemetry/http'],
-        },
-      );
-      expect(result).toBeFalse();
-    });
-
-    it('should excludePackageName', () => {
-      const result = packageNameMatcher.excludes(
-        {
-          packageName: 'def',
-        },
-        {
-          excludePackageNames: ['def'],
+          matchPackageNames: ['/b/'],
         },
       );
       expect(result).toBeTrue();

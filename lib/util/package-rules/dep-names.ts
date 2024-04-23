@@ -16,17 +16,4 @@ export class DepNameMatcher extends Matcher {
     }
     return matchRegexOrGlobList(depName, matchDepNames);
   }
-
-  override excludes(
-    { depName }: PackageRuleInputConfig,
-    { excludeDepNames }: PackageRule,
-  ): boolean | null {
-    if (is.undefined(excludeDepNames)) {
-      return null;
-    }
-    if (is.undefined(depName)) {
-      return false;
-    }
-    return matchRegexOrGlobList(depName, excludeDepNames);
-  }
 }

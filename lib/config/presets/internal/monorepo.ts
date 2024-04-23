@@ -588,6 +588,6 @@ for (const [name, value] of Object.entries(orgGroups)) {
 for (const [name, value] of Object.entries(patternGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchPackagePatterns: toArray(value),
+    matchPackageNames: toArray(value).map((pattern) => `/${pattern}/`),
   };
 }
