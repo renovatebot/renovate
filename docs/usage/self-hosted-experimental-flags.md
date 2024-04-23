@@ -34,3 +34,7 @@ Example usage:
 ```js
 experimentalFlags: ['noMavenPomCheck'];
 ```
+
+## `paginateAll`
+
+If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.

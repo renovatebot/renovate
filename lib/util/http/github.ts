@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../config/global';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -319,7 +320,10 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         if (next?.url && linkHeader?.last?.page) {
           let lastPage = parseInt(linkHeader.last.page, 10);
           // istanbul ignore else: needs a test
-          if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
+          if (
+            !GlobalConfig.getExperimentalFlag('paginateAll') &&
+            opts.paginate !== 'all'
+          ) {
             lastPage = Math.min(pageLimit, lastPage);
           }
           const baseUrl = opts.baseUrl;

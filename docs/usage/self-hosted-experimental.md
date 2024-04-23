@@ -23,15 +23,6 @@ For more information see [the OpenTelemetry docs](opentelemetry.md).
 
 If set to any integer, Renovate will use this integer instead of the default npm cache time (15 minutes) for the npm datasource.
 
-## `RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK`
-
-If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
-Skipping the check will speed things up, but may result in versions being returned which don't properly exist on the server.
-
-## `RENOVATE_PAGINATE_ALL`
-
-If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
-
 ## `RENOVATE_USER_AGENT`
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
