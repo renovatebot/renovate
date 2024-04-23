@@ -2883,7 +2883,7 @@ For more details on this syntax see Renovate's [string pattern matching document
 ### matchPackageNames
 
 Use this field to match against the `packageName` field.
-This matching can be an exact match, Glob match, or Regular Express match.
+This matching can be an exact match, Glob match, or Regular Expression match.
 
 For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 Note that Glob matching (including exact name matching) is case-insensitive.
