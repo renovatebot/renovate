@@ -12,7 +12,6 @@ import { MergeConfidenceMatcher } from './merge-confidence';
 import { NewValueMatcher } from './new-value';
 import { PackageNameMatcher } from './package-names';
 import { RepositoriesMatcher } from './repositories';
-import { SourceUrlPrefixesMatcher } from './sourceurl-prefixes';
 import { SourceUrlsMatcher } from './sourceurls';
 import type { MatcherApi } from './types';
 import { UpdateTypesMatcher } from './update-types';
@@ -26,14 +25,15 @@ export default matchers;
 // Therefore, when multiple matchers are set in a single packageRule, some may not be checked.
 // Since matchConfidence matcher can abort the run due to unauthenticated use, it should be evaluated first.
 matchers.push([new MergeConfidenceMatcher()]);
-matchers.push([new DepNameMatcher(), new PackageNameMatcher()]);
+matchers.push([new DepNameMatcher()]);
+matchers.push([new PackageNameMatcher()]);
 matchers.push([new FileNamesMatcher()]);
 matchers.push([new DepTypesMatcher()]);
 matchers.push([new BaseBranchesMatcher()]);
 matchers.push([new ManagersMatcher()]);
 matchers.push([new DatasourcesMatcher()]);
 matchers.push([new UpdateTypesMatcher()]);
-matchers.push([new SourceUrlsMatcher(), new SourceUrlPrefixesMatcher()]);
+matchers.push([new SourceUrlsMatcher()]);
 matchers.push([new CurrentValueMatcher()]);
 matchers.push([new NewValueMatcher()]);
 matchers.push([new CurrentVersionMatcher()]);

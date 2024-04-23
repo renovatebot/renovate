@@ -254,7 +254,7 @@ describe('config/migration', () => {
             groupName: ['angular packages'],
           },
         ],
-      };
+      } as unknown as RenovateConfig;
       const { isMigrated, migratedConfig } =
         configMigration.migrateConfig(config);
       expect(isMigrated).toBeTrue();
@@ -558,7 +558,7 @@ describe('config/migration', () => {
             matchManagers: ['dockerfile'],
             matchPackageNames: ['foo', '/^bar/', '!baz', '!/^baz/'],
             matchFileNames: ['package.json'],
-            matchSourceUrlPrefixes: ['https://github.com/lodash'],
+            matchSourceUrls: ['https://github.com/lodash**'],
             matchUpdateTypes: ['major'],
           },
         ],

@@ -2849,21 +2849,6 @@ The above will group together any npm package which starts with `@angular/` exce
 
 The above will group together any npm package which starts with the string `angular`.
 
-### matchSourceUrlPrefixes
-
-Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchSourceUrlPrefixes": ["https://github.com/renovatebot/"],
-      "groupName": "All renovate packages"
-    }
-  ]
-}
-```
-
 ### matchSourceUrls
 
 Here's an example of where you use this to group together all packages from the Vue monorepo:

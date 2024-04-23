@@ -199,9 +199,9 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'jekyll ecosystem packages',
-        matchSourceUrlPrefixes: [
-          'https://github.com/jekyll/',
-          'https://github.com/github/pages-gem',
+        matchSourceUrls: [
+          'https://github.com/jekyll/**',
+          'https://github.com/github/pages-gem**',
         ],
       },
     ],
@@ -480,7 +480,7 @@ const staticGroups = {
       {
         groupName: 'remark',
         matchDatasources: ['npm'],
-        matchSourceUrlPrefixes: ['https://github.com/remarkjs/'],
+        matchSourceUrls: ['https://github.com/remarkjs/**'],
       },
     ],
   },

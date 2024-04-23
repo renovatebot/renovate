@@ -14,7 +14,7 @@ export const presets: Record<string, Preset> = {
   },
   apollographql: {
     description: 'All packages published by Apollo GraphQL.',
-    matchSourceUrlPrefixes: ['https://github.com/apollographql/'],
+    matchSourceUrls: ['https://github.com/apollographql/**'],
   },
   emberTemplateLint: {
     description: 'All ember-template-lint packages.',

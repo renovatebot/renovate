@@ -367,7 +367,6 @@ export interface PackageRule
   matchNewValue?: string;
   matchPackageNames?: string[];
   matchRepositories?: string[];
-  matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
   registryUrls?: string[] | null;

@@ -103,6 +103,14 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       }
       delete newPackageRule.excludePackagePatterns;
     }
+    // sourceUrl
+    if (key === 'matchSourceUrlPrefixes') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchSourceUrls ??= [];
+        newPackageRule.matchSourceUrls.push(...val.map((v) => `${v}**`));
+      }
+      delete newPackageRule.matchSourceUrlPrefixes;
+    }
   }
   return newPackageRule;
 }

@@ -141,10 +141,9 @@ describe('util/package-rules/index', () => {
         },
       ],
     };
+    // This should not match
     const res = applyPackageRules(dep);
-    expect(res.automerge).toBeFalse();
-    const res2 = applyPackageRules({ ...dep, packageName: 'foo' });
-    expect(res2.automerge).toBeTrue();
+    expect(res.automerge).toBeTrue();
   });
 
   it('do apply rule with matchPackageName', () => {
@@ -471,13 +470,13 @@ describe('util/package-rules/index', () => {
     expect(res.y).toBeUndefined();
   });
 
-  it('matches matchSourceUrlPrefixes', () => {
+  it('matches matchSourceUrls with glob', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchSourceUrlPrefixes: [
-            'https://github.com/foo/bar',
-            'https://github.com/renovatebot/',
+          matchSourceUrls: [
+            'https://github.com/foo/bar**',
+            'https://github.com/renovatebot/**',
           ],
           x: 1,
         },
@@ -493,13 +492,13 @@ describe('util/package-rules/index', () => {
     expect(res.x).toBe(1);
   });
 
-  it('non-matches matchSourceUrlPrefixes', () => {
+  it('non-matches matchSourceUrls with globs', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchSourceUrlPrefixes: [
-            'https://github.com/foo/bar',
-            'https://github.com/renovatebot/',
+          matchSourceUrls: [
+            'https://github.com/foo/bar**',
+            'https://github.com/renovatebot/**',
           ],
           x: 1,
         },
@@ -515,13 +514,13 @@ describe('util/package-rules/index', () => {
     expect(res.x).toBeUndefined();
   });
 
-  it('handles matchSourceUrlPrefixes when missing sourceUrl', () => {
+  it('handles matchSourceUrls when missing sourceUrl', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchSourceUrlPrefixes: [
-            'https://github.com/foo/bar',
-            'https://github.com/renovatebot/',
+          matchSourceUrls: [
+            'https://github.com/foo/bar**',
+            'https://github.com/renovatebot/**',
           ],
           x: 1,
         },
@@ -575,27 +574,6 @@ describe('util/package-rules/index', () => {
       packageName: 'a',
       updateType: 'patch' as UpdateType,
       sourceUrl: 'https://github.com/facebook/react-native',
-    };
-    const res = applyPackageRules({ ...config, ...dep });
-    expect(res.x).toBeUndefined();
-  });
-
-  it('handles matchSourceUrls when missing sourceUrl', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          matchSourceUrls: [
-            'https://github.com/foo/bar',
-            'https://github.com/renovatebot/',
-          ],
-          x: 1,
-        },
-      ],
-    };
-    const dep = {
-      depType: 'dependencies',
-      packageName: 'a',
-      updateType: 'patch' as UpdateType,
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
@@ -993,13 +971,13 @@ describe('util/package-rules/index', () => {
     expect(res.groupSlug).toBe('b');
   });
 
-  it('matches matchSourceUrlPrefixes(case-insensitive)', () => {
+  it('matches matchSourceUrls with patterns (case-insensitive)', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchSourceUrlPrefixes: [
-            'https://github.com/foo/bar',
-            'https://github.com/Renovatebot/',
+          matchSourceUrls: [
+            'https://github.com/foo/bar**',
+            'https://github.com/Renovatebot/**',
           ],
           x: 1,
         },

@@ -16,7 +16,6 @@ describe('config/migrations/custom/package-rules-migration', () => {
           depTypeList: [],
           addLabels: [],
           packageNames: [],
-          sourceUrlPrefixes: [],
           updateTypes: [],
         },
       ],
@@ -174,6 +173,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
           {
             matchPackagePatterns: ['pattern'],
             matchPackagePrefixes: ['prefix1', 'prefix2'],
+            matchSourceUrlPrefixes: ['prefix1', 'prefix2'],
             excludePackageNames: ['excluded'],
             excludePackagePatterns: ['excludepattern'],
             excludePackagePrefixes: ['prefix1b'],
@@ -211,6 +211,7 @@ describe('config/migrations/custom/package-rules-migration', () => {
               '!/excludepattern/',
               '!prefix1b**',
             ],
+            matchSourceUrls: ['prefix1**', 'prefix2**'],
             automerge: true,
           },
         ],

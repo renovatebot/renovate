@@ -1361,19 +1361,6 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchSourceUrlPrefixes',
-    description:
-      'A list of source URL prefixes to match against, commonly used to group monorepos or packages from the same organization.',
-    type: 'array',
-    subType: 'string',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-  },
-  {
     name: 'matchSourceUrls',
     description: 'A list of source URLs to exact match against.',
     type: 'array',
