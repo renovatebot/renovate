@@ -637,27 +637,28 @@ describe('modules/manager/pipenv/artifacts', () => {
     expect(getMatchingHostRule('')).toBeNull();
   });
 
-  it('extracts correct environment variable from credential placeholder', () => {
-    for (const testCase of [
-      { credential: '$USERNAME', result: 'USERNAME' },
-      { credential: '$', result: null },
-      { credential: '', result: null },
-      { credential: '${USERNAME}', result: 'USERNAME' },
-      { credential: '${USERNAME:-default}', result: 'USERNAME' },
-      { credential: '${COMPLEX_NAME_1:-default}', result: 'COMPLEX_NAME_1' },
-    ]) {
+  it.each([
+    { credential: '$USERNAME', result: 'USERNAME' },
+    { credential: '$', result: null },
+    { credential: '', result: null },
+    { credential: '${USERNAME}', result: 'USERNAME' },
+    { credential: '${USERNAME:-default}', result: 'USERNAME' },
+    { credential: '${COMPLEX_NAME_1:-default}', result: 'COMPLEX_NAME_1' },
+  ])(
+    'extracts correct environment variable from credential placeholder',
+    (testCase) => {
       expect(extractEnvironmentVariableName(testCase.credential)).toEqual(
         testCase.result,
       );
-    }
-  });
+    },
+  );
 
   it('warns about duplicate placeholders with different values', () => {
     const extraEnv: Opt<ExtraEnv> = {
       FOO: '1',
     };
     addExtraEnvVariable(extraEnv, 'FOO', '2');
-    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledOnce();
   });
 
   it('updates extraEnv if variable names differ from default', async () => {
