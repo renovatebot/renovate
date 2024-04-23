@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
-import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -160,12 +159,6 @@ async function lookupLabelByName(name: string): Promise<number | null> {
 }
 
 async function fetchRepositories(topic?: string): Promise<string[]> {
-  const autodiscoverRepoOrder = GlobalConfig.getExperimentalFlag(
-    'autoDiscoverRepoOrder',
-  );
-  const autodiscoverRepoSort = GlobalConfig.getExperimentalFlag(
-    'autoDiscoverRepoSort',
-  );
   const repos = await helper.searchRepos({
     uid: botUserID,
     archived: false,
@@ -173,11 +166,11 @@ async function fetchRepositories(topic?: string): Promise<string[]> {
       topic: true,
       q: topic,
     }),
-    ...(autodiscoverRepoSort && {
-      sort: autodiscoverRepoSort as RepoSortMethod,
+    ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT && {
+      sort: process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT as RepoSortMethod,
     }),
-    ...(autodiscoverRepoOrder && {
-      order: autodiscoverRepoOrder as SortMethod,
+    ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER && {
+      order: process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER as SortMethod,
     }),
   });
   return repos.filter((r) => !r.mirror).map((r) => r.full_name);

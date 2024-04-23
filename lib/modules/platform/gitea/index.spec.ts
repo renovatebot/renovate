@@ -38,7 +38,6 @@ describe('modules/platform/gitea/index', () => {
   let git: jest.Mocked<typeof _git>;
   let hostRules: typeof import('../../../util/host-rules');
   let memCache: typeof import('../../../util/cache/memory');
-  let globalConfig: typeof import('../../../config/global');
 
   const mockCommitHash =
     '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
@@ -218,11 +217,12 @@ describe('modules/platform/gitea/index', () => {
     git.isBranchBehindBase.mockResolvedValue(false);
     git.getBranchCommit.mockReturnValue(mockCommitHash);
     hostRules = await import('../../../util/host-rules');
+
     hostRules.clear();
-    globalConfig = await import('../../../config/global');
     setBaseUrl('https://gitea.renovatebot.com/');
 
-    globalConfig.GlobalConfig.reset();
+    delete process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT;
+    delete process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER;
   });
 
   async function initFakePlatform(
@@ -417,12 +417,8 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('Sorts repos', async () => {
-      globalConfig.GlobalConfig.set({
-        experimentalFlags: [
-          'autoDiscoverRepoOrder=desc',
-          'autoDiscoverRepoSort=updated',
-        ],
-      });
+      process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT = 'updated';
+      process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER = 'desc';
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/search')

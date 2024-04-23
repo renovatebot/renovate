@@ -37,7 +37,7 @@ export class GlobalConfig {
   ];
 
   private static config: RepoGlobalConfig = {};
-  private static parsedExperimentalFlags: Record<string, string> = {};
+  private static parsedExperimentalFlags: Set<string> = new Set();
 
   static get(): RepoGlobalConfig;
   static get<Key extends keyof RepoGlobalConfig>(
@@ -66,27 +66,18 @@ export class GlobalConfig {
     return result;
   }
 
-  static getExperimentalFlag(key: string): string | null {
+  static getExperimentalFlag(key: string): boolean {
     const experimentalFlags = GlobalConfig.get('experimentalFlags');
 
     if (!experimentalFlags) {
-      return null;
+      return false;
     }
 
-    // Check if the flag value is already parsed and stored
-    if (GlobalConfig.parsedExperimentalFlags[key]) {
-      return GlobalConfig.parsedExperimentalFlags[key];
+    if (!GlobalConfig.parsedExperimentalFlags.size) {
+      GlobalConfig.parsedExperimentalFlags = new Set(experimentalFlags);
     }
 
-    for (const flag of experimentalFlags) {
-      if (flag.includes(key)) {
-        const [name, value] = flag.split('=');
-        GlobalConfig.parsedExperimentalFlags[name] = value ?? name;
-        return value ?? name;
-      }
-    }
-
-    return null;
+    return GlobalConfig.parsedExperimentalFlags.has(key);
   }
 
   /**
@@ -95,6 +86,6 @@ export class GlobalConfig {
    */
   static reset(): void {
     GlobalConfig.config = {};
-    GlobalConfig.parsedExperimentalFlags = {};
+    GlobalConfig.parsedExperimentalFlags = new Set();
   }
 }

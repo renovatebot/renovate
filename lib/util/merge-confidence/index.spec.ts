@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { GlobalConfig } from '../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
@@ -431,7 +430,7 @@ describe('util/merge-confidence/index', () => {
         };
 
         afterEach(() => {
-          GlobalConfig.reset();
+          delete process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES;
         });
 
         it.each([
@@ -442,17 +441,22 @@ describe('util/merge-confidence/index', () => {
           },
           {
             name: 'it should successfully parse the given datasource list',
-            datasourceListString: 'go,npm',
+            datasourceListString: `["go","npm"]`,
             expected: ['go', 'npm'],
           },
           {
-            name: 'it should gracefully handle invalid string format',
-            datasourceListString: '{',
+            name: 'it should gracefully handle invalid json',
+            datasourceListString: `{`,
             expected: undefined,
           },
           {
-            name: 'it should discard non-string input',
-            datasourceListString: '1,2',
+            name: 'it should discard non-array JSON input',
+            datasourceListString: `{}`,
+            expected: undefined,
+          },
+          {
+            name: 'it should discard non-string array JSON input',
+            datasourceListString: `[1,2]`,
             expected: undefined,
           },
         ])(
@@ -461,11 +465,8 @@ describe('util/merge-confidence/index', () => {
             datasourceListString,
             expected,
           }: ParseSupportedDatasourceTestCase) => {
-            GlobalConfig.set({
-              experimentalFlags: [
-                `mergeConfidenceSupportedDatasources=${datasourceListString ?? ''}`,
-              ],
-            });
+            process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES =
+              datasourceListString;
 
             expect(parseSupportedDatasourceString()).toStrictEqual(expected);
           },

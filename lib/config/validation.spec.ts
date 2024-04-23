@@ -3,12 +3,6 @@ import { GlobalConfig } from './global';
 import type { RenovateConfig } from './types';
 import * as configValidation from './validation';
 
-jest.mock('../modules/datasource', () => {
-  return {
-    getDatasourceList: jest.fn(() => ['docker', 'deno']),
-  };
-});
-
 describe('config/validation', () => {
   describe('getParentName()', () => {
     it('ignores encrypted in root', () => {
@@ -1721,13 +1715,7 @@ describe('config/validation', () => {
 
     it('warns if invalid flag found', async () => {
       const config = {
-        experimentalFlags: [
-          'invalidintegertag=10',
-          'invalidtag',
-          'invalidstringtag=string',
-          'invalidarraytag=a,b,c',
-          10,
-        ],
+        experimentalFlags: ['invalidtag', 10],
       };
       const { warnings } = await configValidation.validateConfig(
         'global',
@@ -1738,21 +1726,6 @@ describe('config/validation', () => {
           topic: 'Configuration Error',
           message:
             'Experimental flags can only be of type string. Found invalid type',
-        },
-        {
-          topic: 'Configuration Error',
-          message:
-            'Invalid flag `invalidarraytag` found in `experimentalFlags`.',
-        },
-        {
-          topic: 'Configuration Error',
-          message:
-            'Invalid flag `invalidintegertag` found in `experimentalFlags`.',
-        },
-        {
-          topic: 'Configuration Error',
-          message:
-            'Invalid flag `invalidstringtag` found in `experimentalFlags`.',
         },
         {
           topic: 'Configuration Error',
@@ -1770,199 +1743,6 @@ describe('config/validation', () => {
         config,
       );
       expect(warnings).toBeEmptyArray();
-    });
-
-    it('warns if value set for dockerHubTags', async () => {
-      const config = {
-        experimentalFlags: ['dockerHubTags=10'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message: 'Experimental flag `dockerHubTags` should not have a value.',
-        },
-      ]);
-    });
-
-    it('dockerMaxPages', async () => {
-      const config = {
-        experimentalFlags: ['dockerMaxPages=10'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toBeEmptyArray();
-    });
-
-    it('warns if invalid value set for dockerMaxPages', async () => {
-      const config = {
-        experimentalFlags: ['dockerMaxPages=string'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message:
-            'Experimental flag `dockerMaxPages` should be of type integer. Found invalid type instead.',
-        },
-      ]);
-    });
-
-    it('warns if no value set for dockerMaxPages', async () => {
-      const config = {
-        experimentalFlags: ['dockerMaxPages'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message: 'Experimental flag `dockerMaxPages` should have a value.',
-        },
-      ]);
-    });
-
-    it('autoDiscoverRepoOrder', async () => {
-      const config = {
-        experimentalFlags: ['autoDiscoverRepoOrder=asc'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toBeEmptyArray();
-    });
-
-    it('warns if invalid order set for autoDiscoverRepoOrder', async () => {
-      const config = {
-        experimentalFlags: ['autoDiscoverRepoOrder=string'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message: `Invalid value \`string\` found for experimental flag \`autoDiscoverRepoOrder\`.The allowed values are asc, desc.`,
-        },
-      ]);
-    });
-
-    it('warns if invalid type set for autoDiscoverRepoOrder', async () => {
-      const config = {
-        experimentalFlags: ['autoDiscoverRepoOrder=10'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message: `Experimental flag \`autoDiscoverRepoOrder\` should be of type string. Found invalid type instead.`,
-        },
-      ]);
-    });
-
-    it('autoDiscoverRepoSort', async () => {
-      const config = {
-        experimentalFlags: ['autoDiscoverRepoSort=alpha'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toBeEmptyArray();
-    });
-
-    it('warns if invalid value set for autoDiscoverRepoSort', async () => {
-      const config = {
-        experimentalFlags: ['autoDiscoverRepoSort=string'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message: `Invalid value \`string\` found for experimental flag \`autoDiscoverRepoSort\`.The allowed values are alpha, created, updated, size, id.`,
-        },
-      ]);
-    });
-
-    it('warns if invalid type set for autoDiscoverRepoSort', async () => {
-      const config = {
-        experimentalFlags: ['autoDiscoverRepoSort=10'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message: `Experimental flag \`autoDiscoverRepoSort\` should be of type string. Found invalid type instead.`,
-        },
-      ]);
-    });
-
-    it('mergeConfidenceSupportedDatasources', async () => {
-      const config = {
-        experimentalFlags: ['mergeConfidenceSupportedDatasources=docker,deno'],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toBeEmptyArray();
-    });
-
-    it('warns if invalid datasource set for mergeConfidenceSupportedDatasources', async () => {
-      const config = {
-        experimentalFlags: [
-          'mergeConfidenceSupportedDatasources=docker,invalid-datasource',
-        ],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message: `Invalid value \`invalid-datasource\` found for experimental flag \`mergeConfidenceSupportedDatasources\`.The allowed values are docker, deno.`,
-        },
-      ]);
-    });
-
-    it('warns if invalid format used for mergeConfidenceSupportedDatasources', async () => {
-      const config = {
-        experimentalFlags: [
-          'mergeConfidenceSupportedDatasources=[docker,invalid-datasource]',
-        ],
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toEqual([
-        {
-          topic: 'Configuration Error',
-          message: `Experimental flag \`mergeConfidenceSupportedDatasources\` should be a list of strings separated by a comma. Found invalid format instead.`,
-        },
-      ]);
     });
   });
 });

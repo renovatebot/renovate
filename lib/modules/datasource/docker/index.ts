@@ -643,8 +643,9 @@ export class DockerDatasource extends Datasource {
       return null;
     }
     let page = 0;
-    const dockerMaxPages = GlobalConfig.getExperimentalFlag('dockerMaxPages');
-    const pages = dockerMaxPages ? parseInt(dockerMaxPages, 10) : 20;
+    const pages = process.env.RENOVATE_X_DOCKER_MAX_PAGES
+      ? parseInt(process.env.RENOVATE_X_DOCKER_MAX_PAGES, 10)
+      : 20;
     let foundMaxResultsError = false;
     do {
       let res: HttpResponse<{ tags: string[] }>;
@@ -1028,9 +1029,8 @@ export class DockerDatasource extends Datasource {
         'dockerhub-error' as const,
       ).catch(getTags);
 
-    const allowDockerHubTags = is.string(
-      GlobalConfig.getExperimentalFlag('dockerHubTags'),
-    );
+    const allowDockerHubTags =
+      GlobalConfig.getExperimentalFlag('dockerHubTags');
     const tagsResult =
       registryHost === 'https://index.docker.io' && allowDockerHubTags
         ? getDockerHubTags()

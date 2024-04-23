@@ -36,12 +36,52 @@ If set to any value, Renovate will always paginate requests to GitHub fully, ins
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
 
+## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
+
+<!-- prettier-ignore -->
+!!! note
+    For the Forgejo and Gitea platform only.
+
+The order method for autodiscover server side repository search.
+
+> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
+> Allowed values:
+
+- `asc`
+- `desc`
+
+Default value: `asc`.
+
+## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
+
+<!-- prettier-ignore -->
+!!! note
+    For the Forgejo and Gitea platform only.
+
+The sort method for autodiscover server side repository search.
+
+> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
+> Allowed values:
+
+- `alpha`
+- `created`
+- `updated`
+- `size`
+- `id`
+
+Default value: `alpha`.
+
 ## `RENOVATE_X_DELETE_CONFIG_FILE`
 
 If `true` Renovate tries to delete the self-hosted config file after reading it.
 You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE` environment variable.
 
 The process that runs Renovate must have the correct permissions to delete the config file.
+
+## `RENOVATE_X_DOCKER_MAX_PAGES`
+
+If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
+This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
 
 ## `RENOVATE_X_EAGER_GLOBAL_EXTENDS`
 
@@ -89,6 +129,11 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 
 If set, Renovate will query this API for Merge Confidence data.
 This feature is in private beta.
+
+## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`
+
+If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
+The expected value for this environment variable is a JSON array of strings.
 
 ## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
 

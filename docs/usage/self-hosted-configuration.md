@@ -554,11 +554,9 @@ The `experimentalFlags` configuration option helps you manage experimental setti
 
 ```javascript
 module.exports = {
-  experimentalFlags: ['dockerMaxPages=10'],
+  experimentalFlags: ['dockerHubTags'],
 };
 ```
-
-Each setting must be formatted like this: `flagName=value` or `flagName`.
 
 Read [Self-Hosted Experimental Flags](./self-hosted-experimental.md) for the full list of flags supported by Renovate.
 

@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
-import { getDatasourceList } from '../modules/datasource';
 import { allManagersList, getManagerList } from '../modules/manager';
 import { isCustomManager } from '../modules/manager/custom';
 import type {
@@ -27,7 +26,6 @@ import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
 import {
   AllowedParents,
-  ExperimentalFlagValue,
   type RenovateConfig,
   type RenovateOptions,
   type StatusCheckKey,
@@ -45,7 +43,6 @@ let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
 
 const managerList = getManagerList();
-const datasourceList = getDatasourceList();
 
 const topLevelObjects = [...managerList, 'env'];
 
@@ -955,13 +952,7 @@ async function validateGlobalConfig(
         if (key === 'experimentalFlags') {
           for (const flag of val) {
             if (is.string(flag)) {
-              const [flagName, flagValue] = flag.split('=');
-              validateExperimentalFlag(
-                flagName,
-                flagValue ?? null,
-                warnings,
-                currentPath,
-              );
+              validateExperimentalFlag(flag, warnings, currentPath);
             } else {
               warnings.push({
                 topic: 'Configuration Error',
@@ -1051,96 +1042,15 @@ function isFalseGlobal(optionName: string, parentPath?: string): boolean {
 
 function validateExperimentalFlag(
   flagName: string,
-  flagValue: string | null,
   warnings: ValidationMessage[],
   currentPath: string | undefined,
 ): void {
-  const allowedExperimentalFlags: Record<string, ExperimentalFlagValue> = {
-    dockerHubTags: {},
-    dockerMaxPages: { type: 'integer' },
-    autoDiscoverRepoOrder: { type: 'string', acceptedValues: ['asc', 'desc'] },
-    autoDiscoverRepoSort: {
-      type: 'string',
-      acceptedValues: ['alpha', 'created', 'updated', 'size', 'id'],
-    },
-    mergeConfidenceSupportedDatasources: {
-      type: 'multiple-strings',
-      acceptedValues: datasourceList,
-    },
-  };
-
-  const flagDetails = allowedExperimentalFlags[flagName];
-  if (!flagDetails) {
+  const allowedExperimentalFlags = new Set(['dockerHubTags']);
+  if (!allowedExperimentalFlags.has(flagName)) {
     warnings.push({
       topic: 'Configuration Error',
       message: `Invalid flag \`${flagName}\` found in \`${currentPath}\`.`,
     });
     return;
-  }
-
-  if (flagDetails.type && !flagValue) {
-    warnings.push({
-      topic: 'Configuration Error',
-      message: `Experimental flag \`${flagName}\` should have a value.`,
-    });
-    return;
-  }
-
-  if (!flagDetails.type && flagValue) {
-    warnings.push({
-      topic: 'Configuration Error',
-      message: `Experimental flag \`${flagName}\` should not have a value.`,
-    });
-    return;
-  }
-
-  if (flagDetails.type && flagValue) {
-    switch (flagDetails.type) {
-      case 'integer':
-        if (!regEx(/^\d+$/).test(flagValue)) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Experimental flag \`${flagName}\` should be of type integer. Found invalid type instead.`,
-          });
-        }
-        break;
-      case 'string':
-        if (!regEx(/^[a-z]+$/, 'i').test(flagValue)) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Experimental flag \`${flagName}\` should be of type string. Found invalid type instead.`,
-          });
-          return;
-        }
-        if (
-          flagDetails.acceptedValues &&
-          !flagDetails.acceptedValues.includes(flagValue)
-        ) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Invalid value \`${flagValue}\` found for experimental flag \`${flagName}\`.The allowed values are ${flagDetails.acceptedValues.join(', ')}.`,
-          });
-        }
-        break;
-      case 'multiple-strings':
-        if (!regEx(/^([a-z0-9-],?)+[^,]$/, 'i').test(flagValue)) {
-          warnings.push({
-            topic: 'Configuration Error',
-            message: `Experimental flag \`${flagName}\` should be a list of strings separated by a comma. Found invalid format instead.`,
-          });
-          return;
-        }
-        if (flagDetails.acceptedValues) {
-          for (const value of flagValue.split(',')) {
-            if (!flagDetails.acceptedValues.includes(value)) {
-              warnings.push({
-                topic: 'Configuration Error',
-                message: `Invalid value \`${value}\` found for experimental flag \`${flagName}\`.The allowed values are ${flagDetails.acceptedValues.join(', ')}.`,
-              });
-            }
-          }
-        }
-        break;
-    }
   }
 }

@@ -1,11 +1,10 @@
 import is from '@sindresorhus/is';
-import { GlobalConfig } from '../../config/global';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
 import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';
-import { getDatasourceList } from '../../modules/datasource';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../cache/package';
+import { parseJson } from '../common';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
 import { regEx } from '../regex';
@@ -18,7 +17,6 @@ const http = new Http(hostType);
 let token: string | undefined;
 let apiBaseUrl: string | undefined;
 let supportedDatasources: string[] = [];
-const datasourceList = new Set(getDatasourceList());
 
 export const confidenceLevels: Record<MergeConfidence, number> = {
   low: -1,
@@ -39,30 +37,29 @@ export function initConfig(): void {
 }
 
 export function parseSupportedDatasourceString(): string[] | undefined {
-  const supportedDatasourceString = GlobalConfig.getExperimentalFlag(
-    'mergeConfidenceSupportedDatasources',
-  );
+  const supportedDatasourceString =
+    process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES;
 
-  if (!is.nonEmptyString(supportedDatasourceString)) {
+  if (!is.string(supportedDatasourceString)) {
     return undefined;
   }
 
-  if (!regEx(/^([a-z0-9-],?)+[^,]$/, 'i').test(supportedDatasourceString)) {
+  let parsedDatasourceList: unknown;
+  try {
+    parsedDatasourceList = parseJson(supportedDatasourceString, '.json5');
+  } catch (err) {
+    logger.error(
+      { supportedDatasourceString, err },
+      'Failed to parse supported datasources list; Invalid JSON format',
+    );
+  }
+
+  if (!is.array<string>(parsedDatasourceList, is.string)) {
     logger.warn(
-      { mergeConfidenceSupportedDatasources: supportedDatasourceString },
-      `Expected a list of strings separated by comma. But got invalid format instead`,
+      { parsedDatasourceList },
+      `Expected a string array but got ${typeof parsedDatasourceList}`,
     );
     return undefined;
-  }
-
-  const parsedDatasourceList = supportedDatasourceString.split(',');
-  for (const datasource of parsedDatasourceList) {
-    if (!datasourceList.has(datasource)) {
-      logger.warn(
-        `Merge datasources should only consist allowed datasources. Found invalid datasource \`{datasource}\` instead.`,
-      );
-      return undefined;
-    }
   }
 
   return parsedDatasourceList;

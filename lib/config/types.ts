@@ -563,15 +563,3 @@ export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
 }
-
-/**
- * Experimental Flags can have the following values:
- * 1. integer                // dockerMaxPages=10
- * 2. string                 // s3Endpoint=some-url
- * 3. multiple-strings       // mergeConfidenceSupportedDatasources=docker,azure
- * 4. no value               // dockerHugTags
- */
-export interface ExperimentalFlagValue {
-  type?: 'integer' | 'string' | 'multiple-strings';
-  acceptedValues?: string[];
-}

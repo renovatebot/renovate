@@ -49,6 +49,7 @@ describe('modules/datasource/docker/index', () => {
     });
     hostRules.hosts.mockReturnValue([]);
     GlobalConfig.reset();
+    delete process.env.RENOVATE_X_DOCKER_MAX_PAGES;
   });
 
   describe('getDigest', () => {
@@ -1286,7 +1287,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('uses custom max pages', async () => {
-      GlobalConfig.set({ experimentalFlags: ['dockerMaxPages=2'] });
+      process.env.RENOVATE_X_DOCKER_MAX_PAGES = '2';
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
