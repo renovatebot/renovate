@@ -2962,9 +2962,6 @@ See also `excludePackagePrefixes`.
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
-`matchPackagePrefixes` will match against `packageName` first, and then `depName`, however `depName` matching is deprecated and will be removed in a future major release.
-If matching against `depName`, use `matchDepPatterns` instead.
-
 ### matchSourceUrlPrefixes
 
 Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
