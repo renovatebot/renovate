@@ -637,18 +637,20 @@ describe('modules/manager/pipenv/artifacts', () => {
     expect(getMatchingHostRule('')).toBeNull();
   });
 
-  it.each([
-    { credential: '$USERNAME', result: 'USERNAME' },
-    { credential: '$', result: null },
-    { credential: '', result: null },
-    { credential: '${USERNAME}', result: 'USERNAME' },
-    { credential: '${USERNAME:-default}', result: 'USERNAME' },
-    { credential: '${COMPLEX_NAME_1:-default}', result: 'COMPLEX_NAME_1' },
-  ])(
+  it.each`
+    credential                        | result
+    ${'$USERNAME'}                    | ${'USERNAME'}
+    ${'$'}                            | ${null}
+    ${''}                             | ${null}
+    ${'${USERNAME}'}'                 | ${'USERNAME'}
+    ${'${USERNAME:-default}'}'        | ${'USERNAME'}
+    ${'${COMPLEX_NAME_1:-default}'}'  | ${'COMPLEX_NAME_1'}
+  `
+  (
     'extracts correct environment variable from credential placeholder',
-    (testCase) => {
-      expect(extractEnvironmentVariableName(testCase.credential)).toEqual(
-        testCase.result,
+    ({credential, result}) => {
+      expect(extractEnvironmentVariableName(credential)).toEqual(
+        result,
       );
     },
   );
