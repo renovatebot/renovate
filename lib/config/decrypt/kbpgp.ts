@@ -1,31 +1,6 @@
-import kbpgp from 'kbpgp';
+import * as kbpgp from '@renovatebot/kbpgp';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
-
-declare module 'kbpgp' {
-  export class KeyManager {
-    static import_from_armored_pgp(
-      opts: { armored: string },
-      cb: (err: Error, pk: KeyManager) => void,
-    ): void;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  export namespace keyring {
-    export class KeyRing {
-      add_key_manager(pk: KeyManager): void;
-    }
-  }
-
-  export class Literal {
-    toString(): string;
-  }
-
-  export function unbox(
-    opts: { keyfetch: keyring.KeyRing; armored: string },
-    cb: (err: Error, literals: Literal[]) => void,
-  ): void;
-}
 
 export async function tryDecryptKbPgp(
   privateKey: string,
