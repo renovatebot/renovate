@@ -646,7 +646,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     ${'${USERNAME:-default}'}       | ${'USERNAME'}
     ${'${COMPLEX_NAME_1:-default}'} | ${'COMPLEX_NAME_1'}
   `(
-    'extracts correct environment variable from credential placeholder',
+    'extractEnvironmentVariableName(%p)',
     ({ credential, result }) => {
       expect(extractEnvironmentVariableName(credential)).toEqual(result);
     },
