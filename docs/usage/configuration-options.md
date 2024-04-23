@@ -2886,11 +2886,7 @@ See also `excludePackageNames`.
 
 The above will configure `rangeStrategy` to `pin` only for the package `angular`.
 
-<!-- prettier-ignore -->
-!!! note
-    `matchPackageNames` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepNames` instead.
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchPackagePatterns
 
@@ -2910,12 +2906,6 @@ See also `excludePackagePatterns`.
 
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
-<!-- prettier-ignore -->
-!!! note
-    `matchPackagePatterns` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepPatterns` instead.
-
 ### matchPackagePrefixes
 
 Use this field to match a package prefix without needing to write a regex expression.
@@ -2933,12 +2923,6 @@ See also `excludePackagePrefixes`.
 ```
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
-
-<!-- prettier-ignore -->
-!!! note
-    `matchPackagePrefixes` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepPatterns` instead.
 
 ### matchSourceUrlPrefixes
 
