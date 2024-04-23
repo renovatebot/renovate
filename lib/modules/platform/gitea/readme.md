@@ -40,7 +40,7 @@ If you use Gitea packages, add the `read:packages` scope.
 
 ## Repo autodiscover
 
-Renovate can discover repositories on Gitea using the autodiscover feature.
+Renovate can discover repositories on Gitea using the `autodiscover` feature.
 Repositories are ignored when one of the following conditions is met:
 
 - The repository is a `mirror`
