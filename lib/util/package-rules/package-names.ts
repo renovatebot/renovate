@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
+import { matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
 
 export class PackageNameMatcher extends Matcher {
@@ -14,7 +15,7 @@ export class PackageNameMatcher extends Matcher {
     if (!packageName) {
       return false;
     }
-    return matchPackageNames.includes(packageName);
+    return matchRegexOrGlobList(packageName, matchPackageNames);
   }
 
   override excludes(
@@ -28,6 +29,6 @@ export class PackageNameMatcher extends Matcher {
     if (!packageName) {
       return false;
     }
-    return excludePackageNames.includes(packageName);
+    return matchRegexOrGlobList(packageName, excludePackageNames);
   }
 }
