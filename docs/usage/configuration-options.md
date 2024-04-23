@@ -2758,6 +2758,8 @@ For more details on supported syntax see Renovate's [string pattern matching doc
 
 ### matchDepNames
 
+This field behaves the same as `matchPackageNames` except it matches against `depName` instead of `packageName`.
+
 ### matchNewValue
 
 This option is matched against the `newValue` field of a dependency.
