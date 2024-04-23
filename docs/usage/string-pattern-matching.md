@@ -5,12 +5,7 @@ Renovate string matching syntax for some configuration options allows you, as us
 - [`minimatch`](https://github.com/isaacs/minimatch) glob patterns, including exact strings matches
 - regular expression (regex) patterns
 
-The following fields support this pattern matching:
-
-- `allowedEnv`
-- `allowedHeaders`
-- `autodiscoverProjects`
-- `matchRepositories`
+In cases where there are potentially multiple _inputs_, e.g. managers can have multiple categories, then the matcher will return `true` if _any_ of them match.
 
 ## Special case: Match everything
 
@@ -110,6 +105,10 @@ For example, the pattern `["/^abc/", "!/^abcd/", "!/abce/"]`:
 
 If you find yourself in a situation where you need to positive-match a string which starts with `!`, then you need to do so using a regular expression pattern.
 For example, `["/^!abc$/"]` will positively match against the string `"!abc"`.
+
+One limitation of negative matching is when there may be multiple inputs to match against.
+For example, a manager may have multiple categories, such as `java` and `docker`.
+If you have a rule such as `"matchCategories": ["!docker"]` then this will return `true` because the `java` category satisfies this rule.
 
 ## Usage in Renovate configuration options
 
