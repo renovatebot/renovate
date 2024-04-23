@@ -3,6 +3,7 @@ import { ReleaseResult, getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as hostRules from '../../../util/host-rules';
 import { id as versioning } from '../../versioning/maven';
@@ -189,7 +190,7 @@ describe('modules/datasource/maven/index', () => {
 
   afterEach(() => {
     hostRules.clear();
-    delete process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK;
+    GlobalConfig.reset();
   });
 
   it('returns null when metadata is not found', async () => {
@@ -252,7 +253,7 @@ describe('modules/datasource/maven/index', () => {
   });
 
   it('returns html-based releases', async () => {
-    process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK = 'true';
+    GlobalConfig.set({ experimentalFlags: ['noMavenPomCheck'] });
 
     mockGenericPackage({
       latest: '2.0.0',
@@ -402,7 +403,7 @@ describe('modules/datasource/maven/index', () => {
   });
 
   it('removes authentication header after redirect', async () => {
-    process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK = 'true';
+    GlobalConfig.set({ experimentalFlags: ['noMavenPomCheck'] });
 
     const frontendHost = 'frontend_for_private_s3_repository';
     const frontendUrl = `https://${frontendHost}/maven2`;

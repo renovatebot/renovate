@@ -23,3 +23,14 @@ Example usage:
 ```js
 experimentalFlags: ['dockerHubTags'];
 ```
+
+## `noMavenPomCheck`
+
+If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
+Skipping the check will speed things up, but may result in versions being returned which don't properly exist on the server.
+
+Example usage:
+
+```js
+experimentalFlags: ['noMavenPomCheck'];
+```

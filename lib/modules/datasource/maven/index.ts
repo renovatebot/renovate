@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import type { XmlDocument } from 'xmldoc';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { filterMap } from '../../../util/filter-map';
@@ -206,7 +207,7 @@ export class MavenDatasource extends Datasource {
   ): Promise<ReleaseMap> {
     const releaseMap = { ...inputReleaseMap };
 
-    if (process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK) {
+    if (GlobalConfig.getExperimentalFlag('noMavenPomCheck')) {
       return releaseMap;
     }
 
