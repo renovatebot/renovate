@@ -9,7 +9,7 @@ export class LocalFs implements PlatformScm {
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean> {
     return Promise.resolve(false);
   }
-  isBranchModified(branchName: string): Promise<boolean> {
+  isBranchModified(branchName: string, baseBranch: string): Promise<boolean> {
     return Promise.resolve(false);
   }
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean> {
