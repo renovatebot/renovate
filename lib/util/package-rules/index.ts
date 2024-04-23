@@ -4,22 +4,16 @@ import { mergeChildConfig } from '../../config';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
 import { logger } from '../../logger';
 import matchers from './matchers';
-import { matcherOR } from './utils';
 
 function matchesRule(
   inputConfig: PackageRuleInputConfig,
   packageRule: PackageRule,
 ): boolean {
-  let positiveMatch = true;
+  const positiveMatch = true;
   let matchApplied = false;
   // matches
-  for (const groupMatchers of matchers) {
-    const isMatch = matcherOR(
-      'matches',
-      groupMatchers,
-      inputConfig,
-      packageRule,
-    );
+  for (const matcher of matchers) {
+    const isMatch = matcher.matches(inputConfig, packageRule);
 
     // no rules are defined
     if (is.nullOrUndefined(isMatch)) {
@@ -35,26 +29,7 @@ function matchesRule(
 
   // not a single match rule is defined --> assume to match everything
   if (!matchApplied) {
-    positiveMatch = true;
-  }
-
-  // excludes
-  for (const groupExcludes of matchers) {
-    const isExclude = matcherOR(
-      'excludes',
-      groupExcludes,
-      inputConfig,
-      packageRule,
-    );
-
-    // no rules are defined
-    if (is.nullOrUndefined(isExclude)) {
-      continue;
-    }
-
-    if (isExclude) {
-      return false;
-    }
+    return true;
   }
 
   return positiveMatch;

@@ -1107,4 +1107,21 @@ describe('util/package-rules/index', () => {
     expect(res1.x).toBe(1);
     expect(res2.x).toBeUndefined();
   });
+
+  it('matches if there are no matchers', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          x: 1,
+        },
+      ],
+    };
+
+    const res = applyPackageRules({
+      ...config,
+      depName: 'test2',
+    });
+
+    expect(res.x).toBe(1);
+  });
 });
