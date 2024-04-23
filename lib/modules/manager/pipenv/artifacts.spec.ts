@@ -638,20 +638,17 @@ describe('modules/manager/pipenv/artifacts', () => {
   });
 
   it.each`
-    credential                        | result
-    ${'$USERNAME'}                    | ${'USERNAME'}
-    ${'$'}                            | ${null}
-    ${''}                             | ${null}
-    ${'${USERNAME}'}'                 | ${'USERNAME'}
-    ${'${USERNAME:-default}'}'        | ${'USERNAME'}
-    ${'${COMPLEX_NAME_1:-default}'}'  | ${'COMPLEX_NAME_1'}
-  `
-  (
+    credential                      | result
+    ${'$USERNAME'}                  | ${'USERNAME'}
+    ${'$'}                          | ${null}
+    ${''}                           | ${null}
+    ${'${USERNAME}'}                | ${'USERNAME'}
+    ${'${USERNAME:-default}'}       | ${'USERNAME'}
+    ${'${COMPLEX_NAME_1:-default}'} | ${'COMPLEX_NAME_1'}
+  `(
     'extracts correct environment variable from credential placeholder',
-    ({credential, result}) => {
-      expect(extractEnvironmentVariableName(credential)).toEqual(
-        result,
-      );
+    ({ credential, result }) => {
+      expect(extractEnvironmentVariableName(credential)).toEqual(result);
     },
   );
 
