@@ -2950,13 +2950,12 @@ Use this field to restrict rules to a particular package manager. e.g.
 }
 ```
 
-For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
+### matchDepPrefixes
 
-### matchMessage
-
-For log level remapping, use this field to match against the particular log messages.
-
-For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+<!-- prettier-ignore -->
+!!! note
+    `matchDepNames` now supports pattern matching and should be used instead.
+    Use of `matchDepPrefixes` is now deprecated and will be migrated in future.
 
 ### matchNewValue
 
@@ -3007,13 +3006,17 @@ For more details on this syntax see Renovate's [string pattern matching document
 
 ### matchPackageNames
 
-Use this field if you want to have one or more exact name matches in your package rule.
-See also `excludePackageNames`.
+Use this field to match against the `packageName` field.
+This matching can be an exact match, Glob match, or Regular Expression match.
 
-```json
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+Note that Glob matching (including exact name matching) is case-insensitive.
+
+```json title="exact name match"
 {
   "packageRules": [
     {
+      "matchDatasources": ["npm"],
       "matchPackageNames": ["angular"],
       "rangeStrategy": "pin"
     }
@@ -3021,39 +3024,49 @@ See also `excludePackageNames`.
 }
 ```
 
-The above will configure `rangeStrategy` to `pin` only for the package `angular`.
+The above will configure `rangeStrategy` to `pin` only for the npm package `angular`.
 
-<!-- prettier-ignore -->
-!!! note
-    `matchPackageNames` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepNames` instead.
-
-### matchPackagePatterns
-
-Use this field if you want to have one or more package names patterns in your package rule.
-See also `excludePackagePatterns`.
-
-```json
+```json title="prefix match using Glob"
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^angular"],
-      "rangeStrategy": "replace"
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["@angular/*", "!@angular/abc"],
+      "groupName": "Angular"
     }
   ]
 }
 ```
 
-The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+The above will group together any npm package which starts with `@angular/` except `@angular/abc`.
+
+```json title="pattern match using RegEx"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["/^angular/"],
+      "groupName": "Angular"
+    }
+  ]
+}
+```
+
+The above will group together any npm package which starts with the string `angular`.
+
+### matchPackagePatterns
 
 <!-- prettier-ignore -->
 !!! note
-    `matchPackagePatterns` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepPatterns` instead.
+    `matchPackageNames` now supports pattern matching and should be used instead.
+    Use of `matchPackagePatterns` is now deprecated and will be migrated in future.
 
 ### matchPackagePrefixes
+
+<!-- prettier-ignore -->
+!!! note
+    `matchPackageNames` now supports pattern matching and should be used instead.
+    Use of `matchPackagePrefixes` is now deprecated and will be migrated in future.
 
 Use this field to match a package prefix without needing to write a regex expression.
 See also `excludePackagePrefixes`.
@@ -3071,11 +3084,6 @@ See also `excludePackagePrefixes`.
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
-<!-- prettier-ignore -->
-!!! note
-    `matchPackagePrefixes` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepPatterns` instead.
 
 ### matchRepositories
 
