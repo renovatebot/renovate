@@ -2583,6 +2583,8 @@ To read the changelogs you must use the link.
 !!! note
     Renovate can fetch changelogs from Bitbucket, Gitea (Forgejo), GitHub and GitLab platforms only, and setting the URL to an unsupported host/platform type won't change that.
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### excludeDepNames
 
 ### excludeDepPatterns
@@ -2950,12 +2952,7 @@ Use this field to restrict rules to a particular package manager. e.g.
 }
 ```
 
-### matchDepPrefixes
-
-<!-- prettier-ignore -->
-!!! note
-    `matchDepNames` now supports pattern matching and should be used instead.
-    Use of `matchDepPrefixes` is now deprecated and will be migrated in future.
+### matchMessage
 
 ### matchNewValue
 
@@ -3084,7 +3081,6 @@ See also `excludePackagePrefixes`.
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
-
 ### matchRepositories
 
 Use this field to restrict rules to a particular repository. e.g.
@@ -3132,6 +3128,8 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### matchUpdateTypes
 
 Use `matchUpdateTypes` to match rules against types of updates.
@@ -3147,6 +3145,8 @@ For example to apply a special label to `major` updates:
   ]
 }
 ```
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 <!-- prettier-ignore -->
 !!! warning
