@@ -53,6 +53,7 @@ bun 0.2.2
 cargo-make 0.36.2
 checkov 2.3.3
 clojure 1.11.1.1182
+cosign 2.2.4
 crystal 1.6.1
 dart 2.19.3
 deno 1.26.2
@@ -69,6 +70,7 @@ github-cli 2.32.1
 gohugo extended_0.104.3
 golang 1.19.2
 golangci-lint 1.52.2
+gomplate 3.11.7
 hadolint 2.12.0
 haskell 9.4.2
 helm 3.10.1
@@ -183,6 +185,13 @@ dummy 1.2.3
             depName: 'clojure',
           },
           {
+            currentValue: '2.2.4',
+            datasource: 'github-releases',
+            packageName: 'sigstore/cosign',
+            depName: 'cosign',
+            extractVersion: "^v(?<version>\\S+)",
+          },
+          {
             currentValue: '1.6.1',
             datasource: 'github-releases',
             packageName: 'crystal-lang/crystal',
@@ -285,6 +294,13 @@ dummy 1.2.3
             packageName: 'golangci/golangci-lint',
             depName: 'golangci-lint',
             extractVersion: '^v(?<version>.+)',
+          },
+          {
+            currentValue: '3.11.7',
+            datasource: 'github-releases',
+            packageName: 'hairyhenderson/gomplate',
+            depName: 'gomplate',
+            extractVersion: "^v(?<version>.+)",
           },
           {
             currentValue: '2.12.0',
