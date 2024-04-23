@@ -15,6 +15,30 @@ describe('util/package-rules/dep-patterns', () => {
       );
       expect(result).toBeFalse();
     });
+
+    it('should massage wildcards', () => {
+      const result = depPatternsMatcher.matches(
+        {
+          depName: 'http',
+        },
+        {
+          matchDepPatterns: ['*'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should convert to regex', () => {
+      const result = depPatternsMatcher.matches(
+        {
+          depName: 'http',
+        },
+        {
+          matchDepPatterns: ['^h'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
   });
 
   describe('exclude', () => {
@@ -28,6 +52,30 @@ describe('util/package-rules/dep-patterns', () => {
         },
       );
       expect(result).toBeFalse();
+    });
+
+    it('should massage wildcards', () => {
+      const result = depPatternsMatcher.excludes(
+        {
+          depName: 'http',
+        },
+        {
+          excludeDepPatterns: ['*'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should convert to regex', () => {
+      const result = depPatternsMatcher.excludes(
+        {
+          depName: 'http',
+        },
+        {
+          excludeDepPatterns: ['^h'],
+        },
+      );
+      expect(result).toBeTrue();
     });
   });
 });
