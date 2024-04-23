@@ -41,6 +41,7 @@ describe('util/package-rules/index', () => {
   it('applies', () => {
     const config: PackageRuleInputConfig = {
       packageName: 'a',
+      updateType: 'minor',
       isBump: true,
       currentValue: '1.0.0',
       packageRules: [
@@ -331,6 +332,23 @@ describe('util/package-rules/index', () => {
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
+  });
+
+  it('returns false if no depTypes', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchDepTypes: ['test'],
+          matchPackageNames: ['a'],
+          x: 1,
+        },
+      ],
+    };
+    const input = { ...config, packageName: 'a' };
+    delete input.depType;
+    delete input.depTypes;
+    const res = applyPackageRules(input);
+    expect(res).toEqual(input);
   });
 
   it('filters managers with matching manager', () => {
