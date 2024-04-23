@@ -398,7 +398,6 @@ export async function validateConfig(
               'matchDepTypes',
               'matchDepNames',
               'matchPackageNames',
-              'excludeRepositories',
               'matchCurrentValue',
               'matchCurrentVersion',
               'matchSourceUrls',

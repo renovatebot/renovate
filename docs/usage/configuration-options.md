@@ -2504,23 +2504,6 @@ Instead you should do `> 13 months`.
 Use this field if you want to limit a `packageRule` to certain `depType` values.
 Invalid if used outside of a `packageRule`.
 
-### excludeRepositories
-
-Use this field to restrict rules to a particular repository. e.g.
-
-```json
-{
-  "packageRules": [
-    {
-      "excludeRepositories": ["literal/repo", "/^some/.*$/", "**/*-archived"],
-      "enabled": false
-    }
-  ]
-}
-```
-
-This field supports Regular Expressions if they begin and end with `/`, otherwise it will use `minimatch`.
-
 ### matchCategories
 
 Use `matchCategories` to restrict rules to a particular language or group.

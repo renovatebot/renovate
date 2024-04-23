@@ -111,6 +111,14 @@ function mergeMatchers(packageRule: PackageRule): PackageRule {
       }
       delete newPackageRule.matchSourceUrlPrefixes;
     }
+    // repository
+    if (key === 'excludeRepositories') {
+      if (is.array(val, is.string)) {
+        newPackageRule.matchRepositories ??= [];
+        newPackageRule.matchRepositories.push(...val.map((v) => `!${v}`));
+      }
+      delete newPackageRule.excludeRepositories;
+    }
   }
   return newPackageRule;
 }

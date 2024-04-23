@@ -351,7 +351,6 @@ export interface PackageRule
     UpdateConfig,
     Record<string, unknown> {
   description?: string | string[];
-  excludeRepositories?: string[];
   isVulnerabilityAlert?: boolean;
   matchBaseBranches?: string[];
   matchCategories?: string[];

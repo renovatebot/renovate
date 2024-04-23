@@ -12,9 +12,6 @@ export function matcherOR(
   for (const matcher of groupMatchers) {
     let isMatch;
     switch (matchType) {
-      case 'excludes':
-        isMatch = matcher.excludes(inputConfig, packageRule);
-        break;
       case 'matches':
         isMatch = matcher.matches(inputConfig, packageRule);
         break;
