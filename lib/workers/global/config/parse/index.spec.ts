@@ -1,13 +1,12 @@
 import upath from 'upath';
 import { mocked } from '../../../../../test/util';
-import { readSystemFile } from '../../../../util/fs';
+import { getParentDir, readSystemFile } from '../../../../util/fs';
 import getArgv from './__fixtures__/argv';
 import * as _hostRulesFromEnv from './host-rules-from-env';
 
 jest.mock('../../../../modules/datasource/npm');
 jest.mock('../../../../util/fs');
 jest.mock('./host-rules-from-env');
-jest.mock('../../config.js', () => ({}), { virtual: true });
 
 const { hostRulesFromEnv } = mocked(_hostRulesFromEnv);
 
@@ -174,9 +173,38 @@ describe('workers/global/config/parse/index', () => {
       expect(parsed).toContainEntries([['dryRun', null]]);
     });
 
+    it('initalizes file logging when logFile is set and env vars LOG_FILE is undefined', async () => {
+      jest.doMock(
+        '../../../../../config.js',
+        () => ({ logFile: 'somepath', logFileLevel: 'debug' }),
+        {
+          virtual: true,
+        },
+      );
+      const env: NodeJS.ProcessEnv = {};
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
+      expect(getParentDir).toHaveBeenCalledWith('somepath');
+    });
+
+    it('skips initializing file logging when logFile is set but env vars LOG_FILE is defined', async () => {
+      jest.doMock(
+        '../../../../../config.js',
+        () => ({ logFile: 'somepath', logFileLevel: 'debug' }),
+        {
+          virtual: true,
+        },
+      );
+      const env: NodeJS.ProcessEnv = {};
+      process.env.LOG_FILE = 'somepath';
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
+      expect(getParentDir).not.toHaveBeenCalled();
+    });
+
     it('massage onboardingNoDeps when autodiscover is false', async () => {
-      jest.mock(
-        '../../config.js',
+      jest.doMock(
+        '../../../../../config.js',
         () => ({ onboardingNoDeps: 'auto', autodiscover: false }),
         {
           virtual: true,

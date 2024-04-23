@@ -2510,6 +2510,8 @@ Invalid if used outside of a `packageRule`.
 
 ### excludeDepPatterns
 
+### excludeDepPrefixes
+
 ### excludePackageNames
 
 **Important**: Do not mix this up with the option `ignoreDeps`.
@@ -2828,7 +2830,21 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 
 ### matchDepNames
 
+This field behaves the same as `matchPackageNames` except it matches against `depName` instead of `packageName`.
+
 ### matchDepPatterns
+
+<!-- prettier-ignore -->
+!!! note
+    `matchDepNames` now supports pattern matching and should be used instead.
+    Use of `matchDepPatterns` is now deprecated and will be migrated in future.
+
+### matchDepPrefixes
+
+<!-- prettier-ignore -->
+!!! note
+    `matchDepNames` now supports pattern matching and should be used instead.
+    Use of `matchDepPrefixes` is now deprecated and will be migrated in future.
 
 ### matchNewValue
 
@@ -2866,13 +2882,17 @@ For more details on this syntax see Renovate's [string pattern matching document
 
 ### matchPackageNames
 
-Use this field if you want to have one or more exact name matches in your package rule.
-See also `excludePackageNames`.
+Use this field to match against the `packageName` field.
+This matching can be an exact match, Glob match, or Regular Expression match.
 
-```json
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+Note that Glob matching (including exact name matching) is case-insensitive.
+
+```json title="exact name match"
 {
   "packageRules": [
     {
+      "matchDatasources": ["npm"],
       "matchPackageNames": ["angular"],
       "rangeStrategy": "pin"
     }
@@ -2880,27 +2900,49 @@ See also `excludePackageNames`.
 }
 ```
 
-The above will configure `rangeStrategy` to `pin` only for the package `angular`.
+The above will configure `rangeStrategy` to `pin` only for the npm package `angular`.
 
-### matchPackagePatterns
-
-Use this field if you want to have one or more package names patterns in your package rule.
-See also `excludePackagePatterns`.
-
-```json
+```json title="prefix match using Glob"
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^angular"],
-      "rangeStrategy": "replace"
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["@angular/*", "!@angular/abc"],
+      "groupName": "Angular"
     }
   ]
 }
 ```
 
-The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+The above will group together any npm package which starts with `@angular/` except `@angular/abc`.
+
+```json title="pattern match using RegEx"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["/^angular/"],
+      "groupName": "Angular"
+    }
+  ]
+}
+```
+
+The above will group together any npm package which starts with the string `angular`.
+
+### matchPackagePatterns
+
+<!-- prettier-ignore -->
+!!! note
+    `matchPackageNames` now supports pattern matching and should be used instead.
+    Use of `matchPackagePatterns` is now deprecated and will be migrated in future.
 
 ### matchPackagePrefixes
+
+<!-- prettier-ignore -->
+!!! note
+    `matchPackageNames` now supports pattern matching and should be used instead.
+    Use of `matchPackagePrefixes` is now deprecated and will be migrated in future.
 
 Use this field to match a package prefix without needing to write a regex expression.
 See also `excludePackagePrefixes`.
@@ -2917,9 +2959,6 @@ See also `excludePackagePrefixes`.
 ```
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
-
-`matchPackagePrefixes` will match against `packageName` first, and then `depName`, however `depName` matching is deprecated and will be removed in a future major release.
-If matching against `depName`, use `matchDepPatterns` instead.
 
 ### matchSourceUrlPrefixes
 
@@ -3753,9 +3792,16 @@ If you want to enforce grouped package updates, you need to set this option to `
 
 ## separateMinorPatch
 
-By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" (e.g. 1.x.0) releases - it groups them together.
-E.g., if you are running version 1.0.0 of a package and both versions 1.0.1 and 1.1.0 are available then Renovate will raise a single PR for version 1.1.0.
-If you wish to distinguish between patch and minor upgrades, for example if you wish to automerge patch but not minor, then you can configured this option to `true`.
+By default, Renovate groups `patch` (`1.0.x`) and `minor` (`1.x.0`) releases into a single PR.
+For example: you are running version `1.0.0` of a package, which has two updates:
+
+- `1.0.1`, a `patch` type update
+- `1.1.0`, a `minor` type update
+
+By default, Renovate creates a single PR for the `1.1.0` version.
+
+If you want Renovate to create _separate_ PRs for `patch` and `minor` upgrades, set `separateMinorPatch` to `true`.
+Getting separate updates from Renovate can be handy when you want to, for example, automerge `patch` updates but manually merge `minor` updates.
 
 ## separateMultipleMajor
 
