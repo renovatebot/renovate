@@ -645,12 +645,9 @@ describe('modules/manager/pipenv/artifacts', () => {
     ${'${USERNAME}'}                | ${'USERNAME'}
     ${'${USERNAME:-default}'}       | ${'USERNAME'}
     ${'${COMPLEX_NAME_1:-default}'} | ${'COMPLEX_NAME_1'}
-  `(
-    'extractEnvironmentVariableName(%p)',
-    ({ credential, result }) => {
-      expect(extractEnvironmentVariableName(credential)).toEqual(result);
-    },
-  );
+  `('extractEnvironmentVariableName(%p)', ({ credential, result }) => {
+    expect(extractEnvironmentVariableName(credential)).toEqual(result);
+  });
 
   it('warns about duplicate placeholders with different values', () => {
     const extraEnv: Opt<ExtraEnv> = {
