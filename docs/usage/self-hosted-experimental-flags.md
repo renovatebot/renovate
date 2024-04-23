@@ -38,3 +38,7 @@ experimentalFlags: ['noMavenPomCheck'];
 ## `paginateAll`
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
+
+## `execGpidHandle`
+
+If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.

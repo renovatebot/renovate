@@ -2,6 +2,7 @@ import { spawn as _spawn } from 'node:child_process';
 import type { SendHandle, Serializable } from 'node:child_process';
 import { Readable } from 'node:stream';
 import { mockedFunction, partial } from '../../../test/util';
+import { GlobalConfig } from '../../config/global';
 import { exec } from './common';
 import type { RawExecOptions } from './types';
 
@@ -287,12 +288,12 @@ describe('util/exec/common', () => {
     const killSpy = jest.spyOn(process, 'kill');
 
     afterEach(() => {
-      delete process.env.RENOVATE_X_EXEC_GPID_HANDLE;
+      GlobalConfig.reset();
       jest.restoreAllMocks();
     });
 
     it('calls process.kill on the gpid', async () => {
-      process.env.RENOVATE_X_EXEC_GPID_HANDLE = 'true';
+      GlobalConfig.set({ experimentalFlags: ['execGpidHandle'] });
       const cmd = 'ls -l';
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });
@@ -309,7 +310,7 @@ describe('util/exec/common', () => {
     });
 
     it('handles process.kill call on non existent gpid', async () => {
-      process.env.RENOVATE_X_EXEC_GPID_HANDLE = 'true';
+      GlobalConfig.set({ experimentalFlags: ['execGpidHandle'] });
       const cmd = 'ls -l';
       const exitSignal = 'SIGTERM';
       const stub = getSpawnStub({ cmd, exitCode: null, exitSignal });

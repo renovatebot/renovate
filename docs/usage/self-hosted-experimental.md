@@ -78,10 +78,6 @@ This is useful for registries which ignores the `n` parameter in the query strin
 
 Resolve and merge `globalExtends` presets before other global config, instead of after.
 
-## `RENOVATE_X_EXEC_GPID_HANDLE`
-
-If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
-
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
 If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.

@@ -1,4 +1,5 @@
 import { ChildProcess, spawn } from 'node:child_process';
+import { GlobalConfig } from '../../config/global';
 import { ExecError, ExecErrorData } from './exec-error';
 import type { ExecResult, RawExecOptions } from './types';
 
@@ -122,7 +123,7 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
 
 function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
   try {
-    if (cp.pid && process.env.RENOVATE_X_EXEC_GPID_HANDLE) {
+    if (cp.pid && GlobalConfig.getExperimentalFlag('execGpidHandle')) {
       /**
        * If `pid` is negative, but not `-1`, signal shall be sent to all processes
        * (excluding an unspecified set of system processes),
