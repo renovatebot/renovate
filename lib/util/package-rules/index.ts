@@ -9,9 +9,6 @@ function matchesRule(
   inputConfig: PackageRuleInputConfig,
   packageRule: PackageRule,
 ): boolean {
-  const positiveMatch = true;
-  let matchApplied = false;
-  // matches
   for (const matcher of matchers) {
     const isMatch = matcher.matches(inputConfig, packageRule);
 
@@ -20,19 +17,12 @@ function matchesRule(
       continue;
     }
 
-    matchApplied = true;
-
     if (!is.truthy(isMatch)) {
       return false;
     }
   }
 
-  // not a single match rule is defined --> assume to match everything
-  if (!matchApplied) {
-    return true;
-  }
-
-  return positiveMatch;
+  return true;
 }
 
 export function applyPackageRules<T extends PackageRuleInputConfig>(
