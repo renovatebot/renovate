@@ -111,7 +111,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
       if (isHttpUrl(value)) {
         rules.packageRules?.push({
           matchDatasources,
-          matchPackageNames: [scope + '/**'],
+          matchPackageNames: [`${scope}/**`],
           registryUrls: [value],
         });
       } else {
