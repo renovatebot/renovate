@@ -1,13 +1,13 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
+import { matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
 
 export class PackagePrefixesMatcher extends Matcher {
   override matches(
-    { depName, packageName }: PackageRuleInputConfig,
-    packageRule: PackageRule,
+    { packageName }: PackageRuleInputConfig,
+    { matchPackagePrefixes }: PackageRule,
   ): boolean | null {
-    const { matchPackagePrefixes } = packageRule;
     if (is.undefined(matchPackagePrefixes)) {
       return null;
     }
@@ -16,14 +16,10 @@ export class PackagePrefixesMatcher extends Matcher {
       return false;
     }
 
-    if (
-      is.string(packageName) &&
-      matchPackagePrefixes.some((prefix) => packageName.startsWith(prefix))
-    ) {
-      return true;
-    }
-
-    return false;
+    const massagedPatterns = matchPackagePrefixes.map(
+      (pattern) => `${pattern}**`,
+    );
+    return matchRegexOrGlobList(packageName, massagedPatterns);
   }
 
   override excludes(
@@ -38,13 +34,9 @@ export class PackagePrefixesMatcher extends Matcher {
       return false;
     }
 
-    if (
-      is.string(packageName) &&
-      excludePackagePrefixes.some((prefix) => packageName.startsWith(prefix))
-    ) {
-      return true;
-    }
-
-    return false;
+    const massagedPatterns = excludePackagePrefixes.map(
+      (pattern) => `${pattern}**`,
+    );
+    return matchRegexOrGlobList(packageName, massagedPatterns);
   }
 }
