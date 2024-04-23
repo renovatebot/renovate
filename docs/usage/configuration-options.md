@@ -2937,8 +2937,6 @@ The above will group together any npm package which starts with the string `angu
     `matchPackageNames` now supports pattern matching and should be used instead.
     Use of `matchPackagePatterns` is now deprecated and will be migrated in future.
 
-Use this field if you want to have one or more package names patterns in your package rule.
-
 ### matchPackagePrefixes
 
 <!-- prettier-ignore -->
