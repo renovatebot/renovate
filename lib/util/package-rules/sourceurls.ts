@@ -15,8 +15,6 @@ export class SourceUrlsMatcher extends Matcher {
       return false;
     }
 
-    const upperCaseSourceUrl = sourceUrl.toUpperCase();
-    const upperCaseMatches = matchSourceUrls.map((url) => url.toUpperCase());
-    return matchRegexOrGlobList(upperCaseSourceUrl, upperCaseMatches);
+    return matchRegexOrGlobList(sourceUrl, matchSourceUrls);
   }
 }
