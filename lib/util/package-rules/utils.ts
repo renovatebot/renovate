@@ -33,7 +33,3 @@ export function matcherOR(
   }
   return matchApplied ? false : null;
 }
-
-export function massagePattern(pattern: string): string {
-  return pattern === '^*$' || pattern === '*' ? '.*' : pattern;
-}
