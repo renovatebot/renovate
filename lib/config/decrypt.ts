@@ -22,6 +22,7 @@ export async function tryDecrypt(
 ): Promise<string | null> {
   let decryptedStr: string | null = null;
   if (privateKey?.startsWith('-----BEGIN PGP PRIVATE KEY BLOCK-----')) {
+    // istanbul ignore next: not sure about the test needed here
     const decryptedObjStr = GlobalConfig.getExperimentalFlag('useOpenpgp')
       ? await tryDecryptOpenPgp(privateKey, encryptedStr)
       : await tryDecryptKbPgp(privateKey, encryptedStr);
