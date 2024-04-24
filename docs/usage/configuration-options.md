@@ -2901,7 +2901,7 @@ For more details on supported syntax see Renovate's [string pattern matching doc
       "groupName": "high merge confidence"
     }
   ]
-##}
+}
 ```
 
 Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
