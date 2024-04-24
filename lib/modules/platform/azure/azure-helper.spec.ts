@@ -456,7 +456,6 @@ describe('modules/platform/azure/azure-helper', () => {
       );
       const res = await azureHelper.getAllProjectTeams('projectId');
       expect(res).toEqual(allTeams);
-      console.log(allTeams);
     });
   });
 });

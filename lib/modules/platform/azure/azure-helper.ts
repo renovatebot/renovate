@@ -1,9 +1,9 @@
+import type { WebApiTeam } from 'azure-devops-node-api/interfaces/CoreInterfaces.js';
 import {
   GitCommit,
   GitPullRequestMergeStrategy,
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
-import type { WebApiTeam } from 'azure-devops-node-api/interfaces/CoreInterfaces.js';
 import { logger } from '../../../logger';
 import { streamToString } from '../../../util/streams';
 import { getNewBranchName } from '../util';
@@ -183,19 +183,18 @@ export async function getMergeMethod(
 export async function getAllProjectTeams(
   projectId: string,
 ): Promise<WebApiTeam[]> {
+  const allTeams: WebApiTeam[] = [];
   const azureApiCore = await azureApi.coreApi();
   const top = 100;
   let skip = 0;
-  let allTeams: WebApiTeam[] = [];
+  let length = 0;
 
-  while (true) {
+  do {
     const teams = await azureApiCore.getTeams(projectId, undefined, top, skip);
+    length = teams.length;
     allTeams.push(...teams);
-    if (teams.length < top) {
-      break;
-    }
     skip += top;
-  }
+  } while (top <= length);
 
   return allTeams;
 }
