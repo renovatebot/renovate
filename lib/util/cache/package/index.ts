@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global';
 import type { AllConfig } from '../../../config/types';
 import { PackageCacheStats } from '../../stats';
 import * as memCache from '../memory';
@@ -62,7 +63,7 @@ export async function init(config: AllConfig): Promise<void> {
     return;
   }
 
-  if (process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE) {
+  if (GlobalConfig.getExperimentalFlag('sqlitePackageCache')) {
     cacheProxy = await SqlitePackageCache.init(config.cacheDir!);
     return;
   }

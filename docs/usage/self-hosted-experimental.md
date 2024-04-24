@@ -133,11 +133,6 @@ Read [platform details](modules/platform/gitlab/index.md) to learn why we need t
 
 If set, Renovate will use this string as the `endpoint` when instantiating the AWS S3 client.
 
-## `RENOVATE_X_SQLITE_PACKAGE_CACHE`
-
-If set, Renovate will use SQLite as the backend for the package cache.
-Don't combine with `redisUrl`, Redis would be preferred over SQlite.
-
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
 Suppress the pre-commit support warning in PR bodies.
