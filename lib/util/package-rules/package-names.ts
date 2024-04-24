@@ -21,7 +21,7 @@ export class PackageNameMatcher extends Matcher {
     }
 
     if (matchPackageNames.includes(depName)) {
-      logger.once.info(
+      logger.once.warn(
         { packageRule, packageName, depName },
         'Use matchDepNames instead of matchPackageNames',
       );
@@ -48,7 +48,7 @@ export class PackageNameMatcher extends Matcher {
     }
 
     if (excludePackageNames.includes(depName)) {
-      logger.once.info(
+      logger.once.warn(
         { packageRule, packageName, depName },
         'Use excludeDepNames instead of excludePackageNames',
       );
