@@ -2631,7 +2631,7 @@ For example, the following enforces that only `1.*` versions will be used:
 {
   "packageRules": [
     {
-      "matchPackageNames": ["/io\.github\.resilience4j/"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchCurrentValue": "/^1\\./"
     }
   ]
@@ -2645,7 +2645,7 @@ Use the syntax `!/ /` like this:
 {
   "packageRules": [
     {
-      "matchPackageNames": ["/io\.github\.resilience4j/"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchCurrentValue": "!/^0\\./"
     }
   ]
@@ -2686,7 +2686,7 @@ For example, the following enforces that only `1.*` versions will be used:
 {
   "packageRules": [
     {
-      "matchPackageNames": ["/io\.github\.resilience4j/"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchCurrentVersion": "/^1\\./"
     }
   ]
@@ -2700,7 +2700,7 @@ Use the syntax `!/ /` like this:
 {
   "packageRules": [
     {
-      "matchPackageNames": ["/io\.github\.resilience4j/"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchCurrentVersion": "!/^0\\./"
     }
   ]
@@ -2771,7 +2771,7 @@ For example, the following enforces that only `1.*` versions will be used:
 {
   "packageRules": [
     {
-      "matchPackageNames": ["/io.github.resilience4j/"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchNewValue": "/^1\\./"
     }
   ]
@@ -2785,7 +2785,7 @@ Use the syntax `!/ /` like this:
 {
   "packageRules": [
     {
-      "matchPackageNames": ["/io.github.resilience4j/"],
+      "matchPackageNames": ["io.github.resilience4j**"],
       "matchNewValue": "!/^0\\./"
     }
   ]
