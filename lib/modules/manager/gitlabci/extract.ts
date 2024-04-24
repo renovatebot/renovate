@@ -140,11 +140,9 @@ function extractDepFromIncludeComponent(
     );
     return null;
   }
-  const registryAlias = Object.entries(registryAliases ?? {}).find(
-    ([name, value]) => name === componentReference.fqdn,
-  );
-  if (registryAlias) {
-    componentReference.fqdn = registryAlias[1];
+  const aliasValue = registryAliases?.[componentReference.fqdn];
+  if (aliasValue) {
+    componentReference.fqdn = aliasValue;
   }
 
   const dep: PackageDependency = {
