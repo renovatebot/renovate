@@ -191,7 +191,7 @@ export async function generateLockFile(
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
-          'Error removing package-lock.json for lock file maintenance',
+          'Error removing `package-lock.json` for lock file maintenance',
         );
       }
     }

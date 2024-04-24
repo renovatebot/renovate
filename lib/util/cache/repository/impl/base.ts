@@ -5,6 +5,7 @@ import { compressToBase64, decompressFromBase64 } from '../../../compress';
 import { hash } from '../../../hash';
 import { safeStringify } from '../../../stringify';
 import { CACHE_REVISION } from '../common';
+import { cleanupHttpCache } from '../http-cache';
 import { RepoCacheRecord, RepoCacheV13 } from '../schema';
 import type { RepoCache, RepoCacheData } from '../types';
 
@@ -70,6 +71,7 @@ export abstract class RepoCacheBase implements RepoCache {
   }
 
   async save(): Promise<void> {
+    cleanupHttpCache(this.data);
     const jsonStr = safeStringify(this.data);
     const hashedJsonStr = hash(jsonStr);
     if (hashedJsonStr === this.oldHash) {
