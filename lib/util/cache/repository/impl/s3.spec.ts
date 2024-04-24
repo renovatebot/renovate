@@ -70,6 +70,10 @@ describe('util/cache/repository/impl/s3', () => {
     );
   });
 
+  afterEach(() => {
+    GlobalConfig.reset();
+  });
+
   it('successfully reads from s3', async () => {
     const json = '{}';
     s3Mock
@@ -200,7 +204,7 @@ describe('util/cache/repository/impl/s3', () => {
   });
 
   it('should persists data locally after uploading to s3', async () => {
-    process.env.RENOVATE_X_REPO_CACHE_FORCE_LOCAL = 'true';
+    GlobalConfig.set({ experimentalFlags: ['repoCacheForceLocal'] });
     const putObjectCommandOutput: PutObjectCommandOutput = {
       $metadata: { attempts: 1, httpStatusCode: 200, totalRetryDelay: 0 },
     };
