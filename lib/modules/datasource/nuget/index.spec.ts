@@ -317,12 +317,8 @@ describe('modules/datasource/nuget/index', () => {
       beforeEach(() => {
         GlobalConfig.set({
           cacheDir: join('/tmp/cache'),
+          experimentalFlags: ['nugetDownloadNupkgs'],
         });
-        process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS = 'true';
-      });
-
-      afterEach(() => {
-        delete process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS;
       });
 
       it('can determine source URL from nupkg when PackageBaseAddress is missing', async () => {

@@ -3,6 +3,7 @@ import extract from 'extract-zip';
 import semver from 'semver';
 import upath from 'upath';
 import { XmlDocument } from 'xmldoc';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
@@ -278,8 +279,8 @@ export class NugetV3Api {
     nupkgUrl: string,
   ): Promise<string | null> {
     // istanbul ignore if: experimental feature
-    if (!process.env.RENOVATE_X_NUGET_DOWNLOAD_NUPKGS) {
-      logger.once.debug('RENOVATE_X_NUGET_DOWNLOAD_NUPKGS is not set');
+    if (!GlobalConfig.getExperimentalFlag('nugetDownloadNupkgs')) {
+      logger.once.debug('Flag nugetDownloadNupkgs is not set');
       return null;
     }
     const cacheDir = await ensureCacheDir('nuget');
