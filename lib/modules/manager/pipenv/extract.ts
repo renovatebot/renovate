@@ -140,25 +140,24 @@ export async function extractPackageFile(
     res.registryUrls = sources.map((source) => source.url);
   }
 
-  const categories: [string, Record<string, PipRequirement>][] = [];
+  let pipenv_constraint: PipRequirement | undefined;
 
-  // This should obviously just be a Array.filter() call, but TypeScript doesn't infer the types correctly
-  Object.entries(pipfile).forEach(([category, section]) => {
-    if (
-      category === 'source' ||
-      category === 'requires' ||
-      !isPipRequirements(section)
-    ) {
-      return;
-    }
+  res.deps = Object.entries(pipfile)
+    .map(([category, section]) => {
+      if (
+        category === 'source' ||
+        category === 'requires' ||
+        !isPipRequirements(section)
+      ) {
+        return [];
+      }
 
-    categories.push([category, section]);
-  });
+      if (section.pipenv && !pipenv_constraint) {
+        pipenv_constraint = section.pipenv;
+      }
 
-  res.deps = categories
-    .map(([category, section]) =>
-      extractFromSection(category, section, sources),
-    )
+      return extractFromSection(category, section, sources);
+    })
     .flat();
 
   if (!res.deps.length) {
@@ -173,12 +172,8 @@ export async function extractPackageFile(
     extractedConstraints.python = `== ${pipfile.requires.python_full_version}`;
   }
 
-  const pipenv_constraint_category = categories.find(
-    ([, section]) => section?.pipenv,
-  );
-
-  if (pipenv_constraint_category) {
-    extractedConstraints.pipenv = pipenv_constraint_category[1].pipenv;
+  if (pipenv_constraint) {
+    extractedConstraints.pipenv = pipenv_constraint;
   }
 
   const lockFileName = `${packageFile}.lock`;
