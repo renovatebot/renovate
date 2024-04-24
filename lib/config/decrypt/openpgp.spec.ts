@@ -12,7 +12,7 @@ describe('config/decrypt/openpgp', () => {
     let config: RenovateConfig;
 
     beforeAll(() => {
-      process.env.RENOVATE_X_USE_OPENPGP = 'true';
+      GlobalConfig.set({ experimentalFlags: ['useOpenpgp'] });
     });
 
     beforeEach(() => {

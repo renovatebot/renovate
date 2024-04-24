@@ -24,6 +24,10 @@ Example usage:
 experimentalFlags: ['dockerHubTags'];
 ```
 
+## `execGpidHandle`
+
+If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
+
 ## `noMavenPomCheck`
 
 If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
@@ -35,17 +39,13 @@ Example usage:
 experimentalFlags: ['noMavenPomCheck'];
 ```
 
-## `paginateAll`
-
-If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
-
-## `execGpidHandle`
-
-If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
-
 ## `nugetDownloadNupkgs`
 
 If set to any value, Renovate will download `nupkg` files for determining package metadata.
+
+## `paginateAll`
+
+If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
 ## `rebasePaginationLinks`
 
@@ -79,3 +79,7 @@ Suppress the pre-commit support warning in PR bodies.
 ## `yarnProxy`
 
 Configure global Yarn proxy settings if HTTP proxy environment variables are detected.
+
+## `useOpenpgp`
+
+Use `openpgp` instead of `kbpgp` for `PGP` decryption.
