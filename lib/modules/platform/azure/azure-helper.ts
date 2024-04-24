@@ -12,6 +12,7 @@ import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
 } from './util';
+import type { WebApiTeam } from 'azure-devops-node-api/interfaces/CoreInterfaces';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
 
@@ -177,4 +178,24 @@ export async function getMergeMethod(
   } catch (err) {
     return GitPullRequestMergeStrategy.NoFastForward;
   }
+}
+
+export async function getAllProjectTeams(
+  projectId: string,
+): Promise<WebApiTeam[]> {
+  const azureApiCore = await azureApi.coreApi();
+  const top = 100;
+  let skip = 0;
+  let allTeams: WebApiTeam[] = [];
+
+  while (true) {
+    const teams = await azureApiCore.getTeams(projectId, undefined, top, skip);
+    allTeams.push(...teams);
+    if (teams.length < top) {
+      break;
+    }
+    skip += top;
+  }
+
+  return allTeams;
 }
