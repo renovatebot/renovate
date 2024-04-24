@@ -8,7 +8,7 @@ export const supportsRanges = false;
 
 /**
  *
- * Converts input to range if it's a version. eg. X.Y.Z -> '>=X.Y.Z <X+1.0.0'
+ * Converts input to range if it's a version. eg. X.Y.Z -> '>=X.Y.Z <X+1'
  * If the input is already a range, it returns the input.
  */
 function massageVersion(input: string): string {
