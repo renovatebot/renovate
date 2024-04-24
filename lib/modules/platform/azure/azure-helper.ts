@@ -3,6 +3,7 @@ import {
   GitPullRequestMergeStrategy,
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { WebApiTeam } from 'azure-devops-node-api/interfaces/CoreInterfaces.js';
 import { logger } from '../../../logger';
 import { streamToString } from '../../../util/streams';
 import { getNewBranchName } from '../util';
@@ -12,7 +13,6 @@ import {
   getBranchNameWithoutRefsPrefix,
   getBranchNameWithoutRefsheadsPrefix,
 } from './util';
-import type { WebApiTeam } from 'azure-devops-node-api/interfaces/CoreInterfaces';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
 
