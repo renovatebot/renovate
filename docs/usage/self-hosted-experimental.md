@@ -122,28 +122,12 @@ This feature is in private beta.
 If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
 The expected value for this environment variable is a JSON array of strings.
 
-## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
-
-If set to any value, Renovate will download `nupkg` files for determining package metadata.
-
 ## `RENOVATE_X_PLATFORM_VERSION`
 
 Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
 Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls for Bitbucket.
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
-
-## `RENOVATE_X_REBASE_PAGINATION_LINKS`
-
-If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to use the `endpoint` URL from the Renovate config.
-
-<!-- prettier-ignore -->
-!!! note
-    For the GitHub Enterprise Server platform only.
-
-## `RENOVATE_X_REPO_CACHE_FORCE_LOCAL`
-
-If set, Renovate will persist repository cache locally after uploading to S3.
 
 ## `RENOVATE_X_S3_ENDPOINT`
 

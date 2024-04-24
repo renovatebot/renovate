@@ -42,3 +42,19 @@ If set to any value, Renovate will always paginate requests to GitHub fully, ins
 ## `execGpidHandle`
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
+
+## `nugetDownloadNupkgs`
+
+If set to any value, Renovate will download `nupkg` files for determining package metadata.
+
+## `rebasePaginationLinks`
+
+If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to use the `endpoint` URL from the Renovate config.
+
+<!-- prettier-ignore -->
+!!! note
+    For the GitHub Enterprise Server platform only.
+
+## `repoCacheForceLocal`
+
+If set, Renovate will persist repository cache locally after uploading to S3.

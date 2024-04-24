@@ -330,7 +330,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
           const parsedUrl = new URL(next.url, baseUrl);
           const rebasePagination =
             !!baseUrl &&
-            !!process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
+            GlobalConfig.getExperimentalFlag('rebasePaginationLinks') &&
             // Preserve github.com URLs for use cases like release notes
             parsedUrl.origin !== 'https://api.github.com';
           const firstPageUrl = rebasePagination
