@@ -455,7 +455,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.3.15',
+    default: 'ghcr.io/containerbase/sidecar:10.3.16',
     globalOnly: true,
   },
   {
@@ -1374,6 +1374,34 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+  },
+  {
+    name: 'matchDepPrefixes',
+    description:
+      'Dep names prefixes to match. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
+    name: 'excludeDepPrefixes',
+    description:
+      'Dep names prefixes to exclude. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+    advancedUse: true,
   },
   {
     name: 'matchPackagePatterns',
@@ -2443,6 +2471,16 @@ const options: RenovateOptions[] = [
     name: 'matchHost',
     description: 'A domain name, host name or base URL to match against.',
     type: 'string',
+    stage: 'repository',
+    parents: ['hostRules'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'readOnly',
+    description:
+      'Match against requests that only read data and do not mutate anything.',
+    type: 'boolean',
     stage: 'repository',
     parents: ['hostRules'],
     cli: false,

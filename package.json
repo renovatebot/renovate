@@ -27,7 +27,7 @@
     "generate": "run-s 'generate:*'",
     "generate:imports": "node tools/generate-imports.mjs",
     "git-check": "node tools/check-git-version.mjs",
-    "jest": "node tools/jest.mjs",
+    "jest": "GIT_ALLOW_PROTOCOL=file LOG_LEVEL=fatal node --experimental-vm-modules node_modules/jest/bin/jest.js --logHeapUsage",
     "lint": "run-s ls-lint type-check eslint prettier markdown-lint git-check doc-fence-check",
     "lint-fix": "run-s eslint-fix prettier-fix markdown-lint-fix",
     "ls-lint": "ls-lint",
@@ -148,7 +148,7 @@
     "@aws-sdk/client-s3": "3.363.0",
     "@aws-sdk/credential-providers": "3.363.0",
     "@breejs/later": "4.2.0",
-    "@cdktf/hcl2json": "0.20.6",
+    "@cdktf/hcl2json": "0.20.7",
     "@opentelemetry/api": "1.8.0",
     "@opentelemetry/context-async-hooks": "1.23.0",
     "@opentelemetry/exporter-trace-otlp-http": "0.50.0",
@@ -160,6 +160,7 @@
     "@opentelemetry/sdk-trace-node": "1.23.0",
     "@opentelemetry/semantic-conventions": "1.23.0",
     "@qnighy/marshal": "0.1.3",
+    "@renovatebot/kbpgp": "3.0.1",
     "@renovatebot/osv-offline": "1.5.4",
     "@renovatebot/pep440": "3.0.20",
     "@renovatebot/ruby-semver": "3.0.23",
@@ -201,7 +202,7 @@
     "glob": "10.3.12",
     "global-agent": "3.0.0",
     "good-enough-parser": "1.1.23",
-    "google-auth-library": "9.7.0",
+    "google-auth-library": "9.8.0",
     "got": "11.8.6",
     "graph-data-structure": "3.5.0",
     "handlebars": "4.7.8",
@@ -222,7 +223,6 @@
     "ms": "2.1.3",
     "nanoid": "3.3.7",
     "node-html-parser": "6.1.13",
-    "openpgp": "5.11.1",
     "p-all": "3.0.0",
     "p-map": "4.0.0",
     "p-queue": "6.6.2",
@@ -251,6 +251,7 @@
     "zod": "3.22.4"
   },
   "optionalDependencies": {
+    "openpgp": "5.11.1",
     "re2": "1.20.10"
   },
   "devDependencies": {
@@ -264,7 +265,7 @@
     "@openpgp/web-stream-tools": "0.0.14",
     "@renovate/eslint-plugin": "file:tools/eslint",
     "@semantic-release/exec": "6.0.3",
-    "@swc/core": "1.4.13",
+    "@swc/core": "1.4.16",
     "@types/auth-header": "1.0.6",
     "@types/aws4": "1.11.6",
     "@types/breejs__later": "4.1.5",
@@ -330,7 +331,7 @@
     "jest-mock-extended": "3.0.6",
     "jest-snapshot": "29.7.0",
     "markdownlint-cli2": "0.13.0",
-    "memfs": "4.8.1",
+    "memfs": "4.8.2",
     "nock": "13.5.4",
     "npm-run-all2": "6.1.2",
     "nyc": "15.1.0",
@@ -342,15 +343,17 @@
     "ts-jest": "29.1.2",
     "ts-node": "10.9.2",
     "type-fest": "4.15.0",
-    "typescript": "5.3.3",
+    "typescript": "5.4.5",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@8.15.6",
+  "packageManager": "pnpm@8.15.7",
   "files": [
     "dist",
     "renovate-schema.json"
   ],
-  "pnpm":{
-    "neverBuiltDependencies": ["dtrace-provider"]
+  "pnpm": {
+    "neverBuiltDependencies": [
+      "dtrace-provider"
+    ]
   }
 }
