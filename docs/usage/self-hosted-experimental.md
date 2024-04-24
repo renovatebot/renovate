@@ -132,11 +132,3 @@ Read [platform details](modules/platform/gitlab/index.md) to learn why we need t
 ## `RENOVATE_X_S3_ENDPOINT`
 
 If set, Renovate will use this string as the `endpoint` when instantiating the AWS S3 client.
-
-## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
-
-Suppress the pre-commit support warning in PR bodies.
-
-## `RENOVATE_X_YARN_PROXY`
-
-Configure global Yarn proxy settings if HTTP proxy environment variables are detected.

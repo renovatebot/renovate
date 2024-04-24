@@ -71,3 +71,7 @@ Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://doc
 
 If set, Renovate will use SQLite as the backend for the package cache.
 Don't combine with `redisUrl`, Redis would be preferred over SQlite.
+
+## `supressPreCpmmitWarning`
+
+Suppress the pre-commit support warning in PR bodies.

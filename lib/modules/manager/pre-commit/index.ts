@@ -1,3 +1,4 @@
+import { GlobalConfig } from '../../../config/global';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 export { extractPackageFile } from './extract';
@@ -11,7 +12,7 @@ export const defaultConfig = {
   commitMessageTopic: 'pre-commit hook {{depName}}',
   enabled: false,
   fileMatch: ['(^|/)\\.pre-commit-config\\.ya?ml$'],
-  prBodyNotes: process.env.RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING
+  prBodyNotes: GlobalConfig.getExperimentalFlag('suppressPreCommitWarning')
     ? /* istanbul ignore next */
       []
     : [
