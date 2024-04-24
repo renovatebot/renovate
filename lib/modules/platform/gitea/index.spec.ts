@@ -217,8 +217,8 @@ describe('modules/platform/gitea/index', () => {
     git.isBranchBehindBase.mockResolvedValue(false);
     git.getBranchCommit.mockReturnValue(mockCommitHash);
     hostRules = await import('../../../util/host-rules');
-
     hostRules.clear();
+
     setBaseUrl('https://gitea.renovatebot.com/');
 
     delete process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT;
