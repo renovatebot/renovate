@@ -75,3 +75,7 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 ## `supressPreCpmmitWarning`
 
 Suppress the pre-commit support warning in PR bodies.
+
+## `yarnProxy`
+
+Configure global Yarn proxy settings if HTTP proxy environment variables are detected.

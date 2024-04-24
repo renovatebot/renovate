@@ -18,7 +18,7 @@ If Renovate detects a `packageManager` setting for Yarn in `package.json` then i
 
 Yarn itself does not natively recognize/support the `HTTP_PROXY` and `HTTPS_PROXY` environment variables.
 
-You can configure `RENOVATE_X_YARN_PROXY=true` as an environment variable to enable configuring of Yarn proxy (e.g. if you cannot configure these proxy settings yourself in `~/.yarnrc.yml`).
+You can add `yarnProxy` in the `experimentalFlags` array in your configuration to enable configuring of Yarn proxy (e.g. if you cannot configure these proxy settings yourself in `~/.yarnrc.yml`).
 
 If set, and Renovate detects Yarn 2+, and one or both of those variables are present, then Renovate will run commands like `yarn config set --home httpProxy http://proxy` prior to executing `yarn install`.
 This will result in the `~/.yarnrc.yml` file being created or modified with these settings, and the settings are not removed afterwards.
