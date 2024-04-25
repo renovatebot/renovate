@@ -162,6 +162,13 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     applyDefaultHeaders(options);
 
+    if (
+      is.undefined(options.readOnly) &&
+      ['head', 'get'].includes(options.method)
+    ) {
+      options.readOnly = true;
+    }
+
     const hostRule = findMatchingRule(url, options);
     options = applyHostRule(url, options, hostRule);
     if (options.enabled === false) {
@@ -457,6 +464,14 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
 
     applyDefaultHeaders(combinedOptions);
+
+    if (
+      is.undefined(combinedOptions.readOnly) &&
+      ['head', 'get'].includes(combinedOptions.method)
+    ) {
+      combinedOptions.readOnly = true;
+    }
+
     const hostRule = findMatchingRule(url, combinedOptions);
     combinedOptions = applyHostRule(resolvedUrl, combinedOptions, hostRule);
     if (combinedOptions.enabled === false) {
