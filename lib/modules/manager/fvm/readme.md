@@ -1,2 +1,2 @@
-Keeps both the `.fvmrc` and `.fvm/fvm_config.json` file updated.
+Keeps the `.fvmrc` file or older `.fvm/fvm_config.json` file updated.
 
