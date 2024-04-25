@@ -42,8 +42,7 @@ When it comes to Renovate's core contributors and maintainers, we prioritize fea
 - are sponsored by 3rd parties after independent validation ( PRs will not be accepted if they are not in the interest of Renovate OSS ), or
 - those we need personally, or just want to see done
 
-A surprising number of users find it hard to accept that the Renovate core team or other community contributors won't build every feature or fix every bug which they'd like to see.
-Participating in this repo is dependent on you finding a way to accept this reality, and not being pushy about it.
+When users are excited or pressured to get an implementing working then it can be hard to accept that there's nobody to add their particular feature or look into their bug, but it's important that you understand and accept this reality.
 
 ## Maintaining Issue and Code Quality
 
