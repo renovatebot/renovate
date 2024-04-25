@@ -70,10 +70,6 @@ describe('util/cache/repository/impl/s3', () => {
     );
   });
 
-  afterEach(() => {
-    GlobalConfig.reset();
-  });
-
   it('successfully reads from s3', async () => {
     const json = '{}';
     s3Mock
