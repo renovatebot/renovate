@@ -43,7 +43,11 @@ function sortPackageFiles(
   manager: string,
   packageFiles: FileAddition[],
 ): void {
-  const managerPackageFiles = config.packageFiles![manager];
+  const managerPackageFiles = config.packageFiles?.[manager];
+  // istanbul ignore if
+  if (!managerPackageFiles) {
+    return;
+  }
   packageFiles.sort((lhs, rhs) => {
     const lhsIndex = managerPackageFiles.findIndex(
       (entry) => entry.packageFile === lhs.path,
