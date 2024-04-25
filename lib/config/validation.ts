@@ -556,6 +556,7 @@ export async function validateConfig(
               for (const pattern of val as string[]) {
                 if (startPattern.test(pattern) && endPattern.test(pattern)) {
                   try {
+                    // regEx isn't aware of our !/ prefix but can handle the suffix
                     regEx(pattern.replace(startPattern, '/'));
                   } catch (e) {
                     errors.push({
