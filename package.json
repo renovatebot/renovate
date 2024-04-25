@@ -141,12 +141,12 @@
     "node": "^18.12.0 || >=20.0.0"
   },
   "dependencies": {
-    "@aws-sdk/client-codecommit": "3.556.0",
-    "@aws-sdk/client-ec2": "3.562.0",
-    "@aws-sdk/client-ecr": "3.556.0",
-    "@aws-sdk/client-rds": "3.561.0",
-    "@aws-sdk/client-s3": "3.556.0",
-    "@aws-sdk/credential-providers": "3.556.0",
+    "@aws-sdk/client-codecommit": "3.563.0",
+    "@aws-sdk/client-ec2": "3.563.0",
+    "@aws-sdk/client-ecr": "3.563.0",
+    "@aws-sdk/client-rds": "3.563.0",
+    "@aws-sdk/client-s3": "3.563.0",
+    "@aws-sdk/credential-providers": "3.563.0",
     "@breejs/later": "4.2.0",
     "@cdktf/hcl2json": "0.20.7",
     "@opentelemetry/api": "1.8.0",
