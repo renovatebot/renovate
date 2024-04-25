@@ -410,8 +410,8 @@ importers:
         specifier: 5.0.9
         version: 5.0.9
       '@types/eslint':
-        specifier: 8.56.9
-        version: 8.56.9
+        specifier: 8.56.10
+        version: 8.56.10
       '@types/fs-extra':
         specifier: 11.0.4
         version: 11.0.4
@@ -3849,8 +3849,8 @@ packages:
     resolution: {integrity: sha512-TB/6hBkYQJxsZHSqyeuO1Jt0AB/bW6G7rHt9g7lML7SOF6lbgcHvw/Lr+69iqN0qxgXLhWKScAon73JNnptuDw==}
     dev: false
 
-  /@types/eslint@8.56.9:
-    resolution: {integrity: sha512-W4W3KcqzjJ0sHg2vAq9vfml6OhsJ53TcUjUqfzzZf/EChUtwspszj/S0pzMxnfRcO55/iGq47dscXw71Fxc4Zg==}
+  /@types/eslint@8.56.10:
+    resolution: {integrity: sha512-Shavhk87gCtY2fhXDctcfS3e6FdxWkCx1iUZ9eEUbh7rTqlZT0/IzOkCOVt0fCjcFuZ9FPYfuezTBImfHCDBGQ==}
     dependencies:
       '@types/estree': 1.0.5
       '@types/json-schema': 7.0.15
