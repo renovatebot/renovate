@@ -224,9 +224,8 @@ export async function lookupUpdates(
           res.warnings.push({
             topic: config.packageName,
             // TODO: types (#22198)
-            message: `Can't find version matching ${compareValue!} for ${
-              config.datasource
-            } package ${config.packageName}`,
+            message: `Can't find version matching ${compareValue!} for ${config.datasource
+              } package ${config.packageName}`,
           });
           return Result.ok(res);
         }
@@ -499,7 +498,7 @@ export async function lookupUpdates(
       if (versioning.valueToVersion) {
         // TODO #22198
         res.currentVersion = versioning.valueToVersion(res.currentVersion!);
-        for (const update of res.updates || /* istanbul ignore next*/ []) {
+        for (const update of res.updates || /* istanbul ignore next*/[]) {
           // TODO #22198
           update.newVersion = versioning.valueToVersion(update.newVersion!);
         }
@@ -515,6 +514,13 @@ export async function lookupUpdates(
             ...config,
             registryUrl: update.registryUrl ?? res.registryUrl,
             lookupName: res.lookupName,
+          };
+          //TODO #27728
+          // If the present contains the replacementName option and this update executes the replacement
+          // uses the correct lookupname based on the new replacementName, otherwise it keeps the origina one
+          if (update.updateType === 'replacement' && config.replacementName) {
+            getDigestConfig.lookupName = config.replacementName.substring(config.replacementName.indexOf("/") + 1);
+            getDigestConfig.currentDigest = undefined
           };
           // TODO #22198
           update.newDigest ??=
