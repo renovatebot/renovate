@@ -94,6 +94,10 @@ function getNewValue({
   if (!currentValue || currentValue === '*') {
     return rangeStrategy === 'pin' ? `=${newVersion}` : currentValue;
   }
+  // If the current value is a simple version, bump to fully specified newVersion
+  if (rangeStrategy === 'bump' && currentValue.match(regEx(/^(\d+\.?)+$/))) {
+    return newVersion;
+  }
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';
     if (currentValue.startsWith('= ')) {
