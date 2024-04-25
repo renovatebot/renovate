@@ -458,8 +458,8 @@ importers:
         specifier: 0.5.9
         version: 0.5.9
       '@types/nock':
-        specifier: 10.0.3
-        version: 10.0.3
+        specifier: 11.1.0
+        version: 11.1.0
       '@types/node':
         specifier: 18.19.31
         version: 18.19.31
@@ -3896,10 +3896,13 @@ packages:
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
     dev: false
 
-  /@types/nock@10.0.3:
-    resolution: {integrity: sha512-OthuN+2FuzfZO3yONJ/QVjKmLEuRagS9TV9lEId+WHL9KhftYG+/2z+pxlr0UgVVXSpVD8woie/3fzQn8ft/Ow==}
+  /@types/nock@11.1.0:
+    resolution: {integrity: sha512-jI/ewavBQ7X5178262JQR0ewicPAcJhXS/iFaNJl0VHLfyosZ/kwSrsa6VNQNSO8i9d8SqdRgOtZSOKJ/+iNMw==}
+    deprecated: This is a stub types definition. nock provides its own type definitions, so you do not need this installed.
     dependencies:
-      '@types/node': 18.19.31
+      nock: 13.5.4
+    transitivePeerDependencies:
+      - supports-color
     dev: true
 
   /@types/node@18.19.31:
