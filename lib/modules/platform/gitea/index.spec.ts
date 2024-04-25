@@ -22,6 +22,7 @@ import type {
   Label,
   PR,
   Repo,
+  RepoPermission,
   User,
 } from './types';
 
@@ -39,6 +40,14 @@ describe('modules/platform/gitea/index', () => {
   let hostRules: typeof import('../../../util/host-rules');
   let memCache: typeof import('../../../util/cache/memory');
 
+  function mockedRepo(opts: Partial<Repo>): Repo {
+    return partial<Repo>({
+      permissions: partial<RepoPermission>({ push: true, pull: true }),
+      has_pull_requests: true,
+      ...opts,
+    });
+  }
+
   const mockCommitHash =
     '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha;
 
@@ -49,33 +58,28 @@ describe('modules/platform/gitea/index', () => {
     email: 'renovate@example.com',
   };
 
-  const mockRepo = partial<Repo>({
+  const mockRepo = mockedRepo({
     allow_rebase: true,
     clone_url: 'https://gitea.renovatebot.com/some/repo.git',
     ssh_url: 'git@gitea.renovatebot.com/some/repo.git',
     default_branch: 'master',
     full_name: 'some/repo',
-    permissions: {
-      pull: true,
-      push: true,
-      admin: false,
-    },
   });
 
   type MockPr = PR & Required<Pick<PR, 'head' | 'base'>>;
 
   const mockRepos: Repo[] = [
-    partial<Repo>({ full_name: 'a/b' }),
-    partial<Repo>({ full_name: 'c/d' }),
-    partial<Repo>({ full_name: 'e/f', mirror: true }),
+    mockedRepo({ full_name: 'a/b' }),
+    mockedRepo({ full_name: 'c/d' }),
+    mockedRepo({ full_name: 'e/f', mirror: true }),
   ];
 
-  const mockTopicRepos: Repo[] = [partial<Repo>({ full_name: 'a/b' })];
+  const mockTopicRepos: Repo[] = [mockedRepo({ full_name: 'a/b' })];
 
   const mockNamespaceRepos: Repo[] = [
-    partial<Repo>({ full_name: 'org1/repo' }),
-    partial<Repo>({ full_name: 'org2/repo' }),
-    partial<Repo>({ full_name: 'org2/repo2', archived: true }),
+    mockedRepo({ full_name: 'org1/repo' }),
+    mockedRepo({ full_name: 'org2/repo' }),
+    mockedRepo({ full_name: 'org2/repo2', archived: true }),
   ];
 
   const mockPRs: MockPr[] = [
@@ -510,6 +514,20 @@ describe('modules/platform/gitea/index', () => {
       await initFakePlatform(scope);
       await expect(gitea.initRepo(initRepoCfg)).rejects.toThrow(
         REPOSITORY_ACCESS_FORBIDDEN,
+      );
+    });
+
+    it('should abort when repo has pulls disabled', async () => {
+      const scope = httpMock
+        .scope('https://gitea.com/api/v1')
+        .get(`/repos/${initRepoCfg.repository}`)
+        .reply(200, {
+          ...mockRepo,
+          has_pull_requests: false,
+        });
+      await initFakePlatform(scope);
+      await expect(gitea.initRepo(initRepoCfg)).rejects.toThrow(
+        REPOSITORY_BLOCKED,
       );
     });
 
