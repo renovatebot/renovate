@@ -36,6 +36,7 @@ If set to any string, Renovate will use this as the `user-agent` it sends with H
 The order method for autodiscover server side repository search.
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
+
 > Allowed values:
 
 - `asc`
@@ -52,6 +53,7 @@ Default value: `asc`.
 The sort method for autodiscover server side repository search.
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
+
 > Allowed values:
 
 - `alpha`
@@ -138,4 +140,5 @@ If set, Renovate will use this string as the `endpoint` when instantiating the A
 If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 client.
 
 > Whether to force path style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
-> Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
+
+Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)

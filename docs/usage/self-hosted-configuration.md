@@ -558,7 +558,7 @@ module.exports = {
 };
 ```
 
-Read [Self-Hosted Experimental Flags](./self-hosted-experimental.md) for the full list of flags supported by Renovate.
+Read [Self-Hosted Experimental Flags](./self-hosted-experimental-flags.md) for the full list of flags supported by Renovate.
 
 ## exposeAllEnv
 
