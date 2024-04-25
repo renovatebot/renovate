@@ -554,7 +554,7 @@ export async function validateConfig(
               const startPattern = regEx(/!?\//);
               const endPattern = regEx(/\/g?i?$/);
               for (const pattern of val as string[]) {
-                if (pattern.match(startPattern) && pattern.match(endPattern)) {
+                if (startPattern.test(pattern) && endPattern.test(pattern)) {
                   try {
                     regEx(pattern.replace(startPattern, '/'));
                   } catch (e) {
