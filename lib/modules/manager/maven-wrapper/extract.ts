@@ -15,10 +15,17 @@ const WRAPPER_URL_REGEX = regEx(
   '^(?:wrapperUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)(?:.jar))',
 );
 
+const WRAPPER_VERSION_REGEX = regEx(
+  '^(?:wrapperVersion\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)(?:.jar))',
+);
+
 function extractVersions(fileContent: string): MavenVersionExtract {
   const lines = coerceArray(fileContent?.split(newlineRegex));
   const maven = extractLineInfo(lines, DISTRIBUTION_URL_REGEX) ?? undefined;
-  const wrapper = extractLineInfo(lines, WRAPPER_URL_REGEX) ?? undefined;
+  const wrapper =
+    extractLineInfo(lines, WRAPPER_VERSION_REGEX) ??
+    extractLineInfo(lines, WRAPPER_URL_REGEX) ??
+    undefined;
   return { maven, wrapper };
 }
 
