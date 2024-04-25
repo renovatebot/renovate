@@ -958,7 +958,7 @@ async function validateGlobalConfig(
             } else {
               warnings.push({
                 topic: 'Configuration Error',
-                message: `Experimental flags can only be of type string. Found invalid type`,
+                message: `Experimental flags can only be of type string. Found invalid type ${typeof flag}`,
               });
             }
           }

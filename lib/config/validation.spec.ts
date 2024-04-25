@@ -1725,7 +1725,7 @@ describe('config/validation', () => {
         {
           topic: 'Configuration Error',
           message:
-            'Experimental flags can only be of type string. Found invalid type',
+            'Experimental flags can only be of type string. Found invalid type number',
         },
         {
           topic: 'Configuration Error',
