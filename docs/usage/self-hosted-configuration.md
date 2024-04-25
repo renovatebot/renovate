@@ -550,7 +550,7 @@ If this option is not set, Renovate will fallback to 15 minutes.
 
 ## experimentalFlags
 
-The `experimentalFlags` configuration option helps you manage experimental settings within Renovate.
+The `experimentalFlags` configuration option helps you manage some of the experimental settings within Renovate.
 
 ```javascript
 module.exports = {
