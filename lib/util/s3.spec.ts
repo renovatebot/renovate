@@ -1,9 +1,7 @@
-import { GlobalConfig } from '../config/global';
 import { getS3Client, parseS3Url } from './s3';
 
 describe('util/s3', () => {
   afterEach(() => {
-    GlobalConfig.reset();
     delete process.env.RENOVATE_X_S3_ENDPOINT;
     jest.resetModules();
   });
@@ -29,7 +27,7 @@ describe('util/s3', () => {
     expect(client1).toBe(client2);
   });
 
-  it('is uses experimental env', async () => {
+  it('uses experimental env and flag', async () => {
     process.env.RENOVATE_X_S3_ENDPOINT = 'https://minio.domain.test';
     process.env.RENOVATE_X_S3_PATH_STYLE = 'true';
     const s3 = await import('./s3');
