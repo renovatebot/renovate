@@ -815,22 +815,22 @@ describe('workers/repository/update/branch/get-updated', () => {
 
       it('passes package files to updateArtifacts in the same order they were returned by the manager', async () => {
         config.upgrades.push({
-          packageFile: 'requirements.in',
-          manager: 'pip-compile',
-          updateType: 'replacement',
-          depName: 'botocore',
-          currentValue: '==1.34.86',
-          newVersion: '1.34.92',
-          branchName: undefined!,
-        });
-        config.upgrades.push({
           packageFile: 'requirements-dev.in',
           manager: 'pip-compile',
           updateType: 'replacement',
           depName: 'awscli',
           currentValue: '==1.32.86',
           newVersion: '1.32.92',
-          branchName: undefined!,
+          branchName: 'renovate/aws-packages',
+        });
+        config.upgrades.push({
+          packageFile: 'requirements.in',
+          manager: 'pip-compile',
+          updateType: 'replacement',
+          depName: 'botocore',
+          currentValue: '==1.34.86',
+          newVersion: '1.34.92',
+          branchName: 'renovate/aws-packages',
         });
         config.packageFiles = {
           'pip-compile': [
