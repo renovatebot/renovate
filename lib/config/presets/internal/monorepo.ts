@@ -517,6 +517,7 @@ const repoGroups = {
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
   'web3-react': 'https://github.com/Uniswap/web3-react',
+  weasel: 'https://github.com/JasperFx/weasel',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   wolverine: 'https://github.com/jasperfx/wolverine',
   workbox: 'https://github.com/googlechrome/workbox',
