@@ -54,7 +54,7 @@ The sort method for autodiscover server side repository search.
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
-> Allowed values:
+Allowed values:
 
 - `alpha`
 - `created`
