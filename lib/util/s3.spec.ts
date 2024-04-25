@@ -31,7 +31,7 @@ describe('util/s3', () => {
 
   it('is uses experimental env', async () => {
     process.env.RENOVATE_X_S3_ENDPOINT = 'https://minio.domain.test';
-    GlobalConfig.set({ experimentalFlags: ['s3PathStyle'] });
+    process.env.RENOVATE_X_S3_PATH_STYLE = 'true';
     const s3 = await import('./s3');
     const client1 = s3.getS3Client();
     const client2 = getS3Client();
