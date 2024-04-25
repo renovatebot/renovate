@@ -39,6 +39,7 @@ When it comes to Renovate's core contributors and maintainers, we prioritize fea
 - those affecting a large number of users, or
 - regression errors (something used to work, but we broke it by accident), or
 - features needed by a Mend.io customer (Renovate's sponsor/owner), or
+- are sponsored by 3rd parties after independent validation ( PRs will not be accepted if they are not in the interest of Renovate OSS ), or
 - those we need personally, or just want to see done
 
 A surprising number of users find it hard to accept that the Renovate core team or other community contributors won't build every feature or fix every bug which they'd like to see.
@@ -67,10 +68,10 @@ If you do happen to be a Mend.io customer then escalation of feature or support 
 
 ## Getting more help
 
-If you need more help than this Open Source project can provide, or simply need guaranteed help, then there are two main options:
+If you need more help for you than this Open Source project can provide, simply need guaranteed help or need a feature which has not been prioritised high enough for you, then there are two main options:
 
 1. Become a customer of Mend.io, such as purchasing Renovate Enterprise, or
-2. Engage privately with an experienced Renovate contributor on an hourly or project basis. Mend.io staff do not currently offer this, but one of Renovate's non-Mend.io employed maintainers who otherwise works voluntarily on the project is available for such consulting work.
+2. Engage privately with an experienced Renovate contributor on an hourly or project basis. Mend.io staff do not currently offer this, but one of Renovate's non-Mend.io employed maintainers ( @secustor ) who otherwise works voluntarily on the project is available for such consulting work.
 
 ## Feedback
 
