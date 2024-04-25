@@ -170,9 +170,9 @@ terraform {
   source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0"
 }
 
-# gitlab-tags
+# gitlab-tags with custom port
 terraform {
-  source = "git::https://gitlab.com/hashicorp/example?ref=v1.0.0"
+  source = "git::https://gitlab.com:1234/hashicorp/example?ref=v1.0.0"
 }
 
 # gitea-tags
