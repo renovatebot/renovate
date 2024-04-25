@@ -9,6 +9,7 @@ query($packageName: String!) {
   orb(name: $packageName) {
     name,
     homeUrl,
+    isPrivate,
     versions {
       version,
       createdAt
@@ -65,7 +66,7 @@ export class OrbDatasource extends Datasource {
       releaseTimestamp: createdAt ?? null,
     }));
 
-    const dep = { homepage, releases };
+    const dep = { homepage, isPrivate: !!orb.isPrivate, releases };
     logger.trace({ dep }, 'dep');
     return dep;
   }

@@ -1,31 +1,57 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
-import { DockerDatasource } from '../../datasource/docker';
+import { parseSingleYaml } from '../../../util/yaml';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
-import { splitImageParts } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import { getDep } from '../dockerfile/extract';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { HelmChart, Image, Kustomize } from './types';
 
 // URL specifications should follow the hashicorp URL format
 // https://github.com/hashicorp/go-getter#url-format
 const gitUrl = regEx(
-  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/,
+);
+// regex to match URLs with ".git" delimiter
+const dotGitRegex = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(\.git))))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/,
+);
+// regex to match URLs with "_git" delimiter
+const underscoreGitRegex = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/,
+);
+// regex to match URLs having an extra "//"
+const gitUrlWithPath = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])(?<project>[^?\s]+)))(?:\/\/)(?<subdir>[^?\s]+)\?ref=(?<currentValue>.+)$/,
 );
 
 export function extractResource(base: string): PackageDependency | null {
-  const match = gitUrl.exec(base);
+  let match: RegExpExecArray | null;
+
+  if (base.includes('_git')) {
+    match = underscoreGitRegex.exec(base);
+  } else if (base.includes('.git')) {
+    match = dotGitRegex.exec(base);
+  } else if (gitUrlWithPath.test(base)) {
+    match = gitUrlWithPath.exec(base);
+  } else {
+    match = gitUrl.exec(base);
+  }
 
   if (!match?.groups) {
     return null;
   }
 
   const { path } = match.groups;
-  if (path.startsWith('github.com:') || path.startsWith('github.com/')) {
+  if (regEx(/(?:github\.com)(:|\/)/).test(path)) {
     return {
       currentValue: match.groups.currentValue,
       datasource: GithubTagsDatasource.id,
@@ -41,17 +67,25 @@ export function extractResource(base: string): PackageDependency | null {
   };
 }
 
-export function extractImage(image: Image): PackageDependency | null {
+export function extractImage(
+  image: Image,
+  aliases?: Record<string, string> | undefined,
+): PackageDependency | null {
   if (!image.name) {
     return null;
   }
-  const nameDep = splitImageParts(image.newName ?? image.name);
+  const nameToSplit = image.newName ?? image.name;
+  if (!is.string(nameToSplit)) {
+    logger.debug({ image }, 'Invalid image name');
+    return null;
+  }
+  const nameDep = getDep(nameToSplit, false, aliases);
   const { depName } = nameDep;
   const { digest, newTag } = image;
   if (digest && newTag) {
-    logger.warn(
+    logger.debug(
       { newTag, digest },
-      'Kustomize ignores newTag when digest is provided. Pick one, or use `newTag: tag@digest`'
+      'Kustomize ignores newTag when digest is provided. Pick one, or use `newTag: tag@digest`',
     );
     return {
       depName,
@@ -71,9 +105,7 @@ export function extractImage(image: Image): PackageDependency | null {
     }
 
     return {
-      datasource: DockerDatasource.id,
-      depName,
-      currentValue: nameDep.currentValue,
+      ...nameDep,
       currentDigest: digest,
       replaceString: digest,
     };
@@ -88,20 +120,18 @@ export function extractImage(image: Image): PackageDependency | null {
       };
     }
 
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const dep = splitImageParts(`${depName}:${newTag}`);
+    const dep = getDep(`${depName}:${newTag}`, false, aliases);
     return {
       ...dep,
-      datasource: DockerDatasource.id,
       replaceString: newTag,
+      autoReplaceStringTemplate:
+        '{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}',
     };
   }
 
   if (image.newName) {
     return {
       ...nameDep,
-      datasource: DockerDatasource.id,
       replaceString: image.newName,
     };
   }
@@ -110,10 +140,27 @@ export function extractImage(image: Image): PackageDependency | null {
 }
 
 export function extractHelmChart(
-  helmChart: HelmChart
+  helmChart: HelmChart,
+  aliases?: Record<string, string> | undefined,
 ): PackageDependency | null {
   if (!helmChart.name) {
     return null;
+  }
+
+  if (isOCIRegistry(helmChart.repo)) {
+    const dep = getDep(
+      `${removeOCIPrefix(helmChart.repo)}/${helmChart.name}:${helmChart.version}`,
+      false,
+      aliases,
+    );
+    return {
+      ...dep,
+      depName: helmChart.name,
+      packageName: dep.depName,
+      // https://github.com/helm/helm/issues/10312
+      // https://github.com/helm/helm/issues/10678
+      pinDigests: false,
+    };
   }
 
   return {
@@ -124,11 +171,16 @@ export function extractHelmChart(
   };
 }
 
-export function parseKustomize(content: string): Kustomize | null {
+export function parseKustomize(
+  content: string,
+  packageFile?: string,
+): Kustomize | null {
   let pkg: Kustomize | null = null;
   try {
-    pkg = load(content, { json: true }) as Kustomize;
+    // TODO: use schema (#9610)
+    pkg = parseSingleYaml(content, { json: true });
   } catch (e) /* istanbul ignore next */ {
+    logger.debug({ packageFile }, 'Error parsing kustomize file');
     return null;
   }
 
@@ -145,17 +197,21 @@ export function parseKustomize(content: string): Kustomize | null {
   return pkg;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
-  logger.trace('kustomize.extractPackageFile()');
+export function extractPackageFile(
+  content: string,
+  packageFile: string,
+  config: ExtractConfig,
+): PackageFileContent | null {
+  logger.trace(`kustomize.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
 
-  const pkg = parseKustomize(content);
+  const pkg = parseKustomize(content, packageFile);
   if (!pkg) {
     return null;
   }
 
   // grab the remote bases
-  for (const base of coerceArray(pkg.bases)) {
+  for (const base of coerceArray(pkg.bases).filter(is.string)) {
     const dep = extractResource(base);
     if (dep) {
       deps.push({
@@ -166,7 +222,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote resources
-  for (const resource of coerceArray(pkg.resources)) {
+  for (const resource of coerceArray(pkg.resources).filter(is.string)) {
     const dep = extractResource(resource);
     if (dep) {
       deps.push({
@@ -177,7 +233,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote components
-  for (const component of coerceArray(pkg.components)) {
+  for (const component of coerceArray(pkg.components).filter(is.string)) {
     const dep = extractResource(component);
     if (dep) {
       deps.push({
@@ -189,7 +245,7 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   // grab the image tags
   for (const image of coerceArray(pkg.images)) {
-    const dep = extractImage(image);
+    const dep = extractImage(image, config.registryAliases);
     if (dep) {
       deps.push({
         ...dep,
@@ -200,7 +256,7 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   // grab the helm charts
   for (const helmChart of coerceArray(pkg.helmCharts)) {
-    const dep = extractHelmChart(helmChart);
+    const dep = extractHelmChart(helmChart, config.registryAliases);
     if (dep) {
       deps.push({
         ...dep,

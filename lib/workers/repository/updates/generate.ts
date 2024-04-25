@@ -9,6 +9,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { safeStringify } from '../../../util/stringify';
 import * as template from '../../../util/template';
+import { uniq } from '../../../util/uniq';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
 
@@ -24,7 +25,7 @@ function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
     new Set(
-      branchUpgrades.map(({ depName }) => depName?.replace(/^@types\//, ''))
+      branchUpgrades.map(({ depName }) => depName?.replace(/^@types\//, '')),
     ).size === 1
   );
 }
@@ -33,7 +34,7 @@ function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
   const isTypesUpgrade = ({ depName }: BranchUpgradeConfig): boolean =>
     !!depName?.startsWith('@types/');
   const regularUpgrades = upgrades.filter(
-    (upgrade) => !isTypesUpgrade(upgrade)
+    (upgrade) => !isTypesUpgrade(upgrade),
   );
   const typesUpgrades = upgrades.filter(isTypesUpgrade);
   upgrades.splice(0, upgrades.length);
@@ -50,7 +51,7 @@ function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
   if (datasource && name && currentVersion && newVersion) {
     return [datasource, name, currentVersion, newVersion];
   }
-  logger.debug(
+  logger.trace(
     {
       datasource,
       packageName,
@@ -58,13 +59,13 @@ function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
       currentVersion,
       newVersion,
     },
-    'Cannot determine table values'
+    'Cannot determine table values',
   );
   return null;
 }
 
 export function generateBranchConfig(
-  upgrades: BranchUpgradeConfig[]
+  upgrades: BranchUpgradeConfig[],
 ): BranchConfig {
   let branchUpgrades = upgrades;
   if (!branchUpgrades.every((upgrade) => upgrade.pendingChecks)) {
@@ -82,7 +83,10 @@ export function generateBranchConfig(
   const newValue: string[] = [];
   const toVersions: string[] = [];
   const toValues = new Set<string>();
+  const depTypes = new Set<string>();
   for (const upg of branchUpgrades) {
+    upg.recreateClosed = upg.recreateWhen === 'always';
+
     if (upg.currentDigest) {
       upg.currentDigestShort =
         upg.currentDigestShort ??
@@ -103,6 +107,10 @@ export function generateBranchConfig(
       upg.displayFrom = upg.currentValue;
       upg.displayTo = upg.newValue;
     }
+
+    if (upg.isLockFileMaintenance) {
+      upg.recreateClosed = upg.recreateWhen !== 'never';
+    }
     upg.displayFrom ??= '';
     upg.displayTo ??= '';
     if (!depNames.includes(upg.depName!)) {
@@ -112,6 +120,9 @@ export function generateBranchConfig(
       toVersions.push(upg.newVersion!);
     }
     toValues.add(upg.newValue!);
+    if (upg.depType) {
+      depTypes.add(upg.depType);
+    }
     // prettify newVersion and newMajor for printing
     if (upg.newVersion) {
       upg.prettyNewVersion = prettifyVersion(upg.newVersion);
@@ -137,8 +148,15 @@ export function generateBranchConfig(
   const useGroupSettings = hasGroupName && groupEligible;
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: string;
+
+  if (depTypes.size) {
+    config.depTypes = Array.from(depTypes).sort();
+  }
+
   for (const branchUpgrade of branchUpgrades) {
     let upgrade: BranchUpgradeConfig = { ...branchUpgrade };
+
+    upgrade.depTypes = config.depTypes;
 
     // needs to be done for each upgrade, as we reorder them below
     if (newValue.length > 1 && !groupEligible) {
@@ -178,11 +196,14 @@ export function generateBranchConfig(
       logger.trace({ toVersions });
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
-      upgrade.recreateClosed = true;
-    } else if (newValue.length > 1 && upgrade.isDigest) {
+      upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
+    } else if (
+      newValue.length > 1 &&
+      (upgrade.isDigest || upgrade.isPinDigest)
+    ) {
       logger.trace({ newValue });
       delete upgrade.commitMessageExtra;
-      upgrade.recreateClosed = true;
+      upgrade.recreateClosed = upgrade.recreateWhen !== 'never';
     } else if (semver.valid(toVersions[0])) {
       upgrade.isRange = false;
     }
@@ -193,7 +214,7 @@ export function generateBranchConfig(
       if (upgrade.semanticCommitScope) {
         semanticPrefix += `(${template.compile(
           upgrade.semanticCommitScope,
-          upgrade
+          upgrade,
         )})`;
       }
       upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix!);
@@ -205,7 +226,7 @@ export function generateBranchConfig(
     // Compile a few times in case there are nested templates
     upgrade.commitMessage = template.compile(
       upgrade.commitMessage ?? '',
-      upgrade
+      upgrade,
     );
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
@@ -213,7 +234,7 @@ export function generateBranchConfig(
     if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
       logger.debug(
         { branchName: config.branchName },
-        'Secrets exposed in commit message'
+        'Secrets exposed in commit message',
       );
       throw new Error(CONFIG_SECRETS_EXPOSED);
     }
@@ -221,9 +242,9 @@ export function generateBranchConfig(
     upgrade.commitMessage = upgrade.commitMessage.replace(regEx(/\s+/g), ' '); // Trim extra whitespace inside string
     upgrade.commitMessage = upgrade.commitMessage.replace(
       regEx(/to vv(\d)/),
-      'to v$1'
+      'to v$1',
     );
-    if (upgrade.toLowerCase) {
+    if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
       // We only need to lowercase the first line
       const splitMessage = upgrade.commitMessage.split(newlineRegex);
       splitMessage[0] = splitMessage[0].toLowerCase();
@@ -242,30 +263,32 @@ export function generateBranchConfig(
       if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
         logger.debug(
           { branchName: config.branchName },
-          'Secrets were exposed in PR title'
+          'Secrets were exposed in PR title',
         );
         throw new Error(CONFIG_SECRETS_EXPOSED);
       }
-      if (upgrade.toLowerCase) {
+      if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
         upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }
     } else {
       [upgrade.prTitle] = upgrade.commitMessage.split(newlineRegex);
     }
-    upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
-    if (upgrade.isGroup) {
-      upgrade.prTitle +=
-        upgrade.updateType === 'major' && upgrade.separateMajorMinor
-          ? ' (major)'
-          : '';
-      upgrade.prTitle +=
-        upgrade.updateType === 'minor' && upgrade.separateMinorPatch
-          ? ' (minor)'
-          : '';
-      upgrade.prTitle +=
-        upgrade.updateType === 'patch' && upgrade.separateMinorPatch
-          ? ' (patch)'
-          : '';
+    if (!upgrade.prTitleStrict) {
+      upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
+      if (upgrade.isGroup) {
+        upgrade.prTitle +=
+          upgrade.updateType === 'major' && upgrade.separateMajorMinor
+            ? ' (major)'
+            : '';
+        upgrade.prTitle +=
+          upgrade.updateType === 'minor' && upgrade.separateMinorPatch
+            ? ' (minor)'
+            : '';
+        upgrade.prTitle +=
+          upgrade.updateType === 'patch' && upgrade.separateMinorPatch
+            ? ' (patch)'
+            : '';
+      }
     }
     // Compile again to allow for nested templates
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
@@ -322,27 +345,24 @@ export function generateBranchConfig(
     ...config.upgrades[0],
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
-  config.reuseLockFiles = config.upgrades.every(
-    (upgrade) => upgrade.updateType !== 'lockFileMaintenance'
-  );
   config.dependencyDashboardApproval = config.upgrades.some(
-    (upgrade) => upgrade.dependencyDashboardApproval
+    (upgrade) => upgrade.dependencyDashboardApproval,
   );
   config.dependencyDashboardPrApproval = config.upgrades.some(
-    (upgrade) => upgrade.prCreation === 'approval'
+    (upgrade) => upgrade.prCreation === 'approval',
   );
   config.prBodyColumns = [
     ...new Set(
       config.upgrades.reduce(
         (existing: string[], upgrade) =>
           existing.concat(upgrade.prBodyColumns!),
-        []
-      )
+        [],
+      ),
     ),
   ].filter(is.nonEmptyString);
   // combine excludeCommitPaths for multiple manager experience
   const hasExcludeCommitPaths = config.upgrades.some(
-    (u) => u.excludeCommitPaths && u.excludeCommitPaths.length > 0
+    (u) => u.excludeCommitPaths && u.excludeCommitPaths.length > 0,
   );
   if (hasExcludeCommitPaths) {
     config.excludeCommitPaths = Object.keys(
@@ -354,7 +374,7 @@ export function generateBranchConfig(
         }
 
         return acc;
-      }, {} as Record<string, boolean>)
+      }, {}),
     );
   }
 
@@ -364,14 +384,14 @@ export function generateBranchConfig(
     ...new Set(
       config.upgrades
         .map((upgrade) => upgrade.labels ?? [])
-        .reduce((a, b) => a.concat(b), [])
+        .reduce((a, b) => a.concat(b), []),
     ),
   ];
   config.addLabels = [
     ...new Set(
       config.upgrades
         .map((upgrade) => upgrade.addLabels ?? [])
-        .reduce((a, b) => a.concat(b), [])
+        .reduce((a, b) => a.concat(b), []),
     ),
   ];
   if (config.upgrades.some((upgrade) => upgrade.updateType === 'major')) {
@@ -403,6 +423,15 @@ export function generateBranchConfig(
       table.push(row);
     }
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
+  }
+  const additionalReviewers = uniq(
+    config.upgrades
+      .map((upgrade) => upgrade.additionalReviewers)
+      .flat()
+      .filter(is.nonEmptyString),
+  );
+  if (additionalReviewers.length > 0) {
+    config.additionalReviewers = additionalReviewers;
   }
   return config;
 }

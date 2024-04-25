@@ -7,8 +7,8 @@ describe('config/migrations/custom/renovate-fork-migration', () => {
         renovateFork: true,
       },
       {
-        includeForks: true,
-      }
+        forkProcessing: 'enabled',
+      },
     );
   });
 
@@ -18,8 +18,8 @@ describe('config/migrations/custom/renovate-fork-migration', () => {
         renovateFork: false,
       },
       {
-        includeForks: false,
-      }
+        forkProcessing: 'disabled',
+      },
     );
   });
 
@@ -28,7 +28,7 @@ describe('config/migrations/custom/renovate-fork-migration', () => {
       {
         renovateFork: 'test',
       },
-      {}
+      {},
     );
   });
 });

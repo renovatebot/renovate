@@ -1,15 +1,15 @@
 import { mocked } from '../../../test/util';
 import { getOptions } from '../../config/options';
-import * as _exec from '../exec';
+import * as _execUtils from '../exec/utils';
 import * as template from '.';
 
-jest.mock('../exec');
+jest.mock('../exec/utils');
 
-const exec = mocked(_exec);
+const execUtils = mocked(_execUtils);
 
 describe('util/template/index', () => {
   beforeEach(() => {
-    exec.getChildEnv.mockReturnValue({
+    execUtils.getChildEnv.mockReturnValue({
       CUSTOM_FOO: 'foo',
       HOME: '/root',
     });
@@ -22,7 +22,7 @@ describe('util/template/index', () => {
   it('has valid exposed config options', () => {
     const allOptions = getOptions().map((option) => option.name);
     const missingOptions = template.exposedConfigOptions.filter(
-      (option) => !allOptions.includes(option)
+      (option) => !allOptions.includes(option),
     );
     expect(missingOptions).toEqual([]);
   });
@@ -114,24 +114,36 @@ describe('util/template/index', () => {
     expect(output).toBe('CUSTOM_FOO is foo');
   });
 
+  it('replace', () => {
+    const userTemplate =
+      "{{ replace '[a-z]+\\.github\\.com' 'ghc' depName }}{{ replace 'some' 'other' depType }}";
+    const output = template.compile(userTemplate, {
+      depName: 'some.github.com/dep',
+    });
+    expect(output).toBe('ghc/dep');
+  });
+
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
+    const allowedArrayField = 'prBodyNotes';
     const forbiddenField = 'foobar';
 
     type TestCompileInput = Record<
-      typeof allowedField | typeof forbiddenField,
+      typeof allowedField | typeof allowedArrayField | typeof forbiddenField,
       unknown
     >;
 
     const compileInput: TestCompileInput = {
       [allowedField]: 'allowed',
+      [allowedArrayField]: ['allowed'],
       [forbiddenField]: 'forbidden',
     };
 
-    it('accessing allowed files', () => {
+    it('accessing allowed fields', () => {
       const p = template.proxyCompileInput(compileInput);
 
       expect(p[allowedField]).toBe('allowed');
+      expect(p[allowedArrayField]).toStrictEqual(['allowed']);
       expect(p[forbiddenField]).toBeUndefined();
     });
 
@@ -153,6 +165,7 @@ describe('util/template/index', () => {
       const arr = proxy[allowedField] as TestCompileInput[];
       const obj = arr[0];
       expect(obj[allowedField]).toBe('allowed');
+      expect(obj[allowedArrayField]).toStrictEqual(['allowed']);
       expect(obj[forbiddenField]).toBeUndefined();
     });
   });
@@ -166,20 +179,20 @@ describe('util/template/index', () => {
       expect(
         template.containsTemplates(
           '{{#if logJSON}}{{logJSON}}{{/if}}',
-          'logJSON'
-        )
+          'logJSON',
+        ),
       ).toBeTrue();
       expect(
         template.containsTemplates(
           '{{#with logJSON.hasReleaseNotes as | hasNotes |}}{{hasNotes}}{{/if}}',
-          'logJSON'
-        )
+          'logJSON',
+        ),
       ).toBeTrue();
       expect(
         template.containsTemplates(
           '{{#if logJSON.hasReleaseNotes}}has notes{{/if}}',
-          'logJSON'
-        )
+          'logJSON',
+        ),
       ).toBeTrue();
     });
 
@@ -192,7 +205,7 @@ describe('util/template/index', () => {
     it('encodes values', () => {
       const output = template.compile(
         '{{{encodeURIComponent "@fsouza/prettierd"}}}',
-        undefined as never
+        undefined as never,
       );
       expect(output).toBe('%40fsouza%2Fprettierd');
     });
@@ -200,9 +213,113 @@ describe('util/template/index', () => {
     it('decodes values', () => {
       const output = template.compile(
         '{{{decodeURIComponent "%40fsouza/prettierd"}}}',
-        undefined as never
+        undefined as never,
       );
       expect(output).toBe('@fsouza/prettierd');
+    });
+  });
+
+  describe('base64 encoding', () => {
+    it('encodes values', () => {
+      const output = template.compile(
+        '{{{encodeBase64 "@fsouza/prettierd"}}}',
+        undefined as never,
+      );
+      expect(output).toBe('QGZzb3V6YS9wcmV0dGllcmQ=');
+    });
+
+    it('handles null values gracefully', () => {
+      const output = template.compile('{{{encodeBase64 packageName}}}', {
+        packageName: null,
+      });
+      expect(output).toBe('');
+    });
+
+    it('handles undefined values gracefully', () => {
+      const output = template.compile('{{{encodeBase64 packageName}}}', {
+        packageName: undefined,
+      });
+      expect(output).toBe('');
+    });
+  });
+
+  describe('equals', () => {
+    it('equals', () => {
+      const output = template.compile(
+        '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
+        {
+          datasource: 'git-refs',
+          packageName: 'renovatebot/renovate',
+        },
+      );
+      expect(output).toBe('https://github.com/renovatebot/renovate');
+    });
+
+    it('not equals', () => {
+      const output = template.compile(
+        '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
+        {
+          datasource: 'github-releases',
+          packageName: 'renovatebot/renovate',
+        },
+      );
+      expect(output).toBe('renovatebot/renovate');
+    });
+
+    it('not strict equals', () => {
+      const output = template.compile(
+        '{{#if (equals newMajor "3")}}equals{{else}}not equals{{/if}}',
+        {
+          newMajor: 3,
+        },
+      );
+      expect(output).toBe('not equals');
+    });
+  });
+
+  describe('includes', () => {
+    it('includes is true', () => {
+      const output = template.compile(
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          labels: ['dependencies'],
+        },
+      );
+
+      expect(output).toBe('production');
+    });
+
+    it('includes is false', () => {
+      const output = template.compile(
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          labels: ['devDependencies'],
+        },
+      );
+
+      expect(output).toBe('notProduction');
+    });
+
+    it('includes with incorrect type first argument', () => {
+      const output = template.compile(
+        '{{#if (includes labels "dependencies")}}production{{else}}notProduction{{/if}}',
+        {
+          labels: 'devDependencies',
+        },
+      );
+
+      expect(output).toBe('notProduction');
+    });
+
+    it('includes with incorrect type second argument', () => {
+      const output = template.compile(
+        '{{#if (includes labels 555)}}production{{else}}notProduction{{/if}}',
+        {
+          labels: ['devDependencies'],
+        },
+      );
+
+      expect(output).toBe('notProduction');
     });
   });
 });

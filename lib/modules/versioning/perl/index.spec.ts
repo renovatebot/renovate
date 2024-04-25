@@ -1,7 +1,7 @@
 import perl from '.';
 
 describe('modules/versioning/perl/index', () => {
-  test.each`
+  it.each`
     input           | expected
     ${'1'}          | ${true}
     ${'1.2'}        | ${true}
@@ -28,7 +28,7 @@ describe('modules/versioning/perl/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input         | expected
     ${'1'}        | ${true}
     ${'1.234'}    | ${true}
@@ -41,7 +41,7 @@ describe('modules/versioning/perl/index', () => {
     expect(perl.isStable(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a             | b              | expected
     ${'1.2'}      | ${'v1.200.0'}  | ${true}
     ${'1.02'}     | ${'v1.20.0'}   | ${true}
@@ -55,7 +55,7 @@ describe('modules/versioning/perl/index', () => {
     expect(perl.equals(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a            | b            | expected
     ${'2.4.2'}   | ${'2.4.1'}   | ${true}
     ${'0.1301'}  | ${'0.13_01'} | ${true}

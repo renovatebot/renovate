@@ -5,13 +5,11 @@ import type {
   GithubGitTree,
   GithubGitTreeNode,
 } from '../../../../../../types/platform/github';
-import {
-  queryReleases,
-  queryTags,
-} from '../../../../../../util/github/graphql';
+import { queryReleases } from '../../../../../../util/github/graphql';
 import { GithubHttp } from '../../../../../../util/http/github';
 import { fromBase64 } from '../../../../../../util/string';
 import { ensureTrailingSlash, joinUrlParts } from '../../../../../../util/url';
+import { compareChangelogFilePath } from '../common';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
@@ -22,44 +20,10 @@ import type {
 export const id = 'github-changelog';
 const http = new GithubHttp(id);
 
-export async function getTags(
-  endpoint: string,
-  repository: string
-): Promise<string[]> {
-  logger.trace('github.getTags()');
-  try {
-    const tags = await queryTags(
-      {
-        registryUrl: endpoint,
-        packageName: repository,
-      },
-      http
-    );
-
-    // istanbul ignore if
-    if (!tags.length) {
-      logger.debug(`No Github tags found for repository:${repository}`);
-    }
-
-    return tags.map(({ version }) => version);
-  } catch (err) {
-    logger.debug(
-      { sourceRepo: repository, err },
-      'Failed to fetch Github tags'
-    );
-    // istanbul ignore if
-    if (err.message?.includes('Bad credentials')) {
-      logger.warn('Bad credentials triggering tag fail lookup in changelog');
-      throw err;
-    }
-    return [];
-  }
-}
-
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  sourceDirectory: string
+  sourceDirectory: string,
 ): Promise<ChangeLogFile | null> {
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
@@ -71,7 +35,7 @@ export async function getReleaseNotesMd(
   const res = await http.getJson<GithubGitTree>(
     `${apiPrefix}/git/trees/${defaultBranch}${
       sourceDirectory ? '?recursive=1' : ''
-    }`
+    }`,
   );
 
   // istanbul ignore if
@@ -81,13 +45,14 @@ export async function getReleaseNotesMd(
 
   const allFiles = res.body.tree.filter((f) => f.type === 'blob');
   let files: GithubGitTreeNode[] = [];
+
   if (sourceDirectory?.length) {
     files = allFiles
       .filter((f) => f.path.startsWith(sourceDirectory))
       .filter((f) =>
         changelogFilenameRegex.test(
-          f.path.replace(ensureTrailingSlash(sourceDirectory), '')
-        )
+          f.path.replace(ensureTrailingSlash(sourceDirectory), ''),
+        ),
       );
   }
   if (!files.length) {
@@ -97,17 +62,19 @@ export async function getReleaseNotesMd(
     logger.trace('no changelog file found');
     return null;
   }
-  const { path: changelogFile, sha } = files.shift()!;
+  const { path: changelogFile, sha } = files
+    .sort((a, b) => compareChangelogFilePath(a.path, b.path))
+    .shift()!;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(
-      `Multiple candidates for changelog file, using ${changelogFile}`
+      `Multiple candidates for changelog file, using ${changelogFile}`,
     );
   }
 
   // https://docs.github.com/en/rest/reference/git#get-a-blob
   const fileRes = await http.getJson<GithubGitBlob>(
-    `${apiPrefix}/git/blobs/${sha}`
+    `${apiPrefix}/git/blobs/${sha}`,
   );
 
   const changelogMd = fromBase64(fileRes.body.content) + '\n#\n##';
@@ -116,23 +83,23 @@ export async function getReleaseNotesMd(
 
 export async function getReleaseList(
   project: ChangeLogProject,
-  _release: ChangeLogRelease
+  _release: ChangeLogRelease,
 ): Promise<ChangeLogNotes[]> {
   logger.trace('github.getReleaseList()');
-  const apiBaseUrl = project.apiBaseUrl!; // TODO #7154
+  const apiBaseUrl = project.apiBaseUrl;
   const repository = project.repository;
   const notesSourceUrl = joinUrlParts(
     apiBaseUrl,
     'repos',
     repository,
-    'releases'
+    'releases',
   );
   const releases = await queryReleases(
     {
       registryUrl: apiBaseUrl,
       packageName: repository,
     },
-    http
+    http,
   );
 
   const result = releases.map(
@@ -143,7 +110,7 @@ export async function getReleaseList(
       tag,
       name,
       body,
-    })
+    }),
   );
   return result;
 }

@@ -32,6 +32,26 @@ exports[`modules/manager/pre-commit/extract extractPackageFile() extracts from c
       "packageName": "psf/black",
     },
     {
+      "currentValue": "v42.0",
+      "datasource": "gitlab-tags",
+      "depName": "my/dep",
+      "depType": "repository",
+      "packageName": "my/dep",
+      "registryUrls": [
+        "https://gitlab.mycompany.com",
+      ],
+    },
+    {
+      "currentValue": "v42.0",
+      "datasource": "gitlab-tags",
+      "depName": "my/dep",
+      "depType": "repository",
+      "packageName": "my/dep",
+      "registryUrls": [
+        "https://gitlab.mycompany.com",
+      ],
+    },
+    {
       "currentValue": "v2.1.2",
       "datasource": "github-tags",
       "depName": "prettier/pre-commit",

@@ -34,6 +34,15 @@ describe('modules/manager/kubernetes/extract', () => {
           autoReplaceStringTemplate:
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
           currentDigest: undefined,
+          currentValue: '1.22.1',
+          datasource: 'docker',
+          depName: 'nginx',
+          replaceString: 'nginx:1.22.1',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
           currentValue: 'v1.11.1',
           datasource: 'docker',
           depName: 'k8s.gcr.io/kube-proxy-amd64',
@@ -58,7 +67,7 @@ describe('modules/manager/kubernetes/extract', () => {
       const res = extractPackageFile(
         kubernetesArraySyntaxFile,
         'file.yaml',
-        {}
+        {},
       );
       expect(res?.deps).toStrictEqual([
         {

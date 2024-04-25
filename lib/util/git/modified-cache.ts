@@ -3,11 +3,11 @@ import { getCache } from '../cache/repository';
 
 export function getCachedModifiedResult(
   branchName: string,
-  branchSha: string | null
+  branchSha: string | null,
 ): boolean | null {
   const cache = getCache();
   const branch = cache.branches?.find(
-    (branch) => branch.branchName === branchName
+    (branch) => branch.branchName === branchName,
   );
 
   if (branch?.sha === branchSha && branch.isModified !== undefined) {
@@ -19,11 +19,11 @@ export function getCachedModifiedResult(
 
 export function setCachedModifiedResult(
   branchName: string,
-  isModified: boolean
+  isModified: boolean,
 ): void {
   const cache = getCache();
   const branch = cache.branches?.find(
-    (branch) => branch.branchName === branchName
+    (branch) => branch.branchName === branchName,
   );
 
   if (!branch) {

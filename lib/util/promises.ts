@@ -37,7 +37,7 @@ function handleError(err: any): never {
 
 export async function all<T>(
   tasks: PromiseFactory<T>[],
-  options?: pAll.Options
+  options?: pAll.Options,
 ): Promise<T[]> {
   try {
     const res = await pAll(tasks, {
@@ -54,7 +54,7 @@ export async function all<T>(
 export async function map<Element, NewElement>(
   input: Iterable<Element>,
   mapper: pMap.Mapper<Element, NewElement>,
-  options?: pMap.Options
+  options?: pMap.Options,
 ): Promise<NewElement[]> {
   try {
     const res = await pMap(input, mapper, {

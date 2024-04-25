@@ -1,23 +1,31 @@
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { id as versioning } from '../../versioning/maven';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { MavenVersionExtract, Version } from './types';
 
 // https://regex101.com/r/IcOs7P/1
 const DISTRIBUTION_URL_REGEX = regEx(
-  '^(?:distributionUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip)\\s*$'
+  '^(?:distributionUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)-(?<type>bin|all)\\.zip)\\s*$',
 );
 
 const WRAPPER_URL_REGEX = regEx(
-  '^(?:wrapperUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)(?:.jar))'
+  '^(?:wrapperUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)(?:.jar))',
+);
+
+const WRAPPER_VERSION_REGEX = regEx(
+  '^(?:wrapperVersion\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)(?:.jar))',
 );
 
 function extractVersions(fileContent: string): MavenVersionExtract {
-  const lines = fileContent?.split(newlineRegex) ?? [];
+  const lines = coerceArray(fileContent?.split(newlineRegex));
   const maven = extractLineInfo(lines, DISTRIBUTION_URL_REGEX) ?? undefined;
-  const wrapper = extractLineInfo(lines, WRAPPER_URL_REGEX) ?? undefined;
+  const wrapper =
+    extractLineInfo(lines, WRAPPER_VERSION_REGEX) ??
+    extractLineInfo(lines, WRAPPER_URL_REGEX) ??
+    undefined;
   return { maven, wrapper };
 }
 
@@ -36,7 +44,9 @@ function extractLineInfo(lines: string[], regex: RegExp): Version | null {
   return null;
 }
 
-export function extractPackageFile(fileContent: string): PackageFile | null {
+export function extractPackageFile(
+  fileContent: string,
+): PackageFileContent | null {
   logger.trace('maven-wrapper.extractPackageFile()');
   const extractResult = extractVersions(fileContent);
   const deps = [];

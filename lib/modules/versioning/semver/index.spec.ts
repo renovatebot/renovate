@@ -1,7 +1,7 @@
 import semver from '.';
 
 describe('modules/versioning/semver/index', () => {
-  test.each`
+  it.each`
     version                                          | expected
     ${'17.04.0'}                                     | ${false}
     ${'1.2.3'}                                       | ${true}
@@ -17,7 +17,7 @@ describe('modules/versioning/semver/index', () => {
     expect(!!semver.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version            | expected
     ${'1.2.3'}         | ${true}
     ${'1.2.3-alpha.1'} | ${true}
@@ -28,9 +28,10 @@ describe('modules/versioning/semver/index', () => {
     expect(!!semver.isSingleVersion(version)).toBe(expected);
   });
 
-  test.each`
-    currentValue | rangeStrategy | currentVersion | newVersion | expected
-    ${'=1.0.0'}  | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'} | ${'1.1.0'}
+  it.each`
+    currentValue | rangeStrategy | currentVersion | newVersion  | expected
+    ${'=1.0.0'}  | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'}  | ${'1.1.0'}
+    ${'1.0.0'}   | ${'auto'}     | ${'v1.0.0'}    | ${'v2.0.0'} | ${'2.0.0'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
@@ -41,10 +42,10 @@ describe('modules/versioning/semver/index', () => {
         newVersion,
       });
       expect(res).toEqual(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     version    | expected
     ${'1.2.0'} | ${true}
   `('isCompatible("$version") === $expected', ({ version, expected }) => {

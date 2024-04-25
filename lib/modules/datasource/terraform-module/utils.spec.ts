@@ -11,10 +11,10 @@ describe('modules/datasource/terraform-module/utils', () => {
         {
           'modules.v1': '/v1/modules/',
         },
-        'hashicorp/consul/aws'
+        'hashicorp/consul/aws',
       );
       expect(result).toBe(
-        'https://registry.example.com/v1/modules/hashicorp/consul/aws'
+        'https://registry.example.com/v1/modules/hashicorp/consul/aws',
       );
     });
 
@@ -25,10 +25,10 @@ describe('modules/datasource/terraform-module/utils', () => {
         {
           'providers.v1': '/v1/providers/',
         },
-        'hashicorp/azure'
+        'hashicorp/azure',
       );
       expect(result).toBe(
-        'https://registry.example.com/v1/providers/hashicorp/azure'
+        'https://registry.example.com/v1/providers/hashicorp/azure',
       );
     });
 
@@ -39,10 +39,10 @@ describe('modules/datasource/terraform-module/utils', () => {
         {
           'modules.v1': 'https://other.example.com/v1/modules/',
         },
-        'hashicorp/consul/aws'
+        'hashicorp/consul/aws',
       );
       expect(result).toBe(
-        'https://other.example.com/v1/modules/hashicorp/consul/aws'
+        'https://other.example.com/v1/modules/hashicorp/consul/aws',
       );
     });
 
@@ -53,10 +53,10 @@ describe('modules/datasource/terraform-module/utils', () => {
         {
           'providers.v1': 'https://other.example.com/providers',
         },
-        'hashicorp/azure'
+        'hashicorp/azure',
       );
       expect(result).toBe(
-        'https://other.example.com/providers/hashicorp/azure'
+        'https://other.example.com/providers/hashicorp/azure',
       );
     });
 
@@ -67,7 +67,7 @@ describe('modules/datasource/terraform-module/utils', () => {
         {
           'providers.v1': '',
         },
-        'hashicorp/azure'
+        'hashicorp/azure',
       );
       expect(result).toBe('https://registry.example.com/hashicorp/azure');
     });
@@ -77,7 +77,7 @@ describe('modules/datasource/terraform-module/utils', () => {
         defaultRegistryURL,
         'providers.v1',
         {},
-        'hashicorp/azure'
+        'hashicorp/azure',
       );
       expect(result).toBe('https://registry.example.com/hashicorp/azure');
     });

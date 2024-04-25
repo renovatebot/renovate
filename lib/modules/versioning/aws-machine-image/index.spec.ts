@@ -42,7 +42,7 @@ describe('modules/versioning/aws-machine-image/index', () => {
   describe('isCompatible(version,range)', () => {
     it('should return true', () => {
       expect(
-        aws.isCompatible('ami-00e1b2c30011d4e5f', 'anything')
+        aws.isCompatible('ami-00e1b2c30011d4e5f', 'anything'),
       ).toBeTruthy();
     });
 

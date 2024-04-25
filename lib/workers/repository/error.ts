@@ -5,6 +5,7 @@ import {
   CONFIG_VALIDATION,
   EXTERNAL_HOST_ERROR,
   MANAGER_LOCKFILE_ERROR,
+  MISSING_API_CREDENTIALS,
   NO_VULNERABILITY_ALERTS,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -20,6 +21,8 @@ import {
   REPOSITORY_DISABLED_BY_CONFIG,
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
+  REPOSITORY_FORK_MISSING,
+  REPOSITORY_FORK_MODE_FORKED,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_CONFIG,
@@ -33,11 +36,14 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { raiseConfigWarningIssue } from './error-config';
+import {
+  raiseConfigWarningIssue,
+  raiseCredentialsWarningIssue,
+} from './error-config';
 
 export default async function handleError(
   config: RenovateConfig,
-  err: Error
+  err: Error,
 ): Promise<string> {
   if (err.message === REPOSITORY_UNINITIATED) {
     logger.info('Repository is uninitiated - skipping');
@@ -89,12 +95,24 @@ export default async function handleError(
     logger.error('Repository is not found');
     return err.message;
   }
+  if (err.message === REPOSITORY_FORK_MODE_FORKED) {
+    logger.info(
+      'Repository is a fork and cannot be processed when Renovate is running in fork mode itself',
+    );
+    return err.message;
+  }
   if (err.message === REPOSITORY_FORKED) {
-    logger.info('Repository is a fork and not manually configured - skipping');
+    logger.info(
+      'Repository is a fork and not manually configured - skipping - did you want to run with --fork-processing=enabled?',
+    );
     return err.message;
   }
   if (err.message === REPOSITORY_CANNOT_FORK) {
     logger.info('Cannot fork repository - skipping');
+    return err.message;
+  }
+  if (err.message === REPOSITORY_FORK_MISSING) {
+    logger.info('Cannot find fork required for fork mode - skipping');
     return err.message;
   }
   if (err.message === REPOSITORY_NO_PACKAGE_FILES) {
@@ -116,18 +134,24 @@ export default async function handleError(
     await raiseConfigWarningIssue(config, err);
     return err.message;
   }
+  if (err.message === MISSING_API_CREDENTIALS) {
+    delete config.branchList;
+    logger.info({ error: err }, MISSING_API_CREDENTIALS);
+    await raiseCredentialsWarningIssue(config, err);
+    return err.message;
+  }
   if (err.message === CONFIG_SECRETS_EXPOSED) {
     delete config.branchList;
     logger.warn(
       { error: err },
-      'Repository aborted due to potential secrets exposure'
+      'Repository aborted due to potential secrets exposure',
     );
     return err.message;
   }
   if (err instanceof ExternalHostError) {
     logger.warn(
       { hostType: err.hostType, packageName: err.packageName, err: err.err },
-      'Host error'
+      'Host error',
     );
     logger.info('External host error causing abort - skipping');
     delete config.branchList;

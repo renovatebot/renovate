@@ -1,13 +1,14 @@
 import { ERROR, WARN } from 'bunyan';
+import { codeBlock } from 'common-tags';
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import {
   RenovateConfig,
-  getConfig,
   logger,
   mockedFunction,
   platform,
 } from '../../../test/util';
+import { getConfig } from '../../config/defaults';
 import { GlobalConfig } from '../../config/global';
 import type {
   PackageDependency,
@@ -21,7 +22,20 @@ import {
 import { regEx } from '../../util/regex';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
+import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
+
+const createVulnerabilitiesMock = jest.fn();
+jest.mock('./process/vulnerabilities', () => {
+  return {
+    __esModule: true,
+    Vulnerabilities: class {
+      static create() {
+        return createVulnerabilitiesMock();
+      }
+    },
+  };
+});
 
 type PrUpgrade = BranchUpgradeConfig;
 
@@ -50,7 +64,7 @@ function genRandString(length: number): string {
 
 function genRandPackageFile(
   depsNum: number,
-  depNameLen: number
+  depNameLen: number,
 ): Record<string, PackageFile[]> {
   const deps: PackageDependency[] = [];
   for (let i = 0; i < depsNum; i++) {
@@ -66,18 +80,38 @@ async function dryRun(
   branches: BranchConfig[],
   platform: jest.MockedObject<Platform>,
   ensureIssueClosingCalls: number,
-  ensureIssueCalls: number
+  ensureIssueCalls: number,
 ) {
   GlobalConfig.set({ dryRun: 'full' });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
-    ensureIssueClosingCalls
+    ensureIssueClosingCalls,
   );
   expect(platform.ensureIssue).toHaveBeenCalledTimes(ensureIssueCalls);
 }
 
 describe('workers/repository/dependency-dashboard', () => {
   describe('readDashboardBody()', () => {
+    it('parses invalid dashboard body without throwing error', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: null as never,
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {},
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
+    });
+
     it('reads dashboard body', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
@@ -87,7 +121,7 @@ describe('workers/repository/dependency-dashboard', () => {
         body:
           Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
             '- [ ]',
-            '- [x]'
+            '- [x]',
           ) + '\n\n - [x] <!-- rebase-all-open-prs -->',
       });
       await dependencyDashboard.readDashboardBody(conf);
@@ -104,6 +138,31 @@ describe('workers/repository/dependency-dashboard', () => {
       });
     });
 
+    it('reads dashboard body and apply checkedBranches', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      conf.checkedBranches = ['branch1', 'branch2'];
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt'),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        checkedBranches: ['branch1', 'branch2'],
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {
+          branch1: 'global-config',
+          branch2: 'global-config',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
+    });
+
     it('reads dashboard body all pending approval', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
@@ -112,7 +171,7 @@ describe('workers/repository/dependency-dashboard', () => {
         number: 1,
         body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
           '- [ ] <!-- approve-all-pending-prs -->',
-          '- [x] <!-- approve-all-pending-prs -->'
+          '- [x] <!-- approve-all-pending-prs -->',
         ),
       });
       await dependencyDashboard.readDashboardBody(conf);
@@ -138,7 +197,7 @@ describe('workers/repository/dependency-dashboard', () => {
         number: 1,
         body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
           '- [ ] <!-- create-all-rate-limited-prs -->',
-          '- [x] <!-- create-all-rate-limited-prs -->'
+          '- [x] <!-- create-all-rate-limited-prs -->',
         ),
       });
       await dependencyDashboard.readDashboardBody(conf);
@@ -155,12 +214,31 @@ describe('workers/repository/dependency-dashboard', () => {
         dependencyDashboardAllRateLimited: true,
       });
     });
+
+    it('does not read dashboard body but applies checkedBranches regardless', async () => {
+      const conf: RenovateConfig = {};
+      conf.dependencyDashboard = false;
+      conf.checkedBranches = ['branch1', 'branch2'];
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        checkedBranches: ['branch1', 'branch2'],
+        dependencyDashboard: false,
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {
+          branch1: 'global-config',
+          branch2: 'global-config',
+        },
+        dependencyDashboardRebaseAllOpen: false,
+      });
+    });
   });
 
   describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
       PackageFiles.add('main', null);
       GlobalConfig.reset();
+      logger.getProblems.mockReturnValue([]);
     });
 
     it('do nothing if dependencyDashboard is disabled', async () => {
@@ -200,7 +278,7 @@ describe('workers/repository/dependency-dashboard', () => {
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
@@ -227,7 +305,7 @@ describe('workers/repository/dependency-dashboard', () => {
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
@@ -244,7 +322,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -269,13 +347,13 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
-        /platform:github/
+        /platform:github/,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatch(
-        /repository:test/
+        /repository:test/,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
@@ -355,10 +433,10 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-8-PR.txt')
+        Fixtures.get('dependency-dashboard-with-8-PR.txt'),
       );
 
       // same with dry run
@@ -392,10 +470,10 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-2-PR-edited.txt')
+        Fixtures.get('dependency-dashboard-with-2-PR-edited.txt'),
       );
 
       // same with dry run
@@ -437,10 +515,10 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-3-PR-in-progress.txt')
+        Fixtures.get('dependency-dashboard-with-3-PR-in-progress.txt'),
       );
 
       // same with dry run
@@ -472,10 +550,10 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt')
+        Fixtures.get('dependency-dashboard-with-2-PR-closed-ignored.txt'),
       );
 
       // same with dry run
@@ -522,10 +600,10 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.dependencyDashboardTitle
+        config.dependencyDashboardTitle,
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
-        Fixtures.get('dependency-dashboard-with-3-PR-in-approval.txt')
+        Fixtures.get('dependency-dashboard-with-3-PR-in-approval.txt'),
       );
 
       // same with dry run
@@ -581,6 +659,38 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
 
+    it('contains logged problems with custom header', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep1', repository: 'repo1' },
+          ],
+          result: 'pending',
+          branchName: 'branchName1',
+        },
+      ];
+      logger.getProblems.mockReturnValueOnce([
+        {
+          level: ERROR,
+          msg: 'i am a non-duplicated problem',
+        },
+      ]);
+      config.dependencyDashboard = true;
+      config.customizeDashboard = {
+        repoProblemsHeader: 'platform is {{platform}}',
+      };
+
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toContain(
+        'platform is github',
+      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
+    });
+
     it('dependency Dashboard All Pending Approval', async () => {
       const branches: BranchConfig[] = [
         {
@@ -618,28 +728,28 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       const checkApprovePendingSelectAll = regEx(
-        / - \[ ] <!-- approve-all-pending-prs -->/g
+        / - \[ ] <!-- approve-all-pending-prs -->/g,
       );
       const checkApprovePendingBranch1 = regEx(
-        / - \[ ] <!-- approve-branch=branchName1 -->pr1/g
+        / - \[ ] <!-- approve-branch=branchName1 -->pr1/g,
       );
       const checkApprovePendingBranch2 = regEx(
-        / - \[ ] <!-- approve-branch=branchName2 -->pr2/g
+        / - \[ ] <!-- approve-branch=branchName2 -->pr2/g,
       );
       expect(
         checkApprovePendingSelectAll.test(
-          platform.ensureIssue.mock.calls[0][0].body
-        )
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
       expect(
         checkApprovePendingBranch1.test(
-          platform.ensureIssue.mock.calls[0][0].body
-        )
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
       expect(
         checkApprovePendingBranch2.test(
-          platform.ensureIssue.mock.calls[0][0].body
-        )
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
     });
 
@@ -677,24 +787,28 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.ensureDependencyDashboard(config, branches);
       const checkRateLimitedSelectAll = regEx(
-        / - \[ ] <!-- create-all-rate-limited-prs -->/g
+        / - \[ ] <!-- create-all-rate-limited-prs -->/g,
       );
       const checkRateLimitedBranch1 = regEx(
-        / - \[ ] <!-- unlimit-branch=branchName1 -->pr1/g
+        / - \[ ] <!-- unlimit-branch=branchName1 -->pr1/g,
       );
       const checkRateLimitedBranch2 = regEx(
-        / - \[ ] <!-- unlimit-branch=branchName2 -->pr2/g
+        / - \[ ] <!-- unlimit-branch=branchName2 -->pr2/g,
       );
       expect(
         checkRateLimitedSelectAll.test(
-          platform.ensureIssue.mock.calls[0][0].body
-        )
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
       expect(
-        checkRateLimitedBranch1.test(platform.ensureIssue.mock.calls[0][0].body)
+        checkRateLimitedBranch1.test(
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
       expect(
-        checkRateLimitedBranch2.test(platform.ensureIssue.mock.calls[0][0].body)
+        checkRateLimitedBranch2.test(
+          platform.ensureIssue.mock.calls[0][0].body,
+        ),
       ).toBeTrue();
     });
 
@@ -727,6 +841,10 @@ describe('workers/repository/dependency-dashboard', () => {
       config.dependencyDashboardIssue = 1;
       mockedFunction(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
+        body: '',
+      });
+      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 
         ## Pending Approval
@@ -749,6 +867,31 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
 
+    it('skips fetching issue if content unchanged', async () => {
+      const branches: BranchConfig[] = [];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardChecks = {};
+      config.dependencyDashboardIssue = 1;
+      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
+        body: `This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+This repository currently has no open or pending branches.
+
+## Detected dependencies
+
+None detected
+
+`,
+      });
+      mockedFunction(platform.getIssue).mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
+        body: '',
+      });
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      expect(platform.ensureIssue).not.toHaveBeenCalled();
+    });
+
     it('forwards configured labels to the ensure issue call', async () => {
       const branches: BranchConfig[] = [];
       config.dependencyDashboard = true;
@@ -767,7 +910,7 @@ describe('workers/repository/dependency-dashboard', () => {
     describe('checks detected dependencies section', () => {
       const packageFiles = Fixtures.getJson('./package-files.json');
       const packageFilesWithDigest = Fixtures.getJson(
-        './package-files-digest.json'
+        './package-files-digest.json',
       );
       let config: RenovateConfig;
 
@@ -877,7 +1020,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(
             platform.ensureIssue.mock.calls[0][0].body.length <
-              GitHubMaxPrBodyLen
+              GitHubMaxPrBodyLen,
           ).toBeTrue();
 
           // same with dry run
@@ -911,7 +1054,7 @@ describe('workers/repository/dependency-dashboard', () => {
           await dependencyDashboard.ensureDependencyDashboard(
             config,
             branches,
-            packageFiles
+            packageFiles,
           );
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
@@ -922,15 +1065,11 @@ describe('workers/repository/dependency-dashboard', () => {
 
       describe('PackageFiles.getDashboardMarkdown()', () => {
         const note =
-          '> **Note**\n> Detected dependencies section has been truncated\n';
+          '> ℹ **Note**\n> \n> Detected dependencies section has been truncated\n\n';
         const title = `## Detected dependencies\n\n`;
 
         beforeEach(() => {
           PackageFiles.clear();
-        });
-
-        afterAll(() => {
-          jest.resetAllMocks();
         });
 
         it('does not truncates as there is enough space to fit', () => {
@@ -991,6 +1130,177 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(post.includes('dev')).toBeTrue();
         });
       });
+    });
+  });
+
+  describe('getDashboardMarkdownVulnerabilities()', () => {
+    const packageFiles = Fixtures.getJson<Record<string, PackageFile[]>>(
+      './package-files.json',
+    );
+
+    it('return empty string if summary is empty', async () => {
+      const result = await getDashboardMarkdownVulnerabilities(
+        config,
+        packageFiles,
+      );
+      expect(result).toBeEmpty();
+    });
+
+    it('return empty string if summary is set to none', async () => {
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'none',
+        },
+        packageFiles,
+      );
+      expect(result).toBeEmpty();
+    });
+
+    it('return no data section if summary is set to all and no vulnerabilities', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([]);
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
+        },
+        {},
+      );
+      expect(result).toBe(
+        `## Vulnerabilities\n\nRenovate has not found any CVEs on [osv.dev](https://osv.dev).\n\n`,
+      );
+    });
+
+    it('return all vulnerabilities if set to all and disabled osvVulnerabilities', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          fixedVersion: '4.18.1',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-29mw-wpgm-hmr9',
+          },
+        },
+        {
+          packageName: 'cookie-parser',
+          depVersion: '1.4.6',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-35jh-r3h4-6jhm',
+          },
+        },
+      ]);
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
+          osvVulnerabilityAlerts: true,
+        },
+        packageFiles,
+      );
+      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
+
+\`1\`/\`2\` CVEs have Renovate fixes.
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>undefined</summary>
+<blockquote>
+
+<details><summary>express</summary>
+<blockquote>
+
+- [GHSA-29mw-wpgm-hmr9](https://osv.dev/vulnerability/GHSA-29mw-wpgm-hmr9) (fixed in 4.18.1)
+</blockquote>
+</details>
+
+<details><summary>cookie-parser</summary>
+<blockquote>
+
+- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>`);
+    });
+
+    it('return unresolved vulnerabilities if set to "unresolved"', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          fixedVersion: '4.18.1',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-29mw-wpgm-hmr9',
+          },
+        },
+        {
+          packageName: 'cookie-parser',
+          depVersion: '1.4.6',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-35jh-r3h4-6jhm',
+          },
+        },
+      ]);
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardOSVVulnerabilitySummary: 'unresolved',
+        },
+        packageFiles,
+      );
+      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
+
+\`1\`/\`2\` CVEs have possible Renovate fixes.
+See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>undefined</summary>
+<blockquote>
+
+<details><summary>cookie-parser</summary>
+<blockquote>
+
+- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>`);
     });
   });
 });

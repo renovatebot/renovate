@@ -11,9 +11,35 @@ describe('util/package-rules/package-prefixes', () => {
         },
         {
           matchPackagePrefixes: ['@opentelemetry'],
-        }
+        },
       );
       expect(result).toBeFalse();
+    });
+
+    it('should return true if packageName matched', () => {
+      const result = packagePrefixesMatcher.matches(
+        {
+          depName: 'abc1',
+          packageName: 'def1',
+        },
+        {
+          matchPackagePrefixes: ['def'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should return true but warn if depName matched', () => {
+      const result = packagePrefixesMatcher.matches(
+        {
+          depName: 'abc1',
+          packageName: 'def1',
+        },
+        {
+          matchPackagePrefixes: ['abc'],
+        },
+      );
+      expect(result).toBeTrue();
     });
   });
 
@@ -25,9 +51,22 @@ describe('util/package-rules/package-prefixes', () => {
         },
         {
           excludePackagePrefixes: ['@opentelemetry'],
-        }
+        },
       );
       expect(result).toBeFalse();
+    });
+
+    it('should return true if packageName matched', () => {
+      const result = packagePrefixesMatcher.excludes(
+        {
+          depName: 'abc1',
+          packageName: 'def1',
+        },
+        {
+          excludePackagePrefixes: ['def'],
+        },
+      );
+      expect(result).toBeTrue();
     });
   });
 });

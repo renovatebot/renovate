@@ -1,21 +1,29 @@
-# Branches and Commits Methodology
+# Branches and commits behavior
 
 ## Multiple files per branch
 
 Renovate can, and should, update multiple files in the same branch/PR.
+For example:
 
-e.g. Renovate can update the `package.json` and the corresponding `yarn.lock` file in the same commit.
-The bot can also update multiple package files at once in a monorepo, including from different package managers.
+- update the `package.json` and the `yarn.lock` file
+- update multiple package files in a monorepo, including different package managers
 
 ## One commit per branch
 
-To keep things neat: Renovate always makes one commit per branch, even when multiple files need updating.
-This way we can use the following logic:
+Renovate always creates one commit per branch, even when updating multiple files.
+This keeps Renovate's branches neat, so we can use the following logic:
 
-- If the last commit in a branch was using Renovate's identity, we assume it to be clean.
-- If the last commit in a branch is by an identity other than Renovate's, the branch is assumed to have been edited by users and Renovate will not push to it any longer.
+| Last commit in branch made by | Behavior                                                    |
+| ----------------------------- | ----------------------------------------------------------- |
+| Renovate                      | Assume branch is clean                                      |
+| Someone or something else     | Assume branch edited by user, do not push to branch anymore |
 
-## Updating branches
+### Updating branches
 
-If files in an already-existing branch need updating (e.g. an even newer version has been released), then we still want to have only one commit.
-Renovate achieves this by force pushing the necessary changes to the existing branch with `git`.
+We always want a single commit in Renovate's branches.
+This means we let Renovate force-push a single new commit whenever it needs to.
+For example:
+
+1. Renovate creates a `renovate/jest` branch to update the Jest package to `1.0.1`
+1. Renovate later finds a newer `1.1.0` version
+1. Renovate force-pushes a new commit for the `1.1.0` update into its `renovate/jest` branch

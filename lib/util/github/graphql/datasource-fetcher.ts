@@ -2,6 +2,8 @@ import AggregateError from 'aggregate-error';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as memCache from '../../cache/memory';
+import * as packageCache from '../../cache/package';
+import type { PackageCacheNamespace } from '../../cache/package/types';
 import type {
   GithubGraphqlResponse,
   GithubHttp,
@@ -36,23 +38,23 @@ function isUnknownGraphqlError(err: Error): boolean {
 function canBeSolvedByShrinking(err: Error): boolean {
   const errors: Error[] = err instanceof AggregateError ? [...err] : [err];
   return errors.some(
-    (e) => err instanceof ExternalHostError || isUnknownGraphqlError(e)
+    (e) => err instanceof ExternalHostError || isUnknownGraphqlError(e),
   );
 }
 
 export class GithubGraphqlDatasourceFetcher<
   GraphqlItem,
-  ResultItem extends GithubDatasourceItem
+  ResultItem extends GithubDatasourceItem,
 > {
   static async query<T, U extends GithubDatasourceItem>(
     config: GithubPackageConfig,
     http: GithubHttp,
-    adapter: GithubGraphqlDatasourceAdapter<T, U>
+    adapter: GithubGraphqlDatasourceAdapter<T, U>,
   ): Promise<U[]> {
     const instance = new GithubGraphqlDatasourceFetcher<T, U>(
       config,
       http,
-      adapter
+      adapter,
     );
     const items = await instance.getItems();
     return items;
@@ -68,7 +70,7 @@ export class GithubGraphqlDatasourceFetcher<
 
   private cursor: string | null = null;
 
-  private isCacheable: boolean | null = null;
+  private isPersistent: boolean | undefined;
 
   constructor(
     packageConfig: GithubPackageConfig,
@@ -76,14 +78,14 @@ export class GithubGraphqlDatasourceFetcher<
     private datasourceAdapter: GithubGraphqlDatasourceAdapter<
       GraphqlItem,
       ResultItem
-    >
+    >,
   ) {
     const { packageName, registryUrl } = packageConfig;
     [this.repoOwner, this.repoName] = packageName.split('/');
     this.baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
   }
 
-  private getCacheNs(): string {
+  private getCacheNs(): PackageCacheNamespace {
     return this.datasourceAdapter.key;
   }
 
@@ -105,6 +107,7 @@ export class GithubGraphqlDatasourceFetcher<
     return {
       baseUrl,
       repository,
+      readOnly: true,
       body: { query, variables },
     };
   }
@@ -159,10 +162,10 @@ export class GithubGraphqlDatasourceFetcher<
 
     this.queryCount += 1;
 
-    if (this.isCacheable === null) {
+    if (this.isPersistent === undefined) {
       // For values other than explicit `false`,
       // we assume that items can not be cached.
-      this.isCacheable = data.repository.isRepoPrivate === false;
+      this.isPersistent = data.repository.isRepoPrivate === false;
     }
 
     const res = data.repository.payload;
@@ -207,7 +210,7 @@ export class GithubGraphqlDatasourceFetcher<
         const { body, ...options } = this.getRawQueryOptions();
         logger.debug(
           { options, newSize: this.itemsPerQuery },
-          'Shrinking GitHub GraphQL page size after error'
+          'Shrinking GitHub GraphQL page size after error',
         );
       }
     }
@@ -223,13 +226,17 @@ export class GithubGraphqlDatasourceFetcher<
     }
     const cacheNs = this.getCacheNs();
     const cacheKey = this.getCacheKey();
-    this._cacheStrategy = this.isCacheable
+    this._cacheStrategy = this.isPersistent
       ? new GithubGraphqlPackageCacheStrategy<ResultItem>(cacheNs, cacheKey)
       : new GithubGraphqlMemoryCacheStrategy<ResultItem>(cacheNs, cacheKey);
     return this._cacheStrategy;
   }
 
-  private async doPaginatedQuery(): Promise<ResultItem[]> {
+  /**
+   * This method is responsible for data synchronization.
+   * It also detects persistence of the package, based on the first page result.
+   */
+  private async doPaginatedFetch(): Promise<void> {
     let hasNextPage = true;
     let isPaginationDone = false;
     let nextCursor: string | undefined;
@@ -239,8 +246,14 @@ export class GithubGraphqlDatasourceFetcher<
       const resultItems: ResultItem[] = [];
       for (const node of queryResult.nodes) {
         const item = this.datasourceAdapter.transform(node);
-        // istanbul ignore if: will be tested later
         if (!item) {
+          logger.once.info(
+            {
+              packageName: `${this.repoOwner}/${this.repoName}`,
+              baseUrl: this.baseUrl,
+            },
+            `GitHub GraphQL datasource: skipping empty item`,
+          );
           continue;
         }
         resultItems.push(item);
@@ -260,24 +273,53 @@ export class GithubGraphqlDatasourceFetcher<
       }
     }
 
-    return this.cacheStrategy().finalize();
+    if (this.isPersistent) {
+      await this.storePersistenceFlag(30);
+    }
+  }
+
+  private async doCachedQuery(): Promise<ResultItem[]> {
+    await this.loadPersistenceFlag();
+    if (!this.isPersistent) {
+      await this.doPaginatedFetch();
+    }
+
+    const res = await this.cacheStrategy().finalizeAndReturn();
+    if (res.length) {
+      return res;
+    }
+
+    delete this.isPersistent;
+    await this.doPaginatedFetch();
+    return this.cacheStrategy().finalizeAndReturn();
+  }
+
+  async loadPersistenceFlag(): Promise<void> {
+    const ns = this.getCacheNs();
+    const key = `${this.getCacheKey()}:is-persistent`;
+    this.isPersistent = await packageCache.get<true>(ns, key);
+  }
+
+  async storePersistenceFlag(minutes: number): Promise<void> {
+    const ns = this.getCacheNs();
+    const key = `${this.getCacheKey()}:is-persistent`;
+    await packageCache.set(ns, key, true, minutes);
   }
 
   /**
-   * This method intentionally was made not async, though it returns `Promise`.
-   * This method doesn't make pages to be fetched concurrently.
-   * Instead, it ensures that same package release is not fetched twice.
+   * This method ensures the only one query is executed
+   * to a particular package during single run.
    */
-  private doConcurrentQuery(): Promise<ResultItem[]> {
+  private doUniqueQuery(): Promise<ResultItem[]> {
     const cacheKey = `github-pending:${this.getCacheNs()}:${this.getCacheKey()}`;
     const resultPromise =
-      memCache.get<Promise<ResultItem[]>>(cacheKey) ?? this.doPaginatedQuery();
+      memCache.get<Promise<ResultItem[]>>(cacheKey) ?? this.doCachedQuery();
     memCache.set(cacheKey, resultPromise);
     return resultPromise;
   }
 
   async getItems(): Promise<ResultItem[]> {
-    const res = await this.doConcurrentQuery();
+    const res = await this.doUniqueQuery();
     return res;
   }
 }

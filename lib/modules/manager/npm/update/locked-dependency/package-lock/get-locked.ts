@@ -6,7 +6,7 @@ export function getLockedDependencies(
   entry: PackageLockOrEntry,
   depName: string,
   currentVersion: string | null,
-  bundled = false
+  bundled = false,
 ): PackageLockDependency[] {
   let res: PackageLockDependency[] = [];
   try {
@@ -27,8 +27,8 @@ export function getLockedDependencies(
           dependency,
           depName,
           currentVersion,
-          bundled || !!entry.bundled
-        )
+          bundled || !!entry.bundled,
+        ),
       );
     }
   } catch (err) {

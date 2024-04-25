@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { UrlPathParsedResult } from './types';
 import { isSpace, removeComments, skip } from './util';
 
@@ -57,7 +57,7 @@ function extractUrl(content: string): string | null {
 }
 
 export function parseUrlPath(
-  urlStr: string | null | undefined
+  urlStr: string | null | undefined,
 ): UrlPathParsedResult | null {
   if (!urlStr) {
     return null;
@@ -76,7 +76,7 @@ export function parseUrlPath(
       currentValue = s[3];
       const targz = currentValue.slice(
         currentValue.length - 7,
-        currentValue.length
+        currentValue.length,
       );
       if (targz === '.tar.gz') {
         currentValue = currentValue.substring(0, currentValue.length - 7);
@@ -129,7 +129,7 @@ function extractClassName(content: string): string | null {
 }
 
 // TODO: Maybe check if quotes/double-quotes are balanced (#9591)
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace('extractPackageFile()');
   /*
     1. match "class className < Formula"
@@ -166,8 +166,7 @@ export function extractPackageFile(content: string): PackageFile | null {
     skipReason = 'invalid-sha256';
   }
   const dep: PackageDependency = {
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     depName: `${ownerName}/${repoName}`,
     managerData: { ownerName, repoName, sha256, url },
     currentValue,

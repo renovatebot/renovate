@@ -33,6 +33,13 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check colle
     "packageName": "https://example.com/organization/repo_name.git",
   },
   {
+    "currentValue": "3.0.0",
+    "datasource": "git-tags",
+    "depName": "namespace.mycollection",
+    "depType": "galaxy-collection",
+    "packageName": "https://example.com/organization/repo_name.git",
+  },
+  {
     "currentValue": "1.2.2",
     "datasource": "git-tags",
     "depName": "example.com/organization/repo_name",
@@ -46,7 +53,7 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check colle
     "registryUrls": [
       "https://cloud.redhat.com/api/automation-hub/",
     ],
-    "skipReason": "no-version",
+    "skipReason": "unspecified-version",
   },
   {
     "currentValue": null,
@@ -54,7 +61,7 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check colle
     "depName": "foo.bar/organization/repo_name",
     "depType": "galaxy-collection",
     "packageName": "https://foo.bar/organization/repo_name.git",
-    "skipReason": "no-version",
+    "skipReason": "unspecified-version",
   },
   {
     "currentValue": "1.0.0",
@@ -134,15 +141,63 @@ exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check colle
 exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check galaxy definition file 1`] = `
 [
   {
+    "currentValue": "1.5.4",
+    "datasource": "galaxy-collection",
+    "depName": "ansible.posix",
+    "depType": "galaxy-collection",
+  },
+  {
+    "currentValue": "1.5.4",
+    "datasource": "galaxy-collection",
+    "depName": "ansible.posix_with_comment",
+    "depType": "galaxy-collection",
+  },
+  {
     "currentValue": "1.4.0",
     "datasource": "galaxy-collection",
     "depName": "ansible.windows",
     "depType": "galaxy-collection",
   },
   {
+    "currentValue": "1.4.0",
+    "datasource": "galaxy-collection",
+    "depName": "ansible.windows_with_comment",
+    "depType": "galaxy-collection",
+  },
+  {
+    "currentValue": "7.3.0",
+    "datasource": "galaxy-collection",
+    "depName": "community.general",
+    "depType": "galaxy-collection",
+  },
+  {
+    "currentValue": "7.3.0",
+    "datasource": "galaxy-collection",
+    "depName": "community.general_with_comment",
+    "depType": "galaxy-collection",
+  },
+  {
     "currentValue": ">=1.0.0,<2.0.0",
     "datasource": "galaxy-collection",
     "depName": "community.windows",
+    "depType": "galaxy-collection",
+  },
+  {
+    "currentValue": "7.3.0",
+    "datasource": "galaxy-collection",
+    "depName": "community.general_quoted",
+    "depType": "galaxy-collection",
+  },
+  {
+    "currentValue": "7.3.0",
+    "datasource": "galaxy-collection",
+    "depName": "community.general_with_comment_quoted",
+    "depType": "galaxy-collection",
+  },
+  {
+    "currentValue": ">=1.0.0,<2.0.0",
+    "datasource": "galaxy-collection",
+    "depName": "community.windows_quoted",
     "depType": "galaxy-collection",
   },
 ]

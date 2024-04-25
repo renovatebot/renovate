@@ -1,5 +1,7 @@
 import AggregateError from 'aggregate-error';
 import * as httpMock from '../../../../test/http-mock';
+import { mocked, partial } from '../../../../test/util';
+import * as _packageCache from '../../../util/cache/package';
 import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
 import { range } from '../../range';
 import {
@@ -11,6 +13,9 @@ import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRepoResponse,
 } from './types';
+
+jest.mock('../../../util/cache/package');
+const packageCache = mocked(_packageCache);
 
 interface TestAdapterInput {
   version: string;
@@ -26,7 +31,7 @@ const adapter: GithubGraphqlDatasourceAdapter<
   TestAdapterInput,
   TestAdapterOutput
 > = {
-  key: 'test-adapter',
+  key: '_test-namespace',
   query: `
     items {
       pageInfo {
@@ -44,17 +49,20 @@ const adapter: GithubGraphqlDatasourceAdapter<
     version,
     releaseTimestamp,
     foo,
-  }: TestAdapterInput): TestAdapterOutput => ({
-    version,
-    releaseTimestamp,
-    bar: foo,
-  }),
+  }: TestAdapterInput): TestAdapterOutput | null =>
+    version && releaseTimestamp && foo
+      ? {
+          version,
+          releaseTimestamp,
+          bar: foo,
+        }
+      : null,
 };
 
 function resp(
   isRepoPrivate: boolean | undefined,
   nodes: TestAdapterInput[],
-  cursor: string | undefined = undefined
+  cursor: string | undefined = undefined,
 ): GithubGraphqlResponse<GithubGraphqlRepoResponse<TestAdapterInput>> {
   const data: GithubGraphqlRepoResponse<TestAdapterInput> = {
     repository: {
@@ -104,7 +112,6 @@ describe('util/github/graphql/datasource-fetcher', () => {
     const t3 = '01-01-2023';
 
     beforeEach(() => {
-      jest.resetAllMocks();
       http = new GithubHttp();
     });
 
@@ -112,15 +119,41 @@ describe('util/github/graphql/datasource-fetcher', () => {
       httpMock
         .scope('https://api.github.com/')
         .post('/graphql')
-        .reply(200, resp(false, []));
+        .reply(
+          200,
+          resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
+        );
 
       const res = await Datasource.query(
         { packageName: 'foo/bar' },
         http,
-        adapter
+        adapter,
       );
 
-      expect(res).toBeEmptyArray();
+      expect(res).toEqual([
+        { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
+      ]);
+    });
+
+    it('performs query when persistence flag is set and cache is expired', async () => {
+      packageCache.get.mockResolvedValueOnce(true);
+      httpMock
+        .scope('https://api.github.com/')
+        .post('/graphql')
+        .reply(
+          200,
+          resp(false, [{ version: v1, releaseTimestamp: t1, foo: '1' }]),
+        );
+
+      const res = await Datasource.query(
+        { packageName: 'foo/bar' },
+        http,
+        adapter,
+      );
+
+      expect(res).toEqual([
+        { bar: '1', releaseTimestamp: '01-01-2021', version: '1.0.0' },
+      ]);
     });
 
     it('throws on unknown errors', async () => {
@@ -130,7 +163,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
         .replyWithError('unknown error');
 
       await expect(() =>
-        Datasource.query({ packageName: 'foo/bar' }, http, adapter)
+        Datasource.query({ packageName: 'foo/bar' }, http, adapter),
       ).rejects.toThrow('unknown error');
     });
 
@@ -141,7 +174,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
         .reply(200, err('single error'));
 
       const res = await catchError(() =>
-        Datasource.query({ packageName: 'foo/bar' }, http, adapter)
+        Datasource.query({ packageName: 'foo/bar' }, http, adapter),
       );
 
       expect(res.message).toBe('single error');
@@ -155,7 +188,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
         .reply(200, err('first error', 'second error'));
 
       const res = (await catchError(() =>
-        Datasource.query({ packageName: 'foo/bar' }, http, adapter)
+        Datasource.query({ packageName: 'foo/bar' }, http, adapter),
       )) as AggregateError;
 
       expect(res).toBeInstanceOf(AggregateError);
@@ -169,7 +202,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
       httpMock.scope('https://api.github.com/').post('/graphql').reply(200, {});
 
       await expect(() =>
-        Datasource.query({ packageName: 'foo/bar' }, http, adapter)
+        Datasource.query({ packageName: 'foo/bar' }, http, adapter),
       ).rejects.toThrow('GitHub GraphQL datasource: failed to obtain data');
     });
 
@@ -180,9 +213,9 @@ describe('util/github/graphql/datasource-fetcher', () => {
         .reply(200, { data: {} });
 
       await expect(() =>
-        Datasource.query({ packageName: 'foo/bar' }, http, adapter)
+        Datasource.query({ packageName: 'foo/bar' }, http, adapter),
       ).rejects.toThrow(
-        'GitHub GraphQL datasource: failed to obtain repository data'
+        'GitHub GraphQL datasource: failed to obtain repository data',
       );
     });
 
@@ -193,9 +226,9 @@ describe('util/github/graphql/datasource-fetcher', () => {
         .reply(200, { data: { repository: {} } });
 
       await expect(() =>
-        Datasource.query({ packageName: 'foo/bar' }, http, adapter)
+        Datasource.query({ packageName: 'foo/bar' }, http, adapter),
       ).rejects.toThrow(
-        'GitHub GraphQL datasource: failed to obtain repository payload data'
+        'GitHub GraphQL datasource: failed to obtain repository payload data',
       );
     });
 
@@ -208,14 +241,15 @@ describe('util/github/graphql/datasource-fetcher', () => {
           resp(false, [
             { version: v3, releaseTimestamp: t3, foo: '3' },
             { version: v2, releaseTimestamp: t2, foo: '2' },
+            partial<TestAdapterInput>(),
             { version: v1, releaseTimestamp: t1, foo: '1' },
-          ])
+          ]),
         );
 
       const res = await Datasource.query(
         { packageName: 'foo/bar' },
         http,
-        adapter
+        adapter,
       );
 
       expect(res).toEqual([
@@ -229,12 +263,12 @@ describe('util/github/graphql/datasource-fetcher', () => {
       const page1 = resp(
         false,
         [{ version: v3, releaseTimestamp: t3, foo: '3' }],
-        'aaa'
+        'aaa',
       );
       const page2 = resp(
         false,
         [{ version: v2, releaseTimestamp: t2, foo: '2' }],
-        'bbb'
+        'bbb',
       );
       const page3 = resp(false, [
         { version: v1, releaseTimestamp: t1, foo: '1' },
@@ -251,7 +285,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
       const res = await Datasource.query(
         { packageName: 'foo/bar' },
         http,
-        adapter
+        adapter,
       );
 
       expect(res).toEqual([
@@ -285,11 +319,11 @@ describe('util/github/graphql/datasource-fetcher', () => {
 
       function generatePages(
         items: TestAdapterInput[],
-        perPage: number
+        perPage: number,
       ): GithubGraphqlResponse<GithubGraphqlRepoResponse<TestAdapterInput>>[] {
         const partitions = partitionBy(items, perPage);
         const pages = partitions.map((nodes, idx) =>
-          resp(false, nodes, `page-${idx + 2}`)
+          resp(false, nodes, `page-${idx + 2}`),
         );
         delete pages[pages.length - 1].data?.repository.payload.pageInfo;
         return pages;
@@ -309,7 +343,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
         const res = await Datasource.query(
           { packageName: 'foo/bar' },
           http,
-          adapter
+          adapter,
         );
 
         expect(res).toHaveLength(150);
@@ -337,7 +371,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
         const res = await Datasource.query(
           { packageName: 'foo/bar' },
           http,
-          adapter
+          adapter,
         );
 
         expect(res).toHaveLength(100);
@@ -360,7 +394,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
           .reply(200, err('Something went wrong while executing your query.'));
 
         await expect(
-          Datasource.query({ packageName: 'foo/bar' }, http, adapter)
+          Datasource.query({ packageName: 'foo/bar' }, http, adapter),
         ).rejects.toThrow('Something went wrong while executing your query.');
 
         expect(httpMock.getTrace()).toMatchObject([
@@ -378,14 +412,14 @@ describe('util/github/graphql/datasource-fetcher', () => {
         { version: v1, releaseTimestamp: t1, foo: '1' },
       ];
 
-      test.each`
-        isPrivate    | isCacheable
+      it.each`
+        isPrivate    | isPersistent
         ${undefined} | ${false}
         ${true}      | ${false}
         ${false}     | ${true}
       `(
-        'private=$isPrivate => isCacheable=$isCacheable',
-        async ({ isPrivate, isCacheable }) => {
+        'private=$isPrivate => isPersistent=$isPersistent',
+        async ({ isPrivate, isPersistent }) => {
           httpMock
             .scope('https://api.github.com/')
             .post('/graphql')
@@ -394,12 +428,12 @@ describe('util/github/graphql/datasource-fetcher', () => {
           const instance = new GithubGraphqlDatasourceFetcher(
             { packageName: 'foo/bar' },
             http,
-            adapter
+            adapter,
           );
           await instance.getItems();
 
-          expect(instance).toHaveProperty('isCacheable', isCacheable);
-        }
+          expect(instance).toHaveProperty('isPersistent', isPersistent);
+        },
       );
     });
   });

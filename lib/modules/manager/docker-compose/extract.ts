@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageFile } from '../types';
-import type { DockerComposeConfig } from './types';
+import type { ExtractConfig, PackageFileContent } from '../types';
+import { DockerComposeFile } from './schema';
 
 class LineMapper {
   private imageLines: { line: string; lineNumber: number; used: boolean }[];
@@ -17,7 +17,7 @@ class LineMapper {
 
   pluckLineNumber(imageName: string | undefined): number | null {
     const lineMeta = this.imageLines.find(
-      ({ line, used }) => !used && imageName && line.includes(imageName)
+      ({ line, used }) => !used && imageName && line.includes(imageName),
     );
     // istanbul ignore if
     if (!lineMeta) {
@@ -30,31 +30,21 @@ class LineMapper {
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
-  extractConfig: ExtractConfig
-): PackageFile | null {
-  logger.debug('docker-compose.extractPackageFile()');
-  let config: DockerComposeConfig;
+  packageFile: string,
+  extractConfig: ExtractConfig,
+): PackageFileContent | null {
+  logger.debug(`docker-compose.extractPackageFile(${packageFile})`);
+  let config: DockerComposeFile;
   try {
-    // TODO: fix me (#9610)
-    config = load(content, { json: true }) as DockerComposeConfig;
-    if (!config) {
-      logger.debug(
-        { fileName },
-        'Null config when parsing Docker Compose content'
-      );
-      return null;
-    }
-    if (typeof config !== 'object') {
-      logger.debug(
-        { fileName, type: typeof config },
-        'Unexpected type for Docker Compose content'
-      );
-      return null;
-    }
+    config = parseSingleYaml(content, {
+      json: true,
+      customSchema: DockerComposeFile,
+    });
   } catch (err) {
-    logger.debug({ err }, 'err');
-    logger.debug(`Parsing Docker Compose config YAML in ${fileName}`);
+    logger.debug(
+      { err, packageFile },
+      `Parsing Docker Compose config YAML failed`,
+    );
     return null;
   }
   try {
@@ -69,7 +59,9 @@ export function extractPackageFile(
 
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
-    const deps = Object.values(services || {})
+    const deps = Object.values(
+      services || /* istanbul ignore next: can never happen */ {},
+    )
       .filter((service) => is.string(service?.image) && !service?.build)
       .map((service) => {
         const dep = getDep(service.image, true, extractConfig.registryAliases);
@@ -85,10 +77,7 @@ export function extractPackageFile(
     logger.trace({ deps }, 'Docker Compose image');
     return { deps };
   } catch (err) /* istanbul ignore next */ {
-    logger.warn(
-      { fileName, content, err },
-      'Error extracting Docker Compose file'
-    );
+    logger.debug({ packageFile, err }, 'Error extracting Docker Compose file');
     return null;
   }
 }

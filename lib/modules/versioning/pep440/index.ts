@@ -48,7 +48,7 @@ export function isValid(input: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const found = pep440.filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[found.length - 1];
@@ -56,7 +56,7 @@ function getSatisfyingVersion(
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   const found = pep440.filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[0];

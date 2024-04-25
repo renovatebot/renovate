@@ -57,7 +57,7 @@ exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd(
 -   **yargs:** correct support of bundled electron apps ([#1554](https://www.github.com/yargs/yargs/issues/1554)) ([a0b61ac](https://www.github.com/yargs/yargs/commit/a0b61ac21e2b554aa73dbf1a66d4a7af94047c2f))
 ",
   "notesSourceUrl": "https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md",
-  "url": "https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1520-httpswwwgithubcomyargsyargscomparev1510v1520-2020-03-01",
+  "url": "https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1520-2020-03-01",
 }
 `;
 
@@ -73,7 +73,7 @@ exports[`workers/repository/update/pr/changelog/release-notes getReleaseNotesMd(
 -   address ambiguity between nargs of 1 and requiresArg ([#1572](https://www.github.com/yargs/yargs/issues/1572)) ([a5edc32](https://www.github.com/yargs/yargs/commit/a5edc328ecb3f90d1ba09cfe70a0040f68adf50a))
 ",
   "notesSourceUrl": "https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md",
-  "url": "https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1530-httpswwwgithubcomyargsyargscomparev1520v1530-2020-03-08",
+  "url": "https://github.com/yargs/yargs/blob/HEAD/CHANGELOG.md#1530-2020-03-08",
 }
 `;
 

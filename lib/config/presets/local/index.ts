@@ -12,7 +12,7 @@ interface Resolver {
     filePreset: string,
     presetPath?: string,
     endpoint?: string,
-    tag?: string
+    tag?: string,
   ): Promise<Preset | undefined>;
 }
 
@@ -21,9 +21,11 @@ const resolvers = {
   bitbucket: local,
   'bitbucket-server': local,
   codecommit: null,
+  gerrit: local,
   gitea,
   github,
   gitlab,
+  local: null,
 } satisfies Record<PlatformId, Resolver | null>;
 
 export function getPreset({
@@ -32,22 +34,23 @@ export function getPreset({
   presetPath,
   tag,
 }: PresetConfig): Promise<Preset | undefined> {
-  const { platform, endpoint } = GlobalConfig.get();
+  const platform = GlobalConfig.get('platform');
   if (!platform) {
     throw new Error(`Missing platform config for local preset.`);
   }
   const resolver = resolvers[platform];
   if (!resolver) {
     throw new Error(
-      `The platform you're using ($platform) does not support local presets.`
+      `The platform you're using (${platform}) does not support local presets.`,
     );
   }
+  const endpoint = GlobalConfig.get('endpoint');
   return resolver.getPresetFromEndpoint(
     repo,
     presetName,
     presetPath,
-    // TODO: fix type #7154
+    // TODO: fix type #22198
     endpoint!,
-    tag
+    tag,
   );
 }

@@ -36,7 +36,7 @@ export class DistroInfo {
 
   constructor(distroJsonKey: DistroDataFile) {
     this._distroInfo = JSON.parse(
-      dataFiles.get(distroJsonKey as DataFile)!.replace(/v([\d.]+)\b/gm, '$1')
+      dataFiles.get(distroJsonKey as DataFile)!.replace(/v([\d.]+)\b/gm, '$1'),
     );
 
     for (const version of Object.keys(this._distroInfo)) {
@@ -45,7 +45,7 @@ export class DistroInfo {
     }
 
     const arr = Object.keys(this._distroInfo).sort(
-      (a, b) => parseFloat(a) - parseFloat(b)
+      (a, b) => parseFloat(a) - parseFloat(b),
     );
 
     for (const v of arr) {

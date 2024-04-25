@@ -3,7 +3,7 @@ import { NixPkgsVersioning } from '.';
 describe('modules/versioning/nixpkgs/index', () => {
   const versioning = new NixPkgsVersioning();
 
-  test.each`
+  it.each`
     version                           | expected
     ${undefined}                      | ${false}
     ${null}                           | ${false}
@@ -29,7 +29,7 @@ describe('modules/versioning/nixpkgs/index', () => {
     expect(versioning.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                   | expected
     ${undefined}              | ${false}
     ${null}                   | ${false}
@@ -46,7 +46,7 @@ describe('modules/versioning/nixpkgs/index', () => {
     expect(versioning.isStable(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                         | b                         | expected
     ${'nixos-22.05'}          | ${'nixos-22.05'}          | ${true}
     ${'nixos-22.05'}          | ${'nixos-21.11'}          | ${false}
@@ -57,19 +57,19 @@ describe('modules/versioning/nixpkgs/index', () => {
     expect(versioning.equals(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     versions                                                                                         | expected
     ${['nixos-21.11', 'nixos-22.05', 'nixos-22.05-small', 'nixos-unstable', 'nixos-unstable-small']} | ${['nixos-21.11', 'nixos-22.05', 'nixos-22.05-small', 'nixos-unstable', 'nixos-unstable-small']}
   `(
     '$versions -> sortVersions -> $expected ',
     ({ versions, expected }: { versions: string[]; expected: string[] }) => {
       expect(versions.sort((a, b) => versioning.sortVersions(a, b))).toEqual(
-        expected
+        expected,
       );
-    }
+    },
   );
 
-  test.each`
+  it.each`
     a                | b                        | expected
     ${'nixos-22.05'} | ${'nixos-22.05'}         | ${true}
     ${'nixos-22.05'} | ${'nixpkgs-22.05'}       | ${false}

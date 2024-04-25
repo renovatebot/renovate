@@ -24,7 +24,7 @@ const parentKeyRe = regEx(/image$/i);
  */
 export function matchesHelmValuesDockerHeuristic(
   parentKey: string,
-  data: unknown
+  data: unknown,
 ): data is HelmDockerImageDependency {
   return !!(
     parentKeyRe.test(parentKey) &&
@@ -37,7 +37,7 @@ export function matchesHelmValuesDockerHeuristic(
 
 export function matchesHelmValuesInlineImage(
   parentKey: string,
-  data: unknown
+  data: unknown,
 ): data is string {
   return !!(parentKeyRe.test(parentKey) && data && typeof data === 'string');
 }

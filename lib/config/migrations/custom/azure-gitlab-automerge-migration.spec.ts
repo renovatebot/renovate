@@ -8,7 +8,7 @@ describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
       },
       {
         platformAutomerge: true,
-      }
+      },
     );
   });
 
@@ -17,7 +17,7 @@ describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
       {
         gitLabAutomerge: undefined,
       },
-      {}
+      {},
     );
   });
 
@@ -29,7 +29,7 @@ describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
       },
       {
         platformAutomerge: true,
-      }
+      },
     );
   });
 
@@ -40,7 +40,7 @@ describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
       },
       {
         platformAutomerge: true,
-      }
+      },
     );
   });
 
@@ -49,7 +49,7 @@ describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
       {
         azureAutoComplete: undefined,
       },
-      {}
+      {},
     );
   });
 
@@ -61,7 +61,7 @@ describe('config/migrations/custom/azure-gitlab-automerge-migration', () => {
       },
       {
         platformAutomerge: true,
-      }
+      },
     );
   });
 });

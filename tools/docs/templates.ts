@@ -8,7 +8,8 @@ export async function generateTemplates(dist: string): Promise<void> {
   exposedConfigOptionsText +=
     exposedConfigOptions
       .map(
-        (field) => `[${field}](/configuration-options/#${field.toLowerCase()})`
+        (field) =>
+          `[${field}](configuration-options.md#${field.toLowerCase()})`,
       )
       .join(', ') + '.';
 

@@ -3,18 +3,22 @@ import * as json5 from 'json5';
 import { coerce, satisfies } from 'semver';
 import { logger } from '../../../logger';
 import { MavenDatasource } from '../../datasource/maven';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { Bundle, FeatureModel } from './types';
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
-  config?: ExtractConfig
-): PackageFile | null {
+  packageFile: string,
+  _config?: ExtractConfig,
+): PackageFileContent | null {
   // References:
   // - OSGi compendium release 8 ( https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.feature.html )
   // - The Sling implementation of the feature model ( https://sling.apache.org/documentation/development/feature-model.html )
-  logger.trace({ fileName }, 'osgi.extractPackageFile');
+  logger.trace(`osgi.extractPackageFile($packageFile)`);
 
   const deps: PackageDependency[] = [];
   let featureModel: FeatureModel;
@@ -22,7 +26,7 @@ export function extractPackageFile(
     // Compendium R8 159.3: JS comments are supported
     featureModel = json5.parse<FeatureModel>(content);
   } catch (err) {
-    logger.warn({ fileName, err }, 'Failed to parse osgi file');
+    logger.warn({ packageFile, err }, 'Failed to parse osgi file');
     return null;
   }
 
@@ -30,7 +34,7 @@ export function extractPackageFile(
     // for empty an empty result
     is.nullOrUndefined(featureModel) ||
     // Compendium R8 159.9: resource versioning
-    !isSupportedFeatureResourceVersion(featureModel, fileName)
+    !isSupportedFeatureResourceVersion(featureModel, packageFile)
   ) {
     return null;
   }
@@ -51,7 +55,7 @@ export function extractPackageFile(
   // section 159.7.3 yet. As of 05-12-2022, there is no implementation that
   // supports this
   for (const [section, value] of Object.entries(featureModel)) {
-    logger.trace({ fileName, section }, 'Parsing section');
+    logger.trace({ fileName: packageFile, section }, 'Parsing section');
     const customSectionEntries = extractArtifactList(section, value);
     allBundles.push(...customSectionEntries);
   }
@@ -98,14 +102,14 @@ export function extractPackageFile(
 
 function isSupportedFeatureResourceVersion(
   featureModel: FeatureModel,
-  fileName: string
+  fileName: string,
 ): boolean {
   const resourceVersion = featureModel['feature-resource-version'];
   if (resourceVersion) {
     const resourceSemVer = coerce(resourceVersion);
     if (!resourceSemVer) {
       logger.debug(
-        `Skipping file ${fileName} due to invalid feature-resource-version '${resourceVersion}'`
+        `Skipping file ${fileName} due to invalid feature-resource-version '${resourceVersion}'`,
       );
       return false;
     }
@@ -113,7 +117,7 @@ function isSupportedFeatureResourceVersion(
     // we only support 1.x, although no over version has been defined
     if (!satisfies(resourceSemVer, '^1')) {
       logger.debug(
-        `Skipping file ${fileName} due to unsupported feature-resource-version '${resourceVersion}'`
+        `Skipping file ${fileName} due to unsupported feature-resource-version '${resourceVersion}'`,
       );
       return false;
     }
@@ -124,7 +128,7 @@ function isSupportedFeatureResourceVersion(
 
 function extractArtifactList(
   sectionName: string,
-  sectionValue: unknown
+  sectionValue: unknown,
 ): Bundle[] {
   // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model implementation
   if (sectionName.includes(':ARTIFACTS|') && is.array(sectionValue)) {

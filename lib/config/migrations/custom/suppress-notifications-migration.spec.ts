@@ -8,7 +8,7 @@ describe('config/migrations/custom/suppress-notifications-migration', () => {
       },
       {
         suppressNotifications: ['test'],
-      }
+      },
     );
   });
 
@@ -20,7 +20,7 @@ describe('config/migrations/custom/suppress-notifications-migration', () => {
       {
         suppressNotifications: ['test'],
       },
-      false
+      false,
     );
   });
 
@@ -32,7 +32,7 @@ describe('config/migrations/custom/suppress-notifications-migration', () => {
       {
         suppressNotifications: [],
       },
-      false
+      false,
     );
   });
 });

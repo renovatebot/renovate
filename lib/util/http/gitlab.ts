@@ -21,7 +21,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: InternalHttpOptions & GitlabHttpOptions
+    options?: InternalHttpOptions & GitlabHttpOptions,
   ): Promise<HttpResponse<T>> {
     const opts = {
       baseUrl,

@@ -34,7 +34,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
   });
 
@@ -49,7 +49,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         isClean(): boolean {
           return true;
         },
-      })
+      }),
     );
     expect(
       await updateArtifacts({
@@ -57,7 +57,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -65,14 +65,16 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
   it('updates the vendor dir when dependencies change', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      not_added: ['vendor/foo/main.jsonnet', 'vendor/bar/main.jsonnet'],
-      modified: ['jsonnetfile.json', 'jsonnetfile.lock.json'],
-      deleted: ['vendor/baz/deleted.jsonnet'],
-      isClean(): boolean {
-        return false;
-      },
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['vendor/foo/main.jsonnet', 'vendor/bar/main.jsonnet'],
+        modified: ['jsonnetfile.json', 'jsonnetfile.lock.json'],
+        deleted: ['vendor/baz/deleted.jsonnet'],
+        isClean(): boolean {
+          return false;
+        },
+      }),
+    );
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.json');
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('New foo/main.jsonnet');
@@ -95,7 +97,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
         ],
         newPackageFileContent: 'Updated jsonnetfile.json',
         config,
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -138,12 +140,14 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
   it('performs lock file maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['jsonnetfile.lock.json'],
-      isClean(): boolean {
-        return false;
-      },
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['jsonnetfile.lock.json'],
+        isClean(): boolean {
+          return false;
+        },
+      }),
+    );
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
     expect(
       await updateArtifacts({
@@ -154,7 +158,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           ...config,
           isLockFileMaintenance: true,
         },
-      })
+      }),
     ).toMatchObject([
       {
         file: {
@@ -173,12 +177,14 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
 
     fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
     const execSnapshots = mockExecAll(execError);
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['jsonnetfile.lock.json'],
-      isClean(): boolean {
-        return false;
-      },
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['jsonnetfile.lock.json'],
+        isClean(): boolean {
+          return false;
+        },
+      }),
+    );
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
     expect(
       await updateArtifacts({
@@ -189,7 +195,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
           ...config,
           isLockFileMaintenance: true,
         },
-      })
+      }),
     ).toMatchObject([
       {
         artifactError: {

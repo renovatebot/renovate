@@ -60,8 +60,8 @@ describe('modules/manager/circleci/extract', () => {
           'jobs:\n' +
             '  build:\n' +
             '    machine:\n' +
-            '      image: android:202102-01'
-        )
+            '      image: android:202102-01',
+        ),
       ).toBeNull();
     });
   });

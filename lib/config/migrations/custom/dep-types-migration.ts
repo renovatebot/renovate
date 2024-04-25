@@ -15,7 +15,7 @@ export class DepTypesMigration extends AbstractMigration {
       packageRules.push({
         matchDepTypes: [key],
         ...value,
-      } as PackageRule);
+      });
     }
 
     if (is.array(value)) {

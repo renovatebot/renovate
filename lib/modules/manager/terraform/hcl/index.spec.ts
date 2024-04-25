@@ -8,8 +8,8 @@ const lockedVersion = Fixtures.get('lockedVersion.tf');
 
 describe('modules/manager/terraform/hcl/index', () => {
   describe('parseHCL()', () => {
-    it('should return flat modules', () => {
-      const res = parseHCL(modulesTF);
+    it('should return flat modules', async () => {
+      const res = await parseHCL(modulesTF, 'file.tf');
       expect(res?.module).toBeDefined();
       expect(Object.keys(res!.module!)).toBeArrayOfSize(6);
       expect(res).toMatchObject({
@@ -50,8 +50,8 @@ describe('modules/manager/terraform/hcl/index', () => {
       });
     });
 
-    it('should return nested terraform block', () => {
-      const res = parseHCL(lockedVersion);
+    it('should return nested terraform block', async () => {
+      const res = await parseHCL(lockedVersion, 'file.tf');
       expect(res).toMatchObject({
         terraform: [
           {
@@ -67,8 +67,8 @@ describe('modules/manager/terraform/hcl/index', () => {
       });
     });
 
-    it('should return resource blocks', () => {
-      const res = parseHCL(resourcesTF);
+    it('should return resource blocks', async () => {
+      const res = await parseHCL(resourcesTF, 'file.tf');
       expect(res).toMatchObject({
         resource: {
           docker_container: {

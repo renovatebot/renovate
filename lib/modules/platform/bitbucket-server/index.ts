@@ -1,6 +1,5 @@
-import is from '@sindresorhus/is';
-import delay from 'delay';
-import JSON5 from 'json5';
+import { setTimeout } from 'timers/promises';
+import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
 import {
   REPOSITORY_CHANGED,
@@ -8,8 +7,9 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import type { FileData } from '../../../types/platform/bitbucket-server';
+import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
 import { deleteBranch } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
@@ -38,7 +38,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
-import { repoFingerprint } from '../util';
+import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import type {
   BbsConfig,
@@ -49,6 +49,7 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
+import { getExtraCloneOpts } from './utils';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -60,6 +61,8 @@ import * as utils from './utils';
  * https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer
  */
 
+export const id = 'bitbucket-server';
+
 let config: BbsConfig = {} as any;
 
 const bitbucketServerHttp = new BitbucketServerHttp();
@@ -67,8 +70,10 @@ const bitbucketServerHttp = new BitbucketServerHttp();
 const defaults: {
   endpoint?: string;
   hostType: string;
+  version: string;
 } = {
   hostType: 'bitbucket-server',
+  version: '0.0.0',
 };
 
 /* istanbul ignore next */
@@ -78,17 +83,22 @@ function updatePrVersion(pr: number, version: number): number {
   return res;
 }
 
-export function initPlatform({
+export async function initPlatform({
   endpoint,
+  token,
   username,
   password,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
-  if (!(username && password)) {
+  if (!(username && password) && !token) {
     throw new Error(
-      'Init: You must configure a Bitbucket Server username/password'
+      'Init: You must either configure a Bitbucket Server username/password or a HTTP access token',
+    );
+  } else if (password && token) {
+    throw new Error(
+      'Init: You must either configure a Bitbucket Server password or a HTTP access token',
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
@@ -97,7 +107,32 @@ export function initPlatform({
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
-  return Promise.resolve(platformConfig);
+  try {
+    let bitbucketServerVersion: string;
+    // istanbul ignore if: experimental feature
+    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
+      bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    } else {
+      const { version } = (
+        await bitbucketServerHttp.getJson<{ version: string }>(
+          `./rest/api/1.0/application-properties`,
+        )
+      ).body;
+      bitbucketServerVersion = version;
+      logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    }
+
+    if (semver.valid(bitbucketServerVersion)) {
+      defaults.version = bitbucketServerVersion;
+    }
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
+    );
+  }
+
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -105,11 +140,11 @@ export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Server repositories');
   try {
     const repos = await utils.accumulateValues(
-      `./rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE`
+      `./rest/api/1.0/repos?permission=REPO_WRITE&state=AVAILABLE`,
     );
     const result = repos.map(
       (r: { project: { key: string }; slug: string }) =>
-        `${r.project.key.toLowerCase()}/${r.slug}`
+        `${r.project.key}/${r.slug}`,
     );
     logger.debug({ result }, 'result of getRepos()');
     return result;
@@ -122,7 +157,7 @@ export async function getRepos(): Promise<string[]> {
 export async function getRawFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
+  branchOrTag?: string,
 ): Promise<string | null> {
   const repo = repoName ?? config.repository;
   const [project, slug] = repo.split('/');
@@ -142,14 +177,14 @@ export async function getRawFile(
 export async function getJsonFile(
   fileName: string,
   repoName?: string,
-  branchOrTag?: string
-): Promise<any | null> {
-  // TODO #7154
-  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
-  return JSON5.parse(raw);
+  branchOrTag?: string,
+): Promise<any> {
+  // TODO #22198
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  return parseJson(raw, fileName);
 }
 
-// Initialize BitBucket Server by getting base branch
+// Initialize Bitbucket Server by getting base branch
 export async function initRepo({
   repository,
   cloneSubmodules,
@@ -176,13 +211,13 @@ export async function initRepo({
   try {
     const info = (
       await bitbucketServerHttp.getJson<BbsRestRepo>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`,
       )
     ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
     const branchRes = await bitbucketServerHttp.getJson<BbsRestBranch>(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`,
     );
 
     // 204 means empty, 404 means repo not found or missing default branch. repo must exist here.
@@ -192,18 +227,19 @@ export async function initRepo({
 
     const url = utils.getRepoGitUrl(
       config.repositorySlug,
-      // TODO #7154
+      // TODO #22198
       defaults.endpoint!,
       gitUrl,
       info,
-      opts
+      opts,
     );
 
     await git.initRepo({
       ...config,
       url,
+      extraCloneOpts: getExtraCloneOpts(opts),
       cloneSubmodules,
-      fullClone: true,
+      fullClone: semver.lte(defaults.version, '8.0.0'),
     });
 
     config.mergeMethod = 'merge';
@@ -227,14 +263,14 @@ export async function initRepo({
   }
 }
 
-export async function getRepoForceRebase(): Promise<boolean> {
-  logger.debug(`getRepoForceRebase()`);
-
+export async function getBranchForceRebase(
+  _branchName: string,
+): Promise<boolean> {
   // https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp342
   const res = await bitbucketServerHttp.getJson<{
     mergeConfig: { defaultStrategy: { id: string } };
   }>(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/pull-requests`
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/settings/pull-requests`,
   );
 
   // If the default merge strategy contains `ff-only` the PR can only be merged
@@ -242,13 +278,13 @@ export async function getRepoForceRebase(): Promise<boolean> {
   // The current options for id are:
   // no-ff, ff, ff-only, rebase-no-ff, rebase-ff-only, squash, squash-ff-only
   return Boolean(
-    res.body?.mergeConfig?.defaultStrategy?.id.includes('ff-only')
+    res.body?.mergeConfig?.defaultStrategy?.id.includes('ff-only'),
   );
 }
 // Gets details for a PR
 export async function getPr(
   prNo: number,
-  refreshCache?: boolean
+  refreshCache?: boolean,
 ): Promise<BbsPr | null> {
   logger.debug(`getPr(${prNo})`);
   if (!prNo) {
@@ -257,16 +293,14 @@ export async function getPr(
 
   const res = await bitbucketServerHttp.getJson<BbsRestPr>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
-    { useCache: !refreshCache }
+    { memCache: !refreshCache },
   );
 
   const pr: BbsPr = {
-    displayNumber: `Pull Request #${res.body.id}`,
     ...utils.prInfo(res.body),
     reviewers: res.body.reviewers.map((r) => r.user.name),
   };
-  pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
-  // TODO #7154
+  // TODO #22198
   pr.version = updatePrVersion(pr.number, pr.version!);
 
   return pr;
@@ -290,7 +324,7 @@ const isRelevantPr =
   (branchName: string, prTitle: string | null | undefined, state: string) =>
   (p: Pr): boolean =>
     p.sourceBranch === branchName &&
-    (!prTitle || p.title === prTitle) &&
+    (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
     matchesState(p.state, state);
 
 // TODO: coverage (#9624)
@@ -301,13 +335,13 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     const searchParams: Record<string, string> = {
       state: 'ALL',
     };
-    if (!config.ignorePrAuthor) {
+    if (!config.ignorePrAuthor && config.username !== undefined) {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = config.username;
     }
     const query = getQueryString(searchParams);
     const values = await utils.accumulateValues(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
     );
 
     config.prList = values.map(utils.prInfo);
@@ -325,8 +359,34 @@ export async function findPr({
   prTitle,
   state = 'all',
   refreshCache,
+  includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
+
+  if (includeOtherAuthors) {
+    // PR might have been created by anyone, so don't use the cached Renovate PR list
+    const searchParams: Record<string, string> = {
+      state: 'OPEN',
+    };
+    searchParams['direction'] = 'outgoing';
+    searchParams['at'] = `refs/heads/${branchName}`;
+
+    const query = getQueryString(searchParams);
+    const prs = await utils.accumulateValues(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
+      'get',
+      {},
+      1, // only fetch the latest pr
+    );
+
+    if (!prs.length) {
+      logger.debug(`No PR found for branch ${branchName}`);
+      return null;
+    }
+
+    return utils.prInfo(prs[0]);
+  }
+
   const prList = await getPrList(refreshCache);
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
   if (pr) {
@@ -350,24 +410,22 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
 // istanbul ignore next
 export async function refreshPr(number: number): Promise<void> {
   // wait for pr change propagation
-  await delay(1000);
+  await setTimeout(1000);
   // refresh cache
   await getPr(number, true);
 }
 
 async function getStatus(
   branchName: string,
-  useCache = true
+  memCache = true,
 ): Promise<utils.BitbucketCommitStatus> {
   const branchCommit = git.getBranchCommit(branchName);
 
   return (
     await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
-      {
-        useCache,
-      }
+      { memCache },
     )
   ).body;
 }
@@ -376,7 +434,7 @@ async function getStatus(
 // umbrella for status checks
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
 
@@ -405,22 +463,22 @@ export async function getBranchStatus(
 
 function getStatusCheck(
   branchName: string,
-  useCache = true
+  memCache = true,
 ): Promise<utils.BitbucketStatus[]> {
   const branchCommit = git.getBranchCommit(branchName);
 
   return utils.accumulateValues(
-    // TODO: types (#7154)
+    // TODO: types (#22198)
     `./rest/build-status/1.0/commits/${branchCommit!}`,
     'get',
-    { useCache }
+    { memCache },
   );
 }
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-build-rest.html#idp2
 export async function getBranchStatusCheck(
   branchName: string,
-  context: string
+  context: string,
 ): Promise<BranchStatus | null> {
   logger.debug(`getBranchStatusCheck(${branchName}, context=${context})`);
 
@@ -484,9 +542,9 @@ export async function setBranchStatus({
     }
 
     await bitbucketServerHttp.postJson(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `./rest/build-status/1.0/commits/${branchCommit!}`,
-      { body }
+      { body },
     );
 
     // update status cache
@@ -557,17 +615,26 @@ export function addAssignees(iid: number, assignees: string[]): Promise<void> {
 
 export async function addReviewers(
   prNo: number,
-  reviewers: string[]
+  reviewers: string[],
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
+  await retry(updatePRAndAddReviewers, [prNo, reviewers], 3, [
+    REPOSITORY_CHANGED,
+  ]);
+}
+
+async function updatePRAndAddReviewers(
+  prNo: number,
+  reviewers: string[],
+): Promise<void> {
   try {
     const pr = await getPr(prNo);
     if (!pr) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
 
-    // TODO: can `reviewers` be undefined? (#7154)
+    // TODO: can `reviewers` be undefined? (#22198)
     const reviewersSet = new Set([...pr.reviewers!, ...reviewers]);
 
     await bitbucketServerHttp.putJson(
@@ -580,7 +647,7 @@ export async function addReviewers(
             user: { name },
           })),
         },
-      }
+      },
     );
     await getPr(prNo, true);
   } catch (err) {
@@ -592,13 +659,40 @@ export async function addReviewers(
       !utils.isInvalidReviewersResponse(err)
     ) {
       logger.debug(
-        '409 response to adding reviewers - has repository changed?'
+        '409 response to adding reviewers - has repository changed?',
       );
       throw new Error(REPOSITORY_CHANGED);
     } else {
       throw err;
     }
   }
+}
+
+async function retry<T extends (...arg0: any[]) => Promise<any>>(
+  fn: T,
+  args: Parameters<T>,
+  maxTries: number,
+  retryErrorMessages: string[],
+): Promise<Awaited<ReturnType<T>>> {
+  const maxAttempts = Math.max(maxTries, 1);
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await fn(...args);
+    } catch (e) {
+      lastError = e;
+      if (
+        retryErrorMessages.length !== 0 &&
+        !retryErrorMessages.includes(e.message)
+      ) {
+        logger.debug(`Error not marked for retry`);
+        throw e;
+      }
+    }
+  }
+
+  logger.debug(`All ${maxAttempts} retry attempts exhausted`);
+  throw lastError;
 }
 
 export function deleteLabel(issueNo: number, label: string): Promise<void> {
@@ -614,13 +708,13 @@ type Comment = { text: string; id: number };
 async function getComments(prNo: number): Promise<Comment[]> {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/activities
   let comments = await utils.accumulateValues(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/activities`
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/activities`,
   );
 
   comments = comments
     .filter(
       (a: { action: string; commentAction: string }) =>
-        a.action === 'COMMENTED' && a.commentAction === 'ADDED'
+        a.action === 'COMMENTED' && a.commentAction === 'ADDED',
     )
     .map((a: { comment: Comment }) => a.comment);
 
@@ -635,18 +729,18 @@ async function addComment(prNo: number, text: string): Promise<void> {
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments`,
     {
       body: { text },
-    }
+    },
   );
 }
 
 async function getCommentVersion(
   prNo: number,
-  commentId: number
+  commentId: number,
 ): Promise<number> {
   // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
   const { version } = (
     await bitbucketServerHttp.getJson<{ version: number }>(
-      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`,
     )
   ).body;
 
@@ -656,7 +750,7 @@ async function getCommentVersion(
 async function editComment(
   prNo: number,
   commentId: number,
-  text: string
+  text: string,
 ): Promise<void> {
   const version = await getCommentVersion(prNo, commentId);
 
@@ -665,7 +759,7 @@ async function editComment(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}`,
     {
       body: { text, version },
-    }
+    },
   );
 }
 
@@ -674,7 +768,7 @@ async function deleteComment(prNo: number, commentId: number): Promise<void> {
 
   // DELETE /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/comments/{commentId}
   await bitbucketServerHttp.deleteJson(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}?version=${version}`
+    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/comments/${commentId}?version=${version}`,
   );
 }
 
@@ -712,13 +806,13 @@ export async function ensureComment({
       await addComment(number, body);
       logger.info(
         { repository: config.repository, prNo: number, topic },
-        'Comment added'
+        'Comment added',
       );
     } else if (commentNeedsUpdating) {
       await editComment(number, commentId, body);
       logger.debug(
         { repository: config.repository, prNo: number },
-        'Comment updated'
+        'Comment updated',
       );
     } else {
       logger.debug('Comment is already update-to-date');
@@ -731,7 +825,7 @@ export async function ensureComment({
 }
 
 export async function ensureCommentRemoval(
-  deleteConfig: EnsureCommentRemovalConfig
+  deleteConfig: EnsureCommentRemovalConfig,
 ): Promise<void> {
   try {
     const { number: prNo } = deleteConfig;
@@ -783,7 +877,7 @@ export async function createPr({
     logger.debug(`fetching default reviewers`);
     const { id } = (
       await bitbucketServerHttp.getJson<{ id: number }>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`,
       )
     ).body;
 
@@ -792,8 +886,8 @@ export async function createPr({
         `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
           config.repositorySlug
         }/reviewers?sourceRefId=refs/heads/${escapeHash(
-          sourceBranch
-        )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
+          sourceBranch,
+        )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`,
       )
     ).body;
 
@@ -817,7 +911,7 @@ export async function createPr({
   try {
     prInfoRes = await bitbucketServerHttp.postJson<BbsRestPr>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests`,
-      { body }
+      { body },
     );
   } catch (err) /* istanbul ignore next */ {
     if (
@@ -825,7 +919,7 @@ export async function createPr({
       'com.atlassian.bitbucket.pull.EmptyPullRequestException'
     ) {
       logger.debug(
-        'Empty pull request - deleting branch so it can be recreated next run'
+        'Empty pull request - deleting branch so it can be recreated next run',
       );
       await deleteBranch(sourceBranch);
       throw new Error(REPOSITORY_CHANGED);
@@ -834,11 +928,10 @@ export async function createPr({
   }
 
   const pr: BbsPr = {
-    displayNumber: `Pull Request #${prInfoRes.body.id}`,
     ...utils.prInfo(prInfoRes.body),
   };
 
-  // TODO #7154
+  // TODO #22198
   updatePrVersion(pr.number, pr.version!);
 
   // istanbul ignore if
@@ -855,6 +948,7 @@ export async function updatePr({
   prBody: rawDescription,
   state,
   bitbucketInvalidReviewers,
+  targetBranch,
 }: UpdatePrConfig & {
   bitbucketInvalidReviewers: string[] | undefined;
 }): Promise<void> {
@@ -867,29 +961,32 @@ export async function updatePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
+    const body: any = {
+      title,
+      description,
+      version: pr.version,
+      reviewers: pr.reviewers
+        ?.filter((name: string) => !bitbucketInvalidReviewers?.includes(name))
+        .map((name: string) => ({ user: { name } })),
+    };
+    if (targetBranch) {
+      body.toRef = {
+        id: getNewBranchName(targetBranch),
+      };
+    }
+
     const { body: updatedPr } = await bitbucketServerHttp.putJson<{
       version: number;
       state: string;
     }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
-      {
-        body: {
-          title,
-          description,
-          version: pr.version,
-          reviewers: pr.reviewers
-            ?.filter(
-              (name: string) => !bitbucketInvalidReviewers?.includes(name)
-            )
-            .map((name: string) => ({ user: { name } })),
-        },
-      }
+      { body },
     );
 
     updatePrVersion(prNo, updatedPr.version);
 
     const currentState = updatedPr.state;
-    // TODO #7154
+    // TODO #22198
     const newState = {
       ['open']: 'OPEN',
       ['closed']: 'DECLINED',
@@ -904,7 +1001,7 @@ export async function updatePr({
       const { body: updatedStatePr } = await bitbucketServerHttp.postJson<{
         version: number;
       }>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPr.version}`
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPr.version}`,
       );
 
       updatePrVersion(pr.number, updatedStatePr.version);
@@ -946,10 +1043,10 @@ export async function mergePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
     const { body } = await bitbucketServerHttp.postJson<{ version: number }>(
-      // TODO: types (#7154)
+      // TODO: types (#22198)
       `./rest/api/1.0/projects/${config.projectKey}/repos/${
         config.repositorySlug
-      }/pull-requests/${prNo}/merge?version=${pr.version!}`
+      }/pull-requests/${prNo}/merge?version=${pr.version!}`,
     );
     updatePrVersion(prNo, body.version);
   } catch (err) {
@@ -974,15 +1071,14 @@ export function massageMarkdown(input: string): string {
   return smartTruncate(input, 30000)
     .replace(
       'you tick the rebase/retry checkbox',
-      'rename PR to start with "rebase!"'
+      'rename PR to start with "rebase!"',
+    )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"',
     )
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
     .replace(regEx('<!--.*?-->', 'g'), '');
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  logger.debug(`getVulnerabilityAlerts()`);
-  return Promise.resolve([]);
 }

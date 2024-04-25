@@ -1,15 +1,28 @@
-import { git, logger, mocked } from '../../../../test/util';
+import { logger, mocked, scm } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
+import type { LongCommitSha } from '../../../util/git/types';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
 import * as _branchify from '../updates/branchify';
 import { extract, isCacheExtractValid, lookup, update } from './extract-update';
 
+const createVulnerabilitiesMock = jest.fn();
+
 jest.mock('./write');
 jest.mock('./sort');
 jest.mock('./fetch');
+jest.mock('./vulnerabilities', () => {
+  return {
+    __esModule: true,
+    Vulnerabilities: class {
+      static create() {
+        return createVulnerabilitiesMock();
+      }
+    },
+  };
+});
 jest.mock('../updates/branchify');
 jest.mock('../extract');
 jest.mock('../../../util/cache/repository');
@@ -18,19 +31,21 @@ jest.mock('../../../util/git');
 const branchify = mocked(_branchify);
 const repositoryCache = mocked(_repositoryCache);
 
-branchify.branchifyUpgrades.mockResolvedValueOnce({
-  branches: [
-    {
-      manager: 'some-manager',
-      branchName: 'some-branch',
-      baseBranch: 'base',
-      upgrades: [],
-    },
-  ],
-  branchList: ['branchName'],
-});
-
 describe('workers/repository/process/extract-update', () => {
+  beforeEach(() => {
+    branchify.branchifyUpgrades.mockResolvedValue({
+      branches: [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          baseBranch: 'base',
+          upgrades: [],
+        },
+      ],
+      branchList: ['branchName'],
+    });
+  });
+
   describe('extract()', () => {
     it('runs with no baseBranches', async () => {
       const config = {
@@ -38,7 +53,7 @@ describe('workers/repository/process/extract-update', () => {
         suppressNotifications: ['deprecationWarningIssues'],
       };
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      git.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
       const packageFiles = await extract(config);
       const res = await lookup(config, packageFiles);
       expect(res).toEqual({
@@ -69,7 +84,7 @@ describe('workers/repository/process/extract-update', () => {
           addLabels: 'npm',
         },
       };
-      git.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
       expect(packageFiles).toBeUndefined();
@@ -92,10 +107,46 @@ describe('workers/repository/process/extract-update', () => {
           },
         },
       });
-      git.getBranchCommit.mockReturnValueOnce('123test');
-      git.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.getBranchCommit.mockResolvedValueOnce('123test' as LongCommitSha);
+      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
       const res = await extract(config);
       expect(res).toEqual(packageFiles);
+    });
+
+    it('fetches vulnerabilities', async () => {
+      const config = {
+        repoIsOnboarded: true,
+        suppressNotifications: ['deprecationWarningIssues'],
+        osvVulnerabilityAlerts: true,
+      };
+      const appendVulnerabilityPackageRulesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
+      });
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+
+      const packageFiles = await extract(config);
+      await lookup(config, packageFiles);
+
+      expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
+      expect(appendVulnerabilityPackageRulesMock).toHaveBeenCalledOnce();
+    });
+
+    it('handles exception when fetching vulnerabilities', async () => {
+      const config = {
+        repoIsOnboarded: true,
+        suppressNotifications: ['deprecationWarningIssues'],
+        osvVulnerabilityAlerts: true,
+      };
+      createVulnerabilitiesMock.mockRejectedValueOnce(new Error());
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      scm.checkoutBranch.mockResolvedValueOnce('123test' as LongCommitSha);
+
+      const packageFiles = await extract(config);
+      await lookup(config, packageFiles);
+
+      expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
     });
   });
 
@@ -125,7 +176,7 @@ describe('workers/repository/process/extract-update', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('new_sha', 'hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        `Cached extract result cannot be used due to base branch SHA change (old=sha, new=new_sha)`
+        `Cached extract result cannot be used due to base branch SHA change (old=sha, new=new_sha)`,
       );
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
@@ -134,7 +185,7 @@ describe('workers/repository/process/extract-update', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'new_hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Cached extract result cannot be used due to config change'
+        'Cached extract result cannot be used due to config change',
       );
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
@@ -146,11 +197,11 @@ describe('workers/repository/process/extract-update', () => {
         isCacheExtractValid(
           'sha',
           'hash',
-          restOfCache as never as BaseBranchCache
-        )
+          restOfCache as never as BaseBranchCache,
+        ),
       ).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Cached extract is missing extractionFingerprints, so cannot be used'
+        'Cached extract is missing extractionFingerprints, so cannot be used',
       );
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
@@ -166,7 +217,7 @@ describe('workers/repository/process/extract-update', () => {
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        'Cached extract for sha=sha is valid and can be used'
+        'Cached extract for sha=sha is valid and can be used',
       );
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });

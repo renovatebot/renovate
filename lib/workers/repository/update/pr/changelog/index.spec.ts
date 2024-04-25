@@ -5,6 +5,7 @@ import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as githubGraphql from '../../../../../util/github/graphql';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchConfig } from '../../../../types';
+import * as releases from './releases';
 import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
@@ -13,10 +14,11 @@ const githubApiHost = 'https://api.github.com';
 
 const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
 const githubReleasesMock = jest.spyOn(githubGraphql, 'queryReleases');
+const getInRangeReleasesMock = jest.spyOn(releases, 'getInRangeReleases');
 
-const upgrade: BranchConfig = partial<BranchConfig>({
+const upgrade = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',
-  depName: 'renovate',
+  packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '1.0.0',
   newVersion: '3.0.0',
@@ -38,7 +40,6 @@ const upgrade: BranchConfig = partial<BranchConfig>({
 describe('workers/repository/update/pr/changelog/index', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.clear();
       hostRules.add({
         hostType: 'github',
@@ -52,7 +53,16 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           currentVersion: undefined,
-        })
+        }),
+      ).toBeNull();
+    });
+
+    it('handles unsupported changelog source', async () => {
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: 'https://dev.azure.com/unknown-repo',
+        }),
       ).toBeNull();
     });
 
@@ -61,7 +71,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -71,7 +81,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
           ...upgrade,
           currentVersion: '1.0.0',
           newVersion: '1.0.0',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -80,13 +90,18 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com/about',
-        })
+        }),
       ).toBeNull();
     });
 
     it('works without Github', async () => {
-      githubTagsMock.mockRejectedValueOnce(new Error('Unknown'));
-      githubReleasesMock.mockRejectedValueOnce(new Error('Unknown'));
+      githubTagsMock.mockRejectedValue(new Error('Unknown'));
+      // 4 versions, so 4 calls without cache
+      githubReleasesMock
+        .mockRejectedValueOnce(new Error('Unknown'))
+        .mockRejectedValueOnce(new Error('Unknown'))
+        .mockRejectedValueOnce(new Error('Unknown'))
+        .mockRejectedValueOnce(new Error('Unknown'));
       httpMock
         .scope(githubApiHost)
         .get('/repos/chalk/chalk')
@@ -95,13 +110,13 @@ describe('workers/repository/update/pr/changelog/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -130,13 +145,13 @@ describe('workers/repository/update/pr/changelog/index', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -152,21 +167,21 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('filters unnecessary warns', async () => {
-      githubTagsMock.mockRejectedValueOnce(new Error('Unknown Github Repo'));
+      githubTagsMock.mockRejectedValue(new Error('Unknown Github Repo'));
       githubReleasesMock.mockRejectedValueOnce(
-        new Error('Unknown Github Repo')
+        new Error('Unknown Github Repo'),
       );
       httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
       const res = await getChangeLogJSON({
         ...upgrade,
-        depName: '@renovate/no',
+        packageName: '@renovate/no',
       });
       expect(res).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: '@renovate/no',
+          packageName: '@renovate/no',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -182,19 +197,20 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('supports node engines', async () => {
-      githubTagsMock.mockRejectedValueOnce([]);
-      githubReleasesMock.mockRejectedValueOnce([]);
+      githubTagsMock.mockResolvedValueOnce([]);
+      githubReleasesMock.mockResolvedValueOnce([]);
+      httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
       expect(
         await getChangeLogJSON({
           ...upgrade,
           depType: 'engines',
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -207,8 +223,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           { version: '2.2.2' },
         ],
       });
-      // FIXME: missing mocks
-      httpMock.clear(false);
     });
 
     it('handles no sourceUrl', async () => {
@@ -216,7 +230,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: undefined,
-        })
+        }),
       ).toBeNull();
     });
 
@@ -225,7 +239,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'http://example.com',
-        })
+        }),
       ).toBeNull();
     });
 
@@ -235,7 +249,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com',
-        })
+        }),
       ).toEqual({ error: 'MissingGithubToken' });
     });
 
@@ -244,7 +258,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           releases: [],
-        })
+        }),
       ).toBeNull();
     });
 
@@ -253,13 +267,21 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           releases: [{ version: '0.9.0' }],
-        })
+        }),
       ).toBeNull();
     });
 
+    it('will call getInRangeReleases when releases is undefined', async () => {
+      await getChangeLogJSON({
+        ...upgrade,
+        releases: undefined,
+      });
+      expect(getInRangeReleasesMock).toHaveBeenCalledOnce();
+    });
+
     it('supports github enterprise and github.com changelog', async () => {
-      githubTagsMock.mockRejectedValueOnce([]);
-      githubReleasesMock.mockRejectedValueOnce([]);
+      githubTagsMock.mockRejectedValue([]);
+      githubReleasesMock.mockRejectedValue([]);
       httpMock.scope(githubApiHost).persist().get(/.*/).reply(200, []);
       hostRules.add({
         hostType: 'github',
@@ -270,13 +292,13 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           endpoint: 'https://github-enterprise.example.com/',
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -292,8 +314,8 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('supports github enterprise and github enterprise changelog', async () => {
-      githubTagsMock.mockRejectedValueOnce([]);
-      githubReleasesMock.mockRejectedValueOnce([]);
+      githubTagsMock.mockRejectedValue([]);
+      githubReleasesMock.mockRejectedValue([]);
       httpMock
         .scope('https://github-enterprise.example.com')
         .persist()
@@ -310,13 +332,13 @@ describe('workers/repository/update/pr/changelog/index', () => {
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
           endpoint: 'https://github-enterprise.example.com/',
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           baseUrl: 'https://github-enterprise.example.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
@@ -332,8 +354,8 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('supports github.com and github enterprise changelog', async () => {
-      githubTagsMock.mockRejectedValueOnce([]);
-      githubReleasesMock.mockRejectedValueOnce([]);
+      githubTagsMock.mockRejectedValue([]);
+      githubReleasesMock.mockRejectedValue([]);
       httpMock
         .scope('https://github-enterprise.example.com')
         .persist()
@@ -348,13 +370,13 @@ describe('workers/repository/update/pr/changelog/index', () => {
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
-        })
+        }),
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           baseUrl: 'https://github-enterprise.example.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',

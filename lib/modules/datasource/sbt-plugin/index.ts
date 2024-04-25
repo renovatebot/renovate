@@ -31,20 +31,20 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
   async resolvePluginReleases(
     rootUrl: string,
     artifact: string,
-    scalaVersion: string
+    scalaVersion: string,
   ): Promise<string[] | null> {
     const searchRoot = `${rootUrl}/${artifact}`;
     const parse = (content: string): string[] =>
       parseIndexDir(content, (x) => !regEx(/^\.+$/).test(x));
     const { body: indexContent } = await downloadHttpProtocol(
       this.http,
-      ensureTrailingSlash(searchRoot)
+      ensureTrailingSlash(searchRoot),
     );
     if (indexContent) {
       const releases: string[] = [];
       const scalaVersionItems = parse(indexContent);
       const scalaVersions = scalaVersionItems.map((x) =>
-        x.replace(regEx(/^scala_/), '')
+        x.replace(regEx(/^scala_/), ''),
       );
       const searchVersions = scalaVersions.includes(scalaVersion)
         ? [scalaVersion]
@@ -53,7 +53,7 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
         const searchSubRoot = `${searchRoot}/scala_${searchVersion}`;
         const { body: subRootContent } = await downloadHttpProtocol(
           this.http,
-          ensureTrailingSlash(searchSubRoot)
+          ensureTrailingSlash(searchSubRoot),
         );
         if (subRootContent) {
           const sbtVersionItems = parse(subRootContent);
@@ -61,7 +61,7 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
             const releasesRoot = `${searchSubRoot}/${sbtItem}`;
             const { body: releasesIndexContent } = await downloadHttpProtocol(
               this.http,
-              ensureTrailingSlash(releasesRoot)
+              ensureTrailingSlash(releasesRoot),
             );
             if (releasesIndexContent) {
               const releasesParsed = parse(releasesIndexContent);
@@ -102,7 +102,7 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
       let versions = await this.resolvePluginReleases(
         searchRoot,
         artifact,
-        scalaVersion
+        scalaVersion,
       );
       let urls = {};
 
@@ -110,7 +110,7 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
         const artifactSubdirs = await this.getArtifactSubdirs(
           searchRoot,
           artifact,
-          scalaVersion
+          scalaVersion,
         );
         versions = await this.getPackageReleases(searchRoot, artifactSubdirs);
         const latestVersion = getLatestVersion(versions);
@@ -130,7 +130,7 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
     }
 
     logger.debug(
-      `No versions found for ${packageName} in ${searchRoots.length} repositories`
+      `No versions found for ${packageName} in ${searchRoots.length} repositories`,
     );
     return null;
   }

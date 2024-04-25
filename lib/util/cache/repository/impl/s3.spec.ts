@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import {
   GetObjectCommand,
   GetObjectCommandInput,
@@ -8,18 +8,20 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { mockClient } from 'aws-sdk-client-mock';
-import { partial } from '../../../../../test/util';
+import { fs, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { parseS3Url } from '../../../s3';
-import type { RepoCacheRecord } from '../schemas';
+import type { RepoCacheRecord } from '../schema';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheS3 } from './s3';
+
+jest.mock('../../../fs');
 
 function createGetObjectCommandInput(
   repository: string,
   url: string,
-  folder = ''
+  folder = '',
 ): GetObjectCommandInput {
   const platform = GlobalConfig.get('platform')!;
   return {
@@ -32,7 +34,7 @@ function createPutObjectCommandInput(
   repository: string,
   url: string,
   data: RepoCacheRecord,
-  folder = ''
+  folder = '',
 ): PutObjectCommandInput {
   return {
     ...createGetObjectCommandInput(repository, url, folder),
@@ -57,14 +59,14 @@ describe('util/cache/repository/impl/s3', () => {
   let s3Cache: RepoCacheS3;
 
   beforeEach(() => {
-    GlobalConfig.set({ platform: 'github' });
+    GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
     s3Mock.reset();
     s3Cache = new RepoCacheS3(repository, '0123456789abcdef', url);
     getObjectCommandInput = createGetObjectCommandInput(repository, url);
     putObjectCommandInput = createPutObjectCommandInput(
       repository,
       url,
-      repoCache
+      repoCache,
     );
   });
 
@@ -84,12 +86,12 @@ describe('util/cache/repository/impl/s3', () => {
     s3Cache = new RepoCacheS3(
       repository,
       '0123456789abcdef',
-      `${url}/${folder}`
+      `${url}/${folder}`,
     );
     s3Mock
       .on(
         GetObjectCommand,
-        createGetObjectCommandInput(repository, url, folder)
+        createGetObjectCommandInput(repository, url, folder),
       )
       .resolvesOnce({ Body: Readable.from([json]) as never });
     await expect(s3Cache.read()).resolves.toBe(json);
@@ -104,12 +106,12 @@ describe('util/cache/repository/impl/s3', () => {
     s3Cache = new RepoCacheS3(
       repository,
       '0123456789abcdef',
-      `${url}/${pathname}`
+      `${url}/${pathname}`,
     );
     s3Mock
       .on(
         GetObjectCommand,
-        createGetObjectCommandInput(repository, url, pathname + '/')
+        createGetObjectCommandInput(repository, url, pathname + '/'),
       )
       .resolvesOnce({ Body: Readable.from([json]) as never });
     await expect(s3Cache.read()).resolves.toBe(json);
@@ -117,7 +119,7 @@ describe('util/cache/repository/impl/s3', () => {
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(
       { pathname },
-      'RepoCacheS3.getCacheFolder() - appending missing trailing slash to pathname'
+      'RepoCacheS3.getCacheFolder() - appending missing trailing slash to pathname',
     );
   });
 
@@ -125,7 +127,7 @@ describe('util/cache/repository/impl/s3', () => {
     s3Mock.on(GetObjectCommand, getObjectCommandInput).resolvesOnce({});
     await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
-      "RepoCacheS3.read() - failure - expecting Readable return type got 'undefined' type instead"
+      "RepoCacheS3.read() - failure - expecting Readable return type got 'undefined' type instead",
     );
   });
 
@@ -138,7 +140,7 @@ describe('util/cache/repository/impl/s3', () => {
     await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith(
-      `RepoCacheS3.read() - No cached file found`
+      `RepoCacheS3.read() - No cached file found`,
     );
   });
 
@@ -147,7 +149,7 @@ describe('util/cache/repository/impl/s3', () => {
     await expect(s3Cache.read()).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
       { err },
-      'RepoCacheS3.read() - failure'
+      'RepoCacheS3.read() - failure',
     );
   });
 
@@ -170,12 +172,12 @@ describe('util/cache/repository/impl/s3', () => {
     s3Cache = new RepoCacheS3(
       repository,
       '0123456789abcdef',
-      `${url}/${folder}`
+      `${url}/${folder}`,
     );
     s3Mock
       .on(
         PutObjectCommand,
-        createPutObjectCommandInput(repository, url, repoCache, folder)
+        createPutObjectCommandInput(repository, url, repoCache, folder),
       )
       .resolvesOnce(putObjectCommandOutput);
     await expect(s3Cache.write(repoCache)).toResolve();
@@ -188,12 +190,27 @@ describe('util/cache/repository/impl/s3', () => {
     await expect(s3Cache.write(repoCache)).toResolve();
     expect(logger.warn).toHaveBeenCalledWith(
       { err },
-      'RepoCacheS3.write() - failure'
+      'RepoCacheS3.write() - failure',
     );
   });
 
   it('creates an S3 client using the cache factory', () => {
     const cache = CacheFactory.get(repository, '0123456789abcdef', url);
     expect(cache instanceof RepoCacheS3).toBeTrue();
+  });
+
+  it('should persists data locally after uploading to s3', async () => {
+    process.env.RENOVATE_X_REPO_CACHE_FORCE_LOCAL = 'true';
+    const putObjectCommandOutput: PutObjectCommandOutput = {
+      $metadata: { attempts: 1, httpStatusCode: 200, totalRetryDelay: 0 },
+    };
+    s3Mock
+      .on(PutObjectCommand, putObjectCommandInput)
+      .resolvesOnce(putObjectCommandOutput);
+    await s3Cache.write(repoCache);
+    expect(fs.outputCacheFile).toHaveBeenCalledWith(
+      'renovate/repository/github/org/repo.json',
+      JSON.stringify(repoCache),
+    );
   });
 });

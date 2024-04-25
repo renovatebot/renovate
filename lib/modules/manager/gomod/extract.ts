@@ -4,13 +4,13 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { GoDatasource } from '../../datasource/go';
 import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { isVersion } from '../../versioning/semver';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { MultiLineParseResult } from './types';
 
 function getDep(
   lineNumber: number,
   match: RegExpMatchArray,
-  type: string
+  type: string,
 ): PackageDependency {
   const [, , currentValue] = match;
   let [, depName] = match;
@@ -32,25 +32,33 @@ function getDep(
   if (digestMatch?.groups?.digest) {
     dep.currentDigest = digestMatch.groups.digest;
     dep.digestOneAndOnly = true;
+    dep.versioning = 'loose';
   }
   return dep;
 }
 
-function getGoDep(lineNumber: number, goVer: string): PackageDependency {
+function getGoDep(
+  lineNumber: number,
+  goVer: string,
+  versioning: string | undefined = undefined,
+  depType: string = 'golang',
+): PackageDependency {
   return {
     managerData: {
       lineNumber,
     },
     depName: 'go',
-    depType: 'golang',
+    depType,
     currentValue: goVer,
     datasource: GolangVersionDatasource.id,
-    versioning: 'go-mod-directive',
-    rangeStrategy: 'replace',
+    ...(versioning && { versioning }),
   };
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string,
+): PackageFileContent | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
   const deps: PackageDependency[] = [];
   try {
@@ -59,11 +67,20 @@ export function extractPackageFile(content: string): PackageFile | null {
       const line = lines[lineNumber];
       const goVer = line.startsWith('go ') ? line.replace('go ', '') : null;
       if (goVer && semver.validRange(goVer)) {
-        const dep = getGoDep(lineNumber, goVer);
+        const dep = getGoDep(lineNumber, goVer, 'go-mod-directive');
         deps.push(dep);
+        continue;
+      }
+      const goToolVer = line.startsWith('toolchain go')
+        ? line.replace('toolchain go', '')
+        : null;
+      if (goToolVer && semver.valid(goToolVer)) {
+        const dep = getGoDep(lineNumber, goToolVer, undefined, 'toolchain');
+        deps.push(dep);
+        continue;
       }
       const replaceMatch = regEx(
-        /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/
+        /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/,
       ).exec(line);
       if (replaceMatch) {
         const dep = getDep(lineNumber, replaceMatch, 'replace');
@@ -89,7 +106,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           lineNumber,
           lines,
           matcher,
-          'require'
+          'require',
         );
         lineNumber = reachedLine;
         deps.push(...detectedDeps);
@@ -100,14 +117,14 @@ export function extractPackageFile(content: string): PackageFile | null {
           lineNumber,
           lines,
           matcher,
-          'replace'
+          'replace',
         );
         lineNumber = reachedLine;
         deps.push(...detectedDeps);
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting go modules');
+    logger.warn({ err, packageFile }, 'Error extracting go modules');
   }
   if (!deps.length) {
     return null;
@@ -119,7 +136,7 @@ function parseMultiLine(
   startingLine: number,
   lines: string[],
   matchRegex: RegExp,
-  blockType: 'require' | 'replace'
+  blockType: 'require' | 'replace',
 ): MultiLineParseResult {
   const deps: PackageDependency[] = [];
   let lineNumber = startingLine;

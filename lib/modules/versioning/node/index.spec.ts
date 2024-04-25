@@ -12,7 +12,7 @@ describe('modules/versioning/node/index', () => {
     DateTime.local = dtLocal;
   });
 
-  test.each`
+  it.each`
     currentValue | rangeStrategy | currentVersion | newVersion   | expected
     ${'1.0.0'}   | ${'replace'}  | ${'1.0.0'}     | ${'v1.1.0'}  | ${'1.1.0'}
     ${'~8.0.0'}  | ${'replace'}  | ${'8.0.2'}     | ${'v8.2.0'}  | ${'~8.2.0'}
@@ -31,13 +31,13 @@ describe('modules/versioning/node/index', () => {
         newVersion,
       });
       expect(res).toBe(expected);
-    }
+    },
   );
 
   const t1 = DateTime.fromISO('2020-09-01');
   const t2 = DateTime.fromISO('2021-06-01');
 
-  test.each`
+  it.each`
     version       | time  | expected
     ${'16.0.0'}   | ${t1} | ${false}
     ${'15.0.0'}   | ${t1} | ${false}
@@ -53,12 +53,12 @@ describe('modules/versioning/node/index', () => {
     ${'10.0.0a'}  | ${t1} | ${false}
     ${'9.0.0'}    | ${t1} | ${false}
   `('isStable("$version") === $expected', ({ version, time, expected }) => {
-    DateTime.local = (...args: (string | any)[]) =>
+    DateTime.local = (...args: any[]) =>
       args.length ? dtLocal.apply(DateTime, args) : time;
     expect(nodever.isStable(version as string)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version       | expected
     ${'16.0.0'}   | ${true}
     ${'erbium'}   | ${true}
@@ -70,7 +70,7 @@ describe('modules/versioning/node/index', () => {
     expect(nodever.isValid(version as string)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version     | range        | expected
     ${'16.0.0'} | ${'gallium'} | ${true}
     ${'16.0.0'} | ${'fermium'} | ${false}
@@ -78,12 +78,12 @@ describe('modules/versioning/node/index', () => {
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
       expect(nodever.matches(version as string, range as string)).toBe(
-        expected
+        expected,
       );
-    }
+    },
   );
 
-  test.each`
+  it.each`
     versions                          | range        | expected
     ${['16.0.0']}                     | ${'gallium'} | ${'16.0.0'}
     ${['16.0.0', '14.0.0', '16.9.9']} | ${'gallium'} | ${'16.9.9'}
@@ -92,12 +92,12 @@ describe('modules/versioning/node/index', () => {
     'getSatisfyingVersion("$versions", "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(
-        nodever.getSatisfyingVersion(versions as string[], range as string)
+        nodever.getSatisfyingVersion(versions as string[], range as string),
       ).toBe(expected);
-    }
+    },
   );
 
-  test.each`
+  it.each`
     versions                          | range        | expected
     ${['16.0.0']}                     | ${'gallium'} | ${'16.0.0'}
     ${['16.0.0', '14.0.0', '16.9.9']} | ${'gallium'} | ${'16.0.0'}
@@ -106,8 +106,8 @@ describe('modules/versioning/node/index', () => {
     'minSatisfyingVersion("$versions", "$range") === $expected',
     ({ versions, range, expected }) => {
       expect(
-        nodever.minSatisfyingVersion(versions as string[], range as string)
+        nodever.minSatisfyingVersion(versions as string[], range as string),
       ).toBe(expected);
-    }
+    },
   );
 });

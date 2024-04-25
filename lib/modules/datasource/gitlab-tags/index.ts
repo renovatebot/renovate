@@ -37,7 +37,7 @@ export class GitlabTagsDatasource extends Datasource {
       depHost,
       `api/v4/projects`,
       urlEncodedRepo,
-      `repository/tags?per_page=100`
+      `repository/tags?per_page=100`,
     );
 
     const gitlabTags = (
@@ -71,7 +71,7 @@ export class GitlabTagsDatasource extends Datasource {
   })
   override async getDigest(
     { packageName: repo, registryUrl }: Partial<DigestConfig>,
-    newValue?: string
+    newValue?: string,
   ): Promise<string | null> {
     const depHost = getDepHost(registryUrl);
 
@@ -85,7 +85,7 @@ export class GitlabTagsDatasource extends Datasource {
           `api/v4/projects`,
           urlEncodedRepo,
           `repository/commits/`,
-          newValue
+          newValue,
         );
         const gitlabCommits = await this.http.getJson<GitlabCommit>(url);
         digest = gitlabCommits.body.id;
@@ -94,7 +94,7 @@ export class GitlabTagsDatasource extends Datasource {
           depHost,
           `api/v4/projects`,
           urlEncodedRepo,
-          `repository/commits?per_page=1`
+          `repository/commits?per_page=1`,
         );
         const gitlabCommits = await this.http.getJson<GitlabCommit[]>(url);
         digest = gitlabCommits.body[0].id;
@@ -102,7 +102,7 @@ export class GitlabTagsDatasource extends Datasource {
     } catch (err) {
       logger.debug(
         { gitlabRepo: repo, err, registryUrl },
-        'Error getting latest commit from Gitlab repo'
+        'Error getting latest commit from Gitlab repo',
       );
     }
 

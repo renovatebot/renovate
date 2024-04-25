@@ -5,7 +5,7 @@ import { Matcher } from './base';
 export class UpdateTypesMatcher extends Matcher {
   override matches(
     { updateType, isBump }: PackageRuleInputConfig,
-    { matchUpdateTypes }: PackageRule
+    { matchUpdateTypes }: PackageRule,
   ): boolean | null {
     if (is.undefined(matchUpdateTypes)) {
       return null;

@@ -8,9 +8,7 @@ Requirements:
 
 Create a `docker-compose.yaml` and `otel-collector-config.yml` file as seen below in a folder.
 
-`docker-compose.yaml`:
-
-```yaml
+```yaml title="docker-compose.yaml"
 version: '3'
 services:
   # Jaeger
@@ -18,10 +16,10 @@ services:
     image: jaegertracing/all-in-one:1
     ports:
       - '16686:16686'
-      - '14250'
+      - '4317'
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.52.0
+    image: otel/opentelemetry-collector-contrib:0.88.0
     command: ['--config=/etc/otel-collector-config.yml']
     volumes:
       - ./otel-collector-config.yml:/etc/otel-collector-config.yml
@@ -36,9 +34,7 @@ services:
       - jaeger
 ```
 
-`otel-collector-config.yml`:
-
-```yaml
+```yaml title="otel-collector-config.yml"
 receivers:
   otlp:
     protocols:
@@ -46,8 +42,8 @@ receivers:
       http:
 
 exporters:
-  jaeger:
-    endpoint: jaeger:14250
+  otlp/jaeger:
+    endpoint: jaeger:4317
     tls:
       insecure: true
   logging:
@@ -76,7 +72,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [jaeger, logging]
+      exporters: [otlp/jaeger, logging]
       processors: [spanmetrics, batch]
 
     metrics:

@@ -1,13 +1,15 @@
 import {
   addSecretForSanitizing,
-  clearSanitizedSecretsList,
+  clearGlobalSanitizedSecretsList,
+  clearRepoSanitizedSecretsList,
   sanitize,
 } from './sanitize';
 import { toBase64 } from './string';
 
 describe('util/sanitize', () => {
   beforeEach(() => {
-    clearSanitizedSecretsList();
+    clearRepoSanitizedSecretsList();
+    clearGlobalSanitizedSecretsList();
   });
 
   it('sanitizes empty string', () => {
@@ -38,7 +40,7 @@ describe('util/sanitize', () => {
   it('sanitizes github app tokens', () => {
     addSecretForSanitizing('x-access-token:abc123');
     expect(sanitize(`hello ${toBase64('abc123')} world`)).toBe(
-      'hello **redacted** world'
+      'hello **redacted** world',
     );
   });
 });

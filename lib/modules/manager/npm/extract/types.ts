@@ -14,6 +14,9 @@ export type NpmPackage = PackageJson & {
   dependenciesMeta?: DependenciesMeta;
   overrides?: OverrideDependency;
   volta?: PackageJson.Dependency;
+  pnpm?: {
+    overrides?: PackageJson.Dependency;
+  };
 };
 
 export type LockFileEntry = Record<
@@ -22,7 +25,11 @@ export type LockFileEntry = Record<
 >;
 
 export interface LockFile {
-  lockedVersions: Record<string, string>;
+  lockedVersions?: Record<string, string>;
+  lockedVersionsWithPath?: Record<
+    string,
+    Record<string, Record<string, string>>
+  >;
   lockfileVersion?: number; // cache version for Yarn
   isYarn1?: boolean;
 }

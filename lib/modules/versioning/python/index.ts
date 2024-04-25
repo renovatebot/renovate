@@ -25,7 +25,7 @@ function matches(version: string, range: string): boolean {
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return poetry.isValid(range)
     ? poetry.getSatisfyingVersion(versions, range)
@@ -34,15 +34,21 @@ function getSatisfyingVersion(
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return poetry.isValid(range)
     ? poetry.minSatisfyingVersion(versions, range)
     : pep440.minSatisfyingVersion(versions, range);
 }
 
-function getNewValue(_: NewValueConfig): string | null {
-  return null;
+function getNewValue(newValue: NewValueConfig): string | null {
+  return poetry.getNewValue(newValue);
+}
+
+function subset(subRange: string, superRange: string): boolean | undefined {
+  return poetry.isValid(subRange) && poetry.isValid(superRange)
+    ? poetry.subset!(subRange, superRange)
+    : undefined;
 }
 
 export const api: VersioningApi = {
@@ -53,5 +59,6 @@ export const api: VersioningApi = {
   isValid,
   matches,
   minSatisfyingVersion,
+  subset,
 };
 export default api;

@@ -1,25 +1,21 @@
+import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked } from '../../../../test/util';
+import { env, fs, git, mocked, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
-import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as util from './util';
 import * as nuget from '.';
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
-jest.mock('../../../util/host-rules');
+jest.mock('../../../util/host-rules', () => mockDeep());
 jest.mock('../../../util/git');
 jest.mock('./util');
 
-const { getConfiguredRegistries, getDefaultRegistries } = mocked(util);
-const hostRules = mocked(_hostRules);
-
-const realFs =
-  jest.requireActual<typeof import('../../../util/fs')>('../../../util/fs');
+const { getDefaultRegistries } = mocked(util);
 
 process.env.CONTAINERBASE = 'true';
 
@@ -34,12 +30,12 @@ const config: UpdateArtifactsConfig = {};
 
 describe('modules/manager/nuget/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
+    const realFs =
+      jest.requireActual<typeof import('../../../util/fs')>('../../../util/fs');
     getDefaultRegistries.mockReturnValue([]);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     fs.privateCacheDir.mockImplementation(realFs.privateCacheDir);
-    git.getFileList.mockResolvedValueOnce([]);
+    scm.getFileList.mockResolvedValueOnce([]);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });
@@ -58,7 +54,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -66,7 +62,7 @@ describe('modules/manager/nuget/artifacts', () => {
   it('aborts if lock file is unchanged', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce(
-      'path/with space/packages.lock.json'
+      'path/with space/packages.lock.json',
     );
     git.getFiles.mockResolvedValueOnce({
       'path/with space/packages.lock.json': 'Current packages.lock.json',
@@ -80,7 +76,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
@@ -112,7 +108,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -152,7 +148,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -172,7 +168,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toBeNull();
     expect(execSnapshots).toBeEmptyArray();
   });
@@ -195,7 +191,7 @@ describe('modules/manager/nuget/artifacts', () => {
           ...config,
           isLockFileMaintenance: true,
         },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -221,7 +217,11 @@ describe('modules/manager/nuget/artifacts', () => {
   });
 
   it('supports docker mode', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({
+      ...adminConfig,
+      binarySource: 'docker',
+      dockerSidecarImage: 'ghcr.io/containerbase/sidecar',
+    });
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     git.getFiles.mockResolvedValueOnce({
@@ -236,7 +236,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config: { ...config, constraints: { dotnet: '7.0.100' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -248,7 +248,7 @@ describe('modules/manager/nuget/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull renovate/sidecar',
+        cmd: 'docker pull ghcr.io/containerbase/sidecar',
       },
       {
         cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -260,10 +260,9 @@ describe('modules/manager/nuget/artifacts', () => {
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e NUGET_PACKAGES ' +
           '-e MSBUILDDISABLENODEREUSE ' +
-          '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar ' +
+          'ghcr.io/containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool dotnet 7.0.100' +
           ' && ' +
@@ -271,7 +270,6 @@ describe('modules/manager/nuget/artifacts', () => {
           '"',
         options: {
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
@@ -298,7 +296,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config: { ...config, constraints: { dotnet: '7.0.100' } },
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -314,7 +312,6 @@ describe('modules/manager/nuget/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
@@ -327,7 +324,6 @@ describe('modules/manager/nuget/artifacts', () => {
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
-            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
@@ -354,7 +350,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         file: {
@@ -394,7 +390,7 @@ describe('modules/manager/nuget/artifacts', () => {
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
         config,
-      })
+      }),
     ).toEqual([
       {
         artifactError: {
@@ -404,102 +400,5 @@ describe('modules/manager/nuget/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeEmptyArray();
-  });
-
-  it('authenticates at registries', async () => {
-    const execSnapshots = mockExecAll();
-    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFiles.mockResolvedValueOnce({
-      'packages.lock.json': 'Current packages.lock.json',
-    });
-    fs.getLocalFiles.mockResolvedValueOnce({
-      'packages.lock.json': 'New packages.lock.json',
-    });
-    getConfiguredRegistries.mockResolvedValueOnce([
-      {
-        name: 'myRegistry',
-        url: 'https://my-registry.example.org',
-      },
-    ] as never);
-    hostRules.find.mockImplementationOnce((search) => {
-      if (
-        search.hostType === 'nuget' &&
-        search.url === 'https://my-registry.example.org'
-      ) {
-        return {
-          username: 'some-username',
-          password: 'some-password',
-        };
-      }
-      return {};
-    });
-    expect(
-      await nuget.updateArtifacts({
-        packageFileName: 'project.csproj',
-        updatedDeps: [{ depName: 'dep' }],
-        newPackageFileContent: '{}',
-        config,
-      })
-    ).toEqual([
-      {
-        file: {
-          contents: 'New packages.lock.json',
-          path: 'packages.lock.json',
-          type: 'addition',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd:
-          'dotnet nuget add source https://my-registry.example.org/ --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config ' +
-          '--name myRegistry --username some-username --password some-password --store-password-in-clear-text',
-      },
-      {
-        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
-      },
-    ]);
-  });
-
-  it('strips protocol version from feed url', async () => {
-    const execSnapshots = mockExecAll();
-    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    git.getFiles.mockResolvedValueOnce({
-      'packages.lock.json': 'Current packages.lock.json',
-    });
-    fs.getLocalFiles.mockResolvedValueOnce({
-      'packages.lock.json': 'New packages.lock.json',
-    });
-    getConfiguredRegistries.mockResolvedValueOnce([
-      {
-        name: 'myRegistry',
-        url: 'https://my-registry.example.org#protocolVersion=3',
-      },
-    ] as never);
-    hostRules.find.mockImplementationOnce(() => ({}));
-    expect(
-      await nuget.updateArtifacts({
-        packageFileName: 'project.csproj',
-        updatedDeps: [{ depName: 'dep' }],
-        newPackageFileContent: '{}',
-        config,
-      })
-    ).toEqual([
-      {
-        file: {
-          contents: 'New packages.lock.json',
-          path: 'packages.lock.json',
-          type: 'addition',
-        },
-      },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'dotnet nuget add source https://my-registry.example.org/ --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config --name myRegistry',
-      },
-      {
-        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
-      },
-    ]);
   });
 });

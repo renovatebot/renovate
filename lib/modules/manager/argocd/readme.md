@@ -1,8 +1,12 @@
-The `argocd` manager has no `fileMatch` default patterns, so it won't match any files until you configure it with a pattern. This is because there is no commonly accepted file/directory naming convention for argocd YAML files and we don't want to check every single `*.yaml` file in repositories just in case any of them have ArgoCD definitions.
+To use the `argocd` manager you must set your own `fileMatch` pattern.
+The `argocd` manager has no default `fileMatch` pattern, because there is no common filename or directory name convention for Argo CD YAML files.
+By setting your own `fileMatch` Renovate avoids having to check each `*.yaml` file in a repository for a Argo CD definition.
 
-If most `.yaml` files in your repository are argocd ones, then you could add this to your config:
+If you need to change the versioning format, read the [versioning](../../../modules/versioning/index.md) documentation to learn more.
 
-```json
+Some configuration examples:
+
+```json title="If most .yaml files in your repository are for Argo CD"
 {
   "argocd": {
     "fileMatch": ["\\.yaml$"]
@@ -10,9 +14,7 @@ If most `.yaml` files in your repository are argocd ones, then you could add thi
 }
 ```
 
-If instead you have them all inside a `argocd/` directory, you would add this:
-
-```json
+```json title="Argo CD YAML files are in a argocd/ directory"
 {
   "argocd": {
     "fileMatch": ["argocd/.+\\.yaml$"]
@@ -20,14 +22,10 @@ If instead you have them all inside a `argocd/` directory, you would add this:
 }
 ```
 
-Or if it's just a single file then something like this:
-
-```json
+```json title="One Argo CD file in a directory"
 {
   "argocd": {
     "fileMatch": ["^config/applications\\.yaml$"]
   }
 }
 ```
-
-If you need to change the versioning format, read the [versioning](https://docs.renovatebot.com/modules/versioning/) documentation to learn more.

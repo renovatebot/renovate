@@ -16,7 +16,12 @@ import type { StatusResult } from '../../../util/git/types';
 import { Http } from '../../../util/http';
 import { newlineRegex } from '../../../util/regex';
 import { replaceAt } from '../../../util/string';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { updateArtifacts as gradleUpdateArtifacts } from '../gradle';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types';
 import {
   extraEnv,
   getJavaConstraint,
@@ -31,7 +36,7 @@ type Ctx = string[];
 
 async function addIfUpdated(
   status: StatusResult,
-  fileProjectPath: string
+  fileProjectPath: string,
 ): Promise<UpdateArtifactsResult | null> {
   if (status.modified.includes(fileProjectPath)) {
     return {
@@ -64,7 +69,7 @@ async function getDistributionChecksum(url: string): Promise<string> {
 
 export async function updateBuildFile(
   localGradleDir: string,
-  wrapperProperties: Record<string, string | undefined | null>
+  wrapperProperties: Record<string, string | undefined | null>,
 ): Promise<string> {
   let buildFileName = join(localGradleDir, 'build.gradle');
   if (!(await localPathExists(buildFileName))) {
@@ -94,7 +99,7 @@ export async function updateBuildFile(
             buildFileUpdated,
             offset,
             value,
-            newValue
+            newValue,
           );
           return ctx;
         }),
@@ -105,6 +110,24 @@ export async function updateBuildFile(
   await writeLocalFile(buildFileName, buildFileUpdated);
 
   return buildFileName;
+}
+
+export async function updateLockFiles(
+  buildFileName: string,
+  config: UpdateArtifactsConfig,
+): Promise<UpdateArtifactsResult[] | null> {
+  const buildFileContent = await readLocalFile(buildFileName, 'utf8');
+  if (!buildFileContent) {
+    logger.debug('build.gradle or build.gradle.kts not found');
+    return null;
+  }
+
+  return await gradleUpdateArtifacts({
+    packageFileName: buildFileName,
+    updatedDeps: [],
+    newPackageFileContent: buildFileContent,
+    config,
+  });
 }
 
 export async function updateArtifacts({
@@ -123,7 +146,7 @@ export async function updateArtifacts({
       logger.info('No gradlew found - skipping Artifacts update');
       return null;
     }
-    cmd += ' wrapper';
+    cmd += ' :wrapper';
 
     let checksum: string | null = null;
     const distributionUrl = getDistributionUrl(newPackageFileContent);
@@ -136,8 +159,8 @@ export async function updateArtifacts({
           packageFileName,
           newPackageFileContent.replace(
             /distributionSha256Sum=.*/,
-            `distributionSha256Sum=${checksum}`
-          )
+            `distributionSha256Sum=${checksum}`,
+          ),
         );
         cmd += ` --gradle-distribution-sha256-sum ${quote(checksum)}`;
       }
@@ -148,6 +171,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
       docker: {},
+      userConfiguredEnv: config.env,
       extraEnv,
       toolConstraints: [
         {
@@ -166,7 +190,7 @@ export async function updateArtifacts({
       }
       logger.warn(
         { err },
-        'Error executing gradle wrapper update command. It can be not a critical one though.'
+        'Error executing gradle wrapper update command. It can be not a critical one though.',
       );
     }
 
@@ -175,25 +199,30 @@ export async function updateArtifacts({
       distributionSha256Sum: checksum,
       distributionUrl,
     });
+    const lockFiles = await updateLockFiles(buildFileName, config);
 
     const status = await getRepoStatus();
     const artifactFileNames = [
       packageFileName,
       buildFileName,
       ...['gradle/wrapper/gradle-wrapper.jar', 'gradlew', 'gradlew.bat'].map(
-        (filename) => join(localGradleDir, filename)
+        (filename) => join(localGradleDir, filename),
       ),
     ];
     const updateArtifactsResult = (
       await Promise.all(
         artifactFileNames.map((fileProjectPath) =>
-          addIfUpdated(status, fileProjectPath)
-        )
+          addIfUpdated(status, fileProjectPath),
+        ),
       )
     ).filter(is.truthy);
+    if (lockFiles) {
+      updateArtifactsResult.push(...lockFiles);
+    }
+
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file?.path) },
-      `Returning updated gradle-wrapper files`
+      `Returning updated gradle-wrapper files`,
     );
     return updateArtifactsResult;
   } catch (err) {

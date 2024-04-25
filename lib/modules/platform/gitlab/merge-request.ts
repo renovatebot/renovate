@@ -4,7 +4,7 @@ import type { GitLabMergeRequest, UpdateMergeRequest } from './types';
 
 export async function getMR(
   repository: string,
-  iid: number
+  iid: number,
 ): Promise<GitLabMergeRequest> {
   logger.debug(`getMR(${iid})`);
 
@@ -15,7 +15,7 @@ export async function getMR(
 export async function updateMR(
   repository: string,
   iid: number,
-  data: UpdateMergeRequest
+  data: UpdateMergeRequest,
 ): Promise<void> {
   logger.debug(`updateMR(${iid})`);
 

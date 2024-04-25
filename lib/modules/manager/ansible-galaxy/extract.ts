@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { extractCollections } from './collections';
 import { extractCollectionsMetaDataFile } from './collections-metadata';
 import { extractRoles } from './roles';
@@ -13,7 +13,7 @@ export function getSliceEndNumber(
   if (start < 0 || start > numberOfLines - 1) {
     return -1;
   }
-  let nearestEnd = numberOfLines - 1;
+  let nearestEnd = numberOfLines;
   for (const blocksKey of blocks) {
     if (start < blocksKey && blocksKey < nearestEnd) {
       nearestEnd = blocksKey;
@@ -24,16 +24,16 @@ export function getSliceEndNumber(
 
 export function extractPackageFile(
   content: string,
-  fileName: string
-): PackageFile | null {
-  logger.trace('ansible-galaxy.extractPackageFile()');
+  packageFile: string,
+): PackageFileContent | null {
+  logger.trace(`ansible-galaxy.extractPackageFile(${packageFile})`);
   const galaxyFileNameRegEx = regEx(/galaxy\.ya?ml$/);
   const deps: PackageDependency[] = [];
   const lines = content.split(newlineRegex);
 
   try {
     // if this is a galaxy.yml file we have to interpret the dependencies differently
-    if (galaxyFileNameRegEx.exec(fileName)) {
+    if (galaxyFileNameRegEx.exec(packageFile)) {
       const galaxyDeps = extractCollectionsMetaDataFile(lines);
       deps.push(...galaxyDeps);
     } else {
@@ -59,8 +59,8 @@ export function extractPackageFile(
           getSliceEndNumber(
             positions.collections,
             lines.length,
-            positions.roles
-          )
+            positions.roles,
+          ),
         );
         const collectionDeps = extractCollections(collectionLines);
         deps.push(...collectionDeps);
@@ -70,8 +70,8 @@ export function extractPackageFile(
           getSliceEndNumber(
             positions.roles,
             lines.length,
-            positions.collections
-          )
+            positions.collections,
+          ),
         );
         const roleDeps = extractRoles(roleLines);
         deps.push(...roleDeps);
@@ -87,7 +87,7 @@ export function extractPackageFile(
     }
     return { deps };
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error extracting ansible-galaxy deps');
+    logger.debug({ err, packageFile }, 'Error extracting ansible-galaxy deps');
     return null;
   }
 }

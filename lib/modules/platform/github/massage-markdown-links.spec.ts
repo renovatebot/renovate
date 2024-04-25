@@ -11,11 +11,11 @@ describe('modules/platform/github/massage-markdown-links', () => {
       [
         'Link [foo/bar#1](https://togithub.com/foo/bar/pull/1) points to [https://github.com/foo/bar/pull/1](https://togithub.com/foo/bar/pull/1).',
         'URL [https://github.com/foo/bar/pull/1](https://togithub.com/foo/bar/pull/1) becomes [foo/bar#1](https://togithub.com/foo/bar/pull/1).',
-      ].join('\n')
+      ].join('\n'),
     );
   });
 
-  test.each`
+  it.each`
     input
     ${'github.com'}
     ${'github.com/foo/bar'}
@@ -57,7 +57,7 @@ describe('modules/platform/github/massage-markdown-links', () => {
     expect(massageMarkdownLinks(inputLink)).toEqual(inputLink);
   });
 
-  test.each`
+  it.each`
     input                                                                                     | output
     ${'github.com/foo/bar/discussions/1'}                                                     | ${'[github.com/foo/bar/discussions/1](togithub.com/foo/bar/discussions/1)'}
     ${'github.com/foo/bar/issues/1'}                                                          | ${'[github.com/foo/bar/issues/1](togithub.com/foo/bar/issues/1)'}
@@ -87,6 +87,6 @@ describe('modules/platform/github/massage-markdown-links', () => {
     '$input -> $output',
     ({ input, output }: { input: string; output: string }) => {
       expect(massageMarkdownLinks(input)).toEqual(output);
-    }
+    },
   );
 });

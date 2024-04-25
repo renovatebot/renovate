@@ -1,10 +1,9 @@
-import fs from 'fs';
+import fs from 'node:fs';
 import upath from 'upath';
-import { regEx } from './regex';
 
 function relatePath(here: string, there: string): string {
-  const thereParts = upath.normalizeTrim(there).split(regEx(/[\\/]/));
-  const hereParts = upath.normalizeTrim(here).split(regEx(/[\\/]/));
+  const thereParts = upath.normalizeTrim(there).split('/');
+  const hereParts = upath.normalizeTrim(here).split('/');
 
   let idx = 0;
   while (
@@ -28,7 +27,7 @@ function relatePath(here: string, there: string): string {
 export function loadModules<T>(
   dirname: string,
   validate?: (module: T, moduleName: string) => boolean,
-  filter: (moduleName: string) => boolean = () => true
+  filter: (moduleName: string) => boolean = () => true,
 ): Record<string, T> {
   const result: Record<string, T> = {};
 

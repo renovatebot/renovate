@@ -52,9 +52,9 @@ describe('util/http/github', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
+    delete process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
-    jest.resetAllMocks();
     repoCache = {};
     repositoryCache.getCache.mockReturnValue(repoCache);
   });
@@ -73,7 +73,7 @@ describe('util/http/github', () => {
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'some-accept, application/vnd.github.machine-man-preview+json'
+        'some-accept, application/vnd.github.machine-man-preview+json',
       );
       expect(req.headers.authorization).toBe('token 123test');
     });
@@ -120,7 +120,7 @@ describe('util/http/github', () => {
           { the_field: ['a'], total: 4 },
           {
             link: `<${url}?page=2>; rel="next", <${url}?page=3>; rel="last"`,
-          }
+          },
         )
         .get(`${url}?page=2`)
         .reply(
@@ -128,7 +128,7 @@ describe('util/http/github', () => {
           { the_field: ['b', 'c'], total: 4 },
           {
             link: `<${url}?page=3>; rel="next", <${url}?page=3>; rel="last"`,
-          }
+          },
         )
         .get(`${url}?page=3`)
         .reply(200, { the_field: ['d'], total: 4 });
@@ -229,11 +229,80 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a']);
     });
 
+    it('rebases GHE Server pagination links', async () => {
+      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
+      // The origin and base URL which Renovate uses (from its config) to reach GHE:
+      const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
+      setBaseUrl(baseUrl);
+      // The hostname from GHE settings, which users use through their browsers to reach GHE:
+      // https://docs.github.com/en/enterprise-server@3.5/admin/configuration/configuring-network-settings/configuring-a-hostname
+      const gheHostname = 'ghe.mycompany.com';
+      // GHE replies to paginated requests with a Link response header whose URLs have this base
+      const gheBaseUrl = `https://${gheHostname}/api/v3`;
+      const apiUrl = '/some-url?per_page=2';
+      httpMock
+        .scope(baseUrl)
+        .get(apiUrl)
+        .reply(200, ['a', 'b'], {
+          link: `<${gheBaseUrl}${apiUrl}&page=2>; rel="next", <${gheBaseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`${apiUrl}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${gheBaseUrl}${apiUrl}&page=3>; rel="next", <${gheBaseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`${apiUrl}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(apiUrl, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('preserves pagination links by default', async () => {
+      const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
+      setBaseUrl(baseUrl);
+      const apiUrl = '/some-url?per_page=2';
+      httpMock
+        .scope(baseUrl)
+        .get(apiUrl)
+        .reply(200, ['a', 'b'], {
+          link: `<${baseUrl}${apiUrl}&page=2>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`${apiUrl}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${baseUrl}${apiUrl}&page=3>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`${apiUrl}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(apiUrl, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('preserves pagination links for github.com', async () => {
+      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
+      const baseUrl = 'https://api.github.com/';
+
+      setBaseUrl(baseUrl);
+      const apiUrl = 'some-url?per_page=2';
+      httpMock
+        .scope(baseUrl)
+        .get('/' + apiUrl)
+        .reply(200, ['a', 'b'], {
+          link: `<${baseUrl}${apiUrl}&page=2>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`/${apiUrl}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${baseUrl}${apiUrl}&page=3>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`/${apiUrl}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(apiUrl, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
     describe('handleGotError', () => {
       async function fail(
         code: number,
         body: any = undefined,
-        headers: httpMock.ReplyHeaders = {}
+        headers: httpMock.ReplyHeaders = {},
       ) {
         const url = '/some-url';
         httpMock
@@ -248,7 +317,7 @@ describe('util/http/github', () => {
               }
               return body;
             },
-            headers
+            headers,
           );
         await githubApi.getJson(url);
       }
@@ -261,15 +330,15 @@ describe('util/http/github', () => {
 
       it('should throw Not found', async () => {
         await expect(fail(404)).rejects.toThrow(
-          'Response code 404 (Not Found)'
+          'Response code 404 (Not Found)',
         );
       });
 
       it('should throw 410', async () => {
         await expect(
-          fail(410, { message: 'Issues are disabled for this repo' })
+          fail(410, { message: 'Issues are disabled for this repo' }),
         ).rejects.toThrow(
-          'Response code 410 (Issues are disabled for this repo)'
+          'Response code 410 (Issues are disabled for this repo)',
         );
       });
 
@@ -278,7 +347,7 @@ describe('util/http/github', () => {
           fail(403, {
             message:
               'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
-          })
+          }),
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       });
 
@@ -287,13 +356,13 @@ describe('util/http/github', () => {
           fail(403, {
             message:
               'You have exceeded a secondary rate limit and have been temporarily blocked from content creation. Please retry your request again later.',
-          })
+          }),
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       });
 
       it('should throw Bad credentials', async () => {
         await expect(
-          fail(401, { message: 'Bad credentials. (401)' })
+          fail(401, { message: 'Bad credentials. (401)' }),
         ).rejects.toThrow(PLATFORM_BAD_CREDENTIALS);
       });
 
@@ -304,8 +373,8 @@ describe('util/http/github', () => {
             { message: 'Bad credentials. (401)' },
             {
               'x-ratelimit-limit': '60',
-            }
-          )
+            },
+          ),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
 
@@ -314,7 +383,7 @@ describe('util/http/github', () => {
         for (let idx = 0; idx < codes.length; idx += 1) {
           const code = codes[idx];
           await expect(failWithError({ code })).rejects.toThrow(
-            EXTERNAL_HOST_ERROR
+            EXTERNAL_HOST_ERROR,
           );
         }
       });
@@ -329,13 +398,15 @@ describe('util/http/github', () => {
 
       it('should throw for unauthorized integration', async () => {
         await expect(
-          fail(403, { message: 'Resource not accessible by integration (403)' })
+          fail(403, {
+            message: 'Resource not accessible by integration (403)',
+          }),
         ).rejects.toThrow(PLATFORM_INTEGRATION_UNAUTHORIZED);
       });
 
       it('should throw for unauthorized integration2', async () => {
         await expect(
-          fail(403, { message: 'Upgrade to GitHub Pro' })
+          fail(403, { message: 'Upgrade to GitHub Pro' }),
         ).rejects.toThrow('Upgrade to GitHub Pro');
       });
 
@@ -343,7 +414,7 @@ describe('util/http/github', () => {
         await expect(
           fail(403, {
             message: 'You have triggered an abuse detection mechanism',
-          })
+          }),
         ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       });
 
@@ -352,7 +423,7 @@ describe('util/http/github', () => {
           fail(422, {
             message: 'foobar',
             errors: [{ code: 'invalid' }],
-          })
+          }),
         ).rejects.toThrow(REPOSITORY_CHANGED);
       });
 
@@ -360,7 +431,7 @@ describe('util/http/github', () => {
         await expect(
           fail(422, {
             message: 'foobar',
-          })
+          }),
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       });
 
@@ -368,9 +439,9 @@ describe('util/http/github', () => {
         await expect(
           fail(422, {
             message: 'Review cannot be requested from pull request author.',
-          })
+          }),
         ).rejects.toThrow(
-          'Review cannot be requested from pull request author.'
+          'Review cannot be requested from pull request author.',
         );
       });
 
@@ -379,7 +450,7 @@ describe('util/http/github', () => {
           fail(422, {
             message: 'Validation error',
             errors: [{ message: 'A pull request already exists' }],
-          })
+          }),
         ).rejects.toThrow('Validation error');
       });
 
@@ -387,8 +458,28 @@ describe('util/http/github', () => {
         await expect(
           fail(418, {
             message: 'Sorry, this is a teapot',
-          })
+          }),
         ).rejects.toThrow('Sorry, this is a teapot');
+      });
+
+      it('should throw original error when milestone not found', async () => {
+        const milestoneNotFoundError = {
+          message: 'Validation Failed',
+          errors: [
+            {
+              value: 1,
+              resource: 'Issue',
+              field: 'milestone',
+              code: 'invalid',
+            },
+          ],
+          documentation_url:
+            'https://docs.github.com/rest/issues/issues#update-an-issue',
+        };
+
+        await expect(fail(422, milestoneNotFoundError)).rejects.toThrow(
+          'Validation Failed',
+        );
       });
     });
   });
@@ -482,7 +573,7 @@ describe('util/http/github', () => {
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json'
+        'application/vnd.github.machine-man-preview+json',
       );
     });
 
@@ -498,7 +589,7 @@ describe('util/http/github', () => {
       expect(
         await githubApi.queryRepoField(graphqlQuery, 'testItem', {
           paginate: false,
-        })
+        }),
       ).toEqual([]);
     });
 
@@ -512,7 +603,7 @@ describe('util/http/github', () => {
       expect(
         await githubApi.queryRepoField(graphqlQuery, 'testItem', {
           paginate: false,
-        })
+        }),
       ).toEqual([]);
     });
 
@@ -521,7 +612,7 @@ describe('util/http/github', () => {
       await expect(
         githubApi.queryRepoField(graphqlQuery, 'someItem', {
           paginate: false,
-        })
+        }),
       ).rejects.toThrow("Response code 418 (I'm a Teapot)");
     });
 
@@ -536,7 +627,7 @@ describe('util/http/github', () => {
           },
         });
       expect(
-        await githubApi.queryRepoField(graphqlQuery, 'testItem')
+        await githubApi.queryRepoField(graphqlQuery, 'testItem'),
       ).toMatchInlineSnapshot(`[]`);
     });
 
@@ -551,7 +642,7 @@ describe('util/http/github', () => {
         .reply(200, { data: { repository } });
 
       const res = await githubApi.requestGraphql(graphqlQuery);
-      expect(res?.data).toStrictEqual({ repository });
+      expect(res?.data).toEqual({ repository });
     });
 
     it('queryRepoField', async () => {
@@ -691,7 +782,7 @@ describe('util/http/github', () => {
       await expect(
         githubApi.queryRepoField(graphqlQuery, 'testItem', {
           count: 9,
-        })
+        }),
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
   });

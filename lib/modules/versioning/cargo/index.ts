@@ -12,7 +12,6 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
-  'widen',
   'pin',
   'replace',
 ];
@@ -20,11 +19,10 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 const isVersion = (input: string): boolean => npm.isVersion(input);
 
 function convertToCaret(item: string): string {
-  // In Cargo, "1.2.3" doesn't mean exactly 1.2.3, it means >= 1.2.3 < 2.0.0
-  if (isVersion(item)) {
-    // NOTE: Partial versions like '1.2' don't get converted to '^1.2'
-    // because isVersion('1.2') === false
-    // In cargo and in npm 1.2 is equivalent to 1.2.* so it is correct behavior.
+  // In Cargo, caret versions are used by default, so "1.2.3" actually means ^1.2.3.
+  // Similarly, "0.4" actually means ^0.4.
+  // See: https://doc.rust-lang.org/stable/cargo/reference/specifying-dependencies.html#caret-requirements
+  if (isVersion(item) || isVersion(item + '.0') || isVersion(item + '.0.0')) {
     return '^' + item.trim();
   }
   return item.trim();
@@ -71,14 +69,14 @@ const matches = (version: string, range: string): boolean =>
 
 function getSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return npm.getSatisfyingVersion(versions, cargo2npm(range));
 }
 
 function minSatisfyingVersion(
   versions: string[],
-  range: string
+  range: string,
 ): string | null {
   return npm.minSatisfyingVersion(versions, cargo2npm(range));
 }
@@ -94,7 +92,11 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (!currentValue || currentValue === '*') {
-    return currentValue;
+    return rangeStrategy === 'pin' ? `=${newVersion}` : currentValue;
+  }
+  // If the current value is a simple version, bump to fully specified newVersion
+  if (rangeStrategy === 'bump' && regEx(/^\d+(?:\.\d+)*$/).test(currentValue)) {
+    return newVersion;
   }
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';
@@ -110,18 +112,35 @@ function getNewValue({
     currentVersion,
     newVersion,
   });
-  let newCargo = newSemver ? npm2cargo(newSemver) : null;
+  let newCargo = newSemver
+    ? npm2cargo(newSemver)
+    : /* istanbul ignore next: should never happen */ null;
   // istanbul ignore if
   if (!newCargo) {
     logger.info(
       { currentValue, newSemver },
-      'Could not get cargo version from semver'
+      'Could not get cargo version from semver',
     );
     return currentValue;
   }
+  // Keep new range precision the same as current
+  if (
+    (currentValue.startsWith('~') || currentValue.startsWith('^')) &&
+    rangeStrategy === 'replace' &&
+    newCargo.split('.').length > currentValue.split('.').length
+  ) {
+    newCargo = newCargo
+      .split('.')
+      .slice(0, currentValue.split('.').length)
+      .join('.');
+  }
   // Try to reverse any caret we added
   if (newCargo.startsWith('^') && !currentValue.startsWith('^')) {
-    newCargo = newCargo.substring(1);
+    const withoutCaret = newCargo.substring(1);
+    // NOTE: We want the number of components in the new version to match the original.
+    // e.g. "5.0" should be updated to "6.0".
+    const components = currentValue.split('.').length;
+    newCargo = withoutCaret.split('.').slice(0, components).join('.');
   }
   return newCargo;
 }

@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 interface FvmConfig {
   flutterSdkVersion: string;
@@ -9,8 +9,8 @@ interface FvmConfig {
 
 export function extractPackageFile(
   content: string,
-  packageFile: string
-): PackageFile | null {
+  packageFile: string,
+): PackageFileContent | null {
   let fvmConfig: FvmConfig;
   try {
     fvmConfig = JSON.parse(content);
@@ -22,7 +22,7 @@ export function extractPackageFile(
   if (!fvmConfig.flutterSdkVersion) {
     logger.debug(
       { contents: fvmConfig },
-      'FVM config does not have flutterSdkVersion specified'
+      'FVM config does not have flutterSdkVersion specified',
     );
     return null;
   } else if (!is.string(fvmConfig.flutterSdkVersion)) {

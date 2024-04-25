@@ -27,7 +27,7 @@ export function getApiBaseUrl(registryUrl: string | undefined): string {
 
 export function getSourceUrl(
   packageName: string,
-  registryUrl?: string
+  registryUrl?: string,
 ): string {
   const sourceUrlBase = getSourceUrlBase(registryUrl);
   return `${sourceUrlBase}${packageName}`;

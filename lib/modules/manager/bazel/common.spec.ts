@@ -36,7 +36,7 @@ describe('modules/manager/bazel/common', () => {
       const input = `git_repository(name = "foo", deps = ["bar", "baz", "qux"])`;
       const output = updateCode(input, [0, 'deps', 1], 'BAZ');
       expect(output).toBe(
-        `git_repository(name = "foo", deps = ["bar", "BAZ", "qux"])`
+        `git_repository(name = "foo", deps = ["bar", "BAZ", "qux"])`,
       );
     });
 

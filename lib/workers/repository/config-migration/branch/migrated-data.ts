@@ -1,12 +1,15 @@
+import is from '@sindresorhus/is';
 import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
-import type { BuiltInParserName } from 'prettier';
+import type { BuiltInParserName, Options } from 'prettier';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
 import { prettier } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
+import { platform } from '../../../../modules/platform';
+import { scm } from '../../../../modules/platform/scm';
 import { readLocalFile } from '../../../../util/fs';
-import { getFileList } from '../../../../util/git';
+import { EditorConfig } from '../../../../util/json-writer';
 import { detectRepoFileConfig } from '../../init/merge';
 
 export interface MigratedData {
@@ -37,15 +40,20 @@ const prettierConfigFilenames = new Set([
 export type PrettierParser = BuiltInParserName;
 
 export async function applyPrettierFormatting(
+  filename: string,
   content: string,
   parser: PrettierParser,
-  indent?: Indent
+  indent?: Indent,
 ): Promise<string> {
   try {
     logger.trace('applyPrettierFormatting - START');
-    const fileList = await getFileList();
+    const fileList = await scm.getFileList();
     let prettierExists = fileList.some((file) =>
-      prettierConfigFilenames.has(file)
+      prettierConfigFilenames.has(file),
+    );
+
+    const editorconfigExists = fileList.some(
+      (file) => file === '.editorconfig',
     );
 
     if (!prettierExists) {
@@ -55,7 +63,7 @@ export async function applyPrettierFormatting(
           packageJsonContent && JSON.parse(packageJsonContent).prettier;
       } catch {
         logger.warn(
-          'applyPrettierFormatting - Error processing package.json file'
+          'applyPrettierFormatting - Error processing package.json file',
         );
       }
     }
@@ -63,11 +71,25 @@ export async function applyPrettierFormatting(
     if (!prettierExists) {
       return content;
     }
-    const options = {
+
+    const options: Options = {
       parser,
       tabWidth: indent?.amount === 0 ? 2 : indent?.amount,
       useTabs: indent?.type === 'tab',
     };
+
+    if (editorconfigExists) {
+      const editorconf = await EditorConfig.getCodeFormat(filename);
+
+      // https://github.com/prettier/prettier/blob/bab892242a1f9d8fcae50514b9304bf03f2e25ab/src/config/editorconfig/editorconfig-to-prettier.js#L47
+      if (editorconf.maxLineLength) {
+        options.printWidth = is.number(editorconf.maxLineLength)
+          ? editorconf.maxLineLength
+          : Number.POSITIVE_INFINITY;
+      }
+
+      // TODO: support editor config `indent_style` and `indent_size`
+    }
 
     return prettier().format(content, options);
   } finally {
@@ -103,17 +125,14 @@ export class MigratedDataFactory {
     indent,
   }: MigratedData): Promise<string> {
     const parser = upath.extname(filename).replace('.', '') as PrettierParser;
-    return applyPrettierFormatting(content, parser, indent);
+    return applyPrettierFormatting(filename, content, parser, indent);
   }
 
   private static async build(): Promise<MigratedData | null> {
     let res: MigratedData | null = null;
     try {
-      const {
-        configFileName,
-        configFileRaw: raw,
-        configFileParsed = {},
-      } = await detectRepoFileConfig();
+      const { configFileName, configFileParsed = {} } =
+        await detectRepoFileConfig();
 
       // get migrated config
       const { isMigrated, migratedConfig } = migrateConfig(configFileParsed);
@@ -124,9 +143,10 @@ export class MigratedDataFactory {
       delete migratedConfig.errors;
       delete migratedConfig.warnings;
 
+      // TODO #22198
+      const raw = await platform.getRawFile(configFileName!);
+      const indent = detectIndent(raw ?? '');
       // indent defaults to 2 spaces
-      // TODO #7154
-      const indent = detectIndent(raw!);
       const indentSpace = indent.indent ?? '  ';
       const filename = configFileName!;
       let content: string;
@@ -145,7 +165,7 @@ export class MigratedDataFactory {
     } catch (err) {
       logger.debug(
         { err },
-        'MigratedDataFactory.getAsync() Error initializing renovate MigratedData'
+        'MigratedDataFactory.getAsync() Error initializing renovate MigratedData',
       );
     }
     return res;

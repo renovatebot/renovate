@@ -1,3 +1,5 @@
+import is from '@sindresorhus/is';
+import type { PackageRule } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class PackagesMigration extends AbstractMigration {
@@ -7,8 +9,8 @@ export class PackagesMigration extends AbstractMigration {
   override run(value: unknown): void {
     const packageRules = this.get('packageRules');
 
-    let newPackageRules = Array.isArray(packageRules) ? packageRules : [];
-    if (Array.isArray(value)) {
+    let newPackageRules = is.array(packageRules) ? packageRules : [];
+    if (is.array<PackageRule>(value)) {
       newPackageRules = newPackageRules.concat(value);
     }
     this.setHard('packageRules', newPackageRules);

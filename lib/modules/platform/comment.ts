@@ -1,13 +1,10 @@
-import hasha from 'hasha';
 import { getCache } from '../../util/cache/repository';
+import { hash } from '../../util/hash';
 import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from './types';
 import { platform } from '.';
 
-// use sha512: https://www.npmjs.com/package/hasha#algorithm
-const hash = (content: string): string => hasha(content);
-
 export async function ensureComment(
-  commentConfig: EnsureCommentConfig
+  commentConfig: EnsureCommentConfig,
 ): Promise<boolean> {
   const { number, content } = commentConfig;
   const topic = commentConfig.topic ?? '';
@@ -29,7 +26,7 @@ export async function ensureComment(
 }
 
 export async function ensureCommentRemoval(
-  config: EnsureCommentRemovalConfig
+  config: EnsureCommentRemovalConfig,
 ): Promise<void> {
   await platform.ensureCommentRemoval(config);
 
@@ -42,7 +39,7 @@ export async function ensureCommentRemoval(
     } else if (type === 'by-content') {
       const contentHash = hash(config.content);
       for (const [cachedTopic, cachedContentHash] of Object.entries(
-        repoCache.prComments?.[number]
+        repoCache.prComments?.[number],
       )) {
         if (cachedContentHash === contentHash) {
           delete repoCache.prComments?.[number]?.[cachedTopic];

@@ -8,6 +8,7 @@ exports[`config/presets/index getPreset gets linters 1`] = `
   "extends": [
     "packages:emberTemplateLint",
     "packages:eslint",
+    "packages:phpLinters",
     "packages:stylelint",
     "packages:tslint",
   ],
@@ -30,8 +31,8 @@ exports[`config/presets/index resolvePreset migrates automerge in presets 1`] = 
   "automergeType": "pr",
   "branchPrefix": "renovate/",
   "description": [
-    "Prefix \`renovate/\` to all branch names.",
-    "If Renovate detects semantic commits, it will use semantic commit type \`fix\` for dependencies and \`chore\` for all others.",
+    "Add the \`renovate/\` prefix to all branch names.",
+    "Use semantic commit type \`fix\` for dependencies and \`chore\` for all others if semantic commits are in use.",
     "Require all status checks to pass before any automerging.",
     "Pin dependency versions for \`devDependencies\` and retain SemVer ranges for others.",
   ],
@@ -118,8 +119,11 @@ exports[`config/presets/index resolvePreset resolves eslint 1`] = `
   "matchPackageNames": [
     "@types/eslint",
     "babel-eslint",
+    "@babel/eslint-parser",
   ],
   "matchPackagePrefixes": [
+    "@eslint/",
+    "@types/eslint__",
     "@typescript-eslint/",
     "eslint",
   ],
@@ -134,6 +138,10 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
   "matchPackageNames": [
     "@types/eslint",
     "babel-eslint",
+    "@babel/eslint-parser",
+    "friendsofphp/php-cs-fixer",
+    "squizlabs/php_codesniffer",
+    "symplify/easy-coding-standard",
     "codelyzer",
     "prettier",
     "remark-lint",
@@ -144,6 +152,8 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
   ],
   "matchPackagePrefixes": [
     "ember-template-lint",
+    "@eslint/",
+    "@types/eslint__",
     "@typescript-eslint/",
     "eslint",
     "stylelint",
@@ -165,6 +175,10 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
       "matchPackageNames": [
         "@types/eslint",
         "babel-eslint",
+        "@babel/eslint-parser",
+        "friendsofphp/php-cs-fixer",
+        "squizlabs/php_codesniffer",
+        "symplify/easy-coding-standard",
         "codelyzer",
         "prettier",
         "remark-lint",
@@ -175,6 +189,8 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
       ],
       "matchPackagePrefixes": [
         "ember-template-lint",
+        "@eslint/",
+        "@types/eslint__",
         "@typescript-eslint/",
         "eslint",
         "stylelint",

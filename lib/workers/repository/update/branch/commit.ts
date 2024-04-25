@@ -1,24 +1,26 @@
-// TODO #7154
+// TODO #22198
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
 import { GlobalConfig } from '../../../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
+import { scm } from '../../../../modules/platform/scm';
+import type { LongCommitSha } from '../../../../util/git/types';
+import { minimatch } from '../../../../util/minimatch';
 import { sanitize } from '../../../../util/sanitize';
 import type { BranchConfig } from '../../../types';
 
 export function commitFilesToBranch(
-  config: BranchConfig
-): Promise<string | null> {
+  config: BranchConfig,
+): Promise<LongCommitSha | null> {
   let updatedFiles = config.updatedPackageFiles!.concat(
-    config.updatedArtifacts!
+    config.updatedArtifacts!,
   );
   // istanbul ignore if
   if (is.nonEmptyArray(config.excludeCommitPaths)) {
     updatedFiles = updatedFiles.filter(({ path: filePath }) => {
       const matchesExcludePaths = config.excludeCommitPaths!.some(
-        (excludedPath) => minimatch(filePath, excludedPath, { dot: true })
+        (excludedPath) =>
+          minimatch(excludedPath, { dot: true }).match(filePath),
       );
       if (matchesExcludePaths) {
         logger.debug(`Excluding ${filePath} from commit`);
@@ -45,13 +47,13 @@ export function commitFilesToBranch(
   ) {
     logger.debug(
       { branchName: config.branchName },
-      'Secrets exposed in branchName or commitMessage'
+      'Secrets exposed in branchName or commitMessage',
     );
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
 
   // API will know whether to create new branch or not
-  return commitAndPush({
+  return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName: config.branchName,
     files: updatedFiles,

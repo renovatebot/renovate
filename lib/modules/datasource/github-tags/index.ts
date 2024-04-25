@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { queryReleases, queryTags } from '../../../util/github/graphql';
 import type { GithubReleaseItem } from '../../../util/github/graphql/types';
+import { findCommitOfTag } from '../../../util/github/tags';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { Datasource } from '../datasource';
@@ -17,6 +18,8 @@ export class GithubTagsDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://github.com'];
 
+  override readonly registryStrategy = 'hunt';
+
   override http: GithubHttp;
 
   constructor() {
@@ -24,29 +27,9 @@ export class GithubTagsDatasource extends Datasource {
     this.http = new GithubHttp(GithubTagsDatasource.id);
   }
 
-  async getTagCommit(
-    registryUrl: string | undefined,
-    packageName: string,
-    tag: string
-  ): Promise<string | null> {
-    try {
-      const tags = await queryTags({ packageName, registryUrl }, this.http);
-      const tagItem = tags.find(({ version }) => version === tag);
-      if (tagItem) {
-        return tagItem.hash;
-      }
-    } catch (err) {
-      logger.debug(
-        { githubRepo: packageName, err },
-        'Error getting tag commit from GitHub repo'
-      );
-    }
-    return null;
-  }
-
   async getCommit(
     registryUrl: string | undefined,
-    githubRepo: string
+    githubRepo: string,
   ): Promise<string | null> {
     const apiBaseUrl = getApiBaseUrl(registryUrl);
     let digest: string | null = null;
@@ -57,7 +40,7 @@ export class GithubTagsDatasource extends Datasource {
     } catch (err) {
       logger.debug(
         { githubRepo, err, registryUrl },
-        'Error getting latest commit from GitHub repo'
+        'Error getting latest commit from GitHub repo',
       );
     }
     return digest;
@@ -72,25 +55,26 @@ export class GithubTagsDatasource extends Datasource {
    */
   override getDigest(
     { packageName: repo, registryUrl }: Partial<DigestConfig>,
-    newValue?: string
+    newValue?: string,
   ): Promise<string | null> {
     return newValue
-      ? this.getTagCommit(registryUrl, repo!, newValue)
+      ? findCommitOfTag(registryUrl, repo!, newValue, this.http)
       : this.getCommit(registryUrl, repo!);
   }
 
   override async getReleases(
-    config: GetReleasesConfig
+    config: GetReleasesConfig,
   ): Promise<ReleaseResult> {
     const { registryUrl, packageName: repo } = config;
     const sourceUrl = getSourceUrl(repo, registryUrl);
     const tagsResult = await queryTags(config, this.http);
     const releases: Release[] = tagsResult.map(
-      ({ version, releaseTimestamp, gitRef }) => ({
+      ({ version, releaseTimestamp, gitRef, hash }) => ({
+        newDigest: hash,
         version,
         releaseTimestamp,
         gitRef,
-      })
+      }),
     );
 
     try {

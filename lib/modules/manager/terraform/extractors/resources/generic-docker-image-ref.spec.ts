@@ -4,7 +4,7 @@ describe('modules/manager/terraform/extractors/resources/generic-docker-image-re
   const extractor = new GenericDockerImageRefExtractor();
 
   it('return empty array if no resource is found', () => {
-    const res = extractor.extract({});
+    const res = extractor.extract({}, [], {});
     expect(res).toBeArrayOfSize(0);
   });
 });

@@ -4,7 +4,7 @@ import { isVersion } from '../../versioning/ruby';
 
 const DEP_REGEX = new RegExp('(?<=\\().*(?=\\))'); // TODO #12872  (?<=re)	after text matching
 export function extractLockFileEntries(
-  lockFileContent: string
+  lockFileContent: string,
 ): Map<string, string> {
   const gemLock = new Map<string, string>();
   try {

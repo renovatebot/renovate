@@ -1,4 +1,4 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
+import { RenovateConfig, partial } from '../../../../../test/util';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { getConfigDesc } from './config-description';
 
@@ -7,8 +7,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
-      config = getConfig();
+      config = partial<RenovateConfig>();
     });
 
     it('returns empty', () => {
@@ -49,7 +48,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
           - Start dependency updates only once this onboarding PR is merged
           - Run Renovate on following schedule: before 5am
 
-        🔡 Would you like to change the way Renovate is upgrading your dependencies? Simply edit the \`renovate.json\` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time Renovate runs.
+        🔡 Do you want to change how Renovate upgrades your dependencies? Add your custom config to \`renovate.json\` in this branch. Renovate will update the Pull Request description the next time it runs.
 
         ---
         "
@@ -82,6 +81,15 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       const res = getConfigDesc(config);
       expect(res).toMatchSnapshot();
       expect(res.indexOf('`renovate.json`')).not.toBe(-1);
+    });
+
+    it('include retry/refresh checkbox message only if onboardingRebaseCheckbox is true', () => {
+      delete config.description;
+      config.schedule = ['before 5am'];
+      config.onboardingConfigFileName = '.github/renovate.json';
+      config.onboardingRebaseCheckbox = true;
+      const res = getConfigDesc(config);
+      expect(res).toMatchSnapshot();
     });
   });
 });

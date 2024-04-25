@@ -36,22 +36,22 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
       if (is.string(val) && val.includes('{{baseDir}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{baseDir}}/g),
-          '{{packageFileDir}}'
+          '{{packageFileDir}}',
         );
       } else if (is.string(val) && val.includes('{{lookupName}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{lookupName}}/g),
-          '{{packageName}}'
+          '{{packageName}}',
         );
       } else if (is.string(val) && val.includes('{{depNameShort}}')) {
         migratedConfig[key] = val.replace(
           regEx(/{{depNameShort}}/g),
-          '{{depName}}'
+          '{{depName}}',
         );
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
-          '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}'
+          '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}',
         );
       } else if (optionTypes[key] === 'object' && is.boolean(val)) {
         migratedConfig[key] = { enabled: val };
@@ -99,9 +99,33 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         for (const [from, to] of Object.entries(migratedTemplates)) {
           migratedConfig[key] = (migratedConfig[key] as string).replace(
             regEx(from, 'g'),
-            to
+            to,
           );
         }
+      }
+    }
+    const languages = [
+      'docker',
+      'dotnet',
+      'golang',
+      'java',
+      'js',
+      'node',
+      'php',
+      'python',
+      'ruby',
+      'rust',
+    ];
+    for (const language of languages) {
+      if (is.nonEmptyObject(migratedConfig[language])) {
+        migratedConfig.packageRules ??= [];
+        const currentContent = migratedConfig[language] as any;
+        const packageRule = {
+          matchCategories: [language],
+          ...currentContent,
+        };
+        migratedConfig.packageRules.unshift(packageRule);
+        delete migratedConfig[language];
       }
     }
     // Migrate nested packageRules
@@ -113,10 +137,10 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
           logger.debug('Flattening nested packageRules');
           // merge each subrule and add to the parent list
           for (const subrule of packageRule.packageRules) {
-            // TODO: fix types #7154
+            // TODO: fix types #22198
             const combinedRule = mergeChildConfig(
               packageRule,
-              subrule as PackageRule
+              subrule as PackageRule,
             );
             delete combinedRule.packageRules;
             migratedConfig.packageRules.push(combinedRule);
@@ -126,20 +150,34 @@ export function migrateConfig(config: RenovateConfig): MigratedConfig {
         }
       }
     }
+    if (
+      is.nonEmptyObject(migratedConfig['pip-compile']) &&
+      is.nonEmptyArray(migratedConfig['pip-compile'].fileMatch)
+    ) {
+      migratedConfig['pip-compile'].fileMatch = migratedConfig[
+        'pip-compile'
+      ].fileMatch.map((fileMatch) => {
+        const match = fileMatch as string;
+        if (match.endsWith('.in')) {
+          return match.replace(/\.in$/, '.txt');
+        }
+        return match.replace(/\.in\$$/, '.txt$');
+      });
+    }
     if (is.nonEmptyArray(migratedConfig.matchManagers)) {
       if (migratedConfig.matchManagers.includes('gradle-lite')) {
         if (!migratedConfig.matchManagers.includes('gradle')) {
           migratedConfig.matchManagers.push('gradle');
         }
         migratedConfig.matchManagers = migratedConfig.matchManagers.filter(
-          (manager) => manager !== 'gradle-lite'
+          (manager) => manager !== 'gradle-lite',
         );
       }
     }
     if (is.nonEmptyObject(migratedConfig['gradle-lite'])) {
       migratedConfig.gradle = mergeChildConfig(
         migratedConfig.gradle ?? {},
-        migratedConfig['gradle-lite']
+        migratedConfig['gradle-lite'],
       );
     }
     delete migratedConfig['gradle-lite'];

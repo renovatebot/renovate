@@ -6,7 +6,7 @@ describe('modules/manager/fvm/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for invalid json', () => {
       expect(
-        extractPackageFile('clearly invalid json', packageFile)
+        extractPackageFile('clearly invalid json', packageFile),
       ).toBeNull();
     });
 
@@ -18,15 +18,15 @@ describe('modules/manager/fvm/extract', () => {
       expect(
         extractPackageFile(
           '{"flutterSdkVersion": 2.1, "flavors": {}}',
-          packageFile
-        )
+          packageFile,
+        ),
       ).toBeNull();
     });
 
     it('returns a result', () => {
       const res = extractPackageFile(
         '{"flutterSdkVersion": "2.10.1", "flavors": {}}',
-        packageFile
+        packageFile,
       );
       expect(res?.deps).toEqual([
         {
@@ -41,7 +41,7 @@ describe('modules/manager/fvm/extract', () => {
     it('supports non range', () => {
       const res = extractPackageFile(
         '{"flutterSdkVersion": "stable", "flavors": {}}',
-        packageFile
+        packageFile,
       );
       expect(res?.deps).toEqual([
         {

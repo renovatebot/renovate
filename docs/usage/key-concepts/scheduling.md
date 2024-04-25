@@ -43,7 +43,7 @@ At a high level you need to follow these steps:
 
 1. Tell Renovate what `timezone` you want to use
 1. Learn about the scheduling syntax
-1. Optional: configure a "in repository schedule"
+1. Optional: configure an "in repository schedule"
 1. Optional: create packageRules with a custom `schedule` for specific packages
 
 ### Setting your timezone
@@ -52,23 +52,19 @@ By default, Renovate schedules use the UTC timezone.
 If you want Renovate to use your local time, use the `timezone` configuration option.
 The timezone must be a valid [IANA time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
 
-You can set a specific time zone in your local config file like this:
-
-```json
+```json title="Setting a specific timezone in your local config file"
 {
   "timezone": "America/Los_Angeles"
 }
 ```
 
-Read our docs on the [timezone](https://docs.renovatebot.com/configuration-options/#timezone) configuration option.
+Also read the [`timezone` config option docs](../configuration-options.md#timezone).
 
 ### Scheduling syntax
 
 After you've set your local timezone, you can define "days of the week" or "hours of the day" in which Renovate is allowed to make changes.
 
-Examples of the kind of schedules you can create include:
-
-```
+```title="Examples of the kind of schedules you can create"
 every weekend
 before 5:00am
 [after 10pm, before 5:00am]
@@ -88,22 +84,20 @@ The _@breejs/later_ library also handles the concepts of "days", time_before", a
 ### In repository schedule configuration
 
 Reminder: the times when the Renovate process runs are controlled by the bot admin using tools such as `cron`.
-If you use the GitHub hosted app, the default is that Renovate will always be allowed to run.
+If you use the Mend Renovate App, the default is that Renovate will always be allowed to run.
 
 Be sure to schedule enough time for Renovate to process your repository.
 Do not set schedules like "Run Renovate for an hour each Sunday" as you _will_ run into problems.
 
-Say you want Renovate bot to run each day before 2 am:
+Some config examples:
 
-```json
+```json title="Renovate should run each day before 4 am"
 {
-  "schedule": ["before 2am"]
+  "schedule": ["before 4am"]
 }
 ```
 
-Or you could tell Renovate to run outside of common office hours like this:
-
-```json
+```json title="Renovate should run outside of common office hours"
 {
   "schedule": [
     "after 10pm every weekday",
@@ -115,7 +109,7 @@ Or you could tell Renovate to run outside of common office hours like this:
 
 #### Schedule presets
 
-Renovate has preset schedules that you might want to use, go to [Schedule Presets](https://docs.renovatebot.com/presets-schedule/) to see them.
+Renovate has preset schedules that you might want to use, go to [Schedule Presets](../presets-schedule.md) to see them.
 
 These preset schedules only affect when Renovate bot checks for updates, and do not affect any specific dependencies/packages.
 
@@ -123,9 +117,7 @@ These preset schedules only affect when Renovate bot checks for updates, and do 
 
 The scheduling feature can be very useful for "noisy" packages that are updated frequently, such as `aws-sdk`.
 
-Say you want to restrict `aws-sdk` to weekly updates, you would create this package rule:
-
-```json
+```json title="Restrict aws-sdk to weekly updates"
 {
   "packageRules": [
     {
@@ -139,4 +131,4 @@ Say you want to restrict `aws-sdk` to weekly updates, you would create this pack
 The "schedule" property must _always_ be defined in an array, even if you only set a single schedule.
 Multiple entries in the array means "or".
 
-Read the [schedule config option](https://docs.renovatebot.com/configuration-options/#schedule) documentation to learn more.
+Read the [schedule config option](../configuration-options.md#schedule) documentation to learn more.

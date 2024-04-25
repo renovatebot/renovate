@@ -56,7 +56,7 @@ describe('util/promises', () => {
 
     it('throws aggregate error for different error messages', async () => {
       await expect(
-        p.map([1, 2, 3], (x) => Promise.reject(new Error(`error ${x}`)))
+        p.map([1, 2, 3], (x) => Promise.reject(new Error(`error ${x}`))),
       ).rejects.toHaveProperty('name', 'AggregateError');
     });
 
@@ -70,7 +70,7 @@ describe('util/promises', () => {
             () => Promise.resolve('ok'),
             () => Promise.reject(unknownErr),
           ],
-          { stopOnError: true }
+          { stopOnError: true },
         );
       } catch (err) {
         res = err;

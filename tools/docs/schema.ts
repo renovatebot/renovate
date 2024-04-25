@@ -49,7 +49,12 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
     if (hasKey('format', option) && option.format) {
       temp.format = option.format;
     }
-    if (option.allowedValues) {
+    if (option.name === 'versioning') {
+      temp.oneOf = [
+        { enum: option.allowedValues },
+        { type: 'string', pattern: '^regex:' },
+      ];
+    } else if (option.allowedValues) {
       temp.enum = option.allowedValues;
     }
   }
@@ -70,7 +75,7 @@ function createSingleConfig(option: RenovateOptions): Record<string, unknown> {
 
 function createSchemaForParentConfigs(): void {
   for (const option of options) {
-    if (!option.parent) {
+    if (!option.parents) {
       properties[option.name] = createSingleConfig(option);
     }
   }
@@ -78,24 +83,46 @@ function createSchemaForParentConfigs(): void {
 
 function addChildrenArrayInParents(): void {
   for (const option of options) {
-    if (option.parent) {
-      properties[option.parent].items = {
-        allOf: [
-          {
-            type: 'object',
-            properties: {},
-          },
-        ],
-      };
+    if (option.parents) {
+      for (const parent of option.parents) {
+        properties[parent].items = {
+          allOf: [
+            {
+              type: 'object',
+              properties: {
+                description: {
+                  oneOf: [
+                    {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        description:
+                          'A custom description for this configuration object',
+                      },
+                    },
+                    {
+                      type: 'string',
+                      description:
+                        'A custom description for this configuration object',
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+        };
+      }
     }
   }
 }
 
 function createSchemaForChildConfigs(): void {
   for (const option of options) {
-    if (option.parent) {
-      properties[option.parent].items.allOf[0].properties[option.name] =
-        createSingleConfig(option);
+    if (option.parents) {
+      for (const parent of option.parents) {
+        properties[parent].items.allOf[0].properties[option.name] =
+          createSingleConfig(option);
+      }
     }
   }
 }
@@ -106,6 +133,6 @@ export async function generateSchema(dist: string): Promise<void> {
   createSchemaForChildConfigs();
   await updateFile(
     `${dist}/renovate-schema.json`,
-    `${JSON.stringify(schema, null, 2)}\n`
+    `${JSON.stringify(schema, null, 2)}\n`,
   );
 }

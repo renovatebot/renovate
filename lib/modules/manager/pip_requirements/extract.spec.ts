@@ -47,6 +47,46 @@ describe('modules/manager/pip_requirements/extract', () => {
       expect(res?.deps).toHaveLength(4);
     });
 
+    it('extracts dependencies with --index-url short code', () => {
+      const requirements = `-i http://example.com/private-pypi/
+some-package==0.3.1`;
+
+      const res = extractPackageFile(requirements);
+
+      expect(res).toMatchObject({
+        deps: [
+          {
+            currentValue: '==0.3.1',
+            currentVersion: '0.3.1',
+            datasource: 'pypi',
+            depName: 'some-package',
+          },
+        ],
+      });
+    });
+
+    it('extracts --requirement short code option', () => {
+      const requirements = `-r base.txt
+some-package==0.3.1`;
+
+      const res = extractPackageFile(requirements);
+
+      expect(res).toHaveProperty('managerData', {
+        requirementsFiles: ['base.txt'],
+      });
+    });
+
+    it('extracts --constraints short code option', () => {
+      const requirements = `-c constrain.txt
+some-package==0.3.1`;
+
+      const res = extractPackageFile(requirements);
+
+      expect(res).toHaveProperty('managerData', {
+        constraintsFiles: ['constrain.txt'],
+      });
+    });
+
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(requirements2)?.deps;
       expect(res).toMatchSnapshot();

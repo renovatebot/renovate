@@ -12,7 +12,7 @@ class TestDatasource extends Datasource {
   }
 
   async getReleases(
-    getReleasesConfig: GetReleasesConfig
+    getReleasesConfig: GetReleasesConfig,
   ): Promise<ReleaseResult | null> {
     try {
       await this.http.get(exampleUrl);
@@ -30,7 +30,17 @@ describe('modules/datasource/datasource', () => {
     httpMock.scope(exampleUrl).get('/').reply(429);
 
     await expect(
-      testDatasource.getReleases(partial<GetReleasesConfig>({}))
+      testDatasource.getReleases(partial<GetReleasesConfig>()),
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+  });
+
+  it('should throw on statusCode >=500 && <600', async () => {
+    const testDatasource = new TestDatasource();
+
+    httpMock.scope(exampleUrl).get('/').reply(504);
+
+    await expect(
+      testDatasource.getReleases(partial<GetReleasesConfig>()),
     ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
 });

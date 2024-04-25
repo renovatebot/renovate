@@ -14,7 +14,21 @@ If you want help with your Renovate configuration, go to the [discussions tab in
 
 ## Bug Reports and Feature Requests
 
-If you've found a **bug** or have a **feature request** then please create an issue in this repository (but search first in case a similar issue already exists).
+**Bugs**: First search for related bugs in the issues and discussions, if you don't find anything then:
+
+1. Create a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md)
+1. Open a new _discussion_ and link to the minimal reproduction
+
+For **feature requests**: first search for related requests in the issues and discussions, if you don't find anything: create a _discussion_.
+
+## Rate Limiting of Support Requests through Temporary Blocking
+
+To ensure that the Renovate maintainers don't burn out from dealing with unfriendly behavior, those who display a bad attitude when asking for or receiving support in the repo will be rate limited from further requests through the use of temporary blocking.
+The duration of the temporary block depends on how rude or inconsiderate the behavior is perceived to be, and can be from 1-30 days.
+
+If you have been blocked temporarily and believe that it is due to a misunderstanding, or you regret your comments and wish to make amends, please reach out to the lead maintainer Rhys Arkins by email with any request for early unblocking.
+If/once you are unblocked, you should edit or delete whatever comment lead to the blocking, even if you did not intend it to be rude or inconsiderate.
+Long emails or apologies are undesirable - the maintainers are busy and want to be able to help as many users as possible with the time they have available.
 
 ## Code
 
@@ -26,7 +40,40 @@ Before you start any Pull Request, it's recommended that you open a [discussion]
 That way you can be sure that the maintainer(s) agree on what to change and how, and you can hopefully get a quick merge afterwards.
 Also, let the maintainers know that you plan to work on a particular issue so that no one else starts any duplicate work.
 
-Pull Requests can only be merged once all status checks are green, which means `yarn test` passes, and coverage is 100%.
+### Tests
+
+Pull Requests can only be merged once all status checks are green, which means `pnpm test` passes, and coverage is 100%.
+
+Use these commands to help run your tests:
+
+- To run a single test folder, specify the path
+
+  ```bash
+  pnpm jest platform/gitlab
+  ```
+
+- To run against a single test file, specify down to the filename (suffix is not necessary)
+
+  ```bash
+  pnpm jest platform/gitlab/index
+  ```
+
+- To run a single test batch, the `-t` value must be part of the `describe` value of the test batch
+
+  ```bash
+  pnpm jest platform/gitlab/index -t "getJsonFile"
+  ```
+
+- To run a single test, the `-t` value must be part of the `it` value of the test batch
+
+  ```bash
+  pnpm jest platform/gitlab/index -t "returns file content from given repo"
+  ```
+
+And some options:
+
+- `--verbose=false` to avoid the test list
+- `--collectCoverage=false` to avoid collecting coverage, faster for the part you need the test to pass
 
 ## Do not force push to your pull request branch
 
@@ -35,12 +82,13 @@ This makes it harder for us to review your work because we don't know what has c
 PRs will always be squashed by us when we merge your work.
 Commit as many times as you need in your pull request branch.
 
-If you are updating your PR branch from within the GitHub PR interface, then only use the default "Update branch" button.
+If you're updating your PR branch from within the GitHub PR interface, use the default "Update branch" button.
+This is the "Update with merge commit" option in the dropdown.
 
-Force pushing a PR is OK when:
+Force pushing a PR, or using the "Update with rebase" button is OK when you:
 
-- you need to make large changes on a PR which require a full review anyway
-- you need to bring the branch up-to-date with the target branch and incorporating the changes is more work than to create a new PR
+- make large changes on a PR which require a full review anyway
+- bring the branch up-to-date with the target branch and incorporating the changes is more work than to create a new PR
 
 ## Apply maintainer provided review suggestions
 
@@ -53,8 +101,8 @@ Read the [GitHub docs, Applying suggested changes](https://docs.github.com/en/pu
 
 ## Resolve review comments instead of commenting
 
-A maintainer/contributor can ask you to make changes, without providing a suggestion that you can apply.
-In this case you need to do some work yourself to address the feedback.
+A maintainer/contributor can ask you to make changes, without giving you a _suggestion_ that you can apply.
+In this case you should make the necessary changes.
 
 Once you've done the work, resolve the conversation by selecting the **Resolve conversation** button in the PR overview.
 Avoid posting comments like "I've done the work", or "Done".
@@ -73,7 +121,7 @@ The codebase can be difficult to navigate, especially for a first-time contribut
 We don't want you spending an hour trying to work out something that would take us only a minute to explain.
 
 For that reason, we have a Slack channel dedicated to helping anyone who's working on or considering Pull Requests for Renovate.
-Please email rhys@arkins.net and simply mention that you need an invitation to the channel and you'll be added ASAP.
+Please email <rhys@arkins.net> and simply mention that you need an invitation to the channel and you'll be added ASAP.
 
 Important: this Slack group is restricted to development questions only in order to keep the volume of messages lower - all technical support questions should still be posted to this repository's Discussions instead.
 
@@ -82,4 +130,4 @@ Important: this Slack group is restricted to development questions only in order
 Pull Request authors must sign the [Renovate CLA](https://cla-assistant.io/renovateapp/renovate).
 
 If you cannot or do not want to sign this CLA (e.g. your employment contract for your employer may not allow this), you should not submit a PR.
-Open an issue and someone else can do the work.
+Open a discussion and someone else can do the work.

@@ -8,31 +8,49 @@ import {
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
 export const presets: Record<string, Preset> = {
   all: {
-    description: 'All replacements.',
+    description: 'Apply crowd-sourced package replacement rules.',
     extends: [
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
+      'replacements:containerbase',
+      'replacements:cpx-to-maintenance-fork',
       'replacements:cucumber-to-scoped',
+      'replacements:eslint-config-standard-with-typescript-to-eslint-config-love',
+      'replacements:eslint-plugin-node-to-maintained-fork',
+      'replacements:fakerjs-to-scoped',
       'replacements:fastify-to-scoped',
       'replacements:hapi-to-scoped',
       'replacements:jade-to-pug',
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
+      'replacements:k8s-registry-move',
+      'replacements:mem-rename',
       'replacements:middie-to-scoped',
       'replacements:now-to-vercel',
+      'replacements:npm-run-all-to-maintenance-fork',
       'replacements:parcel-css-to-lightningcss',
+      'replacements:passport-saml',
       'replacements:react-query-devtools-to-scoped',
       'replacements:react-query-to-scoped',
       'replacements:react-scripts-ts-to-react-scripts',
+      'replacements:read-pkg-up-rename',
+      'replacements:redux-devtools-extension-to-scope',
       'replacements:renovate-pep440-to-renovatebot-pep440',
+      'replacements:rollup-babel-to-scoped',
+      'replacements:rollup-json-to-scoped',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:rollup-terser-to-scoped',
+      'replacements:rome-to-biome',
+      'replacements:semantic-release-replace-plugin-to-unscoped',
+      'replacements:spectre-cli-to-spectre-console-cli',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
     ],
+    ignoreDeps: [], // Hack to improve onboarding PR description
   },
   'apollo-server-to-scoped': {
-    description: '`apollo-server` packages became scoped',
+    description: '`apollo-server` packages became scoped.',
     packageRules: [
       {
         matchCurrentVersion: '>=3.10.3',
@@ -101,6 +119,75 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  containerbase: {
+    description: 'Replace containerbase dependencies.',
+    packageRules: [
+      {
+        description:
+          'Replace `containerbase/(buildpack|base)` and `renovate/buildpack` with `ghcr.io/containerbase/base`.',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?containerbase/(?:buildpack|base)$',
+          '^ghcr\\.io/containerbase/buildpack$',
+          '^(?:docker\\.io/)?renovate/buildpack$',
+        ],
+        replacementName: 'ghcr.io/containerbase/base',
+      },
+      {
+        description:
+          'Replace `containerbase/node` and `renovate/node` with `ghcr.io/containerbase/node`.',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?(?:containerbase|renovate)/node$',
+        ],
+        replacementName: 'ghcr.io/containerbase/node',
+      },
+      {
+        description:
+          'Replace `containerbase/sidecar` and `renovate/sidecar` with `ghcr.io/containerbase/sidecar`.',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?(?:containerbase|renovate)/sidecar$',
+        ],
+        replacementName: 'ghcr.io/containerbase/sidecar',
+      },
+      {
+        description:
+          'Replace `renovatebot/internal-tools` with `containerbase/internal-tools`.',
+        matchDatasources: ['github-tags'],
+        matchPackageNames: ['renovatebot/internal-tools'],
+        replacementName: 'containerbase/internal-tools',
+      },
+      {
+        description: 'Replace `renovate` `slim` docker tag with `latest`.',
+        matchCurrentValue: '/^slim$/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['ghcr.io/renovatebot/renovate'],
+        matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+        replacementVersion: 'latest',
+      },
+      {
+        description: 'Remove `renovate` `-slim` docker tag suffix.',
+        extractVersion: '^(?<version>.+)-slim$',
+        matchCurrentValue: '/-slim$/',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['ghcr.io/renovatebot/renovate'],
+        matchPackagePatterns: ['^(?:docker\\.io/)?renovate/renovate$'],
+        versioning: 'semver',
+      },
+    ],
+  },
+  'cpx-to-maintenance-fork': {
+    description: 'Maintenance fork of `cpx`',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['cpx'],
+        replacementName: 'cpx2',
+        replacementVersion: '2.0.0',
+      },
+    ],
+  },
   'cucumber-to-scoped': {
     description: '`cucumber` became scoped.',
     packageRules: [
@@ -112,8 +199,74 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'eslint-config-standard-with-typescript-to-eslint-config-love': {
+    description:
+      '`eslint-config-standard-with-typescript` was renamed to `eslint-config-love`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^43.0.1',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['eslint-config-standard-with-typescript'],
+        replacementName: 'eslint-config-love',
+        replacementVersion: '43.1.0',
+      },
+    ],
+  },
+  'eslint-plugin-node-to-maintained-fork': {
+    description:
+      'Replace stale `eslint-plugin-node` with a maintained fork: `eslint-plugin-n`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^11.1.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['eslint-plugin-node'],
+        replacementName: 'eslint-plugin-n',
+        replacementVersion: '14.0.0',
+      },
+    ],
+  },
+  'fakerjs-to-scoped': {
+    description: '`fakerjs` packages became scoped.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '5.5.3',
+      },
+      {
+        matchCurrentVersion: '>=4.0.0 <5.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '4.1.0',
+      },
+      {
+        matchCurrentVersion: '>=3.0.0 <4.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '3.1.0',
+      },
+      {
+        matchCurrentVersion: '>=2.0.0 <3.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '2.1.5',
+      },
+      {
+        matchCurrentVersion: '<2.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['faker'],
+        replacementName: '@faker-js/faker',
+        replacementVersion: '1.1.0',
+      },
+    ],
+  },
   'fastify-to-scoped': {
-    description: '`fastify` packages became scoped',
+    description: '`fastify` packages became scoped.',
     packageRules: [
       {
         matchCurrentVersion: '>=3.3.0 <4.0.0',
@@ -514,6 +667,30 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'k8s-registry-move': {
+    description:
+      'The Kubernetes container registry has changed from `k8s.gcr.io` to `registry.k8s.io`.',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackagePatterns: ['^k8s\\.gcr\\.io/.+$'],
+        replacementNameTemplate:
+          "{{{replace 'k8s\\.gcr\\.io/' 'registry.k8s.io/' packageName}}}",
+      },
+    ],
+  },
+  'mem-rename': {
+    description: '`mem` was renamed to `memoize`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^10.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['mem'],
+        replacementName: 'memoize',
+        replacementVersion: '10.0.0',
+      },
+    ],
+  },
   'middie-to-scoped': {
     description: '`middie` became scoped.',
     packageRules: [
@@ -538,14 +715,36 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'npm-run-all-to-maintenance-fork': {
+    description: 'Maintenance fork of `npm-run-all`',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['npm-run-all'],
+        replacementName: 'npm-run-all2',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
   'parcel-css-to-lightningcss': {
-    description: '`@parcel/css` was renamed `lightningcss`.',
+    description: '`@parcel/css` was renamed to `lightningcss`.',
     packageRules: [
       {
         matchDatasources: ['npm'],
         matchPackageNames: ['@parcel/css'],
         replacementName: 'lightningcss',
         replacementVersion: '1.14.0',
+      },
+    ],
+  },
+  'passport-saml': {
+    description: '`passport-saml` was renamed to `@node-saml/passport-saml`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['passport-saml'],
+        replacementName: '@node-saml/passport-saml',
+        replacementVersion: '4.0.4',
       },
     ],
   },
@@ -576,13 +775,24 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'react-scripts-ts-to-react-scripts': {
-    description: '`react-scripts` supports typescripts since version 2.1.0.',
+    description: '`react-scripts` supports TypeScript since version `2.1.0`.',
     packageRules: [
       {
         matchDatasources: ['npm'],
         matchPackageNames: ['react-scripts-ts'],
         replacementName: 'react-scripts',
         replacementVersion: '2.1.8',
+      },
+    ],
+  },
+  'read-pkg-up-rename': {
+    description: '`read-pkg-up` was renamed to `read-package-up`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['read-pkg-up'],
+        replacementName: 'read-package-up',
+        replacementVersion: '11.0.0',
       },
     ],
   },
@@ -610,6 +820,28 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'rollup-babel-to-scoped': {
+    description: 'The babel plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-babel'],
+        replacementName: '@rollup/plugin-babel',
+        replacementVersion: '5.0.0',
+      },
+    ],
+  },
+  'rollup-json-to-scoped': {
+    description: 'The json plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-json'],
+        replacementName: '@rollup/plugin-json',
+        replacementVersion: '4.0.0',
+      },
+    ],
+  },
   'rollup-node-resolve-to-scoped': {
     description: 'The node-resolve plugin for rollup became scoped.',
     packageRules: [
@@ -618,6 +850,42 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rollup-plugin-node-resolve'],
         replacementName: '@rollup/plugin-node-resolve',
         replacementVersion: '6.0.0',
+      },
+    ],
+  },
+  'rollup-terser-to-scoped': {
+    description: 'The terser plugin for rollup became scoped.',
+    packageRules: [
+      {
+        matchCurrentVersion: '>=7.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rollup-plugin-terser'],
+        replacementName: '@rollup/plugin-terser',
+        replacementVersion: '0.1.0',
+      },
+    ],
+  },
+  'rome-to-biome': {
+    description:
+      'The Rome repository is archived, and Biome is the community replacement. Read [the Biome announcement](https://biomejs.dev/blog/annoucing-biome/) for migration instructions.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['rome'],
+        replacementName: '@biomejs/biome',
+        replacementVersion: '1.0.0',
+      },
+    ],
+  },
+  'semantic-release-replace-plugin-to-unscoped': {
+    description:
+      '`semantic-release-replace-plugin` was moved out of the `google` organization.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['@google/semantic-release-replace-plugin'],
+        replacementName: 'semantic-release-replace-plugin',
+        replacementVersion: '1.2.1',
       },
     ],
   },
@@ -700,7 +968,7 @@ const mui: PresetTemplate = {
 
 const messageFormat: PresetTemplate = {
   description:
-    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
+    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}` to `@messageformat/{{package}}`.',
   packageRules: [
     {
       matchCurrentVersion: '>=2.0.0 <3.0.0',
@@ -727,7 +995,7 @@ const messageFormat: PresetTemplate = {
       replacementVersion: '5.0.0',
     },
   ],
-  title: 'messageFormat-{{package}}-to-@messageformat/{{package}}',
+  title: 'messageFormat-to-scoped',
 };
 
 addPresets(presets, messageFormat, mui);

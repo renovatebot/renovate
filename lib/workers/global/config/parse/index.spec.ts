@@ -7,11 +7,7 @@ import * as _hostRulesFromEnv from './host-rules-from-env';
 jest.mock('../../../../modules/datasource/npm');
 jest.mock('../../../../util/fs');
 jest.mock('./host-rules-from-env');
-try {
-  jest.mock('../../config.js');
-} catch (err) {
-  // file does not exist
-}
+jest.mock('../../config.js', () => ({}), { virtual: true });
 
 const { hostRulesFromEnv } = mocked(_hostRulesFromEnv);
 
@@ -27,10 +23,9 @@ describe('workers/global/config/parse/index', () => {
       defaultEnv = {
         RENOVATE_CONFIG_FILE: upath.resolve(
           __dirname,
-          './__fixtures__/default.js'
+          './__fixtures__/default.js',
         ),
       };
-      jest.mock('delay', () => Promise.resolve());
     });
 
     it('supports token in env', async () => {
@@ -47,7 +42,7 @@ describe('workers/global/config/parse/index', () => {
       ]);
       const parsedConfig = await configParser.parseConfigs(
         defaultEnv,
-        defaultArgv
+        defaultArgv,
       );
       expect(parsedConfig).toContainEntries([
         ['token', 'abc'],
@@ -92,7 +87,7 @@ describe('workers/global/config/parse/index', () => {
       const privateKeyPath = upath.join(__dirname, '__fixtures__/private.pem');
       const privateKeyPathOld = upath.join(
         __dirname,
-        '__fixtures__/private.pem'
+        '__fixtures__/private.pem',
       );
       const env: NodeJS.ProcessEnv = {
         ...defaultEnv,
@@ -113,7 +108,7 @@ describe('workers/global/config/parse/index', () => {
       ]);
       const parsedConfig = await configParser.parseConfigs(
         defaultEnv,
-        defaultArgv
+        defaultArgv,
       );
       expect(parsedConfig).toContainEntries([
         ['platform', 'bitbucket'],

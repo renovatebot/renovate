@@ -1,13 +1,19 @@
 import { fs as memfs } from 'memfs';
 import upath from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
-import { git } from '../../../../test/util';
+import { scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { getDependentPackageFiles } from './package-tree';
 
 jest.mock('fs', () => memfs);
-jest.mock('fs-extra', () => Fixtures.fsExtra());
+jest.mock('fs-extra', () =>
+  jest
+    .requireActual<
+      typeof import('../../../../test/fixtures')
+    >('../../../../test/fixtures')
+    .fsExtra(),
+);
 jest.mock('../../../util/git');
 
 const adminConfig: RepoGlobalConfig = {
@@ -27,10 +33,10 @@ describe('modules/manager/nuget/package-tree', () => {
     });
 
     it('returns self for single project', async () => {
-      git.getFileList.mockResolvedValue(['single.csproj']);
+      scm.getFileList.mockResolvedValue(['single.csproj']);
       Fixtures.mock({
         '/tmp/repo/single.csproj': Fixtures.get(
-          'single-project-file/single.csproj'
+          'single-project-file/single.csproj',
         ),
       });
 
@@ -40,7 +46,7 @@ describe('modules/manager/nuget/package-tree', () => {
     });
 
     it('returns self for two projects with no references', async () => {
-      git.getFileList.mockResolvedValue(['one.csproj', 'two.csproj']);
+      scm.getFileList.mockResolvedValue(['one.csproj', 'two.csproj']);
       Fixtures.mock({
         '/tmp/repo/one.csproj': Fixtures.get('two-no-reference/one.csproj'),
         '/tmp/repo/two.csproj': Fixtures.get('two-no-reference/two.csproj'),
@@ -55,13 +61,13 @@ describe('modules/manager/nuget/package-tree', () => {
     });
 
     it('returns projects for two projects with one reference', async () => {
-      git.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
+      scm.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
-          'two-one-reference/one/one.csproj'
+          'two-one-reference/one/one.csproj',
         ),
         '/tmp/repo/two/two.csproj': Fixtures.get(
-          'two-one-reference/two/two.csproj'
+          'two-one-reference/two/two.csproj',
         ),
       });
 
@@ -72,21 +78,21 @@ describe('modules/manager/nuget/package-tree', () => {
     });
 
     it('returns project for two projects with one reference and central versions', async () => {
-      git.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
+      scm.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
-          'two-one-reference-with-central-versions/one/one.csproj'
+          'two-one-reference-with-central-versions/one/one.csproj',
         ),
         '/tmp/repo/two/two.csproj': Fixtures.get(
-          'two-one-reference-with-central-versions/two/two.csproj'
+          'two-one-reference-with-central-versions/two/two.csproj',
         ),
         '/tmp/repo/Directory.Packages.props': Fixtures.get(
-          'two-one-reference-with-central-versions/Directory.Packages.props'
+          'two-one-reference-with-central-versions/Directory.Packages.props',
         ),
       });
 
       expect(
-        await getDependentPackageFiles('Directory.Packages.props', true)
+        await getDependentPackageFiles('Directory.Packages.props', true),
       ).toEqual([
         { isLeaf: false, name: 'one/one.csproj' },
         { isLeaf: true, name: 'two/two.csproj' },
@@ -94,20 +100,20 @@ describe('modules/manager/nuget/package-tree', () => {
     });
 
     it('returns projects for three projects with two linear references', async () => {
-      git.getFileList.mockResolvedValue([
+      scm.getFileList.mockResolvedValue([
         'one/one.csproj',
         'two/two.csproj',
         'three/three.csproj',
       ]);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
-          'three-two-linear-references/one/one.csproj'
+          'three-two-linear-references/one/one.csproj',
         ),
         '/tmp/repo/two/two.csproj': Fixtures.get(
-          'three-two-linear-references/two/two.csproj'
+          'three-two-linear-references/two/two.csproj',
         ),
         '/tmp/repo/three/three.csproj': Fixtures.get(
-          'three-two-linear-references/three/three.csproj'
+          'three-two-linear-references/three/three.csproj',
         ),
       });
 
@@ -128,20 +134,20 @@ describe('modules/manager/nuget/package-tree', () => {
     });
 
     it('returns projects for three projects with two tree-like references', async () => {
-      git.getFileList.mockResolvedValue([
+      scm.getFileList.mockResolvedValue([
         'one/one.csproj',
         'two/two.csproj',
         'three/three.csproj',
       ]);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
-          'three-two-treelike-references/one/one.csproj'
+          'three-two-treelike-references/one/one.csproj',
         ),
         '/tmp/repo/two/two.csproj': Fixtures.get(
-          'three-two-treelike-references/two/two.csproj'
+          'three-two-treelike-references/two/two.csproj',
         ),
         '/tmp/repo/three/three.csproj': Fixtures.get(
-          'three-two-treelike-references/three/three.csproj'
+          'three-two-treelike-references/three/three.csproj',
         ),
       });
 
@@ -160,23 +166,23 @@ describe('modules/manager/nuget/package-tree', () => {
     });
 
     it('throws error on circular reference', async () => {
-      git.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
+      scm.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
-          'circular-reference/one/one.csproj'
+          'circular-reference/one/one.csproj',
         ),
         '/tmp/repo/two/two.csproj': Fixtures.get(
-          'circular-reference/two/two.csproj'
+          'circular-reference/two/two.csproj',
         ),
       });
 
       await expect(getDependentPackageFiles('one/one.csproj')).rejects.toThrow(
-        'Circular reference detected in NuGet package files'
+        'Circular reference detected in NuGet package files',
       );
     });
 
     it('skips on invalid xml file', async () => {
-      git.getFileList.mockResolvedValue(['foo/bar.csproj']);
+      scm.getFileList.mockResolvedValue(['foo/bar.csproj']);
       Fixtures.mock({ '/tmp/repo/foo/bar.csproj': '<invalid' });
       expect(await getDependentPackageFiles('foo/bar.csproj')).toEqual([
         { isLeaf: true, name: 'foo/bar.csproj' },

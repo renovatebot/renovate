@@ -1,9 +1,11 @@
-import { logger } from '../../logger';
 import versionings from './api';
-import { isVersioningApiConstructor } from './common';
+import { Versioning } from './schema';
+import * as semverCoerced from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 
 export * from './types';
+
+export const defaultVersioning = semverCoerced;
 
 export const getVersioningList = (): string[] => Array.from(versionings.keys());
 /**
@@ -14,23 +16,20 @@ export const getVersionings = (): Map<
   VersioningApi | VersioningApiConstructor
 > => versionings;
 
-export function get(versioning: string | undefined): VersioningApi {
-  if (!versioning) {
-    logger.trace('Missing versioning, using semver as fallback.');
-    return versionings.get('semver') as VersioningApi;
-  }
-  const [versioningName, ...versioningRest] = versioning.split(':');
-  const versioningConfig = versioningRest.length
-    ? versioningRest.join(':')
-    : undefined;
+export function get(versioning: string | null | undefined): VersioningApi {
+  const res = Versioning.safeParse(
+    versioning ? versioning : defaultVersioning.id,
+  );
 
-  const theVersioning = versionings.get(versioningName);
-  if (!theVersioning) {
-    logger.info({ versioning }, 'Unknown versioning - defaulting to semver');
-    return versionings.get('semver') as VersioningApi;
+  if (!res.success) {
+    const [issue] = res.error.issues;
+    if (issue && issue.code === 'custom' && issue.params?.error) {
+      throw issue.params.error;
+    }
+
+    // istanbul ignore next: should never happen
+    throw res.error;
   }
-  if (isVersioningApiConstructor(theVersioning)) {
-    return new theVersioning(versioningConfig);
-  }
-  return theVersioning;
+
+  return res.data;
 }

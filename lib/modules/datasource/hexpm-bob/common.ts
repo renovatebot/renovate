@@ -1,3 +1,3 @@
-export const defaultRegistryUrl = 'https://repo.hex.pm';
+export const defaultRegistryUrl = 'https://builds.hex.pm';
 
 export const datasource = 'hexpm-bob';

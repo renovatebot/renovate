@@ -7,19 +7,20 @@ import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
+import type { PipRequirementsManagerData } from './types';
 
 export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
 export const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 const packageGitRegex = regEx(
-  /(?<source>(?:git\+)(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?:(?<user>[^@]+)@)?(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(\.git)?(?:@(?<version>.*))))/
+  /(?<source>(?:git\+)(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?:(?<user>[^@]+)@)?(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(\.git)?(?:@(?<version>.*))))/,
 );
 
 const rangePattern: string = RANGE_PATTERN;
 const specifierPartPattern = `\\s*${rangePattern.replace(
   regEx(/\?<\w+>/g),
-  '?:'
+  '?:',
 )}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
 export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
@@ -41,25 +42,32 @@ export function cleanRegistryUrls(registryUrls: string[]): string[] {
           .replace(regEx(/}$/), '');
         const sub = process.env[envvar];
         return sub ?? match;
-      }
+      },
     );
   });
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+): PackageFileContent<PipRequirementsManagerData> | null {
   logger.trace('pip_requirements.extractPackageFile()');
 
   let registryUrls: string[] = [];
   const additionalRegistryUrls: string[] = [];
+  const additionalRequirementsFiles: string[] = [];
+  const additionalConstraintsFiles: string[] = [];
   content.split(newlineRegex).forEach((line) => {
-    if (line.startsWith('--index-url ')) {
-      registryUrls = [line.substring('--index-url '.length).split(' ')[0]];
-    }
-    if (line.startsWith('--extra-index-url ')) {
+    if (line.startsWith('-i ') || line.startsWith('--index-url ')) {
+      registryUrls = [line.split(' ')[1]];
+    } else if (line.startsWith('--extra-index-url ')) {
       const extraUrl = line
         .substring('--extra-index-url '.length)
         .split(' ')[0];
       additionalRegistryUrls.push(extraUrl);
+    } else if (line.startsWith('-r ')) {
+      additionalRequirementsFiles.push(line.split(' ')[1]);
+    } else if (line.startsWith('-c ')) {
+      additionalConstraintsFiles.push(line.split(' ')[1]);
     }
   });
 
@@ -126,12 +134,24 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!deps.length) {
     return null;
   }
-  const res: PackageFile = { deps };
+  const res: PackageFileContent = { deps };
   if (registryUrls.length > 0) {
     res.registryUrls = cleanRegistryUrls(registryUrls);
   }
   if (additionalRegistryUrls.length) {
     res.additionalRegistryUrls = cleanRegistryUrls(additionalRegistryUrls);
+  }
+  if (additionalRequirementsFiles.length) {
+    if (!res.managerData) {
+      res.managerData = {};
+    }
+    res.managerData.requirementsFiles = additionalRequirementsFiles;
+  }
+  if (additionalConstraintsFiles.length) {
+    if (!res.managerData) {
+      res.managerData = {};
+    }
+    res.managerData.constraintsFiles = additionalConstraintsFiles;
   }
   return res;
 }

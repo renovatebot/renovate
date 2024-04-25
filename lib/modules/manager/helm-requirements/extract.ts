@@ -1,25 +1,29 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
+import { parseSingleYaml } from '../../../util/yaml';
 import { HelmDatasource } from '../../datasource/helm';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
-  config: ExtractConfig
-): PackageFile | null {
+  packageFile: string,
+  config: ExtractConfig,
+): PackageFileContent | null {
   let deps = [];
   // TODO: fix type
   let doc: any;
   try {
-    doc = load(content, { json: true }); // TODO #9610
+    doc = parseSingleYaml(content, { json: true }); // TODO #9610
   } catch (err) {
-    logger.debug(`Failed to parse helm requirements.yaml in ${fileName}`);
+    logger.debug({ packageFile }, `Failed to parse helm requirements.yaml`);
     return null;
   }
   if (!(doc && is.array(doc.dependencies))) {
-    logger.debug(`requirements.yaml in ${fileName} has no dependencies`);
+    logger.debug({ packageFile }, `requirements.yaml has no dependencies`);
     return null;
   }
   deps = doc.dependencies.map((dep: Record<string, any>) => {
@@ -55,7 +59,7 @@ export function extractPackageFile(
     res.registryUrls = [dep.repository];
     if (dep.repository.startsWith('@') || dep.repository.startsWith('alias:')) {
       const repoWithPrefixRemoved = dep.repository.slice(
-        dep.repository[0] === '@' ? 1 : 6
+        dep.repository[0] === '@' ? 1 : 6,
       );
       const alias = config.registryAliases?.[repoWithPrefixRemoved];
       if (alias) {
@@ -71,7 +75,10 @@ export function extractPackageFile(
           res.skipReason = 'local-dependency';
         }
       } catch (err) {
-        logger.debug({ err }, 'Error parsing url');
+        logger.debug(
+          { err, packageFile, url: dep.repository },
+          'Error parsing url',
+        );
         res.skipReason = 'invalid-url';
       }
     }

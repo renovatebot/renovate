@@ -1,4 +1,4 @@
-import url from 'url';
+import url from 'node:url';
 import is from '@sindresorhus/is';
 import ini from 'ini';
 import { GlobalConfig } from '../../../config/global';
@@ -8,7 +8,7 @@ import type { HostRule } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { fromBase64 } from '../../../util/string';
-import { ensureTrailingSlash, validateUrl } from '../../../util/url';
+import { ensureTrailingSlash, isHttpUrl } from '../../../util/url';
 import { defaultRegistryUrls } from './common';
 import type { NpmrcRules } from './types';
 
@@ -89,7 +89,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
   const { registry } = npmrc;
   // packageRules order matters, so look for a default registry first
   if (is.nonEmptyString(registry)) {
-    if (validateUrl(registry)) {
+    if (isHttpUrl(registry)) {
       // Default registry
       rules.packageRules?.push({
         matchDatasources,
@@ -108,7 +108,7 @@ export function convertNpmrcToRules(npmrc: Record<string, any>): NpmrcRules {
     const keyType = keyParts.pop();
     if (keyType === 'registry' && keyParts.length && is.nonEmptyString(value)) {
       const scope = keyParts.join(':');
-      if (validateUrl(value)) {
+      if (isHttpUrl(value)) {
         rules.packageRules?.push({
           matchDatasources,
           matchPackagePrefixes: [scope + '/'],
@@ -131,17 +131,17 @@ export function setNpmrc(input?: string): void {
     npmrcRaw = input;
     logger.debug('Setting npmrc');
     npmrc = ini.parse(input.replace(regEx(/\\n/g), '\n'));
-    const { exposeAllEnv } = GlobalConfig.get();
+    const exposeAllEnv = GlobalConfig.get('exposeAllEnv');
     for (const [key, val] of Object.entries(npmrc)) {
       if (
         !exposeAllEnv &&
         key.endsWith('registry') &&
-        val &&
+        is.string(val) &&
         val.includes('localhost')
       ) {
         logger.debug(
           { key, val },
-          'Detected localhost registry - rejecting npmrc file'
+          'Detected localhost registry - rejecting npmrc file',
         );
         npmrc = existingNpmrc;
         return;
@@ -173,7 +173,7 @@ export function resolveRegistryUrl(packageName: string): string {
       !matchPackagePrefixes ||
       packageName.startsWith(matchPackagePrefixes[0])
     ) {
-      // TODO: fix types #7154
+      // TODO: fix types #22198
       registryUrl = registryUrls![0];
     }
   }
@@ -182,10 +182,10 @@ export function resolveRegistryUrl(packageName: string): string {
 
 export function resolvePackageUrl(
   registryUrl: string,
-  packageName: string
+  packageName: string,
 ): string {
   return url.resolve(
     ensureTrailingSlash(registryUrl),
-    encodeURIComponent(packageName).replace(regEx(/^%40/), '@')
+    encodeURIComponent(packageName).replace(regEx(/^%40/), '@'),
   );
 }

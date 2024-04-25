@@ -1,24 +1,33 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { parseUrl } from '../../../util/url';
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
+import { id as semverId } from '../../versioning/semver';
+import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
+import { parseGoproxy } from './goproxy-parser';
 import { GoDirectDatasource } from './releases-direct';
 import { GoProxyDatasource } from './releases-goproxy';
 
 export class GoDatasource extends Datasource {
   static readonly id = 'go';
 
+  override readonly defaultVersioning = semverId;
+
   constructor() {
     super(GoDatasource.id);
   }
+
+  override readonly defaultConfig = {
+    commitMessageTopic: 'module {{depName}}',
+  };
 
   override readonly customRegistrySupport = false;
 
@@ -27,18 +36,15 @@ export class GoDatasource extends Datasource {
 
   // Pseudo versions https://go.dev/ref/mod#pseudo-versions
   static readonly pversionRegexp = regEx(
-    /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/
+    /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/,
   );
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return process.env.GOPROXY
-      ? this.goproxy.getReleases(config)
-      : this.direct.getReleases(config);
+    return this.goproxy.getReleases(config);
   }
 
   /**
@@ -57,29 +63,39 @@ export class GoDatasource extends Datasource {
   })
   override async getDigest(
     { packageName }: DigestConfig,
-    value?: string | null
+    value?: string | null,
   ): Promise<string | null> {
+    if (parseGoproxy().some(({ url }) => url === 'off')) {
+      logger.debug(
+        `Skip digest fetch for ${packageName} with GOPROXY containing "off"`,
+      );
+      return null;
+    }
+
     const source = await BaseGoDatasource.getDatasource(packageName);
     if (!source) {
       return null;
     }
 
     // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
+    // ignore v0.0.0 versions to fetch the digest of default branch, not the commit of non-existing tag `v0.0.0`
     const tag =
-      value && !GoDatasource.pversionRegexp.test(value) ? value : undefined;
+      value && !GoDatasource.pversionRegexp.test(value) && value !== 'v0.0.0'
+        ? value
+        : undefined;
 
     switch (source.datasource) {
       case GitTagsDatasource.id: {
-        return this.direct.git.getDigest?.(source, tag) ?? null;
+        return this.direct.git.getDigest(source, tag);
       }
       case GithubTagsDatasource.id: {
         return this.direct.github.getDigest(source, tag);
       }
-      case BitBucketTagsDatasource.id: {
-        return this.direct.bitbucket.getDigest?.(source, tag) ?? null;
+      case BitbucketTagsDatasource.id: {
+        return this.direct.bitbucket.getDigest(source, tag);
       }
       case GitlabTagsDatasource.id: {
-        return this.direct.gitlab.getDigest?.(source, tag) ?? null;
+        return this.direct.gitlab.getDigest(source, tag);
       }
       /* istanbul ignore next: can never happen, makes lint happy */
       default: {

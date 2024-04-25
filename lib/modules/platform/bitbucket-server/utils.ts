@@ -1,10 +1,10 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
-import url from 'url';
+import url, { URL } from 'node:url';
 import is from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
-import type { GitProtocol } from '../../../types/git';
+import type { GitOptions, GitProtocol } from '../../../types/git';
 import * as git from '../../../util/git';
 import { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
@@ -50,7 +50,7 @@ const addMaxLength = (inputUrl: string, limit = 100): string => {
 function callApi<T>(
   apiUrl: string,
   method: string,
-  options?: HttpOptions
+  options?: HttpOptions,
 ): Promise<HttpResponse<T>> {
   /* istanbul ignore next */
   switch (method.toLowerCase()) {
@@ -61,7 +61,9 @@ function callApi<T>(
     case 'patch':
       return bitbucketServerHttp.patchJson<T>(apiUrl, options);
     case 'head':
-      return bitbucketServerHttp.headJson<T>(apiUrl, options);
+      return bitbucketServerHttp.headJson(apiUrl, options) as Promise<
+        HttpResponse<T>
+      >;
     case 'delete':
       return bitbucketServerHttp.deleteJson<T>(apiUrl, options);
     case 'get':
@@ -74,7 +76,7 @@ export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
   options?: HttpOptions,
-  limit?: number
+  limit?: number,
 ): Promise<T[]> {
   let accumulator: T[] = [];
   let nextUrl = addMaxLength(reqUrl, limit);
@@ -126,7 +128,7 @@ export function isInvalidReviewersResponse(err: BitbucketError): boolean {
   return (
     errors.length > 0 &&
     errors.every(
-      (error) => error.exceptionName === BITBUCKET_INVALID_REVIEWERS_EXCEPTION
+      (error) => error.exceptionName === BITBUCKET_INVALID_REVIEWERS_EXCEPTION,
     )
   );
 }
@@ -139,7 +141,7 @@ export function getInvalidReviewers(err: BitbucketError): string[] {
       invalidReviewers = invalidReviewers.concat(
         error.reviewerErrors
           ?.map(({ context }) => context)
-          .filter(is.nonEmptyString) ?? []
+          .filter(is.nonEmptyString) ?? [],
       );
     }
   }
@@ -150,17 +152,15 @@ export function getInvalidReviewers(err: BitbucketError): string[] {
 function generateUrlFromEndpoint(
   defaultEndpoint: string,
   opts: HostRule,
-  repository: string
+  repository: string,
 ): string {
   const url = new URL(defaultEndpoint);
   const generatedUrl = git.getUrl({
     protocol: url.protocol as GitProtocol,
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    // TODO: types (#22198)
     auth: `${opts.username}:${opts.password}`,
     host: `${url.host}${url.pathname}${
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      url.pathname!.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+      url.pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
     }scm`,
     repository,
   });
@@ -174,9 +174,10 @@ function injectAuth(url: string, opts: HostRule): string {
     logger.debug(`Invalid url: ${url}`);
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
-  // TODO: null checks (#7154)
-  repoUrl.username = opts.username!;
-  repoUrl.password = opts.password!;
+  if (!opts.token && opts.username && opts.password) {
+    repoUrl.username = opts.username;
+    repoUrl.password = opts.password;
+  }
   return repoUrl.toString();
 }
 
@@ -185,7 +186,7 @@ export function getRepoGitUrl(
   defaultEndpoint: string,
   gitUrl: GitUrlOption | undefined,
   info: BbsRestRepo,
-  opts: HostRule
+  opts: HostRule,
 ): string {
   if (gitUrl === 'ssh') {
     const sshUrl = info.links.clone?.find(({ name }) => name === 'ssh');
@@ -207,4 +208,13 @@ export function getRepoGitUrl(
   }
   // SSH urls can be used directly
   return cloneUrl.href;
+}
+
+export function getExtraCloneOpts(opts: HostRule): GitOptions {
+  if (opts.token) {
+    return {
+      '-c': `http.extraheader=Authorization: Bearer ${opts.token}`,
+    };
+  }
+  return {};
 }

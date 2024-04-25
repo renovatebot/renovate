@@ -1,4 +1,5 @@
 import semver from 'semver';
+import { regEx } from '../../../util/regex';
 import { RANGE_COMPARATOR_PATTERN, VERSION_PATTERN } from './patterns';
 
 interface LetterTag {
@@ -20,7 +21,7 @@ function parseLetterTag(letter?: string, number?: string): LetterTag | null {
     };
     return {
       letter: spellings[letter] || letter,
-      number: number === undefined ? '0' : number,
+      number: number ?? '0',
     };
   }
   if (letter === undefined && number !== undefined) {
@@ -41,7 +42,7 @@ function notEmpty(s: string): boolean {
  */
 export function poetry2semver(
   poetry_version: string,
-  padRelease = true
+  padRelease = true,
 ): string | null {
   const matchGroups = VERSION_PATTERN.exec(poetry_version)?.groups;
   if (!matchGroups) {
@@ -62,12 +63,18 @@ export function poetry2semver(
 
   const parts = [releaseParts.map((num) => num.toString()).join('.')];
   if (pre !== null) {
+    // trim leading zeros from valid numbers
+    pre.number = pre.number.replace(regEx(/^0+(\d+)/), '$1');
     parts.push(`-${pre.letter}.${pre.number}`);
   }
   if (post !== null) {
+    // trim leading zeros from valid numbers
+    post.number = post.number.replace(regEx(/^0+(\d+)/), '$1');
     parts.push(`-${post.letter}.${post.number}`);
   }
   if (dev !== null) {
+    // trim leading zeros from valid numbers
+    dev.number = dev.number.replace(regEx(/^0+(\d+)/), '$1');
     parts.push(`-${dev.letter}.${dev.number}`);
   }
 
@@ -100,7 +107,7 @@ export function semver2poetry(version?: string): string | null {
  * add a '^', because poetry treats versions without operators as
  * exact versions.
  */
-export function poetry2npm(input: string): string {
+export function poetry2npm(input: string, throwOnUnsupported = false): string {
   // replace commas with spaces, then split at valid semver comparators
   const chunks = input
     .split(',')
@@ -113,6 +120,14 @@ export function poetry2npm(input: string): string {
     .map((chunk) => poetry2semver(chunk, false) ?? chunk)
     .join('')
     .replace(/===/, '=');
+  if (throwOnUnsupported) {
+    const isUnsupported = transformed
+      .split(regEx(/\s+/))
+      .some((part) => part.startsWith('!=')); // Patterns like `!=1.2.3` can't be easily translated between poetry/npm
+    if (isUnsupported) {
+      throw new Error('Unsupported by Poetry versioning implementation');
+    }
+  }
   return transformed;
 }
 

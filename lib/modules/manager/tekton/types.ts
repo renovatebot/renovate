@@ -1,11 +1,16 @@
 export interface TektonResource {
   spec: TektonResourceSpec;
   items?: TektonResource[];
+  metadata?: {
+    annotations: Record<string, string>;
+  };
 }
 
-interface TektonResourceSpec {
+export interface TektonResourceSpec {
   // TaskRun
   taskRef: TektonBundle;
+  // TaskRun with inline Pipeline definition
+  taskSpec?: TektonResourceSpec;
   // PipelineRun
   pipelineRef: TektonBundle;
   // PipelienRun with inline Pipeline definition
@@ -16,6 +21,10 @@ interface TektonResourceSpec {
   finally?: TektonResourceSpec[];
   // TriggerTemplate
   resourcetemplates: TektonResource[];
+
+  steps?: TektonStep[];
+  stepTemplate?: TektonStep;
+  sidecars?: TektonStep[];
 }
 
 export interface TektonBundle {
@@ -28,4 +37,8 @@ export interface TektonBundle {
 export interface TektonResolverParamsField {
   name: string;
   value: string;
+}
+
+export interface TektonStep {
+  image?: string;
 }

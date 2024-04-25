@@ -8,7 +8,7 @@ import type {
 } from './types';
 
 const artifactRegex = regEx(
-  '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$'
+  '^[a-zA-Z][-_a-zA-Z0-9]*(?:\\.[a-zA-Z0-9][-_a-zA-Z0-9]*?)*$',
 );
 
 const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+]+)');
@@ -16,10 +16,19 @@ const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+]+)');
 // Extracts version-like and range-like strings
 // from the beginning of input
 export function versionLikeSubstring(
-  input: string | null | undefined
+  input: string | null | undefined,
 ): string | null {
-  const match = input ? versionLikeRegex.exec(input) : null;
-  return match?.groups?.version ?? null;
+  if (!input) {
+    return null;
+  }
+
+  const match = versionLikeRegex.exec(input);
+  const version = match?.groups?.version;
+  if (!version || !regEx(/\d/).test(version)) {
+    return null;
+  }
+
+  return version;
 }
 
 export function isDependencyString(input: string): boolean {
@@ -61,7 +70,7 @@ export function isDependencyString(input: string): boolean {
 }
 
 export function parseDependencyString(
-  input: string
+  input: string,
 ): PackageDependency<GradleManagerData> | null {
   if (!isDependencyString(input)) {
     return null;
@@ -102,6 +111,11 @@ export function isGradleBuildFile(path: string): boolean {
 export function isPropsFile(path: string): boolean {
   const filename = upath.basename(path).toLowerCase();
   return filename === 'gradle.properties';
+}
+
+export function isKotlinSourceFile(path: string): boolean {
+  const filename = upath.basename(path).toLowerCase();
+  return filename.endsWith('.kt');
 }
 
 export function isTOMLFile(path: string): boolean {
@@ -162,7 +176,7 @@ export function reorderFiles(packageFiles: string[]): string[] {
 export function getVars(
   registry: VariableRegistry,
   dir: string,
-  vars: PackageVariables = registry[dir] || {}
+  vars: PackageVariables = registry[dir] || {},
 ): PackageVariables {
   const dirAbs = toAbsolutePath(dir);
   const parentDir = upath.dirname(dirAbs);
@@ -171,4 +185,13 @@ export function getVars(
   }
   const parentVars = registry[parentDir] || {};
   return getVars(registry, parentDir, { ...parentVars, ...vars });
+}
+
+export function updateVars(
+  registry: VariableRegistry,
+  dir: string,
+  newVars: PackageVariables,
+): void {
+  const oldVars = registry[dir] ?? {};
+  registry[dir] = { ...oldVars, ...newVars };
 }

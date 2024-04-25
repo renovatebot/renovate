@@ -8,7 +8,7 @@ describe('config/migrations/custom/packages-migration', () => {
       },
       {
         packageRules: [{ matchPackagePatterns: ['*'] }],
-      }
+      },
     );
   });
 
@@ -23,7 +23,7 @@ describe('config/migrations/custom/packages-migration', () => {
           { matchPackageNames: [] },
           { matchPackagePatterns: ['*'] },
         ],
-      }
+      },
     );
   });
 
@@ -35,7 +35,7 @@ describe('config/migrations/custom/packages-migration', () => {
       },
       {
         packageRules: [{ matchPackageNames: [] }],
-      }
+      },
     );
   });
 });

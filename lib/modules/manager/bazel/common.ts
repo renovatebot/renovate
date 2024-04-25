@@ -4,7 +4,7 @@ import type { Fragment, FragmentPath, FragmentUpdater } from './types';
 
 export function findCodeFragment(
   input: string,
-  path: FragmentPath
+  path: FragmentPath,
 ): Fragment | null {
   const parsed = parse(input);
   if (!parsed) {
@@ -35,7 +35,7 @@ export function findCodeFragment(
 export function patchCodeAtFragment(
   input: string,
   fragment: Fragment,
-  updater: FragmentUpdater
+  updater: FragmentUpdater,
 ): string {
   const { value, offset } = fragment;
   const left = input.slice(0, offset);
@@ -48,10 +48,10 @@ export function patchCodeAtFragment(
 export function patchCodeAtFragments(
   input: string,
   fragments: Fragment[],
-  updater: FragmentUpdater
+  updater: FragmentUpdater,
 ): string {
   const sortedFragments = fragments.sort(
-    ({ offset: a }, { offset: b }) => b - a
+    ({ offset: a }, { offset: b }) => b - a,
   );
   let result = input;
   for (const fragment of sortedFragments) {
@@ -63,7 +63,7 @@ export function patchCodeAtFragments(
 export function updateCode(
   input: string,
   path: FragmentPath,
-  updater: FragmentUpdater
+  updater: FragmentUpdater,
 ): string {
   const fragment = findCodeFragment(input, path);
   if (!fragment) {

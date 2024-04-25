@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -12,7 +13,7 @@ import type { ReadContentResult } from './types';
  * updateArtifacts runs hermit install for each updated dependencies
  */
 export async function updateArtifacts(
-  update: UpdateArtifact
+  update: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName } = update;
   try {
@@ -77,7 +78,7 @@ async function getContent(file: string): Promise<ReadContentResult> {
  */
 function getAddResult(
   path: string,
-  contentRes: ReadContentResult
+  contentRes: ReadContentResult,
 ): UpdateArtifactsResult {
   return {
     file: {
@@ -107,13 +108,13 @@ function getDeleteResult(path: string): UpdateArtifactsResult {
  * has been performed for all packages
  */
 async function getUpdateResult(
-  packageFileName: string
+  packageFileName: string,
 ): Promise<UpdateArtifactsResult[]> {
   const hermitFolder = `${upath.dirname(packageFileName)}/`;
   const hermitChanges = await getRepoStatus(hermitFolder);
   logger.debug(
     { hermitChanges, hermitFolder },
-    `hermit changes after package update`
+    `hermit changes after package update`,
   );
 
   // handle added files
@@ -123,7 +124,7 @@ async function getUpdateResult(
       const contents = await getContent(path);
 
       return getAddResult(path, contents);
-    }
+    },
   );
 
   const deleted = hermitChanges.deleted.map(getDeleteResult);
@@ -136,7 +137,7 @@ async function getUpdateResult(
         getDeleteResult(path), // delete existing link
         getAddResult(path, contents), // add a new link
       ];
-    }
+    },
   );
 
   const renamed = await p.map(
@@ -147,7 +148,7 @@ async function getUpdateResult(
       const toContents = await getContent(to);
 
       return [getDeleteResult(from), getAddResult(to, toContents)];
-    }
+    },
   );
 
   return [
@@ -176,6 +177,8 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
 
   const toInstall = [];
   const from = [];
+  // storing the old package for replacement
+  const toUninstall = [];
 
   for (const pkg of update.updatedDeps) {
     if (!pkg.depName || !pkg.currentVersion || !pkg.newValue) {
@@ -185,32 +188,62 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
           currentVersion: pkg.currentVersion,
           newValue: pkg.newValue,
         },
-        'missing package update information'
+        'missing package update information',
       );
 
       throw new UpdateHermitError(
         getHermitPackage(pkg.depName ?? '', pkg.currentVersion ?? ''),
         getHermitPackage(pkg.depName ?? '', pkg.newValue ?? ''),
-        'invalid package to update'
+        'invalid package to update',
       );
     }
 
     const depName = pkg.depName;
+    const newName = pkg.newName;
     const currentVersion = pkg.currentVersion;
     const newValue = pkg.newValue;
     const fromPackage = getHermitPackage(depName, currentVersion);
-    const toPackage = getHermitPackage(depName, newValue);
+    // newName will be available for replacement
+    const toPackage = getHermitPackage(newName ?? depName, newValue);
     toInstall.push(toPackage);
     from.push(fromPackage);
+    // skips uninstall for version only replacement
+    if (pkg.updateType === 'replacement' && newName !== depName) {
+      toUninstall.push(depName);
+    }
   }
 
   const execOptions: ExecOptions = {
     docker: {},
+    userConfiguredEnv: update?.config?.env,
     cwdFile: update.packageFileName,
   };
 
+  const fromPackages = from.map(quote).join(' ');
+
+  // when a name replacement happens, need to uninstall the old package
+  if (toUninstall.length > 0) {
+    const packagesToUninstall = toUninstall.join(' ');
+    const uninstallCommands = `./hermit uninstall ${packagesToUninstall}`;
+
+    try {
+      const result = await exec(uninstallCommands, execOptions);
+      logger.trace(
+        { stdout: result.stdout },
+        `hermit uninstall command stdout`,
+      );
+    } catch (e) {
+      logger.warn({ err: e }, `error uninstall hermit package for replacement`);
+      throw new UpdateHermitError(
+        fromPackages,
+        packagesToUninstall,
+        e.stderr,
+        e.stdout,
+      );
+    }
+  }
+
   const packagesToInstall = toInstall.join(' ');
-  const fromPackages = from.join(' ');
 
   const execCommands = `./hermit install ${packagesToInstall}`;
   logger.debug(
@@ -218,7 +251,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
       packageFile: update.packageFileName,
       packagesToInstall,
     },
-    `performing updates`
+    `performing updates`,
   );
 
   try {
@@ -230,7 +263,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
       fromPackages,
       packagesToInstall,
       e.stderr,
-      e.stdout
+      e.stdout,
     );
   }
 }

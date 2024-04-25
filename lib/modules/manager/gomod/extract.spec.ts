@@ -1,8 +1,8 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const gomod1 = Fixtures.get('1/go.mod');
-const gomod2 = Fixtures.get('2/go.mod');
+const gomod1 = Fixtures.get('1/go-mod');
+const gomod2 = Fixtures.get('2/go-mod');
 
 describe('modules/manager/gomod/extract', () => {
   describe('extractPackageFile()', () => {
@@ -67,7 +67,6 @@ replace (
             currentValue: '1.18',
             datasource: 'golang-version',
             versioning: 'go-mod-directive',
-            rangeStrategy: 'replace',
           },
           {
             managerData: {
@@ -117,6 +116,47 @@ replace (
             depName: 'k8s.io/code-generator',
             depType: 'replace',
             currentValue: 'v0.17.3',
+            datasource: 'go',
+          },
+        ],
+      });
+    });
+
+    it('extracts the toolchain directive', () => {
+      const goMod = `
+module github.com/renovate-tests/gomod
+go 1.21
+toolchain go1.21.7
+replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0`;
+      const res = extractPackageFile(goMod);
+      expect(res).toEqual({
+        deps: [
+          {
+            managerData: {
+              lineNumber: 2,
+            },
+            depName: 'go',
+            depType: 'golang',
+            currentValue: '1.21',
+            datasource: 'golang-version',
+            versioning: 'go-mod-directive',
+          },
+          {
+            managerData: {
+              lineNumber: 3,
+            },
+            depName: 'go',
+            depType: 'toolchain',
+            currentValue: '1.21.7',
+            datasource: 'golang-version',
+          },
+          {
+            managerData: {
+              lineNumber: 4,
+            },
+            depName: 'github.com/pravesht/gocql',
+            depType: 'replace',
+            currentValue: 'v0.0.0',
             datasource: 'go',
           },
         ],

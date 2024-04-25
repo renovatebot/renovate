@@ -8,7 +8,7 @@ import { matcherOR } from './utils';
 
 function matchesRule(
   inputConfig: PackageRuleInputConfig,
-  packageRule: PackageRule
+  packageRule: PackageRule,
 ): boolean {
   let positiveMatch = true;
   let matchApplied = false;
@@ -18,7 +18,7 @@ function matchesRule(
       'matches',
       groupMatchers,
       inputConfig,
-      packageRule
+      packageRule,
     );
 
     // no rules are defined
@@ -44,7 +44,7 @@ function matchesRule(
       'excludes',
       groupExcludes,
       inputConfig,
-      packageRule
+      packageRule,
     );
 
     // no rules are defined
@@ -61,19 +61,19 @@ function matchesRule(
 }
 
 export function applyPackageRules<T extends PackageRuleInputConfig>(
-  inputConfig: T
+  inputConfig: T,
 ): T {
   let config = { ...inputConfig };
   const packageRules = config.packageRules ?? [];
   logger.trace(
     { dependency: config.depName, packageRules },
-    `Checking against ${packageRules.length} packageRules`
+    `Checking against ${packageRules.length} packageRules`,
   );
   for (const packageRule of packageRules) {
     // This rule is considered matched if there was at least one positive match and no negative matches
     if (matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
-      const toApply = { ...packageRule };
+      const toApply = removeMatchers({ ...packageRule });
       if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {
         // Need to apply groupSlug otherwise the existing one will take precedence
         toApply.groupSlug = slugify(packageRule.groupName, {
@@ -81,16 +81,19 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
         });
       }
       config = mergeChildConfig(config, toApply);
-      delete config.matchPackageNames;
-      delete config.matchPackagePatterns;
-      delete config.matchPackagePrefixes;
-      delete config.excludePackageNames;
-      delete config.excludePackagePatterns;
-      delete config.excludePackagePrefixes;
-      delete config.matchDepTypes;
-      delete config.matchCurrentValue;
-      delete config.matchCurrentVersion;
     }
   }
   return config;
+}
+
+function removeMatchers(
+  packageRule: PackageRule & PackageRuleInputConfig,
+): Record<string, unknown> {
+  for (const key of Object.keys(packageRule)) {
+    if (key.startsWith('match') || key.startsWith('exclude')) {
+      delete packageRule[key];
+    }
+  }
+
+  return packageRule;
 }

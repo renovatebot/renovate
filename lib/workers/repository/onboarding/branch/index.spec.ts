@@ -2,12 +2,13 @@ import { mock } from 'jest-mock-extended';
 import {
   RenovateConfig,
   fs,
-  getConfig,
   git,
   mocked,
   platform,
+  scm,
 } from '../../../../../test/util';
 import { configFileNames } from '../../../../config/app-strings';
+import { getConfig } from '../../../../config/defaults';
 import { GlobalConfig } from '../../../../config/global';
 import {
   REPOSITORY_FORKED,
@@ -17,22 +18,26 @@ import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import * as memCache from '../../../../util/cache/memory';
 import * as _cache from '../../../../util/cache/repository';
-import type { FileAddition } from '../../../../util/git/types';
+import type { RepoCacheData } from '../../../../util/cache/repository/types';
+import type { FileAddition, LongCommitSha } from '../../../../util/git/types';
 import { OnboardingState } from '../common';
 import * as _config from './config';
+import * as _onboardingCache from './onboarding-branch-cache';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
 
-const rebase: any = _rebase;
 const configModule: any = _config;
 
-jest.mock('../../../repository/onboarding/branch/rebase');
 jest.mock('../../../../util/cache/repository');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 jest.mock('./config');
+jest.mock('./rebase');
+jest.mock('./onboarding-branch-cache');
 
 const cache = mocked(_cache);
+const rebase = mocked(_rebase);
+const onboardingCache = mocked(_onboardingCache);
 
 describe('workers/repository/onboarding/branch/index', () => {
   describe('checkOnboardingBranch', () => {
@@ -40,31 +45,30 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     beforeEach(() => {
       memCache.init();
-      jest.resetAllMocks();
       config = getConfig();
       config.repository = 'some/repo';
       OnboardingState.prUpdateRequested = false;
-      git.getFileList.mockResolvedValue([]);
+      scm.getFileList.mockResolvedValue([]);
       cache.getCache.mockReturnValue({});
     });
 
     it('throws if no package files', async () => {
       await expect(checkOnboardingBranch(config)).rejects.toThrow(
-        REPOSITORY_NO_PACKAGE_FILES
+        REPOSITORY_NO_PACKAGE_FILES,
       );
     });
 
     it("doesn't throw if there are no package files and onboardingNoDeps config option is set", async () => {
       config.onboardingNoDeps = true;
       await expect(checkOnboardingBranch(config)).resolves.not.toThrow(
-        REPOSITORY_NO_PACKAGE_FILES
+        REPOSITORY_NO_PACKAGE_FILES,
       );
     });
 
     it('throws if fork', async () => {
       config.isFork = true;
       await expect(checkOnboardingBranch(config)).rejects.toThrow(
-        REPOSITORY_FORKED
+        REPOSITORY_FORKED,
       );
     });
 
@@ -78,25 +82,26 @@ describe('workers/repository/onboarding/branch/index', () => {
       async ({ checkboxEnabled, expected }) => {
         config.onboardingRebaseCheckbox = checkboxEnabled;
         configModule.getOnboardingConfig.mockResolvedValue(
-          config.onboardingConfig
+          config.onboardingConfig,
         );
         configModule.getOnboardingConfigContents.mockResolvedValue(
           '{\n' +
             '  "$schema": "https://docs.renovatebot.com/renovate-schema.json"\n' +
-            '}\n'
+            '}\n',
         );
-        git.getFileList.mockResolvedValue(['package.json']);
+        scm.getFileList.mockResolvedValue(['package.json']);
         fs.readLocalFile.mockResolvedValue('{}');
         await checkOnboardingBranch(config);
-        const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
+        const file = scm.commitAndPush.mock.calls[0][0]
+          .files[0] as FileAddition;
         const contents = file.contents?.toString();
         expect(contents).toBeJsonString();
-        // TODO #7154
+        // TODO #22198
         expect(JSON.parse(contents!)).toEqual({
           $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         });
         expect(OnboardingState.prUpdateRequested).toBe(expected);
-      }
+      },
     );
 
     it('uses discovered onboarding config', async () => {
@@ -107,9 +112,9 @@ describe('workers/repository/onboarding/branch/index', () => {
         '{\n' +
           '  "$schema": "https://docs.renovatebot.com/renovate-schema.json",\n' +
           '  "extends": ["some/renovate-config"]\n' +
-          '}\n'
+          '}\n',
       );
-      git.getFileList.mockResolvedValue(['package.json']);
+      scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
       const expectConfig = {
@@ -122,12 +127,12 @@ describe('workers/repository/onboarding/branch/index', () => {
       delete expectConfig.ignorePresets;
       expect(configModule.getOnboardingConfigContents).toHaveBeenCalledWith(
         expectConfig,
-        configFileNames[0]
+        configFileNames[0],
       );
-      const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
+      const file = scm.commitAndPush.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents?.toString();
       expect(contents).toBeJsonString();
-      // TODO #7154
+      // TODO #22198
       expect(JSON.parse(contents!)).toEqual({
         $schema: 'https://docs.renovatebot.com/renovate-schema.json',
         extends: ['some/renovate-config'],
@@ -144,7 +149,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     it('handles skipped onboarding, requireConfig=required, and a config file', async () => {
       config.requireConfig = 'required';
       config.onboarding = false;
-      git.getFileList.mockResolvedValueOnce(['renovate.json']);
+      scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
@@ -159,21 +164,22 @@ describe('workers/repository/onboarding/branch/index', () => {
     it('handles skipped onboarding, requireConfig=required, and no config file', async () => {
       config.requireConfig = 'required';
       config.onboarding = false;
-      git.getFileList.mockResolvedValueOnce(['package.json']);
+      scm.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const onboardingResult = checkOnboardingBranch(config);
       await expect(onboardingResult).rejects.toThrow('disabled');
     });
 
     it('detects repo is onboarded via file', async () => {
-      git.getFileList.mockResolvedValueOnce(['renovate.json']);
+      scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
+      expect(onboardingCache.deleteOnboardingCache).toHaveBeenCalledTimes(1); // removes onboarding cache when repo is onboarded
     });
 
     it('handles removed cached file name', async () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
-      git.getFileList.mockResolvedValueOnce(['renovate.json']);
+      scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
@@ -183,17 +189,17 @@ describe('workers/repository/onboarding/branch/index', () => {
       platform.getJsonFile.mockResolvedValueOnce({});
       const res = await checkOnboardingBranch(config);
       expect(logger.debug).toHaveBeenCalledWith(
-        'Checking cached config file name'
+        'Checking cached config file name',
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        'Existing config file confirmed'
+        'Existing config file confirmed',
       );
       expect(logger.debug).toHaveBeenCalledWith(
         {
           fileName: '.renovaterc',
           config: {},
         },
-        'Repository config'
+        'Repository config',
       );
       expect(res.repoIsOnboarded).toBeTrue();
     });
@@ -204,10 +210,10 @@ describe('workers/repository/onboarding/branch/index', () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await checkOnboardingBranch(config);
       expect(logger.debug).toHaveBeenCalledWith(
-        'Checking cached config file name'
+        'Checking cached config file name',
       );
       expect(logger.debug).toHaveBeenCalledWith(
-        'Existing config file confirmed'
+        'Existing config file confirmed',
       );
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -216,13 +222,13 @@ describe('workers/repository/onboarding/branch/index', () => {
             renovate: {},
           },
         },
-        'Repository config'
+        'Repository config',
       );
       expect(res.repoIsOnboarded).toBeTrue();
     });
 
     it('detects repo is onboarded via package.json config', async () => {
-      git.getFileList.mockResolvedValueOnce(['package.json']);
+      scm.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{"renovate":{}}');
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
@@ -248,16 +254,139 @@ describe('workers/repository/onboarding/branch/index', () => {
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
 
-    it('updates onboarding branch', async () => {
-      git.getFileList.mockResolvedValue(['package.json']);
+    it('rebases onboarding branch', async () => {
+      const dummyCache = {
+        scan: {
+          master: {
+            sha: 'base_sha',
+            configHash: 'hash',
+            packageFiles: {},
+            extractionFingerprints: {},
+          },
+        },
+      } satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
+      scm.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
-      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('123test');
+      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('new-onboarding-sha');
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(scm.mergeToLocal).toHaveBeenCalledOnce();
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(logger.debug).not.toHaveBeenCalledWith(
+        'Skip processing since the onboarding branch is up to date and default branch has not changed',
+      ); // onboarding cache no longer valid
+      expect(logger.info).toHaveBeenCalledWith(
+        {
+          branch: config.onboardingBranch,
+          commit: 'new-onboarding-sha',
+          onboarding: true,
+        },
+        'Branch updated',
+      );
+    });
+
+    it('skips processing onboarding branch when main/onboarding SHAs have not changed', async () => {
+      GlobalConfig.set({ platform: 'github' });
+      const dummyCache = {
+        onboardingBranchCache: {
+          defaultBranchSha: 'default-sha',
+          onboardingBranchSha: 'onboarding-sha',
+          isConflicted: false,
+          isModified: false,
+          configFileParsed: 'raw',
+          configFileName: 'renovate.json',
+        },
+      } satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
+      scm.getFileList.mockResolvedValue(['package.json']);
+      platform.findPr.mockResolvedValue(null); // finds closed onboarding pr
+      platform.getBranchPr.mockResolvedValueOnce(
+        mock<Pr>({ bodyStruct: { rebaseRequested: false } }),
+      ); // finds open onboarding pr
+      git.getBranchCommit
+        .mockReturnValueOnce('default-sha' as LongCommitSha)
+        .mockReturnValueOnce('default-sha' as LongCommitSha)
+        .mockReturnValueOnce('onboarding-sha' as LongCommitSha);
+      config.onboardingRebaseCheckbox = true;
+      await checkOnboardingBranch(config);
+      expect(scm.commitAndPush).not.toHaveBeenCalled();
+      expect(scm.mergeToLocal).not.toHaveBeenCalled();
+    });
+
+    it('processes modified onboarding branch and invalidates extract cache', async () => {
+      const dummyCache = {
+        scan: {
+          master: {
+            sha: 'default-sha',
+            configHash: 'hash',
+            packageFiles: {},
+            extractionFingerprints: {},
+          },
+        },
+      } satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
+      platform.findPr.mockResolvedValue(null);
+      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+      git.getBranchCommit
+        .mockReturnValueOnce('default-sha' as LongCommitSha)
+        .mockReturnValueOnce('new-onboarding-sha' as LongCommitSha);
+      config.baseBranch = 'master';
+      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
+      onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
+      onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
+      await checkOnboardingBranch(config);
+      expect(scm.mergeToLocal).toHaveBeenCalledOnce();
+      expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
+        'default-sha',
+        'new-onboarding-sha',
+        false,
+        true,
+      );
+      expect(dummyCache).toMatchObject({
+        scan: {},
+      });
+    });
+
+    it('skips processing conflicted onboarding branch', async () => {
+      scm.getFileList.mockResolvedValue(['package.json']);
+      platform.findPr.mockResolvedValue(null);
+      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+      git.getBranchCommit
+        .mockReturnValueOnce('default-sha' as LongCommitSha)
+        .mockReturnValueOnce('onboarding-sha' as LongCommitSha);
+      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
+      onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
+      onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(true);
+      await checkOnboardingBranch(config);
+      expect(scm.mergeToLocal).not.toHaveBeenCalled();
+      expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
+        'default-sha',
+        'onboarding-sha',
+        true,
+        true,
+      );
+    });
+
+    it('sets onboarding cache for existing onboarding branch', async () => {
+      scm.getFileList.mockResolvedValue(['package.json']);
+      platform.findPr.mockResolvedValue(null);
+      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+      git.getBranchCommit
+        .mockReturnValueOnce('default-sha' as LongCommitSha)
+        .mockReturnValueOnce('onboarding-sha' as LongCommitSha);
+      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(false);
+      await checkOnboardingBranch(config);
+      expect(scm.mergeToLocal).toHaveBeenCalled();
+      expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
+        'default-sha',
+        'onboarding-sha',
+        false,
+        false,
+      );
     });
 
     describe('tests onboarding rebase/retry checkbox handling', () => {
@@ -265,9 +394,9 @@ describe('workers/repository/onboarding/branch/index', () => {
         GlobalConfig.set({ platform: 'github' });
         config.onboardingRebaseCheckbox = true;
         OnboardingState.prUpdateRequested = false;
-        git.getFileList.mockResolvedValueOnce(['package.json']);
+        scm.getFileList.mockResolvedValueOnce(['package.json']);
+        onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
         platform.findPr.mockResolvedValueOnce(null);
-        rebase.rebaseOnboardingBranch.mockResolvedValueOnce(null);
       });
 
       it('detects unsupported platfom', async () => {
@@ -278,25 +407,25 @@ describe('workers/repository/onboarding/branch/index', () => {
         await checkOnboardingBranch(config);
 
         expect(logger.trace).toHaveBeenCalledWith(
-          `Platform '${pl}' does not support extended markdown`
+          `Platform '${pl}' does not support extended markdown`,
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
-        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
       it('detects missing rebase checkbox', async () => {
-        const pr = { bodyStruct: { rebaseRequested: undefined } };
+        const pr = { bodyStruct: undefined };
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
 
         await checkOnboardingBranch(config);
 
         expect(logger.debug).toHaveBeenCalledWith(
-          `No rebase checkbox was found in the onboarding PR`
+          `No rebase checkbox was found in the onboarding PR`,
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
-        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
       it('detects manual pr update requested', async () => {
@@ -306,12 +435,11 @@ describe('workers/repository/onboarding/branch/index', () => {
         await checkOnboardingBranch(config);
 
         expect(logger.debug).toHaveBeenCalledWith(
-          `Manual onboarding PR update requested`
+          `Manual onboarding PR update requested`,
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        ``;
-        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
-        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
       it('handles unchecked rebase checkbox', async () => {
@@ -321,8 +449,8 @@ describe('workers/repository/onboarding/branch/index', () => {
         await checkOnboardingBranch(config);
 
         expect(OnboardingState.prUpdateRequested).toBeFalse();
-        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
-        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+        expect(scm.mergeToLocal).toHaveBeenCalledOnce();
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
     });
   });

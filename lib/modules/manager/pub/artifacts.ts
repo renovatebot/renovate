@@ -9,19 +9,11 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import { regEx } from '../../../util/regex';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
+import { parsePubspec, parsePubspecLock } from './utils';
 
-function getFlutterConstraint(lockFileContent: string): string | undefined {
-  return regEx(/^\tflutter: ['"](?<flutterVersion>.*)['"]$/m).exec(
-    lockFileContent
-  )?.groups?.flutterVersion;
-}
-
-function getDartConstraint(lockFileContent: string): string | undefined {
-  return regEx(/^\tdart: ['"](?<dartVersion>.*)['"]$/m).exec(lockFileContent)
-    ?.groups?.dartVersion;
-}
+const SDK_NAMES = ['dart', 'flutter'];
+const PUB_GET_COMMAND = 'pub get --no-precompile';
 
 export async function updateArtifacts({
   packageFileName,
@@ -49,26 +41,24 @@ export async function updateArtifacts({
 
     const isFlutter = newPackageFileContent.includes('sdk: flutter');
     const toolName = isFlutter ? 'flutter' : 'dart';
-    const cmd: string[] = [];
+    const cmd = getExecCommand(toolName, updatedDeps, isLockFileMaintenance);
 
-    if (isLockFileMaintenance) {
-      cmd.push(`${toolName} pub upgrade`);
-    } else {
-      cmd.push(
-        `${toolName} pub upgrade ${updatedDeps
-          .map((dep) => dep.depName)
-          .filter(is.string)
-          .map((dep) => quote(dep))
-          .join(' ')}`
-      );
+    let constraint = config.constraints?.[toolName];
+    if (!constraint) {
+      const pubspec = parsePubspec(packageFileName, newPackageFileContent);
+      const pubspecToolName = isFlutter ? 'flutter' : 'sdk';
+      constraint = pubspec?.environment[pubspecToolName];
+
+      if (!constraint) {
+        const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
+        constraint = pubspecLock?.sdks[toolName];
+      }
     }
 
-    const constraint = isFlutter
-      ? config.constraints?.flutter ?? getFlutterConstraint(oldLockFileContent)
-      : config.constraints?.dart ?? getDartConstraint(oldLockFileContent);
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {},
+      userConfiguredEnv: config.env,
       toolConstraints: [
         {
           toolName,
@@ -96,7 +86,7 @@ export async function updateArtifacts({
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
-    logger.warn({ err }, `Failed to update ${lockFileName} file`);
+    logger.warn({ lockfile: lockFileName, err }, `Failed to update lock file`);
     return [
       {
         artifactError: {
@@ -105,5 +95,34 @@ export async function updateArtifacts({
         },
       },
     ];
+  }
+}
+
+function getExecCommand(
+  toolName: string,
+  updatedDeps: Upgrade<Record<string, unknown>>[],
+  isLockFileMaintenance: boolean,
+): string {
+  if (isLockFileMaintenance) {
+    return `${toolName} pub upgrade`;
+  } else {
+    const depNames = updatedDeps.map((dep) => dep.depName).filter(is.string);
+    if (depNames.length === 1 && SDK_NAMES.includes(depNames[0])) {
+      return `${toolName} ${PUB_GET_COMMAND}`;
+    }
+    // If there are two updated dependencies and both of them are SDK updates (Dart and Flutter),
+    // we use Flutter over Dart to run `pub get` as it is a Flutter project.
+    else if (
+      depNames.length === 2 &&
+      depNames.filter((depName) => SDK_NAMES.includes(depName)).length === 2
+    ) {
+      return `flutter ${PUB_GET_COMMAND}`;
+    } else {
+      const depNamesCmd = depNames
+        .filter((depName) => !SDK_NAMES.includes(depName))
+        .map(quote)
+        .join(' ');
+      return `${toolName} pub upgrade ${depNamesCmd}`;
+    }
   }
 }

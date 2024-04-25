@@ -2,25 +2,20 @@ import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getManagerList, hashMap } from '../../../modules/manager';
-import { getFileList } from '../../../util/git';
+import { getEnabledManagersList, hashMap } from '../../../modules/manager';
+import { isCustomManager } from '../../../modules/manager/custom';
+import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
+import { processSupersedesManagers } from './supersedes';
 
 export async function extractAllDependencies(
-  config: RenovateConfig
+  config: RenovateConfig,
 ): Promise<ExtractResult> {
-  let managerList = getManagerList();
-  const { enabledManagers } = config;
-  if (is.nonEmptyArray(enabledManagers)) {
-    logger.debug('Applying enabledManagers filtering');
-    managerList = managerList.filter((manager) =>
-      enabledManagers.includes(manager)
-    );
-  }
+  const managerList = getEnabledManagersList(config.enabledManagers);
   const extractList: WorkerExtractConfig[] = [];
-  const fileList = await getFileList();
+  const fileList = await scm.getFileList();
 
   const tryConfig = (managerConfig: ManagerConfig): void => {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
@@ -32,9 +27,12 @@ export async function extractAllDependencies(
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     managerConfig.manager = manager;
-    if (manager === 'regex') {
-      for (const regexManager of config.regexManagers ?? []) {
-        tryConfig(mergeChildConfig(managerConfig, regexManager));
+    if (isCustomManager(manager)) {
+      const filteredCustomManagers = (config.customManagers ?? []).filter(
+        (mgr) => mgr.customType === manager,
+      );
+      for (const customManager of filteredCustomManagers) {
+        tryConfig(mergeChildConfig(managerConfig, customManager));
       }
     } else {
       tryConfig(managerConfig);
@@ -52,11 +50,23 @@ export async function extractAllDependencies(
     extractResult.extractionFingerprints[manager] = hashMap.get(manager);
   }
 
+  const extractDurations: Record<string, number> = {};
   const extractResults = await Promise.all(
     extractList.map(async (managerConfig) => {
+      const start = Date.now();
       const packageFiles = await getManagerPackageFiles(managerConfig);
+      const durationMs = Math.round(Date.now() - start);
+      extractDurations[managerConfig.manager] = durationMs;
       return { manager: managerConfig.manager, packageFiles };
-    })
+    }),
+  );
+
+  // De-duplicate results using supersedesManagers
+  processSupersedesManagers(extractResults);
+
+  logger.debug(
+    { managers: extractDurations },
+    'manager extract durations (ms)',
   );
   let fileCount = 0;
   for (const { manager, packageFiles } of extractResults) {
@@ -74,10 +84,12 @@ export async function extractAllDependencies(
   // If not, log a warning to indicate possible misconfiguration.
   if (is.nonEmptyArray(config.enabledManagers)) {
     for (const enabledManager of config.enabledManagers) {
-      if (!(enabledManager in extractResult.packageFiles)) {
+      if (
+        !(enabledManager.replace('custom.', '') in extractResult.packageFiles)
+      ) {
         logger.debug(
           { manager: enabledManager },
-          `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
+          `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`,
         );
       }
     }

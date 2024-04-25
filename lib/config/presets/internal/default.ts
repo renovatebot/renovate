@@ -2,6 +2,15 @@ import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 export const presets: Record<string, Preset> = {
+  approveMajorUpdates: {
+    description: 'Require Dependency Dashboard approval for `major` updates.',
+    packageRules: [
+      {
+        dependencyDashboardApproval: true,
+        matchUpdateTypes: ['major'],
+      },
+    ],
+  },
   assignAndReview: {
     description: 'Set `{{arg0}}` as assignee and reviewer of PRs.',
     extends: [':assignee({{arg0}})', ':reviewer({{arg0}})'],
@@ -9,10 +18,6 @@ export const presets: Record<string, Preset> = {
   assignee: {
     assignees: ['{{arg0}}'],
     description: 'Assign PRs to `{{arg0}}`.',
-  },
-  autodetectRangeStrategy: {
-    description: 'Automatically detect the best rangeStrategy to use.',
-    rangeStrategy: 'auto',
   },
   automergeAll: {
     automerge: true,
@@ -85,6 +90,17 @@ export const presets: Record<string, Preset> = {
     description: 'Require all status checks to pass before any automerging.',
     ignoreTests: false,
   },
+  automergeStableNonMajor: {
+    description:
+      'Automerge non-major upgrades for semver stable packages if they pass tests.',
+    packageRules: [
+      {
+        automerge: true,
+        matchCurrentVersion: '>= 1.0.0',
+        matchUpdateTypes: ['minor', 'patch'],
+      },
+    ],
+  },
   automergeTesters: {
     description: 'Update testing packages automatically if tests pass.',
     packageRules: [
@@ -121,7 +137,7 @@ export const presets: Record<string, Preset> = {
     description: 'Disable Renovate Dependency Dashboard creation.',
   },
   disableDevDependencies: {
-    description: 'Do not renovate `devDependencies` versions/ranges.',
+    description: 'Do not update `devDependencies` versions/ranges.',
     packageRules: [
       {
         enabled: false,
@@ -164,7 +180,7 @@ export const presets: Record<string, Preset> = {
     },
   },
   disablePeerDependencies: {
-    description: 'Do not renovate `peerDependencies` versions/ranges.',
+    description: 'Do not update `peerDependencies` versions/ranges.',
     packageRules: [
       {
         enabled: false,
@@ -194,7 +210,10 @@ export const presets: Record<string, Preset> = {
   },
   docker: {
     description: 'Keep Dockerfile `FROM` sources updated.',
-    docker: {
+    'docker-compose': {
+      enabled: true,
+    },
+    dockerfile: {
       enabled: true,
     },
   },
@@ -342,21 +361,12 @@ export const presets: Record<string, Preset> = {
       enabled: true,
     },
   },
-  onlyNpm: {
-    description: 'Renovate only npm dependencies.',
-    docker: {
-      enabled: false,
-    },
-    meteor: {
-      enabled: false,
-    },
-  },
   pathSemanticCommitType: {
     description:
-      'Use semanticCommitType `{{arg0}}` for all package files matching path `{{arg1}}`.',
+      'Use semanticCommitType `{{arg1}}` for all package files matching path `{{arg0}}`.',
     packageRules: [
       {
-        matchPaths: ['{{arg0}}'],
+        matchFileNames: ['{{arg0}}'],
         semanticCommitType: '{{arg1}}',
       },
     ],
@@ -475,7 +485,7 @@ export const presets: Record<string, Preset> = {
   },
   renovatePrefix: {
     branchPrefix: 'renovate/',
-    description: 'Prefix `renovate/` to all branch names.',
+    description: 'Add the `renovate/` prefix to all branch names.',
   },
   respectLatest: {
     description: 'Upgrade versions up to the "latest" tag in the npm registry.',
@@ -512,7 +522,7 @@ export const presets: Record<string, Preset> = {
       'If Renovate detects semantic commits, it will use semantic commit type `{{arg0}}` for all commits.',
     packageRules: [
       {
-        matchPackagePatterns: ['*'],
+        matchFileNames: ['**/*'],
         semanticCommitType: '{{arg0}}',
       },
     ],
@@ -529,7 +539,7 @@ export const presets: Record<string, Preset> = {
   },
   semanticPrefixFixDepsChoreOthers: {
     description:
-      'If Renovate detects semantic commits, it will use semantic commit type `fix` for dependencies and `chore` for all others.',
+      'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],
@@ -563,6 +573,11 @@ export const presets: Record<string, Preset> = {
       'Separate each `major` version of dependencies into individual branches/PRs.',
     separateMajorMinor: true,
     separateMultipleMajor: true,
+  },
+  separateMultipleMinorReleases: {
+    description:
+      'Separate each `minor` version of dependencies into individual branches/PRs.',
+    separateMultipleMinor: true,
   },
   separatePatchReleases: {
     description:

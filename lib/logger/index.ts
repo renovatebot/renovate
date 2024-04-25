@@ -4,7 +4,9 @@ import { nanoid } from 'nanoid';
 import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
+import { once, reset as onceReset } from './once';
 import { RenovateStream } from './pretty-stdout';
+import { getRemappedLevel } from './remap';
 import type { BunyanRecord, Logger } from './types';
 import { ProblemStream, validateLogLevel, withSanitizer } from './utils';
 
@@ -60,20 +62,39 @@ const bunyanLogger = bunyan.createLogger({
   ].map(withSanitizer),
 });
 
-const logFactory =
-  (level: bunyan.LogLevelString): any =>
-  (p1: any, p2: any): void => {
+const logFactory = (
+  _level: bunyan.LogLevelString,
+): ((p1: unknown, p2: unknown) => void) => {
+  return (p1: any, p2: any): void => {
+    let level = _level;
     if (p2) {
       // meta and msg provided
-      bunyanLogger[level]({ logContext, ...curMeta, ...p1 }, p2);
+      const msg = p2;
+      const meta: Record<string, unknown> = { logContext, ...curMeta, ...p1 };
+      const remappedLevel = getRemappedLevel(msg);
+      // istanbul ignore if: not testable
+      if (remappedLevel) {
+        meta.oldLevel = level;
+        level = remappedLevel;
+      }
+      bunyanLogger[level](meta, msg);
     } else if (is.string(p1)) {
       // only message provided
-      bunyanLogger[level]({ logContext, ...curMeta }, p1);
+      const msg = p1;
+      const meta: Record<string, unknown> = { logContext, ...curMeta };
+      const remappedLevel = getRemappedLevel(msg);
+      // istanbul ignore if: not testable
+      if (remappedLevel) {
+        meta.oldLevel = level;
+        level = remappedLevel;
+      }
+      bunyanLogger[level](meta, msg);
     } else {
       // only meta provided
       bunyanLogger[level]({ logContext, ...curMeta, ...p1 });
     }
   };
+};
 
 const loggerLevels: bunyan.LogLevelString[] = [
   'trace',
@@ -84,10 +105,22 @@ const loggerLevels: bunyan.LogLevelString[] = [
   'fatal',
 ];
 
-export const logger: Logger = {} as any;
+export const logger: Logger = { once: { reset: onceReset } } as any;
 
 loggerLevels.forEach((loggerLevel) => {
-  logger[loggerLevel] = logFactory(loggerLevel);
+  logger[loggerLevel] = logFactory(loggerLevel) as never;
+
+  const logOnceFn = (p1: any, p2: any): void => {
+    once(() => {
+      const logFn = logger[loggerLevel];
+      if (is.undefined(p2)) {
+        logFn(p1);
+      } else {
+        logFn(p1, p2);
+      }
+    }, logOnceFn);
+  };
+  logger.once[loggerLevel] = logOnceFn as never;
 });
 
 export function setContext(value: string): void {
@@ -118,7 +151,7 @@ export function removeMeta(fields: string[]): void {
 }
 
 export /* istanbul ignore next */ function addStream(
-  stream: bunyan.Stream
+  stream: bunyan.Stream,
 ): void {
   bunyanLogger.addStream(withSanitizer(stream));
 }

@@ -8,7 +8,7 @@ describe('config/migrations/custom/node-migration', () => {
       },
       {
         travis: { enabled: true },
-      }
+      },
     );
   });
 
@@ -20,7 +20,7 @@ describe('config/migrations/custom/node-migration', () => {
       {
         node: { automerge: false },
         travis: { enabled: true },
-      }
+      },
     );
   });
 });

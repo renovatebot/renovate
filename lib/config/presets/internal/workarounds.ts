@@ -5,7 +5,7 @@ import type { Preset } from '../types';
 export const presets: Record<string, Preset> = {
   all: {
     description: [
-      'A collection of workarounds for known problems with packages.',
+      'Apply crowd-sourced workarounds for known problems with packages.',
     ],
     extends: [
       'workarounds:mavenCommonsAncientVersion',
@@ -13,13 +13,40 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreWeb3jCoreWithOldReleaseTimestamp',
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
+      'workarounds:nodeDockerVersioning',
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
       'workarounds:javaLTSVersions',
+      'workarounds:disableEclipseLifecycleMapping',
       'workarounds:disableMavenParentRoot',
+      'workarounds:containerbase',
     ],
-    ignoreDeps: [],
+    ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  containerbase: {
+    description: 'Add some containerbase overrides.',
+    packageRules: [
+      {
+        description:
+          'Use node versioning for `(containerbase|renovate)/node` images',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:(?:docker|ghcr)\\.io/)?(?:containerbase|renovate)/node$',
+        ],
+        versioning: 'node',
+      },
+    ],
+  },
+  disableEclipseLifecycleMapping: {
+    description: 'Disable Eclipse m2e lifecycle-mapping placeholder package.',
+    packageRules: [
+      {
+        enabled: false,
+        matchDatasources: ['maven'],
+        matchPackageNames: ['org.eclipse.m2e:lifecycle-mapping'],
+      },
+    ],
   },
   disableMavenParentRoot: {
     description:
@@ -37,7 +64,13 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         allowedVersions: '<20000000',
-        matchCurrentVersion: '<20000000',
+        matchCurrentVersion: '!/^\\d{8}$/',
+        matchDatasources: ['docker'],
+        matchDepNames: ['alpine'],
+      },
+      {
+        allowedVersions: '<20000000',
+        matchCurrentVersion: '!/^\\d{8}$/',
         matchDatasources: ['docker'],
         matchPackageNames: ['alpine'],
       },
@@ -79,10 +112,10 @@ export const presets: Record<string, Preset> = {
     description: 'Limit Java runtime versions to LTS releases.',
     packageRules: [
       {
-        allowedVersions: '/^(?:8|11|17)(?:\\.|-|$)/',
+        allowedVersions: '/^(?:8|11|17|21)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
-        matchDatasources: ['docker', 'adoptium-java'],
+        matchDatasources: ['docker', 'java-version'],
         matchPackageNames: [
           'eclipse-temurin',
           'amazoncorretto',
@@ -92,8 +125,30 @@ export const presets: Record<string, Preset> = {
           'java-jre',
           'sapmachine',
         ],
+        matchPackagePatterns: [
+          '^azul/zulu-openjdk',
+          '^bellsoft/liberica-openj(dk|re)-',
+          '^cimg/openjdk',
+        ],
         versioning:
-          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
+          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
+      },
+      {
+        allowedVersions: '/^(?:8|11|17|21)(?:\\.|-|$)/',
+        description:
+          'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
+        matchDatasources: ['docker', 'java-version'],
+        matchDepNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jre',
+          'sapmachine',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
       },
     ],
   },
@@ -107,13 +162,25 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  nodeDockerVersioning: {
+    description: 'Use node versioning for `node` docker images.',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchDepNames: ['node'],
+        versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
+        versioning: 'node',
+      },
+    ],
+  },
   reduceRepologyServerLoad: {
     description:
-      'Limit concurrent requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
+      'Limit requests to reduce load on Repology servers until we can fix this properly, see issue `#10133`.',
     hostRules: [
       {
         concurrentRequestLimit: 1,
         matchHost: 'repology.org',
+        maxRequestsPerSecond: 0.5,
       },
     ],
   },

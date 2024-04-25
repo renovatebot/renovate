@@ -5,12 +5,12 @@ import type { RangeConfig } from '../types';
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const { depType, currentValue, rangeStrategy } = config;
-  // TODO #7154
+  // TODO #22198
   const isComplexRange = parseRange(currentValue!).length > 1;
   if (rangeStrategy === 'bump' && isComplexRange) {
     logger.debug(
       { currentValue },
-      'Replacing bump strategy for complex range with widen'
+      'Replacing bump strategy for complex range with widen',
     );
     return 'widen';
   }
@@ -25,5 +25,5 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (isComplexRange) {
     return 'widen';
   }
-  return 'replace';
+  return 'update-lockfile';
 }

@@ -29,19 +29,19 @@ export function getPrExtraNotes(config: BranchConfig): string {
   let res = '';
   if (config.upgrades.some((upgrade) => upgrade.gitRef)) {
     res += emojify(
-      ':abcd: If you wish to disable git hash updates, add `":disableDigestUpdates"` to the extends array in your config.\n\n'
+      ':abcd: If you wish to disable git hash updates, add `":disableDigestUpdates"` to the extends array in your config.\n\n',
     );
   }
 
   if (config.updateType === 'lockFileMaintenance') {
     res += emojify(
-      ':wrench: This Pull Request updates lock files to use the latest dependency versions.\n\n'
+      ':wrench: This Pull Request updates lock files to use the latest dependency versions.\n\n',
     );
   }
 
   if (config.isPin) {
     res += emojify(
-      `Add the preset \`:preserveSemverRanges\` to your config if you don't want to pin your dependencies.\n\n`
+      `Add the preset \`:preserveSemverRanges\` to your config if you don't want to pin your dependencies.\n\n`,
     );
   }
 

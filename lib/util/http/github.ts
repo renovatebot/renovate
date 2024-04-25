@@ -14,7 +14,7 @@ import * as p from '../promises';
 import { range } from '../range';
 import { regEx } from '../regex';
 import { joinUrlParts, parseLinkHeader, resolveBaseUrl } from '../url';
-import { findMatchingRules } from './host-rules';
+import { findMatchingRule } from './host-rules';
 import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
@@ -57,7 +57,7 @@ export type GithubGraphqlResponse<T = unknown> =
 function handleGotError(
   err: GotLegacyError,
   url: string | URL,
-  opts: GithubHttpOptions
+  opts: GithubHttpOptions,
 ): Error {
   const path = url.toString();
   let message = err.message || '';
@@ -111,7 +111,7 @@ function handleGotError(
   ) {
     logger.debug(
       { err },
-      'GitHub failure: Resource not accessible by integration'
+      'GitHub failure: Resource not accessible by integration',
     );
     return new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
@@ -122,7 +122,7 @@ function handleGotError(
         token: maskToken(opts.token),
         err,
       },
-      'GitHub failure: Bad credentials'
+      'GitHub failure: Bad credentials',
     );
     if (rateLimit === '60') {
       return new ExternalHostError(err, 'github');
@@ -134,12 +134,14 @@ function handleGotError(
       message.includes('Review cannot be requested from pull request author')
     ) {
       return err;
+    } else if (err.body?.errors?.find((e: any) => e.field === 'milestone')) {
+      return err;
     } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     } else if (
       err.body?.errors?.find((e: any) =>
-        e.message?.startsWith('A pull request already exists')
+        e.message?.startsWith('A pull request already exists'),
       )
     ) {
       return err;
@@ -189,7 +191,7 @@ export type GraphqlPageCache = Record<string, GraphqlPageCacheItem>;
 
 function getGraphqlPageSize(
   fieldName: string,
-  defaultPageSize = MAX_GRAPHQL_PAGE_SIZE
+  defaultPageSize = MAX_GRAPHQL_PAGE_SIZE,
 ): number {
   const cache = getCache();
   const graphqlPageCache = cache?.platform?.github
@@ -199,7 +201,7 @@ function getGraphqlPageSize(
   if (graphqlPageCache && cachedRecord) {
     logger.debug(
       { fieldName, ...cachedRecord },
-      'GraphQL page size: found cached value'
+      'GraphQL page size: found cached value',
     );
 
     const oldPageSize = cachedRecord.pageSize;
@@ -214,7 +216,7 @@ function getGraphqlPageSize(
 
         logger.debug(
           { fieldName, oldPageSize, newPageSize, timestamp },
-          'GraphQL page size: expanding'
+          'GraphQL page size: expanding',
         );
 
         cachedRecord.pageLastResizedAt = timestamp;
@@ -222,7 +224,7 @@ function getGraphqlPageSize(
       } else {
         logger.debug(
           { fieldName, oldPageSize, newPageSize },
-          'GraphQL page size: expanded to default page size'
+          'GraphQL page size: expanded to default page size',
         );
 
         delete graphqlPageCache[fieldName];
@@ -244,7 +246,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
     const pageLastResizedAt = now.toISO();
     logger.debug(
       { fieldName, oldPageSize, newPageSize, timestamp: pageLastResizedAt },
-      'GraphQL page size: shrinking'
+      'GraphQL page size: shrinking',
     );
     const cache = getCache();
     cache.platform ??= {};
@@ -259,6 +261,11 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   }
 }
 
+function replaceUrlBase(url: URL, baseUrl: string): URL {
+  const relativeUrl = `${url.pathname}${url.search}`;
+  return new URL(relativeUrl, baseUrl);
+}
+
 export class GithubHttp extends Http<GithubHttpOptions> {
   constructor(hostType = 'github', options?: GithubHttpOptions) {
     super(hostType, options);
@@ -267,9 +274,9 @@ export class GithubHttp extends Http<GithubHttpOptions> {
   protected override async request<T>(
     url: string | URL,
     options?: InternalHttpOptions & GithubHttpOptions,
-    okToRetry = true
+    okToRetry = true,
   ): Promise<HttpResponse<T>> {
-    const opts: GithubHttpOptions = {
+    const opts: InternalHttpOptions & GithubHttpOptions = {
       baseUrl,
       ...options,
       throwHttpErrors: true,
@@ -285,14 +292,22 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         authUrl.pathname = joinUrlParts(
           authUrl.pathname.startsWith('/api/v3') ? '/api/v3' : '',
           'repos',
-          `${opts.repository}`
+          `${opts.repository}`,
         );
       }
 
-      const { token } = findMatchingRules(
-        { hostType: this.hostType },
-        authUrl.toString()
-      );
+      let readOnly = opts.readOnly;
+      const { method = 'get' } = opts;
+      if (
+        readOnly === undefined &&
+        ['get', 'head'].includes(method.toLowerCase())
+      ) {
+        readOnly = true;
+      }
+      const { token } = findMatchingRule(authUrl.toString(), {
+        hostType: this.hostType,
+        readOnly,
+      });
       opts.token = token;
     }
 
@@ -309,22 +324,34 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         // Check if result is paginated
         const pageLimit = opts.pageLimit ?? 10;
         const linkHeader = parseLinkHeader(result?.headers?.link);
-        if (linkHeader?.next && linkHeader?.last) {
+        const next = linkHeader?.next;
+        if (next?.url && linkHeader?.last?.page) {
           let lastPage = parseInt(linkHeader.last.page, 10);
           // istanbul ignore else: needs a test
           if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
             lastPage = Math.min(pageLimit, lastPage);
           }
+          const baseUrl = opts.baseUrl;
+          const parsedUrl = new URL(next.url, baseUrl);
+          const rebasePagination =
+            !!baseUrl &&
+            !!process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
+            // Preserve github.com URLs for use cases like release notes
+            parsedUrl.origin !== 'https://api.github.com';
+          const firstPageUrl = rebasePagination
+            ? replaceUrlBase(parsedUrl, baseUrl)
+            : parsedUrl;
           const queue = [...range(2, lastPage)].map(
             (pageNumber) => (): Promise<HttpResponse<T>> => {
-              const nextUrl = new URL(linkHeader.next.url, opts.baseUrl);
+              // copy before modifying searchParams
+              const nextUrl = new URL(firstPageUrl);
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
-                { ...opts, paginate: false },
-                okToRetry
+                { ...opts, paginate: false, cacheProvider: undefined },
+                okToRetry,
               );
-            }
+            },
           );
           const pages = await p.all(queue);
           if (opts.paginationField && is.plainObject(result.body)) {
@@ -356,7 +383,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
   public async requestGraphql<T = unknown>(
     query: string,
-    options: GraphqlOptions = {}
+    options: GraphqlOptions = {},
   ): Promise<GithubGraphqlResponse<T> | null> {
     const path = 'graphql';
 
@@ -375,15 +402,15 @@ export class GithubHttp extends Http<GithubHttpOptions> {
       baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body,
       headers: { accept: options?.acceptHeader },
+      readOnly: options.readOnly,
     };
-
+    if (options.token) {
+      opts.token = options.token;
+    }
     logger.trace(`Performing Github GraphQL request`);
 
     try {
-      const res = await this.postJson<GithubGraphqlResponse<T>>(
-        'graphql',
-        opts
-      );
+      const res = await this.postJson<GithubGraphqlResponse<T>>(path, opts);
       return res?.body;
     } catch (err) {
       logger.debug({ err, query, options }, 'Unexpected GraphQL Error');
@@ -398,7 +425,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
   async queryRepoField<T = Record<string, unknown>>(
     query: string,
     fieldName: string,
-    options: GraphqlOptions = {}
+    options: GraphqlOptions = {},
   ): Promise<T[]> {
     const result: T[] = [];
 
@@ -407,7 +434,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
     let optimalCount: null | number = null;
     let count = getGraphqlPageSize(
       fieldName,
-      options.count ?? MAX_GRAPHQL_PAGE_SIZE
+      options.count ?? MAX_GRAPHQL_PAGE_SIZE,
     );
     let limit = options.limit ?? 1000;
     let cursor: string | null = null;

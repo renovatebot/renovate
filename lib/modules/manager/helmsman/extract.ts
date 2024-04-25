@@ -1,16 +1,22 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
+import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { HelmsmanDocument } from './types';
 
 const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
 
 function createDep(
   key: string,
-  doc: HelmsmanDocument
+  doc: HelmsmanDocument,
 ): PackageDependency | null {
   const dep: PackageDependency = {
     depName: key,
@@ -22,10 +28,17 @@ function createDep(
   }
 
   if (!anApp.version) {
-    dep.skipReason = 'no-version';
+    dep.skipReason = 'unspecified-version';
     return dep;
   }
   dep.currentValue = anApp.version;
+
+  // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
+  if (isOCIRegistry(anApp.chart)) {
+    dep.datasource = DockerDatasource.id;
+    dep.packageName = removeOCIPrefix(anApp.chart!);
+    return dep;
+  }
 
   const regexResult = anApp.chart ? chartRegex.exec(anApp.chart) : null;
   if (!regexResult?.groups) {
@@ -51,16 +64,16 @@ function createDep(
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
-  config: ExtractConfig
-): PackageFile | null {
+  packageFile: string,
+  _config: ExtractConfig,
+): PackageFileContent | null {
   try {
-    // TODO: fix me (#9610)
-    const doc = load(content, {
+    // TODO: use schema (#9610)
+    const doc = parseSingleYaml<HelmsmanDocument>(content, {
       json: true,
-    }) as HelmsmanDocument;
-    if (!(doc?.helmRepos && doc.apps)) {
-      logger.debug(`Missing helmRepos and/or apps keys in ${fileName}`);
+    });
+    if (!doc.apps) {
+      logger.debug({ packageFile }, `Missing apps keys`);
       return null;
     }
 
@@ -75,9 +88,9 @@ export function extractPackageFile(
     return { deps };
   } catch (err) /* istanbul ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
-      logger.debug({ err }, 'YAML exception extracting');
+      logger.debug({ err, packageFile }, 'YAML exception extracting');
     } else {
-      logger.warn({ err }, 'Error extracting');
+      logger.debug({ err, packageFile }, 'Error extracting');
     }
     return null;
   }

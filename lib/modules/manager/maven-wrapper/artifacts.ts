@@ -1,5 +1,5 @@
-import type { Stats } from 'fs';
-import os from 'os';
+import type { Stats } from 'node:fs';
+import os from 'node:os';
 import is from '@sindresorhus/is';
 import { dirname, join } from 'upath';
 import { GlobalConfig } from '../../../config/global';
@@ -27,7 +27,7 @@ interface MavenWrapperPaths {
 
 async function addIfUpdated(
   status: StatusResult,
-  fileProjectPath: string
+  fileProjectPath: string,
 ): Promise<UpdateArtifactsResult | null> {
   if (status.modified.includes(fileProjectPath)) {
     return {
@@ -52,7 +52,7 @@ export async function updateArtifacts({
 
     if (!updatedDeps.some((dep) => dep.depName === 'maven-wrapper')) {
       logger.info(
-        'Maven wrapper version not updated - skipping Artifacts update'
+        'Maven wrapper version not updated - skipping Artifacts update',
       );
       return null;
     }
@@ -77,7 +77,7 @@ export async function updateArtifacts({
     ].map(
       (filename) =>
         packageFileName.replace('.mvn/wrapper/maven-wrapper.properties', '') +
-        filename
+        filename,
     );
     const updateArtifactsResult = (
       await getUpdatedArtifacts(status, artifactFileNames)
@@ -85,7 +85,7 @@ export async function updateArtifacts({
 
     logger.debug(
       { files: updateArtifactsResult.map((r) => r.file?.path) },
-      `Returning updated maven-wrapper files`
+      `Returning updated maven-wrapper files`,
     );
     return updateArtifactsResult;
   } catch (err) {
@@ -103,7 +103,7 @@ export async function updateArtifacts({
 
 async function getUpdatedArtifacts(
   status: StatusResult,
-  artifactFileNames: string[]
+  artifactFileNames: string[],
 ): Promise<UpdateArtifactsResult[]> {
   const updatedResults: UpdateArtifactsResult[] = [];
   for (const artifactFileName of artifactFileNames) {
@@ -122,7 +122,7 @@ async function getUpdatedArtifacts(
  * @returns A Java semver range
  */
 export function getJavaConstraint(
-  mavenWrapperVersion: string | null | undefined
+  mavenWrapperVersion: string | null | undefined,
 ): string | null {
   const major = mavenWrapperVersion
     ? mavenVersioning.getMajor(mavenWrapperVersion)
@@ -139,7 +139,7 @@ async function executeWrapperCommand(
   cmd: string,
   config: UpdateArtifactsConfig,
   packageFileName: string,
-  extraEnv: ExtraEnv
+  extraEnv: ExtraEnv,
 ): Promise<void> {
   logger.debug(`Updating maven wrapper: "${cmd}"`);
   const { wrapperFullyQualifiedPath } = getMavenPaths(packageFileName);
@@ -147,6 +147,7 @@ async function executeWrapperCommand(
   const execOptions: ExecOptions = {
     cwdFile: wrapperFullyQualifiedPath,
     docker: {},
+    userConfiguredEnv: config.env,
     extraEnv,
     toolConstraints: [
       {
@@ -174,10 +175,17 @@ function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
 }
 
 function getCustomMavenWrapperRepoUrl(
+<<<<<<< HEAD
   deps: PackageDependency[]
 ): string | null {
   const replaceString = deps.find(
     (dep) => dep.depName === 'maven-wrapper'
+=======
+  deps: PackageDependency[],
+): string | null {
+  const replaceString = deps.find(
+    (dep) => dep.depName === 'maven-wrapper',
+>>>>>>> bd1c36528987803d9725ab235ae1caf782dbd896
   )?.replaceString;
 
   if (!replaceString) {
@@ -185,7 +193,11 @@ function getCustomMavenWrapperRepoUrl(
   }
 
   const match = regEx(/^(.*?)\/org\/apache\/maven\/wrapper\//).exec(
+<<<<<<< HEAD
     replaceString
+=======
+    replaceString,
+>>>>>>> bd1c36528987803d9725ab235ae1caf782dbd896
   );
 
   if (!match) {
@@ -196,7 +208,7 @@ function getCustomMavenWrapperRepoUrl(
 }
 
 async function createWrapperCommand(
-  packageFileName: string
+  packageFileName: string,
 ): Promise<string | null> {
   const {
     wrapperExecutableFileName,
@@ -208,7 +220,7 @@ async function createWrapperCommand(
     wrapperExecutableFileName,
     localProjectDir,
     await statLocalFile(wrapperFullyQualifiedPath),
-    'wrapper:wrapper'
+    'wrapper:wrapper',
   );
 }
 
@@ -227,7 +239,7 @@ function getMavenPaths(packageFileName: string): MavenWrapperPaths {
   const localProjectDir = join(dirname(packageFileName), '../../');
   const wrapperFullyQualifiedPath = join(
     localProjectDir,
-    wrapperExecutableFileName
+    wrapperExecutableFileName,
   );
   return {
     wrapperExecutableFileName,
@@ -240,7 +252,7 @@ async function prepareCommand(
   fileName: string,
   cwd: string | undefined,
   pathFileStats: Stats | null,
-  args: string | null
+  args: string | null,
 ): Promise<string | null> {
   // istanbul ignore if
   if (pathFileStats?.isFile() === true) {
