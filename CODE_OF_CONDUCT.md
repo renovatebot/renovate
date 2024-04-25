@@ -1,6 +1,6 @@
 # Code of Conduct
 
-In order to deliver great features and support to the Renovate Open Source project, we ask for high politeness and careful attention from those who want to join us.
+In order to deliver great features and support to the Renovate Open Source project, we ask for high politeness and careful attention from those who want to participate.
 
 ## Our priorities
 
