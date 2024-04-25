@@ -114,7 +114,7 @@ function isPipRequirements(
   return (
     !is.array(section) &&
     is.object(section) &&
-    !Object.values(section).find((dep) => !is.object(dep) && !is.string(dep))
+    !Object.values(section).some((dep) => !is.object(dep) && !is.string(dep))
   );
 }
 
