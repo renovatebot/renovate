@@ -44,7 +44,6 @@ function sortPackageFiles(
   packageFiles: FileAddition[],
 ): void {
   const managerPackageFiles = config.packageFiles?.[manager];
-  // istanbul ignore if
   if (!managerPackageFiles) {
     return;
   }
