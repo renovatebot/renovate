@@ -171,9 +171,19 @@ terraform {
   source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0"
 }
 
-# gitlab-tags with custom port
+# gitlab-tags
 terraform {
-  source = "git::https://gitlab.com:1234/hashicorp/example?ref=v1.0.0"
+  source = "git::https://gitlab.com/hashicorp/example?ref=v1.0.0"
+}
+
+# gitlab-tags https with custom port
+terraform {
+  source = "git::https://gitlab.com:4321/hashicorp/example?ref=v1.0.1"
+}
+
+# gitlab-tags ssh with custom port
+terraform {
+  source = "git::ssh://gitlab.com:1234/hashicorp/example?ref=v1.0.2"
 }
 
 # gitea-tags

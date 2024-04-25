@@ -69,7 +69,7 @@ export function analyseTerragruntModule(
     dep.datasource = GithubTagsDatasource.id;
   } else if (gitTagsRefMatch?.groups) {
     const { url, tag } = gitTagsRefMatch.groups;
-    const { hostname, origin, pathname } = new URL(url);
+    const { hostname, host, origin, pathname, protocol } = new URL(url);
     const containsSubDirectory = pathname.includes('//');
     if (containsSubDirectory) {
       logger.debug('Terragrunt module contains subdirectory');
@@ -88,7 +88,9 @@ export function analyseTerragruntModule(
     } else {
       // The packageName should only contain the path to the repository
       dep.packageName = pathname.replace(/^\//, '').split('//')[0];
-      dep.registryUrls = [`https://${hostname}`];
+      dep.registryUrls = [
+        protocol === 'https:' ? `https://${host}` : `https://${hostname}`,
+      ];
     }
   } else if (tfrVersionMatch?.groups) {
     dep.depType = 'terragrunt';
