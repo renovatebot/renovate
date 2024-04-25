@@ -59,6 +59,14 @@ If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to
 
 If set, Renovate will persist repository cache locally after uploading to S3.
 
+## `s3PathStyle`
+
+If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 client.
+
+> Whether to force path style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
+
+Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
+
 ## `sqlitePackageCache`
 
 If set, Renovate will use SQLite as the backend for the package cache.
