@@ -19,7 +19,7 @@ export function extractPackageFile(
   if (!flutterVersion) {
     logger.debug(
       { contents: content },
-      'FVM config does not have flutter version specified',
+      'FVM config does not have a flutter version specified',
     );
     return null;
   }

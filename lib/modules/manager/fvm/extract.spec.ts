@@ -23,7 +23,7 @@ describe('modules/manager/fvm/extract', () => {
       ).toBeNull();
     });
 
-    it('returns a result .fvm/fvm_config.json', () => {
+    it('returns a result for .fvm/fvm_config.json', () => {
       const res = extractPackageFile(
         '{"flutterSdkVersion": "2.10.1", "flavors": {}}',
         packageFile,
@@ -38,7 +38,7 @@ describe('modules/manager/fvm/extract', () => {
       ]);
     });
 
-    it('returns a result .fvmrc', () => {
+    it('returns a result for .fvmrc', () => {
       const res = extractPackageFile(
         '{"flutter": "2.10.1"}',
         packageFile,
@@ -53,7 +53,7 @@ describe('modules/manager/fvm/extract', () => {
       ]);
     });
 
-    it('supports non range .fvm/fvm_config.json', () => {
+    it('supports non range for .fvm/fvm_config.json', () => {
       const res = extractPackageFile(
         '{"flutterSdkVersion": "stable", "flavors": {}}',
         packageFile,
@@ -68,7 +68,7 @@ describe('modules/manager/fvm/extract', () => {
       ]);
     });
 
-    it('supports non range .fvmrc', () => {
+    it('supports non range for .fvmrc', () => {
       const res = extractPackageFile(
         '{"flutter": "stable"}',
         packageFile,
