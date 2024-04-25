@@ -27,6 +27,7 @@ export type PackageCacheNamespace =
   | 'changelog-gitlab-notes@v2'
   | 'changelog-gitlab-release'
   | 'datasource-artifactory'
+  | 'datasource-aws-lambda-layer'
   | 'datasource-aws-machine-image'
   | 'datasource-aws-rds'
   | 'datasource-azure-bicep-resource'
