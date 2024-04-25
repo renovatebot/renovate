@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
+import parseGitlabUrl from 'parse-git-url';
 import { detectPlatform } from '../../util/common';
 import { parseGitUrl } from '../../util/git/url';
 import * as hostRules from '../../util/host-rules';
@@ -178,9 +179,13 @@ export function addMetaData(
     } else {
       // try massaging it
       dep.sourceUrl =
-        parse(massagedUrl, {
+        // original way to parse source urls, works for most of the cases except gitlab.com nested groups
+        (parse(massagedUrl, {
           extraBaseUrls,
-        }) || dep.sourceUrl;
+        }) ||
+          // if previous parse fails this tries to extract sourceUrl via another library which supports also gitlab.com nested groups
+          tryParseGitlabUrl(massagedUrl)) ??
+        dep.sourceUrl;
     }
   }
   if (shouldDeleteHomepage(dep.sourceUrl, dep.homepage)) {
@@ -232,4 +237,14 @@ export function shouldDeleteHomepage(
     );
   }
   return massagedSourceUrl === homepage;
+}
+
+function tryParseGitlabUrl(url: string): string | null {
+  const result = parseGitlabUrl(url);
+
+  if (result === null || result.type !== 'gitlab') {
+    return null;
+  }
+
+  return `https://gitlab.com/${result.owner}/${result.name}`;
 }
