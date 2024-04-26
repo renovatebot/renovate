@@ -86,6 +86,6 @@ export class GlobalConfig {
    */
   static reset(): void {
     GlobalConfig.config = {};
-    GlobalConfig.parsedExperimentalFlags = new Set();
+    GlobalConfig.parsedExperimentalFlags.clear();
   }
 }
