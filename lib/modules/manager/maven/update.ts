@@ -86,12 +86,12 @@ export function bumpPackageVersion(
       // Therefore the same qualifier (prerelease) will be used as before.
       let releaseType = bumpVersion;
       if (!bumpVersion.startsWith('pre')) {
-        releaseType = ('pre' + bumpVersion) as ReleaseType;
+        releaseType = `pre${bumpVersion}` as ReleaseType;
       }
       newPomVersion = semver.inc(
         currentValue,
         releaseType,
-        currentPrereleaseValue?.join('.'),
+        currentPrereleaseValue!.join('.'),
         false,
       );
     } else if (currentPrereleaseValue) {
@@ -101,7 +101,7 @@ export function bumpPackageVersion(
     } else {
       // A release version without any qualifier is present.
       // Therefore the SNAPSHOT qualifier will be added if a prerelease is requested.
-      // This will do a normal increment, ignoring SNAPSNOT, if a non-prerelease bumpVersion is configured
+      // This will do a normal increment, ignoring SNAPSHOT, if a non-prerelease bumpVersion is configured
       newPomVersion = semver.inc(currentValue, bumpVersion, 'SNAPSHOT', false);
     }
     if (!newPomVersion) {
