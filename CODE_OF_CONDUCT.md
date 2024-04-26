@@ -1,81 +1,104 @@
 # Code of Conduct
 
-In order to deliver great features and support to the Renovate Open Source project, we ask for high politeness and careful attention from those who want to participate.
+To help us deliver great features and support the Renovate Open Source project we ask that you:
+
+- are polite
+- pay attention to details
+- keep in mind that most maintainers are volunteers
+- are respectful of the time and effort of the maintainers
 
 ## Our priorities
 
-Our main goal is to keep this project sustainable.
-This involves supporting our maintainers and contributors, most of whom volunteer their time to help others.
-The biggest threat to Open Source projects is when maintainers get too stressed, and this stress is often caused by rudeness from a few users.
+We want to keep this project sustainable.
+This means we support our maintainers and contributors, who spend their free time to help others.
+
+Maintainers getting stressed is a big threat to Open Source projects, like ours.
+Stressed maintainers quit, or reduce their time spent on the project.
+Often a few users behave badly, where most users are nice.
+
+We want to avoid maintainers getting stressed out by bad behavior from contributors.
+That's why we have these rules.
 
 ## Politeness
 
-Sadly, it's not unusual in Open Source projects for a few users to be aggressive and disrespectful (like saying, "You should have fixed this already"), but we do not tolerate this behavior here.
+Sadly, it's common in Open Source projects for a few users to behave in an aggressive and rude way.
+A user might say something like: "You should have fixed this bug already!", or "Why am I still waiting for this feature?".
+We do not allow this kind of behavior.
 
-We expect basic politeness—just don’t be rude.
-It's fine if you ask a question and don’t thank us afterward.
-However, avoid making disrespectful remarks like "Pity the documentation didn’t say that" or "thanks for nothing."
+We expect basic politeness, do not act rude.
+For example: it is okay if you ask a question and do not thank us afterwards.
+But avoid writing mean comments like: "Pity the documentation didn’t say that." or "Thanks for nothing.".
 
 ## Respect the time of those who help you
 
-Respect is a two-way street, but time is limited, and those asking for help should remember that our maintainers’ time is precious.
-We receive many queries each week and do our best to address each one.
-Often, we need you to provide detailed logs or descriptions of your issues.
-If you’re not prepared to do this, it’s unlikely you will get the help you need.
+Respect goes both ways, but time is limited.
+When you ask for help, please remember that the maintainer's time is valuable.
+We get many questions each week and do our best to answer each one.
+To get the help you need, please be prepared to give detailed logs or descriptions of your issues.
+If you do not want to spend the effort giving us enough information, it's likely you will not get the help you need.
 
-Remember, most of the support provided by our team, including Mend.io staff, is unpaid.
+Remember, most of the support provided by our team, including the Mend.io staff, is _unpaid_.
 
 ## Blocking and unblocking
 
-We quickly tackle rudeness in the community through automated comments, temporary blocks, or permanent bans.
-If you repeatedly break the rules (like spamming maintainers with @mentions) or challenge our guidelines openly, you will be blocked.
-We generally do not argue about these decisions, but we are willing to reverse a block if a user shows they understand and respect the rules or if there was a misunderstanding.
+We quickly deal with rudeness in the community with:
 
-Simply put, we block and unblock swiftly, and what matters is how you follow the rules going forward.
+- automated comments
+- temporary blocks
+- permanent bans
+
+If you keep breaking the rules or challenge our guidelines openly, you will be blocked.
+For example: if you keep spamming the maintainers with `@mentions` or challenge our rules openly, you will be blocked.
+
+We generally do not argue about these decisions, but we are willing to reverse a block if a you show that you understand and respect the rules, or if there was a misunderstanding.
+
+Simply put: we block and unblock swiftly, what matters is how you follow the rules going forward.
 
 ## How we prioritize work
 
-For Renovate's core contributors and maintainers, we focus on work that:
+Renovate's core contributors and maintainers focus on work that:
 
-- Benefits a large number of users, or
+- Helps a lot of users, or
 - Fixes regressions (errors introduced by recent changes), or
-- Is required by a Mend.io customer,
-- Is sponsored by 3rd parties after independent validation, or
+- Is required by a customer of Mend.io, or
+- Is sponsored by third parties after independent validation, or
 - We personally need or want to implement
 
-It may be disappointing when we can’t prioritize your specific feature or bug, but understanding and accepting this is crucial.
+You may be disappointed when we focus on other work ahead of your feature or bug, but you should understand and accept this.
 
 ## Maintaining Issue and Code Quality
 
-We use GitHub Discussions to start and sort issues but don't allow non-maintainers to directly create new issues.
+We use GitHub Discussions to start and sort issues.
+Only maintainers are allowed to create new issues.
 If we confirm a bug or agree with a feature idea, and if it's well-documented, we will turn it into an official issue.
-This process ensures that most issues are actionable, either by us or the community.
+This way most issues are ready to work on, either by us or the community.
 
-Sometimes we reject ideas if they are too specialized and would complicate the project more than they would help.
+We may reject ideas that are too specialized, or that would make the project too hard to maintain.
 
-We enforce strict coding standards and reviews to keep our codebase maintainable.
-A feature or fix must not only work, it must be well designed to stay maintainable.
-We may ask for several revisions, which can be demanding, but our goal is to keep the project sustainable.
+We have strict coding standards and reviews to keep our code in good shape.
+A feature or fix must of course work, but it must also be well designed to stay maintainable.
+We may ask you to improve your code several times in a row, which can be difficult for you.
+We only do this to keep the project sustainable.
 
 ## If you have urgent work
 
-People working for significant companies might push too hard in Open Source projects.
-It’s often hard for them to understand that our maintainers cannot dedicate much time to solve their specific issues quickly.
-Frequent requests for updates like "@rarkins how can we move this forward?" are not helpful.
+People working for big companies might push too hard in Open Source projects.
+It’s often hard for them to understand that our maintainers cannot spend much time to solve their issues quickly.
+Frequent requests for updates like "@rarkins how can we move this forward?" are _not_ helpful.
 
 Please remember, unless you are a Mend.io customer, this project does not owe you the level of response or support you might expect.
 Mend.io customers should use their designated support channels for urgent needs.
 
 ## Getting more help
 
-If you need more assistance than what this project offers, there are two options:
+If you need more assistance than what this project offers, you have two options:
 
-1. Become a Mend.io customer, such as by purchasing Renovate Enterprise, or
-2. Hire an experienced Renovate contributor privately for consulting. Mend.io staff do not offer this service, but one of our volunteer maintainers, `@secustor`, does.
+1. Become a Mend.io customer, such as by buying Renovate Enterprise, or
+1. Hire an experienced Renovate contributor privately for consulting. Mend.io staff do _not_ offer this service, but one of our volunteer maintainers, `@secustor`, does
 
 ## Feedback
 
-We welcome respectful discussions about this policy and accept suggestions for improving this text.
+We welcome respectful discussions about this policy and accept suggestions that improve this text.
 We avoid debates on social media or going off-topic in GitHub Discussions.
 
-Our consistent delivery of new features and excellent community support show that our approach is effective.
+Because we enforce all these rules, we can deliver new features and give excellent support to the community.
