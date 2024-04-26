@@ -1,6 +1,8 @@
-import * as openpgp from 'openpgp';
+import { openpgp } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
+
+let pgp: typeof import('openpgp') | null | undefined = undefined;
 
 export async function tryDecryptOpenPgp(
   privateKey: string,
@@ -10,8 +12,22 @@ export async function tryDecryptOpenPgp(
     // optimization during transition of public key -> pgp
     return null;
   }
+  if (pgp === undefined) {
+    try {
+      pgp = openpgp();
+    } catch (err) {
+      logger.warn({ err }, 'Could load openpgp');
+      pgp = null;
+    }
+  }
+
+  if (pgp === null) {
+    logger.once.warn('Cannot load openpgp, skipping decryption');
+    return null;
+  }
+
   try {
-    const pk = await openpgp.readPrivateKey({
+    const pk = await pgp.readPrivateKey({
       // prettier-ignore
       armoredKey: privateKey.replace(regEx(/\n[ \t]+/g), '\n'), // little massage to help a common problem
     });
@@ -24,10 +40,10 @@ export async function tryDecryptOpenPgp(
     if (!armoredMessage.endsWith(endBlock)) {
       armoredMessage = `${armoredMessage}${endBlock}`;
     }
-    const message = await openpgp.readMessage({
+    const message = await pgp.readMessage({
       armoredMessage,
     });
-    const { data } = await openpgp.decrypt({
+    const { data } = await pgp.decrypt({
       message,
       decryptionKeys: pk,
     });

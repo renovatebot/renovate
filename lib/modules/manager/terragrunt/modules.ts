@@ -15,7 +15,7 @@ export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/i,
 );
 export const gitTagsRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
+  /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<host>[^/]*)\/(?<path>.*))\?(depth=\d+&)?ref=(?<tag>.*?)(&depth=\d+)?$/,
 );
 export const tfrVersionMatchRegex = regEx(
   /tfr:\/\/(?<registry>.*?)\/(?<org>[^/]+?)\/(?<name>[^/]+?)\/(?<cloud>[^/?]+).*\?(?:ref|version)=(?<currentValue>.*?)$/,
@@ -68,18 +68,28 @@ export function analyseTerragruntModule(
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = GithubTagsDatasource.id;
   } else if (gitTagsRefMatch?.groups) {
-    dep.depType = 'gitTags';
-    if (gitTagsRefMatch.groups.path.includes('//')) {
+    const { url, host, path, tag } = gitTagsRefMatch.groups;
+    const containsSubDirectory = path.includes('//');
+    if (containsSubDirectory) {
       logger.debug('Terragrunt module contains subdirectory');
-      dep.depName = gitTagsRefMatch.groups.path.split('//')[0];
-      const tempLookupName = gitTagsRefMatch.groups.url.split('//');
-      dep.packageName = tempLookupName[0] + '//' + tempLookupName[1];
-    } else {
-      dep.depName = gitTagsRefMatch.groups.path.replace('.git', '');
-      dep.packageName = gitTagsRefMatch.groups.url;
     }
-    dep.currentValue = gitTagsRefMatch.groups.tag;
-    dep.datasource = detectGitTagDatasource(gitTagsRefMatch.groups.url);
+    dep.depType = 'gitTags';
+    // We don't want to have .git or subdirectory in the depName
+    dep.depName = `${host}/${path.split('//')[0].replace('.git', '')}`;
+    dep.currentValue = tag;
+    dep.datasource = detectGitTagDatasource(url);
+    if (dep.datasource === GitTagsDatasource.id) {
+      if (containsSubDirectory) {
+        const [protocol, hostAndPath] = url.split('//');
+        dep.packageName = `${protocol}//${hostAndPath}`;
+      } else {
+        dep.packageName = url;
+      }
+    } else {
+      // The packageName should only contain the path to the repository
+      dep.packageName = path.split('//')[0];
+      dep.registryUrls = [`https://${host}`];
+    }
   } else if (tfrVersionMatch?.groups) {
     dep.depType = 'terragrunt';
     dep.depName =

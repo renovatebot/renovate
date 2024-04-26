@@ -3,22 +3,27 @@ import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { decryptConfig } from '../decrypt';
 import { GlobalConfig } from '../global';
 import type { RenovateConfig } from '../types';
+import { tryDecryptKbPgp } from './kbpgp';
 
 const privateKey = Fixtures.get('private-pgp.pem', '..');
 const repository = 'abc/def';
 
-describe('config/decrypt/openpgp', () => {
+describe('config/decrypt/kbpgp', () => {
   describe('decryptConfig()', () => {
     let config: RenovateConfig;
 
-    beforeAll(() => {
-      process.env.RENOVATE_X_USE_OPENPGP = 'true';
-    });
-
     beforeEach(() => {
-      jest.resetModules();
       config = {};
       GlobalConfig.reset();
+    });
+
+    it('returns null for invalid key', async () => {
+      expect(
+        await tryDecryptKbPgp(
+          'invalid-key',
+          'wcFMAw+4H7SgaqGOAQ/+Lz6RlbEymbnmMhrktuaGiDPWRNPEQFuMRwwYM6/B/r0JMZa9tskAA5RpyYKxGmJJeuRtlA8GkTw02GoZomlJf/KXJZ95FwSbkXMSRJRD8LJ2402Hw2TaOTaSvfamESnm8zhNo8cok627nkKQkyrpk64heVlU5LIbO2+UgYgbiSQjuXZiW+QuJ1hVRjx011FQgEYc59+22yuKYqd8rrni7TrVqhGRlHCAqvNAGjBI4H7uTFh0sP4auunT/JjxTeTkJoNu8KgS/LdrvISpO67TkQziZo9XD5FOzSN7N3e4f8vO4N4fpjgkIDH/9wyEYe0zYz34xMAFlnhZzqrHycRqzBJuMxGqlFQcKWp9IisLMoVJhLrnvbDLuwwcjeqYkhvODjSs7UDKwTE4X4WmvZr0x4kOclOeAAz/pM6oNVnjgWJd9SnYtoa67bZVkne0k6mYjVhosie8v8icijmJ4OyLZUGWnjZCRd/TPkzQUw+B0yvsop9FYGidhCI+4MVx6W5w7SRtCctxVfCjLpmU4kWaBUUJ5YIQ5xm55yxEYuAsQkxOAYDCMFlV8ntWStYwIG1FsBgJX6VPevXuPPMjWiPNedIpJwBH2PLB4blxMfzDYuCeaIqU4daDaEWxxpuFTTK9fLdJKuipwFG6rwE3OuijeSN+2SLszi834DXtUjQdikHSTQG392+oTmZCFPeffLk/OiV2VpdXF3gGL7sr5M9hOWIZ783q0vW1l6nAElZ7UA//kW+L6QRxbnBVTJK5eCmMY6RJmL76zjqC1jQ0FC10',
+        ),
+      ).toBeNull();
     });
 
     it('rejects invalid PGP message', async () => {
@@ -122,24 +127,6 @@ describe('config/decrypt/openpgp', () => {
       await expect(decryptConfig(config, 'abc/defg')).rejects.toThrow(
         CONFIG_VALIDATION,
       );
-    });
-
-    it('fails to load openpgp', async () => {
-      jest.doMock('../../expose.cjs', () => ({
-        openpgp: () => {
-          throw new Error('openpgp error');
-        },
-      }));
-      const pgp = await import('./openpgp');
-      const { logger } = await import('../../logger');
-      expect(
-        await pgp.tryDecryptOpenPgp(
-          '',
-          'wcFMAw+4H7SgaqGOAQ/+Lz6RlbEymbnmMhrktuaGiDPWRNPEQFuMRwwYM6/B/r0JMZa9tskAA5RpyYKxGmJJeuRtlA8GkTw02GoZomlJf/KXJZ95FwSbkXMSRJRD8LJ2402Hw2TaOTaSvfamESnm8zhNo8cok627nkKQkyrpk64heVlU5LIbO2+UgYgbiSQjuXZiW+QuJ1hVRjx011FQgEYc59+22yuKYqd8rrni7TrVqhGRlHCAqvNAGjBI4H7uTFh0sP4auunT/JjxTeTkJoNu8KgS/LdrvISpO67TkQziZo9XD5FOzSN7N3e4f8vO4N4fpjgkIDH/9wyEYe0zYz34xMAFlnhZzqrHycRqzBJuMxGqlFQcKWp9IisLMoVJhLrnvbDLuwwcjeqYkhvODjSs7UDKwTE4X4WmvZr0x4kOclOeAAz/pM6oNVnjgWJd9SnYtoa67bZVkne0k6mYjVhosie8v8icijmJ4OyLZUGWnjZCRd/TPkzQUw+B0yvsop9FYGidhCI+4MVx6W5w7SRtCctxVfCjLpmU4kWaBUUJ5YIQ5xm55yxEYuAsQkxOAYDCMFlV8ntWStYwIG1FsBgJX6VPevXuPPMjWiPNedIpJwBH2PLB4blxMfzDYuCeaIqU4daDaEWxxpuFTTK9fLdJKuipwFG6rwE3OuijeSN+2SLszi834DXtUjQdikHSTQG392+oTmZCFPeffLk/OiV2VpdXF3gGL7sr5M9hOWIZ783q0vW1l6nAElZ7UA//kW+L6QRxbnBVTJK5eCmMY6RJmL76zjqC1jQ0FC10',
-        ),
-      ).toBeNull();
-      expect(logger.warn).toHaveBeenCalled();
-      expect(logger.once.warn).toHaveBeenCalled();
     });
   });
 });

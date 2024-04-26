@@ -934,7 +934,7 @@ describe('modules/manager/npm/extract/index', () => {
             prettyDepType: 'devDependency',
           },
           {
-            depType: 'overrides',
+            depType: 'pnpm.overrides',
             depName: 'node',
             currentValue: '8.9.2',
             datasource: 'npm',
@@ -942,7 +942,7 @@ describe('modules/manager/npm/extract/index', () => {
             prettyDepType: 'overrides',
           },
           {
-            depType: 'overrides',
+            depType: 'pnpm.overrides',
             depName: '@types/react',
             currentValue: '18.0.5',
             datasource: 'npm',
