@@ -478,6 +478,9 @@ importers:
       '@types/traverse':
         specifier: 0.6.36
         version: 0.6.36
+      '@types/unist':
+        specifier: 2.0.10
+        version: 2.0.10
       '@types/url-join':
         specifier: 4.0.3
         version: 4.0.3

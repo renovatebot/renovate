@@ -1,3 +1,5 @@
+const { jest } = require('@jest/globals');
+
 module.exports = {
   root: true,
   env: {
@@ -222,6 +224,15 @@ module.exports = {
       rules: {
         // esm always requires extensions
         'import/extensions': 0,
+      },
+    },
+    {
+      files: ['tools/docs/test/**/*.mjs'],
+      env: {
+        jest: false,
+      },
+      rules: {
+        '@typescript-eslint/no-floating-promises': 0,
       },
     },
   ],
