@@ -95,8 +95,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
         with:
-          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           filter: blob:none # we don't need all blobs
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          show-progress: false
 
       - name: Calculate matrix for `node_modules` prefetch
         uses: ./.github/actions/calculate-prefetch-matrix
@@ -152,8 +153,9 @@ jobs:
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
         with:
-          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           filter: blob:none # we don't need all blobs
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          show-progress: false
 
       - name: Setup Node.js
         if: needs.setup.outputs.os-matrix-is-full && runner.os != 'Linux'
@@ -174,6 +176,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -217,6 +221,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -257,6 +263,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -284,6 +292,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -321,6 +331,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -384,6 +396,7 @@ jobs:
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
         with:
           filter: blob:none # we don't need all blobs
+          show-progress: false
 
       - name: Download coverage reports
         uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
@@ -410,8 +423,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
         with:
-          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
           filter: blob:none # we don't need all blobs
+          sparse-checkout: ${{ env.SPARSE_CHECKOUT }}
+          show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -498,6 +512,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -530,6 +546,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          show-progress: false
 
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
@@ -556,15 +574,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
+        with:
+          show-progress: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+        with:
+          standalone: true
 
       - name: Setup Node.js
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: Enable corepack
-        shell: bash
-        run: corepack enable
 
       - name: Download package
         uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
@@ -604,8 +625,8 @@ jobs:
       - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
         with:
           fetch-depth: 0 # zero stands for full checkout, which is required for semantic-release
-          show-progress: false
           filter: blob:none # we don't need all blobs, only the full tree
+          show-progress: false
 
       - name: docker-config
         uses: containerbase/internal-tools@75d68da3c8cd3d622cf6d4b8d2dfe7e4dc33dfed # v3.0.78
