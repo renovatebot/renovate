@@ -443,7 +443,10 @@ export interface RenovateOptionBase {
    */
   deprecationMsg?: string;
 
-  regexOrGlob?: boolean;
+  /**
+   * For internal use only: helps with regexOrGlob option validation
+   */
+  patternMatch?: boolean;
 }
 
 export interface RenovateArrayOption<
