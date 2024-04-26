@@ -442,6 +442,8 @@ export interface RenovateOptionBase {
    * This is used to add depreciation message in the docs
    */
   deprecationMsg?: string;
+
+  regexOrGlob?: boolean;
 }
 
 export interface RenovateArrayOption<
