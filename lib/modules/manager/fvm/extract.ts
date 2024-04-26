@@ -2,6 +2,7 @@ import { logger } from '../../../logger';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { FvmConfig } from './schema';
+import { Json } from '../../../util/schema-utils';
 
 export function extractPackageFile(
   content: string,
@@ -9,7 +10,7 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   let flutterVersion: string | undefined;
   try {
-    const config = FvmConfig.parse(JSON.parse(content));
+    const config = Json.pipe(FvmConfig).parse(content);
     flutterVersion = config.flutter ?? config.flutterSdkVersion;
 
     if (!flutterVersion) {
