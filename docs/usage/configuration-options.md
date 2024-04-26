@@ -898,6 +898,27 @@ It will be compiled using Handlebars and the regex `groups` result.
 It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
 
+### readOnly
+
+If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
+Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
+
+This option could be used to avoid rate limits for certain platforms like GitHub or Bitbucket, by offloading the read operations to a different user.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "readOnly": true,
+      "token": "********"
+    }
+  ]
+}
+```
+
+If more than one token matches for a read-only request then the `readOnly` token will be given preference.
+
 ### currentValueTemplate
 
 If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
@@ -2510,6 +2531,8 @@ Invalid if used outside of a `packageRule`.
 
 ### excludeDepPatterns
 
+### excludeDepPrefixes
+
 ### excludePackageNames
 
 **Important**: Do not mix this up with the option `ignoreDeps`.
@@ -2747,7 +2770,7 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
 }
 ```
 
-The syntax of the version range must follow the [versioning scheme](modules/versioning.md#supported-versioning) used by the matched package(s).
+The syntax of the version range must follow the [versioning scheme](modules/versioning/index.md#supported-versioning) used by the matched package(s).
 This is usually defined by the [manager](modules/manager/index.md#supported-managers) which discovered them or by the default versioning for the package's [datasource](modules/datasource/index.md).
 For example, a Gradle package would typically need Gradle constraint syntax (e.g. `[,7.0)`) and not SemVer syntax (e.g. `<7.0`).
 
@@ -2830,6 +2853,8 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 
 ### matchDepPatterns
 
+### matchDepPrefixes
+
 ### matchNewValue
 
 This option is matched against the `newValue` field of a dependency.
@@ -2882,6 +2907,12 @@ See also `excludePackageNames`.
 
 The above will configure `rangeStrategy` to `pin` only for the package `angular`.
 
+<!-- prettier-ignore -->
+!!! note
+    `matchPackageNames` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepNames` instead.
+
 ### matchPackagePatterns
 
 Use this field if you want to have one or more package names patterns in your package rule.
@@ -2899,6 +2930,12 @@ See also `excludePackagePatterns`.
 ```
 
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+
+<!-- prettier-ignore -->
+!!! note
+    `matchPackagePatterns` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepPatterns` instead.
 
 ### matchPackagePrefixes
 
@@ -2918,8 +2955,11 @@ See also `excludePackagePrefixes`.
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
-`matchPackagePrefixes` will match against `packageName` first, and then `depName`, however `depName` matching is deprecated and will be removed in a future major release.
-If matching against `depName`, use `matchDepPatterns` instead.
+<!-- prettier-ignore -->
+!!! note
+    `matchPackagePrefixes` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepPatterns` instead.
 
 ### matchSourceUrlPrefixes
 
@@ -3753,9 +3793,16 @@ If you want to enforce grouped package updates, you need to set this option to `
 
 ## separateMinorPatch
 
-By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" (e.g. 1.x.0) releases - it groups them together.
-E.g., if you are running version 1.0.0 of a package and both versions 1.0.1 and 1.1.0 are available then Renovate will raise a single PR for version 1.1.0.
-If you wish to distinguish between patch and minor upgrades, for example if you wish to automerge patch but not minor, then you can configured this option to `true`.
+By default, Renovate groups `patch` (`1.0.x`) and `minor` (`1.x.0`) releases into a single PR.
+For example: you are running version `1.0.0` of a package, which has two updates:
+
+- `1.0.1`, a `patch` type update
+- `1.1.0`, a `minor` type update
+
+By default, Renovate creates a single PR for the `1.1.0` version.
+
+If you want Renovate to create _separate_ PRs for `patch` and `minor` upgrades, set `separateMinorPatch` to `true`.
+Getting separate updates from Renovate can be handy when you want to, for example, automerge `patch` updates but manually merge `minor` updates.
 
 ## separateMultipleMajor
 
@@ -4004,3 +4051,7 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
   }
 }
 ```
+
+<!-- prettier-ignore -->
+!!! note
+    If you want to raise only vulnerability fix PRs, you may use the `security:only-security-updates` preset.

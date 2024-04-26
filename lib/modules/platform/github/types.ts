@@ -97,7 +97,6 @@ export interface LocalRepoConfig {
   forkToken?: string;
   forkCreation?: boolean;
   prList: GhPr[] | null;
-  issueList: GithubIssue[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
   repositoryOwner: string;
@@ -133,6 +132,7 @@ export interface GhRepo {
       oid: string;
     };
   };
+  issues: { nodes: unknown[] };
 }
 
 export interface GhAutomergeResponse {
@@ -152,12 +152,4 @@ export interface ApiPageItem {
 export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
   lastModified?: string;
-}
-
-export interface GithubIssue {
-  body: string;
-  number: number;
-  state: string;
-  title: string;
-  lastModified: string;
 }

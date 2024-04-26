@@ -2,7 +2,7 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { ensureLocalPath } from '../../../util/fs/util';
-import { normalizeDepName } from '../../datasource/pypi/common';
+import { normalizePythonDepName } from '../../datasource/pypi/common';
 import { extractPackageFile as extractRequirementsFile } from '../pip_requirements/extract';
 import { extractPackageFile as extractSetupPyFile } from '../pip_setup';
 import type {
@@ -75,7 +75,7 @@ export async function extractAllPackageFiles(
   const lockFileArgs = new Map<string, PipCompileArgs>();
   const depsBetweenFiles: DependencyBetweenFiles[] = [];
   const packageFiles = new Map<string, PackageFile>();
-  const lockFileSources = new Map<string, PackageFile>();
+  const lockFileSources = new Map<string, PackageFile[]>();
   for (const fileMatch of fileMatches) {
     const fileContent = await readLocalFile(fileMatch, 'utf8');
     if (!fileContent) {
@@ -141,7 +141,9 @@ export async function extractAllPackageFiles(
         const existingPackageFile = packageFiles.get(packageFile)!;
         existingPackageFile.lockFiles!.push(fileMatch);
         extendWithIndirectDeps(existingPackageFile, lockedDeps);
-        lockFileSources.set(fileMatch, existingPackageFile);
+        const source = lockFileSources.get(fileMatch) ?? [];
+        source.push(existingPackageFile);
+        lockFileSources.set(fileMatch, source);
         continue;
       }
       const content = await readLocalFile(packageFile, 'utf8');
@@ -177,8 +179,8 @@ export async function extractAllPackageFiles(
         for (const dep of packageFileContent.deps) {
           const lockedVersion = lockedDeps?.find(
             (lockedDep) =>
-              normalizeDepName(lockedDep.depName!) ===
-              normalizeDepName(dep.depName!),
+              normalizePythonDepName(lockedDep.depName!) ===
+              normalizePythonDepName(dep.depName!),
           )?.currentVersion;
           if (lockedVersion) {
             dep.lockedVersion = lockedVersion;
@@ -196,7 +198,9 @@ export async function extractAllPackageFiles(
           packageFile,
         };
         packageFiles.set(packageFile, newPackageFile);
-        lockFileSources.set(fileMatch, newPackageFile);
+        const source = lockFileSources.get(fileMatch) ?? [];
+        source.push(newPackageFile);
+        lockFileSources.set(fileMatch, source);
       } else {
         logger.warn(
           { packageFile },
@@ -216,19 +220,29 @@ export async function extractAllPackageFiles(
   // This needs to go in reverse order to handle transitive dependencies
   for (const packageFile of [...result].reverse()) {
     for (const reqFile of packageFile.managerData?.requirementsFiles ?? []) {
-      let sourceFile: PackageFile | undefined = undefined;
+      let sourceFiles: PackageFile[] | undefined = undefined;
       if (fileMatches.includes(reqFile)) {
-        sourceFile = lockFileSources.get(reqFile);
+        sourceFiles = lockFileSources.get(reqFile);
       } else if (packageFiles.has(reqFile)) {
-        sourceFile = packageFiles.get(reqFile);
+        sourceFiles = [packageFiles.get(reqFile)!];
       }
-      if (!sourceFile) {
+      if (!sourceFiles) {
         logger.warn(
           `pip-compile: ${packageFile.packageFile} references ${reqFile} which does not appear to be a requirements file managed by pip-compile`,
         );
         continue;
       }
-      sourceFile.lockFiles!.push(...packageFile.lockFiles!);
+      // These get reversed before merging so that we keep the last instance of any common
+      // lock files, since a file that -r includes multiple lock files needs to be updated after
+      // all of the lock files it includes
+      const files = new Set([...packageFile.lockFiles!].reverse());
+      for (const sourceFile of sourceFiles) {
+        const merged = new Set(files);
+        for (const lockFile of [...sourceFile.lockFiles!].reverse()) {
+          merged.add(lockFile);
+        }
+        sourceFile.lockFiles = Array.from(merged).reverse();
+      }
     }
   }
   logger.debug(
@@ -246,8 +260,8 @@ function extendWithIndirectDeps(
     if (
       !packageFileContent.deps.find(
         (dep) =>
-          normalizeDepName(lockedDep.depName!) ===
-          normalizeDepName(dep.depName!),
+          normalizePythonDepName(lockedDep.depName!) ===
+          normalizePythonDepName(dep.depName!),
       )
     ) {
       packageFileContent.deps.push(indirectDep(lockedDep));

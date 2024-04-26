@@ -59,6 +59,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
       const depName = attr?.Include || attr?.Update;
       const version =
         attr?.Version ??
+        attr?.version ??
         child.valueWithPath('Version') ??
         attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');

@@ -60,6 +60,20 @@ describe('modules/manager/nuget/extract', () => {
       expect(res?.deps).toHaveLength(17);
     });
 
+    it('extracts dependency with lower-case Version attribute', async () => {
+      const contents = codeBlock`
+        <Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <TargetFramework>net8.0</TargetFramework>
+          </PropertyGroup>
+          <ItemGroup>
+            <PackageReference Include="Moq" version="4.18.4" />
+          </ItemGroup>
+        </Project>`;
+      const res = await extractPackageFile(contents, 'some.csproj', config);
+      expect(res?.deps).toHaveLength(1);
+    });
+
     it('extracts all dependencies from global packages file', async () => {
       const packageFile = 'packages.props';
       const sample = Fixtures.get(packageFile);

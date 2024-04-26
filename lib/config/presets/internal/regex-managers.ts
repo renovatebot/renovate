@@ -3,6 +3,21 @@ import type { Preset } from '../types';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const presets: Record<string, Preset> = {
+  biomeVersions: {
+    customManagers: [
+      {
+        customType: 'regex',
+        datasourceTemplate: 'npm',
+        depNameTemplate: '@biomejs/biome',
+        fileMatch: ['^biome.json$'],
+        matchStrings: [
+          'https://biomejs.dev/schemas/(?<currentValue>.*)/schema.json',
+        ],
+      },
+    ],
+    description:
+      'Update `$schema` version in `biome.json` configuration files.',
+  },
   dockerfileVersions: {
     customManagers: [
       {
