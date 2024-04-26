@@ -31,7 +31,11 @@ function renameObjKey(
 function replaceAsString(
   parsedContents: NpmPackage,
   fileContent: string,
-  depType: NpmDepType | 'dependenciesMeta' | 'packageManager',
+  depType:
+    | NpmDepType
+    | 'dependenciesMeta'
+    | 'packageManager'
+    | 'pnpm.overrides',
   depName: string,
   oldValue: string,
   newValue: string,
@@ -39,6 +43,8 @@ function replaceAsString(
 ): string {
   if (depType === 'packageManager') {
     parsedContents[depType] = newValue;
+  } else if (depType === 'pnpm.overrides') {
+    parsedContents.pnpm!.overrides![depName] = newValue;
   } else if (depName === oldValue) {
     // The old value is the name of the dependency itself
     delete Object.assign(parsedContents[depType]!, {
@@ -130,10 +136,9 @@ export function updateDependency({
     }
   }
   if (upgrade.npmPackageAlias) {
-    // TODO: types (#22198)
     newValue = `npm:${upgrade.packageName}@${newValue}`;
   }
-  // TODO: types (#22198)
+
   logger.debug(`npm.updateDependency(): ${depType}.${depName} = ${newValue}`);
   try {
     const parsedContents: NpmPackage = JSON.parse(fileContent);
@@ -142,7 +147,6 @@ export function updateDependency({
     let oldVersion: string | undefined;
     if (depType === 'packageManager') {
       oldVersion = parsedContents[depType];
-      // TODO: types (#22198)
       newValue = `${depName}@${newValue}`;
     } else if (isOverrideObject(upgrade)) {
       overrideDepParents = managerData?.parents;
@@ -157,8 +161,9 @@ export function updateDependency({
           oldVersion = depObjectReference[overrideDepName]!;
         }
       }
+    } else if (depType === 'pnpm.overrides') {
+      oldVersion = parsedContents.pnpm?.overrides?.[depName];
     } else {
-      // eslint-disable @typescript-eslint/no-unnecessary-type-assertion
       oldVersion = parsedContents[depType as NpmDepType]![depName] as string;
     }
     if (oldVersion === newValue) {
@@ -262,6 +267,7 @@ export function updateDependency({
     return null;
   }
 }
+
 function overrideDepPosition(
   overrideBlock: OverrideDependency,
   parents: string[],

@@ -5,7 +5,7 @@ import { parseYaml } from '../../../util/yaml';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
-import { isOCIRegistry } from '../helmv3/utils';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import { checkIfStringIsPath } from '../terraform/util';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { FleetFile, type FleetHelmBlock, GitRepo } from './schema';
@@ -55,7 +55,7 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
 
   if (isOCIRegistry(doc.chart)) {
     const dockerDep = getDep(
-      `${doc.chart.replace('oci://', '')}:${doc.version}`,
+      `${removeOCIPrefix(doc.chart)}:${doc.version}`,
       false,
     );
 

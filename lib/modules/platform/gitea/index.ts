@@ -59,6 +59,7 @@ import {
   smartLinks,
   toRenovatePR,
   trimTrailingApiPath,
+  usableRepo,
 } from './utils';
 
 interface GiteaRepoConfig {
@@ -78,6 +79,7 @@ const defaults = {
   hostType: 'gitea',
   endpoint: 'https://gitea.com/',
   version: '0.0.0',
+  isForgejo: false,
 };
 
 let config: GiteaRepoConfig = {} as any;
@@ -172,7 +174,7 @@ async function fetchRepositories(topic?: string): Promise<string[]> {
       order: process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER as SortMethod,
     }),
   });
-  return repos.filter((r) => !r.mirror).map((r) => r.full_name);
+  return repos.filter(usableRepo).map((r) => r.full_name);
 }
 
 const platform: Platform = {
@@ -200,6 +202,12 @@ const platform: Platform = {
       botUserID = user.id;
       botUserName = user.username;
       defaults.version = await helper.getVersion({ token });
+      if (defaults.version?.includes('gitea-')) {
+        defaults.version = defaults.version.substring(
+          defaults.version.indexOf('gitea-') + 6,
+        );
+        defaults.isForgejo = true;
+      }
     } catch (err) {
       logger.debug(
         { err },
@@ -255,26 +263,27 @@ const platform: Platform = {
 
     // Ensure appropriate repository state and permissions
     if (repo.archived) {
-      logger.debug(
-        'Repository is archived - throwing error to abort renovation',
-      );
+      logger.debug('Repository is archived - aborting renovation');
       throw new Error(REPOSITORY_ARCHIVED);
     }
     if (repo.mirror) {
-      logger.debug(
-        'Repository is a mirror - throwing error to abort renovation',
-      );
+      logger.debug('Repository is a mirror - aborting renovation');
       throw new Error(REPOSITORY_MIRRORED);
     }
-    if (!repo.permissions.pull || !repo.permissions.push) {
+    if (repo.permissions.pull === false || repo.permissions.push === false) {
       logger.debug(
-        'Repository does not permit pull and push - throwing error to abort renovation',
+        'Repository does not permit pull or push - aborting renovation',
       );
       throw new Error(REPOSITORY_ACCESS_FORBIDDEN);
     }
     if (repo.empty) {
-      logger.debug('Repository is empty - throwing error to abort renovation');
+      logger.debug('Repository is empty - aborting renovation');
       throw new Error(REPOSITORY_EMPTY);
+    }
+
+    if (repo.has_pull_requests === false) {
+      logger.debug('Repo has disabled pull requests - aborting renovation');
+      throw new Error(REPOSITORY_BLOCKED);
     }
 
     if (repo.allow_rebase) {
@@ -287,7 +296,7 @@ const platform: Platform = {
       config.mergeMethod = 'merge';
     } else {
       logger.debug(
-        'Repository has no allowed merge methods - throwing error to abort renovation',
+        'Repository has no allowed merge methods - aborting renovation',
       );
       throw new Error(REPOSITORY_BLOCKED);
     }

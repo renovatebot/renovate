@@ -71,6 +71,7 @@ const repoGroups = {
   capacitor: 'https://github.com/ionic-team/capacitor',
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   chromely: 'https://github.com/chromelyapps/Chromely',
+  'citation-js': 'https://github.com/citation-js/citation-js',
   ckeditor: 'https://github.com/ckeditor/ckeditor5',
   clarity: 'https://github.com/vmware/clarity',
   clearscript: [
@@ -515,6 +516,7 @@ const repoGroups = {
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
+  weasel: 'https://github.com/JasperFx/weasel',
   'web3-react': 'https://github.com/Uniswap/web3-react',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   wolverine: 'https://github.com/jasperfx/wolverine',
