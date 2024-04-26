@@ -1,8 +1,8 @@
 import { logger } from '../../../logger';
+import { Json } from '../../../util/schema-utils';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { FvmConfig } from './schema';
-import { Json } from '../../../util/schema-utils';
 
 export function extractPackageFile(
   content: string,
