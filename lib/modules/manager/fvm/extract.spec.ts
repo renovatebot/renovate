@@ -39,10 +39,7 @@ describe('modules/manager/fvm/extract', () => {
     });
 
     it('returns a result for .fvmrc', () => {
-      const res = extractPackageFile(
-        '{"flutter": "2.10.1"}',
-        packageFile,
-      );
+      const res = extractPackageFile('{"flutter": "2.10.1"}', packageFile);
       expect(res?.deps).toEqual([
         {
           currentValue: '2.10.1',
@@ -69,10 +66,7 @@ describe('modules/manager/fvm/extract', () => {
     });
 
     it('supports non range for .fvmrc', () => {
-      const res = extractPackageFile(
-        '{"flutter": "stable"}',
-        packageFile,
-      );
+      const res = extractPackageFile('{"flutter": "stable"}', packageFile);
       expect(res?.deps).toEqual([
         {
           currentValue: 'stable',

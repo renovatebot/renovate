@@ -6,9 +6,6 @@ export { extractPackageFile } from './extract';
 export const supportedDatasources = [FlutterVersionDatasource.id];
 
 export const defaultConfig = {
-  fileMatch: [
-    '(^|/)\\.fvm/fvm_config\\.json$',
-    '(^|/)\\.fvmrc$'
-    ],
+  fileMatch: ['(^|/)\\.fvm/fvm_config\\.json$', '(^|/)\\.fvmrc$'],
   versioning: semverVersioning.id,
 };
