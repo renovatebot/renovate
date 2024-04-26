@@ -444,7 +444,7 @@ export interface RenovateOptionBase {
   deprecationMsg?: string;
 
   /**
-   * For internal use only: helps with regexOrGlob option validation
+   * For internal use only: add it any option that supports regex or glob matching
    */
   patternMatch?: boolean;
 }
