@@ -94,7 +94,7 @@ Mend.io customers should use their designated support channels for urgent needs.
 If you need more assistance than what this project offers, you have two options:
 
 1. Become a Mend.io customer, such as by buying Renovate Enterprise, or
-1. Hire an experienced Renovate contributor privately for consulting. Mend.io staff do _not_ offer this service, but one of our volunteer maintainers, but [`@secustor`](https://github.com/secustor), does
+1. Hire an experienced Renovate contributor privately for consulting. Mend.io staff do _not_ offer this service, but one of our volunteer maintainers, [`@secustor`](https://github.com/secustor), does
 
 ## Feedback
 
