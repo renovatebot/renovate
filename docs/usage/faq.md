@@ -36,6 +36,23 @@ The maintainers don't follow any release schedule or release cadence.
 This means the Mend Renovate App can lag a few hours to a week behind the open source version.
 Major releases of Renovate are held back until the maintainers are reasonably certain it works for most users.
 
+## How to see which version the Mend Renovate app is using?
+
+You can see which version the Mend Renovate app is on by:
+
+1. Going to the [Mend Developer Portal](https://developer.mend.io/)
+2. Selecting your username
+3. Selecting a installed repository
+4. Selecting a job from the _Recent jobs_ overview
+5. Selecting the _Info_ Log Level from the dropdown menu
+6. You should see something like this:
+   ```
+   INFO: Repository started
+   {
+     "renovateVersion": "37.326.0"
+   }
+   ```
+
 ## Renovate core features not supported on all platforms
 
 | Feature               | Platforms which lack feature                               | See Renovate issue(s)                                        |
