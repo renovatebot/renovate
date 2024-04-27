@@ -135,7 +135,7 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 
 If set, Renovate will query this API for Merge Confidence data.
 
-If you use Mend Renovate Enterprise and:
+If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
 
 - have a static merge confidence token that you set via `MEND_RNV_MC_TOKEN`
 - _or_ set `MEND_RNV_MC_TOKEN` to `auto`
