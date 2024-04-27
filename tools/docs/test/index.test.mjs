@@ -31,7 +31,7 @@ function checkNode(node, files, file) {
         path.dirname(file),
         link.url.replace(/#.*/, ''),
       );
-      // relative url
+      // relative URL
       const target = abs.substring(root.length + 1);
 
       assert.ok(
