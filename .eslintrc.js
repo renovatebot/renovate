@@ -1,5 +1,3 @@
-const { jest } = require('@jest/globals');
-
 module.exports = {
   root: true,
   env: {
