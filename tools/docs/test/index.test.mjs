@@ -56,10 +56,6 @@ test('index', async (t) => {
     const todo = await glob('**/*.md', { cwd: 'tmp/docs' });
     const files = new Set(todo);
 
-    // add generated files
-    files.add('index.md');
-    files.add('release-notes-for-major-versions.md');
-    files.add('merge-confidence.md');
 
     let c = 0;
 
