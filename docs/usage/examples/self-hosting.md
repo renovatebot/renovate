@@ -416,7 +416,10 @@ This means Renovate can safely connect to systems using that certificate or cert
 
 Helper programs like Git and npm use the system trust store.
 For those programs to trust a self-signed certificate you must add it to the systems trust store.
-On Ubuntu/Debian and many Linux-based systems, this can be done by copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards.
+On Ubuntu/Debian and many Linux-based systems, this can be done by:
+
+1. copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/`
+1. and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards
 
 ### Renovate Docker image
 
