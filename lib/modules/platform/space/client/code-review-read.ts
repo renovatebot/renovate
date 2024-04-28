@@ -1,6 +1,6 @@
-import { logger } from '../../../../logger';
-import type { SpaceHttp } from '../../../../util/http/space';
-import { PaginatedIterable } from '../paginated-iterator';
+import {logger} from '../../../../logger';
+import type {SpaceHttp} from '../../../../util/http/space';
+import {PaginatedIterable} from '../paginated-iterator';
 import type {
   CodeReviewStateFilter,
   SpaceChannelItem,
@@ -8,10 +8,11 @@ import type {
   SpaceCodeReviewBasicInfo,
   SpaceMergeRequestRecord,
 } from '../types';
-import { mapNotNullFlatten } from '../utils';
+import {mapNotNullFlatten} from '../utils';
 
 export class SpaceCodeReviewReadClient {
-  constructor(private http: SpaceHttp) {}
+  constructor(private http: SpaceHttp) {
+  }
 
   async getByCodeReviewId(
     projectKey: string,
@@ -48,11 +49,10 @@ export class SpaceCodeReviewReadClient {
       repositoryQueryParam = `&repository=${config.repository}`;
     }
 
-    const iterable =
-      PaginatedIterable.fromGetUsingSkip<SpaceCodeReviewBasicInfo>(
-        this.http,
-        `/api/http/projects/key:${projectKey}/code-reviews?$top=1&state=${config.prState}${repositoryQueryParam}`,
-      );
+    const iterable = PaginatedIterable.fromGetUsingSkip<SpaceCodeReviewBasicInfo>(
+      this.http,
+      `/api/http/projects/key:${projectKey}/code-reviews?$top=1&state=${config.prState}${repositoryQueryParam}`,
+    );
 
     return await mapNotNullFlatten(
       iterable,

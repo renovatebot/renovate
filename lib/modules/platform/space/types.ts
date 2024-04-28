@@ -29,7 +29,6 @@ export interface SpaceCodeReviewBasicInfo {
     className: CodeReviewClassName;
     id: string;
   };
-  messagesCount: number;
 }
 
 export type CodeReviewClassName =
