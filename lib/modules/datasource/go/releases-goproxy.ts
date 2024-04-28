@@ -237,9 +237,10 @@ export class GoProxyDatasource extends Datasource {
           result.tags.latest = latestVersion;
         }
         if (!result.releases.length) {
-          result.releases.push(
-            pseudoVersionToRelease(latestVersion) ?? { version: latestVersion },
-          );
+          const releaseFromLatest = pseudoVersionToRelease(latestVersion);
+          if (releaseFromLatest) {
+            result.releases.push(releaseFromLatest);
+          }
         }
       }
     }
