@@ -165,7 +165,7 @@
     "@renovatebot/pep440": "3.0.20",
     "@renovatebot/ruby-semver": "3.0.23",
     "@sindresorhus/is": "4.6.0",
-    "@types/better-sqlite3": "7.6.9",
+    "@types/better-sqlite3": "7.6.10",
     "@types/ms": "0.7.34",
     "@types/tmp": "0.2.6",
     "@yarnpkg/core": "4.0.3",
