@@ -24,6 +24,24 @@ const pseudoVersionRegex = regEx(
   /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?(?<timestamp>\d{14})-(?<digest>[a-f0-9]{12})/i,
 );
 
+export function pseudoVersionToRelease(pseudoVersion: string): Release | null {
+  const match = pseudoVersion.match(pseudoVersionRegex)?.groups;
+  if (!match) {
+    return null;
+  }
+
+  const { digest: newDigest, timestamp } = match;
+  const releaseTimestamp = DateTime.fromFormat(timestamp, 'yyyyMMddHHmmss', {
+    zone: 'UTC',
+  }).toISO({ suppressMilliseconds: true });
+
+  return {
+    version: pseudoVersion,
+    newDigest,
+    releaseTimestamp,
+  };
+}
+
 export class GoProxyDatasource extends Datasource {
   static readonly id = 'go-proxy';
 
@@ -119,29 +137,13 @@ export class GoProxyDatasource extends Datasource {
       }
 
       const [version, releaseTimestamp] = str.trim().split(regEx(/\s+/));
-      const release: Release = { version };
+      let release: Release = { version };
 
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
 
-      const pseudoVersionMatch = version.match(pseudoVersionRegex)?.groups;
-      if (pseudoVersionMatch) {
-        const { digest: newDigest, timestamp } = pseudoVersionMatch;
-
-        if (newDigest) {
-          release.newDigest = newDigest;
-        }
-
-        const pseudoVersionReleaseTimestamp = DateTime.fromFormat(
-          timestamp,
-          'yyyyMMddHHmmss',
-          { zone: 'UTC' },
-        ).toISO({ suppressMilliseconds: true });
-        if (pseudoVersionReleaseTimestamp) {
-          release.releaseTimestamp = pseudoVersionReleaseTimestamp;
-        }
-      }
+      release = pseudoVersionToRelease(version) ?? release;
 
       return release;
     });
@@ -233,6 +235,11 @@ export class GoProxyDatasource extends Datasource {
         result.tags.latest ??= latestVersion;
         if (goVersioning.isGreaterThan(latestVersion, result.tags.latest)) {
           result.tags.latest = latestVersion;
+        }
+        if (!result.releases.length) {
+          result.releases.push(
+            pseudoVersionToRelease(latestVersion) ?? { version: latestVersion },
+          );
         }
       }
     }
