@@ -111,8 +111,8 @@ importers:
         specifier: 1.12.0
         version: 1.12.0
       azure-devops-node-api:
-        specifier: 12.5.0
-        version: 12.5.0
+        specifier: 13.0.0
+        version: 13.0.0
       better-sqlite3:
         specifier: 9.5.0
         version: 9.5.0
@@ -407,8 +407,8 @@ importers:
         specifier: 1.0.2
         version: 1.0.2
       '@types/diff':
-        specifier: 5.0.9
-        version: 5.0.9
+        specifier: 5.2.0
+        version: 5.2.0
       '@types/eslint':
         specifier: 8.56.10
         version: 8.56.10
@@ -3841,8 +3841,8 @@ packages:
     resolution: {integrity: sha512-Yzo8dW+b2vziyDD9WNY+IPq4rcZyguHNuyNZC3wv0igpVFRd7VWHufl+vRQaCzDR2ftPTB1VPwbvXxWVpzBo+g==}
     dev: true
 
-  /@types/diff@5.0.9:
-    resolution: {integrity: sha512-RWVEhh/zGXpAVF/ZChwNnv7r4rvqzJ7lYNSmZSVTxjV0PBLf6Qu7RNg+SUtkpzxmiNkjCx0Xn2tPp7FIkshJwQ==}
+  /@types/diff@5.2.0:
+    resolution: {integrity: sha512-pjJH+02ukgJRW0mViDUA1cdC+wzSgRu0e4cPuogPLAw0i66y62iMP0ZlXoJAmoXrKRZnF3pMDwyKZsgNVlMX4A==}
     dev: true
 
   /@types/emscripten@1.39.10:
@@ -4658,8 +4658,8 @@ packages:
     resolution: {integrity: sha512-NmWvPnx0F1SfrQbYwOi7OeaNGokp9XhzNioJ/CSBs8Qa4vxug81mhJEAVZwxXuBmYB5KDRfMq/F3RR0BIU7sWg==}
     dev: false
 
-  /azure-devops-node-api@12.5.0:
-    resolution: {integrity: sha512-R5eFskGvOm3U/GzeAuxRkUsAl0hrAwGgWn6zAd2KrZmrEhWZVqLew4OOupbQlXUuojUzpGtq62SmdhJ06N88og==}
+  /azure-devops-node-api@13.0.0:
+    resolution: {integrity: sha512-T/i3pt2Dxb2//1+TJT05Ff5heUmQEWKwa8sdguIhdRYT3Zge9FYw98zpfFvCD7CZsz6AN74SKGgqF3ISVN2TGg==}
     dependencies:
       tunnel: 0.0.6
       typed-rest-client: 1.8.11
