@@ -87,9 +87,6 @@ export class GoProxyDatasource extends Datasource {
           result = res;
           break;
         }
-        if (res.tags?.latest) {
-          result = res;
-        }
       } catch (err) {
         const statusCode = err?.response?.statusCode;
         const canFallback =
