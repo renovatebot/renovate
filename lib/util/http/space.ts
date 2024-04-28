@@ -1,6 +1,6 @@
-import { validateUrl } from '../url';
-import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
-import { Http } from './index';
+import {isHttpUrl} from "../url";
+import type {HttpOptions, HttpResponse, InternalHttpOptions} from './types';
+import {Http} from './index';
 
 export class SpaceHttp extends Http {
   constructor(
@@ -14,7 +14,7 @@ export class SpaceHttp extends Http {
     path: string,
     options?: InternalHttpOptions,
   ): Promise<HttpResponse<T>> {
-    const url = validateUrl(path) ? path : this.baseUrl + path;
+    const url = isHttpUrl(path) ? path : this.baseUrl + path;
     const opts: InternalHttpOptions = {
       ...options,
     };

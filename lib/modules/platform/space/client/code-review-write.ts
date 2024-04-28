@@ -15,7 +15,7 @@ export class SpaceCodeReviewWriteClient {
     request: SpaceCodeReviewCreateRequest,
   ): Promise<SpaceMergeRequestRecord> {
     logger.debug(
-      `SPACE: createMergeRequest: projectKey=${projectKey}, request=${JSON.stringify(request)}`,
+      `SPACE: create: projectKey=${projectKey}, request=${JSON.stringify(request)}`,
     );
 
     const response = await this.http.postJson<SpaceMergeRequestRecord>(
@@ -23,7 +23,7 @@ export class SpaceCodeReviewWriteClient {
       { body: request },
     );
     logger.debug(
-      `SPACE: createMergeRequest: response: ${JSON.stringify(response.body)}`,
+      `SPACE: create: response: ${JSON.stringify(response.body)}`,
     );
 
     return response.body;
