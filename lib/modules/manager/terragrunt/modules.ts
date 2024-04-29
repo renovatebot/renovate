@@ -76,7 +76,7 @@ export function analyseTerragruntModule(
     }
     dep.depType = 'gitTags';
     // We don't want to have .git or subdirectory in the depName
-    dep.depName = `${hostname}${pathname.split('//')[0].replace('.git', '')}`;
+    dep.depName = `${hostname}${pathname.split('//')[0].replace(regEx('.git$'), '')}`;
     dep.currentValue = tag;
     dep.datasource = detectGitTagDatasource(url);
     if (dep.datasource === GitTagsDatasource.id) {
@@ -88,8 +88,8 @@ export function analyseTerragruntModule(
     } else {
       // The packageName should only contain the path to the repository
       dep.packageName = pathname
-        .replace(/^\//, '')
-        .replace('.git', '')
+        .replace(regEx(/^\//), '')
+        .replace(regEx('.git$'), '')
         .split('//')[0];
       dep.registryUrls = [
         protocol === 'https:' ? `https://${host}` : `https://${hostname}`,
