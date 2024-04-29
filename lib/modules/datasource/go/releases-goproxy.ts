@@ -134,13 +134,12 @@ export class GoProxyDatasource extends Datasource {
       }
 
       const [version, releaseTimestamp] = str.trim().split(regEx(/\s+/));
-      let release: Release = { version };
+      const release: Release = pseudoVersionToRelease(version) ?? { version };
 
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
 
-      release = pseudoVersionToRelease(version) ?? release;
 
       return release;
     });
