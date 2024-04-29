@@ -39,7 +39,6 @@ describe('modules/platform/gitea/index', () => {
   let git: jest.Mocked<typeof _git>;
   let hostRules: typeof import('../../../util/host-rules');
   let memCache: typeof import('../../../util/cache/memory');
-  let globalConfig: typeof import('../../../config/global');
 
   function mockedRepo(opts: Partial<Repo>): Repo {
     return partial<Repo>({
@@ -223,10 +222,8 @@ describe('modules/platform/gitea/index', () => {
     git.getBranchCommit.mockReturnValue(mockCommitHash);
     hostRules = await import('../../../util/host-rules');
     hostRules.clear();
-    globalConfig = await import('../../../config/global');
-    setBaseUrl('https://gitea.renovatebot.com/');
 
-    globalConfig.GlobalConfig.reset();
+    setBaseUrl('https://gitea.renovatebot.com/');
   });
 
   async function initFakePlatform(
@@ -421,10 +418,6 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('Sorts repos', async () => {
-      globalConfig.GlobalConfig.set({
-        autodiscoverRepoSort: 'updated',
-        autodiscoverRepoOrder: 'desc',
-      });
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/search')
@@ -440,7 +433,10 @@ describe('modules/platform/gitea/index', () => {
         });
       await initFakePlatform(scope);
 
-      const repos = await gitea.getRepos();
+      const repos = await gitea.getRepos({
+        sort: 'updated',
+        order: 'desc',
+      });
       expect(repos).toEqual(['a/b', 'c/d']);
     });
   });
