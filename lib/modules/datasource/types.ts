@@ -9,6 +9,8 @@ export interface GetDigestInputConfig {
   packageName: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
+  registryUrl?: string;
+  lookupName?: string;
   additionalRegistryUrls?: string[];
   currentValue?: string;
   currentDigest?: string;
@@ -17,6 +19,7 @@ export interface GetDigestInputConfig {
 
 export interface DigestConfig {
   packageName: string;
+  lookupName?: string;
   registryUrl?: string;
   currentValue?: string;
   currentDigest?: string;
@@ -27,6 +30,7 @@ export interface GetReleasesConfig {
   datasource?: string;
   packageName: string;
   registryUrl?: string;
+  currentValue?: string;
 }
 
 export interface GetPkgReleasesConfig {
@@ -37,6 +41,7 @@ export interface GetPkgReleasesConfig {
   additionalRegistryUrls?: string[];
   datasource: string;
   packageName: string;
+  currentValue?: string;
   versioning?: string;
   extractVersion?: string;
   versionCompatibility?: string;
@@ -81,6 +86,8 @@ export interface ReleaseResult {
   registryUrl?: string;
   replacementName?: string;
   replacementVersion?: string;
+  lookupName?: string;
+  packageScope?: string;
 }
 
 export type RegistryStrategy = 'first' | 'hunt' | 'merge';

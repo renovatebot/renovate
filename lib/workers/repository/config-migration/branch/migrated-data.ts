@@ -6,6 +6,7 @@ import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
 import { prettier } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
+import { platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
 import { readLocalFile } from '../../../../util/fs';
 import { EditorConfig } from '../../../../util/json-writer';
@@ -142,10 +143,10 @@ export class MigratedDataFactory {
       delete migratedConfig.errors;
       delete migratedConfig.warnings;
 
-      // indent defaults to 2 spaces
       // TODO #22198
-      const raw = await readLocalFile(configFileName!, 'utf8');
-      const indent = detectIndent(raw!);
+      const raw = await platform.getRawFile(configFileName!);
+      const indent = detectIndent(raw ?? '');
+      // indent defaults to 2 spaces
       const indentSpace = indent.indent ?? '  ';
       const filename = configFileName!;
       let content: string;

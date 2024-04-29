@@ -1,8 +1,10 @@
 import type { AllConfig } from '../../../config/types';
+import { PackageCacheStats } from '../../stats';
 import * as memCache from '../memory';
 import * as fileCache from './file';
 import * as redisCache from './redis';
-import type { PackageCache } from './types';
+import { SqlitePackageCache } from './sqlite';
+import type { PackageCache, PackageCacheNamespace } from './types';
 
 let cacheProxy: PackageCache | undefined;
 
@@ -11,31 +13,28 @@ function getGlobalKey(namespace: string, key: string): string {
 }
 
 export async function get<T = any>(
-  namespace: string,
+  namespace: PackageCacheNamespace,
   key: string,
 ): Promise<T | undefined> {
   if (!cacheProxy) {
     return undefined;
   }
+
   const globalKey = getGlobalKey(namespace, key);
-  let start = 0;
-  if (memCache.get(globalKey) === undefined) {
-    memCache.set(globalKey, cacheProxy.get(namespace, key));
-    start = Date.now();
+  let p = memCache.get(globalKey);
+  if (!p) {
+    p = PackageCacheStats.wrapGet(() =>
+      cacheProxy!.get<number[]>(namespace, key),
+    );
+    memCache.set(globalKey, p);
   }
-  const result = await memCache.get(globalKey);
-  if (start) {
-    // Only count duration if it's not a duplicate
-    const durationMs = Math.round(Date.now() - start);
-    const cacheDurations = memCache.get<number[]>('package-cache-gets') ?? [];
-    cacheDurations.push(durationMs);
-    memCache.set('package-cache-gets', cacheDurations);
-  }
+
+  const result = await p;
   return result;
 }
 
 export async function set(
-  namespace: string,
+  namespace: PackageCacheNamespace,
   key: string,
   value: unknown,
   minutes: number,
@@ -43,14 +42,14 @@ export async function set(
   if (!cacheProxy) {
     return;
   }
+
+  await PackageCacheStats.wrapSet(() =>
+    cacheProxy!.set(namespace, key, value, minutes),
+  );
+
   const globalKey = getGlobalKey(namespace, key);
-  memCache.set(globalKey, value);
-  const start = Date.now();
-  await cacheProxy.set(namespace, key, value, minutes);
-  const durationMs = Math.round(Date.now() - start);
-  const cacheDurations = memCache.get<number[]>('package-cache-sets') ?? [];
-  cacheDurations.push(durationMs);
-  memCache.set('package-cache-sets', cacheDurations);
+  const p = Promise.resolve(value);
+  memCache.set(globalKey, p);
 }
 
 export async function init(config: AllConfig): Promise<void> {
@@ -60,13 +59,22 @@ export async function init(config: AllConfig): Promise<void> {
       get: redisCache.get,
       set: redisCache.set,
     };
-  } else if (config.cacheDir) {
+    return;
+  }
+
+  if (process.env.RENOVATE_X_SQLITE_PACKAGE_CACHE) {
+    cacheProxy = await SqlitePackageCache.init(config.cacheDir!);
+    return;
+  }
+
+  if (config.cacheDir) {
     fileCache.init(config.cacheDir);
     cacheProxy = {
       get: fileCache.get,
       set: fileCache.set,
       cleanup: fileCache.cleanup,
     };
+    return;
   }
 }
 

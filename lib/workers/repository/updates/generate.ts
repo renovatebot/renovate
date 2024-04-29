@@ -51,7 +51,7 @@ function getTableValues(upgrade: BranchUpgradeConfig): string[] | null {
   if (datasource && name && currentVersion && newVersion) {
     return [datasource, name, currentVersion, newVersion];
   }
-  logger.debug(
+  logger.trace(
     {
       datasource,
       packageName,
@@ -83,6 +83,7 @@ export function generateBranchConfig(
   const newValue: string[] = [];
   const toVersions: string[] = [];
   const toValues = new Set<string>();
+  const depTypes = new Set<string>();
   for (const upg of branchUpgrades) {
     upg.recreateClosed = upg.recreateWhen === 'always';
 
@@ -119,6 +120,9 @@ export function generateBranchConfig(
       toVersions.push(upg.newVersion!);
     }
     toValues.add(upg.newValue!);
+    if (upg.depType) {
+      depTypes.add(upg.depType);
+    }
     // prettify newVersion and newMajor for printing
     if (upg.newVersion) {
       upg.prettyNewVersion = prettifyVersion(upg.newVersion);
@@ -144,8 +148,15 @@ export function generateBranchConfig(
   const useGroupSettings = hasGroupName && groupEligible;
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: string;
+
+  if (depTypes.size) {
+    config.depTypes = Array.from(depTypes).sort();
+  }
+
   for (const branchUpgrade of branchUpgrades) {
     let upgrade: BranchUpgradeConfig = { ...branchUpgrade };
+
+    upgrade.depTypes = config.depTypes;
 
     // needs to be done for each upgrade, as we reorder them below
     if (newValue.length > 1 && !groupEligible) {
@@ -334,9 +345,6 @@ export function generateBranchConfig(
     ...config.upgrades[0],
     releaseTimestamp: releaseTimestamp!,
   }; // TODO: fixme (#9666)
-  config.reuseLockFiles = config.upgrades.every(
-    (upgrade) => upgrade.updateType !== 'lockFileMaintenance',
-  );
   config.dependencyDashboardApproval = config.upgrades.some(
     (upgrade) => upgrade.dependencyDashboardApproval,
   );

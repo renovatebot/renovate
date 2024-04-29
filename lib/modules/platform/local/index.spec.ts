@@ -33,10 +33,6 @@ describe('modules/platform/local/index', () => {
   });
 
   describe('dummy functions', () => {
-    it('getRepoForceRebase', async () => {
-      expect(await platform.getRepoForceRebase()).toBe(false);
-    });
-
     it('findIssue', async () => {
       expect(await platform.findIssue()).toBeNull();
     });

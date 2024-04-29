@@ -81,7 +81,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       [now.minus({ weeks: 2 }), 1435],
       [now.minus({ years: 1 }), 14495],
     ])('works with string date (%s, %i)', (date, minutes) => {
-      expect(releaseNotesCacheMinutes(date.toISO()!)).toEqual(minutes);
+      expect(releaseNotesCacheMinutes(date.toISO())).toEqual(minutes);
     });
 
     it('handles date object', () => {

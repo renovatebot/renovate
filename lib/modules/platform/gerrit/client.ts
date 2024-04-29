@@ -1,6 +1,7 @@
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { GerritHttp } from '../../../util/http/gerrit';
+import { regEx } from '../../../util/regex';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
@@ -11,6 +12,8 @@ import type {
   GerritProjectInfo,
 } from './types';
 import { mapPrStateToGerritFilter } from './utils';
+
+const QUOTES_REGEX = regEx('"', 'g');
 
 class GerritClient {
   private requestDetails = [
@@ -235,8 +238,10 @@ class GerritClient {
       filters.push(`label:Code-Review=${searchConfig.label}`);
     }
     if (searchConfig.prTitle) {
+      // escaping support in Gerrit is not great, so we need to remove quotes
+      // special characters are ignored anyway in the search so it does not create any issues
       filters.push(
-        `message:${encodeURIComponent('"' + searchConfig.prTitle + '"')}`,
+        `message:${encodeURIComponent('"' + searchConfig.prTitle.replace(QUOTES_REGEX, '') + '"')}`,
       );
     }
     return filters;

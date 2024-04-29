@@ -246,10 +246,10 @@ describe('modules/manager/npm/update/locked-dependency/index', () => {
       expect(res.status).toBe('update-failed');
     });
 
-    it('fails if pnpm', async () => {
+    it('rejects in-range remediation if pnpm', async () => {
       config.lockFile = 'pnpm-lock.yaml';
       const res = await updateLockedDependency(config);
-      expect(res.status).toBe('update-failed');
+      expect(res.status).toBe('unsupported');
     });
   });
 });

@@ -119,8 +119,11 @@ exports[`config/presets/index resolvePreset resolves eslint 1`] = `
   "matchPackageNames": [
     "@types/eslint",
     "babel-eslint",
+    "@babel/eslint-parser",
   ],
   "matchPackagePrefixes": [
+    "@eslint/",
+    "@types/eslint__",
     "@typescript-eslint/",
     "eslint",
   ],
@@ -135,6 +138,7 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
   "matchPackageNames": [
     "@types/eslint",
     "babel-eslint",
+    "@babel/eslint-parser",
     "friendsofphp/php-cs-fixer",
     "squizlabs/php_codesniffer",
     "symplify/easy-coding-standard",
@@ -148,6 +152,8 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
   ],
   "matchPackagePrefixes": [
     "ember-template-lint",
+    "@eslint/",
+    "@types/eslint__",
     "@typescript-eslint/",
     "eslint",
     "stylelint",
@@ -169,6 +175,7 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
       "matchPackageNames": [
         "@types/eslint",
         "babel-eslint",
+        "@babel/eslint-parser",
         "friendsofphp/php-cs-fixer",
         "squizlabs/php_codesniffer",
         "symplify/easy-coding-standard",
@@ -182,6 +189,8 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
       ],
       "matchPackagePrefixes": [
         "ember-template-lint",
+        "@eslint/",
+        "@types/eslint__",
         "@typescript-eslint/",
         "eslint",
         "stylelint",

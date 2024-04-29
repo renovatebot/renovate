@@ -1,15 +1,43 @@
-ARG RENOVATE_VERSION
 ARG BASE_IMAGE_TYPE=slim
 
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:1.15.1@sha256:d2cca5e71e439b6d0884a8970adb6c853108cd3c698ff0351ebab7249ea2b1a9 AS slim-base
+FROM ghcr.io/renovatebot/base-image:2.5.1@sha256:c01c07ed27151426bf67a325c57f1fac247ffb53741ace65656d9582fc1d5db7 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:1.15.1-full@sha256:4553951f65fabcdb7a652d3e46a1008d17b1c9c46b58b03d7db9985b348e4f93 AS full-base
+FROM ghcr.io/renovatebot/base-image:2.5.1-full@sha256:b37e76901a52e7df5ed5c067ada98d2189b9ac214b4ade4345c7028d3e6f501a AS full-base
+
+# --------------------------------------
+# build image
+# --------------------------------------
+FROM slim-base as build
+
+WORKDIR /usr/local/renovate
+
+ENV CI=1 npm_config_modules_cache_max_age=0
+
+COPY pnpm-lock.yaml ./
+
+# only fetch deps from lockfile https://pnpm.io/cli/fetch
+RUN corepack pnpm fetch --prod
+
+COPY . ./
+
+# install
+RUN set -ex; \
+  corepack pnpm install --prod --offline --ignore-scripts; \
+  true
+
+# test
+COPY tools/docker/bin/ /usr/local/bin/
+RUN set -ex; \
+  renovate --version; \
+  renovate-config-validator; \
+  node -e "new require('re2')('.*').exec('test')"; \
+  true
 
 # --------------------------------------
 # final image
@@ -21,19 +49,24 @@ LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate" 
   org.opencontainers.image.url="https://renovatebot.com" \
   org.opencontainers.image.licenses="AGPL-3.0-only"
 
-
 WORKDIR /usr/src/app
 
 ENV RENOVATE_X_IGNORE_NODE_WARN=true
 
-COPY bin/ /usr/local/bin/
+COPY tools/docker/bin/ /usr/local/bin/
 CMD ["renovate"]
 
 ARG RENOVATE_VERSION
-RUN install-tool renovate
+
+COPY --from=build --chown=root:root /usr/local/renovate/ /usr/local/renovate/
 
 # Compabillity, so `config.js` can access renovate and deps
-RUN ln -sf /opt/containerbase/tools/renovate/${RENOVATE_VERSION}/node_modules ./node_modules;
+RUN set -ex; \
+  mkdir /opt/containerbase/tools/renovate; \
+  echo "${RENOVATE_VERSION}" > /opt/containerbase/versions/renovate; \
+  ln -sf /usr/local/renovate /opt/containerbase/tools/renovate/${RENOVATE_VERSION}; \
+  ln -sf /usr/local/renovate/node_modules ./node_modules; \
+  true
 
 RUN set -ex; \
   renovate --version; \

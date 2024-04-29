@@ -5,6 +5,7 @@ import { compressToBase64, decompressFromBase64 } from '../../../compress';
 import { hash } from '../../../hash';
 import { safeStringify } from '../../../stringify';
 import { CACHE_REVISION } from '../common';
+import { cleanupHttpCache } from '../http-cache';
 import { RepoCacheRecord, RepoCacheV13 } from '../schema';
 import type { RepoCache, RepoCacheData } from '../types';
 
@@ -63,13 +64,14 @@ export abstract class RepoCacheBase implements RepoCache {
         return;
       }
 
-      logger.debug('Repository cache is invalid');
+      logger.warn({ err: cacheV13.error }, 'Repository cache is invalid');
     } catch (err) /* istanbul ignore next: not easily testable */ {
       logger.debug({ err }, 'Error reading repository cache');
     }
   }
 
   async save(): Promise<void> {
+    cleanupHttpCache(this.data);
     const jsonStr = safeStringify(this.data);
     const hashedJsonStr = hash(jsonStr);
     if (hashedJsonStr === this.oldHash) {

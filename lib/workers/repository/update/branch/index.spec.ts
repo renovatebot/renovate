@@ -108,6 +108,7 @@ describe('workers/repository/update/branch/index', () => {
     beforeEach(() => {
       scm.branchExists.mockResolvedValue(false);
       prWorker.ensurePr = jest.fn();
+      prWorker.getPlatformPrOptions = jest.fn();
       prAutomerge.checkAutoMerge = jest.fn();
       // TODO: incompatible types (#22198)
       config = {
@@ -132,6 +133,9 @@ describe('workers/repository/update/branch/index', () => {
           sourceBranch: '',
           state: '',
         }),
+      });
+      prWorker.getPlatformPrOptions.mockReturnValue({
+        usePlatformAutomerge: true,
       });
       GlobalConfig.set(adminConfig);
       // TODO: fix types, jest is using wrong overload (#22198)
@@ -901,6 +905,35 @@ describe('workers/repository/update/branch/index', () => {
         ...config,
         automerge: true,
         rebaseWhen: 'conflicted',
+      });
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
+      expect(prAutomerge.checkAutoMerge).toHaveBeenCalledTimes(1);
+    });
+
+    it('ensures PR when impossible to automerge with mismatch keepUpdatedLabel', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        }),
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
+      prWorker.ensurePr.mockResolvedValueOnce({
+        type: 'with-pr',
+        pr: partial<Pr>({ labels: ['keep-not-updated'] }),
+      });
+      prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      await branchWorker.processBranch({
+        ...config,
+        automerge: true,
+        rebaseWhen: 'conflicted',
+        keepUpdatedLabel: 'keep-updated',
       });
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
@@ -2033,6 +2066,60 @@ describe('workers/repository/update/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(
         await branchWorker.processBranch({ ...config, rebaseWhen: 'never' }),
+      ).toMatchObject({ result: 'no-work' });
+      expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
+    });
+
+    it('continues when rebaseWhen=never and keepUpdatedLabel', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          state: 'open',
+          title: '',
+          labels: ['keep-updated'],
+        }),
+      );
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          rebaseWhen: 'never',
+          keepUpdatedLabel: 'keep-updated',
+        }),
+      ).toMatchObject({ result: 'done' });
+      expect(commit.commitFilesToBranch).toHaveBeenCalled();
+    });
+
+    it('returns when rebaseWhen=never and keepUpdatedLabel does not match', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          state: 'open',
+          title: '',
+          labels: ['keep-updated'],
+        }),
+      );
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      expect(
+        await branchWorker.processBranch({
+          ...config,
+          rebaseWhen: 'never',
+          keepUpdatedLabel: 'keep-not-updated',
+        }),
       ).toMatchObject({ result: 'no-work' });
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });

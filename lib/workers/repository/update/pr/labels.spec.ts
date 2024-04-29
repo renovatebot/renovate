@@ -1,4 +1,9 @@
-import { prepareLabels } from './labels';
+import {
+  areLabelsModified,
+  getChangedLabels,
+  prepareLabels,
+  shouldUpdateLabels,
+} from './labels';
 
 describe('workers/repository/update/pr/labels', () => {
   describe('prepareLabels(config)', () => {
@@ -76,6 +81,61 @@ describe('workers/repository/update/pr/labels', () => {
       });
       expect(result).toBeArrayOfSize(0);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('getChangedLabels', () => {
+    it('adds new labels', () => {
+      expect(getChangedLabels(['npm'], ['node', 'npm'])).toEqual([
+        ['node'],
+        [],
+      ]);
+    });
+
+    it('removes old labels', () => {
+      expect(getChangedLabels(['node', 'npm'], ['npm'])).toEqual([
+        [],
+        ['node'],
+      ]);
+    });
+  });
+
+  describe('areLabelsModified', () => {
+    it('returns true', () => {
+      expect(areLabelsModified(['npm', 'node'], ['npm'])).toBeTrue();
+    });
+
+    it('returns false', () => {
+      expect(areLabelsModified(['node', 'npm'], ['node', 'npm'])).toBeFalse();
+      expect(areLabelsModified([], [])).toBeFalse();
+    });
+  });
+
+  describe('shouldUpdateLabels', () => {
+    it('returns true', () => {
+      expect(
+        shouldUpdateLabels(['npm', 'node'], ['npm', 'node'], ['npm']),
+      ).toBeTrue();
+      expect(
+        shouldUpdateLabels(['npm', 'node'], ['npm', 'node'], undefined),
+      ).toBeTrue();
+      expect(shouldUpdateLabels([], [], ['npm', 'node'])).toBeTrue();
+    });
+
+    it('returns false if no labels found in debugData', () => {
+      expect(
+        shouldUpdateLabels(undefined, ['npm', 'node'], ['npm', 'node']),
+      ).toBeFalse();
+    });
+
+    it('returns false if labels have been modified by user', () => {
+      expect(shouldUpdateLabels(['npm', 'node'], ['npm'], ['npm'])).toBeFalse();
+    });
+
+    it('returns false if labels are not changed', () => {
+      expect(
+        shouldUpdateLabels(['npm', 'node'], ['npm', 'node'], ['npm', 'node']),
+      ).toBeFalse();
     });
   });
 });

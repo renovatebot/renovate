@@ -2,10 +2,12 @@ import {
   CodeCommitClient,
   CreatePullRequestApprovalRuleCommand,
   CreatePullRequestCommand,
+  type CreatePullRequestOutput,
   DeleteCommentContentCommand,
   GetCommentsForPullRequestCommand,
   GetFileCommand,
   GetPullRequestCommand,
+  type GetPullRequestOutput,
   GetRepositoryCommand,
   ListPullRequestsCommand,
   ListRepositoriesCommand,
@@ -252,19 +254,12 @@ describe('modules/platform/codecommit/index', () => {
     });
   });
 
-  describe('getRepoForceRebase()', () => {
-    it('Always return false, since CodeCommit does not support force rebase', async () => {
-      const actual = await codeCommit.getRepoForceRebase();
-      expect(actual).toBeFalse();
-    });
-  });
-
   describe('getPrList()', () => {
     it('gets PR list by author', async () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1', '2'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -328,7 +323,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -359,7 +354,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -390,10 +385,10 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
-          pullRequestStatus: '!open',
+          pullRequestStatus: 'CLOSED',
           pullRequestTargets: [
             {
               sourceReference: 'refs/heads/sourceBranch',
@@ -421,10 +416,10 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
-          pullRequestStatus: 'closed',
+          pullRequestStatus: 'CLOSED',
           pullRequestTargets: [
             {
               sourceReference: 'refs/heads/sourceBranch',
@@ -462,7 +457,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -489,7 +484,7 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['1'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -509,7 +504,7 @@ describe('modules/platform/codecommit/index', () => {
 
   describe('getPr()', () => {
     it('gets pr', async () => {
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           description: 'body',
@@ -536,7 +531,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('gets closed pr', async () => {
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'CLOSED',
@@ -562,7 +557,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('gets merged pr', async () => {
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
@@ -676,7 +671,7 @@ describe('modules/platform/codecommit/index', () => {
 
   describe('createPr()', () => {
     it('posts PR', async () => {
-      const prRes = {
+      const prRes: CreatePullRequestOutput = {
         pullRequest: {
           pullRequestId: '1',
           pullRequestStatus: 'OPEN',
@@ -711,7 +706,7 @@ describe('modules/platform/codecommit/index', () => {
     });
 
     it('doesnt return a title', async () => {
-      const prRes = {
+      const prRes: CreatePullRequestOutput = {
         pullRequest: {
           pullRequestId: '1',
           pullRequestStatus: 'OPEN',
@@ -992,9 +987,9 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['42'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
-          number: '42',
+          pullRequestId: '42',
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
           pullRequestTargets: [
@@ -1160,9 +1155,9 @@ describe('modules/platform/codecommit/index', () => {
       codeCommitClient
         .on(ListPullRequestsCommand)
         .resolvesOnce({ pullRequestIds: ['42'] });
-      const prRes = {
+      const prRes: GetPullRequestOutput = {
         pullRequest: {
-          number: '42',
+          pullRequestId: '42',
           title: 'someTitle',
           pullRequestStatus: 'OPEN',
           pullRequestTargets: [

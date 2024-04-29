@@ -115,6 +115,7 @@ export async function generateLockFile(
     };
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
+      userConfiguredEnv: config.env,
       extraEnv,
       toolConstraints: [
         await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
@@ -190,7 +191,7 @@ export async function generateLockFile(
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
-          'Error removing package-lock.json for lock file maintenance',
+          'Error removing `package-lock.json` for lock file maintenance',
         );
       }
     }

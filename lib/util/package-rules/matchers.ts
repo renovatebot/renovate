@@ -6,10 +6,12 @@ import { CurrentVersionMatcher } from './current-version';
 import { DatasourcesMatcher } from './datasources';
 import { DepNameMatcher } from './dep-names';
 import { DepPatternsMatcher } from './dep-patterns';
+import { DepPrefixesMatcher } from './dep-prefixes';
 import { DepTypesMatcher } from './dep-types';
 import { FileNamesMatcher } from './files';
 import { ManagersMatcher } from './managers';
 import { MergeConfidenceMatcher } from './merge-confidence';
+import { NewValueMatcher } from './new-value';
 import { PackageNameMatcher } from './package-names';
 import { PackagePatternsMatcher } from './package-patterns';
 import { PackagePrefixesMatcher } from './package-prefixes';
@@ -31,6 +33,7 @@ matchers.push([new MergeConfidenceMatcher()]);
 matchers.push([
   new DepNameMatcher(),
   new DepPatternsMatcher(),
+  new DepPrefixesMatcher(),
   new PackageNameMatcher(),
   new PackagePatternsMatcher(),
   new PackagePrefixesMatcher(),
@@ -43,6 +46,7 @@ matchers.push([new DatasourcesMatcher()]);
 matchers.push([new UpdateTypesMatcher()]);
 matchers.push([new SourceUrlsMatcher(), new SourceUrlPrefixesMatcher()]);
 matchers.push([new CurrentValueMatcher()]);
+matchers.push([new NewValueMatcher()]);
 matchers.push([new CurrentVersionMatcher()]);
 matchers.push([new RepositoriesMatcher()]);
 matchers.push([new CategoriesMatcher()]);

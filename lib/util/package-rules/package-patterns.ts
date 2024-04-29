@@ -39,7 +39,7 @@ export class PackagePatternsMatcher extends Matcher {
       return true;
     }
     if (matchPatternsAgainstName(matchPackagePatterns, depName)) {
-      logger.once.info(
+      logger.once.warn(
         { packageRule, packageName, depName },
         'Use matchDepPatterns instead of matchPackagePatterns',
       );
@@ -50,9 +50,10 @@ export class PackagePatternsMatcher extends Matcher {
   }
 
   override excludes(
-    { depName }: PackageRuleInputConfig,
-    { excludePackagePatterns }: PackageRule,
+    { depName, packageName }: PackageRuleInputConfig,
+    packageRule: PackageRule,
   ): boolean | null {
+    const { excludePackagePatterns } = packageRule;
     // ignore lockFileMaintenance for backwards compatibility
     if (is.undefined(excludePackagePatterns)) {
       return null;
@@ -61,15 +62,22 @@ export class PackagePatternsMatcher extends Matcher {
       return false;
     }
 
-    let isMatch = false;
-    for (const pattern of excludePackagePatterns) {
-      const packageRegex = regEx(massagePattern(pattern));
-      if (packageRegex.test(depName)) {
-        logger.trace(`${depName} matches against ${String(packageRegex)}`);
-        isMatch = true;
-      }
+    if (
+      is.string(packageName) &&
+      matchPatternsAgainstName(excludePackagePatterns, packageName)
+    ) {
+      return true;
     }
-    return isMatch;
+
+    if (matchPatternsAgainstName(excludePackagePatterns, depName)) {
+      logger.once.warn(
+        { packageRule, packageName, depName },
+        'Use excludeDepPatterns instead of excludePackagePatterns',
+      );
+      return true;
+    }
+
+    return false;
   }
 }
 

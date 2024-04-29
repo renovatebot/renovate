@@ -10,6 +10,7 @@ describe('workers/repository/update/branch/reuse', () => {
       sourceBranch: 'master',
       state: 'open',
       title: 'any',
+      labels: ['keep-updated'],
     };
     let config: BranchConfig;
 
@@ -162,9 +163,9 @@ describe('workers/repository/update/branch/reuse', () => {
       expect(res.reuseExistingBranch).toBeFalse();
     });
 
-    it('returns false if getRepoForceRebase and stale', async () => {
+    it('returns false if getBranchForceRebase and stale', async () => {
       config.rebaseWhen = 'auto';
-      platform.getRepoForceRebase.mockResolvedValueOnce(true);
+      platform.getBranchForceRebase.mockResolvedValueOnce(true);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
@@ -184,6 +185,38 @@ describe('workers/repository/update/branch/reuse', () => {
     it('returns true if automerge, rebaseWhen=conflicted and stale', async () => {
       config.rebaseWhen = 'conflicted';
       config.automerge = true;
+      scm.branchExists.mockResolvedValueOnce(true);
+      scm.isBranchBehindBase.mockResolvedValueOnce(true);
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBeTrue();
+    });
+
+    it('returns false if rebaseWhen=never, keepUpdatedLabel and stale', async () => {
+      config.rebaseWhen = 'never';
+      config.keepUpdatedLabel = 'keep-updated';
+      platform.getBranchPr.mockResolvedValueOnce(pr);
+      scm.branchExists.mockResolvedValueOnce(true);
+      scm.isBranchBehindBase.mockResolvedValueOnce(true);
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBeFalse();
+    });
+
+    it('returns false if rebaseWhen=conflicted, keepUpdatedLabel and modified', async () => {
+      config.rebaseWhen = 'never';
+      config.keepUpdatedLabel = 'keep-updated';
+      platform.getBranchPr.mockResolvedValue(pr);
+      scm.branchExists.mockResolvedValueOnce(true);
+      scm.isBranchConflicted.mockResolvedValueOnce(true);
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBeFalse();
+      expect(res.isModified).toBeUndefined();
+    });
+
+    it('returns true if rebaseWhen=never, miss-match keepUpdatedLabel and stale', async () => {
+      config.rebaseWhen = 'never';
+      config.keepUpdatedLabel = 'keep-not-updated';
+      platform.getBranchPr.mockResolvedValueOnce(pr);
       scm.branchExists.mockResolvedValueOnce(true);
       scm.isBranchBehindBase.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);

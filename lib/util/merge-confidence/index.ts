@@ -7,6 +7,8 @@ import * as packageCache from '../cache/package';
 import { parseJson } from '../common';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
+import { regEx } from '../regex';
+import { ensureTrailingSlash, joinUrlParts } from '../url';
 import { MERGE_CONFIDENCE } from './common';
 import type { MergeConfidence } from './types';
 
@@ -163,8 +165,15 @@ async function queryApi(
     return 'neutral';
   }
 
-  const escapedPackageName = packageName.replace('/', '%2f');
-  const url = `${apiBaseUrl}api/mc/json/${datasource}/${escapedPackageName}/${currentVersion}/${newVersion}`;
+  const escapedPackageName = packageName.replace(regEx(/\//g), '%2f');
+  const url = joinUrlParts(
+    apiBaseUrl,
+    'api/mc/json',
+    datasource,
+    escapedPackageName,
+    currentVersion,
+    newVersion,
+  );
   const cacheKey = `${token}:${url}`;
   const cachedResult = await packageCache.get(hostType, cacheKey);
 
@@ -217,7 +226,7 @@ export async function initMergeConfidence(): Promise<void> {
     return;
   }
 
-  const url = `${apiBaseUrl}api/mc/availability`;
+  const url = joinUrlParts(apiBaseUrl, 'api/mc/availability');
   try {
     await http.get(url);
   } catch (err) {
@@ -246,7 +255,7 @@ function getApiBaseUrl(): string {
       { baseUrl: parsedBaseUrl },
       'using merge confidence API base found in environment variables',
     );
-    return parsedBaseUrl;
+    return ensureTrailingSlash(parsedBaseUrl);
   } catch (err) {
     logger.warn(
       { err, baseFromEnv },

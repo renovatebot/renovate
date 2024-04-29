@@ -26,6 +26,9 @@ const sourceBlockWithNewLinesGemfileLock = Fixtures.get(
 const sourceBlockWithNewLinesGemfile = Fixtures.get(
   'Gemfile.sourceBlockWithNewLines',
 );
+const sourceBlockWithGroupsGemfile = Fixtures.get(
+  'Gemfile.sourceBlockWithGroups',
+);
 
 describe('modules/manager/bundler/extract', () => {
   describe('extractPackageFile()', () => {
@@ -123,5 +126,19 @@ describe('modules/manager/bundler/extract', () => {
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(2);
+  });
+
+  it('parses source blocks with groups in Gemfile', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithGroupsGemfile);
+    const res = await extractPackageFile(
+      sourceBlockWithGroupsGemfile,
+      'Gemfile',
+    );
+    expect(res?.deps).toMatchObject([
+      { depName: 'internal_test_gem', currentValue: '"~> 1"' },
+      { depName: 'internal_production_gem', currentValue: '"~> 1"' },
+      { depName: 'sfn_my_dep1', currentValue: '"~> 1"' },
+      { depName: 'sfn_my_dep2', currentValue: '"~> 1"' },
+    ]);
   });
 });
