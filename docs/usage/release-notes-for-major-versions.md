@@ -9,24 +9,24 @@ You also don't have to scroll to the bottom of the page to find the latest relea
 
 ## Version 37
 
-### Breaking changes
+### Breaking changes for 37
 
 - **npm:** drop explicit lerna support
 
-### Commentary
+### Commentary for 37
 
 We switched from "merge" strategy to "hunt" strategy to match with how Maven works.
 
 Lerna v7 does not need our explicit support anymore, so we dropped it.
 If you're on a version of Lerna before v7, you should prioritize upgrading to v7.
 
-### Link to release notes
+### Link to release notes for 37
 
 [Release notes for `v37` on GitHub](https://github.com/renovatebot/renovate/releases/tag/37.0.0).
 
 ## Version 36
 
-### Breaking changes
+### Breaking changes for 36
 
 - postUpgradeTasks.fileFilters is now optional and defaults to all files
 - `languages` are now called `categories` instead. Use `matchCategories` in `packageRules`
@@ -48,7 +48,7 @@ If you're on a version of Lerna before v7, you should prioritize upgrading to v7
 - The "full" image is now available via the tag `full`, e.g. `renovate/renovate:37-full`, and defaults to `binarySource=global` (no dynamic installs)
 - Third party tools in the full image have been updated to latest/LTS major version
 
-### Commentary
+### Commentary for 36
 
 If you're self-hosting Renovate, pay particular attention to:
 
@@ -57,13 +57,13 @@ If you're self-hosting Renovate, pay particular attention to:
 - If you're using `config:base` in your `onboardingConfig` then switch to `config:recommended`
 - `gitAuthor` may change if you're on GitLab and have a different commit email for your bot account. If so then configure `gitIgnoredAuthors` with the old email
 
-### Link to release notes
+### Link to release notes for 36
 
 [Release notes for `v36` on GitHub](https://github.com/renovatebot/renovate/releases/tag/36.0.0).
 
 ## Version 35
 
-### Breaking changes
+### Breaking changes for 35
 
 - require NodeJS v18.12+ ([#20838](https://github.com/renovatebot/renovate/pull/20838))
 - **config:** Forked repos will now be processed automatically if `autodiscover=false`. `includeForks` is removed and replaced by new option `forkProcessing`
@@ -78,7 +78,7 @@ If you're self-hosting Renovate, pay particular attention to:
 - **config:** Renovate will now default to updating locked dependency versions. To revert to previous behavior, configure `rangeStrategy=replace`
 - **config:** PyPI releases will no longer be filtered by default based on `constraints.python` compatibility. To retain existing functionality, set `constraintsFiltering=strict`
 
-### Commentary
+### Commentary for 35
 
 Most of these changes will be invisible to the majority of users.
 They may be "breaking" (change of behavior) but good changes of defaults to make.
@@ -86,17 +86,17 @@ They may be "breaking" (change of behavior) but good changes of defaults to make
 The biggest change is defaulting `rangeStrategy=auto` to use `update-lockfile` instead of `replace`, which impacts anyone using the recommended `config:base`.
 This will mean that you start seeing some "lockfile-only" PRs for in-range updates, such as updating `package-lock.json` when a range exists in `package.json`.
 
-### Link to release notes
+### Link to release notes for 35
 
 [Release notes for `v35` on GitHub](https://github.com/renovatebot/renovate/releases/tag/35.0.0).
 
 ## Version 34
 
-### Breaking changes
+### Breaking changes for 34
 
 - Revert `branchNameStrict` to `false`
 
-### Commentary
+### Commentary for 34
 
 Here comes v34 hot on the heels of v33.
 We decided to issue another breaking change to revert one of the breaking changes in v33.
@@ -114,13 +114,13 @@ If you prefer to keep the way in v33 because you already had a bunch of PRs clos
 
 Apologies to anyone negatively affected by this v33 change.
 
-### Link to release notes
+### Link to release notes for 34
 
 [Release notes for `v34` on GitHub](https://github.com/renovatebot/renovate/releases/tag/34.0.0).
 
 ## Version 33
 
-### Breaking changes
+### Breaking changes for 33
 
 - Node 16 is the required runtime for Renovate
 - [NOTE: This was reverted in `v34`] **config:** `branchNameStrict` default value is now `true`
@@ -135,7 +135,7 @@ Apologies to anyone negatively affected by this v33 change.
 - Users of `containerbase` images (such as official Renovate images) will now have dynamic package manager installs enabled by default
 - Dependencies are no longer automatically pinned if `rangeStrategy=auto`, pinning must be opted into using `rangeStrategy=pin`
 
-### Commentary
+### Commentary for 33
 
 This release contains some changes of default values/behavior:
 
@@ -152,6 +152,6 @@ And two major features!
 Both the above are considered "experimental".
 Please test them out and let us know your feedback - both positive or negative - so that we can progress them to fully available.
 
-### Link to release notes
+### Link to release notes for 33
 
 [Release notes for `v33` on GitHub](https://github.com/renovatebot/renovate/releases/tag/33.0.0).
