@@ -140,7 +140,6 @@ export class GoProxyDatasource extends Datasource {
         release.releaseTimestamp = releaseTimestamp;
       }
 
-
       return release;
     });
   }
