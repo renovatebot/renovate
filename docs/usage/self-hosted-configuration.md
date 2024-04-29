@@ -233,6 +233,43 @@ This feature is useful for users who want Renovate to only work on repositories 
 The `autodiscoverProjects` config option takes an array of minimatch-compatible globs or RE2-compatible regex strings.
 For more details on this syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
+## autodiscoverRepoOrder
+
+<!-- prettier-ignore -->
+!!! note
+    For the Forgejo and Gitea platform only.
+
+The order method for autodiscover server side repository search.
+
+> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
+
+Allowed values:
+
+- `asc`
+- `desc`
+
+Default value: `asc`.
+
+## autodiscoverRepoSort
+
+<!-- prettier-ignore -->
+!!! note
+    For the Forgejo and Gitea platform only.
+
+The sort method for autodiscover server side repository search.
+
+> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
+
+Allowed values:
+
+- `alpha`
+- `created`
+- `updated`
+- `size`
+- `id`
+
+Default value: `alpha`.
+
 ## autodiscoverTopics
 
 Some platforms allow you to add tags, or topics, to repositories and retrieve repository lists by specifying those

@@ -36,43 +36,6 @@ If set to any value, Renovate will always paginate requests to GitHub fully, ins
 
 If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
 
-## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
-
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
-
-The order method for autodiscover server side repository search.
-
-> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `asc`
-- `desc`
-
-Default value: `asc`.
-
-## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
-
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
-
-The sort method for autodiscover server side repository search.
-
-> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `alpha`
-- `created`
-- `updated`
-- `size`
-- `id`
-
-Default value: `alpha`.
-
 ## `RENOVATE_X_DELETE_CONFIG_FILE`
 
 If `true` Renovate tries to delete the self-hosted config file after reading it.

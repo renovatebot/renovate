@@ -159,6 +159,8 @@ export interface RepoGlobalConfig {
   privateKey?: string;
   privateKeyOld?: string;
   httpCacheTtlDays?: number;
+  autodiscoverRepoSort?: 'alpha' | 'created' | 'updated' | 'size' | 'id';
+  autodiscoverRepoOrder?: 'asc' | 'desc';
 }
 
 export interface LegacyAdminConfig {
