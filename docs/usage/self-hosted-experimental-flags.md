@@ -15,7 +15,9 @@ We will try to keep breakage to a minimum, but make no guarantees that an experi
 
 ## `disableDockerHubTags`
 
-If added to the `experimentalFlags` list, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
+By default, Renovate uses the _Docker Hub_ API (`https://hub.docker.com`) to fetch tags.
+
+But when you set the `disableDockerHubTags` flag, Renovate will instead fetch tags from the normal _Docker_ API, for images pulled from `https://index.docker.io`.
 
 Example usage:
 
