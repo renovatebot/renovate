@@ -235,40 +235,15 @@ For more details on this syntax see Renovate's [string pattern matching document
 
 ## autodiscoverRepoOrder
 
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
-
 The order method for autodiscover server side repository search.
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
 
-Allowed values:
-
-- `asc`
-- `desc`
-
-Default value: `asc`.
-
 ## autodiscoverRepoSort
-
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
 
 The sort method for autodiscover server side repository search.
 
 > If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `alpha`
-- `created`
-- `updated`
-- `size`
-- `id`
-
-Default value: `alpha`.
 
 ## autodiscoverTopics
 
