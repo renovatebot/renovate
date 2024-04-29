@@ -19,7 +19,7 @@ const options: RenovateOptions[] = [
     description:
       'The order method for autodiscover server side repository search.',
     type: 'string',
-    default: 'asc',
+    default: null,
     globalOnly: true,
     allowedValues: ['asc', 'desc'],
     supportedPlatforms: ['gitea'],
@@ -29,7 +29,7 @@ const options: RenovateOptions[] = [
     description:
       'The sort method for autodiscover server side repository search.',
     type: 'string',
-    default: 'aplha',
+    default: null,
     globalOnly: true,
     allowedValues: ['alpha', 'created', 'updated', 'size', 'id'],
     supportedPlatforms: ['gitea'],
