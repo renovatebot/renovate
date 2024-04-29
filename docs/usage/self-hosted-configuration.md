@@ -554,7 +554,7 @@ The `experimentalFlags` configuration option helps you manage some of the experi
 
 ```javascript
 module.exports = {
-  experimentalFlags: ['dockerHubTags'],
+  experimentalFlags: ['disableDockerHubTags'],
 };
 ```
 

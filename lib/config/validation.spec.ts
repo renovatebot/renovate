@@ -1768,9 +1768,9 @@ describe('config/validation', () => {
       ]);
     });
 
-    it('dockerHubTags', async () => {
+    it('disableDockerHubTags', async () => {
       const config = {
-        experimentalFlags: ['dockerHubTags'],
+        experimentalFlags: ['disableDockerHubTags'],
       };
       const { warnings } = await configValidation.validateConfig(
         'global',

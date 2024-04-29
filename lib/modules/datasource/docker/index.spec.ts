@@ -1225,7 +1225,7 @@ describe('modules/datasource/docker/index', () => {
 
   describe('getReleases', () => {
     it('returns null if no token', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      GlobalConfig.set({ experimentalFlags: ['disableDockerHubTags'] });
       httpMock
         .scope(baseUrl)
         .get('/library/node/tags/list?n=10000')
@@ -1272,7 +1272,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('uses custom max pages', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      GlobalConfig.set({ experimentalFlags: ['disableDockerHubTags'] });
       process.env.RENOVATE_X_DOCKER_MAX_PAGES = '2';
       httpMock
         .scope(baseUrl)
@@ -1922,7 +1922,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null on error', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      GlobalConfig.set({ experimentalFlags: ['disableDockerHubTags'] });
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -1937,7 +1937,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('strips trailing slash from registry', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      GlobalConfig.set({ experimentalFlags: ['disableDockerHubTags'] });
       httpMock
         .scope(baseUrl)
         .get('/my/node/tags/list?n=10000')
@@ -1964,7 +1964,7 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('returns null if no auth', async () => {
-      process.env.RENOVATE_X_DOCKER_HUB_TAGS_DISABLE = 'true';
+      GlobalConfig.set({ experimentalFlags: ['disableDockerHubTags'] });
       hostRules.find.mockReturnValue({});
       httpMock
         .scope(baseUrl)

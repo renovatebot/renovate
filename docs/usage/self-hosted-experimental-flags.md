@@ -13,14 +13,14 @@ Use these experimental flags at your own risk.
 These flags may be removed or have their behavior changed in **any** version.
 We will try to keep breakage to a minimum, but make no guarantees that an experimental flag will keep working.
 
-## `dockerHubTags`
+## `disableDockerHubTags`
 
-If added to the `experimentalFlags` list, Renovate will use the Docker Hub API (`https://hub.docker.com`) to fetch tags instead of the normal Docker API for images pulled from `https://index.docker.io`.
+If added to the `experimentalFlags` list, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
 
 Example usage:
 
 ```js
-experimentalFlags: ['dockerHubTags'];
+experimentalFlags: ['disableDockerHubTags'];
 ```
 
 ## `execGpidHandle`

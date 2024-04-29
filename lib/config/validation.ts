@@ -1055,7 +1055,7 @@ function validateExperimentalFlag(
   warnings: ValidationMessage[],
   currentPath: string | undefined,
 ): void {
-  const allowedExperimentalFlags = new Set(['dockerHubTags']);
+  const allowedExperimentalFlags = new Set(['disableDockerHubTags']);
   if (!allowedExperimentalFlags.has(flagName)) {
     warnings.push({
       topic: 'Configuration Error',

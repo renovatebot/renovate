@@ -8,20 +8,26 @@ describe('config/experimental-flags', () => {
 
     it('returns true if flag set', () => {
       GlobalConfig.set({
-        experimentalFlags: ['dockerHubTags'],
+        experimentalFlags: ['disableDockerHubTags'],
       });
-      expect(GlobalConfig.getExperimentalFlag('dockerHubTags')).toBeTrue();
+      expect(
+        GlobalConfig.getExperimentalFlag('disableDockerHubTags'),
+      ).toBeTrue();
     });
 
     it('returns false if flag not set', () => {
       GlobalConfig.set({
         experimentalFlags: ['some-other-flag'],
       });
-      expect(GlobalConfig.getExperimentalFlag('dockerHubTags')).toBeFalse();
+      expect(
+        GlobalConfig.getExperimentalFlag('disableDockerHubTags'),
+      ).toBeFalse();
     });
 
     it('returns false if experimentalFlags is undefined', () => {
-      expect(GlobalConfig.getExperimentalFlag('dockerHubTags')).toBeFalse();
+      expect(
+        GlobalConfig.getExperimentalFlag('disableDockerHubTags'),
+      ).toBeFalse();
     });
   });
 });
