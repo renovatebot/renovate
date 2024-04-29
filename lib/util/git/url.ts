@@ -11,14 +11,13 @@ export function parseGitUrl(url: string): gitUrlParse.GitUrl {
 export function getHttpUrl(url: string, token?: string): string {
   const parsedUrl = parseGitUrl(url);
 
-  if (parsedUrl.protocol === 'ssh') {
-    // Delete port from ssh url as it definitely won't work with https
-    parsedUrl.port = 443;
-  }
+  let { protocol } = parsedUrl;
 
-  const protocol = regEx(/^https?$/).exec(parsedUrl.protocol)
-    ? parsedUrl.protocol
-    : 'https';
+  // Convert non-https URLs to https and strip port
+  if (!regEx(/^https?$/).exec(protocol)) {
+    parsedUrl.port = 443;
+    protocol = 'https';
+  }
 
   parsedUrl.user = '';
   parsedUrl.token = token ?? '';
