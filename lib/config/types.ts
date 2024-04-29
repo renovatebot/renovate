@@ -165,6 +165,7 @@ export interface RepoGlobalConfig {
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
+  userAgent?: string;
 }
 
 export interface LegacyAdminConfig {
