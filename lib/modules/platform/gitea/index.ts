@@ -34,6 +34,8 @@ import type {
   Pr,
   RepoParams,
   RepoResult,
+  RepoSortMethod,
+  SortMethod,
   UpdatePrConfig,
 } from '../types';
 import { repoFingerprint } from '../util';
@@ -49,8 +51,6 @@ import type {
   PRMergeMethod,
   PRUpdateParams,
   Repo,
-  RepoSortMethod,
-  SortMethod,
 } from './types';
 import {
   DRAFT_PREFIX,

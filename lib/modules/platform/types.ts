@@ -1,7 +1,6 @@
 import type { MergeStrategy } from '../../config/types';
 import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
 import type { CommitFilesConfig, LongCommitSha } from '../../util/git/types';
-import type { RepoSortMethod, SortMethod } from './gitea/types';
 
 type VulnerabilityKey = string;
 type VulnerabilityRangeKey = string;
@@ -202,6 +201,9 @@ export type EnsureCommentRemovalConfig =
 
 export type EnsureIssueResult = 'updated' | 'created';
 
+export type RepoSortMethod = 'alpha' | 'created' | 'updated' | 'size' | 'id';
+
+export type SortMethod = 'asc' | 'desc';
 export interface AutodiscoverConfig {
   topics?: string[];
   sort?: RepoSortMethod;
