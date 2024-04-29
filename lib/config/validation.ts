@@ -34,6 +34,7 @@ import {
   allowedStatusCheckStrings,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
+import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
 
 const options = getOptions();
 
@@ -41,6 +42,7 @@ let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
+let optionRegexOrGlob: Set<string>;
 
 const managerList = getManagerList();
 
@@ -109,6 +111,18 @@ function isInhertConfigOption(key: string): boolean {
     }
   }
   return optionInherits.has(key);
+}
+
+function isRegexOrGlobOption(key: string): boolean {
+  if (!optionRegexOrGlob) {
+    optionRegexOrGlob = new Set();
+    for (const option of options) {
+      if (option.patternMatch) {
+        optionRegexOrGlob.add(option.name);
+      }
+    }
+  }
+  return optionRegexOrGlob.has(key);
 }
 
 function isGlobalOption(key: string): boolean {
@@ -353,6 +367,14 @@ export async function validateConfig(
                 warnings = warnings.concat(subValidation.warnings);
                 errors = errors.concat(subValidation.errors);
               }
+            }
+            if (isRegexOrGlobOption(key)) {
+              errors.push(
+                ...regexOrGlobValidator.check({
+                  val: val as string[],
+                  currentPath,
+                }),
+              );
             }
             if (key === 'extends') {
               for (const subval of val) {
@@ -951,9 +973,17 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (is.array(val)) {
+        if (isRegexOrGlobOption(key)) {
+          warnings.push(
+            ...regexOrGlobValidator.check({
+              val: val as string[],
+              currentPath: currentPath!,
+            }),
+          );
+        }
         if (key === 'gitNoVerify') {
           const allowedValues = ['commit', 'push'];
-          for (const value of val as string[]) {
+          for (const value of val) {
             if (!allowedValues.includes(value)) {
               warnings.push({
                 topic: 'Configuration Error',

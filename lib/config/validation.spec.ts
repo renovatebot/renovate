@@ -1225,6 +1225,30 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(2);
     });
+
+    it('catches when * or ** is combined with others patterns in a regexOrGlob option', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchRepositories: ['*', 'repo'],
+            enabled: false,
+          },
+        ],
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'repo',
+        config,
+      );
+      expect(errors).toMatchObject([
+        {
+          message:
+            'packageRules[0].matchRepositories: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(0);
+    });
   });
 
   describe('validateConfig() -> globaOnly options', () => {
@@ -1705,6 +1729,46 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
+    });
+
+    it('catches when * or ** is combined with others patterns in a regexOrGlob option', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchRepositories: ['*', 'repo'], // invalid
+            enabled: false,
+          },
+        ],
+        allowedHeaders: ['*', '**'], // invalid
+        autodiscoverProjects: ['**', 'project'], // invalid
+        allowedEnv: ['env_var'], // valid
+      };
+      const { errors, warnings } = await configValidation.validateConfig(
+        'global',
+        config,
+      );
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'allowedHeaders: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'autodiscoverProjects: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.',
+          topic: 'Configuration Error',
+        },
+      ]);
+
+      expect(errors).toMatchObject([
+        {
+          message:
+            'packageRules[0].matchRepositories: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.',
+          topic: 'Configuration Error',
+        },
+      ]);
+      expect(warnings).toHaveLength(2);
+      expect(errors).toHaveLength(1);
     });
   });
 });
