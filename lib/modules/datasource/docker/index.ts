@@ -1029,8 +1029,9 @@ export class DockerDatasource extends Datasource {
         'dockerhub-error' as const,
       ).catch(getTags);
 
-    const disableDockerHubTags =
-      GlobalConfig.getExperimentalFlag('disableDockerHubTags');
+    const disableDockerHubTags = GlobalConfig.getExperimentalFlag(
+      'disableDockerHubTags',
+    );
     const tagsResult =
       registryHost === 'https://index.docker.io' && !disableDockerHubTags
         ? getDockerHubTags()
