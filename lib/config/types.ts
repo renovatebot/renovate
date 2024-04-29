@@ -161,6 +161,7 @@ export interface RepoGlobalConfig {
   httpCacheTtlDays?: number;
   autodiscoverRepoSort?: 'alpha' | 'created' | 'updated' | 'size' | 'id';
   autodiscoverRepoOrder?: 'asc' | 'desc';
+  userAgent?: string;
 }
 
 export interface LegacyAdminConfig {

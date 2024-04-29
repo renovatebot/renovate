@@ -35,6 +35,7 @@ export class GlobalConfig {
     'httpCacheTtlDays',
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
+    'userAgent',
   ];
 
   private static config: RepoGlobalConfig = {};
