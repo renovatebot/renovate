@@ -1055,7 +1055,19 @@ function validateExperimentalFlag(
   warnings: ValidationMessage[],
   currentPath: string | undefined,
 ): void {
-  const allowedExperimentalFlags = new Set(['disableDockerHubTags']);
+  const allowedExperimentalFlags = new Set([
+    'disableDockerHubTags',
+    'execGpidHandle',
+    'noMavenPomCheck',
+    'nugetDownloadNupkgs',
+    'paginateAll',
+    'rebasePaginationLinks',
+    'repoCacheForceLocal',
+    'sqlitePackageCache',
+    'suppressPreCommitWarning',
+    'yarnProxy',
+    'useOpenpgp',
+  ]);
   if (!allowedExperimentalFlags.has(flagName)) {
     warnings.push({
       topic: 'Configuration Error',
