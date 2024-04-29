@@ -87,7 +87,10 @@ export function analyseTerragruntModule(
       }
     } else {
       // The packageName should only contain the path to the repository
-      dep.packageName = pathname.replace(/^\//, '').split('//')[0];
+      dep.packageName = pathname
+        .replace(/^\//, '')
+        .replace('.git', '')
+        .split('//')[0];
       dep.registryUrls = [
         protocol === 'https:' ? `https://${host}` : `https://${hostname}`,
       ];
