@@ -91,7 +91,7 @@ experimentalFlags: ['repoCacheForceLocal'];
 ## `sqlitePackageCache`
 
 If added to the `experimentalFlags` list, Renovate will use SQLite as the backend for the package cache.
-Don't combine with `redisUrl`, Redis would be preferred over SQlite.
+Do not combine with `redisUrl`, as Renovate would then prefer Redis over SQlite.
 
 Example usage:
 
