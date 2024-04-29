@@ -38,6 +38,7 @@ const repoGroups = {
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
   'aspnet-health-checks':
     'https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks',
+  astro: 'https://github.com/withastro/astro',
   'automapper-dotnet': [
     'https://github.com/AutoMapper/AutoMapper',
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
