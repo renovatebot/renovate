@@ -321,6 +321,16 @@ const staticGroups = {
       },
     ],
   },
+  mkdocsAndMaterial: {
+    description: 'Group `mkdocs` and `mkdocs-material` packages together.',
+    packageRules: [
+      {
+        groupName: 'MkDocs and Material for MkDocs',
+        matchCategories: ['python'],
+        matchPackageNames: ['mkdocs', 'mkdocs-material'],
+      },
+    ],
+  },
   nodeJs: {
     description:
       "Group anything that looks like Node.js together so that it's updated together.",
@@ -437,6 +447,7 @@ const staticGroups = {
       'group:jestPlusTypes',
       'group:jwtFramework',
       'group:kubernetes',
+      'group:mkdocsAndMaterial',
       'group:phpstan',
       'group:polymer',
       'group:react',
