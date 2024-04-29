@@ -2527,6 +2527,8 @@ Instead you should do `> 13 months`.
 Use this field if you want to limit a `packageRule` to certain `depType` values.
 Invalid if used outside of a `packageRule`.
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### excludeDepNames
 
 ### excludeDepPatterns
@@ -2629,6 +2631,8 @@ The categories can be found in the [manager documentation](modules/manager/index
 }
 ```
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### matchRepositories
 
 Use this field to restrict rules to a particular repository. e.g.
@@ -2676,6 +2680,8 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
 }
 ```
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### matchManagers
 
 Use this field to restrict rules to a particular package manager. e.g.
@@ -2693,6 +2699,8 @@ Use this field to restrict rules to a particular package manager. e.g.
 ```
 
 For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchMessage
 
@@ -2714,6 +2722,8 @@ Use this field to restrict rules to a particular datasource. e.g.
   ]
 }
 ```
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchCurrentValue
 
@@ -2849,11 +2859,25 @@ The following example matches any file in directories starting with `app/`:
 
 It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### matchDepNames
+
+This field behaves the same as `matchPackageNames` except it matches against `depName` instead of `packageName`.
 
 ### matchDepPatterns
 
+<!-- prettier-ignore -->
+!!! note
+    `matchDepNames` now supports pattern matching and should be used instead.
+    Use of `matchDepPatterns` is now deprecated and will be migrated in future.
+
 ### matchDepPrefixes
+
+<!-- prettier-ignore -->
+!!! note
+    `matchDepNames` now supports pattern matching and should be used instead.
+    Use of `matchDepPrefixes` is now deprecated and will be migrated in future.
 
 ### matchNewValue
 
@@ -2891,13 +2915,17 @@ For more details on this syntax see Renovate's [string pattern matching document
 
 ### matchPackageNames
 
-Use this field if you want to have one or more exact name matches in your package rule.
-See also `excludePackageNames`.
+Use this field to match against the `packageName` field.
+This matching can be an exact match, Glob match, or Regular Expression match.
 
-```json
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+Note that Glob matching (including exact name matching) is case-insensitive.
+
+```json title="exact name match"
 {
   "packageRules": [
     {
+      "matchDatasources": ["npm"],
       "matchPackageNames": ["angular"],
       "rangeStrategy": "pin"
     }
@@ -2905,39 +2933,49 @@ See also `excludePackageNames`.
 }
 ```
 
-The above will configure `rangeStrategy` to `pin` only for the package `angular`.
+The above will configure `rangeStrategy` to `pin` only for the npm package `angular`.
 
-<!-- prettier-ignore -->
-!!! note
-    `matchPackageNames` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepNames` instead.
-
-### matchPackagePatterns
-
-Use this field if you want to have one or more package names patterns in your package rule.
-See also `excludePackagePatterns`.
-
-```json
+```json title="prefix match using Glob"
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["^angular"],
-      "rangeStrategy": "replace"
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["@angular/*", "!@angular/abc"],
+      "groupName": "Angular"
     }
   ]
 }
 ```
 
-The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+The above will group together any npm package which starts with `@angular/` except `@angular/abc`.
+
+```json title="pattern match using RegEx"
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["/^angular/"],
+      "groupName": "Angular"
+    }
+  ]
+}
+```
+
+The above will group together any npm package which starts with the string `angular`.
+
+### matchPackagePatterns
 
 <!-- prettier-ignore -->
 !!! note
-    `matchPackagePatterns` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepPatterns` instead.
+    `matchPackageNames` now supports pattern matching and should be used instead.
+    Use of `matchPackagePatterns` is now deprecated and will be migrated in future.
 
 ### matchPackagePrefixes
+
+<!-- prettier-ignore -->
+!!! note
+    `matchPackageNames` now supports pattern matching and should be used instead.
+    Use of `matchPackagePrefixes` is now deprecated and will be migrated in future.
 
 Use this field to match a package prefix without needing to write a regex expression.
 See also `excludePackagePrefixes`.
@@ -2954,12 +2992,6 @@ See also `excludePackagePrefixes`.
 ```
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
-
-<!-- prettier-ignore -->
-!!! note
-    `matchPackagePrefixes` will try matching `packageName` first and then fall back to matching `depName`.
-    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
-    Use `matchDepPatterns` instead.
 
 ### matchSourceUrlPrefixes
 
@@ -2991,6 +3023,8 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### matchUpdateTypes
 
 Use `matchUpdateTypes` to match rules against types of updates.
@@ -3006,6 +3040,8 @@ For example to apply a special label to `major` updates:
   ]
 }
 ```
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 <!-- prettier-ignore -->
 !!! warning
@@ -3874,15 +3910,6 @@ The above config will suppress the comment which is added to a PR whenever you c
 
 It is only recommended to configure this field if you wish to use the `schedules` feature and want to write them in your local timezone.
 Please see the above link for valid timezone names.
-
-## transitiveRemediation
-
-When enabled, Renovate tries to remediate vulnerabilities even if they exist only in transitive dependencies.
-
-Applicable only for GitHub platform (with vulnerability alerts enabled) and `npm` manager.
-When the `lockfileVersion` is higher than `1` in `package-lock.json`, remediations are only possible when changes are made to `package.json`.
-
-This is considered a feature flag with the aim to remove it and default to this behavior once it has been more widely tested.
 
 ## updateInternalDeps
 

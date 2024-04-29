@@ -1,26 +1,11 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import { logger } from '../../logger';
-import { regEx } from '../regex';
+import { matchRegexOrGlobList } from '../string-match';
 import { Matcher } from './base';
-import { massagePattern } from './utils';
-
-function matchPatternsAgainstName(
-  matchPackagePatterns: string[],
-  name: string,
-): boolean {
-  let isMatch = false;
-  for (const packagePattern of matchPackagePatterns) {
-    if (isPackagePatternMatch(packagePattern, name)) {
-      isMatch = true;
-    }
-  }
-  return isMatch;
-}
 
 export class PackagePatternsMatcher extends Matcher {
   override matches(
-    { depName, packageName }: PackageRuleInputConfig,
+    { packageName }: PackageRuleInputConfig,
     packageRule: PackageRule,
   ): boolean | null {
     const { matchPackagePatterns } = packageRule;
@@ -28,29 +13,18 @@ export class PackagePatternsMatcher extends Matcher {
       return null;
     }
 
-    if (is.undefined(depName)) {
+    if (!packageName) {
       return false;
     }
 
-    if (
-      is.string(packageName) &&
-      matchPatternsAgainstName(matchPackagePatterns, packageName)
-    ) {
-      return true;
-    }
-    if (matchPatternsAgainstName(matchPackagePatterns, depName)) {
-      logger.once.warn(
-        { packageRule, packageName, depName },
-        'Use matchDepPatterns instead of matchPackagePatterns',
-      );
-      return true;
-    }
-
-    return false;
+    const massagedPatterns = matchPackagePatterns.map((pattern) =>
+      pattern === '^*$' || pattern === '*' ? '*' : `/${pattern}/`,
+    );
+    return matchRegexOrGlobList(packageName, massagedPatterns);
   }
 
   override excludes(
-    { depName, packageName }: PackageRuleInputConfig,
+    { packageName }: PackageRuleInputConfig,
     packageRule: PackageRule,
   ): boolean | null {
     const { excludePackagePatterns } = packageRule;
@@ -58,34 +32,13 @@ export class PackagePatternsMatcher extends Matcher {
     if (is.undefined(excludePackagePatterns)) {
       return null;
     }
-    if (is.undefined(depName)) {
+    if (!packageName) {
       return false;
     }
 
-    if (
-      is.string(packageName) &&
-      matchPatternsAgainstName(excludePackagePatterns, packageName)
-    ) {
-      return true;
-    }
-
-    if (matchPatternsAgainstName(excludePackagePatterns, depName)) {
-      logger.once.warn(
-        { packageRule, packageName, depName },
-        'Use excludeDepPatterns instead of excludePackagePatterns',
-      );
-      return true;
-    }
-
-    return false;
+    const massagedPatterns = excludePackagePatterns.map((pattern) =>
+      pattern === '^*$' || pattern === '*' ? '*' : `/${pattern}/`,
+    );
+    return matchRegexOrGlobList(packageName, massagedPatterns);
   }
-}
-
-function isPackagePatternMatch(pckPattern: string, pck: string): boolean {
-  const re = regEx(massagePattern(pckPattern));
-  if (re.test(pck)) {
-    logger.trace(`${pck} matches against ${String(re)}`);
-    return true;
-  }
-  return false;
 }

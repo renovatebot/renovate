@@ -71,14 +71,18 @@ You can set the config file Renovate should read with the `RENOVATE_CONFIG_FILE`
 
 The process that runs Renovate must have the correct permissions to delete the config file.
 
+## `RENOVATE_X_DOCKER_HUB_TAGS_DISABLE`
+
+If set to any value, Renovate will stop using the Docker Hub API (`https://hub.docker.com`) to fetch tags and instead use the normal Docker API for images pulled from `https://index.docker.io`.
+
 ## `RENOVATE_X_DOCKER_MAX_PAGES`
 
 If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
 This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
 
-## `RENOVATE_X_EAGER_GLOBAL_EXTENDS`
+## `RENOVATE_X_EXEC_GPID_HANDLE`
 
-Resolve and merge `globalExtends` presets before other global config, instead of after.
+If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
 ## `RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS`
 
@@ -117,6 +121,16 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 ## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
 
 If set, Renovate will query this API for Merge Confidence data.
+
+If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
+
+- have a static merge confidence token that you set via `MEND_RNV_MC_TOKEN`
+- _or_ set `MEND_RNV_MC_TOKEN` to `auto`
+
+Then you must set this variable at the _server_ and the _workers_.
+
+But if you have specified the token as a [`matchConfidence`](https://docs.renovatebot.com/configuration-options/#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
+
 This feature is in private beta.
 
 ## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`

@@ -1,13 +1,13 @@
 import { PackagePatternsMatcher } from './package-patterns';
 
 describe('util/package-rules/package-patterns', () => {
-  const packageNameMatcher = new PackagePatternsMatcher();
+  const packagePatternsMatcher = new PackagePatternsMatcher();
 
   describe('match', () => {
-    it('should return false if depName is not defined', () => {
-      const result = packageNameMatcher.matches(
+    it('should return false if packageName is not defined', () => {
+      const result = packagePatternsMatcher.matches(
         {
-          depName: undefined,
+          packageName: undefined,
         },
         {
           matchPackagePatterns: ['@opentelemetry/http'],
@@ -17,9 +17,8 @@ describe('util/package-rules/package-patterns', () => {
     });
 
     it('should match packageName', () => {
-      const result = packageNameMatcher.matches(
+      const result = packagePatternsMatcher.matches(
         {
-          depName: 'abc',
           packageName: 'def',
         },
         {
@@ -30,7 +29,7 @@ describe('util/package-rules/package-patterns', () => {
     });
 
     it('should fall back to matching depName', () => {
-      const result = packageNameMatcher.matches(
+      const result = packagePatternsMatcher.matches(
         {
           depName: 'abc',
           packageName: 'def',
@@ -45,9 +44,8 @@ describe('util/package-rules/package-patterns', () => {
 
   describe('exclude', () => {
     it('should exclude packageName', () => {
-      const result = packageNameMatcher.excludes(
+      const result = packagePatternsMatcher.excludes(
         {
-          depName: 'abc',
           packageName: 'def',
         },
         {
