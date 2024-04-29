@@ -14,7 +14,7 @@ export function getHttpUrl(url: string, token?: string): string {
   let { protocol } = parsedUrl;
 
   // Convert non-https URLs to https and strip port
-  if (!regEx(/^https?$/).exec(protocol)) {
+  if (!regEx(/^https?$/).test(protocol)) {
     parsedUrl.port = 443;
     protocol = 'https';
   }
