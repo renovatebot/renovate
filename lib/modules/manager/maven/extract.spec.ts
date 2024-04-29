@@ -243,6 +243,20 @@ describe('modules/manager/maven/extract', () => {
         packageFileVersion: '1',
       });
     });
+
+    it('tries minimum snapshot manifests', () => {
+      const res = extractPackage(
+        Fixtures.get(`minimum_snapshot.pom.xml`),
+        'some-file',
+      );
+      expect(res).toEqual({
+        datasource: 'maven',
+        deps: [],
+        mavenProps: {},
+        packageFile: 'some-file',
+        packageFileVersion: '0.0.1-SNAPSHOT',
+      });
+    });
   });
 
   describe('resolveParents', () => {
