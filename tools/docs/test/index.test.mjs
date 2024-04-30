@@ -3,11 +3,8 @@ import path from 'node:path';
 import test from 'node:test';
 import fs from 'fs-extra';
 import { glob } from 'glob';
-import MarkdownIt from 'markdown-it';
 import remark from 'remark';
-
-const markdown = new MarkdownIt('zero');
-markdown.enable(['fence']);
+import github from 'remark-github';
 
 const root = path.resolve('tmp/docs');
 
@@ -25,7 +22,7 @@ function checkNode(node, files, file) {
       `Link should be external or relative: ${link.url}`,
     );
 
-    if (link.url.startsWith('.')) {
+    if (link.url.startsWith('.') && !/^https?:\/\//.test(link.url)) {
       // absolute path
       const absPath = path.resolve(
         'tmp/docs',
@@ -59,17 +56,16 @@ test('index', async (t) => {
 
     // Files from https://github.com/renovatebot/renovatebot.github.io/tree/main/src
     files.add('index.md');
-    // TODO: drop after #28721
-    files.add('release-notes-for-major-versions.md');
 
     let c = 0;
 
     for (const file of todo) {
       c++;
+
       await t.test(`${file}`, async () => {
-        const node = remark().parse(
-          await fs.readFile(`tmp/docs/${file}`, 'utf8'),
-        );
+        const node = remark()
+          .use(github)
+          .parse(await fs.readFile(`tmp/docs/${file}`, 'utf8'));
         checkNode(node, files, file);
       });
     }
