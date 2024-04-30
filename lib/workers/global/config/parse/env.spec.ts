@@ -271,9 +271,11 @@ describe('workers/global/config/parse/env', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_X_AUTODISCOVER_REPO_SORT: 'alpha',
         RENOVATE_X_DOCKER_MAX_PAGES: '10',
+        RENOVATE_AUTODISCOVER_REPO_ORDER: 'desc',
       };
       const config = await env.getConfig(envParam);
       expect(config.autodiscoverRepoSort).toBe('alpha');
+      expect(config.autodiscoverRepoOrder).toBe('desc');
       expect(config.dockerMaxPages).toBeUndefined();
     });
 
