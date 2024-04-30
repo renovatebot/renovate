@@ -48,6 +48,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'userAgent',
+    description:
+      'If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+  },
+  {
     name: 'allowPostUpgradeCommandTemplating',
     description:
       'Set this to `false` to disable template compilation for post-upgrade commands.',
@@ -455,7 +463,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.5.0',
+    default: 'ghcr.io/containerbase/sidecar:10.5.2',
     globalOnly: true,
   },
   {

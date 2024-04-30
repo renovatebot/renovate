@@ -223,6 +223,22 @@ describe('modules/manager/terragrunt/extract', () => {
             registryUrls: ['https://gitlab.com'],
           },
           {
+            currentValue: 'v1.0.1',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com:4321'],
+          },
+          {
+            currentValue: 'v1.0.2',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com'],
+          },
+          {
             currentValue: 'v1.0.0',
             datasource: 'gitea-tags',
             depName: 'gitea.com/hashicorp/example',
@@ -232,7 +248,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(33);
+      expect(res?.deps).toHaveLength(35);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -418,6 +434,22 @@ describe('modules/manager/terragrunt/extract', () => {
             registryUrls: ['https://gitlab.com'],
           },
           {
+            currentValue: 'v1.0.1',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com:4321'],
+          },
+          {
+            currentValue: 'v1.0.2',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com'],
+          },
+          {
             currentValue: 'v1.0.0',
             datasource: 'gitea-tags',
             depName: 'gitea.com/hashicorp/example',
@@ -427,7 +459,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(33);
+      expect(res?.deps).toHaveLength(35);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
@@ -613,6 +645,22 @@ describe('modules/manager/terragrunt/extract', () => {
             registryUrls: ['https://gitlab.com'],
           },
           {
+            currentValue: 'v1.0.1',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com:4321'],
+          },
+          {
+            currentValue: 'v1.0.2',
+            datasource: 'gitlab-tags',
+            depName: 'gitlab.com/hashicorp/example',
+            depType: 'gitTags',
+            packageName: 'hashicorp/example',
+            registryUrls: ['https://gitlab.com'],
+          },
+          {
             currentValue: 'v1.0.0',
             datasource: 'gitea-tags',
             depName: 'gitea.com/hashicorp/example',
@@ -622,7 +670,7 @@ describe('modules/manager/terragrunt/extract', () => {
           },
         ],
       });
-      expect(res?.deps).toHaveLength(33);
+      expect(res?.deps).toHaveLength(35);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
