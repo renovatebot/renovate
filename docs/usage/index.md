@@ -1,7 +1,3 @@
----
-edit_url: https://github.com/renovatebot/renovatebot.github.io/edit/main/src/index.md
----
-
 ![Renovate banner](https://app.renovatebot.com/images/whitesource_renovate_660_220.jpg){ loading=lazy }
 
 # Renovate documentation
