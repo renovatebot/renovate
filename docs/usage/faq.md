@@ -55,6 +55,9 @@ Follow these steps to see which version the Mend Renovate app is on:
      "renovateVersion": "37.326.0"
    }
    ```
+<!-- prettier-ignore -->
+!!! tip
+    The PRs that Renovate creates have a link to the "repository job log" in the footer of the PR body text.
 
 ## Renovate core features not supported on all platforms
 
