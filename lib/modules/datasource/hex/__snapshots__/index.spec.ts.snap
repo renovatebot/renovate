@@ -6,6 +6,7 @@ exports[`modules/datasource/hex/index getReleases process public repo without au
   "registryUrl": "https://hex.pm/",
   "releases": [
     {
+      "isDeprecated": true,
       "releaseTimestamp": "2015-09-10T13:58:55.620Z",
       "version": "0.1.1",
     },
@@ -112,6 +113,7 @@ exports[`modules/datasource/hex/index getReleases processes real data 1`] = `
   "registryUrl": "https://hex.pm/",
   "releases": [
     {
+      "isDeprecated": true,
       "releaseTimestamp": "2015-09-10T13:58:55.620Z",
       "version": "0.1.1",
     },

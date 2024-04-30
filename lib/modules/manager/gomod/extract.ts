@@ -32,20 +32,26 @@ function getDep(
   if (digestMatch?.groups?.digest) {
     dep.currentDigest = digestMatch.groups.digest;
     dep.digestOneAndOnly = true;
+    dep.versioning = 'loose';
   }
   return dep;
 }
 
-function getGoDep(lineNumber: number, goVer: string): PackageDependency {
+function getGoDep(
+  lineNumber: number,
+  goVer: string,
+  versioning: string | undefined = undefined,
+  depType: string = 'golang',
+): PackageDependency {
   return {
     managerData: {
       lineNumber,
     },
     depName: 'go',
-    depType: 'golang',
+    depType,
     currentValue: goVer,
     datasource: GolangVersionDatasource.id,
-    versioning: 'go-mod-directive',
+    ...(versioning && { versioning }),
   };
 }
 
@@ -61,8 +67,17 @@ export function extractPackageFile(
       const line = lines[lineNumber];
       const goVer = line.startsWith('go ') ? line.replace('go ', '') : null;
       if (goVer && semver.validRange(goVer)) {
-        const dep = getGoDep(lineNumber, goVer);
+        const dep = getGoDep(lineNumber, goVer, 'go-mod-directive');
         deps.push(dep);
+        continue;
+      }
+      const goToolVer = line.startsWith('toolchain go')
+        ? line.replace('toolchain go', '')
+        : null;
+      if (goToolVer && semver.valid(goToolVer)) {
+        const dep = getGoDep(lineNumber, goToolVer, undefined, 'toolchain');
+        deps.push(dep);
+        continue;
       }
       const replaceMatch = regEx(
         /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/,

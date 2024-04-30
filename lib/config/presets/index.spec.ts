@@ -233,8 +233,19 @@ describe('config/presets/index', () => {
       config.extends = ['packages:eslint', 'packages:stylelint'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toEqual({
-        matchPackageNames: ['@types/eslint', 'babel-eslint'],
-        matchPackagePrefixes: ['@typescript-eslint/', 'eslint', 'stylelint'],
+        matchPackageNames: [
+          '@types/eslint',
+          'babel-eslint',
+          '@babel/eslint-parser',
+          '@stylistic/stylelint-plugin',
+        ],
+        matchPackagePrefixes: [
+          '@eslint/',
+          '@types/eslint__',
+          '@typescript-eslint/',
+          'eslint',
+          'stylelint',
+        ],
       });
     });
 
@@ -250,8 +261,17 @@ describe('config/presets/index', () => {
         packageRules: [
           {
             groupName: 'eslint',
-            matchPackageNames: ['@types/eslint', 'babel-eslint'],
-            matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
+            matchPackageNames: [
+              '@types/eslint',
+              'babel-eslint',
+              '@babel/eslint-parser',
+            ],
+            matchPackagePrefixes: [
+              '@eslint/',
+              '@types/eslint__',
+              '@typescript-eslint/',
+              'eslint',
+            ],
           },
         ],
       });
@@ -261,16 +281,16 @@ describe('config/presets/index', () => {
       config.extends = ['packages:eslint'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.matchPackagePrefixes).toHaveLength(2);
+      expect(res.matchPackagePrefixes).toHaveLength(4);
     });
 
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.matchPackageNames).toHaveLength(9);
+      expect(res.matchPackageNames).toHaveLength(11);
       expect(res.matchPackagePatterns).toHaveLength(1);
-      expect(res.matchPackagePrefixes).toHaveLength(4);
+      expect(res.matchPackagePrefixes).toHaveLength(6);
     });
 
     it('resolves nested groups', async () => {
@@ -279,9 +299,9 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(9);
+      expect(rule.matchPackageNames).toHaveLength(11);
       expect(rule.matchPackagePatterns).toHaveLength(1);
-      expect(rule.matchPackagePrefixes).toHaveLength(4);
+      expect(rule.matchPackagePrefixes).toHaveLength(6);
     });
 
     it('migrates automerge in presets', async () => {
@@ -934,6 +954,48 @@ describe('config/presets/index', () => {
         presetName: 'webapp',
         presetPath: undefined,
         presetSource: 'npm',
+      });
+    });
+
+    it('parses HTTPS URLs', () => {
+      expect(
+        presets.parsePreset(
+          'https://my.server/gitea/renovate-config/raw/branch/main/default.json',
+        ),
+      ).toEqual({
+        repo: 'https://my.server/gitea/renovate-config/raw/branch/main/default.json',
+        params: undefined,
+        presetName: '',
+        presetPath: undefined,
+        presetSource: 'http',
+      });
+    });
+
+    it('parses HTTP URLs', () => {
+      expect(
+        presets.parsePreset(
+          'http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain',
+        ),
+      ).toEqual({
+        repo: 'http://my.server/users/me/repos/renovate-presets/raw/default.json?at=refs%2Fheads%2Fmain',
+        params: undefined,
+        presetName: '',
+        presetPath: undefined,
+        presetSource: 'http',
+      });
+    });
+
+    it('parses HTTPS URLs with parameters', () => {
+      expect(
+        presets.parsePreset(
+          'https://my.server/gitea/renovate-config/raw/branch/main/default.json(param1)',
+        ),
+      ).toEqual({
+        repo: 'https://my.server/gitea/renovate-config/raw/branch/main/default.json',
+        params: ['param1'],
+        presetName: '',
+        presetPath: undefined,
+        presetSource: 'http',
       });
     });
   });

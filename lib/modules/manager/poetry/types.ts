@@ -22,6 +22,8 @@ export interface PoetryDependency {
   git?: string;
   tag?: string;
   version?: string;
+  branch?: string;
+  rev?: string;
 }
 
 export interface PoetrySource {

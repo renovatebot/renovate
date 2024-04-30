@@ -5,17 +5,17 @@ import { mockedFunction, scm } from '../../../../../test/util';
 import { migrateConfig } from '../../../../config/migration';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
+import { EditorConfig } from '../../../../util/json-writer';
 import { detectRepoFileConfig } from '../../init/merge';
 import { MigratedDataFactory, applyPrettierFormatting } from './migrated-data';
 
 jest.mock('../../../../config/migration');
 jest.mock('../../../../util/git');
 jest.mock('../../../../util/fs');
+jest.mock('../../../../util/json-writer');
 jest.mock('../../init/merge');
 jest.mock('detect-indent');
 
-const rawNonMigrated = Fixtures.get('./renovate.json');
-const rawNonMigratedJson5 = Fixtures.get('./renovate.json5');
 const migratedData = Fixtures.getJson('./migrated-data.json');
 const migratedDataJson5 = Fixtures.getJson('./migrated-data.json5');
 const migratedConfigObj = Fixtures.getJson('./migrated.json');
@@ -33,7 +33,6 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       });
       mockedFunction(detectRepoFileConfig).mockResolvedValue({
         configFileName: 'renovate.json',
-        configFileRaw: rawNonMigrated,
       });
       mockedFunction(migrateConfig).mockReturnValue({
         isMigrated: true,
@@ -100,7 +99,6 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     it('Migrate a JSON5 config file', async () => {
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json5',
-        configFileRaw: rawNonMigratedJson5,
       });
       MigratedDataFactory.reset();
       await expect(MigratedDataFactory.getAsync()).resolves.toEqual(
@@ -129,7 +127,6 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
       });
       mockedFunction(detectRepoFileConfig).mockResolvedValueOnce({
         configFileName: 'renovate.json',
-        configFileRaw: rawNonMigrated,
       });
       mockedFunction(migrateConfig).mockReturnValueOnce({
         isMigrated: true,
@@ -191,13 +188,42 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     });
 
     it('formats with default 2 spaces', async () => {
-      mockedFunction(scm.getFileList).mockResolvedValue(['.prettierrc']);
+      mockedFunction(scm.getFileList).mockResolvedValue([
+        '.prettierrc',
+        '.editorconfig',
+      ]);
+      mockedFunction(EditorConfig.getCodeFormat).mockResolvedValueOnce({
+        maxLineLength: 80,
+      });
       await expect(
-        applyPrettierFormatting(migratedData.content, 'json', {
+        applyPrettierFormatting('.prettierrc', migratedData.content, 'json', {
           amount: 0,
           indent: '  ',
         }),
       ).resolves.toEqual(formattedMigratedData.content);
+    });
+
+    it('formats with printWith=Infinity', async () => {
+      mockedFunction(scm.getFileList).mockResolvedValue([
+        '.prettierrc',
+        '.editorconfig',
+      ]);
+      mockedFunction(EditorConfig.getCodeFormat).mockResolvedValueOnce({
+        maxLineLength: 'off',
+      });
+      await expect(
+        applyPrettierFormatting(
+          '.prettierrc',
+          `{\n"extends":[":separateMajorReleases",":prImmediately",":renovatePrefix",":semanticPrefixFixDepsChoreOthers"]}`,
+          'json',
+          {
+            amount: 0,
+            indent: '  ',
+          },
+        ),
+      ).resolves.toBe(
+        `{\n  "extends": [":separateMajorReleases", ":prImmediately", ":renovatePrefix", ":semanticPrefixFixDepsChoreOthers"]\n}\n`,
+      );
     });
   });
 });

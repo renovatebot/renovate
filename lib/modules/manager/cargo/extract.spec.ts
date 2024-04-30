@@ -585,5 +585,19 @@ replace-with = "mcorbin"
         expect.not.objectContaining({ lockedVersion: expect.anything() }),
       ]);
     });
+
+    it('should extract project version', async () => {
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        version = "0.1.0"
+        edition = "2021"
+        [dependencies]
+        syn = "2.0"
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.packageFileVersion).toBe('0.1.0');
+    });
   });
 });

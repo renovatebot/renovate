@@ -124,7 +124,6 @@ describe('workers/repository/init/merge', () => {
         configFileParsed: {
           schema: 'https://docs.renovate.com',
         },
-        configFileRaw: undefined,
       });
     });
 
@@ -199,7 +198,6 @@ describe('workers/repository/init/merge', () => {
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: 'renovate.json5',
         configFileParsed: {},
-        configFileRaw,
       });
     });
 
@@ -212,7 +210,6 @@ describe('workers/repository/init/merge', () => {
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.github/renovate.json',
         configFileParsed: {},
-        configFileRaw: '{}',
       });
     });
 
@@ -225,7 +222,6 @@ describe('workers/repository/init/merge', () => {
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.gitlab/renovate.json',
         configFileParsed: {},
-        configFileRaw: '{}',
       });
     });
 
@@ -236,14 +232,12 @@ describe('workers/repository/init/merge', () => {
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.renovaterc.json',
         configFileParsed: {},
-        configFileRaw: '{}',
       });
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.renovaterc.json',
         configFileParsed: {
           something: 'new',
         },
-        configFileRaw: '{"something":"new"}',
       });
     });
 
@@ -254,14 +248,12 @@ describe('workers/repository/init/merge', () => {
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.renovaterc.json5',
         configFileParsed: {},
-        configFileRaw: '{}',
       });
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: '.renovaterc.json5',
         configFileParsed: {
           something: 'new',
         },
-        configFileRaw: '{"something":"new"}',
       });
     });
   });

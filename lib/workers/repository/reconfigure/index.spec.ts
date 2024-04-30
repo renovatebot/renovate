@@ -8,6 +8,7 @@ import {
   platform,
   scm,
 } from '../../../../test/util';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform/types';
 import * as _cache from '../../../util/cache/repository';
@@ -39,8 +40,8 @@ describe('workers/repository/reconfigure/index', () => {
     cache.getCache.mockReturnValue({});
     git.getBranchCommit.mockReturnValue('sha' as LongCommitSha);
     fs.readLocalFile.mockResolvedValue(null);
-    platform.getBranchPr.mockResolvedValue(null);
     platform.getBranchStatusCheck.mockResolvedValue(null);
+    GlobalConfig.reset();
   });
 
   it('no effect on repo with no reconfigure branch', async () => {
@@ -126,7 +127,7 @@ describe('workers/repository/reconfigure/index', () => {
             "enabledManagers": ["docker"]
         }
         `);
-    platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
+    platform.findPr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
     await validateReconfigureBranch(config);
     expect(logger.debug).toHaveBeenCalledWith(
       { errors: expect.any(String) },
@@ -229,7 +230,6 @@ describe('workers/repository/reconfigure/index', () => {
             "enabledManagers": ["npm",]
         }
         `);
-    platform.getBranchPr.mockResolvedValueOnce(mock<Pr>({ number: 1 }));
     await validateReconfigureBranch(config);
     expect(platform.setBranchStatus).toHaveBeenCalledWith({
       branchName: 'prefix/reconfigure',

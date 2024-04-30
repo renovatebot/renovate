@@ -157,10 +157,15 @@ describe('modules/manager/gradle/parser', () => {
       it('map with interpolated dependency strings', () => {
         const input = codeBlock`
           def slfj4Version = "2.0.0"
+          def lifecycle_version = "2.5.1"
           libraries = [
             jcl: "org.slf4j:jcl-over-slf4j:\${slfj4Version}",
             releaseCoroutines: "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.1-eap13"
             api: "org.slf4j:slf4j-api:$slfj4Version",
+            lifecycle: [
+                "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version",
+                "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+            ]
           ]
           foo = [ group: "org.slf4j", name: "slf4j-ext", version: slfj4Version ]
         `;
@@ -181,6 +186,16 @@ describe('modules/manager/gradle/parser', () => {
             depName: 'org.slf4j:slf4j-api',
             groupName: 'slfj4Version',
             currentValue: '2.0.0',
+          },
+          {
+            depName: 'androidx.lifecycle:lifecycle-runtime-ktx',
+            groupName: 'lifecycle_version',
+            currentValue: '2.5.1',
+          },
+          {
+            depName: 'androidx.lifecycle:lifecycle-viewmodel-ktx',
+            groupName: 'lifecycle_version',
+            currentValue: '2.5.1',
           },
           {
             depName: 'org.slf4j:slf4j-ext',
@@ -721,6 +736,7 @@ describe('modules/manager/gradle/parser', () => {
       ${''}                                         | ${'library("foo", "bar", "baz", "qux").version("1.2.3")'}       | ${null}
       ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3", "4.5.6")'} | ${null}
       ${''}                                         | ${'library("foo", bar, "baz").version("1.2.3")'}                | ${null}
+      ${''}                                         | ${'plugin("foo.bar", "foo")'}                                   | ${null}
       ${''}                                         | ${'plugin("foo.bar", "foo").version("1.2.3")'}                  | ${{ depName: 'foo', currentValue: '1.2.3' }}
       ${''}                                         | ${'alias("foo.bar").to("foo", "bar").version("1.2.3")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").versionRef("baz")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
@@ -925,6 +941,7 @@ describe('modules/manager/gradle/parser', () => {
       ${''}              | ${'unknown { toolVersion = "1.2.3" }'}                           | ${null}
       ${''}              | ${'composeOptions { kotlinCompilerExtensionVersion = "1.2.3" }'} | ${{ depName: 'composeOptions', packageName: GRADLE_PLUGINS['composeOptions'][1], currentValue: '1.2.3' }}
       ${''}              | ${'jmh { jmhVersion = "1.2.3" }'}                                | ${{ depName: 'jmh', packageName: GRADLE_PLUGINS['jmh'][1], currentValue: '1.2.3' }}
+      ${''}              | ${'micronaut { version = "1.2.3" }'}                             | ${{ depName: 'micronaut', packageName: GRADLE_PLUGINS['micronaut'][1], currentValue: '1.2.3' }}
     `('$def | $input', ({ def, input, output }) => {
       const { deps } = parseGradle([def, input].join('\n'));
       expect(deps).toMatchObject([output].filter(is.truthy));

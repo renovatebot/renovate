@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../config/global';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   GITEA_API_USING_HOST_TYPES,
@@ -9,13 +10,14 @@ import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
 import type { HostRule } from '../../types';
 import * as hostRules from '../host-rules';
+import { matchRegexOrGlobList } from '../string-match';
 import { parseUrl } from '../url';
 import { dnsLookup } from './dns';
 import { keepAliveAgents } from './keep-alive';
-import type { GotOptions } from './types';
+import type { GotOptions, InternalHttpOptions } from './types';
 
 export type HostRulesGotOptions = Pick<
-  GotOptions,
+  GotOptions & InternalHttpOptions,
   | 'hostType'
   | 'url'
   | 'noAuth'
@@ -32,14 +34,15 @@ export type HostRulesGotOptions = Pick<
   | 'agent'
   | 'http2'
   | 'https'
+  | 'readOnly'
 >;
 
 export function findMatchingRule<GotOptions extends HostRulesGotOptions>(
   url: string,
   options: GotOptions,
 ): HostRule {
-  const { hostType } = options;
-  let res = hostRules.find({ hostType, url });
+  const { hostType, readOnly } = options;
+  let res = hostRules.find({ hostType, url, readOnly });
 
   if (
     is.nonEmptyString(res.token) ||
@@ -160,6 +163,27 @@ export function applyHostRule<GotOptions extends HostRulesGotOptions>(
 
   if (hostRule.dnsCache) {
     options.lookup = dnsLookup;
+  }
+
+  if (hostRule.headers) {
+    const allowedHeaders = GlobalConfig.get('allowedHeaders', []);
+    const filteredHeaders: Record<string, string> = {};
+
+    for (const [header, value] of Object.entries(hostRule.headers)) {
+      if (matchRegexOrGlobList(header, allowedHeaders)) {
+        filteredHeaders[header] = value;
+      } else {
+        logger.once.error(
+          { allowedHeaders, header },
+          'Disallowed hostRules headers',
+        );
+      }
+    }
+
+    options.headers = {
+      ...filteredHeaders,
+      ...options.headers,
+    };
   }
 
   if (hostRule.keepAlive) {

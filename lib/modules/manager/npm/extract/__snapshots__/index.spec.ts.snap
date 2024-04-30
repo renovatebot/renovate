@@ -82,12 +82,10 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
     {
       "commitMessageTopic": "Node.js",
       "currentValue": ">= 8.9.2",
-      "datasource": "github-tags",
+      "datasource": "node-version",
       "depName": "node",
       "depType": "engines",
-      "packageName": "nodejs/node",
       "prettyDepType": "engine",
-      "versioning": "node",
     },
     {
       "commitMessageTopic": "npm",
@@ -121,6 +119,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
       "depType": "engines",
       "packageName": "microsoft/vscode",
       "prettyDepType": "engine",
+      "versioning": "npm",
     },
   ],
   "extractedConstraints": {
@@ -172,6 +171,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "pinDigests": false,
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/c",
+      "versioning": "npm",
     },
     {
       "currentValue": "github:owner/d#a7g3eaf",
@@ -191,6 +191,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "packageName": "owner/e",
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/e",
+      "versioning": "npm",
     },
     {
       "currentRawValue": "owner/f#v2.0.0",
@@ -203,6 +204,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "pinDigests": false,
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/f",
+      "versioning": "npm",
     },
     {
       "currentValue": "gitlab:owner/g#v1.0.0",
@@ -243,6 +245,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "packageName": "owner/k",
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/k",
+      "versioning": "npm",
     },
     {
       "currentDigest": "abcdef0",
@@ -255,6 +258,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "packageName": "owner/l",
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/l",
+      "versioning": "npm",
     },
     {
       "currentRawValue": "https://github.com/owner/m.git#v1.0.0",
@@ -267,6 +271,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "pinDigests": false,
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/m",
+      "versioning": "npm",
     },
     {
       "currentRawValue": "git+https://github.com/owner/n#v2.0.0",
@@ -279,6 +284,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "pinDigests": false,
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/n",
+      "versioning": "npm",
     },
     {
       "currentRawValue": "git@github.com:owner/o.git#v2.0.0",
@@ -291,6 +297,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "pinDigests": false,
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/owner/o",
+      "versioning": "npm",
     },
     {
       "currentRawValue": "Owner/P.git#v2.0.0",
@@ -303,6 +310,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "pinDigests": false,
       "prettyDepType": "dependency",
       "sourceUrl": "https://github.com/Owner/P",
+      "versioning": "npm",
     },
   ],
   "extractedConstraints": {},
@@ -440,22 +448,18 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
     {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
-      "datasource": "github-tags",
+      "datasource": "node-version",
       "depName": "node",
       "depType": "engines",
-      "packageName": "nodejs/node",
       "prettyDepType": "engine",
-      "versioning": "node",
     },
     {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
-      "datasource": "github-tags",
+      "datasource": "node-version",
       "depName": "node",
       "depType": "volta",
-      "packageName": "nodejs/node",
       "prettyDepType": "volta",
-      "versioning": "node",
     },
     {
       "commitMessageTopic": "Yarn",
@@ -512,22 +516,18 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
     {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
-      "datasource": "github-tags",
+      "datasource": "node-version",
       "depName": "node",
       "depType": "engines",
-      "packageName": "nodejs/node",
       "prettyDepType": "engine",
-      "versioning": "node",
     },
     {
       "commitMessageTopic": "Node.js",
       "currentValue": "8.9.2",
-      "datasource": "github-tags",
+      "datasource": "node-version",
       "depName": "node",
       "depType": "volta",
-      "packageName": "nodejs/node",
       "prettyDepType": "volta",
-      "versioning": "node",
     },
     {
       "commitMessageTopic": "Yarn",

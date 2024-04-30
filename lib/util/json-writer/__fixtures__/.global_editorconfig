@@ -1,3 +1,4 @@
 [*]
 indent_style = space
 indent_size = 6
+max_line_length = 160

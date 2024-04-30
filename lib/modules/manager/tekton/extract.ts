@@ -22,7 +22,8 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   let docs: TektonResource[];
   try {
-    docs = parseYaml(content) as TektonResource[];
+    // TODO: use schema (#9610)
+    docs = parseYaml(content);
   } catch (err) {
     logger.debug(
       { err, packageFile },
@@ -85,7 +86,9 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   return deps;
 }
 
-const taskAnnotation = regEx(/^pipelinesascode\.tekton\.dev\/task(-[0-9]+)?$/);
+const annotationRegex = regEx(
+  /^pipelinesascode\.tekton\.dev\/(?:task(-[0-9]+)?|pipeline)$/,
+);
 
 function addPipelineAsCodeAnnotations(
   annotations: Record<string, string> | undefined | null,
@@ -96,16 +99,16 @@ function addPipelineAsCodeAnnotations(
   }
 
   for (const [key, value] of Object.entries(annotations)) {
-    if (!taskAnnotation.test(key)) {
+    if (!annotationRegex.test(key)) {
       continue;
     }
 
-    const tasks = value
+    const values = value
       .replace(regEx(/]$/), '')
       .replace(regEx(/^\[/), '')
       .split(',');
-    for (const task of tasks) {
-      const dep = getAnnotationDep(task.trim());
+    for (const value of values) {
+      const dep = getAnnotationDep(value.trim());
       if (!dep) {
         continue;
       }

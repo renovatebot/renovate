@@ -104,5 +104,12 @@ describe('modules/versioning/bazel-module/index', () => {
       newVersion: '1.0.1',
     };
     expect(bzlmod.getNewValue(config)).toBe('1.0.1');
+    const vConfig: NewValueConfig = {
+      currentValue: '1.0.0',
+      currentVersion: 'v1.0.0',
+      rangeStrategy: 'auto',
+      newVersion: 'v1.0.1',
+    };
+    expect(bzlmod.getNewValue(vConfig)).toBe('1.0.1');
   });
 });

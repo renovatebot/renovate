@@ -356,6 +356,12 @@ describe('modules/versioning/regex/index', () => {
       'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.+)(?<build>\\d+)-r(?<revision>\\d+))?$',
     );
 
+    const versions = [
+      '12.7.0-debian-10-r69',
+      '12.7.0-debian-10-r100',
+      '12.7.0-debian-10-r101',
+    ];
+
     it.each`
       version                    | expected
       ${'12.7.0-debian-10-r69'}  | ${true}
@@ -385,13 +391,31 @@ describe('modules/versioning/regex/index', () => {
 
     it.each`
       version                  | range                     | expected
-      ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-10-r69'} | ${true}
-      ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-10-r68'} | ${true}
+      ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-9-r69'}  | ${true}
+      ${'12.7.0-debian-9-r69'} | ${'12.7.0-debian-10-r68'} | ${false}
     `(
       'matches("$version", "$range") === $expected',
       ({ version, range, expected }) => {
         expect(re.matches(version, range)).toBe(expected);
       },
     );
+
+    it('getSatisfyingVersion', () => {
+      expect(re.getSatisfyingVersion(versions, '12.7.0-debian-10-r100')).toBe(
+        '12.7.0-debian-10-r100',
+      );
+      expect(
+        re.getSatisfyingVersion(versions, '12.7.0-debian-12-r100'),
+      ).toBeNull();
+    });
+
+    it('minSatisfyingVersion', () => {
+      expect(re.minSatisfyingVersion(versions, '12.7.0-debian-10-r100')).toBe(
+        '12.7.0-debian-10-r100',
+      );
+      expect(
+        re.minSatisfyingVersion(versions, '12.7.0-debian-12-r100'),
+      ).toBeNull();
+    });
   });
 });

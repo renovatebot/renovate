@@ -28,6 +28,6 @@ For example:
 
 ### Bundle versioning
 
-This manager assumes that any bundles referenced use tags for versioning, and that these tags use [SemVer](../../versioning.md#semantic-versioning).
+This manager assumes that any bundles referenced use tags for versioning, and that these tags use [SemVer](../../versioning/semver/index.md).
 The implementation of SemVer is strict - versions must follow the `X.Y.Z` or `vX.Y.Z` format.
 Versions that don't match this format (eg. `X.Y`) will be ignored.

@@ -32,8 +32,9 @@ import { getPackageManagerVersion, lazyLoadPackageJson } from './utils';
 
 async function getNpmConstraintFromPackageLock(
   lockFileDir: string,
+  filename: string,
 ): Promise<string | null> {
-  const packageLockFileName = upath.join(lockFileDir, 'package-lock.json');
+  const packageLockFileName = upath.join(lockFileDir, filename);
   const packageLockContents = await readLocalFile(packageLockFileName, 'utf8');
   const packageLockJson = Result.parse(
     packageLockContents,
@@ -79,7 +80,7 @@ export async function generateLockFile(
       constraint:
         config.constraints?.npm ??
         getPackageManagerVersion('npm', await lazyPkgJson.getValue()) ??
-        (await getNpmConstraintFromPackageLock(lockFileDir)) ??
+        (await getNpmConstraintFromPackageLock(lockFileDir, filename)) ??
         null,
     };
     const supportsPreferDedupeFlag =
@@ -114,6 +115,7 @@ export async function generateLockFile(
     };
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
+      userConfiguredEnv: config.env,
       extraEnv,
       toolConstraints: [
         await getNodeToolConstraint(config, upgrades, lockFileDir, lazyPkgJson),
@@ -189,7 +191,7 @@ export async function generateLockFile(
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
-          'Error removing package-lock.json for lock file maintenance',
+          'Error removing `package-lock.json` for lock file maintenance',
         );
       }
     }

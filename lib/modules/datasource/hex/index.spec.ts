@@ -131,6 +131,19 @@ describe('modules/datasource/hex/index', () => {
       expect(res).toBeDefined();
     });
 
+    it('extracts depreceated info', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/packages/certifi')
+        .reply(200, certifiResponse);
+      hostRules.find.mockReturnValueOnce({});
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'certifi',
+      });
+      expect(res?.releases.some((rel) => rel.isDeprecated)).toBeTrue();
+    });
+
     it('processes a private repo with auth', async () => {
       httpMock
         .scope(baseUrl, {

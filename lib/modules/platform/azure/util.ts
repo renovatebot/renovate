@@ -1,9 +1,11 @@
 import {
   GitPullRequest,
+  GitPullRequestMergeStrategy,
   GitRepository,
   GitStatusContext,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import type { MergeStrategy } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { HostRule, PrState } from '../../../types';
 import type { GitOptions } from '../../../types/git';
@@ -180,4 +182,20 @@ export function getRepoByName(
     logger.debug(`Repo not found: ${name}`);
   }
   return foundRepo ?? null;
+}
+
+export function mapMergeStrategy(
+  mergeStrategy?: MergeStrategy,
+): GitPullRequestMergeStrategy {
+  switch (mergeStrategy) {
+    case 'rebase':
+    case 'fast-forward':
+      return GitPullRequestMergeStrategy.Rebase;
+    case 'merge-commit':
+      return GitPullRequestMergeStrategy.NoFastForward;
+    case 'squash':
+      return GitPullRequestMergeStrategy.Squash;
+    default:
+      return GitPullRequestMergeStrategy.NoFastForward;
+  }
 }

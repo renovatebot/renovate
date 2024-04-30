@@ -194,6 +194,7 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       extraEnv,
       docker: {},
+      userConfiguredEnv: config.env,
       toolConstraints: [
         { toolName: 'python', constraint: pythonConstraint },
         { toolName: 'poetry', constraint: poetryConstraint },

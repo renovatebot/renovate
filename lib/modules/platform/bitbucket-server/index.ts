@@ -1,4 +1,5 @@
 import { setTimeout } from 'timers/promises';
+import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
 import {
   REPOSITORY_CHANGED,
@@ -48,6 +49,7 @@ import type {
   BbsRestUserRef,
 } from './types';
 import * as utils from './utils';
+import { getExtraCloneOpts } from './utils';
 
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
@@ -68,8 +70,10 @@ const bitbucketServerHttp = new BitbucketServerHttp();
 const defaults: {
   endpoint?: string;
   hostType: string;
+  version: string;
 } = {
   hostType: 'bitbucket-server',
+  version: '0.0.0',
 };
 
 /* istanbul ignore next */
@@ -79,17 +83,22 @@ function updatePrVersion(pr: number, version: number): number {
   return res;
 }
 
-export function initPlatform({
+export async function initPlatform({
   endpoint,
+  token,
   username,
   password,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
-  if (!(username && password)) {
+  if (!(username && password) && !token) {
     throw new Error(
-      'Init: You must configure a Bitbucket Server username/password',
+      'Init: You must either configure a Bitbucket Server username/password or a HTTP access token',
+    );
+  } else if (password && token) {
+    throw new Error(
+      'Init: You must either configure a Bitbucket Server password or a HTTP access token',
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
@@ -98,7 +107,32 @@ export function initPlatform({
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
-  return Promise.resolve(platformConfig);
+  try {
+    let bitbucketServerVersion: string;
+    // istanbul ignore if: experimental feature
+    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
+      bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    } else {
+      const { version } = (
+        await bitbucketServerHttp.getJson<{ version: string }>(
+          `./rest/api/1.0/application-properties`,
+        )
+      ).body;
+      bitbucketServerVersion = version;
+      logger.debug('Bitbucket Server version is: ' + bitbucketServerVersion);
+    }
+
+    if (semver.valid(bitbucketServerVersion)) {
+      defaults.version = bitbucketServerVersion;
+    }
+  } catch (err) {
+    logger.debug(
+      { err },
+      'Error authenticating with Bitbucket. Check that your token includes "api" permissions',
+    );
+  }
+
+  return platformConfig;
 }
 
 // Get all repositories that the user has access to
@@ -203,8 +237,9 @@ export async function initRepo({
     await git.initRepo({
       ...config,
       url,
+      extraCloneOpts: getExtraCloneOpts(opts),
       cloneSubmodules,
-      fullClone: true,
+      fullClone: semver.lte(defaults.version, '8.0.0'),
     });
 
     config.mergeMethod = 'merge';
@@ -228,9 +263,9 @@ export async function initRepo({
   }
 }
 
-export async function getRepoForceRebase(): Promise<boolean> {
-  logger.debug(`getRepoForceRebase()`);
-
+export async function getBranchForceRebase(
+  _branchName: string,
+): Promise<boolean> {
   // https://docs.atlassian.com/bitbucket-server/rest/7.0.1/bitbucket-rest.html#idp342
   const res = await bitbucketServerHttp.getJson<{
     mergeConfig: { defaultStrategy: { id: string } };
@@ -300,7 +335,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     const searchParams: Record<string, string> = {
       state: 'ALL',
     };
-    if (!config.ignorePrAuthor) {
+    if (!config.ignorePrAuthor && config.username !== undefined) {
       searchParams['role.1'] = 'AUTHOR';
       searchParams['username.1'] = config.username;
     }
@@ -324,8 +359,34 @@ export async function findPr({
   prTitle,
   state = 'all',
   refreshCache,
+  includeOtherAuthors,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
+
+  if (includeOtherAuthors) {
+    // PR might have been created by anyone, so don't use the cached Renovate PR list
+    const searchParams: Record<string, string> = {
+      state: 'OPEN',
+    };
+    searchParams['direction'] = 'outgoing';
+    searchParams['at'] = `refs/heads/${branchName}`;
+
+    const query = getQueryString(searchParams);
+    const prs = await utils.accumulateValues(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`,
+      'get',
+      {},
+      1, // only fetch the latest pr
+    );
+
+    if (!prs.length) {
+      logger.debug(`No PR found for branch ${branchName}`);
+      return null;
+    }
+
+    return utils.prInfo(prs[0]);
+  }
+
   const prList = await getPrList(refreshCache);
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
   if (pr) {
@@ -558,6 +619,15 @@ export async function addReviewers(
 ): Promise<void> {
   logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
+  await retry(updatePRAndAddReviewers, [prNo, reviewers], 3, [
+    REPOSITORY_CHANGED,
+  ]);
+}
+
+async function updatePRAndAddReviewers(
+  prNo: number,
+  reviewers: string[],
+): Promise<void> {
   try {
     const pr = await getPr(prNo);
     if (!pr) {
@@ -596,6 +666,33 @@ export async function addReviewers(
       throw err;
     }
   }
+}
+
+async function retry<T extends (...arg0: any[]) => Promise<any>>(
+  fn: T,
+  args: Parameters<T>,
+  maxTries: number,
+  retryErrorMessages: string[],
+): Promise<Awaited<ReturnType<T>>> {
+  const maxAttempts = Math.max(maxTries, 1);
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      return await fn(...args);
+    } catch (e) {
+      lastError = e;
+      if (
+        retryErrorMessages.length !== 0 &&
+        !retryErrorMessages.includes(e.message)
+      ) {
+        logger.debug(`Error not marked for retry`);
+        throw e;
+      }
+    }
+  }
+
+  logger.debug(`All ${maxAttempts} retry attempts exhausted`);
+  throw lastError;
 }
 
 export function deleteLabel(issueNo: number, label: string): Promise<void> {

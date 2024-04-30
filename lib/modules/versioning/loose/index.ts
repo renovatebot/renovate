@@ -52,7 +52,9 @@ class LooseVersioningApi extends GenericVersioningApi {
     }
 
     if (parsed1.suffix && parsed2.suffix) {
-      return parsed1.suffix.localeCompare(parsed2.suffix);
+      return parsed1.suffix.localeCompare(parsed2.suffix, undefined, {
+        numeric: true,
+      });
     }
 
     if (parsed1.suffix) {

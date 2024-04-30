@@ -21,7 +21,7 @@ export class PackageNameMatcher extends Matcher {
     }
 
     if (matchPackageNames.includes(depName)) {
-      logger.once.info(
+      logger.once.warn(
         { packageRule, packageName, depName },
         'Use matchDepNames instead of matchPackageNames',
       );
@@ -32,15 +32,29 @@ export class PackageNameMatcher extends Matcher {
   }
 
   override excludes(
-    { depName }: PackageRuleInputConfig,
-    { excludePackageNames }: PackageRule,
+    { depName, packageName }: PackageRuleInputConfig,
+    packageRule: PackageRule,
   ): boolean | null {
+    const { excludePackageNames } = packageRule;
     if (is.undefined(excludePackageNames)) {
       return null;
     }
     if (is.undefined(depName)) {
       return false;
     }
-    return excludePackageNames.includes(depName);
+
+    if (is.string(packageName) && excludePackageNames.includes(packageName)) {
+      return true;
+    }
+
+    if (excludePackageNames.includes(depName)) {
+      logger.once.warn(
+        { packageRule, packageName, depName },
+        'Use excludeDepNames instead of excludePackageNames',
+      );
+      return true;
+    }
+
+    return false;
   }
 }

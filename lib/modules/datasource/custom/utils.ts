@@ -9,6 +9,7 @@ export function massageCustomDatasourceConfig(
   {
     customDatasources,
     packageName,
+    currentValue,
     registryUrl: defaultRegistryUrl,
   }: GetReleasesConfig,
 ): Required<CustomDatasourceConfig> | null {
@@ -19,7 +20,7 @@ export function massageCustomDatasourceConfig(
     );
     return null;
   }
-  const templateInput = { packageName };
+  const templateInput = { packageName, currentValue };
 
   const registryUrlTemplate =
     defaultRegistryUrl ?? customDatasource.defaultRegistryUrlTemplate;

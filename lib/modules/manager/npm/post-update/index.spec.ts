@@ -7,6 +7,7 @@ import type { FileChange } from '../../../../util/git/types';
 import type { PostUpdateConfig } from '../../types';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
+import * as rules from './rules';
 import type { AdditionalPackageFiles } from './types';
 import * as yarn from './yarn';
 import {
@@ -203,23 +204,6 @@ describe('modules/manager/npm/post-update/index', () => {
       expect(git.getFile).toHaveBeenCalledOnce();
     });
 
-    it('works no reuse lockfiles', async () => {
-      await expect(
-        writeExistingFiles(
-          { ...updateConfig, reuseLockFiles: false },
-          additionalFiles,
-        ),
-      ).resolves.toBeUndefined();
-
-      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
-      expect(fs.deleteLocalFile.mock.calls).toEqual([
-        ['package-lock.json'],
-        ['yarn.lock'],
-        ['yarn.lock'],
-        ['packages/pnpm/pnpm-lock.yaml'],
-      ]);
-    });
-
     it('writes .npmrc files', async () => {
       await writeExistingFiles(updateConfig, {
         npm: [
@@ -393,11 +377,16 @@ describe('modules/manager/npm/post-update/index', () => {
     const spyNpm = jest.spyOn(npm, 'generateLockFile');
     const spyYarn = jest.spyOn(yarn, 'generateLockFile');
     const spyPnpm = jest.spyOn(pnpm, 'generateLockFile');
+    const spyProcessHostRules = jest.spyOn(rules, 'processHostRules');
 
     beforeEach(() => {
       spyNpm.mockResolvedValue({});
       spyPnpm.mockResolvedValue({});
       spyYarn.mockResolvedValue({});
+      spyProcessHostRules.mockReturnValue({
+        additionalNpmrcContent: [],
+        additionalYarnRcYml: undefined,
+      });
     });
 
     it('works', async () => {
@@ -675,6 +664,91 @@ describe('modules/manager/npm/post-update/index', () => {
           { lockFile: 'packages/pnpm/pnpm-lock.yaml', stderr: 'some-error' },
         ],
         updatedArtifacts: [],
+      });
+    });
+
+    describe('should fuzzy merge yarn npmRegistries', () => {
+      beforeEach(() => {
+        spyProcessHostRules.mockReturnValue({
+          additionalNpmrcContent: [],
+          additionalYarnRcYml: {
+            npmRegistries: {
+              '//my-private-registry': {
+                npmAuthToken: 'xxxxxx',
+              },
+            },
+          },
+        });
+        fs.getSiblingFileName.mockReturnValue('.yarnrc.yml');
+      });
+
+      it('should fuzzy merge the yarnrc Files', async () => {
+        (yarn.fuzzyMatchAdditionalYarnrcYml as jest.Mock).mockReturnValue({
+          npmRegistries: {
+            'https://my-private-registry': { npmAuthToken: 'xxxxxx' },
+          },
+        });
+        fs.readLocalFile.mockImplementation((f): Promise<any> => {
+          if (f === '.yarnrc.yml') {
+            return Promise.resolve(
+              'npmRegistries:\n' +
+                '  https://my-private-registry:\n' +
+                '    npmAlwaysAuth: true\n',
+            );
+          }
+          return Promise.resolve(null);
+        });
+
+        spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
+        await getAdditionalFiles(
+          {
+            ...updateConfig,
+            updateLockFiles: true,
+            reuseExistingBranch: true,
+          },
+          additionalFiles,
+        );
+        expect(fs.writeLocalFile).toHaveBeenCalledWith(
+          '.yarnrc.yml',
+          'npmRegistries:\n' +
+            '  https://my-private-registry:\n' +
+            '    npmAlwaysAuth: true\n' +
+            '    npmAuthToken: xxxxxx\n',
+        );
+      });
+
+      it('should warn if there is an error writing the yarnrc.yml', async () => {
+        fs.readLocalFile.mockImplementation((f): Promise<any> => {
+          if (f === '.yarnrc.yml') {
+            return Promise.resolve(
+              `yarnPath: .yarn/releases/yarn-3.0.1.cjs\na: b\n`,
+            );
+          }
+          return Promise.resolve(null);
+        });
+
+        fs.writeLocalFile.mockImplementation((f): Promise<any> => {
+          if (f === '.yarnrc.yml') {
+            throw new Error();
+          }
+          return Promise.resolve(null);
+        });
+
+        spyYarn.mockResolvedValueOnce({ error: false, lockFile: '{}' });
+
+        await getAdditionalFiles(
+          {
+            ...updateConfig,
+            updateLockFiles: true,
+            reuseExistingBranch: true,
+          },
+          additionalFiles,
+        ).catch(() => {});
+
+        expect(logger.logger.warn).toHaveBeenCalledWith(
+          expect.anything(),
+          'Error appending .yarnrc.yml content',
+        );
       });
     });
   });

@@ -10,7 +10,7 @@
 > This article was originally published on [Medium](https://medium.com/swissquote-engineering/how-swissquote-is-keeping-software-dependencies-up-to-date-with-renovate-6246e8b20437) by [Stéphane Goetz](https://onigoetz.ch/), Principal Software Engineer at [Swissquote Bank](https://github.com/swissquote/).
 
 Swissquote has more than 1000 distinct applications running in production.
-They come in many different flavors including services, daemons, and webapps, and their age can be counted from days to more than a decade.
+They come in many different flavors including services, daemons, and web apps, and their age can be counted from days to more than a decade.
 While there are many topics of interest when talking about software maintenance, today’s topic is software dependencies.
 We’ll see in this article why it’s important to keep them up-to-date and why it’s not as simple as one may think.
 
@@ -22,7 +22,7 @@ Depending on third-party software is a sword of Damocles; you never know when a 
 
 <figure markdown>
   ![XKCD 2347](../assets/images/swissquote_xkcd.png){ loading=lazy }
-  <figcaption><a href=https://xkcd.com/2347/ target=_blank>XKCD comic 2347</a> is always relevant when talking about dependencies.</figcaption>
+  <figcaption><a href=https://xkcd.com/2347/>XKCD comic 2347</a> is always relevant when talking about dependencies.</figcaption>
 </figure>
 
 Each software dependency is a risk.

@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
+import { compile } from '../../../../util/template';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -25,7 +26,17 @@ export async function createOnboardingBranch(
     config,
     configFile!,
   );
-  const commitMessage = commitMessageFactory.create();
+  let commitMessage = commitMessageFactory.create().toString();
+
+  if (config.commitBody) {
+    commitMessage = `${commitMessage}\n\n${compile(
+      config.commitBody,
+      // only allow gitAuthor template value in the commitBody
+      { gitAuthor: config.gitAuthor },
+    )}`;
+
+    logger.trace(`commitMessage: ${commitMessage}`);
+  }
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
@@ -44,7 +55,7 @@ export async function createOnboardingBranch(
         contents,
       },
     ],
-    message: commitMessage.toString(),
+    message: commitMessage,
     platformCommit: !!config.platformCommit,
     force: true,
   });

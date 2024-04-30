@@ -5,6 +5,7 @@ import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
+import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -46,10 +47,19 @@ function extractDepsFromXml(xmlNode: XmlDocument): NugetPackageDependency[] {
     const child = todo.pop()!;
     const { name, attr } = child;
 
+    if (name === 'ContainerBaseImage') {
+      const { depName, ...dep } = getDep(child.val, true);
+
+      if (is.nonEmptyStringAndNotWhitespace(depName)) {
+        results.push({ ...dep, depName, depType: 'docker' });
+      }
+    }
+
     if (elemNames.has(name)) {
       const depName = attr?.Include || attr?.Update;
       const version =
         attr?.Version ??
+        attr?.version ??
         child.valueWithPath('Version') ??
         attr?.VersionOverride ??
         child.valueWithPath('VersionOverride');

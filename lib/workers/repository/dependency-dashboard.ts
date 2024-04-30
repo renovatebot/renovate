@@ -423,6 +423,18 @@ export async function ensureDependencyDashboard(
   issueBody += footer;
 
   if (config.dependencyDashboardIssue) {
+    // If we're not changing the dashboard issue then we can skip checking if the user changed it
+    // The cached issue we get back here will reflect its state at the _start_ of our run
+    const cachedIssue = await platform.getIssue?.(
+      config.dependencyDashboardIssue,
+    );
+    if (cachedIssue?.body === issueBody) {
+      logger.debug('No changes to dependency dashboard issue needed');
+      return;
+    }
+
+    // Skip cache when getting the issue to ensure we get the latest body,
+    // including any updates the user made after we started the run
     const updatedIssue = await platform.getIssue?.(
       config.dependencyDashboardIssue,
       false,

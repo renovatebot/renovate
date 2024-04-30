@@ -189,11 +189,16 @@ const allToolConfig: Record<string, ToolConfig> = {
   dart: {
     datasource: 'dart-version',
     packageName: 'dart',
-    versioning: semverVersioningId,
+    versioning: npmVersioningId,
   },
   flutter: {
     datasource: 'flutter-version',
     packageName: 'flutter',
+    versioning: npmVersioningId,
+  },
+  vendir: {
+    datasource: 'github-releases',
+    packageName: 'carvel-dev/vendir',
     versioning: semverVersioningId,
   },
 };

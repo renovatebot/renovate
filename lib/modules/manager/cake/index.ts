@@ -31,7 +31,8 @@ function parseDependencyLine(line: string): PackageDependency | null {
     const isEmptyHost = url.startsWith('?');
     url = isEmptyHost ? `http://localhost/${url}` : url;
 
-    const { origin: registryUrl, protocol, searchParams } = new URL(url);
+    const { origin, pathname, protocol, searchParams } = new URL(url);
+    const registryUrl = `${origin}${pathname}`;
 
     const depName = searchParams.get('package')!;
     const currentValue = searchParams.get('version') ?? undefined;

@@ -37,3 +37,8 @@ terraform {
 terraform {
   source = "tfr://terraform-aws-modules/vpc/aws?version=3.3.0"
 }
+
+#with domain
+terraform {
+  source = "tfr://registry.domain.com/abc/helloworld/aws?version=1.0.0"
+}

@@ -98,6 +98,7 @@ describe('modules/versioning/swift/index', () => {
 
   it.each`
     version     | range           | expected
+    ${'1.2.3'}  | ${'1.2.3'}      | ${true}
     ${'1.2.4'}  | ${'..."1.2.4"'} | ${true}
     ${'v1.2.4'} | ${'..."1.2.4"'} | ${true}
     ${'1.2.4'}  | ${'..."1.2.3"'} | ${false}

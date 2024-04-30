@@ -1,49 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/manager/helmfile/extract extractPackageFile() parses multidoc yaml 1`] = `
-{
-  "datasource": "helm",
-  "deps": [
-    {
-      "depName": "manifests",
-      "skipReason": "local-chart",
-    },
-    {
-      "currentValue": "7.4.3",
-      "depName": "rabbitmq",
-      "registryUrls": [
-        "https://charts.bitnami.com/bitnami",
-      ],
-    },
-    {
-      "currentValue": "13.7",
-      "depName": "kube-prometheus-stack",
-      "registryUrls": [
-        "https://prometheus-community.github.io/helm-charts",
-      ],
-    },
-    {
-      "depName": "invalid",
-      "skipReason": "invalid-name",
-    },
-    {
-      "depName": "external-dns",
-      "skipReason": "invalid-version",
-    },
-    {
-      "currentValue": "0.1.0",
-      "depName": "raw",
-      "registryUrls": [
-        "https://charts.helm.sh/incubator/",
-      ],
-    },
-  ],
-  "managerData": {
-    "needKustomize": true,
-  },
-}
-`;
-
 exports[`modules/manager/helmfile/extract extractPackageFile() skip chart that does not have specified version 1`] = `
 {
   "datasource": "helm",
