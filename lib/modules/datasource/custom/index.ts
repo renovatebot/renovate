@@ -64,6 +64,6 @@ export class CustomDatasource extends Datasource {
   ): Promise<string | null> {
     // Return null here to support setting a digest: value can be provided digest in getReleases
     // istanbul ignore next
-    return Promise.resolve(null)
+    return Promise.resolve(null);
   }
 }

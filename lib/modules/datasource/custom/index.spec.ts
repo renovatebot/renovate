@@ -700,9 +700,9 @@ describe('modules/datasource/custom/index', () => {
 
   describe('getDigest', () => {
     it('returns null as digest should be provided in releases', async () => {
-      const digest = await new CustomDatasource().getDigest(
-        { packageName: 'my-package' },
-      );
+      const digest = await new CustomDatasource().getDigest({
+        packageName: 'my-package',
+      });
       expect(digest).toBeNull();
     });
   });
