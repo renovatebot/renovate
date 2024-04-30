@@ -267,6 +267,16 @@ describe('workers/global/config/parse/env', () => {
       expect(config.token).toBe('a');
     });
 
+    it('massages converted experimental env vars', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_X_AUTODISCOVER_REPO_SORT: 'alpha',
+        RENOVATE_X_DOCKER_MAX_PAGES: '10',
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.autodiscoverRepoSort).toBe('alpha');
+      expect(config.dockerMaxPages).toBeUndefined();
+    });
+
     describe('RENOVATE_CONFIG tests', () => {
       let processExit: jest.SpyInstance<never, [code?: number]>;
 
