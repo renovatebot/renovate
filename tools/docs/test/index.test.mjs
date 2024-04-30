@@ -26,17 +26,18 @@ function checkNode(node, files, file) {
     );
 
     if (link.url.startsWith('.')) {
-      const abs = path.resolve(
+      // absolute path
+      const absPath = path.resolve(
         'tmp/docs',
         path.dirname(file),
         link.url.replace(/#.*/, ''),
       );
-      // relative URL
-      const target = abs.substring(root.length + 1);
+      // relative path
+      const relPath = absPath.substring(root.length + 1);
 
       assert.ok(
-        files.has(target),
-        `File not found: ${link.url} in ${file} -> ${target}`,
+        files.has(relPath),
+        `File not found: ${link.url} in ${file} -> ${relPath}`,
       );
     } else {
       assert.ok(
