@@ -1,6 +1,6 @@
 import assert from 'node:assert';
 import path from 'node:path';
-import test from 'node:test';
+import { describe, it } from 'node:test';
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import remark from 'remark';
@@ -49,8 +49,8 @@ function checkNode(node, files, file) {
   }
 }
 
-test('index', async (t) => {
-  await t.test('validate links', async (t) => {
+describe('index', async () => {
+  await describe('validate links', async () => {
     const todo = await glob('**/*.md', { cwd: 'tmp/docs' });
     const files = new Set(todo);
 
@@ -62,7 +62,7 @@ test('index', async (t) => {
     for (const file of todo) {
       c++;
 
-      await t.test(`${file}`, async () => {
+      await it(`${file}`, async () => {
         const node = remark()
           .use(github)
           .parse(await fs.readFile(`tmp/docs/${file}`, 'utf8'));
