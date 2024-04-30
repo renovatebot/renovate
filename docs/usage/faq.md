@@ -42,7 +42,6 @@ Follow these steps to see which version the Mend Renovate app is on:
 
 1. Go to the [Mend Developer Portal](https://developer.mend.io/)
 1. Sign in to the Renovate app with your GitHub or Bitbucket account
-1. Select the app you would like to log in with: Forking Renovate or Renovate
 1. Select your organization
 1. Select a installed repository
 1. Select a job from the _Recent jobs_ overview
