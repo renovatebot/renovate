@@ -11,7 +11,7 @@ describe('config/validation-helpers/regex-glob-matchers', () => {
 
   it('should have errors - 2', () => {
     const res = check({
-      val: ['*', 2] as never,
+      val: ['*', 2],
       currentPath: 'hostRules[0].allowedHeaders',
     });
     expect(res).toMatchObject([

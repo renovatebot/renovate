@@ -371,7 +371,7 @@ export async function validateConfig(
             if (isRegexOrGlobOption(key)) {
               errors.push(
                 ...regexOrGlobValidator.check({
-                  val: val as string[],
+                  val,
                   currentPath,
                 }),
               );
@@ -976,7 +976,7 @@ async function validateGlobalConfig(
         if (isRegexOrGlobOption(key)) {
           warnings.push(
             ...regexOrGlobValidator.check({
-              val: val as string[],
+              val,
               currentPath: currentPath!,
             }),
           );
