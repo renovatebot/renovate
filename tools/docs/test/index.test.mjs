@@ -1,10 +1,10 @@
+import assert from 'node:assert';
+import path from 'node:path';
 import test from 'node:test';
 import fs from 'fs-extra';
 import { glob } from 'glob';
-import assert from 'node:assert';
 import MarkdownIt from 'markdown-it';
 import remark from 'remark';
-import path from 'node:path';
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['fence']);
@@ -22,7 +22,7 @@ function checkNode(node, files, file) {
     const link = node;
     assert.ok(
       !link.url.startsWith('/'),
-      'Link should be external or relative: ' + link.url,
+      `Link should be external or relative: ${link.url}`,
     );
 
     if (link.url.startsWith('.')) {
@@ -41,7 +41,7 @@ function checkNode(node, files, file) {
     } else {
       assert.ok(
         !link.url.startsWith('https://docs.renovatebot.com/'),
-        'Docs links should be relative: ' + link.url,
+        `Docs links should be relative: ${link.url}`,
       );
     }
   } else if ('children' in node) {
@@ -56,6 +56,10 @@ test('index', async (t) => {
     const todo = await glob('**/*.md', { cwd: 'tmp/docs' });
     const files = new Set(todo);
 
+    // Files from https://github.com/renovatebot/renovatebot.github.io/tree/main/src
+    files.add('index.md');
+    // TODO: drop after #28721
+    files.add('release-notes-for-major-versions.md');
 
     let c = 0;
 
