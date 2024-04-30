@@ -3868,16 +3868,18 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      const res = await lookup.lookupUpdates(config);
-      expect(res).toMatchObject({
-        updates: [
-          {
-            newDigest: '0123456789abcdef',
-            newValue: '1.0.0',
-            updateType: 'digest',
-          },
-        ],
-      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          newDigest: '0123456789abcdef',
+          newValue: '1.0.0',
+          updateType: 'digest',
+        },
+      ]);
     });
 
     it('handles digest update for non-version', async () => {
