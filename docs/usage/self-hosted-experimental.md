@@ -19,10 +19,6 @@ We will try to keep breakage to a minimum, but make no guarantees that an experi
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.
 For more information see [the OpenTelemetry docs](opentelemetry.md).
 
-## `RENOVATE_CACHE_NPM_MINUTES`
-
-If set to any integer, Renovate will use this integer instead of the default npm cache time (15 minutes) for the npm datasource.
-
 ## `RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK`
 
 If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
@@ -130,6 +126,16 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 ## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
 
 If set, Renovate will query this API for Merge Confidence data.
+
+If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
+
+- have a static merge confidence token that you set via `MEND_RNV_MC_TOKEN`
+- _or_ set `MEND_RNV_MC_TOKEN` to `auto`
+
+Then you must set this variable at the _server_ and the _workers_.
+
+But if you have specified the token as a [`matchConfidence`](https://docs.renovatebot.com/configuration-options/#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
+
 This feature is in private beta.
 
 ## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`

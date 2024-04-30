@@ -28,8 +28,8 @@ describe('util/package-rules/package-patterns', () => {
       expect(result).toBeTrue();
     });
 
-    it('should fall back to matching depName', () => {
-      const result = packageNameMatcher.matches(
+    it('should not fall back to matching depName', () => {
+      const result = packagePatternsMatcher.matches(
         {
           depName: 'abc',
           packageName: 'def',
@@ -38,7 +38,7 @@ describe('util/package-rules/package-patterns', () => {
           matchPackagePatterns: ['abc'],
         },
       );
-      expect(result).toBeTrue();
+      expect(result).toBeFalse();
     });
   });
 
