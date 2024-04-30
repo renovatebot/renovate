@@ -27,6 +27,19 @@ describe('util/package-rules/package-patterns', () => {
       );
       expect(result).toBeTrue();
     });
+
+    it('should not fall back to matching depName', () => {
+      const result = packagePatternsMatcher.matches(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          matchPackagePatterns: ['abc'],
+        },
+      );
+      expect(result).toBeFalse();
+    });
   });
 
   describe('exclude', () => {
