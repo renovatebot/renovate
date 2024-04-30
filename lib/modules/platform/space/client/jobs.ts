@@ -7,7 +7,7 @@ import { flatten, mapNotNullFlatten } from '../utils';
 export class SpaceJobsClient {
   constructor(private http: SpaceHttp) {}
 
-  async getAllJobs(
+  async getAll(
     projectKey: string,
     repository: string,
     branch: string,

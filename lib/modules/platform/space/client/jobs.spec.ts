@@ -36,7 +36,7 @@ describe('modules/platform/space/client/jobs', () => {
       mockJobsPage(projectKey, repository, branch, [job2], next2, next1);
       mockJobsPage(projectKey, repository, branch, [], next2, next2);
 
-      expect(await client.getAllJobs(projectKey, repository, branch)).toEqual([
+      expect(await client.getAll(projectKey, repository, branch)).toEqual([
         job1,
         job2,
       ]);

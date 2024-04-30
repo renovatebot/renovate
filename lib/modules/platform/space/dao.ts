@@ -476,7 +476,7 @@ export class SpaceDao {
     logger.debug(
       `SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}), head: ${JSON.stringify(repositoryHead)}`,
     );
-    const jobs = await this.client.jobs.getAllJobs(
+    const jobs = await this.client.jobs.getAll(
       projectKey,
       repository,
       branch,
