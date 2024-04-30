@@ -91,22 +91,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest
 }
 `;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest update for custom datasource 1`] = `
-{
-  "currentVersion": "1.0.0",
-  "fixedVersion": "1.0.0",
-  "updates": [
-    {
-      "newDigest": "0123456789abcdef",
-      "newValue": "1.0.0",
-      "updateType": "digest",
-    },
-  ],
-  "versioning": "npm",
-  "warnings": [],
-}
-`;
-
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest update for non-version 1`] = `
 {
   "updates": [
