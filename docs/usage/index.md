@@ -11,6 +11,7 @@ Multi-platform and multi-language.
 
 ## Why use Renovate?
 
+<!-- markdownlint-disable list-marker-space -->
 <!-- prettier-ignore-start -->
 
 <div class="grid cards" markdown>
@@ -60,6 +61,7 @@ Multi-platform and multi-language.
 </div>
 
 <!-- prettier-ignore-end -->
+<!-- markdownlint-enable list-marker-space -->
 
 ## Supported Platforms
 
