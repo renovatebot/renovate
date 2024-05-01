@@ -6,6 +6,6 @@ export interface CheckManagerArgs {
 }
 
 export interface CheckMatcherArgs {
-  val: unknown[];
+  val: unknown;
   currentPath: string;
 }
