@@ -1230,8 +1230,12 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            matchRepositories: ['groupA/**', 'groupB/**'],
+            matchRepositories: ['groupA/**', 'groupB/**'], // valid
             enabled: false,
+          },
+          {
+            matchRepositories: ['*', 'repo'], // invalid
+            enabled: true,
           },
         ],
       };
@@ -1242,7 +1246,7 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message:
-            'packageRules[0].matchRepositories: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.',
+            'packageRules[1].matchRepositories: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.',
           topic: 'Configuration Error',
         },
       ]);
