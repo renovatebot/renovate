@@ -1,5 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { partial } from '../../../../test/util';
 import { extractPackageFile } from '.';
+import type { ExtractConfig } from '../types';
 
 const helmDefaultChartInitValues = Fixtures.get(
   'default_chart_init_values.yaml',
@@ -8,6 +10,12 @@ const helmDefaultChartInitValues = Fixtures.get(
 const helmMultiAndNestedImageValues = Fixtures.get(
   'multi_and_nested_image_values.yaml',
 );
+
+const config = partial<ExtractConfig>({
+  registryAliases: {
+    'quay.io': 'registry.internal/mirror/quay.io',
+  },
+});
 
 describe('modules/manager/helm-values/extract', () => {
   describe('extractPackageFile()', () => {
@@ -55,6 +63,29 @@ describe('modules/manager/helm-values/extract', () => {
           {
             currentValue: 'v0.13.10',
             depName: 'quay.io/metallb/speaker',
+            datasource: 'docker',
+            versioning: 'docker',
+          },
+        ],
+      });
+    });
+
+    it('extract data from file with registry aliases', () => {
+      const multiDocumentFile = Fixtures.get(
+        'single_file_with_multiple_documents.yaml',
+      );
+      const result = extractPackageFile(multiDocumentFile, 'values.yaml', config);
+      expect(result).toMatchObject({
+        deps: [
+          {
+            currentValue: 'v0.13.10',
+            depName: 'registry.internal/mirror/quay.io/metallb/controller',
+            datasource: 'docker',
+            versioning: 'docker',
+          },
+          {
+            currentValue: 'v0.13.10',
+            depName: 'registry.internal/mirror/quay.io/metallb/speaker',
             datasource: 'docker',
             versioning: 'docker',
           },

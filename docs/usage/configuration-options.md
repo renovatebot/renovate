@@ -3591,6 +3591,7 @@ This feature works with the following managers:
 - [`droneci`](modules/manager/droneci/index.md)
 - [`gitlabci`](modules/manager/gitlabci/index.md)
 - [`helm-requirements`](modules/manager/helm-requirements/index.md)
+- [`helm-values`](modules/manager/helm-values/index.md)
 - [`helmfile`](modules/manager/helmfile/index.md)
 - [`helmv3`](modules/manager/helmv3/index.md)
 - [`kubernetes`](modules/manager/kubernetes/index.md)
