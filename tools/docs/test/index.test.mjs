@@ -55,7 +55,6 @@ describe('index', async () => {
     const files = new Set(todo);
 
     // Files from https://github.com/renovatebot/renovatebot.github.io/tree/main/src
-    files.add('index.md');
 
     let c = 0;
 
