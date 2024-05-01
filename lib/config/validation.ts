@@ -980,7 +980,7 @@ async function validateGlobalConfig(
         }
         if (key === 'gitNoVerify') {
           const allowedValues = ['commit', 'push'];
-          for (const value of val) {
+          for (const value of val as string[]) {
             if (!allowedValues.includes(value)) {
               warnings.push({
                 topic: 'Configuration Error',
