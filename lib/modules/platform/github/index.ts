@@ -1967,7 +1967,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
         {
           paginate: false,
           headers: { accept: 'application/vnd.github+json' },
-          repoCache: true,
+          cacheProvider: repoCacheProvider,
         },
       )
     ).body;
