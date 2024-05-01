@@ -38,6 +38,7 @@ import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers'
 
 const options = getOptions();
 
+let optionsInitialized = false;
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
@@ -102,39 +103,45 @@ function getDeprecationMessage(option: string): string | undefined {
 }
 
 function isInhertConfigOption(key: string): boolean {
-  if (!optionInherits) {
-    optionInherits = new Set();
-    for (const option of options) {
-      if (option.inheritConfigSupport) {
-        optionInherits.add(option.name);
-      }
-    }
-  }
   return optionInherits.has(key);
 }
 
 function isRegexOrGlobOption(key: string): boolean {
-  if (!optionRegexOrGlob) {
-    optionRegexOrGlob = new Set();
-    for (const option of options) {
-      if (option.patternMatch) {
-        optionRegexOrGlob.add(option.name);
-      }
-    }
-  }
   return optionRegexOrGlob.has(key);
 }
 
 function isGlobalOption(key: string): boolean {
-  if (!optionGlobals) {
-    optionGlobals = new Set();
-    for (const option of options) {
-      if (option.globalOnly) {
-        optionGlobals.add(option.name);
-      }
+  return optionGlobals.has(key);
+}
+
+function initOptions(): void {
+  optionParents = {};
+  optionInherits = new Set();
+  optionTypes = {};
+  optionRegexOrGlob = new Set();
+  optionGlobals = new Set();
+
+  for (const option of options) {
+    optionTypes[option.name] = option.type;
+
+    if (option.parents) {
+      optionParents[option.name] = option.parents;
+    }
+
+    if (option.inheritConfigSupport) {
+      optionInherits.add(option.name);
+    }
+
+    if (option.patternMatch) {
+      optionRegexOrGlob.add(option.name);
+    }
+
+    if (option.globalOnly) {
+      optionGlobals.add(option.name);
     }
   }
-  return optionGlobals.has(key);
+
+  optionsInitialized = true;
 }
 
 export function getParentName(parentPath: string | undefined): string {
@@ -153,20 +160,10 @@ export async function validateConfig(
   isPreset?: boolean,
   parentPath?: string,
 ): Promise<ValidationResult> {
-  if (!optionTypes) {
-    optionTypes = {};
-    options.forEach((option) => {
-      optionTypes[option.name] = option.type;
-    });
+  if (!optionsInitialized) {
+    initOptions();
   }
-  if (!optionParents) {
-    optionParents = {};
-    options.forEach((option) => {
-      if (option.parents) {
-        optionParents[option.name] = option.parents;
-      }
-    });
-  }
+
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
