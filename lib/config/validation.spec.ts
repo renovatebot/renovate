@@ -1230,7 +1230,7 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            matchRepositories: ['*', 'repo'],
+            matchRepositories: ['groupA/**', 'groupB/**'],
             enabled: false,
           },
         ],
