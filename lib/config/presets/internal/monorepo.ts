@@ -38,6 +38,7 @@ const repoGroups = {
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
   'aspnet-health-checks':
     'https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks',
+  astro: 'https://github.com/withastro/astro',
   'automapper-dotnet': [
     'https://github.com/AutoMapper/AutoMapper',
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
@@ -516,6 +517,7 @@ const repoGroups = {
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
+  weasel: 'https://github.com/JasperFx/weasel',
   'web3-react': 'https://github.com/Uniswap/web3-react',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   wolverine: 'https://github.com/jasperfx/wolverine',

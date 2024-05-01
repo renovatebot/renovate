@@ -898,6 +898,27 @@ It will be compiled using Handlebars and the regex `groups` result.
 It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
 
+### readOnly
+
+If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
+Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
+
+This option could be used to avoid rate limits for certain platforms like GitHub or Bitbucket, by offloading the read operations to a different user.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "readOnly": true,
+      "token": "********"
+    }
+  ]
+}
+```
+
+If more than one token matches for a read-only request then the `readOnly` token will be given preference.
+
 ### currentValueTemplate
 
 If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
@@ -2506,6 +2527,8 @@ Instead you should do `> 13 months`.
 Use this field if you want to limit a `packageRule` to certain `depType` values.
 Invalid if used outside of a `packageRule`.
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### excludeDepNames
 
 ### excludeDepPatterns
@@ -2608,6 +2631,8 @@ The categories can be found in the [manager documentation](modules/manager/index
 }
 ```
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### matchRepositories
 
 Use this field to restrict rules to a particular repository. e.g.
@@ -2655,6 +2680,8 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
 }
 ```
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### matchManagers
 
 Use this field to restrict rules to a particular package manager. e.g.
@@ -2672,6 +2699,8 @@ Use this field to restrict rules to a particular package manager. e.g.
 ```
 
 For the full list of available managers, see the [Supported Managers](modules/manager/index.md#supported-managers) documentation.
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchMessage
 
@@ -2693,6 +2722,8 @@ Use this field to restrict rules to a particular datasource. e.g.
   ]
 }
 ```
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchCurrentValue
 
@@ -2827,6 +2858,8 @@ The following example matches any file in directories starting with `app/`:
 ```
 
 It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 ### matchDepNames
 
@@ -2990,6 +3023,8 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
+
 ### matchUpdateTypes
 
 Use `matchUpdateTypes` to match rules against types of updates.
@@ -3005,6 +3040,8 @@ For example to apply a special label to `major` updates:
   ]
 }
 ```
+
+For more details on supported syntax see Renovate's [string pattern matching documentation](./string-pattern-matching.md).
 
 <!-- prettier-ignore -->
 !!! warning

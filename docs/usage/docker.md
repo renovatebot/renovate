@@ -9,6 +9,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 - Docker's `Dockerfile` files
 - Docker Compose `docker-compose.yml`, `compose.yml` files
+- Visual Studio Code dev containers and GitHub Codespaces images and features
 - CircleCI config files
 - Kubernetes manifest files
 - Ansible configuration files
@@ -383,7 +384,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:37.315.1
+FROM renovate/renovate:37.326.3
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

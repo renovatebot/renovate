@@ -1,11 +1,11 @@
 import { PackagePatternsMatcher } from './package-patterns';
 
 describe('util/package-rules/package-patterns', () => {
-  const packageNameMatcher = new PackagePatternsMatcher();
+  const packagePatternsMatcher = new PackagePatternsMatcher();
 
   describe('match', () => {
     it('should return false if packageName is not defined', () => {
-      const result = packageNameMatcher.matches(
+      const result = packagePatternsMatcher.matches(
         {
           packageName: undefined,
         },
@@ -17,7 +17,7 @@ describe('util/package-rules/package-patterns', () => {
     });
 
     it('should match packageName', () => {
-      const result = packageNameMatcher.matches(
+      const result = packagePatternsMatcher.matches(
         {
           packageName: 'def',
         },
@@ -27,11 +27,24 @@ describe('util/package-rules/package-patterns', () => {
       );
       expect(result).toBeTrue();
     });
+
+    it('should not fall back to matching depName', () => {
+      const result = packagePatternsMatcher.matches(
+        {
+          depName: 'abc',
+          packageName: 'def',
+        },
+        {
+          matchPackagePatterns: ['abc'],
+        },
+      );
+      expect(result).toBeFalse();
+    });
   });
 
   describe('exclude', () => {
     it('should exclude packageName', () => {
-      const result = packageNameMatcher.excludes(
+      const result = packagePatternsMatcher.excludes(
         {
           packageName: 'def',
         },

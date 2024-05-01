@@ -456,7 +456,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.3.15',
+    default: 'ghcr.io/containerbase/sidecar:10.5.0',
     globalOnly: true,
   },
   {
@@ -1087,6 +1087,7 @@ const options: RenovateOptions[] = [
       'ansible',
       'bitbucket-pipelines',
       'crossplane',
+      'devcontainer',
       'docker-compose',
       'dockerfile',
       'droneci',
@@ -2468,6 +2469,16 @@ const options: RenovateOptions[] = [
     name: 'matchHost',
     description: 'A domain name, host name or base URL to match against.',
     type: 'string',
+    stage: 'repository',
+    parents: ['hostRules'],
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'readOnly',
+    description:
+      'Match against requests that only read data and do not mutate anything.',
+    type: 'boolean',
     stage: 'repository',
     parents: ['hostRules'],
     cli: false,

@@ -460,6 +460,7 @@ export async function initRepo({
   const opts = hostRules.find({
     hostType: 'github',
     url: platformConfig.endpoint,
+    readOnly: true,
   });
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
@@ -498,6 +499,7 @@ export async function initRepo({
         name: config.repositoryName,
         user: renovateUsername,
       },
+      readOnly: true,
     });
 
     if (res?.errors) {
@@ -1213,6 +1215,7 @@ async function getIssues(): Promise<Issue[]> {
         name: config.repositoryName,
         user: config.renovateUsername,
       },
+      readOnly: true,
     },
   );
 
