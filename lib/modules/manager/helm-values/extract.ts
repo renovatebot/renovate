@@ -14,21 +14,15 @@ import {
 } from './util';
 
 function getHelmDep(
-  {
-    registry,
-    repository,
-    tag,
-  }: {
-    registry: string;
-    repository: string;
-    tag: string;
-  },
-  config?: ExtractConfig,
+  registry: string,
+  repository: string,
+  tag: string,
+  config: ExtractConfig,
 ): PackageDependency {
   const dep = getDep(
     `${registry}${repository}:${tag}`,
     false,
-    config?.registryAliases,
+    config.registryAliases,
   );
   dep.replaceString = tag;
   dep.versioning = dockerVersioning;
@@ -45,7 +39,7 @@ function getHelmDep(
 function findDependencies(
   parsedContent: Record<string, unknown> | HelmDockerImageDependency,
   packageDependencies: Array<PackageDependency>,
-  config?: ExtractConfig,
+  config: ExtractConfig,
 ): Array<PackageDependency> {
   if (!parsedContent || typeof parsedContent !== 'object') {
     return packageDependencies;
@@ -59,11 +53,9 @@ function findDependencies(
       registry = registry ? `${registry}/` : '';
       const repository = String(currentItem.repository);
       const tag = `${currentItem.tag ?? currentItem.version}`;
-      packageDependencies.push(
-        getHelmDep({ repository, tag, registry }, config),
-      );
+      packageDependencies.push(getHelmDep(registry, repository, tag, config));
     } else if (matchesHelmValuesInlineImage(key, value)) {
-      packageDependencies.push(getDep(value, true, config?.registryAliases));
+      packageDependencies.push(getDep(value, true, config.registryAliases));
     } else {
       findDependencies(
         value as Record<string, unknown>,
@@ -77,8 +69,8 @@ function findDependencies(
 
 export function extractPackageFile(
   content: string,
-  packageFile?: string,
-  config?: ExtractConfig,
+  packageFile: string,
+  config: ExtractConfig,
 ): PackageFileContent | null {
   let parsedContent: Record<string, unknown>[] | HelmDockerImageDependency[];
   try {

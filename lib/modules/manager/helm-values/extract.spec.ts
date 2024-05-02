@@ -11,26 +11,34 @@ const helmMultiAndNestedImageValues = Fixtures.get(
   'multi_and_nested_image_values.yaml',
 );
 
-const config = partial<ExtractConfig>({
+const config = partial<ExtractConfig>({});
+
+const configAliases = partial<ExtractConfig>({
   registryAliases: {
     'quay.io': 'registry.internal/mirror/quay.io',
   },
 });
 
+const packageFile = 'values.yaml';
+
 describe('modules/manager/helm-values/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for invalid yaml file content', () => {
-      const result = extractPackageFile('nothing here: [');
+      const result = extractPackageFile('nothing here: [', packageFile, config);
       expect(result).toBeNull();
     });
 
     it('returns null for empty yaml file content', () => {
-      const result = extractPackageFile('');
+      const result = extractPackageFile('', packageFile, config);
       expect(result).toBeNull();
     });
 
     it('extracts from values.yaml correctly with same structure as "helm create"', () => {
-      const result = extractPackageFile(helmDefaultChartInitValues);
+      const result = extractPackageFile(
+        helmDefaultChartInitValues,
+        packageFile,
+        config,
+      );
       expect(result).toMatchSnapshot({
         deps: [
           {
@@ -42,7 +50,11 @@ describe('modules/manager/helm-values/extract', () => {
     });
 
     it('extracts from complex values file correctly"', () => {
-      const result = extractPackageFile(helmMultiAndNestedImageValues);
+      const result = extractPackageFile(
+        helmMultiAndNestedImageValues,
+        packageFile,
+        config,
+      );
       expect(result).toMatchSnapshot();
       expect(result?.deps).toHaveLength(5);
     });
@@ -51,7 +63,7 @@ describe('modules/manager/helm-values/extract', () => {
       const multiDocumentFile = Fixtures.get(
         'single_file_with_multiple_documents.yaml',
       );
-      const result = extractPackageFile(multiDocumentFile);
+      const result = extractPackageFile(multiDocumentFile, packageFile, config);
       expect(result).toMatchObject({
         deps: [
           {
@@ -76,8 +88,8 @@ describe('modules/manager/helm-values/extract', () => {
       );
       const result = extractPackageFile(
         multiDocumentFile,
-        'values.yaml',
-        config,
+        packageFile,
+        configAliases,
       );
       expect(result).toMatchObject({
         deps: [
