@@ -84,9 +84,11 @@ kubectl 1.26.3
 kustomize 4.5.7
 lua 5.4.4
 maven 3.9.6
+mimirtool 2.11.0
 nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
+opentofu 1.6.0
 perl 5.37.5
 php 8.1.12
 pnpm 7.26.2
@@ -107,6 +109,7 @@ tflint 0.44.1
 tfsec 1.28.1
 trivy 0.33.0
 vault 1.15.1
+yq 4.40.5
 zig 0.9.1
 maestro 1.24.0
 detekt 1.21.0
@@ -386,6 +389,13 @@ dummy 1.2.3
             depName: 'maven',
           },
           {
+            currentValue: '2.11.0',
+            datasource: 'github-releases',
+            packageName: 'grafana/mimir',
+            depName: 'mimirtool',
+            extractVersion: '^mimir-(?<version>\\S+)',
+          },
+          {
             currentValue: '1.6.8',
             datasource: 'github-tags',
             packageName: 'nim-lang/Nim',
@@ -402,6 +412,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'ocaml/ocaml',
             depName: 'ocaml',
+          },
+          {
+            currentValue: '1.6.0',
+            datasource: 'github-releases',
+            packageName: 'opentofu/opentofu',
+            depName: 'opentofu',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '5.37.5',
@@ -538,6 +555,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'hashicorp/vault',
             depName: 'vault',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '4.40.5',
+            datasource: 'github-releases',
+            packageName: 'mikefarah/yq',
+            depName: 'yq',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

@@ -56,6 +56,7 @@ export async function updateArtifacts({
       },
     ],
     docker: {},
+    userConfiguredEnv: config.env,
   };
 
   try {

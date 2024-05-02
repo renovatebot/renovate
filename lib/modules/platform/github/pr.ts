@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
+import { repoCacheProvider } from '../../../util/http/cache/repository-http-cache-provider';
 import type { GithubHttp, GithubHttpOptions } from '../../../util/http/github';
 import { parseLinkHeader } from '../../../util/url';
 import { ApiCache } from './api-cache';
@@ -12,7 +13,6 @@ function getPrApiCache(): ApiCache<GhPr> {
   const repoCache = getCache();
   repoCache.platform ??= {};
   repoCache.platform.github ??= {};
-  delete repoCache.platform.github.prCache;
   repoCache.platform.github.pullRequestsCache ??= { items: {} };
   const prApiCache = new ApiCache<GhPr>(
     repoCache.platform.github.pullRequestsCache as ApiPageCache<GhPr>,
@@ -64,10 +64,12 @@ export async function getPrCache(
     let pageIdx = 1;
     while (needNextPageFetch && needNextPageSync) {
       const opts: GithubHttpOptions = { paginate: false };
-      if (pageIdx === 1 && isInitial) {
-        // Speed up initial fetch
-        opts.paginate = true;
-        opts.repoCache = true;
+      if (pageIdx === 1) {
+        opts.cacheProvider = repoCacheProvider;
+        if (isInitial) {
+          // Speed up initial fetch
+          opts.paginate = true;
+        }
       }
 
       const perPage = isInitial ? 100 : 20;

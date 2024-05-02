@@ -57,6 +57,7 @@ describe('util/package-rules/index', () => {
         },
         {
           matchUpdateTypes: ['bump'],
+          labels: ['bump'],
         },
         {
           excludePackageNames: ['a'],
@@ -69,7 +70,7 @@ describe('util/package-rules/index', () => {
     };
     expect(applyPackageRules(config)).toEqual({
       ...config,
-      matchUpdateTypes: ['bump'],
+      labels: ['bump'],
     });
   });
 
@@ -1223,6 +1224,54 @@ describe('util/package-rules/index', () => {
     const res2 = applyPackageRules({
       ...config,
       depName: 'test1',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBeUndefined();
+    expect(res2.x).toBe(1);
+  });
+
+  it('matches matchDepPrefixes(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchDepPrefixes: ['abc'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'abc1',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'def1',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBe(1);
+    expect(res2.x).toBeUndefined();
+  });
+
+  it('matches excludeDepPrefixes(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          excludeDepPrefixes: ['abc'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'abc1',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'def1',
     });
     applyPackageRules(config); // coverage
 

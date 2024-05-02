@@ -104,7 +104,7 @@ export function stripReservedPrefixFromKeyTokens(ctx: Ctx): Ctx {
 
 export function coalesceVariable(ctx: Ctx): Ctx {
   if (ctx.varTokens.length > 1) {
-    ctx.varTokens[0]!.value = ctx.varTokens
+    ctx.varTokens[0].value = ctx.varTokens
       .map((token) => token.value)
       .join('.');
     ctx.varTokens.length = 1;
@@ -231,7 +231,7 @@ export const qVariableAccessIdentifier = q
   .handler(coalesceVariable)
   .handler((ctx) => {
     ctx.varTokens = [
-      ...ctx.tmpTokenStore.backupVarAccessTokens!,
+      ...ctx.tmpTokenStore.backupVarAccessTokens,
       ...ctx.varTokens,
     ];
     delete ctx.tmpTokenStore.backupVarAccessTokens;

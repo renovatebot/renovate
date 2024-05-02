@@ -34,6 +34,7 @@ export function updateDependency({
       return null;
     }
     const lineToChange = lines[upgrade.managerData.lineNumber];
+    logger.trace({ upgrade, lineToChange }, 'go.mod current line');
     if (
       !lineToChange.includes(depNameNoVersion) &&
       !lineToChange.includes('rethinkdb/rethinkdb-go.v5')
@@ -46,8 +47,10 @@ export function updateDependency({
     }
     let updateLineExp: RegExp | undefined;
 
-    if (depType === 'golang') {
-      updateLineExp = regEx(/(?<depPart>go)(?<divider>\s+)[^\s]+/);
+    if (depType === 'golang' || depType === 'toolchain') {
+      updateLineExp = regEx(
+        /(?<depPart>(?:toolchain )?go)(?<divider>\s*)([^\s]+|[\w]+)/,
+      );
     }
     if (depType === 'replace') {
       if (upgrade.managerData.multiLine) {
@@ -69,7 +72,7 @@ export function updateDependency({
       }
     }
     if (updateLineExp && !updateLineExp.test(lineToChange)) {
-      logger.debug('No image line found');
+      logger.debug('No line found to update');
       return null;
     }
     let newLine: string;

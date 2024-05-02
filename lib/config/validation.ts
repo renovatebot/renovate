@@ -8,13 +8,18 @@ import type {
 } from '../modules/manager/custom/regex/types';
 import type { CustomManager } from '../modules/manager/custom/types';
 import type { HostRule } from '../types/host-rules';
-import { anyMatchRegexOrMinimatch } from '../util/package-rules/match';
-import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
+import { regEx } from '../util/regex';
+import {
+  getRegexPredicate,
+  isRegexMatch,
+  matchRegexOrGlobList,
+} from '../util/string-match';
 import * as template from '../util/template';
 import {
   hasValidSchedule,
   hasValidTimezone,
 } from '../workers/repository/update/branch/schedule';
+import { configFileNames } from './app-strings';
 import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
@@ -35,10 +40,11 @@ const options = getOptions();
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
+let optionInherits: Set<string>;
 
 const managerList = getManagerList();
 
-const topLevelObjects = managerList;
+const topLevelObjects = [...managerList, 'env'];
 
 const ignoredNodes = [
   '$schema',
@@ -93,6 +99,30 @@ function getDeprecationMessage(option: string): string | undefined {
   return deprecatedOptions[option];
 }
 
+function isInhertConfigOption(key: string): boolean {
+  if (!optionInherits) {
+    optionInherits = new Set();
+    for (const option of options) {
+      if (option.inheritConfigSupport) {
+        optionInherits.add(option.name);
+      }
+    }
+  }
+  return optionInherits.has(key);
+}
+
+function isGlobalOption(key: string): boolean {
+  if (!optionGlobals) {
+    optionGlobals = new Set();
+    for (const option of options) {
+      if (option.globalOnly) {
+        optionGlobals.add(option.name);
+      }
+    }
+  }
+  return optionGlobals.has(key);
+}
+
 export function getParentName(parentPath: string | undefined): string {
   return parentPath
     ? parentPath
@@ -104,7 +134,7 @@ export function getParentName(parentPath: string | undefined): string {
 }
 
 export async function validateConfig(
-  isGlobalConfig: boolean,
+  configType: 'global' | 'inherit' | 'repo',
   config: RenovateConfig,
   isPreset?: boolean,
   parentPath?: string,
@@ -123,7 +153,6 @@ export async function validateConfig(
       }
     });
   }
-
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
@@ -147,20 +176,26 @@ export async function validateConfig(
         message: `The "${key}" object can only be configured at the top level of a config but was found inside "${parentPath}"`,
       });
     }
-    if (!isGlobalConfig) {
-      if (!optionGlobals) {
-        optionGlobals = new Set<string>();
-        for (const option of options) {
-          if (option.globalOnly) {
-            optionGlobals.add(option.name);
-          }
-        }
-      }
 
-      if (optionGlobals.has(key) && !isFalseGlobal(key, parentPath)) {
+    if (isGlobalOption(key)) {
+      if (configType === 'global') {
+        await validateGlobalConfig(
+          key,
+          val,
+          optionTypes[key],
+          warnings,
+          errors,
+          currentPath,
+          config,
+        );
+        continue;
+      } else if (
+        !isFalseGlobal(key, parentPath) &&
+        !(configType === 'inherit' && isInhertConfigOption(key))
+      ) {
         warnings.push({
           topic: 'Configuration Error',
-          message: `The "${key}" option is a global option reserved only for bot's global configuration and cannot be configured within repository config file`,
+          message: `The "${key}" option is a global option reserved only for Renovate's global configuration and cannot be configured within a repository's config file.`,
         });
         continue;
       }
@@ -251,9 +286,9 @@ export async function validateConfig(
         }
       } else if (
         ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
-        isConfigRegex(val)
+        isRegexMatch(val)
       ) {
-        if (!configRegexPredicate(val)) {
+        if (!getRegexPredicate(val)) {
           errors.push({
             topic: 'Configuration Error',
             message: `Invalid regExp for ${currentPath}: \`${val}\``,
@@ -262,7 +297,16 @@ export async function validateConfig(
       } else if (
         key === 'matchCurrentValue' &&
         is.string(val) &&
-        !configRegexPredicate(val)
+        !getRegexPredicate(val)
+      ) {
+        errors.push({
+          topic: 'Configuration Error',
+          message: `Invalid regExp for ${currentPath}: \`${val}\``,
+        });
+      } else if (
+        key === 'matchNewValue' &&
+        is.string(val) &&
+        !getRegexPredicate(val)
       ) {
         errors.push({
           topic: 'Configuration Error',
@@ -301,7 +345,7 @@ export async function validateConfig(
             for (const [subIndex, subval] of val.entries()) {
               if (is.object(subval)) {
                 const subValidation = await validateConfig(
-                  isGlobalConfig,
+                  configType,
                   subval as RenovateConfig,
                   isPreset,
                   `${currentPath}[${subIndex}]`,
@@ -352,11 +396,13 @@ export async function validateConfig(
               'matchDepTypes',
               'matchDepNames',
               'matchDepPatterns',
+              'matchDepPrefixes',
               'matchPackageNames',
               'matchPackagePatterns',
               'matchPackagePrefixes',
               'excludeDepNames',
               'excludeDepPatterns',
+              'excludeDepPrefixes',
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
@@ -367,7 +413,9 @@ export async function validateConfig(
               'matchSourceUrls',
               'matchUpdateTypes',
               'matchConfidence',
+              'matchCurrentAge',
               'matchRepositories',
+              'matchNewValue',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
@@ -418,6 +466,7 @@ export async function validateConfig(
                     'separateMajorMinor',
                     'separateMinorPatch',
                     'separateMultipleMajor',
+                    'separateMultipleMinor',
                     'versioning',
                   ];
                   if (is.nonEmptyArray(resolvedRule.matchUpdateTypes)) {
@@ -547,8 +596,8 @@ export async function validateConfig(
             if (key === 'baseBranches') {
               for (const baseBranch of val as string[]) {
                 if (
-                  isConfigRegex(baseBranch) &&
-                  !configRegexPredicate(baseBranch)
+                  isRegexMatch(baseBranch) &&
+                  !getRegexPredicate(baseBranch)
                 ) {
                   errors.push({
                     topic: 'Configuration Error',
@@ -598,6 +647,25 @@ export async function validateConfig(
                   message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
                 });
               }
+            } else if (key === 'env') {
+              const allowedEnvVars =
+                configType === 'global'
+                  ? (config.allowedEnv as string[]) ?? []
+                  : GlobalConfig.get('allowedEnv', []);
+              for (const [envVarName, envVarValue] of Object.entries(val)) {
+                if (!is.string(envVarValue)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid env variable value: \`${currentPath}.${envVarName}\` must be a string.`,
+                  });
+                }
+                if (!matchRegexOrGlobList(envVarName, allowedEnvVars)) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Env variable name \`${envVarName}\` is not allowed by this bot's \`allowedEnv\`.`,
+                  });
+                }
+              }
             } else if (key === 'statusCheckNames') {
               for (const [statusCheckKey, statusCheckValue] of Object.entries(
                 val,
@@ -646,38 +714,31 @@ export async function validateConfig(
                   if (!allowedKeys.includes(subKey)) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: key is not allowed`,
+                      message: `Invalid \`${currentPath}.${subKey}\` configuration: key is not allowed`,
                     });
                   } else if (subKey === 'transformTemplates') {
                     if (!is.array(subValue, is.string)) {
                       errors.push({
                         topic: 'Configuration Error',
-                        message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is not an array of string`,
+                        message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of string`,
+                      });
+                    }
+                  } else if (subKey === 'description') {
+                    if (
+                      !(is.string(subValue) || is.array(subValue, is.string))
+                    ) {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of strings`,
                       });
                     }
                   } else if (!is.string(subValue)) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is a string`,
+                      message: `Invalid \`${currentPath}.${subKey}\` configuration: is a string`,
                     });
                   }
                 }
-              }
-            } else if (
-              [
-                'customEnvVariables',
-                'migratePresets',
-                'productLinks',
-                'secrets',
-                'customizeDashboard',
-              ].includes(key)
-            ) {
-              const res = validatePlainObject(val);
-              if (res !== true) {
-                errors.push({
-                  topic: 'Configuration Error',
-                  message: `Invalid \`${currentPath}.${key}.${res}\` configuration: value is not a string`,
-                });
               }
             } else {
               const ignoredObjects = options
@@ -685,7 +746,7 @@ export async function validateConfig(
                 .map((option) => option.name);
               if (!ignoredObjects.includes(key)) {
                 const subValidation = await validateConfig(
-                  isGlobalConfig,
+                  configType,
                   val,
                   isPreset,
                   currentPath,
@@ -705,7 +766,10 @@ export async function validateConfig(
     }
 
     if (key === 'hostRules' && is.array(val)) {
-      const allowedHeaders = GlobalConfig.get('allowedHeaders');
+      const allowedHeaders =
+        configType === 'global'
+          ? (config.allowedHeaders as string[]) ?? []
+          : GlobalConfig.get('allowedHeaders', []);
       for (const rule of val as HostRule[]) {
         if (!rule.headers) {
           continue;
@@ -717,7 +781,7 @@ export async function validateConfig(
               message: `Invalid hostRules headers value configuration: header must be a string.`,
             });
           }
-          if (!anyMatchRegexOrMinimatch(allowedHeaders, header)) {
+          if (!matchRegexOrGlobList(header, allowedHeaders)) {
             errors.push({
               topic: 'Configuration Error',
               message: `hostRules header \`${header}\` is not allowed by this bot's \`allowedHeaders\`.`,
@@ -782,6 +846,168 @@ function validateRegexManagerFields(
         topic: 'Configuration Error',
         message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
       });
+    }
+  }
+}
+
+/**
+ * Basic validation for global config options
+ */
+async function validateGlobalConfig(
+  key: string,
+  val: unknown,
+  type: string,
+  warnings: ValidationMessage[],
+  errors: ValidationMessage[],
+  currentPath: string | undefined,
+  config: RenovateConfig,
+): Promise<void> {
+  if (val !== null) {
+    if (type === 'string') {
+      if (is.string(val)) {
+        if (
+          key === 'onboardingConfigFileName' &&
+          !configFileNames.includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${configFileNames.join(', ')}.`,
+          });
+        } else if (
+          key === 'repositoryCache' &&
+          !['enabled', 'disabled', 'reset'].includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['enabled', 'disabled', 'reset'].join(', ')}.`,
+          });
+        } else if (
+          key === 'dryRun' &&
+          !['extract', 'lookup', 'full'].includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['extract', 'lookup', 'full'].join(', ')}.`,
+          });
+        } else if (
+          key === 'binarySource' &&
+          !['docker', 'global', 'install', 'hermit'].includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['docker', 'global', 'install', 'hermit'].join(', ')}.`,
+          });
+        } else if (
+          key === 'requireConfig' &&
+          !['required', 'optional', 'ignored'].includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['required', 'optional', 'ignored'].join(', ')}.`,
+          });
+        } else if (
+          key === 'gitUrl' &&
+          !['default', 'ssh', 'endpoint'].includes(val)
+        ) {
+          warnings.push({
+            topic: 'Configuration Error',
+            message: `Invalid value \`${val}\` for \`${currentPath}\`. The allowed values are ${['default', 'ssh', 'endpoint'].join(', ')}.`,
+          });
+        }
+
+        if (
+          key === 'reportType' &&
+          ['s3', 'file'].includes(val) &&
+          !is.string(config.reportPath)
+        ) {
+          errors.push({
+            topic: 'Configuration Error',
+            message: `reportType '${val}' requires a configured reportPath`,
+          });
+        }
+      } else {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Configuration option \`${currentPath}\` should be a string.`,
+        });
+      }
+    } else if (type === 'integer') {
+      if (!is.number(val)) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
+            val,
+          )} (${typeof val}).`,
+        });
+      }
+    } else if (type === 'boolean') {
+      if (val !== true && val !== false) {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Configuration option \`${currentPath}\` should be a boolean. Found: ${JSON.stringify(
+            val,
+          )} (${typeof val}).`,
+        });
+      }
+    } else if (type === 'array') {
+      if (is.array(val)) {
+        if (key === 'gitNoVerify') {
+          const allowedValues = ['commit', 'push'];
+          for (const value of val as string[]) {
+            if (!allowedValues.includes(value)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
+              });
+            }
+          }
+        }
+      } else {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Configuration option \`${currentPath}\` should be a list (Array).`,
+        });
+      }
+    } else if (type === 'object') {
+      if (is.plainObject(val)) {
+        if (key === 'onboardingConfig') {
+          const subValidation = await validateConfig('repo', val);
+          for (const warning of subValidation.warnings.concat(
+            subValidation.errors,
+          )) {
+            warnings.push(warning);
+          }
+        } else if (key === 'force') {
+          const subValidation = await validateConfig('global', val);
+          for (const warning of subValidation.warnings.concat(
+            subValidation.errors,
+          )) {
+            warnings.push(warning);
+          }
+        } else if (key === 'cacheTtlOverride') {
+          for (const [subKey, subValue] of Object.entries(val)) {
+            if (!is.number(subValue)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid \`${currentPath}.${subKey}\` configuration: value must be an integer.`,
+              });
+            }
+          }
+        } else {
+          const res = validatePlainObject(val);
+          if (res !== true) {
+            warnings.push({
+              topic: 'Configuration Error',
+              message: `Invalid \`${currentPath}.${res}\` configuration: value must be a string.`,
+            });
+          }
+        }
+      } else {
+        warnings.push({
+          topic: 'Configuration Error',
+          message: `Configuration option \`${currentPath}\` should be a JSON object.`,
+        });
+      }
     }
   }
 }

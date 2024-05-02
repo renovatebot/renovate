@@ -73,7 +73,7 @@ Get started with Renovate by checking out our [tutorial](https://github.com/reno
 ### GitHub
 
 We recommend that you use the Mend Renovate App.
-Install the [the Mend Renovate App](https://github.com/apps/renovate) now.
+Install [the Mend Renovate App](https://github.com/apps/renovate) now.
 [More details on the Mend Renovate App installation](https://docs.renovatebot.com/getting-started/installing-onboarding/).
 
 ### Azure DevOps

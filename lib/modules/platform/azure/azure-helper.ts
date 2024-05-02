@@ -119,6 +119,9 @@ export async function getMergeMethod(
   branchRef?: string | null,
   defaultBranch?: string,
 ): Promise<GitPullRequestMergeStrategy> {
+  logger.debug(
+    `getMergeMethod(branchRef=${branchRef}, defaultBranch=${defaultBranch})`,
+  );
   type Scope = {
     repositoryId: string;
     refName?: string;
@@ -132,7 +135,7 @@ export async function getMergeMethod(
     ) {
       return true;
     }
-    if (scope.repositoryId !== repoId) {
+    if (scope.repositoryId !== repoId && scope.repositoryId !== null) {
       return false;
     }
     if (!branchRef) {
@@ -152,9 +155,9 @@ export async function getMergeMethod(
     .filter((p) => p.settings.scope.some(isRelevantScope))
     .map((p) => p.settings)[0];
 
-  logger.trace(
+  logger.debug(
     // TODO: types (#22198)
-    `getMergeMethod(${repoId}, ${project}, ${branchRef!}) determining mergeMethod from matched policy:\n${JSON.stringify(
+    `getMergeMethod(branchRef=${branchRef!}) determining mergeMethod from matched policy:\n${JSON.stringify(
       policyConfigurations,
       null,
       4,

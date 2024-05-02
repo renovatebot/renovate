@@ -30,7 +30,7 @@ describe('config/presets/internal/index', () => {
             const config = await resolveConfigPresets(
               massageConfig(presetConfig),
             );
-            const res = await validateConfig(false, config, true);
+            const res = await validateConfig('repo', config, true);
             expect(res.errors).toHaveLength(0);
             expect(res.warnings).toHaveLength(0);
           } catch (err) {
@@ -43,4 +43,15 @@ describe('config/presets/internal/index', () => {
       }
     }
   }
+
+  it('internal presets should not contain handlebars', () => {
+    Object.entries(internal.groups)
+      .map(([groupName, groupPresets]) =>
+        Object.entries(groupPresets).map(
+          ([presetName]) => `${groupName}:${presetName}`,
+        ),
+      )
+      .flat()
+      .forEach((preset) => expect(preset).not.toMatch(/{{.*}}/));
+  });
 });

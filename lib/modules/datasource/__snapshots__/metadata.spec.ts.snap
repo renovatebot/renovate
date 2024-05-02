@@ -34,7 +34,7 @@ exports[`modules/datasource/metadata Should handle failed parsing of sourceUrls 
 
 exports[`modules/datasource/metadata Should handle manualChangelogUrls 1`] = `
 {
-  "changelogUrl": "https://github.com/django/django/tree/master/docs/releases",
+  "changelogUrl": "https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt",
   "releases": [
     {
       "releaseTimestamp": "2018-07-13T10:14:17.000Z",
@@ -53,7 +53,7 @@ exports[`modules/datasource/metadata Should handle manualChangelogUrls 1`] = `
       "version": "2.2.0",
     },
   ],
-  "sourceUrl": "https://github.com/django/django",
+  "sourceUrl": "https://github.com/flyingcircusio/pycountry",
 }
 `;
 
