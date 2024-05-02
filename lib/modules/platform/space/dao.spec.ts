@@ -160,49 +160,19 @@ describe('modules/platform/space/dao', () => {
 
   describe('findMergeRequest()', () => {
     it('should find specific merge request', async () => {
-      const projectKey = 'my-project'
-      const repository = 'my-repo'
-      const message1 = 'message1'
-      const message2 = 'message2'
-
-      const pr2: SpaceMergeRequestRecord = {
-        id: '456',
-        number: 2,
-        title: 'another pr',
-        state: 'Opened',
-        branchPairs: [{sourceBranch: 'my-feature-branch', targetBranch: 'my-main-branch'}],
-        createdAt: 456,
-        description: 'another description',
-      }
-
-      mockCodeReviewRead.find.mockReturnValueOnce([pr1, pr2])
-
-      mockMergeRequestBody(projectKey, pr1.id, pr1.number, message1)
-      mockMergeRequestBody(projectKey, pr2.id, pr2.number, message2)
-
-      expect(await dao.findAllMergeRequests(projectKey, repository)).toEqual([
-        {
-          bodyStruct: {
-            hash: hashBody(message1),
-          },
-          number: 1,
-          sourceBranch: 'my-feature-branch',
-          targetBranch: 'my-main-branch',
-          state: "open",
-          title: pr1.title,
+      expect(await dao.findMergeRequest('my-project', 'my-repo',  {
+        branchName: 'my-feature-branch',
+      })).toEqual({
+        bodyStruct: {
+          hash: hashBody('this text is no the message body'),
         },
-        {
-          bodyStruct: {
-            hash: hashBody(message2),
-          },
-          number: 2,
-          sourceBranch: 'my-feature-branch',
-          targetBranch: 'my-main-branch',
-          state: "open",
-          title: pr2.title,
-        },
-      ]);
-    });
+        number: 1,
+        sourceBranch: 'my-feature-branch',
+        targetBranch: 'my-main-branch',
+        state: "open",
+        title: 'my awesome pr',
+      });
+    })
   });
 
   function mockMergeRequestBody(projectKey: string, codeReviewId: string, codeReviewNumber: number, text: string) {
