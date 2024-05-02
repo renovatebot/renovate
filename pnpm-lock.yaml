@@ -216,8 +216,8 @@ importers:
         specifier: 2.0.6
         version: 2.0.6
       lru-cache:
-        specifier: 10.2.0
-        version: 10.2.0
+        specifier: 10.2.1
+        version: 10.2.1
       luxon:
         specifier: 3.4.4
         version: 3.4.4
@@ -4199,8 +4199,8 @@ packages:
     resolution: {integrity: sha512-tqNXrS78oMOE73NMxK4EMLQsQowWf8jKooH9g7xPavRT706R6bkQJ6DY2Te7QukaZsulxa30wQ7bk0pm4XiHmA==}
     engines: {node: '>=8'}
 
-  lru-cache@10.2.0:
-    resolution: {integrity: sha512-2bIM8x+VAf6JT4bKAljS1qUWgMsqZRPGJS6FSahIMPVvctcNhyVp7AJu7quxOW9jwkryBReKZY5tY5JYv2n/7Q==}
+  lru-cache@10.2.1:
+    resolution: {integrity: sha512-tS24spDe/zXhWbNPErCHs/AGOzbKGHT+ybSBqmdLm8WZ1xXLWvH8Qn71QPAlqVhd0qUTWjy+Kl9JmISgDdEjsA==}
     engines: {node: 14 || >=16.14}
 
   lru-cache@5.1.1:
@@ -7255,7 +7255,7 @@ snapshots:
       agent-base: 7.1.1
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.4
-      lru-cache: 10.2.0
+      lru-cache: 10.2.1
       socks-proxy-agent: 8.0.3
     transitivePeerDependencies:
       - supports-color
@@ -8883,7 +8883,7 @@ snapshots:
       '@npmcli/fs': 3.1.0
       fs-minipass: 3.0.3
       glob: 10.3.12
-      lru-cache: 10.2.0
+      lru-cache: 10.2.1
       minipass: 7.0.4
       minipass-collect: 2.0.1
       minipass-flush: 1.0.5
@@ -10108,7 +10108,7 @@ snapshots:
 
   hosted-git-info@7.0.1:
     dependencies:
-      lru-cache: 10.2.0
+      lru-cache: 10.2.1
 
   html-escaper@2.0.2: {}
 
@@ -10944,7 +10944,7 @@ snapshots:
 
   lowercase-keys@2.0.0: {}
 
-  lru-cache@10.2.0: {}
+  lru-cache@10.2.1: {}
 
   lru-cache@5.1.1:
     dependencies:
@@ -11602,7 +11602,7 @@ snapshots:
 
   path-scurry@1.10.2:
     dependencies:
-      lru-cache: 10.2.0
+      lru-cache: 10.2.1
       minipass: 7.0.4
 
   path-to-regexp@6.2.2: {}

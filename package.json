@@ -211,7 +211,7 @@
     "json5": "2.2.3",
     "jsonata": "2.0.4",
     "klona": "2.0.6",
-    "lru-cache": "10.2.0",
+    "lru-cache": "10.2.1",
     "luxon": "3.4.4",
     "markdown-it": "14.1.0",
     "markdown-table": "2.0.0",
