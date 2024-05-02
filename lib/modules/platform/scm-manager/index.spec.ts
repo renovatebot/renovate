@@ -412,28 +412,34 @@ describe('modules/platform/scm-manager/index', () => {
         expectedState: string,
         expectedIsDraft: boolean,
       ) => {
-        httpMock.scope(endpoint).post(`/pull-requests/${repo.namespace}/${repo.name}`).reply(201, undefined, {
-          location: `${endpoint}/pull-requests/${repo.namespace}/${repo.name}/1337`,
-        });
+        httpMock
+          .scope(endpoint)
+          .post(`/pull-requests/${repo.namespace}/${repo.name}`)
+          .reply(201, undefined, {
+            location: `${endpoint}/pull-requests/${repo.namespace}/${repo.name}/1337`,
+          });
 
-        httpMock.scope(endpoint).get(`/pull-requests/${repo.namespace}/${repo.name}/1337`).reply(200, {
-          id: '1337',
-          source: 'feature/test',
-          target: 'develop',
-          title: 'PR Title',
-          description: 'PR Body',
-          creationDate: '2023-01-01T13:37:00.000Z',
-          status: draftPR ? 'DRAFT' : 'OPEN',
-          labels: [],
-          tasks: { todo: 0, done: 0 },
-          _links: {},
-          _embedded: {
-            defaultConfig: {
-              mergeStrategy: 'FAST_FORWARD_IF_POSSIBLE',
-              deleteBranchOnMerge: false,
+        httpMock
+          .scope(endpoint)
+          .get(`/pull-requests/${repo.namespace}/${repo.name}/1337`)
+          .reply(200, {
+            id: '1337',
+            source: 'feature/test',
+            target: 'develop',
+            title: 'PR Title',
+            description: 'PR Body',
+            creationDate: '2023-01-01T13:37:00.000Z',
+            status: draftPR ? 'DRAFT' : 'OPEN',
+            labels: [],
+            tasks: { todo: 0, done: 0 },
+            _links: {},
+            _embedded: {
+              defaultConfig: {
+                mergeStrategy: 'FAST_FORWARD_IF_POSSIBLE',
+                deleteBranchOnMerge: false,
+              },
             },
-          },
-        });
+          });
 
         expect(
           await createPr({
@@ -476,7 +482,7 @@ describe('modules/platform/scm-manager/index', () => {
         httpMock
           .scope(endpoint)
           .put(`/pull-requests/${repo.namespace}/${repo.name}/1`)
-          .reply(204)
+          .reply(204);
 
         await updatePr({
           number: 1,
@@ -486,9 +492,7 @@ describe('modules/platform/scm-manager/index', () => {
           targetBranch: 'Target/Branch',
         });
 
-        expect(
-          httpMock.allUsed()
-        ).toBeTrue();
+        expect(httpMock.allUsed()).toBeTrue();
       },
     );
   });
