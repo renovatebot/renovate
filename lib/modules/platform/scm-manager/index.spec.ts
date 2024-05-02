@@ -4,12 +4,7 @@ import * as hostRules from '../../../util/host-rules';
 import type { Pr } from '../types';
 import * as _util from '../util';
 import { mapPrFromScmToRenovate } from './mapper';
-import type {
-  PrFilterByState,
-  PullRequest,
-  Repo,
-  User,
-} from './types';
+import type { PrFilterByState, PullRequest, Repo, User } from './types';
 import {
   addAssignees,
   addReviewers,
@@ -150,10 +145,25 @@ describe('modules/platform/scm-manager/index', () => {
       });
 
       expect(git.initRepo).toHaveBeenCalledWith({
-        url: `https://${user.username}@localhost:8080/scm/default/repo`,
+        url: `https://${user.username}:${token}@localhost:8080/scm/default/repo`,
         repository,
         defaultBranch: expectedDefaultBranch,
       });
+    });
+
+    it('should throw error, because username is not provided in host rules', async () => {
+      hostRules.clear();
+      await expect(
+        initRepo({ repository: `${repo.namespace}/${repo.name}` }),
+      ).rejects.toThrow('Username is not provided');
+    });
+
+    it('should throw error, because token is not provided in host rules', async () => {
+      hostRules.clear();
+      hostRules.add({username: user.username});
+      await expect(
+        initRepo({ repository: `${repo.namespace}/${repo.name}` }),
+      ).rejects.toThrow('Token is not provided');
     });
   });
 
@@ -193,6 +203,17 @@ describe('modules/platform/scm-manager/index', () => {
             pullRequests: [],
           },
         });
+
+      expect(await getPrList()).toIncludeAllMembers([]);
+    });
+
+    it('should return empty array, because api request failed', async () => {
+      httpMock
+        .scope(endpoint)
+        .get(
+          `/pull-requests/${repo.namespace}/${repo.name}?status=ALL&pageSize=1000000`,
+        )
+        .reply(400);
 
       expect(await getPrList()).toIncludeAllMembers([]);
     });

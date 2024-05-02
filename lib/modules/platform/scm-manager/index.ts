@@ -64,15 +64,23 @@ export async function initRepo({
   repository,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
+  const hostOptions = hostRules.find({hostType: id, url: scmmClient.getEndpoint()});
+
+  if (!hostOptions.username) {
+    throw new Error('Username is not provided');
+  }
+
+  if (!hostOptions.token) {
+    throw new Error('Token is not provided');
+  }
+
   const repo = await scmmClient.getRepo(repository);
   const defaultBranch = await scmmClient.getDefaultBranch(repo);
   const url = getRepoUrl(
     repo,
     gitUrl,
-    /* istanbul ignore next */
-    hostRules.find({ hostType: id, url: scmmClient.getEndpoint() }).username ??
-      '',
-    process.env.RENOVATE_TOKEN ?? '',
+    hostOptions.username,
+    hostOptions.token
   );
 
   config = {} as any;
