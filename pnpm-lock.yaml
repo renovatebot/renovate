@@ -80,15 +80,6 @@ importers:
       '@sindresorhus/is':
         specifier: 4.6.0
         version: 4.6.0
-      '@types/better-sqlite3':
-        specifier: 7.6.10
-        version: 7.6.10
-      '@types/ms':
-        specifier: 0.7.34
-        version: 0.7.34
-      '@types/tmp':
-        specifier: 0.2.6
-        version: 0.2.6
       '@yarnpkg/core':
         specifier: 4.0.3
         version: 4.0.3(typanion@3.14.0)
@@ -379,6 +370,9 @@ importers:
       '@types/aws4':
         specifier: 1.11.6
         version: 1.11.6
+      '@types/better-sqlite3':
+        specifier: 7.6.10
+        version: 7.6.10
       '@types/breejs__later':
         specifier: 4.1.5
         version: 4.1.5
@@ -454,6 +448,9 @@ importers:
       '@types/moo':
         specifier: 0.5.9
         version: 0.5.9
+      '@types/ms':
+        specifier: 0.7.34
+        version: 0.7.34
       '@types/node':
         specifier: 18.19.31
         version: 18.19.31
@@ -472,6 +469,9 @@ importers:
       '@types/tar':
         specifier: 6.1.13
         version: 6.1.13
+      '@types/tmp':
+        specifier: 0.2.6
+        version: 0.2.6
       '@types/traverse':
         specifier: 0.6.36
         version: 0.6.36
