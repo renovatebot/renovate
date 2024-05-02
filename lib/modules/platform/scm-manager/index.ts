@@ -155,16 +155,16 @@ export async function getPr(number: number): Promise<Pr | null> {
   const cachedPr = inProgressPrs.find((pr) => pr.number === number);
 
   if (cachedPr) {
-    logger.info(`Returning from cached PRs, ${JSON.stringify(cachedPr)}`);
+    logger.info('Returning from cached PRs');
     return cachedPr;
   }
 
   try {
     const result = await scmmClient.getRepoPr(config.repository, number);
-    logger.info(`Returning PR from API, ${JSON.stringify(result)}`);
+    logger.info('Returning PR from API');
     return mapPrFromScmToRenovate(result);
   } catch (error) {
-    logger.info(`Can not find a PR with id ${number}`);
+    logger.error(`Can not find a PR with id ${number}`);
     return null;
   }
 }
@@ -201,7 +201,6 @@ export async function createPr({
   logger.info(
     `PR created with title '${createdPr.title}' from source '${createdPr.source}' to target '${createdPr.target}'`,
   );
-  logger.debug(`PR created ${JSON.stringify(createdPr)}`);
 
   return mapPrFromScmToRenovate(createdPr);
 }
