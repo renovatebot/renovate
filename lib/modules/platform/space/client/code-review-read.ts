@@ -40,7 +40,7 @@ export class SpaceCodeReviewReadClient {
   ): Promise<SpaceMergeRequestRecord[]> {
     const config: FindConfig = {
       prState: 'null',
-      predicate: () => Promise.resolve(true),
+      predicate: { test: () => Promise.resolve(true), },
       ...partialConfig,
     };
 
@@ -74,7 +74,7 @@ export class SpaceCodeReviewReadClient {
           return undefined;
         }
 
-        const accept = await config.predicate(review);
+        const accept = await config.predicate.test(review);
         return accept ? review : undefined;
       },
       config.limit,
@@ -130,6 +130,11 @@ export class SpaceCodeReviewReadClient {
 interface FindConfig {
   repository?: string;
   prState: CodeReviewStateFilter;
-  predicate: (pr: SpaceMergeRequestRecord) => Promise<boolean>;
+  predicate: SpaceMergeRequestRecordPredicate;
   limit?: number;
 }
+
+export interface SpaceMergeRequestRecordPredicate {
+  test(pr: SpaceMergeRequestRecord): Promise<boolean>;
+}
+

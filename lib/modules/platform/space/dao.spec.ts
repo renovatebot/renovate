@@ -159,19 +159,58 @@ describe('modules/platform/space/dao', () => {
   });
 
   describe('findMergeRequest()', () => {
-    it('should find specific merge request', async () => {
-      expect(await dao.findMergeRequest('my-project', 'my-repo',  {
-        branchName: 'my-feature-branch',
+    it('should find latest found merge request', async () => {
+      const projectKey = 'my-project'
+      const repository = 'my-repo'
+      const message1 = 'message1'
+
+      const pr1: SpaceMergeRequestRecord = {
+        id: '123',
+        number: 1,
+        title: 'my awesome pr',
+        state: 'Opened',
+        branchPairs: [{sourceBranch: 'my-feature-branch', targetBranch: 'my-main-branch'}],
+        createdAt: 123,
+        description: 'please merge it, its awesome',
+      }
+
+      const pr2: SpaceMergeRequestRecord = {
+        id: '456',
+        number: 2,
+        title: 'another pr',
+        state: 'Opened',
+        branchPairs: [{sourceBranch: 'my-feature-branch', targetBranch: 'my-main-branch'}],
+        createdAt: 456,
+        description: 'another description',
+      }
+
+      mockCodeReviewRead.find.mockReturnValueOnce([pr2, pr1])
+
+      mockMergeRequestBody(projectKey, pr1.id, pr1.number, message1)
+
+      expect(await dao.findMergeRequest(projectKey, repository, {
+        branchName: 'my-feature-branch'
       })).toEqual({
         bodyStruct: {
-          hash: hashBody('this text is no the message body'),
+          hash: hashBody(message1),
         },
         number: 1,
         sourceBranch: 'my-feature-branch',
         targetBranch: 'my-main-branch',
         state: "open",
-        title: 'my awesome pr',
+        title: pr1.title,
       });
+
+      expect(mockCodeReviewRead.find).toHaveBeenCalledTimes(1)
+    })
+  });
+
+
+
+
+  describe('FindPRConfigPrecate.test()', () => {
+    it('should return true', () => {
+      expect(1).toBe(2)
     })
   });
 

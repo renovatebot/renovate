@@ -1,13 +1,8 @@
-import type { MergeStrategy } from '../../../config/types';
-import { logger } from '../../../logger';
-import type { BranchStatus } from '../../../types';
-import type {
-  CreatePRConfig,
-  FindPRConfig,
-  Pr,
-  UpdatePrConfig,
-} from '../types';
-import type { SpaceClient } from './client';
+import type {MergeStrategy} from '../../../config/types';
+import {logger} from '../../../logger';
+import type {BranchStatus} from '../../../types';
+import type {CreatePRConfig, FindPRConfig, Pr, UpdatePrConfig,} from '../types';
+import type {SpaceClient} from './client';
 import type {
   CodeReviewStateFilter,
   SpaceChannelItemRecord,
@@ -16,7 +11,8 @@ import type {
   SpaceMergeRequestRecord,
   SpaceRepositoryDetails,
 } from './types';
-import { mapSpaceCodeReviewDetailsToPr } from './utils';
+import {mapSpaceCodeReviewDetailsToPr} from './utils';
+import type {SpaceMergeRequestRecordPredicate} from "./client/code-review-read";
 
 export class SpaceDao {
   constructor(private client: SpaceClient) {}
@@ -83,7 +79,6 @@ export class SpaceDao {
     logger.debug(`SPACE: searching for PR in ${projectKey}/${repository}`);
 
     let prState: CodeReviewStateFilter = 'null';
-    const allButOpen = config.state === '!open';
     switch (config.state) {
       case 'open':
         prState = 'Opened';
@@ -101,38 +96,7 @@ export class SpaceDao {
       prState,
       repository,
       limit: 1,
-      predicate: (review) => {
-        if (allButOpen && review.state === 'Opened') {
-          logger.info(
-            `SPACE: stateFilter=${config.state}. Ignoring PR ${review.title} because it is open`,
-          );
-          return Promise.resolve(false);
-        }
-
-        // TODO: figure out what is the case here
-        if (review.branchPairs.length !== 1) {
-          logger.debug(
-            `SPACE: Not sure what to do with not a single branch pair in PR ${review.title}`,
-          );
-          return Promise.resolve(false);
-        }
-
-        if (review.branchPairs[0].sourceBranch !== config.branchName) {
-          logger.debug(
-            `SPACE: branchFilter=${config.branchName}. Ignoring PR ${review.title} because it doesn't match the branch`,
-          );
-          return Promise.resolve(false);
-        }
-
-        if (config.prTitle && review.title !== config.prTitle) {
-          return Promise.resolve(false);
-        }
-
-        logger.debug(
-          `SPACE: branchFilter=${config.branchName}. found PR ${review.title} with state ${review.state}`,
-        );
-        return Promise.resolve(true);
-      },
+      predicate: new FindPRConfigPredicate(config),
     });
 
     const mergeRequest = mergeRequests.pop();
@@ -529,6 +493,49 @@ export class SpaceDao {
     );
     return body;
   }
+}
+
+export class FindPRConfigPredicate implements SpaceMergeRequestRecordPredicate {
+
+  private allButOpen: boolean
+
+  constructor(private config: FindPRConfig) {
+    this.allButOpen = config.state === '!open';
+  }
+
+  test(pr: SpaceMergeRequestRecord): Promise<boolean> {
+    if (this.allButOpen && pr.state === 'Opened') {
+      logger.info(
+        `SPACE: stateFilter=${this.config.state}. Ignoring PR ${pr.title} because it is open`,
+      );
+      return Promise.resolve(false);
+    }
+
+    // TODO: figure out what is the case here
+    if (pr.branchPairs.length !== 1) {
+      logger.debug(
+        `SPACE: Not sure what to do with not a single branch pair in PR ${pr.title}`,
+      );
+      return Promise.resolve(false);
+    }
+
+    if (pr.branchPairs[0].sourceBranch !== this.config.branchName) {
+      logger.debug(
+        `SPACE: branchFilter=${this.config.branchName}. Ignoring PR ${pr.title} because it doesn't match the branch`,
+      );
+      return Promise.resolve(false);
+    }
+
+    if (this.config.prTitle && pr.title !== this.config.prTitle) {
+      return Promise.resolve(false);
+    }
+
+    logger.debug(
+      `SPACE: branchFilter=${this.config.branchName}. found PR ${pr.title} with state ${pr.state}`,
+    );
+    return Promise.resolve(true);
+  }
+
 }
 
 const DEFAULT_PR_BODY = 'no pr body';

@@ -1,11 +1,11 @@
-import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import type { PrState } from '../../../types';
+import {CONFIG_GIT_URL_UNAVAILABLE} from '../../../constants/error-messages';
+import {logger} from '../../../logger';
+import type {PrState} from '../../../types';
 import * as hostRules from '../../../util/host-rules';
-import { joinUrlParts } from '../../../util/url';
-import { hashBody } from '../pr-body';
-import type { Pr } from '../types';
-import type { SpaceCodeReviewState, SpaceMergeRequestRecord } from './types';
+import {joinUrlParts} from '../../../util/url';
+import {hashBody} from '../pr-body';
+import type {Pr} from '../types';
+import type {SpaceCodeReviewState, SpaceMergeRequestRecord} from './types';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
@@ -49,18 +49,6 @@ export function getSpaceRepoUrl(repository: string, endpoint: string): string {
   );
   return url.toString();
 }
-
-// export async function findFirstFlatten<T>(iterable: AsyncIterable<T[]>, predicate: (value: T) => Promise<boolean>): Promise<T | undefined> {
-//   const result = await mapNotNullFlatten(iterable, async it => {
-//     if (await predicate(it)) {
-//       return it
-//     } else {
-//       return undefined
-//     }
-//   }, 1)
-//
-//   return result.pop()
-// }
 
 export async function flatten<T>(iterable: AsyncIterable<T[]>): Promise<T[]> {
   return await mapNotNullFlatten(iterable, (it) => Promise.resolve(it));
