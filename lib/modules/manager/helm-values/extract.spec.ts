@@ -1,7 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { partial } from '../../../../test/util';
-import { extractPackageFile } from '.';
 import type { ExtractConfig } from '../types';
+import { extractPackageFile } from '.';
 
 const helmDefaultChartInitValues = Fixtures.get(
   'default_chart_init_values.yaml',
@@ -74,7 +74,11 @@ describe('modules/manager/helm-values/extract', () => {
       const multiDocumentFile = Fixtures.get(
         'single_file_with_multiple_documents.yaml',
       );
-      const result = extractPackageFile(multiDocumentFile, 'values.yaml', config);
+      const result = extractPackageFile(
+        multiDocumentFile,
+        'values.yaml',
+        config,
+      );
       expect(result).toMatchObject({
         deps: [
           {

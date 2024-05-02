@@ -2,23 +2,34 @@ import { logger } from '../../../logger';
 import { parseYaml } from '../../../util/yaml';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { HelmDockerImageDependency } from './types';
 import {
   matchesHelmValuesDockerHeuristic,
   matchesHelmValuesInlineImage,
 } from './util';
 
-function getHelmDep({
-  registry,
-  repository,
-  tag,
-}: {
-  registry: string;
-  repository: string;
-  tag: string;
-}, config ?: ExtractConfig): PackageDependency {
-  const dep = getDep(`${registry}${repository}:${tag}`, false, config?.registryAliases);
+function getHelmDep(
+  {
+    registry,
+    repository,
+    tag,
+  }: {
+    registry: string;
+    repository: string;
+    tag: string;
+  },
+  config?: ExtractConfig,
+): PackageDependency {
+  const dep = getDep(
+    `${registry}${repository}:${tag}`,
+    false,
+    config?.registryAliases,
+  );
   dep.replaceString = tag;
   dep.versioning = dockerVersioning;
   dep.autoReplaceStringTemplate =
@@ -48,11 +59,17 @@ function findDependencies(
       registry = registry ? `${registry}/` : '';
       const repository = String(currentItem.repository);
       const tag = `${currentItem.tag ?? currentItem.version}`;
-      packageDependencies.push(getHelmDep({ repository, tag, registry }, config));
+      packageDependencies.push(
+        getHelmDep({ repository, tag, registry }, config),
+      );
     } else if (matchesHelmValuesInlineImage(key, value)) {
       packageDependencies.push(getDep(value, true, config?.registryAliases));
     } else {
-      findDependencies(value as Record<string, unknown>, packageDependencies, config);
+      findDependencies(
+        value as Record<string, unknown>,
+        packageDependencies,
+        config,
+      );
     }
   });
   return packageDependencies;
