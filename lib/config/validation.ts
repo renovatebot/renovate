@@ -115,6 +115,10 @@ function isGlobalOption(key: string): boolean {
 }
 
 function initOptions(): void {
+  if (optionsInitialized) {
+    return;
+  }
+
   optionParents = {};
   optionInherits = new Set();
   optionTypes = {};
@@ -160,9 +164,7 @@ export async function validateConfig(
   isPreset?: boolean,
   parentPath?: string,
 ): Promise<ValidationResult> {
-  if (!optionsInitialized) {
-    initOptions();
-  }
+  initOptions();
 
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
