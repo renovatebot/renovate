@@ -1,6 +1,5 @@
 import { Http } from '../../../util/http';
 import type {
-  HttpRequestOptions,
   HttpResponse,
   InternalHttpOptions,
 } from '../../../util/http/types';
@@ -48,7 +47,7 @@ export default class ScmClient extends Http<ScmmHttpOptions> {
 
   protected override async request<T>(
     requestUrl: string | URL,
-    options?: InternalHttpOptions & ScmmHttpOptions & HttpRequestOptions<T>,
+    options?: InternalHttpOptions & ScmmHttpOptions,
   ): Promise<HttpResponse<T>> {
     const opts = {
       ...options,

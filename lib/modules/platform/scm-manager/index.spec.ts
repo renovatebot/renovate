@@ -4,11 +4,9 @@ import * as hostRules from '../../../util/host-rules';
 import type { Pr } from '../types';
 import * as _util from '../util';
 import { mapPrFromScmToRenovate } from './mapper';
-import ScmClient from './scm-client';
 import type {
   PrFilterByState,
   PullRequest,
-  PullRequestCreateParams,
   Repo,
   User,
 } from './types';
