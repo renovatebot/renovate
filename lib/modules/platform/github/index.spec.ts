@@ -3803,8 +3803,6 @@ describe('modules/platform/github/index', () => {
       expect(res).toHaveLength(1);
     });
 
-    // what to do with this test, most function which do not separately deal with ghe appp do not such a test
-
     it('returns empty if disabled', async () => {
       // prettier-ignore
       const scope = httpMock.scope(githubApiHost);
