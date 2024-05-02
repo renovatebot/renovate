@@ -295,6 +295,25 @@ describe('util/host-rules', () => {
         }),
       ).toEqual({ token: 'longest' });
     });
+
+    it('matches readOnly requests', () => {
+      add({
+        matchHost: 'https://api.github.com/repos/',
+        token: 'aaa',
+        hostType: 'github',
+      });
+      add({
+        matchHost: 'https://api.github.com',
+        token: 'bbb',
+        readOnly: true,
+      });
+      expect(
+        find({
+          url: 'https://api.github.com/repos/foo/bar/tags',
+          readOnly: true,
+        }),
+      ).toEqual({ token: 'bbb' });
+    });
   });
 
   describe('hosts()', () => {

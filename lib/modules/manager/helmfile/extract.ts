@@ -5,6 +5,7 @@ import { regEx } from '../../../util/regex';
 import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
+import { isOCIRegistry } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -24,10 +25,6 @@ function isLocalPath(possiblePath: string): boolean {
   return ['./', '../', '/'].some((localPrefix) =>
     possiblePath.startsWith(localPrefix),
   );
-}
-
-function isOciUrl(possibleUrl: string): boolean {
-  return possibleUrl.startsWith('oci://');
 }
 
 export async function extractPackageFile(
@@ -86,7 +83,7 @@ export async function extractPackageFile(
         continue;
       }
 
-      if (isOciUrl(dep.chart)) {
+      if (isOCIRegistry(dep.chart)) {
         const v = dep.chart.substring(6).split('/');
         depName = v.pop()!;
         repoName = v.join('/');
@@ -120,7 +117,7 @@ export async function extractPackageFile(
       const repository = doc.repositories?.find(
         (repo) => repo.name === repoName,
       );
-      if (isOciUrl(dep.chart)) {
+      if (isOCIRegistry(dep.chart)) {
         res.datasource = DockerDatasource.id;
         res.packageName = repoName + '/' + depName;
       } else if (repository?.oci) {

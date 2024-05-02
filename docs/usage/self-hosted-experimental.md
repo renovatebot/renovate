@@ -32,10 +32,6 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_USER_AGENT`
-
-If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
-
 ## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
 
 <!-- prettier-ignore -->
@@ -134,12 +130,26 @@ Skip initializing `RE2` for regular expressions and instead use Node-native `Reg
 ## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
 
 If set, Renovate will query this API for Merge Confidence data.
+
+If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
+
+- have a static merge confidence token that you set via `MEND_RNV_MC_TOKEN`
+- _or_ set `MEND_RNV_MC_TOKEN` to `auto`
+
+Then you must set this variable at the _server_ and the _workers_.
+
+But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
+
 This feature is in private beta.
 
 ## `RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES`
 
 If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
 The expected value for this environment variable is a JSON array of strings.
+
+## `RENOVATE_X_NUGET_DOWNLOAD_NUPKGS`
+
+If set to any value, Renovate will download `nupkg` files for determining package metadata.
 
 ## `RENOVATE_X_PLATFORM_VERSION`
 
@@ -180,6 +190,10 @@ Don't combine with `redisUrl`, Redis would be preferred over SQlite.
 ## `RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING`
 
 Suppress the pre-commit support warning in PR bodies.
+
+## `RENOVATE_X_USE_OPENPGP`
+
+Use `openpgp` instead of `kbpgp` for `PGP` decryption.
 
 ## `RENOVATE_X_YARN_PROXY`
 

@@ -770,7 +770,7 @@ As example the following configuration will update all three lines in the Docker
 ```
 
 ```dockerfile title="Dockerfile"
-FROM amd64/ubuntu:18.04
+FROM amd64/ubuntu:24.04
 ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
 ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
 ```
@@ -897,6 +897,27 @@ It will be compiled using Handlebars and the regex `groups` result.
 `packageName` is used for looking up dependency versions.
 It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
+
+### readOnly
+
+If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
+Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
+
+This option could be used to avoid rate limits for certain platforms like GitHub or Bitbucket, by offloading the read operations to a different user.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "readOnly": true,
+      "token": "********"
+    }
+  ]
+}
+```
+
+If more than one token matches for a read-only request then the `readOnly` token will be given preference.
 
 ### currentValueTemplate
 
@@ -1251,7 +1272,7 @@ It is valid only as a top-level configuration option and not, for example, withi
 
 <!-- prettier-ignore -->
 !!! warning
-    The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedEnv) config option, before users can use those allowed names in the `env` option.
+    The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedenv) config option, before users can use those allowed names in the `env` option.
 
 Behavior:
 
@@ -1355,7 +1376,7 @@ Renovate can fetch changelogs when they are hosted on one of these platforms:
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch changelogs notes from `github.com`.
+If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs) to allow Renovate to fetch changelogs notes from `github.com`.
 
 <!-- prettier-ignore -->
 !!! note
@@ -1848,7 +1869,7 @@ Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#ht
 You can provide a `headers` object that includes fields to be forwarded to the HTTP request headers.
 By default, all headers starting with "X-" are allowed.
 
-A bot administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedHeaders) to configure more permitted headers.
+A bot administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
 `headers` value(s) configured in the bot admin `hostRules` (for example in a `config.js` file) are _not_ validated, so it may contain any header regardless of `allowedHeaders`.
 
@@ -2510,6 +2531,8 @@ Invalid if used outside of a `packageRule`.
 
 ### excludeDepPatterns
 
+### excludeDepPrefixes
+
 ### excludePackageNames
 
 **Important**: Do not mix this up with the option `ignoreDeps`.
@@ -2830,6 +2853,8 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 
 ### matchDepPatterns
 
+### matchDepPrefixes
+
 ### matchNewValue
 
 This option is matched against the `newValue` field of a dependency.
@@ -2882,6 +2907,12 @@ See also `excludePackageNames`.
 
 The above will configure `rangeStrategy` to `pin` only for the package `angular`.
 
+<!-- prettier-ignore -->
+!!! note
+    `matchPackageNames` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepNames` instead.
+
 ### matchPackagePatterns
 
 Use this field if you want to have one or more package names patterns in your package rule.
@@ -2899,6 +2930,12 @@ See also `excludePackagePatterns`.
 ```
 
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+
+<!-- prettier-ignore -->
+!!! note
+    `matchPackagePatterns` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepPatterns` instead.
 
 ### matchPackagePrefixes
 
@@ -2918,8 +2955,11 @@ See also `excludePackagePrefixes`.
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
-`matchPackagePrefixes` will match against `packageName` first, and then `depName`, however `depName` matching is deprecated and will be removed in a future major release.
-If matching against `depName`, use `matchDepPatterns` instead.
+<!-- prettier-ignore -->
+!!! note
+    `matchPackagePrefixes` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepPatterns` instead.
 
 ### matchSourceUrlPrefixes
 

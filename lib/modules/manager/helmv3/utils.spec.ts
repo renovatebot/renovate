@@ -1,4 +1,5 @@
-import { isAlias, isOCIRegistry, resolveAlias } from './utils';
+import { isOCIRegistry } from './oci';
+import { isAlias, resolveAlias } from './utils';
 
 describe('modules/manager/helmv3/utils', () => {
   describe('.resolveAlias()', () => {

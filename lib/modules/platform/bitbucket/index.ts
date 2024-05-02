@@ -782,7 +782,10 @@ async function sanitizeReviewers(
         // Validate that each previous PR reviewer account is still active
         for (const reviewer of reviewers) {
           const reviewerUser = (
-            await bitbucketHttp.getJson<Account>(`/2.0/users/${reviewer.uuid}`)
+            await bitbucketHttp.getJson<Account>(
+              `/2.0/users/${reviewer.uuid}`,
+              { memCache: true },
+            )
           ).body;
 
           if (reviewerUser.account_status === 'active') {
@@ -836,6 +839,7 @@ async function isAccountMemberOfWorkspace(
   try {
     await bitbucketHttp.get(
       `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`,
+      { memCache: true },
     );
 
     return true;

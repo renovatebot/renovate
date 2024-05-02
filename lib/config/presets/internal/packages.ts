@@ -138,6 +138,7 @@ export const presets: Record<string, Preset> = {
   },
   stylelint: {
     description: 'All Stylelint packages.',
+    matchPackageNames: ['@stylistic/stylelint-plugin'],
     matchPackagePrefixes: ['stylelint'],
   },
   test: {

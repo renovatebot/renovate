@@ -45,6 +45,7 @@ export type PackageCacheNamespace =
   | 'datasource-deno-versions'
   | 'datasource-deno'
   | 'datasource-docker-architecture'
+  | 'datasource-docker-hub-cache'
   | 'datasource-docker-digest'
   | 'datasource-docker-hub-tags'
   | 'datasource-docker-imageconfig'
