@@ -517,21 +517,21 @@ describe('modules/platform/scm-manager/index', () => {
   });
 
   describe(mergePr, () => {
-    it('should no-op and return false', async () => {
+    it('should Not implemented and return false', async () => {
       const result = await mergePr({ id: 1 });
       expect(result).toBeFalse();
     });
   });
 
   describe(getBranchStatus, () => {
-    it('should no-op and return red', async () => {
+    it('should Not implemented and return red', async () => {
       const result = await getBranchStatus('test/branch', false);
       expect(result).toBe('red');
     });
   });
 
   describe(setBranchStatus, () => {
-    it('should no-op', async () => {
+    it('should Not implemented', async () => {
       await expect(
         setBranchStatus({
           branchName: 'test/branch',
@@ -544,59 +544,59 @@ describe('modules/platform/scm-manager/index', () => {
   });
 
   describe(getBranchStatusCheck, () => {
-    it('should no-op and return null', async () => {
+    it('should Not implemented and return null', async () => {
       const result = await getBranchStatusCheck('test/branch', null);
       expect(result).toBeNull();
     });
   });
 
   describe(addReviewers, () => {
-    it('should no-op', async () => {
+    it('should Not implemented', async () => {
       await expect(addReviewers(1, ['reviewer'])).resolves.not.toThrow();
     });
   });
 
   describe(addAssignees, () => {
-    it('should no-op', async () => {
+    it('should Not implemented', async () => {
       await expect(addAssignees(1, ['assignee'])).resolves.not.toThrow();
     });
   });
 
   describe(deleteLabel, () => {
-    it('should no-op', async () => {
+    it('should Not implemented', async () => {
       await expect(deleteLabel(1, 'label')).resolves.not.toThrow();
     });
   });
 
   describe(getIssueList, () => {
-    it('should no-op and return empty list', async () => {
+    it('should Not implemented and return empty list', async () => {
       const result = await getIssueList();
       expect(result).toEqual([]);
     });
   });
 
   describe(findIssue, () => {
-    it('should no-op and return null', async () => {
+    it('should Not implemented and return null', async () => {
       const result = await findIssue('issue');
       expect(result).toBeNull();
     });
   });
 
   describe(ensureIssue, () => {
-    it('should no-op and return null', async () => {
+    it('should Not implemented and return null', async () => {
       const result = await ensureIssue({ title: 'issue', body: 'body' });
       expect(result).toBeNull();
     });
   });
 
   describe(ensureIssueClosing, () => {
-    it('should no-op', async () => {
+    it('should Not implemented', async () => {
       await expect(ensureIssueClosing('issue')).resolves.not.toThrow();
     });
   });
 
   describe(ensureCommentRemoval, () => {
-    it('should no-op', async () => {
+    it('should Not implemented', async () => {
       await expect(
         ensureCommentRemoval({
           type: 'by-content',
@@ -615,21 +615,21 @@ describe('modules/platform/scm-manager/index', () => {
   });
 
   describe(getRepoForceRebase, () => {
-    it('should no-op and return false', async () => {
+    it('should Not implemented and return false', async () => {
       const result = await getRepoForceRebase();
       expect(result).toBeFalse();
     });
   });
 
   describe(getRawFile, () => {
-    it('should no-op and return null', async () => {
+    it('should Not implemented and return null', async () => {
       const result = await getRawFile('file');
       expect(result).toBeNull();
     });
   });
 
   describe(getJsonFile, () => {
-    it('should no-op and return undefined', async () => {
+    it('should Not implemented and return undefined', async () => {
       const result = await getJsonFile('package.json');
       expect(result).toBeUndefined();
     });

@@ -224,7 +224,7 @@ export async function updatePr({
 }
 
 export function mergePr(config: MergePRConfig): Promise<boolean> {
-  logger.debug('NO-OP mergePr');
+  logger.debug('Not implemented mergePr');
   return Promise.resolve(false);
 }
 
@@ -232,14 +232,14 @@ export function getBranchStatus(
   branchName: string,
   internalChecksAsSuccess: boolean,
 ): Promise<BranchStatus> {
-  logger.debug('NO-OP getBranchStatus');
+  logger.debug('Not implemented getBranchStatus');
   return Promise.resolve('red');
 }
 
 export function setBranchStatus(
   branchStatusConfig: BranchStatusConfig,
 ): Promise<void> {
-  logger.debug('NO-OP setBranchStatus');
+  logger.debug('Not implemented setBranchStatus');
   return Promise.resolve();
 }
 
@@ -247,7 +247,7 @@ export function getBranchStatusCheck(
   branchName: string,
   context: string | null | undefined,
 ): Promise<BranchStatus | null> {
-  logger.debug('NO-OP setBranchStatus');
+  logger.debug('Not implemented setBranchStatus');
   return Promise.resolve(null);
 }
 
@@ -255,7 +255,7 @@ export function addReviewers(
   number: number,
   reviewers: string[],
 ): Promise<void> {
-  logger.debug('NO-OP addReviewers');
+  logger.debug('Not implemented addReviewers');
   return Promise.resolve();
 }
 
@@ -263,40 +263,40 @@ export function addAssignees(
   number: number,
   assignees: string[],
 ): Promise<void> {
-  logger.debug('NO-OP addAssignees');
+  logger.debug('Not implemented addAssignees');
   return Promise.resolve();
 }
 
 export function deleteLabel(number: number, label: string): Promise<void> {
-  logger.debug('NO-OP deleteLabel');
+  logger.debug('Not implemented deleteLabel');
   return Promise.resolve();
 }
 
 export function getIssueList(): Promise<Issue[]> {
-  logger.debug('NO-OP getIssueList');
+  logger.debug('Not implemented getIssueList');
   return Promise.resolve([]);
 }
 
 export function findIssue(title: string): Promise<Issue | null> {
-  logger.debug('NO-OP findIssue');
+  logger.debug('Not implemented findIssue');
   return Promise.resolve(null);
 }
 
 export function ensureIssue(
   config: EnsureIssueConfig,
 ): Promise<'updated' | 'created' | null> {
-  logger.debug('NO-OP ensureIssue');
+  logger.debug('Not implemented ensureIssue');
   return Promise.resolve(null);
 }
 
 export function ensureIssueClosing(title: string): Promise<void> {
-  logger.debug('NO-OP ensureIssueClosing');
+  logger.debug('Not implemented ensureIssueClosing');
   return Promise.resolve();
 }
 
 /* istanbul ignore next */
 export function ensureComment(config: EnsureCommentConfig): Promise<boolean> {
-  logger.debug('NO-OP ensureComment');
+  logger.debug('Not implemented ensureComment');
   return Promise.resolve(false);
 }
 
@@ -305,7 +305,7 @@ export function ensureCommentRemoval(
     | EnsureCommentRemovalConfigByTopic
     | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
-  logger.debug('NO-OP ensureCommentRemoval');
+  logger.debug('Not implemented ensureCommentRemoval');
   return Promise.resolve();
 }
 
@@ -322,7 +322,7 @@ export function getRawFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<string | null> {
-  logger.debug('NO-OP getRawFile');
+  logger.debug('Not implemented getRawFile');
   return Promise.resolve(null);
 }
 
@@ -331,7 +331,7 @@ export function getJsonFile(
   repoName?: string,
   branchOrTag?: string,
 ): Promise<any> {
-  logger.debug('NO-OP getJsonFile');
+  logger.debug('Not implemented getJsonFile');
   return Promise.resolve(undefined);
 }
 
