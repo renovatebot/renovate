@@ -205,9 +205,6 @@ describe('modules/platform/space/dao', () => {
     })
   });
 
-
-
-
   describe('FindPRConfigPrecate.test()', () => {
     it('should return true', () => {
       expect(1).toBe(2)
