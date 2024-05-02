@@ -64,7 +64,10 @@ export async function initRepo({
   repository,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
-  const hostOptions = hostRules.find({hostType: id, url: scmmClient.getEndpoint()});
+  const hostOptions = hostRules.find({
+    hostType: id,
+    url: scmmClient.getEndpoint(),
+  });
 
   if (!hostOptions.username) {
     throw new Error('Username is not provided');
@@ -76,12 +79,7 @@ export async function initRepo({
 
   const repo = await scmmClient.getRepo(repository);
   const defaultBranch = await scmmClient.getDefaultBranch(repo);
-  const url = getRepoUrl(
-    repo,
-    gitUrl,
-    hostOptions.username,
-    hostOptions.token
-  );
+  const url = getRepoUrl(repo, gitUrl, hostOptions.username, hostOptions.token);
 
   config = {} as any;
   config.repository = repository;

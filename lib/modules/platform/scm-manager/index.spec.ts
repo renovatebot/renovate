@@ -160,7 +160,7 @@ describe('modules/platform/scm-manager/index', () => {
 
     it('should throw error, because token is not provided in host rules', async () => {
       hostRules.clear();
-      hostRules.add({username: user.username});
+      hostRules.add({ username: user.username });
       await expect(
         initRepo({ repository: `${repo.namespace}/${repo.name}` }),
       ).rejects.toThrow('Token is not provided');
