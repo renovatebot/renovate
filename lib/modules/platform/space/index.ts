@@ -117,7 +117,7 @@ export async function findPr(
 
 export async function getPr(number: number): Promise<Pr | null> {
   logger.debug(`SPACE getPr(${number})`);
-  return await dao.getPr(repoConfig.projectKey!, number);
+  return await dao.getMergeRequest(repoConfig.projectKey!, number);
 }
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {

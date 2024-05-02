@@ -148,7 +148,7 @@ export class SpaceDao {
     }
   }
 
-  async getPr(projectKey: string, codeReviewNumber: number): Promise<Pr> {
+  async getMergeRequest(projectKey: string, codeReviewNumber: number): Promise<Pr> {
     logger.debug(`SPACE getPr(${projectKey}, ${codeReviewNumber})`);
     const review = await this.client.codeReview.read.getByCodeReviewNumber(
       projectKey,
