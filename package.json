@@ -176,7 +176,6 @@
     "auth-header": "1.0.0",
     "aws4": "1.12.0",
     "azure-devops-node-api": "13.0.0",
-    "better-sqlite3": "9.5.0",
     "bunyan": "1.8.15",
     "cacache": "18.0.2",
     "cacheable-lookup": "5.0.4",
@@ -252,6 +251,7 @@
     "zod": "3.23.4"
   },
   "optionalDependencies": {
+    "better-sqlite3": "9.5.0",
     "openpgp": "5.11.1",
     "re2": "1.20.10"
   },
