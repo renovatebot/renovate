@@ -12,7 +12,7 @@ describe('modules/platform/space/dao', () => {
   const mockJobs = {getAll: jest.fn()}
 
   const mockCodeReviewWrite = {create: jest.fn()}
-  const mockCodeReviewRead = {find: jest.fn(), getMessages: jest.fn()}
+  const mockCodeReviewRead = {find: jest.fn(), getMessages: jest.fn(), getByCodeReviewNumber: jest.fn()}
   const mockSpaceClient: jest.Mocked<SpaceClient> = {
     repository: mockRepository as any,
     jobs: mockJobs as any,
@@ -105,6 +105,8 @@ describe('modules/platform/space/dao', () => {
     it('should find all merge requests', async () => {
       const projectKey = 'my-project'
       const repository = 'my-repo'
+      const sourceBranch = 'my-feature-branch'
+      const targetBranch = 'my-main-branch'
       const message1 = 'message1'
       const message2 = 'message2'
 
@@ -113,7 +115,7 @@ describe('modules/platform/space/dao', () => {
         number: 1,
         title: 'my awesome pr',
         state: 'Opened',
-        branchPairs: [{sourceBranch: 'my-feature-branch', targetBranch: 'my-main-branch'}],
+        branchPairs: [{sourceBranch, targetBranch}],
         createdAt: 123,
         description: 'please merge it, its awesome',
       }
@@ -123,7 +125,7 @@ describe('modules/platform/space/dao', () => {
         number: 2,
         title: 'another pr',
         state: 'Opened',
-        branchPairs: [{sourceBranch: 'my-feature-branch', targetBranch: 'my-main-branch'}],
+        branchPairs: [{sourceBranch, targetBranch}],
         createdAt: 456,
         description: 'another description',
       }
@@ -138,9 +140,9 @@ describe('modules/platform/space/dao', () => {
           bodyStruct: {
             hash: hashBody(message1),
           },
-          number: 1,
-          sourceBranch: 'my-feature-branch',
-          targetBranch: 'my-main-branch',
+          number: pr1.number,
+          sourceBranch,
+          targetBranch,
           state: "open",
           title: pr1.title,
         },
@@ -148,9 +150,9 @@ describe('modules/platform/space/dao', () => {
           bodyStruct: {
             hash: hashBody(message2),
           },
-          number: 2,
-          sourceBranch: 'my-feature-branch',
-          targetBranch: 'my-main-branch',
+          number: pr2.number,
+          sourceBranch,
+          targetBranch,
           state: "open",
           title: pr2.title,
         },
@@ -163,13 +165,15 @@ describe('modules/platform/space/dao', () => {
       const projectKey = 'my-project'
       const repository = 'my-repo'
       const message1 = 'message1'
+      const sourceBranch = 'my-feature-branch'
+      const targetBranch = 'my-main-branch'
 
       const pr1: SpaceMergeRequestRecord = {
         id: '123',
         number: 1,
         title: 'my awesome pr',
         state: 'Opened',
-        branchPairs: [{sourceBranch: 'my-feature-branch', targetBranch: 'my-main-branch'}],
+        branchPairs: [{sourceBranch, targetBranch}],
         createdAt: 123,
         description: 'please merge it, its awesome',
       }
@@ -179,7 +183,7 @@ describe('modules/platform/space/dao', () => {
         number: 2,
         title: 'another pr',
         state: 'Opened',
-        branchPairs: [{sourceBranch: 'my-feature-branch', targetBranch: 'my-main-branch'}],
+        branchPairs: [{sourceBranch, targetBranch}],
         createdAt: 456,
         description: 'another description',
       }
@@ -194,15 +198,50 @@ describe('modules/platform/space/dao', () => {
         bodyStruct: {
           hash: hashBody(message1),
         },
-        number: 1,
-        sourceBranch: 'my-feature-branch',
-        targetBranch: 'my-main-branch',
+        number: pr1.number,
+        sourceBranch,
+        targetBranch,
         state: "open",
         title: pr1.title,
       });
 
       expect(mockCodeReviewRead.find).toHaveBeenCalledTimes(1)
     })
+  });
+
+  describe('getMergeRequest()', () => {
+    it('should get merge request by number', async () => {
+      const projectKey = 'my-project'
+      const codeReviewNumber = 10
+      const message1 = 'message1'
+      const sourceBranch = 'my-feature-branch'
+      const targetBranch = 'my-main-branch'
+
+      const pr: SpaceMergeRequestRecord = {
+        id: '123',
+        number: codeReviewNumber,
+        title: 'my awesome pr',
+        state: 'Opened',
+        branchPairs: [{sourceBranch, targetBranch}],
+        createdAt: 123,
+        description: 'please merge it, its awesome',
+      }
+
+      mockCodeReviewRead.getByCodeReviewNumber.mockReturnValueOnce(pr)
+
+      mockMergeRequestBody(projectKey, pr.id, pr.number, message1)
+
+      expect(await dao.getMergeRequest(projectKey, codeReviewNumber)).toEqual({
+        bodyStruct: {
+          hash: hashBody(message1),
+        },
+        number: pr.number,
+        sourceBranch,
+        targetBranch,
+        state: "open",
+        title: pr.title,
+      });
+    });
   });
 
   describe('FindPRConfigPrecate.test()', () => {
