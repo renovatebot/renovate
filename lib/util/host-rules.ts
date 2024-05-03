@@ -73,6 +73,7 @@ export function add(params: HostRule): void {
 export interface HostRuleSearch {
   hostType?: string;
   url?: string;
+  readOnly?: boolean;
 }
 
 function matchesHost(url: string, matchHost: string): boolean {
@@ -107,8 +108,9 @@ function fromShorterToLongerMatchHost(a: HostRule, b: HostRule): number {
   return a.matchHost.length - b.matchHost.length;
 }
 
-function hostRuleRank({ hostType, matchHost }: HostRule): number {
-  if (hostType && matchHost) {
+function hostRuleRank({ hostType, matchHost, readOnly }: HostRule): number {
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+  if ((hostType || readOnly) && matchHost) {
     return 3;
   }
 
@@ -142,6 +144,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
   for (const rule of sortedRules) {
     let hostTypeMatch = true;
     let hostMatch = true;
+    let readOnlyMatch = true;
 
     if (rule.hostType) {
       hostTypeMatch = false;
@@ -157,7 +160,15 @@ export function find(search: HostRuleSearch): CombinedHostRule {
       }
     }
 
-    if (hostTypeMatch && hostMatch) {
+    if (!is.undefined(rule.readOnly)) {
+      readOnlyMatch = false;
+      if (search.readOnly === rule.readOnly) {
+        readOnlyMatch = true;
+        hostTypeMatch = true; // When we match `readOnly`, we don't care about `hostType`
+      }
+    }
+
+    if (hostTypeMatch && readOnlyMatch && hostMatch) {
       matchedRules.push(clone(rule));
     }
   }
@@ -166,6 +177,7 @@ export function find(search: HostRuleSearch): CombinedHostRule {
   delete res.hostType;
   delete res.resolvedHost;
   delete res.matchHost;
+  delete res.readOnly;
   return res;
 }
 

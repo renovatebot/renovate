@@ -3,6 +3,7 @@ import merge from 'deepmerge';
 import got, { Options, RequestError } from 'got';
 import type { SetRequired } from 'type-fest';
 import { infer as Infer, type ZodError, ZodType } from 'zod';
+import { GlobalConfig } from '../../config/global';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
@@ -50,7 +51,7 @@ function applyDefaultHeaders(options: Options): void {
   options.headers = {
     ...options.headers,
     'user-agent':
-      process.env.RENOVATE_USER_AGENT ??
+      GlobalConfig.get('userAgent') ??
       `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`,
   };
 }
@@ -161,6 +162,13 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     };
 
     applyDefaultHeaders(options);
+
+    if (
+      is.undefined(options.readOnly) &&
+      ['head', 'get'].includes(options.method)
+    ) {
+      options.readOnly = true;
+    }
 
     const hostRule = findMatchingRule(url, options);
     options = applyHostRule(url, options, hostRule);
@@ -457,6 +465,14 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
 
     applyDefaultHeaders(combinedOptions);
+
+    if (
+      is.undefined(combinedOptions.readOnly) &&
+      ['head', 'get'].includes(combinedOptions.method)
+    ) {
+      combinedOptions.readOnly = true;
+    }
+
     const hostRule = findMatchingRule(url, combinedOptions);
     combinedOptions = applyHostRule(resolvedUrl, combinedOptions, hostRule);
     if (combinedOptions.enabled === false) {
