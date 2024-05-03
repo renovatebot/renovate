@@ -28,10 +28,6 @@ Skipping the check will speed things up, but may result in versions being return
 
 If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
-## `RENOVATE_USER_AGENT`
-
-If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
-
 ## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
 
 <!-- prettier-ignore -->
@@ -134,7 +130,7 @@ If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
 
 Then you must set this variable at the _server_ and the _workers_.
 
-But if you have specified the token as a [`matchConfidence`](https://docs.renovatebot.com/configuration-options/#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
+But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
 
 This feature is in private beta.
 

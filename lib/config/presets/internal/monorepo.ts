@@ -279,6 +279,7 @@ const repoGroups = {
   emotion: 'https://github.com/emotion-js/emotion',
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
+  'eslint-stylistic': 'https://github.com/eslint-stylistic/eslint-stylistic',
   expo: 'https://github.com/expo/expo',
   'fabric-chaincode-node':
     'https://github.com/hyperledger/fabric-chaincode-node',

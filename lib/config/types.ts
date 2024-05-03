@@ -159,6 +159,7 @@ export interface RepoGlobalConfig {
   privateKey?: string;
   privateKeyOld?: string;
   httpCacheTtlDays?: number;
+  userAgent?: string;
 }
 
 export interface LegacyAdminConfig {
