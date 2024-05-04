@@ -34,7 +34,7 @@ export class GerritScm extends DefaultGitScm {
       .findChanges(repository, searchConfig, true)
       .then((res) => res.pop());
     if (change) {
-      return change.current_revision! as LongCommitSha;
+      return change.current_revision as LongCommitSha;
     }
     return git.getBranchCommit(branchName);
   }
@@ -52,7 +52,7 @@ export class GerritScm extends DefaultGitScm {
       .findChanges(repository, searchConfig, true)
       .then((res) => res.pop());
     if (change) {
-      const currentGerritPatchset = change.revisions![change.current_revision!];
+      const currentGerritPatchset = change.revisions[change.current_revision];
       return currentGerritPatchset.actions?.['rebase'].enabled === true;
     }
     return true;
@@ -85,7 +85,7 @@ export class GerritScm extends DefaultGitScm {
       .findChanges(repository, searchConfig, true)
       .then((res) => res.pop());
     if (change) {
-      const currentGerritPatchset = change.revisions![change.current_revision!];
+      const currentGerritPatchset = change.revisions[change.current_revision];
       return currentGerritPatchset.uploader.username !== username;
     }
     return false;
@@ -154,7 +154,7 @@ export class GerritScm extends DefaultGitScm {
       .then((res) => res.pop());
     if (change) {
       return super.mergeToLocal(
-        change.revisions![change.current_revision!].ref,
+        change.revisions[change.current_revision].ref,
       );
     }
     return super.mergeToLocal(branchName);
