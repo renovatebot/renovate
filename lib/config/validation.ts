@@ -833,15 +833,22 @@ function validateRegexManagerFields(
     });
   }
 
-  const mandatoryFields = ['depName', 'currentValue', 'datasource'];
-  for (const field of mandatoryFields) {
+  function hasField(
+    customManager: Partial<RegexManagerConfig>,
+    field: string,
+  ): boolean {
     const templateField = `${field}Template` as keyof RegexManagerTemplates;
-    if (
-      !customManager[templateField] &&
-      !customManager.matchStrings?.some((matchString) =>
+    return !!(
+      customManager[templateField] ||
+      customManager.matchStrings?.some((matchString) =>
         matchString.includes(`(?<${field}>`),
       )
-    ) {
+    );
+  }
+
+  const mandatoryFields = ['depName', 'currentValue', 'datasource'];
+  for (const field of mandatoryFields) {
+    if (!hasField(customManager, field)) {
       errors.push({
         topic: 'Configuration Error',
         message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
