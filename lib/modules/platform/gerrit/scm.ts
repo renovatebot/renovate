@@ -153,9 +153,7 @@ export class GerritScm extends DefaultGitScm {
       .findChanges(repository, searchConfig, true)
       .then((res) => res.pop());
     if (change) {
-      return super.mergeToLocal(
-        change.revisions[change.current_revision].ref,
-      );
+      return super.mergeToLocal(change.revisions[change.current_revision].ref);
     }
     return super.mergeToLocal(branchName);
   }
