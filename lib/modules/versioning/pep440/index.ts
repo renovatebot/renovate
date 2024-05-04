@@ -1,4 +1,5 @@
 import * as pep440 from '@renovatebot/pep440';
+import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import type { VersioningApi } from '../types';
 import { getNewValue, isLessThanRange } from './range';
@@ -16,7 +17,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 
 const {
   compare: sortVersions,
-  satisfies: matches,
+  satisfies,
   valid,
   validRange,
   explain,
@@ -73,6 +74,9 @@ export { isVersion, matches };
 
 const equals = (version1: string, version2: string): boolean =>
   isVersion(version1) && isVersion(version2) && eq(version1, version2);
+
+const matches = (version: string, range: string): boolean =>
+  isVersion(version) && isValid(range) && satisfies(version, range);
 
 export const api: VersioningApi = {
   equals,
