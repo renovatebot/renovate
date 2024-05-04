@@ -1,5 +1,4 @@
 import * as pep440 from '@renovatebot/pep440';
-import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import type { VersioningApi } from '../types';
 import { getNewValue, isLessThanRange } from './range';
