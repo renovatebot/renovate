@@ -2851,6 +2851,8 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 
 ### matchDepNames
 
+This field behaves the same as `matchPackageNames` except it matches against `depName` instead of `packageName`.
+
 ### matchDepPatterns
 
 ### matchDepPrefixes

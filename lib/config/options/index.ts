@@ -1342,7 +1342,6 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
-    advancedUse: true,
   },
   {
     name: 'excludeDepNames',
