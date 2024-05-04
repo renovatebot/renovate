@@ -29,7 +29,7 @@ Before Renovate can look up a dependency and decide about updates, it needs this
 Configuration-wise, it works like this:
 
 - You must capture the `currentValue` of the dependency in a named capture group
-- You must have either a `depName` capture group or a `depNameTemplate` config field
+- You must have either a `depName` capture group or a `depNameTemplate` config field, or `packageName` or `packageNameTemplate`
 - You can optionally have a `packageName` capture group or a `packageNameTemplate` if it differs from `depName`
 - You must have either a `datasource` capture group or a `datasourceTemplate` config field
 - You can optionally have a `depType` capture group or a `depTypeTemplate` config field
@@ -88,15 +88,13 @@ But you don't want to write a regex custom manager rule for _each_ variable.
 Instead you enhance your `Dockerfile` like this:
 
 ```Dockerfile
-ARG IMAGE=node:12@sha256:6e5264cd4cfaefd7174b2bc10c7f9a1c2b99d98d127fc57a802d264da9fb43bd
-FROM ${IMAGE}
-# renovate: datasource=github-tags depName=nodejs/node versioning=node
-ENV NODE_VERSION=10.19.0
-# renovate: datasource=github-releases depName=composer/composer
+# renovate: datasource=github-tags depName=node packageName=nodejs/node versioning=node
+ENV NODE_VERSION=20.10.0
+# renovate: datasource=github-releases depName=composer packageName=composer/composer
 ENV COMPOSER_VERSION=1.9.3
-# renovate: datasource=docker depName=docker versioning=docker
+# renovate: datasource=docker packageName=docker versioning=docker
 ENV DOCKER_VERSION=19.03.1
-# renovate: datasource=npm depName=yarn
+# renovate: datasource=npm packageName=yarn
 ENV YARN_VERSION=1.19.1
 ```
 
@@ -109,18 +107,11 @@ You could configure Renovate to update the `Dockerfile` like this:
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^Dockerfile$"],
+      "description": "Update _VERSION variables in Dockerfiles",
+      "fileMatch": ["(^|/|\\.)Dockerfile$", "(^|/)Dockerfile\\.[^/]*$"],
       "matchStrings": [
-        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=(?<currentValue>.*)\\s"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
-    },
-    {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": [
-        "ARG IMAGE=(?<depName>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:[a-f0-9]+)\\s"
-      ],
-      "datasourceTemplate": "docker"
+        "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? packageName=(?<packageName>.+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s(?:ENV|ARG) .+?_VERSION=(?<currentValue>.+?)\\s"
+      ]
     }
   ]
 }

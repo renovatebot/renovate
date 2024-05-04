@@ -746,6 +746,16 @@ describe('config/validation', () => {
             extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
             depTypeTemplate: 'apple',
           },
+          {
+            customType: 'regex',
+            fileMatch: ['Dockerfile'],
+            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
+            packageNameTemplate: 'foo',
+            datasourceTemplate: 'bar',
+            registryUrlTemplate: 'foobar',
+            extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
+            depTypeTemplate: 'apple',
+          },
         ],
       };
       const { warnings, errors } = await configValidation.validateConfig(

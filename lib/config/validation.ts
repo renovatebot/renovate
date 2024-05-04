@@ -846,7 +846,7 @@ function validateRegexManagerFields(
     });
   }
 
-  const mandatoryFields = ['depName', 'currentValue', 'datasource'];
+  const mandatoryFields = ['currentValue', 'datasource'];
   for (const field of mandatoryFields) {
     if (!hasField(customManager, field)) {
       errors.push({
@@ -854,6 +854,14 @@ function validateRegexManagerFields(
         message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
       });
     }
+  }
+
+  const nameFields = ['depName', 'packageName'];
+  if (!nameFields.some((field) => hasField(customManager, field))) {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `Regex Managers must contain depName or packageName regex groups or templates`,
+    });
   }
 }
 
