@@ -806,6 +806,19 @@ export async function validateConfig(
   return { errors, warnings };
 }
 
+function hasField(
+  customManager: Partial<RegexManagerConfig>,
+  field: string,
+): boolean {
+  const templateField = `${field}Template` as keyof RegexManagerTemplates;
+  return !!(
+    customManager[templateField] ||
+    customManager.matchStrings?.some((matchString) =>
+      matchString.includes(`(?<${field}>`),
+    )
+  );
+}
+
 function validateRegexManagerFields(
   customManager: Partial<RegexManagerConfig>,
   currentPath: string,
@@ -831,19 +844,6 @@ function validateRegexManagerFields(
       topic: 'Configuration Error',
       message: `Each Custom Manager must contain a non-empty matchStrings array`,
     });
-  }
-
-  function hasField(
-    customManager: Partial<RegexManagerConfig>,
-    field: string,
-  ): boolean {
-    const templateField = `${field}Template` as keyof RegexManagerTemplates;
-    return !!(
-      customManager[templateField] ||
-      customManager.matchStrings?.some((matchString) =>
-        matchString.includes(`(?<${field}>`),
-      )
-    );
   }
 
   const mandatoryFields = ['depName', 'currentValue', 'datasource'];
