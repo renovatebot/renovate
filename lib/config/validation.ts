@@ -812,7 +812,7 @@ function hasField(
 ): boolean {
   const templateField = `${field}Template` as keyof RegexManagerTemplates;
   return !!(
-    customManager[templateField] ||
+    customManager[templateField] ??
     customManager.matchStrings?.some((matchString) =>
       matchString.includes(`(?<${field}>`),
     )
