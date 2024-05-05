@@ -1,7 +1,7 @@
 import { check } from './regex-glob-matchers';
 
 describe('config/validation-helpers/regex-glob-matchers', () => {
-  it('should have errors', () => {
+  it('should error for multiple match alls', () => {
     const res = check({
       val: ['*', '**'],
       currentPath: 'hostRules[0].allowedHeaders',
@@ -9,7 +9,15 @@ describe('config/validation-helpers/regex-glob-matchers', () => {
     expect(res).toHaveLength(1);
   });
 
-  it('should have errors - 2', () => {
+  it('should error for invalid regex', () => {
+    const res = check({
+      val: ['[', '/[/', '/.*[/'],
+      currentPath: 'hostRules[0].allowedHeaders',
+    });
+    expect(res).toHaveLength(2);
+  });
+
+  it('should error for non-strings', () => {
     const res = check({
       val: ['*', 2],
       currentPath: 'hostRules[0].allowedHeaders',

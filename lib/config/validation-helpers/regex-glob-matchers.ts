@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { getRegexPredicate, isRegexMatch } from '../../util/string-match';
 import type { ValidationMessage } from '../types';
 import type { CheckMatcherArgs } from './types';
 
@@ -9,22 +10,33 @@ export function check({
   val,
   currentPath,
 }: CheckMatcherArgs): ValidationMessage[] {
-  let errMessage: string | undefined;
+  const res: ValidationMessage[] = [];
 
   if (is.array(val, is.string)) {
     if ((val.includes('*') || val.includes('**')) && val.length > 1) {
-      errMessage = `${currentPath}: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.`;
+      res.push({
+        topic: 'Configuration Error',
+        message: `${currentPath}: Your input contains * or ** along with other patterns. Please remove them, as * or ** matches all patterns.`,
+      });
+    }
+    for (const pattern of val) {
+      // Validate regex pattern
+      if (isRegexMatch(pattern)) {
+        const autodiscoveryPred = getRegexPredicate(pattern);
+        if (!autodiscoveryPred) {
+          res.push({
+            topic: 'Configuration Error',
+            message: `Failed to parse regex pattern "${pattern}"`,
+          });
+        }
+      }
     }
   } else {
-    errMessage = `${currentPath}: should be an array of strings. You have included ${typeof val}.`;
+    res.push({
+      topic: 'Configuration Error',
+      message: `${currentPath}: should be an array of strings. You have included ${typeof val}.`,
+    });
   }
 
-  return errMessage
-    ? [
-        {
-          topic: 'Configuration Error',
-          message: errMessage,
-        },
-      ]
-    : [];
+  return res;
 }
