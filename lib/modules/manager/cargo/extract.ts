@@ -191,6 +191,14 @@ function resolveRegistryIndex(
     );
   }
 
+  const sourceRegistry = config.source?.[registryName]?.registry;
+  if (sourceRegistry) {
+    logger.debug(
+      `Replacing cargo source registry with ${sourceRegistry} for ${registryName}`,
+    );
+    return sourceRegistry;
+  }
+
   const registryIndex = config.registries?.[registryName]?.index;
   if (registryIndex) {
     return registryIndex;
