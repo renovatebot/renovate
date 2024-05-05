@@ -75,6 +75,7 @@ import {
 import { GithubIssueCache, GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
+import { VulnerabilityAlertSchema } from './schema';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -1959,16 +1960,16 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     return [];
   }
   let vulnerabilityAlerts: VulnerabilityAlert[] | undefined;
-
   try {
     vulnerabilityAlerts = (
-      await githubApi.getJson<VulnerabilityAlert[]>(
+      await githubApi.getJson(
         `/repos/${config.repositoryOwner}/${config.repositoryName}/dependabot/alerts?state=open`,
         {
           paginate: false,
           headers: { accept: 'application/vnd.github+json' },
           cacheProvider: repoCacheProvider,
         },
+        VulnerabilityAlertSchema,
       )
     ).body;
   } catch (err) {
@@ -1980,14 +1981,15 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       'Cannot access vulnerability alerts. Please ensure permissions have been granted.',
     );
   }
-  let alerts: VulnerabilityAlert[] = [];
   try {
     if (vulnerabilityAlerts?.length) {
-      alerts = vulnerabilityAlerts;
       const shortAlerts: AggregatedVulnerabilities = {};
-      if (alerts.length) {
-        logger.trace({ alerts }, 'GitHub vulnerability details');
-        for (const alert of alerts) {
+      if (vulnerabilityAlerts.length) {
+        logger.trace(
+          { alerts: vulnerabilityAlerts },
+          'GitHub vulnerability details',
+        );
+        for (const alert of vulnerabilityAlerts) {
           if (alert.security_vulnerability === null) {
             // As described in the documentation, there are cases in which
             // GitHub API responds with `"securityVulnerability": null`.
@@ -2015,7 +2017,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
-  return alerts;
+  return vulnerabilityAlerts ?? [];
 }
 
 async function pushFiles(

@@ -3783,12 +3783,15 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope.get('/repos/some/repo/dependabot/alerts?state=open').reply(200, [
         {
-          security_advisory: { severity: 'high', references: [] },
+          security_advisory: {
+            description: 'description',
+            identifiers: [{ type: 'type', value: 'value' }],
+            references: [],
+          },
           security_vulnerability: {
             package: {
               ecosystem: 'npm',
               name: 'left-pad',
-              scope: 'runtime',
             },
             vulnerable_version_range: '0.0.2',
             first_patched_version: { identifier: '0.0.3' },
@@ -3832,12 +3835,15 @@ describe('modules/platform/github/index', () => {
       initRepoMock(scope, 'some/repo');
       scope.get('/repos/some/repo/dependabot/alerts?state=open').reply(200, [
         {
-          security_advisory: { severity: 'high', references: [] },
+          security_advisory: {
+            description: 'description',
+            identifiers: [{ type: 'type', value: 'value' }],
+            references: [],
+          },
           security_vulnerability: {
             package: {
               ecosystem: 'npm',
               name: 'left-pad',
-              scope: 'runtime',
             },
             vulnerable_version_range: '0.0.2',
             first_patched_version: { identifier: '0.0.3' },
@@ -3848,7 +3854,11 @@ describe('modules/platform/github/index', () => {
         },
 
         {
-          security_advisory: { severity: 'high', references: [] },
+          security_advisory: {
+            description: 'description',
+            identifiers: [{ type: 'type', value: 'value' }],
+            references: [],
+          },
           security_vulnerability: null,
           dependency: {
             manifest_path: 'bar/foo',
