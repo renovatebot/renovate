@@ -248,7 +248,7 @@ describe('config/migration', () => {
 
     it('migrates packages', () => {
       const config = {
-        packageRules: [
+        packages: [
           {
             packagePatterns: '^(@angular|typescript)',
             groupName: ['angular packages'],
