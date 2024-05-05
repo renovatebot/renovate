@@ -29,7 +29,7 @@ Before Renovate can look up a dependency and decide about updates, it needs this
 Configuration-wise, it works like this:
 
 - You must capture the `currentValue` of the dependency in a named capture group
-- You must have either a `depName` or `packageName` capture group, or use on of the respective template fields (  `depNameTemplate` and `packageNameTemplate` )
+- You must have either a `depName` or `packageName` capture group, or use on of the respective template fields ( `depNameTemplate` and `packageNameTemplate` )
 - You must have either a `datasource` capture group or a `datasourceTemplate` config field
 - You can optionally have a `depType` capture group or a `depTypeTemplate` config field
 - You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, Renovate will use `semver-coerced` as the default
