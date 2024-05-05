@@ -13,6 +13,7 @@ const options: RenovateOptions[] = [
     default: ['X-*'],
     subType: 'string',
     globalOnly: true,
+    patternMatch: true,
   },
   {
     name: 'allowedEnv',
@@ -22,6 +23,7 @@ const options: RenovateOptions[] = [
     default: [],
     subType: 'string',
     globalOnly: true,
+    patternMatch: true,
   },
   {
     name: 'detectGlobalManagerConfig',
@@ -463,7 +465,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.0',
+    default: 'ghcr.io/containerbase/sidecar:10.6.1',
     globalOnly: true,
   },
   {
@@ -957,6 +959,7 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     supportedPlatforms: ['bitbucket'],
+    patternMatch: true,
   },
   {
     name: 'autodiscoverTopics',
@@ -1238,6 +1241,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'excludeRepositories',
