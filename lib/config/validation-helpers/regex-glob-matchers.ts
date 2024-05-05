@@ -25,8 +25,7 @@ export function check({
     for (const matcher of matchers) {
       // Validate regex pattern
       if (isRegexMatch(matcher)) {
-        const autodiscoveryPred = getRegexPredicate(matcher);
-        if (!autodiscoveryPred) {
+        if (!getRegexPredicate(matcher)) {
           res.push({
             topic: 'Configuration Error',
             message: `Failed to parse regex pattern "${matcher}"`,
