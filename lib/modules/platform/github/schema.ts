@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { LooseArray } from '../../../util/schema-utils';
 
 const PackageSchema = z.object({
   ecosystem: z.union([
@@ -33,7 +34,7 @@ const SecurityAdvisorySchema = z.object({
   references: z.array(z.object({ url: z.string() })).optional(),
 });
 
-export const VulnerabilityAlertSchema = z.array(
+export const VulnerabilityAlertSchema = LooseArray(
   z.object({
     dismissed_reason: z.string().nullish(),
     security_advisory: SecurityAdvisorySchema,
