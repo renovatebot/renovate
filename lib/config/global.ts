@@ -34,6 +34,7 @@ export class GlobalConfig {
     'endpoint',
     'experimentalFlags',
     'httpCacheTtlDays',
+    'userAgent',
   ];
 
   private static config: RepoGlobalConfig = {};
