@@ -37,7 +37,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 
 Presets are repo-hosted, and you can have one or more presets hosted per repository.
 If you omit a file name from your preset (e.g. `github>abc/foo`) then Renovate will look for a `default.json` file in the repo.
-If you wish to have an alternative file name, you need to specify it (e.g. `github>abc/foo:alternative-name.json5`).
+If you wish to have an alternative file name, you need to specify it (e.g. `github>abc/foo//alternative-name.json5`).
 
 <!-- prettier-ignore -->
 !!! warning
