@@ -689,7 +689,7 @@ The `regex` manager which is based on using Regular Expression named capture gro
 You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
 
 - `datasource`
-- `depName` or `packageName` (either or both is OK)
+- `depName` and / or `packageName`
 - `currentValue`
 
 Use named capture group matching _or_ set a corresponding template.
