@@ -907,6 +907,7 @@ export const presets: Record<string, Preset> = {
       '`standard-version` is now maintained as `commit-and-tag-version`.',
     packageRules: [
       {
+        matchCurrentVersion: '^9.0.0',
         matchDatasources: ['npm'],
         matchPackageNames: ['standard-version'],
         replacementName: 'commit-and-tag-version',
