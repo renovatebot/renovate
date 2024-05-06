@@ -8,12 +8,14 @@ import type { ExecOptions, ExtraEnv, Opt } from '../../../util/exec/types';
 import {
   deleteLocalFile,
   ensureCacheDir,
+  getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { parse as parseToml } from '../../../util/toml';
 import { parseUrl } from '../../../util/url';
 import { PypiDatasource } from '../../datasource/pypi';
 import type {
@@ -24,38 +26,83 @@ import type {
 import { extractPackageFile } from './extract';
 import { PipfileLockSchema } from './schema';
 
-export function getPythonConstraint(
+export async function getPythonConstraint(
+  pipfileName: string,
+  pipfileContent: string,
   existingLockFileContent: string,
   config: UpdateArtifactsConfig,
-): string | undefined {
+): Promise<string | undefined> {
   const { constraints = {} } = config;
   const { python } = constraints;
 
   if (python) {
-    logger.debug('Using python constraint from config');
+    logger.debug(`Using python constraint ${python} from config`);
     return python;
   }
+
+  // Try Pipfile first because it may have had its Python version updated
+  try {
+    const pipfile = parseToml(pipfileContent) as any;
+    const pythonFullVersion = pipfile.requires.python_full_version;
+    if (pythonFullVersion) {
+      logger.debug(
+        `Using python full version ${pythonFullVersion} from Pipfile`,
+      );
+      return `== ${pythonFullVersion}`;
+    }
+    const pythonVersion = pipfile.requires.python_version;
+    if (pythonVersion) {
+      logger.debug(`Using python version ${pythonVersion} from Pipfile`);
+      return `== ${pythonVersion}.*`;
+    }
+  } catch (err) {
+    logger.warn({ err }, 'Error parsing Pipfile');
+  }
+
+  // Try Pipfile.lock next
   try {
     const result = PipfileLockSchema.safeParse(existingLockFileContent);
     // istanbul ignore if: not easily testable
     if (!result.success) {
-      logger.warn({ error: result.error }, 'Invalid Pipfile.lock');
+      logger.warn({ err: result.error }, 'Invalid Pipfile.lock');
       return undefined;
     }
     // Exact python version has been included since 2022.10.9. It is more specific than the major.minor version
     // https://github.com/pypa/pipenv/blob/main/CHANGELOG.md#2022109-2022-10-09
-    if (result.data._meta?.requires?.python_full_version) {
-      const pythonFullVersion = result.data._meta.requires.python_full_version;
+    const pythonFullVersion = result.data._meta?.requires?.python_full_version;
+    if (pythonFullVersion) {
+      logger.debug(
+        `Using python full version ${pythonFullVersion} from Pipfile.lock`,
+      );
       return `== ${pythonFullVersion}`;
     }
     // Before 2022.10.9, only the major.minor version was included
-    if (result.data._meta?.requires?.python_version) {
-      const pythonVersion = result.data._meta.requires.python_version;
+    const pythonVersion = result.data._meta?.requires?.python_version;
+    if (pythonVersion) {
+      logger.debug(`Using python version ${pythonVersion} from Pipfile.lock`);
       return `== ${pythonVersion}.*`;
     }
   } catch (err) {
     // Do nothing
   }
+
+  // Try looking for the contents of .python-version
+  const pythonVersionFileName = getSiblingFileName(
+    pipfileName,
+    '.python-version',
+  );
+  try {
+    const pythonVersion = await readLocalFile(pythonVersionFileName, 'utf8');
+    if (semver.valid(pythonVersion)) {
+      logger.debug(
+        `Using python version ${pythonVersion} from .python-version`,
+      );
+      return `== ${pythonVersion}.*`;
+    }
+  } catch (err) {
+    // Do nothing
+  }
+
   return undefined;
 }
 
@@ -233,7 +280,12 @@ export async function updateArtifacts({
       await deleteLocalFile(lockFileName);
     }
     const cmd = 'pipenv lock';
-    const tagConstraint = getPythonConstraint(existingLockFileContent, config);
+    const tagConstraint = await getPythonConstraint(
+      pipfileName,
+      newPipfileContent,
+      existingLockFileContent,
+      config,
+    );
     const pipenvConstraint = getPipenvConstraint(
       existingLockFileContent,
       config,
