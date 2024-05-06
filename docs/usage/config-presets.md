@@ -260,10 +260,10 @@ Here you can make use of templating to validate and load the preset on branch le
 // config.js
 module.exports = {
   customEnvVariables: {
-    GITLAB_REF: process.env.CI_COMMIT_REF_NAME || "main",
+    GITLAB_REF: process.env.CI_COMMIT_REF_NAME || 'main',
   },
-  extends: ["local>renovate/presets#{{ env.GITLAB_REF }}"]
-}
+  extends: ['local>renovate/presets#{{ env.GITLAB_REF }}'],
+};
 ```
 
 ## Contributing to presets
