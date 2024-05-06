@@ -68,15 +68,16 @@ In short, users who set `constraintsFiltering=strict` often do not understand ho
 
 ## Transitive constraint limitations
 
-It is a common problem that a library may declare language constraints (such as the `engines` from the above examples) but then itself depend on one or more libraries which have narrower contraints (such as `"node": "^20.0.0"`).
-In such scenarios Renovate "trusts" the declaration of the library and may propose it as an update even with strict constraints filtering.
+Often a library sets language constraints (like the `engines` examples above), and then depend on libraries with _narrower_ contraints, like `"node": "^20.0.0"`.
+In cases like these, Renovate "trusts" the declaration of the library and may create a update, even _with_ strict constraints filtering.
 
-For some package managers, such as npm, this incompatibility won't be detected or warned (even during lock file generation), although it may also not be a problem in your application either.
-Other package managers, such as Poetry, may detect incompatible language constraints during lock file generation and Renovate will report that as an "Artifacts update error".
+For some package managers, like `npm`, this incompatibility will _not_ be detected or warned about (even during lock file generation), but this may not be a problem for your application.
+Other package managers, like Poetry, may detect and warn about incompatible language constraints during lock file generation, which Renovate reports as an "Artifacts update error".
 
 ## Applying constraints through config
 
-Renovate supports the manual configuration of language constraints in its config. For example:
+You can set language constraints in the Renovate config.
+For example:
 
 ```json title="Renovate config with Node.js constraints"
 {
@@ -86,18 +87,19 @@ Renovate supports the manual configuration of language constraints in its config
 }
 ```
 
-Defining constraints manually using Renovate config can be necessary for the following use cases:
+You may need to set constraints in the Renovate config when:
 
-- The package manager of the project doesn't support constraints declarations, or
-- The project hassn't declared any constraints, or
-- The user wants Renovate to use different constraints to what's declared in the project.
+- The package manager of the project does not support constraints declarations, or
+- The project has not declared any constraints, or
+- You want Renovate to use _different_ constraints to what's declared in the _project_
 
-Renovate will not propose "update" PRs proposing to update any of these versions once they become outdated, so the user is responsible for keeping them updated manually.
-For this reason, configuring constraints manually in config is considered _undesirable_ and we'd prefer to fix problems in Renovate instead if that's the reason for needing it.
+Renovate will _not_ create "update" PRs to update any of these versions once they become outdated, so you must update those by hand.
+For this reason, setting constraints manually in the Renovate config is _undesirable_.
+We prefer to fix problems in Renovate itself, instead of you setting constraints.
 
 ## Future Work
 
-Please start or join a GitHub Discussion if you have an interest in this topic.
+Please start, or join, a GitHub Discussion if you are interested in this topic.
 Subtopics include:
 
 - Improving language constraints update automation in package files
