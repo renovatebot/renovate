@@ -241,6 +241,17 @@ describe('workers/repository/dependency-dashboard', () => {
       logger.getProblems.mockReturnValue([]);
     });
 
+    it('does nothing if mode=silent', async () => {
+      const branches: BranchConfig[] = [];
+      config.mode = 'silent';
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
+
+      // same with dry run
+      await dryRun(branches, platform, 0, 0);
+    });
+
     it('do nothing if dependencyDashboard is disabled', async () => {
       const branches: BranchConfig[] = [];
       await dependencyDashboard.ensureDependencyDashboard(config, branches);

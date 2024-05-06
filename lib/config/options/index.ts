@@ -6,6 +6,13 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'mode',
+    description: 'Mode of operation.',
+    type: 'string',
+    default: 'full',
+    allowedValues: ['full', 'silent'],
+  },
+  {
     name: 'allowedHeaders',
     description:
       'List of allowed patterns for header names in repository hostRules config.',

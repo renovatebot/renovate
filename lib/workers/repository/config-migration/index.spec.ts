@@ -28,6 +28,13 @@ describe('workers/repository/config-migration/index', () => {
     });
   });
 
+  it('does nothing when in silent mode', async () => {
+    await configMigration({ ...config, mode: 'silent' }, []);
+    expect(MigratedDataFactory.getAsync).toHaveBeenCalledTimes(0);
+    expect(checkConfigMigrationBranch).toHaveBeenCalledTimes(0);
+    expect(ensureConfigMigrationPr).toHaveBeenCalledTimes(0);
+  });
+
   it('does nothing when config migration is disabled', async () => {
     await configMigration({ ...config, configMigration: false }, []);
     expect(MigratedDataFactory.getAsync).toHaveBeenCalledTimes(0);

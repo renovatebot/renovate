@@ -181,6 +181,12 @@ export async function ensureDependencyDashboard(
   packageFiles: Record<string, PackageFile[]> = {},
 ): Promise<void> {
   logger.debug('ensureDependencyDashboard()');
+  if (config.mode === 'silent') {
+    logger.debug(
+      'Dependency Dashboard issue is not created, updated or closed when mode=silent',
+    );
+    return;
+  }
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   const branches = allBranches.filter(
