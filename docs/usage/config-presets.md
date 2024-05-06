@@ -245,23 +245,25 @@ Read the [templates](./templates.md) section to learn more.
 
 ### Example use-case
 
-The following example shows a self-hosted Renovate configuration for a company called "Renovators".
-The company is split into multiple organizations:
+The following example shows a self-hosted Renovate preset located in a GitLab repository `renovate/presets`.
 
-- `foo`
-- `bar`
-- `baz`
+```json
+{
+  "extends": ["local>renovate/presets"]
+}
+```
 
-Each organization provides its opinionated shareable preset.
-Renovate is configured to load the preset of each organization dynamically based on the `ORGANIZATION_SLUG` environment variable.
+Usually you want to validate the preset before blindly using it in your Renovate configuration.
+Here you can make use of templating to validate and load the preset on branch level:
 
 ```javascript
+// config.js
 module.exports = {
   customEnvVariables: {
-    ORGANIZATION_SLUG: process.env.ORGANIZATION_SLUG,
+    GITLAB_REF: process.env.CI_COMMIT_REF_NAME || "main",
   },
-  extends: ['local>{{ env.ORGANIZATION_SLUG }}/renovate'],
-};
+  extends: ["local>renovate/presets#{{ env.GITLAB_REF }}"]
+}
 ```
 
 ## Contributing to presets
