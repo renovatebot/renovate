@@ -15,6 +15,12 @@ export async function raiseDeprecationWarnings(
   if (config.suppressNotifications?.includes('deprecationWarningIssues')) {
     return;
   }
+  if (config.mode === 'silent') {
+    logger.debug(
+      `Deprecation warning issues are not created, updated or closed when mode=silent`,
+    );
+    return;
+  }
   for (const [manager, files] of Object.entries(packageFiles)) {
     const deprecatedPackages: Record<
       string,

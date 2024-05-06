@@ -3,6 +3,7 @@ import merge from 'deepmerge';
 import got, { Options, RequestError } from 'got';
 import type { SetRequired } from 'type-fest';
 import { infer as Infer, type ZodError, ZodType } from 'zod';
+import { GlobalConfig } from '../../config/global';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
@@ -50,7 +51,7 @@ function applyDefaultHeaders(options: Options): void {
   options.headers = {
     ...options.headers,
     'user-agent':
-      process.env.RENOVATE_USER_AGENT ??
+      GlobalConfig.get('userAgent') ??
       `RenovateBot/${renovateVersion} (https://github.com/renovatebot/renovate)`,
   };
 }

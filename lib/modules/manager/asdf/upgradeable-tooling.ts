@@ -86,7 +86,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     },
   },
   'cargo-make': {
-    asdfPluginUrl: 'https://github.com/kachick/asdf-cargo-make',
+    asdfPluginUrl: 'https://github.com/mise-plugins/asdf-cargo-make',
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'sagiegurari/cargo-make',
@@ -670,7 +670,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     },
   },
   yamlfmt: {
-    asdfPluginUrl: 'https://github.com/kachick/asdf-yamlfmt',
+    asdfPluginUrl: 'https://github.com/mise-plugins/asdf-yamlfmt',
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'google/yamlfmt',

@@ -29,6 +29,20 @@ describe('workers/repository/error-config', () => {
       GlobalConfig.reset();
     });
 
+    it('returns if mode is silent', async () => {
+      config.mode = 'silent';
+
+      const res = await raiseConfigWarningIssue(
+        config,
+        new Error(CONFIG_VALIDATION),
+      );
+
+      expect(res).toBeUndefined();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Config warning issues are not created, updated or closed when mode=silent',
+      );
+    });
+
     it('creates issues', async () => {
       const expectedBody = `There are missing credentials for the authentication-required feature. As a precaution, Renovate will pause PRs until it is resolved.
 

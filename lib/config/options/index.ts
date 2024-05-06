@@ -6,6 +6,13 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'mode',
+    description: 'Mode of operation.',
+    type: 'string',
+    default: 'full',
+    allowedValues: ['full', 'silent'],
+  },
+  {
     name: 'allowedHeaders',
     description:
       'List of allowed patterns for header names in repository hostRules config.',
@@ -13,6 +20,7 @@ const options: RenovateOptions[] = [
     default: ['X-*'],
     subType: 'string',
     globalOnly: true,
+    patternMatch: true,
   },
   {
     name: 'allowedEnv',
@@ -22,6 +30,7 @@ const options: RenovateOptions[] = [
     default: [],
     subType: 'string',
     globalOnly: true,
+    patternMatch: true,
   },
   {
     name: 'detectGlobalManagerConfig',
@@ -45,6 +54,14 @@ const options: RenovateOptions[] = [
       'If `false`, Renovate does not try to access cloud metadata services.',
     type: 'boolean',
     default: true,
+    globalOnly: true,
+  },
+  {
+    name: 'userAgent',
+    description:
+      'If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.',
+    type: 'string',
+    default: null,
     globalOnly: true,
   },
   {
@@ -455,7 +472,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.3.16',
+    default: 'ghcr.io/containerbase/sidecar:10.6.4',
     globalOnly: true,
   },
   {
@@ -949,6 +966,7 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     supportedPlatforms: ['bitbucket'],
+    patternMatch: true,
   },
   {
     name: 'autodiscoverTopics',
@@ -1082,6 +1100,7 @@ const options: RenovateOptions[] = [
       'ansible',
       'bitbucket-pipelines',
       'crossplane',
+      'devcontainer',
       'docker-compose',
       'dockerfile',
       'droneci',
@@ -1229,6 +1248,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'excludeRepositories',
@@ -1333,7 +1353,6 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
-    advancedUse: true,
   },
   {
     name: 'excludeDepNames',

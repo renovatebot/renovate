@@ -47,9 +47,10 @@ runs:
           (steps.node-modules-restore.outputs.cache-hit == 'true') && 'true' || ''
         }}' >> "$GITHUB_ENV"
 
-    - name: Enable corepack
-      shell: bash
-      run: corepack enable
+    - name: Setup pnpm
+      uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+      with:
+        standalone: true
 
     - name: Setup Node
       uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2

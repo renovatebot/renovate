@@ -3,12 +3,12 @@ ARG BASE_IMAGE_TYPE=slim
 # --------------------------------------
 # slim image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.3.1@sha256:6963dd7b63a99ea57e7d2fa0c7b30fbfefe977fd0eaa7cf398a297f780f9b202 AS slim-base
+FROM ghcr.io/renovatebot/base-image:2.9.2@sha256:47dbf2b5d27305563910bf618a31ebe8bde175a8c73c95910a5af47a819f05a8 AS slim-base
 
 # --------------------------------------
 # full image
 # --------------------------------------
-FROM ghcr.io/renovatebot/base-image:2.3.1-full@sha256:0b7d77482f6d0abaab83c4dcda2b474989f411cf8912571ad6c39bfdc1d97e3d AS full-base
+FROM ghcr.io/renovatebot/base-image:2.9.2-full@sha256:f19e6dfbe80d9688c6b5511d3175ebe831a018f3967dee41cb59a1ed6a0d6954 AS full-base
 
 # --------------------------------------
 # build image
@@ -22,13 +22,13 @@ ENV CI=1 npm_config_modules_cache_max_age=0
 COPY pnpm-lock.yaml ./
 
 # only fetch deps from lockfile https://pnpm.io/cli/fetch
-RUN pnpm fetch --prod
+RUN corepack pnpm fetch --prod
 
 COPY . ./
 
 # install
 RUN set -ex; \
-  pnpm install --prod --offline --ignore-scripts; \
+  corepack pnpm install --prod --offline --ignore-scripts; \
   true
 
 # test

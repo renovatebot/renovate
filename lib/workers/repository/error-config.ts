@@ -33,6 +33,12 @@ async function raiseWarningIssue(
   initialBody: string,
   error: Error,
 ): Promise<void> {
+  if (config.mode === 'silent') {
+    logger.debug(
+      `Config warning issues are not created, updated or closed when mode=silent`,
+    );
+    return;
+  }
   let body = initialBody;
   if (error.validationSource) {
     body += `Location: \`${error.validationSource}\`\n`;

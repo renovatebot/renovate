@@ -120,6 +120,7 @@ function getAllIncludeComponents(
 
 function extractDepFromIncludeComponent(
   includeComponent: GitlabIncludeComponent,
+  registryAliases?: Record<string, string>,
 ): PackageDependency | null {
   const componentReference = componentReferenceRegex.exec(
     includeComponent.component,
@@ -138,6 +139,10 @@ function extractDepFromIncludeComponent(
       'Ignoring component reference with incomplete project path',
     );
     return null;
+  }
+  const aliasValue = registryAliases?.[componentReference.fqdn];
+  if (aliasValue) {
+    componentReference.fqdn = aliasValue;
   }
 
   const dep: PackageDependency = {
@@ -209,7 +214,10 @@ export function extractPackageFile(
 
       const includedComponents = getAllIncludeComponents(doc);
       for (const includedComponent of includedComponents) {
-        const dep = extractDepFromIncludeComponent(includedComponent);
+        const dep = extractDepFromIncludeComponent(
+          includedComponent,
+          config.registryAliases,
+        );
         if (dep) {
           deps.push(dep);
         }
