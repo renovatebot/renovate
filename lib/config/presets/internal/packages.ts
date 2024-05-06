@@ -29,6 +29,7 @@ export const presets: Record<string, Preset> = {
     ],
     matchPackagePrefixes: [
       '@eslint/',
+      '@stylistic/eslint-plugin',
       '@types/eslint__',
       '@typescript-eslint/',
       'eslint',

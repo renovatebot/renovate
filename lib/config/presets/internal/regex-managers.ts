@@ -9,9 +9,9 @@ export const presets: Record<string, Preset> = {
         customType: 'regex',
         datasourceTemplate: 'npm',
         depNameTemplate: '@biomejs/biome',
-        fileMatch: ['^biome.json$'],
+        fileMatch: ['(^|/)biome.jsonc?$'],
         matchStrings: [
-          'https://biomejs.dev/schemas/(?<currentValue>.*)/schema.json',
+          '"https://biomejs.dev/schemas/(?<currentValue>[^"]+)/schema.json"',
         ],
       },
     ],

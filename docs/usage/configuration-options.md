@@ -689,7 +689,7 @@ The `regex` manager which is based on using Regular Expression named capture gro
 You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
 
 - `datasource`
-- `depName`
+- `depName` and / or `packageName`
 - `currentValue`
 
 Use named capture group matching _or_ set a corresponding template.
@@ -2851,6 +2851,8 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 
 ### matchDepNames
 
+This field behaves the same as `matchPackageNames` except it matches against `depName` instead of `packageName`.
+
 ### matchDepPatterns
 
 ### matchDepPrefixes
@@ -3591,6 +3593,7 @@ This feature works with the following managers:
 - [`droneci`](modules/manager/droneci/index.md)
 - [`gitlabci`](modules/manager/gitlabci/index.md)
 - [`helm-requirements`](modules/manager/helm-requirements/index.md)
+- [`helm-values`](modules/manager/helm-values/index.md)
 - [`helmfile`](modules/manager/helmfile/index.md)
 - [`helmv3`](modules/manager/helmv3/index.md)
 - [`kubernetes`](modules/manager/kubernetes/index.md)
