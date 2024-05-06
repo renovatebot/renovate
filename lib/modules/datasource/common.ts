@@ -208,6 +208,11 @@ export function applyConstraintsFiltering<
           break;
         }
 
+        if (configConstraint === releaseConstraint) {
+          satisfiesConstraints = true;
+          break;
+        }
+
         if (versioning.subset?.(configConstraint, releaseConstraint)) {
           satisfiesConstraints = true;
           break;
