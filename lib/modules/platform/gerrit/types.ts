@@ -43,12 +43,16 @@ export interface GerritChange {
   labels?: Record<string, GerritLabelInfo>;
   reviewers?: Record<GerritReviewersType, GerritAccountInfo[]>;
   messages?: GerritChangeMessageInfo[];
-  current_revision?: string;
+  current_revision: string;
   /**
    * All patch sets of this change as a map that maps the commit ID of the patch set to a RevisionInfo entity.
    */
-  revisions?: Record<string, GerritRevisionInfo>;
+  revisions: Record<string, GerritRevisionInfo>;
   problems: unknown[];
+}
+
+export interface GerritCommitInfo {
+  message: string;
 }
 
 export interface GerritRevisionInfo {
@@ -58,6 +62,7 @@ export interface GerritRevisionInfo {
    */
   ref: string;
   actions?: Record<string, GerritActionInfo>;
+  commit: GerritCommitInfo;
 }
 
 export interface GerritChangeMessageInfo {

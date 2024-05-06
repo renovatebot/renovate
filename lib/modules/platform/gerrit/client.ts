@@ -24,6 +24,7 @@ class GerritClient {
     'LABELS',
     'CURRENT_ACTIONS', //to check if current_revision can be "rebased"
     'CURRENT_REVISION', //get RevisionInfo::ref to fetch
+    'CURRENT_COMMIT', // to get the commit message
   ] as const;
 
   private gerritHttp = new GerritHttp();
@@ -103,15 +104,17 @@ class GerritClient {
     });
   }
 
-  async updateCommitMessage(
+  async updateChangeSubject(
     number: number,
-    gerritChangeID: string,
-    prTitle: string,
+    currentMessage: string,
+    newSubject: string,
   ): Promise<void> {
-    await this.setCommitMessage(
-      number,
-      `${prTitle}\n\nChange-Id: ${gerritChangeID}\n`,
+    // Replace first line of the commit message with the new subject
+    const newMessage = currentMessage.replace(
+      new RegExp(`^.*$`, 'm'),
+      newSubject,
     );
+    await this.setCommitMessage(number, newMessage);
   }
 
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {

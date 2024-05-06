@@ -54,6 +54,8 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '1.2.3',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/features/first',
+            depType: 'feature',
+            pinDigests: false,
             replaceString:
               'devcontainer.registry.renovate.com/test/features/first:1.2.3',
           },
@@ -64,6 +66,8 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '4.5.6',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/features/second',
+            depType: 'feature',
+            pinDigests: false,
             replaceString:
               'devcontainer.registry.renovate.com/test/features/second:4.5.6',
           },
@@ -99,6 +103,7 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '1.2.3',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/image',
+            depType: 'image',
             replaceString:
               'devcontainer.registry.renovate.com/test/image:1.2.3',
           },
@@ -109,6 +114,8 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '4.5.6',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/feature',
+            depType: 'feature',
+            pinDigests: false,
             replaceString:
               'devcontainer.registry.renovate.com/test/feature:4.5.6',
           },
@@ -140,6 +147,7 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '1.2.3',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/image',
+            depType: 'image',
             replaceString:
               'devcontainer.registry.renovate.com/test/image:1.2.3',
           },
@@ -302,6 +310,8 @@ describe('modules/manager/devcontainer/extract', () => {
             currentValue: '1.2.3',
             datasource: 'docker',
             depName: 'devcontainer.registry.renovate.com/test/feature',
+            depType: 'feature',
+            pinDigests: false,
             replaceString:
               'devcontainer.registry.renovate.com/test/feature:1.2.3',
           },
