@@ -84,6 +84,8 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 }
 
 const convertedExperimentalEnvVars = [
+  'RENOVATE_X_AUTODISCOVER_REPO_SORT',
+  'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
   'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
   'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
 ];
@@ -91,7 +93,7 @@ const convertedExperimentalEnvVars = [
 /**
  * Massages the experimental env vars which have been converted to config options
  *
- * e.g. RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL -> RENOVATE_MERGE_CONFIDENCE_API_BASE_URL
+ * e.g. RENOVATE_X_AUTODISCOVER_REPO_SORT -> RENOVATE_AUTODISCOVER_REPO_SORT
  */
 function massageConvertedExperimentalVars(
   env: NodeJS.ProcessEnv,

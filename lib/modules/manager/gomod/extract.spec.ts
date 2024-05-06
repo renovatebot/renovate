@@ -14,11 +14,11 @@ describe('modules/manager/gomod/extract', () => {
     it('extracts single-line requires', () => {
       const res = extractPackageFile(gomod1)?.deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(9);
+      expect(res).toHaveLength(10);
       expect(res?.filter((e) => e.depType === 'require')).toHaveLength(7);
       expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
-      expect(res?.filter((e) => e.skipReason)).toHaveLength(1);
-      expect(res?.filter((e) => e.depType === 'replace')).toHaveLength(1);
+      expect(res?.filter((e) => e.skipReason)).toHaveLength(2);
+      expect(res?.filter((e) => e.depType === 'replace')).toHaveLength(2);
     });
 
     it('extracts multi-line requires', () => {

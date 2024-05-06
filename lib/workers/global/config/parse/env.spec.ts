@@ -272,11 +272,17 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL: 'some-url', // converted
         RENOVATE_X_DOCKER_MAX_PAGES: '10',
         RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES: '["docker"]', // converted
+        RENOVATE_X_AUTODISCOVER_REPO_SORT: 'alpha',
+        RENOVATE_X_DOCKER_MAX_PAGES: '10',
+        RENOVATE_AUTODISCOVER_REPO_ORDER: 'desc',
       };
       const config = await env.getConfig(envParam);
-      expect(config.mergeConfidenceApiBaseUrl).toBe('some-url');
-      expect(config.mergeConfidenceSupportedDatasources).toEqual(['docker']);
-      expect(config.dockerMaxPages).toBeUndefined();
+      expect(config).toMatchObject({
+        mergeConfidenceApiBaseUrl: 'some-url',
+        mergeConfidenceSupportedDatasources: ['docker'],
+        autodiscoverRepoSort: 'alpha',
+        autodiscoverRepoOrder: 'desc',
+      });
     });
 
     describe('RENOVATE_CONFIG tests', () => {
