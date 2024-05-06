@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
+import { GlobalConfig } from '../../config/global';
 import { supportedDatasources as presetSupportedDatasources } from '../../config/presets/internal/merge-confidence';
 import type { UpdateType } from '../../config/types';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../cache/package';
-import { parseJson } from '../common';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
 import { regEx } from '../regex';
@@ -37,32 +37,19 @@ export function initConfig(): void {
 }
 
 export function parseSupportedDatasourceString(): string[] | undefined {
-  const supportedDatasourceString =
-    process.env.RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES;
+  const supportedDatasources = GlobalConfig.get(
+    'mergeConfidenceSupportedDatasources',
+  );
 
-  if (!is.string(supportedDatasourceString)) {
-    return undefined;
-  }
-
-  let parsedDatasourceList: unknown;
-  try {
-    parsedDatasourceList = parseJson(supportedDatasourceString, '.json5');
-  } catch (err) {
-    logger.error(
-      { supportedDatasourceString, err },
-      'Failed to parse supported datasources list; Invalid JSON format',
-    );
-  }
-
-  if (!is.array<string>(parsedDatasourceList, is.string)) {
+  if (!is.array<string>(supportedDatasources, is.string)) {
     logger.warn(
-      { parsedDatasourceList },
-      `Expected a string array but got ${typeof parsedDatasourceList}`,
+      { supportedDatasources },
+      `Expected a string array but got ${typeof supportedDatasources}`,
     );
     return undefined;
   }
 
-  return parsedDatasourceList;
+  return supportedDatasources;
 }
 
 export function resetConfig(): void {
@@ -242,7 +229,7 @@ export async function initMergeConfidence(): Promise<void> {
 
 function getApiBaseUrl(): string {
   const defaultBaseUrl = 'https://developer.mend.io/';
-  const baseFromEnv = process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL;
+  const baseFromEnv = GlobalConfig.get('mergeConfidenceApiBaseUrl');
 
   if (is.nullOrUndefined(baseFromEnv)) {
     logger.trace('using default merge confidence API base URL');

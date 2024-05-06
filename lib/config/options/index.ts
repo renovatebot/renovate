@@ -1,3 +1,4 @@
+import { getDatasourceList } from '../../modules/datasource';
 import { getManagers } from '../../modules/manager';
 import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
@@ -46,6 +47,22 @@ const options: RenovateOptions[] = [
       'If `true`, Renovate tries to detect host rules from environment variables.',
     type: 'boolean',
     default: false,
+    globalOnly: true,
+  },
+  {
+    name: 'mergeConfidenceApiBaseUrl',
+    description:
+      'If set, Renovate will query this API for Merge Confidence data.',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
+    name: 'mergeConfidenceSupportedDatasources',
+    description:
+      'If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.',
+    allowedValues: getDatasourceList(),
+    type: 'array',
+    subType: 'string',
     globalOnly: true,
   },
   {

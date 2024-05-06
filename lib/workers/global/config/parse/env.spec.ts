@@ -267,6 +267,18 @@ describe('workers/global/config/parse/env', () => {
       expect(config.token).toBe('a');
     });
 
+    it('massages converted experimental env vars', async () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL: 'some-url', // converted
+        RENOVATE_X_DOCKER_MAX_PAGES: '10',
+        RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES: '["docker"]', // converted
+      };
+      const config = await env.getConfig(envParam);
+      expect(config.mergeConfidenceApiBaseUrl).toBe('some-url');
+      expect(config.mergeConfidenceSupportedDatasources).toEqual(['docker']);
+      expect(config.dockerMaxPages).toBeUndefined();
+    });
+
     describe('RENOVATE_CONFIG tests', () => {
       let processExit: jest.SpyInstance<never, [code?: number]>;
 

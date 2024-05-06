@@ -83,6 +83,30 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
+const convertedExperimentalEnvVars = [
+  'RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL',
+  'RENOVATE_X_MERGE_CONFIDENCE_SUPPORTED_DATASOURCES',
+];
+
+/**
+ * Massages the experimental env vars which have been converted to config options
+ *
+ * e.g. RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL -> RENOVATE_MERGE_CONFIDENCE_API_BASE_URL
+ */
+function massageConvertedExperimentalVars(
+  env: NodeJS.ProcessEnv,
+): NodeJS.ProcessEnv {
+  const result = { ...env };
+  for (const key of convertedExperimentalEnvVars) {
+    if (env[key] !== undefined) {
+      const newKey = key.replace('RENOVATE_X_', 'RENOVATE_');
+      result[newKey] = env[key];
+      delete result[key];
+    }
+  }
+  return result;
+}
+
 export async function getConfig(
   inputEnv: NodeJS.ProcessEnv,
 ): Promise<AllConfig> {
@@ -91,6 +115,7 @@ export async function getConfig(
   env = renameEnvKeys(env);
   // massage the values of migrated configuration keys
   env = massageEnvKeyValues(env);
+  env = massageConvertedExperimentalVars(env);
 
   const options = getOptions();
 

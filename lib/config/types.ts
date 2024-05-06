@@ -153,6 +153,8 @@ export interface RepoGlobalConfig {
   githubTokenWarn?: boolean;
   includeMirrors?: boolean;
   localDir?: string;
+  mergeConfidenceApiBaseUrl?: string;
+  mergeConfidenceSupportedDatasources?: string[];
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   presetCachePersistence?: boolean;

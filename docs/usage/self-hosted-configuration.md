@@ -743,6 +743,33 @@ If left as default (null), a random short ID will be selected.
 
 ## logFileLevel
 
+## mergeConfidenceApiBaseUrl
+
+If set, Renovate will query this API for Merge Confidence data.
+
+If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
+
+- have a static merge confidence token that you set via `MEND_RNV_MC_TOKEN`
+- _or_ set `MEND_RNV_MC_TOKEN` to `auto`
+
+Then you must set this variable at the _server_ and the _workers_.
+
+But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
+
+This feature is in private beta.
+
+## mergeConfidenceSupportedDatasources
+
+If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
+
+Example:
+
+```js
+modules.exports = {
+  mergeConfidenceSupportedDatasources: ['docker'],
+};
+```
+
 ## migratePresets
 
 Use this if you have repositories that extend from a particular preset, which has now been renamed or removed.
