@@ -39,7 +39,6 @@ describe('modules/manager/gomod/extract', () => {
         	github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect
         )
       `;
-
       const res = extractPackageFile(goMod)?.deps;
       expect(res).toHaveLength(3);
     });
@@ -56,9 +55,8 @@ describe('modules/manager/gomod/extract', () => {
           k8s.io/cloud-provider => k8s.io/cloud-provider v0.17.3
           k8s.io/cluster-bootstrap => k8s.io/cluster-bootstrap v0.17.3 // indirect
           k8s.io/code-generator => k8s.io/code-generator v0.17.3
-                )
+        )
       `;
-
       const res = extractPackageFile(goMod);
       expect(res).toEqual({
         deps: [
@@ -133,7 +131,6 @@ describe('modules/manager/gomod/extract', () => {
         toolchain go1.21.7
         replace golang.org/x/foo => github.com/pravesht/gocql v0.0.0
       `;
-
       const res = extractPackageFile(goMod);
       expect(res).toEqual({
         deps: [
