@@ -6,6 +6,13 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'mode',
+    description: 'Mode of operation.',
+    type: 'string',
+    default: 'full',
+    allowedValues: ['full', 'silent'],
+  },
+  {
     name: 'allowedHeaders',
     description:
       'List of allowed patterns for header names in repository hostRules config.',
@@ -465,7 +472,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.3',
+    default: 'ghcr.io/containerbase/sidecar:10.6.4',
     globalOnly: true,
   },
   {
