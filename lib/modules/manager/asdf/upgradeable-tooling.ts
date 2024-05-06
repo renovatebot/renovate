@@ -107,6 +107,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$`,
     },
   },
+  cosign: {
+    asdfPluginUrl: 'https://gitlab.com/wt0f/asdf-cosign',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'sigstore/cosign',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   crystal: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-crystal',
     config: {
@@ -218,6 +226,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'golangci/golangci-lint',
+      extractVersion: '^v(?<version>.+)',
+    },
+  },
+  gomplate: {
+    asdfPluginUrl: 'https://github.com/sneakybeaky/asdf-gomplate',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'hairyhenderson/gomplate',
       extractVersion: '^v(?<version>.+)',
     },
   },
