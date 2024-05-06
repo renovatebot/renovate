@@ -1984,33 +1984,31 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   try {
     if (vulnerabilityAlerts?.length) {
       const shortAlerts: AggregatedVulnerabilities = {};
-      if (vulnerabilityAlerts.length) {
-        logger.trace(
-          { alerts: vulnerabilityAlerts },
-          'GitHub vulnerability details',
-        );
-        for (const alert of vulnerabilityAlerts) {
-          if (alert.security_vulnerability === null) {
-            // As described in the documentation, there are cases in which
-            // GitHub API responds with `"securityVulnerability": null`.
-            // But it's may be faulty, so skip processing it here.
-            continue;
-          }
-          const {
-            package: { name, ecosystem },
-            vulnerable_version_range: vulnerableVersionRange,
-            first_patched_version: firstPatchedVersion,
-          } = alert.security_vulnerability;
-          const patch = firstPatchedVersion?.identifier;
-
-          const key = `${ecosystem.toLowerCase()}/${name}`;
-          const range = vulnerableVersionRange;
-          const elem = shortAlerts[key] || {};
-          elem[range] = coerceToNull(patch);
-          shortAlerts[key] = elem;
+      logger.trace(
+        { alerts: vulnerabilityAlerts },
+        'GitHub vulnerability details',
+      );
+      for (const alert of vulnerabilityAlerts) {
+        if (alert.security_vulnerability === null) {
+          // As described in the documentation, there are cases in which
+          // GitHub API responds with `"securityVulnerability": null`.
+          // But it's may be faulty, so skip processing it here.
+          continue;
         }
-        logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');
+        const {
+          package: { name, ecosystem },
+          vulnerable_version_range: vulnerableVersionRange,
+          first_patched_version: firstPatchedVersion,
+        } = alert.security_vulnerability;
+        const patch = firstPatchedVersion?.identifier;
+
+        const key = `${ecosystem.toLowerCase()}/${name}`;
+        const range = vulnerableVersionRange;
+        const elem = shortAlerts[key] || {};
+        elem[range] = coerceToNull(patch);
+        shortAlerts[key] = elem;
       }
+      logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');
     } else {
       logger.debug('No vulnerability alerts found');
     }
