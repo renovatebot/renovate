@@ -1,53 +1,70 @@
-# Language Constraints and Upgrading
+# Language constraints and upgrading
 
-## Package Releases have language constraints
+## Package releases have language constraints
 
-Many ecosystems support the concept that each release of packages has its own language "constraint".
-For example, a npm package may support Node.js 18 and 20 in its v1 releases and Node.js 20 and 22 from v2.0.0 onwards.
+Many ecosystems have the concept where each release of a package has its own language "constraint".
+For example, a npm package may support Node.js 18 and 20 in its `v1` releases and Node.js 20 and 22 from `v2.0.0` onwards.
 
 In an ideal scenario:
 
-- Package files allow a project to declare its supported language constraints, and
-- Package registries allow packages to declare declare the supported language constraints per release
+- Package files allow a project to show its supported language constraints, and
+- Package registries allow packages to show the supported language constraints per release
 
 ## Restricting upgrades to compatible releases
 
-By default Renovate _does not_ apply language constraints to upgrades, which means it will propose "any" stable upgrade without consideration of language version.
-For certain ecosystems, changes to language constraints are usually done in major releases and documented in the release notes, so this behavior may not be problematic.
-For other ecosystems this may seem simply _wrong_.
+By default Renovate _does not_ apply language constraints to upgrades.
+This means Renovate will propose "any" stable upgrade.
+Renovate will _not_ check if the language version you're using actually supports that upgrade.
+In certain ecosystems, changes to language constraints are made with a major release, and are documented in the release notes.
+So Renovate's default behavior may be okay in those ecosystems.
+For other ecosystems Renovate's default behavior may seem _wrong_.
 
-Renovate users can opt into strict compatibility filtering using `constraintsFiltering=strict`.
-You should understand the limitations of this first, also as an understanding of why it's not the default behavior.
+As a Renovate user, you can opt into strict compatibility filtering by setting `constraintsFiltering=strict`.
+Before you set `constraintsFiltering=strict`, you should:
+
+- understand the limitations of this setting
+- understand why `constraintsFiltering=strict` is _not_ the default behavior
+
+Please keep reading to learn more.
 
 ## Language constraint updating
 
 The first challenge is that Renovate may not yet support the ability to update your language constraints in an automated manner, and even when it does, users may not understand how many updates are depending on it.
 
-For example, consider a Node.js project which has its `engines` set to `"node": "^18.0.0 || ^20.0.0"`.
+For example: a Node.js project has set its `engines` field to `"node": "^18.0.0 || ^20.0.0"`.
 
-Should Renovate skip Node.js v21 because it's non-LTS?
-When Node.js v22 comes out, should Renovate add it to your engines, or wait until it starts LTS?
-When Node.js v18 is EOL, should Renovate drop it from the engines list?
+Should Renovate _skip_ Node.js `v21` because it is a non-LTS release?
+When Node.js `v22` releases, should Renovate add it to your `engines`, or wait until `v22` becomes the LTS version?
+When Node.js `v18` is EOL, should Renovate drop it from the `engines` field?
 
-It's hard for Renovate to know or guess what users want, because users have strong but also different opinions on the answer to the above questions.
+Renovate can not guess what users want.
+Users have strong and different opinions on what Renovate should do for each example listed above.
 
-Additionally, even if Renovate guesses right or adds advanced capabilities to allow this to be configurable, then users might sit any of these "major" upgrades for months.
-If a project delays creating or merging the update to drop Node.js v18 from engines then it won't be able to upgrade to any new versions of library dependencies which themselves already dropped support.
+Also, even _if_ Renovate guesses right or adds advanced capabilities to allow this to be configurable: users might still wait on any of these "major" upgrades for months.
+If a project waits to create or merge the update to drop Node.js `v18` from `engines`, then they can _not_ upgrade to any new versions of library dependencies.
+Those library dependencies may have dropped support for Node.js `v18` already.
 
 ## Strict filtering limitations
 
-Consider again the Node.js project which has its `engines` set to `"node": "^18.0.0 || ^20.0.0"`.
+Let's go back to the Node.js project which has its `engines` field set to `"node": "^18.0.0 || ^20.0.0"`.
 
-Now also consider a library which sets its `engines` to `"node": "^18.12.0 || ^20.9.0"` because it wants to only support "LTS releases" of Node.js.
-Strictly speaking, this dependency is not compatible with the project above which has wider requirements for Node versions, and Renovate would hold back any upgrades for it.
-Should Renovate somehow reason and _assume_ that this narrower engines support is actually OK?
-What if the project _already_ used an existing version of this library "incorrectly"?
+Now also consider a library which sets its `engines` field to `"node": "^18.12.0 || ^20.9.0"` because the library only supports "LTS releases" of Node.js.
+Strictly speaking, this library is _not_ compatible with the project above, because the project has _wider requirements_ for their Node versions.
+This means Renovate holds back any upgrades for it.
+Should Renovate somehow "think" and _assume_ that this narrower `engines` support is actually OK?
+What if the project _already_ used a current version of this library "in a way that's not officially supported"?
 
-A second problem is that if Renovate is unable to update the language constraints, or the user ignores or does not notice the language upgrade, then they also may not realize that many of their dependencies are out of date because Renovate is not proposing PRs.
-For example, a project may have 10 dependencies, and 8 of those have updates but all 8 require the project to update its language constraints first.
-The project administrator may think they are mostly up to date, because Renovate is not proposing PRs, but in reality 80% of their dependencies are outdated.
+A second problem is that if:
 
-In short, users who apply `constraintsFiltering=strict` usually understimate just how strict that will be and how many releases will be filtered out.
+- Renovate can _not_ update the language constraints, or
+- a user _ignores_ or does not see the language upgrade
+
+Then the user may not know that many dependencies are out of date, because Renovate is not creating PRs.
+For example: a project may have 10 dependencies, and 8 of those have updates.
+But all 8 dependencies need the project to update its language constraints _first_.
+The project administrator thinks they are up to date, because Renovate is not creating PRs, but 80% of their dependencies are outdated.
+
+In short, users who set `constraintsFiltering=strict` often do not understand how _strict_ that setting is and how many releases it will _filter out_.
 
 ## Transitive constraint limitations
 
