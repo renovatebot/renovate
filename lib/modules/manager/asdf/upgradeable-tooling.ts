@@ -113,7 +113,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubReleasesDatasource.id,
       packageName: 'sigstore/cosign',
       extractVersion: '^v(?<version>\\S+)',
-    }
+    },
   },
   crystal: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-crystal',

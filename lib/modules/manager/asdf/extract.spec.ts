@@ -189,7 +189,7 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'sigstore/cosign',
             depName: 'cosign',
-            extractVersion: "^v(?<version>\\S+)",
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '1.6.1',
@@ -300,7 +300,7 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'hairyhenderson/gomplate',
             depName: 'gomplate',
-            extractVersion: "^v(?<version>.+)",
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '2.12.0',
