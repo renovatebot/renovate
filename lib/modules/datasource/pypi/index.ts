@@ -1,4 +1,5 @@
 import url from 'node:url';
+import is from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
@@ -10,7 +11,6 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { isGitHubRepo, normalizePythonDepName } from './common';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
-import is from '@sindresorhus/is';
 
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
