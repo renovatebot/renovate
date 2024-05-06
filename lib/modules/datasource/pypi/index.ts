@@ -10,6 +10,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { isGitHubRepo, normalizePythonDepName } from './common';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
+import is from '@sindresorhus/is';
 
 export class PypiDatasource extends Datasource {
   static readonly id = 'pypi';
@@ -156,9 +157,11 @@ export class PypiDatasource extends Datasource {
           result.isDeprecated = isDeprecated;
         }
         // There may be multiple releases with different requires_python, so we return all in an array
+        const pythonConstraints = releases
+          .map(({ requires_python }) => requires_python)
+          .filter(is.string);
         result.constraints = {
-          // TODO: string[] isn't allowed here
-          python: releases.map(({ requires_python }) => requires_python) as any,
+          python: Array.from(new Set(pythonConstraints)),
         };
         return result;
       });
