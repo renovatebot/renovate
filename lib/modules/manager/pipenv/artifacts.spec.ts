@@ -210,7 +210,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
-    fs.getSiblingFileName.mockResolvedValueOnce('.python-version');
+    fs.getSiblingFileName.mockResolvedValueOnce('.python-version' as never);
     fs.readLocalFile.mockResolvedValueOnce('3.7.6');
 
     expect(
