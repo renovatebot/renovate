@@ -34,6 +34,8 @@ import type {
   Pr,
   RepoParams,
   RepoResult,
+  RepoSortMethod,
+  SortMethod,
   UpdatePrConfig,
 } from '../types';
 import { repoFingerprint } from '../util';
@@ -49,8 +51,6 @@ import type {
   PRMergeMethod,
   PRUpdateParams,
   Repo,
-  RepoSortMethod,
-  SortMethod,
 } from './types';
 import {
   DRAFT_PREFIX,
@@ -159,7 +159,17 @@ async function lookupLabelByName(name: string): Promise<number | null> {
   return labelList.find((l) => l.name === name)?.id ?? null;
 }
 
-async function fetchRepositories(topic?: string): Promise<string[]> {
+interface FetchRepositoriesArgs {
+  topic?: string;
+  sort?: RepoSortMethod;
+  order?: SortMethod;
+}
+
+async function fetchRepositories({
+  topic,
+  sort,
+  order,
+}: FetchRepositoriesArgs): Promise<string[]> {
   const repos = await helper.searchRepos({
     uid: botUserID,
     archived: false,
@@ -167,11 +177,11 @@ async function fetchRepositories(topic?: string): Promise<string[]> {
       topic: true,
       q: topic,
     }),
-    ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT && {
-      sort: process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT as RepoSortMethod,
+    ...(sort && {
+      sort,
     }),
-    ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER && {
-      order: process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER as SortMethod,
+    ...(order && {
+      order,
     }),
   });
   return repos.filter(usableRepo).map((r) => r.full_name);
@@ -330,7 +340,16 @@ const platform: Platform = {
     try {
       if (config?.topics) {
         logger.debug({ topics: config.topics }, 'Auto-discovering by topics');
-        const repos = await map(config.topics, fetchRepositories);
+        const fetchRepoArgs: FetchRepositoriesArgs[] = config.topics.map(
+          (topic) => {
+            return {
+              topic,
+              sort: config.sort,
+              order: config.order,
+            };
+          },
+        );
+        const repos = await map(fetchRepoArgs, fetchRepositories);
         return deduplicateArray(repos.flat());
       } else if (config?.namespaces) {
         logger.debug(
@@ -348,7 +367,10 @@ const platform: Platform = {
         );
         return deduplicateArray(repos.flat());
       } else {
-        return await fetchRepositories();
+        return await fetchRepositories({
+          sort: config?.sort,
+          order: config?.order,
+        });
       }
     } catch (err) {
       logger.error({ err }, 'Gitea getRepos() error');
