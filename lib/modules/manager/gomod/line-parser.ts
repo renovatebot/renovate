@@ -21,39 +21,6 @@ const goVersionRegex = regEx(/^\s*go\s+(?<version>[^\s]+)\s*$/);
 
 const toolchainVersionRegex = regEx(/^\s*toolchain\s+go(?<version>[^\s]+)\s*$/);
 
-export interface RequireLine {
-  type: 'require';
-  module: string;
-  version: string;
-  indirect?: true;
-  multiLine?: true;
-}
-
-export interface ReplaceLine {
-  type: 'replace';
-  module: string;
-  replacement: string;
-  version?: string;
-  indirect?: true;
-  multiLine?: true;
-}
-
-export interface GoVersionLine {
-  type: 'go';
-  version: string;
-}
-
-export interface ToolchainVersionLine {
-  type: 'toolchain';
-  version: string;
-}
-
-export type ParsedLine =
-  | RequireLine
-  | ReplaceLine
-  | GoVersionLine
-  | ToolchainVersionLine;
-
 const pseudoVersionRegex = regEx(GoDatasource.pversionRegexp);
 
 function extractDigest(input: string): string | undefined {
