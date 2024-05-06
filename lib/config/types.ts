@@ -159,6 +159,7 @@ export interface RepoGlobalConfig {
   privateKey?: string;
   privateKeyOld?: string;
   httpCacheTtlDays?: number;
+  userAgent?: string;
 }
 
 export interface LegacyAdminConfig {
@@ -442,6 +443,11 @@ export interface RenovateOptionBase {
    * This is used to add depreciation message in the docs
    */
   deprecationMsg?: string;
+
+  /**
+   * For internal use only: add it to any config option that supports regex or glob matching
+   */
+  patternMatch?: boolean;
 }
 
 export interface RenovateArrayOption<

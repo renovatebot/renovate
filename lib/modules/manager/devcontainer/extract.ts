@@ -21,6 +21,7 @@ export function extractPackageFile(
     const imageDep = getDep(image, packageFile, extractConfig.registryAliases);
 
     if (imageDep) {
+      imageDep.depType = 'image';
       deps.push(imageDep);
     } else {
       logger.trace(
@@ -39,6 +40,8 @@ export function extractPackageFile(
           extractConfig.registryAliases,
         );
         if (featureDep) {
+          featureDep.depType = 'feature';
+          featureDep.pinDigests = false;
           deps.push(featureDep);
           continue;
         }

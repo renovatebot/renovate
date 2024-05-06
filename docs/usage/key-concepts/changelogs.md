@@ -98,11 +98,11 @@ If your repository uses the monorepo pattern make sure _each_ `package.json` fil
 
 ### maven package maintainers
 
-Read [`maven` datasource, making your changelogs fetchable](https://docs.renovatebot.com/modules/datasource/maven/#making-your-changelogs-fetchable).
+Read [`maven` datasource, making your changelogs fetchable](../modules/datasource/maven/index.md#making-your-changelogs-fetchable).
 
 ### Docker image maintainers
 
-Read the [Docker datasource](https://docs.renovatebot.com/modules/datasource/docker/) docs.
+Read the [Docker datasource](../modules/datasource/docker/index.md) docs.
 
 ### Nuget package maintainers
 

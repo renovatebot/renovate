@@ -182,7 +182,7 @@ terraform {
 
 # gitlab-tags ssh with custom port
 terraform {
-  source = "git::ssh://gitlab.com:1234/hashicorp/example?ref=v1.0.2"
+  source = "git::ssh://gitlab.com:1234/hashicorp/example.git//foo/bar?ref=v1.0.2"
 }
 
 # gitea-tags
