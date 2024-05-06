@@ -354,6 +354,9 @@
   "pnpm": {
     "neverBuiltDependencies": [
       "dtrace-provider"
-    ]
+    ],
+    "overrides": {
+      "@types/linkify-it": "<5.0.0"
+    }
   }
 }
