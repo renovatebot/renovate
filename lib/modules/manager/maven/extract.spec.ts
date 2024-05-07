@@ -706,6 +706,37 @@ describe('modules/manager/maven/extract', () => {
       ]);
     });
 
+    it('should extract from .mvn/extensions.xml file', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(codeBlock`
+      <extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/EXTENSIONS/1.0.0 http://maven.apache.org/xsd/core-extensions-1.0.0.xsd">
+    <extension>
+        <groupId>io.jenkins.tools.incrementals</groupId>
+        <artifactId>git-changelist-maven-extension</artifactId>
+        <version>1.6</version>
+    </extension>
+</extensions>
+    `);
+      const res = await extractAllPackageFiles({}, ['.mvn/extensions.xml']);
+      expect(res).toMatchObject([
+        {
+          packageFile: '.mvn/extensions.xml',
+          deps: [
+            {
+              datasource: 'maven',
+              depName:
+                'io.jenkins.tools.incrementals:git-changelist-maven-extension',
+              currentValue: '1.6',
+              depType: 'build',
+              fileReplacePosition: 394,
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+          ],
+        },
+      ]);
+    });
+
     describe('root pom handling', () => {
       it('should skip root pom.xml', async () => {
         fs.readLocalFile.mockResolvedValueOnce(codeBlock`
