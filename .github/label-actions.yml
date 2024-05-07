@@ -229,6 +229,21 @@
   close: true
   close-reason: 'not planned'
 
+'auto:inactivity-pr-close':
+  comment: >
+    **This PR has been closed due to inactivity, but resuming work on it in future would be welcome.**
+
+
+    We try to avoid having too many PRs open at once, so we close PRs that have been inactive for too long or which don't seem on track to be mergeable.
+
+
+    If you want to continue working on this PR, please reopen it and let us know.
+
+
+    Thanks, the Renovate team
+  close: true
+  close-reason: 'not planned'
+
 'auto:format-code':
   comment: >
     Hi, please format any copy/pasted code or logs so they're readable.
