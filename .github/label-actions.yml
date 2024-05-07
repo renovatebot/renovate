@@ -231,13 +231,13 @@
 
 'auto:inactivity-pr-close':
   comment: >
-    **This PR has been closed due to inactivity, but resuming work on it in future would be welcome.**
+    **We're closing this PR due to inactivity, but we are happy for you, or others, to finish the PR.**
 
 
-    We try to avoid having too many PRs open at once, so we close PRs that have been inactive for too long or which don't seem on track to be mergeable.
+    We limit the number of open PRs, so we close stale PRs, or PRs that are not getting ready to merge.
 
 
-    If you want to continue working on this PR, please reopen it and let us know.
+    If you, or someone else, want to continue working on this PR, then please reopen this PR and let us know.
 
 
     Thanks, the Renovate team
