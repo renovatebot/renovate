@@ -3,7 +3,6 @@ import { logger } from '../../../../logger';
 import * as p from '../../../../util/promises';
 import { escapeRegExp, regEx } from '../../../../util/regex';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
-import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { get as getVersioning } from '../../../versioning';
 import type {
   UpdateArtifact,
@@ -99,8 +98,8 @@ export function getNewConstraint(
     );
     //remove surplus .0 version
     return oldConstraint.replace(
-      regEx(`${escapeRegExp(currentValue)}(\\.0)*`),
-      newValue,
+      regEx(`(,\\s|^)${escapeRegExp(currentValue)}(\\.0)*`),
+      `$1${newValue}`,
     );
   }
 
@@ -167,9 +166,6 @@ export async function updateArtifacts({
         massageProviderLookupName(dep);
         const { registryUrls, newVersion, packageName } = dep;
 
-        const registryUrl = registryUrls
-          ? registryUrls[0]
-          : TerraformProviderDatasource.defaultRegistryUrls[0];
         const updateLock = locks.find(
           (value) => value.packageName === packageName,
         );
@@ -177,6 +173,24 @@ export async function updateArtifacts({
         if (!updateLock) {
           continue;
         }
+        if (dep.isLockfileUpdate) {
+          const versioning = getVersioning(dep.versioning);
+          const satisfyingVersion = versioning.getSatisfyingVersion(
+            [dep.newVersion!],
+            updateLock.constraints,
+          );
+
+          if (!satisfyingVersion) {
+            logger.debug(
+              `Skipping. Lockfile update with "${newVersion}" does not statisfy constraints "${updateLock.constraints}" for "${packageName}"`,
+            );
+            continue;
+          }
+        }
+
+        // use registryURL defined in the update and fall back to the one defined in the lockfile
+        const registryUrl = registryUrls?.[0] ?? updateLock.registryUrl;
+
         const newConstraint = getNewConstraint(dep, updateLock.constraints);
         const update: ProviderLockUpdate = {
           // TODO #22198

@@ -1,7 +1,7 @@
 import { fs } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import { compress } from '../../../compress';
+import { compressToBase64 } from '../../../compress';
 import { hash } from '../../../hash';
 import { CACHE_REVISION } from '../common';
 import type { RepoCacheRecord } from '../schema';
@@ -21,7 +21,7 @@ async function createCacheRecord(
 
   const jsonStr = JSON.stringify(data);
   const hashedJsonStr = hash(jsonStr);
-  const payload = await compress(jsonStr);
+  const payload = await compressToBase64(jsonStr);
 
   return {
     revision,

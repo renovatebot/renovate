@@ -882,6 +882,60 @@ describe('workers/repository/process/vulnerabilities', () => {
       expect(config.packageRules).toHaveLength(0);
     });
 
+    it('describe last_affected version as ecosystem-specific version constraint', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        maven: [
+          {
+            deps: [
+              {
+                depName: 'com.guicedee.services:log4j-core',
+                currentValue: '1.0.10.1',
+                datasource: 'maven',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-jfh8-c2jp-5v3q',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'com.guicedee.services:log4j-core',
+                ecosystem: 'Maven',
+                purl: 'pkg:maven/com.guicedee.services/log4j-core',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [
+                    { introduced: '0' },
+                    { last_affected: '1.2.1.2-jre17' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles,
+      );
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['maven'],
+          matchPackageNames: ['com.guicedee.services:log4j-core'],
+          matchCurrentVersion: '1.0.10.1',
+          allowedVersions: '(1.2.1.2-jre17,)',
+        },
+      ]);
+    });
+
     it('returns packageRule based on last_affected version', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [

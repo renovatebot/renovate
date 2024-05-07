@@ -1,4 +1,4 @@
-export interface HostRuleSearchResult {
+export interface HostRule {
   authType?: string;
   token?: string;
   username?: string;
@@ -11,6 +11,7 @@ export interface HostRuleSearchResult {
   enableHttp2?: boolean;
   concurrentRequestLimit?: number;
   maxRequestsPerSecond?: number;
+  headers?: Record<string, string>;
   maxRetryAfter?: number;
 
   dnsCache?: boolean;
@@ -19,11 +20,15 @@ export interface HostRuleSearchResult {
   httpsCertificateAuthority?: string;
   httpsPrivateKey?: string;
   httpsCertificate?: string;
-}
 
-export interface HostRule extends HostRuleSearchResult {
   encrypted?: HostRule;
   hostType?: string;
   matchHost?: string;
   resolvedHost?: string;
+  readOnly?: boolean;
 }
+
+export type CombinedHostRule = Omit<
+  HostRule,
+  'encrypted' | 'hostType' | 'matchHost' | 'resolvedHost' | 'readOnly'
+>;

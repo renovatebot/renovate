@@ -24,7 +24,7 @@ export const HexRelease = z
       .record(
         z.string(),
         z.object({
-          message: z.string(),
+          message: z.string().nullable(),
           reason: z.string(),
         }),
       )

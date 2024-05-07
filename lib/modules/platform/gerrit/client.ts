@@ -1,6 +1,7 @@
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { GerritHttp } from '../../../util/http/gerrit';
+import { regEx } from '../../../util/regex';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
@@ -12,6 +13,8 @@ import type {
 } from './types';
 import { mapPrStateToGerritFilter } from './utils';
 
+const QUOTES_REGEX = regEx('"', 'g');
+
 class GerritClient {
   private requestDetails = [
     'SUBMITTABLE', //include the submittable field in ChangeInfo, which can be used to tell if the change is reviewed and ready for submit.
@@ -21,6 +24,7 @@ class GerritClient {
     'LABELS',
     'CURRENT_ACTIONS', //to check if current_revision can be "rebased"
     'CURRENT_REVISION', //get RevisionInfo::ref to fetch
+    'CURRENT_COMMIT', // to get the commit message
   ] as const;
 
   private gerritHttp = new GerritHttp();
@@ -100,15 +104,17 @@ class GerritClient {
     });
   }
 
-  async updateCommitMessage(
+  async updateChangeSubject(
     number: number,
-    gerritChangeID: string,
-    prTitle: string,
+    currentMessage: string,
+    newSubject: string,
   ): Promise<void> {
-    await this.setCommitMessage(
-      number,
-      `${prTitle}\n\nChange-Id: ${gerritChangeID}\n`,
+    // Replace first line of the commit message with the new subject
+    const newMessage = currentMessage.replace(
+      new RegExp(`^.*$`, 'm'),
+      newSubject,
     );
+    await this.setCommitMessage(number, newMessage);
   }
 
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
@@ -233,6 +239,13 @@ class GerritClient {
     }
     if (searchConfig.label) {
       filters.push(`label:Code-Review=${searchConfig.label}`);
+    }
+    if (searchConfig.prTitle) {
+      // escaping support in Gerrit is not great, so we need to remove quotes
+      // special characters are ignored anyway in the search so it does not create any issues
+      filters.push(
+        `message:${encodeURIComponent('"' + searchConfig.prTitle.replace(QUOTES_REGEX, '') + '"')}`,
+      );
     }
     return filters;
   }

@@ -5,7 +5,7 @@ import { detectPlatform } from '../../util/common';
 import { parseGitUrl } from '../../util/git/url';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
-import { parseUrl, trimTrailingSlash, validateUrl } from '../../util/url';
+import { isHttpUrl, parseUrl, trimTrailingSlash } from '../../util/url';
 import { manualChangelogUrls, manualSourceUrls } from './metadata-manual';
 import type { ReleaseResult } from './types';
 
@@ -87,7 +87,14 @@ export function normalizeDate(input: any): string | null {
     //   2. Format of `input` is very exotic
     //      (from `DateTime.fromISO()` perspective)
     //
-    const luxonDate = DateTime.fromISO(input, { zone: 'UTC' });
+
+    let luxonDate = DateTime.fromISO(input, { zone: 'UTC' });
+    if (luxonDate.isValid) {
+      return luxonDate.toISO();
+    }
+    luxonDate = DateTime.fromFormat(input, 'yyyyMMddHHmmss', {
+      zone: 'UTC',
+    });
     if (luxonDate.isValid) {
       return luxonDate.toISO();
     }
@@ -188,7 +195,7 @@ export function addMetaData(
   ];
   for (const urlKey of urlKeys) {
     const urlVal = dep[urlKey];
-    if (is.string(urlVal) && validateUrl(urlVal.trim())) {
+    if (is.string(urlVal) && isHttpUrl(urlVal.trim())) {
       dep[urlKey] = urlVal.trim() as never;
     } else {
       delete dep[urlKey];

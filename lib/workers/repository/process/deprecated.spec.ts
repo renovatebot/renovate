@@ -16,6 +16,15 @@ describe('workers/repository/process/deprecated', () => {
       await expect(raiseDeprecationWarnings(config, {})).resolves.not.toThrow();
     });
 
+    it('returns if in silent mode', async () => {
+      const config: RenovateConfig = {
+        repoIsOnboarded: true,
+        suppressNotifications: [],
+        mode: 'silent',
+      };
+      await expect(raiseDeprecationWarnings(config, {})).resolves.not.toThrow();
+    });
+
     it('raises deprecation warnings', async () => {
       const config: RenovateConfig = {
         repoIsOnboarded: true,

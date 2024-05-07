@@ -1,4 +1,5 @@
 import type { LongCommitSha } from '../../../util/git/types';
+import type { Pr, RepoSortMethod, SortMethod } from '../types';
 
 export interface PrReviewersParams {
   reviewers?: string[];
@@ -16,6 +17,10 @@ export type CommitStatusType =
   | 'unknown';
 export type PRMergeMethod = 'merge' | 'rebase' | 'rebase-merge' | 'squash';
 
+export interface GiteaLabel {
+  id: number;
+  name: string;
+}
 export interface PR {
   number: number;
   state: PRState;
@@ -23,6 +28,7 @@ export interface PR {
   body: string;
   mergeable: boolean;
   created_at: string;
+  updated_at: string;
   closed_at: string;
   diff_url: string;
   base?: {
@@ -38,6 +44,10 @@ export interface PR {
   };
   assignees?: any[];
   user?: { username?: string };
+
+  // labels returned from the Gitea API are represented as an array of objects
+  // ref: https://docs.gitea.com/api/1.20/#tag/repository/operation/repoGetPullRequest
+  labels?: GiteaLabel[];
 }
 
 export interface Issue {
@@ -64,8 +74,10 @@ export interface Repo {
   allow_squash_merge: boolean;
   archived: boolean;
   clone_url?: string;
+  default_merge_style: string;
   external_tracker?: unknown;
   has_issues: boolean;
+  has_pull_requests: boolean;
   ssh_url?: string;
   default_branch: string;
   empty: boolean;
@@ -135,13 +147,11 @@ export interface CombinedCommitStatus {
   statuses: CommitStatus[];
 }
 
-export type RepoSortMethod = 'alpha' | 'created' | 'updated' | 'size' | 'id';
-
-export type SortMethod = 'asc' | 'desc';
-
 export interface RepoSearchParams {
   uid?: number;
   archived?: boolean;
+  topic?: boolean;
+  q?: string;
 
   /**
    * Repo sort type, defaults to `alpha`.
@@ -185,11 +195,6 @@ export interface PRUpdateParams {
   base?: string;
 }
 
-export interface PRSearchParams {
-  state?: PRState;
-  labels?: number[];
-}
-
 export interface PRMergeParams {
   Do: PRMergeMethod;
   merge_when_checks_succeed?: boolean;
@@ -206,4 +211,10 @@ export interface CommitStatusCreateParams {
   description?: string;
   state?: CommitStatusType;
   target_url?: string;
+}
+
+export interface GiteaPrCacheData {
+  items: Record<number, Pr>;
+  updated_at: string | null;
+  author: string | null;
 }

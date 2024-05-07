@@ -3,6 +3,21 @@ import type { Preset } from '../types';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const presets: Record<string, Preset> = {
+  biomeVersions: {
+    customManagers: [
+      {
+        customType: 'regex',
+        datasourceTemplate: 'npm',
+        depNameTemplate: '@biomejs/biome',
+        fileMatch: ['(^|/)biome.jsonc?$'],
+        matchStrings: [
+          '"https://biomejs.dev/schemas/(?<currentValue>[^"]+)/schema.json"',
+        ],
+      },
+    ],
+    description:
+      'Update `$schema` version in `biome.json` configuration files.',
+  },
   dockerfileVersions: {
     customManagers: [
       {
@@ -22,7 +37,10 @@ export const presets: Record<string, Preset> = {
     customManagers: [
       {
         customType: 'regex',
-        fileMatch: ['^.github/(?:workflows|actions)/.+\\.ya?ml$'],
+        fileMatch: [
+          '(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$',
+          '(^|/)action\\.ya?ml$',
+        ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],

@@ -181,6 +181,12 @@ export async function ensureDependencyDashboard(
   packageFiles: Record<string, PackageFile[]> = {},
 ): Promise<void> {
   logger.debug('ensureDependencyDashboard()');
+  if (config.mode === 'silent') {
+    logger.debug(
+      'Dependency Dashboard issue is not created, updated or closed when mode=silent',
+    );
+    return;
+  }
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   const branches = allBranches.filter(
@@ -423,6 +429,18 @@ export async function ensureDependencyDashboard(
   issueBody += footer;
 
   if (config.dependencyDashboardIssue) {
+    // If we're not changing the dashboard issue then we can skip checking if the user changed it
+    // The cached issue we get back here will reflect its state at the _start_ of our run
+    const cachedIssue = await platform.getIssue?.(
+      config.dependencyDashboardIssue,
+    );
+    if (cachedIssue?.body === issueBody) {
+      logger.debug('No changes to dependency dashboard issue needed');
+      return;
+    }
+
+    // Skip cache when getting the issue to ensure we get the latest body,
+    // including any updates the user made after we started the run
     const updatedIssue = await platform.getIssue?.(
       config.dependencyDashboardIssue,
       false,

@@ -102,6 +102,14 @@ describe('modules/datasource/docker/common', () => {
           registryHost: 'https://index.docker.io',
         },
       },
+      {
+        name: 'registry-1.docker.io/bitnamicharts/cert-manager',
+        url: 'https://index.docker.io',
+        res: {
+          dockerRepository: 'bitnamicharts/cert-manager',
+          registryHost: 'https://index.docker.io',
+        },
+      },
     ])('($name, $url)', ({ name, url, res }) => {
       expect(getRegistryRepository(name, url)).toStrictEqual(res);
     });

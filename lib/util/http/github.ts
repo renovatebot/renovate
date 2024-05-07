@@ -19,7 +19,6 @@ import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
   HttpOptions,
-  HttpRequestOptions,
   HttpResponse,
   InternalHttpOptions,
 } from './types';
@@ -135,12 +134,14 @@ function handleGotError(
       message.includes('Review cannot be requested from pull request author')
     ) {
       return err;
+    } else if (err.body?.errors?.find((e: any) => e.field === 'milestone')) {
+      return err;
     } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
       logger.debug({ err }, 'Received invalid response - aborting');
       return new Error(REPOSITORY_CHANGED);
     } else if (
-      err.body?.errors?.find(
-        (e: any) => e.message?.startsWith('A pull request already exists'),
+      err.body?.errors?.find((e: any) =>
+        e.message?.startsWith('A pull request already exists'),
       )
     ) {
       return err;
@@ -211,7 +212,7 @@ function getGraphqlPageSize(
     if (now > expiry) {
       const newPageSize = Math.min(oldPageSize * 2, MAX_GRAPHQL_PAGE_SIZE);
       if (newPageSize < MAX_GRAPHQL_PAGE_SIZE) {
-        const timestamp = now.toISO()!;
+        const timestamp = now.toISO();
 
         logger.debug(
           { fieldName, oldPageSize, newPageSize, timestamp },
@@ -242,7 +243,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   const oldPageSize = getGraphqlPageSize(fieldName);
   if (newPageSize !== oldPageSize) {
     const now = DateTime.local();
-    const pageLastResizedAt = now.toISO()!;
+    const pageLastResizedAt = now.toISO();
     logger.debug(
       { fieldName, oldPageSize, newPageSize, timestamp: pageLastResizedAt },
       'GraphQL page size: shrinking',
@@ -272,10 +273,10 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: InternalHttpOptions & GithubHttpOptions & HttpRequestOptions<T>,
+    options?: InternalHttpOptions & GithubHttpOptions,
     okToRetry = true,
   ): Promise<HttpResponse<T>> {
-    const opts: GithubHttpOptions = {
+    const opts: InternalHttpOptions & GithubHttpOptions = {
       baseUrl,
       ...options,
       throwHttpErrors: true,
@@ -295,8 +296,17 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         );
       }
 
+      let readOnly = opts.readOnly;
+      const { method = 'get' } = opts;
+      if (
+        readOnly === undefined &&
+        ['get', 'head'].includes(method.toLowerCase())
+      ) {
+        readOnly = true;
+      }
       const { token } = findMatchingRule(authUrl.toString(), {
         hostType: this.hostType,
+        readOnly,
       });
       opts.token = token;
     }
@@ -338,7 +348,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
-                { ...opts, paginate: false },
+                { ...opts, paginate: false, cacheProvider: undefined },
                 okToRetry,
               );
             },
@@ -392,6 +402,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
       baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body,
       headers: { accept: options?.acceptHeader },
+      readOnly: options.readOnly,
     };
     if (options.token) {
       opts.token = options.token;

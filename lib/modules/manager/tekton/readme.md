@@ -17,15 +17,16 @@ Read the [Tekton Pipeline remote resolution docs](https://tekton.dev/docs/pipeli
 
 ### Using a PipelinesAsCode remote URL reference
 
-By specifying the annotation with a remote task based on the recommended way using [git based versioning](https://github.com/tektoncd/community/blob/main/teps/0115-tekton-catalog-git-based-versioning.md). How this can be used can be seen in the example below.
+By specifying the annotation with a remote task or a remote pipeline based on the recommended way using [git based versioning](https://github.com/tektoncd/community/blob/main/teps/0115-tekton-catalog-git-based-versioning/index.md). How this can be used can be seen in the example below.
 
-```yaml title="How an annotation in could look like in an pipeline-run.yaml"
+```yaml title="How an annotation could look like in an pipeline-run.yaml"
 apiVersion: tekton.dev/v1
 kind: PipelineRun
 metadata:
   name: main
   annotations:
-    pipelinesascode.tekton.dev/task: 'https://github.com/foo/bar/raw/v0.0.1/tasks/task/task.yaml'
+    pipelinesascode.tekton.dev/task: 'https://github.com/foo/bar/raw/v0.0.1/task/my-task/my-task.yaml'
+    pipelinesascode.tekton.dev/pipeline: 'https://github.com/foo/bar/raw/v0.0.1/pipeline/my-pipeline/my-pipeline.yaml'
 ```
 
 Supported URLs:
@@ -77,4 +78,4 @@ As an example, the following config matches all the YAML files in a repository:
 }
 ```
 
-See our [versioning](../../versioning.md) documentation for details on the existing versioning rules and possible alterations.
+See our [versioning](../../versioning/index.md) documentation for details on the existing versioning rules and possible alterations.

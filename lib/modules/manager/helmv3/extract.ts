@@ -22,8 +22,8 @@ export async function extractPackageFile(
     dependencies: Array<{ name: string; version: string; repository: string }>;
   };
   try {
-    // TODO: fix me (#9610)
-    chart = parseSingleYaml(content, { json: true }) as any;
+    // TODO: use schema (#9610)
+    chart = parseSingleYaml(content, { json: true });
     if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { packageFile },

@@ -7,10 +7,6 @@ export function coerceArray<T>(input: T[] | null | undefined): T[] {
   return [];
 }
 
-export function sortNumeric(a: number, b: number): number {
-  return a - b;
-}
-
 // Useful for filtering an array so that it includes values that are not null or
 // undefined. This predicate acts as a type guard so that the resulting type for
 // `values.filter(isNotNullOrUndefined)` is `T[]`.
@@ -27,4 +23,8 @@ export function isNotNullOrUndefined<T>(
  */
 export function toArray<T>(value: T | T[]): T[] {
   return is.array(value) ? value : [value];
+}
+
+export function deduplicateArray<T>(array: T[]): T[] {
+  return Array.from(new Set(array));
 }

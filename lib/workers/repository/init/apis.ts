@@ -13,7 +13,7 @@ export type WorkerPlatformConfig = RepoResult &
   Record<string, any>;
 
 // TODO #22198
-const defaultConfigFile = (config: RenovateConfig): string =>
+const getDefaultConfigFile = (config: RenovateConfig): string =>
   configFileNames.includes(config.onboardingConfigFileName!)
     ? config.onboardingConfigFileName!
     : configFileNames[0];
@@ -30,7 +30,7 @@ async function validateOptimizeForDisabled(
   config: RenovateConfig,
 ): Promise<void> {
   if (config.optimizeForDisabled) {
-    const renovateConfig = await getJsonFile(defaultConfigFile(config));
+    const renovateConfig = await getJsonFile(getDefaultConfigFile(config));
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
     }
@@ -62,14 +62,31 @@ async function validateOptimizeForDisabled(
 
 async function validateIncludeForks(config: RenovateConfig): Promise<void> {
   if (config.forkProcessing !== 'enabled' && config.isFork) {
-    const renovateConfig = await getJsonFile(defaultConfigFile(config));
-    if (
-      renovateConfig?.includeForks !== true &&
-      renovateConfig?.forkProcessing !== 'enabled'
-    ) {
+    const defaultConfigFile = getDefaultConfigFile(config);
+    const repoConfig = await getJsonFile(defaultConfigFile);
+    if (!repoConfig) {
+      logger.debug(
+        `Default config file ${defaultConfigFile} not found in repo`,
+      );
       throw new Error(REPOSITORY_FORKED);
     }
-    logger.debug('Repository config enables forks - continuing');
+    if (repoConfig.includeForks) {
+      logger.debug(
+        `Found legacy setting includeForks in ${defaultConfigFile} - continuing`,
+      );
+      return;
+    }
+    if (repoConfig.forkProcessing === 'enabled') {
+      logger.debug(
+        `Found forkProcessing=enabled in ${defaultConfigFile} - continuing`,
+      );
+      return;
+    }
+    logger.debug(
+      { config: repoConfig },
+      `Default config file ${defaultConfigFile} found in repo but does not enable forks`,
+    );
+    throw new Error(REPOSITORY_FORKED);
   }
 }
 

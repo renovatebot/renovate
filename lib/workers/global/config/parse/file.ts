@@ -2,12 +2,12 @@ import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import JSON5 from 'json5';
 import upath from 'upath';
-import { migrateConfig } from '../../../../config/migration';
 import type { AllConfig, RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { parseJson } from '../../../../util/common';
 import { readSystemFile } from '../../../../util/fs';
 import { parseSingleYaml } from '../../../../util/yaml';
+import { migrateAndValidateConfig } from './util';
 
 export async function getParsedContent(file: string): Promise<RenovateConfig> {
   if (upath.basename(file) === '.renovaterc') {
@@ -18,7 +18,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
     case '.yml':
       return parseSingleYaml(await readSystemFile(file, 'utf8'), {
         json: true,
-      }) as RenovateConfig;
+      });
     case '.json5':
     case '.json':
       return parseJson(
@@ -27,7 +27,9 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
       ) as RenovateConfig;
     case '.cjs':
     case '.js': {
-      const tmpConfig = await import(file);
+      const tmpConfig = await import(
+        upath.isAbsolute(file) ? file : `${process.cwd()}/${file}`
+      );
       let config = tmpConfig.default
         ? tmpConfig.default
         : /* istanbul ignore next: hard to test */ tmpConfig;
@@ -43,10 +45,7 @@ export async function getParsedContent(file: string): Promise<RenovateConfig> {
 }
 
 export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
-  let configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';
-  if (!upath.isAbsolute(configFile)) {
-    configFile = `${process.cwd()}/${configFile}`;
-  }
+  const configFile = env.RENOVATE_CONFIG_FILE ?? 'config.js';
 
   if (env.RENOVATE_CONFIG_FILE && !(await fs.pathExists(configFile))) {
     logger.fatal(
@@ -73,7 +72,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
       logger.fatal(err.message);
       process.exit(1);
     } else if (env.RENOVATE_CONFIG_FILE) {
-      logger.fatal('No custom config file found on disk');
+      logger.fatal('Error parsing config file');
       process.exit(1);
     }
     // istanbul ignore next: we can ignore this
@@ -82,15 +81,7 @@ export async function getConfig(env: NodeJS.ProcessEnv): Promise<AllConfig> {
 
   await deleteNonDefaultConfig(env); // Try deletion only if RENOVATE_CONFIG_FILE is specified
 
-  const { isMigrated, migratedConfig } = migrateConfig(config);
-  if (isMigrated) {
-    logger.warn(
-      { originalConfig: config, migratedConfig },
-      'Config needs migrating',
-    );
-    config = migratedConfig;
-  }
-  return config;
+  return migrateAndValidateConfig(config, configFile);
 }
 
 export async function deleteNonDefaultConfig(

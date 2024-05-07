@@ -94,6 +94,10 @@ function getNewValue({
   if (!currentValue || currentValue === '*') {
     return rangeStrategy === 'pin' ? `=${newVersion}` : currentValue;
   }
+  // If the current value is a simple version, bump to fully specified newVersion
+  if (rangeStrategy === 'bump' && regEx(/^\d+(?:\.\d+)*$/).test(currentValue)) {
+    return newVersion;
+  }
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';
     if (currentValue.startsWith('= ')) {
@@ -118,6 +122,17 @@ function getNewValue({
       'Could not get cargo version from semver',
     );
     return currentValue;
+  }
+  // Keep new range precision the same as current
+  if (
+    (currentValue.startsWith('~') || currentValue.startsWith('^')) &&
+    rangeStrategy === 'replace' &&
+    newCargo.split('.').length > currentValue.split('.').length
+  ) {
+    newCargo = newCargo
+      .split('.')
+      .slice(0, currentValue.split('.').length)
+      .join('.');
   }
   // Try to reverse any caret we added
   if (newCargo.startsWith('^') && !currentValue.startsWith('^')) {

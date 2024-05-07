@@ -2,12 +2,13 @@
 import { DateTime } from 'luxon';
 import { createClient } from 'redis';
 import { logger } from '../../../logger';
-import { compress, decompress } from '../../compress';
+import { compressToBase64, decompressFromBase64 } from '../../compress';
+import type { PackageCacheNamespace } from './types';
 
 let client: ReturnType<typeof createClient> | undefined;
 let rprefix: string | undefined;
 
-function getKey(namespace: string, key: string): string {
+function getKey(namespace: PackageCacheNamespace, key: string): string {
   return `${rprefix}${namespace}-${key}`;
 }
 
@@ -20,13 +21,16 @@ export async function end(): Promise<void> {
   }
 }
 
-async function rm(namespace: string, key: string): Promise<void> {
+async function rm(
+  namespace: PackageCacheNamespace,
+  key: string,
+): Promise<void> {
   logger.trace({ rprefix, namespace, key }, 'Removing cache entry');
   await client?.del(getKey(namespace, key));
 }
 
 export async function get<T = never>(
-  namespace: string,
+  namespace: PackageCacheNamespace,
   key: string,
 ): Promise<T | undefined> {
   if (!client) {
@@ -43,7 +47,7 @@ export async function get<T = never>(
         if (!cachedValue.compress) {
           return cachedValue.value;
         }
-        const res = await decompress(cachedValue.value);
+        const res = await decompressFromBase64(cachedValue.value);
         return JSON.parse(res);
       }
       // istanbul ignore next
@@ -56,7 +60,7 @@ export async function get<T = never>(
 }
 
 export async function set(
-  namespace: string,
+  namespace: PackageCacheNamespace,
   key: string,
   value: unknown,
   ttlMinutes = 5,
@@ -71,7 +75,7 @@ export async function set(
       getKey(namespace, key),
       JSON.stringify({
         compress: true,
-        value: await compress(JSON.stringify(value)),
+        value: await compressToBase64(JSON.stringify(value)),
         expiry: DateTime.local().plus({ minutes: ttlMinutes }),
       }),
       { EX: redisTTL },
@@ -98,6 +102,7 @@ export async function init(
         return Math.min(retries * 100, 3000);
       },
     },
+    pingInterval: 30000, // 30s
   });
   await client.connect();
 }

@@ -60,6 +60,20 @@ describe('modules/manager/nuget/extract', () => {
       expect(res?.deps).toHaveLength(17);
     });
 
+    it('extracts dependency with lower-case Version attribute', async () => {
+      const contents = codeBlock`
+        <Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <TargetFramework>net8.0</TargetFramework>
+          </PropertyGroup>
+          <ItemGroup>
+            <PackageReference Include="Moq" version="4.18.4" />
+          </ItemGroup>
+        </Project>`;
+      const res = await extractPackageFile(contents, 'some.csproj', config);
+      expect(res?.deps).toHaveLength(1);
+    });
+
     it('extracts all dependencies from global packages file', async () => {
       const packageFile = 'packages.props';
       const sample = Fixtures.get(packageFile);
@@ -296,9 +310,7 @@ describe('modules/manager/nuget/extract', () => {
     it('extracts msbuild-sdks from global.json', async () => {
       const packageFile = 'msbuild-sdk-files/global.json';
       const contents = Fixtures.get(packageFile);
-      expect(
-        await extractPackageFile(contents, packageFile, config),
-      ).toMatchObject({
+      expect(await extractPackageFile(contents, packageFile, config)).toEqual({
         deps: [
           {
             currentValue: '5.0.302',
@@ -313,24 +325,26 @@ describe('modules/manager/nuget/extract', () => {
             depType: 'msbuild-sdk',
           },
         ],
+        extractedConstraints: { 'dotnet-sdk': '5.0.302' },
       });
     });
 
     it('extracts dotnet-sdk from global.json', async () => {
       const packageFile = 'msbuild-sdk-files/global.1.json';
       const contents = Fixtures.get(packageFile);
-      expect(
-        await extractPackageFile(contents, 'global.json', config),
-      ).toMatchObject({
-        deps: [
-          {
-            currentValue: '5.0.302',
-            depName: 'dotnet-sdk',
-            depType: 'dotnet-sdk',
-            datasource: DotnetVersionDatasource.id,
-          },
-        ],
-      });
+      expect(await extractPackageFile(contents, 'global.json', config)).toEqual(
+        {
+          deps: [
+            {
+              currentValue: '5.0.302',
+              depName: 'dotnet-sdk',
+              depType: 'dotnet-sdk',
+              datasource: DotnetVersionDatasource.id,
+            },
+          ],
+          extractedConstraints: { 'dotnet-sdk': '5.0.302' },
+        },
+      );
     });
 
     it('handles malformed global.json', async () => {
