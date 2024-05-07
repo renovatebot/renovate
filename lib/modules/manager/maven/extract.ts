@@ -51,13 +51,13 @@ function parseExtensions(raw: string, packageFile: string): XmlDocument | null {
   if (name !== 'extensions') {
     return null;
   }
-  if (attr.xmlns === 'http://maven.apache.org/EXTENSIONS/1.0.0') {
-    return extensions;
+  if (attr.xmlns !== 'http://maven.apache.org/EXTENSIONS/1.0.0') {
+    return null;
   }
-  if (is.nonEmptyArray(children)) {
-    return extensions;
+  if (!is.nonEmptyArray(children)) {
+    return null;
   }
-  return null;
+  return extensions;
 }
 
 function containsPlaceholder(str: string | null | undefined): boolean {
@@ -497,7 +497,7 @@ function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
   return packageFiles;
 }
 
-function extractExtensions(
+export function extractExtensions(
   rawContent: string,
   packageFile: string,
 ): PackageFile | null {
@@ -543,7 +543,7 @@ export async function extractAllPackageFiles(
         );
         additionalRegistryUrls.push(...registries);
       }
-    } else if (packageFile === '.mvn/extensions.xml') {
+    } else if (packageFile.endsWith('extensions.xml')) {
       const extensions = extractExtensions(content, packageFile);
       if (extensions) {
         packages.push(extensions);

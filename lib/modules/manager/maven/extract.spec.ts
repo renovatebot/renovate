@@ -3,6 +3,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import {
   extractAllPackageFiles,
+  extractExtensions,
   extractPackage,
   extractRegistries,
   resolveParents,
@@ -362,6 +363,27 @@ describe('modules/manager/maven/extract', () => {
       expect(res).toStrictEqual([
         'https://proxy-repo.com/artifactory/apache-maven',
       ]);
+    });
+  });
+
+  describe('extractExtensions', () => {
+    it('returns null for invalid xml files', () => {
+      expect(extractExtensions('', '.mvn/extensions.xml')).toBeNull();
+      expect(
+        extractExtensions('invalid xml content', '.mvn/extensions.xml'),
+      ).toBeNull();
+      expect(
+        extractExtensions('<foobar></foobar>', '.mvn/extensions.xml'),
+      ).toBeNull();
+      expect(
+        extractExtensions('<extensions></extensions>', '.mvn/extensions.xml'),
+      ).toBeNull();
+      expect(
+        extractExtensions(
+          '<extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0"></extensions>',
+          '.mvn/extensions.xml',
+        ),
+      ).toBeNull();
     });
   });
 
@@ -735,6 +757,18 @@ describe('modules/manager/maven/extract', () => {
           ],
         },
       ]);
+    });
+
+    it('should return empty array if extensions file is invalid or empty', async () => {
+      fs.readLocalFile
+        .mockResolvedValueOnce('')
+        .mockResolvedValueOnce('invalid xml content');
+      expect(
+        await extractAllPackageFiles({}, [
+          '.mvn/extensions.xml',
+          'grp/.mvn/extensions.xml',
+        ]),
+      ).toBeEmptyArray();
     });
 
     describe('root pom handling', () => {
