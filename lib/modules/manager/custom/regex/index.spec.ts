@@ -48,7 +48,7 @@ describe('modules/manager/custom/regex/index', () => {
   it('returns null if no dependencies found', async () => {
     const config = {
       matchStrings: [
-        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s',
+        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<packageName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s',
       ],
       versioningTemplate:
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
@@ -95,7 +95,7 @@ describe('modules/manager/custom/regex/index', () => {
   it('extracts registryUrl', async () => {
     const config = {
       matchStrings: [
-        'chart:\n *repository: (?<registryUrl>.*?)\n *name: (?<depName>.*?)\n *version: (?<currentValue>.*)\n',
+        'chart:\n *repository: (?<registryUrl>.*?)\n *name: (?<packageName>.*?)\n *version: (?<currentValue>.*)\n',
       ],
       datasourceTemplate: 'helm',
     };
@@ -121,7 +121,7 @@ describe('modules/manager/custom/regex/index', () => {
         {
           currentValue: '8.12.13',
           datasource: 'helm',
-          depName: 'prometheus-operator',
+          packageName: 'prometheus-operator',
           registryUrls: ['https://charts.helm.sh/stable'],
         },
       ],
@@ -351,7 +351,8 @@ describe('modules/manager/custom/regex/index', () => {
   });
 
   it('extracts with combination strategy: sets replaceString when current version group present', async () => {
-    const config = {
+    const config: CustomExtractConfig = {
+      matchStringsStrategy: 'combination',
       matchStrings: [
         'image:\\s+(?<depName>[a-z-]+)(?::(?<currentValue>[a-z0-9.-]+))?(?:@(?<currentDigest>sha256:[a-f0-9]+))?',
       ],
@@ -377,7 +378,8 @@ describe('modules/manager/custom/regex/index', () => {
   });
 
   it('extracts with combination strategy: sets replaceString when current digest group present', async () => {
-    const config = {
+    const config: CustomExtractConfig = {
+      matchStringsStrategy: 'combination',
       matchStrings: [
         'image:\\s+(?<depName>[a-z-]+)(?::(?<currentValue>[a-z0-9.-]+))?(?:@(?<currentDigest>sha256:[a-f0-9]+))?',
       ],

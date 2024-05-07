@@ -1,5 +1,6 @@
 import { createReadStream } from 'node:fs';
 import { DirectoryResult, dir } from 'tmp-promise';
+import upath from 'upath';
 import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { getFixturePath, logger } from '../../../../../test/util';
@@ -206,6 +207,111 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     ]);
   });
 
+  it('full walkthrough with different shasum per build', async () => {
+    const readStreamLinux = createReadStream(
+      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
+    );
+    const readStreamDarwin = createReadStream(
+      'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
+    );
+    httpMock
+      .scope(terraformCloudReleaseBackendUrl)
+      .get('/.well-known/terraform.json')
+      .reply(200, terraformCloudSDCJson)
+      .get('/v1/providers/gravitational/teleport/versions')
+      .reply(
+        200,
+        JSON.stringify({
+          id: 'gravitational/teleport',
+          versions: [
+            {
+              version: '14.3.1',
+              protocols: ['5.0'],
+              platforms: [
+                {
+                  os: 'linux',
+                  arch: 'amd64',
+                },
+                {
+                  os: 'darwin',
+                  arch: 'amd64',
+                },
+              ],
+            },
+            {
+              version: '1.33.0',
+              protocols: ['4.0', '5.0'],
+              platforms: [
+                {
+                  os: 'linux',
+                  arch: 'amd64',
+                },
+                {
+                  os: 'darwin',
+                  arch: 'amd64',
+                },
+              ],
+            },
+          ],
+          warnings: null,
+        }),
+      )
+      .get('/v1/providers/gravitational/teleport/14.3.1/download/linux/amd64')
+      .reply(200, {
+        os: 'linux',
+        arch: 'amd64',
+        filename: 'terraform-provider-teleport-v14.3.1-linux-amd64-bin.zip',
+        shasums_url:
+          'https://terraform.releases.teleport.dev/store/terraform-provider-teleport-v14.3.1-linux-amd64-bin.zip.sums',
+        download_url:
+          'https://terraform.releases.teleport.dev/store/terraform-provider-teleport-v14.3.1-linux-amd64-bin.zip',
+      })
+      .get('/v1/providers/gravitational/teleport/14.3.1/download/darwin/amd64')
+      .reply(200, {
+        os: 'darwin',
+        arch: 'amd64',
+        filename: 'terraform-provider-teleport-v14.3.1-darwin-amd64-bin.zip',
+        shasums_url:
+          'https://terraform.releases.teleport.dev/store/terraform-provider-teleport-v14.3.1-darwin-amd64-bin.zip.sums',
+        download_url:
+          'https://terraform.releases.teleport.dev/store/terraform-provider-teleport-v14.3.1-darwin-amd64-bin.zip',
+      });
+
+    httpMock
+      .scope('https://terraform.releases.teleport.dev')
+      .get(
+        '/store/terraform-provider-teleport-v14.3.1-linux-amd64-bin.zip.sums',
+      )
+      .reply(
+        200,
+        '1d47d00730fab764bddb6d548fed7e124739b0bcebb9f3b3c6aa247de55fb804  terraform-provider-teleport-v14.3.1-linux-amd64-bin.zip',
+      )
+      .get('/store/terraform-provider-teleport-v14.3.1-linux-amd64-bin.zip')
+      .reply(200, readStreamLinux)
+      .get(
+        '/store/terraform-provider-teleport-v14.3.1-darwin-amd64-bin.zip.sums',
+      )
+      .reply(
+        200,
+        '29bff92b4375a35a7729248b3bc5db8991ca1b9ba640fc25b13700e12f99c195  terraform-provider-teleport-v14.3.1-darwin-amd64-bin.zip',
+      )
+      .get('/store/terraform-provider-teleport-v14.3.1-darwin-amd64-bin.zip')
+      .reply(200, readStreamDarwin);
+
+    const result = await TerraformProviderHash.createHashes(
+      'https://registry.terraform.io',
+      'gravitational/teleport',
+      '14.3.1',
+    );
+    expect(log.error.mock.calls).toBeEmptyArray();
+    expect(result).toMatchObject([
+      'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
+      'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
+      'zh:1d47d00730fab764bddb6d548fed7e124739b0bcebb9f3b3c6aa247de55fb804',
+      'zh:29bff92b4375a35a7729248b3bc5db8991ca1b9ba640fc25b13700e12f99c195',
+    ]);
+  });
+
   it('full walkthrough without ziphashes available', async () => {
     const readStreamLinux = createReadStream(
       'lib/modules/manager/terraform/lockfile/__fixtures__/test.zip',
@@ -320,5 +426,18 @@ describe('modules/manager/terraform/lockfile/hash', () => {
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
       'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
     ]);
+  });
+
+  describe('hashOfZipContent', () => {
+    const zipWithFolderPath = Fixtures.getPath('test_with_folder.zip');
+
+    it('return hash for content with subfolders', async () => {
+      await expect(
+        TerraformProviderHash.hashOfZipContent(
+          zipWithFolderPath,
+          upath.join(cacheDir.path, 'test'),
+        ),
+      ).resolves.toBe('g92f/mR2hlVmeWBlplxxJyP2H3fdyPwYccr7uJhcRz8=');
+    });
   });
 });

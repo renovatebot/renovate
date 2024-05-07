@@ -33,7 +33,6 @@ describe('util/json-writer/editor-config', () => {
   });
 
   it('should handle empty .editorconfig file', async () => {
-    expect.assertions(2);
     Fixtures.mock({
       '.editorconfig': '',
     });
@@ -41,20 +40,20 @@ describe('util/json-writer/editor-config', () => {
 
     expect(format.indentationSize).toBeUndefined();
     expect(format.indentationType).toBeUndefined();
+    expect(format.maxLineLength).toBeUndefined();
   });
 
   it('should handle global config from .editorconfig', async () => {
-    expect.assertions(2);
     Fixtures.mock({
       '.editorconfig': Fixtures.get('.global_editorconfig'),
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
     expect(format.indentationSize).toBe(6);
     expect(format.indentationType).toBe('space');
+    expect(format.maxLineLength).toBe(160);
   });
 
   it('should return undefined in case of exception', async () => {
-    expect.assertions(2);
     Fixtures.mock({
       '.editorconfig': Fixtures.get('.global_editorconfig'),
     });
@@ -70,7 +69,6 @@ describe('util/json-writer/editor-config', () => {
   });
 
   it('should not handle non json config from .editorconfig', async () => {
-    expect.assertions(2);
     Fixtures.mock({
       '.editorconfig': Fixtures.get('.non_json_editorconfig'),
     });
@@ -81,12 +79,12 @@ describe('util/json-writer/editor-config', () => {
   });
 
   it('should handle json config from .editorconfig', async () => {
-    expect.assertions(1);
     Fixtures.mock({
       '.editorconfig': Fixtures.get('.json_editorconfig'),
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
     expect(format.indentationType).toBe('tab');
+    expect(format.maxLineLength).toBe('off');
   });
 });

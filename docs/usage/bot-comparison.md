@@ -12,8 +12,8 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 | Dependency Dashboard                      | Yes                                                                                                                            | No                                                                                                                                                                           |
 | Grouped updates                           | Yes, use community-provided groups, or create your own                                                                         | Yes, create [`groups`](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#groups) manually     |
 | Upgrades common monorepo packages at once | Yes                                                                                                                            | No                                                                                                                                                                           |
-| Officially supported platforms            | GitHub, GitLab, Bitbucket, Azure, Gitea, see [full list](https://docs.renovatebot.com/#supported-platforms)                    | GitHub only                                                                                                                                                                  |
-| Supported languages                       | [List for Renovate](https://docs.renovatebot.com/modules/manager/)                                                             | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems) |
+| Officially supported platforms            | GitHub, GitLab, Bitbucket, Azure, Gitea, see [full list](./index.md#supported-platforms)                                       | GitHub only                                                                                                                                                                  |
+| Supported languages                       | [List for Renovate](./modules/manager/index.md)                                                                                | [List for Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems) |
 | Show changelogs                           | Yes                                                                                                                            | Yes                                                                                                                                                                          |
 | Compatibility score badges                | Four badges showing: Age, Adoption, Passing, Confidence                                                                        | One badge with overall compatibility score                                                                                                                                   |
 | Built-in to GitHub                        | No, requires app or self-hosting                                                                                               | Yes                                                                                                                                                                          |
@@ -46,7 +46,7 @@ Dependabot can group dependencies into a single PR too, but you must set your ow
 
 ### Upgrades common monorepo packages at once
 
-Renovate has a [`group:monorepos`](https://docs.renovatebot.com/presets-group/#groupmonorepos) preset, that upgrades common monorepo packages in a single PR.
+Renovate has a [`group:monorepos`](./presets-group.md#groupmonorepos) preset, that upgrades common monorepo packages in a single PR.
 
 Dependabot does not update common monorepo packages in a single PR.
 
@@ -55,14 +55,14 @@ Dependabot does not update common monorepo packages in a single PR.
 Platform means the Git-hosting site or program, for example GitHub, GitLab or Azure.
 
 Renovate works on multiple platforms, including GitHub.
-Read the [list of Renovate platforms](https://docs.renovatebot.com/modules/platform/) to learn more.
+Read the [list of Renovate platforms](./modules/platform/index.md) to learn more.
 
 The _official_ Dependabot program only works on GitHub.
 If you're an advanced user, you may use the [`dependabot-core` repository](https://github.com/dependabot/dependabot-core) as a base to build your own Dependabot, which you can run on other platforms.
 
 ### Supported languages
 
-- [Renovate's supported managers](https://docs.renovatebot.com/modules/manager/)
+- [Renovate's supported managers](./modules/manager/index.md)
 - [Dependabot's supported repositories and ecosystems](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates#supported-repositories-and-ecosystems)
 
 ### Show changelogs
@@ -130,7 +130,7 @@ This section explains how to self-host each bot.
 
 ### Self-hosting Renovate
 
-You can self-host Renovate on all [officially supported platforms](https://docs.renovatebot.com/#supported-platforms).
+You can self-host Renovate on all [officially supported platforms](./index.md#supported-platforms).
 
 If you decide to self-host Renovate, read the items from the [Self-hosting Renovate reading list](./reading-list.md#self-hosting-renovate).
 

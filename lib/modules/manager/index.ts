@@ -104,6 +104,10 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
   return config.rangeStrategy;
 }
 
+export function isKnownManager(mgr: string): boolean {
+  return allManagersList.includes(mgr.replace('custom.', ''));
+}
+
 /**
  * Filter a list of managers based on enabled managers.
  *

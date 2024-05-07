@@ -1,4 +1,4 @@
-[GitLab Tags API](https://docs.gitlab.com/ee/api/tags.html) supports looking up [Git tags](https://docs.gitlab.com/ee/topics/git/tags.html#tags) and can be used in combination with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to keep dependencies up-to-date which are not specifically supported by Renovate.
+[GitLab Tags API](https://docs.gitlab.com/ee/api/tags.html) supports looking up [Git tags](https://docs.gitlab.com/ee/topics/git/tags.html#tags) and can be used in combination with [regex managers](../../manager/regex/index.md) to keep dependencies up-to-date which are not specifically supported by Renovate.
 
 To specify which specific repository should be queried when looking up a package, the `packageName` should be set to the project path.
 

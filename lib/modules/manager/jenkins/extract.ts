@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
 import * as mavenVersioning from '../../versioning/maven';
 import type { PackageDependency, PackageFileContent } from '../types';
@@ -57,7 +57,8 @@ function extractYaml(
   const deps: PackageDependency[] = [];
 
   try {
-    const doc = load(content, { json: true }) as JenkinsPlugins;
+    // TODO: use schema (#9610)
+    const doc = parseSingleYaml<JenkinsPlugins>(content, { json: true });
     if (is.nonEmptyArray(doc?.plugins)) {
       for (const plugin of doc.plugins) {
         if (plugin.artifactId) {

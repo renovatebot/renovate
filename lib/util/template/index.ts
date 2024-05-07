@@ -3,29 +3,38 @@ import handlebars from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { getChildEnv } from '../exec/utils';
+import { regEx } from '../regex';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
+
+handlebars.registerHelper('encodeBase64', (str: string) =>
+  Buffer.from(str ?? '').toString('base64'),
+);
 
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2),
 );
 
-// istanbul ignore next
-handlebars.registerHelper(
-  'replace',
-  (find, replace, context) =>
-    (context || '').replace(new RegExp(find, 'g'), replace), // TODO #12873
+handlebars.registerHelper('replace', (find, replace, context) =>
+  (context ?? '').replace(regEx(find, 'g'), replace),
 );
 
 handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
 
-handlebars.registerHelper(
-  'containsString',
-  (str, subStr) => str?.includes(subStr),
+handlebars.registerHelper('containsString', (str, subStr) =>
+  str?.includes(subStr),
 );
 
 handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
+
+handlebars.registerHelper('includes', (arg1: string[], arg2: string) => {
+  if (is.array(arg1, is.string) && is.string(arg2)) {
+    return arg1.includes(arg2);
+  }
+
+  return false;
+});
 
 handlebars.registerHelper({
   and(...args) {
@@ -87,6 +96,8 @@ export const allowedFields = {
   depNameSanitized:
     'The depName field sanitized for use in branches after removing spaces and special characters',
   depType: 'The dependency type (if extracted - manager-dependent)',
+  depTypes:
+    'A deduplicated array of dependency types (if extracted - manager-dependent) in a branch',
   displayFrom: 'The current value, formatted for display',
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
@@ -122,8 +133,10 @@ export const allowedFields = {
   packageFileDir:
     'The directory with full path where the packageFile was found',
   packageName: 'The full name that was used to look up the dependency',
+  packageScope: 'The scope of the package name. Supports Maven group ID only',
   parentDir:
     'The name of the directory that the dependency was found in, without full path',
+  parentOrg: 'The name of the parent organization for the current repository',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',
   prettyDepType: 'Massaged depType',
   prettyNewMajor: 'The new major value with v prepended to it.',
@@ -140,6 +153,8 @@ export const allowedFields = {
   sourceRepoOrg: 'The repository organization in the sourceUrl, if present',
   sourceRepoSlug: 'The slugified pathname of the sourceUrl, if present',
   sourceUrl: 'The source URL for the package',
+  topLevelOrg:
+    'The name of the top-level organization for the current repository',
   updateType:
     'One of digest, pin, rollback, patch, minor, major, replacement, pinDigest',
   upgrades: 'An array of upgrade objects in the branch',
@@ -210,8 +225,9 @@ export function proxyCompileInput(input: CompileInput): CompileInput {
   return new Proxy<CompileInput>(input, compileInputProxyHandler);
 }
 
-const templateRegex =
-  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g; // TODO #12873
+const templateRegex = regEx(
+  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g,
+);
 
 export function compile(
   template: string,

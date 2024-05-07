@@ -69,9 +69,10 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: '.',
       docker: {},
+      userConfiguredEnv: config.env,
       toolConstraints: [
         { toolName: 'python', constraint: config.constraints?.python },
-        { toolName: 'hashin' },
+        { toolName: 'hashin', constraint: config.constraints?.hashin },
       ],
       extraEnv: {
         PIP_CACHE_DIR: await ensureCacheDir('pip'),

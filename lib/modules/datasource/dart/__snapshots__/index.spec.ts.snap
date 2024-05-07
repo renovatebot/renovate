@@ -3,7 +3,7 @@
 exports[`modules/datasource/dart/index getReleases processes real data 1`] = `
 {
   "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
-  "registryUrl": "https://pub.dartlang.org/",
+  "registryUrl": "https://pub.dartlang.org",
   "releases": [
     {
       "releaseTimestamp": "2017-05-09T18:25:24.268Z",

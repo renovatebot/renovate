@@ -51,7 +51,7 @@ A simplified example:
 
 ### Custom dependency extraction
 
-Renovate supports 60+ types of package files.
+Renovate supports 90+ types of package files.
 By default, Renovate finds most dependencies, but there are exceptions.
 This can be because:
 
@@ -127,7 +127,7 @@ To learn more about "automerge" read the [key concepts, automerge](../key-concep
 
 We use these Renovate features to automerge an internal dependency:
 
-- [Git submodule support](https://docs.renovatebot.com/modules/manager/git-submodules/)
+- [Git submodule support](../modules/manager/git-submodules/index.md)
 - [`automerge`](../configuration-options.md#automerge) set to `true`
 - [`automergeType`](../configuration-options.md#automergetype) set to `branch`
 

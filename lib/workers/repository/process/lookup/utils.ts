@@ -38,10 +38,13 @@ export function isReplacementRulesConfigured(
 export function determineNewReplacementName(
   config: LookupUpdateConfig,
 ): string {
-  return (
-    config.replacementName ??
-    template.compile(config.replacementNameTemplate!, config, true)
-  );
+  if (config.replacementName) {
+    return config.replacementName;
+  }
+  if (config.replacementNameTemplate) {
+    return template.compile(config.replacementNameTemplate, config, true);
+  }
+  return config.packageName;
 }
 
 export function determineNewReplacementValue(

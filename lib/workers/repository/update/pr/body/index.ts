@@ -29,9 +29,16 @@ function massageUpdateMetadata(config: BranchConfig): void {
     if (primaryLink) {
       depNameLinked = `[${depNameLinked}](${primaryLink})`;
     }
+
     const otherLinks = [];
-    if (homepage && sourceUrl) {
-      otherLinks.push(`[source](${sourceUrl})`);
+    if (sourceUrl && (!!sourceDirectory || homepage)) {
+      otherLinks.push(
+        `[source](${
+          sourceDirectory
+            ? joinUrlParts(sourceUrl, 'tree/HEAD/', sourceDirectory)
+            : sourceUrl
+        })`,
+      );
     }
     if (changelogUrl) {
       otherLinks.push(`[changelog](${changelogUrl})`);

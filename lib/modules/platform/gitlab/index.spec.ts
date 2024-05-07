@@ -15,6 +15,7 @@ import {
 import type { logger as _logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
+import type { LongCommitSha } from '../../../util/git/types';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
 
@@ -43,13 +44,15 @@ describe('modules/platform/gitlab/index', () => {
     git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
-      '0d9c7726c3d628b7e28af234595cfd20febdbf8e',
+      '0d9c7726c3d628b7e28af234595cfd20febdbf8e' as LongCommitSha,
     );
     hostRules.find.mockReturnValue({
       token: '123test',
     });
     delete process.env.GITLAB_IGNORE_REPO_URL;
     delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY;
+    delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
+    delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
   });
 
   async function initFakePlatform(version: string) {
@@ -485,7 +488,7 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
-  describe('getRepoForceRebase', () => {
+  describe('getBranchForceRebase', () => {
     it('should return false', async () => {
       await initRepo(
         {
@@ -497,7 +500,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'merge',
         },
       );
-      expect(await gitlab.getRepoForceRebase()).toBeFalse();
+      expect(await gitlab.getBranchForceRebase!('master')).toBeFalse();
     });
 
     it('should return true', async () => {
@@ -511,7 +514,7 @@ describe('modules/platform/gitlab/index', () => {
           merge_method: 'ff',
         },
       );
-      expect(await gitlab.getRepoForceRebase()).toBeTrue();
+      expect(await gitlab.getBranchForceRebase!('master')).toBeTrue();
     });
   });
 
@@ -1676,6 +1679,49 @@ describe('modules/platform/gitlab/index', () => {
       });
       expect(res).toBeDefined();
     });
+
+    it('finds pr from other authors', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?source_branch=branch&state=opened',
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch',
+            title: 'branch a pr',
+            state: 'opened',
+          },
+        ]);
+      expect(
+        await gitlab.findPr({
+          branchName: 'branch',
+          state: 'open',
+          includeOtherAuthors: true,
+        }),
+      ).toMatchObject({
+        number: 1,
+        sourceBranch: 'branch',
+        state: 'open',
+        title: 'branch a pr',
+      });
+    });
+
+    it('returns null if no pr found - (includeOtherAuthors)', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?source_branch=branch&state=opened',
+        )
+        .reply(200, []);
+      const pr = await gitlab.findPr({
+        branchName: 'branch',
+        state: 'open',
+        includeOtherAuthors: true,
+      });
+      expect(pr).toBeNull();
+    });
   });
 
   async function initPlatform(gitlabVersion: string) {
@@ -1697,6 +1743,11 @@ describe('modules/platform/gitlab/index', () => {
   }
 
   describe('createPr(branchName, title, body)', () => {
+    beforeEach(() => {
+      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '2';
+      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '100';
+    });
+
     it('returns the PR', async () => {
       await initPlatform('13.3.6-ee');
       httpMock
@@ -1790,15 +1841,7 @@ describe('modules/platform/gitlab/index', () => {
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
         .get('/api/v4/projects/undefined/merge_requests/12345')
-        .reply(200, {
-          merge_status: 'can_be_merged',
-          pipeline: {
-            id: 29626725,
-            sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
-            ref: 'patch-28',
-            status: 'success',
-          },
-        })
+        .reply(200)
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
       expect(
@@ -1812,15 +1855,229 @@ describe('modules/platform/gitlab/index', () => {
             usePlatformAutomerge: true,
           },
         }),
-      ).toMatchInlineSnapshot(`
-        {
-          "id": 1,
-          "iid": 12345,
-          "number": 12345,
-          "sourceBranch": "some-branch",
-          "title": "some title",
-        }
-      `);
+      ).toEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+
+      expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400]]);
+    });
+
+    it('should parse merge_status attribute if detailed_merge_status is not set (on < 15.6)', async () => {
+      await initPlatform('13.3.6-ee');
+      const reply_body = {
+        merge_status: 'pending',
+      };
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(405, {})
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200, {});
+      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        platformOptions: {
+          usePlatformAutomerge: true,
+        },
+      });
+      expect(pr).toEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 1',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 2',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 3',
+      );
+      expect(timers.setTimeout.mock.calls).toMatchObject([
+        [100],
+        [400],
+        [900],
+        [100],
+      ]);
+    });
+
+    it('should parse detailed_merge_status attribute on >= 15.6', async () => {
+      await initPlatform('15.6.0-ee');
+      const reply_body = {
+        detailed_merge_status: 'pending',
+      };
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200, {});
+      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        platformOptions: {
+          usePlatformAutomerge: true,
+        },
+      });
+      expect(pr).toEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 1',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 2',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 3',
+      );
+      expect(timers.setTimeout.mock.calls).toMatchObject([[100], [400], [900]]);
+    });
+
+    it('should retry auto merge creation on 405 method not allowed', async () => {
+      await initPlatform('15.6.0-ee');
+      const reply_body = {
+        detailed_merge_status: 'pending',
+      };
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(405, {})
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(405, {})
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200, {});
+      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        platformOptions: {
+          usePlatformAutomerge: true,
+        },
+      });
+      expect(pr).toEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 1',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 2',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'PR not yet in mergeable state. Retrying 3',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Automerge on PR creation failed. Retrying 1',
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Automerge on PR creation failed. Retrying 2',
+      );
+      expect(timers.setTimeout.mock.calls).toMatchObject([
+        [100],
+        [400],
+        [900],
+        [100],
+        [400],
+      ]);
+    });
+
+    it('should not retry if MR is mergeable and pipeline is running', async () => {
+      await initPlatform('15.6.0-ee');
+      const reply_body = {
+        detailed_merge_status: 'mergeable',
+        pipeline: {
+          status: 'running',
+        },
+      };
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, reply_body)
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200, {});
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        platformOptions: {
+          usePlatformAutomerge: true,
+        },
+      });
+      expect(pr).toEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+      expect(timers.setTimeout.mock.calls).toMatchObject([]);
     });
 
     it('raises with squash enabled when repository squash option is default_on', async () => {
@@ -2030,6 +2287,84 @@ describe('modules/platform/gitlab/index', () => {
             name: 'AnotherRegularApproverRule',
             rule_type: 'regular',
             id: 50007,
+          },
+        ])
+        .delete(
+          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50006',
+        )
+        .reply(200)
+        .delete(
+          '/api/v4/projects/undefined/merge_requests/12345/approval_rules/50007',
+        )
+        .reply(200)
+        .post('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
+        .reply(200);
+      expect(
+        await gitlab.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'master',
+          prTitle: 'some-title',
+          prBody: 'the-body',
+          labels: [],
+          platformOptions: {
+            usePlatformAutomerge: true,
+            gitLabIgnoreApprovals: true,
+          },
+        }),
+      ).toStrictEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
+    });
+
+    it('does not try to remove "report_approver" and "code_owner" approval rules', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'some title',
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: {
+            id: 29626725,
+            sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
+            ref: 'patch-28',
+            status: 'success',
+          },
+        })
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345/approval_rules')
+        .reply(200, [
+          {
+            name: 'RegularApproverRule',
+            rule_type: 'regular',
+            id: 50006,
+          },
+          {
+            name: 'AnotherRegularApproverRule',
+            rule_type: 'regular',
+            id: 50007,
+          },
+          {
+            name: 'Coverage-Check',
+            rule_type: 'report_approver',
+            id: 50008,
+          },
+          {
+            name: 'path/to/folder',
+            rule_type: 'code_owner',
+            id: 50009,
           },
         ])
         .delete(
@@ -2538,6 +2873,67 @@ describe('modules/platform/gitlab/index', () => {
           state: 'closed',
         }),
       ).toResolve();
+    });
+
+    it('adds and removes labels', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&scope=created_by_me',
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: 'open',
+          },
+        ])
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200);
+      await expect(
+        gitlab.updatePr({
+          number: 1,
+          prTitle: 'title',
+          prBody: 'body',
+          state: 'closed',
+          addLabels: ['new_label'],
+          removeLabels: ['old_label'],
+        }),
+      ).toResolve();
+    });
+  });
+
+  describe('reattemptPlatformAutomerge(number, platformOptions)', () => {
+    const pr = {
+      number: 12345,
+      platformOptions: {
+        usePlatformAutomerge: true,
+      },
+    };
+
+    it('should set automatic merge', async () => {
+      await initPlatform('13.3.6-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: {
+            status: 'running',
+          },
+        })
+        .put('/api/v4/projects/undefined/merge_requests/12345/merge')
+        .reply(200);
+
+      await expect(gitlab.reattemptPlatformAutomerge?.(pr)).toResolve();
+
+      expect(logger.debug).toHaveBeenLastCalledWith(
+        'PR platform automerge re-attempted...prNo: 12345',
+      );
     });
   });
 

@@ -1,4 +1,5 @@
 import type { HttpResponse } from '../../../util/http/types';
+import { ensureTrailingSlash } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { DartResult } from './types';
@@ -10,7 +11,7 @@ export class DartDatasource extends Datasource {
     super(DartDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = ['https://pub.dartlang.org/'];
 
@@ -23,7 +24,9 @@ export class DartDatasource extends Datasource {
       return null;
     }
     let result: ReleaseResult | null = null;
-    const pkgUrl = `${registryUrl}api/packages/${packageName}`;
+    const pkgUrl = `${ensureTrailingSlash(
+      registryUrl,
+    )}api/packages/${packageName}`;
 
     let raw: HttpResponse<DartResult> | null = null;
     try {

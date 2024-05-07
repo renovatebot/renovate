@@ -1,16 +1,17 @@
 [requires]
 poco/1.9.4
-zlib/[~1.2.3, loose=False]  
+zlib/[~1.2.3, loose=False]
 fake/8.62.134@test/dev
+cairo/1.17.2#aff2d03608351db075ec1348a3afc9ff
 cairo/1.17.2@_/_#aff2d03608351db075ec1348a3afc9ff
 
 [build_requires]
 7zip/[>1.1 <2.1, include_prerelease=True]
 curl/[~1.2.3, loose=False, include_prerelease=True]@test/dev
 boost/[>1.1 <2.1]
-catch2/[2.8]     
+catch2/[2.8]
 openssl/[~=3.0]@test/prod
-cmake/[>1.1 || 0.8] 
+cmake/[>1.1 || 0.8]
 cryptopp/[1.2.7 || >=1.2.9 <2.0.0]@test/local
 #commentedout/1.2
 # commentedout/3.4

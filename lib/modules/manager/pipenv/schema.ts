@@ -26,3 +26,5 @@ export const PipfileLockSchema = Json.pipe(
     develop: PipfileLockEntrySchema,
   }),
 );
+
+export type PipfileLockSchema = z.infer<typeof PipfileLockSchema>;

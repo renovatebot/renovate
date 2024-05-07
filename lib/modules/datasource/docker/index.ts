@@ -8,7 +8,7 @@ import type { HttpResponse } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { type AsyncResult, Result } from '../../../util/result';
-import { isDockerDigest } from '../../../util/string';
+import { isDockerDigest } from '../../../util/string-match';
 import {
   ensurePathPrefix,
   joinUrlParts,
@@ -32,10 +32,12 @@ import {
   getAuthHeaders,
   getRegistryRepository,
   gitRefLabel,
+  imageUrlLabel,
   isDockerHost,
   sourceLabel,
   sourceLabels,
 } from './common';
+import { DockerHubCache } from './dockerhub-cache';
 import { ecrPublicRegex, ecrRegex, isECRMaxResultsError } from './ecr';
 import {
   DistributionManifest,
@@ -175,7 +177,7 @@ export class DockerDatasource extends Datasource {
     ) => `${registryHost}:${dockerRepository}@${configDigest}`,
     ttlMinutes: 1440 * 28,
   })
-  public async getImageConfig(
+  async getImageConfig(
     registryHost: string,
     dockerRepository: string,
     configDigest: string,
@@ -220,7 +222,7 @@ export class DockerDatasource extends Datasource {
     ) => `${registryHost}:${dockerRepository}@${configDigest}`,
     ttlMinutes: 1440 * 28,
   })
-  public async getHelmConfig(
+  async getHelmConfig(
     registryHost: string,
     dockerRepository: string,
     configDigest: string,
@@ -335,7 +337,7 @@ export class DockerDatasource extends Datasource {
     ) => `${registryHost}:${dockerRepository}@${currentDigest}`,
     ttlMinutes: 1440 * 28,
   })
-  public async getImageArchitecture(
+  async getImageArchitecture(
     registryHost: string,
     dockerRepository: string,
     currentDigest: string,
@@ -433,7 +435,7 @@ export class DockerDatasource extends Datasource {
       `${registryHost}:${dockerRepository}:${tag}`,
     ttlMinutes: 24 * 60,
   })
-  public async getLabels(
+  async getLabels(
     registryHost: string,
     dockerRepository: string,
     tag: string,
@@ -626,9 +628,8 @@ export class DockerDatasource extends Datasource {
       ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)
         ? 1000
         : 10000;
-    let url:
-      | string
-      | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
+    let url: string | null =
+      `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
     url = ensurePathPrefix(url, '/v2');
     const headers = await getAuthHeaders(
       this.http,
@@ -687,7 +688,7 @@ export class DockerDatasource extends Datasource {
     key: (registryHost: string, dockerRepository: string) =>
       `${registryHost}:${dockerRepository}`,
   })
-  public async getTags(
+  async getTags(
     registryHost: string,
     dockerRepository: string,
   ): Promise<string[] | null> {
@@ -788,13 +789,22 @@ export class DockerDatasource extends Datasource {
     },
   })
   override async getDigest(
-    { registryUrl, packageName, currentDigest }: DigestConfig,
+    { registryUrl, lookupName, packageName, currentDigest }: DigestConfig,
     newValue?: string,
   ): Promise<string | null> {
-    const { registryHost, dockerRepository } = getRegistryRepository(
-      packageName,
-      registryUrl!,
-    );
+    let registryHost: string;
+    let dockerRepository: string;
+    if (registryUrl && lookupName) {
+      // Reuse the resolved values from getReleases()
+      registryHost = registryUrl;
+      dockerRepository = lookupName;
+    } else {
+      // Resolve values independently
+      ({ registryHost, dockerRepository } = getRegistryRepository(
+        packageName,
+        registryUrl!,
+      ));
+    }
     logger.debug(
       // TODO: types (#22198)
       `getDigest(${registryHost}, ${dockerRepository}, ${newValue})`,
@@ -913,12 +923,16 @@ export class DockerDatasource extends Datasource {
     return digest;
   }
 
+  @cache({
+    namespace: 'datasource-docker-hub-tags',
+    key: (dockerRepository: string) => `${dockerRepository}`,
+  })
   async getDockerHubTags(dockerRepository: string): Promise<Release[] | null> {
-    const result: Release[] = [];
-    let url:
-      | null
-      | string = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000`;
-    while (url) {
+    let url = `https://hub.docker.com/v2/repositories/${dockerRepository}/tags?page_size=1000&ordering=last_updated`;
+
+    const cache = await DockerHubCache.init(dockerRepository);
+    let needNextPage: boolean = true;
+    while (needNextPage) {
       const { val, err } = await this.http
         .getJsonSafe(url, DockerHubTagsPage)
         .unwrap();
@@ -928,11 +942,39 @@ export class DockerDatasource extends Datasource {
         return null;
       }
 
-      result.push(...val.items);
-      url = val.nextPage;
+      const { results, next } = val;
+
+      needNextPage = cache.reconcile(results);
+
+      if (!next) {
+        break;
+      }
+
+      url = next;
     }
 
-    return result;
+    await cache.save();
+
+    const items = cache.getItems();
+    return items.map(
+      ({
+        name: version,
+        tag_last_pushed: releaseTimestamp,
+        digest: newDigest,
+      }) => {
+        const release: Release = { version };
+
+        if (releaseTimestamp) {
+          release.releaseTimestamp = releaseTimestamp;
+        }
+
+        if (newDigest) {
+          release.newDigest = newDigest;
+        }
+
+        return release;
+      },
+    );
   }
 
   /**
@@ -1003,6 +1045,10 @@ export class DockerDatasource extends Datasource {
       registryUrl: registryHost,
       releases,
     };
+    if (dockerRepository !== packageName) {
+      // This will be reused later if a getDigest() call is made
+      ret.lookupName = dockerRepository;
+    }
 
     const tags = releases.map((release) => release.version);
     const latestTag = tags.includes('latest')
@@ -1027,6 +1073,9 @@ export class DockerDatasource extends Datasource {
           ret.sourceUrl = labels[label];
           break;
         }
+      }
+      if (is.nonEmptyString(labels[imageUrlLabel])) {
+        ret.homepage = labels[imageUrlLabel];
       }
     }
     return ret;

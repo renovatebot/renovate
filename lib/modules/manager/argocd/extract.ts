@@ -1,21 +1,22 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { trimTrailingSlash } from '../../../util/url';
+import { parseYaml } from '../../../util/yaml';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type {
+import {
   ApplicationDefinition,
-  ApplicationSource,
-  ApplicationSpec,
-} from './types';
+  type ApplicationSource,
+  type ApplicationSpec,
+} from './schema';
 import { fileTestRegex } from './util';
 
 export function extractPackageFile(
@@ -33,35 +34,27 @@ export function extractPackageFile(
 
   let definitions: ApplicationDefinition[];
   try {
-    definitions = loadAll(content) as ApplicationDefinition[];
+    definitions = parseYaml(content, null, {
+      customSchema: ApplicationDefinition,
+      failureBehaviour: 'filter',
+      removeTemplates: true,
+    });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse ArgoCD definition.');
     return null;
   }
 
-  const deps = definitions.filter(is.plainObject).flatMap(processAppSpec);
+  const deps = definitions.flatMap(processAppSpec);
 
   return deps.length ? { deps } : null;
 }
 
 function processSource(source: ApplicationSource): PackageDependency | null {
-  if (
-    !source ||
-    !is.nonEmptyString(source.repoURL) ||
-    !is.nonEmptyString(source.targetRevision)
-  ) {
-    return null;
-  }
-
   // a chart variable is defined this is helm declaration
   if (source.chart) {
     // assume OCI helm chart if repoURL doesn't contain explicit protocol
-    if (
-      source.repoURL.startsWith('oci://') ||
-      !source.repoURL.includes('://')
-    ) {
-      let registryURL = source.repoURL.replace('oci://', '');
-      registryURL = trimTrailingSlash(registryURL);
+    if (isOCIRegistry(source.repoURL) || !source.repoURL.includes('://')) {
+      const registryURL = trimTrailingSlash(removeOCIPrefix(source.repoURL));
 
       return {
         depName: `${registryURL}/${source.chart}`,
@@ -88,14 +81,10 @@ function processSource(source: ApplicationSource): PackageDependency | null {
 function processAppSpec(
   definition: ApplicationDefinition,
 ): PackageDependency[] {
-  const spec: ApplicationSpec | null | undefined =
+  const spec: ApplicationSpec =
     definition.kind === 'Application'
-      ? definition?.spec
-      : definition?.spec?.template?.spec;
-
-  if (is.nullOrUndefined(spec)) {
-    return [];
-  }
+      ? definition.spec
+      : definition.spec.template.spec;
 
   const deps: (PackageDependency | null)[] = [];
 

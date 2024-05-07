@@ -3,7 +3,7 @@ import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
 import { minimatchFilter } from '../../util/minimatch';
-import { configRegexPredicate, isConfigRegex } from '../../util/regex';
+import { getRegexPredicate, isRegexMatch } from '../../util/string-match';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {
@@ -38,8 +38,11 @@ export async function autodiscoverRepositories(
   // Autodiscover list of repositories
   let discovered = await platform.getRepos({
     topics: config.autodiscoverTopics,
+    sort: config.autodiscoverRepoSort,
+    order: config.autodiscoverRepoOrder,
     includeMirrors: config.includeMirrors,
     namespaces: config.autodiscoverNamespaces,
+    projects: config.autodiscoverProjects,
   });
   if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
@@ -61,12 +64,12 @@ export async function autodiscoverRepositories(
       logger.debug('None of the discovered repositories matched the filter');
       return config;
     }
-    logger.debug(
-      `Autodiscovered ${discovered.length} repositories after filter`,
-    );
   }
 
-  logger.info({ repositories: discovered }, `Autodiscovered repositories`);
+  logger.info(
+    { length: discovered.length, repositories: discovered },
+    `Autodiscovered repositories`,
+  );
 
   // istanbul ignore if
   if (config.repositories?.length) {
@@ -100,8 +103,8 @@ export function applyFilters(repos: string[], filters: string[]): string[] {
 
   for (const filter of filters) {
     let res: string[];
-    if (isConfigRegex(filter)) {
-      const autodiscoveryPred = configRegexPredicate(filter);
+    if (isRegexMatch(filter)) {
+      const autodiscoveryPred = getRegexPredicate(filter);
       if (!autodiscoveryPred) {
         throw new Error(`Failed to parse regex pattern "${filter}"`);
       }

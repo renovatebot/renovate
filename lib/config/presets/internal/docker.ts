@@ -39,7 +39,6 @@ export const presets: Record<string, Preset> = {
     description: 'Pin Docker digests.',
     packageRules: [
       {
-        enabled: true,
         matchDatasources: ['docker'],
         pinDigests: true,
       },

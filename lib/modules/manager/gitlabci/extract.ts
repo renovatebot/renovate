@@ -1,17 +1,37 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import { trimLeadingSlash } from '../../../util/url';
+import { parseYaml } from '../../../util/yaml';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { isGitlabIncludeLocal } from './common';
-import type { GitlabPipeline, Image, Job, Services } from './types';
+import {
+  filterIncludeFromGitlabPipeline,
+  isGitlabIncludeComponent,
+  isGitlabIncludeLocal,
+  isNonEmptyObject,
+} from './common';
+import type {
+  GitlabInclude,
+  GitlabIncludeComponent,
+  GitlabPipeline,
+  Image,
+  Job,
+  Services,
+} from './types';
 import { getGitlabDep, replaceReferenceTags } from './utils';
+
+// See https://docs.gitlab.com/ee/ci/components/index.html#use-a-component
+const componentReferenceRegex = regEx(
+  /(?<fqdn>[^/]+)\/(?<projectPath>.+)\/(?:.+)@(?<specificVersion>.+)/,
+);
+const componentReferenceLatestVersion = '~latest';
 
 export function extractFromImage(
   image: Image | undefined,
@@ -76,6 +96,72 @@ export function extractFromJob(
   return deps;
 }
 
+function getIncludeComponentsFromInclude(
+  includeValue: GitlabInclude[] | GitlabInclude,
+): GitlabIncludeComponent[] {
+  const includes = is.array(includeValue) ? includeValue : [includeValue];
+  return includes.filter(isGitlabIncludeComponent);
+}
+
+function getAllIncludeComponents(
+  data: GitlabPipeline,
+): GitlabIncludeComponent[] {
+  const childrenData = Object.values(filterIncludeFromGitlabPipeline(data))
+    .filter(isNonEmptyObject)
+    .map(getAllIncludeComponents)
+    .flat();
+
+  // Process include key.
+  if (data.include) {
+    childrenData.push(...getIncludeComponentsFromInclude(data.include));
+  }
+  return childrenData;
+}
+
+function extractDepFromIncludeComponent(
+  includeComponent: GitlabIncludeComponent,
+  registryAliases?: Record<string, string>,
+): PackageDependency | null {
+  const componentReference = componentReferenceRegex.exec(
+    includeComponent.component,
+  )?.groups;
+  if (!componentReference) {
+    logger.debug(
+      { componentReference: includeComponent.component },
+      'Ignoring malformed component reference',
+    );
+    return null;
+  }
+  const projectPathParts = componentReference.projectPath.split('/');
+  if (projectPathParts.length < 2) {
+    logger.debug(
+      { componentReference: includeComponent.component },
+      'Ignoring component reference with incomplete project path',
+    );
+    return null;
+  }
+  const aliasValue = registryAliases?.[componentReference.fqdn];
+  if (aliasValue) {
+    componentReference.fqdn = aliasValue;
+  }
+
+  const dep: PackageDependency = {
+    datasource: GitlabTagsDatasource.id,
+    depName: componentReference.projectPath,
+    depType: 'repository',
+    currentValue: componentReference.specificVersion,
+    registryUrls: [`https://${componentReference.fqdn}`],
+  };
+  if (dep.currentValue === componentReferenceLatestVersion) {
+    logger.debug(
+      { componentVersion: dep.currentValue },
+      'Ignoring component version',
+    );
+    dep.skipReason = 'unsupported-version';
+  }
+  return dep;
+}
+
 export function extractPackageFile(
   content: string,
   packageFile: string,
@@ -83,42 +169,72 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   let deps: PackageDependency[] = [];
   try {
-    const doc = load(replaceReferenceTags(content), {
-      json: true,
-    }) as Record<string, Image | Services | Job>;
-    if (is.object(doc)) {
-      for (const [property, value] of Object.entries(doc)) {
-        switch (property) {
-          case 'image':
-            {
-              const dep = extractFromImage(
-                value as Image,
-                config.registryAliases,
-              );
-              if (dep) {
-                deps.push(dep);
+    // TODO: use schema (#9610)
+    const docs = parseYaml<GitlabPipeline>(
+      replaceReferenceTags(content),
+      null,
+      {
+        json: true,
+      },
+    );
+    for (const doc of docs) {
+      if (is.object(doc)) {
+        for (const [property, value] of Object.entries(doc)) {
+          switch (property) {
+            case 'image':
+              {
+                const dep = extractFromImage(
+                  value as Image,
+                  config.registryAliases,
+                );
+                if (dep) {
+                  deps.push(dep);
+                }
               }
-            }
-            break;
+              break;
 
-          case 'services':
-            deps.push(
-              ...extractFromServices(value as Services, config.registryAliases),
-            );
-            break;
+            case 'services':
+              deps.push(
+                ...extractFromServices(
+                  value as Services,
+                  config.registryAliases,
+                ),
+              );
+              break;
 
-          default:
-            deps.push(...extractFromJob(value as Job, config.registryAliases));
-            break;
+            default:
+              deps.push(
+                ...extractFromJob(value as Job, config.registryAliases),
+              );
+              break;
+          }
+        }
+        deps = deps.filter(is.truthy);
+      }
+
+      const includedComponents = getAllIncludeComponents(doc);
+      for (const includedComponent of includedComponents) {
+        const dep = extractDepFromIncludeComponent(
+          includedComponent,
+          config.registryAliases,
+        );
+        if (dep) {
+          deps.push(dep);
         }
       }
-      deps = deps.filter(is.truthy);
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.debug(
-      { err, packageFile },
-      'Error extracting GitLab CI dependencies',
-    );
+    if (err.stack?.startsWith('YAMLException:')) {
+      logger.debug(
+        { err, packageFile },
+        'YAML exception extracting GitLab CI includes',
+      );
+    } else {
+      logger.debug(
+        { err, packageFile },
+        'Error extracting GitLab CI dependencies',
+      );
+    }
   }
 
   return deps.length ? { deps } : null;
@@ -144,11 +260,12 @@ export async function extractAllPackageFiles(
       );
       continue;
     }
-    let doc: GitlabPipeline;
+    let docs: GitlabPipeline[];
     try {
-      doc = load(replaceReferenceTags(content), {
+      // TODO: use schema (#9610)
+      docs = parseYaml(replaceReferenceTags(content), null, {
         json: true,
-      }) as GitlabPipeline;
+      });
     } catch (err) {
       logger.debug(
         { err, packageFile: file },
@@ -157,19 +274,21 @@ export async function extractAllPackageFiles(
       continue;
     }
 
-    if (is.array(doc?.include)) {
-      for (const includeObj of doc.include.filter(isGitlabIncludeLocal)) {
-        const fileObj = trimLeadingSlash(includeObj.local);
+    for (const doc of docs) {
+      if (is.array(doc?.include)) {
+        for (const includeObj of doc.include.filter(isGitlabIncludeLocal)) {
+          const fileObj = trimLeadingSlash(includeObj.local);
+          if (!seen.has(fileObj)) {
+            seen.add(fileObj);
+            filesToExamine.push(fileObj);
+          }
+        }
+      } else if (is.string(doc?.include)) {
+        const fileObj = trimLeadingSlash(doc.include);
         if (!seen.has(fileObj)) {
           seen.add(fileObj);
           filesToExamine.push(fileObj);
         }
-      }
-    } else if (is.string(doc?.include)) {
-      const fileObj = trimLeadingSlash(doc.include);
-      if (!seen.has(fileObj)) {
-        seen.add(fileObj);
-        filesToExamine.push(fileObj);
       }
     }
 

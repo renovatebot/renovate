@@ -3,6 +3,7 @@ import { logger } from '../../../../../../logger';
 import type { GitlabRelease } from '../../../../../../modules/datasource/gitlab-releases/types';
 import type { GitlabTreeNode } from '../../../../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../../../../util/http/gitlab';
+import { compareChangelogFilePath } from '../common';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
@@ -42,7 +43,9 @@ export async function getReleaseNotesMd(
     logger.trace('no changelog file found');
     return null;
   }
-  const { path: changelogFile, id } = files.shift()!;
+  const { path: changelogFile, id } = files
+    .sort((a, b) => compareChangelogFilePath(a.name, b.name))
+    .shift()!;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(

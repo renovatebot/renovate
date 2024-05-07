@@ -1,13 +1,9 @@
 {
-  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
   "name": "Renovate",
-  "dockerFile": "Dockerfile",
-  "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {}
+  "build": {
+    "dockerfile": "Dockerfile"
   },
-  "capAdd": ["SYS_PTRACE"],
-  "privileged": true,
-  "securityOpt": ["seccomp=unconfined"],
+  "init": true,
   "hostRequirements": {
     "cpus": 4,
     "memory": "7gb",
@@ -15,6 +11,12 @@
   },
   "customizations": {
     "vscode": {
+      "terminal.integrated.profiles.linux": {
+        "bash": {
+          "path": "bash",
+          "icon": "terminal-bash"
+        }
+      },
       "extensions": [
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",

@@ -44,6 +44,7 @@ describe('modules/manager/asdf/extract', () => {
     it('can handle multiple tools in one file', () => {
       const res = extractPackageFile(
         codeBlock`
+act 0.2.54
 adr-tools 3.0.0
 argocd 2.5.4
 asdf-plugin-manager 1.1.1
@@ -52,6 +53,7 @@ bun 0.2.2
 cargo-make 0.36.2
 checkov 2.3.3
 clojure 1.11.1.1182
+cosign 2.2.4
 crystal 1.6.1
 dart 2.19.3
 deno 1.26.2
@@ -68,6 +70,7 @@ github-cli 2.32.1
 gohugo extended_0.104.3
 golang 1.19.2
 golangci-lint 1.52.2
+gomplate 3.11.7
 hadolint 2.12.0
 haskell 9.4.2
 helm 3.10.1
@@ -77,13 +80,17 @@ idris 1.3.4
 java adoptopenjdk-16.0.0+36
 julia 1.8.2
 just 1.7.0
+kind 0.19.0
 kotlin 1.7.20
 kubectl 1.26.3
 kustomize 4.5.7
 lua 5.4.4
+maven 3.9.6
+mimirtool 2.11.0
 nim 1.6.8
 nodejs 18.12.0
 ocaml 4.14.0
+opentofu 1.6.0
 perl 5.37.5
 php 8.1.12
 pnpm 7.26.2
@@ -104,6 +111,7 @@ tflint 0.44.1
 tfsec 1.28.1
 trivy 0.33.0
 vault 1.15.1
+yq 4.40.5
 zig 0.9.1
 maestro 1.24.0
 detekt 1.21.0
@@ -116,6 +124,13 @@ dummy 1.2.3
       );
       expect(res).toEqual({
         deps: [
+          {
+            currentValue: '0.2.54',
+            datasource: 'github-releases',
+            packageName: 'nektos/act',
+            depName: 'act',
+            extractVersion: '^v(?<version>\\S+)',
+          },
           {
             currentValue: '3.0.0',
             datasource: 'github-tags',
@@ -168,6 +183,13 @@ dummy 1.2.3
             versioning:
               'regex:^(?<major>\\d+?)\\.(?<minor>\\d+?)\\.(?<patch>\\d+)\\.(?<build>\\d+)$',
             depName: 'clojure',
+          },
+          {
+            currentValue: '2.2.4',
+            datasource: 'github-releases',
+            packageName: 'sigstore/cosign',
+            depName: 'cosign',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '1.6.1',
@@ -274,6 +296,13 @@ dummy 1.2.3
             extractVersion: '^v(?<version>.+)',
           },
           {
+            currentValue: '3.11.7',
+            datasource: 'github-releases',
+            packageName: 'hairyhenderson/gomplate',
+            depName: 'gomplate',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
             currentValue: '2.12.0',
             datasource: 'github-tags',
             packageName: 'hadolint/hadolint',
@@ -335,6 +364,13 @@ dummy 1.2.3
             depName: 'just',
           },
           {
+            currentValue: '0.19.0',
+            datasource: 'github-releases',
+            packageName: 'kubernetes-sigs/kind',
+            depName: 'kind',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.7.20',
             datasource: 'github-releases',
             packageName: 'JetBrains/kotlin',
@@ -363,6 +399,19 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '3.9.6',
+            datasource: 'github-releases',
+            packageName: 'apache/maven',
+            depName: 'maven',
+          },
+          {
+            currentValue: '2.11.0',
+            datasource: 'github-releases',
+            packageName: 'grafana/mimir',
+            depName: 'mimirtool',
+            extractVersion: '^mimir-(?<version>\\S+)',
+          },
+          {
             currentValue: '1.6.8',
             datasource: 'github-tags',
             packageName: 'nim-lang/Nim',
@@ -379,6 +428,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'ocaml/ocaml',
             depName: 'ocaml',
+          },
+          {
+            currentValue: '1.6.0',
+            datasource: 'github-releases',
+            packageName: 'opentofu/opentofu',
+            depName: 'opentofu',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '5.37.5',
@@ -515,6 +571,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'hashicorp/vault',
             depName: 'vault',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '4.40.5',
+            datasource: 'github-releases',
+            packageName: 'mikefarah/yq',
+            depName: 'yq',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

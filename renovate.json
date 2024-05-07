@@ -14,7 +14,7 @@
       "versioning": "node"
     },
     {
-      "matchDepTypes": ["dependencies"],
+      "matchDepTypes": ["dependencies", "optionalDependencies"],
       "semanticCommitType": "build"
     },
     {
@@ -30,9 +30,15 @@
       "enabled": false
     },
     {
-      "description": "Manually update opentelemetry-js monorepo when the opentelemetry export bug is fixed, see issue https://github.com/open-telemetry/opentelemetry-js/issues/4216",
-      "matchPackagePatterns": ["^@opentelemetry"],
-      "dependencyDashboardApproval": true
+      "description": "set fix scope for base image",
+      "matchDepNames": ["ghcr.io/renovatebot/base-image"],
+      "semanticCommitType": "fix"
+    },
+    {
+      "description": "set feat scope for base image major",
+      "matchDepNames": ["ghcr.io/renovatebot/base-image"],
+      "matchUpdateTypes": ["major", "minor"],
+      "semanticCommitType": "feat"
     }
   ],
   "customManagers": [

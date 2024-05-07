@@ -75,10 +75,17 @@ describe('workers/repository/update/pr/body/index', () => {
         manager: 'some-manager',
         branchName: 'some-branch',
         dependencyUrl: 'https://github.com/foo/bar',
-        sourceUrl: 'https://github.com/foo/bar.git',
+        sourceUrl: 'https://github.com/foo/bar',
         sourceDirectory: '/baz',
         changelogUrl:
           'https://raw.githubusercontent.com/foo/bar/tree/main/CHANGELOG.md',
+        homepage: 'https://example.com',
+      };
+
+      const upgrade1 = {
+        manager: 'some-manager',
+        branchName: 'some-branch',
+        sourceUrl: 'https://github.com/foo/bar',
         homepage: 'https://example.com',
       };
 
@@ -87,7 +94,7 @@ describe('workers/repository/update/pr/body/index', () => {
           manager: 'some-manager',
           baseBranch: 'base',
           branchName: 'some-branch',
-          upgrades: [upgrade],
+          upgrades: [upgrade, upgrade1],
         },
         {
           debugData: {
@@ -104,13 +111,22 @@ describe('workers/repository/update/pr/body/index', () => {
         changelogUrl:
           'https://raw.githubusercontent.com/foo/bar/tree/main/CHANGELOG.md',
         depNameLinked:
-          '[undefined](https://example.com) ([source](https://github.com/foo/bar.git), [changelog](https://raw.githubusercontent.com/foo/bar/tree/main/CHANGELOG.md))',
+          '[undefined](https://example.com) ([source](https://github.com/foo/bar/tree/HEAD/baz), [changelog](https://raw.githubusercontent.com/foo/bar/tree/main/CHANGELOG.md))',
         dependencyUrl: 'https://github.com/foo/bar',
         homepage: 'https://example.com',
         references:
-          '[homepage](https://example.com), [source](https://github.com/foo/bar.git/tree/HEAD/baz), [changelog](https://raw.githubusercontent.com/foo/bar/tree/main/CHANGELOG.md)',
+          '[homepage](https://example.com), [source](https://github.com/foo/bar/tree/HEAD/baz), [changelog](https://raw.githubusercontent.com/foo/bar/tree/main/CHANGELOG.md)',
         sourceDirectory: '/baz',
-        sourceUrl: 'https://github.com/foo/bar.git',
+        sourceUrl: 'https://github.com/foo/bar',
+      });
+      expect(upgrade1).toMatchObject({
+        branchName: 'some-branch',
+        depNameLinked:
+          '[undefined](https://example.com) ([source](https://github.com/foo/bar))',
+        references:
+          '[homepage](https://example.com), [source](https://github.com/foo/bar)',
+        homepage: 'https://example.com',
+        sourceUrl: 'https://github.com/foo/bar',
       });
     });
 

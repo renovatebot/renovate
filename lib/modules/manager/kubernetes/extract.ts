@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { parseYaml } from '../../../util/yaml';
 import {
   KubernetesApiDatasource,
   supportedApis,
@@ -70,7 +70,11 @@ function extractApis(
   let doc: KubernetesConfiguration[];
 
   try {
-    doc = loadAll(content) as KubernetesConfiguration[];
+    // TODO: use schema (#9610)
+    doc = parseYaml(content, null, {
+      filename: packageFile,
+      removeTemplates: true,
+    });
   } catch (err) {
     logger.debug({ err, packageFile }, 'Failed to parse Kubernetes manifest.');
     return [];

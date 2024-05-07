@@ -3,6 +3,7 @@ import { DateTime } from 'luxon';
 import type { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
+import { filterMap } from '../../../util/filter-map';
 import * as p from '../../../util/promises';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -66,7 +67,7 @@ export class MavenDatasource extends Datasource {
 
   override readonly defaultVersioning: string = mavenVersioning.id;
 
-  override readonly registryStrategy: RegistryStrategy = 'hunt';
+  override readonly registryStrategy: RegistryStrategy = 'merge';
 
   constructor(id = MavenDatasource.id) {
     super(id);
@@ -113,6 +114,10 @@ export class MavenDatasource extends Datasource {
     dependency: MavenDependency,
     repoUrl: string,
   ): Promise<ReleaseMap> {
+    if (!repoUrl.startsWith(MAVEN_REPO)) {
+      return inputReleaseMap;
+    }
+
     const cacheNs = 'datasource-maven:index-html-releases';
     const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
     let workingReleaseMap = await packageCache.get<ReleaseMap>(
@@ -123,27 +128,21 @@ export class MavenDatasource extends Datasource {
       workingReleaseMap = {};
       let retryEarlier = false;
       try {
-        if (repoUrl.startsWith(MAVEN_REPO)) {
-          const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
-          const res = await downloadHttpProtocol(this.http, indexUrl);
-          const { body = '' } = res;
-          for (const line of body.split(newlineRegex)) {
-            const match = line.trim().match(mavenCentralHtmlVersionRegex);
-            if (match) {
-              const { version, releaseTimestamp: timestamp } =
-                match?.groups ?? /* istanbul ignore next: hard to test */ {};
-              if (version && timestamp) {
-                const date = DateTime.fromFormat(
-                  timestamp,
-                  'yyyy-MM-dd HH:mm',
-                  {
-                    zone: 'UTC',
-                  },
-                );
-                if (date.isValid) {
-                  const releaseTimestamp = date.toISO();
-                  workingReleaseMap[version] = { version, releaseTimestamp };
-                }
+        const indexUrl = getMavenUrl(dependency, repoUrl, 'index.html');
+        const res = await downloadHttpProtocol(this.http, indexUrl);
+        const { body = '' } = res;
+        for (const line of body.split(newlineRegex)) {
+          const match = line.trim().match(mavenCentralHtmlVersionRegex);
+          if (match) {
+            const { version, releaseTimestamp: timestamp } =
+              match?.groups ?? /* istanbul ignore next: hard to test */ {};
+            if (version && timestamp) {
+              const date = DateTime.fromFormat(timestamp, 'yyyy-MM-dd HH:mm', {
+                zone: 'UTC',
+              });
+              if (date.isValid) {
+                const releaseTimestamp = date.toISO();
+                workingReleaseMap[version] = { version, releaseTimestamp };
               }
             }
           }
@@ -220,11 +219,14 @@ export class MavenDatasource extends Datasource {
     //
     // Even if new version is being released each 10 minutes,
     // we still want to reset the whole cache after 24 hours.
-    const isCacheValid = await packageCache.get<true>(cacheTimeoutNs, cacheKey);
+    const cacheValid = await packageCache.get<'valid'>(
+      cacheTimeoutNs,
+      cacheKey,
+    );
 
     let cachedReleaseMap: ReleaseMap = {};
     // istanbul ignore if
-    if (isCacheValid) {
+    if (cacheValid) {
       const cache = await packageCache.get<ReleaseMap>(cacheNs, cacheKey);
       if (cache) {
         cachedReleaseMap = cache;
@@ -232,8 +234,9 @@ export class MavenDatasource extends Datasource {
     }
 
     // List versions to check with HEAD request
-    const freshVersions = Object.entries(releaseMap)
-      .filter(([version, release]) => {
+    const freshVersions = filterMap(
+      Object.entries(releaseMap),
+      ([version, release]) => {
         // Release is present in maven-metadata.xml,
         // but haven't been validated yet
         const isValidatedAtPreviousSteps = release !== null;
@@ -241,10 +244,15 @@ export class MavenDatasource extends Datasource {
         // Release was validated and cached with HEAD request during previous run
         const isValidatedHere = !is.undefined(cachedReleaseMap[version]);
 
+        // istanbul ignore if: not easily testable
+        if (isValidatedAtPreviousSteps || isValidatedHere) {
+          return null;
+        }
+
         // Select only valid releases not yet verified with HEAD request
-        return !isValidatedAtPreviousSteps && !isValidatedHere;
-      })
-      .map(([k]) => k);
+        return version;
+      },
+    );
 
     // Update cached data with freshly discovered versions
     if (freshVersions.length) {
@@ -270,9 +278,9 @@ export class MavenDatasource extends Datasource {
 
       await p.all(queue);
 
-      if (!isCacheValid) {
+      if (!cacheValid) {
         // Store new TTL flag for 24 hours if the previous one is invalidated
-        await packageCache.set(cacheTimeoutNs, cacheKey, 'long', 24 * 60);
+        await packageCache.set(cacheTimeoutNs, cacheKey, 'valid', 24 * 60);
       }
 
       // Store updated cache object

@@ -6,6 +6,7 @@ import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
+import type { BranchStatus } from '../../../types';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getBranchCommit } from '../../../util/git';
@@ -16,6 +17,25 @@ import {
   setReconfigureBranchCache,
 } from './reconfigure-cache';
 
+async function setBranchStatus(
+  branchName: string,
+  description: string,
+  state: BranchStatus,
+  context?: string | null,
+): Promise<void> {
+  if (!is.nonEmptyString(context)) {
+    // already logged this case when validating the status check
+    return;
+  }
+
+  await platform.setBranchStatus({
+    branchName,
+    context,
+    description,
+    state,
+  });
+}
+
 export function getReconfigureBranchName(prefix: string): string {
   return `${prefix}reconfigure`;
 }
@@ -23,7 +43,7 @@ export async function validateReconfigureBranch(
   config: RenovateConfig,
 ): Promise<void> {
   logger.debug('validateReconfigureBranch()');
-  const context = `renovate/config-validation`;
+  const context = config.statusCheckNames?.configValidation;
 
   const branchName = getReconfigureBranchName(config.branchPrefix!);
   const branchExists = await scm.branchExists(branchName);
@@ -48,14 +68,23 @@ export async function validateReconfigureBranch(
     return;
   }
 
-  const validationStatus = await platform.getBranchStatusCheck(
-    branchName,
-    'renovate/config-validation',
-  );
-  // if old status check is present skip validation
-  if (is.nonEmptyString(validationStatus)) {
-    logger.debug('Skipping validation check as status check already exists');
-    return;
+  if (context) {
+    const validationStatus = await platform.getBranchStatusCheck(
+      branchName,
+      context,
+    );
+
+    // if old status check is present skip validation
+    if (is.nonEmptyString(validationStatus)) {
+      logger.debug(
+        'Skipping validation check because status check already exists.',
+      );
+      return;
+    }
+  } else {
+    logger.debug(
+      'Status check is null or an empty string, skipping status check addition.',
+    );
   }
 
   try {
@@ -70,12 +99,12 @@ export async function validateReconfigureBranch(
 
   if (!is.nonEmptyString(configFileName)) {
     logger.warn('No config file found in reconfigure branch');
-    await platform.setBranchStatus({
+    await setBranchStatus(
       branchName,
+      'Validation Failed - No config file found',
+      'red',
       context,
-      description: 'Validation Failed - No config file found',
-      state: 'red',
-    });
+    );
     setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.defaultBranch!);
     return;
@@ -90,12 +119,12 @@ export async function validateReconfigureBranch(
 
   if (!is.nonEmptyString(configFileRaw)) {
     logger.warn('Empty or invalid config file');
-    await platform.setBranchStatus({
+    await setBranchStatus(
       branchName,
+      'Validation Failed - Empty/Invalid config file',
+      'red',
       context,
-      description: 'Validation Failed - Empty/Invalid config file',
-      state: 'red',
-    });
+    );
     setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.baseBranch!);
     return;
@@ -110,19 +139,19 @@ export async function validateReconfigureBranch(
     }
   } catch (err) {
     logger.error({ err }, 'Error while parsing config file');
-    await platform.setBranchStatus({
+    await setBranchStatus(
       branchName,
+      'Validation Failed - Unparsable config file',
+      'red',
       context,
-      description: 'Validation Failed - Unparsable config file',
-      state: 'red',
-    });
+    );
     setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.baseBranch!);
     return;
   }
 
   // perform validation and provide a passing or failing check run based on result
-  const validationResult = await validateConfig(configFileParsed);
+  const validationResult = await validateConfig('repo', configFileParsed);
 
   // failing check
   if (validationResult.errors.length > 0) {
@@ -132,10 +161,11 @@ export async function validateReconfigureBranch(
     );
 
     // add comment to reconfigure PR if it exists
-    const branchPr = await platform.getBranchPr(
+    const branchPr = await platform.findPr({
       branchName,
-      config.defaultBranch,
-    );
+      state: 'open',
+      includeOtherAuthors: true,
+    });
     if (branchPr) {
       let body = `There is an error with this repository's Renovate configuration that needs to be fixed.\n\n`;
       body += `Location: \`${configFileName}\`\n`;
@@ -150,24 +180,15 @@ export async function validateReconfigureBranch(
         content: body,
       });
     }
-    await platform.setBranchStatus({
-      branchName,
-      context,
-      description: 'Validation Failed',
-      state: 'red',
-    });
+
+    await setBranchStatus(branchName, 'Validation Failed', 'red', context);
     setReconfigureBranchCache(branchSha, false);
     await scm.checkoutBranch(config.baseBranch!);
     return;
   }
 
   // passing check
-  await platform.setBranchStatus({
-    branchName,
-    context,
-    description: 'Validation Successful',
-    state: 'green',
-  });
+  await setBranchStatus(branchName, 'Validation Successful', 'green', context);
 
   setReconfigureBranchCache(branchSha, true);
   await scm.checkoutBranch(config.baseBranch!);

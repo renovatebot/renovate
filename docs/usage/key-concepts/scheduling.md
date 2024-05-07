@@ -109,7 +109,7 @@ Some config examples:
 
 #### Schedule presets
 
-Renovate has preset schedules that you might want to use, go to [Schedule Presets](https://docs.renovatebot.com/presets-schedule/) to see them.
+Renovate has preset schedules that you might want to use, go to [Schedule Presets](../presets-schedule.md) to see them.
 
 These preset schedules only affect when Renovate bot checks for updates, and do not affect any specific dependencies/packages.
 

@@ -9,9 +9,9 @@ import { getDependentPackageFiles } from './package-tree';
 jest.mock('fs', () => memfs);
 jest.mock('fs-extra', () =>
   jest
-    .requireActual<typeof import('../../../../test/fixtures')>(
-      '../../../../test/fixtures',
-    )
+    .requireActual<
+      typeof import('../../../../test/fixtures')
+    >('../../../../test/fixtures')
     .fsExtra(),
 );
 jest.mock('../../../util/git');

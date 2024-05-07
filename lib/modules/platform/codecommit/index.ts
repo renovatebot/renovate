@@ -348,11 +348,6 @@ export async function getRawFile(
   return buf.toString();
 }
 
-/* istanbul ignore next */
-export function getRepoForceRebase(): Promise<boolean> {
-  return Promise.resolve(false);
-}
-
 const AMAZON_MAX_BODY_LENGTH = 10239;
 
 export async function createPr({

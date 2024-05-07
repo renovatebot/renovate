@@ -1,5 +1,6 @@
 // TODO: types (#22198)
 import URL from 'node:url';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import * as hostRules from '../../../util/host-rules';
@@ -70,13 +71,34 @@ export class BaseGoDatasource {
       };
     }
 
+    if (goModule.startsWith('dev.azure.com/')) {
+      const split = goModule.split('/');
+      if ((split.length > 4 && split[3] === '_git') || split.length > 3) {
+        const packageName =
+          'https://dev.azure.com/' +
+          split[1] +
+          '/' +
+          split[2] +
+          '/_git/' +
+          (split[3] === '_git' ? split[4] : split[3]).replace(
+            regEx(/\.git$/),
+            '',
+          );
+        return {
+          datasource: GitTagsDatasource.id,
+          packageName,
+        };
+      }
+    }
+
     return await BaseGoDatasource.goGetDatasource(goModule);
   }
 
   private static async goGetDatasource(
     goModule: string,
   ): Promise<DataSource | null> {
-    const pkgUrl = `https://${goModule}?go-get=1`;
+    const goModuleUrl = goModule.replace(/\.git\/v2$/, '');
+    const pkgUrl = `https://${goModuleUrl}?go-get=1`;
     // GitHub Enterprise only returns a go-import meta
     const res = (await BaseGoDatasource.http.get(pkgUrl)).body;
     return (
@@ -154,17 +176,37 @@ export class BaseGoDatasource {
       const parsedUrl = URL.parse(goSourceUrl);
 
       // TODO: `parsedUrl.pathname` can be undefined
-      const packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
+      let packageName = trimLeadingSlash(`${parsedUrl.pathname}`);
 
-      const registryUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+      const endpoint = GlobalConfig.get('endpoint')!;
+
+      const endpointPrefix = regEx('https://[^/]*/(.*?/)(api/v4/?)?').exec(
+        endpoint,
+      );
+
+      if (endpointPrefix && endpointPrefix[1] !== 'api/') {
+        packageName = packageName.replace(endpointPrefix[1], '');
+      }
+
+      const registryUrl = endpointPrefix
+        ? endpoint.replace(regEx('api/v4/?$'), '')
+        : `${parsedUrl.protocol}//${parsedUrl.host}`;
 
       // a .git path indicates a concrete git repository, which can be different from metadata returned by gitlab
       const vcsIndicatedModule = BaseGoDatasource.gitVcsRegexp.exec(goModule);
       if (vcsIndicatedModule?.groups?.module) {
+        if (endpointPrefix) {
+          packageName = vcsIndicatedModule.groups?.module.replace(
+            endpointPrefix[1],
+            '',
+          );
+        } else {
+          packageName = vcsIndicatedModule.groups?.module;
+        }
         return {
           datasource: GitlabTagsDatasource.id,
           registryUrl,
-          packageName: vcsIndicatedModule.groups?.module,
+          packageName,
         };
       }
 
@@ -213,7 +255,7 @@ export class BaseGoDatasource {
     if (datasource !== null) {
       return datasource;
     }
-    // fall back to old behaviour if detection did not work
+    // fall back to old behavior if detection did not work
 
     switch (detectPlatform(goImportURL)) {
       case 'github': {

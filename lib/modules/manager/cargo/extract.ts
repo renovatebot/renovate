@@ -1,13 +1,16 @@
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
+import { coerceArray } from '../../../util/array';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { parse as parseToml } from '../../../util/toml';
 import { CrateDatasource } from '../../datasource/crate';
+import { api as versioning } from '../../versioning/cargo';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
+import { extractLockFileVersions } from './locked-version';
 import type {
   CargoConfig,
   CargoManifest,
@@ -188,6 +191,14 @@ function resolveRegistryIndex(
     );
   }
 
+  const sourceRegistry = config.source?.[registryName]?.registry;
+  if (sourceRegistry) {
+    logger.debug(
+      `Replacing cargo source registry with ${sourceRegistry} for ${registryName}`,
+    );
+    return sourceRegistry;
+  }
+
   const registryIndex = config.registries?.[registryName]?.index;
   if (registryIndex) {
     return registryIndex;
@@ -221,6 +232,7 @@ export async function extractPackageFile(
   }
   /*
     There are the following sections in Cargo.toml:
+    [package]
     [dependencies]
     [dev-dependencies]
     [build-dependencies]
@@ -281,14 +293,49 @@ export async function extractPackageFile(
   if (!deps.length) {
     return null;
   }
+
+  const packageSection = cargoManifest.package;
+  let version: string | undefined = undefined;
+  if (packageSection) {
+    version = packageSection.version;
+  }
+
   const lockFileName = await findLocalSiblingOrParent(
     packageFile,
     'Cargo.lock',
   );
-  const res: PackageFileContent = { deps };
-  // istanbul ignore if
+  const res: PackageFileContent = { deps, packageFileVersion: version };
   if (lockFileName) {
+    logger.debug(
+      `Found lock file ${lockFileName} for packageFile: ${packageFile}`,
+    );
+
+    const versionsByPackage = await extractLockFileVersions(lockFileName);
+    if (!versionsByPackage) {
+      logger.debug(
+        `Could not extract lock file versions from ${lockFileName}.`,
+      );
+      return res;
+    }
+
     res.lockFiles = [lockFileName];
+
+    for (const dep of deps) {
+      const packageName = dep.packageName ?? dep.depName!;
+      const versions = coerceArray(versionsByPackage.get(packageName));
+      const lockedVersion = versioning.getSatisfyingVersion(
+        versions,
+        dep.currentValue!,
+      );
+      if (lockedVersion) {
+        dep.lockedVersion = lockedVersion;
+      } else {
+        logger.debug(
+          `No locked version found for package ${dep.depName} in the range of ${dep.currentValue}.`,
+        );
+      }
+    }
   }
+
   return res;
 }

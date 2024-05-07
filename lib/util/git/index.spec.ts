@@ -190,6 +190,60 @@ describe('util/git/index', () => {
     it('sets non-master base branch', async () => {
       await expect(git.checkoutBranch('develop')).resolves.not.toThrow();
     });
+
+    describe('submodules', () => {
+      beforeEach(async () => {
+        const repo = Git(base.path);
+
+        const submoduleBasePath = base.path + '/submodule';
+        await fs.mkdir(submoduleBasePath);
+        const submodule = Git(submoduleBasePath);
+        await submodule.init();
+        await submodule.addConfig('user.email', 'Jest@example.com');
+        await submodule.addConfig('user.name', 'Jest');
+
+        await fs.writeFile(submoduleBasePath + '/init_file', 'init');
+        await submodule.add('init_file');
+        await submodule.commit('init submodule');
+
+        await repo.submoduleAdd('./submodule', './submodule');
+        await repo.commit('add submodule');
+        await repo.branch(['stable']);
+
+        await fs.writeFile(submoduleBasePath + '/current_file', 'current');
+        await submodule.add('current_file');
+        await submodule.commit('update');
+        await repo.add('submodule');
+        await repo.commit('update submodule');
+      });
+
+      it('verifies that the --recurse-submodule flag is needed', async () => {
+        const repo = Git(base.path);
+        expect((await repo.status()).isClean()).toBeTrue();
+        await repo.checkout('stable');
+        expect((await repo.status()).isClean()).toBeFalse();
+      });
+
+      it('sets non-master base branch with submodule update', async () => {
+        await git.initRepo({
+          cloneSubmodules: true,
+          url: base.path,
+        });
+        expect((await git.getRepoStatus()).isClean()).toBeTrue();
+        await git.checkoutBranch('stable');
+        expect((await git.getRepoStatus()).isClean()).toBeTrue();
+      });
+
+      afterEach(async () => {
+        const repo = Git(base.path);
+        const defaultBranch =
+          (await repo.getConfig('init.defaultbranch')).value ?? 'master';
+        await repo.checkout(defaultBranch);
+        await repo.reset(['--hard', 'HEAD~2']);
+        await repo.branch(['-D', 'stable']);
+        await fs.rm(base.path + '/submodule', { recursive: true });
+      });
+    });
   });
 
   describe('getFileList()', () => {
@@ -1076,6 +1130,23 @@ describe('util/git/index', () => {
       //checkout this duplicate
       const sha = await git.checkoutBranch(`other/${defaultBranch}`);
       expect(sha).toBe(git.getBranchCommit(defaultBranch));
+    });
+  });
+
+  describe('syncGit()', () => {
+    it('should clone a specified base branch', async () => {
+      tmpDir = await tmp.dir({ unsafeCleanup: true });
+      GlobalConfig.set({ baseBranches: ['develop'], localDir: tmpDir.path });
+      await git.initRepo({
+        url: origin.path,
+        defaultBranch: 'develop',
+      });
+      await git.syncGit();
+      const tmpGit = Git(tmpDir.path);
+      const branch = (
+        await tmpGit.raw(['rev-parse', '--abbrev-ref', 'HEAD'])
+      ).trim();
+      expect(branch).toBe('develop');
     });
   });
 });

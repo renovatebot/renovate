@@ -1,5 +1,10 @@
 import type { DEFAULT_REGISTRY_URL } from './utils';
 
+export interface CargoPackage {
+  /** Semver version */
+  version: string;
+}
+
 export interface CargoDep {
   /** Path on disk to the crate sources */
   path?: string;
@@ -26,6 +31,7 @@ export interface CargoSection {
 export interface CargoManifest extends CargoSection {
   target?: Record<string, CargoSection>;
   workspace?: CargoSection;
+  package?: CargoPackage;
 }
 
 export interface CargoConfig {
@@ -39,6 +45,7 @@ export interface CargoRegistry {
 
 export interface CargoSource {
   'replace-with'?: string;
+  registry?: string;
 }
 
 /**

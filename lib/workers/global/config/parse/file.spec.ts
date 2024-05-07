@@ -24,6 +24,7 @@ describe('workers/global/config/parse/file', () => {
   describe('.getConfig()', () => {
     it.each([
       ['custom js config file', 'config.js'],
+      ['custom js config file', 'config.cjs'],
       ['custom js config file exporting a Promise', 'config-promise.js'],
       ['custom js config file exporting a function', 'config-function.js'],
       // The next two are different syntactic ways of expressing the same thing
@@ -50,6 +51,18 @@ describe('workers/global/config/parse/file', () => {
       const res = await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
       expect(res).toMatchSnapshot();
       expect(res.rangeStrategy).toBe('bump');
+    });
+
+    it('warns if config is invalid', async () => {
+      const configFile = upath.resolve(tmp.path, 'config.js');
+      const fileContent = `module.exports = {
+        "enabled": "invalid-value",
+        "prTitle":"something",
+      };`;
+      fs.writeFileSync(configFile, fileContent, { encoding: 'utf8' });
+      await file.getConfig({ RENOVATE_CONFIG_FILE: configFile });
+      expect(logger.warn).toHaveBeenCalledTimes(2);
+      fs.unlinkSync(configFile);
     });
 
     it('parse and returns empty config if there is no RENOVATE_CONFIG_FILE in env', async () => {

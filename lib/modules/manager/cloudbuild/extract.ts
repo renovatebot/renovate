@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
+import { parseSingleYaml } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
@@ -11,7 +11,7 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   try {
     // TODO: fix types
-    const doc: any = load(content);
+    const doc: any = parseSingleYaml(content);
     if (doc?.steps && is.array(doc.steps)) {
       for (const step of doc.steps) {
         if (step.name) {

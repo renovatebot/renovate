@@ -8,6 +8,7 @@ import {
 } from '../../../../../../modules/platform/gitea/schema';
 import { GiteaHttp } from '../../../../../../util/http/gitea';
 import { fromBase64 } from '../../../../../../util/string';
+import { compareChangelogFilePath } from '../common';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
@@ -46,7 +47,9 @@ export async function getReleaseNotesMd(
     return null;
   }
 
-  const { path: changelogFile } = files.shift()!;
+  const { path: changelogFile } = files
+    .sort((a, b) => compareChangelogFilePath(a.path, b.path))
+    .shift()!;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(

@@ -59,6 +59,14 @@ describe('modules/manager/index', () => {
       if (!module.extractPackageFile && !module.extractAllPackageFiles) {
         return false;
       }
+      // managers must export either extractPackageFile or a custom updateDependency function in addition to extractAllPackageFiles
+      if (
+        module.extractAllPackageFiles &&
+        !module.extractPackageFile &&
+        !module.updateDependency
+      ) {
+        return false;
+      }
       if (Object.values(module).some((v) => v === undefined)) {
         return false;
       }
@@ -224,6 +232,19 @@ describe('modules/manager/index', () => {
 
     afterEach(() => {
       manager.getManagers().delete('dummy');
+    });
+  });
+
+  describe('isKnownManager', () => {
+    it('returns true', () => {
+      expect(manager.isKnownManager('npm')).toBeTrue();
+      expect(manager.isKnownManager('regex')).toBeTrue();
+      expect(manager.isKnownManager('custom.regex')).toBeTrue();
+    });
+
+    it('returns false', () => {
+      expect(manager.isKnownManager('npm-unkown')).toBeFalse();
+      expect(manager.isKnownManager('custom.unknown')).toBeFalse();
     });
   });
 });

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
+import { parseSingleYaml } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageFileContent } from '../types';
 import type { WoodpeckerConfig } from './types';
@@ -22,8 +22,8 @@ export function extractPackageFile(
   logger.debug('woodpecker.extractPackageFile()');
   let config: WoodpeckerConfig;
   try {
-    // TODO: fix me (#9610)
-    config = load(content, { json: true }) as WoodpeckerConfig;
+    // TODO: use schema (#9610)
+    config = parseSingleYaml(content, { json: true });
     if (!config) {
       logger.debug(
         { packageFile },

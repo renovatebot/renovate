@@ -31,7 +31,8 @@ const jenkinsPluginsVersions: JenkinsPluginsVersionsResponse = {
       '3.0.0': {
         version: '3.0.0',
         url: 'https://download.example.com',
-        buildDate: 'Jan 03, 2020',
+        releaseTimestamp: '2020-05-13T00:11:40.00Z',
+        requiredCore: '2.164.3',
       },
     },
   },
@@ -91,7 +92,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
           },
           {
             downloadUrl: 'https://download.example.com',
-            releaseTimestamp: '2020-01-03T00:00:00.000Z',
+            releaseTimestamp: '2020-05-13T00:11:40.000Z',
             version: '3.0.0',
           },
         ],
@@ -142,6 +143,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
         datasource: JenkinsPluginsDatasource.id,
         packageName: 'foobar',
         registryUrls: ['https://custom.registry.renovatebot.com'],
+        constraints: { jenkins: '2.164.0' },
       });
 
       expect(res).toEqual({
@@ -158,7 +160,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
           },
           {
             downloadUrl: 'https://download.example.com',
-            releaseTimestamp: '2020-01-03T00:00:00.000Z',
+            releaseTimestamp: '2020-05-13T00:11:40.000Z',
             version: '3.0.0',
           },
         ],

@@ -1,4 +1,4 @@
-[GitLab Releases API](https://docs.gitlab.com/ee/api/releases/) supports looking up [releases supported by GitLab](https://docs.gitlab.com/ee/user/project/releases/) and can be used in combination with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to keep dependencies up-to-date which are not specifically supported by Renovate.
+[GitLab Releases API](https://docs.gitlab.com/ee/api/releases/) supports looking up [releases supported by GitLab](https://docs.gitlab.com/ee/user/project/releases/) and can be used in combination with [regex managers](../../manager/regex/index.md) to keep dependencies up-to-date which are not specifically supported by Renovate.
 
 To specify which specific repository should be queried when looking up a package, the `packageName` should be set to the project path.
 

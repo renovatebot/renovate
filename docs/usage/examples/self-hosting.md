@@ -167,9 +167,7 @@ Secrets should be configured using environment variables (e.g. `RENOVATE_TOKEN`,
 [Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
 To share environment variables across projects, use [CircleCI Contexts](https://circleci.com/docs/2.0/contexts/).
 
-The following example runs Renovate hourly, and looks for the self-hosted configuration file at `renovate-config.js`:
-
-```yml
+```yml title="This runs Renovate hourly, and looks for the self-hosted config file at renovate-config.js"
 version: '2.1'
 orbs:
   renovate: daniel-shuy/renovate@2.2.0
@@ -190,9 +188,7 @@ workflows:
 
 #### Renovate config file validation when using CircleCI
 
-How to validate your config as part of your workflow:
-
-```yml
+```yml title="Validate your config as part of your workflow"
 version: '2.1'
 orbs:
   renovate: daniel-shuy/renovate@2.2.0
@@ -388,7 +384,7 @@ spec:
 ## Logging
 
 If you're ingesting/parsing logs into another system then we recommend you set `LOG_LEVEL=debug` and `LOG_FORMAT=json` in your environment variables.
-Debug logging is usually needed for any debugging, while JSON format will mean that the output is parseable.
+Debug logging is usually needed for any debugging, while JSON format will mean that the output is parsable.
 
 ### About the log level numbers
 
@@ -420,7 +416,10 @@ This means Renovate can safely connect to systems using that certificate or cert
 
 Helper programs like Git and npm use the system trust store.
 For those programs to trust a self-signed certificate you must add it to the systems trust store.
-On Ubuntu/Debian and many Linux-based systems, this can be done by copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/` and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/xenial/man8/update-ca-certificates.8.html) to update the system trust store afterwards.
+On Ubuntu/Debian and many Linux-based systems, this can be done by:
+
+1. copying the self-signed certificate (e.g. `self-signed-certificate.crt`) to `/usr/local/share/ca-certificates/`
+1. and running [`update-ca-certificates`](https://manpages.ubuntu.com/manpages/noble/man8/update-ca-certificates.8.html) to update the system trust store afterwards
 
 ### Renovate Docker image
 

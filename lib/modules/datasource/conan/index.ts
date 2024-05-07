@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { GithubHttp } from '../../../util/http/github';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
+import { parseSingleYaml } from '../../../util/yaml';
 import * as allVersioning from '../../versioning';
 import { Datasource } from '../datasource';
 import type {
@@ -58,9 +58,10 @@ export class ConanDatasource extends Datasource {
     const res = await this.githubHttp.get(url, {
       headers: { accept: 'application/vnd.github.v3.raw' },
     });
-    const doc = load(res.body, {
+    // TODO: use schema (#9610)
+    const doc = parseSingleYaml<ConanYAML>(res.body, {
       json: true,
-    }) as ConanYAML;
+    });
     return {
       releases: Object.keys(doc?.versions ?? {}).map((version) => ({
         version,

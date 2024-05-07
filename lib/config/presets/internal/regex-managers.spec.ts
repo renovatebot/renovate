@@ -115,6 +115,8 @@ describe('config/presets/internal/regex-managers', () => {
           CONSUL_VERSION: 1.3.1
           # renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$
           TERRAFORM_VERSION: 1.5.7
+          # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$
+          KUSTOMIZE_VERSION: kustomize/v5.2.1
 
         jobs:
           lint:
@@ -172,6 +174,15 @@ describe('config/presets/internal/regex-managers', () => {
             '# renovate: datasource=github-releases depName=hashicorp/terraform versioning=hashicorp extractVersion=^v(?<version>.+)$\n  TERRAFORM_VERSION: 1.5.7\n',
           versioning: 'hashicorp',
           extractVersion: '^v(?<version>.+)$',
+        },
+        {
+          currentValue: 'kustomize/v5.2.1',
+          datasource: 'github-releases',
+          depName: 'kubernetes-sigs/kustomize',
+          replaceString:
+            '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$\n  KUSTOMIZE_VERSION: kustomize/v5.2.1\n',
+          versioning:
+            'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
         },
       ]);
     });

@@ -262,7 +262,7 @@ describe('modules/datasource/go/releases-direct', () => {
       }
     });
 
-    it('returns none if no tags match submodules', async () => {
+    it('falls back to unprefixed tags', async () => {
       getDatasourceSpy.mockResolvedValueOnce({
         datasource: 'github-tags',
         packageName: 'x/text',
@@ -273,22 +273,19 @@ describe('modules/datasource/go/releases-direct', () => {
         packageName: 'x/text',
         registryUrl: 'https://github.com',
       });
-      const packages = [
-        { packageName: 'github.com/x/text/a' },
-        { packageName: 'github.com/x/text/b' },
+
+      const releases = [
+        { version: 'v1.0.0', gitRef: 'v1.0.0' },
+        { version: 'v2.0.0', gitRef: 'v2.0.0' },
       ];
+      githubGetTags.mockResolvedValue({ releases });
 
-      githubGetTags.mockResolvedValue({
-        releases: [
-          { version: 'v1.0.0', gitRef: 'v1.0.0' },
-          { version: 'v2.0.0', gitRef: 'v2.0.0' },
-        ],
-      });
-
-      for (const pkg of packages) {
-        const result = await datasource.getReleases(pkg);
-        expect(result?.releases).toHaveLength(0);
-      }
+      await expect(
+        datasource.getReleases({ packageName: 'github.com/x/text/a' }),
+      ).resolves.toEqual({ releases, sourceUrl: 'https://github.com/x/text' });
+      await expect(
+        datasource.getReleases({ packageName: 'github.com/x/text/b' }),
+      ).resolves.toEqual({ releases, sourceUrl: 'https://github.com/x/text' });
     });
 
     it('works for nested modules on github v2+ major upgrades', async () => {
@@ -305,6 +302,7 @@ describe('modules/datasource/go/releases-direct', () => {
           { version: 'v5.0.0', gitRef: 'v5.0.0' },
           { version: 'b/v2.0.0', gitRef: 'b/v2.0.0' },
           { version: 'b/v3.0.0', gitRef: 'b/v3.0.0' },
+          { version: 'b/vuw/xyz', gitRef: 'b/vuw/xyz' },
         ],
       });
 

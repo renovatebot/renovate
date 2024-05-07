@@ -2,15 +2,21 @@ import { logger } from '../../../../logger';
 import { DotnetVersionDatasource } from '../../../datasource/dotnet-version';
 import { NugetDatasource } from '../../../datasource/nuget';
 import type { PackageDependency, PackageFileContent } from '../../types';
-import type { MsbuildGlobalManifest } from '../types';
+import type {
+  MsbuildGlobalManifest,
+  NugetPackageDependency,
+  Registry,
+} from '../types';
+import { applyRegistries } from '../util';
 
 export function extractMsbuildGlobalManifest(
   content: string,
   packageFile: string,
+  registries: Registry[] | undefined,
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   let manifest: MsbuildGlobalManifest;
-
+  let extractedConstraints: Record<string, string> | undefined;
   try {
     manifest = JSON.parse(content);
   } catch (err) {
@@ -30,21 +36,25 @@ export function extractMsbuildGlobalManifest(
       currentValue: manifest.sdk?.version,
       datasource: DotnetVersionDatasource.id,
     });
+
+    extractedConstraints = { 'dotnet-sdk': manifest.sdk?.version };
   }
 
   if (manifest['msbuild-sdks']) {
     for (const depName of Object.keys(manifest['msbuild-sdks'])) {
       const currentValue = manifest['msbuild-sdks'][depName];
-      const dep: PackageDependency = {
+      const dep: NugetPackageDependency = {
         depType: 'msbuild-sdk',
         depName,
         currentValue,
         datasource: NugetDatasource.id,
       };
 
+      applyRegistries(dep, registries);
+
       deps.push(dep);
     }
   }
 
-  return { deps };
+  return { deps, ...(extractedConstraints && { extractedConstraints }) };
 }

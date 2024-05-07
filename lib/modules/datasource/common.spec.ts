@@ -218,12 +218,31 @@ describe('modules/datasource/common', () => {
       const releaseResult = {
         releases: [
           { version: '1.0.0' },
-          { version: '2.0.0', constraints: {} as never },
-          { version: '3.0.0', constraints: { baz: ['^0.9.0'] } },
+          { version: '2.0.0', constraints: { baz: [undefined] } as never },
+          { version: '3.0.0', constraints: { baz: ['^0.9.0', 'invalid'] } },
         ],
       };
       expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
         releases: [{ version: '1.0.0' }, { version: '2.0.0' }],
+      });
+    });
+
+    it('should match exact constraints', () => {
+      const config = {
+        datasource: 'pypi',
+        packageName: 'bar',
+        versioning: 'pep440',
+        constraintsFiltering: 'strict' as const,
+        constraints: { python: '>=3.8' },
+      };
+      const releaseResult = {
+        releases: [
+          { version: '1.0.0', constraints: { python: ['^1.0.0'] } },
+          { version: '2.0.0', constraints: { python: ['>=3.8'] } },
+        ],
+      };
+      expect(applyConstraintsFiltering(releaseResult, config)).toEqual({
+        releases: [{ version: '2.0.0' }],
       });
     });
   });

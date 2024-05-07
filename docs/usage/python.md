@@ -6,7 +6,7 @@ description: Python/pip dependencies support in Renovate
 # Python package manager support
 
 Renovate supports several Python package managers, including `pip`, `pipenv`, `poetry`, etc.
-See [all supported managers](https://docs.renovatebot.com/modules/manager/).
+See [all supported managers](./modules/manager/index.md).
 
 ## Versioning support
 
@@ -22,24 +22,6 @@ Legacy versions with the `===` prefix are ignored.
 1. Existing dependencies are extracted from the package files
 1. Renovate searches for the latest version on [PyPI](https://pypi.org/) to decide if there are upgrades
 1. If the source package includes a GitHub URL as its source, and has a "changelog" file _or_ uses GitHub releases, a Release Note will be embedded in the generated PR
-
-## Alternative file names
-
-For the `pip_requirements` manager, the default file matching regex for `requirements.txt` follows common file name conventions.
-
-It will match `requirements.txt` and `requirements.pip`, and any file in the format `requirements-*.txt` or `requirements-*.pip`, to allow for common filename patterns such as `requirements-dev.txt`.
-
-But Renovate may not find all your files.
-
-You can tell Renovate where to find your file(s) by setting your own `fileMatch` regex:
-
-```json title="Setting a custom fileMatch regex"
-{
-  "pip_requirements": {
-    "fileMatch": ["my/specifically-named.file", "\\.requirements$"]
-  }
-}
-```
 
 ## Alternate registries
 
@@ -71,14 +53,17 @@ Renovate detects any custom-configured sources in `pyproject.toml` and uses them
 
 ### Specify URL in configuration
 
-Create a `python` object and put a `registryUrls` array in it.
+Create a `packageRules` entry with `matchDatasources=pypi` and a `registryUrls` array.
 Fill the array with alternate index URL(s).
 
 ```json
 {
-  "python": {
-    "registryUrls": ["http://example.com/private-pypi/"]
-  }
+  "packageRules": [
+    {
+      "matchDatasources": ["pypi"],
+      "registryUrls": ["http://example.com/private-pypi/"]
+    }
+  ]
 }
 ```
 

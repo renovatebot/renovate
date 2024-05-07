@@ -3,29 +3,45 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
+import { compile } from '../../../../util/template';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
 const defaultConfigFile = configFileNames[0];
 
+export function getDefaultConfigFileName(
+  config: Partial<RenovateConfig>,
+): string {
+  // TODO #22198
+  return configFileNames.includes(config.onboardingConfigFileName!)
+    ? config.onboardingConfigFileName!
+    : defaultConfigFile;
+}
+
 export async function createOnboardingBranch(
   config: Partial<RenovateConfig>,
 ): Promise<string | null> {
-  // TODO #22198
-  const configFile = configFileNames.includes(config.onboardingConfigFileName!)
-    ? config.onboardingConfigFileName
-    : defaultConfigFile;
-
   logger.debug('createOnboardingBranch()');
+  const configFile = getDefaultConfigFileName(config);
   // TODO #22198
-  const contents = await getOnboardingConfigContents(config, configFile!);
+  const contents = await getOnboardingConfigContents(config, configFile);
   logger.debug('Creating onboarding branch');
 
   const commitMessageFactory = new OnboardingCommitMessageFactory(
     config,
-    configFile!,
+    configFile,
   );
-  const commitMessage = commitMessageFactory.create();
+  let commitMessage = commitMessageFactory.create().toString();
+
+  if (config.commitBody) {
+    commitMessage = `${commitMessage}\n\n${compile(
+      config.commitBody,
+      // only allow gitAuthor template value in the commitBody
+      { gitAuthor: config.gitAuthor },
+    )}`;
+
+    logger.trace(`commitMessage: ${commitMessage}`);
+  }
 
   // istanbul ignore if
   if (GlobalConfig.get('dryRun')) {
@@ -40,11 +56,11 @@ export async function createOnboardingBranch(
       {
         type: 'addition',
         // TODO #22198
-        path: configFile!,
+        path: configFile,
         contents,
       },
     ],
-    message: commitMessage.toString(),
+    message: commitMessage,
     platformCommit: !!config.platformCommit,
     force: true,
   });

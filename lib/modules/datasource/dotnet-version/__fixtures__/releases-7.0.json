@@ -15,10 +15,12 @@
         "version": "7.0.0-rc.1.22426.10",
         "version-display": "7.0.0-rc.1"
       },
-      "sdk": {
-        "version": "7.0.100-rc.1.22431.12",
-        "version-display": "7.0.100-rc.1"
-      }
+      "sdks": [
+        {
+          "version": "7.0.100-rc.1.22431.12",
+          "version-display": "7.0.100-rc.1"
+        }
+      ]
     },
     {
       "release-date": "2022-02-17",
@@ -29,10 +31,12 @@
         "version": "7.0.0-preview.1.22076.8",
         "version-display": "7.0.0-preview.1"
       },
-      "sdk": {
-        "version": "7.0.100-preview.1.22110.4",
-        "version-display": "7.0.100-preview.1"
-      }
+      "sdks": [
+        {
+          "version": "7.0.100-preview.1.22110.4",
+          "version-display": "7.0.100-preview.1"
+        }
+      ]
     }
   ]
 }

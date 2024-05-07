@@ -27,6 +27,20 @@ const bitbucketTreeResponse = {
     },
     {
       type: 'commit_file',
+      path: 'CHANGELOG',
+      commit: {
+        hash: 'cdef',
+      },
+    },
+    {
+      type: 'commit_file',
+      path: 'CHANGELOG.json',
+      commit: {
+        hash: 'defg',
+      },
+    },
+    {
+      type: 'commit_file',
       path: 'CHANGELOG.md',
       commit: {
         hash: 'abcd',

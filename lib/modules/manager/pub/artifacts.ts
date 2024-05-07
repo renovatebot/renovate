@@ -10,7 +10,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
-import { parsePubspecLock } from './utils';
+import { parsePubspec, parsePubspecLock } from './utils';
 
 const SDK_NAMES = ['dart', 'flutter'];
 const PUB_GET_COMMAND = 'pub get --no-precompile';
@@ -45,13 +45,20 @@ export async function updateArtifacts({
 
     let constraint = config.constraints?.[toolName];
     if (!constraint) {
-      const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
-      constraint = pubspecLock?.sdks[toolName];
+      const pubspec = parsePubspec(packageFileName, newPackageFileContent);
+      const pubspecToolName = isFlutter ? 'flutter' : 'sdk';
+      constraint = pubspec?.environment[pubspecToolName];
+
+      if (!constraint) {
+        const pubspecLock = parsePubspecLock(lockFileName, oldLockFileContent);
+        constraint = pubspecLock?.sdks[toolName];
+      }
     }
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {},
+      userConfiguredEnv: config.env,
       toolConstraints: [
         {
           toolName,

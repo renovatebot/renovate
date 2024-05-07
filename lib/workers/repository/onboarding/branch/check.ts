@@ -11,6 +11,7 @@ import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchCommit } from '../../../../util/git';
+import { getSemanticCommitPrTitle } from '../common';
 
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
@@ -41,18 +42,32 @@ async function packageJsonConfigExists(): Promise<boolean> {
   return false;
 }
 
-function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
-  return platform.findPr({
-    branchName: config.onboardingBranch!,
-    prTitle: config.onboardingPrTitle,
-    state: '!open',
-    targetBranch: config.baseBranch,
-  });
+async function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
+  return (
+    (await platform.findPr({
+      branchName: config.onboardingBranch!,
+      prTitle: config.onboardingPrTitle,
+      state: '!open',
+      targetBranch: config.baseBranch,
+    })) ??
+    (await platform.findPr({
+      branchName: config.onboardingBranch!,
+      prTitle: getSemanticCommitPrTitle(config),
+      state: '!open',
+      targetBranch: config.baseBranch,
+    }))
+  );
 }
 
 export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
+
+  // Repo is onboarded if in silent mode
+  if (config.mode === 'silent') {
+    logger.debug('Silent mode enabled so repo is considered onboarded');
+    return true;
+  }
 
   // Repo is onboarded if global config is bypassing onboarding and does not require a
   // configuration file.

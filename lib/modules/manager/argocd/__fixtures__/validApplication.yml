@@ -83,6 +83,8 @@ spec:
     - chart: some/image3
       repoURL: somecontainer.registry.io:443/
       targetRevision: 1.0.0
+    - ref: root
+      repoURL: git@github.com:<redacted>
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -126,4 +128,13 @@ spec:
       helm:
         valueFiles:
           - $foo/values.yaml
-
+---
+{{- if .Values.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+spec:
+  source:
+    chart: somechart
+    repoURL: https://git.example.com/foo/bar.git
+    targetRevision: 3.2.1
+{{- end }}

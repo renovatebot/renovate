@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
-import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { parseSingleYaml } from '../../../util/yaml';
 import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageFileContent } from '../types';
-import type { DockerComposeConfig } from './types';
+import { DockerComposeFile } from './schema';
 
 class LineMapper {
   private imageLines: { line: string; lineNumber: number; used: boolean }[];
@@ -34,24 +34,12 @@ export function extractPackageFile(
   extractConfig: ExtractConfig,
 ): PackageFileContent | null {
   logger.debug(`docker-compose.extractPackageFile(${packageFile})`);
-  let config: DockerComposeConfig;
+  let config: DockerComposeFile;
   try {
-    // TODO: fix me (#9610)
-    config = load(content, { json: true }) as DockerComposeConfig;
-    if (!config) {
-      logger.debug(
-        { packageFile },
-        'Null config when parsing Docker Compose content',
-      );
-      return null;
-    }
-    if (typeof config !== 'object') {
-      logger.debug(
-        { packageFile, type: typeof config },
-        'Unexpected type for Docker Compose content',
-      );
-      return null;
-    }
+    config = parseSingleYaml(content, {
+      json: true,
+      customSchema: DockerComposeFile,
+    });
   } catch (err) {
     logger.debug(
       { err, packageFile },

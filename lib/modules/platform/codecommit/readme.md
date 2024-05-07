@@ -103,7 +103,7 @@ The policy json.
 Set up a global configuration file (`config.js`), or use CLI parameters or environment variables, to run Renovate on CodeCommit:
 
 - Set `platform: 'codecommit'`
-- Set `repositories: ['{repository, names, separated, by, comma}']`, or use [Renovate’s `autodiscover` feature](https://docs.renovatebot.com/self-hosted-configuration/#autodiscover)
+- Set `repositories: ['{repository, names, separated, by, comma}']`, or use [Renovate’s `autodiscover` feature](../../../self-hosted-configuration.md#autodiscover)
 
 Run Renovate and it will process your repositories.
 
@@ -113,12 +113,12 @@ These features are not supported:
 
 - Adding assignees to PRs
 - Auto-merge
-- [`rebaseLabel`](https://docs.renovatebot.com/configuration-options/#rebaselabel) (request a rebase for Renovate)
+- [`rebaseLabel`](../../../configuration-options.md#rebaselabel) (request a rebase for Renovate)
 
 ## Recommendations
 
 - We recommend that you limit the number of open Renovate PRs by setting a `prConcurrentLimit`
-- Due to current platform limitations, if you close a PR but don’t want for Renovate to recreate the PR, use [package rules](https://docs.renovatebot.com/configuration-options/#packagerules) with the `"enabled": false` key
+- Due to current platform limitations, if you close a PR but don’t want for Renovate to recreate the PR, use [package rules](../../../configuration-options.md#packagerules) with the `"enabled": false` key
 
 ## Example configuration
 

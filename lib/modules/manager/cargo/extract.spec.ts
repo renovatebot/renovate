@@ -1,12 +1,20 @@
 import { codeBlock } from 'common-tags';
-import { DirectoryResult, dir } from 'tmp-promise';
-import { join } from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { writeLocalFile } from '../../../util/fs';
+import { fs } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
+
+jest.mock('../../../util/fs');
+
+function mockReadLocalFile(files: Record<string, string | null>) {
+  fs.readLocalFile.mockImplementation((file): Promise<any> => {
+    let content: string | null = null;
+    if (file in files) {
+      content = files[file];
+    }
+    return Promise.resolve(content);
+  });
+}
 
 const cargo1toml = Fixtures.get('Cargo.1.toml');
 const cargo2toml = Fixtures.get('Cargo.2.toml');
@@ -15,29 +23,17 @@ const cargo4toml = Fixtures.get('Cargo.4.toml');
 const cargo5toml = Fixtures.get('Cargo.5.toml');
 const cargo6configtoml = Fixtures.get('cargo.6.config.toml');
 const cargo6toml = Fixtures.get('Cargo.6.toml');
+const cargo7toml = Fixtures.get('Cargo.7.toml');
+
+const lockfileUpdateCargotoml = Fixtures.get('lockfile-update/Cargo.toml');
 
 describe('modules/manager/cargo/extract', () => {
   describe('extractPackageFile()', () => {
-    let config: ExtractConfig;
-    let adminConfig: RepoGlobalConfig;
-    let tmpDir: DirectoryResult;
+    const config: ExtractConfig = {};
 
-    beforeEach(async () => {
-      config = {};
-      tmpDir = await dir({ unsafeCleanup: true });
-      adminConfig = {
-        localDir: join(tmpDir.path, 'local'),
-        cacheDir: join(tmpDir.path, 'cache'),
-      };
-
-      GlobalConfig.set(adminConfig);
+    beforeEach(() => {
       delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
       delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
-    });
-
-    afterEach(async () => {
-      await tmpDir.cleanup();
-      GlobalConfig.reset();
     });
 
     it('returns null for invalid toml', async () => {
@@ -98,7 +94,7 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('extracts registry urls from .cargo/config.toml', async () => {
-      await writeLocalFile('.cargo/config.toml', cargo6configtoml);
+      mockReadLocalFile({ '.cargo/config.toml': cargo6configtoml });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -107,7 +103,7 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('extracts registry urls from .cargo/config (legacy path)', async () => {
-      await writeLocalFile('.cargo/config', cargo6configtoml);
+      mockReadLocalFile({ '.cargo/config.toml': cargo6configtoml });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -116,9 +112,8 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('extracts overridden registry indexes from .cargo/config.toml', async () => {
-      await writeLocalFile(
-        '.cargo/config.toml',
-        codeBlock`[registries]
+      mockReadLocalFile({
+        '.cargo/config.toml': codeBlock`[registries]
 private-crates = { index = "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git" }
 
 [registries.mcorbin]
@@ -129,7 +124,7 @@ replace-with = "mcorbin"
 
 [source.mcorbin]
 replace-with = "private-crates"`,
-      );
+      });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -173,15 +168,39 @@ replace-with = "private-crates"`,
       ]);
     });
 
+    it('extracts overridden source registry indexes from .cargo/config.toml', async () => {
+      mockReadLocalFile({
+        '.cargo/config.toml': codeBlock`[source.crates-io-replacement]
+registry = "https://github.com/replacement/testregistry"
+
+[source.crates-io]
+replace-with = "crates-io-replacement"`,
+      });
+      const res = await extractPackageFile(cargo7toml, 'Cargo.toml', {
+        ...config,
+      });
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.2',
+          datasource: 'crate',
+          depName: 'tokio',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+          registryUrls: ['https://github.com/replacement/testregistry'],
+        },
+      ]);
+    });
+
     it('extracts registries overridden to the default', async () => {
-      await writeLocalFile(
-        '.cargo/config.toml',
-        codeBlock`[source.mcorbin]
+      mockReadLocalFile({
+        '.cargo/config.toml': codeBlock`[source.mcorbin]
 replace-with = "crates-io"
 
 [source.private-crates]
 replace-with = "mcorbin"`,
-      );
+      });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -217,7 +236,7 @@ replace-with = "mcorbin"`,
     });
 
     it('extracts registries with an empty config.toml', async () => {
-      await writeLocalFile('.cargo/config.toml', ``);
+      mockReadLocalFile({ '.cargo/config.toml': '' });
       const res = await extractPackageFile(cargo5toml, 'Cargo.toml', {
         ...config,
       });
@@ -381,8 +400,7 @@ tokio = { version = "1.21.1" }`;
     });
 
     it('fails to parse cargo config with invalid TOML', async () => {
-      await writeLocalFile('.cargo/config', '[registries');
-
+      mockReadLocalFile({ '.cargo/config': '[registries' });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -391,8 +409,7 @@ tokio = { version = "1.21.1" }`;
     });
 
     it('ignore cargo config registries with missing index', async () => {
-      await writeLocalFile('.cargo/config', '[registries.mine]\nfoo = "bar"');
-
+      mockReadLocalFile({ '.cargo/config': '[registries.mine]\nfoo = "bar"' });
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
@@ -401,14 +418,13 @@ tokio = { version = "1.21.1" }`;
     });
 
     it('ignore cargo config source replaced registries with missing index', async () => {
-      await writeLocalFile(
-        '.cargo/config',
-        codeBlock`[registries.mine]
+      mockReadLocalFile({
+        '.cargo/config': codeBlock`[registries.mine]
 foo = "bar"
 
 [source.crates-io]
 replace-with = "mine"`,
-      );
+      });
 
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
@@ -448,9 +464,8 @@ replace-with = "mine"`,
     });
 
     it('ignore cargo config with circular registry source replacements', async () => {
-      await writeLocalFile(
-        '.cargo/config',
-        codeBlock`[registries]
+      mockReadLocalFile({
+        '.cargo/config': codeBlock`[registries]
 private-crates = { index = "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git" }
 
 [registries.mcorbin]
@@ -465,7 +480,7 @@ replace-with = "private-crates"
 [source.private-crates]
 replace-with = "mcorbin"
 `,
-      );
+      });
 
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
@@ -512,6 +527,103 @@ replace-with = "mcorbin"
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].packageName).toBe('boolector');
+    });
+
+    it('extracts locked versions', async () => {
+      const cargolock = Fixtures.get('lockfile-update/Cargo.3.lock');
+      mockReadLocalFile({ 'Cargo.lock': cargolock });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        version = "0.1.0"
+        edition = "2021"
+        [dependencies]
+        syn = "2.0"
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.deps).toMatchObject([{ lockedVersion: '2.0.1' }]);
+    });
+
+    it('extracts locked versions for renamed packages', async () => {
+      const cargolock = Fixtures.get('lockfile-update/Cargo.1.lock');
+      mockReadLocalFile({ 'Cargo.lock': cargolock });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+
+      const res = await extractPackageFile(
+        lockfileUpdateCargotoml,
+        'Cargo.toml',
+        config,
+      );
+      expect(res?.deps).toMatchObject([
+        { lockedVersion: '2.0.1' },
+        { lockedVersion: '1.0.1' },
+      ]);
+    });
+
+    it('handles missing locked versions', async () => {
+      const cargolock = Fixtures.get('lockfile-update/Cargo.2.lock');
+      mockReadLocalFile({ 'Cargo.lock': cargolock });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+
+      const res = await extractPackageFile(
+        lockfileUpdateCargotoml,
+        'Cargo.toml',
+        config,
+      );
+      expect(res?.deps).toMatchObject([
+        { lockedVersion: '2.0.1' },
+        expect.not.objectContaining({ lockedVersion: expect.anything() }),
+      ]);
+    });
+
+    it('handles invalid versions in the toml file', async () => {
+      const cargolock = Fixtures.get('lockfile-update/Cargo.3.lock');
+      mockReadLocalFile({ 'Cargo.lock': cargolock });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        version = "0.1.0"
+        edition = "2021"
+        [dependencies]
+        syn = "2.foo.1"
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.deps).not.toHaveProperty('lockedVersion');
+    });
+
+    it('handles invalid lock file', async () => {
+      mockReadLocalFile({ 'Cargo.lock': 'foo' });
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+
+      const res = await extractPackageFile(
+        lockfileUpdateCargotoml,
+        'Cargo.toml',
+        config,
+      );
+      expect(res?.deps).toMatchObject([
+        expect.not.objectContaining({ lockedVersion: expect.anything() }),
+        expect.not.objectContaining({ lockedVersion: expect.anything() }),
+      ]);
+    });
+
+    it('should extract project version', async () => {
+      const cargotoml = codeBlock`
+        [package]
+        name = "test"
+        version = "0.1.0"
+        edition = "2021"
+        [dependencies]
+        syn = "2.0"
+        `;
+
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.packageFileVersion).toBe('0.1.0');
     });
   });
 });

@@ -15,10 +15,12 @@
         "version": "5.0.17",
         "version-display": "5.0.17"
       },
-      "sdk": {
-        "version": "5.0.408",
-        "version-display": "5.0.408"
-      }
+      "sdks": [
+        {
+          "version": "5.0.408",
+          "version-display": "5.0.408"
+        }
+      ]
     },
     {
       "release-date": "2020-12-08",
@@ -29,10 +31,12 @@
         "version": "5.0.1",
         "version-display": "5.0.1"
       },
-      "sdk": {
-        "version": "5.0.101",
-        "version-display": "5.0.101"
-      }
+      "sdks": [
+        {
+          "version": "5.0.101",
+          "version-display": "5.0.101"
+        }
+      ]
     },
     {
       "release-date": "2020-11-10",
@@ -43,10 +47,12 @@
         "version": "5.0.0",
         "version-display": "5.0.0"
       },
-      "sdk": {
-        "version": "5.0.100",
-        "version-display": "5.0.100"
-      }
+      "sdks": [
+        {
+          "version": "5.0.100",
+          "version-display": "5.0.100"
+        }
+      ]
     },
     {
       "release-date": "2020-09-14",
@@ -57,10 +63,12 @@
         "version": "5.0.0-rc.1.20451.14",
         "version-display": "5.0.0-rc.1"
       },
-      "sdk": {
-        "version": "5.0.100-rc.1.20452.10",
-        "version-display": "5.0.100-rc.1"
-      }
+      "sdks": [
+        {
+          "version": "5.0.100-rc.1.20452.10",
+          "version-display": "5.0.100-rc.1"
+        }
+      ]
     },
     {
       "release-date": "2020-08-25",
@@ -71,10 +79,12 @@
         "version": "5.0.0-preview.8.20407.11",
         "version-display": "5.0.0-preview.8"
       },
-      "sdk": {
-        "version": "5.0.100-preview.8.20417.9",
-        "version-display": "5.0.100-preview.8"
-      }
+      "sdks": [
+        {
+          "version": "5.0.100-preview.8.20417.9",
+          "version-display": "5.0.100-preview.8"
+        }
+      ]
     },
     {
       "release-date": "2020-03-16",
@@ -85,10 +95,12 @@
         "version": "5.0.0-preview.1.20120.5",
         "version-display": "5.0.0-preview.1"
       },
-      "sdk": {
-        "version": "5.0.100-preview.1.20155.7",
-        "version-display": "5.0.100-preview.1"
-      }
+      "sdks": [
+        {
+          "version": "5.0.100-preview.1.20155.7",
+          "version-display": "5.0.100-preview.1"
+        }
+      ]
     }
   ]
 }

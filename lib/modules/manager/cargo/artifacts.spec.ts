@@ -1,10 +1,15 @@
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../../test/exec-util';
+import {
+  envMock,
+  mockExecAll,
+  mockExecSequence,
+} from '../../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
+import { ExecError } from '../../../util/exec/exec-error';
 import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
 import * as cargo from '.';
@@ -112,6 +117,236 @@ describe('modules/manager/cargo/artifacts', () => {
       }),
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('returns updated Cargo.lock with precise version update', async () => {
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --workspace',
+      },
+      {
+        cmd:
+          'cargo update --config net.git-fetch-with-cli=true' +
+          ' --manifest-path Cargo.toml' +
+          ' --package dep1@1.0.0 --precise 1.0.1',
+      },
+    ]);
+  });
+
+  it('returns an artifact error when cargo update fails', async () => {
+    const cmd =
+      'cargo update --config net.git-fetch-with-cli=true --manifest-path Cargo.toml --workspace';
+    const execError = new ExecError('Exec error', {
+      cmd,
+      stdout: '',
+      stderr: '',
+      options: { encoding: 'utf8' },
+    });
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll(execError);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      { artifactError: { lockFile: 'Cargo.lock', stderr: 'Exec error' } },
+    ]);
+    expect(execSnapshots).toMatchObject([{ cmd }]);
+  });
+
+  it('returns updated Cargo.lock when a preceding dependency triggers an update in a later dependency', async () => {
+    // Sometimes `cargo update` will fail when a preceding dependency update
+    // causes another dependency to update. In this case we can no longer
+    // reference the dependency by its old version, so we filter it out
+    // and retry recursively.
+
+    // mock updateArtifacts iter 1
+
+    const lockfileOrig = `
+      [[package]]
+      name = "dep1"
+      version = "1.0.0"
+
+      [[package]]
+      name = "dep2"
+      version = "1.0.0"
+
+      [[package]]
+      name = "dep3"
+      version = "1.0.0"
+    `;
+
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce(lockfileOrig);
+
+    const workspaceCmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml --workspace';
+
+    const packageDep1Cmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml' +
+      ' --package dep1@1.0.0 --precise 1.0.1';
+
+    const packageDep2Cmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml' +
+      ' --package dep2@1.0.0 --precise 1.0.2';
+
+    const execSnapshotsIter1 = mockExecSequence([
+      // Iter 1: workspaceCmd
+      { stdout: '', stderr: '' },
+      // Iter 1: packageDep1Cmd (updates dep1 and dep2)
+      { stdout: '', stderr: '' },
+      // Iter 1: packageDep2Cmd (fails to update dep2 - updated by previous command)
+      new ExecError('Exec error', {
+        cmd: packageDep2Cmd,
+        stdout: '',
+        stderr: '... error: package ID specification ...',
+        options: { encoding: 'utf8' },
+      }),
+    ]);
+
+    const lockfileAfterIter1 = `
+      [[package]]
+      name = "dep1"
+      version = "1.0.1"
+
+      [[package]]
+      name = "dep2"
+      version = "1.0.2"
+
+      [[package]]
+      name = "dep3"
+      version = "1.0.0"
+    `;
+
+    fs.readLocalFile.mockResolvedValueOnce(lockfileAfterIter1);
+
+    // mock updateArtifacts iter 2
+
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce(lockfileAfterIter1);
+
+    const packageDep3Cmd =
+      'cargo update --config net.git-fetch-with-cli=true' +
+      ' --manifest-path Cargo.toml' +
+      ' --package dep3@1.0.0 --precise 1.0.3';
+
+    const execSnapshotsIter2 = mockExecSequence([
+      // Iter 2: workspaceCmd
+      { stdout: '', stderr: '' },
+      // Iter 2: packageDep3Cmd (updates dep3)
+      { stdout: '', stderr: '' },
+    ]);
+
+    // run updateArtifacts
+
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+        packageName: 'dep1',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.1',
+      },
+      {
+        depName: 'dep2',
+        packageName: 'dep2',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.2',
+      },
+      {
+        depName: 'dep3',
+        packageName: 'dep3',
+        lockedVersion: '1.0.0',
+        newVersion: '1.0.3',
+      },
+    ];
+
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      { file: { contents: undefined, path: 'Cargo.lock', type: 'addition' } },
+    ]);
+
+    expect(execSnapshotsIter1).toMatchObject([
+      { cmd: workspaceCmd },
+      { cmd: packageDep1Cmd },
+      { cmd: packageDep2Cmd },
+    ]);
+
+    expect(execSnapshotsIter2).toMatchObject([
+      { cmd: workspaceCmd },
+      { cmd: packageDep3Cmd },
+    ]);
+  });
+
+  it('returns updated Cargo.lock when there are no more dependencies to update', async () => {
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config,
+      }),
+    ).toEqual([
+      {
+        file: {
+          contents: 'New Cargo.lock',
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
+    ]);
   });
 
   it('updates Cargo.lock based on the packageName, when given', async () => {

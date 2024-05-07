@@ -18,10 +18,6 @@ Permissions for your PAT should be at minimum:
 
 Remember to set `platform=azure` somewhere in your Renovate config file.
 
-## Features awaiting implementation
-
-- The `automergeStrategy` configuration option has not been implemented for this platform, and all values behave as if the value `auto` was used. Renovate will use the merge strategy configured in the Azure Repos repository itself, and this cannot be overridden yet
-
 ## Running Renovate in Azure Pipelines
 
 ### Setting up a new pipeline
@@ -86,7 +82,7 @@ module.exports = {
       hostType: 'npm',
       matchHost: 'pkgs.dev.azure.com',
       username: 'apikey',
-      password: process.env.TOKEN,
+      password: process.env.RENOVATE_TOKEN,
     },
   ],
   repositories: ['YOUR-PROJECT/YOUR-REPO'],
@@ -107,7 +103,7 @@ module.exports = {
     {
       matchHost:
         'https://myorg.pkgs.visualstudio.com/_packaging/myorg/npm/registry/',
-      token: process.env.TOKEN,
+      token: process.env.RENOVATE_TOKEN,
       hostType: 'npm',
     },
     {

@@ -38,6 +38,8 @@ const gitterWebappChangelogMd = Fixtures.get('gitter-webapp.md', '..');
 const githubTreeResponse = {
   tree: [
     { path: 'lib', type: 'tree' },
+    { path: 'CHANGELOG', type: 'blob', sha: 'cdef' },
+    { path: 'CHANGELOG.json', type: 'blob', sha: 'bcde' },
     { path: 'CHANGELOG.md', type: 'blob', sha: 'abcd' },
     { path: 'README.md', type: 'blob' },
   ],
@@ -45,6 +47,8 @@ const githubTreeResponse = {
 
 const gitlabTreeResponse = [
   { path: 'lib', name: 'lib', type: 'tree' },
+  { path: 'CHANGELOG', name: 'CHANGELOG', type: 'blob', id: 'cdef' },
+  { path: 'CHANGELOG.json', name: 'CHANGELOG.json', type: 'blob', id: 'bcde' },
   { path: 'CHANGELOG.md', name: 'CHANGELOG.md', type: 'blob', id: 'abcd' },
   { path: 'README.md', name: 'README.md', type: 'blob' },
 ];
@@ -77,7 +81,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       [now.minus({ weeks: 2 }), 1435],
       [now.minus({ years: 1 }), 14495],
     ])('works with string date (%s, %i)', (date, minutes) => {
-      expect(releaseNotesCacheMinutes(date.toISO()!)).toEqual(minutes);
+      expect(releaseNotesCacheMinutes(date.toISO())).toEqual(minutes);
     });
 
     it('handles date object', () => {

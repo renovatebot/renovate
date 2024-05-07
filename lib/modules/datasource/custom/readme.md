@@ -7,15 +7,16 @@ This example shows how to update the `k3s.version` file with a custom datasource
 
 Options:
 
-| option                     | default | description                                                                                                                                                              |
-| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| defaultRegistryUrlTemplate | ""      | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
-| format                     | "json"  | format used by the API. Available values are: `json`, `plain`                                                                                                            |
-| transformTemplates         | []      | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
+| option                     | default  | description                                                                                                                                                              |
+| -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| defaultRegistryUrlTemplate | `""`     | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
+| format                     | `"json"` | format used by the API. Available values are: `json`, `plain`, `yaml`, `html`                                                                                            |
+| transformTemplates         | `[]`     | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 Available template variables:
 
 - `packageName`
+- `currentValue`
 
 ```json
 {
@@ -68,7 +69,8 @@ All available options:
       "releaseTimestamp": "2022-12-24T18:21Z",
       "changelogUrl": "https://github.com/demo-org/demo/blob/main/CHANGELOG.md#v0710",
       "sourceUrl": "https://github.com/demo-org/demo",
-      "sourceDirectory": "monorepo/folder"
+      "sourceDirectory": "monorepo/folder",
+      "digest": "c667f758f9e46e1d8111698e8d3a181c0b10f430"
     }
   ],
   "sourceUrl": "https://github.com/demo-org/demo",
@@ -118,7 +120,7 @@ When Renovate receives this response with the `plain` format, it will convert it
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
 
-### Yaml
+#### Yaml
 
 If `yaml` is used, response is parsed and converted into JSON for further processing.
 
@@ -150,6 +152,41 @@ When Renovate receives this response with the `yaml` format, it will convert it 
 ```
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
+
+#### HTML
+
+If the format is set to `html`, Renovate will call the HTTP endpoint with the `Accept` header value `text/html`.
+The body of the response will be treated as a HTML document, and all hyperlinks will be converted to versions.
+
+For the following HTML document:
+
+```html
+<html>
+  <body>
+    <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+    <a href="package-2.0.tar.gz">package-2.0.tar.gz</a>
+  </body>
+</html>
+```
+
+The following JSON will be generated:
+
+```json
+{
+  "releases": [
+    {
+      "version": "package-1.0.tar.gz"
+    },
+    {
+      "version": "package-1.0.tar.gz"
+    }
+  ]
+}
+```
+
+After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied to process the JSON data.
+
+To extract the version number, you may use [`extractVersion`](../../../configuration-options.md#extractversion) or JSONata rules.
 
 ## Examples
 
@@ -306,6 +343,67 @@ And the following custom manager:
         "#\\s*renovate:\\s*(datasource=(?<datasource>.*?)\\s*)?depName=(?<depName>.*?)(\\s*versioning=(?<versioning>.*?))?\\s*\\w*:\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ]
+}
+```
+
+Or if you have the datasource locally, you can also define your local registry by prefixing it with `file://`:
+
+```json
+{
+  "customDatasources": {
+    "local_generic": {
+      "defaultRegistryUrlTemplate": "file://dependencies/{{packageName}}/versiontracker.json",
+      "transformTemplates": [
+        "{ \"releases\": $map($, function($v) { { \"version\": $v.version, \"sourceUrl\": $v.filelink } }) }"
+      ]
+    }
+  }
+}
+```
+
+Renovate will then parse your file from your current folder to access it.
+
+### nginx directory listing
+
+Sometimes all you have is a directory with files, and a HTTP server that can generate directory listings.
+
+Let's use nginx itself as an example:
+
+```json
+{
+  "customDatasources": {
+    "nginx": {
+      "defaultRegistryUrlTemplate": "https://nginx.org/download",
+      "format": "html"
+    }
+  },
+  "packageRules": [
+    {
+      "matchDatasources": ["custom.nginx"],
+      "extractVersion": "^nginx-(?<version>.+)\\.tar\\.gz$"
+    }
+  ]
+}
+```
+
+### HTML page
+
+You can use the `html` format to extract versions from a typical "Downloads" page:
+
+```json
+{
+  "customDatasources": {
+    "curl": {
+      "defaultRegistryUrlTemplate": "https://curl.se/download.html",
+      "format": "html"
+    }
+  },
+  "packageRules": [
+    {
+      "matchDatasources": ["custom.curl"],
+      "extractVersion": "/curl-(?<version>.+)\\.tar\\.gz$"
     }
   ]
 }

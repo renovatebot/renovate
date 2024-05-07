@@ -1,3 +1,4 @@
+import type { LongCommitSha } from '../../../util/git/types';
 import type { Pr, PrBodyStruct } from '../types';
 
 // https://developer.github.com/v3/repos/statuses
@@ -33,7 +34,7 @@ export interface GhRestRepo {
 export interface GhRestPr {
   head: {
     ref: string;
-    sha: string;
+    sha: LongCommitSha;
     repo: {
       full_name: string;
       pushed_at?: string;
@@ -90,12 +91,12 @@ export interface LocalRepoConfig {
   repositoryName: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
-  repoForceRebase?: boolean;
+  branchForceRebase?: Record<string, boolean>;
   parentRepo: string | null;
   forkOrg?: string;
   forkToken?: string;
+  forkCreation?: boolean;
   prList: GhPr[] | null;
-  issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
   repositoryOwner: string;
@@ -106,6 +107,7 @@ export interface LocalRepoConfig {
   ignorePrAuthor: boolean;
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
+  hasVulnerabilityAlertsEnabled: boolean;
 }
 
 export type BranchProtection = any;
@@ -113,10 +115,14 @@ export type BranchProtection = any;
 export interface GhRepo {
   id: string;
   isFork: boolean;
+  parent?: {
+    nameWithOwner: string;
+  };
   isArchived: boolean;
   nameWithOwner: string;
   autoMergeAllowed: boolean;
   hasIssuesEnabled: boolean;
+  hasVulnerabilityAlertsEnabled: boolean;
   mergeCommitAllowed: boolean;
   rebaseMergeAllowed: boolean;
   squashMergeAllowed: boolean;
@@ -126,6 +132,7 @@ export interface GhRepo {
       oid: string;
     };
   };
+  issues: { nodes: unknown[] };
 }
 
 export interface GhAutomergeResponse {

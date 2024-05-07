@@ -30,10 +30,6 @@ export function initRepo(): Promise<RepoResult> {
   });
 }
 
-export function getRepoForceRebase(): Promise<boolean> {
-  return Promise.resolve(false);
-}
-
 export function findIssue(): Promise<null> {
   return Promise.resolve(null);
 }

@@ -13,6 +13,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreWeb3jCoreWithOldReleaseTimestamp',
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
+      'workarounds:nodeDockerVersioning',
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
@@ -61,6 +62,12 @@ export const presets: Record<string, Preset> = {
   doNotUpgradeFromAlpineStableToEdge: {
     description: 'Do not upgrade from Alpine stable to edge.',
     packageRules: [
+      {
+        allowedVersions: '<20000000',
+        matchCurrentVersion: '!/^\\d{8}$/',
+        matchDatasources: ['docker'],
+        matchDepNames: ['alpine'],
+      },
       {
         allowedVersions: '<20000000',
         matchCurrentVersion: '!/^\\d{8}$/',
@@ -121,9 +128,27 @@ export const presets: Record<string, Preset> = {
         matchPackagePatterns: [
           '^azul/zulu-openjdk',
           '^bellsoft/liberica-openj(dk|re)-',
+          '^cimg/openjdk',
         ],
         versioning:
-          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
+          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
+      },
+      {
+        allowedVersions: '/^(?:8|11|17|21)(?:\\.|-|$)/',
+        description:
+          'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
+        matchDatasources: ['docker', 'java-version'],
+        matchDepNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jre',
+          'sapmachine',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>(\\d\\.?)+)(LTS)?)?(-(?<compatibility>.*))?$',
       },
     ],
   },
@@ -134,6 +159,17 @@ export const presets: Record<string, Preset> = {
         allowedVersions: '!/^200\\d{5}(\\.\\d+)?/',
         matchDatasources: ['maven', 'sbt-package'],
         matchPackagePrefixes: ['commons-'],
+      },
+    ],
+  },
+  nodeDockerVersioning: {
+    description: 'Use node versioning for `node` docker images.',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchDepNames: ['node'],
+        versionCompatibility: '^(?<version>[^-]+)(?<compatibility>-.*)?$',
+        versioning: 'node',
       },
     ],
   },

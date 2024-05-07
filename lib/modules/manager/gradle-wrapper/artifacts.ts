@@ -146,7 +146,7 @@ export async function updateArtifacts({
       logger.info('No gradlew found - skipping Artifacts update');
       return null;
     }
-    cmd += ' wrapper';
+    cmd += ' :wrapper';
 
     let checksum: string | null = null;
     const distributionUrl = getDistributionUrl(newPackageFileContent);
@@ -171,6 +171,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
       docker: {},
+      userConfiguredEnv: config.env,
       extraEnv,
       toolConstraints: [
         {

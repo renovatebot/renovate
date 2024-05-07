@@ -2,9 +2,8 @@ import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { fetch as plainFetch } from './formats/plain';
-import { fetch as yamlFetch } from './formats/yaml';
+import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import { fetchers } from './formats';
 import { ReleaseResultZodSchema } from './schema';
 import { getCustomConfig } from './utils';
 
@@ -26,24 +25,23 @@ export class CustomDatasource extends Datasource {
     }
 
     const { defaultRegistryUrlTemplate, transformTemplates, format } = config;
-    let response: unknown;
+
+    const fetcher = fetchers[format];
+    const isLocalRegistry = defaultRegistryUrlTemplate.startsWith('file://');
+
+    let data: unknown;
     try {
-      switch (format) {
-        case 'plain':
-          response = await plainFetch(this.http, defaultRegistryUrlTemplate);
-          break;
-        case 'yaml':
-          response = await yamlFetch(this.http, defaultRegistryUrlTemplate);
-          break;
-        case 'json':
-          response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
+      if (isLocalRegistry) {
+        data = await fetcher.readFile(
+          defaultRegistryUrlTemplate.replace('file://', ''),
+        );
+      } else {
+        data = await fetcher.fetch(this.http, defaultRegistryUrlTemplate);
       }
     } catch (e) {
       this.handleHttpErrors(e);
       return null;
     }
-
-    let data = response;
 
     for (const transformTemplate of transformTemplates) {
       const expression = jsonata(transformTemplate);
@@ -58,5 +56,13 @@ export class CustomDatasource extends Datasource {
       logger.trace({ data }, 'Response that has failed validation');
       return null;
     }
+  }
+
+  override getDigest(
+    { packageName }: DigestConfig,
+    newValue?: string,
+  ): Promise<string | null> {
+    // Return null here to support setting a digest: value can be provided digest in getReleases
+    return Promise.resolve(null);
   }
 }
