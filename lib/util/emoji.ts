@@ -57,9 +57,12 @@ function lazyInitMappings(): void {
         initMapping(patchedEmojis);
         mappingsInitialized = true;
       })
-      .onError((error) => /* istanbul ignore */ {
-        logger.warn({ error }, 'Unable to parse emoji shortcodes');
-      });
+      .onError(
+        /* istanbul ignore next */
+        (error) => {
+          logger.warn({ error }, 'Unable to parse emoji shortcodes');
+        },
+      );
   }
 }
 
