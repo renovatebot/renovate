@@ -1,4 +1,5 @@
 import url from 'node:url';
+import is from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
@@ -156,9 +157,11 @@ export class PypiDatasource extends Datasource {
           result.isDeprecated = isDeprecated;
         }
         // There may be multiple releases with different requires_python, so we return all in an array
+        const pythonConstraints = releases
+          .map(({ requires_python }) => requires_python)
+          .filter(is.string);
         result.constraints = {
-          // TODO: string[] isn't allowed here
-          python: releases.map(({ requires_python }) => requires_python) as any,
+          python: Array.from(new Set(pythonConstraints)),
         };
         return result;
       });

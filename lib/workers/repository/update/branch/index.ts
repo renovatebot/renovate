@@ -183,12 +183,21 @@ export async function processBranch(
         result: 'pending',
       };
     }
-    // istanbul ignore if
-    if (!branchExists && config.dependencyDashboardApproval) {
-      if (dependencyDashboardCheck) {
-        logger.debug(`Branch ${config.branchName} is approved for creation`);
-      } else {
-        logger.debug(`Branch ${config.branchName} needs approval`);
+    if (!branchExists) {
+      if (config.mode === 'silent' && !dependencyDashboardCheck) {
+        logger.debug(
+          `Branch ${config.branchName} creation is disabled because mode=silent`,
+        );
+        return {
+          branchExists,
+          prNo: branchPr?.number,
+          result: 'needs-approval',
+        };
+      }
+      if (config.dependencyDashboardApproval && !dependencyDashboardCheck) {
+        logger.debug(
+          `Branch ${config.branchName} creation is disabled because dependencyDashboardApproval=true`,
+        );
         return {
           branchExists,
           prNo: branchPr?.number,

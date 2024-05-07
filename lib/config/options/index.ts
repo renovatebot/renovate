@@ -6,6 +6,13 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'mode',
+    description: 'Mode of operation.',
+    type: 'string',
+    default: 'full',
+    allowedValues: ['full', 'silent'],
+  },
+  {
     name: 'allowedHeaders',
     description:
       'List of allowed patterns for header names in repository hostRules config.',
@@ -13,6 +20,7 @@ const options: RenovateOptions[] = [
     default: ['X-*'],
     subType: 'string',
     globalOnly: true,
+    patternMatch: true,
   },
   {
     name: 'allowedEnv',
@@ -22,6 +30,7 @@ const options: RenovateOptions[] = [
     default: [],
     subType: 'string',
     globalOnly: true,
+    patternMatch: true,
   },
   {
     name: 'detectGlobalManagerConfig',
@@ -464,7 +473,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.1',
+    default: 'ghcr.io/containerbase/sidecar:10.6.4',
     globalOnly: true,
   },
   {
@@ -962,6 +971,7 @@ const options: RenovateOptions[] = [
     default: null,
     globalOnly: true,
     supportedPlatforms: ['bitbucket'],
+    patternMatch: true,
   },
   {
     name: 'autodiscoverTopics',
@@ -1243,6 +1253,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    patternMatch: true,
   },
   {
     name: 'excludeRepositories',
