@@ -24,9 +24,15 @@ const EmojiShortcodesSchema = Json.pipe(
   z.record(z.string(), z.union([z.string(), z.array(z.string())])),
 );
 
+const patchedEmojis: z.infer<typeof EmojiShortcodesSchema> = {
+  '26A0-FE0F': 'warning', // Colorful warning (⚠️) instead of black and white (⚠)
+};
+
 function lazyInitMappings(): void {
   if (!mappingsInitialized) {
-    const result = EmojiShortcodesSchema.safeParse(
+    const result = EmojiShortcodesSchema.transform((data) =>
+      Object.assign(data, patchedEmojis),
+    ).safeParse(
       dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!,
     );
     // istanbul ignore if: not easily testable
@@ -37,6 +43,7 @@ function lazyInitMappings(): void {
     for (const [hex, val] of Object.entries(result.data)) {
       const shortCodes = is.array(val) ? val : [val];
       shortCodesByHex.set(hex, `:${shortCodes[0]}:`);
+      shortCodesByHex.set(stripHexCode(hex), `:${shortCodes[0]}:`);
       shortCodes.forEach((shortCode) => {
         hexCodesByShort.set(`:${shortCode}:`, hex);
       });
