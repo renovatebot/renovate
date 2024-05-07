@@ -41,6 +41,10 @@ export function parseSupportedDatasourceString(): string[] | undefined {
     'mergeConfidenceSupportedDatasources',
   );
 
+  if (is.nullOrUndefined(supportedDatasources)) {
+    return undefined;
+  }
+
   if (!is.array<string>(supportedDatasources, is.string)) {
     logger.warn(
       { supportedDatasources },
