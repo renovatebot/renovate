@@ -544,6 +544,7 @@ const orgGroups = {
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   octokit: 'https://github.com/octokit/',
+  pino: 'https://github.com/pinojs/',
   'semantic-release': 'https://github.com/semantic-release/',
   swc: 'https://github.com/swc-project/',
 };
