@@ -45,6 +45,7 @@ export interface CargoRegistry {
 
 export interface CargoSource {
   'replace-with'?: string;
+  registry?: string;
 }
 
 /**

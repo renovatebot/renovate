@@ -108,6 +108,7 @@ describe('workers/repository/update/branch/index', () => {
     beforeEach(() => {
       scm.branchExists.mockResolvedValue(false);
       prWorker.ensurePr = jest.fn();
+      prWorker.getPlatformPrOptions = jest.fn();
       prAutomerge.checkAutoMerge = jest.fn();
       // TODO: incompatible types (#22198)
       config = {
@@ -132,6 +133,9 @@ describe('workers/repository/update/branch/index', () => {
           sourceBranch: '',
           state: '',
         }),
+      });
+      prWorker.getPlatformPrOptions.mockReturnValue({
+        usePlatformAutomerge: true,
       });
       GlobalConfig.set(adminConfig);
       // TODO: fix types, jest is using wrong overload (#22198)
@@ -536,6 +540,42 @@ describe('workers/repository/update/branch/index', () => {
         branchExists: false,
         prNo: undefined,
         result: 'branch-limit-reached',
+      });
+    });
+
+    it('returns if branch does not exist and in silent mode', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      GlobalConfig.set({ ...adminConfig });
+      config.mode = 'silent';
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'needs-approval',
+      });
+    });
+
+    it('returns if branch needs dependencyDashboardApproval', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      GlobalConfig.set({ ...adminConfig });
+      config.dependencyDashboardApproval = true;
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'needs-approval',
       });
     });
 

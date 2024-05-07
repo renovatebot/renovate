@@ -9,7 +9,7 @@ import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
 import { coerceString } from '../../../../../util/string';
-import { validateUrl } from '../../../../../util/url';
+import { isHttpUrl } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as bitbucket from './bitbucket';
 import * as gitea from './gitea';
@@ -346,12 +346,12 @@ export async function getReleaseNotesMd(
             .filter(Boolean);
           let body = section.replace(regEx(/.*?\n(-{3,}\n)?/), '').trim();
           for (const word of title) {
-            if (word.includes(version) && !validateUrl(word)) {
+            if (word.includes(version) && !isHttpUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
               // TODO: fix url
               const notesSourceUrl = `${baseUrl}${repository}/blob/HEAD/${changelogFile}`;
               const mdHeadingLink = title
-                .filter((word) => !validateUrl(word))
+                .filter((word) => !isHttpUrl(word))
                 .join('-')
                 .replace(regEx(/[^A-Za-z0-9-]/g), '');
               const url = `${notesSourceUrl}#${mdHeadingLink}`;

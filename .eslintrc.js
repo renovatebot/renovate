@@ -16,7 +16,6 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
     'plugin:promise/recommended',
     'plugin:jest-formatting/recommended',
-    'prettier',
   ],
   parserOptions: {
     ecmaVersion: 9,
@@ -223,6 +222,15 @@ module.exports = {
       rules: {
         // esm always requires extensions
         'import/extensions': 0,
+      },
+    },
+    {
+      files: ['tools/docs/test/**/*.mjs'],
+      env: {
+        jest: false,
+      },
+      rules: {
+        '@typescript-eslint/no-floating-promises': 0,
       },
     },
   ],

@@ -1,8 +1,8 @@
-import is from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { DockerDatasource } from '../../datasource/docker';
 import type { PackageDependency } from '../types';
+import { removeOCIPrefix } from './oci';
 import type { ChartDefinition, Repository } from './types';
 
 export function parseRepository(
@@ -16,7 +16,7 @@ export function parseRepository(
     switch (url.protocol) {
       case 'oci:':
         res.datasource = DockerDatasource.id;
-        res.packageName = `${repositoryURL.replace('oci://', '')}/${depName}`;
+        res.packageName = `${removeOCIPrefix(repositoryURL)}/${depName}`;
         // https://github.com/helm/helm/issues/10312
         // https://github.com/helm/helm/issues/10678
         res.pinDigests = false;
@@ -84,16 +84,6 @@ export function isAlias(repository: string): boolean {
     return false;
   }
   return repository.startsWith('@') || repository.startsWith('alias:');
-}
-
-export function isOCIRegistry(
-  repository: Repository | string | null | undefined,
-): boolean {
-  if (is.nullOrUndefined(repository)) {
-    return false;
-  }
-  const repo = is.string(repository) ? repository : repository.repository;
-  return repo.startsWith('oci://');
 }
 
 export function aliasRecordToRepositories(

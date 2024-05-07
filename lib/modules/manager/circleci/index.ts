@@ -10,7 +10,7 @@ export const displayName = 'CircleCI';
 export const url = 'https://circleci.com/docs/configuration-reference';
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)\\.circleci/config\\.ya?ml$'],
+  fileMatch: ['(^|/)\\.circleci/.+\\.ya?ml$'],
 };
 
 export const categories: Category[] = ['ci'];

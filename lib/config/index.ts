@@ -31,6 +31,22 @@ export function getManagerConfig(
   return managerConfig;
 }
 
+export function removeGlobalConfig(
+  config: RenovateConfig,
+  keepInherited: boolean,
+): RenovateConfig {
+  const outputConfig: RenovateConfig = { ...config };
+  for (const option of options.getOptions()) {
+    if (keepInherited && option.inheritConfigSupport) {
+      continue;
+    }
+    if (option.globalOnly) {
+      delete outputConfig[option.name];
+    }
+  }
+  return outputConfig;
+}
+
 export function filterConfig(
   inputConfig: AllConfig,
   targetStage: RenovateConfigStage,
@@ -39,6 +55,7 @@ export function filterConfig(
   const outputConfig: RenovateConfig = { ...inputConfig };
   const stages: (string | undefined)[] = [
     'global',
+    'inherit',
     'repository',
     'package',
     'branch',

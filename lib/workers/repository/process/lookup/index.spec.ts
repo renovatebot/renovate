@@ -5,6 +5,7 @@ import * as httpMock from '../../../../../test/http-mock';
 import { partial } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import { CustomDatasource } from '../../../../modules/datasource/custom';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
@@ -61,6 +62,11 @@ describe('workers/repository/process/lookup/index', () => {
   );
 
   const getMavenReleases = jest.spyOn(MavenDatasource.prototype, 'getReleases');
+
+  const getCustomDatasourceReleases = jest.spyOn(
+    CustomDatasource.prototype,
+    'getReleases',
+  );
 
   const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
 
@@ -2785,6 +2791,21 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('should upgrade to 16 minors', async () => {
+      config.currentValue = '1.0.0';
+      config.separateMultipleMinor = true;
+      config.packageName = 'webpack';
+      config.datasource = NpmDatasource.id;
+      httpMock
+        .scope('https://registry.npmjs.org')
+        .get('/webpack')
+        .reply(200, webpackJson);
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+      expect(updates).toHaveLength(16);
+    });
+
     it('does not jump  major unstable', async () => {
       config.currentValue = '^4.4.0-canary.3';
       config.rangeStrategy = 'replace';
@@ -2970,7 +2991,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('rejects non-fully specified in-range updates', async () => {
-      config.rangeStrategy = 'bump';
+      config.rangeStrategy = 'update-lockfile';
       config.currentValue = '1.x';
       config.packageName = 'q';
       config.datasource = NpmDatasource.id;
@@ -3154,13 +3175,16 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
-    it('ignores deprecated', async () => {
+    it('ignores deprecated when it is not the latest', async () => {
       config.currentValue = '1.3.0';
       config.packageName = 'q2';
       config.datasource = NpmDatasource.id;
       const returnJson = JSON.parse(JSON.stringify(qJson));
       returnJson.name = 'q2';
+      // mark latest minor as deprecated
       returnJson.versions['1.4.1'].deprecated = 'true';
+      // make sure latest release isn't the one deprecated as otherwise every release is deprecated
+      returnJson['dist-tags'].latest = '2.0.3';
       httpMock
         .scope('https://registry.npmjs.org')
         .get('/q2')
@@ -3169,16 +3193,8 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await Result.wrap(
         lookup.lookupUpdates(config),
       ).unwrapOrThrow();
-
       expect(res).toEqual({
         currentVersion: '1.3.0',
-        deprecationMessage: codeBlock`
-          On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`q2\` has the following deprecation notice:
-
-          \`true\`
-
-          Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.
-        `,
         fixedVersion: '1.3.0',
         isSingleVersion: true,
         registryUrl: 'https://registry.npmjs.org',
@@ -3193,13 +3209,22 @@ describe('workers/repository/process/lookup/index', () => {
             releaseTimestamp: expect.any(String),
             updateType: 'minor',
           },
+          {
+            bucket: 'major',
+            newMajor: 2,
+            newMinor: 0,
+            newValue: '2.0.3',
+            newVersion: '2.0.3',
+            releaseTimestamp: expect.any(String),
+            updateType: 'major',
+          },
         ],
         versioning: 'npm',
         warnings: [],
       });
     });
 
-    it('is deprecated', async () => {
+    it('treats all versions as deprecated if latest is deprecated', async () => {
       config.currentValue = '1.3.0';
       config.packageName = 'q3';
       config.datasource = NpmDatasource.id;
@@ -3209,6 +3234,7 @@ describe('workers/repository/process/lookup/index', () => {
         deprecated: true,
         repository: { url: null, directory: 'test' },
       };
+      returnJson.versions['1.4.1'].deprecated = 'true';
 
       httpMock
         .scope('https://registry.npmjs.org')
@@ -3221,6 +3247,13 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '1.3.0',
+        deprecationMessage: codeBlock`
+        On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`q3\` has the following deprecation notice:
+
+        \`true\`
+
+        Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.
+      `,
         fixedVersion: '1.3.0',
         isSingleVersion: true,
         registryUrl: 'https://registry.npmjs.org',
@@ -3820,6 +3853,33 @@ describe('workers/repository/process/lookup/index', () => {
         versioning: 'npm',
         warnings: [],
       });
+    });
+
+    it('handles digest update for custom datasource', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'my-package';
+      config.datasource = CustomDatasource.id;
+      config.currentDigest = 'zzzzzzzzzzzzzzz';
+      getCustomDatasourceReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '1.0.0',
+            newDigest: '0123456789abcdef',
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          newDigest: '0123456789abcdef',
+          newValue: '1.0.0',
+          updateType: 'digest',
+        },
+      ]);
     });
 
     it('handles digest update for non-version', async () => {

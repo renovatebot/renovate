@@ -26,16 +26,6 @@ export interface PagedResult<T = any> {
   values: T[];
 }
 
-export interface RepoInfo {
-  isFork: boolean;
-  owner: string;
-  mainbranch: string;
-  mergeMethod: string;
-  has_issues: boolean;
-  uuid: string;
-  is_private: boolean;
-}
-
 export interface RepoBranchingModel {
   development: {
     name: string;
@@ -56,16 +46,6 @@ export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
 export interface BitbucketStatus {
   key: string;
   state: BitbucketBranchState;
-}
-
-export interface RepoInfoBody {
-  parent?: any;
-  owner: { username: string };
-  mainbranch: { name: string };
-  has_issues: boolean;
-  uuid: string;
-  full_name: string;
-  is_private: boolean;
 }
 
 export interface PrResponse {

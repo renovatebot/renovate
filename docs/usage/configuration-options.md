@@ -368,11 +368,6 @@ Solutions:
 
 ## branchName
 
-<!-- prettier-ignore -->
-!!! warning
-    We strongly recommended that you avoid configuring this field directly.
-    Use at your own risk.
-
 If you truly need to configure this then it probably means either:
 
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
@@ -459,9 +454,9 @@ For example, To add `[skip ci]` to every commit you could configure:
 }
 ```
 
-Another example would be if you want to configure a DCO signoff to each commit.
+Another example would be if you want to configure a DCO sign off to each commit.
 
-If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
+If you want Renovate to sign off its commits, add the [`:gitSignOff` preset](./presets-default.md#gitsignoff) to your `extends` array:
 
 ```json
 {
@@ -472,11 +467,6 @@ If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](./pr
 ## commitBodyTable
 
 ## commitMessage
-
-<!-- prettier-ignore -->
-!!! warning
-    We deprecated editing the `commitMessage` directly, and we recommend you stop using this config option.
-    Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, to create the commit message you want.
 
 ## commitMessageAction
 
@@ -531,12 +521,12 @@ Composer `2.2` and up will be run with `--ignore-platform-req='ext-*' --ignore-p
 Older Composer versions will be run with `--ignore-platform-reqs`, which means that all platform constraints (including the PHP version) will be ignored by default.
 This can result in updated dependencies that are not compatible with your platform.
 
-To customize this behaviour, you can explicitly ignore platform requirements (for example `ext-zip`) by setting them separately in this array.
+To customize this behavior, you can explicitly ignore platform requirements (for example `ext-zip`) by setting them separately in this array.
 Each item will be added to the Composer command with `--ignore-platform-req`, resulting in it being ignored during its invocation.
 Note that this requires your project to use Composer V2, as V1 doesn't support excluding single platform requirements.
 The used PHP version will be guessed automatically from your `composer.json` definition, so `php` should not be added as explicit dependency.
 
-If an empty array is configured, Renovate uses its default behaviour.
+If an empty array is configured, Renovate uses its default behavior.
 
 Set to `null` (not recommended) to fully omit `--ignore-platform-reqs/--ignore-platform-req` during Composer invocation.
 This requires the Renovate image to be fully compatible with your Composer platform requirements in order for the Composer invocation to succeed, otherwise Renovate will fail to create the updated lock file.
@@ -638,12 +628,18 @@ Renovate supports two options:
 More advanced filtering options may come in future.
 
 There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
+Additionally, the "datasource" within Renovate must be capable of returning `constraints` values about each package's release.
+
 This feature is limited to the following datasources:
 
+- `crate`
 - `jenkins-plugins`
 - `npm`
 - `packagist`
 - `pypi`
+- `rubygems`
+
+Sometimes when using private registries they may omit constraints information, which then is another reason such filtering may not work even if the datasource and corresponding default public registry supports it.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -693,7 +689,7 @@ The `regex` manager which is based on using Regular Expression named capture gro
 You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
 
 - `datasource`
-- `depName`
+- `depName` and / or `packageName`
 - `currentValue`
 
 Use named capture group matching _or_ set a corresponding template.
@@ -774,7 +770,7 @@ As example the following configuration will update all three lines in the Docker
 ```
 
 ```dockerfile title="Dockerfile"
-FROM amd64/ubuntu:18.04
+FROM amd64/ubuntu:24.04
 ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
 ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
 ```
@@ -901,6 +897,27 @@ It will be compiled using Handlebars and the regex `groups` result.
 `packageName` is used for looking up dependency versions.
 It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
+
+### readOnly
+
+If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
+Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
+
+This option could be used to avoid rate limits for certain platforms like GitHub or Bitbucket, by offloading the read operations to a different user.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "readOnly": true,
+      "token": "********"
+    }
+  ]
+}
+```
+
+If more than one token matches for a read-only request then the `readOnly` token will be given preference.
 
 ### currentValueTemplate
 
@@ -1255,7 +1272,7 @@ It is valid only as a top-level configuration option and not, for example, withi
 
 <!-- prettier-ignore -->
 !!! warning
-    The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedEnv) config option, before users can use those allowed names in the `env` option.
+    The bot administrator must configure a list of allowed environment names in the [`allowedEnv`](./self-hosted-configuration.md#allowedenv) config option, before users can use those allowed names in the `env` option.
 
 Behavior:
 
@@ -1359,7 +1376,7 @@ Renovate can fetch changelogs when they are hosted on one of these platforms:
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
-If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-release-notes) to allow Renovate to fetch changelogs notes from `github.com`.
+If you are running on any platform except `github.com`, you need to [configure a Personal Access Token](./getting-started/running.md#githubcom-token-for-changelogs) to allow Renovate to fetch changelogs notes from `github.com`.
 
 <!-- prettier-ignore -->
 !!! note
@@ -1406,7 +1423,7 @@ For now, you can only use this option on the GitLab platform.
 
 For `followTag` to work, the datasource must support distribution streams or tags, like for example npm does.
 
-The main usecase is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
+The main use case is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
 
 ```json
 {
@@ -1446,7 +1463,7 @@ If this option is enabled, reviewers will need to create a new PR if more change
 By default, Renovate skips any forked repositories when in `autodiscover` mode.
 It even skips a forked repository that has a Renovate configuration file, because Renovate doesn't know if that file was added by the forked repository.
 
-**Process a fork in `autodiscover` mode`**
+**Process a fork in `autodiscover` mode**
 
 If you want Renovate to run on a forked repository when in `autodiscover` mode then:
 
@@ -1852,7 +1869,7 @@ Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#ht
 You can provide a `headers` object that includes fields to be forwarded to the HTTP request headers.
 By default, all headers starting with "X-" are allowed.
 
-A bot administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedHeaders) to configure more permitted headers.
+A bot administrator may configure an override for [`allowedHeaders`](./self-hosted-configuration.md#allowedheaders) to configure more permitted headers.
 
 `headers` value(s) configured in the bot admin `hostRules` (for example in a `config.js` file) are _not_ validated, so it may contain any header regardless of `allowedHeaders`.
 
@@ -2055,11 +2072,11 @@ For example, consider this config:
 ```json
 {
   "extends": ["config:recommended"],
-  "ignorePresets": [":prHourlyLimit2"]
+  "ignorePresets": ["group:monorepos"]
 }
 ```
 
-It would take the entire `"config:recommended"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
+It would take the entire `"config:recommended"` preset - which has a lot of sub-presets - but ignore the `"group:monorepos"` rule.
 
 ## ignoreReviewers
 
@@ -2159,10 +2176,10 @@ Consider this example:
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
 
-Renovate only adds labels when it creates the PR, which means:
+Behavior details:
 
-- If you remove labels which Renovate added, it won't re-apply them
-- If you change your config, the new/changed labels are not applied to any open PRs
+- On GitHub, GitLab and Gitea: Renovate will keep PR labels in sync with configured labels, provided that no other user or bot has made changes to the labels after PR creation. If labels are changed by any other account, Renovate will stop making further changes.
+- For other platforms, Renovate will add labels only at time of PR creation and not update them after that.
 
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
 If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
@@ -2305,6 +2322,24 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 ## minor
 
 Add to this object if you wish to define rules that apply only to minor updates.
+
+## mode
+
+This configuration option was created primarily for use with Mend's hosted app, but can also be useful for some self-hosted use cases.
+
+It enables a new `silent` mode to allow repos to be scanned for updates _and_ for users to be able to request such updates be opened in PRs _on demand_ through the Mend UI, without needing the Dependency Dashboard issue in the repo.
+
+Although similar, the options `mode=silent` and `dryRun` can be used together.
+When both are configured, `dryRun` takes precedence, so for example PRs won't be created.
+
+Configuring `silent` mode is quite similar to `dryRun=lookup` except:
+
+- It will bypass onboarding checks (unlike when performing a dry run on a non-onboarded repo) similar to `requireConfig=optional`
+- It can create branches/PRs if `checkedBranches` is set
+- It will keep any existing branches up-to-date (e.g. ones created previously using `checkedBranches`)
+
+When in `silent` mode, Renovate does not create issues (such as Dependency Dashboard, or due to config errors) or Config Migration PRs, even if enabled.
+It also does not prune/close any which already exist.
 
 ## npmToken
 
@@ -2513,6 +2548,8 @@ Invalid if used outside of a `packageRule`.
 ### excludeDepNames
 
 ### excludeDepPatterns
+
+### excludeDepPrefixes
 
 ### excludePackageNames
 
@@ -2751,7 +2788,7 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
 }
 ```
 
-The syntax of the version range must follow the [versioning scheme](modules/versioning.md#supported-versioning) used by the matched package(s).
+The syntax of the version range must follow the [versioning scheme](modules/versioning/index.md#supported-versioning) used by the matched package(s).
 This is usually defined by the [manager](modules/manager/index.md#supported-managers) which discovered them or by the default versioning for the package's [datasource](modules/datasource/index.md).
 For example, a Gradle package would typically need Gradle constraint syntax (e.g. `[,7.0)`) and not SemVer syntax (e.g. `<7.0`).
 
@@ -2832,7 +2869,11 @@ It is recommended that you avoid using "negative" globs, like `**/!(package.json
 
 ### matchDepNames
 
+This field behaves the same as `matchPackageNames` except it matches against `depName` instead of `packageName`.
+
 ### matchDepPatterns
+
+### matchDepPrefixes
 
 ### matchNewValue
 
@@ -2886,6 +2927,12 @@ See also `excludePackageNames`.
 
 The above will configure `rangeStrategy` to `pin` only for the package `angular`.
 
+<!-- prettier-ignore -->
+!!! note
+    `matchPackageNames` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepNames` instead.
+
 ### matchPackagePatterns
 
 Use this field if you want to have one or more package names patterns in your package rule.
@@ -2903,6 +2950,12 @@ See also `excludePackagePatterns`.
 ```
 
 The above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
+
+<!-- prettier-ignore -->
+!!! note
+    `matchPackagePatterns` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepPatterns` instead.
 
 ### matchPackagePrefixes
 
@@ -2922,8 +2975,11 @@ See also `excludePackagePrefixes`.
 
 Like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
 
-`matchPackagePrefixes` will match against `packageName` first, and then `depName`, however `depName` matching is deprecated and will be removed in a future major release.
-If matching against `depName`, use `matchDepPatterns` instead.
+<!-- prettier-ignore -->
+!!! note
+    `matchPackagePrefixes` will try matching `packageName` first and then fall back to matching `depName`.
+    If the fallback is used, Renovate will log a warning, because the fallback will be removed in a future release.
+    Use `matchDepPatterns` instead.
 
 ### matchSourceUrlPrefixes
 
@@ -3150,8 +3206,7 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
 
 If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
 
-Renovate tries platform-native automerge only when it initially creates the PR.
-Any PR that is being updated will be automerged with the Renovate-based automerge.
+On GitHub and GitLab, Renovate re-enables the PR for platform-native automerge whenever it's rebased.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
 This option is available for Azure, Gitea, GitHub and GitLab.
@@ -3556,6 +3611,7 @@ This feature works with the following managers:
 - [`droneci`](modules/manager/droneci/index.md)
 - [`gitlabci`](modules/manager/gitlabci/index.md)
 - [`helm-requirements`](modules/manager/helm-requirements/index.md)
+- [`helm-values`](modules/manager/helm-values/index.md)
 - [`helmfile`](modules/manager/helmfile/index.md)
 - [`helmv3`](modules/manager/helmv3/index.md)
 - [`kubernetes`](modules/manager/kubernetes/index.md)
@@ -3758,15 +3814,37 @@ If you want to enforce grouped package updates, you need to set this option to `
 
 ## separateMinorPatch
 
-By default, Renovate won't distinguish between "patch" (e.g. 1.0.x) and "minor" (e.g. 1.x.0) releases - it groups them together.
-E.g., if you are running version 1.0.0 of a package and both versions 1.0.1 and 1.1.0 are available then Renovate will raise a single PR for version 1.1.0.
-If you wish to distinguish between patch and minor upgrades, for example if you wish to automerge patch but not minor, then you can configured this option to `true`.
+By default, Renovate groups `patch` (`1.0.x`) and `minor` (`1.x.0`) releases into a single PR.
+For example: you are running version `1.0.0` of a package, which has two updates:
+
+- `1.0.1`, a `patch` type update
+- `1.1.0`, a `minor` type update
+
+By default, Renovate creates a single PR for the `1.1.0` version.
+
+If you want Renovate to create _separate_ PRs for `patch` and `minor` upgrades, set `separateMinorPatch` to `true`.
+Getting separate updates from Renovate can be handy when you want to, for example, automerge `patch` updates but manually merge `minor` updates.
 
 ## separateMultipleMajor
 
 Configure this to `true` if you wish to get one PR for every separate major version upgrade of a dependency.
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
+
+## separateMultipleMinor
+
+Enable this for dependencies when it is important to split updates into separate PRs per minor release stream (e.g. `python`).
+
+For example, if you are on `python@v3.9.0` currently, then by default Renovate creates a PR to upgrade you to the latest version such as `python@v3.12.x`.
+By default, Renovate skips versions in between, like `python@v3.10.x`.
+
+But if you set `separateMultipleMinor=true` then you get separate PRs for each minor stream, like `python@3.9.x`, `python@v3.10.x` and `python@v3.11.x`, etc.
+
+## skipInstalls
+
+By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
+If this is set to false, then a full install of modules will be done.
+This is currently applicable to `npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## statusCheckNames
 
@@ -3994,3 +4072,7 @@ To disable the vulnerability alerts feature, set `enabled=false` in a `vulnerabi
   }
 }
 ```
+
+<!-- prettier-ignore -->
+!!! note
+    If you want to raise only vulnerability fix PRs, you may use the `security:only-security-updates` preset.

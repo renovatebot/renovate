@@ -19,4 +19,4 @@ For example, if you know that an image follows SemVer, you can tell Renovate to 
 }
 ```
 
-Read [Renovate's Docker Versioning](../../versioning.md#docker-versioning) docs to learn more.
+Read [Renovate's Docker Versioning](../../versioning/docker/index.md) docs to learn more.

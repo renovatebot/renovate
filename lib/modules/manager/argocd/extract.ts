@@ -8,6 +8,7 @@ import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -56,12 +57,8 @@ function processSource(source: ApplicationSource): PackageDependency[] {
   // a chart variable is defined this is helm declaration
   if (source.chart) {
     // assume OCI helm chart if repoURL doesn't contain explicit protocol
-    if (
-      source.repoURL.startsWith('oci://') ||
-      !source.repoURL.includes('://')
-    ) {
-      let registryURL = source.repoURL.replace('oci://', '');
-      registryURL = trimTrailingSlash(registryURL);
+    if (isOCIRegistry(source.repoURL) || !source.repoURL.includes('://')) {
+      const registryURL = trimTrailingSlash(removeOCIPrefix(source.repoURL));
 
       return [
         {

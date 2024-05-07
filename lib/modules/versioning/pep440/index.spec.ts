@@ -38,6 +38,14 @@ describe('modules/versioning/pep440/index', () => {
   });
 
   it.each`
+    a          | b            | expected
+    ${'1.0'}   | ${'>=1.0.0'} | ${true}
+    ${'>=3.8'} | ${'>=3.9'}   | ${false}
+  `('matches($a, $b) === $expected', ({ a, b, expected }) => {
+    expect(pep440.matches(a, b)).toBe(expected);
+  });
+
+  it.each`
     version       | isSingle
     ${'1.2.3'}    | ${true}
     ${'1.2.3rc0'} | ${true}

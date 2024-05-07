@@ -22,6 +22,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   skipInstalls?: boolean | null;
+  repository?: string;
 }
 
 export interface UpdateArtifactsConfig {
@@ -186,10 +187,15 @@ export interface ArtifactError {
   stderr?: string;
 }
 
-export interface UpdateArtifactsResult {
-  artifactError?: ArtifactError;
-  file?: FileChange;
-}
+export type UpdateArtifactsResult =
+  | {
+      file?: FileChange;
+      artifactError?: undefined;
+    }
+  | {
+      file?: undefined;
+      artifactError?: ArtifactError;
+    };
 
 export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;
