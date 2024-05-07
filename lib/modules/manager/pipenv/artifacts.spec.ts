@@ -204,7 +204,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     ]);
   });
 
-  it('gets python version from .python-version', async () => {
+  it('gets full python version from .python-version', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
     fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
@@ -224,6 +224,39 @@ describe('modules/manager/pipenv/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.7.6' },
+      {},
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
+  });
+
+  it('gets python stream, from .python-version', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
+    fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
+    fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockResolvedValueOnce('.python-version' as never);
+    fs.readLocalFile.mockResolvedValueOnce('3.8');
+
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: 'some toml',
+        config,
+      }),
+    ).toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.8.5' },
       {},
       {
         cmd: 'pipenv lock',

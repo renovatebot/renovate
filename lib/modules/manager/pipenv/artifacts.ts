@@ -25,6 +25,7 @@ import type {
 } from '../types';
 import { extractPackageFile } from './extract';
 import { PipfileLockSchema } from './schema';
+import pep440 from '../../versioning/pep440';
 
 export async function getPythonConstraint(
   pipfileName: string,
@@ -93,11 +94,19 @@ export async function getPythonConstraint(
   );
   try {
     const pythonVersion = await readLocalFile(pythonVersionFileName, 'utf8');
-    if (semver.valid(pythonVersion)) {
+    let pythonVersionConstraint;
+    if (pythonVersion && pep440.isVersion(pythonVersion)) {
+      if (pythonVersion.split('.').length >= 3) {
+        pythonVersionConstraint = `== ${pythonVersion}`;
+      } else {
+        pythonVersionConstraint = `== ${pythonVersion}.*`;
+      }
+    }
+    if (pythonVersionConstraint) {
       logger.debug(
-        `Using python version ${pythonVersion} from .python-version`,
+        `Using python version ${pythonVersionConstraint} from ${pythonVersionFileName}`,
       );
-      return `== ${pythonVersion}.*`;
+      return pythonVersionConstraint;
     }
   } catch (err) {
     // Do nothing
