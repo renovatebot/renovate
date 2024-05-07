@@ -38,7 +38,7 @@ To install Renovate Bot itself, either enable the [Renovate App](https://github.
 
 ### Replace massaging
 
-Renovate can massage `replace` statements it finds prior to running `go` commands, and then massage them back afterward.
+Renovate can massage `replace` statements it finds prior to running `go` commands, and then massage them back afterwards.
 This capability was added - and originally default behavior - because relative `replace` statements outside the current repo will not work when Renovate clones the repo locally.
 
 On the other hand, this massaging of `replace` statements may lead to unexpected results, especially because `go mod tidy` may not fully tidy the `go.sum` if it is missing the `replace` directives in `go.mod`.

@@ -2,7 +2,7 @@
 
 Did you read our documentation on adding a package manager?
 
-- [ ] I have read the [adding a package manager](adding-a-package-manager.md) documentation.
+- [ ] I read the [adding a package manager](adding-a-package-manager.md) documentation.
 
 ## Basics
 
