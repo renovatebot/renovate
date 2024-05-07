@@ -995,7 +995,7 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (is.array(val)) {
-         if (isRegexOrGlobOption(key)) {
+        if (isRegexOrGlobOption(key)) {
           warnings.push(
             ...regexOrGlobValidator.check({
               val,

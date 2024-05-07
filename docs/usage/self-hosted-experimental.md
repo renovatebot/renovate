@@ -19,9 +19,7 @@ We will try to keep breakage to a minimum, but make no guarantees that an experi
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.
 For more information see [the OpenTelemetry docs](opentelemetry.md).
 
-## `RENOVATE_CACHE_NPM_MINUTES`
 
-If set to any integer, Renovate will use this integer instead of the default npm cache time (15 minutes) for the npm datasource.
 
 ## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
 
