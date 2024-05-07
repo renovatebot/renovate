@@ -1,4 +1,5 @@
 import JSON5 from 'json5';
+import JSONC from 'jsonc-parser';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
 import { z } from 'zod';
@@ -211,6 +212,15 @@ export const Json5 = z.string().transform((str, ctx): JsonValue => {
     return JSON5.parse(str);
   } catch (e) {
     ctx.addIssue({ code: 'custom', message: 'Invalid JSON5' });
+    return z.NEVER;
+  }
+});
+
+export const Jsonc = z.string().transform((str, ctx): JsonValue => {
+  try {
+    return JSONC.parse(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSONC' });
     return z.NEVER;
   }
 });
