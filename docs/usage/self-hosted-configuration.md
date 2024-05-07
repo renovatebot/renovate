@@ -778,7 +778,7 @@ Example:
 
 ```js
 modules.exports = {
-  mergeConfidenceSupportedDatasources: ['docker'],
+  mergeConfidenceSupportedDatasources: ['npm'],
 };
 ```
 
