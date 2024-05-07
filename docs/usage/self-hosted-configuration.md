@@ -755,7 +755,7 @@ If left as default (null), a random short ID will be selected.
 
 ## logFileLevel
 
-## mergeConfidenceApiBaseUrl
+## mergeConfidenceEndpoint
 
 If set, Renovate will query this API for Merge Confidence data.
 

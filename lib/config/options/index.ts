@@ -69,7 +69,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'mergeConfidenceApiBaseUrl',
+    name: 'mergeConfidenceEndpoint',
     description:
       'If set, Renovate will query this API for Merge Confidence data.',
     type: 'string',

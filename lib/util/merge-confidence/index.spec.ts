@@ -61,7 +61,7 @@ describe('util/merge-confidence/index', () => {
       hostRules.add(hostRule);
       initConfig();
       memCache.reset();
-      GlobalConfig.set({ mergeConfidenceApiBaseUrl: apiBaseUrl });
+      GlobalConfig.set({ mergeConfidenceEndpoint: apiBaseUrl });
     });
 
     afterEach(() => {
@@ -330,7 +330,7 @@ describe('util/merge-confidence/index', () => {
       });
 
       it('warns and then resolves if base url is invalid', async () => {
-        GlobalConfig.set({ mergeConfidenceApiBaseUrl: 'invalid-url.com' });
+        GlobalConfig.set({ mergeConfidenceEndpoint: 'invalid-url.com' });
         httpMock
           .scope(defaultApiBaseUrl)
           .get(`/api/mc/availability`)
@@ -349,7 +349,7 @@ describe('util/merge-confidence/index', () => {
 
       it('uses a custom base url containing path', async () => {
         const renovateApi = 'https://domain.com/proxy/renovate-api';
-        GlobalConfig.set({ mergeConfidenceApiBaseUrl: renovateApi });
+        GlobalConfig.set({ mergeConfidenceEndpoint: renovateApi });
         httpMock.scope(renovateApi).get(`/api/mc/availability`).reply(200);
 
         await expect(initMergeConfidence()).toResolve();
