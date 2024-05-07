@@ -492,7 +492,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.4',
+    default: 'ghcr.io/containerbase/sidecar:10.6.5',
     globalOnly: true,
   },
   {
@@ -654,7 +654,7 @@ const options: RenovateOptions[] = [
   {
     name: 'inheritConfigStrict',
     description:
-      'If `true`, any `inheritedConfig` fetch errror will result in an aborted run.',
+      'If `true`, any `inheritedConfig` fetch error will result in an aborted run.',
     type: 'boolean',
     default: false,
     globalOnly: true,
