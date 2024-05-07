@@ -461,6 +461,7 @@ export async function initRepo({
   const opts = hostRules.find({
     hostType: 'github',
     url: platformConfig.endpoint,
+    readOnly: true,
   });
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
@@ -499,6 +500,7 @@ export async function initRepo({
         name: config.repositoryName,
         user: renovateUsername,
       },
+      readOnly: true,
     });
 
     if (res?.errors) {
@@ -847,11 +849,11 @@ export async function findPr({
   if (includeOtherAuthors) {
     const repo = config.parentRepo ?? config.repository;
     // PR might have been created by anyone, so don't use the cached Renovate PR list
-    const response = await githubApi.getJson<GhRestPr[]>(
+    const { body: prList } = await githubApi.getJson<GhRestPr[]>(
       `repos/${repo}/pulls?head=${repo}:${branchName}&state=open`,
+      { cacheProvider: repoCacheProvider },
     );
 
-    const { body: prList } = response;
     if (!prList.length) {
       logger.debug(`No PR found for branch ${branchName}`);
       return null;
@@ -999,15 +1001,15 @@ async function getStatus(
   branchName: string,
   useCache = true,
 ): Promise<CombinedBranchStatus> {
-  const commitStatusUrl = `repos/${config.repository}/commits/${escapeHash(
-    branchName,
-  )}/status`;
+  const branch = escapeHash(branchName);
+  const url = `repos/${config.repository}/commits/${branch}/status`;
 
-  return (
-    await githubApi.getJson<CombinedBranchStatus>(commitStatusUrl, {
-      memCache: useCache,
-    })
-  ).body;
+  const { body: status } = await githubApi.getJson<CombinedBranchStatus>(url, {
+    memCache: useCache,
+    cacheProvider: repoCacheProvider,
+  });
+
+  return status;
 }
 
 // Returns the combined status for a branch.
@@ -1214,6 +1216,7 @@ async function getIssues(): Promise<Issue[]> {
         name: config.repositoryName,
         user: config.renovateUsername,
       },
+      readOnly: true,
     },
   );
 
@@ -1542,15 +1545,13 @@ async function deleteComment(commentId: number): Promise<void> {
 async function getComments(issueNo: number): Promise<Comment[]> {
   // GET /repos/:owner/:repo/issues/:number/comments
   logger.debug(`Getting comments for #${issueNo}`);
-  const url = `repos/${
-    config.parentRepo ?? config.repository
-  }/issues/${issueNo}/comments?per_page=100`;
+  const repo = config.parentRepo ?? config.repository;
+  const url = `repos/${repo}/issues/${issueNo}/comments?per_page=100`;
   try {
-    const comments = (
-      await githubApi.getJson<Comment[]>(url, {
-        paginate: true,
-      })
-    ).body;
+    const { body: comments } = await githubApi.getJson<Comment[]>(url, {
+      paginate: true,
+      cacheProvider: repoCacheProvider,
+    });
     logger.debug(`Found ${comments.length} comments`);
     return comments;
   } catch (err) /* istanbul ignore next */ {
@@ -1977,6 +1978,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       variables: { owner: config.repositoryOwner, name: config.repositoryName },
       paginate: false,
       acceptHeader: 'application/vnd.github.vixen-preview+json',
+      readOnly: true,
     });
   } catch (err) {
     logger.debug({ err }, 'Error retrieving vulnerability alerts');

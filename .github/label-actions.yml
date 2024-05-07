@@ -59,7 +59,7 @@
     <details><summary>Select me to read instructions</summary>
 
 
-    If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
+    Read the [Renovate docs, troubleshooting, self-hosted](https://docs.renovatebot.com/troubleshooting/#self-hosted) to learn how to find the logs.
 
     </details>
 
@@ -308,13 +308,13 @@
     Hi there,
 
 
-    Please do not unnecessarily `@` mention maintainers like `@rarkins` or `@viceice`. Doing so causes annoying mobile notifications and makes it harder to maintain this repository.
+    This is intended as a polite, automated _request_ that users avoid `@` mentioning repository maintainers like `@rarkins` or `@viceice`. Doing so causes annoying mobile notifications and makes it harder to maintain this repository.
 
 
-    For example, never `@` mention a maintainer when you are creating a discussion if your desire is to get attention. This is rude behavior, just like shouting out your coffee order in a Starbucks before it's your turn.
+    We know it might be common elsewhere but we participate in hundreds of discussions a week and would need to turn off GitHub mobile notifications if we were mentioned in every one.
 
 
-    It's OK to comment in an issue or discussion after multiple days or weeks. But please, still don't `@` mention people. The maintainers try to answer most discussions, but they can't answer all discussions. If you're still not getting an answer, take a look at the information you've given us and see if you can improve it.
+    As a general rule, we will read and respond to all discussions in this repository, so there is no need to mention us.
 
 
     Thanks, the Renovate team

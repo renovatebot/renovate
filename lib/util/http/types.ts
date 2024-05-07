@@ -48,6 +48,7 @@ export interface GraphqlOptions {
   cursor?: string | null;
   acceptHeader?: string;
   token?: string;
+  readOnly?: boolean;
 }
 
 export interface HttpOptions {
@@ -67,6 +68,7 @@ export interface HttpOptions {
   token?: string;
   memCache?: boolean;
   cacheProvider?: HttpCacheProvider;
+  readOnly?: boolean;
 }
 
 export interface InternalHttpOptions extends HttpOptions {

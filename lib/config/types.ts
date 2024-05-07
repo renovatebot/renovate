@@ -2,6 +2,7 @@ import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
 import type { LogLevelRemap } from '../logger/types';
 import type { CustomManager } from '../modules/manager/custom/types';
+import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
@@ -158,6 +159,10 @@ export interface RepoGlobalConfig {
   presetCachePersistence?: boolean;
   privateKey?: string;
   privateKeyOld?: string;
+  httpCacheTtlDays?: number;
+  autodiscoverRepoSort?: RepoSortMethod;
+  autodiscoverRepoOrder?: SortMethod;
+  userAgent?: string;
 }
 
 export interface LegacyAdminConfig {
@@ -352,6 +357,7 @@ export interface PackageRule
   description?: string | string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
+  excludeDepPrefixes?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
@@ -366,6 +372,7 @@ export interface PackageRule
   matchDatasources?: string[];
   matchDepNames?: string[];
   matchDepPatterns?: string[];
+  matchDepPrefixes?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
   matchManagers?: string[];
@@ -440,6 +447,11 @@ export interface RenovateOptionBase {
    * This is used to add depreciation message in the docs
    */
   deprecationMsg?: string;
+
+  /**
+   * For internal use only: add it to any config option that supports regex or glob matching
+   */
+  patternMatch?: boolean;
 }
 
 export interface RenovateArrayOption<

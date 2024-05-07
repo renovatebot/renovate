@@ -15,6 +15,7 @@ export const presets: Record<string, Preset> = {
       'replacements:containerbase',
       'replacements:cpx-to-maintenance-fork',
       'replacements:cucumber-to-scoped',
+      'replacements:eslint-config-standard-with-typescript-to-eslint-config-love',
       'replacements:eslint-plugin-node-to-maintained-fork',
       'replacements:fakerjs-to-scoped',
       'replacements:fastify-to-scoped',
@@ -42,6 +43,7 @@ export const presets: Record<string, Preset> = {
       'replacements:rome-to-biome',
       'replacements:semantic-release-replace-plugin-to-unscoped',
       'replacements:spectre-cli-to-spectre-console-cli',
+      'replacements:standard-version-to-commit-and-tag',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
@@ -195,6 +197,19 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['cucumber'],
         replacementName: '@cucumber/cucumber',
         replacementVersion: '7.0.0',
+      },
+    ],
+  },
+  'eslint-config-standard-with-typescript-to-eslint-config-love': {
+    description:
+      '`eslint-config-standard-with-typescript` was renamed to `eslint-config-love`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^43.0.1',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['eslint-config-standard-with-typescript'],
+        replacementName: 'eslint-config-love',
+        replacementVersion: '43.1.0',
       },
     ],
   },
@@ -884,6 +899,19 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['Spectre.Cli'],
         replacementName: 'Spectre.Console.Cli',
         replacementVersion: '0.45.0',
+      },
+    ],
+  },
+  'standard-version-to-commit-and-tag': {
+    description:
+      '`standard-version` is now maintained as `commit-and-tag-version`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^9.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['standard-version'],
+        replacementName: 'commit-and-tag-version',
+        replacementVersion: '9.5.0',
       },
     ],
   },

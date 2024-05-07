@@ -70,6 +70,14 @@ kind: Fleet
             ],
             depType: 'fleet',
           },
+          {
+            currentValue: '7.1.2',
+            datasource: 'docker',
+            depName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            packageName: 'registry-1.docker.io/bitnamicharts/external-dns',
+            depType: 'fleet',
+            pinDigests: false,
+          },
         ]);
       });
 

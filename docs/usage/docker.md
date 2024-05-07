@@ -9,6 +9,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 - Docker's `Dockerfile` files
 - Docker Compose `docker-compose.yml`, `compose.yml` files
+- Visual Studio Code dev containers and GitHub Codespaces images and features
 - CircleCI config files
 - Kubernetes manifest files
 - Ansible configuration files
@@ -120,13 +121,13 @@ For example:
 Renovate understands [Ubuntu release code names](https://wiki.ubuntu.com/Releases) and will offer upgrades to the latest LTS release.
 
 You must only use the _first_ term of the code name in _lowercase_.
-So use `jammy` for the Jammy Jellyfish release.
+So use `noble` for the Noble Numbat release.
 
 For example, Renovate will offer to upgrade the following `Dockerfile` layer:
 
 ```diff
-- FROM ubuntu:focal
-+ FROM ubuntu:jammy
+- FROM ubuntu:jammy
++ FROM ubuntu:noble
 ```
 
 ### Debian codenames
@@ -383,7 +384,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:37.280.0
+FROM renovate/renovate:37.342.1
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

@@ -1,5 +1,5 @@
 import type { LongCommitSha } from '../../../util/git/types';
-import type { Pr } from '../types';
+import type { Pr, RepoSortMethod, SortMethod } from '../types';
 
 export interface PrReviewersParams {
   reviewers?: string[];
@@ -74,8 +74,10 @@ export interface Repo {
   allow_squash_merge: boolean;
   archived: boolean;
   clone_url?: string;
+  default_merge_style: string;
   external_tracker?: unknown;
   has_issues: boolean;
+  has_pull_requests: boolean;
   ssh_url?: string;
   default_branch: string;
   empty: boolean;
@@ -144,10 +146,6 @@ export interface CombinedCommitStatus {
   worstStatus: CommitStatusType;
   statuses: CommitStatus[];
 }
-
-export type RepoSortMethod = 'alpha' | 'created' | 'updated' | 'size' | 'id';
-
-export type SortMethod = 'asc' | 'desc';
 
 export interface RepoSearchParams {
   uid?: number;
