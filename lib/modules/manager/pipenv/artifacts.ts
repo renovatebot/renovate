@@ -18,6 +18,7 @@ import { regEx } from '../../../util/regex';
 import { parse as parseToml } from '../../../util/toml';
 import { parseUrl } from '../../../util/url';
 import { PypiDatasource } from '../../datasource/pypi';
+import pep440 from '../../versioning/pep440';
 import type {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -25,7 +26,6 @@ import type {
 } from '../types';
 import { extractPackageFile } from './extract';
 import { PipfileLockSchema } from './schema';
-import pep440 from '../../versioning/pep440';
 
 export async function getPythonConstraint(
   pipfileName: string,
