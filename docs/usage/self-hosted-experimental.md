@@ -19,8 +19,6 @@ We will try to keep breakage to a minimum, but make no guarantees that an experi
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.
 For more information see [the OpenTelemetry docs](opentelemetry.md).
 
-
-
 ## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
 
 <!-- prettier-ignore -->
