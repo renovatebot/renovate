@@ -34,13 +34,16 @@ import {
   allowedStatusCheckStrings,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
+import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
 
 const options = getOptions();
 
+let optionsInitialized = false;
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
+let optionRegexOrGlob: Set<string>;
 
 const managerList = getManagerList();
 
@@ -100,27 +103,49 @@ function getDeprecationMessage(option: string): string | undefined {
 }
 
 function isInhertConfigOption(key: string): boolean {
-  if (!optionInherits) {
-    optionInherits = new Set();
-    for (const option of options) {
-      if (option.inheritConfigSupport) {
-        optionInherits.add(option.name);
-      }
-    }
-  }
   return optionInherits.has(key);
 }
 
+function isRegexOrGlobOption(key: string): boolean {
+  return optionRegexOrGlob.has(key);
+}
+
 function isGlobalOption(key: string): boolean {
-  if (!optionGlobals) {
-    optionGlobals = new Set();
-    for (const option of options) {
-      if (option.globalOnly) {
-        optionGlobals.add(option.name);
-      }
+  return optionGlobals.has(key);
+}
+
+function initOptions(): void {
+  if (optionsInitialized) {
+    return;
+  }
+
+  optionParents = {};
+  optionInherits = new Set();
+  optionTypes = {};
+  optionRegexOrGlob = new Set();
+  optionGlobals = new Set();
+
+  for (const option of options) {
+    optionTypes[option.name] = option.type;
+
+    if (option.parents) {
+      optionParents[option.name] = option.parents;
+    }
+
+    if (option.inheritConfigSupport) {
+      optionInherits.add(option.name);
+    }
+
+    if (option.patternMatch) {
+      optionRegexOrGlob.add(option.name);
+    }
+
+    if (option.globalOnly) {
+      optionGlobals.add(option.name);
     }
   }
-  return optionGlobals.has(key);
+
+  optionsInitialized = true;
 }
 
 export function getParentName(parentPath: string | undefined): string {
@@ -139,20 +164,8 @@ export async function validateConfig(
   isPreset?: boolean,
   parentPath?: string,
 ): Promise<ValidationResult> {
-  if (!optionTypes) {
-    optionTypes = {};
-    options.forEach((option) => {
-      optionTypes[option.name] = option.type;
-    });
-  }
-  if (!optionParents) {
-    optionParents = {};
-    options.forEach((option) => {
-      if (option.parents) {
-        optionParents[option.name] = option.parents;
-      }
-    });
-  }
+  initOptions();
+
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
@@ -354,6 +367,14 @@ export async function validateConfig(
                 errors = errors.concat(subValidation.errors);
               }
             }
+            if (isRegexOrGlobOption(key)) {
+              errors.push(
+                ...regexOrGlobValidator.check({
+                  val,
+                  currentPath,
+                }),
+              );
+            }
             if (key === 'extends') {
               for (const subval of val) {
                 if (is.string(subval)) {
@@ -396,11 +417,13 @@ export async function validateConfig(
               'matchDepTypes',
               'matchDepNames',
               'matchDepPatterns',
+              'matchDepPrefixes',
               'matchPackageNames',
               'matchPackagePatterns',
               'matchPackagePrefixes',
               'excludeDepNames',
               'excludeDepPatterns',
+              'excludeDepPrefixes',
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
@@ -712,19 +735,28 @@ export async function validateConfig(
                   if (!allowedKeys.includes(subKey)) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: key is not allowed`,
+                      message: `Invalid \`${currentPath}.${subKey}\` configuration: key is not allowed`,
                     });
                   } else if (subKey === 'transformTemplates') {
                     if (!is.array(subValue, is.string)) {
                       errors.push({
                         topic: 'Configuration Error',
-                        message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is not an array of string`,
+                        message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of string`,
+                      });
+                    }
+                  } else if (subKey === 'description') {
+                    if (
+                      !(is.string(subValue) || is.array(subValue, is.string))
+                    ) {
+                      errors.push({
+                        topic: 'Configuration Error',
+                        message: `Invalid \`${currentPath}.${subKey}\` configuration: is not an array of strings`,
                       });
                     }
                   } else if (!is.string(subValue)) {
                     errors.push({
                       topic: 'Configuration Error',
-                      message: `Invalid \`${currentPath}.${key}.${subKey}\` configuration: is a string`,
+                      message: `Invalid \`${currentPath}.${subKey}\` configuration: is a string`,
                     });
                   }
                 }
@@ -795,6 +827,19 @@ export async function validateConfig(
   return { errors, warnings };
 }
 
+function hasField(
+  customManager: Partial<RegexManagerConfig>,
+  field: string,
+): boolean {
+  const templateField = `${field}Template` as keyof RegexManagerTemplates;
+  return !!(
+    customManager[templateField] ??
+    customManager.matchStrings?.some((matchString) =>
+      matchString.includes(`(?<${field}>`),
+    )
+  );
+}
+
 function validateRegexManagerFields(
   customManager: Partial<RegexManagerConfig>,
   currentPath: string,
@@ -822,20 +867,22 @@ function validateRegexManagerFields(
     });
   }
 
-  const mandatoryFields = ['depName', 'currentValue', 'datasource'];
+  const mandatoryFields = ['currentValue', 'datasource'];
   for (const field of mandatoryFields) {
-    const templateField = `${field}Template` as keyof RegexManagerTemplates;
-    if (
-      !customManager[templateField] &&
-      !customManager.matchStrings?.some((matchString) =>
-        matchString.includes(`(?<${field}>`),
-      )
-    ) {
+    if (!hasField(customManager, field)) {
       errors.push({
         topic: 'Configuration Error',
         message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
       });
     }
+  }
+
+  const nameFields = ['depName', 'packageName'];
+  if (!nameFields.some((field) => hasField(customManager, field))) {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `Regex Managers must contain depName or packageName regex groups or templates`,
+    });
   }
 }
 
@@ -940,6 +987,14 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (is.array(val)) {
+        if (isRegexOrGlobOption(key)) {
+          warnings.push(
+            ...regexOrGlobValidator.check({
+              val,
+              currentPath: currentPath!,
+            }),
+          );
+        }
         if (key === 'gitNoVerify') {
           const allowedValues = ['commit', 'push'];
           for (const value of val as string[]) {

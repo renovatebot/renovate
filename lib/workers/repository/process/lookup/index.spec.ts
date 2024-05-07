@@ -5,6 +5,7 @@ import * as httpMock from '../../../../../test/http-mock';
 import { partial } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import { CustomDatasource } from '../../../../modules/datasource/custom';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
@@ -61,6 +62,11 @@ describe('workers/repository/process/lookup/index', () => {
   );
 
   const getMavenReleases = jest.spyOn(MavenDatasource.prototype, 'getReleases');
+
+  const getCustomDatasourceReleases = jest.spyOn(
+    CustomDatasource.prototype,
+    'getReleases',
+  );
 
   const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
 
@@ -2985,7 +2991,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('rejects non-fully specified in-range updates', async () => {
-      config.rangeStrategy = 'bump';
+      config.rangeStrategy = 'update-lockfile';
       config.currentValue = '1.x';
       config.packageName = 'q';
       config.datasource = NpmDatasource.id;
@@ -3847,6 +3853,33 @@ describe('workers/repository/process/lookup/index', () => {
         versioning: 'npm',
         warnings: [],
       });
+    });
+
+    it('handles digest update for custom datasource', async () => {
+      config.currentValue = '1.0.0';
+      config.packageName = 'my-package';
+      config.datasource = CustomDatasource.id;
+      config.currentDigest = 'zzzzzzzzzzzzzzz';
+      getCustomDatasourceReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '1.0.0',
+            newDigest: '0123456789abcdef',
+          },
+        ],
+      });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          newDigest: '0123456789abcdef',
+          newValue: '1.0.0',
+          updateType: 'digest',
+        },
+      ]);
     });
 
     it('handles digest update for non-version', async () => {
