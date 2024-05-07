@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { logger } from '../../../logger';
 import { LooseArray } from '../../../util/schema-utils';
 
 const PackageSchema = z.object({
@@ -43,4 +44,12 @@ export const VulnerabilityAlertSchema = LooseArray(
       manifest_path: z.string(),
     }),
   }),
+  {
+    onError: /* istanbul ignore next */ ({ error }) => {
+      logger.debug(
+        { error },
+        'Vulnerability Alert: Failed to parse some alerts',
+      );
+    },
+  },
 );
