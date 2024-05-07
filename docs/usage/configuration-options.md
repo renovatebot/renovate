@@ -82,7 +82,7 @@ With the above config:
 ## additionalBranchPrefix
 
 By default, the value for this config option is an empty string.
-Normally you d not need to set this config option.
+Normally you do not need to set this config option.
 
 Here's an example where `additionalBranchPrefix` can help you.
 Say you are using a monorepo and want to split pull requests based on the location of the package definition, so that individual teams can manage their own Renovate pull requests.
