@@ -68,7 +68,7 @@ describe('util/emoji', () => {
     });
   });
 
-  describe('problem characters', () => {
+  describe('problematic characters', () => {
     it.each(['🚀', '💎', '🧹', '📦', '⚠️'])(
       'converts %s forth and back',
       (char) => {
