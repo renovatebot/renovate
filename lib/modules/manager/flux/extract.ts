@@ -12,6 +12,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
+import { isOCIRegistry, removeOCIPrefix } from '../helmv3/oci';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -146,14 +147,11 @@ function resolveResourceManifest(
         if (matchingRepositories.length) {
           dep.registryUrls = matchingRepositories
             .map((repo) => {
-              if (
-                repo.spec.type === 'oci' ||
-                repo.spec.url.startsWith('oci://')
-              ) {
+              if (repo.spec.type === 'oci' || isOCIRegistry(repo.spec.url)) {
                 // Change datasource to Docker
                 dep.datasource = DockerDatasource.id;
                 // Ensure the URL is a valid OCI path
-                dep.packageName = `${repo.spec.url.replace('oci://', '')}/${
+                dep.packageName = `${removeOCIPrefix(repo.spec.url)}/${
                   resource.spec.chart.spec.chart
                 }`;
                 return null;
@@ -197,7 +195,7 @@ function resolveResourceManifest(
         break;
       }
       case 'OCIRepository': {
-        const container = resource.spec.url?.replace('oci://', '');
+        const container = removeOCIPrefix(resource.spec.url);
         let dep: PackageDependency = {
           depName: container,
         };

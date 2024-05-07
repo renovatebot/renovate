@@ -6,7 +6,11 @@ import { joinUrlParts } from '../../../util/url';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFileContent } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import {
   AzurePipelines,
   AzurePipelinesYaml,
@@ -23,22 +27,20 @@ const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
 
 export function extractRepository(
   repository: Repository,
+  currentRepository?: string,
 ): PackageDependency | null {
   let repositoryUrl = null;
+
+  let depName = repository.name;
 
   if (repository.type === 'github') {
     repositoryUrl = `https://github.com/${repository.name}.git`;
   } else if (repository.type === 'git') {
-    // "git" type indicates an AzureDevOps repository.
-    // The repository URL is only deducible if we are running on AzureDevOps (so can use the endpoint)
-    // and the name is of the form `Project/Repository`.
-    // The name could just be the repository name, in which case AzureDevOps defaults to the
-    // same project, which is not currently accessible here. It could be deduced later by exposing
-    // the repository URL to managers.
-    // https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/resources-repositories-repository?view=azure-pipelines#types
     const platform = GlobalConfig.get('platform');
     const endpoint = GlobalConfig.get('endpoint');
+
     if (platform === 'azure' && endpoint) {
+      // extract the project name if the repository from which the pipline is referencing templates contains the Azure DevOps project name
       if (repository.name.includes('/')) {
         const [projectName, repoName] = repository.name.split('/');
         repositoryUrl = joinUrlParts(
@@ -47,9 +49,20 @@ export function extractRepository(
           '_git',
           encodeURIComponent(repoName),
         );
+
+        // if the repository from which the pipline is referencing templates does not contain the Azure DevOps project name, get the project name from the repository containing the pipeline file being process
+      } else if (currentRepository?.includes('/')) {
+        const projectName = currentRepository.split('/')[0];
+        depName = `${projectName}/${repository.name}`;
+        repositoryUrl = joinUrlParts(
+          endpoint,
+          encodeURIComponent(projectName),
+          '_git',
+          encodeURIComponent(repository.name),
+        );
       } else {
         logger.debug(
-          'Renovate cannot update repositories that do not include the project name',
+          'Renovate cannot update Azure pipelines in git repositories when neither the current repository nor the target repository contains the Azure DevOps project name.',
         );
       }
     }
@@ -67,7 +80,7 @@ export function extractRepository(
     autoReplaceStringTemplate: 'refs/tags/{{newValue}}',
     currentValue: repository.ref.replace('refs/tags/', ''),
     datasource: GitTagsDatasource.id,
-    depName: repository.name,
+    depName,
     depType: 'gitTags',
     packageName: repositoryUrl,
     replaceString: repository.ref,
@@ -168,6 +181,7 @@ function extractJobs(jobs: Jobs | undefined): PackageDependency[] {
 export function extractPackageFile(
   content: string,
   packageFile: string,
+  config: ExtractConfig,
 ): PackageFileContent | null {
   logger.trace(`azurePipelines.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
@@ -178,7 +192,7 @@ export function extractPackageFile(
   }
 
   for (const repository of coerceArray(pkg.resources?.repositories)) {
-    const dep = extractRepository(repository);
+    const dep = extractRepository(repository, config.repository);
     if (dep) {
       deps.push(dep);
     }

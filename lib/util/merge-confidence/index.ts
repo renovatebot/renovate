@@ -7,6 +7,7 @@ import * as packageCache from '../cache/package';
 import { parseJson } from '../common';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
+import { regEx } from '../regex';
 import { ensureTrailingSlash, joinUrlParts } from '../url';
 import { MERGE_CONFIDENCE } from './common';
 import type { MergeConfidence } from './types';
@@ -164,7 +165,7 @@ async function queryApi(
     return 'neutral';
   }
 
-  const escapedPackageName = packageName.replace('/', '%2f');
+  const escapedPackageName = packageName.replace(regEx(/\//g), '%2f');
   const url = joinUrlParts(
     apiBaseUrl,
     'api/mc/json',

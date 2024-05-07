@@ -38,6 +38,7 @@ const repoGroups = {
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
   'aspnet-health-checks':
     'https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks',
+  astro: 'https://github.com/withastro/astro',
   'automapper-dotnet': [
     'https://github.com/AutoMapper/AutoMapper',
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
@@ -47,6 +48,7 @@ const repoGroups = {
     'https://github.com/awslabs/aws-lambda-powertools-typescript',
     'https://github.com/aws-powertools/powertools-lambda-typescript',
   ],
+  'aws-sdk-client-mock': 'https://github.com/m-radzikowski/aws-sdk-client-mock',
   'aws-sdk-go': 'https://github.com/aws/aws-sdk-go',
   'aws-sdk-go-v2': 'https://github.com/aws/aws-sdk-go-v2',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
@@ -70,6 +72,8 @@ const repoGroups = {
   capacitor: 'https://github.com/ionic-team/capacitor',
   'chakra-ui': 'https://github.com/chakra-ui/chakra-ui',
   chromely: 'https://github.com/chromelyapps/Chromely',
+  'citation-js': 'https://github.com/citation-js/citation-js',
+  ckeditor: 'https://github.com/ckeditor/ckeditor5',
   clarity: 'https://github.com/vmware/clarity',
   clearscript: [
     'https://github.com/microsoft/ClearScript',
@@ -275,6 +279,7 @@ const repoGroups = {
   emotion: 'https://github.com/emotion-js/emotion',
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
+  'eslint-stylistic': 'https://github.com/eslint-stylistic/eslint-stylistic',
   expo: 'https://github.com/expo/expo',
   'fabric-chaincode-node':
     'https://github.com/hyperledger/fabric-chaincode-node',
@@ -491,6 +496,9 @@ const repoGroups = {
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   tika: 'https://github.com/apache/tika',
   tiptap: 'https://github.com/ueberdosis/tiptap',
+  'tokio-prost': 'https://github.com/tokio-rs/prost',
+  'tokio-tracing': 'https://github.com/tokio-rs/tracing',
+  tonic: 'https://github.com/hyperium/tonic',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
   'trust-dns': 'https://github.com/bluejekyll/trust-dns',
@@ -510,6 +518,7 @@ const repoGroups = {
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
+  weasel: 'https://github.com/JasperFx/weasel',
   'web3-react': 'https://github.com/Uniswap/web3-react',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   wolverine: 'https://github.com/jasperfx/wolverine',
@@ -559,6 +568,7 @@ const patternGroups = {
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',
+  'testing-library': '^@testing-library/',
   wordpress: '^@wordpress/',
 };
 

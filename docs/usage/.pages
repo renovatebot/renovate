@@ -4,6 +4,7 @@ nav:
   - ... | getting-started
   - Troubleshooting: 'troubleshooting.md'
   - Configuration:
+      - 'Overview': 'config-overview.md'
       - 'Repository': 'configuration-options.md'
       - 'Self-hosted': 'self-hosted-configuration.md'
       - 'Presets': 'config-presets.md'
@@ -49,6 +50,7 @@ nav:
       - ... | user-stories
       - 'Security and Permissions': 'security-and-permissions.md'
       - 'Merge Confidence': 'merge-confidence.md'
+      - 'Language constraints and upgrading': 'language-constraints-and-upgrading.md'
       - 'Templates': 'templates.md'
       - 'String Pattern Matching': 'string-pattern-matching.md'
       - 'Frequently Asked Questions': 'faq.md'
