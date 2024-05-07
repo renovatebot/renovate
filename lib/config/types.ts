@@ -444,6 +444,11 @@ export interface RenovateOptionBase {
    * This is used to add depreciation message in the docs
    */
   deprecationMsg?: string;
+
+  /**
+   * For internal use only: add it to any config option that supports regex or glob matching
+   */
+  patternMatch?: boolean;
 }
 
 export interface RenovateArrayOption<

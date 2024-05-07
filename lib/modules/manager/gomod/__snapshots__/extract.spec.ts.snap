@@ -721,12 +721,13 @@ exports[`modules/manager/gomod/extract extractPackageFile() extracts single-line
   },
   {
     "currentValue": "abcdef1",
+    "datasource": "go",
     "depName": "github.com/rarkins/foo",
     "depType": "require",
     "managerData": {
       "lineNumber": 6,
     },
-    "skipReason": "unsupported-version",
+    "skipReason": "invalid-version",
   },
   {
     "currentValue": "v1.0.0",
@@ -745,6 +746,15 @@ exports[`modules/manager/gomod/extract extractPackageFile() extracts single-line
     "managerData": {
       "lineNumber": 8,
     },
+  },
+  {
+    "datasource": "go",
+    "depName": "../errors",
+    "depType": "replace",
+    "managerData": {
+      "lineNumber": 10,
+    },
+    "skipReason": "local-dependency",
   },
   {
     "currentValue": "v0.0.0",

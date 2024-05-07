@@ -23,10 +23,6 @@ For more information see [the OpenTelemetry docs](opentelemetry.md).
 
 If set to any integer, Renovate will use this integer instead of the default npm cache time (15 minutes) for the npm datasource.
 
-## `RENOVATE_USER_AGENT`
-
-If set to any string, Renovate will use this as the `user-agent` it sends with HTTP requests.
-
 ## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
 
 <!-- prettier-ignore -->
