@@ -9,7 +9,7 @@ export const defaultConfig = {
   fileMatch: [
     '(^|/|\\.)pom\\.xml$',
     '^(((\\.mvn)|(\\.m2))/)?settings\\.xml$',
-    '(^|/)(\\.mvn)/extensions\\.xml$',
+    '(^|/)\\.mvn/extensions\\.xml$',
   ],
   versioning: mavenVersioning.id,
 };

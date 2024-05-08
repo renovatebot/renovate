@@ -730,15 +730,13 @@ describe('modules/manager/maven/extract', () => {
 
     it('should extract from .mvn/extensions.xml file', async () => {
       fs.readLocalFile.mockResolvedValueOnce(codeBlock`
-      <extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/EXTENSIONS/1.0.0 http://maven.apache.org/xsd/core-extensions-1.0.0.xsd">
-    <extension>
-        <groupId>io.jenkins.tools.incrementals</groupId>
-        <artifactId>git-changelist-maven-extension</artifactId>
-        <version>1.6</version>
-    </extension>
-</extensions>
+      <extensions xmlns="http://maven.apache.org/EXTENSIONS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/EXTENSIONS/1.0.0 http://maven.apache.org/xsd/core-extensions-1.0.0.xsd">
+        <extension>
+          <groupId>io.jenkins.tools.incrementals</groupId>
+          <artifactId>git-changelist-maven-extension</artifactId>
+          <version>1.6</version>
+        </extension>
+      </extensions>
     `);
       const res = await extractAllPackageFiles({}, ['.mvn/extensions.xml']);
       expect(res).toMatchObject([
@@ -751,7 +749,7 @@ describe('modules/manager/maven/extract', () => {
                 'io.jenkins.tools.incrementals:git-changelist-maven-extension',
               currentValue: '1.6',
               depType: 'build',
-              fileReplacePosition: 394,
+              fileReplacePosition: 372,
               registryUrls: ['https://repo.maven.apache.org/maven2'],
             },
           ],

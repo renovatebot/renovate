@@ -15,6 +15,12 @@ const supportedNamespaces = [
   'http://maven.apache.org/SETTINGS/1.2.0',
 ];
 
+const supportedExtensionsNamespaces = [
+  'http://maven.apache.org/EXTENSIONS/1.0.0',
+  'http://maven.apache.org/EXTENSIONS/1.1.0',
+  'http://maven.apache.org/EXTENSIONS/1.2.0',
+];
+
 function parsePom(raw: string, packageFile: string): XmlDocument | null {
   let project: XmlDocument;
   try {
@@ -51,7 +57,7 @@ function parseExtensions(raw: string, packageFile: string): XmlDocument | null {
   if (name !== 'extensions') {
     return null;
   }
-  if (attr.xmlns !== 'http://maven.apache.org/EXTENSIONS/1.0.0') {
+  if (!supportedExtensionsNamespaces.includes(attr.xmlns)) {
     return null;
   }
   if (!is.nonEmptyArray(children)) {
@@ -543,7 +549,7 @@ export async function extractAllPackageFiles(
         );
         additionalRegistryUrls.push(...registries);
       }
-    } else if (packageFile.endsWith('extensions.xml')) {
+    } else if (packageFile.endsWith('.mvn/extensions.xml')) {
       const extensions = extractExtensions(content, packageFile);
       if (extensions) {
         packages.push(extensions);
