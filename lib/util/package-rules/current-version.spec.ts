@@ -28,7 +28,7 @@ describe('util/package-rules/current-version', () => {
           matchCurrentVersion: '1.2.3',
         },
       );
-      expect(result).toBeTrue();
+      expect(result).toBeFalse();
     });
 
     it('return true for a valid match', () => {
@@ -41,7 +41,7 @@ describe('util/package-rules/current-version', () => {
           matchCurrentVersion: '<1.2.3.5',
         },
       );
-      expect(result).toBeFalse();
+      expect(result).toBeTrue();
     });
 
     it('return false if no version could be found', () => {
