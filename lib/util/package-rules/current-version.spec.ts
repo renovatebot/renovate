@@ -1,3 +1,4 @@
+import pep440 from '../../modules/versioning/pep440';
 import { CurrentVersionMatcher } from './current-version';
 
 describe('util/package-rules/current-version', () => {
@@ -19,6 +20,10 @@ describe('util/package-rules/current-version', () => {
     });
 
     it('return false on version exception', () => {
+      const spy = jest.spyOn(pep440, 'isValid').mockImplementationOnce(() => {
+        throw new Error();
+      });
+
       const result = matcher.matches(
         {
           versioning: 'pep440',
@@ -29,6 +34,7 @@ describe('util/package-rules/current-version', () => {
         },
       );
       expect(result).toBeFalse();
+      expect(spy.mock.calls).toHaveLength(1);
     });
 
     it('return true for a valid match', () => {
