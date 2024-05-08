@@ -2323,6 +2323,24 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 Add to this object if you wish to define rules that apply only to minor updates.
 
+## mode
+
+This configuration option was created primarily for use with Mend's hosted app, but can also be useful for some self-hosted use cases.
+
+It enables a new `silent` mode to allow repos to be scanned for updates _and_ for users to be able to request such updates be opened in PRs _on demand_ through the Mend UI, without needing the Dependency Dashboard issue in the repo.
+
+Although similar, the options `mode=silent` and `dryRun` can be used together.
+When both are configured, `dryRun` takes precedence, so for example PRs won't be created.
+
+Configuring `silent` mode is quite similar to `dryRun=lookup` except:
+
+- It will bypass onboarding checks (unlike when performing a dry run on a non-onboarded repo) similar to `requireConfig=optional`
+- It can create branches/PRs if `checkedBranches` is set
+- It will keep any existing branches up-to-date (e.g. ones created previously using `checkedBranches`)
+
+When in `silent` mode, Renovate does not create issues (such as Dependency Dashboard, or due to config errors) or Config Migration PRs, even if enabled.
+It also does not prune/close any which already exist.
+
 ## npmToken
 
 See [Private npm module support](./getting-started/private-packages.md) for details on how this is used.

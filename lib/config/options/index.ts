@@ -6,6 +6,13 @@ import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
   {
+    name: 'mode',
+    description: 'Mode of operation.',
+    type: 'string',
+    default: 'full',
+    allowedValues: ['full', 'silent'],
+  },
+  {
     name: 'allowedHeaders',
     description:
       'List of allowed patterns for header names in repository hostRules config.',
@@ -14,6 +21,26 @@ const options: RenovateOptions[] = [
     subType: 'string',
     globalOnly: true,
     patternMatch: true,
+  },
+  {
+    name: 'autodiscoverRepoOrder',
+    description:
+      'The order method for autodiscover server side repository search.',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+    allowedValues: ['asc', 'desc'],
+    supportedPlatforms: ['gitea'],
+  },
+  {
+    name: 'autodiscoverRepoSort',
+    description:
+      'The sort method for autodiscover server side repository search.',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+    allowedValues: ['alpha', 'created', 'updated', 'size', 'id'],
+    supportedPlatforms: ['gitea'],
   },
   {
     name: 'allowedEnv',
@@ -465,7 +492,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.3',
+    default: 'ghcr.io/containerbase/sidecar:10.6.5',
     globalOnly: true,
   },
   {
@@ -627,7 +654,7 @@ const options: RenovateOptions[] = [
   {
     name: 'inheritConfigStrict',
     description:
-      'If `true`, any `inheritedConfig` fetch errror will result in an aborted run.',
+      'If `true`, any `inheritedConfig` fetch error will result in an aborted run.',
     type: 'boolean',
     default: false,
     globalOnly: true,
