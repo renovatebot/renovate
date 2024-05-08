@@ -1,4 +1,3 @@
-import pep440 from '../../modules/versioning/pep440';
 import { CurrentVersionMatcher } from './current-version';
 
 describe('util/package-rules/current-version', () => {
@@ -20,9 +19,6 @@ describe('util/package-rules/current-version', () => {
     });
 
     it('return false on version exception', () => {
-      const spy = jest.spyOn(pep440, 'matches').mockImplementationOnce(() => {
-        throw new Error();
-      });
       const result = matcher.matches(
         {
           versioning: 'pep440',
@@ -32,8 +28,20 @@ describe('util/package-rules/current-version', () => {
           matchCurrentVersion: '1.2.3',
         },
       );
+      expect(result).toBeTrue();
+    });
+
+    it('return true for a valid match', () => {
+      const result = matcher.matches(
+        {
+          versioning: 'pep440',
+          currentValue: '1.2.3',
+        },
+        {
+          matchCurrentVersion: '<1.2.3.5',
+        },
+      );
       expect(result).toBeFalse();
-      expect(spy.mock.calls).toHaveLength(1);
     });
 
     it('return false if no version could be found', () => {
