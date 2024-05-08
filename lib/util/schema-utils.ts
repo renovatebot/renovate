@@ -1,5 +1,5 @@
 import JSON5 from 'json5';
-import JSONC from 'jsonc-parser';
+import * as JSONC from 'jsonc-parser';
 import { DateTime } from 'luxon';
 import type { JsonArray, JsonValue } from 'type-fest';
 import { z } from 'zod';
