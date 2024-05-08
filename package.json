@@ -210,6 +210,7 @@
     "json-stringify-pretty-compact": "3.0.0",
     "json5": "2.2.3",
     "jsonata": "2.0.4",
+    "jsonc-parser": "3.2.1",
     "klona": "2.0.6",
     "lru-cache": "10.2.2",
     "luxon": "3.4.4",
