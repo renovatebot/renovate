@@ -83,6 +83,32 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
+// list if legacy experimental env vars which have been converted to experimental flags
+const legacyExperimentalEnvVars = {
+  RENOVATE_X_DISABLE_DOCKER_HUB_TAGS: 'disableDockerHubTags',
+  RENOVATE_X_EXEC_GPID_HANDLE: 'execGpidHandle',
+  RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK: 'noMavenPomCheck',
+  RENOVATE_X_NUGET_DOWNLOAD_NUPKGS: 'nugetDownloadNupkgs',
+  RENOVATE_PAGINATE_ALL: 'paginateAll',
+  RENOVATE_X_REBASE_PAGINATION_LINKS: 'rebasePaginationLinks',
+  RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'repoCacheForceLocal',
+  RENOVATE_X_SQLITE_PACKAGE_CACHE: 'sqlitePackageCache',
+  RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING: 'suppressPreCommitWarning',
+  RENOVATE_X_YARN_PROXY: 'yarnProxy',
+  RENOVATE_X_USE_OPENPGP: 'useOpenpgp',
+};
+
+function convertLegacyEnvVarsToFlags(env: NodeJS.ProcessEnv): string[] {
+  const res = [];
+  for (const [key, flag] of Object.entries(legacyExperimentalEnvVars)) {
+    if (env[key]) {
+      res.push(flag);
+    }
+  }
+
+  return res;
+}
+
 export async function getConfig(
   inputEnv: NodeJS.ProcessEnv,
 ): Promise<AllConfig> {
@@ -175,6 +201,11 @@ export async function getConfig(
       matchHost: 'github.com',
       token: env.GITHUB_COM_TOKEN,
     });
+  }
+
+  const experimentalFlags = convertLegacyEnvVarsToFlags(env);
+  if (experimentalFlags.length) {
+    config.experimentalFlags = experimentalFlags;
   }
 
   // These env vars are deprecated and deleted to make sure they're not used

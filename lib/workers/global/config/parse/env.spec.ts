@@ -96,6 +96,37 @@ describe('workers/global/config/parse/env', () => {
       expect(await env.getConfig(envArg)).toMatchObject(config);
     });
 
+    it('converts legacy experimental env vars to experimental flags', async () => {
+      const envArg = {
+        RENOVATE_X_DISABLE_DOCKER_HUB_TAGS: 'true',
+        RENOVATE_X_EXEC_GPID_HANDLE: 'true',
+        RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK: 'true',
+        RENOVATE_X_NUGET_DOWNLOAD_NUPKGS: 'true',
+        RENOVATE_PAGINATE_ALL: 'true',
+        RENOVATE_X_REBASE_PAGINATION_LINKS: 'true',
+        RENOVATE_X_REPO_CACHE_FORCE_LOCAL: 'true',
+        RENOVATE_X_SQLITE_PACKAGE_CACHE: 'true',
+        RENOVATE_X_SUPPRESS_PRE_COMMIT_WARNING: 'true',
+        RENOVATE_X_YARN_PROXY: 'true',
+        RENOVATE_X_USE_OPENPGP: 'true',
+      };
+      expect(await env.getConfig(envArg)).toMatchObject({
+        experimentalFlags: [
+          'disableDockerHubTags',
+          'execGpidHandle',
+          'noMavenPomCheck',
+          'nugetDownloadNupkgs',
+          'paginateAll',
+          'rebasePaginationLinks',
+          'repoCacheForceLocal',
+          'sqlitePackageCache',
+          'suppressPreCommitWarning',
+          'yarnProxy',
+          'useOpenpgp',
+        ],
+      });
+    });
+
     it('skips misconfigured arrays', async () => {
       const envName = 'RENOVATE_HOST_RULES';
       const val = JSON.stringify('foobar');
