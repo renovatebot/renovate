@@ -4,6 +4,7 @@ import { GoDatasource } from '../../datasource/go';
 import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency } from '../types';
+import type { SetRequired } from 'type-fest';
 
 function trimQuotes(str: string): string {
   return str.replace(regEx(/^"(.*)"$/), '$1');

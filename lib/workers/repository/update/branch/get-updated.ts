@@ -5,6 +5,7 @@ import { logger } from '../../../../logger';
 import { get } from '../../../../modules/manager';
 import type {
   ArtifactError,
+  ArtifactNotice,
   PackageDependency,
   PackageFile,
   UpdateArtifact,
@@ -21,6 +22,7 @@ export interface PackageFilesResult {
   reuseExistingBranch?: boolean;
   updatedPackageFiles: FileChange[];
   updatedArtifacts: FileChange[];
+  artifactNotices: ArtifactNotice[];
 }
 
 async function getFileContent(
@@ -287,6 +289,7 @@ export async function getUpdatedPackageFiles(
     contents: updatedFileContents[name],
   }));
   const updatedArtifacts: FileChange[] = [];
+  const artifactNotices: ArtifactNotice[] = [];
   const artifactErrors: ArtifactError[] = [];
   // istanbul ignore if
   if (is.nonEmptyArray(updatedPackageFiles)) {
@@ -308,7 +311,12 @@ export async function getUpdatedPackageFiles(
             packageFile.path,
           ),
         });
-        processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
+        processUpdateArtifactResults(
+          results,
+          updatedArtifacts,
+          artifactNotices,
+          artifactErrors,
+        );
       }
     }
   }
@@ -339,7 +347,12 @@ export async function getUpdatedPackageFiles(
             packageFile.path,
           ),
         });
-        processUpdateArtifactResults(results, updatedArtifacts, artifactErrors);
+        processUpdateArtifactResults(
+          results,
+          updatedArtifacts,
+          artifactNotices,
+          artifactErrors,
+        );
         if (is.nonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
         }
@@ -372,6 +385,7 @@ export async function getUpdatedPackageFiles(
           processUpdateArtifactResults(
             results,
             updatedArtifacts,
+            artifactNotices,
             artifactErrors,
           );
         }
@@ -383,6 +397,7 @@ export async function getUpdatedPackageFiles(
     updatedPackageFiles,
     updatedArtifacts,
     artifactErrors,
+    artifactNotices,
   };
 }
 
@@ -424,14 +439,18 @@ async function managerUpdateArtifacts(
 function processUpdateArtifactResults(
   results: UpdateArtifactsResult[] | null,
   updatedArtifacts: FileChange[],
+  artifactNotices: ArtifactNotice[],
   artifactErrors: ArtifactError[],
 ): void {
   if (is.nonEmptyArray(results)) {
     for (const res of results) {
-      const { file, artifactError } = res;
+      const { file, notice, artifactError } = res;
       // istanbul ignore else
       if (file) {
         updatedArtifacts.push(file);
+        if (notice) {
+          artifactNotices.push({ file: file.path, message: notice });
+        }
       } else if (artifactError) {
         artifactErrors.push(artifactError);
       }
