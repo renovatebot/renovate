@@ -45,7 +45,7 @@ export function parseSupportedDatasourceString(): string[] | undefined {
     return undefined;
   }
 
-  if (!is.array<string>(supportedDatasources, is.string)) {
+  if (!is.array(supportedDatasources, is.string)) {
     logger.warn(
       { supportedDatasources },
       `Expected a string array but got ${typeof supportedDatasources}`,
