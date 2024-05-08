@@ -23,7 +23,6 @@ describe('util/package-rules/current-version', () => {
       const spy = jest.spyOn(pep440, 'isValid').mockImplementationOnce(() => {
         throw new Error();
       });
-
       const result = matcher.matches(
         {
           versioning: 'pep440',
