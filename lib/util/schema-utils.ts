@@ -217,12 +217,13 @@ export const Json5 = z.string().transform((str, ctx): JsonValue => {
 });
 
 export const Jsonc = z.string().transform((str, ctx): JsonValue => {
-  try {
-    return JSONC.parse(str);
-  } catch (e) {
-    ctx.addIssue({ code: 'custom', message: 'Invalid JSONC' });
-    return z.NEVER;
+  const errors: JSONC.ParseError[] = [];
+  const value = JSONC.parse(str, errors);
+  if (errors.length === 0) {
+    return value;
   }
+  ctx.addIssue({ code: 'custom', message: 'Invalid JSONC' });
+  return z.NEVER;
 });
 
 export const UtcDate = z

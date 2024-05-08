@@ -321,7 +321,7 @@ describe('util/schema-utils', () => {
         success: false,
       });
 
-      expect(Schema.safeParse('{{{}}}')).toMatchObject({
+      expect(Schema.safeParse('{')).toMatchObject({
         error: {
           issues: [
             {
