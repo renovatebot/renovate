@@ -1,5 +1,5 @@
 import { quote } from 'shlex';
-import upath from 'upath'
+import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -9,7 +9,12 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
-import type { PackageFileContent, UpdateArtifact, UpdateArtifactsResult, Upgrade } from '../types';
+import type {
+  PackageFileContent,
+  UpdateArtifact,
+  UpdateArtifactsResult,
+  Upgrade,
+} from '../types';
 import {
   extractHeaderCommand,
   getExecOptions,

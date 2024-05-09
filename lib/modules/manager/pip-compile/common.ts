@@ -254,10 +254,10 @@ export function getRegistryCredVarsFromPackageFiles(
   for (const packageFile of packageFiles) {
     urls.push(
       ...(packageFile.registryUrls ?? []),
-      ...(packageFile.additionalRegistryUrls ?? [])
-    )
+      ...(packageFile.additionalRegistryUrls ?? []),
+    );
   }
-  logger.debug(urls, "Extracted registry URLs from package files")
+  logger.debug(urls, 'Extracted registry URLs from package files');
 
   const uniqueHosts = new Set<URL>(
     urls.map(cleanUrl).filter(isNotNullOrUndefined),
