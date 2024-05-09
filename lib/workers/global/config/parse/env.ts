@@ -5,6 +5,7 @@ import type { AllConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
+import { migrateAndValidateConfig } from './util';
 
 function normalizePrefixes(
   env: NodeJS.ProcessEnv,
@@ -82,12 +83,39 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
-export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
+const convertedExperimentalEnvVars = [
+  'RENOVATE_X_AUTODISCOVER_REPO_SORT',
+  'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
+];
+
+/**
+ * Massages the experimental env vars which have been converted to config options
+ *
+ * e.g. RENOVATE_X_AUTODISCOVER_REPO_SORT -> RENOVATE_AUTODISCOVER_REPO_SORT
+ */
+function massageConvertedExperimentalVars(
+  env: NodeJS.ProcessEnv,
+): NodeJS.ProcessEnv {
+  const result = { ...env };
+  for (const key of convertedExperimentalEnvVars) {
+    if (env[key] !== undefined) {
+      const newKey = key.replace('RENOVATE_X_', 'RENOVATE_');
+      result[newKey] = env[key];
+      delete result[key];
+    }
+  }
+  return result;
+}
+
+export async function getConfig(
+  inputEnv: NodeJS.ProcessEnv,
+): Promise<AllConfig> {
   let env = inputEnv;
   env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
   env = renameEnvKeys(env);
   // massage the values of migrated configuration keys
   env = massageEnvKeyValues(env);
+  env = massageConvertedExperimentalVars(env);
 
   const options = getOptions();
 
@@ -97,6 +125,8 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
     try {
       config = JSON5.parse(env.RENOVATE_CONFIG);
       logger.debug({ config }, 'Detected config in env RENOVATE_CONFIG');
+
+      config = await migrateAndValidateConfig(config, 'RENOVATE_CONFIG');
     } catch (err) {
       logger.fatal({ err }, 'Could not parse RENOVATE_CONFIG');
       process.exit(1);

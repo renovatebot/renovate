@@ -280,6 +280,18 @@ describe('workers/repository/init/merge', () => {
       });
     });
 
+    it('uses onboarding config if silent', async () => {
+      scm.getFileList.mockResolvedValue([]);
+      migrateAndValidate.migrateAndValidate.mockResolvedValue({
+        warnings: [],
+        errors: [],
+      });
+      config.mode = 'silent';
+      config.repository = 'some-org/some-repo';
+      const res = await mergeRenovateConfig(config);
+      expect(res).toBeDefined();
+    });
+
     it('throws error if misconfigured', async () => {
       scm.getFileList.mockResolvedValue(['package.json', '.renovaterc.json']);
       fs.readLocalFile.mockResolvedValue('{}');

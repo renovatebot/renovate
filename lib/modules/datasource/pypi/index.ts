@@ -1,4 +1,5 @@
 import url from 'node:url';
+import is from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
@@ -8,7 +9,7 @@ import { ensureTrailingSlash } from '../../../util/url';
 import * as pep440 from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import { isGitHubRepo, normalizeDepName } from './common';
+import { isGitHubRepo, normalizePythonDepName } from './common';
 import type { PypiJSON, PypiJSONRelease, Releases } from './types';
 
 export class PypiDatasource extends Datasource {
@@ -85,7 +86,7 @@ export class PypiDatasource extends Datasource {
   ): Promise<ReleaseResult | null> {
     const lookupUrl = url.resolve(
       hostUrl,
-      `${normalizeDepName(packageName)}/json`,
+      `${normalizePythonDepName(packageName)}/json`,
     );
     const dependency: ReleaseResult = { releases: [] };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
@@ -156,9 +157,11 @@ export class PypiDatasource extends Datasource {
           result.isDeprecated = isDeprecated;
         }
         // There may be multiple releases with different requires_python, so we return all in an array
+        const pythonConstraints = releases
+          .map(({ requires_python }) => requires_python)
+          .filter(is.string);
         result.constraints = {
-          // TODO: string[] isn't allowed here
-          python: releases.map(({ requires_python }) => requires_python) as any,
+          python: Array.from(new Set(pythonConstraints)),
         };
         return result;
       });
@@ -223,7 +226,7 @@ export class PypiDatasource extends Datasource {
   ): Promise<ReleaseResult | null> {
     const lookupUrl = url.resolve(
       hostUrl,
-      ensureTrailingSlash(normalizeDepName(packageName)),
+      ensureTrailingSlash(normalizePythonDepName(packageName)),
     );
     const dependency: ReleaseResult = { releases: [] };
     const response = await this.http.get(lookupUrl);

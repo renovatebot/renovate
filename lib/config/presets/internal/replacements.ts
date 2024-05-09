@@ -15,6 +15,7 @@ export const presets: Record<string, Preset> = {
       'replacements:containerbase',
       'replacements:cpx-to-maintenance-fork',
       'replacements:cucumber-to-scoped',
+      'replacements:eslint-config-standard-with-typescript-to-eslint-config-love',
       'replacements:eslint-plugin-node-to-maintained-fork',
       'replacements:fakerjs-to-scoped',
       'replacements:fastify-to-scoped',
@@ -42,6 +43,7 @@ export const presets: Record<string, Preset> = {
       'replacements:rome-to-biome',
       'replacements:semantic-release-replace-plugin-to-unscoped',
       'replacements:spectre-cli-to-spectre-console-cli',
+      'replacements:standard-version-to-commit-and-tag',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
@@ -195,6 +197,19 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['cucumber'],
         replacementName: '@cucumber/cucumber',
         replacementVersion: '7.0.0',
+      },
+    ],
+  },
+  'eslint-config-standard-with-typescript-to-eslint-config-love': {
+    description:
+      '`eslint-config-standard-with-typescript` was renamed to `eslint-config-love`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^43.0.1',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['eslint-config-standard-with-typescript'],
+        replacementName: 'eslint-config-love',
+        replacementVersion: '43.1.0',
       },
     ],
   },
@@ -887,6 +902,19 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'standard-version-to-commit-and-tag': {
+    description:
+      '`standard-version` is now maintained as `commit-and-tag-version`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^9.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['standard-version'],
+        replacementName: 'commit-and-tag-version',
+        replacementVersion: '9.5.0',
+      },
+    ],
+  },
   'vso-task-lib-to-azure-pipelines-task-lib': {
     description:
       'The `vso-task-lib` package is now published as `azure-pipelines-task-lib`.',
@@ -954,7 +982,7 @@ const mui: PresetTemplate = {
 
 const messageFormat: PresetTemplate = {
   description:
-    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
+    'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}` to `@messageformat/{{package}}`.',
   packageRules: [
     {
       matchCurrentVersion: '>=2.0.0 <3.0.0',
@@ -981,7 +1009,7 @@ const messageFormat: PresetTemplate = {
       replacementVersion: '5.0.0',
     },
   ],
-  title: 'messageFormat-{{package}}-to-@messageformat/{{package}}',
+  title: 'messageFormat-to-scoped',
 };
 
 addPresets(presets, messageFormat, mui);

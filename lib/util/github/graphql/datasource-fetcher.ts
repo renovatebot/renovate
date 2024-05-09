@@ -107,6 +107,7 @@ export class GithubGraphqlDatasourceFetcher<
     return {
       baseUrl,
       repository,
+      readOnly: true,
       body: { query, variables },
     };
   }

@@ -266,9 +266,6 @@ exports[`modules/datasource/pypi/index getReleases respects constraints 1`] = `
   "registryUrl": "https://pypi.org/pypi",
   "releases": [
     {
-      "version": "0.4.0",
-    },
-    {
       "version": "0.4.1",
     },
     {
