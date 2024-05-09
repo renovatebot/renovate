@@ -73,6 +73,7 @@ const options: RenovateOptions[] = [
     description:
       'If set, Renovate will query this API for Merge Confidence data.',
     type: 'string',
+    advancedUse: true,
     globalOnly: true,
   },
   {
