@@ -26,6 +26,15 @@ describe('config/presets/internal/regex-managers', () => {
           # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$
           - export KUSTOMIZE_VERSION v5.2.1
 
+          - pipe: something/cool:latest
+            variables:
+              # renovate: datasource=docker depName=node versioning=docker
+              NODE_VERSION: 18
+              # renovate: datasource=npm depName=pnpm
+              PNPM_VERSION:"7.25.1"
+              # renovate: datasource=npm depName=yarn
+              YARN_VERSION: '3.3.1'
+
           - echo $NODE_VERSION
       `;
 
@@ -74,6 +83,28 @@ describe('config/presets/internal/regex-managers', () => {
           extractVersion: '^kustomize/(?<version>.+)$',
           versioning:
             'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+        },
+        {
+          currentValue: '18',
+          datasource: 'docker',
+          depName: 'node',
+          replaceString:
+            '# renovate: datasource=docker depName=node versioning=docker\n      NODE_VERSION: 18\n',
+          versioning: 'docker',
+        },
+        {
+          currentValue: '7.25.1',
+          datasource: 'npm',
+          depName: 'pnpm',
+          replaceString:
+            '# renovate: datasource=npm depName=pnpm\n      PNPM_VERSION:"7.25.1"\n',
+        },
+        {
+          currentValue: '3.3.1',
+          datasource: 'npm',
+          depName: 'yarn',
+          replaceString:
+            "# renovate: datasource=npm depName=yarn\n      YARN_VERSION: '3.3.1'\n",
         },
       ]);
     });
