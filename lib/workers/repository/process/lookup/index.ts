@@ -287,21 +287,23 @@ export async function lookupUpdates(
       }
 
       res.currentVersion = currentVersion!;
-      const currentVersionTimestamp = allVersions.find(
-        (v) =>
-          versioning.isValid(v.version) &&
-          versioning.equals(v.version, currentVersion),
-      )?.releaseTimestamp;
+      const currentVersionTimestamp =
+        allVersions.find(
+          (v) =>
+            versioning.isValid(v.version) &&
+            versioning.equals(v.version, currentVersion),
+        )?.releaseTimestamp ?? null;
 
-      if (
-        is.nonEmptyString(currentVersionTimestamp) &&
-        config.packageRules?.some((rules) =>
-          is.nonEmptyString(rules.matchCurrentAge),
-        )
-      ) {
+      if (is.string(currentVersionTimestamp)) {
         res.currentVersionTimestamp = currentVersionTimestamp;
-        // Reapply package rules to check matches for matchCurrentAge
-        config = applyPackageRules({ ...config, currentVersionTimestamp });
+        if (
+          config.packageRules?.some((rules) =>
+            is.nonEmptyString(rules.matchCurrentAge),
+          )
+        ) {
+          // Reapply package rules to check matches for matchCurrentAge
+          config = applyPackageRules({ ...config, currentVersionTimestamp });
+        }
       }
 
       if (
