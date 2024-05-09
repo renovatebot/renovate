@@ -36,6 +36,17 @@ import {
   isReplacementRulesConfigured,
 } from './utils';
 
+function getTimestamp(
+  versions: Release[],
+  version: string,
+  versioning: allVersioning.VersioningApi,
+): string | null | undefined {
+  return versions.find(
+    (v) =>
+      versioning.isValid(v.version) && versioning.equals(v.version, version),
+  )?.releaseTimestamp;
+}
+
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig,
 ): Promise<Result<UpdateResult, Error>> {
@@ -287,11 +298,11 @@ export async function lookupUpdates(
       }
 
       res.currentVersion = currentVersion!;
-      const currentVersionTimestamp = allVersions.find(
-        (v) =>
-          versioning.isValid(v.version) &&
-          versioning.equals(v.version, currentVersion),
-      )?.releaseTimestamp;
+      const currentVersionTimestamp = getTimestamp(
+        allVersions,
+        currentVersion,
+        versioning,
+      );
 
       if (is.nonEmptyString(currentVersionTimestamp)) {
         res.currentVersionTimestamp = currentVersionTimestamp;
