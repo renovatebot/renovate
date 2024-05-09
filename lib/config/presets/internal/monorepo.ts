@@ -341,6 +341,7 @@ const repoGroups = {
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
   kroki: 'https://github.com/yuzutech/kroki',
+  ktor: 'https://github.com/ktorio/ktor',
   lamar: 'https://github.com/JasperFx/lamar',
   lerna: 'https://github.com/lerna/lerna',
   lexical: 'https://github.com/facebook/lexical',
