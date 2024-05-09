@@ -1963,7 +1963,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   try {
     vulnerabilityAlerts = (
       await githubApi.getJson(
-        `/repos/${config.repositoryOwner}/${config.repositoryName}/dependabot/alerts?state=open`,
+        `/repos/${config.repositoryOwner}/${config.repositoryName}/dependabot/alerts?state=open&direction=asc&per_page=100`,
         {
           paginate: false,
           headers: { accept: 'application/vnd.github+json' },
