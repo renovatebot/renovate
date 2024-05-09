@@ -4,7 +4,7 @@ import { logger } from '../../../logger';
 import {
   allowedPipOptions,
   extractHeaderCommand,
-  getRegistryCredVarsFromPackageFile,
+  getRegistryCredVarsFromPackageFiles,
 } from './common';
 import { inferCommandExecDir } from './utils';
 
@@ -170,7 +170,7 @@ describe('modules/manager/pip-compile/common', () => {
     );
   });
 
-  describe('getCredentialVarsFromPackageFile()', () => {
+  describe('getRegistryCredVarsFromPackageFiles()', () => {
     it('handles both registryUrls and additionalRegistryUrls', () => {
       hostRules.find.mockReturnValueOnce({
         username: 'user1',
@@ -181,11 +181,11 @@ describe('modules/manager/pip-compile/common', () => {
         password: 'password2',
       });
       expect(
-        getRegistryCredVarsFromPackageFile({
+        getRegistryCredVarsFromPackageFiles([{
           deps: [],
           registryUrls: ['https://example.com/pypi/simple'],
           additionalRegistryUrls: ['https://example2.com/pypi/simple'],
-        }),
+        }]),
       ).toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: 'user1',
@@ -206,13 +206,13 @@ describe('modules/manager/pip-compile/common', () => {
         password: 'password2',
       });
       expect(
-        getRegistryCredVarsFromPackageFile({
+        getRegistryCredVarsFromPackageFiles([{
           deps: [],
           additionalRegistryUrls: [
             'https://example.com/pypi/simple',
             'https://example2.com/pypi/simple',
           ],
-        }),
+        }]),
       ).toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: 'user1',
@@ -228,10 +228,10 @@ describe('modules/manager/pip-compile/common', () => {
         username: 'user',
       });
       expect(
-        getRegistryCredVarsFromPackageFile({
+        getRegistryCredVarsFromPackageFiles([{
           deps: [],
           additionalRegistryUrls: ['https://example.com/pypi/simple'],
-        }),
+        }]),
       ).toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: 'user',
@@ -244,10 +244,10 @@ describe('modules/manager/pip-compile/common', () => {
         password: 'password',
       });
       expect(
-        getRegistryCredVarsFromPackageFile({
+        getRegistryCredVarsFromPackageFiles([{
           deps: [],
           additionalRegistryUrls: ['https://example.com/pypi/simple'],
-        }),
+        }]),
       ).toEqual({
         KEYRING_SERVICE_NAME_0: 'example.com',
         KEYRING_SERVICE_USERNAME_0: '',
@@ -260,11 +260,41 @@ describe('modules/manager/pip-compile/common', () => {
         password: 'password',
       });
       expect(
-        getRegistryCredVarsFromPackageFile({
+        getRegistryCredVarsFromPackageFiles([{
           deps: [],
           additionalRegistryUrls: ['invalid-url'],
-        }),
+        }]),
       ).toEqual({});
+    });
+  });
+
+  it('handles multiple package files', () => {
+    hostRules.find.mockReturnValueOnce({
+      username: 'user1',
+      password: 'password1',
+    });
+    hostRules.find.mockReturnValueOnce({
+      username: 'user2',
+      password: 'password2',
+    });
+    expect(
+      getRegistryCredVarsFromPackageFiles([
+        {
+          deps: [],
+          registryUrls: ['https://example.com/pypi/simple'],
+        },
+        {
+          deps: [],
+          additionalRegistryUrls: ['https://example2.com/pypi/simple'],
+        }
+      ]),
+    ).toEqual({
+      KEYRING_SERVICE_NAME_0: 'example.com',
+      KEYRING_SERVICE_USERNAME_0: 'user1',
+      KEYRING_SERVICE_PASSWORD_0: 'password1',
+      KEYRING_SERVICE_NAME_1: 'example2.com',
+      KEYRING_SERVICE_USERNAME_1: 'user2',
+      KEYRING_SERVICE_PASSWORD_1: 'password2',
     });
   });
 });
