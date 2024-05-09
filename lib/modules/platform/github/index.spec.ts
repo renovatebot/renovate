@@ -3772,7 +3772,11 @@ describe('modules/platform/github/index', () => {
     it('returns empty if error', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/dependabot/alerts?state=open').reply(200, {});
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(200, {});
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
@@ -3781,26 +3785,30 @@ describe('modules/platform/github/index', () => {
     it('returns array if found', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/dependabot/alerts?state=open').reply(200, [
-        {
-          security_advisory: {
-            description: 'description',
-            identifiers: [{ type: 'type', value: 'value' }],
-            references: [],
-          },
-          security_vulnerability: {
-            package: {
-              ecosystem: 'npm',
-              name: 'left-pad',
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(200, [
+          {
+            security_advisory: {
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
             },
-            vulnerable_version_range: '0.0.2',
-            first_patched_version: { identifier: '0.0.3' },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'npm',
+                name: 'left-pad',
+              },
+              vulnerable_version_range: '0.0.2',
+              first_patched_version: { identifier: '0.0.3' },
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
+            },
           },
-          dependency: {
-            manifest_path: 'bar/foo',
-          },
-        },
-      ]);
+        ]);
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(1);
@@ -3811,7 +3819,9 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/dependabot/alerts?state=open')
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
         .reply(200, { data: { repository: {} } });
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
@@ -3823,7 +3833,9 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .get('/repos/some/repo/dependabot/alerts?state=open')
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
         .replyWithError('unknown error');
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getVulnerabilityAlerts();
@@ -3833,38 +3845,42 @@ describe('modules/platform/github/index', () => {
     it('calls logger.debug with only items that include securityVulnerability', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/dependabot/alerts?state=open').reply(200, [
-        {
-          security_advisory: {
-            description: 'description',
-            identifiers: [{ type: 'type', value: 'value' }],
-            references: [],
-          },
-          security_vulnerability: {
-            package: {
-              ecosystem: 'npm',
-              name: 'left-pad',
+      scope
+        .get(
+          '/repos/some/repo/dependabot/alerts?state=open&direction=asc&per_page=100',
+        )
+        .reply(200, [
+          {
+            security_advisory: {
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
             },
-            vulnerable_version_range: '0.0.2',
-            first_patched_version: { identifier: '0.0.3' },
+            security_vulnerability: {
+              package: {
+                ecosystem: 'npm',
+                name: 'left-pad',
+              },
+              vulnerable_version_range: '0.0.2',
+              first_patched_version: { identifier: '0.0.3' },
+            },
+            dependency: {
+              manifest_path: 'bar/foo',
+            },
           },
-          dependency: {
-            manifest_path: 'bar/foo',
-          },
-        },
 
-        {
-          security_advisory: {
-            description: 'description',
-            identifiers: [{ type: 'type', value: 'value' }],
-            references: [],
+          {
+            security_advisory: {
+              description: 'description',
+              identifiers: [{ type: 'type', value: 'value' }],
+              references: [],
+            },
+            security_vulnerability: null,
+            dependency: {
+              manifest_path: 'bar/foo',
+            },
           },
-          security_vulnerability: null,
-          dependency: {
-            manifest_path: 'bar/foo',
-          },
-        },
-      ]);
+        ]);
       await github.initRepo({ repository: 'some/repo' });
       await github.getVulnerabilityAlerts();
       expect(logger.logger.debug).toHaveBeenCalledWith(
