@@ -4,6 +4,46 @@ import { extractPackageFile } from '../../../modules/manager/custom/regex';
 import { presets } from './regex-managers';
 
 describe('config/presets/internal/regex-managers', () => {
+  describe('Update `$schema` version in biome.json', () => {
+    const customManager = presets['biomeVersions'].customManagers?.[0];
+
+    it(`find dependencies in file`, async () => {
+      const fileContent = codeBlock`
+        {
+          "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
+        }
+      `;
+
+      const res = await extractPackageFile(
+        fileContent,
+        'biome.json',
+        customManager!,
+      );
+
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '1.7.3',
+          datasource: 'npm',
+          depName: '@biomejs/biome',
+          replaceString: '"https://biomejs.dev/schemas/1.7.3/schema.json"',
+        },
+      ]);
+    });
+
+    describe('matches regexes patterns', () => {
+      it.each`
+        path                 | expected
+        ${'biome.json'}      | ${true}
+        ${'biome.jsonc'}     | ${true}
+        ${'foo/biome.json'}  | ${true}
+        ${'foo/biome.jsonc'} | ${true}
+        ${'biome.yml'}       | ${false}
+      `('$path', ({ path, expected }) => {
+        expect(regexMatches(path, customManager!.fileMatch)).toBe(expected);
+      });
+    });
+  });
+
   describe('Update `_VERSION` variables in Dockerfiles', () => {
     const customManager = presets['dockerfileVersions'].customManagers?.[0];
 
