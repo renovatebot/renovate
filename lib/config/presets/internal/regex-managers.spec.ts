@@ -17,6 +17,9 @@ describe('config/presets/internal/regex-managers', () => {
         # renovate: datasource=npm depName=pnpm
         ENV PNPM_VERSION="7.25.1"
 
+        # renovate: datasource=npm depName=pnpm
+        ENV PNPM_VERSION='7.25.1'
+
         # renovate: datasource=npm depName=yarn
         ENV YARN_VERSION 3.3.1
 
@@ -50,6 +53,13 @@ describe('config/presets/internal/regex-managers', () => {
           depName: 'pnpm',
           replaceString:
             '# renovate: datasource=npm depName=pnpm\nENV PNPM_VERSION="7.25.1"\n',
+        },
+        {
+          currentValue: '7.25.1',
+          datasource: 'npm',
+          depName: 'pnpm',
+          replaceString:
+            "# renovate: datasource=npm depName=pnpm\nENV PNPM_VERSION='7.25.1'\n",
         },
         {
           currentValue: '3.3.1',
