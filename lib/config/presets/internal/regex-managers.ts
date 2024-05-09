@@ -24,7 +24,7 @@ export const presets: Record<string, Preset> = {
         customType: 'regex',
         fileMatch: ['(^|/)bitbucket-pipelines\\.ya?ml$'],
         matchStrings: [
-          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+.*?[A-Za-z0-9_]+?_VERSION[ =]"?(?<currentValue>.+?)"?\\s',
+          '# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s+.*\\s+[A-Za-z0-9_]+?_VERSION[ =]"?(?<currentValue>.+?)"?\\s',
         ],
       },
     ],

@@ -25,6 +25,8 @@ describe('config/presets/internal/regex-managers', () => {
 
           # renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$
           - export KUSTOMIZE_VERSION v5.2.1
+
+          - echo $NODE_VERSION
       `;
 
       const res = await extractPackageFile(
@@ -39,7 +41,7 @@ describe('config/presets/internal/regex-managers', () => {
           datasource: 'docker',
           depName: 'node',
           replaceString:
-            '# renovate: datasource=docker depName=node versioning=docker\n- export NODE_VERSION=18\n',
+            '# renovate: datasource=docker depName=node versioning=docker\n  - export NODE_VERSION=18\n',
           versioning: 'docker',
         },
         {
@@ -47,28 +49,28 @@ describe('config/presets/internal/regex-managers', () => {
           datasource: 'npm',
           depName: 'pnpm',
           replaceString:
-            '# renovate: datasource=npm depName=pnpm\n- export PNPM_VERSION="7.25.1"\n',
+            '# renovate: datasource=npm depName=pnpm\n  - export PNPM_VERSION="7.25.1"\n',
         },
         {
           currentValue: '3.3.1',
           datasource: 'npm',
           depName: 'yarn',
           replaceString:
-            '# renovate: datasource=npm depName=yarn\n- export YARN_VERSION 3.3.1\n',
+            '# renovate: datasource=npm depName=yarn\n  - export YARN_VERSION 3.3.1\n',
         },
         {
           currentValue: '1.3.1',
           datasource: 'custom.hashicorp',
           depName: 'consul',
           replaceString:
-            '# renovate: datasource=custom.hashicorp depName=consul\n- export CONSUL_VERSION 1.3.1\n',
+            '# renovate: datasource=custom.hashicorp depName=consul\n  - export CONSUL_VERSION 1.3.1\n',
         },
         {
           currentValue: 'v5.2.1',
           datasource: 'github-releases',
           depName: 'kubernetes-sigs/kustomize',
           replaceString:
-            '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$\n- export KUSTOMIZE_VERSION v5.2.1\n',
+            '# renovate: datasource=github-releases depName=kubernetes-sigs/kustomize versioning=regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$ extractVersion=^kustomize/(?<version>.+)$\n  - export KUSTOMIZE_VERSION v5.2.1\n',
           extractVersion: '^kustomize/(?<version>.+)$',
           versioning:
             'regex:^(?<compatibility>.+)/v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
