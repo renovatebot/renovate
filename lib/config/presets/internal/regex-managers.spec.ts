@@ -10,7 +10,7 @@ describe('config/presets/internal/regex-managers', () => {
 
     it(`find dependencies in file`, async () => {
       const fileContent = codeBlock`
-        - script:
+        script:
           # renovate: datasource=docker depName=node versioning=docker
           - export NODE_VERSION=18
 
