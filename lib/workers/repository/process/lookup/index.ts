@@ -287,14 +287,13 @@ export async function lookupUpdates(
       }
 
       res.currentVersion = currentVersion!;
-      const currentVersionTimestamp =
-        allVersions.find(
-          (v) =>
-            versioning.isValid(v.version) &&
-            versioning.equals(v.version, currentVersion),
-        )?.releaseTimestamp ?? null;
+      const currentVersionTimestamp = allVersions.find(
+        (v) =>
+          versioning.isValid(v.version) &&
+          versioning.equals(v.version, currentVersion),
+      )?.releaseTimestamp;
 
-      if (is.string(currentVersionTimestamp)) {
+      if (is.nonEmptyString(currentVersionTimestamp)) {
         res.currentVersionTimestamp = currentVersionTimestamp;
         if (
           config.packageRules?.some((rules) =>
