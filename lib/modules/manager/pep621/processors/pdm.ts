@@ -187,11 +187,10 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
         );
         break;
       }
-      case depTypes.buildSystemRequires: {
+      case depTypes.buildSystemRequires:
         // build requirements are not locked in the lock files, no need to update.
         // Reference: https://github.com/pdm-project/pdm/discussions/2869
         break;
-      }
       default: {
         addPackageToCMDRecord(packagesByCMD, pdmUpdateCMD, dep.packageName!);
       }
