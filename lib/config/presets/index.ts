@@ -148,6 +148,7 @@ export function parsePreset(input: string): ParsedPreset {
   const presetsPackages = [
     'compatibility',
     'config',
+    'customManagers',
     'default',
     'docker',
     'group',
@@ -157,7 +158,6 @@ export function parsePreset(input: string): ParsedPreset {
     'npm',
     'packages',
     'preview',
-    'regexManagers',
     'replacements',
     'schedule',
     'security',
@@ -168,6 +168,11 @@ export function parsePreset(input: string): ParsedPreset {
   ) {
     presetSource = 'internal';
     [repo, presetName] = str.split(':');
+  } else if (str.startsWith('regexManagers:')) {
+    // migration for old regexManagers preset
+    presetSource = 'internal';
+    repo = 'customManagers';
+    presetName = str.split(':')[1];
   } else if (str.startsWith(':')) {
     // default namespace
     presetSource = 'internal';

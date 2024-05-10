@@ -703,7 +703,7 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 
 <!-- prettier-ignore -->
 !!! tip
-    Look at our [Regex Manager Presets](./presets-regexManagers.md), they may have what you need.
+    Look at our [Custom Manager Presets](./presets-customManagers.md), they may have what you need.
 
 ### customType
 
