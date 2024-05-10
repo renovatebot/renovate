@@ -1,3 +1,4 @@
+import { mockDeep } from 'jest-mock-extended';
 import { git, mocked } from '../../../../../test/util';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
@@ -30,7 +31,7 @@ jest.mock('../../../../modules/manager/composer');
 jest.mock('../../../../modules/manager/helmv3');
 jest.mock('../../../../modules/manager/npm');
 jest.mock('../../../../modules/manager/git-submodules');
-jest.mock('../../../../modules/manager/gomod', () => mockDeep ());
+jest.mock('../../../../modules/manager/gomod', () => mockDeep());
 jest.mock('../../../../modules/manager/batect-wrapper');
 jest.mock('../../../../modules/manager/pep621');
 jest.mock('../../../../modules/manager/poetry');
