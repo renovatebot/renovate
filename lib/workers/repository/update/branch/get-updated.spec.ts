@@ -30,7 +30,7 @@ jest.mock('../../../../modules/manager/composer');
 jest.mock('../../../../modules/manager/helmv3');
 jest.mock('../../../../modules/manager/npm');
 jest.mock('../../../../modules/manager/git-submodules');
-jest.mock('../../../../modules/manager/gomod');
+jest.mock('../../../../modules/manager/gomod', () => mockDeep ());
 jest.mock('../../../../modules/manager/batect-wrapper');
 jest.mock('../../../../modules/manager/pep621');
 jest.mock('../../../../modules/manager/poetry');
