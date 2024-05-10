@@ -12,4 +12,5 @@
   "mason": {:hex, :mason, "1.1.0", "344dbbf6610d205760ec37e2848bff2aab5a2de182bb5cdaa72cc2fd19d74535", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: false]}], "hexpm", "19c205c8de0e2e5817f2250100281c58e717cb11ff1bb410bf661ee78c24e79b"},
   "hammer_backend_redis": {:hex, :hammer_backend_redis, "6.1.5", "344dbbf6610d205760ec37e2848bff2aab5a2de182bb5cdaa72cc2fd19d74535", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: false]}], "hexpm", "19c205c8de0e2e5817f2250100281c58e717cb11ff1bb410bf661ee78c24e79b"},
   "public": {:hex, :public, "1.6.14", "344dbbf6610d205760ec37e2848bff2aab5a2de182bb5cdaa72cc2fd19d74535", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: false]}], "hexpm", "19c205c8de0e2e5817f2250100281c58e717cb11ff1bb410bf661ee78c24e79b"},
+  "a_transient_dependency": {:hex, :a_transient_dependency, "1.6.14", "344dbbf6610d205760ec37e2848bff2aab5a2de182bb5cdaa72cc2fd19d74535", [:mix], [{:decimal, "~> 1.0", [hex: :decimal, repo: "hexpm", optional: false]}], "hexpm", "19c205c8de0e2e5817f2250100281c58e717cb11ff1bb410bf661ee78c24e79b"}
 }
