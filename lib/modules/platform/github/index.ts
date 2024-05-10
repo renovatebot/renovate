@@ -71,11 +71,11 @@ import {
   enableAutoMergeMutation,
   getIssuesQuery,
   repoInfoQuery,
-  vulnerabilityAlertsQuery,
 } from './graphql';
 import { GithubIssueCache, GithubIssue as Issue } from './issue';
 import { massageMarkdownLinks } from './massage-markdown-links';
 import { getPrCache, updatePrCache } from './pr';
+import { VulnerabilityAlertSchema } from './schema';
 import type {
   BranchProtection,
   CombinedBranchStatus,
@@ -1961,27 +1961,19 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     logger.debug('No vulnerability alerts enabled for repo');
     return [];
   }
-  let vulnerabilityAlerts: { node: VulnerabilityAlert }[] | undefined;
-
-  // TODO #22198
-  const gheSupportsStateFilter = semver.satisfies(
-    // semver not null safe, accepts null and undefined
-
-    platformConfig.gheVersion!,
-    '>=3.5',
-  );
-  const filterByState = !platformConfig.isGhe || gheSupportsStateFilter;
-  const query = vulnerabilityAlertsQuery(filterByState);
-
+  let vulnerabilityAlerts: VulnerabilityAlert[] | undefined;
   try {
-    vulnerabilityAlerts = await githubApi.queryRepoField<{
-      node: VulnerabilityAlert;
-    }>(query, 'vulnerabilityAlerts', {
-      variables: { owner: config.repositoryOwner, name: config.repositoryName },
-      paginate: false,
-      acceptHeader: 'application/vnd.github.vixen-preview+json',
-      readOnly: true,
-    });
+    vulnerabilityAlerts = (
+      await githubApi.getJson(
+        `/repos/${config.repositoryOwner}/${config.repositoryName}/dependabot/alerts?state=open&direction=asc&per_page=100`,
+        {
+          paginate: false,
+          headers: { accept: 'application/vnd.github+json' },
+          cacheProvider: repoCacheProvider,
+        },
+        VulnerabilityAlertSchema,
+      )
+    ).body;
   } catch (err) {
     logger.debug({ err }, 'Error retrieving vulnerability alerts');
     logger.warn(
@@ -1991,42 +1983,41 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       'Cannot access vulnerability alerts. Please ensure permissions have been granted.',
     );
   }
-  let alerts: VulnerabilityAlert[] = [];
   try {
     if (vulnerabilityAlerts?.length) {
-      alerts = vulnerabilityAlerts.map((edge) => edge.node);
       const shortAlerts: AggregatedVulnerabilities = {};
-      if (alerts.length) {
-        logger.trace({ alerts }, 'GitHub vulnerability details');
-        for (const alert of alerts) {
-          if (alert.securityVulnerability === null) {
-            // As described in the documentation, there are cases in which
-            // GitHub API responds with `"securityVulnerability": null`.
-            // But it's may be faulty, so skip processing it here.
-            continue;
-          }
-          const {
-            package: { name, ecosystem },
-            vulnerableVersionRange,
-            firstPatchedVersion,
-          } = alert.securityVulnerability;
-          const patch = firstPatchedVersion?.identifier;
-
-          const key = `${ecosystem.toLowerCase()}/${name}`;
-          const range = vulnerableVersionRange;
-          const elem = shortAlerts[key] || {};
-          elem[range] = coerceToNull(patch);
-          shortAlerts[key] = elem;
+      logger.trace(
+        { alerts: vulnerabilityAlerts },
+        'GitHub vulnerability details',
+      );
+      for (const alert of vulnerabilityAlerts) {
+        if (alert.security_vulnerability === null) {
+          // As described in the documentation, there are cases in which
+          // GitHub API responds with `"securityVulnerability": null`.
+          // But it's may be faulty, so skip processing it here.
+          continue;
         }
-        logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');
+        const {
+          package: { name, ecosystem },
+          vulnerable_version_range: vulnerableVersionRange,
+          first_patched_version: firstPatchedVersion,
+        } = alert.security_vulnerability;
+        const patch = firstPatchedVersion?.identifier;
+
+        const key = `${ecosystem.toLowerCase()}/${name}`;
+        const range = vulnerableVersionRange;
+        const elem = shortAlerts[key] || {};
+        elem[range] = coerceToNull(patch);
+        shortAlerts[key] = elem;
       }
+      logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');
     } else {
       logger.debug('No vulnerability alerts found');
     }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, 'Error processing vulnerabity alerts');
   }
-  return alerts;
+  return vulnerabilityAlerts ?? [];
 }
 
 async function pushFiles(
