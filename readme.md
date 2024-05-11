@@ -45,7 +45,7 @@ Renovate works on these platforms:
 
 Renovate is widely used in the developer community:
 
-![Renovate Matrix](../renovate/docs/usage/assets/images/matrix.png)
+![Renovate Matrix](./docs/usage/assets/images/matrix.png)
 
 ## Renovate OSS Insights
 
