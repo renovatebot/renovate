@@ -76,7 +76,7 @@ Renovate works on these platforms:
 
 Renovate is used by:
 
-![Renovate Matrix](https://app.renovatebot.com/images/matrix.png){ loading=lazy }
+![Renovate Matrix](../usage/assets/images/matrix.png){ loading=lazy }
 
 ## Ways to run Renovate
 
