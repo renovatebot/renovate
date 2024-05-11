@@ -26,6 +26,7 @@ export type SkipReason =
   | 'no-source'
   | 'non-hex-dep-types'
   | 'not-a-version'
+  | 'package-rules'
   | 'path-dependency'
   | 'placeholder-url'
   | 'unknown-engines'

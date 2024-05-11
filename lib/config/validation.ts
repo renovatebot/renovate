@@ -34,13 +34,16 @@ import {
   allowedStatusCheckStrings,
 } from './types';
 import * as managerValidator from './validation-helpers/managers';
+import * as regexOrGlobValidator from './validation-helpers/regex-glob-matchers';
 
 const options = getOptions();
 
+let optionsInitialized = false;
 let optionTypes: Record<string, RenovateOptions['type']>;
 let optionParents: Record<string, AllowedParents[]>;
 let optionGlobals: Set<string>;
 let optionInherits: Set<string>;
+let optionRegexOrGlob: Set<string>;
 
 const managerList = getManagerList();
 
@@ -102,27 +105,49 @@ function getDeprecationMessage(option: string): string | undefined {
 }
 
 function isInhertConfigOption(key: string): boolean {
-  if (!optionInherits) {
-    optionInherits = new Set();
-    for (const option of options) {
-      if (option.inheritConfigSupport) {
-        optionInherits.add(option.name);
-      }
-    }
-  }
   return optionInherits.has(key);
 }
 
+function isRegexOrGlobOption(key: string): boolean {
+  return optionRegexOrGlob.has(key);
+}
+
 function isGlobalOption(key: string): boolean {
-  if (!optionGlobals) {
-    optionGlobals = new Set();
-    for (const option of options) {
-      if (option.globalOnly) {
-        optionGlobals.add(option.name);
-      }
+  return optionGlobals.has(key);
+}
+
+function initOptions(): void {
+  if (optionsInitialized) {
+    return;
+  }
+
+  optionParents = {};
+  optionInherits = new Set();
+  optionTypes = {};
+  optionRegexOrGlob = new Set();
+  optionGlobals = new Set();
+
+  for (const option of options) {
+    optionTypes[option.name] = option.type;
+
+    if (option.parents) {
+      optionParents[option.name] = option.parents;
+    }
+
+    if (option.inheritConfigSupport) {
+      optionInherits.add(option.name);
+    }
+
+    if (option.patternMatch) {
+      optionRegexOrGlob.add(option.name);
+    }
+
+    if (option.globalOnly) {
+      optionGlobals.add(option.name);
     }
   }
-  return optionGlobals.has(key);
+
+  optionsInitialized = true;
 }
 
 export function getParentName(parentPath: string | undefined): string {
@@ -141,20 +166,8 @@ export async function validateConfig(
   isPreset?: boolean,
   parentPath?: string,
 ): Promise<ValidationResult> {
-  if (!optionTypes) {
-    optionTypes = {};
-    options.forEach((option) => {
-      optionTypes[option.name] = option.type;
-    });
-  }
-  if (!optionParents) {
-    optionParents = {};
-    options.forEach((option) => {
-      if (option.parents) {
-        optionParents[option.name] = option.parents;
-      }
-    });
-  }
+  initOptions();
+
   let errors: ValidationMessage[] = [];
   let warnings: ValidationMessage[] = [];
 
@@ -355,6 +368,14 @@ export async function validateConfig(
                 warnings = warnings.concat(subValidation.warnings);
                 errors = errors.concat(subValidation.errors);
               }
+            }
+            if (isRegexOrGlobOption(key)) {
+              errors.push(
+                ...regexOrGlobValidator.check({
+                  val,
+                  currentPath,
+                }),
+              );
             }
             if (key === 'extends') {
               for (const subval of val) {
@@ -832,7 +853,7 @@ function validateRegexManagerFields(
     });
   }
 
-  const mandatoryFields = ['depName', 'currentValue', 'datasource'];
+  const mandatoryFields = ['currentValue', 'datasource'];
   for (const field of mandatoryFields) {
     if (!hasField(customManager, field)) {
       errors.push({
@@ -840,6 +861,14 @@ function validateRegexManagerFields(
         message: `Regex Managers must contain ${field}Template configuration or regex group named ${field}`,
       });
     }
+  }
+
+  const nameFields = ['depName', 'packageName'];
+  if (!nameFields.some((field) => hasField(customManager, field))) {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `Regex Managers must contain depName or packageName regex groups or templates`,
+    });
   }
 }
 
@@ -950,6 +979,14 @@ async function validateGlobalConfig(
       }
     } else if (type === 'array') {
       if (is.array(val)) {
+        if (isRegexOrGlobOption(key)) {
+          warnings.push(
+            ...regexOrGlobValidator.check({
+              val,
+              currentPath: currentPath!,
+            }),
+          );
+        }
         if (key === 'gitNoVerify') {
           const allowedValues = ['commit', 'push'];
           for (const value of val as string[]) {

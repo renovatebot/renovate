@@ -43,6 +43,7 @@ export const presets: Record<string, Preset> = {
       'replacements:rome-to-biome',
       'replacements:semantic-release-replace-plugin-to-unscoped',
       'replacements:spectre-cli-to-spectre-console-cli',
+      'replacements:standard-version-to-commit-and-tag',
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
@@ -902,6 +903,19 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['Spectre.Cli'],
         replacementName: 'Spectre.Console.Cli',
         replacementVersion: '0.45.0',
+      },
+    ],
+  },
+  'standard-version-to-commit-and-tag': {
+    description:
+      '`standard-version` is now maintained as `commit-and-tag-version`.',
+    packageRules: [
+      {
+        matchCurrentVersion: '^9.0.0',
+        matchDatasources: ['npm'],
+        matchPackageNames: ['standard-version'],
+        replacementName: 'commit-and-tag-version',
+        replacementVersion: '9.5.0',
       },
     ],
   },
