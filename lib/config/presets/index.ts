@@ -168,11 +168,6 @@ export function parsePreset(input: string): ParsedPreset {
   ) {
     presetSource = 'internal';
     [repo, presetName] = str.split(':');
-  } else if (str.startsWith('regexManagers:')) {
-    // migration for old regexManagers preset
-    presetSource = 'internal';
-    repo = 'customManagers';
-    presetName = str.split(':')[1];
   } else if (str.startsWith(':')) {
     // default namespace
     presetSource = 'internal';
