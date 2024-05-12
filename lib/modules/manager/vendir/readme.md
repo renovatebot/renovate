@@ -18,7 +18,7 @@ directories:
   - # path is relative to the `vendir` CLI working directory
     path: config/_ytt_lib
     contents:
-      path: github.com/cloudfoundry/cf-k8s-networking # comment for review: this repo has been archived, what to do with the example?
+      path: github.com/cloudfoundry/cf-k8s-networking
       helmChart:
         # chart name (required)
         name: stable/redis
@@ -52,10 +52,10 @@ kind: Config
 directories:
   - path: config/_ytt_lib
     contents:
-      path: github.com/cloudfoundry/cf-k8s-networking # comment for review: this repo has been archived, what to do with the example?
+      path: github.com/cloudfoundry/cf-k8s-networking
       git:
         # HTTP or SSH URLs are supported (required)
-        url: https://github.com/cloudfoundry/cf-k8s-networking # comment for review: this repo has been archived, what to do with the example?
+        url: https://github.com/cloudfoundry/cf-k8s-networking
         # branch, tag, commit; origin is the name of the remote (required)
         # optional if refSelection is specified (available in v0.11.0+)
         ref: origin/master
@@ -72,7 +72,7 @@ Renovate can update explicit tags in GitHub releases in `vendir.yml` files.
 directories:
   - path: config/_ytt_lib
     contents:
-      path: github.com/cloudfoundry/cf-k8s-networking # comment for review: this repo has been archived, what to do with the example?
+      path: github.com/cloudfoundry/cf-k8s-networking
       githubRelease:
         # slug for repository (org/repo) (required)
         slug: k14s/kapp-controller
