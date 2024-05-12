@@ -1069,7 +1069,7 @@ export async function setBranchStatus({
 
 export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
-    const searchParams: Record<string, any> = {
+    const searchParams: Record<string, string> = {
       per_page: '100',
       state: 'opened',
     };
