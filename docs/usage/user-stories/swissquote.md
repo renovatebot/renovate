@@ -214,26 +214,27 @@ Some statistics:
 ### How does the scheduler work ?
 
 The scheduler is a Node.js application which handles an in-memory queue and starts Docker containers to run Renovate on.
-Our custom scheduler application regularly sends points to an InfluxDB which we then display in Grafana.
+Our custom scheduler application regularly sends data points to our InfluxDB database, which we then display in Grafana.
 
 Here is how it works:
 
 <figure markdown>
   ![Swissquote scheduler diagram](../assets/images/swissquote_stats_collection.png){ loading=lazy }
-  <figcaption>The diagram explaining how our scheduler interacts with Renovate.</figcaption>
+  <figcaption>A diagram explaining how our scheduler interacts with Renovate.</figcaption>
 </figure>
 
 All the information on the dashboard you saw above is created from three measurements:
 
-1. Queue: Every 5 minutes, we send a status of the queue size and number of jobs currently running
-1. Webhook: When receiving a webhook request, we send a point on the duration of treatment for that item
-1. Runs: After each run, we send a point on the duration, success and number of PRs created/updated/merged/closed
+1. Queue: Every 5 minutes, we send the status of the queue size and the number of jobs currently running
+1. Webhook: When receiving a webhook request, we send a data point on the duration of treatment for that item
+1. Runs: After each run, we send a data point on the run duration, success and number of PRs created/updated/merged/closed
 
-The queue is filled either by webhooks or re-queueing all repositories at regular intervals.
+The queue is filled by webhooks _or_ by re-queueing all repositories at regular intervals.
 For each repository we start a Renovate Docker image, and pipe its logs to a file.
-This allows us to run 10 workers in parallel, we could do more but decided not to hammer our GitHub instance.
+This allows us to run ten workers in parallel.
+We could technically run more workers but decided not to hammer our GitHub instance.
 
-If you wish to know more, more details can be found in a [discussion from November 2023](https://github.com/renovatebot/renovate/discussions/23105#discussioncomment-6366621).
+You can find more details in this [discussion on the Renovate repository, from November 2023](https://github.com/renovatebot/renovate/discussions/23105#discussioncomment-6366621).
 
 ## The future of Renovate at Swissquote
 
