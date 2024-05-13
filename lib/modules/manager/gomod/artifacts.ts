@@ -484,7 +484,10 @@ export async function updateArtifacts({
       );
 
       if (extraDepsNotice) {
-        artifactResult.notice = extraDepsNotice;
+        artifactResult.notice = {
+          file: goModFileName,
+          message: extraDepsNotice,
+        };
       }
 
       logger.debug('Found updated go.mod after go.sum update');
