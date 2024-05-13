@@ -82,7 +82,7 @@ export async function generateUpdate(
 
   const newPatch = versioning.getPatch(newVersion);
 
-  // istanbul ignore if
+  // istanbul ignore next
   if (
     update.newDigest &&
     currentDigest !== update.newDigest &&
