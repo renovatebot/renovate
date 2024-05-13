@@ -245,7 +245,7 @@ Read the [templates](./templates.md) section to learn more.
 
 ### Example use-case
 
-The following example shows a self-hosted Renovate preset located in a GitLab repository `renovate/presets`.
+The following example shows a self-hosted Renovate preset located in a GitLab repository called `renovate/presets`.
 
 ```json
 {
@@ -253,8 +253,8 @@ The following example shows a self-hosted Renovate preset located in a GitLab re
 }
 ```
 
-Usually you want to validate the preset before blindly using it in your Renovate configuration.
-Here you can make use of templating to validate and load the preset on branch level:
+Usually you want to validate the preset before you put it in your Renovate configuration
+Here is an example of how you can use templating to validate and load the preset on a branch level:
 
 ```javascript
 // config.js
