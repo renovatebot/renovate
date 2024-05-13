@@ -162,7 +162,7 @@
     "@opentelemetry/semantic-conventions": "1.24.0",
     "@qnighy/marshal": "0.1.3",
     "@renovatebot/kbpgp": "3.0.1",
-    "@renovatebot/osv-offline": "1.5.4",
+    "@renovatebot/osv-offline": "1.5.5",
     "@renovatebot/pep440": "3.0.20",
     "@renovatebot/ruby-semver": "3.0.23",
     "@sindresorhus/is": "4.6.0",
@@ -174,7 +174,7 @@
     "aws4": "1.12.0",
     "azure-devops-node-api": "13.0.0",
     "bunyan": "1.8.15",
-    "cacache": "18.0.2",
+    "cacache": "18.0.3",
     "cacheable-lookup": "5.0.4",
     "chalk": "4.1.2",
     "changelog-filename-regex": "2.0.1",
@@ -286,7 +286,7 @@
     "@types/js-yaml": "4.0.9",
     "@types/json-dup-key-validator": "1.0.2",
     "@types/linkify-markdown": "1.0.3",
-    "@types/lodash": "4.17.0",
+    "@types/lodash": "4.17.1",
     "@types/luxon": "3.4.2",
     "@types/markdown-it": "14.0.1",
     "@types/markdown-table": "2.0.0",
@@ -347,7 +347,7 @@
     "typescript": "5.4.5",
     "unified": "9.2.2"
   },
-  "packageManager": "pnpm@9.0.6",
+  "packageManager": "pnpm@9.1.1",
   "files": [
     "dist",
     "renovate-schema.json"

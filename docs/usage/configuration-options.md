@@ -703,7 +703,7 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 
 <!-- prettier-ignore -->
 !!! tip
-    Look at our [Regex Manager Presets](./presets-regexManagers.md), they may have what you need.
+    Look at our [Custom Manager Presets](./presets-customManagers.md), they may have what you need.
 
 ### customType
 
@@ -2060,9 +2060,12 @@ Applicable for Composer only for now.
 ## ignorePrAuthor
 
 This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
+An additional use case is for GitLab users of project or group access tokens who need to rotate them.
+
 If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
 You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
-It's recommended to revert this setting once that transition period is over and all old PRs are resolved.
+
+Setting this field to `true` in GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
 
 ## ignorePresets
 
@@ -2470,8 +2473,9 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 
 ### allowedVersions
 
-Use this - usually within a packageRule - to limit how far to upgrade a dependency.
-For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
+You can use `allowedVersions` - usually within a `packageRules` entry - to limit how far to upgrade a dependency.
+
+For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 or higher, you could set `allowedVersions` to `<= 1.5` or `< 1.6.0`:
 
 ```json
 {
@@ -2484,10 +2488,14 @@ For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or
 }
 ```
 
-The valid syntax for this will be calculated at runtime because it depends on the versioning scheme, which is itself dynamic.
+Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
 
-This field also supports Regular Expressions if they begin and end with `/`.
-For example, the following will enforce that only 3 or 4-part versions are supported, without any prefixes:
+#### Using regular expressions
+
+You can use Regular Expressions in the `allowedVersion` config.
+You must _begin_ and _end_ your Regular Expression with the `/` character!
+
+For example, this config only allows 3 or 4-part versions, without any prefixes in the version:
 
 ```json
 {
@@ -2500,8 +2508,12 @@ For example, the following will enforce that only 3 or 4-part versions are suppo
 }
 ```
 
-This field also supports a special negated regex syntax for ignoring certain versions.
-Use the syntax `!/ /` like the following:
+Again: note how the Regular Expression _begins_ and _ends_ with the `/` character.
+
+#### Ignore versions with negated regex syntax
+
+You can use a special negated regex syntax to ignore certain versions.
+You must use the `!/ /` syntax, like this:
 
 ```json
 {
