@@ -339,7 +339,7 @@
     "pretty-format": "29.7.0",
     "rimraf": "5.0.5",
     "semantic-release": "22.0.12",
-    "tar": "6.2.1",
+    "tar": "7.1.0",
     "tmp-promise": "3.0.3",
     "ts-jest": "29.1.2",
     "ts-node": "10.9.2",
