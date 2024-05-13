@@ -3492,7 +3492,6 @@ describe('workers/repository/process/lookup/index', () => {
           {
             bucket: 'major',
             newMajor: 9,
-            newMinor: null,
             newValue: '9',
             newVersion: '9',
             updateType: 'major',
@@ -3664,7 +3663,6 @@ describe('workers/repository/process/lookup/index', () => {
           {
             bucket: 'major',
             newMajor: 12,
-            newMinor: null,
             newValue: 'bookworm-slim',
             newVersion: 'bookworm',
             updateType: 'major',
