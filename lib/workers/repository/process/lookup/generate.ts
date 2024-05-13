@@ -68,8 +68,32 @@ export async function generateUpdate(
   } else {
     update.newValue = currentValue;
   }
-  update.newMajor = versioning.getMajor(newVersion)!;
-  update.newMinor = versioning.getMinor(newVersion)!;
+
+  const oldMajor = versioning.getMajor(currentVersion);
+  const newMajor = versioning.getMajor(newVersion);
+  if (is.number(newMajor)) {
+    update.newMajor = newMajor;
+  }
+
+  const oldMinor = versioning.getMinor(currentVersion);
+  const newMinor = versioning.getMinor(newVersion);
+  if (is.number(newMinor)) {
+    update.newMinor = newMinor;
+  }
+
+  const oldPatch = versioning.getPatch(currentVersion);
+  const newPatch = versioning.getPatch(newVersion);
+
+  // istanbul ignore if
+  if (
+    oldMajor === newMajor &&
+    oldMinor === newMinor &&
+    oldPatch === newPatch &&
+    update.newDigest
+  ) {
+    update.updateType = 'digest';
+  }
+
   // istanbul ignore if
   if (!update.updateType && !currentVersion) {
     logger.debug({ update }, 'Update has no currentVersion');
