@@ -11,20 +11,24 @@ For example: do _not_ call your self-hosted version something like @realrenovate
 
 Avoid using our name, logo, or branding in a way that causes people to think you are a developer of Renovate.
 
-## Allowed uses of the Renovate logo
-
-You are allowed to use our logo as:
-
-- an icon in your repository readme, that says you're using Renovate
-- part of a badge in your repository readme, that says you're using Renovate
-- an avatar image for your self-hosted version of Renovate, but give your bot a _different_ name
-
 ## Allowed uses of the Renovate name
 
 You are allowed to use the Renovate name:
 
 - to refer to the official Renovate app
-- in contexts where it's clear you are referring to your self-hosted version
+- as a nickname/shorthand, in contexts where it is clear you are referring to your self-hosted version
+
+## Allowed uses of the Renovate logo
+
+You are allowed to use our logo as:
+
+- an icon in your repository readme, that says you are using Renovate
+- part of a badge in your repository readme, that says you are using Renovate
+- an avatar image for your self-hosted version of Renovate, but give your bot a _different_ name
+
+## Allowed uses of the Renovate branding
+
+Do not use our banner images.
 
 ## We keep the rights to our logo, name, and branding
 
