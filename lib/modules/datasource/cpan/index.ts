@@ -101,7 +101,7 @@ export class CpanDatasource extends Datasource {
         result = {
           releases,
           changelogUrl: `https://metacpan.org/dist/${latestDistribution}/changes`,
-          homepage: `https://metacpan.org/pod/${packageName}`,
+          sourceUrl: `https://metacpan.org/pod/${packageName}`,
         };
       }
     }

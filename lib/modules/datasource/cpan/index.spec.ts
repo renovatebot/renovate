@@ -70,7 +70,7 @@ describe('modules/datasource/cpan/index', () => {
       });
       expect(res).toMatchObject({
         changelogUrl: 'https://metacpan.org/dist/Plack/changes',
-        homepage: 'https://metacpan.org/pod/Plack',
+        sourceUrl: 'https://metacpan.org/pod/Plack',
         registryUrl: 'https://fastapi.metacpan.org/',
         releases: expect.toBeArrayOfSize(10),
       });
