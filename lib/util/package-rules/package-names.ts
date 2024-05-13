@@ -17,18 +17,4 @@ export class PackageNameMatcher extends Matcher {
     }
     return matchRegexOrGlobList(packageName, matchPackageNames);
   }
-
-  override excludes(
-    { packageName }: PackageRuleInputConfig,
-    packageRule: PackageRule,
-  ): boolean | null {
-    const { excludePackageNames } = packageRule;
-    if (is.undefined(excludePackageNames)) {
-      return null;
-    }
-    if (!packageName) {
-      return false;
-    }
-    return matchRegexOrGlobList(packageName, excludePackageNames);
-  }
 }

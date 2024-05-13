@@ -14,13 +14,13 @@ for (const [name, value] of Object.entries(monorepoGroups.repoGroups)) {
 for (const [name, value] of Object.entries(monorepoGroups.orgGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchSourceUrlPrefixes: toArray(value),
+    matchSourceUrls: toArray(value).map((url: string) => `${url}**`),
   };
 }
 
 for (const [name, value] of Object.entries(monorepoGroups.patternGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchPackagePatterns: toArray(value),
+    matchPackageNames: toArray(value),
   };
 }
