@@ -224,9 +224,10 @@ Here is how it works:
 </figure>
 
 All the information on the dashboard you saw above is created from three measurements:
-1. Queue: Every 5 minutes, we send a status of the queue size and number of jobs currently running.
-2. Webhook: When receiving a webhook request, we send a point on the duration of treatment for that item.
-3. Runs: After each run, we send a point on the duration, success and number of PRs created/updated/merged/closed.
+
+1. Queue: Every 5 minutes, we send a status of the queue size and number of jobs currently running
+1. Webhook: When receiving a webhook request, we send a point on the duration of treatment for that item
+1. Runs: After each run, we send a point on the duration, success and number of PRs created/updated/merged/closed
 
 The queue is filled either by webhooks or re-queueing all repositories at regular intervals.
 For each repository we start a Renovate Docker image, and pipe its logs to a file.
