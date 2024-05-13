@@ -115,7 +115,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         automerge: true,
-        matchPackagePrefixes: ['@types/'],
+        matchPackageNames: ['@types/**'],
       },
     ],
   },
@@ -375,7 +375,7 @@ export const presets: Record<string, Preset> = {
     description: 'Pin all dependency versions except `peerDependencies`.',
     packageRules: [
       {
-        matchPackagePatterns: ['*'],
+        matchPackageNames: ['*'],
         rangeStrategy: 'pin',
       },
       {
@@ -412,7 +412,7 @@ export const presets: Record<string, Preset> = {
       'Pin dependency versions for `devDependencies` and retain SemVer ranges for others.',
     packageRules: [
       {
-        matchPackagePatterns: ['*'],
+        matchPackageNames: ['*'],
         rangeStrategy: 'replace',
       },
       {
@@ -451,7 +451,7 @@ export const presets: Record<string, Preset> = {
   preserveSemverRanges: {
     description:
       'Preserve (but continue to upgrade) any existing SemVer ranges.',
-    packageRules: [{ matchPackagePatterns: ['*'], rangeStrategy: 'replace' }],
+    packageRules: [{ matchPackageNames: ['*'], rangeStrategy: 'replace' }],
   },
   prHourlyLimit1: {
     description: 'Rate limit PR creation to a maximum of one per hour.',
@@ -542,7 +542,7 @@ export const presets: Record<string, Preset> = {
       'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use.',
     packageRules: [
       {
-        matchPackagePatterns: ['*'],
+        matchPackageNames: ['*'],
         semanticCommitType: 'chore',
       },
       {

@@ -1417,6 +1417,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+<<<<<<< HEAD
     name: 'sourceUrl',
     description: 'The source URL of the package.',
     type: 'string',
@@ -1434,6 +1435,21 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchSourceUrlPrefixes',
+    description:
+      'A list of source URL prefixes to match against, commonly used to group monorepos or packages from the same organization.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parents: ['packageRules'],
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+=======
+>>>>>>> b66597a89 (feat(packageRules): migrate matchers and excludes (#28602))
     name: 'matchSourceUrls',
     description: 'A list of source URLs to exact match against.',
     type: 'array',
