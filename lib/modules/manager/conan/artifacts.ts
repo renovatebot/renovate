@@ -3,7 +3,11 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
+import {
+  findLocalSiblingOrParent,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../util/fs';
 import { getGitEnvironmentVariables } from '../../../util/git/auth';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
@@ -21,20 +25,17 @@ async function conanUpdate(conanFilePath: string): Promise<void> {
 export async function updateArtifacts(
   updateArtifact: UpdateArtifact,
 ): Promise<UpdateArtifactsResult[] | null> {
-  const { packageFileName, updatedDeps, config } = updateArtifact;
+  const { packageFileName, updatedDeps, newPackageFileContent, config } =
+    updateArtifact;
 
   logger.debug(`conan.updateArtifacts(${packageFileName})`);
 
   const isLockFileMaintenance =
     config.updateType === 'lockFileMaintenance' ||
     config.isLockFileMaintenance === true;
-  if (!isLockFileMaintenance) {
-    logger.debug('conan.lock file maintenance is turned off');
-    return null;
-  }
 
-  if (!updatedDeps?.length) {
-    logger.debug('No conan.file dependencies to update');
+  if (updatedDeps.length === 0 && !isLockFileMaintenance) {
+    logger.debug('No conan.lock dependencies to update');
     return null;
   }
 
@@ -54,9 +55,10 @@ export async function updateArtifacts(
   }
 
   try {
+    await writeLocalFile(packageFileName, newPackageFileContent);
+
     logger.debug('Updating ' + lockFileName);
     await conanUpdate(packageFileName);
-    logger.debug('Returning updated' + lockFileName);
 
     const newLockFileContent = await readLocalFile(lockFileName);
     if (!newLockFileContent) {
@@ -64,6 +66,12 @@ export async function updateArtifacts(
       return null;
     }
 
+    if (existingLockFileContent === newLockFileContent) {
+      logger.debug(lockFileName + ' is unchanged');
+      return null;
+    }
+
+    logger.debug('Returning updated' + lockFileName);
     return [
       {
         file: {
