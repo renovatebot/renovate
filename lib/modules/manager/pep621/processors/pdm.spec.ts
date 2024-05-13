@@ -155,6 +155,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
           depType: depTypes.pdmDevDependencies,
         },
         { depName: 'group3/dep8', depType: depTypes.pdmDevDependencies },
+        { depName: 'dep9', depType: depTypes.buildSystemRequires },
       ];
       const result = await processor.updateArtifacts(
         {

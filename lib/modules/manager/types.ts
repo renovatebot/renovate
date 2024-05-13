@@ -195,7 +195,7 @@ export interface ArtifactError {
 export type UpdateArtifactsResult =
   | {
       file?: FileChange;
-      notice?: string;
+      notice?: ArtifactNotice;
       artifactError?: undefined;
     }
   | {

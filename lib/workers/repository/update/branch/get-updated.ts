@@ -289,8 +289,8 @@ export async function getUpdatedPackageFiles(
     contents: updatedFileContents[name],
   }));
   const updatedArtifacts: FileChange[] = [];
-  const artifactNotices: ArtifactNotice[] = [];
   const artifactErrors: ArtifactError[] = [];
+  const artifactNotices: ArtifactNotice[] = [];
   // istanbul ignore if
   if (is.nonEmptyArray(updatedPackageFiles)) {
     logger.debug('updateArtifacts for updatedPackageFiles');
@@ -314,8 +314,8 @@ export async function getUpdatedPackageFiles(
         processUpdateArtifactResults(
           results,
           updatedArtifacts,
-          artifactNotices,
           artifactErrors,
+          artifactNotices,
         );
       }
     }
@@ -350,8 +350,8 @@ export async function getUpdatedPackageFiles(
         processUpdateArtifactResults(
           results,
           updatedArtifacts,
-          artifactNotices,
           artifactErrors,
+          artifactNotices,
         );
         if (is.nonEmptyArray(results)) {
           updatedPackageFiles.push(packageFile);
@@ -385,8 +385,8 @@ export async function getUpdatedPackageFiles(
           processUpdateArtifactResults(
             results,
             updatedArtifacts,
-            artifactNotices,
             artifactErrors,
+            artifactNotices,
           );
         }
       }
@@ -439,20 +439,22 @@ async function managerUpdateArtifacts(
 function processUpdateArtifactResults(
   results: UpdateArtifactsResult[] | null,
   updatedArtifacts: FileChange[],
-  artifactNotices: ArtifactNotice[],
   artifactErrors: ArtifactError[],
+  artifactNotices: ArtifactNotice[],
 ): void {
   if (is.nonEmptyArray(results)) {
     for (const res of results) {
       const { file, notice, artifactError } = res;
-      // istanbul ignore else
       if (file) {
         updatedArtifacts.push(file);
-        if (notice) {
-          artifactNotices.push({ file: file.path, message: notice });
-        }
-      } else if (artifactError) {
+      }
+
+      if (artifactError) {
         artifactErrors.push(artifactError);
+      }
+
+      if (notice) {
+        artifactNotices.push(notice);
       }
     }
   }

@@ -147,7 +147,7 @@ export async function processBranch(
   }
   const keepUpdatedLabel = config.keepUpdatedLabel;
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
-  const artifactNoticeTopic = emojify(':warning: Notice');
+  const artifactNoticeTopic = emojify(':information_source: Artifact update notice');
   try {
     // Check if branch already existed
     const existingPr =
@@ -886,15 +886,16 @@ export async function processBranch(
         }
       } else {
         if (config.artifactNotices?.length) {
-          const content: string[] = [];
+          const contentLines: string[] = [];
           for (const notice of config.artifactNotices) {
-            content.push(`##### File name: ${notice.file}`);
-            content.push(notice.message);
+            contentLines.push(`##### File name: ${notice.file}`);
+            contentLines.push(notice.message);
           }
+          const content = contentLines.join('\n\n');
           await ensureComment({
             number: pr.number,
             topic: artifactNoticeTopic,
-            content: content.join('\n\n'),
+            content,
           });
         }
 
