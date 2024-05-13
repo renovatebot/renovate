@@ -211,9 +211,9 @@ Some statistics:
 - 239 PRs were merged last month
 - 2 SSDs died on our Renovate machine with the number of projects to clone again and again
 
-### How does the scheduler work ?
+### How does the scheduler work?
 
-The scheduler is a Node.js application which handles an in-memory queue and starts Docker containers to run Renovate on.
+The scheduler is a Node.js application that handles an in-memory queue and starts Docker containers to run Renovate on.
 Our custom scheduler application regularly sends data points to our InfluxDB database, which we then display in Grafana.
 
 Here is how it works:
@@ -226,11 +226,11 @@ Here is how it works:
 All the information on the dashboard you saw above is created from three measurements:
 
 1. Queue: Every 5 minutes, we send the status of the queue size and the number of jobs currently running
-1. Webhook: When receiving a webhook request, we send a data point on the duration of treatment for that item
-1. Runs: After each run, we send a data point on the run duration, success and number of PRs created/updated/merged/closed
+1. Webhook: When receiving a webhook request from GitHub, we send a data point on the duration of treatment for that item
+1. Runs: After each run, we send a data point on the run duration, success, and number of PRs created/updated/merged/closed
 
 The queue is filled by webhooks _or_ by re-queueing all repositories at regular intervals.
-For each repository we start a Renovate Docker image, and pipe its logs to a file.
+For each repository, we start a Renovate Docker image and pipe its logs to a file.
 This allows us to run ten workers in parallel.
 We could technically run more workers but decided not to hammer our GitHub instance.
 
