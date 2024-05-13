@@ -140,6 +140,9 @@ importers:
       detect-indent:
         specifier: 6.1.0
         version: 6.1.0
+      diff:
+        specifier: 5.2.0
+        version: 5.2.0
       editorconfig:
         specifier: 2.0.0
         version: 2.0.0
@@ -511,9 +514,6 @@ importers:
       conventional-changelog-conventionalcommits:
         specifier: 7.0.2
         version: 7.0.2
-      diff:
-        specifier: 5.2.0
-        version: 5.2.0
       emojibase-data:
         specifier: 15.3.0
         version: 15.3.0(emojibase@15.3.0)
