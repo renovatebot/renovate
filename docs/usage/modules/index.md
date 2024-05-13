@@ -2,7 +2,7 @@
 title: Modules introduction
 ---
 
-# Modules
+# Modules introduction
 
 Renovate modules, please select a subsection.
 
