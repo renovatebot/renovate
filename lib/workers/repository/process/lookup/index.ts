@@ -401,6 +401,7 @@ export async function lookupUpdates(
         const update = await generateUpdate(
           config,
           compareValue,
+          config.currentDigest,
           versioning,
           // TODO #22198
 

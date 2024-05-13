@@ -11,6 +11,7 @@ import { getUpdateType } from './update-type';
 export async function generateUpdate(
   config: LookupUpdateConfig,
   currentValue: string | undefined,
+  currentDigest: string | undefined,
   versioning: VersioningApi,
   rangeStrategy: RangeStrategy,
   currentVersion: string,
@@ -69,27 +70,25 @@ export async function generateUpdate(
     update.newValue = currentValue;
   }
 
-  const oldMajor = versioning.getMajor(currentVersion);
   const newMajor = versioning.getMajor(newVersion);
   if (is.number(newMajor)) {
     update.newMajor = newMajor;
   }
 
-  const oldMinor = versioning.getMinor(currentVersion);
   const newMinor = versioning.getMinor(newVersion);
   if (is.number(newMinor)) {
     update.newMinor = newMinor;
   }
 
-  const oldPatch = versioning.getPatch(currentVersion);
   const newPatch = versioning.getPatch(newVersion);
 
   // istanbul ignore if
   if (
-    oldMajor === newMajor &&
-    oldMinor === newMinor &&
-    oldPatch === newPatch &&
-    update.newDigest
+    update.newDigest &&
+    currentDigest !== update.newDigest &&
+    newMajor === versioning.getMajor(currentVersion) &&
+    newMinor === versioning.getMinor(currentVersion) &&
+    newPatch === versioning.getPatch(currentVersion)
   ) {
     update.updateType = 'digest';
   }
