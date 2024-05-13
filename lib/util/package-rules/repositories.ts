@@ -18,19 +18,4 @@ export class RepositoriesMatcher extends Matcher {
 
     return matchRegexOrGlobList(repository, matchRepositories);
   }
-
-  override excludes(
-    { repository }: PackageRuleInputConfig,
-    { excludeRepositories }: PackageRule,
-  ): boolean | null {
-    if (is.undefined(excludeRepositories)) {
-      return null;
-    }
-
-    if (is.undefined(repository)) {
-      return false;
-    }
-
-    return matchRegexOrGlobList(repository, excludeRepositories);
-  }
 }

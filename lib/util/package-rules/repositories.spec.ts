@@ -102,100 +102,88 @@ describe('util/package-rules/repositories', () => {
   });
 
   describe('excludes', () => {
-    it('should return null if exclude repositories is not defined', () => {
-      const result = repositoryMatcher.excludes(
-        {
-          repository: 'org/repo',
-        },
-        {
-          excludeRepositories: undefined,
-        },
-      );
-      expect(result).toBeNull();
-    });
-
     it('should return false if exclude repository is not defined', () => {
-      const result = repositoryMatcher.excludes(
+      const result = repositoryMatcher.matches(
         {
           repository: undefined,
         },
         {
-          excludeRepositories: ['org/repo'],
+          matchRepositories: ['!org/repo'],
         },
       );
       expect(result).toBeFalse();
     });
 
-    it('should return true if exclude repository matches regex pattern', () => {
-      const result = repositoryMatcher.excludes(
+    it('should return false if exclude repository matches regex pattern', () => {
+      const result = repositoryMatcher.matches(
         {
           repository: 'org/repo',
         },
         {
-          excludeRepositories: ['/^org/repo$/'],
+          matchRepositories: ['!/^org/repo$/'],
+        },
+      );
+      expect(result).toBeFalse();
+    });
+
+    it('should return true if exclude repository has invalid regex pattern', () => {
+      const result = repositoryMatcher.matches(
+        {
+          repository: 'org/repo',
+        },
+        {
+          matchRepositories: ['!/[/'],
         },
       );
       expect(result).toBeTrue();
     });
 
-    it('should return false if exclude repository has invalid regex pattern', () => {
-      const result = repositoryMatcher.excludes(
+    it('should return true if exclude repository does not match regex pattern', () => {
+      const result = repositoryMatcher.matches(
         {
           repository: 'org/repo',
         },
         {
-          excludeRepositories: ['/[/'],
-        },
-      );
-      expect(result).toBeFalse();
-    });
-
-    it('should return false if exclude repository does not match regex pattern', () => {
-      const result = repositoryMatcher.excludes(
-        {
-          repository: 'org/repo',
-        },
-        {
-          excludeRepositories: ['/^org/other-repo$/'],
-        },
-      );
-      expect(result).toBeFalse();
-    });
-
-    it('should return true if exclude repository matches minimatch pattern', () => {
-      const result = repositoryMatcher.excludes(
-        {
-          repository: 'org/repo',
-        },
-        {
-          excludeRepositories: ['org/**'],
+          matchRepositories: ['!/^org/other-repo$/'],
         },
       );
       expect(result).toBeTrue();
     });
 
-    it('should return false if exclude repository does not match minimatch pattern', () => {
-      const result = repositoryMatcher.excludes(
+    it('should return false if exclude repository matches minimatch pattern', () => {
+      const result = repositoryMatcher.matches(
         {
           repository: 'org/repo',
         },
         {
-          excludeRepositories: ['other-org/**'],
+          matchRepositories: ['!org/**'],
         },
       );
       expect(result).toBeFalse();
     });
 
-    it('should return true if exclude repository matches at least one pattern', () => {
-      const result = repositoryMatcher.excludes(
+    it('should return true if exclude repository does not match minimatch pattern', () => {
+      const result = repositoryMatcher.matches(
+        {
+          repository: 'org/repo',
+        },
+        {
+          matchRepositories: ['!other-org/**'],
+        },
+      );
+      expect(result).toBeTrue();
+    });
+
+    it('should return false if exclude repository matches at least one pattern', () => {
+      const result = repositoryMatcher.matches(
         {
           repository: 'org/repo-archived',
         },
         {
-          excludeRepositories: ['/^org/repo$/', '**/*-archived'],
+          matchRepositories: ['!/^org/repo$/', '!**/*-archived'],
         },
       );
-      expect(result).toBeTrue();
+      expect(result).toBeFalse();
     });
   });
 });

@@ -16,8 +16,6 @@ describe('config/migrations/custom/package-rules-migration', () => {
           depTypeList: [],
           addLabels: [],
           packageNames: [],
-          packagePatterns: [],
-          sourceUrlPrefixes: [],
           updateTypes: [],
         },
       ],
@@ -102,6 +100,119 @@ describe('config/migrations/custom/package-rules-migration', () => {
           {
             matchCategories: ['python'],
             addLabels: ['py'],
+          },
+        ],
+      },
+    );
+  });
+
+  it('should migrate excludePackageNames to matchPackageNames', () => {
+    expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            excludePackageNames: ['foo', 'bar'],
+            automerge: true,
+          },
+          {
+            matchPackageNames: ['baz'],
+            excludePackageNames: ['foo', 'bar'],
+            automerge: true,
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            automerge: true,
+            matchPackageNames: ['!foo', '!bar'],
+          },
+          {
+            automerge: true,
+            matchPackageNames: ['baz', '!foo', '!bar'],
+          },
+        ],
+      },
+    );
+  });
+
+  it('should migrate matchPackagePatterns to matchPackageNames', () => {
+    expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            matchPackagePatterns: ['foo', 'bar'],
+            automerge: true,
+          },
+          {
+            matchPackageNames: ['baz'],
+            matchPackagePatterns: ['foo', 'bar'],
+            automerge: true,
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            automerge: true,
+            matchPackageNames: ['/foo/', '/bar/'],
+          },
+          {
+            automerge: true,
+            matchPackageNames: ['baz', '/foo/', '/bar/'],
+          },
+        ],
+      },
+    );
+  });
+
+  it('should migrate all match/exclude at once', () => {
+    expect(PackageRulesMigration).toMigrate(
+      {
+        packageRules: [
+          {
+            matchPackagePatterns: ['pattern'],
+            matchPackagePrefixes: ['prefix1', 'prefix2'],
+            matchSourceUrlPrefixes: ['prefix1', 'prefix2'],
+            excludePackageNames: ['excluded'],
+            excludePackagePatterns: ['excludepattern'],
+            excludePackagePrefixes: ['prefix1b'],
+            matchPackageNames: ['mpn1', 'mpn2'],
+            matchDepPatterns: ['pattern'],
+            matchDepPrefixes: ['prefix1', 'prefix2'],
+            excludeDepNames: ['excluded'],
+            excludeDepPatterns: ['excludepattern'],
+            excludeDepPrefixes: ['prefix1b'],
+            matchDepNames: ['mpn1', 'mpn2'],
+            automerge: true,
+          },
+        ],
+      },
+      {
+        packageRules: [
+          {
+            matchPackageNames: [
+              'mpn1',
+              'mpn2',
+              '/pattern/',
+              'prefix1**',
+              'prefix2**',
+              '!excluded',
+              '!/excludepattern/',
+              '!prefix1b**',
+            ],
+            matchDepNames: [
+              'mpn1',
+              'mpn2',
+              '/pattern/',
+              'prefix1**',
+              'prefix2**',
+              '!excluded',
+              '!/excludepattern/',
+              '!prefix1b**',
+            ],
+            matchSourceUrls: ['prefix1**', 'prefix2**'],
+            automerge: true,
           },
         ],
       },
