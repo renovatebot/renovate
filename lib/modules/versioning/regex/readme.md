@@ -45,7 +45,7 @@ Here is another example, this time for handling Bitnami Docker images, which use
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchPackagePrefixes": ["bitnami/", "docker.io/bitnami/"],
+      "matchPackageNamees": ["bitnami/**", "docker.io/bitnami/**"],
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<compatibility>.+)(?<build>\\d+)-r(?<revision>\\d+))?$"
     }
   ]
