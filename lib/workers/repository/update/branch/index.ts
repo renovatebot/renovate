@@ -147,7 +147,9 @@ export async function processBranch(
   }
   const keepUpdatedLabel = config.keepUpdatedLabel;
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
-  const artifactNoticeTopic = emojify(':information_source: Artifact update notice');
+  const artifactNoticeTopic = emojify(
+    ':information_source: Artifact update notice',
+  );
   try {
     // Check if branch already existed
     const existingPr =
