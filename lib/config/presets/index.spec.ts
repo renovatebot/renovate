@@ -1062,6 +1062,14 @@ describe('config/presets/index', () => {
       `);
     });
 
+    it('handles renamed regexManagers presets', async () => {
+      const res = await presets.getPreset(
+        'regexManagers:dockerfileVersions',
+        {},
+      );
+      expect(res.customManagers).toHaveLength(1);
+    });
+
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();

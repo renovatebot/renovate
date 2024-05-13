@@ -1,9 +1,9 @@
 import { codeBlock } from 'common-tags';
 import { regexMatches } from '../../../../test/util';
 import { extractPackageFile } from '../../../modules/manager/custom/regex';
-import { presets } from './regex-managers';
+import { presets } from './custom-managers';
 
-describe('config/presets/internal/regex-managers', () => {
+describe('config/presets/internal/custom-managers', () => {
   describe('Update `$schema` version in biome.json', () => {
     const customManager = presets['biomeVersions'].customManagers?.[0];
 
