@@ -23,6 +23,10 @@ export class CondaDatasource extends Datasource {
 
   override readonly caching = true;
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'To get the source url we use the dev_url field from the response.';
+
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>

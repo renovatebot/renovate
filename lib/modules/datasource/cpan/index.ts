@@ -18,6 +18,14 @@ export class CpanDatasource extends Datasource {
 
   override readonly defaultVersioning = perlVersioning.id;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use the date field from the response.';
+  // override readonly sourceUrlSupport = 'package';
+  // override readonly sourceUrlNote =
+  //   'To get the source url we combine the registryUrl with the packageName.';
+  // note: maybe we can use the homepage field as sourceUrl here
+
   @cache({
     namespace: `datasource-${CpanDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => `${packageName}`,

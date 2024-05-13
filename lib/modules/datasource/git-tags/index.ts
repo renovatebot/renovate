@@ -11,6 +11,9 @@ export class GitTagsDatasource extends GitDatasource {
   }
 
   override readonly customRegistrySupport = false;
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We get `sourceUrl` by removing `.git` from the package name.';
 
   @cache({
     namespace: `datasource-${GitTagsDatasource.id}`,

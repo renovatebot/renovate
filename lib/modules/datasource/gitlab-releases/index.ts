@@ -11,6 +11,13 @@ export class GitlabReleasesDatasource extends Datasource {
 
   static readonly registryStrategy = 'first';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use the `released_at` field from the response.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'To get the source url we combine the `packageName` and `registryUrl`.';
+
   constructor() {
     super(GitlabReleasesDatasource.id);
     this.http = new GitlabHttp(GitlabReleasesDatasource.id);

@@ -19,6 +19,10 @@ export class GitlabPackagesDatasource extends Datasource {
 
   override defaultRegistryUrls = ['https://gitlab.com'];
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use the `created_at` field from the response.';
+
   constructor() {
     super(datasource);
     this.http = new GitlabHttp(datasource);

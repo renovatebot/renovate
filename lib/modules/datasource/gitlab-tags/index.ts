@@ -12,6 +12,13 @@ export class GitlabTagsDatasource extends Datasource {
 
   protected override http: GitlabHttp;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use the `created_at` field from the response.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'To get the source url we combine the `repoName` and `registryUrl`.';
+
   constructor() {
     super(GitlabTagsDatasource.id);
     this.http = new GitlabHttp(GitlabTagsDatasource.id);

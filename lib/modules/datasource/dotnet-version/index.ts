@@ -23,6 +23,10 @@ export class DotnetVersionDatasource extends Datasource {
     'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json',
   ];
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We directly use the url https://github.com/dotnet/sdk for `dotnet-sdk` and https://github.com/dotnet/runtime for the rest.';
+
   @cache({
     namespace: `datasource-${DotnetVersionDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,

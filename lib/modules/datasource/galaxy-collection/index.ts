@@ -28,6 +28,10 @@ export class GalaxyCollectionDatasource extends Datasource {
 
   override readonly defaultVersioning = pep440Versioning.id;
 
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'We extract the `sourceUrl` from the release with the `highest_version`.';
+
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,

@@ -19,6 +19,13 @@ export class GalaxyDatasource extends Datasource {
 
   override readonly defaultVersioning = pep440Versioning.id;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use the `created` field from the response.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'To get the source url we use the `user` and `repo` fields from the response and combine it with `github.com`.';
+
   @cache({
     namespace: 'datasource-galaxy',
     key: (getReleasesConfig: GetReleasesConfig) =>

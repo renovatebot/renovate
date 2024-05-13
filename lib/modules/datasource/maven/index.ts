@@ -69,6 +69,10 @@ export class MavenDatasource extends Datasource {
 
   override readonly registryStrategy: RegistryStrategy = 'merge';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use last-modified header or the lastModified field from the response';
+
   constructor(id = MavenDatasource.id) {
     super(id);
   }

@@ -16,6 +16,13 @@ export class GiteaTagsDatasource extends Datasource {
 
   private static readonly cacheNamespace: PackageCacheNamespace = `datasource-${GiteaTagsDatasource.id}`;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use the `created` field from the response.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'To get the source url we combine the repo name and `registryUrl`.';
+
   constructor() {
     super(GiteaTagsDatasource.id);
   }

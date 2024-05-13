@@ -81,6 +81,13 @@ export class DockerDatasource extends Datasource {
 
   override readonly defaultConfig = defaultConfig;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use the `tag_last_pushed` field from the response.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'It looks for the metadata of the **latest stable** image found on the Docker registry and uses the value of the label `org.opencontainers.image.source` and `org.label-schema.vcs-url` as the `sourceUrl`.';
+
   constructor() {
     super(DockerDatasource.id);
   }

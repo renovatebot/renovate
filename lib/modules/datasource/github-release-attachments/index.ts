@@ -38,6 +38,13 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
 
   override http: GithubHttp;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use the `releaseTimestamp` field from the response.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'To get the source url we combine the `packageName` and `registryUrl`.';
+
   constructor() {
     super(GithubReleaseAttachmentsDatasource.id);
     this.http = new GithubHttp(GithubReleaseAttachmentsDatasource.id);

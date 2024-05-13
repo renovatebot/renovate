@@ -21,6 +21,9 @@ export class AzureBicepResourceDatasource extends Datasource {
 
   override readonly defaultVersioning = azureRestApiVersioningApi.id;
 
+  // releaseTimestampSupport: false // maybe we can use the versionName as releaseDate
+  // sourceUrlNote: I thought we could use the changelog url, but the url does not point to any source repo of sorts and only serves the change logs
+
   constructor() {
     super(AzureBicepResourceDatasource.id);
   }

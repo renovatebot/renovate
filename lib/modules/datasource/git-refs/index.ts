@@ -17,6 +17,10 @@ export class GitRefsDatasource extends GitDatasource {
 
   override readonly customRegistrySupport = false;
 
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We get `sourceUrl` by removing `.git` from the package name.';
+
   @cache({
     namespace: `datasource-${GitRefsDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
