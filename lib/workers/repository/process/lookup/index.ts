@@ -401,7 +401,6 @@ export async function lookupUpdates(
         const update = await generateUpdate(
           config,
           compareValue,
-          config.currentDigest,
           versioning,
           // TODO #22198
 
@@ -410,6 +409,16 @@ export async function lookupUpdates(
           bucket,
           release,
         );
+
+        // #29034
+        if (
+          config.manager === 'gomod' &&
+          compareValue?.startsWith('v0.0.0-') &&
+          config.currentDigest !== update.newDigest
+        ) {
+          update.updateType = 'digest';
+        }
+
         if (pendingChecks) {
           update.pendingChecks = pendingChecks;
         }
