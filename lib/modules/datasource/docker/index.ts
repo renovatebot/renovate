@@ -857,22 +857,43 @@ export class DockerDatasource extends Datasource {
 
         if (architecture && manifestResponse) {
           const parse = ManifestJson.safeParse(manifestResponse.body);
-          const manifestList = parse.success
-            ? parse.data
-            : /* istanbul ignore next: hard to test */ null;
-          if (
-            manifestList &&
-            (manifestList.mediaType ===
-              'application/vnd.docker.distribution.manifest.list.v2+json' ||
+          /* istanbul ignore else: hard to test */
+          if (parse.success) {
+            const manifestList = parse.data;
+            if (
               manifestList.mediaType ===
-                'application/vnd.oci.image.index.v1+json')
-          ) {
-            for (const manifest of manifestList.manifests) {
-              if (manifest.platform?.architecture === architecture) {
-                digest = manifest.digest;
-                break;
+                'application/vnd.docker.distribution.manifest.list.v2+json' ||
+              manifestList.mediaType ===
+                'application/vnd.oci.image.index.v1+json'
+            ) {
+              for (const manifest of manifestList.manifests) {
+                if (manifest.platform?.architecture === architecture) {
+                  digest = manifest.digest;
+                  break;
+                }
               }
+              // TODO: return null if no matching architecture digest found
+              // https://github.com/renovatebot/renovate/discussions/22639
+            } else if (
+              hasKey('docker-content-digest', manifestResponse.headers)
+            ) {
+              // TODO: return null if no matching architecture, requires to fetch the config manifest
+              // https://github.com/renovatebot/renovate/discussions/22639
+              digest = manifestResponse.headers[
+                'docker-content-digest'
+              ] as string;
             }
+          } else {
+            logger.debug(
+              {
+                registryHost,
+                dockerRepository,
+                newTag,
+                body: manifestResponse.body,
+                headers: manifestResponse.headers,
+              },
+              'Failed to parse manifest response',
+            );
           }
         }
 
