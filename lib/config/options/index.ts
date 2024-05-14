@@ -73,6 +73,7 @@ const options: RenovateOptions[] = [
     description:
       'If set, Renovate will query this API for Merge Confidence data.',
     type: 'string',
+    default: 'https://developer.mend.io/',
     advancedUse: true,
     globalOnly: true,
   },

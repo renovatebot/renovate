@@ -233,12 +233,10 @@ export async function initMergeConfidence(): Promise<void> {
 
 function getApiBaseUrl(): string {
   const defaultBaseUrl = 'https://developer.mend.io/';
-  const baseFromEnv = GlobalConfig.get('mergeConfidenceEndpoint');
-
-  if (is.nullOrUndefined(baseFromEnv)) {
-    logger.trace('using default merge confidence API base URL');
-    return defaultBaseUrl;
-  }
+  const baseFromEnv = GlobalConfig.get(
+    'mergeConfidenceEndpoint',
+    defaultBaseUrl,
+  );
 
   try {
     const parsedBaseUrl = new URL(baseFromEnv).toString();

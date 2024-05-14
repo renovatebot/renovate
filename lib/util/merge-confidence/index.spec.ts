@@ -310,9 +310,6 @@ describe('util/merge-confidence/index', () => {
           .reply(200);
 
         await expect(initMergeConfidence()).toResolve();
-        expect(logger.trace).toHaveBeenCalledWith(
-          'using default merge confidence API base URL',
-        );
         expect(logger.debug).toHaveBeenCalledWith(
           {
             supportedDatasources: [

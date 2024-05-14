@@ -757,7 +757,7 @@ If left as default (null), a random short ID will be selected.
 
 ## mergeConfidenceEndpoint
 
-If set, Renovate will query this API for Merge Confidence data.
+If set, Renovate will retrieve Merge Confidence data by querying this API. Otherwise, it will use the default URL, which is <https://developer.mend.io/>.
 
 If you use the Mend Renovate Enterprise Edition (Renovate EE) and:
 
