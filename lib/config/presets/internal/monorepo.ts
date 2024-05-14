@@ -38,6 +38,7 @@ const repoGroups = {
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
   'aspnet-health-checks':
     'https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks',
+  astro: 'https://github.com/withastro/astro',
   'automapper-dotnet': [
     'https://github.com/AutoMapper/AutoMapper',
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
@@ -276,8 +277,10 @@ const repoGroups = {
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
+  eslint: 'https://github.com/eslint/eslint',
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
+  'eslint-stylistic': 'https://github.com/eslint-stylistic/eslint-stylistic',
   expo: 'https://github.com/expo/expo',
   'fabric-chaincode-node':
     'https://github.com/hyperledger/fabric-chaincode-node',
@@ -338,6 +341,7 @@ const repoGroups = {
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
   kroki: 'https://github.com/yuzutech/kroki',
+  ktor: 'https://github.com/ktorio/ktor',
   lamar: 'https://github.com/JasperFx/lamar',
   lerna: 'https://github.com/lerna/lerna',
   lexical: 'https://github.com/facebook/lexical',
@@ -516,6 +520,7 @@ const repoGroups = {
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
   vuepress: 'https://github.com/vuejs/vuepress',
+  weasel: 'https://github.com/JasperFx/weasel',
   'web3-react': 'https://github.com/Uniswap/web3-react',
   webdriverio: 'https://github.com/webdriverio/webdriverio',
   wolverine: 'https://github.com/jasperfx/wolverine',

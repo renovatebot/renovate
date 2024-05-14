@@ -33,6 +33,9 @@ export class GlobalConfig {
     'platform',
     'endpoint',
     'httpCacheTtlDays',
+    'autodiscoverRepoSort',
+    'autodiscoverRepoOrder',
+    'userAgent',
   ];
 
   private static config: RepoGlobalConfig = {};

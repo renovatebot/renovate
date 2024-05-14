@@ -543,6 +543,42 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('returns if branch does not exist and in silent mode', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      GlobalConfig.set({ ...adminConfig });
+      config.mode = 'silent';
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'needs-approval',
+      });
+    });
+
+    it('returns if branch needs dependencyDashboardApproval', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      scm.branchExists.mockResolvedValue(false);
+      GlobalConfig.set({ ...adminConfig });
+      config.dependencyDashboardApproval = true;
+      expect(await branchWorker.processBranch(config)).toEqual({
+        branchExists: false,
+        prNo: undefined,
+        result: 'needs-approval',
+      });
+    });
+
     it('returns if pr creation limit exceeded and branch exists', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,
