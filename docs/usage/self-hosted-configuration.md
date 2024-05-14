@@ -774,7 +774,7 @@ This feature is in private beta.
 ## mergeConfidenceSupportedDatasources
 
 If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
-Otherwise, it falls back to the default value.
+Otherwise, it queries all the supported datasources (check default value).
 
 Example:
 
