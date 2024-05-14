@@ -18,6 +18,15 @@ import {
 describe('util/merge-confidence/index', () => {
   const apiBaseUrl = 'https://www.baseurl.com/';
   const defaultApiBaseUrl = 'https://developer.mend.io/';
+  const supportedDatasources = [
+    'go',
+    'maven',
+    'npm',
+    'nuget',
+    'packagist',
+    'pypi',
+    'rubygems',
+  ];
 
   describe('isActiveConfidenceLevel()', () => {
     it('returns false if null', () => {
@@ -426,9 +435,9 @@ describe('util/merge-confidence/index', () => {
 
         it.each([
           {
-            name: 'it should do nothing when the input is undefined',
+            name: 'it should do return default value when the input is undefined',
             datasources: undefined,
-            expected: undefined,
+            expected: supportedDatasources,
           },
           {
             name: 'it should successfully parse the given datasource list',
@@ -438,17 +447,17 @@ describe('util/merge-confidence/index', () => {
           {
             name: 'it should gracefully handle invalid json',
             datasources: `{`,
-            expected: undefined,
+            expected: supportedDatasources,
           },
           {
             name: 'it should discard non-array JSON input',
             datasources: `{}`,
-            expected: undefined,
+            expected: supportedDatasources,
           },
           {
             name: 'it should discard non-string array JSON input',
             datasources: `[1,2]`,
-            expected: undefined,
+            expected: supportedDatasources,
           },
         ])(`$name`, ({ datasources, expected }) => {
           GlobalConfig.set({

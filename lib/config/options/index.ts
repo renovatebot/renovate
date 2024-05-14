@@ -90,6 +90,7 @@ const options: RenovateOptions[] = [
       'packagist',
       'rubygems',
     ],
+    default: ['go', 'maven', 'npm', 'nuget', 'packagist', 'pypi', 'rubygems'],
     type: 'array',
     subType: 'string',
     globalOnly: true,

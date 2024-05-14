@@ -28,29 +28,25 @@ export const confidenceLevels: Record<MergeConfidence, number> = {
 export function initConfig(): void {
   apiBaseUrl = getApiBaseUrl();
   token = getApiToken();
-  supportedDatasources =
-    parseSupportedDatasourceString() ?? presetSupportedDatasources;
+  supportedDatasources = parseSupportedDatasourceString();
 
   if (!is.nullOrUndefined(token)) {
     logger.debug(`Merge confidence token found for ${apiBaseUrl}`);
   }
 }
 
-export function parseSupportedDatasourceString(): string[] | undefined {
+export function parseSupportedDatasourceString(): string[] {
   const supportedDatasources = GlobalConfig.get(
     'mergeConfidenceSupportedDatasources',
+    presetSupportedDatasources,
   );
-
-  if (is.nullOrUndefined(supportedDatasources)) {
-    return undefined;
-  }
 
   if (!is.array(supportedDatasources, is.string)) {
     logger.warn(
       { supportedDatasources },
-      `Expected a string array but got ${typeof supportedDatasources}`,
+      `Expected a string array but got ${typeof supportedDatasources} - using default value instead`,
     );
-    return undefined;
+    return presetSupportedDatasources;
   }
 
   return supportedDatasources;
