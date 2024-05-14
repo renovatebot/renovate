@@ -145,7 +145,10 @@
   ],
   ImagePolicy: ['image.toolkit.fluxcd.io/v1beta2'],
   ImageRepository: ['image.toolkit.fluxcd.io/v1beta2'],
-  ImageUpdateAutomation: ['image.toolkit.fluxcd.io/v1beta2'],
+  ImageUpdateAutomation: [
+    'image.toolkit.fluxcd.io/v1beta1',
+    'image.toolkit.fluxcd.io/v1beta2'
+    ],
   OCIRepository: ['source.toolkit.fluxcd.io/v1beta2'],
   Provider: [
     'notification.toolkit.fluxcd.io/v1beta2',
