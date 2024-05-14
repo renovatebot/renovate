@@ -155,7 +155,7 @@ export interface RepoGlobalConfig {
   includeMirrors?: boolean;
   localDir?: string;
   mergeConfidenceEndpoint?: string;
-  mergeConfidenceSupportedDatasources?: string[];
+  mergeConfidenceDatasources?: string[];
   migratePresets?: Record<string, string>;
   platform?: PlatformId;
   presetCachePersistence?: boolean;

@@ -461,7 +461,7 @@ describe('util/merge-confidence/index', () => {
           },
         ])(`$name`, ({ datasources, expected }) => {
           GlobalConfig.set({
-            mergeConfidenceSupportedDatasources: datasources,
+            mergeConfidenceDatasources: datasources,
           });
           expect(parseSupportedDatasourceString()).toStrictEqual(expected);
         });

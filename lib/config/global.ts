@@ -36,7 +36,7 @@ export class GlobalConfig {
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
     'mergeConfidenceEndpoint',
-    'mergeConfidenceSupportedDatasources',
+    'mergeConfidenceDatasources',
     'userAgent',
   ];
 

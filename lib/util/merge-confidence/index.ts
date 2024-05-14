@@ -37,7 +37,7 @@ export function initConfig(): void {
 
 export function parseSupportedDatasourceString(): string[] {
   const supportedDatasources = GlobalConfig.get(
-    'mergeConfidenceSupportedDatasources',
+    'mergeConfidenceDatasources',
     presetSupportedDatasources,
   );
 

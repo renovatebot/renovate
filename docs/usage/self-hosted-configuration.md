@@ -755,6 +755,19 @@ If left as default (null), a random short ID will be selected.
 
 ## logFileLevel
 
+## mergeConfidenceDatasources
+
+If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
+Otherwise, it queries all the supported datasources (check default value).
+
+Example:
+
+```js
+modules.exports = {
+  mergeConfidenceDatasources: ['npm'],
+};
+```
+
 ## mergeConfidenceEndpoint
 
 If set, Renovate will retrieve Merge Confidence data by querying this API.
@@ -770,19 +783,6 @@ Then you must set this variable at the _server_ and the _workers_.
 But if you have specified the token as a [`matchConfidence`](configuration-options.md#matchconfidence) `hostRule`, you only need to set this variable at the _workers_.
 
 This feature is in private beta.
-
-## mergeConfidenceSupportedDatasources
-
-If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
-Otherwise, it queries all the supported datasources (check default value).
-
-Example:
-
-```js
-modules.exports = {
-  mergeConfidenceSupportedDatasources: ['npm'],
-};
-```
 
 ## migratePresets
 

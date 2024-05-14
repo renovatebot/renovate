@@ -278,7 +278,7 @@ describe('workers/global/config/parse/env', () => {
       const config = await env.getConfig(envParam);
       expect(config).toMatchObject({
         mergeConfidenceEndpoint: 'some-url',
-        mergeConfidenceSupportedDatasources: ['docker'],
+        mergeConfidenceDatasources: ['docker'],
         autodiscoverRepoSort: 'alpha',
         autodiscoverRepoOrder: 'desc',
       });
