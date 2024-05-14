@@ -407,8 +407,8 @@ importers:
         specifier: 1.0.2
         version: 1.0.2
       '@types/diff':
-        specifier: 5.2.0
-        version: 5.2.0
+        specifier: 5.2.1
+        version: 5.2.1
       '@types/eslint':
         specifier: 8.56.10
         version: 8.56.10
@@ -2032,8 +2032,8 @@ packages:
   '@types/conventional-commits-detector@1.0.2':
     resolution: {integrity: sha512-Yzo8dW+b2vziyDD9WNY+IPq4rcZyguHNuyNZC3wv0igpVFRd7VWHufl+vRQaCzDR2ftPTB1VPwbvXxWVpzBo+g==}
 
-  '@types/diff@5.2.0':
-    resolution: {integrity: sha512-pjJH+02ukgJRW0mViDUA1cdC+wzSgRu0e4cPuogPLAw0i66y62iMP0ZlXoJAmoXrKRZnF3pMDwyKZsgNVlMX4A==}
+  '@types/diff@5.2.1':
+    resolution: {integrity: sha512-uxpcuwWJGhe2AR1g8hD9F5OYGCqjqWnBUQFD8gMZsDbv8oPHzxJF6iMO6n8Tk0AdzlxoaaoQhOYlIg/PukVU8g==}
 
   '@types/emscripten@1.39.11':
     resolution: {integrity: sha512-dOeX2BeNA7j6BTEqJQL3ut0bRCfsyQMd5i4FT8JfHfYhAOuJPCGh0dQFbxVJxUyQ+75x6enhDdndGb624/QszA==}
@@ -8704,7 +8704,7 @@ snapshots:
 
   '@types/conventional-commits-detector@1.0.2': {}
 
-  '@types/diff@5.2.0': {}
+  '@types/diff@5.2.1': {}
 
   '@types/emscripten@1.39.11': {}
 
