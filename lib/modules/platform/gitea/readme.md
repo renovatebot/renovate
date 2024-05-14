@@ -48,5 +48,5 @@ Repositories are ignored when one of the following conditions is met:
 - Pull requests are disabled for that repository
 
 You can change the default server-side sort method and order for autodiscover API.
-Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverRepoSort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverRepoOrder).
+Set those via [`autodiscoverRepoSort`](../../../self-hosted-configuration.md#autodiscoverreposort) and [`autodiscoverRepoOrder`](../../../self-hosted-configuration.md#autodiscoverrepoorder).
 Read the [Gitea swagger docs](https://try.gitea.io/api/swagger#/repository/repoSearch) for more details.
