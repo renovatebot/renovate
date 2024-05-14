@@ -292,7 +292,14 @@ export class DockerDatasource extends Datasource {
     const parsed = ManifestJson.safeParse(manifestResponse.body);
     if (!parsed.success) {
       logger.debug(
-        { registry, dockerRepository, tag, err: parsed.error },
+        {
+          registry,
+          dockerRepository,
+          tag,
+          body: manifestResponse.body,
+          headers: manifestResponse.headers,
+          err: parsed.error,
+        },
         'Invalid manifest response',
       );
       return null;
@@ -856,10 +863,10 @@ export class DockerDatasource extends Datasource {
         );
 
         if (architecture && manifestResponse) {
-          const parse = ManifestJson.safeParse(manifestResponse.body);
+          const parsed = ManifestJson.safeParse(manifestResponse.body);
           /* istanbul ignore else: hard to test */
-          if (parse.success) {
-            const manifestList = parse.data;
+          if (parsed.success) {
+            const manifestList = parsed.data;
             if (
               manifestList.mediaType ===
                 'application/vnd.docker.distribution.manifest.list.v2+json' ||
@@ -891,6 +898,7 @@ export class DockerDatasource extends Datasource {
                 newTag,
                 body: manifestResponse.body,
                 headers: manifestResponse.headers,
+                err: parsed.error,
               },
               'Failed to parse manifest response',
             );
