@@ -444,7 +444,6 @@ describe('modules/platform/azure/azure-helper', () => {
         description: `team2 ${index + 1}`,
       }));
       const allTeams = team1.concat(team2);
-
       azureApi.coreApi.mockImplementationOnce(
         () =>
           ({
