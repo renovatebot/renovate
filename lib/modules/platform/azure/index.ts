@@ -55,7 +55,6 @@ import {
   mapMergeStrategy,
   max4000Chars,
 } from './util';
-import { getAllProjectTeams } from './azure-helper';
 
 interface Config {
   repoForceRebase: boolean;
@@ -856,7 +855,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const validReviewers = new Set<string>();
 
   // TODO #22198
-  const teams = await getAllProjectTeams(repo.project!.id!);
+  const teams = await azureHelper.getAllProjectTeams(repo.project!.id!);
   const members = await Promise.all(
     teams.map(
       async (t) =>

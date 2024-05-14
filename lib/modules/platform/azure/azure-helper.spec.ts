@@ -444,7 +444,6 @@ describe('modules/platform/azure/azure-helper', () => {
         description: `team2 ${index + 1}`,
       }));
       const allTeams = team1.concat(team2);
-
       azureApi.coreApi.mockImplementationOnce(
         () =>
           ({
@@ -456,7 +455,6 @@ describe('modules/platform/azure/azure-helper', () => {
       );
       const res = await azureHelper.getAllProjectTeams('projectId');
       expect(res).toEqual(allTeams);
-      console.log(allTeams);
     });
   });
 });
