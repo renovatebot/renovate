@@ -23,6 +23,26 @@ const options: RenovateOptions[] = [
     patternMatch: true,
   },
   {
+    name: 'autodiscoverRepoOrder',
+    description:
+      'The order method for autodiscover server side repository search.',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+    allowedValues: ['asc', 'desc'],
+    supportedPlatforms: ['gitea'],
+  },
+  {
+    name: 'autodiscoverRepoSort',
+    description:
+      'The sort method for autodiscover server side repository search.',
+    type: 'string',
+    default: null,
+    globalOnly: true,
+    allowedValues: ['alpha', 'created', 'updated', 'size', 'id'],
+    supportedPlatforms: ['gitea'],
+  },
+  {
     name: 'allowedEnv',
     description:
       'List of allowed patterns for environment variable names in repository env config.',
@@ -473,7 +493,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.4',
+    default: 'ghcr.io/containerbase/sidecar:10.6.9',
     globalOnly: true,
   },
   {
@@ -639,7 +659,7 @@ const options: RenovateOptions[] = [
   {
     name: 'inheritConfigStrict',
     description:
-      'If `true`, any `inheritedConfig` fetch errror will result in an aborted run.',
+      'If `true`, any `inheritedConfig` fetch error will result in an aborted run.',
     type: 'boolean',
     default: false,
     globalOnly: true,
@@ -1256,19 +1276,6 @@ const options: RenovateOptions[] = [
     patternMatch: true,
   },
   {
-    name: 'excludeRepositories',
-    description:
-      'List of repositories to exclude (e.g. `["**/*-archived"]`). Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-  },
-  {
     name: 'matchBaseBranches',
     description:
       'List of strings containing exact matches (e.g. `["main"]`) and/or regex expressions (e.g. `["/^release/.*/"]`). Valid only within a `packageRules` object.',
@@ -1334,19 +1341,6 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'excludePackageNames',
-    description:
-      'Package names to exclude. Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-  },
-  {
     name: 'matchDepNames',
     description:
       'Dep names to match. Valid only within a `packageRules` object.',
@@ -1358,132 +1352,6 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
-  },
-  {
-    name: 'excludeDepNames',
-    description:
-      'Dep names to exclude. Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-    advancedUse: true,
-  },
-  {
-    name: 'matchPackagePrefixes',
-    description:
-      'Package name prefixes to match. Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'excludePackagePrefixes',
-    description:
-      'Package name prefixes to exclude. Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'matchDepPrefixes',
-    description:
-      'Dep names prefixes to match. Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-    advancedUse: true,
-  },
-  {
-    name: 'excludeDepPrefixes',
-    description:
-      'Dep names prefixes to exclude. Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-    advancedUse: true,
-  },
-  {
-    name: 'matchPackagePatterns',
-    description:
-      'Package name patterns to match. Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    format: 'regex',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'excludePackagePatterns',
-    description:
-      'Package name patterns to exclude. Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    format: 'regex',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'matchDepPatterns',
-    description:
-      'Dep name patterns to match. Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    format: 'regex',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-    advancedUse: true,
-  },
-  {
-    name: 'excludeDepPatterns',
-    description:
-      'Dep name patterns to exclude. Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    format: 'regex',
-    allowString: true,
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-    advancedUse: true,
   },
   {
     name: 'matchCurrentValue',
@@ -1512,19 +1380,6 @@ const options: RenovateOptions[] = [
     description:
       'A regex to match against the raw `newValue` string of a dependency. Valid only within a `packageRules` object.',
     type: 'string',
-    stage: 'package',
-    parents: ['packageRules'],
-    mergeable: true,
-    cli: false,
-    env: false,
-  },
-  {
-    name: 'matchSourceUrlPrefixes',
-    description:
-      'A list of source URL prefixes to match against, commonly used to group monorepos or packages from the same organization.',
-    type: 'array',
-    subType: 'string',
-    allowString: true,
     stage: 'package',
     parents: ['packageRules'],
     mergeable: true,

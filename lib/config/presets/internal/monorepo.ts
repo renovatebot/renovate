@@ -277,6 +277,7 @@ const repoGroups = {
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
+  eslint: 'https://github.com/eslint/eslint',
   'eslint-config-globex':
     'https://github.com/GlobexDesignsInc/eslint-config-globex',
   'eslint-stylistic': 'https://github.com/eslint-stylistic/eslint-stylistic',
@@ -340,6 +341,7 @@ const repoGroups = {
   junit5: 'https://github.com/junit-team/junit5',
   kotlin: 'https://github.com/JetBrains/kotlin',
   kroki: 'https://github.com/yuzutech/kroki',
+  ktor: 'https://github.com/ktorio/ktor',
   lamar: 'https://github.com/JasperFx/lamar',
   lerna: 'https://github.com/lerna/lerna',
   lexical: 'https://github.com/facebook/lexical',
@@ -584,13 +586,13 @@ for (const [name, value] of Object.entries(repoGroups)) {
 for (const [name, value] of Object.entries(orgGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchSourceUrlPrefixes: toArray(value),
+    matchSourceUrls: toArray(value).map((prefix) => `${prefix}**`),
   };
 }
 
 for (const [name, value] of Object.entries(patternGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchPackagePatterns: toArray(value),
+    matchPackageNames: toArray(value).map((pattern) => `/${pattern}/`),
   };
 }

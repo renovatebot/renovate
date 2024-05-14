@@ -19,42 +19,14 @@ We will try to keep breakage to a minimum, but make no guarantees that an experi
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.
 For more information see [the OpenTelemetry docs](opentelemetry.md).
 
-## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
+## `RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK`
 
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
+If set to any value, Renovate will skip its default artifacts filter check in the Maven datasource.
+Skipping the check will speed things up, but may result in versions being returned which don't properly exist on the server.
 
-The order method for autodiscover server side repository search.
+## `RENOVATE_PAGINATE_ALL`
 
-> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `asc`
-- `desc`
-
-Default value: `asc`.
-
-## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
-
-<!-- prettier-ignore -->
-!!! note
-    For the Forgejo and Gitea platform only.
-
-The sort method for autodiscover server side repository search.
-
-> If multiple `autodiscoverTopics` are used resulting order will be per topic not global.
-
-Allowed values:
-
-- `alpha`
-- `created`
-- `updated`
-- `size`
-- `id`
-
-Default value: `alpha`.
+If set to any value, Renovate will always paginate requests to GitHub fully, instead of stopping after 10 pages.
 
 ## `RENOVATE_X_DELETE_CONFIG_FILE`
 

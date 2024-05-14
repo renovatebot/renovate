@@ -34,6 +34,8 @@ export class GlobalConfig {
     'endpoint',
     'experimentalFlags',
     'httpCacheTtlDays',
+    'autodiscoverRepoSort',
+    'autodiscoverRepoOrder',
     'userAgent',
   ];
 

@@ -3155,6 +3155,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '1.3.0',
+        currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
         fixedVersion: '1.3.0',
         isSingleVersion: true,
         registryUrl: 'https://registry.npmjs.org',
@@ -3195,6 +3196,7 @@ describe('workers/repository/process/lookup/index', () => {
       ).unwrapOrThrow();
       expect(res).toEqual({
         currentVersion: '1.3.0',
+        currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
         fixedVersion: '1.3.0',
         isSingleVersion: true,
         registryUrl: 'https://registry.npmjs.org',
@@ -3247,6 +3249,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '1.3.0',
+        currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
         deprecationMessage: codeBlock`
         On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`q3\` has the following deprecation notice:
 
@@ -3949,7 +3952,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = NpmDatasource.id;
       config.packageRules = [
         {
-          matchSourceUrlPrefixes: ['https://github.com/kriskowal/q'],
+          matchSourceUrls: ['https://github.com/kriskowal/**'],
           allowedVersions: '< 1.4.0',
         },
       ];
@@ -4039,14 +4042,15 @@ describe('workers/repository/process/lookup/index', () => {
           allowedVersions: '< 19.0.0',
         },
       ];
+      const releaseTimestamp = new Date(
+        Date.now() - 25 * 60 * 60 * 1000,
+      ).toISOString();
       getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '17.0.0',
             // a day old release
-            releaseTimestamp: new Date(
-              Date.now() - 25 * 60 * 60 * 1000,
-            ).toISOString(),
+            releaseTimestamp,
           },
           {
             version: '18.0.0',
@@ -4063,6 +4067,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '17.0.0',
+        currentVersionTimestamp: releaseTimestamp,
         fixedVersion: '17.0.0',
         isSingleVersion: true,
         registryUrl: 'https://index.docker.io',
@@ -4078,7 +4083,6 @@ describe('workers/repository/process/lookup/index', () => {
         ],
         versioning: 'docker',
         warnings: [],
-        currentVersionTimestamp: undefined,
       });
     });
 

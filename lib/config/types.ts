@@ -2,7 +2,8 @@ import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
 import type { LogLevelRemap } from '../logger/types';
 import type { CustomManager } from '../modules/manager/custom/types';
-import type { HostRule } from '../types';
+import type { RepoSortMethod, SortMethod } from '../modules/platform/types';
+import type { HostRule, SkipReason } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 import type { MergeConfidence } from '../util/merge-confidence/types';
 
@@ -160,6 +161,8 @@ export interface RepoGlobalConfig {
   privateKeyOld?: string;
   experimentalFlags?: string[];
   httpCacheTtlDays?: number;
+  autodiscoverRepoSort?: RepoSortMethod;
+  autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
 }
 
@@ -353,13 +356,6 @@ export interface PackageRule
     UpdateConfig,
     Record<string, unknown> {
   description?: string | string[];
-  excludeDepNames?: string[];
-  excludeDepPatterns?: string[];
-  excludeDepPrefixes?: string[];
-  excludePackageNames?: string[];
-  excludePackagePatterns?: string[];
-  excludePackagePrefixes?: string[];
-  excludeRepositories?: string[];
   isVulnerabilityAlert?: boolean;
   matchBaseBranches?: string[];
   matchCategories?: string[];
@@ -369,17 +365,12 @@ export interface PackageRule
   matchCurrentVersion?: string;
   matchDatasources?: string[];
   matchDepNames?: string[];
-  matchDepPatterns?: string[];
-  matchDepPrefixes?: string[];
   matchDepTypes?: string[];
   matchFileNames?: string[];
   matchManagers?: string[];
   matchNewValue?: string;
   matchPackageNames?: string[];
-  matchPackagePatterns?: string[];
-  matchPackagePrefixes?: string[];
   matchRepositories?: string[];
-  matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
   registryUrls?: string[] | null;
@@ -542,6 +533,8 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   releaseTimestamp?: string | null;
   repository?: string;
   currentVersionTimestamp?: string;
+  enabled?: boolean;
+  skipReason?: SkipReason;
 }
 
 export interface ConfigMigration {

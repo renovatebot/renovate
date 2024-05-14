@@ -148,6 +148,14 @@ Available [Renovate distributions](./getting-started/running.md#available-distri
 
 You can self-host Dependabot on other platforms than GitHub but none are officially supported.
 
+#### As a GitHub Actions workflow on GitHub
+
+You can run Dependabot as a GitHub Actions workflow on hosted and self-hosted runners.
+Learn more by reading the:
+
+- [GitHub Blog, Dependabot on GitHub Actions and self-hosted runners is now generally available](https://github.blog/2024-05-02-dependabot-on-github-actions-and-self-hosted-runners-is-now-generally-available/)
+- [GitHub Docs, About Dependabot on GitHub Actions runners](https://docs.github.com/en/code-security/dependabot/working-with-dependabot/about-dependabot-on-github-actions-runners)
+
 #### `dependabot-core`
 
 If you want to customize Dependabot, or self-host on another platform, you can use [`dependabot-core`](https://github.com/dependabot/dependabot-core).

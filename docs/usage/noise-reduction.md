@@ -31,14 +31,14 @@ In that case you might create a config like this:
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["eslint"],
+      "matchPackageNames": ["/eslint/"],
       "groupName": "eslint"
     }
   ]
 }
 ```
 
-By setting `matchPackagePatterns` to "eslint", it means that any package with ESLint anywhere in its name will be grouped into a `renovate/eslint` branch and related PR.
+By setting `matchPackageNames` to `/eslint/`, it means that any package with eslint anywhere in its name will be grouped into a `renovate/eslint` branch and related PR.
 
 ### Be smart about grouping dependencies
 
@@ -91,7 +91,7 @@ You don't want to get too far behind, so how about we update `eslint` packages o
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["eslint"],
+      "matchPackageNames": ["/eslint/"],
       "groupName": "eslint",
       "schedule": ["on the first day of the month"]
     }
@@ -105,7 +105,7 @@ Or perhaps at least weekly:
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["eslint"],
+      "matchPackageNames": ["/eslint/"],
       "groupName": "eslint",
       "schedule": ["before 4am on monday"]
     }
@@ -165,7 +165,7 @@ Let's automerge it if all the linting updates pass:
 {
   "packageRules": [
     {
-      "matchPackagePatterns": ["eslint"],
+      "matchPackageNames": ["/eslint/"],
       "groupName": "eslint",
       "schedule": ["before 4am on monday"],
       "automerge": true,
