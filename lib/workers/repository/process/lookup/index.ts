@@ -414,6 +414,7 @@ export async function lookupUpdates(
         if (
           config.manager === 'gomod' &&
           compareValue?.startsWith('v0.0.0-') &&
+          update.newValue?.startsWith('v0.0.0-') &&
           config.currentDigest !== update.newDigest
         ) {
           update.updateType = 'digest';
