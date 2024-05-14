@@ -78,7 +78,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'mergeConfidenceSupportedDatasources',
+    name: 'mergeConfidenceDatasources',
     description:
       'If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.',
     allowedValues: [
