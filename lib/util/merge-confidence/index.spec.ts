@@ -445,7 +445,7 @@ describe('util/merge-confidence/index', () => {
             expected: ['go', 'npm'],
           },
           {
-            name: 'it should gracefully handle invalid json',
+            name: 'it should gracefully handle invalid JSON',
             datasources: `{`,
             expected: supportedDatasources,
           },
