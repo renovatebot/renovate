@@ -952,6 +952,7 @@ Set preference list to:
      Compression: ZLIB, BZIP2, ZIP, Uncompressed
      Features: MDC, Keyserver no-modify
 Really update the preferences? (y/N) y
+gpg> save
 ```
 
 </details>
