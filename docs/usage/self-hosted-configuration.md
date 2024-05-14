@@ -931,10 +931,10 @@ sub   rsa4096 2021-09-10 [E]
 
 <!-- prettier-ignore -->
 !!! note
-    If you use gnupg v2.4 or newer to generate the key, then you need to disable `AEAD` preferences.
-    Otherwise Renovate can't decrypt the encrypted values.
+    If you use GnuPG `v2.4` (or newer) to generate the key, then you must disable `AEAD` preferences.
+    This is needed to allow  Renovate to decrypt the encrypted values.
 
-```
+```bash
 ❯ gpg --edit-key renovate@whitesourcesoftware.com
 gpg> showpref
 [ultimate] (1). Renovate Bot <renovate@whitesourcesoftware.com>
