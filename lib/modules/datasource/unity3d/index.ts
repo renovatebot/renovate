@@ -24,6 +24,10 @@ export class Unity3dDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we extract the date string from the `pubDate` element.';
+
   constructor() {
     super(Unity3dDatasource.id);
   }

@@ -42,6 +42,13 @@ export class TerraformProviderDatasource extends TerraformDatasource {
 
   override readonly registryStrategy = 'hunt';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use the date field from the response.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'To get the source url we combine the registryUrl with the packageName.';
+
   @cache({
     namespace: `datasource-${TerraformProviderDatasource.id}`,
     key: (getReleasesConfig: GetReleasesConfig) =>
