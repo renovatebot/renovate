@@ -85,11 +85,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions> {
     }
   }
 
-  protected override calculateRetryDelay({
-    error,
-    attemptCount,
-    retryOptions,
-  }: RetryObject): number {
+  protected override calculateRetryDelay({ error, attemptCount, retryOptions }: RetryObject): number {
     if (
       attemptCount <= retryOptions.limit &&
       error.options.method === 'POST' &&
