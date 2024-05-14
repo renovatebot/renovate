@@ -68,19 +68,8 @@ export async function generateUpdate(
   } else {
     update.newValue = currentValue;
   }
-
-  const newMajor = versioning.getMajor(newVersion);
-  if (is.number(newMajor)) {
-    update.newMajor = newMajor;
-  }
-
-  const newMinor = versioning.getMinor(newVersion);
-  if (is.number(newMinor)) {
-    update.newMinor = newMinor;
-  }
   update.newMajor = versioning.getMajor(newVersion)!;
   update.newMinor = versioning.getMinor(newVersion)!;
-
   // istanbul ignore if
   if (!update.updateType && !currentVersion) {
     logger.debug({ update }, 'Update has no currentVersion');
