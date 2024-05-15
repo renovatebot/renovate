@@ -528,6 +528,15 @@ export async function lookupUpdates(
             registryUrl: update.registryUrl ?? res.registryUrl,
             lookupName: res.lookupName,
           };
+
+          //TODO #27728
+          // If the present contains the replacementName option and this update executes the replacement
+          // uses the correct lookupname based on the new replacementName, otherwise it keeps the origina one
+          if (update.updateType === 'replacement' && config.replacementName) {
+            getDigestConfig.lookupName = config.replacementName.substring(config.replacementName.indexOf("/") + 1);
+            getDigestConfig.currentDigest = undefined
+          }; 
+
           // TODO #22198
           update.newDigest ??=
             dependency?.releases.find((r) => r.version === update.newValue)
