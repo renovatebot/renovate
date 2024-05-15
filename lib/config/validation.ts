@@ -882,12 +882,6 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: RenovateConfig,
 ): Promise<void> {
-  if (getDeprecationMessage(key)) {
-    warnings.push({
-      topic: 'Deprecation Warning',
-      message: getDeprecationMessage(key)!,
-    });
-  }
   if (val !== null) {
     if (type === 'string') {
       if (is.string(val)) {
