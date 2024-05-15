@@ -15,13 +15,12 @@ const WRAPPER_URL_REGEX = regEx(
   '^(?:wrapperUrl\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)(?:.jar))',
 );
 
-const WRAPPER_VERSION_REGEX = regEx(
-  '^(?:wrapperVersion\\s*=\\s*)(?<url>\\S*-(?<version>\\d+\\.\\d+(?:\\.\\d+)?(?:-\\w+)*)(?:.jar))',
-);
+const WRAPPER_VERSION_REGEX = regEx(/wrapperVersion=(?<version>\d+(\.\d+)*)/);
 
 function extractVersions(fileContent: string): MavenVersionExtract {
   const lines = coerceArray(fileContent?.split(newlineRegex));
   const maven = extractLineInfo(lines, DISTRIBUTION_URL_REGEX) ?? undefined;
+
   const wrapper =
     extractLineInfo(lines, WRAPPER_VERSION_REGEX) ??
     extractLineInfo(lines, WRAPPER_URL_REGEX) ??
@@ -35,8 +34,8 @@ function extractLineInfo(lines: string[], regex: RegExp): Version | null {
       const match = regex.exec(line);
       if (match?.groups) {
         return {
-          url: match.groups.url,
-          version: match.groups.version,
+          url: match.groups.url ?? null,
+          version: match.groups.version ?? null,
         };
       }
     }
