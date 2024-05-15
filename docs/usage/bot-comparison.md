@@ -18,7 +18,7 @@ If you see anything wrong on this page, please let us know by creating a [Discus
 | Compatibility score badges                | Four badges showing: Age, Adoption, Passing, Confidence                                                                        | One badge with overall compatibility score                                                                                                                                   |
 | Built-in to GitHub                        | No, requires app or self-hosting                                                                                               | Yes                                                                                                                                                                          |
 | Scheduling                                | By default, Renovate runs as often as it is allowed to, read [Renovate scheduling](./key-concepts/scheduling.md) to learn more | Yes: `daily`, `weekly`, `monthly`                                                                                                                                            |
-| License                                   | [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license)                                 | [The Prosperity Public License 2.0.0](https://github.com/dependabot/dependabot-core/blob/main/LICENSE)                                                                       |
+| License                                   | [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license)                                 | [MIT License](https://github.com/dependabot/dependabot-core/blob/main/LICENSE)                                                                                               |
 | Programming language of project           | TypeScript                                                                                                                     | Ruby                                                                                                                                                                         |
 | Project pulse                             | [`renovatebot/renovate` monthly pulse](https://github.com/renovatebot/renovate/pulse/monthly)                                  | [`dependabot-core` monthly pulse](https://github.com/dependabot/dependabot-core/pulse/monthly)                                                                               |
 | Contributor graph                         | [`renovatebot/renovate` contributor graph](https://github.com/renovatebot/renovate/graphs/contributors)                        | [`dependabot-core` contributor graph](https://github.com/dependabot/dependabot-core/graphs/contributors)                                                                     |
@@ -114,7 +114,7 @@ Dependabot has four options that apply at a language level:
 
 Renovate uses the [GNU Affero General Public License](https://github.com/renovatebot/renovate/blob/main/license).
 
-Dependabot uses [The Prosperity Public License 2.0.0](https://github.com/dependabot/dependabot-core/blob/main/LICENSE).
+Dependabot uses the [MIT License](https://github.com/dependabot/dependabot-core/blob/main/LICENSE).
 
 Neither license is relevant to the end user though if consuming through an App/SaaS.
 

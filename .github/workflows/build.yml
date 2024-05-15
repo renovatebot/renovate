@@ -406,7 +406,7 @@ jobs:
           merge-multiple: true
 
       - name: Codecov
-        uses: codecov/codecov-action@5ecb98a3c6b747ed38dc09f787459979aebb39be # v4.3.1
+        uses: codecov/codecov-action@6d798873df2b1b8e5846dba6fb86631229fbcb17 # v4.4.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: coverage/lcov
@@ -632,7 +632,7 @@ jobs:
           show-progress: false
 
       - name: docker-config
-        uses: containerbase/internal-tools@dbc381e7a824b3777dceafc226804644311ab9a1 # v3.0.82
+        uses: containerbase/internal-tools@9f7fee1b8ad23efad8e02d0e7afd2cae63532add # v3.0.86
         with:
           command: docker-config
 
