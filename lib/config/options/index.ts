@@ -628,6 +628,12 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
+    name: 'encryptedWarning',
+    description: 'Display warnings about the usage of encrypted token in config',
+    type: 'string',
+    globalOnly: true,
+  },
+  {
     name: 'inheritConfig',
     description:
       'If `true`, Renovate will inherit configuration from the `inheritConfigFileName` file in `inheritConfigRepoName',

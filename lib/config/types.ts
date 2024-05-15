@@ -147,6 +147,7 @@ export interface RepoGlobalConfig {
   dockerSidecarImage?: string;
   dockerUser?: string;
   dryRun?: DryRunConfig;
+  encryptedWarning?: string;
   endpoint?: string;
   executionTimeout?: number;
   exposeAllEnv?: boolean;
