@@ -1,4 +1,4 @@
-![Renovate banner, paintbrush roller in a blue circle with the word Renovate next to it, green background](https://app.renovatebot.com/images/renovate_660_220.jpg)
+![Renovate banner](https://app.renovatebot.com/images/renovate_660_220.jpg)
 
 # Renovate
 
