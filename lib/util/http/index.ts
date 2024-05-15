@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import merge from 'deepmerge';
-import got, { Options, RequestError } from 'got';
+import got, { Options, RequestError, RetryObject } from 'got';
 import type { SetRequired } from 'type-fest';
 import { infer as Infer, type ZodError, ZodType } from 'zod';
 import { GlobalConfig } from '../../config/global';
@@ -124,6 +124,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       {
         context: { hostType },
         retry: {
+          calculateDelay: (retryObject) =>
+            this.calculateRetryDelay(retryObject),
           limit: retryLimit,
           maxRetryAfter: 0, // Don't rely on `got` retry-after handling, just let it fail and then we'll handle it
         },
@@ -246,6 +248,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       }
       throw err;
     }
+  }
+
+  protected calculateRetryDelay({ computedValue }: RetryObject): number {
+    return computedValue;
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {

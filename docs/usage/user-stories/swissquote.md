@@ -182,7 +182,9 @@ Some features and options we enjoy:
 There is an [on-premise option](https://www.mend.io/free-developer-tools/renovate/on-premises/), but you can also use [the Mend Renovate App](https://github.com/marketplace/renovate).
 On our side, we’re not using the on-premise but rather a custom scheduler using the open source Docker image.
 
-## Some stats after two years with Renovate
+## Some stats after four years with Renovate
+
+> The figures here have been updated in November 2023
 
 We started using Renovate Bot in 2019, using the (now deprecated) `renovate/pro` Docker image.
 We installed it as a GitHub app and some early adopters started to use it.
@@ -197,17 +199,42 @@ Here is the dashboard for our current scheduler:
 
 <figure markdown>
   ![Swissquote scheduler dashboard](../assets/images/swissquote_stats.png){ loading=lazy }
-  <figcaption>A dashboard we made at Swissquote to keep our Renovate runs in check, July 2022.</figcaption>
+  <figcaption>A dashboard we made at Swissquote to keep our Renovate runs in check, November 2023.</figcaption>
 </figure>
 
 We don’t force any team to use Renovate, each team can decide to opt-in and do it for each project separately.
 
 Some statistics:
 
-- 824 repositories enabled out of about 2000 active repositories
-- 8000 PRs were merged since we installed Renovate
+- 857 repositories enabled out of about 2000 active repositories
+- 11000 PRs were merged since we installed Renovate
 - 239 PRs were merged last month
 - 2 SSDs died on our Renovate machine with the number of projects to clone again and again
+
+### How does the scheduler work?
+
+The scheduler is a Node.js application that handles an in-memory queue and starts Docker containers to run Renovate on.
+Our custom scheduler application regularly sends data points to our InfluxDB database, which we then display in Grafana.
+
+Here is how it works:
+
+<figure markdown>
+  ![Swissquote scheduler diagram](../assets/images/swissquote_stats_collection.png){ loading=lazy }
+  <figcaption>A diagram explaining how our scheduler interacts with Renovate.</figcaption>
+</figure>
+
+All the information on the dashboard you saw above is created from three measurements:
+
+1. Queue: Every 5 minutes, we send the status of the queue size and the number of jobs currently running
+1. Webhook: When receiving a webhook request from GitHub, we send a data point on the duration of treatment for that item
+1. Runs: After each run, we send a data point on the run duration, success, and number of PRs created/updated/merged/closed
+
+The queue is filled by webhooks _or_ by re-queueing all repositories at regular intervals.
+For each repository, we start a Renovate Docker image and pipe its logs to a file.
+This allows us to run ten workers in parallel.
+We could technically run more workers but decided not to hammer our GitHub instance.
+
+You can find more details in this [discussion on the Renovate repository, from November 2023](https://github.com/renovatebot/renovate/discussions/23105#discussioncomment-6366621).
 
 ## The future of Renovate at Swissquote
 

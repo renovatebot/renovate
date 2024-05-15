@@ -898,27 +898,6 @@ It will be compiled using Handlebars and the regex `groups` result.
 It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
 
-### readOnly
-
-If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
-Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
-
-This option could be used to avoid rate limits for certain platforms like GitHub or Bitbucket, by offloading the read operations to a different user.
-
-```json
-{
-  "hostRules": [
-    {
-      "matchHost": "api.github.com",
-      "readOnly": true,
-      "token": "********"
-    }
-  ]
-}
-```
-
-If more than one token matches for a read-only request then the `readOnly` token will be given preference.
-
 ### currentValueTemplate
 
 If the `currentValue` for a dependency is not captured with a named group then it can be defined in config using this field.
@@ -1970,6 +1949,27 @@ registry=https://gitlab.myorg.com/api/v4/packages/npm/
 <!-- prettier-ignore -->
 !!! note
     Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` -> `https://domain.com/path`)
+
+### readOnly
+
+If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
+Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
+
+This option could be used to avoid rate limits for certain platforms like GitHub or Bitbucket, by offloading the read operations to a different user.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "readOnly": true,
+      "token": "********"
+    }
+  ]
+}
+```
+
+If more than one token matches for a read-only request then the `readOnly` token will be given preference.
 
 ### timeout
 

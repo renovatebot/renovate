@@ -131,7 +131,13 @@ export function extractPackageFile(
       return dep;
     })
     .filter(is.truthy);
-  if (!deps.length) {
+  if (
+    !deps.length &&
+    !registryUrls.length &&
+    !additionalRegistryUrls.length &&
+    !additionalRequirementsFiles.length &&
+    !additionalConstraintsFiles.length
+  ) {
     return null;
   }
   const res: PackageFileContent = { deps };
