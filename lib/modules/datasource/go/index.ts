@@ -31,6 +31,13 @@ export class GoDatasource extends Datasource {
 
   override readonly customRegistrySupport = false;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'First we try to extract it from the response by looking for date-like string in thre response using a regex. Incase that fails, we fetc version info using another url and look for the `Time` field in it.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'Deduces sourceUrl from the registryUrl and packageName';
+
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();
 
@@ -51,7 +58,7 @@ export class GoDatasource extends Datasource {
    * go.getDigest
    *
    * This datasource resolves a go module URL into its source repository
-   *  and then fetches the digest it if it is on GitHub.
+   *  and then fetches the digest if it is on GitHub.
    *
    * This function will:
    *  - Determine the source URL for the module

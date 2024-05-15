@@ -18,6 +18,13 @@ export class NugetDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote = `v2: Publised tag v3: published field`;
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote = `v2: ProjectUrl tag if latestVersion is present
+    v3: use registryUrl to fetch PackageBaseAdress then use PackageBaseAdress to fetch another XML document which contains metadata.repository@url which is the source url
+    `;
+
   readonly v2Api = new NugetV2Api();
 
   readonly v3Api = new NugetV3Api();

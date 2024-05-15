@@ -20,6 +20,13 @@ export class GradleVersionDatasource extends Datasource {
 
   override readonly registryStrategy = 'merge';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'Extract and use the `buildTime` field from the release object.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'Use the url <https://github.com/gradle/gradle>';
+
   private static readonly buildTimeRegex = regEx(
     '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$',
   );

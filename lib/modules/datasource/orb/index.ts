@@ -29,6 +29,10 @@ export class OrbDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://circleci.com/'];
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use the `createdAt` field from the response.';
+
   @cache({
     namespace: `datasource-${OrbDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,

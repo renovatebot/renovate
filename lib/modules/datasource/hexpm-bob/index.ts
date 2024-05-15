@@ -24,6 +24,13 @@ export class HexpmBobDatasource extends Datasource {
 
   override readonly defaultVersioning = semverId;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'Extract and use the `buildDate` field from the release object.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We use <https://github.com/elixir-lang/elixir.git> for `elixir` and <https://github.com/erlang/otp.git> for `erlang`';
+
   @cache({
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>

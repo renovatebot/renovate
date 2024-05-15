@@ -25,6 +25,13 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
   override readonly defaultVersioning = hashicorpVersioning.id;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'It is returned for the latest version only. To get release timestamp we use the `published_at` field from the response.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'To get the source url we use the `source` field from the response.';
+
   readonly extendedApiRegistryUrls = [
     'https://registry.terraform.io',
     'https://app.terraform.io',

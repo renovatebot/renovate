@@ -18,6 +18,13 @@ export class HexDatasource extends Datasource {
 
   override readonly defaultVersioning = hexVersioning.id;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'Extract and use the `inserted_at` field from the release object.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'We use url from the `Github` field present in the `meta[links]` object in the reponse';
+
   @cache({
     namespace: `datasource-${HexDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,

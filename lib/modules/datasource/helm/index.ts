@@ -25,6 +25,16 @@ export class HelmDatasource extends Datasource {
 
   override readonly defaultVersioning = helmVersioning.id;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'Extract and use the `created` field from the release object.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote = `
+  We extract it from the latest release object
+  We use the 'home' field if found else we check the 'sources' array and use the first url which resembles a chat repo url.
+  Incase none of the urls in the sources array are valid chart repo we use the first url.
+    `;
+
   @cache({
     namespace: `datasource-${HelmDatasource.id}`,
     key: (helmRepository: string) => helmRepository,

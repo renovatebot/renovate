@@ -47,6 +47,13 @@ export class RubyGemsDatasource extends Datasource {
 
   private readonly versionsEndpointCache: VersionsEndpointCache;
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'To get release timestamp we use the `created_at` field from the response.';
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'To get the source url we use the `source_code_uri` field from the response';
+
   @cache({
     namespace: `datasource-${RubyGemsDatasource.id}`,
     key: ({ packageName, registryUrl }: GetReleasesConfig) =>

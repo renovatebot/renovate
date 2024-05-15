@@ -25,6 +25,13 @@ export class JenkinsPluginsDatasource extends Datasource {
   private static readonly packageInfoPath = 'current/update-center.actual.json';
   private static readonly packageVersionsPath = 'current/plugin-versions.json';
 
+  override readonly releaseTimestampSupport = true;
+  override readonly releaseTimeStampNote =
+    'Use the `releaseTimestamp` or `buildDate` field from the version object.';
+  override readonly sourceUrlSupport = 'package';
+  override readonly sourceUrlNote =
+    'Extract `scm` field from the plugin info response.';
+
   async getReleases({
     packageName,
     registryUrl,
