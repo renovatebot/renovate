@@ -757,6 +757,8 @@ If left as default (null), a random short ID will be selected.
 
 ## mergeConfidenceDatasources
 
+This feature is applicable only if you have an access token for Mend's Merge Confidence API.
+
 If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.
 Otherwise, it queries all the supported datasources (check default value).
 
@@ -769,6 +771,8 @@ modules.exports = {
 ```
 
 ## mergeConfidenceEndpoint
+
+This feature is applicable only if you have an access token for Mend's Merge Confidence API.
 
 If set, Renovate will retrieve Merge Confidence data by querying this API.
 Otherwise, it will use the default URL, which is <https://developer.mend.io/>.
