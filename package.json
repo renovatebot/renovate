@@ -231,7 +231,7 @@
     "remark": "13.0.0",
     "remark-github": "10.1.0",
     "safe-stable-stringify": "2.4.3",
-    "semver": "7.6.1",
+    "semver": "7.6.2",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
     "shlex": "2.1.2",
@@ -246,7 +246,7 @@
     "validate-npm-package-name": "5.0.1",
     "vuln-vects": "1.1.0",
     "xmldoc": "1.3.0",
-    "zod": "3.23.6"
+    "zod": "3.23.8"
   },
   "optionalDependencies": {
     "better-sqlite3": "9.6.0",
