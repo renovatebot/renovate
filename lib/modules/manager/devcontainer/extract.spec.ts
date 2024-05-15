@@ -27,6 +27,42 @@ describe('modules/manager/devcontainer/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('tests if JSONC can be parsed', () => {
+      // Arrange
+      const content = codeBlock(`
+      {
+        // hello
+        "features": {
+          "devcontainer.registry.renovate.com/test/features/first:1.2.3": {}
+        }
+      }`);
+      const extractConfig = {};
+      // Act
+      const result = extractPackageFile(
+        content,
+        'devcontainer.json',
+        extractConfig,
+      );
+
+      // Assert
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: '1.2.3',
+            datasource: 'docker',
+            depName: 'devcontainer.registry.renovate.com/test/features/first',
+            depType: 'feature',
+            pinDigests: false,
+            replaceString:
+              'devcontainer.registry.renovate.com/test/features/first:1.2.3',
+          },
+        ],
+      });
+    });
+
     it('returns feature image deps when only the features property is defined in dev container JSON file', () => {
       // Arrange
       const content = codeBlock(`
