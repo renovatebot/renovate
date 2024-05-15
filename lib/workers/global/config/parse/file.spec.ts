@@ -75,7 +75,6 @@ describe('workers/global/config/parse/file', () => {
         `module.exports = {
         "platform": "github",
         "token":"abcdef",
-        "logFileLevel": "warn",
         "onboarding": false,
         "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
         "onboardingConfig": {
