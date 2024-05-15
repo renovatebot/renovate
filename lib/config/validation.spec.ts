@@ -1261,9 +1261,10 @@ describe('config/validation', () => {
   });
 
   describe('validateConfig() -> globaOnly options', () => {
-    it('returns invalid option warnings', async () => {
+    it('returns errors for invalid options', async () => {
       const config = {
         logFile: 'something',
+        logFileLevel: 'DEBUG',
       };
       const { errors } = await configValidation.validateConfig(
         'global',
@@ -1272,6 +1273,10 @@ describe('config/validation', () => {
       expect(errors).toMatchObject([
         {
           message: 'Invalid configuration option: logFile',
+          topic: 'Configuration Error',
+        },
+        {
+          message: 'Invalid configuration option: logFileLevel',
           topic: 'Configuration Error',
         },
       ]);
