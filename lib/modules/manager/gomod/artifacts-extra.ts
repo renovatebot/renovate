@@ -1,4 +1,5 @@
 import { diffLines } from 'diff';
+import markdownTable from 'markdown-table';
 import { parseLine } from './line-parser';
 import type { ExtraDep } from './types';
 
@@ -56,18 +57,19 @@ export function getExtraDeps(
 }
 
 export function extraDepsTable(extraDeps: ExtraDep[]): string {
-  const tableLines: string[] = [];
+  const tableLines: string[][] = [];
 
-  tableLines.push('| **Package** | **Change** |');
-  tableLines.push('| ----------- | ---------- |');
+  tableLines.push(['**Package**', '**Change**']);
 
   for (const { depName, currentValue, newValue } of extraDeps) {
-    tableLines.push(
-      `| \`${depName}\` | \`${currentValue}\` -> \`${newValue}\` |`,
-    );
+    const depNameQuoted = `\`${depName}\``;
+    const versionChangeQuoted = `\`${currentValue}\` -> \`${newValue}\``;
+    tableLines.push([depNameQuoted, versionChangeQuoted]);
   }
 
-  return tableLines.join('\n');
+  return markdownTable(tableLines, {
+    align: ['l', 'l'],
+  });
 }
 
 export function getExtraDepsNotice(

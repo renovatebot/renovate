@@ -63,12 +63,14 @@ describe('modules/manager/gomod/artifacts-extra', () => {
 
       const res = extraDepsTable(extraDeps);
 
-      expect(res).toEqual(codeBlock`
-        | **Package** | **Change** |
-        | ----------- | ---------- |
-        | \`github.com/foo/foo\` | \`v1.0.0\` -> \`v1.1.1\` |
-        | \`github.com/bar/bar\` | \`v2.0.0\` -> \`v2.2.2\` |
-      `);
+      expect(res).toEqual(
+        [
+          '| **Package**          | **Change**           |',
+          '| :------------------- | :------------------- |',
+          '| `github.com/foo/foo` | `v1.0.0` -> `v1.1.1` |',
+          '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
+        ].join('\n'),
+      );
     });
   });
 
@@ -90,14 +92,15 @@ describe('modules/manager/gomod/artifacts-extra', () => {
       const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps);
 
       expect(res).toEqual(
-        codeBlock`
-          In addition to the dependencies listed above, the following packages will also be updated:
-
-
-          | **Package** | **Change** |
-          | ----------- | ---------- |
-          | \`github.com/bar/bar\` | \`v2.0.0\` -> \`v2.2.2\` |
-        ` + '\n\n',
+        [
+          'In addition to the dependencies listed above, the following packages will also be updated:',
+          '',
+          '',
+          '| **Package**          | **Change**           |',
+          '| :------------------- | :------------------- |',
+          '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
+          '\n',
+        ].join('\n'),
       );
     });
   });
