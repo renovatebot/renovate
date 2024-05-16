@@ -2,7 +2,7 @@ import { diffLines } from 'diff';
 import { parseLine } from './line-parser';
 import type { ExtraDep } from './types';
 
-function getExtraDeps(
+export function getExtraDeps(
   goModBefore: string,
   goModAfter: string,
   excludeDeps: string[],
@@ -55,7 +55,7 @@ function getExtraDeps(
   return result;
 }
 
-function extraDepsTable(extraDeps: ExtraDep[]): string {
+export function extraDepsTable(extraDeps: ExtraDep[]): string {
   const tableLines: string[] = [];
 
   tableLines.push('| **Package** | **Change** |');
