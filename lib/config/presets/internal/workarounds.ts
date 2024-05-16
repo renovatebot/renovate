@@ -30,9 +30,13 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchDatasources: ['docker'],
-        matchPackagePrefixes: ['gcr.io/bitnami-containers/', 'bitnami/'],
+        matchPackagePrefixes: [
+          'bitnami/',
+          'docker.io/bitnami/',
+          'gcr.io/bitnami-containers/',
+        ],
         versioning:
-          'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?)?$',
+          'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?)?$',
       },
     ],
   },
