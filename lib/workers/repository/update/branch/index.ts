@@ -474,7 +474,6 @@ export async function processBranch(
       if (res.artifactErrors && config.artifactErrors) {
         res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
       }
-
       config = { ...config, ...res };
       if (config.updatedPackageFiles?.length) {
         logger.debug(
