@@ -1,0 +1,97 @@
+import { diffLines } from 'diff';
+import { parseLine } from './line-parser';
+import type { ExtraDep } from './types';
+
+function getExtraDeps(
+  goModBefore: string,
+  goModAfter: string,
+  excludeDeps: string[],
+): ExtraDep[] {
+  const result: ExtraDep[] = [];
+
+  const diff = diffLines(goModBefore, goModAfter, {
+    newlineIsToken: true,
+  });
+
+  const addDeps: Record<string, string> = {};
+  const rmDeps: Record<string, string> = {};
+  for (const { added, removed, value } of diff) {
+    if (!added && !removed) {
+      continue;
+    }
+
+    const res = parseLine(value);
+    if (!res) {
+      continue;
+    }
+
+    const { depName, currentValue } = res;
+    if (!depName || !currentValue) {
+      continue;
+    }
+
+    if (added) {
+      addDeps[depName] = currentValue;
+    } else {
+      rmDeps[depName] = currentValue;
+    }
+  }
+
+  for (const [depName, currentValue] of Object.entries(rmDeps)) {
+    if (excludeDeps.includes(depName)) {
+      continue;
+    }
+
+    const newValue = addDeps[depName];
+    if (newValue) {
+      result.push({
+        depName,
+        currentValue,
+        newValue,
+      });
+    }
+  }
+
+  return result;
+}
+
+function extraDepsTable(extraDeps: ExtraDep[]): string {
+  const tableLines: string[] = [];
+
+  tableLines.push('| **Package** | **Change** |');
+  tableLines.push('| ----------- | ---------- |');
+
+  for (const { depName, currentValue, newValue } of extraDeps) {
+    tableLines.push(
+      `| \`${depName}\` | \`${currentValue}\` -> \`${newValue}\` |`,
+    );
+  }
+
+  return tableLines.join('\n');
+}
+
+export function getExtraDepsNotice(
+  goModBefore: string | null,
+  goModAfter: string | null,
+  excludeDeps: string[],
+): string | null {
+  if (!goModBefore || !goModAfter) {
+    return null;
+  }
+
+  const extraDeps = getExtraDeps(goModBefore, goModAfter, excludeDeps);
+  if (extraDeps.length === 0) {
+    return null;
+  }
+
+  const noticeLines: string[] = [];
+
+  noticeLines.push(
+    'In addition to the dependencies listed above, the following packages will also be updated:',
+  );
+  noticeLines.push('\n');
+  noticeLines.push(extraDepsTable(extraDeps));
+  noticeLines.push('\n');
+
+  return noticeLines.join('\n');
+}
