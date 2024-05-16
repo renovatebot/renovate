@@ -882,6 +882,13 @@ async function validateGlobalConfig(
   currentPath: string | undefined,
   config: RenovateConfig,
 ): Promise<void> {
+  // istanbul ignore if
+  if (getDeprecationMessage(key)) {
+    warnings.push({
+      topic: 'Deprecation Warning',
+      message: getDeprecationMessage(key)!,
+    });
+  }
   if (val !== null) {
     if (type === 'string') {
       if (is.string(val)) {
