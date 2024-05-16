@@ -80,6 +80,9 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
           lower: true,
         });
       }
+      if (toApply.enabled === false && config.enabled !== false) {
+        config.skipReason = 'package-rules';
+      }
       config = mergeChildConfig(config, toApply);
     }
   }

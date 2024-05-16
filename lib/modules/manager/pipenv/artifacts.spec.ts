@@ -78,6 +78,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     // python
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
+        { version: '3.6.2' },
         { version: '3.6.5' },
         { version: '3.7.6' },
         { version: '3.8.5' },
@@ -125,6 +126,138 @@ describe('modules/manager/pipenv/artifacts', () => {
     ).toBeNull();
 
     expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
+  });
+
+  it('gets python full version from Pipfile', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    pipFileLock._meta!.requires!.python_full_version = '3.7.6';
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
+    fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
+    fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: Fixtures.get('Pipfile1'),
+        config,
+      }),
+    ).toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.6.2' },
+      {},
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
+  });
+
+  it('gets python version from Pipfile', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    pipFileLock._meta!.requires!.python_full_version = '3.7.6';
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
+    fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
+    fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: Fixtures.get('Pipfile2'),
+        config,
+      }),
+    ).toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.6.5' },
+      {},
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
+  });
+
+  it('gets full python version from .python-version', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
+    fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
+    fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockResolvedValueOnce('.python-version' as never);
+    fs.readLocalFile.mockResolvedValueOnce('3.7.6');
+
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: 'some toml',
+        config,
+      }),
+    ).toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.7.6' },
+      {},
+      {
+        cmd: 'pipenv lock',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            PIPENV_CACHE_DIR: pipenvCacheDir,
+          },
+        },
+      },
+    ]);
+  });
+
+  it('gets python stream, from .python-version', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.ensureCacheDir.mockResolvedValueOnce(pipenvCacheDir);
+    fs.ensureCacheDir.mockResolvedValueOnce(virtualenvsCacheDir);
+    fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockResolvedValueOnce('.python-version' as never);
+    fs.readLocalFile.mockResolvedValueOnce('3.8');
+
+    expect(
+      await updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: 'some toml',
+        config,
+      }),
+    ).toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.8.5' },
+      {},
       {
         cmd: 'pipenv lock',
         options: {

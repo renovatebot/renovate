@@ -224,9 +224,6 @@ describe('modules/platform/gitea/index', () => {
     hostRules.clear();
 
     setBaseUrl('https://gitea.renovatebot.com/');
-
-    delete process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT;
-    delete process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER;
   });
 
   async function initFakePlatform(
@@ -421,8 +418,6 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('Sorts repos', async () => {
-      process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT = 'updated';
-      process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER = 'desc';
       const scope = httpMock
         .scope('https://gitea.com/api/v1')
         .get('/repos/search')
@@ -438,7 +433,10 @@ describe('modules/platform/gitea/index', () => {
         });
       await initFakePlatform(scope);
 
-      const repos = await gitea.getRepos();
+      const repos = await gitea.getRepos({
+        sort: 'updated',
+        order: 'desc',
+      });
       expect(repos).toEqual(['a/b', 'c/d']);
     });
   });
