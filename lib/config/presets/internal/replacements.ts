@@ -956,7 +956,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         description:
-          'The `zap-stable` image has moved to the `zaproxy` organisation.',
+          'The `zap-stable` image has moved to the `zaproxy` organization.',
         matchCurrentVersion: '>=2.0.0 <2.14.0',
         matchDatasources: ['docker'],
         matchPackagePatterns: [
@@ -968,7 +968,7 @@ export const presets: Record<string, Preset> = {
       },
       {
         description:
-          'The `zap-bare` image has moved to the `zaproxy` organisation.',
+          'The `zap-bare` image has moved to the `zaproxy` organization.',
         matchCurrentVersion: '>=2.0.0 <2.14.0',
         matchDatasources: ['docker'],
         matchPackagePatterns: [
