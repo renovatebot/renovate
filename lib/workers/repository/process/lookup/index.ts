@@ -526,7 +526,9 @@ export async function lookupUpdates(
           const getDigestConfig: GetDigestInputConfig = {
             ...config,
             registryUrl: update.registryUrl ?? res.registryUrl,
-            lookupName: res.lookupName,
+            // TODO #27728
+            lookupName: update.updateType === 'replacement' ? undefined : res.lookupName,
+            currentDigest: update.updateType === 'replacement' ? undefined : config.currentDigest
           };
           // TODO #22198
           update.newDigest ??=
