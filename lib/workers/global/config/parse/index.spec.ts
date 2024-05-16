@@ -173,7 +173,7 @@ describe('workers/global/config/parse/index', () => {
       expect(parsed).toContainEntries([['dryRun', null]]);
     });
 
-    it('does not initalize file when env var LOG_FILE is undefined', async () => {
+    it('only initializes the file when the env var LOG_FILE is properly set', async () => {
       jest.doMock('../../../../../config.js', () => ({}), {
         virtual: true,
       });
