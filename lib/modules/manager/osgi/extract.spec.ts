@@ -3,136 +3,138 @@ import { extractPackageFile } from '.';
 
 const noArtifacts = codeBlock`
   {
-     "configurations": {
-        "org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet": {
-          "alias": "/server"
-        }
-     }
+    "configurations": {
+      "org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet": {
+        "alias": "/server"
+      }
+    }
   }
 `;
 
 const unsupportedFeatureVersion = codeBlock`
   {
-     "feature-resource-version": "2.0",
-     "bundles": [
-        {
-          "id": "commons-codec:commons-codec:1.15",
-          "start-order": "5"
-        }
-     ]
+    "feature-resource-version": "2.0",
+    "bundles": [
+      {
+        "id": "commons-codec:commons-codec:1.15",
+        "start-order": "5"
+      }
+    ]
   }
 `;
 
 const featureWithBundlesAsObjects = codeBlock`
   {
-     "feature-resource-version": "1.0",
-     "bundles": [
-        {
-          "id": "commons-codec:commons-codec:1.15",
-          "start-order": "5"
-        },
-        {
-          "id": "commons-collections:commons-collections:3.2.2",
-          "start-order": "15"
-        }
-     ]
+    "feature-resource-version": "1.0",
+    "bundles": [
+      {
+        "id": "commons-codec:commons-codec:1.15",
+        "start-order": "5"
+      },
+      {
+        "id": "commons-collections:commons-collections:3.2.2",
+        "start-order": "15"
+      }
+    ]
   }
 `;
 
 const featureWithBundlesAsStrings = codeBlock`
   {
-     "bundles": [
-        "org.apache.felix/org.apache.felix.scr/2.1.26",
-        "org.apache.felix/org.apache.felix.log/1.2.4"
-     ]
+    "bundles": [
+      "org.apache.felix/org.apache.felix.scr/2.1.26",
+      "org.apache.felix/org.apache.felix.log/1.2.4"
+    ]
   }
 `;
 
 const featureWithComment = codeBlock`
   {
-     // comments are permitted
-     "bundles": [ "org.apache.aries:org.apache.aries.util:1.1.3" ]
+    // comments are permitted
+    "bundles": [
+      "org.apache.aries:org.apache.aries.util:1.1.3"
+    ]
   }
 `;
 
 const artifactsExtension = codeBlock`
   {
-     "content-packages:ARTIFACTS|true": [
-        "com.day.cq:core.wcm.components.all:zip:2.21.0"
-     ]
+    "content-packages:ARTIFACTS|true": [
+      "com.day.cq:core.wcm.components.all:zip:2.21.0"
+    ]
   }
 `;
 
 const doubleSlashNotComment = codeBlock`
   {
-     "bundles": [
-        {
-          "id": "com.h2database:h2-mvstore:2.1.214",
-          "start-order": "15"
-        },
-        {
-          "id": "org.mongodb:mongo-java-driver:3.12.11",
-          "start-order": "15"
-        }
-     ],
-     "configurations": {
-        "org.apache.jackrabbit.oak.plugins.document.DocumentNodeStoreService": {
-          "db": "sling",
-          "mongouri": "mongodb://$[env:MONGODB_HOST;default=localhost]:$[env:MONGODB_PORT;type=Integer;default=27017]"
-        }
-     }
+    "bundles": [
+      {
+        "id": "com.h2database:h2-mvstore:2.1.214",
+        "start-order": "15"
+      },
+      {
+        "id": "org.mongodb:mongo-java-driver:3.12.11",
+        "start-order": "15"
+      }
+    ],
+    "configurations": {
+      "org.apache.jackrabbit.oak.plugins.document.DocumentNodeStoreService": {
+        "db": "sling",
+        "mongouri": "mongodb://$[env:MONGODB_HOST;default=localhost]:$[env:MONGODB_PORT;type=Integer;default=27017]"
+      }
+    }
   }
 `;
 
 const frameworkArtifact = codeBlock`
   {
-     "execution-environment:JSON|false": {
-        "framework": {
-          "id": "org.apache.felix:org.apache.felix.framework:7.0.5"
-        }
-     }
+    "execution-environment:JSON|false": {
+      "framework": {
+        "id": "org.apache.felix:org.apache.felix.framework:7.0.5"
+      }
+    }
   }
 `;
 
 const versionWithVariable = codeBlock`
   {
-     "bundles": [
-        {
-          "id": "com.fasterxml.jackson.core:jackson-annotations:$\{jackson.version}",
-          "start-order": "20"
-        }
-     ]
+    "bundles": [
+      {
+        "id": "com.fasterxml.jackson.core:jackson-annotations:\${jackson.version}",
+        "start-order": "20"
+      }
+    ]
   }
 `;
 
 const malformedDefinitions = codeBlock`
   {
-     "bundles": [
-        {
-          "#": "missing the 'id' attribute",
-          "not-id": "commons-codec:commons-codec:1.15"
-        },
-        {
-          "#": "too few parts in the GAV definition",
-          "id": "commons-codec:1.15"
-        },
-        {
-          "#": "valid definition, should be extracted",
-          "id": "commons-codec:commons-codec:1.15"
-        }
-     ]
+    "bundles": [
+      {
+        "#": "missing the 'id' attribute",
+        "not-id": "commons-codec:commons-codec:1.15"
+      },
+      {
+        "#": "too few parts in the GAV definition",
+        "id": "commons-codec:1.15"
+      },
+      {
+        "#": "valid definition, should be extracted",
+        "id": "commons-codec:commons-codec:1.15"
+      }
+    ]
   }
 `;
 
 const invalidFeatureVersion = codeBlock`
   {
-     "feature-resource-version": "unknown",
-     "bundles": [
-        {
-          "id": "commons-codec:commons-codec:1.15",
-          "start-order": "5"
-        }
-     ]
+    "feature-resource-version": "unknown",
+    "bundles": [
+      {
+        "id": "commons-codec:commons-codec:1.15",
+        "start-order": "5"
+      }
+    ]
   }
 `;
 
