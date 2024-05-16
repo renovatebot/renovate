@@ -31,7 +31,7 @@ export class OrbDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'To get release timestamp we use the `createdAt` field from the response.';
+    'The release timestamp is determined from the `createdAt` field in the results.';
 
   @cache({
     namespace: `datasource-${OrbDatasource.id}`,

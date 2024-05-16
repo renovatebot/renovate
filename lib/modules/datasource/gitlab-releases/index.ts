@@ -13,10 +13,10 @@ export class GitlabReleasesDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'To get release timestamp we use the `released_at` field from the response.';
+    'The release timestamp is determined from the `released_at` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'To get the source url we combine the `packageName` and `registryUrl`.';
+    'The source url is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
     super(GitlabReleasesDatasource.id);

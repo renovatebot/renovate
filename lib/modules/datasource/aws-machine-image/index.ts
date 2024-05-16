@@ -20,7 +20,7 @@ export class AwsMachineImageDataSource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'The release timestamp is taken from the creationDate field, and is assumed to be in UTC time.';
+    'The release timestamp is determined from the `CreationDate` field in the results.';
 
   override readonly defaultConfig = {
     // Because AMIs don't follow any versioning scheme, we override commitMessageExtra to remove the 'v'

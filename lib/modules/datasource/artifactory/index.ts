@@ -23,7 +23,7 @@ export class ArtifactoryDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'The release timestamp is taken from the date in the directory listing, and is assumed to be in UTC time.';
+    'The release timestamp is determined from the date-like text, next to the version hyperlink tag in the results.';
 
   @cache({
     namespace: `datasource-${datasource}`,

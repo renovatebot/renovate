@@ -20,7 +20,7 @@ export class CpanDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'To get release timestamp we use the date field from the response.';
+    'The release timestamp is determined from the `date` field in the results.';
 
   @cache({
     namespace: `datasource-${CpanDatasource.id}`,

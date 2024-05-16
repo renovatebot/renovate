@@ -7,7 +7,7 @@ export class GithubRunnersDatasource extends Datasource {
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'We directly use the url, https://github.com/actions/runner-images.';
+    'We use the url <https://github.com/actions/runner-images>.';
 
   /**
    * Only add stable runners to the datasource. See datasource readme for details.

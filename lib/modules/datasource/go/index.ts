@@ -32,11 +32,10 @@ export class GoDatasource extends Datasource {
   override readonly customRegistrySupport = false;
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
-    'First we try to extract it from the response by looking for date-like string in thre response using a regex. Incase that fails, we fetc version info using another url and look for the `Time` field in it.';
+  override readonly releaseTimeStampNote = `In case release timestamp isn't already returned from respective datasource used to fetch the releases, it is determined from the \`Time\` field in the results.`;
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'Deduces sourceUrl from the registryUrl and packageName';
+    'The source url is determined from the `packageName` and `registryUrl`.';
 
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();

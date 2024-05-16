@@ -22,10 +22,10 @@ export class GradleVersionDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'Extract and use the `buildTime` field from the release object.';
+    'The release timestamp is determined from the `buildTime` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'Use the url <https://github.com/gradle/gradle>';
+    'We use the url <https://github.com/gradle/gradle>.';
 
   private static readonly buildTimeRegex = regEx(
     '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$',

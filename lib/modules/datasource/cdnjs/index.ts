@@ -30,7 +30,7 @@ export class CdnJsDatasource extends Datasource {
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'To get the source url we use the repository field value from the package object.';
+    'The source url is determined from the `repository` field in the results.';
 
   @cache({
     namespace: `datasource-${CdnJsDatasource.id}`,

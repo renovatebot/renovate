@@ -13,7 +13,7 @@ export class GitTagsDatasource extends GitDatasource {
   override readonly customRegistrySupport = false;
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'We get `sourceUrl` by removing `.git` from the package name.';
+    'The source url is determined by using the `packageName` and `registryUrl`.';
 
   @cache({
     namespace: `datasource-${GitTagsDatasource.id}`,

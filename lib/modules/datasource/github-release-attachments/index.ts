@@ -39,11 +39,12 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
   override http: GithubHttp;
 
   override readonly releaseTimestampSupport = true;
+  // Note: not sure
   override readonly releaseTimeStampNote =
-    'To get release timestamp we use the `releaseTimestamp` field from the response.';
+    'The release timestamp is determined from the `releaseTimestamp` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'To get the source url we combine the `packageName` and `registryUrl`.';
+    'The source url is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
     super(GithubReleaseAttachmentsDatasource.id);
@@ -229,7 +230,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
   }
 
   /**
-   * This function can be used to fetch releases with a customisable versioning
+   * This function can be used to fetch releases with a customizable versioning
    * (e.g. semver) and with releases.
    *
    * This function will:

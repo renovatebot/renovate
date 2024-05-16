@@ -21,10 +21,10 @@ export class GalaxyDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'To get release timestamp we use the `created` field from the response.';
+    'The release timestamp is determined from the `created` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'To get the source url we use the `user` and `repo` fields from the response and combine it with `github.com`.';
+    'The source url is determined from the `github_user` and `github_repo` fields in the results.';
 
   @cache({
     namespace: 'datasource-galaxy',

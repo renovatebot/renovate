@@ -16,7 +16,7 @@ export class EndoflifeDatePackagesource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'To get release timestamp we use the releaseDate field from the response.';
+    'The release timestamp is determined from the `releaseDate` field in the results.';
 
   constructor() {
     super(EndoflifeDatePackagesource.id);

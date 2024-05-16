@@ -22,11 +22,12 @@ export class GithubReleasesDatasource extends Datasource {
   override http: GithubHttp;
 
   override readonly releaseTimestampSupport = true;
+  // Note: not sure
   override readonly releaseTimeStampNote =
-    'To get release timestamp we use the `releaseTimestamp` field from the response.';
+    'The release timestamp is determined from the `releaseTimestamp` field from the response.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'To get the source url we combine the `packageName` and `registryUrl`.';
+    'The source url is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
     super(GithubReleasesDatasource.id);

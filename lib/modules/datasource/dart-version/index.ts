@@ -23,7 +23,7 @@ export class DartVersionDatasource extends Datasource {
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'We use this url directly, https://github.com/dart-lang/sdk.';
+    'We use the url, https://github.com/dart-lang/sdk.';
 
   async getReleases({
     registryUrl,

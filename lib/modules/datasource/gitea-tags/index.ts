@@ -18,10 +18,10 @@ export class GiteaTagsDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'To get release timestamp we use the `created` field from the response.';
+    'The release timestamp is determined from the `created` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'To get the source url we combine the repo name and `registryUrl`.';
+    'The source url determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
     super(GiteaTagsDatasource.id);

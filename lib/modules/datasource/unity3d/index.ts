@@ -26,7 +26,7 @@ export class Unity3dDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'To get release timestamp we extract the date string from the `pubDate` element.';
+    'The release timestamp is determined from the `pubDate` tag in the results.';
 
   constructor() {
     super(Unity3dDatasource.id);

@@ -27,10 +27,10 @@ export class JenkinsPluginsDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'Use the `releaseTimestamp` or `buildDate` field from the version object.';
+    'The releaseTimestamp is determined from the `releaseTimestamp` or `buildDate` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'Extract `scm` field from the plugin info response.';
+    'The source url is determined from the `scm` field in the results.';
 
   async getReleases({
     packageName,

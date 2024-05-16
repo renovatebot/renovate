@@ -26,7 +26,7 @@ export class SbtPackageDatasource extends MavenDatasource {
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'First we split groupId and artifactId from the packageName. Then artifactID is split into artifact and its scalaVersion. We use this info to fetch the artifacts sub-directories and versions. Finally we use the latest version, groupId and the artifact sub-directories to fetch the urls, which also include the `source` field, which is our `sourceUrl`.';
+    'The source url is determined from the `scm` tags in the results.';
 
   constructor(id = SbtPackageDatasource.id) {
     super(id);

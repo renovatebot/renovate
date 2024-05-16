@@ -49,10 +49,10 @@ export class RubyGemsDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'To get release timestamp we use the `created_at` field from the response.';
+    'The release timestamp is determined from the `created_at` field in the results.';
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
-    'To get the source url we use the `source_code_uri` field from the response';
+    'The source url is determined from the `source_code_uri` field in the results.';
 
   @cache({
     namespace: `datasource-${RubyGemsDatasource.id}`,

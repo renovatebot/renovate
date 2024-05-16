@@ -16,13 +16,10 @@ export class NpmDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'To get release timestamp we use the `time` object which contains the release date for each version in a string to string mapping.';
-  override readonly sourceUrlSupport = 'package';
-  override readonly sourceUrlNote = `
-    1. We extract url from the repository object present in the response body (not inside versions array)
-    2. We extract url from the repository object present in each version object present in the versions array from the response
-    We prefer (2), if (1) and (2) are different.
-    `;
+    'The release timestamp is determined from the `time` field in the results.';
+  override readonly sourceUrlSupport = 'release';
+  override readonly sourceUrlNote =
+    'The source url is determined from the `repository` field in the results.';
 
   constructor() {
     super(NpmDatasource.id);

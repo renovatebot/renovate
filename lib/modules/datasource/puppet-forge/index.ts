@@ -14,7 +14,7 @@ export class PuppetForgeDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'To get release timestamp we use the `created_at` field from the response.';
+    'The release timestamp is determined from the `created_at` field from the response.';
 
   async getReleases({
     packageName,

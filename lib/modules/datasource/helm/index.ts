@@ -27,13 +27,10 @@ export class HelmDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimeStampNote =
-    'Extract and use the `created` field from the release object.';
+    'The release timstamp is determined from the `created` field in the results.';
   override readonly sourceUrlSupport = 'package';
-  override readonly sourceUrlNote = `
-  We extract it from the latest release object
-  We use the 'home' field if found else we check the 'sources' array and use the first url which resembles a chat repo url.
-  Incase none of the urls in the sources array are valid chart repo we use the first url.
-    `;
+  override readonly sourceUrlNote =
+    'The source url is determined from the `home` field or the `sources` field in the results.';
 
   @cache({
     namespace: `datasource-${HelmDatasource.id}`,

@@ -114,15 +114,21 @@ export interface DatasourceApi extends ModuleApi {
   customRegistrySupport: boolean;
 
   /**
-   * Whether release timestamps can be returned.
+   * Whether release timestamp can be returned.
    */
   releaseTimestampSupport: boolean;
+  /**
+   * Notes on how release timestamp is determined.
+   */
   releaseTimeStampNote?: string;
 
   /**
-   * Whether sourceURLs can be returned.
+   * Whether sourceURL can be returned.
    */
   sourceUrlSupport: SourceUrlSupport;
+  /**
+   * Notes on how sourceURL is determined.
+   */
   sourceUrlNote?: string;
 
   /**
