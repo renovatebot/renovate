@@ -29,6 +29,8 @@ export const presets: Record<string, Preset> = {
     description: 'Use custom regex versioning for bitnami images',
     packageRules: [
       {
+        matchCurrentValue:
+          '/^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?$/',
         matchDatasources: ['docker'],
         matchPackagePrefixes: [
           'bitnami/',
