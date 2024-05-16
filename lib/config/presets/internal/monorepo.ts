@@ -475,6 +475,7 @@ const repoGroups = {
   storybook: 'https://github.com/storybookjs/storybook',
   'storybook-react-native': 'https://github.com/storybookjs/react-native',
   strapi: 'https://github.com/strapi/strapi',
+  strum: 'https://github.com/Peternator7/strum',
   'stryker-js': 'https://github.com/stryker-mutator/stryker-js',
   surveyjs: 'https://github.com/surveyjs/surveyjs',
   'swashbuckle-aspnetcore':
