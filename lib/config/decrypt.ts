@@ -123,8 +123,6 @@ function validateDecryptedValue(
   return null;
 }
 
-let timesPrinted = 0;
-
 export async function decryptConfig(
   config: RenovateConfig,
   repository: string,
@@ -138,9 +136,8 @@ export async function decryptConfig(
       logger.debug({ config: val }, 'Found encrypted config');
 
       const encryptedWarning = GlobalConfig.get('encryptedWarning');
-      if (encryptedWarning && timesPrinted < 1) {
-        logger.warn(encryptedWarning);
-        timesPrinted++;
+      if (is.string(encryptedWarning)) {
+        logger.once.warn(encryptedWarning);
       }
 
       if (privateKey) {
