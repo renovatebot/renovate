@@ -209,7 +209,7 @@
     "json-dup-key-validator": "1.0.3",
     "json-stringify-pretty-compact": "3.0.0",
     "json5": "2.2.3",
-    "jsonata": "2.0.4",
+    "jsonata": "2.0.5",
     "jsonc-parser": "3.2.1",
     "klona": "2.0.6",
     "lru-cache": "10.2.2",
