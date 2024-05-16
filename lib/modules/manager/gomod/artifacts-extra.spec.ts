@@ -99,7 +99,8 @@ describe('modules/manager/gomod/artifacts-extra', () => {
           '| **Package**          | **Change**           |',
           '| :------------------- | :------------------- |',
           '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
-          '\n',
+          '',
+          '',
         ].join('\n'),
       );
     });
