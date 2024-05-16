@@ -1,4 +1,5 @@
 import { getManagers } from '../../modules/manager';
+import { supportedDatasources } from '../../modules/manager/ansible';
 import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
@@ -81,16 +82,8 @@ const options: RenovateOptions[] = [
     name: 'mergeConfidenceDatasources',
     description:
       'If set, Renovate will query the merge-confidence JSON API only for datasources that are part of this list.',
-    allowedValues: [
-      'go',
-      'npm',
-      'maven',
-      'pypi',
-      'nuget',
-      'packagist',
-      'rubygems',
-    ],
-    default: ['go', 'maven', 'npm', 'nuget', 'packagist', 'pypi', 'rubygems'],
+    allowedValues: supportedDatasources,
+    default: supportedDatasources,
     type: 'array',
     subType: 'string',
     globalOnly: true,
