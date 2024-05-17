@@ -126,7 +126,9 @@ export async function updateArtifacts({
     return null;
   }
 
-  const vendorDir = upath.join(upath.dirname(goModFileName), 'vendor/');
+  const goModDir = upath.dirname(goModFileName);
+
+  const vendorDir = upath.join(goModDir, 'vendor/');
   const vendorModulesFileName = upath.join(vendorDir, 'modules.txt');
   const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
@@ -235,7 +237,6 @@ export async function updateArtifacts({
         throw new Error('Invalid goGetDirs');
       }
     }
-
     let args = `get -d -t ${goGetDirs ?? './...'}`;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
@@ -275,18 +276,38 @@ export async function updateArtifacts({
         config.postUpdateOptions?.includes('gomodTidy1.17') === true ||
         config.postUpdateOptions?.includes('gomodTidyE') === true ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
+
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
 
+    const goWorkSumFileName = upath.join(goModDir, 'go.work.sum');
     if (useVendor) {
-      args = 'mod vendor';
-      logger.debug('go mod tidy command included');
-      execCommands.push(`${cmd} ${args}`);
-    }
+      // If go env GOWORK returns a non-empty path, check that it exists and if
+      // it does, then use go workspace vendoring.
+      const goWorkEnv = await exec(`${cmd} env GOWORK`, execOptions);
+      const goWorkFile = goWorkEnv?.stdout?.trim() || '';
+      const useGoWork = goWorkFile.length && ((await readLocalFile(goWorkFile)) !== null);
+      if (useGoWork) {
+        logger.debug('No go.work found');
+      }
 
+      if (useGoWork) {
+        args = 'work vendor';
+        logger.debug('using go work vendor');
+        execCommands.push(`${cmd} ${args}`);
+
+        args = 'work sync';
+        logger.debug('using go work sync');
+        execCommands.push(`${cmd} ${args}`);
+      } else {
+        args = 'mod vendor';
+        logger.debug('using go mod vendor');
+        execCommands.push(`${cmd} ${args}`);
+      }
+    }
     // We tidy one more time as a solution for #6795
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
@@ -299,7 +320,8 @@ export async function updateArtifacts({
     const status = await getRepoStatus();
     if (
       !status.modified.includes(sumFileName) &&
-      !status.modified.includes(goModFileName)
+      !status.modified.includes(goModFileName) &&
+      !status.modified.includes(goWorkSumFileName)
     ) {
       return null;
     }
@@ -312,6 +334,17 @@ export async function updateArtifacts({
           type: 'addition',
           path: sumFileName,
           contents: await readLocalFile(sumFileName),
+        },
+      });
+    }
+
+    if (status.modified.includes(goWorkSumFileName)) {
+      logger.debug('Returning updated go.work.sum');
+      res.push({
+        file: {
+          type: 'addition',
+          path: goWorkSumFileName,
+          contents: await readLocalFile(goWorkSumFileName),
         },
       });
     }
