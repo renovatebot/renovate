@@ -9,6 +9,7 @@ import {
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
+import { extractPackageFileFlags as extractRequirementsFileFlags } from '../pip_requirements';
 import type {
   PackageFileContent,
   UpdateArtifact,
@@ -20,7 +21,7 @@ import {
   getExecOptions,
   getRegistryCredVarsFromPackageFiles,
 } from './common';
-import { extractPackageFile } from './extract';
+import { matchManager } from './extract';
 import type { PipCompileArgs } from './types';
 import { inferCommandExecDir } from './utils';
 
@@ -116,12 +117,15 @@ export async function updateArtifacts({
       const upgradePackages = updatedDeps.filter((dep) => dep.isLockfileUpdate);
       const packageFiles: PackageFileContent[] = [];
       for (const name of compileArgs.sourceFiles) {
-        const path = upath.join(cwd, name);
-        const content = await readLocalFile(path, 'utf8');
-        if (content) {
-          const packageFile = extractPackageFile(content, path, {});
-          if (packageFile) {
-            packageFiles.push(packageFile);
+        const manager = matchManager(name);
+        if (manager === 'pip_requirements') {
+          const path = upath.join(cwd, name);
+          const content = await readLocalFile(path, 'utf8');
+          if (content) {
+            const packageFile = extractRequirementsFileFlags(content);
+            if (packageFile) {
+              packageFiles.push(packageFile);
+            }
           }
         }
       }

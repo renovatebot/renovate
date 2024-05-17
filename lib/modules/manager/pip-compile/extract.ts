@@ -23,7 +23,7 @@ import {
   sortPackageFiles,
 } from './utils';
 
-function matchManager(filename: string): SupportedManagers | 'unknown' {
+export function matchManager(filename: string): SupportedManagers | 'unknown' {
   if (filename.endsWith('setup.py')) {
     return 'pip_setup';
   }

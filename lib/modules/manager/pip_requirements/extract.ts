@@ -47,11 +47,9 @@ export function cleanRegistryUrls(registryUrls: string[]): string[] {
   });
 }
 
-export function extractPackageFile(
+export function extractPackageFileFlags(
   content: string,
-): PackageFileContent<PipRequirementsManagerData> | null {
-  logger.trace('pip_requirements.extractPackageFile()');
-
+): PackageFileContent<PipRequirementsManagerData> {
   let registryUrls: string[] = [];
   const additionalRegistryUrls: string[] = [];
   const additionalRequirementsFiles: string[] = [];
@@ -70,6 +68,33 @@ export function extractPackageFile(
       additionalConstraintsFiles.push(line.split(' ')[1]);
     }
   });
+
+  const res: PackageFileContent<PipRequirementsManagerData> = { deps: [] };
+  if (registryUrls.length > 0) {
+    res.registryUrls = cleanRegistryUrls(registryUrls);
+  }
+  if (additionalRegistryUrls.length) {
+    res.additionalRegistryUrls = cleanRegistryUrls(additionalRegistryUrls);
+  }
+  if (additionalRequirementsFiles.length) {
+    if (!res.managerData) {
+      res.managerData = {};
+    }
+    res.managerData.requirementsFiles = additionalRequirementsFiles;
+  }
+  if (additionalConstraintsFiles.length) {
+    if (!res.managerData) {
+      res.managerData = {};
+    }
+    res.managerData.constraintsFiles = additionalConstraintsFiles;
+  }
+  return res;
+}
+
+export function extractPackageFile(
+  content: string,
+): PackageFileContent<PipRequirementsManagerData> | null {
+  logger.trace('pip_requirements.extractPackageFile()');
 
   const pkgRegex = regEx(`^(${packagePattern})$`);
   const pkgValRegex = regEx(`^${dependencyPattern}$`);
@@ -131,33 +156,18 @@ export function extractPackageFile(
       return dep;
     })
     .filter(is.truthy);
+
+  const res = extractPackageFileFlags(content);
+  res.deps = deps;
+
   if (
-    !deps.length &&
-    !registryUrls.length &&
-    !additionalRegistryUrls.length &&
-    !additionalRequirementsFiles.length &&
-    !additionalConstraintsFiles.length
+    !res.deps.length &&
+    !res.registryUrls?.length &&
+    !res.additionalRegistryUrls?.length &&
+    !res.managerData?.requirementsFiles?.length &&
+    !res.managerData?.constraintsFiles?.length
   ) {
     return null;
-  }
-  const res: PackageFileContent = { deps };
-  if (registryUrls.length > 0) {
-    res.registryUrls = cleanRegistryUrls(registryUrls);
-  }
-  if (additionalRegistryUrls.length) {
-    res.additionalRegistryUrls = cleanRegistryUrls(additionalRegistryUrls);
-  }
-  if (additionalRequirementsFiles.length) {
-    if (!res.managerData) {
-      res.managerData = {};
-    }
-    res.managerData.requirementsFiles = additionalRequirementsFiles;
-  }
-  if (additionalConstraintsFiles.length) {
-    if (!res.managerData) {
-      res.managerData = {};
-    }
-    res.managerData.constraintsFiles = additionalConstraintsFiles;
   }
   return res;
 }
