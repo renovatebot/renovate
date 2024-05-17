@@ -1069,11 +1069,14 @@ export async function setBranchStatus({
 
 export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
-    const query = getQueryString({
+    const searchParams: Record<string, string> = {
       per_page: '100',
-      scope: 'created_by_me',
       state: 'opened',
-    });
+    };
+    if (!config.ignorePrAuthor) {
+      searchParams.scope = 'created_by_me';
+    }
+    const query = getQueryString(searchParams);
     const res = await gitlabApi.getJson<
       { iid: number; title: string; labels: string[] }[]
     >(`projects/${config.repository}/issues?${query}`, {

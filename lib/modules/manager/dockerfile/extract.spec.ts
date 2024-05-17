@@ -669,6 +669,27 @@ describe('modules/manager/dockerfile/extract', () => {
       ]);
     });
 
+    it('handles debian with prefixes and registries', () => {
+      const res = extractPackageFile(
+        'FROM docker.io/library/debian:10\n',
+        '',
+        {},
+      )?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '10',
+          datasource: 'docker',
+          depName: 'docker.io/library/debian',
+          depType: 'final',
+          replaceString: 'docker.io/library/debian:10',
+          versioning: 'debian',
+        },
+      ]);
+    });
+
     it('handles prefixes', () => {
       const res = extractPackageFile('FROM amd64/ubuntu:18.04\n', '', {})?.deps;
       expect(res).toEqual([
@@ -682,6 +703,27 @@ describe('modules/manager/dockerfile/extract', () => {
           depType: 'final',
           packageName: 'amd64/ubuntu',
           replaceString: 'amd64/ubuntu:18.04',
+          versioning: 'ubuntu',
+        },
+      ]);
+    });
+
+    it('handles prefixes with registries', () => {
+      const res = extractPackageFile(
+        'FROM public.ecr.aws/ubuntu/ubuntu:18.04\n',
+        '',
+        {},
+      )?.deps;
+      expect(res).toEqual([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: '18.04',
+          datasource: 'docker',
+          depName: 'public.ecr.aws/ubuntu/ubuntu',
+          depType: 'final',
+          replaceString: 'public.ecr.aws/ubuntu/ubuntu:18.04',
           versioning: 'ubuntu',
         },
       ]);

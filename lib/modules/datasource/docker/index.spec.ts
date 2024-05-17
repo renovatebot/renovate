@@ -744,6 +744,83 @@ describe('modules/datasource/docker/index', () => {
       );
     });
 
+    it('supports architecture-specific digest whithout manifest list', async () => {
+      const currentDigest =
+        'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull',
+        )
+        .times(4)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .times(3)
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: {
+            digest: 'some-config-digest',
+            mediaType: 'application/vnd.docker.container.image.v1+json',
+          },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(
+          200,
+          {
+            schemaVersion: 2,
+            mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+            config: {
+              mediaType: 'application/vnd.docker.container.image.v1+json',
+              size: 2917,
+              digest:
+                'sha256:4591c431eb2fcf90ebb32476db6cfe342617fc3d3ca9653b9e0c47859cac1cf9',
+            },
+          },
+          {
+            'docker-content-digest': 'some-new-digest',
+          },
+        );
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+          currentDigest,
+        },
+        'some-new-value',
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Current digest ${currentDigest} relates to architecture amd64`,
+      );
+      expect(res).toBe('some-new-digest');
+    });
+
     it('handles missing architecture-specific digest', async () => {
       const currentDigest =
         'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
