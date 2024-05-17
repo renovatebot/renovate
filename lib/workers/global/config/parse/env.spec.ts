@@ -276,7 +276,7 @@ describe('workers/global/config/parse/env', () => {
       const config = await env.getConfig(envParam);
       expect(config.autodiscoverRepoSort).toBe('alpha');
       expect(config.autodiscoverRepoOrder).toBe('desc');
-      expect(config.dockerMaxPages).toBeUndefined();
+      expect(config.dockerMaxPages).toBe(10);
     });
 
     describe('RENOVATE_CONFIG tests', () => {

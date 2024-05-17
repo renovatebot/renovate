@@ -83,9 +83,11 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return result;
 }
 
+// these experimental env vars have been converted into self-hosted config options
 const convertedExperimentalEnvVars = [
   'RENOVATE_X_AUTODISCOVER_REPO_SORT',
   'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
+  'RENOVATE_X_DOCKER_MAX_PAGES',
 ];
 
 /**

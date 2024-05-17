@@ -36,6 +36,7 @@ export class GlobalConfig {
     'autodiscoverRepoSort',
     'autodiscoverRepoOrder',
     'userAgent',
+    'dockerMaxPages',
   ];
 
   private static config: RepoGlobalConfig = {};

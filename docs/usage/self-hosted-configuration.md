@@ -501,6 +501,11 @@ For example, `{"dockerCliOptions": "--memory=4g"}` will add a CLI flag to the `d
 
 Read the [Docker Docs, configure runtime resource constraints](https://docs.docker.com/config/containers/resource_constraints/) to learn more.
 
+## dockerMaxPages
+
+If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
+This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
+
 ## dockerSidecarImage
 
 By default Renovate pulls the sidecar Docker containers from `ghcr.io/containerbase/sidecar`.

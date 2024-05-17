@@ -3067,6 +3067,14 @@ const options: RenovateOptions[] = [
     default: 90,
     globalOnly: true,
   },
+  {
+    name: 'dockerMaxPages',
+    description:
+      'If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.',
+    type: 'integer',
+    default: 20,
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

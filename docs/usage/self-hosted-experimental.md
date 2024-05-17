@@ -43,11 +43,6 @@ The process that runs Renovate must have the correct permissions to delete the c
 
 If set to any value, Renovate will use the Docker Hub API (`https://hub.docker.com`) to fetch tags instead of the normal Docker API for images pulled from `https://index.docker.io`.
 
-## `RENOVATE_X_DOCKER_MAX_PAGES`
-
-If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
-This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
-
 ## `RENOVATE_X_EAGER_GLOBAL_EXTENDS`
 
 Resolve and merge `globalExtends` presets before other global config, instead of after.

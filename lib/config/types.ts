@@ -163,6 +163,7 @@ export interface RepoGlobalConfig {
   autodiscoverRepoSort?: RepoSortMethod;
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
+  dockerMaxPages?: number;
 }
 
 export interface LegacyAdminConfig {
