@@ -285,11 +285,6 @@ export async function updateArtifacts({
       args = 'mod vendor';
       logger.debug('go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
-      if (isGoModTidyRequired) {
-        args = 'mod tidy' + tidyOpts;
-        logger.debug('go mod tidy command included');
-        execCommands.push(`${cmd} ${args}`);
-      }
     }
 
     // We tidy one more time as a solution for #6795
