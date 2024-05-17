@@ -2,31 +2,29 @@
 
 ## Authentication
 
-First, [create a Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account.
+First, [create a Personal Access Token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account, or use a [Group Access Token](https://docs.gitlab.com/ee/user/group/settings/group_access_tokens.html#bot-users-for-groups).
 
 If you are using a Group access token, the token must have Developer role or higher permissions in order to create issues and merge requests.
 The token must have Maintainer permissions in order to perform Automerge.
+Ensure that you are [rotating the group access token](https://docs.gitlab.com/ee/api/group_access_tokens.html#rotate-a-group-access-token) before it expires in order to keep the same GitLab-generated bot user.
 
-For real runs, give the PAT these scopes:
+For real runs, give the access token these scopes:
 
-- `read_user`
 - `api`
 - `write_repository`
 - `read_registry` (only if Renovate needs to access the [GitLab Container registry](https://docs.gitlab.com/ee/user/packages/container_registry/))
 
-For dry runs, give the PAT these scopes:
+For dry runs, give the access token these scopes:
 
-- `read_user`
 - `read_api`
 - `read_repository`
-- `write_repository` (when using autodiscover)
 - `read_registry` (only if Renovate needs to access the [GitLab Container registry](https://docs.gitlab.com/ee/user/packages/container_registry/))
 
-Let Renovate use your PAT by doing _one_ of the following:
+Let Renovate use your access token by doing _one_ of the following:
 
-- Set your PAT as a `token` in your `config.js` file
-- Set your PAT as an environment variable `RENOVATE_TOKEN`
-- Set your PAT when you run Renovate in the CLI with `--token=`
+- Set your access token as a `token` in your `config.js` file
+- Set your access token as an environment variable `RENOVATE_TOKEN`
+- Set your access token when you run Renovate in the CLI with `--token=`
 
 Remember to set `platform=gitlab` somewhere in your Renovate config file.
 
