@@ -20,7 +20,7 @@ export class BitbucketTagsDatasource extends Datasource {
   static readonly defaultRegistryUrls = ['https://bitbucket.org'];
 
   static readonly releaseTimestampSupport = true;
-  static readonly releaseTimeStampNote =
+  static readonly releaseTimestampNote =
     'The release timestamp is determined from the `date` field in the results.';
   static readonly sourceUrlSupport = 'package';
   static readonly sourceUrlNote =

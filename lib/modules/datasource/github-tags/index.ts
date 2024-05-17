@@ -22,7 +22,7 @@ export class GithubTagsDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The get release timestamp is determined from the `releaseTimestamp` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

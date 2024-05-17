@@ -120,7 +120,7 @@ export interface DatasourceApi extends ModuleApi {
   /**
    * Notes on how release timestamp is determined.
    */
-  releaseTimeStampNote?: string;
+  releaseTimestampNote?: string;
 
   /**
    * Whether sourceURL can be returned.

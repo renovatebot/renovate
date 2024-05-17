@@ -33,7 +33,7 @@ export class PackagistDatasource extends Datasource {
   override readonly registryStrategy = 'hunt';
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `time` field in the results.';
   // Note: this can be changed to 'release', as the source is present in each release but we remove it while processing
   override readonly sourceUrlSupport = 'package';

@@ -26,7 +26,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   override readonly defaultVersioning = hashicorpVersioning.id;
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is only supported for the latest version, and is determined from the `published_at` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

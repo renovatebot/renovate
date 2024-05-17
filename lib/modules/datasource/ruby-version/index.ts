@@ -21,11 +21,11 @@ export class RubyVersionDatasource extends Datasource {
   override readonly defaultVersioning = rubyVersioningId;
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `release-list` table in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'We use the url, <https://github.com/ruby/ruby>';
+    'We use the url, https://github.com/ruby/ruby.';
 
   @cache({ namespace: `datasource-${RubyVersionDatasource.id}`, key: 'all' })
   async getReleases({

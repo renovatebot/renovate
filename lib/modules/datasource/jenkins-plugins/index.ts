@@ -26,7 +26,7 @@ export class JenkinsPluginsDatasource extends Datasource {
   private static readonly packageVersionsPath = 'current/plugin-versions.json';
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The releaseTimestamp is determined from the `releaseTimestamp` or `buildDate` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

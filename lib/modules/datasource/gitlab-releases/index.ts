@@ -12,7 +12,7 @@ export class GitlabReleasesDatasource extends Datasource {
   static readonly registryStrategy = 'first';
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `released_at` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

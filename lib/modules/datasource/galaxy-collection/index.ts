@@ -29,7 +29,7 @@ export class GalaxyCollectionDatasource extends Datasource {
   override readonly defaultVersioning = pep440Versioning.id;
 
   override readonly releaseTimestampSupport = true;
-  override releaseTimeStampNote =
+  override releaseTimestampNote =
     'The release timestamp is determined from the `created_at` field in the results.';
   // sourceUrl is returned in each release as well as the ReleaseResult
   // the one present in release result is the sourceUrl of the latest release

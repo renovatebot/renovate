@@ -23,7 +23,7 @@ export class GithubReleasesDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   // Note: not sure
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `releaseTimestamp` field from the response.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

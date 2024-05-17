@@ -27,7 +27,7 @@ export abstract class Datasource implements DatasourceApi {
   registryStrategy: RegistryStrategy | undefined = 'first';
 
   releaseTimestampSupport = false;
-  releaseTimeStampNote: string | undefined;
+  releaseTimestampNote?: string | undefined;
 
   sourceUrlSupport: SourceUrlSupport = 'none';
   sourceUrlNote?: string | undefined;

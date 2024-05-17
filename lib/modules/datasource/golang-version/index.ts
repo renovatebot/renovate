@@ -33,11 +33,11 @@ export class GolangVersionDatasource extends Datasource {
   override readonly defaultVersioning = semverVersioningId;
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `Date` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'We use the url <https://github.com/golang/go>.';
+    'We use the url https://github.com/golang/go.';
 
   @cache({ namespace: `datasource-${GolangVersionDatasource.id}`, key: 'all' })
   async getReleases({

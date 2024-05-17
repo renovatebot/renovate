@@ -13,7 +13,7 @@ export class PuppetForgeDatasource extends Datasource {
   override readonly defaultRegistryUrls = [PUPPET_FORGE];
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `created_at` field from the response.';
 
   async getReleases({

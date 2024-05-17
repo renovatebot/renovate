@@ -82,7 +82,7 @@ export class DockerDatasource extends Datasource {
   override readonly defaultConfig = defaultConfig;
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `tag_last_pushed` field in thre results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

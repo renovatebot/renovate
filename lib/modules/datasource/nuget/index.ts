@@ -19,7 +19,7 @@ export class NugetDatasource extends Datasource {
   override readonly registryStrategy = 'merge';
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote = `
+  override readonly releaseTimestampNote = `
   For the v2 api, the release timestamp is determined from the \`Publised\` tag and,
   for the v3 api, the release timestamp is determined from the \`published\` field in the results.
    `;

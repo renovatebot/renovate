@@ -23,7 +23,7 @@ export class DenoDatasource extends Datasource {
   override readonly defaultRegistryUrls = ['https://apiland.deno.dev'];
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `uploaded_at` field in the results.';
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =

@@ -13,7 +13,7 @@ export class GitlabTagsDatasource extends Datasource {
   protected override http: GitlabHttp;
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'To get release timestamp we use the `created_at` field from the response.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

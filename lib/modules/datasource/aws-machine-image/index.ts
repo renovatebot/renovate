@@ -19,7 +19,7 @@ export class AwsMachineImageDataSource extends Datasource {
   override readonly caching = true;
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `CreationDate` field in the results.';
 
   override readonly defaultConfig = {

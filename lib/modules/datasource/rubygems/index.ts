@@ -48,7 +48,7 @@ export class RubyGemsDatasource extends Datasource {
   private readonly versionsEndpointCache: VersionsEndpointCache;
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `created_at` field in the results.';
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =

@@ -19,7 +19,7 @@ export class HexDatasource extends Datasource {
   override readonly defaultVersioning = hexVersioning.id;
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The relase timestamp is determined the `inserted_at` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =

@@ -20,7 +20,7 @@ export class GalaxyDatasource extends Datasource {
   override readonly defaultVersioning = pep440Versioning.id;
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimeStampNote =
+  override readonly releaseTimestampNote =
     'The release timestamp is determined from the `created` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
