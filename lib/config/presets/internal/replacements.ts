@@ -47,6 +47,7 @@ export const presets: Record<string, Preset> = {
       'replacements:vso-task-lib-to-azure-pipelines-task-lib',
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
+      'replacements:zap',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
   },
@@ -947,6 +948,35 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['xmldom', 'xmldom-alpha'],
         replacementName: '@xmldom/xmldom',
         replacementVersion: '0.7.5',
+      },
+    ],
+  },
+  zap: {
+    description: 'Replace ZAP dependencies.',
+    packageRules: [
+      {
+        description:
+          'The `zap-stable` image has moved to the `zaproxy` organization.',
+        matchCurrentVersion: '>=2.0.0 <2.14.0',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?owasp/zap2docker-stable$',
+          '^(?:docker\\.io/)?softwaresecurityproject/zap-stable$',
+        ],
+        replacementName: 'zaproxy/zap-stable',
+        replacementVersion: '2.14.0',
+      },
+      {
+        description:
+          'The `zap-bare` image has moved to the `zaproxy` organization.',
+        matchCurrentVersion: '>=2.0.0 <2.14.0',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?owasp/zap2docker-bare$',
+          '^(?:docker\\.io/)?softwaresecurityproject/zap-bare$',
+        ],
+        replacementName: 'zaproxy/zap-bare',
+        replacementVersion: '2.14.0',
       },
     ],
   },
