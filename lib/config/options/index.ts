@@ -3075,6 +3075,30 @@ const options: RenovateOptions[] = [
     default: 20,
     globalOnly: true,
   },
+  {
+    name: 'gitlabAutoMergeableCheckAttempts',
+    description:
+      'If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.',
+    type: 'integer',
+    default: 5,
+    globalOnly: true,
+  },
+  {
+    name: 'gitlabBranchStatusDelay',
+    description:
+      'Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.',
+    type: 'integer',
+    default: 1000,
+    globalOnly: true,
+  },
+  {
+    name: 'gitlabMergeRequestDelay',
+    description:
+      'If set, Renovate will use this as a delay to proceed with an automerge.',
+    type: 'integer',
+    default: 250,
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

@@ -624,6 +624,27 @@ Renovate will then create branches on the fork and opens Pull Requests on the pa
 !!! note
     Forked repositories will always be skipped when `forkToken` is set, even if `includeForks` is true.
 
+## gitlabAutoMergeableCheckAttempts
+
+If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
+The formula for the delay between attempts is `gitlabAutoMergeableCheckAttempts * attempt * attempt` milliseconds.
+
+Default value: `5` (attempts results in max. 13.75 seconds timeout).
+
+## gitlabBranchStatusDelay
+
+Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
+
+Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
+
+Default value: `1000` (milliseconds).
+
+## gitlabMergeRequestDelay
+
+If set, Renovate will use this as a delay to proceed with an automerge.
+
+Default value: `250` (milliseconds).
+
 ## gitNoVerify
 
 Controls when Renovate passes the `--no-verify` flag to `git`.

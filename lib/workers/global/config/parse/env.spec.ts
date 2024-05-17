@@ -272,6 +272,9 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_AUTODISCOVER_REPO_SORT: 'alpha',
         RENOVATE_X_DOCKER_MAX_PAGES: '10',
         RENOVATE_AUTODISCOVER_REPO_ORDER: 'desc',
+        RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS: '10',
+        RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY: '10',
+        RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY: '10',
       };
       const config = await env.getConfig(envParam);
       expect(config.autodiscoverRepoSort).toBe('alpha');

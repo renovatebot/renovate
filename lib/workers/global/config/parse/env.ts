@@ -39,6 +39,7 @@ const renameKeys = {
   aliases: 'registryAliases',
   azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
+  gitlabAutoMergeableCheckAttemps: 'gitlabAutoMergeableCheckAttempts', // accounting for typo in RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS
 };
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -88,6 +89,9 @@ const convertedExperimentalEnvVars = [
   'RENOVATE_X_AUTODISCOVER_REPO_SORT',
   'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
   'RENOVATE_X_DOCKER_MAX_PAGES',
+  'RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS',
+  'RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY',
+  'RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY',
 ];
 
 /**
@@ -114,10 +118,10 @@ export async function getConfig(
 ): Promise<AllConfig> {
   let env = inputEnv;
   env = normalizePrefixes(inputEnv, inputEnv.ENV_PREFIX);
+  env = massageConvertedExperimentalVars(env);
   env = renameEnvKeys(env);
   // massage the values of migrated configuration keys
   env = massageEnvKeyValues(env);
-  env = massageConvertedExperimentalVars(env);
 
   const options = getOptions();
 

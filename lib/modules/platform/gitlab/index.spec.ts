@@ -4,6 +4,7 @@ import { mockDeep } from 'jest-mock-extended';
 import type { Platform, RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
+import type * as _globalConfig from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -31,6 +32,7 @@ describe('modules/platform/gitlab/index', () => {
   let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
   let timers: jest.Mocked<typeof _timers>;
+  let globalConfig: jest.Mocked<typeof _globalConfig>;
 
   beforeEach(async () => {
     // reset module
@@ -38,6 +40,7 @@ describe('modules/platform/gitlab/index', () => {
 
     gitlab = await import('.');
     logger = mocked(await import('../../../logger')).logger;
+    globalConfig = mocked(await import('../../../config/global'));
     timers = jest.requireMock('timers/promises');
     hostRules = jest.requireMock('../../../util/host-rules');
     git = jest.requireMock('../../../util/git');
@@ -50,9 +53,7 @@ describe('modules/platform/gitlab/index', () => {
       token: '123test',
     });
     delete process.env.GITLAB_IGNORE_REPO_URL;
-    delete process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY;
-    delete process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS;
-    delete process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY;
+    globalConfig.GlobalConfig.reset();
   });
 
   async function initFakePlatform(version: string) {
@@ -1007,9 +1008,9 @@ describe('modules/platform/gitlab/index', () => {
       ).toResolve();
     });
 
-    it('waits for RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY ms when set', async () => {
+    it('waits for gitlabBranchStatusDelay ms when set', async () => {
       const delay = 5000;
-      process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY = String(delay);
+      globalConfig.GlobalConfig.set({ gitlabBranchStatusDelay: delay });
 
       const scope = await initRepo();
       scope
@@ -1744,8 +1745,10 @@ describe('modules/platform/gitlab/index', () => {
 
   describe('createPr(branchName, title, body)', () => {
     beforeEach(() => {
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '2';
-      process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY = '100';
+      globalConfig.GlobalConfig.set({
+        gitlabAutoMergeableCheckAttempts: 2,
+        gitlabMergeRequestDelay: 100,
+      });
     });
 
     it('returns the PR', async () => {
@@ -1889,7 +1892,10 @@ describe('modules/platform/gitlab/index', () => {
         .reply(405, {})
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      globalConfig.GlobalConfig.set({
+        gitlabAutoMergeableCheckAttempts: 3,
+        gitlabMergeRequestDelay: 100,
+      });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -1944,7 +1950,10 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, reply_body)
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      globalConfig.GlobalConfig.set({
+        gitlabAutoMergeableCheckAttempts: 3,
+        gitlabMergeRequestDelay: 100,
+      });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -1998,7 +2007,10 @@ describe('modules/platform/gitlab/index', () => {
         .reply(405, {})
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS = '3';
+      globalConfig.GlobalConfig.set({
+        gitlabAutoMergeableCheckAttempts: 3,
+        gitlabMergeRequestDelay: 100,
+      });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',

@@ -3,6 +3,7 @@ import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
+import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -23,7 +24,6 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
 import type { HttpResponse } from '../../../util/http/types';
-import { parseInteger } from '../../../util/number';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -666,15 +666,15 @@ async function tryPrAutomerge(
       ];
       const desiredStatus = 'can_be_merged';
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
-      const retryTimes = parseInteger(
-        process.env.RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS,
+      const retryTimes = GlobalConfig.get(
+        'gitlabAutoMergeableCheckAttempts',
         5,
       );
 
-      const mergeDelay = parseInteger(
-        process.env.RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY,
-        250,
-      );
+      const mergeDelay = GlobalConfig.get('gitlabMergeRequestDelay', 250);
+
+      // eslint-disable-next-line
+      console.log(mergeDelay, retryTimes);
 
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
@@ -1042,9 +1042,7 @@ export async function setBranchStatus({
 
   try {
     // give gitlab some time to create pipelines for the sha
-    await setTimeout(
-      parseInteger(process.env.RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY, 1000),
-    );
+    await setTimeout(GlobalConfig.get('gitlabBranchStatusDelay', 1000));
 
     await gitlabApi.postJson(url, { body: options });
 

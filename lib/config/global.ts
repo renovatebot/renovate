@@ -37,6 +37,9 @@ export class GlobalConfig {
     'autodiscoverRepoOrder',
     'userAgent',
     'dockerMaxPages',
+    'gitlabAutoMergeableCheckAttempts',
+    'gitlabBranchStatusDelay',
+    'gitlabMergeRequestDelay',
   ];
 
   private static config: RepoGlobalConfig = {};
