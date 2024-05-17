@@ -1,6 +1,7 @@
 import { setTimeout } from 'timers/promises';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
+import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -109,9 +110,9 @@ export async function initPlatform({
   };
   try {
     let bitbucketServerVersion: string;
-    // istanbul ignore if: experimental feature
-    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
-      bitbucketServerVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    const platformVersion = GlobalConfig.get('platformVersion');
+    if (platformVersion) {
+      bitbucketServerVersion = platformVersion;
     } else {
       const { version } = (
         await bitbucketServerHttp.getJson<{ version: string }>(

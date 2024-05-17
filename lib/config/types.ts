@@ -167,6 +167,7 @@ export interface RepoGlobalConfig {
   gitlabAutoMergeableCheckAttempts?: number;
   gitlabBranchStatusDelay?: number;
   gitlabMergeRequestDelay?: number;
+  platformVersion?: string;
 }
 
 export interface LegacyAdminConfig {

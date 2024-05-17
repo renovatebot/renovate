@@ -275,11 +275,16 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_GITLAB_AUTO_MERGEABLE_CHECK_ATTEMPS: '10',
         RENOVATE_X_GITLAB_BRANCH_STATUS_DELAY: '10',
         RENOVATE_X_GITLAB_MERGE_REQUEST_DELAY: '10',
+        RENOVATE_X_PLATFORM_VERSION: '8.0.0',
       };
       const config = await env.getConfig(envParam);
       expect(config.autodiscoverRepoSort).toBe('alpha');
       expect(config.autodiscoverRepoOrder).toBe('desc');
       expect(config.dockerMaxPages).toBe(10);
+      expect(config.gitlabAutoMergeableCheckAttempts).toBe(10);
+      expect(config.gitlabBranchStatusDelay).toBe(10);
+      expect(config.gitlabMergeRequestDelay).toBe(10);
+      expect(config.platformVersion).toBe('8.0.0');
     });
 
     describe('RENOVATE_CONFIG tests', () => {

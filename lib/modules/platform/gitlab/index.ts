@@ -130,9 +130,10 @@ export async function initPlatform({
         user.commit_email ?? user.email
       }>`;
     }
+    const platformVersion = GlobalConfig.get('platformVersion');
     // istanbul ignore if: experimental feature
-    if (process.env.RENOVATE_X_PLATFORM_VERSION) {
-      gitlabVersion = process.env.RENOVATE_X_PLATFORM_VERSION;
+    if (platformVersion) {
+      gitlabVersion = platformVersion;
     } else {
       const version = (
         await gitlabApi.getJson<{ version: string }>('version', { token })

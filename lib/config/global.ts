@@ -40,6 +40,7 @@ export class GlobalConfig {
     'gitlabAutoMergeableCheckAttempts',
     'gitlabBranchStatusDelay',
     'gitlabMergeRequestDelay',
+    'platformVersion',
   ];
 
   private static config: RepoGlobalConfig = {};

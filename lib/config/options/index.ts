@@ -3099,6 +3099,13 @@ const options: RenovateOptions[] = [
     default: 250,
     globalOnly: true,
   },
+  {
+    name: 'platformVersion',
+    description:
+      'Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.',
+    type: 'string',
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
