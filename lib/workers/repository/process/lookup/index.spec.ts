@@ -10,6 +10,7 @@ import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags';
+import { GoDatasource } from '../../../../modules/datasource/go';
 import { MavenDatasource } from '../../../../modules/datasource/maven';
 import { NpmDatasource } from '../../../../modules/datasource/npm';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist';
@@ -3155,6 +3156,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '1.3.0',
+        currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
         fixedVersion: '1.3.0',
         isSingleVersion: true,
         registryUrl: 'https://registry.npmjs.org',
@@ -3195,6 +3197,7 @@ describe('workers/repository/process/lookup/index', () => {
       ).unwrapOrThrow();
       expect(res).toEqual({
         currentVersion: '1.3.0',
+        currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
         fixedVersion: '1.3.0',
         isSingleVersion: true,
         registryUrl: 'https://registry.npmjs.org',
@@ -3247,6 +3250,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '1.3.0',
+        currentVersionTimestamp: '2015-04-26T16:42:11.311Z',
         deprecationMessage: codeBlock`
         On registry \`https://registry.npmjs.org\`, the "latest" version of dependency \`q3\` has the following deprecation notice:
 
@@ -4039,14 +4043,15 @@ describe('workers/repository/process/lookup/index', () => {
           allowedVersions: '< 19.0.0',
         },
       ];
+      const releaseTimestamp = new Date(
+        Date.now() - 25 * 60 * 60 * 1000,
+      ).toISOString();
       getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '17.0.0',
             // a day old release
-            releaseTimestamp: new Date(
-              Date.now() - 25 * 60 * 60 * 1000,
-            ).toISOString(),
+            releaseTimestamp,
           },
           {
             version: '18.0.0',
@@ -4063,6 +4068,7 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect(res).toEqual({
         currentVersion: '17.0.0',
+        currentVersionTimestamp: releaseTimestamp,
         fixedVersion: '17.0.0',
         isSingleVersion: true,
         registryUrl: 'https://index.docker.io',
@@ -4078,7 +4084,6 @@ describe('workers/repository/process/lookup/index', () => {
         ],
         versioning: 'docker',
         warnings: [],
-        currentVersionTimestamp: undefined,
       });
     });
 
@@ -4555,6 +4560,43 @@ describe('workers/repository/process/lookup/index', () => {
 
         expect(updates).toBeEmptyArray();
       });
+    });
+
+    it('detects gomod updates and uses updateType=digest when appropriate', async () => {
+      config.manager = 'gomod';
+      config.datasource = GoDatasource.id;
+      config.currentValue = 'v0.0.0-20240506185236-b8a5c65736ae';
+      config.currentDigest = 'b8a5c65736ae';
+      config.packageName = 'google.golang.org/genproto/googleapis/rpc';
+      config.digestOneAndOnly = true;
+
+      httpMock
+        .scope(
+          'https://proxy.golang.org/google.golang.org/genproto/googleapis/rpc',
+        )
+        .get('/@v/list')
+        .reply(200, '')
+        .get('/v2/@v/list')
+        .reply(404)
+        .get('/@latest')
+        .reply(200, { Version: 'v0.0.0-20240509183442-62759503f434' });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newDigest: '62759503f434',
+          newMajor: 0,
+          newMinor: 0,
+          newValue: 'v0.0.0-20240509183442-62759503f434',
+          newVersion: 'v0.0.0-20240509183442-62759503f434',
+          releaseTimestamp: '2024-05-09T18:34:42.000Z',
+          updateType: 'digest',
+        },
+      ]);
     });
   });
 });

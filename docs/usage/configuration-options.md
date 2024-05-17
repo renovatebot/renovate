@@ -689,7 +689,7 @@ The `regex` manager which is based on using Regular Expression named capture gro
 You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
 
 - `datasource`
-- `depName`
+- `depName` and / or `packageName`
 - `currentValue`
 
 Use named capture group matching _or_ set a corresponding template.
@@ -703,7 +703,7 @@ For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars
 
 <!-- prettier-ignore -->
 !!! tip
-    Look at our [Regex Manager Presets](./presets-regexManagers.md), they may have what you need.
+    Look at our [Custom Manager Presets](./presets-customManagers.md), they may have what you need.
 
 ### customType
 
@@ -897,27 +897,6 @@ It will be compiled using Handlebars and the regex `groups` result.
 `packageName` is used for looking up dependency versions.
 It will be compiled using Handlebars and the regex `groups` result.
 It will default to the value of `depName` if left unconfigured/undefined.
-
-### readOnly
-
-If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
-Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
-
-This option could be used to avoid rate limits for certain platforms like GitHub or Bitbucket, by offloading the read operations to a different user.
-
-```json
-{
-  "hostRules": [
-    {
-      "matchHost": "api.github.com",
-      "readOnly": true,
-      "token": "********"
-    }
-  ]
-}
-```
-
-If more than one token matches for a read-only request then the `readOnly` token will be given preference.
 
 ### currentValueTemplate
 
@@ -1971,6 +1950,27 @@ registry=https://gitlab.myorg.com/api/v4/packages/npm/
 !!! note
     Values containing a URL path but missing a scheme will be prepended with 'https://' (e.g. `domain.com/path` -> `https://domain.com/path`)
 
+### readOnly
+
+If the `readOnly` field is being set to `true` inside the host rule, it will match only against the requests that are known to be read operations.
+Examples are `GET` requests or `HEAD` requests, but also it could be certain types of GraphQL queries.
+
+This option could be used to avoid rate limits for certain platforms like GitHub or Bitbucket, by offloading the read operations to a different user.
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "readOnly": true,
+      "token": "********"
+    }
+  ]
+}
+```
+
+If more than one token matches for a read-only request then the `readOnly` token will be given preference.
+
 ### timeout
 
 Use this figure to adjust the timeout for queries.
@@ -2060,9 +2060,12 @@ Applicable for Composer only for now.
 ## ignorePrAuthor
 
 This is usually needed if someone needs to migrate bot accounts, including from the Mend Renovate App to self-hosted.
+An additional use case is for GitLab users of project or group access tokens who need to rotate them.
+
 If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
 You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
-It's recommended to revert this setting once that transition period is over and all old PRs are resolved.
+
+Setting this field to `true` in GitLab will also mean that all Issues will be fetched instead of only those by the bot itself.
 
 ## ignorePresets
 
@@ -2323,6 +2326,24 @@ This works because Renovate will add a "renovate/stability-days" pending status 
 
 Add to this object if you wish to define rules that apply only to minor updates.
 
+## mode
+
+This configuration option was created primarily for use with Mend's hosted app, but can also be useful for some self-hosted use cases.
+
+It enables a new `silent` mode to allow repos to be scanned for updates _and_ for users to be able to request such updates be opened in PRs _on demand_ through the Mend UI, without needing the Dependency Dashboard issue in the repo.
+
+Although similar, the options `mode=silent` and `dryRun` can be used together.
+When both are configured, `dryRun` takes precedence, so for example PRs won't be created.
+
+Configuring `silent` mode is quite similar to `dryRun=lookup` except:
+
+- It will bypass onboarding checks (unlike when performing a dry run on a non-onboarded repo) similar to `requireConfig=optional`
+- It can create branches/PRs if `checkedBranches` is set
+- It will keep any existing branches up-to-date (e.g. ones created previously using `checkedBranches`)
+
+When in `silent` mode, Renovate does not create issues (such as Dependency Dashboard, or due to config errors) or Config Migration PRs, even if enabled.
+It also does not prune/close any which already exist.
+
 ## npmToken
 
 See [Private npm module support](./getting-started/private-packages.md) for details on how this is used.
@@ -2452,8 +2473,9 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 
 ### allowedVersions
 
-Use this - usually within a packageRule - to limit how far to upgrade a dependency.
-For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
+You can use `allowedVersions` - usually within a `packageRules` entry - to limit how far to upgrade a dependency.
+
+For example, if you want to upgrade to Angular v1.5 but _not_ to `angular` v1.6 or higher, you could set `allowedVersions` to `<= 1.5` or `< 1.6.0`:
 
 ```json
 {
@@ -2466,10 +2488,14 @@ For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or
 }
 ```
 
-The valid syntax for this will be calculated at runtime because it depends on the versioning scheme, which is itself dynamic.
+Renovate calculates the valid syntax for this at runtime, because it depends on the dynamic versioning scheme.
 
-This field also supports Regular Expressions if they begin and end with `/`.
-For example, the following will enforce that only 3 or 4-part versions are supported, without any prefixes:
+#### Using regular expressions
+
+You can use Regular Expressions in the `allowedVersion` config.
+You must _begin_ and _end_ your Regular Expression with the `/` character!
+
+For example, this config only allows 3 or 4-part versions, without any prefixes in the version:
 
 ```json
 {
@@ -2482,8 +2508,12 @@ For example, the following will enforce that only 3 or 4-part versions are suppo
 }
 ```
 
-This field also supports a special negated regex syntax for ignoring certain versions.
-Use the syntax `!/ /` like the following:
+Again: note how the Regular Expression _begins_ and _ends_ with the `/` character.
+
+#### Ignore versions with negated regex syntax
+
+You can use a special negated regex syntax to ignore certain versions.
+You must use the `!/ /` syntax, like this:
 
 ```json
 {
@@ -2850,6 +2880,8 @@ The following example matches any file in directories starting with `app/`:
 It is recommended that you avoid using "negative" globs, like `**/!(package.json)`, because such patterns might still return true if they match against the lock file name (e.g. `package-lock.json`).
 
 ### matchDepNames
+
+This field behaves the same as `matchPackageNames` except it matches against `depName` instead of `packageName`.
 
 ### matchDepPatterns
 
@@ -3704,6 +3736,12 @@ on friday and saturday
 every 3 months on the first day of the month
 * 0 2 * *
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    You _must_ keep the number and the `am`/`pm` part _together_!
+    Correct: `before 5am`, or `before 5:00am`.
+    Wrong: `before 5 am`, or `before 5:00 am`.
 
 <!-- prettier-ignore -->
 !!! warning

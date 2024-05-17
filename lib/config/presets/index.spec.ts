@@ -336,6 +336,21 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
     });
 
+    it('resolves self-hosted preset with templating', async () => {
+      GlobalConfig.set({ customEnvVariables: { GIT_REF: 'abc123' } });
+      config.extends = ['local>username/preset-repo#{{ env.GIT_REF }}'];
+      local.getPreset.mockImplementationOnce(({ tag }) =>
+        tag === 'abc123'
+          ? Promise.resolve({ labels: ['self-hosted with template resolved'] })
+          : Promise.reject(new Error('Failed to resolve self-hosted preset')),
+      );
+
+      const res = await presets.resolveConfigPresets(config);
+
+      expect(res.labels).toEqual(['self-hosted with template resolved']);
+      expect(local.getPreset).toHaveBeenCalledOnce();
+    });
+
     it('resolves self-hosted transitive presets without baseConfig', async () => {
       config.platform = 'gitlab';
       config.endpoint = 'https://dummy.example.com/api/v4';
@@ -1060,6 +1075,14 @@ describe('config/presets/index', () => {
           ],
         }
       `);
+    });
+
+    it('handles renamed regexManagers presets', async () => {
+      const res = await presets.getPreset(
+        'regexManagers:dockerfileVersions',
+        {},
+      );
+      expect(res.customManagers).toHaveLength(1);
     });
 
     it('gets linters', async () => {
