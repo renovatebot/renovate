@@ -73,7 +73,15 @@ export function parseUrlPath(
     const repoName = s[1];
     let currentValue: string | undefined;
     if (s[2] === 'archive') {
-      currentValue = s[3];
+      if (s.length === 4) {
+        // old archive url in form: [...]/archive/<tag>.tar.gz
+        currentValue = s[3];
+      } else if (s.length === 6) {
+        // new archive url in form: [...]/archive/refs/tags/<tag>.tar.gz
+        currentValue = s[5];
+      } else {
+        return null;
+      }
       const targz = currentValue.slice(
         currentValue.length - 7,
         currentValue.length,
