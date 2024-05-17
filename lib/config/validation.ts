@@ -24,6 +24,7 @@ import { GlobalConfig } from './global';
 import { migrateConfig } from './migration';
 import { getOptions } from './options';
 import { resolveConfigPresets } from './presets';
+import { supportedDatasources } from './presets/internal/merge-confidence';
 import {
   AllowedParents,
   type RenovateConfig,
@@ -1002,6 +1003,17 @@ async function validateGlobalConfig(
               warnings.push({
                 topic: 'Configuration Error',
                 message: `Invalid value for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
+              });
+            }
+          }
+        }
+        if (key === 'mergeConfidenceDatasources') {
+          const allowedValues = supportedDatasources;
+          for (const value of val as string[]) {
+            if (!allowedValues.includes(value)) {
+              warnings.push({
+                topic: 'Configuration Error',
+                message: `Invalid value \`${value}\` for \`${currentPath}\`. The allowed values are ${allowedValues.join(', ')}.`,
               });
             }
           }
