@@ -233,6 +233,56 @@ describe('modules/manager/pip-compile/artifacts', () => {
     ]);
   });
 
+  it('installs Python version according to the lock file', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    datasource.getPkgReleases.mockImplementation(
+      (config) => {
+        if (config.packageName === 'containerbase/python-prebuild') {
+          return Promise.resolve({
+            releases: [
+              { version: '3.11.0' },
+              { version: '3.11.1' },
+              { version: '3.12.0' },
+            ],
+          });
+        }
+
+        if (config.packageName === 'pip-tools') {
+          return Promise.resolve({ releases: [{ version: '6.13.0' }] });
+        }
+
+        return Promise.resolve(null);
+      },
+    );
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['requirements.txt'],
+      }),
+    );
+    fs.readLocalFile.mockResolvedValueOnce(simpleHeader);
+    expect(
+      await updateArtifacts({
+        packageFileName: 'requirements.in',
+        updatedDeps: [],
+        newPackageFileContent: 'some new content',
+        config: {
+          ...config,
+          lockFiles: ['requirements.txt'],
+        },
+      }),
+    ).not.toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool python 3.11.1' },
+      { cmd: 'install-tool pip-tools 6.13.0' },
+      {
+        cmd: 'pip-compile requirements.in',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
   it('catches errors', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('Current requirements.txt');
