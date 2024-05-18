@@ -3739,6 +3739,12 @@ every 3 months on the first day of the month
 
 <!-- prettier-ignore -->
 !!! warning
+    You _must_ keep the number and the `am`/`pm` part _together_!
+    Correct: `before 5am`, or `before 5:00am`.
+    Wrong: `before 5 am`, or `before 5:00 am`.
+
+<!-- prettier-ignore -->
+!!! warning
     For Cron schedules, you _must_ use the `*` wildcard for the minutes value, as Renovate doesn't support minute granularity.
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates.
