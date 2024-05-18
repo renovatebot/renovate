@@ -235,25 +235,23 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('installs Python version according to the lock file', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    datasource.getPkgReleases.mockImplementation(
-      (config) => {
-        if (config.packageName === 'containerbase/python-prebuild') {
-          return Promise.resolve({
-            releases: [
-              { version: '3.11.0' },
-              { version: '3.11.1' },
-              { version: '3.12.0' },
-            ],
-          });
-        }
+    datasource.getPkgReleases.mockImplementation((config) => {
+      if (config.packageName === 'containerbase/python-prebuild') {
+        return Promise.resolve({
+          releases: [
+            { version: '3.11.0' },
+            { version: '3.11.1' },
+            { version: '3.12.0' },
+          ],
+        });
+      }
 
-        if (config.packageName === 'pip-tools') {
-          return Promise.resolve({ releases: [{ version: '6.13.0' }] });
-        }
+      if (config.packageName === 'pip-tools') {
+        return Promise.resolve({ releases: [{ version: '6.13.0' }] });
+      }
 
-        return Promise.resolve(null);
-      },
-    );
+      return Promise.resolve(null);
+    });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
