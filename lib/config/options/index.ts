@@ -3070,7 +3070,7 @@ const options: RenovateOptions[] = [
   {
     name: 'dockerMaxPages',
     description:
-      'If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.',
+      'By default, Renovate fetches up to 20 pages of Docker tags from registries, but this maximum can be adjusted by setting this option.',
     type: 'integer',
     default: 20,
     globalOnly: true,
@@ -3078,7 +3078,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gitlabAutoMergeableCheckAttempts',
     description:
-      'If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.',
+      'If set to a positive integer, Renovate tries this many times to check if a merge request on GitLab is mergeable, before trying to automerge.',
     type: 'integer',
     default: 5,
     globalOnly: true,
@@ -3102,9 +3102,10 @@ const options: RenovateOptions[] = [
   {
     name: 'platformVersion',
     description:
-      'Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.',
+      'Set a string here to let Renovate skip some API calls to fetch the platform version.',
     type: 'string',
     globalOnly: true,
+    supportedPlatforms: ['gitlab', 'bitbucket-server'],
   },
 ];
 
