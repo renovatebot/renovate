@@ -128,16 +128,31 @@ describe('modules/datasource/dotnet-version/index', () => {
       expect(res?.sourceUrl).toBe('https://github.com/dotnet/sdk');
       expect(res?.releases).toHaveLength(19);
       expect(res?.releases).toIncludeAllPartialMembers([
-        { version: '3.1.100-preview1-014459' },
-        { version: '3.1.423' },
-        { version: '5.0.100-preview.1.20155.7' },
-        { version: '5.0.408' },
-        { version: '6.0.100-preview.1.21103.13' },
-        { version: '6.0.401' },
-        { version: '6.0.304' },
-        { version: '6.0.109' },
-        { version: '7.0.100-preview.1.22110.4' },
-        { version: '7.0.100-rc.1.22431.12' },
+        {
+          version: '3.1.100-preview1-014459',
+          releaseTimestamp: '2019-10-15T00:00:00.000Z',
+        },
+        { version: '3.1.423', releaseTimestamp: '2022-09-13T00:00:00.000Z' },
+        {
+          version: '5.0.100-preview.1.20155.7',
+          releaseTimestamp: '2020-03-16T00:00:00.000Z',
+        },
+        { version: '5.0.408', releaseTimestamp: '2022-05-10T00:00:00.000Z' },
+        {
+          version: '6.0.100-preview.1.21103.13',
+          releaseTimestamp: '2021-02-17T00:00:00.000Z',
+        },
+        { version: '6.0.401', releaseTimestamp: '2022-09-13T00:00:00.000Z' },
+        { version: '6.0.304', releaseTimestamp: '2022-09-13T00:00:00.000Z' },
+        { version: '6.0.109', releaseTimestamp: '2022-09-13T00:00:00.000Z' },
+        {
+          version: '7.0.100-preview.1.22110.4',
+          releaseTimestamp: '2022-02-17T00:00:00.000Z',
+        },
+        {
+          version: '7.0.100-rc.1.22431.12',
+          releaseTimestamp: '2022-09-14T00:00:00.000Z',
+        },
       ]);
     });
 
@@ -164,14 +179,29 @@ describe('modules/datasource/dotnet-version/index', () => {
       expect(res?.sourceUrl).toBe('https://github.com/dotnet/runtime');
       expect(res?.releases).toHaveLength(17);
       expect(res?.releases).toIncludeAllPartialMembers([
-        { version: '3.1.0-preview1.19506.1' },
-        { version: '3.1.29' },
-        { version: '5.0.0-preview.1.20120.5' },
-        { version: '5.0.17' },
-        { version: '6.0.0-preview.1.21102.12' },
-        { version: '6.0.9' },
-        { version: '7.0.0-preview.1.22076.8' },
-        { version: '7.0.0-rc.1.22426.10' },
+        {
+          version: '3.1.0-preview1.19506.1',
+          releaseTimestamp: '2019-10-15T00:00:00.000Z',
+        },
+        { version: '3.1.29', releaseTimestamp: '2022-09-13T00:00:00.000Z' },
+        {
+          version: '5.0.0-preview.1.20120.5',
+          releaseTimestamp: '2020-03-16T00:00:00.000Z',
+        },
+        { version: '5.0.17', releaseTimestamp: '2022-05-10T00:00:00.000Z' },
+        {
+          version: '6.0.0-preview.1.21102.12',
+          releaseTimestamp: '2021-02-17T00:00:00.000Z',
+        },
+        { version: '6.0.9', releaseTimestamp: '2022-09-13T00:00:00.000Z' },
+        {
+          version: '7.0.0-preview.1.22076.8',
+          releaseTimestamp: '2022-02-17T00:00:00.000Z',
+        },
+        {
+          version: '7.0.0-rc.1.22426.10',
+          releaseTimestamp: '2022-09-14T00:00:00.000Z',
+        },
       ]);
     });
   });

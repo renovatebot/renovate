@@ -10,6 +10,7 @@ import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../../../../modules/datasource/github-tags';
+import { GoDatasource } from '../../../../modules/datasource/go';
 import { MavenDatasource } from '../../../../modules/datasource/maven';
 import { NpmDatasource } from '../../../../modules/datasource/npm';
 import { PackagistDatasource } from '../../../../modules/datasource/packagist';
@@ -4559,6 +4560,43 @@ describe('workers/repository/process/lookup/index', () => {
 
         expect(updates).toBeEmptyArray();
       });
+    });
+
+    it('detects gomod updates and uses updateType=digest when appropriate', async () => {
+      config.manager = 'gomod';
+      config.datasource = GoDatasource.id;
+      config.currentValue = 'v0.0.0-20240506185236-b8a5c65736ae';
+      config.currentDigest = 'b8a5c65736ae';
+      config.packageName = 'google.golang.org/genproto/googleapis/rpc';
+      config.digestOneAndOnly = true;
+
+      httpMock
+        .scope(
+          'https://proxy.golang.org/google.golang.org/genproto/googleapis/rpc',
+        )
+        .get('/@v/list')
+        .reply(200, '')
+        .get('/v2/@v/list')
+        .reply(404)
+        .get('/@latest')
+        .reply(200, { Version: 'v0.0.0-20240509183442-62759503f434' });
+
+      const { updates } = await Result.wrap(
+        lookup.lookupUpdates(config),
+      ).unwrapOrThrow();
+
+      expect(updates).toEqual([
+        {
+          bucket: 'non-major',
+          newDigest: '62759503f434',
+          newMajor: 0,
+          newMinor: 0,
+          newValue: 'v0.0.0-20240509183442-62759503f434',
+          newVersion: 'v0.0.0-20240509183442-62759503f434',
+          releaseTimestamp: '2024-05-09T18:34:42.000Z',
+          updateType: 'digest',
+        },
+      ]);
     });
   });
 });
