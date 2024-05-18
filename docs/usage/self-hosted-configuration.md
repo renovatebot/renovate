@@ -503,8 +503,10 @@ Read the [Docker Docs, configure runtime resource constraints](https://docs.dock
 
 ## dockerMaxPages
 
-If set to an integer, Renovate will use this as max page number for docker tags lookup on docker registries, instead of the default 20 pages.
-This is useful for registries which ignores the `n` parameter in the query string and only return 50 tags per page.
+By default, Renovate will fetch a maximum of 20 pages when looking up Docker tags on Docker registries.
+
+If set to an integer, Renovate will use this value as the maximum page number.
+Setting a different limit is useful for registries that ignore the `n` parameter in Renovate's query string and thus only return 50 tags per page.
 
 ## dockerSidecarImage
 
@@ -672,8 +674,8 @@ Disabling the warning is helpful for self-hosted environments that can't access 
 
 ## gitlabAutoMergeableCheckAttempts
 
-If set to an positive integer, Renovate will use this as the number of attempts to check if a merge request on GitLab is mergeable before trying to automerge.
-The formula for the delay between attempts is `gitlabAutoMergeableCheckAttempts * attempt * attempt` milliseconds.
+If set to a positive integer, Renovate tries this many times to check if a merge request on GitLab is mergeable, before trying to automerge.
+Renovate calculates the delay between attempts with this formula: `gitlabAutoMergeableCheckAttempts * attempt * attempt` milliseconds.
 
 Default value: `5` (attempts results in max. 13.75 seconds timeout).
 
@@ -880,7 +882,9 @@ It also may mean that ignored directories like `node_modules` can be preserved a
 
 ## platformVersion
 
-Specify this string for Renovate to skip API checks and provide GitLab/Bitbucket server version directly.
+Set a string here to let Renovate skip some API calls to fetch the platform version.
+Renovate will use this value as the GitLab or Bitbucket server version.
+
 Particularly useful with GitLab's `CI_JOB_TOKEN` to authenticate Renovate or to reduce API calls for Bitbucket.
 
 Read [platform details](modules/platform/gitlab/index.md) to learn why we need the server version on GitLab.
