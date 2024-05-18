@@ -8,7 +8,7 @@ import type { ExtraDep } from './types';
 
 describe('modules/manager/gomod/artifacts-extra', () => {
   const goModBefore = codeBlock`
-    go 1.22.2
+    go 1.22.0
 
     require (
       github.com/foo/foo v1.0.0
@@ -37,6 +37,11 @@ describe('modules/manager/gomod/artifacts-extra', () => {
       const res = getExtraDeps(goModBefore, goModAfter, excludeDeps);
 
       expect(res).toEqual([
+        {
+          depName: 'go',
+          currentValue: '1.22.0',
+          newValue: '1.22.2',
+        },
         {
           depName: 'github.com/bar/bar',
           currentValue: 'v2.0.0',
@@ -81,7 +86,7 @@ describe('modules/manager/gomod/artifacts-extra', () => {
     });
 
     it('returns null when all dependencies are excluded', () => {
-      const excludeDeps = ['github.com/foo/foo', 'github.com/bar/bar'];
+      const excludeDeps = ['go', 'github.com/foo/foo', 'github.com/bar/bar'];
       const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps);
       expect(res).toBeNull();
     });
@@ -93,14 +98,18 @@ describe('modules/manager/gomod/artifacts-extra', () => {
 
       expect(res).toEqual(
         [
-          'In addition to the dependencies listed above, the following packages will also be updated:',
+          'In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):',
           '',
           '',
+          '- 1 additional dependency was updated',
+          '- The `go` directive was updated for compatibility reasons',
+          '',
+          '',
+          'Details:',
           '| **Package**          | **Change**           |',
           '| :------------------- | :------------------- |',
+          '| `go`                 | `1.22.0` -> `1.22.2` |',
           '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
-          '',
-          '',
         ].join('\n'),
       );
     });
