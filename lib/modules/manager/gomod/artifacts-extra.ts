@@ -86,14 +86,27 @@ export function getExtraDepsNotice(
     return null;
   }
 
-  const noticeLines: string[] = [];
+  const noticeLines: string[] = [
+    'In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):',
+    '\n',
+  ];
 
-  noticeLines.push(
-    'In addition to the dependencies listed above, the following packages will also be updated:',
-  );
+  const goUpdated = extraDeps.some(({ depName }) => depName === 'go');
+  const otherDepsCount = extraDeps.length - (goUpdated ? 1 : 0);
+
+  if (otherDepsCount > 0) {
+    noticeLines.push(`- ${otherDepsCount} additional dependency was updated`);
+  }
+
+  if (goUpdated) {
+    noticeLines.push(
+      '- The `go` directive was updated for compatibility reasons',
+    );
+  }
+
   noticeLines.push('\n');
+  noticeLines.push('Details:');
   noticeLines.push(extraDepsTable(extraDeps));
-  noticeLines.push('\n');
 
   return noticeLines.join('\n');
 }
