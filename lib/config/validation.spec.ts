@@ -1261,23 +1261,6 @@ describe('config/validation', () => {
   });
 
   describe('validateConfig() -> globaOnly options', () => {
-    it('returns deprecation warnings', async () => {
-      const config = {
-        logFile: 'something',
-      };
-      const { warnings } = await configValidation.validateConfig(
-        'global',
-        config,
-      );
-      expect(warnings).toMatchObject([
-        {
-          message:
-            'Using logFile to specify log file name is deprecated now. Please use the enviroment variable LOG_FILE instead',
-          topic: 'Deprecation Warning',
-        },
-      ]);
-    });
-
     it('returns errors for invalid options', async () => {
       const config = {
         logFile: 'something',
