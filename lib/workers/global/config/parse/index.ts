@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import * as defaultsParser from '../../../../config/defaults';
 import type { AllConfig } from '../../../../config/types';
 import { mergeChildConfig } from '../../../../config/utils';
@@ -67,8 +68,7 @@ export async function parseConfigs(
   }
 
   // Add file logger
-  // istanbul ignore if
-  if (config.logFile) {
+  if (config.logFile && is.undefined(process.env.LOG_FILE)) {
     logger.debug(
       // TODO: types (#22198)
       `Enabling ${config.logFileLevel!} logging to ${config.logFile}`,
@@ -111,6 +111,12 @@ export async function parseConfigs(
   if (!config.autodiscover && config.forkProcessing !== 'disabled') {
     logger.debug('Enabling forkProcessing while in non-autodiscover mode');
     config.forkProcessing = 'enabled';
+  }
+
+  // Massage onboardingNoDeps
+  if (!config.autodiscover && config.onboardingNoDeps !== 'disabled') {
+    logger.debug('Enabling onboardingNoDeps while in non-autodiscover mode');
+    config.onboardingNoDeps = 'enabled';
   }
 
   // Remove log file entries
