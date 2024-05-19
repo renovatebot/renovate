@@ -3081,6 +3081,13 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     globalOnly: true,
   },
+  {
+    name: 'ignoreNodeWarn',
+    description:
+      'If set to true, you can suppress the default warning when a deprecated version of Node.js is used to run Renovate.',
+    type: 'boolean',
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

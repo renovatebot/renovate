@@ -165,6 +165,7 @@ export interface RepoGlobalConfig {
   userAgent?: string;
   deleteConfigFile?: boolean;
   eagerGlobalExtends?: boolean;
+  ignoreNodeWarn?: boolean;
 }
 
 export interface LegacyAdminConfig {

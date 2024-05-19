@@ -274,6 +274,7 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_AUTODISCOVER_REPO_ORDER: 'desc',
         RENOVATE_X_DELETE_CONFIG_FILE: 'true',
         RENOVATE_X_EAGER_GLOBAL_EXTENDS: 'true',
+        RENOVATE_X_IGNORE_NODE_WARN: 'true',
       };
       const config = await env.getConfig(envParam);
       expect(config.autodiscoverRepoSort).toBe('alpha');
@@ -281,6 +282,7 @@ describe('workers/global/config/parse/env', () => {
       expect(config.dockerMaxPages).toBeUndefined();
       expect(config.deleteConfigFile).toBeTrue();
       expect(config.eagerGlobalExtends).toBeTrue();
+      expect(config.ignoreNodeWarn).toBeTrue();
     });
 
     describe('RENOVATE_CONFIG tests', () => {

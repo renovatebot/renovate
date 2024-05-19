@@ -38,6 +38,7 @@ export class GlobalConfig {
     'userAgent',
     'deleteConfigFile',
     'eagerGlobalExtends',
+    'ignoreNodeWarn',
   ];
 
   private static config: RepoGlobalConfig = {};
