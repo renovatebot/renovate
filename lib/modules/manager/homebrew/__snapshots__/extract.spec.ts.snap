@@ -54,6 +54,24 @@ exports[`modules/manager/homebrew/extract extractPackageFile() handles no space 
 }
 `;
 
+exports[`modules/manager/homebrew/extract extractPackageFile() handles old "archive" github url format 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "v0.8.2",
+      "datasource": "github-tags",
+      "depName": "bazelbuild/bazel-watcher",
+      "managerData": {
+        "ownerName": "bazelbuild",
+        "repoName": "bazel-watcher",
+        "sha256": "26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4",
+        "url": "https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz",
+      },
+    },
+  ],
+}
+`;
+
 exports[`modules/manager/homebrew/extract extractPackageFile() skips github dependency with wrong format 1`] = `
 {
   "deps": [
