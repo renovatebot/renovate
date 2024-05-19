@@ -276,9 +276,14 @@ describe('modules/platform/space/dao', () => {
 
       mockRepository.getByName.mockReturnValueOnce(result);
 
-      expect(await dao.findDefaultBranch(projectKey, repository)).toEqual(defaultBranch);
-      expect(mockRepository.getByName).toHaveBeenCalledWith(projectKey, repository);
-    })
+      expect(await dao.findDefaultBranch(projectKey, repository)).toEqual(
+        defaultBranch,
+      );
+      expect(mockRepository.getByName).toHaveBeenCalledWith(
+        projectKey,
+        repository,
+      );
+    });
 
     it('should fall back default branch to main', async () => {
       const result: SpaceRepositoryDetails = {
@@ -293,9 +298,12 @@ describe('modules/platform/space/dao', () => {
       mockRepository.getByName.mockReturnValueOnce(result);
 
       expect(await dao.findDefaultBranch(projectKey, repository)).toBe('main');
-      expect(mockRepository.getByName).toHaveBeenCalledWith(projectKey, repository);
-    })
-  })
+      expect(mockRepository.getByName).toHaveBeenCalledWith(
+        projectKey,
+        repository,
+      );
+    });
+  });
 
   describe('FindPRConfigPredicate.test()', () => {
     const sourceBranch = 'my-feature-branch';
