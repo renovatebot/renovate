@@ -964,8 +964,8 @@ export const presets: Record<string, Preset> = {
         matchCurrentVersion: '>=2.0.0 <2.14.0',
         matchDatasources: ['docker'],
         matchPackageNames: [
-          '^(?:docker\\.io/)?owasp/zap2docker-stable$',
-          '^(?:docker\\.io/)?softwaresecurityproject/zap-stable$',
+          '/^(?:docker\\.io/)?owasp/zap2docker-stable$/',
+          '/^(?:docker\\.io/)?softwaresecurityproject/zap-stable$/',
         ],
         replacementName: 'zaproxy/zap-stable',
         replacementVersion: '2.14.0',
@@ -976,8 +976,8 @@ export const presets: Record<string, Preset> = {
         matchCurrentVersion: '>=2.0.0 <2.14.0',
         matchDatasources: ['docker'],
         matchPackageNames: [
-          '^(?:docker\\.io/)?owasp/zap2docker-bare$',
-          '^(?:docker\\.io/)?softwaresecurityproject/zap-bare$',
+          '/^(?:docker\\.io/)?owasp/zap2docker-bare$/',
+          '/^(?:docker\\.io/)?softwaresecurityproject/zap-bare$/',
         ],
         replacementName: 'zaproxy/zap-bare',
         replacementVersion: '2.14.0',
