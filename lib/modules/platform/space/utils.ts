@@ -100,6 +100,8 @@ function mapSpaceCodeReviewStateToPrState(
     case 'Opened':
       return 'open';
     case 'Closed':
+      // there is no distinct state for merged PRs
+      // except a flag that indicates if a PR could be reopened, which is set to false for merged ones
       if (canBeReopened) {
         return 'closed';
       } else {
