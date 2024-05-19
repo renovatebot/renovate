@@ -63,6 +63,34 @@ describe('modules/manager/homebrew/update', () => {
     expect(newContent).toMatchSnapshot();
   });
 
+  it('updates "archive" github dependency from old url format', async () => {
+    const upgrade = {
+      currentValue: 'v0.8.2',
+      depName: 'Ibazel',
+      managerData: {
+        ownerName: 'bazelbuild',
+        repoName: 'bazel-watcher',
+        sha256:
+          '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4',
+        url: 'https://github.com/bazelbuild/bazel-watcher/archive/v0.8.2.tar.gz',
+      },
+      newValue: 'v0.9.3',
+    };
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz',
+      )
+      .reply(200, Readable.from(['foo']));
+    const newContent = await updateDependency({
+      fileContent: ibazel,
+      upgrade,
+    });
+    expect(newContent).not.toBeNull();
+    expect(newContent).not.toBe(ibazel);
+    expect(newContent).toMatchSnapshot();
+  });
+
   it('returns unchanged content if fromStream promise rejects', async () => {
     const upgrade = {
       currentValue: 'v0.8.2',
