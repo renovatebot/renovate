@@ -79,8 +79,6 @@ export function parseUrlPath(
       } else if (s.length === 6) {
         // new archive url in form: [...]/archive/refs/tags/<tag>.tar.gz
         currentValue = s[5];
-      } else {
-        return null;
       }
       const targz = currentValue.slice(
         currentValue.length - 7,
