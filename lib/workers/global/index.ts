@@ -144,7 +144,7 @@ export async function start(): Promise<number> {
       config = await getGlobalConfig();
       if (config?.globalExtends) {
         // resolve global presets immediately
-        if (config?.globalExtends) {
+        if (config?.eagerGlobalExtends) {
           config = mergeChildConfig(
             await resolveGlobalExtends(config.globalExtends),
             config,

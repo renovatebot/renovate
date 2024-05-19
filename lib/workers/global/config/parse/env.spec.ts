@@ -275,6 +275,8 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_DELETE_CONFIG_FILE: 'true',
         RENOVATE_X_EAGER_GLOBAL_EXTENDS: 'true',
         RENOVATE_X_IGNORE_NODE_WARN: 'true',
+        RENOVATE_X_S3_ENDPOINT: 'endpoint',
+        RENOVATE_X_S3_PATH_STYLE: 'true',
       };
       const config = await env.getConfig(envParam);
       expect(config.autodiscoverRepoSort).toBe('alpha');
@@ -283,6 +285,8 @@ describe('workers/global/config/parse/env', () => {
       expect(config.deleteConfigFile).toBeTrue();
       expect(config.eagerGlobalExtends).toBeTrue();
       expect(config.ignoreNodeWarn).toBeTrue();
+      expect(config.s3Endpoint).toBe('endpoint');
+      expect(config.s3PathStyle).toBeTrue();
     });
 
     describe('RENOVATE_CONFIG tests', () => {
