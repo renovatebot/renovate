@@ -56,7 +56,7 @@ export async function rebaseMigrationBranch(
       },
     ],
     message: commitMessage.toString(),
-    platformCommit: !!config.platformCommit,
+    platformCommit: config.platformCommit,
   });
 }
 

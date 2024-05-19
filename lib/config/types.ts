@@ -27,6 +27,7 @@ export interface GroupConfig extends Record<string, unknown> {
 }
 
 export type RecreateWhen = 'auto' | 'never' | 'always';
+export type PlatformCommitOptions = 'auto' | 'disabled' | 'enabled';
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   $schema?: string;
@@ -70,7 +71,7 @@ export interface RenovateSharedConfig {
   milestone?: number;
   npmrc?: string;
   npmrcMerge?: boolean;
-  platformCommit?: boolean;
+  platformCommit?: PlatformCommitOptions;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
