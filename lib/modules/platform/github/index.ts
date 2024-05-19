@@ -112,6 +112,10 @@ function escapeHash(input: string): string {
   return input?.replace(regEx(/#/g), '%23');
 }
 
+export function isGHApp(): boolean {
+  return !!platformConfig.isGHApp;
+}
+
 export async function detectGhe(token: string): Promise<void> {
   platformConfig.isGhe =
     URL.parse(platformConfig.endpoint).host !== 'api.github.com';
