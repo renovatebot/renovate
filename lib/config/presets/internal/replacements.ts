@@ -963,7 +963,7 @@ export const presets: Record<string, Preset> = {
           'The `zap-stable` image has moved to the `zaproxy` organization.',
         matchCurrentVersion: '>=2.0.0 <2.14.0',
         matchDatasources: ['docker'],
-        matchPackagePatterns: [
+        matchPackageNames: [
           '^(?:docker\\.io/)?owasp/zap2docker-stable$',
           '^(?:docker\\.io/)?softwaresecurityproject/zap-stable$',
         ],
@@ -975,7 +975,7 @@ export const presets: Record<string, Preset> = {
           'The `zap-bare` image has moved to the `zaproxy` organization.',
         matchCurrentVersion: '>=2.0.0 <2.14.0',
         matchDatasources: ['docker'],
-        matchPackagePatterns: [
+        matchPackageNames: [
           '^(?:docker\\.io/)?owasp/zap2docker-bare$',
           '^(?:docker\\.io/)?softwaresecurityproject/zap-bare$',
         ],
