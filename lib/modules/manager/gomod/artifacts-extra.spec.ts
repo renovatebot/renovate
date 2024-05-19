@@ -92,6 +92,27 @@ describe('modules/manager/gomod/artifacts-extra', () => {
     });
 
     it('returns a notice when there are extra dependencies', () => {
+      const excludeDeps = ['go', 'github.com/foo/foo'];
+
+      const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps);
+
+      expect(res).toEqual(
+        [
+          'In order to perform the update(s) described in the table above, Renovate ran the `go get` command, which resulted in the following additional change(s):',
+          '',
+          '',
+          '- 1 additional dependency was updated',
+          '',
+          '',
+          'Details:',
+          '| **Package**          | **Change**           |',
+          '| :------------------- | :------------------- |',
+          '| `github.com/bar/bar` | `v2.0.0` -> `v2.2.2` |',
+        ].join('\n'),
+      );
+    });
+
+    it('adds special notice for updated `go` version', () => {
       const excludeDeps = ['github.com/foo/foo'];
 
       const res = getExtraDepsNotice(goModBefore, goModAfter, excludeDeps);
