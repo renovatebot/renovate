@@ -21,6 +21,9 @@ export function normalizeScalaVersion(str: string): string {
       return str;
     }
   }
+  if (versioning.getMajor(str) === 3) {
+    return '3';
+  }
   if (regEx(/^\d+\.\d+\.\d+$/).test(str)) {
     return str.replace(regEx(/^(\d+)\.(\d+)\.\d+$/), '$1.$2');
   }

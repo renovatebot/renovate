@@ -143,6 +143,9 @@ describe('modules/manager/sbt/extract', () => {
             variableName: 'sbtReleaseVersion',
           },
         ],
+        managerData: {
+          scalaVersion: undefined,
+        },
         packageFileVersion: '1.0.1',
       });
     });
@@ -452,8 +455,8 @@ describe('modules/manager/sbt/extract', () => {
       maven-central
     `;
       fs.readLocalFile
-        .mockResolvedValueOnce(repositoryContent)
-        .mockResolvedValueOnce(sbtDependencyFile);
+        .mockResolvedValueOnce(sbtDependencyFile)
+        .mockResolvedValueOnce(repositoryContent);
       const packages = await extractAllPackageFiles({}, [
         'repositories',
         'build.sbt',

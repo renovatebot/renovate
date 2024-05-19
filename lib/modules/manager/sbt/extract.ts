@@ -318,6 +318,14 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
 ): PackageFileContent | null {
+  return doExtractPackageFile(content, packageFile);
+}
+
+function doExtractPackageFile(
+  content: string,
+  packageFile: string,
+  ctxScalaVersion?: string,
+): PackageFileContent | null {
   if (
     packageFile === 'project/build.properties' ||
     packageFile.endsWith('/project/build.properties')
@@ -352,6 +360,7 @@ export function extractPackageFile(
       vars: {},
       deps: [],
       registryUrls: [],
+      scalaVersion: ctxScalaVersion,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, packageFile }, 'Sbt parsing error');
@@ -361,13 +370,13 @@ export function extractPackageFile(
     return null;
   }
 
-  const { deps, packageFileVersion } = parsedResult;
+  const { deps, scalaVersion, packageFileVersion } = parsedResult;
 
   if (!deps.length) {
     return null;
   }
 
-  return { deps, packageFileVersion };
+  return { deps, packageFileVersion, managerData: { scalaVersion } };
 }
 
 export async function extractAllPackageFiles(
@@ -376,6 +385,18 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   const proxyUrls: string[] = [];
+  let ctxScalaVersion: string | undefined;
+
+  // process build.sbt first
+  packageFiles.sort((a, b) => {
+    if (a === 'build.sbt') {
+      return -1;
+    }
+    if (b === 'build.sbt') {
+      return 1;
+    }
+    return 0;
+  });
 
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
@@ -387,9 +408,12 @@ export async function extractAllPackageFiles(
       const urls = extractProxyUrls(content, packageFile);
       proxyUrls.push(...urls);
     } else {
-      const pkg = extractPackageFile(content, packageFile);
+      const pkg = doExtractPackageFile(content, packageFile, ctxScalaVersion);
       if (pkg) {
         packages.push({ deps: pkg.deps, packageFile });
+        if (pkg.managerData?.scalaVersion) {
+          ctxScalaVersion = pkg.managerData.scalaVersion;
+        }
       }
     }
   }
