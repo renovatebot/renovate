@@ -21,7 +21,7 @@ export class GiteaTagsDatasource extends Datasource {
     'The release timestamp is determined from the `created` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url determined by using the `packageName` and `registryUrl`.';
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
     super(GiteaTagsDatasource.id);
