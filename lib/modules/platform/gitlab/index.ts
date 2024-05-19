@@ -3,7 +3,6 @@ import { setTimeout } from 'timers/promises';
 import is from '@sindresorhus/is';
 import pMap from 'p-map';
 import semver from 'semver';
-import { GlobalConfig } from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -83,6 +82,9 @@ let config: {
   cloneSubmodules: boolean | undefined;
   ignorePrAuthor: boolean | undefined;
   squash: boolean;
+  gitlabAutoMergeableCheckAttempts: number | undefined;
+  gitlabBranchStatusDelay: number | undefined;
+  gitlabMergeRequestDelay: number | undefined;
 } = {} as any;
 
 const defaults = {
@@ -102,6 +104,8 @@ export async function initPlatform({
   endpoint,
   token,
   gitAuthor,
+  platformVersion,
+  gitlabPlatformParams,
 }: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
@@ -130,8 +134,6 @@ export async function initPlatform({
         user.commit_email ?? user.email
       }>`;
     }
-    const platformVersion = GlobalConfig.get('platformVersion');
-    // istanbul ignore if: experimental feature
     if (platformVersion) {
       gitlabVersion = platformVersion;
     } else {
@@ -154,6 +156,10 @@ export async function initPlatform({
   draftPrefix = semver.lt(defaults.version, '13.2.0')
     ? DRAFT_PREFIX_DEPRECATED
     : DRAFT_PREFIX;
+
+  config = {
+    ...(gitlabPlatformParams && { ...gitlabPlatformParams }),
+  } as any;
 
   return platformConfig;
 }
@@ -308,7 +314,7 @@ export async function initRepo({
   endpoint,
   includeMirrors,
 }: RepoParams): Promise<RepoResult> {
-  config = {} as any;
+  config ??= {} as any; // do not initialize to empty object as we might lose fields set in initPlatform
   config.repository = urlEscape(repository);
   config.cloneSubmodules = cloneSubmodules;
   config.ignorePrAuthor = ignorePrAuthor;
@@ -667,15 +673,9 @@ async function tryPrAutomerge(
       ];
       const desiredStatus = 'can_be_merged';
       // The default value of 5 attempts results in max. 13.75 seconds timeout if no pipeline created.
-      const retryTimes = GlobalConfig.get(
-        'gitlabAutoMergeableCheckAttempts',
-        5,
-      );
+      const retryTimes = config.gitlabAutoMergeableCheckAttempts ?? 5;
 
-      const mergeDelay = GlobalConfig.get('gitlabMergeRequestDelay', 250);
-
-      // eslint-disable-next-line
-      console.log(mergeDelay, retryTimes);
+      const mergeDelay = config.gitlabMergeRequestDelay ?? 250;
 
       // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
       for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
@@ -1043,7 +1043,7 @@ export async function setBranchStatus({
 
   try {
     // give gitlab some time to create pipelines for the sha
-    await setTimeout(GlobalConfig.get('gitlabBranchStatusDelay', 1000));
+    await setTimeout(config.gitlabBranchStatusDelay ?? 1000);
 
     await gitlabApi.postJson(url, { body: options });
 

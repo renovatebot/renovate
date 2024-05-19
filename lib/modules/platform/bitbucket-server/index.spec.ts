@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { mockDeep } from 'jest-mock-extended';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
-import type * as _globalConfig from '../../../config/global';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -189,7 +188,6 @@ describe('modules/platform/bitbucket-server/index', () => {
       let hostRules: jest.Mocked<HostRules>;
       let git: jest.Mocked<typeof _git>;
       let logger: jest.Mocked<typeof _logger>;
-      let globalConfig: jest.Mocked<typeof _globalConfig>;
       const username = 'abc';
       const password = '123';
 
@@ -217,7 +215,6 @@ describe('modules/platform/bitbucket-server/index', () => {
         jest.resetModules();
         bitbucket = await import('.');
         logger = mocked(await import('../../../logger')).logger;
-        globalConfig = mocked(await import('../../../config/global'));
         hostRules = jest.requireMock('../../../util/host-rules');
         git = jest.requireMock('../../../util/git');
         git.branchExists.mockReturnValue(true);
@@ -242,7 +239,6 @@ describe('modules/platform/bitbucket-server/index', () => {
           username,
           password,
         });
-        globalConfig.GlobalConfig.reset();
       });
 
       describe('initPlatform()', () => {
@@ -309,12 +305,12 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
 
         it('should skip api call to fetch version when platform version is set in environment', async () => {
-          globalConfig.GlobalConfig.set({ platformVersion: '8.0.0' });
           await expect(
             bitbucket.initPlatform({
               endpoint: 'https://stash.renovatebot.com',
               username: 'abc',
               password: '123',
+              platformVersion: '8.0.0',
             }),
           ).toResolve();
         });

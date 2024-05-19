@@ -1,7 +1,6 @@
 import { setTimeout } from 'timers/promises';
 import semver from 'semver';
 import type { PartialDeep } from 'type-fest';
-import { GlobalConfig } from '../../../config/global';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
@@ -89,6 +88,7 @@ export async function initPlatform({
   token,
   username,
   password,
+  platformVersion,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
@@ -110,7 +110,6 @@ export async function initPlatform({
   };
   try {
     let bitbucketServerVersion: string;
-    const platformVersion = GlobalConfig.get('platformVersion');
     if (platformVersion) {
       bitbucketServerVersion = platformVersion;
     } else {

@@ -10,12 +10,19 @@ export type AggregatedVulnerabilities = Record<
   Record<VulnerabilityRangeKey, VulnerabilityPatch | null>
 >;
 
+export interface GitlabPlatformParams {
+  gitlabAutoMergeableCheckAttempts?: number;
+  gitlabBranchStatusDelay?: number;
+  gitlabMergeRequestDelay?: number;
+}
 export interface PlatformParams {
   endpoint?: string;
   token?: string;
   username?: string;
   password?: string;
   gitAuthor?: string;
+  platformVersion?: string;
+  gitlabPlatformParams?: GitlabPlatformParams;
 }
 
 export interface PlatformResult {

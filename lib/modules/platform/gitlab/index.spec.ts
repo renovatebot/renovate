@@ -1,10 +1,9 @@
 // TODO fix mocks
 import type * as _timers from 'timers/promises';
 import { mockDeep } from 'jest-mock-extended';
-import type { Platform, RepoParams } from '..';
+import type { GitlabPlatformParams, Platform, RepoParams } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import { mocked } from '../../../../test/util';
-import type * as _globalConfig from '../../../config/global';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ARCHIVED,
@@ -32,7 +31,6 @@ describe('modules/platform/gitlab/index', () => {
   let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
   let timers: jest.Mocked<typeof _timers>;
-  let globalConfig: jest.Mocked<typeof _globalConfig>;
 
   beforeEach(async () => {
     // reset module
@@ -40,7 +38,6 @@ describe('modules/platform/gitlab/index', () => {
 
     gitlab = await import('.');
     logger = mocked(await import('../../../logger')).logger;
-    globalConfig = mocked(await import('../../../config/global'));
     timers = jest.requireMock('timers/promises');
     hostRules = jest.requireMock('../../../util/host-rules');
     git = jest.requireMock('../../../util/git');
@@ -53,10 +50,12 @@ describe('modules/platform/gitlab/index', () => {
       token: '123test',
     });
     delete process.env.GITLAB_IGNORE_REPO_URL;
-    globalConfig.GlobalConfig.reset();
   });
 
-  async function initFakePlatform(version: string) {
+  async function initFakePlatform(
+    version: string,
+    gitlabPlatformParams?: GitlabPlatformParams,
+  ) {
     httpMock
       .scope(gitlabApiHost)
       .get('/api/v4/user')
@@ -70,6 +69,7 @@ describe('modules/platform/gitlab/index', () => {
       });
 
     await gitlab.initPlatform({
+      ...(gitlabPlatformParams && { gitlabPlatformParams }),
       token: 'some-token',
       endpoint: undefined,
     });
@@ -138,6 +138,32 @@ describe('modules/platform/gitlab/index', () => {
           gitAuthor: 'somebody',
         }),
       ).toEqual({ endpoint: 'https://gitlab.com/api/v4/' });
+    });
+
+    it('should throw if version could not be fetched', async () => {
+      httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(403);
+      await expect(async () => {
+        await gitlab.initPlatform({
+          token: 'some-token',
+          endpoint: undefined,
+          gitAuthor: 'somebody',
+        });
+      }).rejects.toThrow();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.any(Object),
+        'Error authenticating with GitLab. Check that your token includes "api" permissions',
+      );
+    });
+
+    it('should skip api call to fetch version when platform version is set in environment', async () => {
+      await expect(
+        gitlab.initPlatform({
+          token: 'some-token',
+          endpoint: undefined,
+          platformVersion: '8.0.0',
+          gitAuthor: 'somebody',
+        }),
+      ).toResolve();
     });
   });
 
@@ -1010,7 +1036,7 @@ describe('modules/platform/gitlab/index', () => {
 
     it('waits for gitlabBranchStatusDelay ms when set', async () => {
       const delay = 5000;
-      globalConfig.GlobalConfig.set({ gitlabBranchStatusDelay: delay });
+      await initFakePlatform('13.3.6-ee', { gitlabBranchStatusDelay: delay });
 
       const scope = await initRepo();
       scope
@@ -1725,7 +1751,10 @@ describe('modules/platform/gitlab/index', () => {
     });
   });
 
-  async function initPlatform(gitlabVersion: string) {
+  async function initPlatform(
+    gitlabVersion: string,
+    gitlabPlatformParams?: GitlabPlatformParams,
+  ) {
     httpMock
       .scope(gitlabApiHost)
       .get('/api/v4/user')
@@ -1738,21 +1767,20 @@ describe('modules/platform/gitlab/index', () => {
         version: gitlabVersion,
       });
     await gitlab.initPlatform({
+      ...(gitlabPlatformParams && { gitlabPlatformParams }),
       token: 'some-token',
       endpoint: undefined,
     });
   }
 
   describe('createPr(branchName, title, body)', () => {
-    beforeEach(() => {
-      globalConfig.GlobalConfig.set({
-        gitlabAutoMergeableCheckAttempts: 2,
-        gitlabMergeRequestDelay: 100,
-      });
-    });
+    const gitlabPlatformParams = {
+      gitlabAutoMergeableCheckAttempts: 2,
+      gitlabMergeRequestDelay: 100,
+    };
 
     it('returns the PR', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -1772,7 +1800,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('uses default branch', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -1792,7 +1820,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('supports draftPR on < 13.2', async () => {
-      await initPlatform('13.1.0-ee');
+      await initPlatform('13.1.0-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -1812,7 +1840,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('supports draftPR on >= 13.2', async () => {
-      await initPlatform('13.2.0-ee');
+      await initPlatform('13.2.0-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -1832,7 +1860,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('auto-accepts the MR when requested', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -1870,7 +1898,10 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('should parse merge_status attribute if detailed_merge_status is not set (on < 15.6)', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', {
+        gitlabAutoMergeableCheckAttempts: 3,
+        gitlabMergeRequestDelay: 100,
+      });
       const reply_body = {
         merge_status: 'pending',
       };
@@ -1892,10 +1923,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(405, {})
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      globalConfig.GlobalConfig.set({
-        gitlabAutoMergeableCheckAttempts: 3,
-        gitlabMergeRequestDelay: 100,
-      });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -1930,7 +1957,10 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('should parse detailed_merge_status attribute on >= 15.6', async () => {
-      await initPlatform('15.6.0-ee');
+      await initPlatform('15.6.0-ee', {
+        gitlabAutoMergeableCheckAttempts: 3,
+        gitlabMergeRequestDelay: 100,
+      });
       const reply_body = {
         detailed_merge_status: 'pending',
       };
@@ -1950,10 +1980,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(200, reply_body)
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      globalConfig.GlobalConfig.set({
-        gitlabAutoMergeableCheckAttempts: 3,
-        gitlabMergeRequestDelay: 100,
-      });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -1983,7 +2009,10 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('should retry auto merge creation on 405 method not allowed', async () => {
-      await initPlatform('15.6.0-ee');
+      await initPlatform('15.6.0-ee', {
+        gitlabAutoMergeableCheckAttempts: 3,
+        gitlabMergeRequestDelay: 100,
+      });
       const reply_body = {
         detailed_merge_status: 'pending',
       };
@@ -2007,10 +2036,6 @@ describe('modules/platform/gitlab/index', () => {
         .reply(405, {})
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200, {});
-      globalConfig.GlobalConfig.set({
-        gitlabAutoMergeableCheckAttempts: 3,
-        gitlabMergeRequestDelay: 100,
-      });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
         targetBranch: 'master',
@@ -2054,7 +2079,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('should not retry if MR is mergeable and pipeline is running', async () => {
-      await initPlatform('15.6.0-ee');
+      await initPlatform('15.6.0-ee', gitlabPlatformParams);
       const reply_body = {
         detailed_merge_status: 'mergeable',
         pipeline: {
@@ -2093,7 +2118,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('raises with squash enabled when repository squash option is default_on', async () => {
-      await initPlatform('14.0.0');
+      await initPlatform('14.0.0', gitlabPlatformParams);
 
       httpMock
         .scope(gitlabApiHost)
@@ -2125,7 +2150,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('raises with squash enabled when repository squash option is always', async () => {
-      await initPlatform('14.0.0');
+      await initPlatform('14.0.0', gitlabPlatformParams);
 
       httpMock
         .scope(gitlabApiHost)
@@ -2157,7 +2182,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('adds approval rule to ignore all approvals', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -2208,7 +2233,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('will modify a rule of type any_approvers, if such a rule exists', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -2265,7 +2290,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('will remove rules of type regular, if such rules exist', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -2333,7 +2358,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('does not try to remove "report_approver" and "code_owner" approval rules', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -2411,7 +2436,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('does not try to create already existing approval rule', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -2462,7 +2487,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('silently ignores approval rules adding errors', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -2513,7 +2538,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('auto-approves when enabled', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -2545,7 +2570,7 @@ describe('modules/platform/gitlab/index', () => {
     });
 
     it('should swallow an error on auto-approve', async () => {
-      await initPlatform('13.3.6-ee');
+      await initPlatform('13.3.6-ee', gitlabPlatformParams);
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
