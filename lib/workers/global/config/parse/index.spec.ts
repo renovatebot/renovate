@@ -199,6 +199,15 @@ describe('workers/global/config/parse/index', () => {
       process.env.LOG_FILE = 'somepath';
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
+    });
+
+    it('only initializes the file when the env var LOG_FILE is properly set', async () => {
+      jest.doMock('../../../../../config.js', () => ({}), {
+        virtual: true,
+      });
+      const env: NodeJS.ProcessEnv = {};
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).not.toContain([['logFile', 'someFile']]);
       expect(getParentDir).not.toHaveBeenCalled();
     });
 

@@ -493,7 +493,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate sidecar image.',
     type: 'string',
-    default: 'ghcr.io/containerbase/sidecar:10.6.11',
+    default: 'ghcr.io/containerbase/sidecar:10.6.12',
     globalOnly: true,
   },
   {
@@ -520,25 +520,6 @@ const options: RenovateOptions[] = [
     supportedManagers: ['gomod'],
   },
   // Log options
-  {
-    name: 'logFile',
-    description: 'Log file path.',
-    stage: 'global',
-    type: 'string',
-    globalOnly: true,
-    deprecationMsg:
-      'Instead of configuring log file path in the file config. Use the `LOG_FILE` environment variable instead.',
-  },
-  {
-    name: 'logFileLevel',
-    description: 'Set the log file log level.',
-    stage: 'global',
-    type: 'string',
-    default: 'debug',
-    globalOnly: true,
-    deprecationMsg:
-      'Instead of configuring log file level in the file config. Use the `LOG_FILE_LEVEL` environment variable instead.',
-  },
   {
     name: 'logContext',
     description: 'Add a global or per-repo log context to each log entry.',
