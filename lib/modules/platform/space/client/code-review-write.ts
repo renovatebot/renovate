@@ -14,7 +14,7 @@ export class SpaceCodeReviewWriteClient {
     projectKey: string,
     request: SpaceCodeReviewCreateRequest,
   ): Promise<SpaceMergeRequestRecord> {
-    logger.debug(
+    logger.trace(
       `SPACE: create: projectKey=${projectKey}, request=${JSON.stringify(request)}`,
     );
 
@@ -22,7 +22,7 @@ export class SpaceCodeReviewWriteClient {
       `/api/http/projects/key:${projectKey}/code-reviews/merge-requests`,
       { body: request },
     );
-    logger.debug(`SPACE: create: response: ${JSON.stringify(response.body)}`);
+    logger.trace(`SPACE: create: response: ${JSON.stringify(response.body)}`);
 
     return response.body;
   }
@@ -33,7 +33,7 @@ export class SpaceCodeReviewWriteClient {
     mergeMode: 'FF' | 'FF_ONLY' | 'NO_FF',
     deleteSourceBranch: boolean,
   ): Promise<void> {
-    logger.debug(
+    logger.trace(
       `SPACE mergeMergeRequest(${projectKey}, ${codeReviewNumber}, ${mergeMode}, ${deleteSourceBranch})`,
     );
 
@@ -50,7 +50,7 @@ export class SpaceCodeReviewWriteClient {
     squashedCommitMessage: string | null,
     deleteSourceBranch: boolean,
   ): Promise<void> {
-    logger.debug(
+    logger.trace(
       `SPACE rebaseMergeRequest(${projectKey}, ${codeReviewNumber}, ${rebaseMode}, ${squashedCommitMessage}, ${deleteSourceBranch})`,
     );
 
@@ -68,7 +68,7 @@ export class SpaceCodeReviewWriteClient {
     comment: string,
     externalId: string | null,
   ): Promise<void> {
-    logger.debug(`SPACE addCodeReviewComment(${codeReviewId}, ${comment})`);
+    logger.trace(`SPACE addCodeReviewComment(${codeReviewId}, ${comment})`);
 
     await this.http.postJson(`/api/http/chats/messages/send-message`, {
       body: {
@@ -83,7 +83,7 @@ export class SpaceCodeReviewWriteClient {
   }
 
   async deleteMessage(codeReviewId: string, messageId: string): Promise<void> {
-    logger.debug(
+    logger.trace(
       `SPACE deleteCodeReviewCommentByExternalId(${codeReviewId}, ${messageId})`,
     );
 
@@ -101,7 +101,7 @@ export class SpaceCodeReviewWriteClient {
     username: string,
     role: SpaceCodeReviewParticipantRole,
   ): Promise<void> {
-    logger.debug(
+    logger.trace(
       `SPACE addReviewer(${projectKey}, ${codeReviewNumber}, ${username}, ${role})`,
     );
 
@@ -127,7 +127,7 @@ export class SpaceCodeReviewWriteClient {
     codeReviewId: string,
     description: string,
   ): Promise<void> {
-    logger.debug(
+    logger.trace(
       `SPACE: updateCodeReviewDescription: projectKey=${projectKey}, codeReviewId=${codeReviewId}, description=${description}`,
     );
     await this.http.patchJson(
@@ -141,7 +141,7 @@ export class SpaceCodeReviewWriteClient {
     codeReviewId: string,
     state: CodeReviewStateFilter,
   ): Promise<void> {
-    logger.debug(
+    logger.trace(
       `SPACE: updateCodeReviewState: projectKey=${projectKey}, codeReviewId=${codeReviewId}, state=${state}`,
     );
     await this.http.patchJson(

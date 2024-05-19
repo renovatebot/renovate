@@ -58,7 +58,7 @@ export class SpaceDao {
     projectKey: string,
     repository: string,
   ): Promise<Pr[]> {
-    logger.debug(`SPACE: searching for PRs in ${projectKey}/${repository}`);
+    logger.trace(`SPACE: searching for PRs in ${projectKey}/${repository}`);
     const mergeRequests = await this.client.codeReview.read.find(projectKey, {
       prState: 'null',
       repository,
@@ -72,7 +72,7 @@ export class SpaceDao {
       );
     }
 
-    logger.debug(`SPACE: found ${result.length} PRs`);
+    logger.trace(`SPACE: found ${result.length} PRs`);
     return result;
   }
 
@@ -81,7 +81,7 @@ export class SpaceDao {
     repository: string,
     config: FindPRConfig,
   ): Promise<Pr | null> {
-    logger.debug(`SPACE: searching for PR in ${projectKey}/${repository}`);
+    logger.trace(`SPACE: searching for PR in ${projectKey}/${repository}`);
 
     let prState: CodeReviewStateFilter = 'null';
     switch (config.state) {
@@ -105,7 +105,7 @@ export class SpaceDao {
     });
 
     const mergeRequest = mergeRequests.pop();
-    logger.debug(`SPACE: found ${mergeRequest ? 'a' : 'no'} PR`);
+    logger.trace(`SPACE: found ${mergeRequest ? 'a' : 'no'} PR`);
 
     if (mergeRequest) {
       return mapSpaceCodeReviewDetailsToPr(
@@ -121,7 +121,7 @@ export class SpaceDao {
     projectKey: string,
     codeReviewNumber: number,
   ): Promise<Pr> {
-    logger.debug(`SPACE getPr(${projectKey}, ${codeReviewNumber})`);
+    logger.trace(`SPACE getPr(${projectKey}, ${codeReviewNumber})`);
     const review = await this.client.codeReview.read.getByCodeReviewNumber(
       projectKey,
       codeReviewNumber,
@@ -136,7 +136,7 @@ export class SpaceDao {
     projectKey: string,
     repository: string,
   ): Promise<string> {
-    logger.debug(`SPACE findDefaultBranch(${projectKey}, ${repository})`);
+    logger.trace(`SPACE findDefaultBranch(${projectKey}, ${repository})`);
 
     const repoInfo = await this.client.repository.getByName(
       projectKey,
@@ -146,7 +146,7 @@ export class SpaceDao {
       const ref = repoInfo.defaultBranch.head;
       const lastSlash = ref.lastIndexOf('/');
       if (lastSlash === -1) {
-        logger.debug(
+        logger.trace(
           `SPACE initRepo(${repository}) - invalid default branch ${ref}`,
         );
       } else {
@@ -161,14 +161,14 @@ export class SpaceDao {
     projectKey: string,
     prConfig: UpdatePrConfig,
   ): Promise<SpaceMergeRequestRecord> {
-    logger.debug(`SPACE: updating PR ${prConfig.number}`);
+    logger.trace(`SPACE: updating PR ${prConfig.number}`);
 
     const review = await this.client.codeReview.read.getByCodeReviewNumber(
       projectKey,
       prConfig.number,
     );
     if (review.title !== prConfig.prTitle) {
-      logger.debug(
+      logger.trace(
         `SPACE: updating PR title from ${review.title} to ${prConfig.prTitle}`,
       );
       await this.client.codeReview.write.setTitle(
@@ -179,7 +179,7 @@ export class SpaceDao {
     }
 
     if (prConfig.prBody) {
-      logger.debug(`SPACE: updating PR body for ${review.id}`);
+      logger.trace(`SPACE: updating PR body for ${review.id}`);
       await this.client.codeReview.write.setDescription(
         projectKey,
         review.id,
@@ -188,7 +188,7 @@ export class SpaceDao {
     }
 
     if (prConfig.state === 'closed') {
-      logger.debug(`SPACE: closing PR ${review.id}`);
+      logger.trace(`SPACE: closing PR ${review.id}`);
       await this.client.codeReview.write.setState(
         projectKey,
         review.id,
@@ -208,7 +208,7 @@ export class SpaceDao {
     strategy: MergeStrategy,
     deleteSourceBranch: boolean,
   ): Promise<void> {
-    logger.debug(
+    logger.trace(
       `SPACE mergeMergeRequest(${projectKey}, ${codeReviewNumber}, ${strategy}, ${deleteSourceBranch})`,
     );
 
@@ -257,7 +257,7 @@ export class SpaceDao {
     repository: string,
     branch: string,
   ): Promise<BranchStatus> {
-    logger.debug(
+    logger.trace(
       `SPACE findBranchStatus(${projectKey}, ${repository}, ${branch})`,
     );
 
@@ -267,7 +267,7 @@ export class SpaceDao {
       branch,
     );
     if (executions.length === 0) {
-      logger.debug(
+      logger.trace(
         `SPACE getBranchStatus(${branch}): no executions found, setting status to yellow`,
       );
       return 'yellow';
@@ -286,13 +286,10 @@ export class SpaceDao {
     });
 
     if (branchStatuses.includes('red')) {
-      logger.debug(`SPACE: findBranchStatus: status is 'red'`);
       return 'red';
     } else if (branchStatuses.includes('yellow')) {
-      logger.debug(`SPACE: findBranchStatus: status is 'yellow'`);
       return 'yellow';
     } else {
-      logger.debug(`SPACE: findBranchStatus: status is 'green'`);
       return 'green';
     }
   }
@@ -316,7 +313,7 @@ export class SpaceDao {
     codeReviewNumber: number,
     usernames: string[],
   ): Promise<void> {
-    logger.debug(
+    logger.trace(
       `SPACE: addReviewers(${projectKey}, ${codeReviewNumber}, [${usernames.join(', ')}])`,
     );
     for (const username of usernames) {
@@ -334,7 +331,7 @@ export class SpaceDao {
     codeReviewNumber: number,
     usernames: string[],
   ): Promise<void> {
-    logger.debug(
+    logger.trace(
       `SPACE: addAuthors(${projectKey}, ${codeReviewNumber}, [${usernames.join(', ')}])`,
     );
     for (const username of usernames) {
@@ -353,7 +350,7 @@ export class SpaceDao {
     topic: string | null,
     comment: string,
   ): Promise<void> {
-    logger.debug(
+    logger.trace(
       `SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment})`,
     );
 
@@ -369,14 +366,14 @@ export class SpaceDao {
     );
     for (const message of messages) {
       if (message.externalId === topic && message.text === comment) {
-        logger.debug(
+        logger.trace(
           `SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment}): message exists, doing nothing`,
         );
         return Promise.resolve();
       }
     }
 
-    logger.debug(
+    logger.trace(
       `SPACE: ensureComment(${projectKey}, ${codeReviewNumber}, ${comment}): message wasn't found, creating new one`,
     );
     await this.client.codeReview.write.addMessage(review.id, comment, topic);
@@ -388,7 +385,7 @@ export class SpaceDao {
     topic: string | null,
     content: string | null,
   ): Promise<void> {
-    logger.debug(
+    logger.trace(
       `SPACE: ensureCommentRemoval(${projectKey}, ${codeReviewNumber}, ${topic}, ${content})`,
     );
 
@@ -416,7 +413,7 @@ export class SpaceDao {
     }
 
     if (!foundMessage) {
-      logger.debug(
+      logger.trace(
         `SPACE: ensureCommentRemoval(${projectKey}, ${codeReviewNumber}, ${topic}, ${content}): matching message not found`,
       );
       return Promise.resolve();
@@ -433,7 +430,7 @@ export class SpaceDao {
     repository: string,
     branch: string,
   ): Promise<SpaceJobExecutionDTO[]> {
-    logger.debug(
+    logger.trace(
       `SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch})`,
     );
 
@@ -445,12 +442,12 @@ export class SpaceDao {
     const repositoryHead = allRepositoryHead.find(
       (it) => it.head === `refs/heads/${branch}`,
     )!;
-    logger.debug(
+    logger.trace(
       `SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}), head: ${JSON.stringify(repositoryHead)}`,
     );
     const jobs = await this.client.jobs.getAll(projectKey, repository, branch);
 
-    logger.debug(
+    logger.trace(
       `SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}) found ${jobs.length} jobs`,
     );
 
@@ -463,14 +460,14 @@ export class SpaceDao {
         (dto) => dto.commitId === repositoryHead.ref,
         1,
       );
-      logger.debug(
+      logger.trace(
         `SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}) job ${job.id} found executions: ${executions.length}`,
       );
 
       result.push(...executions);
     }
 
-    logger.debug(
+    logger.trace(
       `SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}): total executions ${result.length}`,
     );
 
@@ -480,19 +477,19 @@ export class SpaceDao {
   private async findMergeRequestBody(
     codeReviewId: string,
   ): Promise<string | undefined> {
-    logger.debug(`SPACE: searching for PR body in ${codeReviewId}`);
+    logger.trace(`SPACE: searching for PR body in ${codeReviewId}`);
     const messages = await this.client.codeReview.read.getMessages(
       codeReviewId,
       1,
       'asc',
     );
     if (messages.length === 0) {
-      logger.debug(`SPACE: found no messages in PR ${codeReviewId}`);
+      logger.trace(`SPACE: found no messages in PR ${codeReviewId}`);
       return undefined;
     }
 
     const body = messages.pop()?.details?.description?.text;
-    logger.debug(
+    logger.trace(
       `SPACE: found PR body in ${codeReviewId} of length ${body?.length}`,
     );
     return body;
@@ -516,14 +513,14 @@ export class FindPRConfigPredicate implements SpaceMergeRequestRecordPredicate {
 
     // TODO: figure out what is the case here
     if (pr.branchPairs.length !== 1) {
-      logger.debug(
+      logger.trace(
         `SPACE: Not sure what to do with not a single branch pair in PR ${pr.title}`,
       );
       return Promise.resolve(false);
     }
 
     if (pr.branchPairs[0].sourceBranch !== this.config.branchName) {
-      logger.debug(
+      logger.trace(
         `SPACE: branchFilter=${this.config.branchName}. Ignoring PR ${pr.title} because it doesn't match the branch`,
       );
       return Promise.resolve(false);
@@ -533,7 +530,7 @@ export class FindPRConfigPredicate implements SpaceMergeRequestRecordPredicate {
       return Promise.resolve(false);
     }
 
-    logger.debug(
+    logger.trace(
       `SPACE: branchFilter=${this.config.branchName}. found PR ${pr.title} with state ${pr.state}`,
     );
     return Promise.resolve(true);

@@ -1,4 +1,3 @@
-import { logger } from '../../../logger';
 import type { BranchStatus } from '../../../types';
 import { parseJson } from '../../../util/common';
 import * as git from '../../../util/git';
@@ -50,8 +49,6 @@ export function initPlatform({
   endpoint,
   token,
 }: PlatformParams): Promise<PlatformResult> {
-  logger.debug(`SPACE initPlatform(${endpoint!})`);
-
   if (!endpoint) {
     throw new Error('Init: You must configure your JetBrains Space endpoint');
   }
@@ -69,15 +66,12 @@ export function initPlatform({
 }
 
 export async function getRepos(): Promise<string[]> {
-  logger.debug(`SPACE getRepos()`);
   return await dao.findRepositories();
 }
 
 export async function initRepo({
   repository,
 }: RepoParams): Promise<RepoResult> {
-  logger.debug(`SPACE initRepo(${repository})`);
-
   const repoParts = repository.split('/');
   const projectKey = repoParts[0];
   const shortRepository = repoParts[1];
@@ -103,11 +97,8 @@ export async function findPr(
   findPRConfig: FindPRConfig,
   refreshCache?: boolean,
 ): Promise<Pr | null> {
-  logger.debug(
-    `SPACE findPr(${JSON.stringify(findPRConfig)}, ${refreshCache})`,
-  );
   // TODO: add support for refreshCache
-  // why there are 2 refreshCache parameters: one in FindPRConfig, another is a parameter
+  // why are there 2 refreshCache parameters: one in FindPRConfig, another is a parameter?
   return await dao.findMergeRequest(
     repoConfig.projectKey!,
     repoConfig.repository!,
@@ -116,17 +107,14 @@ export async function findPr(
 }
 
 export async function getPr(number: number): Promise<Pr | null> {
-  logger.debug(`SPACE getPr(${number})`);
   return await dao.getMergeRequest(repoConfig.projectKey!, number);
 }
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
-  logger.debug(`SPACE updatePr(${prConfig.number}, ${prConfig.prTitle})`);
   await dao.updateMergeRequest(repoConfig.projectKey!, prConfig);
 }
 
 export async function createPr(prConfig: CreatePRConfig): Promise<Pr> {
-  logger.debug(`SPACE createPr(${prConfig.sourceBranch}, ${prConfig.prTitle}`);
   return await dao.createMergeRequest(
     repoConfig.projectKey!,
     repoConfig.repository!,
@@ -135,7 +123,6 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr> {
 }
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
-  logger.debug(`SPACE getBranchPr(${branchName})`);
   return await dao.findMergeRequest(
     repoConfig.projectKey!,
     repoConfig.repository!,
@@ -144,7 +131,6 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 }
 
 export async function getPrList(): Promise<Pr[]> {
-  logger.debug(`SPACE getPrList()`);
   return await dao.findAllMergeRequests(
     repoConfig.projectKey!,
     repoConfig.repository!,
@@ -152,10 +138,6 @@ export async function getPrList(): Promise<Pr[]> {
 }
 
 export async function mergePr(config: MergePRConfig): Promise<boolean> {
-  logger.debug(
-    `SPACE mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`,
-  );
-
   // TODO: add deleteSourceBranch parameter to global config
   // TODO: add support for changing target branch? (config.branch)
 
@@ -171,7 +153,6 @@ export async function mergePr(config: MergePRConfig): Promise<boolean> {
 export async function getBranchStatus(
   branchName: string,
 ): Promise<BranchStatus> {
-  logger.debug(`SPACE getBranchStatus(${branchName})`);
   return await dao.findBranchStatus(
     repoConfig.projectKey!,
     repoConfig.repository!,
@@ -216,10 +197,6 @@ export async function addAssignees(
 export async function ensureComment(
   ensureComment: EnsureCommentConfig,
 ): Promise<boolean> {
-  logger.debug(
-    `SPACE ensureComment(${ensureComment.number}, ${ensureComment.topic!}, ${ensureComment.content})`,
-  );
-
   // there is no concept of a topic for a comment
   await dao.ensureComment(
     repoConfig.projectKey!,
@@ -235,10 +212,6 @@ export async function ensureCommentRemoval(
     | EnsureCommentRemovalConfigByTopic
     | EnsureCommentRemovalConfigByContent,
 ): Promise<void> {
-  logger.debug(
-    `SPACE ensureCommentRemoval(${JSON.stringify(ensureCommentRemoval)})`,
-  );
-
   let topic: string | null = null;
   let content: string | null = null;
 

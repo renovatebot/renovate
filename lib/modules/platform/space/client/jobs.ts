@@ -12,7 +12,7 @@ export class SpaceJobsClient {
     repository: string,
     branch: string,
   ): Promise<SpaceJobDTO[]> {
-    logger.debug(
+    logger.trace(
       `SPACE: findAllJobs: projectKey=${projectKey}, repository=${repository}, branch=${branch}`,
     );
 
@@ -20,10 +20,7 @@ export class SpaceJobsClient {
       this.http,
       `/api/http/projects/key:${projectKey}/automation/jobs?repoFilter=${repository}&branchFilter=${branch}`,
     );
-    const jobs = await flatten(iterable);
-    logger.debug(`SPACE: findAllJobs: all jobs: ${JSON.stringify(jobs)}`);
-
-    return jobs;
+    return await flatten(iterable);
   }
 
   async findJobExecutions(
@@ -33,7 +30,7 @@ export class SpaceJobsClient {
     predicate: (dto: SpaceJobExecutionDTO) => boolean = () => true,
     limit?: number,
   ): Promise<SpaceJobExecutionDTO[]> {
-    logger.debug(
+    logger.trace(
       `SPACE: findJobExecutions: projectKey=${projectKey}, jobId=${jobId}, branch=${branch}`,
     );
 
@@ -53,8 +50,6 @@ export class SpaceJobsClient {
       },
       limit,
     );
-
-    logger.debug(`SPACE: findJobExecutions: found: ${executions.length}`);
 
     return executions;
   }

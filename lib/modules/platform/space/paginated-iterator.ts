@@ -1,4 +1,3 @@
-import { logger } from '../../../logger';
 import type { SpaceHttp } from '../../../util/http/space';
 
 /**
@@ -46,8 +45,6 @@ export class PaginatedIterable<T> implements AsyncIterable<T[]> {
     const encodedQueryParameter = encodeURIComponent(config.queryParameter);
 
     return new PaginatedIterable<T>(async (next?: string) => {
-      logger.debug(`SPACE: iterating over ${basePath} with next=${next}`);
-
       let path = basePath;
       if (next) {
         const encodedNext = encodeURIComponent(next);
@@ -59,10 +56,6 @@ export class PaginatedIterable<T> implements AsyncIterable<T[]> {
       }
 
       const result = await http.getJson<any>(path);
-      logger.debug(
-        `SPACE: from ${path} and next ${next} got ${JSON.stringify(result.body.data)}`,
-      );
-
       return result.body;
     }, config);
   }

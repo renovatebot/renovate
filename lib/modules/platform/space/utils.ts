@@ -7,17 +7,8 @@ import { hashBody } from '../pr-body';
 import type { Pr } from '../types';
 import type { SpaceCodeReviewState, SpaceMergeRequestRecord } from './types';
 
-export const TAG_PULL_REQUEST_BODY = 'pull-request';
-
 export function getSpaceRepoUrl(repository: string, endpoint: string): string {
-  logger.debug(
-    `getSpaceRepoUrl: repository=${repository}, endpoint=${endpoint}`,
-  );
-
   if (!endpoint.endsWith('.jetbrains.space')) {
-    logger.debug(
-      'SPACE: invalid endpoint, it must looks like my-org-name.jetbrains.space',
-    );
     throw Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
 

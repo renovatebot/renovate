@@ -13,26 +13,19 @@ export class SpaceRepositoryClient {
   constructor(private http: SpaceHttp) {}
 
   async getAll(): Promise<SpaceRepositoryBasicInfo[]> {
-    logger.debug('SPACE: getAllRepositoriesForAllProjects');
-
     const iterable =
       PaginatedIterable.fromGetUsingSkip<SpaceRepositoryBasicInfo>(
         this.http,
         '/api/http/projects/repositories/find?term=',
       );
-    const repos = await flatten(iterable);
-    logger.debug(
-      `SPACE: getAllRepositoriesForAllProjects, all repos: ${JSON.stringify(repos)}`,
-    );
-
-    return repos;
+    return await flatten(iterable);
   }
 
   async getByName(
     projectKey: string,
     repository: string,
   ): Promise<SpaceRepositoryDetails> {
-    logger.debug(
+    logger.trace(
       `SPACE: getRepositoryInfo: repository=${repository}, projectKey=${projectKey}`,
     );
     const repoInfo = await this.http.getJson<SpaceRepositoryDetails>(
@@ -45,7 +38,7 @@ export class SpaceRepositoryClient {
     projectKey: string,
     repository: string,
   ): Promise<SpaceBranchHead[]> {
-    logger.debug(
+    logger.trace(
       `SPACE: getRepositoriesHeads: projectKey=${projectKey}, repository=${repository}`,
     );
 
@@ -54,12 +47,7 @@ export class SpaceRepositoryClient {
       `/api/http/projects/key:${projectKey}/repositories/${repository}/heads`,
     );
 
-    const heads = await flatten(iterable);
-    logger.debug(
-      `SPACE: findRepositoryHeads: result: ${JSON.stringify(heads)}`,
-    );
-
-    return heads;
+    return await flatten(iterable);
   }
 
   async getFileContent(
@@ -68,7 +56,7 @@ export class SpaceRepositoryClient {
     path: string,
     commit: string,
   ): Promise<string> {
-    logger.debug(
+    logger.trace(
       `SPACE getFileTextContent(${projectKey}, ${repository}, ${commit}, ${path})`,
     );
 
@@ -76,10 +64,6 @@ export class SpaceRepositoryClient {
       `/api/http/projects/key:${projectKey}/repositories/${repository}/text-content?commit=${commit}&path=${path}`,
     );
     const body = fileContent.body;
-    logger.debug(
-      `SPACE getFileTextContent(${projectKey}, ${repository}, ${commit}, ${path}): got ${body.lines.length}`,
-    );
-
     return body.lines.map((it) => it.text).join('\n');
   }
 }

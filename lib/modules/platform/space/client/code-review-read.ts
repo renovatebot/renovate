@@ -86,7 +86,7 @@ export class SpaceCodeReviewReadClient {
     limit: number,
     order: 'asc' | 'desc',
   ): Promise<SpaceChannelItemRecord[]> {
-    logger.debug(
+    logger.trace(
       `SPACE: findMergeRequestBody: codeReviewId=${codeReviewId}, limit=${limit}, order=${order}`,
     );
 
@@ -106,21 +106,21 @@ export class SpaceCodeReviewReadClient {
     const result = await mapNotNullFlatten(iterable, async (channelItem) => {
       const id = channelItem.id;
 
-      logger.debug(
+      logger.trace(
         `SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} fetching message id=${id}`,
       );
 
       const message = await this.http.getJson<SpaceChannelItemRecord>(
         `/api/http/chats/messages/id:${id}?channel=codeReview:id:${codeReviewId}`,
       );
-      logger.debug(
+      logger.trace(
         `SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} message = ${message.body.time}`,
       );
 
       return message.body;
     });
 
-    logger.debug(
+    logger.trace(
       `SPACE: findMergeRequestBody: codeReviewId=${codeReviewId} found ${result.length} messages`,
     );
     return result;
