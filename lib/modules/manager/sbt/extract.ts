@@ -19,7 +19,7 @@ import type {
   PackageFile,
   PackageFileContent,
 } from '../types';
-import { normalizeScalaVersion } from './util';
+import { normalizeScalaVersion, sortPackageFiles } from './util';
 
 type Vars = Record<string, string>;
 
@@ -318,10 +318,10 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
 ): PackageFileContent | null {
-  return doExtractPackageFile(content, packageFile);
+  return extractPackageFileInternal(content, packageFile);
 }
 
-function doExtractPackageFile(
+function extractPackageFileInternal(
   content: string,
   packageFile: string,
   ctxScalaVersion?: string,
@@ -387,18 +387,9 @@ export async function extractAllPackageFiles(
   const proxyUrls: string[] = [];
   let ctxScalaVersion: string | undefined;
 
-  // process build.sbt first
-  packageFiles.sort((a, b) => {
-    if (a === 'build.sbt') {
-      return -1;
-    }
-    if (b === 'build.sbt') {
-      return 1;
-    }
-    return 0;
-  });
+  const sortedPackageFiles = sortPackageFiles(packageFiles);
 
-  for (const packageFile of packageFiles) {
+  for (const packageFile of sortedPackageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (!content) {
       logger.debug({ packageFile }, 'packageFile has no content');
@@ -408,7 +399,11 @@ export async function extractAllPackageFiles(
       const urls = extractProxyUrls(content, packageFile);
       proxyUrls.push(...urls);
     } else {
-      const pkg = doExtractPackageFile(content, packageFile, ctxScalaVersion);
+      const pkg = extractPackageFileInternal(
+        content,
+        packageFile,
+        ctxScalaVersion,
+      );
       if (pkg) {
         packages.push({ deps: pkg.deps, packageFile });
         if (pkg.managerData?.scalaVersion) {
