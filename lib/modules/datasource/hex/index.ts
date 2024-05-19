@@ -20,10 +20,10 @@ export class HexDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote =
-    'The relase timestamp is determined the `inserted_at` field in the results.';
+    'The release timestamp is determined the `inserted_at` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url from the `Github` field present in the results.';
+    'The source URL is determined from the `Github` field in the results.';
 
   @cache({
     namespace: `datasource-${HexDatasource.id}`,

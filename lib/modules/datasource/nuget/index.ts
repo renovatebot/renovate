@@ -25,8 +25,8 @@ export class NugetDatasource extends Datasource {
    `;
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote = `
-  For the v2 API, The source URL is determined from the \`ProjectUrl\` tag and,
-  for the v3 API, The source URL is determined from the \`metadata.repository@url\` field in the results.
+  For the v2 API, the source URL is determined from the \`ProjectUrl\` tag and,
+  for the v3 API, the source URL is determined from the \`metadata.repository@url\` field in the results.
     `;
 
   readonly v2Api = new NugetV2Api();

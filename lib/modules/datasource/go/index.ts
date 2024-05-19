@@ -32,7 +32,8 @@ export class GoDatasource extends Datasource {
   override readonly customRegistrySupport = false;
 
   override readonly releaseTimestampSupport = true;
-  override readonly releaseTimestampNote = `In case release timestamp isn't already returned from respective datasource used to fetch the releases, it is determined from the \`Time\` field in the results.`;
+  override readonly releaseTimestampNote =
+    'If the release timestamp is not returned from the respective datasoure used to fetch the releases, then Renovate uses the `Time` field in the results instead.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
     'The source URL is determined from the `packageName` and `registryUrl`.';
