@@ -25,7 +25,7 @@ export class GradleVersionDatasource extends Datasource {
     'The release timestamp is determined from the `buildTime` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'We use the url https://github.com/gradle/gradle.';
+    'We use the URL: https://github.com/gradle/gradle.';
 
   private static readonly buildTimeRegex = regEx(
     '^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\+\\d\\d\\d\\d)$',

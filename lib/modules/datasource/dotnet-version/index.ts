@@ -28,7 +28,7 @@ export class DotnetVersionDatasource extends Datasource {
     'The release timestamp is determined from the `release-date` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'We use the url https://github.com/dotnet/sdk for `dotnet-sdk` and, https://github.com/dotnet/runtime for the `dotnet-runtime`.';
+    'We use the URL https://github.com/dotnet/sdk for the `dotnet-sdk` package and, the https://github.com/dotnet/runtime URL for the `dotnet-runtime` package.';
 
   @cache({
     namespace: `datasource-${DotnetVersionDatasource.id}`,

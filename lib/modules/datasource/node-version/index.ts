@@ -24,7 +24,7 @@ export class NodeVersionDatasource extends Datasource {
     'The release timestamp is determined from the `date` field.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'We use the url https://github.com/nodejs/node';
+    'We use the URL: https://github.com/nodejs/node';
 
   @cache({
     namespace: `datasource-${datasource}`,

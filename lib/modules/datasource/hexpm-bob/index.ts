@@ -29,7 +29,7 @@ export class HexpmBobDatasource extends Datasource {
     'The release timestamp is determined from the `buildDate` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'We use the urls, https://github.com/elixir-lang/elixir.git for `elixir` and https://github.com/erlang/otp.git for `erlang`.';
+    'We use the URL https://github.com/elixir-lang/elixir.git for the `elixir` package and the https://github.com/erlang/otp.git URL for the `erlang` package.';
 
   @cache({
     namespace: `datasource-${datasource}`,
