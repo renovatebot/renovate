@@ -86,6 +86,7 @@ function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 const convertedExperimentalEnvVars = [
   'RENOVATE_X_AUTODISCOVER_REPO_SORT',
   'RENOVATE_X_AUTODISCOVER_REPO_ORDER',
+  'RENOVATE_X_DELETE_CONFIG_FILE',
 ];
 
 /**

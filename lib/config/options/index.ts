@@ -3067,6 +3067,13 @@ const options: RenovateOptions[] = [
     default: 90,
     globalOnly: true,
   },
+  {
+    name: 'deleteConfigFile',
+    description:
+      'If set to true, Renovate tries to delete the self-hosted config file atfer reading it.',
+    type: 'boolean',
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
