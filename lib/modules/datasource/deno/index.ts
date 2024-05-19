@@ -27,7 +27,7 @@ export class DenoDatasource extends Datasource {
     'The release timestamp is determined from the `uploaded_at` field in the results.';
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
-    'The source url is determined from the `repository` field in the results.';
+    'The source URL is determined from the `repository` field in the results.';
 
   constructor() {
     super(DenoDatasource.id);

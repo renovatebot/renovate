@@ -20,13 +20,13 @@ export class NugetDatasource extends Datasource {
 
   override readonly releaseTimestampSupport = true;
   override readonly releaseTimestampNote = `
-  For the v2 api, the release timestamp is determined from the \`Publised\` tag and,
-  for the v3 api, the release timestamp is determined from the \`published\` field in the results.
+  For the v2 API, the release timestamp is determined from the \`Publised\` tag and,
+  for the v3 API, the release timestamp is determined from the \`published\` field in the results.
    `;
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote = `
-  For the v2 api, the source url is determined from the \`ProjectUrl\` tag and,
-  for the v3 api, the source url is determined from the \`metadata.repository@url\` field in the results.
+  For the v2 API, The source URL is determined from the \`ProjectUrl\` tag and,
+  for the v3 API, The source URL is determined from the \`metadata.repository@url\` field in the results.
     `;
 
   readonly v2Api = new NugetV2Api();

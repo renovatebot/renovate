@@ -30,7 +30,7 @@ export class JenkinsPluginsDatasource extends Datasource {
     'The releaseTimestamp is determined from the `releaseTimestamp` or `buildDate` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined from the `scm` field in the results.';
+    'The source URL is determined from the `scm` field in the results.';
 
   async getReleases({
     packageName,

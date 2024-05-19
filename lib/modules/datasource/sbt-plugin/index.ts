@@ -25,7 +25,7 @@ export class SbtPluginDatasource extends SbtPackageDatasource {
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined from the `scm` tags in the results.';
+    'The source URL is determined from the `scm` tags in the results.';
 
   constructor() {
     super(SbtPluginDatasource.id);

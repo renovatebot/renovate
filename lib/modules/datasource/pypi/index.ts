@@ -35,7 +35,7 @@ export class PypiDatasource extends Datasource {
     'The relase timestamp is determined from the `upload_time` field in the results.';
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
-    'The source url is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
+    'The source URL is determined from the `homepage` field if it is a github repository, else we use the `project_urls` field.';
 
   async getReleases({
     packageName,

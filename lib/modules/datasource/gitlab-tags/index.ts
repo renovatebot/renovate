@@ -17,7 +17,7 @@ export class GitlabTagsDatasource extends Datasource {
     'To get release timestamp we use the `created_at` field from the response.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined by using the `packageName` and `registryUrl`.';
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
     super(GitlabTagsDatasource.id);

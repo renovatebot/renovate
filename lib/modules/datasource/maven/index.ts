@@ -74,7 +74,7 @@ export class MavenDatasource extends Datasource {
     'The release timestamp is determined from the `Last-Modified` header or the `lastModified` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined from the `scm` tags in the results.';
+    'The source URL is determined from the `scm` tags in the results.';
 
   constructor(id = MavenDatasource.id) {
     super(id);

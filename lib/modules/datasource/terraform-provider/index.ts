@@ -47,7 +47,7 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     'The release timestamp is only supported for the latest version, and is determined from the `published_at` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined from the the `source` field in the results.';
+    'The source URL is determined from the the `source` field in the results.';
 
   @cache({
     namespace: `datasource-${TerraformProviderDatasource.id}`,

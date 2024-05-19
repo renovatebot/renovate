@@ -20,7 +20,7 @@ export class DartDatasource extends Datasource {
     'The release timestamp is determined from the `published` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined from the `repository` field of the latest release object in the results.';
+    'The source URL is determined from the `repository` field of the latest release object in the results.';
 
   async getReleases({
     packageName,

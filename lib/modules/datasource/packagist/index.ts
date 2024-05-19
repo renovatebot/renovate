@@ -38,7 +38,7 @@ export class PackagistDatasource extends Datasource {
   // Note: this can be changed to 'release', as the source is present in each release but we remove it while processing
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined from `source` field in the results.';
+    'The source URL is determined from `source` field in the results.';
 
   // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
   private static getHostOpts(url: string): HttpOptions {

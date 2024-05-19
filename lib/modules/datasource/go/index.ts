@@ -35,7 +35,7 @@ export class GoDatasource extends Datasource {
   override readonly releaseTimestampNote = `In case release timestamp isn't already returned from respective datasource used to fetch the releases, it is determined from the \`Time\` field in the results.`;
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined from the `packageName` and `registryUrl`.';
+    'The source URL is determined from the `packageName` and `registryUrl`.';
 
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();

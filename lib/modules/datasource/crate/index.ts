@@ -37,7 +37,7 @@ export class CrateDatasource extends Datasource {
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined from the `repository` field in the results.';
+    'The source URL is determined from the `repository` field in the results.';
 
   @cache({
     namespace: `datasource-${CrateDatasource.id}`,

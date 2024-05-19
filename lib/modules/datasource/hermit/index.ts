@@ -32,7 +32,7 @@ export class HermitDatasource extends Datasource {
 
   override readonly sourceUrlSupport = 'release';
   override readonly sourceUrlNote =
-    'The source url is determined from the `Repository` field in the results.';
+    'The source URL is determined from the `Repository` field in the results.';
 
   pathRegex: RegExp;
 

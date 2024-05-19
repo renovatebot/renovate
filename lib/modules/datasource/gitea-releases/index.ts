@@ -21,7 +21,7 @@ export class GiteaReleasesDatasource extends Datasource {
     'The release timestamp is determined from the `published_at` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined by using the `packageName` and `registryUrl`.';
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   constructor() {
     super(GiteaReleasesDatasource.id);

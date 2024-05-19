@@ -40,7 +40,7 @@ export class ConanDatasource extends Datasource {
 
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is supported only if the package is served from artifactory servers. In which case we determine it from the `properties[conan.package.url]` field in the results.';
+    'The source URL is supported only if the package is served from the Artifactory servers. In which case we determine it from the `properties[conan.package.url]` field in the results.';
 
   constructor(id = ConanDatasource.id) {
     super(id);

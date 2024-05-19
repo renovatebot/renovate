@@ -86,7 +86,7 @@ export class DockerDatasource extends Datasource {
     'The release timestamp is determined from the `tag_last_pushed` field in thre results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
+    'The source URL is determined from the `org.opencontainers.image.source` and `org.label-schema.vcs-url` labels present in the metadata of the **latest stable** image found on the Docker registry.';
 
   constructor() {
     super(DockerDatasource.id);

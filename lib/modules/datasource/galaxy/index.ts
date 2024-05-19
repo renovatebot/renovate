@@ -24,7 +24,7 @@ export class GalaxyDatasource extends Datasource {
     'The release timestamp is determined from the `created` field in the results.';
   override readonly sourceUrlSupport = 'package';
   override readonly sourceUrlNote =
-    'The source url is determined from the `github_user` and `github_repo` fields in the results.';
+    'The source URL is determined from the `github_user` and `github_repo` fields in the results.';
 
   @cache({
     namespace: 'datasource-galaxy',

@@ -24,7 +24,7 @@ export class BitbucketTagsDatasource extends Datasource {
     'The release timestamp is determined from the `date` field in the results.';
   static readonly sourceUrlSupport = 'package';
   static readonly sourceUrlNote =
-    'The source url is determined by using the `packageName` and `registryUrl`.';
+    'The source URL is determined by using the `packageName` and `registryUrl`.';
 
   static readonly cacheNamespace: PackageCacheNamespace = `datasource-${BitbucketTagsDatasource.id}`;
 
