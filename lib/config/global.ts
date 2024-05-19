@@ -39,6 +39,8 @@ export class GlobalConfig {
     'deleteConfigFile',
     'eagerGlobalExtends',
     'ignoreNodeWarn',
+    's3Endpoint',
+    's3PathStyle',
   ];
 
   private static config: RepoGlobalConfig = {};

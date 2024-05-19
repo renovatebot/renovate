@@ -166,6 +166,8 @@ export interface RepoGlobalConfig {
   deleteConfigFile?: boolean;
   eagerGlobalExtends?: boolean;
   ignoreNodeWarn?: boolean;
+  s3Endpoint?: string;
+  s3PathStyle?: boolean;
 }
 
 export interface LegacyAdminConfig {
@@ -224,6 +226,8 @@ export interface RenovateConfig
     AssigneesAndReviewersConfig,
     ConfigMigration,
     Record<string, unknown> {
+  s3Endpoint?: string;
+  s3PathStyle?: boolean;
   reportPath?: string;
   reportType?: 'logging' | 'file' | 's3' | null;
   depName?: string;
