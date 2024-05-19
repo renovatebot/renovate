@@ -42,7 +42,6 @@ export interface SpaceMergeRequestRecord {
   state: SpaceCodeReviewState;
   canBeReopened?: boolean;
   branchPairs: Array<SpaceMergeRequestBranchPair>;
-  createdAt: number;
   timestamp?: number;
   turnBased?: boolean;
   feedChannelId?: string;

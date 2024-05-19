@@ -1,6 +1,6 @@
-import {isHttpUrl} from "../url";
-import type {HttpOptions, HttpResponse, InternalHttpOptions} from './types';
-import {Http} from './index';
+import { isHttpUrl } from '../url';
+import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
+import { Http } from './index';
 
 export class SpaceHttp extends Http {
   constructor(

@@ -1,8 +1,14 @@
-import type {MergeStrategy} from '../../../config/types';
-import {logger} from '../../../logger';
-import type {BranchStatus} from '../../../types';
-import type {CreatePRConfig, FindPRConfig, Pr, UpdatePrConfig,} from '../types';
-import type {SpaceClient} from './client';
+import type { MergeStrategy } from '../../../config/types';
+import { logger } from '../../../logger';
+import type { BranchStatus } from '../../../types';
+import type {
+  CreatePRConfig,
+  FindPRConfig,
+  Pr,
+  UpdatePrConfig,
+} from '../types';
+import type { SpaceClient } from './client';
+import type { SpaceMergeRequestRecordPredicate } from './client/code-review-read';
 import type {
   CodeReviewStateFilter,
   SpaceChannelItemRecord,
@@ -11,8 +17,7 @@ import type {
   SpaceMergeRequestRecord,
   SpaceRepositoryDetails,
 } from './types';
-import {mapSpaceCodeReviewDetailsToPr} from './utils';
-import type {SpaceMergeRequestRecordPredicate} from "./client/code-review-read";
+import { mapSpaceCodeReviewDetailsToPr } from './utils';
 
 export class SpaceDao {
   constructor(private client: SpaceClient) {}
@@ -112,7 +117,10 @@ export class SpaceDao {
     }
   }
 
-  async getMergeRequest(projectKey: string, codeReviewNumber: number): Promise<Pr> {
+  async getMergeRequest(
+    projectKey: string,
+    codeReviewNumber: number,
+  ): Promise<Pr> {
     logger.debug(`SPACE getPr(${projectKey}, ${codeReviewNumber})`);
     const review = await this.client.codeReview.read.getByCodeReviewNumber(
       projectKey,
@@ -440,11 +448,7 @@ export class SpaceDao {
     logger.debug(
       `SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}), head: ${JSON.stringify(repositoryHead)}`,
     );
-    const jobs = await this.client.jobs.getAll(
-      projectKey,
-      repository,
-      branch,
-    );
+    const jobs = await this.client.jobs.getAll(projectKey, repository, branch);
 
     logger.debug(
       `SPACE findLatestJobExecutions(${projectKey}, ${repository}, ${branch}) found ${jobs.length} jobs`,
@@ -496,8 +500,7 @@ export class SpaceDao {
 }
 
 export class FindPRConfigPredicate implements SpaceMergeRequestRecordPredicate {
-
-  private allButOpen: boolean
+  private allButOpen: boolean;
 
   constructor(private config: FindPRConfig) {
     this.allButOpen = config.state === '!open';
@@ -535,7 +538,6 @@ export class FindPRConfigPredicate implements SpaceMergeRequestRecordPredicate {
     );
     return Promise.resolve(true);
   }
-
 }
 
 const DEFAULT_PR_BODY = 'no pr body';

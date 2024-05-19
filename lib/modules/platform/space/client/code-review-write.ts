@@ -22,9 +22,7 @@ export class SpaceCodeReviewWriteClient {
       `/api/http/projects/key:${projectKey}/code-reviews/merge-requests`,
       { body: request },
     );
-    logger.debug(
-      `SPACE: create: response: ${JSON.stringify(response.body)}`,
-    );
+    logger.debug(`SPACE: create: response: ${JSON.stringify(response.body)}`);
 
     return response.body;
   }

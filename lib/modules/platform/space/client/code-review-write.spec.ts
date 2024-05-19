@@ -1,14 +1,20 @@
-import {expect} from '@jest/globals';
+import { expect } from '@jest/globals';
 import * as httpMock from '../../../../../test/http-mock';
-import {SpaceHttp} from '../../../../util/http/space';
-import type {CodeReviewStateFilter, SpaceCodeReviewParticipantRole, SpaceMergeRequestRecord} from '../types';
-import {SpaceCodeReviewWriteClient} from "./code-review-write";
+import { SpaceHttp } from '../../../../util/http/space';
+import type {
+  CodeReviewStateFilter,
+  SpaceCodeReviewParticipantRole,
+  SpaceMergeRequestRecord,
+} from '../types';
+import { SpaceCodeReviewWriteClient } from './code-review-write';
 
 const spaceEndpointUrl = 'https://myorg.jetbrains.space';
-const jsonResultHeader = {'content-type': 'application/json;charset=utf-8'};
+const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
 
 describe('modules/platform/space/client/code-review-write', () => {
-  const client = new SpaceCodeReviewWriteClient(new SpaceHttp(spaceEndpointUrl));
+  const client = new SpaceCodeReviewWriteClient(
+    new SpaceHttp(spaceEndpointUrl),
+  );
 
   describe('create()', () => {
     it('should create code review', async () => {
@@ -23,30 +29,30 @@ describe('modules/platform/space/client/code-review-write', () => {
         number: 1,
         title,
         state: 'Opened',
-        branchPairs: [{sourceBranch, targetBranch}],
-        createdAt: 123,
+        branchPairs: [{ sourceBranch, targetBranch }],
       };
 
+      httpMock
+        .scope(spaceEndpointUrl)
+        .post(
+          `/api/http/projects/key:${projectKey}/code-reviews/merge-requests`,
+          {
+            repository,
+            sourceBranch,
+            targetBranch,
+            title,
+          },
+        )
+        .reply(200, response, jsonResultHeader);
 
-      httpMock.scope(spaceEndpointUrl)
-        .post(`/api/http/projects/key:${projectKey}/code-reviews/merge-requests`, {
+      expect(
+        await client.create(projectKey, {
           repository,
           sourceBranch,
           targetBranch,
-          title
-        })
-        .reply(
-          200,
-          response,
-          jsonResultHeader,
-        );
-
-      expect(await client.create(projectKey, {
-        repository,
-        sourceBranch,
-        targetBranch,
-        title
-      })).toEqual(response);
+          title,
+        }),
+      ).toEqual(response);
     });
   });
 
@@ -54,21 +60,28 @@ describe('modules/platform/space/client/code-review-write', () => {
     it('should merge code review', async () => {
       const projectKey = 'my-project';
       const codeReviewNumber = 123;
-      const mergeMode = 'FF'
+      const mergeMode = 'FF';
       const deleteSourceBranch = true;
 
-      httpMock.scope(spaceEndpointUrl)
-        .put(`/api/http/projects/key:${projectKey}/code-reviews/number:${codeReviewNumber}/merge`, {
+      httpMock
+        .scope(spaceEndpointUrl)
+        .put(
+          `/api/http/projects/key:${projectKey}/code-reviews/number:${codeReviewNumber}/merge`,
+          {
+            mergeMode,
+            deleteSourceBranch,
+          },
+        )
+        .reply(200, {}, jsonResultHeader);
+
+      await expect(
+        client.merge(
+          projectKey,
+          codeReviewNumber,
           mergeMode,
           deleteSourceBranch,
-        })
-        .reply(
-          200,
-          {},
-          jsonResultHeader,
-        );
-
-      await expect(client.merge(projectKey, codeReviewNumber, mergeMode, deleteSourceBranch)).resolves.not.toThrow();
+        ),
+      ).resolves.not.toThrow();
     });
   });
 
@@ -76,35 +89,44 @@ describe('modules/platform/space/client/code-review-write', () => {
     it('should rebase code review', async () => {
       const projectKey = 'my-project';
       const codeReviewNumber = 123;
-      const rebaseMode = 'NO_FF'
+      const rebaseMode = 'NO_FF';
       const deleteSourceBranch = true;
       const squashedCommitMessage = 'squash message';
-      const squash = true
+      const squash = true;
 
-      httpMock.scope(spaceEndpointUrl)
-        .put(`/api/http/projects/key:${projectKey}/code-reviews/number:${codeReviewNumber}/rebase`, {
+      httpMock
+        .scope(spaceEndpointUrl)
+        .put(
+          `/api/http/projects/key:${projectKey}/code-reviews/number:${codeReviewNumber}/rebase`,
+          {
+            rebaseMode,
+            deleteSourceBranch,
+            squash,
+            squashedCommitMessage,
+          },
+        )
+        .reply(200, {}, jsonResultHeader);
+
+      await expect(
+        client.rebase(
+          projectKey,
+          codeReviewNumber,
           rebaseMode,
+          squashedCommitMessage,
           deleteSourceBranch,
-          squash,
-          squashedCommitMessage
-        })
-        .reply(
-          200,
-          {},
-          jsonResultHeader,
-        );
-
-      await expect(client.rebase(projectKey, codeReviewNumber, rebaseMode, squashedCommitMessage, deleteSourceBranch)).resolves.not.toThrow();
+        ),
+      ).resolves.not.toThrow();
     });
   });
 
   describe('addMessage()', () => {
     it('should add a message to a code review', async () => {
       const codeReviewId = 'my-code-review-id';
-      const comment = 'howdy folks'
+      const comment = 'howdy folks';
       const externalId = 'my-external-id';
 
-      httpMock.scope(spaceEndpointUrl)
+      httpMock
+        .scope(spaceEndpointUrl)
         .post(`/api/http/chats/messages/send-message`, {
           channel: `codeReview:id:${codeReviewId}`,
           content: {
@@ -113,114 +135,119 @@ describe('modules/platform/space/client/code-review-write', () => {
           },
           externalId,
         })
-        .reply(
-          200,
-          {},
-          jsonResultHeader,
-        );
+        .reply(200, {}, jsonResultHeader);
 
-      await expect(client.addMessage(codeReviewId, comment, externalId)).resolves.not.toThrow();
+      await expect(
+        client.addMessage(codeReviewId, comment, externalId),
+      ).resolves.not.toThrow();
     });
   });
 
   describe('deleteMessage()', () => {
     it('should delete a message from a code review', async () => {
       const codeReviewId = 'my-code-review-id';
-      const messageId = 'my-message-id'
+      const messageId = 'my-message-id';
 
-      httpMock.scope(spaceEndpointUrl)
+      httpMock
+        .scope(spaceEndpointUrl)
         .post(`/api/http/chats/messages/delete-message`, {
           channel: `codeReview:id:${codeReviewId}`,
           id: `id:${messageId}`,
         })
-        .reply(
-          200,
-          {},
-          jsonResultHeader,
-        );
+        .reply(200, {}, jsonResultHeader);
 
-      await expect(client.deleteMessage(codeReviewId, messageId)).resolves.not.toThrow();
+      await expect(
+        client.deleteMessage(codeReviewId, messageId),
+      ).resolves.not.toThrow();
     });
   });
 
   describe('addReviewer()', () => {
     it('should add a reviewer to a code review', async () => {
-      const projectKey = 'my-project-key'
+      const projectKey = 'my-project-key';
       const codeReviewNumber = 123;
-      const username = 'my-awesome-user'
-      const role: SpaceCodeReviewParticipantRole = 'Reviewer'
+      const username = 'my-awesome-user';
+      const role: SpaceCodeReviewParticipantRole = 'Reviewer';
 
-      httpMock.scope(spaceEndpointUrl)
-        .post(`/api/http/projects/key:${projectKey}/code-reviews/number:${codeReviewNumber}/participants/username:${username}`, {
-          role
-        })
-        .reply(
-          200,
-          {},
-          jsonResultHeader,
-        );
+      httpMock
+        .scope(spaceEndpointUrl)
+        .post(
+          `/api/http/projects/key:${projectKey}/code-reviews/number:${codeReviewNumber}/participants/username:${username}`,
+          {
+            role,
+          },
+        )
+        .reply(200, {}, jsonResultHeader);
 
-      await expect(client.addReviewer(projectKey, codeReviewNumber, username, role)).resolves.not.toThrow();
+      await expect(
+        client.addReviewer(projectKey, codeReviewNumber, username, role),
+      ).resolves.not.toThrow();
     });
   });
 
   describe('setTitle()', () => {
     it('should set a title for a code review', async () => {
-      const projectKey = 'my-project-key'
+      const projectKey = 'my-project-key';
       const codeReviewId = 'my-code-review';
-      const title = 'This is an awesome Code Review'
+      const title = 'This is an awesome Code Review';
 
-      httpMock.scope(spaceEndpointUrl)
-        .patch(`/api/http/projects/key:${projectKey}/code-reviews/id:${codeReviewId}/title`, {
-          title
-        })
-        .reply(
-          200,
-          {},
-          jsonResultHeader,
-        );
+      httpMock
+        .scope(spaceEndpointUrl)
+        .patch(
+          `/api/http/projects/key:${projectKey}/code-reviews/id:${codeReviewId}/title`,
+          {
+            title,
+          },
+        )
+        .reply(200, {}, jsonResultHeader);
 
-      await expect(client.setTitle(projectKey, codeReviewId, title)).resolves.not.toThrow();
+      await expect(
+        client.setTitle(projectKey, codeReviewId, title),
+      ).resolves.not.toThrow();
     });
   });
 
   describe('setDescription()', () => {
     it('should set a description for a code review', async () => {
-      const projectKey = 'my-project-key'
+      const projectKey = 'my-project-key';
       const codeReviewId = 'my-code-review';
-      const description = 'Please do your thing for this PR'
+      const description = 'Please do your thing for this PR';
 
-      httpMock.scope(spaceEndpointUrl)
-        .patch(`/api/http/projects/key:${projectKey}/code-reviews/id:${codeReviewId}/description`, {
-          description
-        })
-        .reply(
-          200,
-          {},
-          jsonResultHeader,
-        );
+      httpMock
+        .scope(spaceEndpointUrl)
+        .patch(
+          `/api/http/projects/key:${projectKey}/code-reviews/id:${codeReviewId}/description`,
+          {
+            description,
+          },
+        )
+        .reply(200, {}, jsonResultHeader);
 
-      await expect(client.setDescription(projectKey, codeReviewId, description)).resolves.not.toThrow();
+      await expect(
+        client.setDescription(projectKey, codeReviewId, description),
+      ).resolves.not.toThrow();
     });
   });
 
   describe('setState()', () => {
     it('should set a state for a code review', async () => {
-      const projectKey = 'my-project-key'
+      const projectKey = 'my-project-key';
       const codeReviewId = 'my-code-review';
-      const state: CodeReviewStateFilter = 'Closed'
+      const state: CodeReviewStateFilter = 'Closed';
 
-      httpMock.scope(spaceEndpointUrl)
-        .patch(`/api/http/projects/key:${projectKey}/code-reviews/id:${codeReviewId}/state`, {
-          state
-        })
-        .reply(
-          200,
-          {},
-          jsonResultHeader,
-        );
+      httpMock
+        .scope(spaceEndpointUrl)
+        .patch(
+          `/api/http/projects/key:${projectKey}/code-reviews/id:${codeReviewId}/state`,
+          {
+            state,
+          },
+        )
+        .reply(200, {}, jsonResultHeader);
 
-      await expect(client.setState(projectKey, codeReviewId, state)).resolves.not.toThrow();
+      await expect(
+        client.setState(projectKey, codeReviewId, state),
+      ).resolves.not.toThrow();
     });
   });
 });

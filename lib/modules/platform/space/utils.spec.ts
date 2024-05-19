@@ -59,7 +59,6 @@ describe('modules/platform/space/utils', () => {
       const record: SpaceMergeRequestRecord = {
         title,
         branchPairs: [{ sourceBranch, targetBranch }],
-        createdAt: 0,
         id: '1357',
         number: 123456,
         state: 'Opened',

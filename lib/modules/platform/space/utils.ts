@@ -1,11 +1,11 @@
-import {CONFIG_GIT_URL_UNAVAILABLE} from '../../../constants/error-messages';
-import {logger} from '../../../logger';
-import type {PrState} from '../../../types';
+import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
+import type { PrState } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
-import {joinUrlParts} from '../../../util/url';
-import {hashBody} from '../pr-body';
-import type {Pr} from '../types';
-import type {SpaceCodeReviewState, SpaceMergeRequestRecord} from './types';
+import { joinUrlParts } from '../../../util/url';
+import { hashBody } from '../pr-body';
+import type { Pr } from '../types';
+import type { SpaceCodeReviewState, SpaceMergeRequestRecord } from './types';
 
 export const TAG_PULL_REQUEST_BODY = 'pull-request';
 

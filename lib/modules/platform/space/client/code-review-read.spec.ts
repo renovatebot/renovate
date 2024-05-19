@@ -1,11 +1,18 @@
-import {expect} from '@jest/globals';
+import { expect } from '@jest/globals';
 import * as httpMock from '../../../../../test/http-mock';
-import {SpaceHttp} from '../../../../util/http/space';
-import type {CodeReviewStateFilter, SpaceCodeReviewBasicInfo, SpaceMergeRequestRecord} from '../types';
-import {SpaceCodeReviewReadClient} from "./code-review-read";
+import { SpaceHttp } from '../../../../util/http/space';
+import type {
+  CodeReviewStateFilter,
+  SpaceCodeReviewBasicInfo,
+  SpaceMergeRequestRecord,
+} from '../types';
+import {
+  SpaceCodeReviewReadClient,
+  type SpaceMergeRequestRecordPredicate,
+} from './code-review-read';
 
 const spaceEndpointUrl = 'https://myorg.jetbrains.space';
-const jsonResultHeader = {'content-type': 'application/json;charset=utf-8'};
+const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
 
 describe('modules/platform/space/client/code-review-read', () => {
   const client = new SpaceCodeReviewReadClient(new SpaceHttp(spaceEndpointUrl));
@@ -15,8 +22,7 @@ describe('modules/platform/space/client/code-review-read', () => {
     number: 1,
     title: 'my code review',
     state: 'Opened',
-    branchPairs: [{sourceBranch: 'main', targetBranch: 'feature'}],
-    createdAt: 123,
+    branchPairs: [{ sourceBranch: 'main', targetBranch: 'feature' }],
   };
 
   const codeReview2: SpaceMergeRequestRecord = {
@@ -24,8 +30,7 @@ describe('modules/platform/space/client/code-review-read', () => {
     number: 2,
     title: 'my code review 2',
     state: 'Opened',
-    branchPairs: [{sourceBranch: 'main', targetBranch: 'feature'}],
-    createdAt: 123,
+    branchPairs: [{ sourceBranch: 'main', targetBranch: 'feature' }],
   };
 
   describe('getByCodeReviewId()', () => {
@@ -34,7 +39,9 @@ describe('modules/platform/space/client/code-review-read', () => {
 
       mockCodeReviewById(projectKey, codeReview1);
 
-      expect(await client.getByCodeReviewId(projectKey, codeReview1.id)).toEqual(codeReview1);
+      expect(
+        await client.getByCodeReviewId(projectKey, codeReview1.id),
+      ).toEqual(codeReview1);
     });
   });
 
@@ -42,15 +49,16 @@ describe('modules/platform/space/client/code-review-read', () => {
     it('should get code review by number', async () => {
       const projectKey = 'my-project';
 
-      httpMock.scope(spaceEndpointUrl)
-        .get(`/api/http/projects/key:${projectKey}/code-reviews/number:${codeReview1.number}`)
-        .reply(
-          200,
-          codeReview1,
-          jsonResultHeader,
-        );
+      httpMock
+        .scope(spaceEndpointUrl)
+        .get(
+          `/api/http/projects/key:${projectKey}/code-reviews/number:${codeReview1.number}`,
+        )
+        .reply(200, codeReview1, jsonResultHeader);
 
-      expect(await client.getByCodeReviewNumber(projectKey, codeReview1.number)).toEqual(codeReview1);
+      expect(
+        await client.getByCodeReviewNumber(projectKey, codeReview1.number),
+      ).toEqual(codeReview1);
     });
   });
 
@@ -58,15 +66,30 @@ describe('modules/platform/space/client/code-review-read', () => {
     it('should find all code reviews', async () => {
       const projectKey = 'my-project';
 
-      mockCodeReviewPage(projectKey, 'null', [{
-        review: {className: 'MergeRequestRecord', id: codeReview1.id},
-      }], '1')
+      mockCodeReviewPage(
+        projectKey,
+        'null',
+        [
+          {
+            review: { className: 'MergeRequestRecord', id: codeReview1.id },
+          },
+        ],
+        '1',
+      );
 
-      mockCodeReviewPage(projectKey, 'null', [{
-        review: {className: 'MergeRequestRecord', id: codeReview2.id},
-      }], '2', '1')
+      mockCodeReviewPage(
+        projectKey,
+        'null',
+        [
+          {
+            review: { className: 'MergeRequestRecord', id: codeReview2.id },
+          },
+        ],
+        '2',
+        '1',
+      );
 
-      mockCodeReviewPage(projectKey, 'null', [], '2', '2')
+      mockCodeReviewPage(projectKey, 'null', [], '2', '2');
 
       mockCodeReviewById(projectKey, codeReview1);
       mockCodeReviewById(projectKey, codeReview2);
@@ -76,54 +99,82 @@ describe('modules/platform/space/client/code-review-read', () => {
 
     it('should find code review with repository filter', async () => {
       const projectKey = 'my-project';
-      const repository = 'my-repository'
+      const repository = 'my-repository';
 
-      mockCodeReviewPage(projectKey, 'null', [{
-        review: {className: 'MergeRequestRecord', id: codeReview1.id},
-      }], '1', undefined, repository)
+      mockCodeReviewPage(
+        projectKey,
+        'null',
+        [
+          {
+            review: { className: 'MergeRequestRecord', id: codeReview1.id },
+          },
+        ],
+        '1',
+        undefined,
+        repository,
+      );
 
-      mockCodeReviewPage(projectKey, 'null', [], '1', '1', repository)
+      mockCodeReviewPage(projectKey, 'null', [], '1', '1', repository);
 
       mockCodeReviewById(projectKey, codeReview1);
 
-      expect(await client.find(projectKey, { repository })).toEqual([codeReview1]);
+      expect(await client.find(projectKey, { repository })).toEqual([
+        codeReview1,
+      ]);
     });
 
     it('should find with filtering by a predicate', async () => {
       const projectKey = 'my-project';
 
-      mockCodeReviewPage(projectKey, 'null', [{
-        review: {className: 'MergeRequestRecord', id: codeReview1.id},
-      }], '1')
+      mockCodeReviewPage(
+        projectKey,
+        'null',
+        [
+          {
+            review: { className: 'MergeRequestRecord', id: codeReview1.id },
+          },
+        ],
+        '1',
+      );
 
-      mockCodeReviewPage(projectKey, 'null', [{
-        review: {className: 'MergeRequestRecord', id: codeReview2.id},
-      }], '2', '1')
+      mockCodeReviewPage(
+        projectKey,
+        'null',
+        [
+          {
+            review: { className: 'MergeRequestRecord', id: codeReview2.id },
+          },
+        ],
+        '2',
+        '1',
+      );
 
-      mockCodeReviewPage(projectKey, 'null', [], '2', '2')
+      mockCodeReviewPage(projectKey, 'null', [], '2', '2');
 
       mockCodeReviewById(projectKey, codeReview1);
       mockCodeReviewById(projectKey, codeReview2);
 
-      const predicate: (pr: SpaceMergeRequestRecord) => Promise<boolean> = (pr) => Promise.resolve(pr.id === codeReview2.id);
+      const predicate: SpaceMergeRequestRecordPredicate = {
+        test: (pr) => Promise.resolve(pr.id === codeReview2.id),
+      };
 
-      expect(await client.find(projectKey, { predicate })).toEqual([codeReview2]);
-   });
+      expect(await client.find(projectKey, { predicate })).toEqual([
+        codeReview2,
+      ]);
+    });
   });
-
 });
 
 function mockCodeReviewById(
   projectKey: string,
-  codeReview: SpaceMergeRequestRecord
+  codeReview: SpaceMergeRequestRecord,
 ) {
-  httpMock.scope(spaceEndpointUrl)
-    .get(`/api/http/projects/key:${projectKey}/code-reviews/id:${codeReview.id}`)
-    .reply(
-      200,
-      codeReview,
-      jsonResultHeader,
-    );
+  httpMock
+    .scope(spaceEndpointUrl)
+    .get(
+      `/api/http/projects/key:${projectKey}/code-reviews/id:${codeReview.id}`,
+    )
+    .reply(200, codeReview, jsonResultHeader);
 }
 
 function mockCodeReviewPage(
