@@ -45,7 +45,6 @@ describe('workers/global/index', () => {
     initPlatform.mockImplementation((input) => Promise.resolve(input));
     delete process.env.AWS_SECRET_ACCESS_KEY;
     delete process.env.AWS_SESSION_TOKEN;
-    delete process.env.RENOVATE_X_EAGER_GLOBAL_EXTENDS;
   });
 
   describe('getRepositoryConfig', () => {
@@ -89,11 +88,11 @@ describe('workers/global/index', () => {
   });
 
   it('resolves global presets first', async () => {
-    process.env.RENOVATE_X_EAGER_GLOBAL_EXTENDS = 'true';
     parseConfigs.mockResolvedValueOnce({
       repositories: [],
       globalExtends: [':pinVersions'],
       hostRules: [{ matchHost: 'github.com', token: 'abc123' }],
+      eagerGlobalExtends: true,
     });
     presets.resolveConfigPresets.mockResolvedValueOnce({});
     await expect(globalWorker.start()).resolves.toBe(0);

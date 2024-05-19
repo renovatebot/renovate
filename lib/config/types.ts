@@ -164,6 +164,7 @@ export interface RepoGlobalConfig {
   autodiscoverRepoOrder?: SortMethod;
   userAgent?: string;
   deleteConfigFile?: boolean;
+  eagerGlobalExtends?: boolean;
 }
 
 export interface LegacyAdminConfig {

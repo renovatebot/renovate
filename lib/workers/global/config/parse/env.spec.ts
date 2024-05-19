@@ -273,12 +273,14 @@ describe('workers/global/config/parse/env', () => {
         RENOVATE_X_DOCKER_MAX_PAGES: '10',
         RENOVATE_AUTODISCOVER_REPO_ORDER: 'desc',
         RENOVATE_X_DELETE_CONFIG_FILE: 'true',
+        RENOVATE_X_EAGER_GLOBAL_EXTENDS: 'true',
       };
       const config = await env.getConfig(envParam);
       expect(config.autodiscoverRepoSort).toBe('alpha');
       expect(config.autodiscoverRepoOrder).toBe('desc');
       expect(config.dockerMaxPages).toBeUndefined();
       expect(config.deleteConfigFile).toBeTrue();
+      expect(config.eagerGlobalExtends).toBeTrue();
     });
 
     describe('RENOVATE_CONFIG tests', () => {

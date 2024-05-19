@@ -37,6 +37,7 @@ export class GlobalConfig {
     'autodiscoverRepoOrder',
     'userAgent',
     'deleteConfigFile',
+    'eagerGlobalExtends',
   ];
 
   private static config: RepoGlobalConfig = {};

@@ -3074,6 +3074,13 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     globalOnly: true,
   },
+  {
+    name: 'eagerGlobalExtends',
+    description:
+      'If set to true, Renovate resolves and merges `globalExtends` presets before other global config, instead of after.',
+    type: 'boolean',
+    globalOnly: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

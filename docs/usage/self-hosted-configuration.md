@@ -560,6 +560,10 @@ You can choose from the following behaviors for the `dryRun` config option:
 
 Information provided mainly in debug log level.
 
+## eagerGlobalExtends
+
+Resolve and merge `globalExtends` presets before other global config, instead of after.
+
 ## endpoint
 
 ## executionTimeout
