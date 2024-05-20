@@ -21,8 +21,26 @@ export const presets: Record<string, Preset> = {
       'workarounds:disableEclipseLifecycleMapping',
       'workarounds:disableMavenParentRoot',
       'workarounds:containerbase',
+      'workarounds:bitnamiDockerImageVersioning',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
+  },
+  bitnamiDockerImageVersioning: {
+    description: 'Use custom regex versioning for bitnami images',
+    packageRules: [
+      {
+        matchCurrentValue:
+          '/^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?$/',
+        matchDatasources: ['docker'],
+        matchPackagePrefixes: [
+          'bitnami/',
+          'docker.io/bitnami/',
+          'gcr.io/bitnami-containers/',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)(?:\\.(?<minor>\\d+)(?:\\.(?<patch>\\d+))?)?(:?-(?<compatibility>.+)-(?<build>\\d+)(?:-r(?<revision>\\d+))?)?$',
+      },
+    ],
   },
   containerbase: {
     description: 'Add some containerbase overrides.',

@@ -1,3 +1,4 @@
+import type { WebApiTeam } from 'azure-devops-node-api/interfaces/CoreInterfaces.js';
 import {
   GitCommit,
   GitPullRequestMergeStrategy,
@@ -177,4 +178,23 @@ export async function getMergeMethod(
   } catch (err) {
     return GitPullRequestMergeStrategy.NoFastForward;
   }
+}
+
+export async function getAllProjectTeams(
+  projectId: string,
+): Promise<WebApiTeam[]> {
+  const allTeams: WebApiTeam[] = [];
+  const azureApiCore = await azureApi.coreApi();
+  const top = 100;
+  let skip = 0;
+  let length = 0;
+
+  do {
+    const teams = await azureApiCore.getTeams(projectId, undefined, top, skip);
+    length = teams.length;
+    allTeams.push(...teams);
+    skip += top;
+  } while (top <= length);
+
+  return allTeams;
 }
