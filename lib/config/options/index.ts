@@ -1503,7 +1503,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchCurrentValue',
     description:
-      'A regex to match against the raw `currentValue` string of a dependency. Valid only within a `packageRules` object.',
+      'A regex or glob pattern to match against the raw `currentValue` string of a dependency. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'package',
     parents: ['packageRules'],
@@ -1525,7 +1525,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchNewValue',
     description:
-      'A regex to match against the raw `newValue` string of a dependency. Valid only within a `packageRules` object.',
+      'A regex or glob pattern to match against the raw `newValue` string of a dependency. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'package',
     parents: ['packageRules'],
