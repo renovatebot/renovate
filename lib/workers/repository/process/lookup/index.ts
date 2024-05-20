@@ -409,6 +409,17 @@ export async function lookupUpdates(
           bucket,
           release,
         );
+
+        // #29034
+        if (
+          config.manager === 'gomod' &&
+          compareValue?.startsWith('v0.0.0-') &&
+          update.newValue?.startsWith('v0.0.0-') &&
+          config.currentDigest !== update.newDigest
+        ) {
+          update.updateType = 'digest';
+        }
+
         if (pendingChecks) {
           update.pendingChecks = pendingChecks;
         }
