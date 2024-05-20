@@ -674,7 +674,7 @@ Disabling the warning is helpful for self-hosted environments that can't access 
 
 ## gitlabAutoMergeableCheckAttempts
 
-If set to a positive integer, Renovate tries this many times to check if a merge request on GitLab is mergeable, before trying to automerge.
+If set to a positive integer, Renovate tries this many times to check if a Merge Request on GitLab is mergeable, before trying to automerge.
 Renovate calculates the delay between attempts with this formula: `gitlabAutoMergeableCheckAttempts * attempt * attempt` milliseconds.
 
 Default value: `5` (attempts results in max. 13.75 seconds timeout).
@@ -683,7 +683,7 @@ Default value: `5` (attempts results in max. 13.75 seconds timeout).
 
 Adjust default time (in milliseconds) given to GitLab to create pipelines for a commit pushed by Renovate.
 
-Can be useful for slow-running, self-hosted GitLab instances that don't react fast enough for the default delay to help.
+Can be useful for slow-running, self-hosted GitLab instances that do not react fast enough for the default delay to help.
 
 Default value: `1000` (milliseconds).
 

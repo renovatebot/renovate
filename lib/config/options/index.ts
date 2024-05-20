@@ -3102,7 +3102,7 @@ const options: RenovateOptions[] = [
   {
     name: 'platformVersion',
     description:
-      'Set a string here to let Renovate skip some API calls to fetch the platform version.',
+      'Set a version string here to let Renovate skip some API calls to fetch the platform version.',
     type: 'string',
     globalOnly: true,
     supportedPlatforms: ['gitlab', 'bitbucket-server'],
