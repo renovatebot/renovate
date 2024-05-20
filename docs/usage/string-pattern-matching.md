@@ -106,6 +106,10 @@ For example, the pattern `["/^abc/", "!/^abcd/", "!/abce/"]`:
 If you find yourself in a situation where you need to positive-match a string which starts with `!`, then you need to do so using a regular expression pattern.
 For example, `["/^!abc$/"]` will positively match against the string `"!abc"`.
 
+One limitation of negative matching is when there may be multiple inputs to match against.
+For example, a manager may have multiple categories, such as `java` and `docker`.
+If you have a rule such as `"matchCategories": ["!docker"]` then this will return `true` because the `java` category satisfies this rule.
+
 ## Usage in Renovate configuration options
 
 Renovate has evolved its approach to string pattern matching over time, but this means that existing configurations may have a mix of approaches and not be entirely consistent with each other.
