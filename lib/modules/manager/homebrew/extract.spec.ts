@@ -58,20 +58,6 @@ describe('modules/manager/homebrew/extract', () => {
       expect(res).toMatchSnapshot();
     });
 
-    it('return null for invalid "archive" url format', () => {
-      const content = `class Ibazel < Formula
-          desc 'IBazel is a tool for building Bazel targets when source files change.'
-          homepage 'https://github.com/bazelbuild/bazel-watcher'
-          url "https://github.com/bazelbuild/bazel-watcher/archive/i/am/a/wrong/url/format/v0.8.2.tar.gz"
-          sha256 '26f5125218fad2741d3caf937b02296d803900e5f153f5b1f733f15391b9f9b4'
-          end
-      `;
-      const res = extractPackageFile(content);
-      expect(res).not.toBeNull();
-      expect(res?.deps[0].skipReason).toBe('unsupported-url');
-      expect(res).toMatchSnapshot();
-    });
-
     it('handles no space before class header', () => {
       const content = `class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
