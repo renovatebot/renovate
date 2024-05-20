@@ -4231,7 +4231,6 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-
     it('handles replacements - name only no version/tag', async () => {
       config.packageName = 'openjdk';
       config.currentValue = undefined;
