@@ -5,12 +5,7 @@ Renovate string matching syntax for some configuration options allows you, as us
 - [`minimatch`](https://github.com/isaacs/minimatch) glob patterns, including exact strings matches
 - regular expression (regex) patterns
 
-The following fields support this pattern matching:
-
-- `allowedEnv`
-- `allowedHeaders`
-- `autodiscoverProjects`
-- `matchRepositories`
+In cases where there are potentially multiple _inputs_, e.g. managers can have multiple categories, then the matcher will return `true` if _any_ of them match.
 
 ## Special case: Match everything
 
