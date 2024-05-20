@@ -87,6 +87,31 @@ function validatePlainObject(val: Record<string, unknown>): true | string {
   return true;
 }
 
+function validateNumber(
+  val: unknown,
+  currentPath?: string,
+  subKey?: string,
+): ValidationMessage[] {
+  const errors: ValidationMessage[] = [];
+  if (is.number(val)) {
+    if (val < 0) {
+      errors.push({
+        topic: 'Configuration Error',
+        message: `Configuration option \`${currentPath}${subKey ? '.' + subKey : ''}\` should be an positive integer. Found negative value instead.`,
+      });
+    }
+  } else {
+    errors.push({
+      topic: 'Configuration Error',
+      message: `Configuration option \`${currentPath}${subKey ? '.' + subKey : ''}\` should be an integer. Found: ${JSON.stringify(
+        val,
+      )} (${typeof val}).`,
+    });
+  }
+
+  return errors;
+}
+
 function getUnsupportedEnabledManagers(enabledManagers: string[]): string[] {
   return enabledManagers.filter(
     (manager) => !allManagersList.includes(manager.replace('custom.', '')),
@@ -345,14 +370,7 @@ export async function validateConfig(
             });
           }
         } else if (type === 'integer') {
-          if (!is.number(val)) {
-            errors.push({
-              topic: 'Configuration Error',
-              message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-                val,
-              )} (${typeof val})`,
-            });
-          }
+          errors.push(...validateNumber(val, currentPath));
         } else if (type === 'array' && val) {
           if (is.array(val)) {
             for (const [subIndex, subval] of val.entries()) {
@@ -969,12 +987,7 @@ async function validateGlobalConfig(
       }
     } else if (type === 'integer') {
       if (!is.number(val)) {
-        warnings.push({
-          topic: 'Configuration Error',
-          message: `Configuration option \`${currentPath}\` should be an integer. Found: ${JSON.stringify(
-            val,
-          )} (${typeof val}).`,
-        });
+        warnings.push(...validateNumber(val, currentPath));
       }
     } else if (type === 'boolean') {
       if (val !== true && val !== false) {
@@ -1030,12 +1043,7 @@ async function validateGlobalConfig(
           }
         } else if (key === 'cacheTtlOverride') {
           for (const [subKey, subValue] of Object.entries(val)) {
-            if (!is.number(subValue)) {
-              warnings.push({
-                topic: 'Configuration Error',
-                message: `Invalid \`${currentPath}.${subKey}\` configuration: value must be an integer.`,
-              });
-            }
+            warnings.push(...validateNumber(subValue, currentPath, subKey));
           }
         } else {
           const res = validatePlainObject(val);
