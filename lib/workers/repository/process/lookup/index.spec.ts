@@ -4272,6 +4272,7 @@ describe('workers/repository/process/lookup/index', () => {
             version: '17.0.1',
           },
         ],
+        lookupName: 'openjdk'
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       getDockerDigest.mockResolvedValueOnce(undefined);
@@ -4309,7 +4310,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(getDockerDigest).toHaveBeenNthCalledWith(1,
         {"currentDigest": 'sha256:fedcba0987654321', 
         "currentValue": "17.0.0", 
-        "lookupName": undefined,
+        "lookupName": 'openjdk',
         "packageName": "eclipse-temurin", 
         "registryUrl": "https://index.docker.io"}, 
         "17.0.1");
@@ -4323,7 +4324,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(getDockerDigest).toHaveBeenNthCalledWith(3,
         {"currentDigest": 'sha256:fedcba0987654321', 
         "currentValue": "17.0.0", 
-        "lookupName": undefined, 
+        "lookupName": 'openjdk', 
         "packageName": "eclipse-temurin", 
         "registryUrl": "https://index.docker.io"}, 
         "17.0.0");
