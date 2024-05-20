@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { mockDeep } from 'jest-mock-extended';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
@@ -13,7 +14,6 @@ import type { UpdateArtifactsConfig, Upgrade } from '../types';
 import { constructPipCompileCmd } from './artifacts';
 import { extractHeaderCommand } from './common';
 import { updateArtifacts } from '.';
-import { codeBlock } from 'common-tags';
 
 const datasource = mocked(_datasource);
 
