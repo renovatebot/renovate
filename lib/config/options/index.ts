@@ -1,8 +1,8 @@
 import { getManagers } from '../../modules/manager';
-import { supportedDatasources } from '../../modules/manager/ansible';
 import { getCustomManagers } from '../../modules/manager/custom';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
+import { supportedDatasources } from '../presets/internal/merge-confidence';
 import type { RenovateOptions } from '../types';
 
 const options: RenovateOptions[] = [
